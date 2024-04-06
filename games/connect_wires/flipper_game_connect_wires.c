@@ -1,9 +1,10 @@
-/* 
+/*
  * Copyright 2023 Alexander Taran
+ *
  * Use of this source code is governed by an MIT-style
  * license that can be found in the LICENSE file or at
  * https://opensource.org/licenses/MIT
- * 
+ *
  * Thanks to:
  *  - Eugene Kirzhanov: https://github.com/eugene-kirzhanov/flipper-zero-2048-game
  */
@@ -19,6 +20,8 @@
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HIGHT 64
+
+#define TAG "connect_wires_2" // For logging
 
 enum AppStatus {
   ST_PLAYING,
@@ -83,11 +86,34 @@ static const int8_t DY[4] = { 0, -1, 0, 1};
 static const int8_t OPP[4] = {DIR_RIGHT, DIR_BOTTOM, DIR_LEFT, DIR_TOP};
 
 static const char* WINNING_MESSAGE = "Congratulations!";
+static const char* SCORE_MESSAGE = "Moves: %u"; // Will show the user how many "rotations" they made
 
-const NotificationSequence sequence_winning = { 
+const NotificationSequence sequence_winning = {
     &message_vibro_on,
     &message_delay_50,
     &message_vibro_off,
+    NULL,
+};
+
+// Give a notification when the user changes direction
+// show green led for clockwise.
+const NotificationSequence sequence_clockwise = {
+    &message_green_255,
+    &message_vibro_on,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_green_0,
+    NULL,
+};
+
+// Give a notification when the user changes direction
+// show red led for counter-clockwise.
+const NotificationSequence sequence_counter_clockwise = {
+    &message_red_255,
+    &message_vibro_on,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_red_0,
     NULL,
 };
 
@@ -103,12 +129,22 @@ GridElement createGridElement() {
   return g;
 }
 
-void rotate_grid_element(GridElement* elem) {
-    bool tmp = elem->edges[0];
-    for (int8_t i = 0; i < 3; ++i) {
-      elem->edges[i] = elem->edges[i+1];
+
+void rotate_grid_element(GridElement* elem, bool clockwise) {
+    //FURI_LOG_I(TAG, "Attempt Rotation: clockwise = %d", clockwise);
+    if (!clockwise) { // Counter-clockwise logic
+      bool tmp = elem->edges[0];
+      for (int8_t i = 0; i < 3; ++i) {
+        elem->edges[i] = elem->edges[i+1];
+      }
+      elem->edges[3] = tmp;
+    } else { // Clockwise logic
+      bool tmp = elem->edges[3];
+      for (int8_t i = 3; i > 0; --i) {
+        elem->edges[i] = elem->edges[i-1];
+      }
+      elem->edges[0] = tmp;
     }
-    elem->edges[3] = tmp;
 }
 
 uint8_t count_edges(GridElement* elem) {
@@ -141,6 +177,8 @@ typedef struct{
   Coord startingPoint;
   GridElement elements[MAX_FIELD_WIDTH][MAX_FIELD_HEIGHT];
   Coord currentSelection;
+  uint16_t gameMoves; // 65535 theres no check for this, but if they go over....
+  bool clockwise; // CLOCKWISE(true) || COUNTERCLOCKWISE(false)
 
   // calculated properties
   bool reachable[MAX_FIELD_WIDTH][MAX_FIELD_HEIGHT];
@@ -157,7 +195,10 @@ GameState createNewGameState(Coord fieldSize) {
   GameState gs;
   gs.fieldSize = fieldSize;
   Coord start = createCoord(1 + random() % (gs.fieldSize.x-2), 1 + random() % (gs.fieldSize.y - 2));
-  
+
+  gs.gameMoves = 0; // Initialize beginning moves
+  gs.clockwise = false; // This was this games original default, we'll keep it the same.
+
   gs.startingPoint = start;
 
   gs.currentSelection = start;
@@ -199,7 +240,7 @@ GameState createNewGameState(Coord fieldSize) {
           dirs[num_dirs] = i;
           num_dirs++;
         }
-      }   
+      }
       if (num_dirs != 0) break;
       candidates[cand_id] = candidates[num_candidates - 1]; num_candidates--;
     }
@@ -235,7 +276,7 @@ GameState createNewGameState(Coord fieldSize) {
     }
   }
   free(candidates);
-  
+
   return gs;
 }
 
@@ -246,7 +287,7 @@ void shuffle(GameState* gs) {
       for (uint8_t j = 0; j < gs->fieldSize.y; ++j) {
         uint8_t rounds = rand() % 4;
         for (uint8_t r = 0; r < rounds; ++r) {
-          rotate_grid_element(&gs->elements[i][j]);
+          rotate_grid_element(&gs->elements[i][j], false);
           shuffles++;
         }
       }
@@ -266,7 +307,9 @@ void moveSelection(GameState* gs, uint8_t dir) {
 
 void rotateSelection(GameState* gs) {
   Coord* cs = &gs->currentSelection;
-  rotate_grid_element(&gs->elements[cs->x][cs->y]);
+  rotate_grid_element(&gs->elements[cs->x][cs->y], gs->clockwise);
+
+  gs->gameMoves++; // Increment moves counter
 }
 
 void recalculateReachables(GameState* gs) {
@@ -311,13 +354,13 @@ bool checkIsWinning(GameState* gs) {
 static void draw_selection(Canvas* canvas, Coord at, uint8_t cellSize, uint8_t cornerSize) {
   canvas_draw_line(canvas, at.x, at.y, at.x + cornerSize - 1, at.y);
   canvas_draw_line(canvas, at.x, at.y, at.x, at.y + cornerSize - 1);
-  
+
   canvas_draw_line(canvas, at.x + cellSize - 1, at.y, at.x + cellSize - cornerSize, at.y);
   canvas_draw_line(canvas, at.x + cellSize - 1, at.y, at.x + cellSize - 1, at.y + cornerSize - 1);
-  
+
   canvas_draw_line(canvas, at.x, at.y + cellSize - 1, at.x, at.y + cellSize - cornerSize);
   canvas_draw_line(canvas, at.x, at.y + cellSize - 1, at.x + cornerSize - 1, at.y + cellSize - 1);
-  
+
   canvas_draw_line(canvas, at.x + cellSize - 1, at.y + cellSize - 1, at.x + cellSize - 1, at.y + cellSize - cornerSize);
   canvas_draw_line(canvas, at.x + cellSize - 1, at.y + cellSize - 1, at.x + cellSize - cornerSize, at.y + cellSize - 1);
 }
@@ -333,7 +376,7 @@ static void draw_interleaved_dots(Canvas* canvas, Coord at, uint8_t size) {
 
 static void draw_grid_element_size12(Canvas* canvas, Coord at, Coord element, GameState* gs) {
   GridElement* elem = &gs->elements[element.x][element.y];
- 
+
   canvas_set_color(canvas, ColorWhite);
   canvas_draw_box(canvas, at.x, at.y, 12, 12);
 
@@ -463,7 +506,7 @@ void draw_menu(Canvas* canvas, const MenuEntry* menu, uint8_t selectedIndex) {
     int w = canvas_string_width(canvas, menu[i].text);
     if (w > max_width) {
       max_width = w;
-    } 
+    }
   }
   max_width += 2;
   for (uint8_t i = 0; i < nitems; ++i) {
@@ -488,7 +531,7 @@ void draw_about(Canvas* canvas) {
     int w = canvas_string_width(canvas, AboutStrings[i]);
     if (w > max_width) {
       max_width = w;
-    } 
+    }
   }
   canvas_set_color(canvas, ColorBlack);
   for (uint8_t i = 0; i < nitems; ++i) {
@@ -497,19 +540,30 @@ void draw_about(Canvas* canvas) {
   }
 }
 
-void draw_winning(Canvas* canvas) {
+void draw_winning(Canvas* canvas, GameState* gs) {
     canvas_set_font(canvas, FontPrimary);
+
+    size_t s = snprintf(NULL, 0, "%s:%u", SCORE_MESSAGE, gs->gameMoves);
+    char moves[s];
+    // Use snprintf to combine the score message and the actual score
+    snprintf(moves, s, SCORE_MESSAGE, gs->gameMoves);
+
     int w = canvas_string_width(canvas, WINNING_MESSAGE);
-    int h = canvas_current_font_height(canvas);
+    int h = canvas_current_font_height(canvas) * 2;
     const int paddingV = 2;
     const int paddingH = 4;
-    
+
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, SCREEN_WIDTH/2 - w/2 - paddingH, SCREEN_HIGHT/2 - h/2 - paddingV, w + paddingH*2, h + paddingV*2);
+    canvas_draw_box(canvas, SCREEN_WIDTH/2 - w/2 - paddingH, SCREEN_HIGHT/2 - h/2 - paddingV, w + paddingH*2, h + paddingV*2 + canvas_current_font_height(canvas));
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_rframe(canvas, SCREEN_WIDTH/2 - w/2 - paddingH, SCREEN_HIGHT/2 - h/2 - paddingV, w + paddingH*2, h + paddingV*2, 2);
+    canvas_draw_rframe(canvas, SCREEN_WIDTH/2 - w/2 - paddingH, SCREEN_HIGHT/2 - h/2 - paddingV, w + paddingH*2, h + paddingV*2 + canvas_current_font_height(canvas), 2);
     canvas_draw_str_aligned(canvas, SCREEN_WIDTH/2, SCREEN_HIGHT/2, AlignCenter, AlignCenter, WINNING_MESSAGE);
+    canvas_draw_str_aligned(canvas, SCREEN_WIDTH/2, (SCREEN_HIGHT/2) + canvas_current_font_height(canvas), AlignCenter, AlignCenter, moves);
 }
+
+
+
+
 
 static void game_draw_callback(Canvas* canvas, void* ctx) {
     AppState* appState = (AppState*)ctx;
@@ -517,11 +571,11 @@ static void game_draw_callback(Canvas* canvas, void* ctx) {
     GameState* gs = &appState->gameState;
 
     canvas_clear(canvas);
-    if (appState->status == ST_PLAYING) {  
+    if (appState->status == ST_PLAYING) {
       draw_grid(canvas, gs, determine_element_size(gs->fieldSize));
     } else if (appState->status == ST_WINNING) {
       draw_grid(canvas, gs, determine_element_size(gs->fieldSize));
-      draw_winning(canvas);
+      draw_winning(canvas, gs);
     } else if (appState->status == ST_MAIN_MENU) {
       draw_menu(canvas, MainMenu, appState->currentMenuSelection);
     } else if (appState->status == ST_SELECTION_MENU) {
@@ -564,42 +618,48 @@ int32_t flipper_game_connect_wires(void* p) {
     UNUSED(p);
     furi_assert((uint16_t)MAX_FIELD_WIDTH * MAX_FIELD_HEIGHT < 256);
 
-    dolphin_deed(DolphinDeedPluginGameStart);
-
     InputEvent event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
-    // Configure view port
-    ViewPort* view_port = view_port_alloc();
-
-    AppState* appState = malloc(sizeof(AppState));
+	AppState* appState = malloc(sizeof(AppState));
     appState->gameState.fieldSize = createCoord(0, 0);
     appState->status = ST_MAIN_MENU;
 
-    // temp
-    //appState->status = ST_MAIN_MENU;
-    //appState->currentMenuSelection = 0;
-    // temp end
+	appState->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
+    // Configure view port
+    ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, game_draw_callback, appState);
     view_port_input_callback_set(view_port, game_input_callback, event_queue);
 
     // Register view port in GUI
     Gui* gui = furi_record_open(RECORD_GUI);
-    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+	gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+
+    dolphin_deed(DolphinDeedPluginGameStart);
+
 
     while(1) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
-        if(event.type != InputTypePress) continue;
+        if ((event.type != InputTypeShort) && (event.type != InputTypeLong)) continue;
 
         furi_mutex_acquire(appState->mutex, FuriWaitForever);
 
         if (appState->status == ST_PLAYING) {
           if(event.key == InputKeyBack) {
-            appState->currentMenuSelection = 0;
-            appState->status = ST_MAIN_MENU;
+            if (event.type == InputTypeShort) {
+              appState->currentMenuSelection = 0;
+              appState->status = ST_MAIN_MENU;
+            }
+            if (event.type == InputTypeLong) {
+              // Change rotation to default: counter-clockwise
+              appState->gameState.clockwise = false;
+              notification_message_block(notification, &sequence_counter_clockwise);
+              //FURI_LOG_I(TAG, "Rotation: counter-clockwise > clockwise = %d", appState->gameState.clockwise);
+            }
           } else if (event.key == InputKeyLeft) {
             moveSelection(&appState->gameState, DIR_LEFT);
           } else if (event.key == InputKeyRight) {
@@ -609,11 +669,18 @@ int32_t flipper_game_connect_wires(void* p) {
           } else if (event.key == InputKeyDown) {
             moveSelection(&appState->gameState, DIR_BOTTOM);
           } else if (event.key == InputKeyOk) {
-            rotateSelection(&appState->gameState);
-            recalculateReachables(&appState->gameState);
-            if (checkIsWinning(&appState->gameState)) {
-              appState->status = ST_WINNING;
-              notification_message_block(notification, &sequence_winning);
+            if (event.type == InputTypeShort) {
+              rotateSelection(&appState->gameState);
+              recalculateReachables(&appState->gameState);
+              if (checkIsWinning(&appState->gameState)) {
+                appState->status = ST_WINNING;
+                notification_message_block(notification, &sequence_winning);
+              }
+            } else if (event.type == InputTypeLong) {
+                // Change rotation direction to clockwise
+                appState->gameState.clockwise = true;
+                notification_message_block(notification, &sequence_clockwise);
+                // FURI_LOG_I(TAG, "Rotation: clockwise > clockwise = %d", appState->gameState.clockwise);
             }
           }
         } else if (appState->status == ST_WINNING) {
@@ -664,8 +731,8 @@ int32_t flipper_game_connect_wires(void* p) {
           appState->currentMenuSelection = 0;
         }
 
-		view_port_update(view_port);
         furi_mutex_release(appState->mutex);
+		view_port_update(view_port);
     }
 
     free(appState);
