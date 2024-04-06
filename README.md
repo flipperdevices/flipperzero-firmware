@@ -8,7 +8,7 @@
 
 Flipper Zero app to get range measurements from a [Noptel](https://noptel.fi/) [LRF rangefinder](https://noptel.fi/rangefinderhome).
 
-![Noptel rangefinders](images/lrf.png)
+![Noptel rangefinders](screenshots/lrf.png)
 
 https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/e14cb0f0-6c36-47b1-ba0d-2a1234165151
 
@@ -18,16 +18,16 @@ https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/e14cb0
 
 Start the application in **Apps ▶ GPIO**
 
-![Location of the Noptel LRF sampler app in the GPIO menu](images/gpio_menu.png)
+![Location of the Noptel LRF sampler app in the GPIO menu](screenshots/gpio_menu.png)
 
 The main menu opens:
 
-![Main menu](images/main_menu.png)
+![Main menu](screenshots/main_menu.png)
 
 
 ### Configuration menu
 
-![Configuration menu](images/configuration_menu.png)
+![Configuration menu](screenshots/configuration_menu.png)
 
 In the configuration menu, select the sampling mode:
 
@@ -46,7 +46,7 @@ Select the **Sample** option to start sampling the LRF.
 
 In single measurement mode, press the **OK** button to get one measurement.
 
-![Sampling in single measurement mode](images/sample_smm.png)
+![Sampling in single measurement mode](screenshots/sample_smm.png)
 
 Up to 3 distances can be measured in one sample (several targets in the line of sight).
 
@@ -58,7 +58,7 @@ The associated amplitude (i.e. signal strength) is displayed as a small number n
 
 In continuous measurement mode, press the **OK** button to start and stop the measurements.
 
-![Sampling in continuous measurement mode](images/sample_cmm.png)
+![Sampling in continuous measurement mode](screenshots/sample_cmm.png)
 
 Distances and amplitudes are displayed like in single measurement mode.
 
@@ -68,15 +68,15 @@ The effective sampling rate is calculated and displayed at the bottom.
 
 If an averaging time is configured, the average distances and amplitudes over that period of time are displayed instead of the last samples.
 
-![Sample averaging](images/sample_averaging.png)
+![Sample averaging](screenshots/sample_averaging.png)
 
 ### About screen
 
 Gives information about the app and the GPIO pin connections needed to connect an LRF rangefinder to the Flipper Zero.
 
-![App information](images/about.png)
+![App information](screenshots/about.png)
 
-![GPIO pin connections](images/gpio_pin_connections.png)
+![GPIO pin connections](screenshots/gpio_pin_connections.png)
 
 
 
@@ -85,7 +85,7 @@ Gives information about the app and the GPIO pin connections needed to connect a
 - Clone this repository
 - Install [uFBT](https://github.com/flipperdevices/flipperzero-ufbt)
 - Connect your Flipper Zero to the computer with a USB cable
-- cd into the `src` directory inside the repository
+- cd into the repository
 - Invoke `ufbt launch` to install the app in the **Apps ▶ GPIO** menu and run it for the first time
 
 
