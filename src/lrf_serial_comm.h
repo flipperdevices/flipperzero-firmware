@@ -1,15 +1,22 @@
+/***
+ * Noptel LRF rangefinder sampler for the Flipper Zero
+ * Version: 1.0.0
+ *
+ * LRF Serial communication app
+***/
+
 #pragma once
 
-#include "furi_hal.h"
-
+/*** Defines ***/
 #define UART FuriHalUartIdUSART1
 #define BAUDRATE 115200
 #define RX_BUF_SIZE 2048
 
 
+
 /*** Types ***/
 
-/* LRF command */
+/** LRF command **/
 typedef enum {
   smm,
   cmm_1hz,
@@ -23,7 +30,7 @@ typedef enum {
 
 
 
-/* LRF sample */
+/** LRF sample **/
 typedef struct {
 
   /* Distances */
@@ -43,7 +50,7 @@ typedef struct {
 
 
 
-/* App structure */
+/** App structure **/
 typedef struct {
 
   /* UART receive thread */
@@ -72,15 +79,16 @@ typedef struct {
 
 /*** Routines ***/
 
-/* Set the callback to handle the received LRF data */
+/** Set the callback to handle the received LRF data **/
 void set_lrf_data_handler(LRFSerialCommApp *, void (*)(LRFSample *, void *),
 				void *);
 
-/* Send a command to the LRF */
+/** Send a command to the LRF **/
 void send_lrf_command(LRFSerialCommApp*, LRFCommand);
 
-/* Initialize the LRF communication app */
+/** Initialize the LRF serial communication app **/
 LRFSerialCommApp *lrf_serial_comm_app_init();
 
-/* Free up the space allocated for the LRF communication app */
+/** Stop the UART receive thread and free up the space allocated for the LRF
+    communication app **/
 void lrf_serial_comm_app_free(LRFSerialCommApp *);

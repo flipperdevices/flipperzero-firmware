@@ -1,4 +1,11 @@
-/*** Main app ***/
+/***
+ * Noptel LRF rangefinder sampler for the Flipper Zero
+ * Version: 1.0.0
+ *
+ * Main app
+***/
+
+/*** Includes ***/
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
@@ -11,7 +18,7 @@
 #include <notification/notification_messages.h>
 
 #include <noptel_lrf_sampler_icons.h>	/* Generated from
-					   images/noptel_lrf_sampler.png */
+					   noptel_lrf_sampler.png */
 #include "lrf_serial_comm.h"
 
 

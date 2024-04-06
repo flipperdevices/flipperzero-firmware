@@ -1,4 +1,13 @@
-/*** LRF Serial communication app ***/
+/***
+ * Noptel LRF rangefinder sampler for the Flipper Zero
+ * Version: 1.0.0
+ *
+ * LRF Serial communication app
+***/
+
+/*** Includes ***/
+#include <furi_hal.h>
+
 #include "lrf_serial_comm.h"
 
 
