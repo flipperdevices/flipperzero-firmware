@@ -8,7 +8,6 @@
 #pragma once
 
 /*** Defines ***/
-#define UART FuriHalUartIdUSART1
 #define BAUDRATE 115200
 #define RX_BUF_SIZE 2048
 
