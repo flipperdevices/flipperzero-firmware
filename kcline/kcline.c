@@ -716,7 +716,7 @@ int32_t kcline_main(void* p) {
     InputEvent event;
 
     // Event queue for 8 elements of size InputEvent
-    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(5, sizeof(InputEvent));
 
     // Allocate our global app state
     App* app = malloc(sizeof(App));
@@ -798,25 +798,32 @@ int32_t kcline_main(void* p) {
 				}
 			}
 		}
-		furi_mutex_release(app->mutex);
 		view_port_update(view_port);
+ 		furi_mutex_release(app->mutex);
     }
 
-    // Free app memory
-    free(app);
+	
+	// Free app memory
+	FURI_LOG_D(TAG, "Freeing app"); // For tracing crash on exit, not sure whats going on
+	free(app);
 
     // once exit from the loop, we need to free resources:
     // clear all the element inside the queue
-    furi_timer_free(tick_timer);
-    furi_message_queue_free(event_queue);
+  	FURI_LOG_D(TAG, "Freeing tick_timer"); // For tracing crash on exit, not sure whats going on
+  	furi_timer_free(tick_timer);
+   	FURI_LOG_D(TAG, "Freeing event_queue"); // For tracing crash on exit, not sure whats going on
+	furi_message_queue_free(event_queue);
 
     // We remove the gui from the associated view port
-    gui_remove_view_port(gui, view_port);
+ 	FURI_LOG_D(TAG, "Removing view_port from gui"); // For tracing crash on exit, not sure whats going on
+	gui_remove_view_port(gui, view_port);
 
     // Freeing up memory removing the view_port and close
     // the GUI record
-    view_port_free(view_port);
-    furi_record_close(RECORD_GUI);
+    FURI_LOG_D(TAG, "Freeing view_port"); // For tracing crash on exit, not sure whats going on
+	view_port_free(view_port);
+ 	FURI_LOG_D(TAG, "Closing furi record"); // For tracing crash on exit, not sure whats going on
+	furi_record_close(RECORD_GUI);
 
     return 0;
 }

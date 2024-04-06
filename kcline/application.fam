@@ -6,7 +6,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     # Main function (entry point) of the application
     entry_point="kcline_main",
-    stack_size=4 * 1024,
+    stack_size=5 * 1024,
     # Where the application will be stored into the Flip.x0
     fap_category="Games",
     requires=["gui"],
