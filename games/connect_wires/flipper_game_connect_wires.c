@@ -6,7 +6,8 @@
  * https://opensource.org/licenses/MIT
  *
  * Thanks to:
- *  - Eugene Kirzhanov: https://github.com/eugene-kirzhanov/flipper-zero-2048-game
+ *  - Eugene Kirzhanov: https://github.com/eugene-kirzhanov/flipper-zero-2048-game for code example
+ *  - Andrew Diamond https://github.com/HappyAmos for contributions
  */
 
 #include <furi.h>
@@ -21,7 +22,7 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HIGHT 64
 
-#define TAG "connect_wires" // For logging
+#define LOG_TAG "connect_wires" // For logging
 
 enum AppStatus {
   ST_PLAYING,
@@ -131,7 +132,6 @@ GridElement createGridElement() {
 
 
 void rotate_grid_element(GridElement* elem, bool clockwise) {
-    //FURI_LOG_I(TAG, "Attempt Rotation: clockwise = %d", clockwise);
     if (!clockwise) { // Counter-clockwise logic
       bool tmp = elem->edges[0];
       for (int8_t i = 0; i < 3; ++i) {
@@ -621,12 +621,12 @@ int32_t flipper_game_connect_wires(void* p) {
     InputEvent event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
-	AppState* appState = malloc(sizeof(AppState));
+    AppState* appState = malloc(sizeof(AppState));
     appState->gameState.fieldSize = createCoord(0, 0);
     appState->status = ST_MAIN_MENU;
 
-	// Allocate our appState->mutex
-	appState->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    // Allocate our appState->mutex
+    appState->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
@@ -635,7 +635,7 @@ int32_t flipper_game_connect_wires(void* p) {
 
     // Register view port in GUI
     Gui* gui = furi_record_open(RECORD_GUI);
-	gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
@@ -651,15 +651,8 @@ int32_t flipper_game_connect_wires(void* p) {
 
         if (appState->status == ST_PLAYING) {
           if(event.key == InputKeyBack) {
-            if (event.type == InputTypeShort) {
-              appState->currentMenuSelection = 0;
-              appState->status = ST_MAIN_MENU;
-            }
-            if (event.type == InputTypeLong) {
-              // Change rotation to default: counter-clockwise
-              appState->gameState.clockwise = false;
-              notification_message_block(notification, &sequence_counter_clockwise);
-              //FURI_LOG_I(TAG, "Rotation: counter-clockwise > clockwise = %d", appState->gameState.clockwise);
+            appState->currentMenuSelection = 0;
+            appState->status = ST_MAIN_MENU;
             }
           } else if (event.key == InputKeyLeft) {
             moveSelection(&appState->gameState, DIR_LEFT);
@@ -678,10 +671,13 @@ int32_t flipper_game_connect_wires(void* p) {
                 notification_message_block(notification, &sequence_winning);
               }
             } else if (event.type == InputTypeLong) {
-                // Change rotation direction to clockwise
-                appState->gameState.clockwise = true;
-                notification_message_block(notification, &sequence_clockwise);
-                // FURI_LOG_I(TAG, "Rotation: clockwise > clockwise = %d", appState->gameState.clockwise);
+                // Switch rotation direction to opposite
+                appState->gameState.clockwise = !appState->gameState.clockwise;
+                if (appState->gameState.clockwise) {
+                  notification_message_block(notification, &sequence_clockwise);
+                } else {
+                  notification_message_block(notification, &sequence_counter_clockwise);
+                }
             }
           }
         } else if (appState->status == ST_WINNING) {
@@ -732,8 +728,8 @@ int32_t flipper_game_connect_wires(void* p) {
           appState->currentMenuSelection = 0;
         }
 
+        view_port_update(view_port);
         furi_mutex_release(appState->mutex);
-		view_port_update(view_port);
     }
 
     free(appState);
