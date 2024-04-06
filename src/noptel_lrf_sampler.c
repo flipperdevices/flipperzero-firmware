@@ -69,7 +69,7 @@ static char *about_text =
 
 /*** Types */
 
-/* Submenu items */
+/** Submenu items **/
 typedef enum {
 
   /* Configuration view */
@@ -85,7 +85,7 @@ typedef enum {
 
 
 
-/* Views */
+/** Views **/
 typedef enum {
 
   /* Submenu */
@@ -104,7 +104,7 @@ typedef enum {
 
 
 
-/* Sampler model */
+/** Sampler model **/
 typedef struct {
 
   /* LRF frequency */
@@ -141,7 +141,7 @@ typedef struct {
 
 
 
-/* App structure */
+/** App structure **/
 typedef struct {
 
     /* App notifications (used for backlight control) */
@@ -177,8 +177,8 @@ typedef struct {
 
 /*** Routines ***/
 
-/* Time difference in seconds between system ticks in milliseconds, taking the
-timestamp overflow into account */
+/** Time difference in seconds between system ticks in milliseconds, taking the
+timestamp overflow into account **/
 static double ms_tick_time_diff(uint32_t tstamp1, uint32_t tstamp2) {
 
   double timediff_s;
@@ -194,7 +194,7 @@ static double ms_tick_time_diff(uint32_t tstamp1, uint32_t tstamp2) {
 
 
 
-/* Frequency setting change function */
+/** Frequency setting change function **/
 static void config_freq_change(VariableItem *item) {
 
   App *app = variable_item_get_context(item);
@@ -209,7 +209,7 @@ static void config_freq_change(VariableItem *item) {
 
 
 
-/* Averaging time change function */
+/** Averaging time change function **/
 static void config_avg_change(VariableItem *item) {
 
   App *app = variable_item_get_context(item);
@@ -224,7 +224,7 @@ static void config_avg_change(VariableItem *item) {
 
 
 
-/* Beep option change function */
+/** Beep option change function **/
 static void config_beep_change(VariableItem *item) {
 
   App *app = variable_item_get_context(item);
@@ -239,7 +239,7 @@ static void config_beep_change(VariableItem *item) {
 
 
 
-/* Draw callback for the sample view */
+/** Draw callback for the sample view **/
 static void sample_view_draw_callback(Canvas *canvas, void *model) {
 
     SamplerModel *sampler_model = (SamplerModel *)model;
@@ -294,8 +294,8 @@ static void sample_view_draw_callback(Canvas *canvas, void *model) {
     /* None of the distances indicate an error */
     else {
 
-      /* Add "m" signs right of the distance values or indicate no samples
-         depending on whether we have distances or not */
+      /* Add "m" right of the distance values or indicate no samples depending
+         on whether we have distances or not */
       if(sampler_model->disp_sample.dist1 > 0.5)
         canvas_draw_str(canvas, 95, 14, "m");
       else if(sampler_model->disp_sample.dist1 >= 0 &&
@@ -387,7 +387,7 @@ static void sample_view_draw_callback(Canvas *canvas, void *model) {
 }
 
 
-/* Input callback */
+/** Input callback **/
 static bool sample_view_input_callback(InputEvent *evt, void *ctx) {
 
   App *app = (App *)ctx;
@@ -466,7 +466,7 @@ static bool sample_view_input_callback(InputEvent *evt, void *ctx) {
 
 
 
-/* Sample view update timer callback */
+/** Sample view update timer callback **/
 static void sample_view_timer_callback(void *ctx) {
 
     App *app = (App *)ctx;
@@ -479,8 +479,8 @@ static void sample_view_timer_callback(void *ctx) {
 
 
 
-/* Sample view enter callback
-   Setup the timer to update the sample view regularly */
+/** Sample view enter callback
+    Setup the timer to update the sample view regularly **/
 static void sample_view_enter_callback(void *ctx) {
 
   App *app = (App *)ctx;
@@ -514,8 +514,8 @@ static void sample_view_enter_callback(void *ctx) {
 
 
 
-/* Sample view exit callback
-   Stop the timer to update the sample view */
+/** Sample view exit callback
+    Stop the timer to update the sample view **/
 static void sample_view_exit_callback(void *ctx) {
 
   App *app = (App *)ctx;
@@ -537,7 +537,7 @@ static void sample_view_exit_callback(void *ctx) {
 
 
 
-/* Speaker control timer callback */
+/** Speaker control timer callback **/
 static void speaker_control_timer_callback(void *ctx) {
 
   App *app = (App *)ctx;
@@ -574,7 +574,7 @@ static void speaker_control_timer_callback(void *ctx) {
 
 
 
-/* Handle submenu views switching */
+/** Handle submenu views switching **/
 static void submenu_callback(void *ctx, uint32_t idx) {
 
   App *app = (App *)ctx;
@@ -606,7 +606,7 @@ static void submenu_callback(void *ctx, uint32_t idx) {
 
 
 
-/* Callback to return to the submenu */
+/** Callback to return to the submenu **/
 static uint32_t navigation_submenu_callback(void *ctx) {
 
   UNUSED(ctx);
@@ -630,9 +630,8 @@ static uint32_t navigation_exit_callback(void *ctx) {
 
 
 
-/* LRF data handler
-   Called when decoded LRF data is available from the LRF serial communication
-   app */
+/** LRF data handler
+    Called when LRF data is available from the LRF serial communication app **/
 void lrf_data_handler(LRFSample *lrf_sample, void *ctx) {
 
   App *app = (App *)ctx;
@@ -797,7 +796,7 @@ void lrf_data_handler(LRFSample *lrf_sample, void *ctx) {
 
 
 
-/* Initialize the app */
+/** Initialize the app **/
 static App *app_init() {
 
   FURI_LOG_I(TAG, "App init");
@@ -975,7 +974,7 @@ static App *app_init() {
 
 
 
-/* Free up the space allocated for the app */
+/** Free up the space allocated for the app **/
 static void app_free(App *app) {
 
   FURI_LOG_I(TAG, "App free");
@@ -1020,7 +1019,7 @@ static void app_free(App *app) {
 
 
 
-/** Set the log level */
+/** Set the log level **/
 static void set_log_level() {
 #ifdef FURI_DEBUG
   furi_log_set_level(FuriLogLevelTrace);
@@ -1031,7 +1030,7 @@ static void set_log_level() {
 
 
 
-/* App entry point */
+/** App entry point **/
 int32_t noptel_lrf_sampler_app(void *p) {
 
   UNUSED(p);

@@ -6,7 +6,11 @@
 /*** Defines ***/
 #define TAG "lrf_serial_comm"
 
-/* Prebuilt LRF Commands (exec mode) */
+
+
+/*** Parameters ***/
+
+/** Prebuilt LRF Commands (exec mode) **/
 static uint8_t cmd_smm[] = "\xcc\x00\x00\x00\x9c";
 static uint8_t cmd_cmm_1hz[] = "\xcc\x01\x00\x00\x9d";
 static uint8_t cmd_cmm_4hz[] = "\xcc\x02\x00\x00\x9e";
@@ -20,7 +24,7 @@ static uint8_t cmd_cmm_break[] = "\xc6\x96";
 
 /*** Types ***/
 
-/* Receive thread events */
+/** Receive thread events **/
 typedef enum {
   stop = 1,
   rx_done = 2,
@@ -28,7 +32,9 @@ typedef enum {
 
 
 
-/* Set the callback to handle the received LRF data */
+/*** Routines ***/
+
+/** Set the callback to handle the received LRF data **/
 void set_lrf_data_handler(LRFSerialCommApp *app,
 					void (*cb)(LRFSample *, void *),
 					void *ctx) {
@@ -38,7 +44,7 @@ void set_lrf_data_handler(LRFSerialCommApp *app,
 
 
 
-/* IRQ callback */
+/** IRQ callback **/
 static void on_uart_irq_callback(FuriHalSerialHandle *hndl,
 					FuriHalSerialRxEvent evt, void *ctx) {
 
@@ -53,7 +59,7 @@ static void on_uart_irq_callback(FuriHalSerialHandle *hndl,
 
 
 
-/* LRF frame check byte calculator */
+/** LRF frame check byte calculator **/
 static uint8_t checkbyte(uint8_t *data, uint16_t len) {
 
   uint8_t checksum = 0;
@@ -69,7 +75,7 @@ static uint8_t checkbyte(uint8_t *data, uint16_t len) {
 
 
 
-/* UART receive thread */
+/** UART receive thread **/
 static int32_t uart_rx_thread(void *ctx) {
 
   LRFSerialCommApp *app = (LRFSerialCommApp *)ctx;
@@ -284,14 +290,14 @@ static int32_t uart_rx_thread(void *ctx) {
 
 
 
-/* UART send function */
+/** UART send function **/
 static void uart_tx(LRFSerialCommApp *app, uint8_t *data, size_t len) {
   furi_hal_serial_tx(app->serial_handle, data, len);
 }
 
 
 
-/* Send a command to the LRF */
+/** Send a command to the LRF **/
 void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
 
   /* Send the correct sequence of bytes to the LRF depending on the command */
@@ -348,7 +354,7 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
 
 
 
-/* Initialize the LRF serial communication app */
+/** Initialize the LRF serial communication app **/
 LRFSerialCommApp *lrf_serial_comm_app_init() {
 
   FURI_LOG_I(TAG, "App init");
@@ -386,8 +392,8 @@ LRFSerialCommApp *lrf_serial_comm_app_init() {
 
 
 
-/* Stop the UART receive thread and free up the space allocated for the LRF
-   communication app */
+/** Stop the UART receive thread and free up the space allocated for the LRF
+    communication app **/
 void lrf_serial_comm_app_free(LRFSerialCommApp *app) {
 
   FURI_LOG_I(TAG, "App free");
