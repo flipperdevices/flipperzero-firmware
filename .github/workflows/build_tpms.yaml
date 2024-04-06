@@ -1,0 +1,43 @@
+name: "tpms: Build and lint"
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - ".github/workflows/build_tpms.yaml"
+      - "subghz/apps/tpms/**"
+  pull_request:
+    branches: [ master ]
+    paths:
+      - ".github/workflows/build_tpms.yaml"
+      - "subghz/apps/tpms/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        sdk-version: ["release", "dev", "rc"]
+    runs-on: ubuntu-latest
+    name: 'ufbt: Build for ${{ matrix.sdk-version }} Branch'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - name: Build with ufbt
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        id: build-app
+        with:
+          sdk-channel: ${{ matrix.sdk-version }}
+          app-dir: subghz/apps/tpms
+      - name: Upload app artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: "flipperzero-tpms-${{ matrix.sdk-version }}-${{ steps.build-app.outputs.suffix }}"
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
+      - name: Lint sources
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        with:
+          skip-setup: true
+          task: lint
+          app-dir: subghz/apps/tpms
