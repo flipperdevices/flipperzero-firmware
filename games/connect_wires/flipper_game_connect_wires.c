@@ -653,7 +653,6 @@ int32_t flipper_game_connect_wires(void* p) {
           if(event.key == InputKeyBack) {
             appState->currentMenuSelection = 0;
             appState->status = ST_MAIN_MENU;
-            }
           } else if (event.key == InputKeyLeft) {
             moveSelection(&appState->gameState, DIR_LEFT);
           } else if (event.key == InputKeyRight) {
@@ -671,13 +670,13 @@ int32_t flipper_game_connect_wires(void* p) {
                 notification_message_block(notification, &sequence_winning);
               }
             } else if (event.type == InputTypeLong) {
-                // Switch rotation direction to opposite
-                appState->gameState.clockwise = !appState->gameState.clockwise;
-                if (appState->gameState.clockwise) {
-                  notification_message_block(notification, &sequence_clockwise);
-                } else {
-                  notification_message_block(notification, &sequence_counter_clockwise);
-                }
+              // Switch rotation direction to opposite
+              appState->gameState.clockwise = !appState->gameState.clockwise;
+              if (appState->gameState.clockwise) {
+                notification_message_block(notification, &sequence_clockwise);
+              } else {
+                notification_message_block(notification, &sequence_counter_clockwise);
+              }
             }
           }
         } else if (appState->status == ST_WINNING) {
