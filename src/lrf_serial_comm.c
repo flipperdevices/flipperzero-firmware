@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.0.0
+ * Version: 1.0
  *
  * LRF Serial communication app
 ***/
