@@ -15,4 +15,4 @@ navigate the player, back to exit.
 2024 Andrew Diamond
 Distributed under the MIT license.
 #### License
-[MIT](LICENSE)
+[MIT LICENSE](LICENSE)
