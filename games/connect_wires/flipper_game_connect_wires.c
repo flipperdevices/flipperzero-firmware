@@ -21,7 +21,7 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HIGHT 64
 
-#define TAG "connect_wires_2" // For logging
+#define TAG "connect_wires" // For logging
 
 enum AppStatus {
   ST_PLAYING,
@@ -625,6 +625,7 @@ int32_t flipper_game_connect_wires(void* p) {
     appState->gameState.fieldSize = createCoord(0, 0);
     appState->status = ST_MAIN_MENU;
 
+	// Allocate our appState->mutex
 	appState->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     // Configure view port
