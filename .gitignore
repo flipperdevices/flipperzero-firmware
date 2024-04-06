@@ -1,2 +1,9 @@
 .DS_Store
 .vscode/
+
+*/apps/*/dist/*
+*/apps/*/.vscode
+*/apps/*/.clang-format
+*/apps/*/.editorconfig
+*/apps/*/.env
+*/apps/*/.ufbt
