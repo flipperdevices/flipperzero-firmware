@@ -15,4 +15,5 @@ App(
     fap_description="Noptel LRF rangefinder sampler",
     fap_author="Giraut",
     fap_weburl="https://github.com/Giraut/flipper_zero_noptel_lrf_sampler",
+    fap_icon_assets="images",  # Image assets to compile for this application
 )
