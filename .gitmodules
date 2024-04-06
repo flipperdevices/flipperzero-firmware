@@ -1,0 +1,3 @@
+[submodule "subghz/apps/tpms"]
+	path = subghz/apps/tpms
+	url = https://github.com/prplecake/flipperzero-tpms
