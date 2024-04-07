@@ -2,6 +2,14 @@
 #include <furi.h>
 #include <gui/gui.h>
 
+#define FACE_TYPES 4
+typedef enum {
+    Rectangular = 0,
+    Round,
+    DigitalRectangular,
+    DigitalRound,
+} FaceType;
+
 typedef struct {
     uint8_t x;
     uint8_t y;
@@ -13,12 +21,13 @@ typedef struct {
 } Line;
 
 typedef struct {
+    FaceType type;
     Line minute_lines[60];
     Point hour_points[12];
 } ClockFace;
 
 typedef struct {
-    bool round_face;
+    bool split;
     uint8_t width;
     ClockFace face;
 } ClockConfig;
@@ -35,3 +44,8 @@ void set_clock_minute_line(
 void calc_clock_face(ClockConfig* cfg);
 
 void draw_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, int ms);
+
+void init_clock_config(ClockConfig* cfg);
+void modify_clock_left(ClockConfig* cfg);
+void modify_clock_right(ClockConfig* cfg);
+void modify_clock_ok(ClockConfig* cfg);

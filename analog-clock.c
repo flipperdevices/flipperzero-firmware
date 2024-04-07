@@ -67,11 +67,7 @@ int32_t analog_clock_main(void* p) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
-    if(!cfg_load(file, &app->cfg)) {
-        app->cfg.round_face = false;
-        app->cfg.width = 54;
-    }
-
+    if(!cfg_load(file, &app->cfg)) init_clock_config(&app->cfg);
     calc_clock_face(&app->cfg);
 
     ViewPort* view_port = view_port_alloc();
@@ -96,13 +92,13 @@ int32_t analog_clock_main(void* p) {
             if((event.type == InputTypePress) || (event.type == InputTypeRepeat)) {
                 switch(event.key) {
                 case InputKeyLeft:
-                    app->cfg.width = app->cfg.width <= 32 ? 32 : app->cfg.width - 1;
+                    modify_clock_left(&app->cfg);
                     break;
                 case InputKeyRight:
-                    app->cfg.width = app->cfg.width >= 63 ? 63 : app->cfg.width + 1;
+                    modify_clock_right(&app->cfg);
                     break;
                 case InputKeyOk:
-                    app->cfg.round_face = !app->cfg.round_face;
+                    modify_clock_ok(&app->cfg);
                     break;
                 case InputKeyBack:
                     terminate = true;

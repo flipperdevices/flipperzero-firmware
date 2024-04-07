@@ -261,8 +261,24 @@ void draw_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, int ms) {
             cfg->face.minute_lines[i].end.y);
     }
 
-    draw_hand(canvas, hourAng, HM_WIDTH, H_RAD, HM_OFS);
-    draw_hand(canvas, minAng, HM_WIDTH, M_RAD, HM_OFS);
-    draw_sec_hand(canvas, secAng, S_RAD, S_EXT);
-    canvas_draw_disc(canvas, CLOCK_OFS_X, CLOCK_OFS_Y, 2);
+
+void init_clock_config(ClockConfig* cfg) {
+    cfg->split = false;
+    cfg->face.type = Rectangular;
+    cfg->width = FACE_DEFAULT_WIDTH;
+}
+
+void modify_clock_left(ClockConfig* cfg) {
+    if(cfg->split) {
+        cfg->face.type = (cfg->face.type + 1) % FACE_TYPES;
+    } else
+        cfg->width = cfg->width <= 32 ? 32 : cfg->width - 1;
+}
+
+void modify_clock_right(ClockConfig* cfg) {
+    if(!cfg->split) cfg->width = cfg->width >= 63 ? 63 : cfg->width + 1;
+}
+
+void modify_clock_ok(ClockConfig* cfg) {
+    cfg->split = !cfg->split;
 }
