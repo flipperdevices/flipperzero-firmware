@@ -5,6 +5,8 @@
 This script was created for the [YouTube video](https://youtu.be/DAUQGeG4pc4) to demonstrate various concepts in JavaScript running on the Flipper Zero, using a real world scenario.
 
 ## Overview summary
+This script uses features that were introduced in the dev branch of Momentum firmware on April 5, 2024. You need to be sure your firmware is updated or else you will get errors running the script.
+
 This script will copy an MP3 file from the Flipper to the computer, play it on the computer, run commands to get information from the computer (like wifi credentials), copy the output back to the Flipper Zero, and display it and append it on a local file on the Flipper.  It will also automate switching between keyboard, disk, ejecting devices.
 
 Many of these ideas are from the Momentum Discord server's script-sharing channel.  I encourage you to check out the various scripts being shared there.
@@ -64,10 +66,17 @@ Edit the [badusbdemo.js](./badusbdemo.js) file to customize the script.  The fol
 
 ## Running
 
+- Make sure you have the latest dev firmware installed on your Flipper.
 - On the Flipper click the OK button, then choose `Apps`, then choose `Scripts`, then choose `badusbdemo.js`.
 - Connect the Flipper Zero to the computer when prompted with `Waiting for connection`.
 - The script will run and eventually disconnect the Flipper Zero from the computer.
 - The script will finish and the output will be displayed on the screen and appended to the `loot.txt` file on the SD card in the (`SD Card/apps/Scripts/loot.txt`).
+
+## Troubleshooting
+- If you get... `"textbox" module load fail at :23` -- Your firmware is too old.  You need to update to the latest dev branch of the firmware.
+- If you get... `"file/dir not exist at :71"` -- You need to put demo.mp3 (all lowercase) in `SD Card/apps/Scripts/payloads/demo.mp3`. The MP3 file I saved in payloads/demo.mp3 for the video was https://www.soundboard.com/track/download/156453
+- If you get... `"out of memory"` -- Reboot the Flipper (BACK+LEFT buttons) before running the script to free up memory.
+- If you get a different error, **please let me know** (ideally take a picture of the error with your phone) so I can investigate it. Even if you figure it out, it would be great to add to this troubleshooting section.
 
 ## Support
 
