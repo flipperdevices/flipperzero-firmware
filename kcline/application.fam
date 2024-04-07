@@ -6,7 +6,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     # Main function (entry point) of the application
     entry_point="kcline_main",
-    stack_size=5 * 1024,
+    stack_size=6 * 1024,
     # Where the application will be stored into the Flip.x0
     fap_category="Games",
     requires=["gui"],
@@ -21,7 +21,7 @@ App(
     fap_icon="icons/kcline.png",
     fap_icon_assets="icons",
     # Optional values
-    fap_version=(1, 1),
+    fap_version=(1, 2),
     fap_description="One line dot munching game!",
     fap_author="Andrew Diamond",
     fap_weburl="https://github.com/HappyAmos/",

@@ -195,7 +195,7 @@ uint8_t add_delta_looped(uint8_t idx, uint8_t nitems, int8_t delta) {
 
 /* #defaults - Set game defaults */
 static void initialize_game(App* app) {
-    FURI_LOG_D(TAG, "initializing_game");
+    FURI_LOG_I(TAG, "initializing_game");
     app->scene = SCENE_MENU;
     reset_bits(app);
     app->game.kc.direction = STOP;
@@ -499,13 +499,13 @@ static void check_for_collisions(InputEvent* event, App* app) {
 	// Went over left side
 	if ((app->game.kc.col < 3) && app->game.kc.direction == LEFT) { 
 		app->game.kc.col = MAX_COLS - 3; // Reset KC position to far right
-		FURI_LOG_D(TAG, "Set KC Position to MAX_COL - 3: %d ", app->game.kc.col);
+		//FURI_LOG_D(TAG, "Set KC Position to MAX_COL - 3: %d ", app->game.kc.col);
 		return;
 	}
 	// Went over right side 
 	if ((app->game.kc.col > MAX_COLS - 3) && app->game.kc.direction == RIGHT) { 
 		app->game.kc.col = 3; // Reset KC position to far left 
-		FURI_LOG_D(TAG, "Set KC Position to 0 + 3: %d ", app->game.kc.col);
+		//FURI_LOG_D(TAG, "Set KC Position to 0 + 3: %d ", app->game.kc.col);
 		return;
 	}
 
@@ -515,7 +515,7 @@ static void check_for_collisions(InputEvent* event, App* app) {
 	     ((app->game.kc.col <= app->game.ghost.col + (GHOST_WIDTH / 2)) && (app->game.kc.col >= app->game.ghost.col) && app->game.kc.direction == LEFT)) {
 
 		// STOP all players and reset positions.
-		FURI_LOG_D(TAG, "<Collision>  KC: %d, GHOST: %d", app->game.kc.col, app->game.ghost.col);
+		//FURI_LOG_D(TAG, "<Collision>  KC: %d, GHOST: %d", app->game.kc.col, app->game.ghost.col);
 		app->game.kc.direction = STOP;
 		app->game.ghost.direction = STOP;
 		app->game.kc.col = KC_START_COL;
@@ -648,19 +648,20 @@ static void input_handler_scene_game (InputEvent* event, App* app) {
 	switch (event->key) {
 		case InputKeyLeft:
 			app->game.kc.direction = LEFT;
-			FURI_LOG_D(TAG, "Player direction LEFT");
+			FURI_LOG_I(TAG, "Left navigation button keypress detected.");
 			break;
 		case InputKeyRight:
 			app->game.kc.direction = RIGHT;
-			FURI_LOG_D(TAG, "Player direction RIGHT");
+			FURI_LOG_I(TAG, "Right navigation button keypress detected.");
 			break;
 		case InputKeyBack:
 			// pause menu
 			app->scene = SCENE_MENU;
+			FURI_LOG_I(TAG, "Back button keypress detected.");
 			break;
 		case InputKeyOk:
 			app->game.kc.direction = STOP;
-			FURI_LOG_D(TAG, "Player direction STOP: game paused");
+			FURI_LOG_I(TAG, "OK button keypress detected.");
 			break;
 		default:
 			break;
@@ -710,13 +711,11 @@ static void kcline_update_timer_callback(FuriMessageQueue *event_queue)
 int32_t kcline_main(void* p) {
     UNUSED(p);
 
-    //FURI_LOG_D(TAG, "kcline_main()");
-
     // Current event of type InputEvent
     InputEvent event;
 
     // Event queue for 8 elements of size InputEvent
-    FuriMessageQueue* event_queue = furi_message_queue_alloc(5, sizeof(InputEvent));
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(6, sizeof(InputEvent));
 
     // Allocate our global app state
     App* app = malloc(sizeof(App));
@@ -733,8 +732,8 @@ int32_t kcline_main(void* p) {
 
     // Start a furitimer to track time in our game
 	FuriTimer *tick_timer = furi_timer_alloc(kcline_update_timer_callback, FuriTimerTypePeriodic, event_queue);
-    furi_timer_start(tick_timer, app->ticks); 
-
+    furi_timer_start(tick_timer, app->ticks);
+	furi_check(tick_timer);
 
     // ViewPort is need to draw the GUI
     ViewPort* view_port = view_port_alloc();
@@ -753,7 +752,7 @@ int32_t kcline_main(void* p) {
 
 	// Debugging
 	if (!view_port_is_enabled(view_port)) {
-		FURI_LOG_D(TAG, "view_port not enabled");
+		FURI_LOG_E(TAG, "view_port not enabled");
 	}
 
     // You need to create a GUI structure and associate it to the viewport previously defined
@@ -797,32 +796,36 @@ int32_t kcline_main(void* p) {
 					}
 				}
 			}
-		}
+		} // keypress and tick events
 		view_port_update(view_port);
  		furi_mutex_release(app->mutex);
     }
 
 	
-	// Free app memory
-	FURI_LOG_D(TAG, "Freeing app"); // For tracing crash on exit, not sure whats going on
-	free(app);
-
     // once exit from the loop, we need to free resources:
     // clear all the element inside the queue
-  	FURI_LOG_D(TAG, "Freeing tick_timer"); // For tracing crash on exit, not sure whats going on
-  	furi_timer_free(tick_timer);
-   	FURI_LOG_D(TAG, "Freeing event_queue"); // For tracing crash on exit, not sure whats going on
+  	FURI_LOG_I(TAG, "Freeing tick_timer");
+	furi_timer_stop(tick_timer);
+	furi_timer_free(tick_timer);
+   	
+	FURI_LOG_I(TAG, "Freeing event_queue");
 	furi_message_queue_free(event_queue);
 
+	// Free app memory
+	FURI_LOG_I(TAG, "Freeing app");
+	free(app->mutex);
+	free(app);
+
     // We remove the gui from the associated view port
- 	FURI_LOG_D(TAG, "Removing view_port from gui"); // For tracing crash on exit, not sure whats going on
+ 	FURI_LOG_I(TAG, "Removing view_port from gui");
 	gui_remove_view_port(gui, view_port);
 
     // Freeing up memory removing the view_port and close
     // the GUI record
-    FURI_LOG_D(TAG, "Freeing view_port"); // For tracing crash on exit, not sure whats going on
+    FURI_LOG_I(TAG, "Freeing view_port");
 	view_port_free(view_port);
- 	FURI_LOG_D(TAG, "Closing furi record"); // For tracing crash on exit, not sure whats going on
+
+ 	FURI_LOG_I(TAG, "Closing furi record");
 	furi_record_close(RECORD_GUI);
 
     return 0;
