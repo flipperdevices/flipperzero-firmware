@@ -11,5 +11,5 @@ and rotating either clockwise or counter-clockwise.
 [Voltcalc](voltcalc_app/)
 Simple Ohms Law calculator.
 
-[KCLine] (kcline/)
+[KCLine](kcline/)
 Simple one line game where a ghost chases you, and you eat dots.
