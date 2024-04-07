@@ -31,7 +31,7 @@ jobs:
           sdk-channel: ${{ matrix.sdk-version }}
           app-dir: subghz/apps/tpms
       - name: Upload app artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "flipperzero-tpms-${{ matrix.sdk-version }}-${{ steps.build-app.outputs.suffix }}"
           path: ${{ steps.build-app.outputs.fap-artifacts }}
