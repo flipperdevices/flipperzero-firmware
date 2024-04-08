@@ -10,14 +10,14 @@ void nfc_playlist_main_menu_scene_on_exit(void* context);
 
 typedef enum {
    NfcPlaylistEvent_ShowEmulatingPopup,
-   NfcPlaylistEvent_ShowFileSelect,
+   NfcPlaylistEvent_ShowPlaylistSelect,
    NfcPlaylistEvent_ShowFileEdit,
    NfcPlaylistEvent_ShowSettings
 } NfcPlaylistMainMenuEvent;
 
 typedef enum {
    NfcPlaylistMenuSelection_Start,
-   NfcPlaylistMenuSelection_FileSelect,
+   NfcPlaylistMenuSelection_PlaylistSelect,
    NfcPlaylistMenuSelection_FileEdit,
    NfcPlaylistMenuSelection_Settings
 } NfcPlaylistMainMenuMenuSelection;

@@ -8,13 +8,16 @@ void nfc_playlist_main_menu_menu_callback(void* context, uint32_t index) {
 
 void nfc_playlist_main_menu_scene_on_enter(void* context) {
    NfcPlaylist* nfc_playlist = context;
-   if (!nfc_playlist->settings.file_selected) {
-      nfc_playlist->settings.file_selected = true;
-      scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileSelect);
+   if (!nfc_playlist->settings.playlist_selected) {
+      nfc_playlist->settings.playlist_selected = true;
+      scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_PlaylistSelect);
       return;
    }
 
-   submenu_set_header(nfc_playlist->submenu, "NFC Playlist");
+   FuriString* tmp_str = furi_string_alloc();
+   furi_string_printf(tmp_str, "NFC Playlist v%s", FAP_VERSION);
+   submenu_set_header(nfc_playlist->submenu, furi_string_get_cstr(tmp_str));
+   furi_string_free(tmp_str);
 
    submenu_add_lockable_item(
       nfc_playlist->submenu,
@@ -22,13 +25,13 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_Start,
       nfc_playlist_main_menu_menu_callback,
       nfc_playlist,
-      !nfc_playlist->settings.file_selected_check,
+      !nfc_playlist->settings.playlist_selected_check,
       "No\nplaylist\nselected");
 
    submenu_add_item(
       nfc_playlist->submenu,
       "Select playlist",
-      NfcPlaylistMenuSelection_FileSelect,
+      NfcPlaylistMenuSelection_PlaylistSelect,
       nfc_playlist_main_menu_menu_callback,
       nfc_playlist);
 
@@ -57,8 +60,8 @@ bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent even
             scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_EmulatingPopup);
             consumed = true;
             break;
-         case NfcPlaylistEvent_ShowFileSelect:
-            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileSelect);
+         case NfcPlaylistEvent_ShowPlaylistSelect:
+            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_PlaylistSelect);
             consumed = true;
             break;
          case NfcPlaylistEvent_ShowFileEdit:

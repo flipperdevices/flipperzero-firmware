@@ -20,7 +20,7 @@ typedef enum {
    NfcPlaylistView_Menu,
    NfcPlaylistView_Settings,
    NfcPlaylistView_Popup,
-   NfcPlaylistView_FileSelect,
+   NfcPlaylistView_PlaylistSelect,
    NfcPlaylistView_FileEdit,
    NfcPlaylistView_FileRename,
    NfcPlaylistView_ConfirmDelete
@@ -30,7 +30,7 @@ typedef enum {
    NfcPlaylistScene_MainMenu,
    NfcPlaylistScene_Settings,
    NfcPlaylistScene_EmulatingPopup,
-   NfcPlaylistScene_FileSelect,
+   NfcPlaylistScene_PlaylistSelect,
    NfcPlaylistScene_FileEdit,
    NfcPlaylistScene_FileRename,
    NfcPlaylistScene_ConfirmDelete,
@@ -40,8 +40,8 @@ typedef enum {
 typedef struct {
    FuriString* base_file_path;
    FuriString* file_path;
-   bool file_selected;
-   bool file_selected_check;
+   bool playlist_selected;
+   bool playlist_selected_check;
    uint8_t emulate_timeout;
    uint8_t emulate_delay;
    bool emulate_led_indicator;
@@ -52,6 +52,7 @@ typedef struct {
    ViewDispatcher* view_dispatcher;
    VariableItemList* variable_item_list;
    FileBrowser* file_browser;
+   FuriString* file_browser_output;
    TextInput* text_input;
    Submenu* submenu;
    Popup* popup;

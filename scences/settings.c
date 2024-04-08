@@ -73,14 +73,9 @@ void nfc_playlist_settings_scene_on_enter(void* context) {
    VariableItem* credits = variable_item_list_add(nfc_playlist->variable_item_list, "acegoal07", 1, NULL, NULL);
    variable_item_set_current_value_text(credits, "Credits");
    
-   furi_string_printf(tmp_str, "\ev%s\e", FAP_VERSION);
-   variable_item_list_add(nfc_playlist->variable_item_list, furi_string_get_cstr(tmp_str), 1, NULL, NULL);
-
    variable_item_list_set_enter_callback(nfc_playlist->variable_item_list, nfc_playlist_settings_menu_callback, nfc_playlist);
-
-   furi_string_free(tmp_str);
-
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Settings);
+   furi_string_free(tmp_str);
 }
 
 bool nfc_playlist_settings_scene_on_event(void* context, SceneManagerEvent event) {
