@@ -378,7 +378,7 @@ PicopassListenerCommand
         uint8_t rmac[4] = {};
         uint8_t tmac[4] = {};
         const uint8_t* key = instance->data->card_data[instance->key_block_num].data;
-        bool no_key = picopass_is_memset(key, 0x00, PICOPASS_BLOCK_LEN);
+        bool no_key = !instance->data->card_data[instance->key_block_num].valid;
         const uint8_t* rx_data = bit_buffer_get_data(buf);
 
         if(no_key) {
