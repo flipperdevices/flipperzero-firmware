@@ -20,14 +20,22 @@ static void render_callback(Canvas* canvas, void* ctx) {
         uint8_t addr_digits = 4;
         // uint8_t addr_digits = ROUND_UP_TO(infrared_get_protocol_address_length(state->decoded_signal->protocol), 4);
 
-        furi_string_printf(temp_str, "0x%0*lX", addr_digits, state->decoded_signal->address);
-        canvas_draw_str(canvas, 2, 20, "Address:");
+        char* proto = "Unknown";
+        if(infrared_is_protocol_valid(state->decoded_signal->protocol)) {
+            proto = (char*)infrared_get_protocol_name(state->decoded_signal->protocol);
+        }
+        furi_string_printf(temp_str, "%s", proto);
+        canvas_draw_str(canvas, 2, 20, "Protocol:");
         canvas_draw_str(canvas, 50, 20, furi_string_get_cstr(temp_str));
+
+        furi_string_printf(temp_str, "0x%0*lX", addr_digits, state->decoded_signal->address);
+        canvas_draw_str(canvas, 2, 30, "Address:");
+        canvas_draw_str(canvas, 50, 30, furi_string_get_cstr(temp_str));
         uint8_t command_digits = 4;
         // uint8_t command_digits = ROUND_UP_TO(infrared_get_protocol_command_length(state->decoded_signal->protocol), 4);
         furi_string_printf(temp_str, "0x%0*lX", command_digits, state->decoded_signal->command);
-        canvas_draw_str(canvas, 2, 30, "Command:");
-        canvas_draw_str(canvas, 50, 30, furi_string_get_cstr(temp_str));
+        canvas_draw_str(canvas, 2, 40, "Command:");
+        canvas_draw_str(canvas, 50, 40, furi_string_get_cstr(temp_str));
 
         // Check if address is 2 or 4 bytes
         if(state->decoded_signal->address >> 8 == 0) {
@@ -50,8 +58,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
                 bit_reversal(state->decoded_signal->command & 0xFF),
                 bit_reversal((state->decoded_signal->command & mask) >> 8));
         }
-        canvas_draw_str(canvas, 2, 40, "LIRC HEX:");
-        canvas_draw_str(canvas, 50, 40, furi_string_get_cstr(temp_str));
+        canvas_draw_str(canvas, 2, 50, "LIRC HEX:");
+        canvas_draw_str(canvas, 50, 50, furi_string_get_cstr(temp_str));
     }
 
     furi_string_free(temp_str);
