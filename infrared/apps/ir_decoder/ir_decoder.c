@@ -35,20 +35,20 @@ static void render_callback(Canvas* canvas, void* ctx) {
             furi_string_printf(
                 temp_str,
                 "0x%02X%02X%02X%02X",
-                bit_reversal(state->decoded_signal->address),
-                bit_reversal(~state->decoded_signal->address),
-                bit_reversal(state->decoded_signal->command),
-                bit_reversal(~state->decoded_signal->command));
+                bit_lib_reverse_8_fast(state->decoded_signal->address),
+                bit_lib_reverse_8_fast(~state->decoded_signal->address),
+                bit_lib_reverse_8_fast(state->decoded_signal->command),
+                bit_lib_reverse_8_fast(~state->decoded_signal->command));
         } else {
             // 4 bytes
             uint32_t mask = ((1 << (16 - 8 + 1)) - 1) << 8;
             furi_string_printf(
                 temp_str,
                 "0x%02X%02X%02X%02X",
-                bit_reversal(state->decoded_signal->address & 0xFF),
-                bit_reversal((state->decoded_signal->address & mask) >> 8),
-                bit_reversal(state->decoded_signal->command & 0xFF),
-                bit_reversal((state->decoded_signal->command & mask) >> 8));
+                bit_lib_reverse_8_fast(state->decoded_signal->address & 0xFF),
+                bit_lib_reverse_8_fast((state->decoded_signal->address & mask) >> 8),
+                bit_lib_reverse_8_fast(state->decoded_signal->command & 0xFF),
+                bit_lib_reverse_8_fast((state->decoded_signal->command & mask) >> 8));
         }
         canvas_draw_str(canvas, 2, 40, "LIRC HEX:");
         canvas_draw_str(canvas, 50, 40, furi_string_get_cstr(temp_str));
