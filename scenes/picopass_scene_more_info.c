@@ -19,8 +19,12 @@ void picopass_scene_more_info_on_enter(void* context) {
 
     for(size_t i = 0; i < app_limit; i++) {
         for(size_t j = 0; j < PICOPASS_BLOCK_LEN; j += 2) {
-            furi_string_cat_printf(
-                str, "%02X%02X ", card_data[i].data[j], card_data[i].data[j + 1]);
+            if(card_data[i].valid) {
+                furi_string_cat_printf(
+                    str, "%02X%02X ", card_data[i].data[j], card_data[i].data[j + 1]);
+            } else {
+                furi_string_cat_printf(str, "???? ");
+            }
         }
     }
 

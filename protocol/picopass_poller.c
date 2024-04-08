@@ -463,7 +463,7 @@ NfcCommand picopass_poller_parse_credential_handler(PicopassPoller* instance) {
 NfcCommand picopass_poller_parse_wiegand_handler(PicopassPoller* instance) {
     NfcCommand command = NfcCommandContinue;
 
-    picopass_device_parse_wiegand(instance->data->pacs.credential, &instance->data->pacs);
+    picopass_device_parse_wiegand(&instance->data->pacs);
     instance->state = PicopassPollerStateSuccess;
     return command;
 }
