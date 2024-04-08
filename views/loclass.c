@@ -13,14 +13,16 @@ struct Loclass {
 typedef struct {
     FuriString* header;
     uint8_t num_macs;
+    FuriString* subheader;
 } LoclassViewModel;
 
 static void loclass_draw_callback(Canvas* canvas, void* model) {
     LoclassViewModel* m = model;
 
     char draw_str[32] = {};
-    canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 64, 0, AlignCenter, AlignTop, furi_string_get_cstr(m->header));
+    canvas_set_font(canvas, FontSecondary);
 
     if(m->num_macs == 255) {
         return;
@@ -36,6 +38,9 @@ static void loclass_draw_callback(Canvas* canvas, void* model) {
     snprintf(draw_str, sizeof(draw_str), "%d/%d", m->num_macs, LOCLASS_MACS_TO_COLLECT);
 
     elements_progress_bar_with_text(canvas, 0, 20, 128, progress, draw_str);
+
+    canvas_draw_str_aligned(
+        canvas, 64, 45, AlignCenter, AlignBottom, furi_string_get_cstr(m->subheader));
 
     elements_button_center(canvas, "Skip");
 }
@@ -61,6 +66,11 @@ Loclass* loclass_alloc() {
     view_set_context(loclass->view, loclass);
     with_view_model(
         loclass->view, LoclassViewModel * model, { model->header = furi_string_alloc(); }, false);
+    with_view_model(
+        loclass->view,
+        LoclassViewModel * model,
+        { model->subheader = furi_string_alloc(); },
+        false);
     return loclass;
 }
 
@@ -68,6 +78,8 @@ void loclass_free(Loclass* loclass) {
     furi_assert(loclass);
     with_view_model(
         loclass->view, LoclassViewModel * model, { furi_string_free(model->header); }, false);
+    with_view_model(
+        loclass->view, LoclassViewModel * model, { furi_string_free(model->subheader); }, false);
     view_free(loclass->view);
     free(loclass);
 }
@@ -80,6 +92,7 @@ void loclass_reset(Loclass* loclass) {
         {
             model->num_macs = 0;
             furi_string_reset(model->header);
+            furi_string_reset(model->subheader);
         },
         false);
 }
@@ -102,6 +115,17 @@ void loclass_set_header(Loclass* loclass, const char* header) {
 
     with_view_model(
         loclass->view, LoclassViewModel * model, { furi_string_set(model->header, header); }, true);
+}
+
+void loclass_set_subheader(Loclass* loclass, const char* subheader) {
+    furi_assert(loclass);
+    furi_assert(subheader);
+
+    with_view_model(
+        loclass->view,
+        LoclassViewModel * model,
+        { furi_string_set(model->subheader, subheader); },
+        true);
 }
 
 void loclass_set_num_macs(Loclass* loclass, uint16_t num_macs) {
