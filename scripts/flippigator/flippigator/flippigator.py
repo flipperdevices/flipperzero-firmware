@@ -545,23 +545,23 @@ class Gator:
     def __del__(self):
         pass
 
-    def home(self):
-        self._serial.reset_output_buffer()
-        self._serial.reset_input_buffer()
+    async def home(self):
+        await self._serial.drain()
+        await self._serial.clear_read_buffer()
         time.sleep(0.2)
-        self._serial.write(("$H\n").encode("ASCII"))
-        status = self._serial.readline()
+        await self._serial.write(("$H\n").encode("ASCII"))
+        status = await self._serial.readline()
         self.logger.info("Homing in progress")
         while status.decode("ASCII").find("ok") == -1:
-            status = self._serial.readline()
+            status = await self._serial.readline()
             time.sleep(0.2)
 
     def transform(self, x, y, speed=3000):
         return (-x - self._x_size, -y - self._y_size, speed)
 
-    def swim_to(self, x, y, speed=3000):
-        self._serial.reset_output_buffer()
-        self._serial.write(
+    async def swim_to(self, x, y, speed=3000):
+        await self._serial.drain()
+        await self._serial.write(
             ("$J = X" + str(x) + " Y" + str(y) + " F" + str(speed) + "\n").encode(
                 "ASCII"
             )
@@ -569,14 +569,14 @@ class Gator:
         if self._debugFlag == True:
             self.logger.info("Moving to X" + str(x) + " Y" + str(y) + " F" + str(speed))
         time.sleep(0.2)
-        self._serial.reset_input_buffer()
-        self._serial.write(("?\n").encode("ASCII"))
-        status = self._serial.readline()
+        await self._serial.clear_read_buffer()
+        await self._serial.write(("?\n").encode("ASCII"))
+        status = await self._serial.readline()
         while status.decode("ASCII").find("Idle") == -1:
             self.logger.debug("Moving in process")
-            self._serial.reset_input_buffer()
-            self._serial.write(("?\n").encode("ASCII"))
-            status = self._serial.readline()
+            await self._serial.clear_read_buffer()
+            await self._serial.write(("?\n").encode("ASCII"))
+            status = await self._serial.readline()
             time.sleep(0.2)
 
 
@@ -603,9 +603,9 @@ class Reader:
     def __del__(self):
         pass
 
-    def go_to_place(self) -> None:
+    async def go_to_place(self) -> None:
         self.logger.info("Moving to reader")
-        self._gator.swim_to(self._x_coord, self._y_coord, 15000)
+        await self._gator.swim_to(self._x_coord, self._y_coord, 15000)
 
     def is_available(self) -> bool:
         if self._recieved_data:
@@ -613,16 +613,16 @@ class Reader:
         else:
             return False
 
-    def update(self) -> bool:
-        line = self._serial.readline()
+    async def update(self) -> bool:
+        line = await self._serial.readline()
         if len(line):
             self._recieved_data = line.decode("utf-8")
             return True
         else:
             return False
 
-    def clear(self) -> None:
-        self._serial.flushInput()
+    async def clear(self) -> None:
+        await self._serial.clear_read_buffer()
         self._recieved_data = 0
 
     def get(self) -> str:
@@ -641,7 +641,7 @@ class Relay:
         self._recieved_data = 0
         self._curent_reader = 0
         self._curent_key = 0
-        self._serial.reset_output_buffer()
+        self._serial.reset_output_buffer() # TODO: move it out
 
         self._serial.write(("R0K0\n").encode("ASCII"))
         self.logger = logging.getLogger("Relay")
@@ -651,15 +651,15 @@ class Relay:
     def __del__(self):
         pass
 
-    def set_reader(self, reader):
-        self._serial.write(
+    async def set_reader(self, reader):
+        await self._serial.write(
             ("R" + str(reader) + "K" + str(self._curent_key) + "\n").encode("ASCII")
         )
         self._curent_reader = reader
         self.logger.info("Selected reader: " + str(self._curent_reader))
 
-    def set_key(self, key):
-        self._serial.write(
+    async def set_key(self, key):
+        await self._serial.write(
             ("R" + str(self._curent_reader) + "K" + str(key) + "\n").encode("ASCII")
         )
         self._curent_key = key
@@ -671,8 +671,8 @@ class Relay:
     def get_key(self) -> int:
         return self._curent_key
 
-    def reset(self):
-        self._serial.write(("R0K0\n").encode("ASCII"))
+    async def reset(self):
+        await self._serial.write(("R0K0\n").encode("ASCII"))
         self._curent_reader = 0
         self._curent_key = 0
         self.logger.info("Reset relay module")

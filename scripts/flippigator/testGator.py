@@ -9,7 +9,7 @@ from flippigator.flippigator import Gator, Navigator
 from termcolor import colored
 
 
-def main():
+def main():  # TODO: to async
     print(colored("Let's go!", "magenta"))
 
     gator_serial = serial.Serial(sys.argv[1], timeout=1)

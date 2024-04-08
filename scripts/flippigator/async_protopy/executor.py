@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from typing import Any, AsyncGenerator, Self
 
 from async_protopy.flipperzero_protobuf_compiled import flipper_pb2
@@ -58,6 +57,7 @@ class FlipperProtoExecutor:
         waiter = self.event_waiter(self.command_id, event)
 
         await command.execute(command_id=self.command_id, connector=self._connector)
+
         return waiter
 
     async def event_waiter(self, event_name: int, event: asyncio.Event) -> Any:

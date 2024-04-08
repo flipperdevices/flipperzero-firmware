@@ -185,7 +185,7 @@ def flipper_serial(request):
 
 
 @pytest.fixture(scope="session")
-def bench_serial(request):
+async def bench_serial(request):
     # taking port from config or returning OS based default
     port = request.config.getoption("--bench_port")
     if port:
@@ -197,17 +197,17 @@ def bench_serial(request):
 
     bench_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)
 
-    time.sleep(3)
+    await asyncio.sleep(3)
 
-    # bench_serial.flushOutput() # TODO: do it
-    # bench_serial.flushInput()
+    await bench_serial.drain()
+    await bench_serial.clear_read_buffer()
 
     logging.debug("NFC and RFID bench serial port opened on" + port)
     return bench_serial
 
 
 @pytest.fixture(scope="session")
-def reader_serial(request):
+async def reader_serial(request):
     # taking port from config or returning OS based default
     port = request.config.getoption("--reader_port")
     if port:
@@ -217,19 +217,19 @@ def reader_serial(request):
     else:
         port = "/dev/ttyACM1"
 
-    reader_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)  # Надо будет переделать!!!
+    reader_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)
 
-    time.sleep(3)
+    await asyncio.sleep(3)
 
-    # reader_serial.flushOutput()  # TODO: do it
-    # reader_serial.flushInput()
+    await bench_serial.drain()
+    await bench_serial.clear_read_buffer()
 
     logging.debug("NFC and RFID Readers serial port opened on" + port)
     return reader_serial
 
 
 @pytest.fixture(scope="session")
-def flipper_reader_serial(request):
+async def flipper_reader_serial(request):
     # taking port from config or returning OS based default
     port = request.config.getoption("--flipper_r_port")
     if port:
@@ -239,19 +239,19 @@ def flipper_reader_serial(request):
     else:
         port = "/dev/ttyACM2"
 
-    flipper_reader_serial = SerialConnector(url=port, baud_rate=2304000, timeout=1)  # Надо будет переделать!!!
+    flipper_reader_serial = SerialConnector(url=port, baud_rate=2304000, timeout=1)
 
-    time.sleep(3)
+    await asyncio.sleep(3)
 
-    # flipper_reader_serial.flushOutput()  # TODO: do it
-    # flipper_reader_serial.flushInput()
+    await bench_serial.drain()
+    await bench_serial.clear_read_buffer()
 
     logging.debug("Flipper 'reader' serial port opened on" + port)
     return flipper_reader_serial
 
 
 @pytest.fixture(scope="session")
-def flipper_key_serial(request):
+async def flipper_key_serial(request):
     # taking port from config or returning OS based default
     port = request.config.getoption("--flipper_k_port")
     if port:
@@ -261,19 +261,19 @@ def flipper_key_serial(request):
     else:
         port = "/dev/ttyACM3"
 
-    flipper_key_serial = SerialConnector(url=port, baud_rate=2304000, timeout=1)  # Надо будет переделать!!!
+    flipper_key_serial = SerialConnector(url=port, baud_rate=2304000, timeout=1)
 
-    time.sleep(3)
+    await asyncio.sleep(3)
 
-    # flipper_key_serial.flushOutput() # TODO: do it
-    # flipper_key_serial.flushInput()
+    await bench_serial.drain()
+    await bench_serial.clear_read_buffer()
 
     logging.debug("Flipper 'key' serial port opened on" + port)
     return flipper_key_serial
 
 
 @pytest.fixture(scope="session")
-def relay_serial(request):
+async def relay_serial(request):
     # taking port from config or returning OS based default
     port = request.config.getoption("--relay_port")
     if port:
@@ -283,12 +283,12 @@ def relay_serial(request):
     else:
         port = "/dev/ttyACM4"
 
-    relay_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)  # Надо будет переделать!!!
+    relay_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)
 
-    time.sleep(3)
+    await asyncio.sleep(3)
 
-    # relay_serial.flushOutput()  # TODO: do it
-    # relay_serial.flushInput()
+    await bench_serial.drain()
+    await bench_serial.clear_read_buffer()
 
     logging.debug("Relay serial port opened on" + port)
     return relay_serial
@@ -308,14 +308,14 @@ async def nav(flipper_serial, request):
         os.system("ufbt dotenv_create")
         os.system("ufbt update --channel=dev")
         os.system("ufbt flash_usb FLIP_PORT=" + port)
-        time.sleep(2)
+        await asyncio.sleep(2)
 
         start_time = time.time()
         while time.time() - start_time < 120:
             try:
                 flipper_serial = SerialConnector(url=port, baud_rate=230400, timeout=1)
             except serial.serialutil.SerialException:
-                time.sleep(1)
+                await asyncio.sleep(1)
                 print(
                     "Waiting for flipper boot after update "
                     + str(int(time.time() - start_time))
@@ -333,9 +333,9 @@ async def nav(flipper_serial, request):
             else:
                 break
 
-        # flipper_serial.flushOutput()  # TODO: do it
-        # flipper_serial.flushInput()
-        # flipper_serial.timeout = 5
+        await bench_serial.drain()
+        await bench_serial.clear_read_buffer()
+        # flipper_serial.timeout = 5 # TODO change serial timeout
         logging.debug("Flipper serial port opened on" + port)
 
     proto = FlipperProtobufClient(flipper_serial)
@@ -389,7 +389,9 @@ async def nav(flipper_serial, request):
         else:
             raise FlippigatorException("Can not enable debug")
 
-    return nav
+    yield nav
+    await proto.stop()
+
 
 
 @pytest.fixture(scope="session")
@@ -412,12 +414,12 @@ async def nav_reader(flipper_reader_serial, request):
         os.system("ufbt dotenv_create")
         os.system("ufbt update --channel=dev")
         os.system("ufbt flash_usb FLIP_PORT=" + port)
-        time.sleep(2)
+        await asyncio.sleep(2)
 
         start_time = time.time()
         while time.time() - start_time < 120:
             try:
-                flipper_serial = SerialConnector(url=port, baud_rate=230400, timeout=1)  #?
+                flipper_serial = SerialConnector(url=port, baud_rate=230400, timeout=1)
             except serial.serialutil.SerialException:
                 time.sleep(1)
                 print(
@@ -437,10 +439,9 @@ async def nav_reader(flipper_reader_serial, request):
             else:
                 break
 
-        # flipper_serial.baudrate = 230400
-        # flipper_serial.flushOutput()  # TODO: do it
-        # flipper_serial.flushInput()
-        # flipper_serial.timeout = 5
+        await bench_serial.drain()
+        await bench_serial.clear_read_buffer()
+        # flipper_serial.timeout = 5  # TODO: change serial timeout
         logging.debug("Flipper 'reader' serial port opened on" + port)
 
     proto = FlipperProtobufClient(flipper_reader_serial)
@@ -493,7 +494,8 @@ async def nav_reader(flipper_reader_serial, request):
         else:
             raise FlippigatorException("Can not enable debug")
 
-    return nav_reader
+    yield nav_reader
+    await proto.start()
 
 
 @pytest.fixture(scope="session")
@@ -510,14 +512,14 @@ async def nav_key(flipper_key_serial, request):
         os.system("ufbt dotenv_create")
         os.system("ufbt update --channel=dev")
         os.system("ufbt flash_usb FLIP_PORT=" + port)
-        time.sleep(2)
+        await asyncio.sleep(2)
 
         start_time = time.time()
         while time.time() - start_time < 120:
             try:
-                flipper_serial = SerialConnector(url=port, baud_rate=230400, timeout=1)  #?
+                flipper_serial = SerialConnector(url=port, baud_rate=230400, timeout=1)
             except serial.serialutil.SerialException:
-                time.sleep(1)
+                await asyncio.sleep(1)
                 print(
                     "Waiting for flipper boot after update "
                     + str(int(time.time() - start_time))
@@ -535,10 +537,9 @@ async def nav_key(flipper_key_serial, request):
             else:
                 break
 
-        # flipper_serial.baudrate = 230400
-        # flipper_serial.flushOutput()
-        # flipper_serial.flushInput()
-        # flipper_serial.timeout = 5
+        await bench_serial.drain()
+        await bench_serial.clear_read_buffer()
+        # flipper_serial.timeout = 5 # TODO: change serial timeout
         logging.debug("Flipper 'key' serial port opened on" + port)
 
     proto = FlipperProtobufClient(flipper_key_serial)
@@ -591,17 +592,18 @@ async def nav_key(flipper_key_serial, request):
         else:
             raise FlippigatorException("Can not enable debug")
 
-    return nav_key
+    yield nav_key
+    await proto.start()
 
 
 @pytest.fixture(scope="session", autouse=False)
-def gator(bench_serial, request) -> Gator:
+async def gator(bench_serial, request) -> Gator:
     bench = request.config.getoption("--bench_nfc_rfid")
     if bench:
         logging.debug("Gator initialization")
 
         gator = Gator(bench_serial, 900, 900)
-        gator.home()
+        await gator.home()
 
         logging.debug("Gator initialization complete")
         return gator

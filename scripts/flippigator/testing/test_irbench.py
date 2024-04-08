@@ -119,7 +119,7 @@ class TestInfraredBench(BaseCase):
 
     async def test_debug(self, nav_reader, nav_key):
         with allure.step("Emulating TV remote on key_flipper"):
-            await  nav_reader.open_file("Infrared", "Remote")
+            await nav_reader.open_file("Infrared", "Remote")
         with allure.step("Starting debug on key_flipper"):
             await nav_key.infrared.go_into()
             await nav_key.go_to("Debug")

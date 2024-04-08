@@ -8,7 +8,8 @@ class BaseConnector(ABC):
     """Abstract base flipper connector"""
 
     def __init__(self, *args, **kwargs):
-        pass
+        self.args = args
+        self.kwargs = kwargs
 
     @abstractmethod
     async def open_connection(self) -> Self:
@@ -46,6 +47,14 @@ class BaseConnector(ABC):
         """
 
     @abstractmethod
+    async def drain(self) -> None:
+        """Flushes the write buffer.
+
+        Returns:
+            None
+        """
+
+    @abstractmethod
     async def write_and_drain(self, data: Any) -> None:
         """Writes data to the transport and flush the write buffer
 
@@ -68,6 +77,13 @@ class BaseConnector(ABC):
             Any
         """
 
+    @abstractmethod
+    async def readline(self) -> Any:
+        """Reads line from the transport
+
+        Returns:
+            Any
+        """
     @abstractmethod
     async def read_exactly(self, size: int) -> Any:
         """Reads exactly 'size' bytes from the transport

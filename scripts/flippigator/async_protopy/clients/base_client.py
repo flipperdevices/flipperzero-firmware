@@ -1,4 +1,3 @@
-import asyncio
 from typing import Any, AsyncGenerator
 
 from async_protopy.exceptions.base_exceptions import FlipperValidateException

@@ -21,7 +21,6 @@ class SerialConnector(BaseConnector):
 
         self._reader = None
         self._writer = None
-        self.kwargs = kwargs
 
     async def open_connection(self) -> Self:
         reader, writer = await open_serial_connection(url=self.url, baudrate=self.baud_rate, **self.kwargs)
@@ -47,6 +46,9 @@ class SerialConnector(BaseConnector):
     async def read(self, size: int = -1) -> Any:
         return await self._reader.read(n=size)
 
+    async def readline(self) -> Any:
+        return await self._reader.readline()
+
     async def read_exactly(self, size: int) -> Any:
         return await self._reader.readexactly(n=size)
 
@@ -56,8 +58,14 @@ class SerialConnector(BaseConnector):
     async def write(self, data: Any) -> None:
         self._writer.write(data)
 
+    async def drain(self) -> None:
+        await self._writer.drain()
+
     async def write_and_drain(self, data: Any) -> None:
         await self.write(data=data)
-        await self._writer.drain()
+        await self.drain()
+
+    async def clear_read_buffer(self) -> None:
+        self._reader._buffer.clear()
 
     # TODO flush input and output

@@ -19,7 +19,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             await nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-1.0, -10.0, 15000)
+            await gator.swim_to(-1.0, -10.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -103,7 +103,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             await nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-1.0, -90.0, 15000)
+            await gator.swim_to(-1.0, -90.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -185,7 +185,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             await nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-1.0, -170.0, 15000)
+            await gator.swim_to(-1.0, -170.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -266,7 +266,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             await nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-1.0, -250.0, 15000)
+            await gator.swim_to(-1.0, -250.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -338,7 +338,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             await nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-1.0, -330.0, 15000)
+            await gator.swim_to(-1.0, -330.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -406,7 +406,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             await nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-1.0, -410.0, 15000)
+            await gator.swim_to(-1.0, -410.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -476,7 +476,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             await nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-110.0, -10.0, 15000)
+            await gator.swim_to(-110.0, -10.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -543,7 +543,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             await nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-110.0, -90.0, 15000)
+            await gator.swim_to(-110.0, -90.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -808,7 +808,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             await nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-110.0, -170.0, 15000)
+            await gator.swim_to(-110.0, -170.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -875,8 +875,8 @@ class TestNfcBench(BaseCase):
 
     async def test_emulation_mifare_classic_1k_card(self, nav, gator, reader_nfc):
         await nav.go_to_main_screen()
-        reader_nfc.go_to_place()
-        reader_nfc.clear()
+        await reader_nfc.go_to_place()
+        await reader_nfc.clear()
 
         if await nav.open_file("NFC", "BN0") == -1:
             assert 0, "File not found"
@@ -884,7 +884,7 @@ class TestNfcBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_nfc.update():
+            if await reader_nfc.update():
                 string = reader_nfc.get()
                 assert (
                     string == "W58W805C1332674D04"
@@ -898,8 +898,8 @@ class TestNfcBench(BaseCase):
 
     async def test_emulation_nfc_a_card(self, nav, gator, reader_nfc):
         await nav.go_to_main_screen()
-        reader_nfc.go_to_place()
-        reader_nfc.clear()
+        await reader_nfc.go_to_place()
+        await reader_nfc.clear()
 
         if await nav.open_file("NFC", "BN1") == -1:
             assert 0, "File not found"
@@ -907,7 +907,7 @@ class TestNfcBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_nfc.update():
+            if await reader_nfc.update():
                 string = reader_nfc.get()
                 assert string == "W58W00", "Emulated NFC card reading failed"
                 break
@@ -919,8 +919,8 @@ class TestNfcBench(BaseCase):
 
     async def test_emulation_mifare_classic_4k_card(self, nav, gator, reader_nfc):
         await nav.go_to_main_screen()
-        reader_nfc.go_to_place()
-        reader_nfc.clear()
+        await reader_nfc.go_to_place()
+        await reader_nfc.clear()
 
         if await nav.open_file("NFC", "BN7") == -1:
             assert 0, "File not found"
@@ -928,7 +928,7 @@ class TestNfcBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_nfc.update():
+            if await reader_nfc.update():
                 string = reader_nfc.get()
                 assert (
                     string == "W58W9D7CD67A000000"
@@ -942,8 +942,8 @@ class TestNfcBench(BaseCase):
 
     async def test_emulation_troika_card(self, nav, gator, reader_nfc):
         await nav.go_to_main_screen()
-        reader_nfc.go_to_place()
-        reader_nfc.clear()
+        await reader_nfc.go_to_place()
+        await reader_nfc.clear()
 
         if await nav.open_file("NFC", "BN2") == -1:
             assert 0, "File not found"
@@ -951,7 +951,7 @@ class TestNfcBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_nfc.update():
+            if await reader_nfc.update():
                 string = reader_nfc.get()
                 assert string == "W58W60950399D1334", "Emulated NFC card reading failed"
                 break
@@ -963,8 +963,8 @@ class TestNfcBench(BaseCase):
 
     async def test_emulation_ntag215_card(self, nav, gator, reader_nfc):
         await nav.go_to_main_screen()
-        reader_nfc.go_to_place()
-        reader_nfc.clear()
+        await reader_nfc.go_to_place()
+        await reader_nfc.clear()
 
         if await nav.open_file("NFC", "BN3") == -1:
             assert 0, "File not found"
@@ -972,7 +972,7 @@ class TestNfcBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_nfc.update():
+            if await reader_nfc.update():
                 string = reader_nfc.get()
                 assert (
                     string == "W58WC007BA39427704"
@@ -986,8 +986,8 @@ class TestNfcBench(BaseCase):
 
     async def test_emulation_mifare_ultralight_card(self, nav, gator, reader_nfc):
         await nav.go_to_main_screen()
-        reader_nfc.go_to_place()
-        reader_nfc.clear()
+        await reader_nfc.go_to_place()
+        await reader_nfc.clear()
 
         if await nav.open_file("NFC", "BN4") == -1:
             assert 0, "File not found"
@@ -995,7 +995,7 @@ class TestNfcBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_nfc.update():
+            if await reader_nfc.update():
                 string = reader_nfc.get()
                 assert (
                     string == "W58W80485CBABD4004"
@@ -1009,8 +1009,8 @@ class TestNfcBench(BaseCase):
 
     async def test_emulation_mifare_desfire_card(self, nav, gator, reader_nfc):
         await nav.go_to_main_screen()
-        reader_nfc.go_to_place()
-        reader_nfc.clear()
+        await reader_nfc.go_to_place()
+        await reader_nfc.clear()
 
         if await nav.open_file("NFC", "BN5") == -1:
             assert 0, "File not found"
@@ -1018,7 +1018,7 @@ class TestNfcBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_nfc.update():
+            if await reader_nfc.update():
                 string = reader_nfc.get()
                 assert (
                     string == "W58W805833326A4804"
@@ -1032,8 +1032,8 @@ class TestNfcBench(BaseCase):
 
     async def test_emulation_all_in_one_card(self, nav, gator, reader_nfc):
         await nav.go_to_main_screen()
-        reader_nfc.go_to_place()
-        reader_nfc.clear()
+        await reader_nfc.go_to_place()
+        await reader_nfc.clear()
 
         if await nav.open_file("NFC", "BN6") == -1:
             assert 0, "File not found"
@@ -1041,7 +1041,7 @@ class TestNfcBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_nfc.update():
+            if await reader_nfc.update():
                 string = reader_nfc.get()
                 assert (
                     string == "W58W369CE7B10AC134"

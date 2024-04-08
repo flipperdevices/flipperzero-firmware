@@ -18,7 +18,7 @@ class TestRfidBench(BaseCase):
         with allure.step("Go to RFID"):
             await nav.rfid.go_into()
         with allure.step("Swim to RFID card"):
-            gator.swim_to(-0.5, -865.0, 15000)
+            await gator.swim_to(-0.5, -865.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -66,7 +66,7 @@ class TestRfidBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         await nav.press_back()
 
-        gator.swim_to(-0.5, -785.0, 15000)
+        await gator.swim_to(-0.5, -785.0, 15000)
         await nav.go_to("Write")
         await nav.press_ok()
         start_time = time.time()
@@ -97,7 +97,7 @@ class TestRfidBench(BaseCase):
         with allure.step("Go to RFID"):
             await nav.rfid.go_into()
         with allure.step("Swim to RFID card"):
-            gator.swim_to(-100.0, -785.0, 15000)
+            await gator.swim_to(-100.0, -785.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -137,7 +137,7 @@ class TestRfidBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         await nav.press_back()
 
-        gator.swim_to(-1.0, -785.0, 15000)
+        await gator.swim_to(-1.0, -785.0, 15000)
         await nav.go_to("Write")
         await nav.press_ok()
         start_time = time.time()
@@ -168,7 +168,7 @@ class TestRfidBench(BaseCase):
         with allure.step("Go to RFID"):
             await nav.rfid.go_into()
         with allure.step("Swim to RFID card"):
-            gator.swim_to(-100.0, -865.0, 15000)
+            await gator.swim_to(-100.0, -865.0, 15000)
         with allure.step("Read a card"):
             await nav.go_to("Read")
             await nav.press_ok()
@@ -208,7 +208,7 @@ class TestRfidBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         await nav.press_back()
 
-        gator.swim_to(-1.0, -785.0, 15000)
+        await gator.swim_to(-1.0, -785.0, 15000)
         await nav.go_to("Write")
         await nav.press_ok()
         start_time = time.time()
@@ -235,8 +235,8 @@ class TestRfidBench(BaseCase):
 
     async def test_emulation_indala_card(self, nav, gator, reader_indala):
         await nav.go_to_main_screen()
-        reader_indala.go_to_place()
-        reader_indala.clear()
+        await reader_indala.go_to_place()
+        await reader_indala.clear()
 
         if await nav.open_file("RFID", "BR0") == -1:
             assert 0, "File not found"
@@ -244,7 +244,7 @@ class TestRfidBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_indala.update():
+            if await reader_indala.update():
                 string = reader_indala.get()
                 assert string == "W32W0316CE9E8", "Emulated RFID card reading failed"
                 break
@@ -256,8 +256,8 @@ class TestRfidBench(BaseCase):
 
     async def test_emulation_em_card(self, nav, gator, reader_em_hid):
         await nav.go_to_main_screen()
-        reader_em_hid.go_to_place()
-        reader_em_hid.clear()
+        await reader_em_hid.go_to_place()
+        await reader_em_hid.clear()
 
         if await nav.open_file("RFID", "BR1") == -1:
             assert 0, "File not found"
@@ -265,7 +265,7 @@ class TestRfidBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_em_hid.update():
+            if await reader_em_hid.update():
                 string = reader_em_hid.get()
                 assert string == "W26W0660F12", "Emulated RFID card reading failed"
                 break
@@ -277,8 +277,8 @@ class TestRfidBench(BaseCase):
 
     async def test_emulation_hid_card(self, nav, gator, reader_em_hid):
         await nav.go_to_main_screen()
-        reader_em_hid.go_to_place()
-        reader_em_hid.clear()
+        await reader_em_hid.go_to_place()
+        await reader_em_hid.clear()
 
         if await nav.open_file("RFID", "BR2") == -1:
             assert 0, "File not found"
@@ -286,7 +286,7 @@ class TestRfidBench(BaseCase):
 
         start_time = time.time()
         while start_time + 5 > time.time():
-            if reader_em_hid.update():
+            if await reader_em_hid.update():
                 string = reader_em_hid.get()
                 assert string == "W26W0F8C88A", "Emulated RFID card reading failed"
                 break
