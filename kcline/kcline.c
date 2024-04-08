@@ -813,7 +813,7 @@ int32_t kcline_main(void* p) {
 
 	// Free app memory
 	FURI_LOG_I(TAG, "Freeing app");
-	free(app->mutex);
+	furi_mutex_free(app->mutex);
 	free(app);
 
     // We remove the gui from the associated view port
