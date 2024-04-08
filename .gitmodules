@@ -26,6 +26,12 @@
 [submodule "lib/cxxheaderparser"]
 	path = lib/cxxheaderparser
 	url = https://github.com/robotpy/cxxheaderparser.git
+[submodule "applications/external/dap_link/lib/free-dap"]
+	path = applications/external/dap_link/lib/free-dap
+	url = https://github.com/ataradov/free-dap.git
+[submodule "scripts/flippigator/flipperzero_protobuf_py"]
+	path = scripts/flippigator/flipperzero_protobuf_py
+	url = https://github.com/flipperdevices/flipperzero_protobuf_py.git
 [submodule "lib/heatshrink"]
 	path = lib/heatshrink
 	url = https://github.com/flipperdevices/heatshrink.git
