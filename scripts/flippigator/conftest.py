@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import sys
@@ -6,10 +7,6 @@ import time
 import allure
 import pytest
 import serial
-from flipperzero_protobuf_py.flipperzero_protobuf.flipper_base import (
-    FlipperProtoException,
-)
-from flipperzero_protobuf_py.flipperzero_protobuf.flipper_proto import FlipperProto
 from flippigator.extensions.proxmark_wrapper import proxmark_wrapper
 from flippigator.flippigator import (
     FlippigatorException,
@@ -18,8 +15,18 @@ from flippigator.flippigator import (
     Reader,
     Relay,
 )
+from async_protopy.connectors.serial_connector import SerialConnector
+from async_protopy.clients.protobuf_client import FlipperProtobufClient
+
 
 os.system("color")
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
 
 
 def is_windows():
@@ -167,12 +174,9 @@ def flipper_serial(request):
         port = "/dev/ttyACM0"
 
     try:
-        flipper_serial = serial.Serial(port, timeout=1)
-        flipper_serial.baudrate = 230400
-        flipper_serial.flushOutput()
-        flipper_serial.flushInput()
-        flipper_serial.timeout = 5
-    except serial.serialutil.SerialException:
+
+        flipper_serial = SerialConnector(url=port, baud_rate=230400, timeout=5)
+    except serial.serialutil.SerialException:  # TODO exception
         logging.error("can not open serial port")
         sys.exit(0)
 
@@ -191,13 +195,12 @@ def bench_serial(request):
     else:
         port = "/dev/ttyUSB0"
 
-    bench_serial = serial.Serial(port, timeout=1)
-    bench_serial.baudrate = 115200
+    bench_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)
 
     time.sleep(3)
 
-    bench_serial.flushOutput()
-    bench_serial.flushInput()
+    # bench_serial.flushOutput() # TODO: do it
+    # bench_serial.flushInput()
 
     logging.debug("NFC and RFID bench serial port opened on" + port)
     return bench_serial
@@ -214,13 +217,12 @@ def reader_serial(request):
     else:
         port = "/dev/ttyACM1"
 
-    reader_serial = serial.Serial(port, timeout=1)  # Надо будет переделать!!!
-    reader_serial.baudrate = 115200
+    reader_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)  # Надо будет переделать!!!
 
     time.sleep(3)
 
-    reader_serial.flushOutput()
-    reader_serial.flushInput()
+    # reader_serial.flushOutput()  # TODO: do it
+    # reader_serial.flushInput()
 
     logging.debug("NFC and RFID Readers serial port opened on" + port)
     return reader_serial
@@ -237,13 +239,12 @@ def flipper_reader_serial(request):
     else:
         port = "/dev/ttyACM2"
 
-    flipper_reader_serial = serial.Serial(port, timeout=1)  # Надо будет переделать!!!
-    flipper_reader_serial.baudrate = 2304000
+    flipper_reader_serial = SerialConnector(url=port, baud_rate=2304000, timeout=1)  # Надо будет переделать!!!
 
     time.sleep(3)
 
-    flipper_reader_serial.flushOutput()
-    flipper_reader_serial.flushInput()
+    # flipper_reader_serial.flushOutput()  # TODO: do it
+    # flipper_reader_serial.flushInput()
 
     logging.debug("Flipper 'reader' serial port opened on" + port)
     return flipper_reader_serial
@@ -260,13 +261,12 @@ def flipper_key_serial(request):
     else:
         port = "/dev/ttyACM3"
 
-    flipper_key_serial = serial.Serial(port, timeout=1)  # Надо будет переделать!!!
-    flipper_key_serial.baudrate = 2304000
+    flipper_key_serial = SerialConnector(url=port, baud_rate=2304000, timeout=1)  # Надо будет переделать!!!
 
     time.sleep(3)
 
-    flipper_key_serial.flushOutput()
-    flipper_key_serial.flushInput()
+    # flipper_key_serial.flushOutput() # TODO: do it
+    # flipper_key_serial.flushInput()
 
     logging.debug("Flipper 'key' serial port opened on" + port)
     return flipper_key_serial
@@ -283,20 +283,19 @@ def relay_serial(request):
     else:
         port = "/dev/ttyACM4"
 
-    relay_serial = serial.Serial(port, timeout=1)  # Надо будет переделать!!!
-    relay_serial.baudrate = 115200
+    relay_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)  # Надо будет переделать!!!
 
     time.sleep(3)
 
-    relay_serial.flushOutput()
-    relay_serial.flushInput()
+    # relay_serial.flushOutput()  # TODO: do it
+    # relay_serial.flushInput()
 
     logging.debug("Relay serial port opened on" + port)
     return relay_serial
 
 
 @pytest.fixture(scope="session")
-def nav(flipper_serial, request):
+async def nav(flipper_serial, request):
     if request.config.getoption("--update_flippers"):
         port = request.config.getoption("--port")
         if port:
@@ -314,7 +313,7 @@ def nav(flipper_serial, request):
         start_time = time.time()
         while time.time() - start_time < 120:
             try:
-                flipper_serial = serial.Serial(port, timeout=1)
+                flipper_serial = SerialConnector(url=port, baud_rate=230400, timeout=1)
             except serial.serialutil.SerialException:
                 time.sleep(1)
                 print(
@@ -334,14 +333,13 @@ def nav(flipper_serial, request):
             else:
                 break
 
-        flipper_serial.baudrate = 230400
-        flipper_serial.flushOutput()
-        flipper_serial.flushInput()
-        flipper_serial.timeout = 5
+        # flipper_serial.flushOutput()  # TODO: do it
+        # flipper_serial.flushInput()
+        # flipper_serial.timeout = 5
         logging.debug("Flipper serial port opened on" + port)
 
-    proto = FlipperProto(serial_port=flipper_serial, debug=True)
-    proto.start_rpc_session()
+    proto = FlipperProtobufClient(flipper_serial)
+    await proto.start()
     logging.debug("RPC session of main flipper started")
 
     path = request.config.getoption("--path")
@@ -359,35 +357,35 @@ def nav(flipper_serial, request):
         path=path,
         window_name="Main flipper",
     )
-    nav.update_screen()
+    await nav.update_screen()
 
     if not (request.config.getoption("--no_init")):
         # Enabling of bluetooth
-        nav.go_to_main_screen()
-        nav.press_ok()
-        nav.go_to("Settings")
-        nav.press_ok()
-        nav.go_to("Bluetooth")
-        nav.press_ok()
-        nav.update_screen()
-        menu = nav.get_menu_list()
+        await nav.go_to_main_screen()
+        await nav.press_ok()
+        await nav.go_to("Settings")
+        await nav.press_ok()
+        await nav.go_to("Bluetooth")
+        await nav.press_ok()
+        await nav.update_screen()
+        menu = await nav.get_menu_list()
         if "BluetoothIsON" in menu:
             pass
         elif "BluetoothIsOFF" in menu:
-            nav.press_right()
+            await nav.press_right()
         else:
             raise FlippigatorException("Can not enable bluetooth")
 
         # Enabling Debug
-        nav.press_back()
-        nav.go_to("System")
-        nav.press_ok()
-        menu = nav.get_menu_list()
+        await nav.press_back()
+        await nav.go_to("System")
+        await nav.press_ok()
+        menu = await nav.get_menu_list()
         if "DebugIsON" in menu:
             pass
         elif "DebugIsOFF" in menu:
-            nav.go_to("DebugIsOFF")
-            nav.press_right()
+            await nav.go_to("DebugIsOFF")
+            await nav.press_right()
         else:
             raise FlippigatorException("Can not enable debug")
 
@@ -401,7 +399,7 @@ def px(request):
 
 
 @pytest.fixture(scope="session")
-def nav_reader(flipper_reader_serial, request):
+async def nav_reader(flipper_reader_serial, request):
     if request.config.getoption("--update_flippers"):
         port = request.config.getoption("--flipper_r_port")
         if port:
@@ -419,7 +417,7 @@ def nav_reader(flipper_reader_serial, request):
         start_time = time.time()
         while time.time() - start_time < 120:
             try:
-                flipper_serial = serial.Serial(port, timeout=1)
+                flipper_serial = SerialConnector(url=port, baud_rate=230400, timeout=1)  #?
             except serial.serialutil.SerialException:
                 time.sleep(1)
                 print(
@@ -439,14 +437,14 @@ def nav_reader(flipper_reader_serial, request):
             else:
                 break
 
-        flipper_serial.baudrate = 230400
-        flipper_serial.flushOutput()
-        flipper_serial.flushInput()
-        flipper_serial.timeout = 5
+        # flipper_serial.baudrate = 230400
+        # flipper_serial.flushOutput()  # TODO: do it
+        # flipper_serial.flushInput()
+        # flipper_serial.timeout = 5
         logging.debug("Flipper 'reader' serial port opened on" + port)
 
-    proto = FlipperProto(serial_port=flipper_reader_serial, debug=True)
-    proto.start_rpc_session()
+    proto = FlipperProtobufClient(flipper_reader_serial)
+    await proto.start()
     logging.debug("RPC session of flipper 'reader' started")
 
     path = request.config.getoption("--path")
@@ -464,17 +462,17 @@ def nav_reader(flipper_reader_serial, request):
         path=path,
         window_name="Reader flipper",
     )
-    nav_reader.update_screen()
+    await nav_reader.update_screen()
     if not (request.config.getoption("--no_init")):
         # Enabling of bluetooth
-        nav_reader.go_to_main_screen()
-        nav_reader.press_ok()
-        nav_reader.go_to("Settings")
-        nav_reader.press_ok()
-        nav_reader.go_to("Bluetooth")
-        nav_reader.press_ok()
-        nav_reader.update_screen()
-        menu = nav_reader.get_menu_list()
+        await nav_reader.go_to_main_screen()
+        await nav_reader.press_ok()
+        await nav_reader.go_to("Settings")
+        await nav_reader.press_ok()
+        await nav_reader.go_to("Bluetooth")
+        await nav_reader.press_ok()
+        await nav_reader.update_screen()
+        menu = await nav_reader.get_menu_list()
         if "BluetoothIsON" in menu:
             pass
         elif "BluetoothIsOFF" in menu:
@@ -483,15 +481,15 @@ def nav_reader(flipper_reader_serial, request):
             raise FlippigatorException("Can not enable bluetooth")
 
         # Enabling Debug
-        nav_reader.press_back()
-        nav_reader.go_to("System")
-        nav_reader.press_ok()
-        menu = nav_reader.get_menu_list()
+        await nav_reader.press_back()
+        await nav_reader.go_to("System")
+        await nav_reader.press_ok()
+        menu = await nav_reader.get_menu_list()
         if "DebugIsON" in menu:
             pass
         elif "DebugIsOFF" in menu:
-            nav_reader.go_to("DebugIsOFF")
-            nav_reader.press_right()
+            await nav_reader.go_to("DebugIsOFF")
+            await nav_reader.press_right()
         else:
             raise FlippigatorException("Can not enable debug")
 
@@ -499,7 +497,7 @@ def nav_reader(flipper_reader_serial, request):
 
 
 @pytest.fixture(scope="session")
-def nav_key(flipper_key_serial, request):
+async def nav_key(flipper_key_serial, request):
     if request.config.getoption("--update_flippers"):
         port = request.config.getoption("--flipper_k_port")
         if port:
@@ -517,7 +515,7 @@ def nav_key(flipper_key_serial, request):
         start_time = time.time()
         while time.time() - start_time < 120:
             try:
-                flipper_serial = serial.Serial(port, timeout=1)
+                flipper_serial = SerialConnector(url=port, baud_rate=230400, timeout=1)  #?
             except serial.serialutil.SerialException:
                 time.sleep(1)
                 print(
@@ -537,14 +535,14 @@ def nav_key(flipper_key_serial, request):
             else:
                 break
 
-        flipper_serial.baudrate = 230400
-        flipper_serial.flushOutput()
-        flipper_serial.flushInput()
-        flipper_serial.timeout = 5
+        # flipper_serial.baudrate = 230400
+        # flipper_serial.flushOutput()
+        # flipper_serial.flushInput()
+        # flipper_serial.timeout = 5
         logging.debug("Flipper 'key' serial port opened on" + port)
 
-    proto = FlipperProto(serial_port=flipper_key_serial, debug=True)
-    proto.start_rpc_session()
+    proto = FlipperProtobufClient(flipper_key_serial)
+    await proto.start()
     logging.debug("RPC session of flipper 'key' started")
 
     path = request.config.getoption("--path")
@@ -562,34 +560,34 @@ def nav_key(flipper_key_serial, request):
         path=path,
         window_name="Key flipper",
     )
-    nav_key.update_screen()
+    await nav_key.update_screen()
     if not (request.config.getoption("--no_init")):
         # Enabling of bluetooth
-        nav_key.go_to_main_screen()
-        nav_key.press_ok()
-        nav_key.go_to("Settings")
-        nav_key.press_ok()
-        nav_key.go_to("Bluetooth")
-        nav_key.press_ok()
-        nav_key.update_screen()
-        menu = nav_key.get_menu_list()
+        await nav_key.go_to_main_screen()
+        await nav_key.press_ok()
+        await nav_key.go_to("Settings")
+        await nav_key.press_ok()
+        await nav_key.go_to("Bluetooth")
+        await nav_key.press_ok()
+        await nav_key.update_screen()
+        menu = await nav_key.get_menu_list()
         if "BluetoothIsON" in menu:
             pass
         elif "BluetoothIsOFF" in menu:
-            nav_key.press_right()
+            await nav_key.press_right()
         else:
             raise FlippigatorException("Can not enable bluetooth")
 
         # Enabling Debug
-        nav_key.press_back()
-        nav_key.go_to("System")
-        nav_key.press_ok()
-        menu = nav_key.get_menu_list()
+        await nav_key.press_back()
+        await nav_key.go_to("System")
+        await nav_key.press_ok()
+        menu = await nav_key.get_menu_list()
         if "DebugIsON" in menu:
             pass
         elif "DebugIsOFF" in menu:
-            nav_key.go_to("DebugIsOFF")
-            nav_key.press_right()
+            await nav_key.go_to("DebugIsOFF")
+            await nav_key.press_right()
         else:
             raise FlippigatorException("Can not enable debug")
 

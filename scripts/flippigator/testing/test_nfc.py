@@ -13,11 +13,11 @@ os.system("color")
 @pytest.mark.nfc
 class TestNfc(BaseCase):
     @pytest.mark.smoke
-    def test_nfc_menu(self, nav):
+    async def test_nfc_menu(self, nav):
         """
         TODO: needs refactor
         """
-        nav.nfc.go_into()
+        await nav.nfc.go_into()
         menu_ref = [
             "Read",
             "Detect Reader",
@@ -27,20 +27,20 @@ class TestNfc(BaseCase):
             "Debug",
         ]
         assert (
-            nav.get_menu_list(
+            await nav.get_menu_list(
                 ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
             )
             == menu_ref
         ), "NFC menu list differs from reference"
 
     @pytest.mark.smoke
-    def test_read(self, nav):
-        nav.nfc.go_into()
-        nav.go_to("Read")
-        nav.press_ok()
-        state = nav.get_current_state()
+    async def test_read(self, nav):
+        await nav.nfc.go_into()
+        await nav.go_to("Read")
+        await nav.press_ok()
+        state = await nav.get_current_state()
         assert "ReadingNFC" in state, "NFC Reading failed"
-        nav.go_to_main_screen()
+        await nav.go_to_main_screen()
 
     '''
     def test_read_ref_card(self, nav):
@@ -102,36 +102,36 @@ class TestNfc(BaseCase):
     '''
 
     @pytest.mark.smoke
-    def test_detect_reader(self, nav):
-        nav.nfc.go_into()
-        nav.go_to("Detect Reader")
-        nav.press_ok()
-        state = nav.get_current_state()
+    async def test_detect_reader(self, nav):
+        await nav.nfc.go_into()
+        await nav.go_to("Detect Reader")
+        await nav.press_ok()
+        state = await nav.get_current_state()
         assert "EmulatingDetectReader" in state, "Reader detection error"
-        nav.go_to_main_screen()
+        await nav.go_to_main_screen()
 
     @pytest.mark.smoke
-    def test_saved(self, nav):
-        nav.nfc.go_into()
-        nav.go_to("Saved")
-        nav.press_ok()
-        state = nav.get_current_state()
+    async def test_saved(self, nav):
+        await nav.nfc.go_into()
+        await nav.go_to("Saved")
+        await nav.press_ok()
+        state = await nav.get_current_state()
         assert "FileBrowserLevelUp" in state, "File browser in 'Saved' was not opened"
 
     @pytest.mark.smoke
-    def test_extra_actions(self, nav):
-        nav.nfc.go_into()
+    async def test_extra_actions(self, nav):
+        await nav.nfc.go_into()
 
         with allure.step("Check Extra Actions"):
-            nav.go_to("Extra Actions")
-            nav.press_ok()
+            await nav.go_to("Extra Actions")
+            await nav.press_ok()
             menu_ref = [
                 "Read Specific Card Type",
                 "Mifare Classic Keys",
                 "Unlock NTAG/Ultralight",
             ]
             assert (
-                nav.get_menu_list(
+                await nav.get_menu_list(
                     ref=nav.get_ref_from_list(
                         menu_ref, nav.font_haxrcorp_4089, invert=1
                     )
@@ -140,36 +140,36 @@ class TestNfc(BaseCase):
             ), "NFC Extra Actions list is wrong"
 
         with allure.step("Mifare Classic Keys"):
-            nav.go_to("Mifare Classic Keys")
-            nav.press_ok()
-            state = nav.get_current_state()
+            await nav.go_to("Mifare Classic Keys")
+            await nav.press_ok()
+            state = await nav.get_current_state()
             assert (
                 "Mifare Classic Keys Pict" in state
             ), "Can't find Mifare Classic Keys dict"
-            nav.press_back()
+            await nav.press_back()
 
         with allure.step("Unlock NTAG/Ultralight"):
-            nav.go_to("Unlock NTAG/Ultralight")
-            nav.press_ok()
+            await nav.go_to("Unlock NTAG/Ultralight")
+            await nav.press_ok()
             menu_ref = [
                 "Auth As Ameebo",
                 "Auth As Xiaomi Air Purifier",
                 "Enter Password Manually",
             ]
             assert (
-                nav.get_menu_list(
+                await nav.get_menu_list(
                     ref=nav.get_ref_from_list(
                         menu_ref, nav.font_haxrcorp_4089, invert=1
                     )
                 )
                 == menu_ref
             ), "NFC Extra Actions list is wrong"
-            nav.press_back()
+            await nav.press_back()
 
-    def test_add_manually(self, nav):
-        nav.nfc.go_into()
-        nav.go_to("Add Manually")
-        nav.press_ok()
+    async def test_add_manually(self, nav):
+        await nav.nfc.go_into()
+        await nav.go_to("Add Manually")
+        await nav.press_ok()
         menu_ref = [
             "NFC-A 7-bytes UID",
             "NFC-A 4-bytes UID",
@@ -193,17 +193,17 @@ class TestNfc(BaseCase):
             "Mifare Classic 4k 7byte UI...",
         ]
         assert (
-            nav.get_menu_list(
+            await nav.get_menu_list(
                 ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
             )
             == menu_ref
         ), "NFC Add manually option list is wrong"
 
     @pytest.mark.smoke
-    def test_add_manually_smoke(self, nav):
-        nav.nfc.go_into()
-        nav.go_to("Add Manually")
-        nav.press_ok()
+    async def test_add_manually_smoke(self, nav):
+        await nav.nfc.go_into()
+        await nav.go_to("Add Manually")
+        await nav.press_ok()
         menu_ref = [
             "NFC-A 7-bytes UID",
             "NFC-A 4-bytes UID",
@@ -227,19 +227,19 @@ class TestNfc(BaseCase):
             "Mifare Classic 4k 7byte UI...",
         ]
         assert (
-            nav.get_menu_list(
+            await nav.get_menu_list(
                 ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
             )
             == menu_ref
         ), "NFC Add manually option list is wrong"
 
-    def test_debug(self, nav):
-        nav.nfc.go_into()
-        nav.go_to("Debug")
-        nav.press_ok()
+    async def test_debug(self, nav):
+        await nav.nfc.go_into()
+        await nav.go_to("Debug")
+        await nav.press_ok()
         menu_ref = ["Field"]
         assert (
-            nav.get_menu_list(
+            await nav.get_menu_list(
                 ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
             )
             == menu_ref

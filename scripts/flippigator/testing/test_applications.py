@@ -9,11 +9,11 @@ os.system("color")
 
 @pytest.mark.applications
 class TestApplications(BaseCase):
-    def test_applications_menu(self, nav):
+    async def test_applications_menu(self, nav):
         """
         Verifying applications folder list
         """
-        nav.applications.go_into()
+        await nav.applications.go_into()
         menu_ref = [
             "Bluetooth",
             "GPIO",
@@ -29,7 +29,7 @@ class TestApplications(BaseCase):
         ]
         ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
         ref["FileBrowserLevelUp"] = nav.imRef["FileBrowserLevelUp"]
-        menu = nav.get_menu_list(ref=ref)
+        menu = await nav.get_menu_list(ref=ref)
         for i in menu:
             if i in menu_ref:
                 menu_ref.remove(i)
@@ -40,7 +40,7 @@ class TestApplications(BaseCase):
 
         print(menu_ref)
         assert len(menu_ref) == 0, "Applications menu list is wrong"
-        nav.go_to_main_screen()
+        await nav.go_to_main_screen()
 
 
 '''
