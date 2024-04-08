@@ -204,10 +204,10 @@ void* pvPortMalloc(size_t xSize) {
     // clear block content
     memset(data, 0, xSize);
 
+    memmgr_unlock();
+
     // trace allocation
     memmgr_heap_trace_malloc(data, xSize);
-
-    memmgr_unlock();
 
     return data;
 }
@@ -233,11 +233,119 @@ void vPortFree(void* pv) {
         // free
         tlsf_free(tlsf, pv);
 
+        memmgr_unlock();
+
         // trace free
         memmgr_heap_trace_free(pv);
-
-        memmgr_unlock();
     }
+}
+
+extern void* pvPortAllocAligned(size_t xSize, size_t xAlignment) {
+    // memory management in ISR is not allowed
+    if(FURI_IS_IRQ_MODE()) {
+        furi_crash("memmgt in ISR");
+    }
+
+    memmgr_lock();
+
+    // initialize tlsf, if not initialized
+    if(tlsf == NULL) {
+        size_t pool_size = (size_t)&__heap_end__ - (size_t)&__heap_start__;
+        tlsf = tlsf_create_with_pool((void*)&__heap_start__, pool_size, pool_size);
+        memmgr_heap_init();
+    }
+
+    // allocate block
+    void* data = tlsf_memalign(tlsf, xAlignment, xSize);
+    if(data == NULL) {
+        if(xSize == 0) {
+            furi_crash("malloc_aligned(0)");
+        } else {
+            furi_crash("out of memory");
+        }
+    }
+
+    // update heap usage
+    heap_used += tlsf_block_size(data);
+    heap_used += tlsf_alloc_overhead();
+    if(heap_used > heap_max_used) {
+        heap_max_used = heap_used;
+    }
+
+    memmgr_unlock();
+
+    // clear block content
+    memset(data, 0, xSize);
+
+    // trace allocation
+    memmgr_heap_trace_malloc(data, xSize);
+
+    return data;
+}
+
+extern void* pvPortRealloc(void* pv, size_t xSize) {
+    // size 0 is considered as free
+    if(xSize == 0) {
+        vPortFree(pv);
+        return NULL;
+    }
+
+    // realloc(NULL, size) is equivalent to malloc(size)
+    if(pv == NULL) {
+        return pvPortMalloc(xSize);
+    }
+
+    // realloc things //
+
+    // memory management in ISR is not allowed
+    if(FURI_IS_IRQ_MODE()) {
+        furi_crash("memmgt in ISR");
+    }
+
+    memmgr_lock();
+
+    // initialize tlsf, if not initialized
+    if(tlsf == NULL) {
+        size_t pool_size = (size_t)&__heap_end__ - (size_t)&__heap_start__;
+        tlsf = tlsf_create_with_pool((void*)&__heap_start__, pool_size, pool_size);
+        memmgr_heap_init();
+    }
+
+    // trace old block as free
+    size_t old_size = 0;
+    if(pv != NULL) {
+        old_size = tlsf_block_size(pv);
+        memmgr_heap_trace_free(pv);
+    }
+
+    // reallocate block
+    void* data = tlsf_realloc(tlsf, pv, xSize);
+    if(data == NULL) {
+        if(xSize == 0) {
+            furi_crash("realloc(0)");
+        } else {
+            furi_crash("out of memory");
+        }
+    }
+
+    // update heap usage
+    heap_used -= old_size;
+    heap_used += tlsf_block_size(data);
+    if(heap_used > heap_max_used) {
+        heap_max_used = heap_used;
+    }
+
+    // clear remain block content, if the new size is bigger
+    if(xSize > old_size) {
+        memset((uint8_t*)data + old_size, 0, xSize - old_size);
+    }
+
+    memmgr_unlock();
+
+    // trace allocation
+    memmgr_heap_trace_malloc(data, xSize);
+
+    return data;
 }
 
 size_t xPortGetFreeHeapSize(void) {
