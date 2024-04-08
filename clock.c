@@ -20,6 +20,10 @@
 #define LO_TRESHOLD (1.0 / 32.0)
 #define HI_TRESHOLD (1.0 - LO_TRESHOLD)
 
+char* WEEKDAYS[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+char* MONTHS[] =
+    {"Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
 float wide_line_distance(float xpax, float ypay, float bax, float bay) {
     float h = fmaxf(fminf((xpax * bax + ypay * bay) / (bax * bax + bay * bay), 1.0f), 0.0f);
     float dx = xpax - bax * h, dy = ypay - bay * h;
@@ -153,8 +157,8 @@ inline void set_clock_hour_point(ClockConfig* cfg, uint8_t idx, float x, float y
 void calc_clock_face(ClockConfig* cfg) {
     furi_assert(cfg);
 
-    bool digital = (cfg->face.type == DigitalRectangular) || (cfg->face.type == DigitalRound);
-    bool roundFace = (cfg->face.type == Round) || (cfg->face.type == DigitalRound);
+    bool digital = (cfg->face_type == DigitalRectangular) || (cfg->face_type == DigitalRound);
+    bool roundFace = (cfg->face_type == Round) || (cfg->face_type == DigitalRound);
     bool round = cfg->split ? roundFace : false;
     bool dots = digital && cfg->split;
 
@@ -162,6 +166,7 @@ void calc_clock_face(ClockConfig* cfg) {
     float horOfs = round ? FACE_RADIUS : FACE_HEIGHT;
     float verOfs = round ? FACE_RADIUS : width;
 
+    cfg->face.time_fmt = locale_get_time_format();
     cfg->face.ctr.x = cfg->split ? CLOCK_OFS_X / 2.0 : CLOCK_OFS_X;
     cfg->face.ctr.y = CLOCK_OFS_Y;
 
@@ -225,9 +230,19 @@ void calc_clock_face(ClockConfig* cfg) {
     }
 }
 
-void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s) {
+void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt) {
+    uint8_t hour = dt->hour;
+    if(cfg->face.time_fmt == LocaleTimeFormat12h) {
+        hour = hour % 12 == 0 ? 12 : hour % 12;
+        uint8_t x = cfg->face.ctr.x;
+        uint8_t y = cfg->face.ctr.y;
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(
+            canvas, x, y - 10, AlignCenter, AlignBottom, (dt->hour >= 12 ? "PM" : "AM"));
+    }
+
     FuriString* time = furi_string_alloc();
-    furi_string_printf(time, "%2u:%02u", h, m);
+    furi_string_printf(time, "%2u:%02u", hour, dt->minute);
     canvas_set_font(canvas, FontBigNumbers);
     const char* buf = furi_string_get_cstr(time);
     canvas_draw_str_aligned(
@@ -235,7 +250,7 @@ void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s) {
     furi_string_free(time);
 
     for(int i = 0; i <= 45; i++) {
-        int idx = (s - i + 60) % 60;
+        int idx = (dt->second - i + 60) % 60;
         canvas_draw_line(
             canvas,
             cfg->face.minute_lines[idx].start.x,
@@ -245,11 +260,10 @@ void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s) {
     }
 }
 
-void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, int ms) {
-    float secAng = M_PI / 30.0 * s + M_PI / 30.0 / 1000.0 * ms; // min: 2*PI/60 hour: 2*PI/12
-    float minAng =
-        M_PI / 30.0 * m + M_PI / 30.0 / 60.0 * s + M_PI / 30.0 / 60.0 / 60.0 / 1000.0 * ms;
-    float hourAng = M_PI / 6.0 * (h % 12) + M_PI / 6.0 / 60.0 * m + M_PI / 6.0 / 60.0 / 60.0 * s;
+void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms) {
+    float secAng = M_PI / 30.0 * dt->second + M_PI / 30000.0 * ms;
+    float minAng = M_PI / 30.0 * dt->minute + M_PI / 1800.0 * dt->second;
+    float hourAng = M_PI / 6.0 * (dt->hour % 12) + M_PI / 360.0 * dt->minute;
 
     canvas_set_font(canvas, FontSecondary);
     for(int i = 0; i < 60; i++) {
@@ -278,16 +292,35 @@ void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, in
     canvas_draw_disc(canvas, cfg->face.ctr.x, cfg->face.ctr.y, 2);
 }
 
-void draw_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, int ms) {
-    bool digital = (cfg->face.type == DigitalRectangular) || (cfg->face.type == DigitalRound);
+void draw_date(Canvas* canvas, ClockConfig* cfg, DateTime* dt) {
+    uint8_t x = 96;
+    uint8_t y = cfg->face.ctr.y;
+    FuriString* dat = furi_string_alloc();
+    furi_string_printf(dat, "%2u", dt->day);
+    canvas_set_font(canvas, FontBigNumbers);
+    canvas_draw_str_aligned(canvas, x - 2, y, AlignRight, AlignCenter, furi_string_get_cstr(dat));
+    furi_string_free(dat);
+
+    const char* month = MONTHS[(dt->month - 1) % 12];
+    const char* weekday = WEEKDAYS[(dt->weekday - 1) % 7];
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, x + 2, y + 3, AlignLeft, AlignCenter, month);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, x, y + 10, AlignCenter, AlignTop, weekday);
+}
+
+void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms) {
+    bool digital = (cfg->face_type == DigitalRectangular) || (cfg->face_type == DigitalRound);
     if(cfg->split && digital)
-        draw_digital_clock(canvas, cfg, h, m, s);
+        draw_digital_clock(canvas, cfg, dt);
     else
-        draw_analog_clock(canvas, cfg, h, m, s, ms);
+        draw_analog_clock(canvas, cfg, dt, ms);
+    if(cfg->split) draw_date(canvas, cfg, dt);
 }
 
 void init_clock_config(ClockConfig* cfg) {
     cfg->split = false;
+    cfg->face_type = Rectangular;
     cfg->digits_mod = 1;
     cfg->width = FACE_DEFAULT_WIDTH;
 }
@@ -308,7 +341,7 @@ void modify_clock_down(ClockConfig* cfg) {
 
 void modify_clock_left(ClockConfig* cfg) {
     if(cfg->split) {
-        cfg->face.type = (cfg->face.type + 1) % FACE_TYPES;
+        cfg->face_type = (cfg->face_type + 1) % FACE_TYPES;
     } else
         cfg->width = cfg->width <= 32 ? 32 : cfg->width - 1;
 }

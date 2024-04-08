@@ -30,7 +30,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     furi_hal_rtc_get_datetime(&dt);
     if(dt.second != app->second) app->ms_adjust = tick % 1000;
     app->second = dt.second;
-    draw_clock(canvas, &app->cfg, dt.hour, dt.minute, dt.second, (tick - app->ms_adjust) % 1000);
+    draw_clock(canvas, &app->cfg, &dt, (tick - app->ms_adjust) % 1000);
     furi_mutex_release(app->mutex);
 }
 

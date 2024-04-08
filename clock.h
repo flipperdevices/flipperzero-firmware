@@ -1,6 +1,7 @@
 #pragma once
 #include <furi.h>
 #include <gui/gui.h>
+#include <locale/locale.h>
 
 #define FACE_TYPES 4
 typedef enum {
@@ -21,7 +22,7 @@ typedef struct {
 } Line;
 
 typedef struct {
-    FaceType type;
+    LocaleTimeFormat time_fmt;
     Point ctr;
     Line minute_lines[60];
     Point hour_points[12];
@@ -29,6 +30,7 @@ typedef struct {
 
 typedef struct {
     bool split;
+    FaceType face_type;
     uint8_t digits_mod;
     uint8_t width;
     ClockFace face;
@@ -45,9 +47,11 @@ void set_clock_minute_line(
     float end_y);
 void calc_clock_face(ClockConfig* cfg);
 
-void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s);
-void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, int ms);
-void draw_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, int ms);
+void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt);
+void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms);
+void draw_date(Canvas* canvas, ClockConfig* cfg, DateTime* dt);
+
+void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms);
 
 void init_clock_config(ClockConfig* cfg);
 void modify_clock_up(ClockConfig* cfg);
