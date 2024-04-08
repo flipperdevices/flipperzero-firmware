@@ -146,14 +146,6 @@ MfDesfireError
     do {
         error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
-        if(error == MfDesfireErrorAuthentication) {
-            FURI_LOG_D(TAG, "Reading key settings impossible without authentication");
-            data->is_free_directory_list = false;
-            data->max_keys = 1;
-            error = MfDesfireErrorNone;
-            break;
-        }
-
         if(error != MfDesfireErrorNone) break;
 
         if(!mf_desfire_key_settings_parse(data, instance->result_buffer)) {
@@ -446,6 +438,18 @@ MfDesfireError mf_desfire_poller_read_file_data_multi(
 
         MfDesfireFileData* file_data = simple_array_get(data, i);
 
+        bool can_read_data = false;
+        for(size_t i = 0; i < file_settings_cur->access_rights_len; i++) {
+            uint8_t read_access = (file_settings_cur->access_rights[i] >> 12) & 0x0f;
+            uint8_t read_write_access = (file_settings_cur->access_rights[i] >> 4) & 0x0f;
+            can_read_data = (read_access == 0x0e) || (read_write_access == 0x0e);
+            if(can_read_data) break;
+        }
+        if(!can_read_data) {
+            FURI_LOG_D(TAG, "Can't read file %ld data without authentication", i);
+            continue;
+        }
+
         if(file_type == MfDesfireFileTypeStandard || file_type == MfDesfireFileTypeBackup) {
             error = mf_desfire_poller_read_file_data(
                 instance, file_id, 0, file_settings_cur->data.size, file_data);
@@ -457,8 +461,6 @@ MfDesfireError mf_desfire_poller_read_file_data_multi(
             error = mf_desfire_poller_read_file_records(
                 instance, file_id, 0, file_settings_cur->data.size, file_data);
         }
-
-        if(error != MfDesfireErrorNone) break;
     }
 
     return error;
@@ -473,22 +475,36 @@ MfDesfireError
 
     do {
         error = mf_desfire_poller_read_key_settings(instance, &data->key_settings);
+        if(error == MfDesfireErrorAuthentication) {
+            FURI_LOG_D(TAG, "Auth is required to read master key settings and app ids");
+            data->key_settings.is_free_directory_list = false;
+            error = MfDesfireErrorNone;
+            break;
+        }
         if(error != MfDesfireErrorNone) break;
 
         error = mf_desfire_poller_read_key_versions(
             instance, data->key_versions, data->key_settings.max_keys);
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_E(TAG, "Failed to read key version: %d", error);
+            break;
+        }
 
         error = mf_desfire_poller_read_file_ids(instance, data->file_ids);
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_E(TAG, "Failed to read file ids: %d", error);
+            break;
+        }
 
         error = mf_desfire_poller_read_file_settings_multi(
             instance, data->file_ids, data->file_settings);
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_E(TAG, "Failed to read file settings: %d", error);
+            break;
+        }
 
         error = mf_desfire_poller_read_file_data_multi(
             instance, data->file_ids, data->file_settings, data->file_data);
-        if(error != MfDesfireErrorNone) break;
 
     } while(false);
 
@@ -511,9 +527,11 @@ MfDesfireError mf_desfire_poller_read_applications(
 
     for(uint32_t i = 0; i < app_id_count; ++i) {
         do {
+            FURI_LOG_I(TAG, "Selecting app %ld", i);
             error = mf_desfire_poller_select_application(instance, simple_array_cget(app_ids, i));
             if(error != MfDesfireErrorNone) break;
 
+            FURI_LOG_I(TAG, "Reading app %ld", i);
             MfDesfireApplication* current_app = simple_array_get(data, i);
             error = mf_desfire_poller_read_application(instance, current_app);
 

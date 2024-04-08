@@ -89,7 +89,8 @@ typedef uint16_t MfDesfireFileAccessRights;
 typedef struct {
     MfDesfireFileType type;
     MfDesfireFileCommunicationSettings comm;
-    MfDesfireFileAccessRights access_rights;
+    MfDesfireFileAccessRights access_rights[MF_DESFIRE_MAX_KEYS];
+    uint8_t access_rights_len;
     union {
         struct {
             uint32_t size;

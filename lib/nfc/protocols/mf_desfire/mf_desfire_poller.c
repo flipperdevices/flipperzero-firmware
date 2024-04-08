@@ -100,6 +100,11 @@ static NfcCommand mf_desfire_poller_handler_read_master_key_settings(MfDesfirePo
     if(instance->error == MfDesfireErrorNone) {
         FURI_LOG_D(TAG, "Read master key settings success");
         instance->state = MfDesfirePollerStateReadMasterKeyVersion;
+    } else if(instance->error == MfDesfireErrorAuthentication) {
+        FURI_LOG_D(TAG, "Auth is required to read master key settings and app ids");
+        instance->data->master_key_settings.is_free_directory_list = false;
+        instance->data->master_key_settings.max_keys = 1;
+        instance->state = MfDesfirePollerStateReadMasterKeyVersion;
     } else {
         FURI_LOG_E(TAG, "Failed to read master key settings");
         iso14443_4a_poller_halt(instance->iso14443_4a_poller);
@@ -116,7 +121,11 @@ static NfcCommand mf_desfire_poller_handler_read_master_key_version(MfDesfirePol
         instance->data->master_key_settings.max_keys);
     if(instance->error == MfDesfireErrorNone) {
         FURI_LOG_D(TAG, "Read master key version success");
-        instance->state = MfDesfirePollerStateReadApplicationIds;
+        if(instance->data->master_key_settings.is_free_directory_list) {
+            instance->state = MfDesfirePollerStateReadApplicationIds;
+        } else {
+            instance->state = MfDesfirePollerStateReadSuccess;
+        }
     } else {
         FURI_LOG_E(TAG, "Failed to read master key version");
         iso14443_4a_poller_halt(instance->iso14443_4a_poller);
