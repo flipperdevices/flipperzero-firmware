@@ -3,6 +3,7 @@
 #include <tlsf_block_functions.h>
 #include <FreeRTOS.h>
 #include <task.h>
+#include <m-dict.h>
 
 extern const void __heap_start__;
 extern const void __heap_end__;
@@ -10,9 +11,6 @@ extern const void __heap_end__;
 static tlsf_t tlsf = NULL;
 static size_t heap_used = 0;
 static size_t heap_max_used = 0;
-
-// Furi heap extension
-#include <m-dict.h>
 
 // Allocation tracking types
 DICT_DEF2(MemmgrHeapAllocDict, uint32_t, uint32_t) //-V1048
@@ -67,6 +65,34 @@ void memmgr_heap_disable_thread_trace(FuriThreadId thread_id) {
         memmgr_heap_thread_trace_depth--;
     }
     memmgr_unlock();
+}
+
+static inline void memmgr_heap_trace_malloc(void* pointer, size_t size) {
+    FuriThreadId thread_id = furi_thread_get_current_id();
+    if(thread_id && memmgr_heap_thread_trace_depth == 0) {
+        memmgr_heap_thread_trace_depth++;
+        MemmgrHeapAllocDict_t* alloc_dict =
+            MemmgrHeapThreadDict_get(memmgr_heap_thread_dict, (uint32_t)thread_id);
+        if(alloc_dict) {
+            MemmgrHeapAllocDict_set_at(*alloc_dict, (uint32_t)pointer, (uint32_t)size);
+        }
+        memmgr_heap_thread_trace_depth--;
+    }
+}
+
+static inline void memmgr_heap_trace_free(void* pointer) {
+    FuriThreadId thread_id = furi_thread_get_current_id();
+    if(thread_id && memmgr_heap_thread_trace_depth == 0) {
+        memmgr_heap_thread_trace_depth++;
+        MemmgrHeapAllocDict_t* alloc_dict =
+            MemmgrHeapThreadDict_get(memmgr_heap_thread_dict, (uint32_t)thread_id);
+        if(alloc_dict) {
+            // In some cases thread may want to release memory that was not allocated by it
+            const bool res = MemmgrHeapAllocDict_erase(*alloc_dict, (uint32_t)pointer);
+            UNUSED(res);
+        }
+        memmgr_heap_thread_trace_depth--;
+    }
 }
 
 size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
@@ -141,34 +167,6 @@ void memmgr_heap_walk_blocks(BlockWalker walker, void* context) {
     tlsf_walk_pool(pool, tlsf_walker_wrapper, &wrapper);
 
     memmgr_unlock();
-}
-
-static inline void memmgr_heap_trace_malloc(void* pointer, size_t size) {
-    FuriThreadId thread_id = furi_thread_get_current_id();
-    if(thread_id && memmgr_heap_thread_trace_depth == 0) {
-        memmgr_heap_thread_trace_depth++;
-        MemmgrHeapAllocDict_t* alloc_dict =
-            MemmgrHeapThreadDict_get(memmgr_heap_thread_dict, (uint32_t)thread_id);
-        if(alloc_dict) {
-            MemmgrHeapAllocDict_set_at(*alloc_dict, (uint32_t)pointer, (uint32_t)size);
-        }
-        memmgr_heap_thread_trace_depth--;
-    }
-}
-
-static inline void memmgr_heap_trace_free(void* pointer) {
-    FuriThreadId thread_id = furi_thread_get_current_id();
-    if(thread_id && memmgr_heap_thread_trace_depth == 0) {
-        memmgr_heap_thread_trace_depth++;
-        MemmgrHeapAllocDict_t* alloc_dict =
-            MemmgrHeapThreadDict_get(memmgr_heap_thread_dict, (uint32_t)thread_id);
-        if(alloc_dict) {
-            // In some cases thread may want to release memory that was not allocated by it
-            const bool res = MemmgrHeapAllocDict_erase(*alloc_dict, (uint32_t)pointer);
-            UNUSED(res);
-        }
-        memmgr_heap_thread_trace_depth--;
-    }
 }
 
 void* pvPortMalloc(size_t xSize) {
