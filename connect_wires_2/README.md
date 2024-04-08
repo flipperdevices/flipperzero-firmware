@@ -1,4 +1,6 @@
-# "Connect Wires" game for Flipper Zero
+# "Connect Wires" game for Flipper Zero *Abandoned*
+
+Please note that this version is abandoned, as these changes were accepted into the original game.
 
 This is a modified version of Alexander Taran's connect_wires game.
 
