@@ -252,6 +252,17 @@ set(BSP_MP1_COMPONENTS )
 set(BSP_MP1_SOURCES_STM32MP15xx_DISCO bus stpmic1)
 set(BSP_MP1_SOURCES_STM32MP15xx_EVAL bus stpmic1)
 
+### U0 ###
+set(BSP_U0_BOARDS
+    STM32U0xx_Nucleo STM32U083C_Discovery
+)
+set(BSP_U0_COMPONENTS 
+    stts22h
+)
+
+set(BSP_U0_SOURCES_STM32U083C_Discovery stts22h)
+set(BSP_U0_DEVICE_STM32U083C_Discovery U083CC)
+
 ### WB ###
 set(BSP_WB_BOARDS
     STM32WB15CC_Nucleo STM32WB55_Nucleo STM32WB55_USBDongle STM32WB5MM_Discovery
