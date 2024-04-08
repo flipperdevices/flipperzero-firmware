@@ -190,7 +190,10 @@ FelicaData* felica_get_base_data(const FelicaData* data) {
     furi_crash("No base data");
 }
 
-void felica_reverse_copy_block(const uint8_t* array, uint8_t* reverse_array) {
+static void felica_reverse_copy_block(const uint8_t* array, uint8_t* reverse_array) {
+    furi_assert(array);
+    furi_assert(reverse_array);
+
     for(int i = 0; i < 8; i++) {
         reverse_array[i] = array[7 - i];
     }
@@ -229,8 +232,7 @@ static bool felica_calculate_mac(
     const uint8_t* data,
     const size_t length,
     uint8_t* mac) {
-    furi_assert(data);
-    furi_assert(length % 8);
+    furi_assert((length % 8) == 0);
 
     uint8_t reverse_data[8];
     uint8_t iv[8];
@@ -263,6 +265,8 @@ static void felica_prepare_first_block(
     const uint8_t* blocks,
     const uint8_t block_count,
     uint8_t* out) {
+    furi_assert(blocks);
+    furi_assert(out);
     if(operation_type == FelicaMACTypeRead) {
         memset(out, 0xFF, 8);
         for(uint8_t i = 0, j = 0; i < block_count; i++, j += 2) {
@@ -287,6 +291,12 @@ bool felica_check_mac(
     const uint8_t* blocks,
     const uint8_t block_count,
     uint8_t* data) {
+    furi_assert(ctx);
+    furi_assert(session_key);
+    furi_assert(rc);
+    furi_assert(blocks);
+    furi_assert(data);
+
     uint8_t first_block[8];
     uint8_t mac[8];
     felica_prepare_first_block(FelicaMACTypeRead, blocks, block_count, first_block);
@@ -305,13 +315,20 @@ void felica_calculate_mac_write(
     const uint8_t* wcnt,
     const uint8_t* data,
     uint8_t* mac) {
+    furi_assert(ctx);
+    furi_assert(session_key);
+    furi_assert(rc);
+    furi_assert(wcnt);
+    furi_assert(data);
+    furi_assert(mac);
+
     const uint8_t WCNT_length = 3;
     uint8_t block_data[WCNT_length + 1];
     uint8_t first_block[8];
 
     memcpy(block_data, wcnt, WCNT_length);
     block_data[3] = FELICA_BLOCK_INDEX_STATE;
-    felica_prepare_first_block(FelicaMACTypeWrite, block_data, WCNT_length, first_block);
+    felica_prepare_first_block(FelicaMACTypeWrite, block_data, WCNT_length + 1, first_block);
 
     uint8_t session_swapped[FELICA_DATA_BLOCK_SIZE];
     memcpy(session_swapped, session_key + 8, 8);

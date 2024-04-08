@@ -154,8 +154,6 @@ bool felica_set_uid(FelicaData* data, const uint8_t* uid, size_t uid_len);
 
 FelicaData* felica_get_base_data(const FelicaData* data);
 
-void felica_reverse_copy_block(const uint8_t* array, uint8_t* reverse_array);
-
 void felica_calculate_session_key(
     mbedtls_des3_context* ctx,
     const uint8_t* ck,
