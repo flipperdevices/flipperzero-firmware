@@ -254,13 +254,15 @@ void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, in
     canvas_set_font(canvas, FontSecondary);
     for(int i = 0; i < 60; i++) {
         if(i % 5 == 0) {
-            canvas_draw_str_aligned(
-                canvas,
-                cfg->face.hour_points[i / 5].x,
-                cfg->face.hour_points[i / 5].y,
-                AlignCenter,
-                AlignCenter,
-                clock_number_str(i / 5));
+            int hour = i / 5;
+            if((cfg->digits_mod <= 12) && (hour % cfg->digits_mod == 0))
+                canvas_draw_str_aligned(
+                    canvas,
+                    cfg->face.hour_points[hour].x,
+                    cfg->face.hour_points[hour].y,
+                    AlignCenter,
+                    AlignCenter,
+                    clock_number_str(hour));
         }
         canvas_draw_line(
             canvas,
@@ -286,8 +288,22 @@ void draw_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, int ms) {
 
 void init_clock_config(ClockConfig* cfg) {
     cfg->split = false;
-    cfg->face.type = Rectangular;
+    cfg->digits_mod = 1;
     cfg->width = FACE_DEFAULT_WIDTH;
+}
+
+void modify_clock_up(ClockConfig* cfg) {
+    if(cfg->digits_mod < 3)
+        cfg->digits_mod += 1;
+    else if(cfg->digits_mod <= 12)
+        cfg->digits_mod *= 2;
+}
+
+void modify_clock_down(ClockConfig* cfg) {
+    if(cfg->digits_mod >= 6)
+        cfg->digits_mod /= 2;
+    else if(cfg->digits_mod > 1)
+        cfg->digits_mod -= 1;
 }
 
 void modify_clock_left(ClockConfig* cfg) {

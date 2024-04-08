@@ -29,6 +29,7 @@ typedef struct {
 
 typedef struct {
     bool split;
+    uint8_t digits_mod;
     uint8_t width;
     ClockFace face;
 } ClockConfig;
@@ -49,6 +50,8 @@ void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, in
 void draw_clock(Canvas* canvas, ClockConfig* cfg, int h, int m, int s, int ms);
 
 void init_clock_config(ClockConfig* cfg);
+void modify_clock_up(ClockConfig* cfg);
+void modify_clock_down(ClockConfig* cfg);
 void modify_clock_left(ClockConfig* cfg);
 void modify_clock_right(ClockConfig* cfg);
 void modify_clock_ok(ClockConfig* cfg);

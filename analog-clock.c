@@ -91,6 +91,12 @@ int32_t analog_clock_main(void* p) {
         if(furi_message_queue_get(event_queue, &event, FRAME_MS) == FuriStatusOk) {
             if((event.type == InputTypePress) || (event.type == InputTypeRepeat)) {
                 switch(event.key) {
+                case InputKeyUp:
+                    modify_clock_up(&app->cfg);
+                    break;
+                case InputKeyDown:
+                    modify_clock_down(&app->cfg);
+                    break;
                 case InputKeyLeft:
                     modify_clock_left(&app->cfg);
                     break;
