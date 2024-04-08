@@ -55,7 +55,7 @@ badusb.press(0x47); // Press key with HID code (hex) 0x47 (Scroll lock)
 ```
 
 ## hold
-Hold a key. Up to 5 keys (excluding modifiers) can be hold simultaneously.
+Hold a key. Up to 5 keys (excluding modifiers) can be held simultaneously.
 
 ### Parameters
 Same as `press`
