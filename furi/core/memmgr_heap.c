@@ -187,7 +187,11 @@ void* pvPortMalloc(size_t xSize) {
     // allocate block
     void* data = tlsf_malloc(tlsf, xSize);
     if(data == NULL) {
-        furi_crash("out of memory");
+        if(xSize == 0) {
+            furi_crash("malloc(0)");
+        } else {
+            furi_crash("out of memory");
+        }
     }
 
     // update heap usage
