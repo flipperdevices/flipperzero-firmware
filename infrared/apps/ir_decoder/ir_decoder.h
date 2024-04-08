@@ -4,8 +4,7 @@
 #include <infrared_worker.h>
 #include <furi_hal_infrared.h>
 #include <gui/gui.h>
-
-#include "helpers/bit_ops.h"
+#include <bit_lib/bit_lib.h>
 
 #define TAG "IR Decoder"
 
