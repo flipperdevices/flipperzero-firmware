@@ -1,12 +1,12 @@
 set(STM32_U0_TYPES
     U031xx
-    U073xC
-    U083xC
+    U073xx
+    U083xx
 )
 set(STM32_U0_TYPE_MATCH 
-    "U031.."
-    "U073.."
-    "U083.."
+    "U031.[468]"
+    "U073.C"
+    "U083.C"
 )
 set(STM32_U0_RAM_SIZES 
     12K
