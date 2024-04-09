@@ -2,6 +2,10 @@
 
 ## Quick Action Remote Control for Flipperzero
 
+[Latest Version: 0.6](https://github.com/rdefeo/quac/releases)
+
+![build status badge](https://github.com/rdefeo/quac/actions/workflows/build.yml/badge.svg)
+
 This app allows you to organize previously recorded signals, of any type*, so that you can quickly and easily play them back. No more needing to recall whether that door is Sub-GHz or RFID! Just navigate to that action in **Quac!** and press OK to send!
 
 The app does not provide any recording functionality - you must use the existing Flipperzero apps to create the saved files for your action/device. Quac! provides some basic functionality to manage your files. Or, you can manage the folder structure manually on your SD card.
