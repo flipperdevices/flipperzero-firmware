@@ -431,7 +431,7 @@ MfDesfireError mf_desfire_poller_read_file_data_multi(
         simple_array_init(data, file_id_count);
     }
 
-    for(uint32_t i = 0; i < file_id_count; ++i) {
+    for(size_t i = 0; i < file_id_count; ++i) {
         const MfDesfireFileId file_id = *(const MfDesfireFileId*)simple_array_cget(file_ids, i);
         const MfDesfireFileSettings* file_settings_cur = simple_array_cget(file_settings, i);
         const MfDesfireFileType file_type = file_settings_cur->type;
@@ -439,9 +439,9 @@ MfDesfireError mf_desfire_poller_read_file_data_multi(
         MfDesfireFileData* file_data = simple_array_get(data, i);
 
         bool can_read_data = false;
-        for(size_t i = 0; i < file_settings_cur->access_rights_len; i++) {
-            uint8_t read_access = (file_settings_cur->access_rights[i] >> 12) & 0x0f;
-            uint8_t read_write_access = (file_settings_cur->access_rights[i] >> 4) & 0x0f;
+        for(size_t j = 0; j < file_settings_cur->access_rights_len; j++) {
+            uint8_t read_access = (file_settings_cur->access_rights[j] >> 12) & 0x0f;
+            uint8_t read_write_access = (file_settings_cur->access_rights[j] >> 4) & 0x0f;
             can_read_data = (read_access == 0x0e) || (read_write_access == 0x0e);
             if(can_read_data) break;
         }
