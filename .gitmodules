@@ -1,3 +1,6 @@
 [submodule "subghz/apps/tpms"]
 	path = subghz/apps/tpms
 	url = https://github.com/prplecake/flipperzero-tpms
+[submodule "tools/apps/hex_viewer"]
+	path = tools/apps/hex_viewer
+	url = https://github.com/prplecake/flipperzero-hex-viewer
