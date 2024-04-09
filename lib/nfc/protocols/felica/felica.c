@@ -43,17 +43,18 @@ FelicaData* felica_alloc(void) {
 }
 
 void felica_free(FelicaData* data) {
-    furi_assert(data);
+    furi_check(data);
     free(data);
 }
 
 void felica_reset(FelicaData* data) {
+    furi_check(data);
     memset(data, 0, sizeof(FelicaData));
 }
 
 void felica_copy(FelicaData* data, const FelicaData* other) {
-    furi_assert(data);
-    furi_assert(other);
+    furi_check(data);
+    furi_check(other);
 
     *data = *other;
 }
@@ -66,7 +67,7 @@ bool felica_verify(FelicaData* data, const FuriString* device_type) {
 }
 
 bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
-    furi_assert(data);
+    furi_check(data);
 
     bool parsed = false;
 
@@ -109,7 +110,7 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
 }
 
 bool felica_save(const FelicaData* data, FlipperFormat* ff) {
-    furi_assert(data);
+    furi_check(data);
 
     bool saved = false;
 
@@ -149,8 +150,8 @@ bool felica_save(const FelicaData* data, FlipperFormat* ff) {
 }
 
 bool felica_is_equal(const FelicaData* data, const FelicaData* other) {
-    furi_assert(data);
-    furi_assert(other);
+    furi_check(data);
+    furi_check(other);
 
     return memcmp(data, other, sizeof(FelicaData)) == 0;
 }
@@ -163,7 +164,7 @@ const char* felica_get_device_name(const FelicaData* data, NfcDeviceNameType nam
 }
 
 const uint8_t* felica_get_uid(const FelicaData* data, size_t* uid_len) {
-    furi_assert(data);
+    furi_check(data);
 
     // Consider Manufacturer ID as UID
     if(uid_len) {
@@ -174,7 +175,7 @@ const uint8_t* felica_get_uid(const FelicaData* data, size_t* uid_len) {
 }
 
 bool felica_set_uid(FelicaData* data, const uint8_t* uid, size_t uid_len) {
-    furi_assert(data);
+    furi_check(data);
 
     // Consider Manufacturer ID as UID
     const bool uid_valid = uid_len == FELICA_IDM_SIZE;
@@ -204,10 +205,10 @@ void felica_calculate_session_key(
     const uint8_t* ck,
     const uint8_t* rc,
     uint8_t* out) {
-    furi_assert(ctx);
-    furi_assert(ck);
-    furi_assert(rc);
-    furi_assert(out);
+    furi_check(ctx);
+    furi_check(ck);
+    furi_check(rc);
+    furi_check(out);
 
     uint8_t iv[8];
     memset(iv, 0, 8);
@@ -232,7 +233,7 @@ static bool felica_calculate_mac(
     const uint8_t* data,
     const size_t length,
     uint8_t* mac) {
-    furi_assert((length % 8) == 0);
+    furi_check((length % 8) == 0);
 
     uint8_t reverse_data[8];
     uint8_t iv[8];
@@ -265,8 +266,8 @@ static void felica_prepare_first_block(
     const uint8_t* blocks,
     const uint8_t block_count,
     uint8_t* out) {
-    furi_assert(blocks);
-    furi_assert(out);
+    furi_check(blocks);
+    furi_check(out);
     if(operation_type == FelicaMACTypeRead) {
         memset(out, 0xFF, 8);
         for(uint8_t i = 0, j = 0; i < block_count; i++, j += 2) {
@@ -274,7 +275,7 @@ static void felica_prepare_first_block(
             out[j + 1] = 0;
         }
     } else {
-        furi_assert(block_count == 4);
+        furi_check(block_count == 4);
         memset(out, 0, 8);
         out[0] = blocks[0];
         out[1] = blocks[1];
@@ -291,11 +292,11 @@ bool felica_check_mac(
     const uint8_t* blocks,
     const uint8_t block_count,
     uint8_t* data) {
-    furi_assert(ctx);
-    furi_assert(session_key);
-    furi_assert(rc);
-    furi_assert(blocks);
-    furi_assert(data);
+    furi_check(ctx);
+    furi_check(session_key);
+    furi_check(rc);
+    furi_check(blocks);
+    furi_check(data);
 
     uint8_t first_block[8];
     uint8_t mac[8];
@@ -315,12 +316,12 @@ void felica_calculate_mac_write(
     const uint8_t* wcnt,
     const uint8_t* data,
     uint8_t* mac) {
-    furi_assert(ctx);
-    furi_assert(session_key);
-    furi_assert(rc);
-    furi_assert(wcnt);
-    furi_assert(data);
-    furi_assert(mac);
+    furi_check(ctx);
+    furi_check(session_key);
+    furi_check(rc);
+    furi_check(wcnt);
+    furi_check(data);
+    furi_check(mac);
 
     const uint8_t WCNT_length = 3;
     uint8_t block_data[WCNT_length + 1];
