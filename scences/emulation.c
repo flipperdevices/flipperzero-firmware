@@ -20,7 +20,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
       FuriString* line = furi_string_alloc();
       FuriString* tmp_header_str = furi_string_alloc();
       FuriString* tmp_counter_str = furi_string_alloc();
-      
+
       while(stream_read_line(stream, line) && EmulationState == NfcPlaylistEmulationState_Emulating) {
 
          char* file_path = (char*)furi_string_get_cstr(line);

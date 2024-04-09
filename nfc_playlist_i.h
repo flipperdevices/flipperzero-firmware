@@ -6,3 +6,4 @@
 #include "scences/file_edit.h"
 #include "scences/file_rename.h"
 #include "scences/confirm_delete.h"
+#include "scences/view_playlist_content.h"
