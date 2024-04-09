@@ -141,6 +141,7 @@ static bool picopass_device_save_file_lfrfid(PicopassDevice* dev, FuriString* fi
     FURI_LOG_D(TAG, "LFRFID Brief: %s", furi_string_get_cstr(briefStr));
     furi_string_free(briefStr);
 
+    storage_simply_mkdir(dev->storage, EXT_PATH("lfrfid"));
     result = lfrfid_dict_file_save(dict, protocol, furi_string_get_cstr(file_path));
     if(result) {
         FURI_LOG_D(TAG, "Written: %d", result);
@@ -159,7 +160,7 @@ static bool picopass_device_save_file(
     const char* extension,
     bool use_load_path) {
     furi_assert(dev);
-    FURI_LOG_D(TAG, "Save File");
+    FURI_LOG_D(TAG, "Save File %s %s %s", folder, dev_name, extension);
 
     bool saved = false;
     FlipperFormat* file = flipper_format_file_alloc(dev->storage);
@@ -245,10 +246,10 @@ bool picopass_device_save(PicopassDevice* dev, const char* dev_name) {
         return picopass_device_save_file(
             dev, dev_name, STORAGE_APP_DATA_PATH_PREFIX, PICOPASS_APP_EXTENSION, true);
     } else if(dev->format == PicopassDeviceSaveFormatLF) {
-        return picopass_device_save_file(dev, dev_name, ANY_PATH("lfrfid"), ".rfid", true);
+        return picopass_device_save_file(dev, dev_name, ANY_PATH("lfrfid"), ".rfid", false);
     } else if(dev->format == PicopassDeviceSaveFormatSeader) {
         return picopass_device_save_file(
-            dev, dev_name, EXT_PATH("apps_data/seader"), ".credential", true);
+            dev, dev_name, EXT_PATH("apps_data/seader"), ".credential", false);
     } else if(dev->format == PicopassDeviceSaveFormatPartial) {
         return picopass_device_save_file(
             dev, dev_name, STORAGE_APP_DATA_PATH_PREFIX, PICOPASS_APP_EXTENSION, true);
@@ -433,6 +434,10 @@ void picopass_device_data_clear(PicopassDeviceData* dev_data) {
 
 bool picopass_device_delete(PicopassDevice* dev, bool use_load_path) {
     furi_assert(dev);
+    if(dev->format != PicopassDeviceSaveFormatHF) {
+        // Never delete other formats (LF, Seader, etc)
+        return false;
+    }
 
     bool deleted = false;
     FuriString* file_path;
