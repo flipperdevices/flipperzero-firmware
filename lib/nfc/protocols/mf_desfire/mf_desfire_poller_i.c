@@ -446,7 +446,7 @@ MfDesfireError mf_desfire_poller_read_file_data_multi(
             if(can_read_data) break;
         }
         if(!can_read_data) {
-            FURI_LOG_D(TAG, "Can't read file %ld data without authentication", i);
+            FURI_LOG_D(TAG, "Can't read file %zu data without authentication", i);
             continue;
         }
 
@@ -525,13 +525,13 @@ MfDesfireError mf_desfire_poller_read_applications(
         simple_array_init(data, app_id_count);
     }
 
-    for(uint32_t i = 0; i < app_id_count; ++i) {
+    for(size_t i = 0; i < app_id_count; ++i) {
         do {
-            FURI_LOG_I(TAG, "Selecting app %ld", i);
+            FURI_LOG_I(TAG, "Selecting app %zu", i);
             error = mf_desfire_poller_select_application(instance, simple_array_cget(app_ids, i));
             if(error != MfDesfireErrorNone) break;
 
-            FURI_LOG_I(TAG, "Reading app %ld", i);
+            FURI_LOG_I(TAG, "Reading app %zu", i);
             MfDesfireApplication* current_app = simple_array_get(data, i);
             error = mf_desfire_poller_read_application(instance, current_app);
 
