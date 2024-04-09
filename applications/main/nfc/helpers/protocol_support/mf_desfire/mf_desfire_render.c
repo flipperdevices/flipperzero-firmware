@@ -11,14 +11,6 @@ void nfc_render_mf_desfire_info(
     const uint32_t bytes_total = 1UL << (data->version.sw_storage >> 1);
     const uint32_t bytes_free = data->free_memory.is_present ? data->free_memory.bytes_free : 0;
 
-    furi_string_cat_printf(str, "\n%lu", bytes_total);
-
-    if(data->version.sw_storage & 1) {
-        furi_string_push_back(str, '+');
-    }
-
-    furi_string_cat_printf(str, " bytes, %lu bytes free\n", bytes_free);
-
     if(data->master_key_settings.is_free_directory_list) {
         const uint32_t app_count = simple_array_get_count(data->applications);
         uint32_t file_count = 0;
@@ -30,11 +22,18 @@ void nfc_render_mf_desfire_info(
             }
         }
 
-        furi_string_cat_printf(str, "%lu Application%s", app_count, app_count != 1 ? "s" : "");
+        furi_string_cat_printf(str, "\n%lu Application%s", app_count, app_count != 1 ? "s" : "");
         furi_string_cat_printf(str, ", %lu File%s", file_count, file_count != 1 ? "s" : "");
     } else {
-        furi_string_cat_printf(str, "Auth required to read apps!");
+        furi_string_cat_printf(str, "\nAuth required to read apps!");
     }
+
+    furi_string_cat_printf(str, "\n%lu", bytes_total);
+
+    if(data->version.sw_storage & 1) {
+        furi_string_push_back(str, '+');
+    }
+    furi_string_cat_printf(str, " bytes, %lu bytes free", bytes_free);
 
     if(format_type != NfcProtocolFormatTypeFull) return;
 
@@ -128,7 +127,7 @@ void nfc_render_mf_desfire_key_settings(const MfDesfireKeySettings* data, FuriSt
     if(data->is_free_directory_list) {
         furi_string_cat_printf(str, "maxKeys %d\n", data->max_keys);
     } else {
-        furi_string_cat_printf(str, "maxKeys ?");
+        furi_string_cat_printf(str, "maxKeys ??\n");
     }
 }
 
@@ -249,7 +248,7 @@ void nfc_render_mf_desfire_file_settings_data(
             break;
         }
     }
-    if(!is_auth_required) {
+    if(is_auth_required) {
         furi_string_cat_printf(str, "Auth required to read file data\n");
         return;
     }

@@ -240,7 +240,11 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
             if(data_size != bytes_processed +
                                 additional_access_rights_len * sizeof(MfDesfireFileAccessRights) +
                                 1) {
-                FURI_LOG_W(TAG, "Unexpected command length");
+                FURI_LOG_W(TAG, "Unexpected command length: %zu", data_size);
+                for(size_t i = 0; i < bit_buffer_get_size_bytes(buf); i++) {
+                    printf("%02X ", bit_buffer_get_byte(buf, i));
+                }
+                printf("\r\n");
                 break;
             }
             if(additional_access_rights_len >
@@ -257,14 +261,6 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
         *data = file_settings_temp;
         parsed = true;
     } while(false);
-
-    if(!parsed) {
-        FURI_LOG_W("Desfire", "Raw data:");
-        for(size_t i = 0; i < bit_buffer_get_size_bytes(buf); i++) {
-            printf("%02X ", bit_buffer_get_byte(buf, i));
-        }
-        printf("\r\n");
-    }
 
     return parsed;
 }
@@ -773,8 +769,11 @@ bool mf_desfire_application_save(
         if(i != key_version_count) break;
 
         const uint32_t file_count = simple_array_get_count(data->file_ids);
-        if(!mf_desfire_file_ids_save(simple_array_get_data(data->file_ids), file_count, prefix, ff))
-            break;
+        if(file_count > 0) {
+            if(!mf_desfire_file_ids_save(
+                   simple_array_get_data(data->file_ids), file_count, prefix, ff))
+                break;
+        }
 
         for(i = 0; i < file_count; ++i) {
             const MfDesfireFileId* file_id = simple_array_cget(data->file_ids, i);

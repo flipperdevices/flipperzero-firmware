@@ -527,11 +527,11 @@ MfDesfireError mf_desfire_poller_read_applications(
 
     for(size_t i = 0; i < app_id_count; ++i) {
         do {
-            FURI_LOG_I(TAG, "Selecting app %zu", i);
+            FURI_LOG_D(TAG, "Selecting app %zu", i);
             error = mf_desfire_poller_select_application(instance, simple_array_cget(app_ids, i));
             if(error != MfDesfireErrorNone) break;
 
-            FURI_LOG_I(TAG, "Reading app %zu", i);
+            FURI_LOG_D(TAG, "Reading app %zu", i);
             MfDesfireApplication* current_app = simple_array_get(data, i);
             error = mf_desfire_poller_read_application(instance, current_app);
 
