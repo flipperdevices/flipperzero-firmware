@@ -148,7 +148,7 @@ void item_prettify_name(FuriString* name) {
             }
         }
     }
-    furi_string_replace_str(name, "_", " ", 0);
+    furi_string_replace_all_str(name, "_", " ");
     // FURI_LOG_I(TAG, "... %s", furi_string_get_cstr(name));
 }
 

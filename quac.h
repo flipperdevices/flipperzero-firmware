@@ -14,11 +14,7 @@
 #include <notification/notification_messages.h>
 
 #include "views/action_menu.h"
-
 #include "item.h"
-
-// #pragma GCC push_options
-// #pragma GCC optimize("O0")
 
 #define QUAC_NAME "Quac!"
 #define QUAC_VERSION "v0.6"

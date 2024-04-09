@@ -69,7 +69,6 @@ bool infrared_utils_read_signal_at_index(
             break;
         }
         if(furi_string_equal(temp_str, "parsed")) {
-            FURI_LOG_I(TAG, "IR File is PARSED");
             signal->is_raw = false;
 
             if(!flipper_format_read_string(fff_data_file, "protocol", temp_str)) {
@@ -95,7 +94,6 @@ bool infrared_utils_read_signal_at_index(
             }
             success = true;
         } else if(furi_string_equal(temp_str, "raw")) {
-            FURI_LOG_I(TAG, "IR File is RAW");
             signal->is_raw = true;
 
             if(!flipper_format_read_uint32(

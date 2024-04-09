@@ -8,9 +8,7 @@
 #include "quac.h"
 #include "scenes.h"
 #include "scene_action_ir_list.h"
-#include "../actions/action.h"
 #include "../actions/action_ir_utils.h"
-#include "quac_icons.h"
 
 #include <flipper_format/flipper_format.h>
 
@@ -94,9 +92,10 @@ bool scene_action_ir_list_on_event(void* context, SceneManagerEvent event) {
                 break;
             }
 
-            // Import successful
-            // TODO: give user an OK prompt and leave them on this scene
-            // in case they want to import more from this IR file
+            // Import successful!
+            // Leave the user on this scene, in case they want to import
+            // more commands from this IR file
+            notification_message(app->notifications, &sequence_success);
 
         } while(false);
 

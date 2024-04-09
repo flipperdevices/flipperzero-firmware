@@ -128,10 +128,8 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
 
                     if(furi_string_size(error)) {
                         FURI_LOG_E(TAG, furi_string_get_cstr(error));
-                        // Change LED to Red and Vibrate!
+                        // Fire up the LED and vibrate!
                         notification_message(app->notifications, &sequence_error);
-
-                        // Display DialogEx popup or something?
                     }
 
                     furi_string_free(error);
