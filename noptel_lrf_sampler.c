@@ -13,17 +13,16 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
-#include <gui/modules/widget.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-#include <noptel_lrf_sampler_icons.h>	/* Generated from
-					   noptel_lrf_sampler.png */
+#include "noptel_lrf_sampler_icons.h"	/* Generated from images in assets */
 #include "lrf_serial_comm.h"
 
 
 
 /*** Defines ***/
+#define VERSION "1.0"
 #define TAG "noptel_lrf_sampler"
 #define SAMPLES_RING_BUFFER_SIZE 2500	/* Should hold at least 10 seconds worth
 					   of samples at 200 Hz */
@@ -53,25 +52,6 @@ static uint16_t min_beep_duration = 70; /*ms*/
 
 static uint16_t sample_view_update_every = 150; /*ms*/
 
-static uint8_t about_widget_x = 0;
-static uint8_t about_widget_y = 0;
-static uint8_t about_widget_w = 128;
-static uint8_t about_widget_h = 64;
-static char *about_text =
-	"Noptel LRF sampler  \n"
-	"--------------\n"
-	"Get measurements from a\n"
-        "Noptel LRF rangefinder\n"
-	"\n"
-        "https://noptel.fi/\n"
-	"\n"
-        "GPIO pin connections:\n"
-	"---------------\n"
-        "+5V (pin #1):  LRF Vdc\n"
-        "GND (pin #11): LRF ground\n"
-        "TX  (pin #13): LRF serial Rx\n"
-        "RX  (pin #14): LRF serial Tx";
-
 
 
 /*** Types */
@@ -85,7 +65,10 @@ typedef enum {
   /* Sample view */
   submenu_sample,
 
-  /* "About" view */
+  /* LRF info view */
+  submenu_lrfinfo,
+
+  /* About view */
   submenu_about,
 
 } SubmenuIndex;
@@ -104,7 +87,10 @@ typedef enum {
   /* Sample view */
   view_sample,
 
-  /* "About" view */
+  /* LRF info view */
+  view_lrfinfo,
+
+  /* About view */
   view_about,
 
 } AppView;
@@ -123,8 +109,8 @@ typedef struct {
   /* Beep option */
   bool beep;
 
-  /* Sample view scratchpad string */
-  char svstr[32];
+  /* Scratchpad string */
+  char spstr[32];
 
   /* LRF sample ring buffer */
   LRFSample samples[SAMPLES_RING_BUFFER_SIZE];
@@ -140,6 +126,9 @@ typedef struct {
   /* Whether continuous measurement is started */
   bool cmm_started;
 
+  /* Flag to indicate whether the sample data was updated */
+  bool samples_updated;
+
   /* Flag to play a beep, and whether a beep is already playing */
   bool play_beep;
   bool beep_playing;
@@ -148,35 +137,61 @@ typedef struct {
 
 
 
+/** LRF info model **/
+typedef struct {
+
+  /* LRF identification */
+  LRFIdent ident;
+
+  /* Whether we have a valid identification */
+  bool has_ident;
+
+} LRFInfoModel;
+
+
+
+/** About view model **/
+typedef struct {
+
+  /* Displayed screen number */
+  uint8_t screen;
+
+} AboutModel;
+
+
+
 /** App structure **/
 typedef struct {
 
-    /* App notifications (used for backlight control) */
-    NotificationApp *notifications;
+  /* App notifications (used for backlight control) */
+  NotificationApp *notifications;
 
-    /* View dispatcher */
-    ViewDispatcher *view_dispatcher;
+  /* View dispatcher */
+  ViewDispatcher *view_dispatcher;
 
-    /* Submenu */
-    Submenu *submenu;
+  /* Submenu */
+  Submenu *submenu;
 
-    /* Configuration  */
-    VariableItemList *config_list;
+  /* Configuration  */
+  VariableItemList *config_list;
 
-    /* Sample view */
-    View *sample_view;
+  /* Sample view */
+  View *sample_view;
 
-    /* "About" widget  */
-    Widget *about_widget;
+  /* LRF info view */
+  View *lrfinfo_view;
 
-    /* Timer to update the sample view */
-    FuriTimer *sample_view_timer;
+  /* About view  */
+  View *about_view;
 
-    /* Timer to control the speaker */
-    FuriTimer *speaker_control_timer;
+  /* Timer to update the sample view */
+  FuriTimer *sample_view_timer;
 
-    /* LRF serial communication app */
-    LRFSerialCommApp *lrf_serial_comm_app;
+  /* Timer to control the speaker */
+  FuriTimer *speaker_control_timer;
+
+  /* LRF serial communication app */
+  LRFSerialCommApp *lrf_serial_comm_app;
 
 } App;
 
@@ -249,152 +264,149 @@ static void config_beep_change(VariableItem *item) {
 /** Draw callback for the sample view **/
 static void sample_view_draw_callback(Canvas *canvas, void *model) {
 
-    SamplerModel *sampler_model = (SamplerModel *)model;
+  SamplerModel *sampler_model = (SamplerModel *)model;
 
-    /* First print all the things we need to print in the FontBigNumber font */
-    canvas_set_font(canvas, FontBigNumbers);
+  /* First print all the things we need to print in the FontBigNumber font */
+  canvas_set_font(canvas, FontBigNumbers);
 
-    /* Print the measured distances if they're valid */
-    if(sampler_model->disp_sample.dist1 > 0.5) {
-      snprintf(sampler_model->svstr,
-		(volatile size_t){sizeof(sampler_model->svstr)},
+  /* Print the measured distances if they're valid */
+  if(sampler_model->disp_sample.dist1 > 0.5) {
+    snprintf(sampler_model->spstr,
+		(volatile size_t){sizeof(sampler_model->spstr)},
 		"%8.2f", (double)sampler_model->disp_sample.dist1);
-      canvas_draw_str(canvas, 0, 14, sampler_model->svstr);
-    }
+    canvas_draw_str(canvas, 0, 14, sampler_model->spstr);
+  }
 
-    if(sampler_model->disp_sample.dist2 > 0.5) {
-      snprintf(sampler_model->svstr,
-		(volatile size_t){sizeof(sampler_model->svstr)},
+  if(sampler_model->disp_sample.dist2 > 0.5) {
+    snprintf(sampler_model->spstr,
+		(volatile size_t){sizeof(sampler_model->spstr)},
 		"%8.2f", (double)sampler_model->disp_sample.dist2);
-      canvas_draw_str(canvas, 0, 30, sampler_model->svstr);
-    }
+    canvas_draw_str(canvas, 0, 30, sampler_model->spstr);
+  }
 
-    if(sampler_model->disp_sample.dist3 > 0.5) {
-      snprintf(sampler_model->svstr,
-		(volatile size_t){sizeof(sampler_model->svstr)},
+  if(sampler_model->disp_sample.dist3 > 0.5) {
+    snprintf(sampler_model->spstr,
+		(volatile size_t){sizeof(sampler_model->spstr)},
 		"%8.2f", (double)sampler_model->disp_sample.dist3);
-      canvas_draw_str(canvas, 0, 46, sampler_model->svstr);
-    }
+    canvas_draw_str(canvas, 0, 46, sampler_model->spstr);
+  }
 
-    /* If we have an effective sampling frequency, print it at the bottom */
-    if(sampler_model->eff_freq >= 0) {
-      snprintf(sampler_model->svstr,
-		(volatile size_t){sizeof(sampler_model->svstr)},
+  /* If we have an effective sampling frequency, print it at the bottom */
+  if(sampler_model->eff_freq >= 0) {
+    snprintf(sampler_model->spstr,
+		(volatile size_t){sizeof(sampler_model->spstr)},
 		"%5.1f", sampler_model->eff_freq);
-      canvas_draw_str(canvas, 0, 64, sampler_model->svstr);
-    }
+    canvas_draw_str(canvas, 0, 64, sampler_model->spstr);
+  }
 
-    /* Second print all the things we need to print in the FontPrimary font
-       (bold, proportional) */
-    canvas_set_font(canvas, FontPrimary);
+  /* Second print all the things we need to print in the FontPrimary font
+     (bold, proportional) */
+  canvas_set_font(canvas, FontPrimary);
 
-    /* If any of the distances indicate an error or the eye safety limit was hit
-      display the error in the middle of the screen */
-    if(sampler_model->disp_sample.dist1 == 0.5 ||
+  /* If any of the distances indicate an error or the eye safety limit was hit
+    display the error in the middle of the screen */
+  if(sampler_model->disp_sample.dist1 == 0.5 ||
 	sampler_model->disp_sample.dist1 == 0.5 ||
 	sampler_model->disp_sample.dist3 == 0.5)
-    {
-      canvas_draw_str(canvas, 8, 27, "ERROR / EYE SAFETY");
-      canvas_draw_frame(canvas, 6, 17, 115, 12);
-    }
+  {
+    canvas_draw_str(canvas, 8, 27, "ERROR / EYE SAFETY");
+    canvas_draw_frame(canvas, 6, 17, 115, 12);
+  }
 
-    /* None of the distances indicate an error */
-    else {
+  /* None of the distances indicate an error */
+  else {
 
-      /* Add "m" right of the distance values or indicate no samples depending
-         on whether we have distances or not */
-      if(sampler_model->disp_sample.dist1 > 0.5)
-        canvas_draw_str(canvas, 95, 14, "m");
-      else if(sampler_model->disp_sample.dist1 >= 0 &&
+    /* Add "m" right of the distance values or indicate no samples depending
+       on whether we have distances or not */
+    if(sampler_model->disp_sample.dist1 > 0.5)
+      canvas_draw_str(canvas, 95, 14, "m");
+    else if(sampler_model->disp_sample.dist1 >= 0 &&
 		sampler_model->disp_sample.dist1 < 0.5) {
-        canvas_draw_str(canvas, 33, 11, "NO SAMPLE");
-        canvas_draw_frame(canvas, 31, 1, 66, 12);
-      }
-      else if(sampler_model->disp_sample.dist1 == NO_AVERAGE) {
-        canvas_draw_str(canvas, 30, 11, "NO AVERAGE");
-        canvas_draw_frame(canvas, 28, 1, 73, 12);
-      }
+      canvas_draw_str(canvas, 33, 11, "NO SAMPLE");
+      canvas_draw_frame(canvas, 31, 1, 66, 12);
+    }
+    else if(sampler_model->disp_sample.dist1 == NO_AVERAGE) {
+      canvas_draw_str(canvas, 30, 11, "NO AVERAGE");
+      canvas_draw_frame(canvas, 28, 1, 73, 12);
+    }
 
-      if(sampler_model->disp_sample.dist2 > 0.5)
-        canvas_draw_str(canvas, 95, 30, "m");
-      else if(sampler_model->disp_sample.dist2 >= 0 &&
+    if(sampler_model->disp_sample.dist2 > 0.5)
+      canvas_draw_str(canvas, 95, 30, "m");
+    else if(sampler_model->disp_sample.dist2 >= 0 &&
 		sampler_model->disp_sample.dist2 < 0.5) {
-        canvas_draw_str(canvas, 33, 27, "NO SAMPLE");
-        canvas_draw_frame(canvas, 31, 17, 66, 12);
-      }
-      else if(sampler_model->disp_sample.dist2 == NO_AVERAGE) {
-        canvas_draw_str(canvas, 30, 27, "NO AVERAGE");
-        canvas_draw_frame(canvas, 28, 17, 73, 12);
-      }
+      canvas_draw_str(canvas, 33, 27, "NO SAMPLE");
+      canvas_draw_frame(canvas, 31, 17, 66, 12);
+    }
+    else if(sampler_model->disp_sample.dist2 == NO_AVERAGE) {
+      canvas_draw_str(canvas, 30, 27, "NO AVERAGE");
+      canvas_draw_frame(canvas, 28, 17, 73, 12);
+    }
 
-      if(sampler_model->disp_sample.dist3 > 0.5)
-        canvas_draw_str(canvas, 95, 46, "m");
-      else if(sampler_model->disp_sample.dist3 >= 0 &&
+    if(sampler_model->disp_sample.dist3 > 0.5)
+      canvas_draw_str(canvas, 95, 46, "m");
+    else if(sampler_model->disp_sample.dist3 >= 0 &&
 		sampler_model->disp_sample.dist3 < 0.5) {
-        canvas_draw_str(canvas, 33, 43, "NO SAMPLE");
-        canvas_draw_frame(canvas, 31, 33, 66, 12);
-      }
-      else if(sampler_model->disp_sample.dist3 == NO_AVERAGE) {
-        canvas_draw_str(canvas, 30, 43, "NO AVERAGE");
-        canvas_draw_frame(canvas, 28, 33, 73, 12);
-      }
+      canvas_draw_str(canvas, 33, 43, "NO SAMPLE");
+      canvas_draw_frame(canvas, 31, 33, 66, 12);
     }
-
-    /* If we have an effective sampling frequency, print "Hz" right of
-       the value */
-    if(sampler_model->eff_freq >= 0)
-      canvas_draw_str(canvas, 59, 64, "Hz");
-
-    /* Print "OK=meas", "OK=start" or "OK=stop" in a frame at the right-hand
-       side depending on whether we do single or continuous measurement, and
-       whether continuous measurement is started */
-    if(sampler_model->freq < 0) {
-      canvas_draw_str(canvas, 79, 62, "OK=meas");
-      canvas_draw_frame(canvas, 77, 52, 51, 12);
+    else if(sampler_model->disp_sample.dist3 == NO_AVERAGE) {
+      canvas_draw_str(canvas, 30, 43, "NO AVERAGE");
+      canvas_draw_frame(canvas, 28, 33, 73, 12);
     }
+  }
+
+  /* If we have an effective sampling frequency, print "Hz" right of
+     the value */
+  if(sampler_model->eff_freq >= 0)
+    canvas_draw_str(canvas, 59, 64, "Hz");
+
+  /* Print the OK button symbol followed by "Sample", "Start" or "Stop"
+     in a frame at the right-hand side depending on whether we do single or
+     continuous measurement, and whether continuous measurement is started */
+  canvas_draw_frame(canvas, 77, 52, 51, 12);
+  canvas_draw_icon(canvas, 79, 54, &I_ok_button);
+  if(sampler_model->freq < 0)
+    canvas_draw_str(canvas, 90, 62, "Sample");
+  else
+    if(sampler_model->cmm_started)
+      canvas_draw_str(canvas, 102, 62, "Stop");
     else
-      if(sampler_model->cmm_started) {
-        canvas_draw_str(canvas, 84, 62, "OK=stop");
-        canvas_draw_frame(canvas, 82, 52, 46, 12);
-      }
-      else {
-        canvas_draw_str(canvas, 82, 62, "OK=start");
-        canvas_draw_frame(canvas, 80, 52, 48, 12);
-      }
+      canvas_draw_str(canvas, 102, 62, "Start");
 
-    /* Finally print all the things we need to print in the FontKeyboard font
-       (thin, fixed) */
-    canvas_set_font(canvas, FontKeyboard);
+  /* Finally print all the things we need to print in the FontKeyboard font
+     (thin, fixed) */
+  canvas_set_font(canvas, FontKeyboard);
 
-    /* Print amplitude values when the corresponding distances are valid */
-    if(sampler_model->disp_sample.dist1 > 0.5) {
-      snprintf(sampler_model->svstr,
-		(volatile size_t){sizeof(sampler_model->svstr)},
+  /* Print amplitude values when the corresponding distances are valid */
+  if(sampler_model->disp_sample.dist1 > 0.5) {
+    snprintf(sampler_model->spstr,
+		(volatile size_t){sizeof(sampler_model->spstr)},
 		"%4d", sampler_model->disp_sample.ampl1);
-      canvas_draw_str(canvas, 105, 7, sampler_model->svstr);
-    }
+    canvas_draw_str(canvas, 105, 7, sampler_model->spstr);
+  }
 
-    if(sampler_model->disp_sample.dist2 > 0.5) {
-      snprintf(sampler_model->svstr,
-		(volatile size_t){sizeof(sampler_model->svstr)},
+  if(sampler_model->disp_sample.dist2 > 0.5) {
+    snprintf(sampler_model->spstr,
+		(volatile size_t){sizeof(sampler_model->spstr)},
 		"%4d", sampler_model->disp_sample.ampl2);
-      canvas_draw_str(canvas, 105, 23, sampler_model->svstr);
-    }
+    canvas_draw_str(canvas, 105, 23, sampler_model->spstr);
+  }
 
-    if(sampler_model->disp_sample.dist3 > 0.5) {
-      snprintf(sampler_model->svstr,
-		(volatile size_t){sizeof(sampler_model->svstr)},
+  if(sampler_model->disp_sample.dist3 > 0.5) {
+    snprintf(sampler_model->spstr,
+		(volatile size_t){sizeof(sampler_model->spstr)},
 		"%4d", sampler_model->disp_sample.ampl3);
-      canvas_draw_str(canvas, 105, 39, sampler_model->svstr);
-    }
+    canvas_draw_str(canvas, 105, 39, sampler_model->spstr);
+  }
 
-    /* Draw a dividing line between the distances / amplitudes and the bottom
-       line */
-    canvas_draw_line(canvas, 0, 48, 128, 48);
+  /* Draw a dividing line between the distances / amplitudes and the bottom
+     line */
+  canvas_draw_line(canvas, 0, 48, 128, 48);
 }
 
 
-/** Input callback **/
+
+/** Input callback for the sample view **/
 static bool sample_view_input_callback(InputEvent *evt, void *ctx) {
 
   App *app = (App *)ctx;
@@ -476,12 +488,18 @@ static bool sample_view_input_callback(InputEvent *evt, void *ctx) {
 /** Sample view update timer callback **/
 static void sample_view_timer_callback(void *ctx) {
 
-    App *app = (App *)ctx;
+  App *app = (App *)ctx;
+  SamplerModel *sampler_model = view_get_model(app->sample_view);
 
-    /* Trigger a sample view redraw: redraw the sample view by passing true to
-       the last parameter of with_view_model */
+  /* Were the samples updated? */
+  if(sampler_model->samples_updated) {
+
+    /* Trigger a sample view redraw */
     with_view_model(app->sample_view, SamplerModel* _model,
 			{UNUSED(_model);}, true);
+
+    sampler_model->samples_updated = false;
+  }
 }
 
 
@@ -491,29 +509,33 @@ static void sample_view_timer_callback(void *ctx) {
 static void sample_view_enter_callback(void *ctx) {
 
   App *app = (App *)ctx;
-  SamplerModel *sampler_model = view_get_model(app->sample_view);
   uint32_t period = furi_ms_to_ticks(sample_view_update_every);
 
   /* Set the backlight on all the time */
   notification_message(app->notifications,
 			&sequence_display_backlight_enforce_on);
 
-  /* Initialize the displayed distances */
-  sampler_model->disp_sample.dist1 = NO_DISTANCE_DISPLAY;
-  sampler_model->disp_sample.dist2 = NO_DISTANCE_DISPLAY;
-  sampler_model->disp_sample.dist3 = NO_DISTANCE_DISPLAY;
+  with_view_model(app->sample_view, SamplerModel* sampler_model,
+	{
+	  /* Initialize the displayed distances */
+	  sampler_model->disp_sample.dist1 = NO_DISTANCE_DISPLAY;
+	  sampler_model->disp_sample.dist2 = NO_DISTANCE_DISPLAY;
+	  sampler_model->disp_sample.dist3 = NO_DISTANCE_DISPLAY;
 
-  /* Reset the samples ring buffer */
-  sampler_model->samples_start_i = 0;
-  sampler_model->samples_end_i = 0;
+	  /* Reset the samples ring buffer */
+	  sampler_model->samples_start_i = 0;
+	  sampler_model->samples_end_i = 0;
+	  sampler_model->samples_updated = false;
 
-  /* Initialize the displayed effective sampling frequency */
-  sampler_model->eff_freq = -1;
+	  /* Initialize the displayed effective sampling frequency */
+	  sampler_model->eff_freq = -1;
 
-  /* Mark continuous measurement as not currently started */
-  sampler_model->cmm_started = false;
+	  /* Mark continuous measurement as not currently started */
+	  sampler_model->cmm_started = false;
+	},
+	false);
 
-  /* Setup and start the sample view update timer */
+  /* Setup and start the view update timer */
   app->sample_view_timer = furi_timer_alloc(sample_view_timer_callback,
 						FuriTimerTypePeriodic, ctx);
   furi_timer_start(app->sample_view_timer, period);
@@ -536,10 +558,235 @@ static void sample_view_exit_callback(void *ctx) {
   notification_message(app->notifications,
 			&sequence_display_backlight_enforce_auto);
 
-  /* Stop and free the sample view update timer */
+  /* Stop and free the view update timer */
   furi_timer_stop(app->sample_view_timer);
   furi_timer_free(app->sample_view_timer);
-  app->sample_view_timer = NULL;
+}
+
+
+
+/** Draw callback for the LRF info view **/
+static void lrfinfo_view_draw_callback(Canvas *canvas, void *model) {
+
+  LRFInfoModel *lrfinfo_model = (LRFInfoModel *)model;
+
+  /* First print all the things we need to print in the FontPrimary font
+     (bold, proportional) */
+  canvas_set_font(canvas, FontPrimary);
+
+  /* Do we have a valid identification to display? */
+  if(lrfinfo_model->has_ident) {
+
+    /* Draw the identification fields' names */
+    canvas_draw_str(canvas, 13, 8, "ID");
+    canvas_draw_str(canvas, 3, 17, "Add");
+    canvas_draw_str(canvas, 4, 26, "S/N");
+    canvas_draw_str(canvas, 2, 35, "F/W");
+    canvas_draw_str(canvas, 0, 44, "Date");
+
+    canvas_draw_str(canvas, 90, 26, "Opt");
+    canvas_draw_str(canvas, 88, 35, "Elec");
+  }
+
+  /* Print the OK button symbol followed by "Read" in a frame at the
+     right-hand side */
+  canvas_draw_frame(canvas, 77, 52, 51, 12);
+  canvas_draw_icon(canvas, 79, 54, &I_ok_button);
+  canvas_draw_str(canvas, 103, 62, "Read");
+
+  /* Draw a dividing line between the LRF information and the bottom line */
+  canvas_draw_line(canvas, 0, 48, 128, 48);
+
+  /* Do we have a valid identification to display? */
+  if(lrfinfo_model->has_ident) {
+
+    /* Second draw the identification values in the FontSecondary font
+       (normal, proportional) */
+    canvas_set_font(canvas, FontSecondary);
+
+    /* Draw the identification values */
+    canvas_draw_str(canvas, 26, 8, lrfinfo_model->ident.id);
+    canvas_draw_str(canvas, 26, 17, lrfinfo_model->ident.addinfo);
+    canvas_draw_str(canvas, 26, 26, lrfinfo_model->ident.serial);
+    canvas_draw_str(canvas, 26, 35, lrfinfo_model->ident.fwversion);
+    canvas_draw_str(canvas, 26, 44, lrfinfo_model->ident.builddate);
+
+    canvas_draw_str(canvas, 111, 26, lrfinfo_model->ident.optics);
+    canvas_draw_str(canvas, 111, 35, lrfinfo_model->ident.electronics);
+
+  }
+}
+
+
+/** Input callback for the LRF info view **/
+static bool lrfinfo_view_input_callback(InputEvent *evt, void *ctx) {
+
+  App *app = (App *)ctx;
+  LRFInfoModel *lrfinfo_model = view_get_model(app->lrfinfo_view);
+
+  /* If the user pressed the OK button, tell the LRF to send its identification
+     information */
+  if(evt->type == InputTypePress && evt->key == InputKeyOk) {
+    FURI_LOG_I(TAG, "OK button pressed");
+
+    /* Invalidate the current identification - if any */
+    lrfinfo_model->has_ident = false;
+
+    /* Trigger an LRF info view redraw to clear the information currently
+       displayed - if any */
+    with_view_model(app->lrfinfo_view, LRFInfoModel* _model,
+			{UNUSED(_model);}, true);
+
+    /* Send a send-identification-frame command */
+    send_lrf_command(app->lrf_serial_comm_app, send_ident);
+
+    return true;
+  }
+
+  /* We haven't handled this event */
+  return false;
+}
+
+
+
+/** LRF info view enter callback **/
+static void lrfinfo_view_enter_callback(void *ctx) {
+
+  App *app = (App *)ctx;
+
+  with_view_model(app->lrfinfo_view, LRFInfoModel* lrfinfo_model,
+	{
+	  /* Invalidate the current identification - if any */
+	  lrfinfo_model->has_ident = false;
+	},
+	true);
+}
+
+
+
+/** Draw callback for the about view **/
+static void about_view_draw_callback(Canvas *canvas, void *model) {
+
+  AboutModel *about_model = (AboutModel *)model;
+
+  /* Which screen should we draw? */
+  switch(about_model->screen) {
+
+    /* Draw the first screen with the version number */
+    case 0:
+
+      /* Draw the first screen's background */
+      canvas_draw_icon(canvas, 0, 0, &I_about_screen1);
+
+      /* Superimpose the app's version number */
+      canvas_set_font(canvas, FontPrimary);
+      canvas_draw_str(canvas, 1, 64, "v");
+      canvas_draw_str(canvas, 6, 64, VERSION);
+
+      break;
+
+    /* Draw the second screen with the pinout */
+    case 1:
+
+      /* Draw the second screen's background */
+      canvas_draw_icon(canvas, 0, 0, &I_about_screen2);
+
+      /* Superimpose the heading */
+      canvas_set_font(canvas, FontPrimary);
+      canvas_draw_str(canvas, 11, 8, "GPIO pin connections");
+
+      /* Write "LRF" over the LRF side of the pinout diagram */
+      canvas_set_font(canvas, FontSecondary);
+      canvas_draw_str(canvas, 56, 22, "LRF");
+
+      /* Write "Flipper Zero" under the Flipper side of the pinout diagram */
+      canvas_draw_str(canvas, 39, 62, "Flipper Zero");
+
+      break;
+  }
+}
+
+
+/** Input callback for the about view**/
+static bool about_view_input_callback(InputEvent *evt, void *ctx) {
+
+  App *app = (App *)ctx;
+  AboutModel *about_model = view_get_model(app->about_view);
+  bool evt_handled = false;
+
+  /* Was the event a button press? */
+  if(evt->type == InputTypePress)
+
+    /* Which button press was it? */
+    switch(evt->key) {
+
+      /* OK button: cycle screens */
+      case InputKeyOk:
+        FURI_LOG_I(TAG, "OK button pressed");
+        about_model->screen = (about_model->screen + 1) % 2;
+        evt_handled = true;
+        break;
+
+      /* Right button: go to the next screen */
+      case InputKeyRight:
+        FURI_LOG_I(TAG, "Right button pressed");
+        about_model->screen = about_model->screen < 1? about_model->screen + 1 :
+							about_model->screen;
+        evt_handled = true;
+        break;
+
+      /* Down button: go to the next screen */
+      case InputKeyDown:
+        FURI_LOG_I(TAG, "Down button pressed");
+        about_model->screen = about_model->screen < 1? about_model->screen + 1 :
+							about_model->screen;
+        evt_handled = true;
+        break;
+
+      /* Left button: go to the previous screen */
+      case InputKeyLeft:
+        FURI_LOG_I(TAG, "Left button pressed");
+        about_model->screen = about_model->screen > 0? about_model->screen - 1 :
+							about_model->screen;
+        evt_handled = true;
+        break;
+
+      /* Up button: go to the previous screen */
+      case InputKeyUp:
+        FURI_LOG_I(TAG, "Up button pressed");
+        about_model->screen = about_model->screen > 0? about_model->screen - 1 :
+							about_model->screen;
+        evt_handled = true;
+        break;
+
+      default:
+        evt_handled = false;
+  }
+
+  /* If we haven't handled this event, return now */
+  if(!evt_handled)
+    return false;
+
+  /* Trigger an about view redraw */
+  with_view_model(app->about_view, AboutModel* _model, {UNUSED(_model);}, true);
+
+  /* We handled the event */
+  return true;
+}
+
+
+
+/** About view enter callback **/
+static void about_view_enter_callback(void *ctx) {
+
+  App *app = (App *)ctx;
+
+  with_view_model(app->about_view, AboutModel* about_model,
+	{
+	  /* Start at the first screen */
+	  about_model->screen = 0;
+	},
+	true);
 }
 
 
@@ -600,7 +847,13 @@ static void submenu_callback(void *ctx, uint32_t idx) {
       FURI_LOG_I(TAG, "Switch to sample view");
       break;
 
-    /* Switch to the "about" view */
+    /* Switch to the LRF info view */
+    case submenu_lrfinfo:
+      view_dispatcher_switch_to_view(app->view_dispatcher, view_lrfinfo);
+      FURI_LOG_I(TAG, "Switch to LRF info view");
+      break;
+
+    /* Switch to the about view */
     case submenu_about:
       view_dispatcher_switch_to_view(app->view_dispatcher, view_about);
       FURI_LOG_I(TAG, "Switch to about view");
@@ -637,9 +890,10 @@ static uint32_t navigation_exit_callback(void *ctx) {
 
 
 
-/** LRF data handler
-    Called when LRF data is available from the LRF serial communication app **/
-void lrf_data_handler(LRFSample *lrf_sample, void *ctx) {
+/** LRF sample handler
+    Called when a LRF sample is available from the LRF serial
+    communication app **/
+void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 
   App *app = (App *)ctx;
   SamplerModel *sampler_model = view_get_model(app->sample_view);
@@ -799,6 +1053,28 @@ void lrf_data_handler(LRFSample *lrf_sample, void *ctx) {
         sampler_model->disp_sample.dist3 = NO_AVERAGE;
     }
   }
+
+  /* Mark the samples as updated */
+  sampler_model->samples_updated = true;
+}
+
+
+
+/** LRF identification handler
+    Called when a LRF identification frame is available from the LRF serial
+    communication app **/
+void lrf_ident_handler(LRFIdent *lrf_ident, void *ctx) {
+
+  App *app = (App *)ctx;
+  LRFInfoModel *lrfinfo_model = view_get_model(app->lrfinfo_view);
+
+  /* Copy the identification and mark it as valid */
+  memcpy(&(lrfinfo_model->ident), lrf_ident, sizeof(LRFIdent));
+  lrfinfo_model->has_ident = true;
+
+  /* Trigger an LRF info view redraw */
+  with_view_model(app->lrfinfo_view, LRFInfoModel* _model,
+			{UNUSED(_model);}, true);
 }
 
 
@@ -836,6 +1112,9 @@ static App *app_init() {
 
   submenu_add_item(app->submenu, "Sample",
 			submenu_sample, submenu_callback, app);
+
+  submenu_add_item(app->submenu, "LRF information",
+			submenu_lrfinfo, submenu_callback, app);
 
   submenu_add_item(app->submenu, "About",
 			submenu_about, submenu_callback, app);
@@ -911,29 +1190,68 @@ static App *app_init() {
   SamplerModel *sampler_model = view_get_model(app->sample_view);
 
   /* Add the sample view */
-  view_dispatcher_add_view(app->view_dispatcher, view_sample,
-				app->sample_view);
+  view_dispatcher_add_view(app->view_dispatcher, view_sample, app->sample_view);
 
 
 
-  /* Setup the "about view" */
+  /* Setup the LRF info view */
 
-  /* Allocate space for the "about" text widget */
-  app->about_widget = widget_alloc();
+  /* Allocate space for the LRF info view */
+  app->lrfinfo_view = view_alloc();
 
-  /* Create the "about" text widget */
-  widget_add_text_scroll_element(app->about_widget,
-					about_widget_x, about_widget_y,
-					about_widget_w, about_widget_h,
-					about_text);
+  /* Setup the draw callback for the LRF info view */
+  view_set_draw_callback(app->lrfinfo_view, lrfinfo_view_draw_callback);
 
-  /* Configure the "previous" callback for the "about" view */
-  view_set_previous_callback(widget_get_view(app->about_widget),
-				navigation_submenu_callback);
+  /* Setup the input callback for the LRF info view */
+  view_set_input_callback(app->lrfinfo_view, lrfinfo_view_input_callback);
 
-  /* Add the "about" view */
-  view_dispatcher_add_view(app->view_dispatcher, view_about,
-				widget_get_view(app->about_widget));
+  /* Configure the "previous" callback for the LRF info view */
+  view_set_previous_callback(app->lrfinfo_view, navigation_submenu_callback);
+
+  /* Configure the enter callback for the LRF info view */
+  view_set_enter_callback(app->lrfinfo_view, lrfinfo_view_enter_callback);
+
+  /* Set the context for the LRF info view callbacks */
+  view_set_context(app->lrfinfo_view, app);
+
+  /* Allocate the LRF info model */
+  view_allocate_model(app->lrfinfo_view, ViewModelTypeLockFree,
+			sizeof(LRFInfoModel));
+
+  /* Add the LRF info view */
+  view_dispatcher_add_view(app->view_dispatcher, view_lrfinfo,
+				app->lrfinfo_view);
+
+
+
+  /* Setup the about view */
+
+  /* Allocate space for the sample view */
+  app->about_view = view_alloc();
+
+  /* Setup the draw callback for the about view */
+  view_set_draw_callback(app->about_view, about_view_draw_callback);
+
+  /* Setup the input callback for the about view */
+  view_set_input_callback(app->about_view, about_view_input_callback);
+
+  /* Configure the "previous" callback for the about view */
+  view_set_previous_callback(app->about_view, navigation_submenu_callback);
+
+  /* Configure the enter callback for the about view */
+  view_set_enter_callback(app->about_view, about_view_enter_callback);
+
+  /* Set the context for the about view callbacks */
+  view_set_context(app->about_view, app);
+
+  /* Allocate the about view model */
+  view_allocate_model(app->about_view, ViewModelTypeLockFree,
+			sizeof(AboutModel));
+
+  /* Add the about view */
+  view_dispatcher_add_view(app->view_dispatcher, view_about, app->about_view);
+
+
 
   /* Start out at the submenu view */
   view_dispatcher_switch_to_view(app->view_dispatcher, view_submenu);
@@ -996,9 +1314,9 @@ static void app_free(App *app) {
   /* Disable notifications */
   furi_record_close(RECORD_NOTIFICATION);
 
-  /* Remove the "about" view */
+  /* Remove the about view */
   view_dispatcher_remove_view(app->view_dispatcher, view_about);
-  widget_free(app->about_widget);
+  view_free(app->about_view);
 
   /* Remove the sample view */
   view_dispatcher_remove_view(app->view_dispatcher, view_sample);
@@ -1066,8 +1384,11 @@ int32_t noptel_lrf_sampler_app(void *p) {
   /* Initialize the app */
   App *app = app_init();
 
-  /* Setup the callback to receive the decoded LRF data */
-  set_lrf_data_handler(app->lrf_serial_comm_app, lrf_data_handler, app);
+  /* Setup the callback to receive decoded LRF samples */
+  set_lrf_sample_handler(app->lrf_serial_comm_app, lrf_sample_handler, app);
+
+  /* Setup the callback to receive decoded LRF identification frames */
+  set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler, app);
 
   /* Run the view dispatcher */
   FURI_LOG_I(TAG, "Run view dispatcher");
