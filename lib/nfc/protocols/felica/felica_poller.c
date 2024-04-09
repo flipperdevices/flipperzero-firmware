@@ -239,14 +239,15 @@ NfcCommand felica_poller_state_handler_read_success(FelicaPoller* instance) {
     if(!instance->auth.context.auth_status.internal ||
        !instance->auth.context.auth_status.external) {
         instance->data->blocks_read--;
+        instance->felica_event.type = FelicaPollerEventTypeIncomplete;
     } else {
         memcpy(
             instance->data->data.fs.ck.data,
             instance->auth.context.card_key.data,
             FELICA_DATA_BLOCK_SIZE);
+        instance->felica_event.type = FelicaPollerEventTypeReady;
     }
 
-    instance->felica_event.type = FelicaPollerEventTypeReady;
     instance->felica_event_data.error = FelicaErrorNone;
     return instance->callback(instance->general_event, instance->context);
 }
