@@ -20,7 +20,6 @@ typedef enum {
 typedef enum {
     LoaderEventTypeApplicationBeforeLoad,
     LoaderEventTypeApplicationLoadFailed,
-    LoaderEventTypeApplicationStarted,
     LoaderEventTypeApplicationStopped
 } LoaderEventType;
 
