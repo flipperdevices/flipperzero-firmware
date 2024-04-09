@@ -49,10 +49,10 @@ static bool cfg_load(File* file, ClockConfig* cfg) {
 }
 
 static void cfg_save(File* file, ClockConfig* cfg) {
+    calc_clock_face(cfg);
     if(storage_file_open(file, CFG_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS))
         storage_file_write(file, cfg, sizeof(ClockConfig));
     storage_file_close(file);
-    calc_clock_face(cfg);
 }
 
 int32_t analog_clock_main(void* p) {
@@ -67,8 +67,10 @@ int32_t analog_clock_main(void* p) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
-    if(!cfg_load(file, &app->cfg)) init_clock_config(&app->cfg);
-    calc_clock_face(&app->cfg);
+    if(!cfg_load(file, &app->cfg)) {
+        init_clock_config(&app->cfg);
+        cfg_save(file, &app->cfg);
+    }
 
     ViewPort* view_port = view_port_alloc();
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
