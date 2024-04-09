@@ -11,9 +11,9 @@ App(
     fap_category="GPIO",
     # Optional values
     fap_version="1.0",
-    fap_icon="noptel_lrf_sampler.png",  # 10x10 1-bit PNG
+    fap_icon="assets/noptel_lrf_sampler.png",  # 10x10 1-bit PNG
     fap_description="Noptel LRF rangefinder sampler",
     fap_author="Giraut",
     fap_weburl="https://github.com/Giraut/flipper_zero_noptel_lrf_sampler",
-    fap_icon_assets="images",  # Image assets to compile for this application
+    fap_icon_assets="assets",  # Image assets to compile for this application
 )
