@@ -24,3 +24,9 @@ As i know these firmwares are supported and working if you know any more please 
 ## Playlist editor:
 - Delete playlist (Deletes the selected playlist)
 - Rename playlist (Renames the selected playlist the new name provided)
+## Development plans/ideas:
+Things i would like to add:
+- Ability to add cards to playlists
+- Ability to remove cards from the playlist
+
+Any feedback is welcome and would be very much appreciated

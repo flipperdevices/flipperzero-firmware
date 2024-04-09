@@ -25,7 +25,7 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_Start,
       nfc_playlist_main_menu_menu_callback,
       nfc_playlist,
-      !nfc_playlist->settings.playlist_selected_check,
+      furi_string_empty(nfc_playlist->settings.file_path),
       "No\nplaylist\nselected");
 
    submenu_add_item(

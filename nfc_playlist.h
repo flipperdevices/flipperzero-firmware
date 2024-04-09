@@ -38,10 +38,8 @@ typedef enum {
 } NfcPlaylistScene;
 
 typedef struct {
-   FuriString* base_file_path;
    FuriString* file_path;
    bool playlist_selected;
-   bool playlist_selected_check;
    uint8_t emulate_timeout;
    uint8_t emulate_delay;
    bool emulate_led_indicator;
@@ -51,9 +49,10 @@ typedef struct {
    SceneManager* scene_manager;
    ViewDispatcher* view_dispatcher;
    VariableItemList* variable_item_list;
-   FileBrowser* file_browser;
+   FileBrowser* playlist_file_browser;
    FuriString* file_browser_output;
    TextInput* text_input;
+   char* text_input_output;
    Submenu* submenu;
    Popup* popup;
    Widget* widget;
@@ -61,7 +60,6 @@ typedef struct {
    FuriThread* thread;
    NfcPlaylistWorker* nfc_playlist_worker;
    NfcPlaylistSettings settings;
-   char* playlist_name;
 } NfcPlaylist;
 
 static const int options_emulate_timeout[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
@@ -69,3 +67,6 @@ static const int default_emulate_timeout = 4;
 static const int options_emulate_delay[] = {0, 1, 2, 3, 4, 5, 6};
 static const int default_emulate_delay = 0;
 static const bool default_emulate_led_indicator = true;
+
+#define PLAYLIST_LOCATION "/ext/apps_data/nfc_playlist/"
+#define PLAYLIST_DIR "/ext/apps_data/nfc_playlist"
