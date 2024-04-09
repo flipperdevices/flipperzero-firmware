@@ -36,19 +36,12 @@ size_t memmgr_get_total_heap(void);
 size_t memmgr_get_minimum_free_heap(void);
 
 /**
- * An aligned version of malloc, used when you need to get the aligned space on the heap
- * Freeing the received address is performed ONLY through the aligned_free function
+ * An aligned version of malloc, used when you need to get the aligned space on the heap.
  * @param size 
  * @param alignment 
  * @return void* 
  */
 void* aligned_malloc(size_t size, size_t alignment);
-
-/**
- * Freed space obtained through the aligned_malloc function
- * @param p pointer to result of aligned_malloc
- */
-void aligned_free(void* p);
 
 /**
  * @brief Allocate memory from the auxiliary memory pool. That memory can't be freed.
@@ -59,7 +52,7 @@ void aligned_free(void* p);
 void* memmgr_aux_pool_alloc(size_t size);
 
 /**
- * @brief Get the auxiliary poll free memory size
+ * @brief Get the auxiliary pool free memory size
  * 
  * @return size_t 
  */

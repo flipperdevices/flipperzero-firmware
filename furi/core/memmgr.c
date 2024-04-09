@@ -42,10 +42,6 @@ void* aligned_malloc(size_t size, size_t alignment) {
     return pvPortAllocAligned(size, alignment);
 }
 
-void aligned_free(void* p) {
-    vPortFree(p);
-}
-
 size_t memmgr_get_free_heap(void) {
     return xPortGetFreeHeapSize();
 }

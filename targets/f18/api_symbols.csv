@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,61.1,,
+Version,+,62.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -515,7 +515,6 @@ Function,-,acoshf,float,float
 Function,-,acoshl,long double,long double
 Function,-,acosl,long double,long double
 Function,-,aligned_alloc,void*,"size_t, size_t"
-Function,+,aligned_free,void,void*
 Function,+,aligned_malloc,void*,"size_t, size_t"
 Function,-,arc4random,__uint32_t,
 Function,-,arc4random_buf,void,"void*, size_t"
