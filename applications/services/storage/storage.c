@@ -42,7 +42,7 @@ Storage* storage_app_alloc(void) {
         storage_data_timestamp(&app->storage[i]);
     }
 
-#ifdef STORAGE_INT_ON_LFS
+#if defined(STORAGE_INT_ON_LFS) && !defined(FURI_RAM_EXEC)
     storage_int_init(&app->storage[ST_INT]);
 #endif
 

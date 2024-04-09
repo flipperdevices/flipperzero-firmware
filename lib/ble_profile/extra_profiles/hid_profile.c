@@ -373,6 +373,13 @@ bool ble_profile_hid_mouse_scroll(FuriHalBleProfileBase* profile, int8_t delta) 
     return state;
 }
 
+#ifdef STORAGE_INT_ON_LFS
+// AN5289: 4.7, we need at least 25ms + advertisement, which is 30 ms
+#define CONNECTION_INTERVAL (0x18)
+#else
+#define CONNECTION_INTERVAL (0x0006)
+#endif
+
 static GapConfig template_config = {
     .adv_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
     .appearance_char = GAP_APPEARANCE_KEYBOARD,
@@ -380,8 +387,8 @@ static GapConfig template_config = {
     .pairing_method = GapPairingPinCodeVerifyYesNo,
     .conn_param =
         {
-            .conn_int_min = 0x18, // AN5289: 4.7, we need at least 25ms + advertisement, which is 30 ms
-            .conn_int_max = 0x18, // 30 ms
+            .conn_int_min = CONNECTION_INTERVAL,
+            .conn_int_max = CONNECTION_INTERVAL,
             .slave_latency = 0,
             .supervisor_timeout = 0,
         },
