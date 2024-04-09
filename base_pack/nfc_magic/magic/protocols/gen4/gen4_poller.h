@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gen4.h"
 #include <nfc/nfc.h>
 #include <nfc/protocols/nfc_protocol.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
@@ -9,8 +10,10 @@
 extern "C" {
 #endif
 
+// TODO: cleanup, check gen4_poller_i.c defines
 #define GEN4_CMD_PREFIX (0xCF)
 #define GEN4_CMD_GET_CFG (0xC6)
+#define GEN4_CMD_GET_REVISION (0xCC)
 #define GEN4_CMD_WRITE (0xCD)
 #define GEN4_CMD_READ (0xCE)
 #define GEN4_CMD_SET_CFG (0xF0)
@@ -38,9 +41,11 @@ typedef enum {
     Gen4PollerModeWrite,
     Gen4PollerModeSetPassword,
 
-    Gen4PollerModeSetDefaultCFG,
-    Gen4PollerModeGetCFG,
-    Gen4PollerModeGetRevision,
+    Gen4PollerModeGetInfo,
+
+    Gen4PollerModeSetDefaultCfg,
+    Gen4PollerModeSetShadowMode,
+    Gen4PollerModeSetDirectWriteBlock0Mode
 } Gen4PollerMode;
 
 typedef struct {
@@ -53,16 +58,13 @@ typedef struct {
 } Gen4PollerEventDataRequestDataToWrite;
 
 typedef struct {
-    uint32_t password;
+    Gen4Password password;
 } Gen4PollerEventDataRequestNewPassword;
 
 typedef union {
     Gen4PollerEventDataRequestMode request_mode;
     Gen4PollerEventDataRequestDataToWrite request_data;
     Gen4PollerEventDataRequestNewPassword request_password;
-
-    uint8_t display_config[32];
-    uint8_t revision_data[5];
 } Gen4PollerEventData;
 
 typedef struct {
@@ -74,17 +76,25 @@ typedef NfcCommand (*Gen4PollerCallback)(Gen4PollerEvent event, void* context);
 
 typedef struct Gen4Poller Gen4Poller;
 
-Gen4PollerError gen4_poller_detect(Nfc* nfc, uint32_t password);
+Gen4PollerError gen4_poller_detect(Nfc* nfc, Gen4Password password, Gen4* gen4_data);
 
 Gen4Poller* gen4_poller_alloc(Nfc* nfc);
 
 void gen4_poller_free(Gen4Poller* instance);
 
-void gen4_poller_set_password(Gen4Poller* instance, uint32_t password);
+void gen4_poller_set_password(Gen4Poller* instance, Gen4Password password);
 
 void gen4_poller_start(Gen4Poller* instance, Gen4PollerCallback callback, void* context);
 
 void gen4_poller_stop(Gen4Poller* instance);
+
+const Gen4* gen4_poller_get_gen4_data(const Gen4Poller* instance);
+
+void gen4_poller_struct_set_direct_write_block_0_mode(
+    Gen4Poller* instance,
+    Gen4DirectWriteBlock0Mode mode);
+
+void gen4_poller_struct_set_shadow_mode(Gen4Poller* instance, Gen4ShadowMode mode);
 
 #ifdef __cplusplus
 }

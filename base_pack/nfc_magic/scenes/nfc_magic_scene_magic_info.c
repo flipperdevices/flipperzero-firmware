@@ -1,4 +1,5 @@
 #include "../nfc_magic_app_i.h"
+#include "magic/nfc_magic_scanner.h"
 
 void nfc_magic_scene_magic_info_widget_callback(
     GuiButtonType result,
@@ -31,6 +32,28 @@ void nfc_magic_scene_magic_info_on_enter(void* context) {
         message, "Magic Type: %s", nfc_magic_protocols_get_name(instance->protocol));
     widget_add_text_box_element(
         widget, 0, 10, 128, 54, AlignLeft, AlignTop, furi_string_get_cstr(message), false);
+
+    if(instance->protocol == NfcMagicProtocolGen4) {
+        gen4_copy(instance->gen4_data, nfc_magic_scanner_get_gen4_data(instance->scanner));
+
+        furi_string_printf(
+            message,
+            "Revision: %02X %02X\n",
+            instance->gen4_data->revision.data[3],
+            instance->gen4_data->revision.data[4]);
+
+        widget_add_string_element(
+            widget, 0, 20, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(message));
+
+        furi_string_printf(
+            message,
+            "Configured As %s",
+            gen4_get_configuration_name(&instance->gen4_data->config));
+
+        widget_add_string_multiline_element(
+            widget, 0, 30, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(message));
+    }
+
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_magic_scene_magic_info_widget_callback, instance);
     widget_add_button_element(
@@ -63,6 +86,9 @@ bool nfc_magic_scene_magic_info_on_event(void* context, SceneManagerEvent event)
                 consumed = true;
             }
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        consumed = scene_manager_search_and_switch_to_previous_scene(
+            instance->scene_manager, NfcMagicSceneStart);
     }
     return consumed;
 }
