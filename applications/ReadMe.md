@@ -77,5 +77,4 @@ Utility apps not visible in other menus, plus few external apps pre-packaged wit
 - `hid_app`             - BLE & USB HID remote
 - `js_app`              - JS engine runner
 - `snake_game`          - Snake game
-- `storage_move_to_sd`  - Data migration tool for internal storage
 - `updater`             - Update service & application

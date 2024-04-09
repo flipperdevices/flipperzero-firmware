@@ -35,7 +35,6 @@
 /applications/services/dolphin_passport/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
 /applications/services/power_settings_app/ @skotopes @DrZlo13 @hedger @gsurkov @gornekich
 
-/applications/system/storage_move_to_sd/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
 /applications/system/js_app/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
 
 /applications/debug/unit_tests/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov @gornekich @Astrrra @Skorpionm

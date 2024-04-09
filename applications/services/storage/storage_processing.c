@@ -2,6 +2,8 @@
 #include <m-list.h>
 #include <m-dict.h>
 
+#define TAG "StorageProcessing"
+
 #define STORAGE_PATH_PREFIX_LEN 4u
 _Static_assert(
     sizeof(STORAGE_ANY_PATH_PREFIX) == STORAGE_PATH_PREFIX_LEN + 1,
@@ -53,7 +55,7 @@ static StorageType storage_get_type_by_path(FuriString* path) {
     if(memcmp(path_cstr, STORAGE_EXT_PATH_PREFIX, strlen(STORAGE_EXT_PATH_PREFIX)) == 0) {
         type = ST_EXT;
     } else if(memcmp(path_cstr, STORAGE_INT_PATH_PREFIX, strlen(STORAGE_INT_PATH_PREFIX)) == 0) {
-        type = ST_INT;
+        type = ST_EXT;
     } else if(memcmp(path_cstr, STORAGE_ANY_PATH_PREFIX, strlen(STORAGE_ANY_PATH_PREFIX)) == 0) {
         type = ST_ANY;
     }
@@ -559,6 +561,15 @@ void storage_process_alias(
             furi_string_get_cstr(apps_assets_path_with_appsid));
 
         furi_string_free(apps_assets_path_with_appsid);
+    } else if(furi_string_start_with(path, STORAGE_INT_PATH_PREFIX)) {
+        furi_string_replace_at(
+            path, 0, strlen(STORAGE_INT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX "/.int");
+
+        FuriString* int_on_ext_path = furi_string_alloc_set(STORAGE_EXT_PATH_PREFIX "/.int");
+        if(storage_process_common_stat(app, int_on_ext_path, NULL) != FSE_OK) {
+            storage_process_common_mkdir(app, int_on_ext_path);
+        }
+        furi_string_free(int_on_ext_path);
     }
 }
 
