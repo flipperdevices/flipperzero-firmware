@@ -70,7 +70,9 @@ static NfcCommand nfc_scene_read_poller_callback_felica(NfcGenericEvent event, v
             instance->nfc_device, NfcProtocolFelica, nfc_poller_get_data(instance->poller));
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         command = NfcCommandStop;
-    } else if(felica_event->type == FelicaPollerEventTypeError) {
+    } else if(
+        felica_event->type == FelicaPollerEventTypeError ||
+        felica_event->type == FelicaPollerEventTypeIncomplete) {
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolFelica, nfc_poller_get_data(instance->poller));
         view_dispatcher_send_custom_event(
