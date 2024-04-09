@@ -425,8 +425,8 @@ void cli_command_free(Cli* cli, FuriString* args, void* context) {
     printf("Minimum heap size: %zu\r\n", memmgr_get_minimum_free_heap());
     printf("Maximum heap block: %zu\r\n", memmgr_heap_get_max_free_block());
 
-    printf("Pool free: %zu\r\n", memmgr_pool_get_free());
-    printf("Maximum pool block: %zu\r\n", memmgr_pool_get_max_block());
+    printf("Aux pool total free: %zu\r\n", memmgr_aux_pool_get_free());
+    printf("Aux pool max free block: %zu\r\n", memmgr_pool_get_max_block());
 }
 
 typedef struct {

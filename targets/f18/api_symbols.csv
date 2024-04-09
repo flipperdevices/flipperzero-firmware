@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,61.0,,
+Version,+,61.1,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1972,7 +1972,8 @@ Function,+,memchr,void*,"const void*, int, size_t"
 Function,+,memcmp,int,"const void*, const void*, size_t"
 Function,+,memcpy,void*,"void*, const void*, size_t"
 Function,-,memmem,void*,"const void*, size_t, const void*, size_t"
-Function,-,memmgr_alloc_from_pool,void*,size_t
+Function,-,memmgr_aux_pool_alloc,void*,size_t
+Function,-,memmgr_aux_pool_get_free,size_t,
 Function,+,memmgr_get_free_heap,size_t,
 Function,+,memmgr_get_minimum_free_heap,size_t,
 Function,+,memmgr_get_total_heap,size_t,
@@ -1981,7 +1982,6 @@ Function,+,memmgr_heap_enable_thread_trace,void,FuriThreadId
 Function,+,memmgr_heap_get_max_free_block,size_t,
 Function,+,memmgr_heap_get_thread_memory,size_t,FuriThreadId
 Function,+,memmgr_heap_walk_blocks,void,"BlockWalker, void*"
-Function,-,memmgr_pool_get_free,size_t,
 Function,-,memmgr_pool_get_max_block,size_t,
 Function,+,memmove,void*,"void*, const void*, size_t"
 Function,-,mempcpy,void*,"void*, const void*, size_t"
