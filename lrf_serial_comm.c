@@ -14,6 +14,9 @@
 
 /*** Defines ***/
 #define TAG "lrf_serial_comm"
+#define CR 13
+#define LF 10
+#define SLASH 47
 
 
 
@@ -28,6 +31,7 @@ static uint8_t cmd_cmm_20hz[] = "\xcc\x04\x00\x00\x80";
 static uint8_t cmd_cmm_100hz[] = "\xcc\x05\x00\x00\x81";
 static uint8_t cmd_cmm_200hz[] = "\xcc\x06\x00\x00\x82";
 static uint8_t cmd_cmm_break[] = "\xc6\x96";
+static uint8_t cmd_send_ident[] = "\xc0\x90";
 
 
 
@@ -43,12 +47,20 @@ typedef enum {
 
 /*** Routines ***/
 
-/** Set the callback to handle the received LRF data **/
-void set_lrf_data_handler(LRFSerialCommApp *app,
-					void (*cb)(LRFSample *, void *),
-					void *ctx) {
-  app->lrf_data_handler = cb;
-  app->lrf_data_handler_ctx = ctx;
+/** Set the callback to handle one received LRF sample **/
+void set_lrf_sample_handler(LRFSerialCommApp *app,
+				void (*cb)(LRFSample *, void *), void *ctx) {
+  app->lrf_sample_handler = cb;
+  app->lrf_sample_handler_ctx = ctx;
+}
+
+
+
+/** Set the callback to handle one received LRF identification frame **/
+void set_lrf_ident_handler(LRFSerialCommApp *app,
+				void (*cb)(LRFIdent *, void *), void *ctx) {
+  app->lrf_ident_handler = cb;
+  app->lrf_ident_handler_ctx = ctx;
 }
 
 
@@ -64,6 +76,19 @@ static void on_uart_irq_callback(FuriHalSerialHandle *hndl,
     furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
     furi_thread_flags_set(furi_thread_get_id(app->rx_thread), rx_done);
   }
+}
+
+
+
+/** Copy bytes to a string and stop as soon as a non-printable character or
+    space is encountered */
+void strcpy_rstrip(char *dst, uint8_t *src) {
+
+  int i;
+
+  for(i = 0; src[i] > 32 && src[i] < 127; i++)
+    dst[i] = src[i];
+  dst[i] = 0;
 }
 
 
@@ -94,6 +119,10 @@ static int32_t uart_rx_thread(void *ctx) {
   uint16_t wait_dec_buf_len;
   bool is_little_endian;
   LRFSample lrf_sample;
+  LRFIdent lrf_ident;
+  uint8_t electronics;
+  uint8_t fw_major, fw_minor, fw_micro, fw_build;
+  bool is_fw_newer_than_x4;
   uint16_t i;
 
   /* Union to convert bytes to float, initialized with the endianness test value
@@ -158,6 +187,13 @@ static int32_t uart_rx_thread(void *ctx) {
 						   for this frame */
                   break;
 
+                /* We got an identification frame response */
+                case 0xc0:
+                  app->dec_buf[dec_buf_len++] = app->rx_buf[i];
+                  wait_dec_buf_len = 73;	/* We need to get 73 bytes total
+						   for this frame */
+                  break;
+
                 /* We got an unknown command byte: reset the decode buffer */
                 default:
                   dec_buf_len = 0;
@@ -187,6 +223,7 @@ static int32_t uart_rx_thread(void *ctx) {
                 case 0xcc:
 
                   if(is_little_endian) {
+
                     /* Decode the 1st distance */
                     fun.bytes[0] = app->dec_buf[2];
                     fun.bytes[1] = app->dec_buf[3];
@@ -225,6 +262,7 @@ static int32_t uart_rx_thread(void *ctx) {
                   }
 
                   else {
+
                     /* Decode the 1st distance */
                     fun.bytes[3] = app->dec_buf[2];
                     fun.bytes[2] = app->dec_buf[3];
@@ -265,13 +303,13 @@ static int32_t uart_rx_thread(void *ctx) {
                   /* Timestamp the sample */
                   lrf_sample.tstamp_ms = furi_get_tick();
 
-                  /* If we have a callback to handle the decoded LRF data,
-                     call it and pass it the data */
-                  if(app->lrf_data_handler)
-                    app->lrf_data_handler(&lrf_sample,
-					app->lrf_data_handler_ctx);
+                  /* If we have a callback to handle the decoded LRF sample,
+                     call it and pass it the sample */
+                  if(app->lrf_sample_handler)
+                    app->lrf_sample_handler(&lrf_sample,
+						app->lrf_sample_handler_ctx);
 
-                   FURI_LOG_I(TAG, "LRF sample received: "
+                  FURI_LOG_I(TAG, "LRF sample received: "
 					"dist1=%f, dist2=%f, dist3=%f, "
 					"ampl1=%d, ampl2=%d, ampl3=%d",
 				(double)lrf_sample.dist1,
@@ -280,6 +318,139 @@ static int32_t uart_rx_thread(void *ctx) {
 				lrf_sample.ampl1,
 				lrf_sample.ampl2,
 				lrf_sample.ampl3);
+
+                  break;
+
+                /* We got an identification frame response */
+                case 0xc0:
+
+                  /* Make sure the LRF ID is terminated by CRLF and discard the
+                     frame if it isn't */
+                  if(app->dec_buf[17] != CR || app->dec_buf[18] != LF)
+                    break;
+
+                  /* Copy the printable left-hand part of the LRF ID */
+                  strcpy_rstrip(lrf_ident.id, app->dec_buf + 2);
+
+                  /* Make sure the additional information is terminated by CRLF
+                     and discard the frame if it isn't */
+                  if(app->dec_buf[34] != CR || app->dec_buf[35] != LF)
+                    break;
+
+                  /* Copy the printable left-hand part of the additional
+                     information */
+                  strcpy_rstrip(lrf_ident.addinfo, app->dec_buf + 19);
+
+                  /* Make sure the serial number is terminated by CRLF
+                     and discard the frame if it isn't */
+                  if(app->dec_buf[46] != CR || app->dec_buf[47] != LF)
+                    break;
+
+                  /* Copy the printable left-hand part of the serial number */
+                  strcpy_rstrip(lrf_ident.serial, app->dec_buf + 36);
+
+                  /* Decode the firmware version number */
+                  if(is_little_endian) {
+                    usiun.bytes[0] = app->dec_buf[48];
+                    usiun.bytes[1] = app->dec_buf[49];
+                  }
+                  else {
+                    usiun.bytes[1] = app->dec_buf[48];
+                    usiun.bytes[0] = app->dec_buf[49];
+                  }
+
+                  /* Get the electronics type */
+                  electronics = app->dec_buf[50];
+
+                  /* Get the optics type in readable format */
+                  snprintf(lrf_ident.optics, 4, "%d", app->dec_buf[51]);
+
+                  /* Interpret the firmware version information */
+                  fw_major = usiun.usi >> 12;
+                  fw_minor = (usiun.usi & 0xf00) >> 8;
+                  fw_micro = usiun.usi & 0xff;
+                  is_fw_newer_than_x4 = fw_minor > 4 ||
+					(fw_minor == 4 && fw_micro > 0);
+
+                  /* Extract the firmware's build number from the electronics
+                     type if the firmware is a newer version */
+                  if (is_fw_newer_than_x4) {
+                    fw_build = electronics;
+                    electronics = 0;
+                  }
+                  else {
+                    fw_build = electronics & 0x0f;
+                    electronics >>= 4;
+                  }
+
+                  /* Store the eletronics type in readable format */
+                  snprintf(lrf_ident.electronics, 4, "%d", electronics);
+
+                  /* Store the firmware version in readable format */
+                  snprintf(lrf_ident.fwversion, 16, "%d.%d.%d.%d",
+				fw_major, fw_minor, fw_micro, fw_build);
+
+                  /* Make sure the year, month and day of the build date are
+                     ASCII digits and discard the frame if they aren't */
+                  if(app->dec_buf[52] < 0x30 || app->dec_buf[52] > 0x39 ||
+			app->dec_buf[53] < 0x30 || app->dec_buf[53] > 0x39 ||
+			app->dec_buf[55] < 0x30 || app->dec_buf[55] > 0x39 ||
+			app->dec_buf[56] < 0x30 || app->dec_buf[56] > 0x39 ||
+			app->dec_buf[58] < 0x30 || app->dec_buf[58] > 0x39 ||
+			app->dec_buf[59] < 0x30 || app->dec_buf[59] > 0x39)
+                    break;
+
+                  /* Make sure the date is terminated by CRLF and discard the
+                     if it isn't */
+                  if(app->dec_buf[60] != CR || app->dec_buf[61] != LF)
+                    break;
+
+                  /* Make sure the hour, minute and second of the build date are
+                     ASCII digits and discard the frame if they aren't */
+                  if(app->dec_buf[62] < 0x30 || app->dec_buf[62] > 0x39 ||
+			app->dec_buf[63] < 0x30 || app->dec_buf[63] > 0x39 ||
+			app->dec_buf[65] < 0x30 || app->dec_buf[65] > 0x39 ||
+			app->dec_buf[66] < 0x30 || app->dec_buf[66] > 0x39 ||
+			app->dec_buf[68] < 0x30 || app->dec_buf[68] > 0x39 ||
+			app->dec_buf[69] < 0x30 || app->dec_buf[69] > 0x39)
+                    break;
+
+                  /* Get the build date. If the month separator is "/", swap
+                     the day and the year */
+                  if(app->dec_buf[57] == SLASH)
+                    snprintf(lrf_ident.builddate, 20,
+				"20%c%c-%c%c-%c%c %c%c:%c%c:%c%c",
+				app->dec_buf[58], app->dec_buf[59],
+				app->dec_buf[55], app->dec_buf[56],
+				app->dec_buf[52], app->dec_buf[53],
+				app->dec_buf[62], app->dec_buf[63],
+				app->dec_buf[65], app->dec_buf[66],
+				app->dec_buf[68], app->dec_buf[69]);
+                  else
+                    snprintf(lrf_ident.builddate, 20,
+				"20%c%c-%c%c-%c%c %c%c:%c%c:%c%c",
+				app->dec_buf[52], app->dec_buf[53],
+				app->dec_buf[55], app->dec_buf[56],
+				app->dec_buf[58], app->dec_buf[59],
+				app->dec_buf[62], app->dec_buf[63],
+				app->dec_buf[65], app->dec_buf[66],
+				app->dec_buf[68], app->dec_buf[69]);
+
+                  /* If we have a callback to handle the decoded LRF
+                     identification frame, call it and pass it the
+                     identification */
+                  if(app->lrf_ident_handler)
+                    app->lrf_ident_handler(&lrf_ident,
+						app->lrf_ident_handler_ctx);
+
+                  FURI_LOG_I(TAG, "LRF identification frame received: "
+					"lrfid=%s, addinfo=%s, serial=%s, "
+					"fwversion=%s, electronics=%s, "
+					"optics=%s, builddate=%s",
+				lrf_ident.id, lrf_ident.addinfo,
+				lrf_ident.serial, lrf_ident.fwversion,
+				lrf_ident.electronics, lrf_ident.optics,
+				lrf_ident.builddate);
 
                   break;
               }
@@ -357,6 +528,13 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
     /* Send a CMM-break command */
     case cmm_break:
       uart_tx(app, cmd_cmm_break, sizeof(cmd_cmm_break));
+      FURI_LOG_I(TAG, "CMM break command sent");
+      break;
+
+    /* Send a send-identification-frame command */
+    case send_ident:
+      uart_tx(app, cmd_send_ident, sizeof(cmd_send_ident));
+      FURI_LOG_I(TAG, "Send identification frame command sent");
       break;
   }
 }
@@ -372,7 +550,10 @@ LRFSerialCommApp *lrf_serial_comm_app_init() {
   LRFSerialCommApp *app = malloc(sizeof(LRFSerialCommApp));
 
   /* No received LRF data handler callback setup yet */
-  app->lrf_data_handler = NULL;
+  app->lrf_sample_handler = NULL;
+
+  /* No received LRF data identification frame callback setup yet */
+  app->lrf_ident_handler = NULL;
 
   /* Allocate space for the UART receive stream buffer */
   app->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
