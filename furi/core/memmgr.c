@@ -38,7 +38,7 @@ char* strdup(const char* s) {
     return y;
 }
 
-void* aligned_alloc(size_t size, size_t alignment) {
+void* aligned_alloc(size_t alignment, size_t size) {
     return pvPortAllocAligned(size, alignment);
 }
 
