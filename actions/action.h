@@ -4,4 +4,12 @@
 
 struct Item;
 
+/** Transmits the selected item
+ * 
+ * @param   context     The App
+ * @param   item        Selected item to transmit
+ * @param   error       Error message if unsuccessful
+*/
 void action_tx(void* context, Item* item, FuriString* error);
+
+bool action_ir_list_commands(const FuriString* ir_file, FuriString* command);

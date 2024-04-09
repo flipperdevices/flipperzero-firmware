@@ -33,7 +33,7 @@ void scene_action_create_group_on_enter(void* context) {
     // TextInputValidatorCallback
     // text_input_set_validator(text, validator_callback, context)
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, QView_ActionTextInput);
+    view_dispatcher_switch_to_view(app->view_dispatcher, QView_TextInput);
 }
 
 bool scene_action_create_group_on_event(void* context, SceneManagerEvent event) {
