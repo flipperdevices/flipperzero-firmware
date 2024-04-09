@@ -3,6 +3,7 @@
 #include "storage_message.h"
 #include "storage_processing.h"
 #include "storage/storage_glue.h"
+#include "storages/storage_int.h"
 #include "storages/storage_ext.h"
 #include <assets_icons.h>
 
@@ -40,6 +41,10 @@ Storage* storage_app_alloc(void) {
         storage_data_init(&app->storage[i]);
         storage_data_timestamp(&app->storage[i]);
     }
+
+#ifdef STORAGE_INT_ON_LFS
+    storage_int_init(&app->storage[ST_INT]);
+#endif
 
     storage_ext_init(&app->storage[ST_EXT]);
 
