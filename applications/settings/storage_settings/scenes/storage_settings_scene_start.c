@@ -1,6 +1,7 @@
 #include "../storage_settings.h"
 
 enum StorageSettingsStartSubmenuIndex {
+    StorageSettingsStartSubmenuIndexInternalInfo,
     StorageSettingsStartSubmenuIndexSDInfo,
     StorageSettingsStartSubmenuIndexUnmount,
     StorageSettingsStartSubmenuIndexFormat,
@@ -18,6 +19,12 @@ void storage_settings_scene_start_on_enter(void* context) {
     StorageSettings* app = context;
     Submenu* submenu = app->submenu;
 
+    submenu_add_item(
+        submenu,
+        "About Internal Storage",
+        StorageSettingsStartSubmenuIndexInternalInfo,
+        storage_settings_scene_start_submenu_callback,
+        app);
     submenu_add_item(
         submenu,
         "About SD Card",
@@ -77,6 +84,14 @@ bool storage_settings_scene_start_on_event(void* context, SceneManagerEvent even
             scene_manager_set_scene_state(
                 app->scene_manager, StorageSettingsStart, StorageSettingsStartSubmenuIndexSDInfo);
             scene_manager_next_scene(app->scene_manager, StorageSettingsSDInfo);
+            consumed = true;
+            break;
+        case StorageSettingsStartSubmenuIndexInternalInfo:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                StorageSettingsStart,
+                StorageSettingsStartSubmenuIndexInternalInfo);
+            scene_manager_next_scene(app->scene_manager, StorageSettingsInternalInfo);
             consumed = true;
             break;
         case StorageSettingsStartSubmenuIndexUnmount:
