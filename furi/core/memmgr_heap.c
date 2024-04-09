@@ -38,9 +38,15 @@ static inline size_t memmgr_get_heap_size(void) {
     return (size_t)&__heap_end__ - (size_t)&__heap_start__;
 }
 
-// Initialize tracing storage on start
-void memmgr_heap_init(void) {
+// Initialize tracing storage
+static void memmgr_heap_init(void) {
     MemmgrHeapThreadDict_init(memmgr_heap_thread_dict);
+}
+
+__attribute__((constructor)) static void memmgr_init(void) {
+    size_t pool_size = (size_t)&__heap_end__ - (size_t)&__heap_start__;
+    tlsf = tlsf_create_with_pool((void*)&__heap_start__, pool_size, pool_size);
+    memmgr_heap_init();
 }
 
 void memmgr_heap_enable_thread_trace(FuriThreadId thread_id) {
@@ -97,7 +103,7 @@ static inline void memmgr_heap_trace_free(void* pointer) {
 
 size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
     size_t leftovers = MEMMGR_HEAP_UNKNOWN;
-    vTaskSuspendAll();
+    memmgr_lock();
     {
         memmgr_heap_thread_trace_depth++;
         MemmgrHeapAllocDict_t* alloc_dict =
@@ -112,7 +118,6 @@ size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
                 if(data->key != 0) {
                     block_header_t* block = block_from_ptr((uint8_t*)data->key);
                     if(!block_is_free(block)) {
-                        // with tlsf we know the size of the block, so we don't need to store it on the dict
                         leftovers += data->value;
                     }
                 }
@@ -120,7 +125,7 @@ size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
         }
         memmgr_heap_thread_trace_depth--;
     }
-    (void)xTaskResumeAll();
+    memmgr_unlock();
     return leftovers;
 }
 
@@ -177,13 +182,6 @@ void* pvPortMalloc(size_t xSize) {
 
     memmgr_lock();
 
-    // initialize tlsf, if not initialized
-    if(tlsf == NULL) {
-        size_t pool_size = (size_t)&__heap_end__ - (size_t)&__heap_start__;
-        tlsf = tlsf_create_with_pool((void*)&__heap_start__, pool_size, pool_size);
-        memmgr_heap_init();
-    }
-
     // allocate block
     void* data = tlsf_malloc(tlsf, xSize);
     if(data == NULL) {
@@ -201,13 +199,13 @@ void* pvPortMalloc(size_t xSize) {
         heap_max_used = heap_used;
     }
 
-    // clear block content
-    memset(data, 0, xSize);
+    // trace allocation
+    memmgr_heap_trace_malloc(data, xSize);
 
     memmgr_unlock();
 
-    // trace allocation
-    memmgr_heap_trace_malloc(data, xSize);
+    // clear block content
+    memset(data, 0, xSize);
 
     return data;
 }
@@ -222,8 +220,10 @@ void vPortFree(void* pv) {
     if(pv != NULL) {
         memmgr_lock();
 
-        // clear block content
+        // get block size
         size_t block_size = tlsf_block_size(pv);
+
+        // clear block content
         memset(pv, 0, block_size);
 
         // update heap usage
@@ -233,10 +233,10 @@ void vPortFree(void* pv) {
         // free
         tlsf_free(tlsf, pv);
 
-        memmgr_unlock();
-
         // trace free
         memmgr_heap_trace_free(pv);
+
+        memmgr_unlock();
     }
 }
 
@@ -247,13 +247,6 @@ extern void* pvPortAllocAligned(size_t xSize, size_t xAlignment) {
     }
 
     memmgr_lock();
-
-    // initialize tlsf, if not initialized
-    if(tlsf == NULL) {
-        size_t pool_size = (size_t)&__heap_end__ - (size_t)&__heap_start__;
-        tlsf = tlsf_create_with_pool((void*)&__heap_start__, pool_size, pool_size);
-        memmgr_heap_init();
-    }
 
     // allocate block
     void* data = tlsf_memalign(tlsf, xAlignment, xSize);
@@ -272,19 +265,19 @@ extern void* pvPortAllocAligned(size_t xSize, size_t xAlignment) {
         heap_max_used = heap_used;
     }
 
+    // trace allocation
+    memmgr_heap_trace_malloc(data, xSize);
+
     memmgr_unlock();
 
     // clear block content
     memset(data, 0, xSize);
 
-    // trace allocation
-    memmgr_heap_trace_malloc(data, xSize);
-
     return data;
 }
 
 extern void* pvPortRealloc(void* pv, size_t xSize) {
-    // size 0 is considered as free
+    // realloc(ptr, 0) is equivalent to free(ptr)
     if(xSize == 0) {
         vPortFree(pv);
         return NULL;
@@ -295,7 +288,7 @@ extern void* pvPortRealloc(void* pv, size_t xSize) {
         return pvPortMalloc(xSize);
     }
 
-    // realloc things //
+    /* realloc things */
 
     // memory management in ISR is not allowed
     if(FURI_IS_IRQ_MODE()) {
@@ -304,28 +297,16 @@ extern void* pvPortRealloc(void* pv, size_t xSize) {
 
     memmgr_lock();
 
-    // initialize tlsf, if not initialized
-    if(tlsf == NULL) {
-        size_t pool_size = (size_t)&__heap_end__ - (size_t)&__heap_start__;
-        tlsf = tlsf_create_with_pool((void*)&__heap_start__, pool_size, pool_size);
-        memmgr_heap_init();
-    }
-
     // trace old block as free
-    size_t old_size = 0;
-    if(pv != NULL) {
-        old_size = tlsf_block_size(pv);
-        memmgr_heap_trace_free(pv);
-    }
+    size_t old_size = tlsf_block_size(pv);
+
+    // trace free
+    memmgr_heap_trace_free(pv);
 
     // reallocate block
     void* data = tlsf_realloc(tlsf, pv, xSize);
     if(data == NULL) {
-        if(xSize == 0) {
-            furi_crash("realloc(0)");
-        } else {
-            furi_crash("out of memory");
-        }
+        furi_crash("out of memory");
     }
 
     // update heap usage
@@ -335,15 +316,15 @@ extern void* pvPortRealloc(void* pv, size_t xSize) {
         heap_max_used = heap_used;
     }
 
+    // trace allocation
+    memmgr_heap_trace_malloc(data, xSize);
+
+    memmgr_unlock();
+
     // clear remain block content, if the new size is bigger
     if(xSize > old_size) {
         memset((uint8_t*)data + old_size, 0, xSize - old_size);
     }
-
-    memmgr_unlock();
-
-    // trace allocation
-    memmgr_heap_trace_malloc(data, xSize);
 
     return data;
 }
