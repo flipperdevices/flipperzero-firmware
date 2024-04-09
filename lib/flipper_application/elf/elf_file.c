@@ -461,7 +461,7 @@ static bool elf_load_section_data(ELFFile* elf, ELFSection* section, Elf32_Shdr*
         return true;
     }
 
-    section->data = aligned_malloc(section_header->sh_size, section_header->sh_addralign);
+    section->data = aligned_alloc(section_header->sh_size, section_header->sh_addralign);
     section->size = section_header->sh_size;
 
     if(section_header->sh_type == SHT_NOBITS) {

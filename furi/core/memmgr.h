@@ -36,14 +36,6 @@ size_t memmgr_get_total_heap(void);
 size_t memmgr_get_minimum_free_heap(void);
 
 /**
- * An aligned version of malloc, used when you need to get the aligned space on the heap.
- * @param size 
- * @param alignment 
- * @return void* 
- */
-void* aligned_malloc(size_t size, size_t alignment);
-
-/**
  * @brief Allocate memory from the auxiliary memory pool. That memory can't be freed.
  * 
  * @param size 
