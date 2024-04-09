@@ -20,10 +20,17 @@ const char unknown_block[] = "?? ?? ?? ?? ?? ?? ?? ??";
 
 PicopassDevice* picopass_device_alloc() {
     PicopassDevice* picopass_dev = malloc(sizeof(PicopassDevice));
+    picopass_dev->dev_data.auth = PicopassDeviceAuthMethodUnset;
     picopass_dev->dev_data.pacs.legacy = false;
     picopass_dev->dev_data.pacs.se_enabled = false;
+    picopass_dev->dev_data.pacs.sio = false;
+    picopass_dev->dev_data.pacs.biometrics = false;
+    memset(picopass_dev->dev_data.pacs.key, 0, sizeof(picopass_dev->dev_data.pacs.key));
     picopass_dev->dev_data.pacs.elite_kdf = false;
     picopass_dev->dev_data.pacs.pin_length = 0;
+    picopass_dev->dev_data.pacs.bitLength = 0;
+    memset(
+        picopass_dev->dev_data.pacs.credential, 0, sizeof(picopass_dev->dev_data.pacs.credential));
     picopass_dev->storage = furi_record_open(RECORD_STORAGE);
     picopass_dev->dialogs = furi_record_open(RECORD_DIALOGS);
     picopass_dev->load_path = furi_string_alloc();
@@ -422,8 +429,8 @@ void picopass_device_data_clear(PicopassDeviceData* dev_data) {
         memset(dev_data->card_data[i].data, 0, sizeof(dev_data->card_data[i].data));
         dev_data->card_data[i].valid = false;
     }
-
     memset(dev_data->pacs.credential, 0, sizeof(dev_data->pacs.credential));
+    dev_data->auth = PicopassDeviceAuthMethodUnset;
     dev_data->pacs.legacy = false;
     dev_data->pacs.se_enabled = false;
     dev_data->pacs.elite_kdf = false;

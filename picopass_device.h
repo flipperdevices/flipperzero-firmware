@@ -75,6 +75,14 @@ typedef enum {
 } PicopassDeviceSaveFormat;
 
 typedef enum {
+    PicopassDeviceAuthMethodUnset,
+    PicopassDeviceAuthMethodNone, // unsecured picopass
+    PicopassDeviceAuthMethodKey,
+    PicopassDeviceAuthMethodNrMac,
+    PicopassDeviceAuthMethodFailed,
+} PicopassDeviceAuthMethod;
+
+typedef enum {
     PicopassEmulatorStateHalt,
     PicopassEmulatorStateIdle,
     PicopassEmulatorStateActive,
@@ -105,6 +113,7 @@ typedef struct {
 typedef struct {
     PicopassBlock card_data[PICOPASS_MAX_APP_LIMIT];
     PicopassPacs pacs;
+    PicopassDeviceAuthMethod auth;
 } PicopassDeviceData;
 
 typedef struct {
