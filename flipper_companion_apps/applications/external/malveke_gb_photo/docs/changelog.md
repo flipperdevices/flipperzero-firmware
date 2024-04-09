@@ -1,5 +1,8 @@
 # Changelog - Patch Notes
 
+## Version 2.3
+Memory optimization and fix for issue #35.
+
 ## Version 2.2
 Fix Frozen upon exiting the gb photo.
 

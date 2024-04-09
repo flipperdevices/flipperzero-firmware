@@ -51,7 +51,6 @@ typedef struct {
     int pos_y;
     bool show_instructions;
     uint8_t tile_data[16];
-    uint8_t scratchpad1[0x11FC]; // 0000 - 11fb
 
     unsigned long palette_color_hex_a;
     unsigned long palette_color_hex_b;

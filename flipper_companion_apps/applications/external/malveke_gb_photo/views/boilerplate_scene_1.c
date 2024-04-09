@@ -80,33 +80,37 @@ void boilerplate_scene_1_draw(Canvas* canvas, BoilerplateScene1Model* model) {
         elements_button_center(canvas, "OK");
     } else {
         int count = (app->page + 1) * 0x1000;
-        uint8_t status = app->scratchpad1[0x11B2 + app->page];
+        if(app->camera_ram_sav) {
+            storage_file_seek(app->camera_ram_sav, count - 0x1b1, true);
+            uint8_t status;
+            storage_file_read(app->camera_ram_sav, &status, 1);
 
-        storage_file_seek(app->camera_ram_sav, count, true);
+            storage_file_seek(app->camera_ram_sav, count, true);
 
-        for(int y = app->pos_y; y < 14; y++) {
-            for(int x = app->pos_x; x < 16; x++) {
-                storage_file_read(app->camera_ram_sav, app->tile_data, sizeof(app->tile_data));
-                for(int row = 0; row < 8; row++) {
-                    uint8_t temp1 = app->tile_data[row * 2];
-                    uint8_t temp2 = app->tile_data[row * 2 + 1];
-                    for(int pixel = 7; pixel >= 0; pixel--) {
-                        if(((temp1 & 1) + ((temp2 & 1) * 2)) >= 2) {
-                            canvas_draw_dot(canvas, (x * 8) + pixel, (y * 8) + row);
+            for(int y = app->pos_y; y < 14; y++) {
+                for(int x = app->pos_x; x < 16; x++) {
+                    storage_file_read(app->camera_ram_sav, app->tile_data, sizeof(app->tile_data));
+                    for(int row = 0; row < 8; row++) {
+                        uint8_t temp1 = app->tile_data[row * 2];
+                        uint8_t temp2 = app->tile_data[row * 2 + 1];
+                        for(int pixel = 7; pixel >= 0; pixel--) {
+                            if(((temp1 & 1) + ((temp2 & 1) * 2)) >= 2) {
+                                canvas_draw_dot(canvas, (x * 8) + pixel, (y * 8) + row);
+                            }
+                            temp1 >>= 1;
+                            temp2 >>= 1;
                         }
-                        temp1 >>= 1;
-                        temp2 >>= 1;
                     }
                 }
             }
-        }
 
-        if(app->info) {
-            if(status == 0xFF) {
-                canvas_draw_rbox(canvas, 100, 4, 20, 11, 4);
-                canvas_invert_color(canvas);
-                canvas_draw_str_aligned(canvas, 110, 10, AlignCenter, AlignCenter, "D");
-                canvas_invert_color(canvas);
+            if(app->info) {
+                if(status == 0xFF) { // DELETED
+                    canvas_draw_rbox(canvas, 100, 4, 20, 11, 4);
+                    canvas_invert_color(canvas);
+                    canvas_draw_str_aligned(canvas, 110, 10, AlignCenter, AlignCenter, "D");
+                    canvas_invert_color(canvas);
+                }
             }
         }
     }
