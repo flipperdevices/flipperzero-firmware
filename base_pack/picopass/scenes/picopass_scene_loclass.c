@@ -36,6 +36,7 @@ void picopass_scene_loclass_on_enter(void* context) {
 
     loclass_set_callback(picopass->loclass, picopass_loclass_result_callback, picopass);
     loclass_set_header(picopass->loclass, "Loclass");
+    loclass_set_subheader(picopass->loclass, "Hold To Reader");
 
     picopass_blink_emulate_start(picopass);
     view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewLoclass);

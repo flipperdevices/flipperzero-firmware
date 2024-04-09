@@ -2,6 +2,8 @@
 #include <dolphin/dolphin.h>
 #include <picopass_keys.h>
 
+#define TAG "PicopassSceneReadCardSuccess"
+
 void picopass_scene_read_card_success_widget_callback(
     GuiButtonType result,
     InputType type,
@@ -26,6 +28,28 @@ void picopass_scene_read_card_success_on_enter(void* context) {
 
     // Send notification
     notification_message(picopass->notifications, &sequence_success);
+
+    // For initial testing, print auth method
+    switch(picopass->dev->dev_data.auth) {
+    case PicopassDeviceAuthMethodUnset:
+        FURI_LOG_D(TAG, "Auth: Unset");
+        break;
+    case PicopassDeviceAuthMethodNone:
+        FURI_LOG_D(TAG, "Auth: None");
+        break;
+    case PicopassDeviceAuthMethodKey:
+        FURI_LOG_D(TAG, "Auth: Key");
+        break;
+    case PicopassDeviceAuthMethodNrMac:
+        FURI_LOG_D(TAG, "Auth: NR-MAC");
+        break;
+    case PicopassDeviceAuthMethodFailed:
+        FURI_LOG_D(TAG, "Auth: Failed");
+        break;
+    default:
+        FURI_LOG_D(TAG, "Auth: Unknown");
+        break;
+    };
 
     // Setup view
     PicopassBlock* card_data = picopass->dev->dev_data.card_data;
@@ -133,8 +157,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             furi_string_cat_printf(credential_str, " +SIO");
         }
 
-        bool no_key = picopass_is_memset(
-            card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
+        bool no_key = !card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].valid;
 
         if(no_key) {
             furi_string_cat_printf(key_str, "No Key: used NR-MAC");

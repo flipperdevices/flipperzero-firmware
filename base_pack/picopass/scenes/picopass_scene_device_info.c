@@ -102,8 +102,7 @@ bool picopass_scene_device_info_on_event(void* context, SceneManagerEvent event)
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewWidget);
-        consumed = true;
+        consumed = scene_manager_previous_scene(picopass->scene_manager);
     }
     return consumed;
 }

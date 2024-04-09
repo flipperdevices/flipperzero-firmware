@@ -6,6 +6,7 @@ enum SubmenuIndex {
     SubmenuIndexEmulate,
     SubmenuIndexRename,
     SubmenuIndexDelete,
+    SubmenuIndexSaveAsLF,
 };
 
 void picopass_scene_saved_menu_submenu_callback(void* context, uint32_t index) {
@@ -18,6 +19,13 @@ void picopass_scene_saved_menu_on_enter(void* context) {
     Picopass* picopass = context;
     Submenu* submenu = picopass->submenu;
 
+    PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
+    PicopassBlock* card_data = picopass->dev->dev_data.card_data;
+
+    bool secured = (card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
+                   PICOPASS_FUSE_CRYPT0;
+    bool no_credential = picopass_is_memset(pacs->credential, 0x00, sizeof(pacs->credential));
+
     submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, picopass_scene_saved_menu_submenu_callback, picopass);
     submenu_add_item(
@@ -28,6 +36,16 @@ void picopass_scene_saved_menu_on_enter(void* context) {
         SubmenuIndexEmulate,
         picopass_scene_saved_menu_submenu_callback,
         picopass);
+
+    if(secured && !no_credential) {
+        submenu_add_item(
+            submenu,
+            "Save as LFRFID",
+            SubmenuIndexSaveAsLF,
+            picopass_scene_saved_menu_submenu_callback,
+            picopass);
+    }
+
     submenu_add_item(
         submenu,
         "Rename",
@@ -69,6 +87,12 @@ bool picopass_scene_saved_menu_on_event(void* context, SceneManagerEvent event) 
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneEmulate);
             consumed = true;
         } else if(event.event == SubmenuIndexRename) {
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneSaveName);
+            consumed = true;
+        } else if(event.event == SubmenuIndexSaveAsLF) {
+            scene_manager_set_scene_state(
+                picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexSaveAsLF);
+            picopass->dev->format = PicopassDeviceSaveFormatLF;
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneSaveName);
             consumed = true;
         }
