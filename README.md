@@ -6,11 +6,11 @@ This app allows you to organize previously recorded signals, of any type*, so th
 
 The app does not provide any recording functionality - you must use the existing Flipperzero apps to create the saved files for your action/device. Quac! provides some basic functionality to manage your files. Or, you can manage the folder structure manually on your SD card.
 
-> Only Sub-Ghz (.sub), RFID (.rfid), and Infrared (.ir) files are supported at this time. NFC support coming soon.
+> Support files include: Sub-Ghz (.sub), RFID (.rfid), Infrared (.ir), and NFC (.nfc)
 
 ## Features
 
-* [Playback of rfid, sub-ghz, IR signals](README.md#signal-playback)
+* [Playback of rfid, sub-ghz, IR, NFC signals](README.md#signal-playback)
 * [Easy navigation](README.md#navigation--controls)
 * [Flexible signal organization](README.md#signal-organization) - utilizing the SDcard filesystem
 * [In-app file management](README.md#action-settings) - rename, delete, import
@@ -66,6 +66,7 @@ Long pressing the `Right` button will launch a settings menu for the currently s
 * Rename: Allows you to rename the selected item. Useful for changing sorting order. The file extension is preserved on signal files. **Note: folder renaming is broken right now**
 * Delete: Deletes files and folders - folders must be empty
 * Import Here: Launches file browser to let you select a signal file from anywhere on the SDcard and then copies it to the current folder.
+  * When importing an IR file, you are prompted to select which IR command to import. This individual command is imported as it's own `.ir` file into the current location.
 * Create Group: Prompts for the name of a new folder that will be created at that point in the folder structure.
 
 ## Playlists
@@ -111,7 +112,10 @@ The settings menu will appear as the last item when you are viewing the "root" d
 * Show Icons: Toggles display of all icons
 * Show Headers: Toggles display of header/folder text at the top, giving you room for one more item on screen!
 * RFID Duration: Changes the length of time a RFID signal is transmitted. Within playlists, this can be overridden per `.rfid` file.
+* NFC Duration: Changes the length of time a NFC signal is transmitted. Within playlists, this can be overridden per `.nfc` file.
 * SubGhz Ext Ant: Whether to try using the external antenna for sub-ghz signals. If this is "Enabled" but no external antenna is attached, or the external antenna can't be accessed, Quac! will fall back to using the internal antenna.
+* Show Hidden: Will display files and folders that start with a period (`.`)
+* About: Application info
 
 ## On deck
 
