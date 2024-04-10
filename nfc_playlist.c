@@ -10,7 +10,8 @@ static void (*const nfc_playlist_scene_on_enter_handlers[])(void*) = {
    nfc_playlist_file_rename_scene_on_enter,
    nfc_playlist_confirm_delete_scene_on_enter,
    nfc_playlist_view_playlist_content_scene_on_enter,
-   nfc_playlist_nfc_select_scene_on_enter
+   nfc_playlist_nfc_select_scene_on_enter,
+   nfc_playlist_name_new_file_scene_on_enter
 };
 
 static bool (*const nfc_playlist_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
@@ -22,7 +23,8 @@ static bool (*const nfc_playlist_scene_on_event_handlers[])(void*, SceneManagerE
    nfc_playlist_file_rename_scene_on_event,
    nfc_playlist_confirm_delete_scene_on_event,
    nfc_playlist_view_playlist_content_scene_on_event,
-   nfc_playlist_nfc_select_scene_on_event
+   nfc_playlist_nfc_select_scene_on_event,
+   nfc_playlist_name_new_file_scene_on_event
 };
 
 static void (*const nfc_playlist_scene_on_exit_handlers[])(void*) = {
@@ -34,7 +36,8 @@ static void (*const nfc_playlist_scene_on_exit_handlers[])(void*) = {
    nfc_playlist_file_rename_scene_on_exit,
    nfc_playlist_confirm_delete_scene_on_exit,
    nfc_playlist_view_playlist_content_scene_on_exit,
-   nfc_playlist_nfc_select_scene_on_exit
+   nfc_playlist_nfc_select_scene_on_exit,
+   nfc_playlist_name_new_file_scene_on_exit
 };
 
 static const SceneManagerHandlers nfc_playlist_scene_manager_handlers = {
@@ -92,6 +95,7 @@ static NfcPlaylist* nfc_playlist_alloc() {
    view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ConfirmDelete, widget_get_view(nfc_playlist->widget));
    view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ViewPlaylistContent, widget_get_view(nfc_playlist->widget));
    view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_NfcSelect, file_browser_get_view(nfc_playlist->nfc_file_browser));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_NameNewFile, text_input_get_view(nfc_playlist->text_input));
 
    Storage* storage = furi_record_open(RECORD_STORAGE);
    if (!storage_common_exists(storage, PLAYLIST_DIR)) {
@@ -114,6 +118,7 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
    view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ConfirmDelete);
    view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ViewPlaylistContent);
    view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_NfcSelect);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_NameNewFile);
 
    scene_manager_free(nfc_playlist->scene_manager);
    view_dispatcher_free(nfc_playlist->view_dispatcher);

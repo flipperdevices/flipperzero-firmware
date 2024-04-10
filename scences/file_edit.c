@@ -11,6 +11,13 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
 
    submenu_set_header(nfc_playlist->submenu, "Edit Playlist");
 
+   submenu_add_item(
+      nfc_playlist->submenu,
+      "Create Playlist",
+      NfcPlaylistMenuSelection_CreatePlaylist,
+      nfc_playlist_file_edit_menu_callback,
+      nfc_playlist);
+
    submenu_add_lockable_item(
       nfc_playlist->submenu,
       "Delete Playlist",
@@ -55,6 +62,10 @@ bool nfc_playlist_file_edit_scene_on_event(void* context, SceneManagerEvent even
    bool consumed = false;
    if(event.type == SceneManagerEventTypeCustom) {
       switch(event.event) {
+         case NfcPlaylistMenuSelection_CreatePlaylist:
+            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_NameNewFile);
+            consumed = true;
+            break;
          case NfcPlaylistMenuSelection_DeletePlaylist:
             scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_ConfirmDelete);
             consumed = true;

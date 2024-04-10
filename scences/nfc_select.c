@@ -15,7 +15,11 @@ void nfc_playlist_nfc_select_menu_callback(void* context) {
       furi_string_push_back(playlist_content, buffer[i]);
    }
 
-   furi_string_printf(playlist_content, "\n%s", furi_string_get_cstr(nfc_playlist->file_browser_output));
+   if (read_count > 0) {
+      furi_string_printf(playlist_content, "\n%s", furi_string_get_cstr(nfc_playlist->file_browser_output));
+   } else {
+      furi_string_printf(playlist_content, "%s", furi_string_get_cstr(nfc_playlist->file_browser_output));
+   }
 
    storage_file_write(file, furi_string_get_cstr(playlist_content), sizeof(char) * furi_string_utf8_length(playlist_content));
 

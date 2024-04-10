@@ -9,6 +9,7 @@ bool nfc_playlist_file_edit_scene_on_event(void* context, SceneManagerEvent even
 void nfc_playlist_file_edit_scene_on_exit(void* context);
 
 typedef enum {
+   NfcPlaylistMenuSelection_CreatePlaylist,
    NfcPlaylistMenuSelection_DeletePlaylist,
    NfcPlaylistMenuSelection_RenamePlaylist,
    NfcPlaylistMenuSelection_ViewPlaylistContent,

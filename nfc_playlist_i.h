@@ -8,3 +8,4 @@
 #include "scences/confirm_delete.h"
 #include "scences/view_playlist_content.h"
 #include "scences/nfc_select.h"
+#include "scences/name_new_file.h"

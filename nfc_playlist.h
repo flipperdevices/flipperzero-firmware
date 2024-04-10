@@ -26,6 +26,7 @@ typedef enum {
    NfcPlaylistView_ConfirmDelete,
    NfcPlaylistView_ViewPlaylistContent,
    NfcPlaylistView_NfcSelect,
+   NfcPlaylistView_NameNewFile
 } NfcPlayScenesView;
 
 typedef enum {
@@ -38,6 +39,7 @@ typedef enum {
    NfcPlaylistScene_ConfirmDelete,
    NfcPlaylistScene_ViewPlaylistContent,
    NfcPlaylistScene_NfcSelect,
+   NfcPlaylistScene_NameNewFile,
    NfcPlaylistScene_count
 } NfcPlaylistScene;
 
