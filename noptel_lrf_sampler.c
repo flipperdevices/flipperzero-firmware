@@ -853,10 +853,10 @@ static void about_view_draw_callback(Canvas *canvas, void *model) {
     /* Draw the splash screen with the version number */
     case 0:
 
-      /* Draw the first screen's background */
+      /* Draw the screen's background */
       canvas_draw_icon(canvas, 0, 0, &I_about_splash);
 
-      /* Superimpose the app's version number */
+      /* Draw the app's version number */
       canvas_set_font(canvas, FontPrimary);
       canvas_draw_str(canvas, 1, 64, "v");
       canvas_draw_str(canvas, 6, 64, VERSION);
@@ -890,22 +890,22 @@ static void about_view_draw_callback(Canvas *canvas, void *model) {
 
       break;
 
-    /* Draw the with the description of the GPIO pin connections */
+    /* Draw the screen showing the GPIO pin connections */
     case 2:
 
-      /* Draw the second screen's background */
+      /* Draw the screen's background */
       canvas_draw_icon(canvas, 0, 0, &I_about_gpio_pin_connections);
 
-      /* Superimpose the heading */
+      /* Draw the title */
       canvas_set_font(canvas, FontPrimary);
       canvas_draw_str(canvas, 11, 8, "GPIO pin connections");
       canvas_draw_line(canvas, 11, 10, 115, 10);
 
-      /* Write "LRF" over the LRF side of the pinout diagram */
+      /* Draw "LRF" over the LRF side of the pinout diagram */
       canvas_set_font(canvas, FontSecondary);
       canvas_draw_str(canvas, 56, 22, "LRF");
 
-      /* Write "Flipper Zero" under the Flipper side of the pinout diagram */
+      /* Draw "Flipper Zero" under the Flipper side of the pinout diagram */
       canvas_draw_str(canvas, 39, 62, "Flipper Zero");
 
       /* Draw a left arrow at the top left */
@@ -1087,12 +1087,12 @@ static uint32_t return_to_submenu_callback(void *ctx) {
 
 
 
-/* Handle back button presses */
-static uint32_t navigation_exit_callback(void *ctx) {
+/* Callback to exit the submenu and the app altogether */
+static uint32_t submenu_exit_callback(void *ctx) {
 
   UNUSED(ctx);
 
-  /* Set the view to VIEW_NONE to Exit */
+  /* Set the view to VIEW_NONE to exit */
   FURI_LOG_I(TAG, "Exit");
   return VIEW_NONE;
 }
@@ -1316,7 +1316,7 @@ static App *app_init() {
   /* Allocate space for the submenu */
   app->submenu = submenu_alloc();
 
-  /* Add configuration submenu items */
+  /* Add submenu items */
   submenu_add_item(app->submenu, "Configuration",
 			submenu_config, submenu_callback, app);
 
@@ -1331,7 +1331,7 @@ static App *app_init() {
 
   /* Configure the "previous" callback for the submenu, which exits the app */
   view_set_previous_callback(submenu_get_view(app->submenu),
-				navigation_exit_callback);
+				submenu_exit_callback);
 
   /* Add the submenu view */
   view_dispatcher_add_view(app->view_dispatcher, view_submenu,
@@ -1534,6 +1534,10 @@ static void app_free(App *app) {
   /* Remove the about view */
   view_dispatcher_remove_view(app->view_dispatcher, view_about);
   view_free(app->about_view);
+
+  /* Remove the LRF info view */
+  view_dispatcher_remove_view(app->view_dispatcher, view_lrfinfo);
+  view_free(app->lrfinfo_view);
 
   /* Remove the sample view */
   view_dispatcher_remove_view(app->view_dispatcher, view_sample);
