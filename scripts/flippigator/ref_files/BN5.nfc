@@ -1,0 +1,27 @@
+Filetype: Flipper NFC device
+Version: 4
+# Device type can be ISO14443-3A, ISO14443-3B, ISO14443-4A, ISO14443-4B, ISO15693-3, FeliCa, NTAG/Ultralight, Mifare Classic, Mifare DESFire, SLIX, ST25TB
+Device type: Mifare DESFire
+# UID is common for all formats
+UID: 04 48 6A 32 33 58 80
+# ISO14443-3A specific data
+ATQA: 03 44
+SAK: 20
+# ISO14443-4A specific data
+T0: 75
+TA(1): 77
+TB(1): 81
+TC(1): 02
+T1...Tk: 80
+# Mifare DESFire specific data
+PICC Version: 04 01 01 01 00 1A 05 04 01 01 01 04 1A 05 04 48 6A 32 33 58 80 B9 0C 17 49 80 28 17
+PICC Free Memory: 7936
+PICC Change Key ID: 00
+PICC Config Changeable: true
+PICC Free Create Delete: true
+PICC Free Directory List: true
+PICC Key Changeable: true
+PICC Flags: 00
+PICC Max Keys: 01
+PICC Key 0 Version: 00
+Application Count: 0

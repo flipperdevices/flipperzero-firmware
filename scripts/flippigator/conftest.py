@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import time
+from datetime import datetime
 
 import allure
 import pytest
@@ -102,12 +103,20 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     # here you can add setup before launching session!
-    if config.getoption("--port"):
-        reboot_flipper(config.getoption("--port"))
-    if config.getoption("--bench-ibutton-ir"):
-        reboot_flipper(config.getoption("--flipper-r-port"))
-        reboot_flipper(config.getoption("--flipper-k-port"))
+    if not os.path.exists('reports'):
+        os.makedirs('reports')
+    config.option.htmlpath = 'reports/'+datetime.now().strftime("%d-%m-%Y %H-%M-%S")+".html"
 
+    if config.getoption("--relay-port"):
+        relay_serial = serial.Serial(config.getoption("--relay-port"), timeout=1)
+        time.sleep(10)
+    else:
+        if config.getoption("--port"):
+            reboot_flipper(config.getoption("--port"))
+        if config.getoption("--bench-ibutton-ir"):
+            reboot_flipper(config.getoption("--flipper-r-port"))
+            reboot_flipper(config.getoption("--flipper-k-port"))
+        time.sleep(2)
     if config.getoption("--update-flippers"):
         chan = config.getoption("--update-flippers")
         update_firmware(config.getoption("--port"), chan)
@@ -136,12 +145,12 @@ def reboot_flipper(port):
         except serial.serialutil.SerialException:
             time.sleep(1)
             print(
-                "Waiting for flipper boot after reboot"
+                "Waiting for flipper boot after reboot "
                 + str(int(time.time() - start_time))
                 + "s"
             )
             logging.debug(
-                "Waiting for flipper boot after reboot"
+                "Waiting for flipper boot after reboot "
                 + str(int(time.time() - start_time))
                 + "s"
             )
@@ -371,7 +380,7 @@ def relay_serial(request):
     relay_serial = serial.Serial(port, timeout=1)  # Надо будет переделать!!!
     relay_serial.baudrate = 115200
 
-    time.sleep(3)
+    time.sleep(5)
 
     relay_serial.flushOutput()
     relay_serial.flushInput()
@@ -601,13 +610,14 @@ def reader_indala(reader_serial, gator, request) -> Reader:
         return reader
 
 
-@pytest.fixture(scope="session", autouse=False)
+@pytest.fixture(scope="session", autouse=True)
 def relay(relay_serial, gator, request) -> Relay:
     bench = request.config.getoption("--bench-ibutton-ir")
     if bench:
         logging.debug("Relay module initialization")
 
         relay = Relay(relay_serial)
+        relay.reset()
 
         logging.debug("Relay module initialization complete")
         return relay

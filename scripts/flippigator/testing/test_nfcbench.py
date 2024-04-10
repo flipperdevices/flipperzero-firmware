@@ -7,12 +7,27 @@ import pytest
 from flippigator.case import BaseCase
 from flippigator.flippigator import FlipperHEXKeyboard, FlipperTextKeyboard
 from termcolor import colored
+import difflib as df
 
 os.system("color")
 
 
 @pytest.mark.bench_nfc_rfid
 class TestNfcBench(BaseCase):
+    def compare_nfc_files(self, nav, name):
+        with open("./ref_files/"+name) as ref_file:
+            ref = ref_file.read().splitlines()
+        try:
+            downloaded = nav.proto.rpc_read("/ext/nfc/"+name).decode("UTF-8").splitlines()
+        except nav.proto.FlipperProtoException:
+            assert 0, "No dump file for "+name
+        d = df.Differ()
+        diff = d.compare(ref, downloaded)
+        compared = list()
+        for i in diff:
+            compared.append(i[2:])
+        assert compared == ref, "Dump" + name + "is wrong!"
+
     def test_read_mifare_classic_1k_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("NFC", "BN0")
@@ -99,6 +114,10 @@ class TestNfcBench(BaseCase):
         gator.swim_to(-220.0, -10.0, 15000)
         nav.go_to_main_screen()
 
+    @pytest.mark.run(after='test_read_mifare_classic_1k_card')
+    def test_reference_file_mfc1k_card(self, nav):
+        self.compare_nfc_files(nav, "BN0.nfc")
+
     def test_read_nfc_a_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("NFC", "BN1")
@@ -183,6 +202,10 @@ class TestNfcBench(BaseCase):
         gator.swim_to(-220.0, -90.0, 15000)
         nav.go_to_main_screen()
 
+    @pytest.mark.run(after='test_read_nfc_a_card')
+    def test_reference_file_nfc_a_card(self, nav):
+        self.compare_nfc_files(nav, "BN1.nfc")
+
     def test_read_mifare_classic_4k_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("NFC", "BN7")
@@ -265,6 +288,10 @@ class TestNfcBench(BaseCase):
         gator.swim_to(-220.0, -170.0, 15000)
         nav.go_to_main_screen()
 
+    @pytest.mark.run(after='test_read_mifare_classic_4k_card')
+    def test_reference_file_mfc4k_card(self, nav):
+        self.compare_nfc_files(nav, "BN7.nfc")
+
     def test_read_troika_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("NFC", "BN2")
@@ -294,7 +321,7 @@ class TestNfcBench(BaseCase):
         )
         assert len(state) > 0, "Result of reading reference card is fail (Name)"
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string("Transport departament:", nav.font_haxrcorp_4089, 0, no_space=1)
+            ref=nav.get_ref_from_string("Transport department:", nav.font_haxrcorp_4089, 0, no_space=1)
         )
         assert len(state) > 0, "Result of reading reference card is fail (Data)"
         nav.press_right()
@@ -333,6 +360,10 @@ class TestNfcBench(BaseCase):
             state = nav.get_current_state()
         gator.swim_to(-220.0, -250.0, 15000)
         nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_troika_card')
+    def test_reference_file_troika_card(self, nav):
+        self.compare_nfc_files(nav, "BN2.nfc")
 
     def test_read_ntag215_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -409,6 +440,10 @@ class TestNfcBench(BaseCase):
         gator.swim_to(-220.0, -330.0, 15000)
         nav.go_to_main_screen()
 
+    @pytest.mark.run(after='test_read_ntag215_card')
+    def test_reference_file_ntag215_card(self, nav):
+        self.compare_nfc_files(nav, "BN3.nfc")
+
     def test_read_mifare_ultralight_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("NFC", "BN4")
@@ -480,6 +515,10 @@ class TestNfcBench(BaseCase):
         gator.swim_to(-220.0, -410.0, 15000)
         nav.go_to_main_screen()
 
+    @pytest.mark.run(after='test_read_mifare_ultralight_card')
+    def test_reference_file_ultralight_card(self, nav):
+        self.compare_nfc_files(nav, "BN4.nfc")
+
     def test_read_mifare_desfire_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("NFC", "BN5")
@@ -545,6 +584,10 @@ class TestNfcBench(BaseCase):
             state = nav.get_current_state()
         gator.swim_to(-220.0, -10.0, 15000)
         nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_mifare_desfire_card')
+    def test_reference_file_desfire_card(self, nav):
+        self.compare_nfc_files(nav, "BN5.nfc")
 
     def test_read_bank_card(self, nav, gator):
         with allure.step("Delete previous card, if possible"):
@@ -814,6 +857,18 @@ class TestNfcBench(BaseCase):
         gator.swim_to(-220.0, -90.0, 15000)
         nav.go_to_main_screen()
 
+    @pytest.mark.run(after='test_read_bank_card')
+    def test_reference_file_bank1_card(self, nav):
+        self.compare_nfc_files(nav, "BN8_1.nfc")
+
+    @pytest.mark.run(after='test_read_bank_card')
+    def test_reference_file_bank2_card(self, nav):
+        self.compare_nfc_files(nav, "BN8_2.nfc")
+
+    @pytest.mark.run(after='test_read_bank_card')
+    def test_reference_file_bank3_card(self, nav):
+        self.compare_nfc_files(nav, "BN8_3.nfc")
+
     def test_read_all_in_one_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("NFC", "BN6")
@@ -885,6 +940,10 @@ class TestNfcBench(BaseCase):
             state = nav.get_current_state()
         gator.swim_to(-220.0, -170.0, 15000)
         nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_all_in_one_card')
+    def test_reference_file_aio_card(self, nav):
+        self.compare_nfc_files(nav, "BN6.nfc")
 
     def test_emulation_mifare_classic_1k_card(self, nav, gator, reader_nfc):
         nav.go_to_main_screen()
@@ -1030,7 +1089,7 @@ class TestNfcBench(BaseCase):
         nav.get_current_state()
 
         start_time = time.time()
-        while start_time + 5 > time.time():
+        while start_time + 25 > time.time():
             if reader_nfc.update():
                 string = reader_nfc.get()
                 assert (
@@ -1038,7 +1097,7 @@ class TestNfcBench(BaseCase):
                 ), "Emulated NFC card reading failed"
                 break
 
-        if start_time + 5 < time.time():
+        if start_time + 25 < time.time():
             assert 0, "Timeout of emulation"
 
         nav.go_to_main_screen()

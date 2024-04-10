@@ -1,0 +1,15 @@
+Filetype: Flipper NFC device
+Version: 4
+# Device type can be ISO14443-3A, ISO14443-3B, ISO14443-4A, ISO14443-4B, ISO15693-3, FeliCa, NTAG/Ultralight, Mifare Classic, Mifare DESFire, SLIX, ST25TB
+Device type: ISO14443-4A
+# UID is common for all formats
+UID: 8E C5 C8 AF
+# ISO14443-3A specific data
+ATQA: 00 04
+SAK: 28
+# ISO14443-4A specific data
+T0: 78
+TA(1): 80
+TB(1): 75
+TC(1): 02
+T1...Tk: 86 65 00 A7 08 C0 55 00 90 00

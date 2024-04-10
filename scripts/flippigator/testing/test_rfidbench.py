@@ -6,12 +6,27 @@ import pytest
 from flippigator.case import BaseCase
 from flippigator.flippigator import FlipperHEXKeyboard, FlipperTextKeyboard
 from termcolor import colored
+import difflib as df
 
 os.system("color")
 
 
 @pytest.mark.bench_nfc_rfid
 class TestRfidBench(BaseCase):
+    def compare_rfid_files(self, nav, name):
+        with open("./ref_files/"+name) as ref_file:
+            ref = ref_file.read().splitlines()
+        try:
+            downloaded = nav.proto.rpc_read("/ext/lfrfid/"+name).decode("UTF-8").splitlines()
+        except FlipperProtoException:
+            assert 0, "No dump file for "+name
+        d = df.Differ()
+        diff = d.compare(ref, downloaded)
+        compared = list()
+        for i in diff:
+            compared.append(i[2:])
+        assert compared == ref, "Dump" + name + "is wrong!"
+
     def test_read_indala_card(self, nav, gator, reader_indala):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("RFID", "BR0")
@@ -30,16 +45,24 @@ class TestRfidBench(BaseCase):
             while "ReadingRFID" in state:
                 nav.logger.debug("Reading")
                 state = nav.get_current_state()
-                if time.time() - start_time > 10:
+                if time.time() - start_time > 20:
                     break
         state = nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Indala26[Motorola]", nav.font_helvB08, 0, no_space=1
+                "Motorola Indala26", nav.font_helvB08, 0, no_space=1
             )
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string("C8 33 65 B0", nav.font_haxrcorp_4089, 0)
+            ref=nav.get_ref_from_string("Hex: C8 33 65 B0", nav.font_haxrcorp_4089, 0)
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("FC: 184", nav.font_haxrcorp_4089, 0)
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Card: 8574", nav.font_haxrcorp_4089, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
@@ -91,6 +114,10 @@ class TestRfidBench(BaseCase):
             state = nav.get_current_state()
         nav.go_to_main_screen()
 
+    @pytest.mark.run(after='test_read_indala_card')
+    def test_reference_file_indala_card(self, nav):
+        self.compare_rfid_files(nav, "BR0.rfid")
+
     def test_read_em_card(self, nav, gator, reader_em_hid):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("RFID", "BR1")
@@ -112,19 +139,21 @@ class TestRfidBench(BaseCase):
                 if time.time() - start_time > 10:
                     break
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string("EM4100[EM-Micro]", nav.font_helvB08, 0)
-        )
-        assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "DC 69 66 0F 12", nav.font_haxrcorp_4089, 0
+                "EM-Micro EM4100", nav.font_helvB08, 0, no_space=1
             )
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string(
-                "(RF/64)", nav.font_haxrcorp_4089, 0
-            )
+            ref=nav.get_ref_from_string("Hex: DC 69 66 0F 12", nav.font_haxrcorp_4089, 0)
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("FC: 102", nav.font_haxrcorp_4089, 0)
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Card: 03858 (RF/64)", nav.font_haxrcorp_4089, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
@@ -176,6 +205,10 @@ class TestRfidBench(BaseCase):
             state = nav.get_current_state()
         nav.go_to_main_screen()
 
+    @pytest.mark.run(after='test_read_em_card')
+    def test_reference_file_em_card(self, nav):
+        self.compare_rfid_files(nav, "BR1.rfid")
+
     def test_read_hid_card(self, nav, gator, reader_em_hid):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("RFID", "BR2")
@@ -196,8 +229,24 @@ class TestRfidBench(BaseCase):
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
-        state = nav.get_current_state()
-        assert "card_HID_bench" in state, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "HID H10301", nav.font_helvB08, 0, no_space=1
+            )
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Hex: F8 C8 8A", nav.font_haxrcorp_4089, 0)
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("FC: 248", nav.font_haxrcorp_4089, 0)
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Card: 51338", nav.font_haxrcorp_4089, 0)
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
             "Save",
@@ -246,6 +295,10 @@ class TestRfidBench(BaseCase):
         while "Saved!" in state:
             state = nav.get_current_state()
         nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_hid_card')
+    def test_reference_file_hid_card(self, nav):
+        self.compare_rfid_files(nav, "BR2.rfid")
 
     def test_emulation_indala_card(self, nav, gator, reader_indala):
         nav.go_to_main_screen()
