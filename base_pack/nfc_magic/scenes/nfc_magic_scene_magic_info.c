@@ -47,7 +47,7 @@ void nfc_magic_scene_magic_info_on_enter(void* context) {
 
         furi_string_printf(
             message,
-            "Configured As %s",
+            "Configured As:\n%s",
             gen4_get_configuration_name(&instance->gen4_data->config));
 
         widget_add_string_multiline_element(
