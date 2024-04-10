@@ -18,16 +18,16 @@ https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/e14cb0
 
 Start the application in **Apps ▶ GPIO**
 
-![Location of the Noptel LRF sampler app in the GPIO menu](screenshots/8-gpio_menu.png)
+![Location of the Noptel LRF sampler app in the GPIO menu](screenshots/9-gpio_menu.png)
 
 The main menu opens:
 
-![Main menu](screenshots/7-main_menu.png)
+![Main menu](screenshots/8-main_menu.png)
 
 
 ### Configuration
 
-![Configuration menu](screenshots/6-configuration_menu.png)
+![Configuration menu](screenshots/7-configuration_menu.png)
 
 In the configuration menu, select the sampling mode:
 
@@ -83,9 +83,11 @@ Select the **LRF information** option to view the LRF's identification informati
 
 Gives information about the app and the GPIO pin connections needed to connect an LRF rangefinder to the Flipper Zero. Use the **OK** button or the arrows to switch pages.
 
-![App information](screenshots/4-about.png)
+![App version](screenshots/4-splash_version.png)
 
-![GPIO pin connections](screenshots/5-gpio_pin_connections.png)
+![App description](screenshots/5-app_description.png)
+
+![GPIO pin connections](screenshots/6-gpio_pin_connections.png)
 
 
 
