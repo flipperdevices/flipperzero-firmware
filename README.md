@@ -27,7 +27,6 @@ As i know these firmwares are supported and working if you know any more please 
 - View playlist content (Allows you to view the items in the playlist)
 ## Development plans/ideas:
 Things i would like to add:
-- Ability to add cards to playlists
 - Ability to remove cards from the playlist
 
 These features are not guaranteed to be added but are being looked at as features to add

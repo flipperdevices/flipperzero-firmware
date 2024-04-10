@@ -6,11 +6,10 @@ void nfc_playlist_view_playlist_content_scene_on_enter(void* context) {
 
    Storage* storage = furi_record_open(RECORD_STORAGE);
    File* file = storage_file_alloc(storage);
-   uint8_t buffer[8000];
-   FuriString* playlist_content = furi_string_alloc();
-
+   uint8_t buffer[MAX_PLAYLIST_SIZE];
    storage_file_open(file, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ, FSOM_OPEN_EXISTING);
-   uint16_t read_count = storage_file_read(file, buffer, 8000);
+   uint16_t read_count = storage_file_read(file, buffer, MAX_PLAYLIST_SIZE);
+   FuriString* playlist_content = furi_string_alloc();
 
    for(uint16_t i = 0; i < read_count; i++) {
       furi_string_push_back(playlist_content, buffer[i]);

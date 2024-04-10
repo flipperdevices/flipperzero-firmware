@@ -8,3 +8,5 @@
 void nfc_playlist_view_playlist_content_scene_on_enter(void* context);
 bool nfc_playlist_view_playlist_content_scene_on_event(void* context, SceneManagerEvent event);
 void nfc_playlist_view_playlist_content_scene_on_exit(void* context);
+
+#define MAX_PLAYLIST_SIZE 1000

@@ -38,6 +38,15 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
       furi_string_empty(nfc_playlist->settings.file_path),
       "No\nplaylist\nselected");
 
+   submenu_add_lockable_item(
+      nfc_playlist->submenu,
+      "Add NFC Item",
+      NfcPlaylistMenuSelection_AddNfcItem,
+      nfc_playlist_file_edit_menu_callback,
+      nfc_playlist,
+      furi_string_empty(nfc_playlist->settings.file_path),
+      "No\nplaylist\nselected");
+
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit);
 }
 
@@ -56,6 +65,10 @@ bool nfc_playlist_file_edit_scene_on_event(void* context, SceneManagerEvent even
             break;
          case NfcPlaylistMenuSelection_ViewPlaylistContent:
             scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_ViewPlaylistContent);
+            consumed = true;
+            break;
+         case NfcPlaylistMenuSelection_AddNfcItem:
+            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_NfcSelect);
             consumed = true;
             break;
          default:

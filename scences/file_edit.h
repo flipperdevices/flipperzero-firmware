@@ -11,5 +11,6 @@ void nfc_playlist_file_edit_scene_on_exit(void* context);
 typedef enum {
    NfcPlaylistMenuSelection_DeletePlaylist,
    NfcPlaylistMenuSelection_RenamePlaylist,
-   NfcPlaylistMenuSelection_ViewPlaylistContent
+   NfcPlaylistMenuSelection_ViewPlaylistContent,
+   NfcPlaylistMenuSelection_AddNfcItem
 } NfcPlaylistFileEditMenuSelection;

@@ -24,7 +24,8 @@ typedef enum {
    NfcPlaylistView_FileEdit,
    NfcPlaylistView_FileRename,
    NfcPlaylistView_ConfirmDelete,
-   NfcPlaylistView_ViewPlaylistContent
+   NfcPlaylistView_ViewPlaylistContent,
+   NfcPlaylistView_NfcSelect,
 } NfcPlayScenesView;
 
 typedef enum {
@@ -36,6 +37,7 @@ typedef enum {
    NfcPlaylistScene_FileRename,
    NfcPlaylistScene_ConfirmDelete,
    NfcPlaylistScene_ViewPlaylistContent,
+   NfcPlaylistScene_NfcSelect,
    NfcPlaylistScene_count
 } NfcPlaylistScene;
 
@@ -52,6 +54,7 @@ typedef struct {
    ViewDispatcher* view_dispatcher;
    VariableItemList* variable_item_list;
    FileBrowser* playlist_file_browser;
+   FileBrowser* nfc_file_browser;
    FuriString* file_browser_output;
    TextInput* text_input;
    char* text_input_output;
