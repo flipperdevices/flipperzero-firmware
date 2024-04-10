@@ -327,6 +327,7 @@ extern void* pvPortRealloc(void* pv, size_t xSize) {
     memmgr_unlock();
 
     // clear remain block content, if the new size is bigger
+    // can't guarantee that all data will be zeroed, cos tlsf_block_size is not always the same as xSize
     if(xSize > old_size) {
         memset((uint8_t*)data + old_size, 0, xSize - old_size);
     }
