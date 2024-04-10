@@ -25,6 +25,7 @@ As i know these firmwares are supported and working if you know any more please 
 - Delete playlist (Deletes the selected playlist)
 - Rename playlist (Renames the selected playlist to the new name provided)
 - View playlist content (Allows you to view the items in the playlist)
+- Add NFC Item (Allows you to select a NFC item to add to the end of playlist)
 ## Development plans/ideas:
 Things i would like to add:
 - Ability to remove cards from the playlist
