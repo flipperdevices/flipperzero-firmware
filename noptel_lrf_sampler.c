@@ -850,24 +850,51 @@ static void about_view_draw_callback(Canvas *canvas, void *model) {
   /* Which screen should we draw? */
   switch(about_model->screen) {
 
-    /* Draw the first screen with the version number */
+    /* Draw the splash screen with the version number */
     case 0:
 
       /* Draw the first screen's background */
-      canvas_draw_icon(canvas, 0, 0, &I_about_screen1);
+      canvas_draw_icon(canvas, 0, 0, &I_about_splash);
 
       /* Superimpose the app's version number */
       canvas_set_font(canvas, FontPrimary);
       canvas_draw_str(canvas, 1, 64, "v");
       canvas_draw_str(canvas, 6, 64, VERSION);
 
+      /* Draw a right arrow at the top right */
+      canvas_draw_icon(canvas, 124, 0, &I_arrow_right);
+
       break;
 
-    /* Draw the second screen with the pinout */
+    /* Draw the app purpose description screen */
     case 1:
 
+      /* Draw the title */
+      canvas_set_font(canvas, FontPrimary);
+      canvas_draw_str(canvas, 15, 8, "Noptel LRF sampler");
+      canvas_draw_line(canvas, 15, 10, 113, 10);
+
+      /* Draw the URL */
+      canvas_draw_str(canvas, 25, 62, "https://noptel.fi");
+
+      /* Draw the description */
+      canvas_set_font(canvas, FontSecondary);
+      canvas_draw_str(canvas, 10, 29, "Get measurements from a");
+      canvas_draw_str(canvas, 15, 40, "Noptel LRF Rangefinder");
+
+      /* Draw a left arrow at the top left */
+      canvas_draw_icon(canvas, 0, 0, &I_arrow_left);
+
+      /* Draw a right arrow at the top right */
+      canvas_draw_icon(canvas, 124, 0, &I_arrow_right);
+
+      break;
+
+    /* Draw the with the description of the GPIO pin connections */
+    case 2:
+
       /* Draw the second screen's background */
-      canvas_draw_icon(canvas, 0, 0, &I_about_screen2);
+      canvas_draw_icon(canvas, 0, 0, &I_about_gpio_pin_connections);
 
       /* Superimpose the heading */
       canvas_set_font(canvas, FontPrimary);
@@ -879,6 +906,9 @@ static void about_view_draw_callback(Canvas *canvas, void *model) {
 
       /* Write "Flipper Zero" under the Flipper side of the pinout diagram */
       canvas_draw_str(canvas, 39, 62, "Flipper Zero");
+
+      /* Draw a left arrow at the top left */
+      canvas_draw_icon(canvas, 0, 0, &I_arrow_left);
 
       break;
   }
@@ -901,14 +931,14 @@ static bool about_view_input_callback(InputEvent *evt, void *ctx) {
       /* OK button: cycle screens */
       case InputKeyOk:
         FURI_LOG_I(TAG, "OK button pressed");
-        about_model->screen = (about_model->screen + 1) % 2;
+        about_model->screen = (about_model->screen + 1) % 3;
         evt_handled = true;
         break;
 
       /* Right button: go to the next screen */
       case InputKeyRight:
         FURI_LOG_I(TAG, "Right button pressed");
-        about_model->screen = about_model->screen < 1? about_model->screen + 1 :
+        about_model->screen = about_model->screen < 2? about_model->screen + 1 :
 							about_model->screen;
         evt_handled = true;
         break;
@@ -916,7 +946,7 @@ static bool about_view_input_callback(InputEvent *evt, void *ctx) {
       /* Down button: go to the next screen */
       case InputKeyDown:
         FURI_LOG_I(TAG, "Down button pressed");
-        about_model->screen = about_model->screen < 1? about_model->screen + 1 :
+        about_model->screen = about_model->screen < 2? about_model->screen + 1 :
 							about_model->screen;
         evt_handled = true;
         break;
