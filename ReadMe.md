@@ -146,7 +146,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | T-rex game | ![Games Badge] | [by Rrycbarm](https://github.com/Rrycbarm/t-rex-runner) |  | [![UFW Badge]](https://lab.flipper.net/apps/t_rex_runner) |
 | TAMA P1 | ![Games Badge] | [by GMMan & DroomOne](https://github.com/GMMan/flipperzero-tamagotch-p1) | requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` folder on SD renamed as `rom.bin` to make it work. - Modified to allow saving game state by [DroomOne](https://github.com/DroomOne/flipperzero-tamagotch-p1) - Mute mode & settings by [Round-Pi](https://github.com/Round-Pi/flipperzero-tamagotch-p1) | ![None Badge] |
 | Tanks Game | ![Games Badge] | [by alexgr13](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) | Fixes for latest subghz changes **by @Sil333033** | ![None Badge] |
-| Tic-Tac-Toe Multi | ![Games Badge] | [by RouNNdeL](https://github.com/RouNNdeL/flipper-tictactoe-multi) |  | [![UFW Badge]](https://lab.flipper.net/apps/ttt_multi) |
 | Video Poker | ![Games Badge] | [by PixlEmly](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c) |  | [![UFW Badge]](https://lab.flipper.net/apps/videopoker) |
 | Yatzee | ![Games Badge] | [by emfleak](https://github.com/emfleak/flipperzero-yatzee) |  | [![UFW Badge]](https://lab.flipper.net/apps/yatzee) |
 | Secret Toggle | ![Games Badge] | [by nostrumuva](https://github.com/nostrumuva/secret_toggle) |  | [![Author Badge]](https://lab.flipper.net/apps/secret_toggle) |
