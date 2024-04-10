@@ -8,6 +8,7 @@
 /*** Includes ***/
 #include <furi.h>
 #include <furi_hal.h>
+#include <storage/storage.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
@@ -33,6 +34,9 @@
 
 
 /*** Parameters ***/
+static const char *config_file = STORAGE_APP_DATA_PATH_PREFIX
+				"/noptel_lrf_sampler.save";
+
 static const char *config_freq_label = "Frequency";
 static int16_t config_freq_values[] = {-1, 1, 4, 10, 20, 100, 200};
 static char *config_freq_names[] = {"SMM", "1 Hz", "4 Hz", "10 Hz",
@@ -97,7 +101,7 @@ typedef enum {
 
 
 
-/** Sampler model **/
+/** Configuration values **/
 typedef struct {
 
   /* LRF frequency */
@@ -107,7 +111,17 @@ typedef struct {
   uint8_t avg;
 
   /* Beep option */
-  bool beep;
+  uint8_t beep;
+
+} Config;
+
+
+
+/** Sampler model **/
+typedef struct {
+
+  /* Configuration values */
+  Config config;
 
   /* Scratchpad string */
   char spstr[32];
@@ -172,8 +186,11 @@ typedef struct {
   /* Submenu */
   Submenu *submenu;
 
-  /* Configuration  */
+  /* Configuration items */
   VariableItemList *config_list;
+  VariableItem *item_freq;
+  VariableItem *item_avg;
+  VariableItem *item_beep;
 
   /* Sample view */
   View *sample_view;
@@ -216,14 +233,167 @@ static double ms_tick_time_diff(uint32_t tstamp1, uint32_t tstamp2) {
 
 
 
+/** Load saved configuration options
+    Silently fail **/
+static void load_configuration(App *app) {
+
+  SamplerModel *sampler_model = view_get_model(app->sample_view);
+  Storage* storage;
+  File* file;
+  Config read_config;
+  bool file_read = false;
+  uint16_t bytes_read = 0;
+  uint8_t freq_idx, avg_idx, beep_idx;
+
+  /* Open storage and allocate space for the file*/
+  storage = furi_record_open(RECORD_STORAGE);
+  file = storage_file_alloc(storage);
+
+  /* Attempt to open the file */
+  if(storage_file_open(file, config_file, FSAM_READ, FSOM_OPEN_EXISTING)) {
+
+    /* Read the file */
+    bytes_read = storage_file_read(file, &read_config, sizeof(Config));
+
+    /* Close the file */
+    storage_file_close(file);
+
+    file_read = true;
+  }
+  else
+    FURI_LOG_I(TAG, "Could not read config file %s", config_file);
+
+  /* Free the file and close storage */
+  storage_file_free(file);
+  furi_record_close(RECORD_STORAGE);
+
+  /* If we couldn't read the file, give up */
+  if(!file_read)
+    return;
+
+  /* If we didn't read enough bytes, give up */
+  if(bytes_read < sizeof(Config)) {
+    FURI_LOG_I(TAG, "Read %d bytes from config file %s but %d expected",
+			bytes_read, config_file, sizeof(Config));
+    return;
+  }
+
+  /* Check that the frequency exists */
+  for(freq_idx = 0; freq_idx < COUNT_OF(config_freq_values) &&
+			read_config.freq != config_freq_values[freq_idx];
+	freq_idx++);
+
+  if(freq_idx >= COUNT_OF(config_freq_values)) {
+    FURI_LOG_I(TAG, "Invalid frequency value %d in config file %s",
+			read_config.freq, config_file);
+    return;
+  }
+
+  /* Check that the averaging time exists */
+  for(avg_idx = 0; avg_idx < COUNT_OF(config_avg_values) &&
+			read_config.avg != config_avg_values[avg_idx];
+	avg_idx++);
+
+  if(avg_idx >= COUNT_OF(config_avg_values)) {
+    FURI_LOG_I(TAG, "Invalid averaging time value %d in config file %s",
+			read_config.avg, config_file);
+    return;
+  }
+
+  /* Check that the beep option exists */
+  for(beep_idx = 0; beep_idx < COUNT_OF(config_beep_values) &&
+			read_config.beep != config_beep_values[beep_idx];
+	beep_idx++);
+
+  if(beep_idx >= COUNT_OF(config_beep_values)) {
+    FURI_LOG_I(TAG, "Invalid beep option %d in config file %s",
+			read_config.beep, config_file);
+    return;
+  }
+
+  /* Configure the frequency from the read value */
+  sampler_model->config.freq = read_config.freq;
+  variable_item_set_current_value_index(app->item_freq, freq_idx);
+  variable_item_set_current_value_text(app->item_freq,
+					config_freq_names[freq_idx]);
+
+  /* Configure the averaging time from the read value */
+  sampler_model->config.avg = read_config.avg;
+  variable_item_set_current_value_index(app->item_avg, avg_idx);
+  variable_item_set_current_value_text(app->item_avg,
+					config_avg_names[avg_idx]);
+
+  /* Configure the beep option from the read value */
+  sampler_model->config.beep = read_config.beep;
+  variable_item_set_current_value_index(app->item_beep, beep_idx);
+  variable_item_set_current_value_text(app->item_beep,
+					config_beep_names[beep_idx]);
+
+  FURI_LOG_I(TAG, "Restored config frequency %s, averaging time %s, beep %s",
+		config_freq_names[freq_idx], config_avg_names[avg_idx],
+		config_beep_names[beep_idx]);
+}
+
+
+
+/** Save configuration options
+    Silently fail **/
+static void save_configuration(App *app) {
+
+  SamplerModel *sampler_model = view_get_model(app->sample_view);
+  Storage* storage;
+  File* file;
+  bool file_written = false;
+  uint16_t bytes_written = 0;
+
+  /* Open storage and allocate space for the file*/
+  storage = furi_record_open(RECORD_STORAGE);
+  file = storage_file_alloc(storage);
+
+  /* Attempt to open the file */
+  if(storage_file_open(file, config_file, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+
+    /* Write the file */
+    bytes_written = storage_file_write(file, &sampler_model->config,
+					sizeof(Config));
+    /* Close the file */
+    storage_file_close(file);
+
+    file_written = true;
+  }
+  else
+    FURI_LOG_I(TAG, "Could not open config file %s for writing", config_file);
+
+  /* Free the file and close storage */
+  storage_file_free(file);
+  furi_record_close(RECORD_STORAGE);
+
+  /* If we couldn't write the file, stop now */
+  if(!file_written)
+    return;
+
+  /* If we didn't write the correct number of bytes, log the error */
+  if(bytes_written != sizeof(Config))
+    FURI_LOG_I(TAG, "Wrote %d bytes to config file %s but %d expected",
+			bytes_written, config_file, sizeof(Config));
+
+  FURI_LOG_I(TAG, "Config saved in file %s", config_file);
+}
+
+
+
 /** Frequency setting change function **/
 static void config_freq_change(VariableItem *item) {
 
   App *app = variable_item_get_context(item);
-  uint8_t idx = variable_item_get_current_value_index(item);
   SamplerModel *sampler_model = view_get_model(app->sample_view);
+  uint8_t idx;
 
-  sampler_model->freq = config_freq_values[idx];
+  /* Get the new frequency item index */
+  idx = variable_item_get_current_value_index(item);
+
+  /* Set the new frequency */
+  sampler_model->config.freq = config_freq_values[idx];
   variable_item_set_current_value_text(item, config_freq_names[idx]);
 
   FURI_LOG_I(TAG, "Frequency change: %s", config_freq_names[idx]);
@@ -235,10 +405,14 @@ static void config_freq_change(VariableItem *item) {
 static void config_avg_change(VariableItem *item) {
 
   App *app = variable_item_get_context(item);
-  uint8_t idx = variable_item_get_current_value_index(item);
   SamplerModel *sampler_model = view_get_model(app->sample_view);
+  uint8_t idx;
 
-  sampler_model->avg = config_avg_values[idx];
+  /* Get the new averaging time item index */
+  idx = variable_item_get_current_value_index(item);
+
+  /* Set the new averaging time */
+  sampler_model->config.avg = config_avg_values[idx];
   variable_item_set_current_value_text(item, config_avg_names[idx]);
 
   FURI_LOG_I(TAG, "Averaging time change: %s", config_avg_names[idx]);
@@ -250,10 +424,14 @@ static void config_avg_change(VariableItem *item) {
 static void config_beep_change(VariableItem *item) {
 
   App *app = variable_item_get_context(item);
-  uint8_t idx = variable_item_get_current_value_index(item);
   SamplerModel *sampler_model = view_get_model(app->sample_view);
+  uint8_t idx;
 
-  sampler_model->beep = config_beep_values[idx] != 0;
+  /* Get the new beep option item index */
+  idx = variable_item_get_current_value_index(item);
+
+  /* Set the new beep option */
+  sampler_model->config.beep = config_beep_values[idx] != 0;
   variable_item_set_current_value_text(item, config_beep_names[idx]);
 
   FURI_LOG_I(TAG, "Beep option change: %s", config_beep_names[idx]);
@@ -365,7 +543,7 @@ static void sample_view_draw_callback(Canvas *canvas, void *model) {
      continuous measurement, and whether continuous measurement is started */
   canvas_draw_frame(canvas, 77, 52, 51, 12);
   canvas_draw_icon(canvas, 79, 54, &I_ok_button);
-  if(sampler_model->freq < 0)
+  if(sampler_model->config.freq < 0)
     canvas_draw_str(canvas, 90, 62, "Sample");
   else
     if(sampler_model->cmm_started)
@@ -418,7 +596,7 @@ static bool sample_view_input_callback(InputEvent *evt, void *ctx) {
     FURI_LOG_I(TAG, "OK button pressed");
 
     /* Are we doing single measurement? */
-    if(sampler_model->freq < 0)
+    if(sampler_model->config.freq < 0)
 
       /* Send a SMM command (exec mode) */
       send_lrf_command(app->lrf_serial_comm_app, smm);
@@ -440,7 +618,7 @@ static bool sample_view_input_callback(InputEvent *evt, void *ctx) {
       else {
 
         /* Send the appropriate start-CMM command */
-        switch(sampler_model->freq) {
+        switch(sampler_model->config.freq) {
 
           /* Send a start-CMM command at 1Hz (exec mode) */
           case 1:
@@ -867,7 +1045,7 @@ static void submenu_callback(void *ctx, uint32_t idx) {
 
 
 /** Callback to return to the submenu **/
-static uint32_t navigation_submenu_callback(void *ctx) {
+static uint32_t return_to_submenu_callback(void *ctx) {
 
   UNUSED(ctx);
 
@@ -913,9 +1091,9 @@ void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 
   /* If beeps are enabled and any distance in the new LRF sample is valid,
      play a beep */
-  if(sampler_model->beep && (lrf_sample->dist1 > 0.5 ||
-				lrf_sample->dist2 > 0.5 ||
-				lrf_sample->dist3 > 0.5))
+  if(sampler_model->config.beep && (lrf_sample->dist1 > 0.5 ||
+					lrf_sample->dist2 > 0.5 ||
+					lrf_sample->dist3 > 0.5))
     sampler_model->play_beep = true;
 
   /* Find the next spot in the samples ring buffer */
@@ -939,7 +1117,8 @@ void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 	ms_tick_time_diff(
 		sampler_model->samples[prev_samples_end_i].tstamp_ms,
 		sampler_model->samples[sampler_model->samples_start_i].tstamp_ms
-	) > (double)(sampler_model->avg > 0.75? sampler_model->avg : 0.75)) {
+	) > (double)(sampler_model->config.avg > 0.75?
+			sampler_model->config.avg : 0.75)) {
     i = sampler_model->samples_start_i + 1;
     if(i >= SAMPLES_RING_BUFFER_SIZE)
       i = 0;
@@ -982,7 +1161,7 @@ void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
       sampler_model->eff_freq = - 1;
 
     /* If we don't average samples, display the last sample directly */
-    if(sampler_model->avg == 0)
+    if(sampler_model->config.avg == 0)
       memcpy(&(sampler_model->disp_sample),
 		&(sampler_model->samples[prev_samples_end_i]),
 		sizeof(LRFSample));
@@ -1136,26 +1315,26 @@ static App *app_init() {
   variable_item_list_reset(app->config_list);
 
   /* Add configuration frequency list items */
-  VariableItem *item_freq = variable_item_list_add(app->config_list,
+  app->item_freq = variable_item_list_add(app->config_list,
 						config_freq_label,
 						COUNT_OF(config_freq_values),
 						config_freq_change, app);
 
   /* Add configuration averaging list items */
-  VariableItem *item_avg = variable_item_list_add(app->config_list,
+  app->item_avg = variable_item_list_add(app->config_list,
 						config_avg_label,
 						COUNT_OF(config_avg_values),
 						config_avg_change, app);
 
   /* Add beep option list items */
-  VariableItem *item_beep = variable_item_list_add(app->config_list,
+  app->item_beep = variable_item_list_add(app->config_list,
 						config_beep_label,
 						COUNT_OF(config_beep_values),
 						config_beep_change, app);
 
   /* Configure the "previous" callback for the configuration view */
   view_set_previous_callback(variable_item_list_get_view(app->config_list),
-				navigation_submenu_callback);
+				return_to_submenu_callback);
 
   /* Add the configuration view */
   view_dispatcher_add_view(app->view_dispatcher, view_config,
@@ -1175,7 +1354,7 @@ static App *app_init() {
   view_set_input_callback(app->sample_view, sample_view_input_callback);
 
   /* Configure the "previous" callback for the sample view */
-  view_set_previous_callback(app->sample_view, navigation_submenu_callback);
+  view_set_previous_callback(app->sample_view, return_to_submenu_callback);
 
   /* Configure the enter and exit callbacks for the sample view */
   view_set_enter_callback(app->sample_view, sample_view_enter_callback);
@@ -1206,7 +1385,7 @@ static App *app_init() {
   view_set_input_callback(app->lrfinfo_view, lrfinfo_view_input_callback);
 
   /* Configure the "previous" callback for the LRF info view */
-  view_set_previous_callback(app->lrfinfo_view, navigation_submenu_callback);
+  view_set_previous_callback(app->lrfinfo_view, return_to_submenu_callback);
 
   /* Configure the enter callback for the LRF info view */
   view_set_enter_callback(app->lrfinfo_view, lrfinfo_view_enter_callback);
@@ -1236,7 +1415,7 @@ static App *app_init() {
   view_set_input_callback(app->about_view, about_view_input_callback);
 
   /* Configure the "previous" callback for the about view */
-  view_set_previous_callback(app->about_view, navigation_submenu_callback);
+  view_set_previous_callback(app->about_view, return_to_submenu_callback);
 
   /* Configure the enter callback for the about view */
   view_set_enter_callback(app->about_view, about_view_enter_callback);
@@ -1261,19 +1440,23 @@ static App *app_init() {
   /* Setup the default configuration */
 
   /* Set the default frequency */
-  sampler_model->freq = config_freq_values[0];
-  variable_item_set_current_value_index(item_freq, 0);
-  variable_item_set_current_value_text(item_freq, config_freq_names[0]);
+  sampler_model->config.freq = config_freq_values[0];
+  variable_item_set_current_value_index(app->item_freq, 0);
+  variable_item_set_current_value_text(app->item_freq, config_freq_names[0]);
 
   /* Set the default averaging time */
-  sampler_model->avg = config_avg_values[0];
-  variable_item_set_current_value_index(item_avg, 0);
-  variable_item_set_current_value_text(item_avg, config_avg_names[0]);
+  sampler_model->config.avg = config_avg_values[0];
+  variable_item_set_current_value_index(app->item_avg, 0);
+  variable_item_set_current_value_text(app->item_avg, config_avg_names[0]);
 
   /* Set the default beep option */
-  sampler_model->beep = config_beep_values[0] != 0;
-  variable_item_set_current_value_index(item_beep, 0);
-  variable_item_set_current_value_text(item_beep, config_beep_names[0]);
+  sampler_model->config.beep = config_beep_values[0] != 0;
+  variable_item_set_current_value_index(app->item_beep, 0);
+  variable_item_set_current_value_text(app->item_beep, config_beep_names[0]);
+
+  /* Try to load the configuration file and restore the configuration from the
+     saved values */
+  load_configuration(app);
 
 
 
@@ -1313,6 +1496,9 @@ static void app_free(App *app) {
 
   /* Disable notifications */
   furi_record_close(RECORD_NOTIFICATION);
+
+  /* Try to save the configuration */
+  save_configuration(app);
 
   /* Remove the about view */
   view_dispatcher_remove_view(app->view_dispatcher, view_about);
