@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.0
+ * Version: 1.1
  *
  * Main app
 ***/
@@ -23,7 +23,7 @@
 
 
 /*** Defines ***/
-#define VERSION "1.0"
+#define VERSION "1.1"
 #define TAG "noptel_lrf_sampler"
 #define SAMPLES_RING_BUFFER_SIZE 2500	/* Should hold at least 10 seconds worth
 					   of samples at 200 Hz */
