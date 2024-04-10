@@ -97,6 +97,7 @@ void hex_viewer_app_free(HexViewer* app) {
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdMenu);
+    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdStartscreen);
     view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdScroll);
     view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdSettings);
 

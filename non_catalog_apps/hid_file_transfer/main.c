@@ -148,6 +148,11 @@ static DataTransferApp* dataTransferApp_alloc() {
 static void dataTransferApp_free(DataTransferApp* instance) {
     furi_record_close(RECORD_STORAGE);
 
+    view_dispatcher_remove_view(app->view_dispatcher, VIEW_DISPATCHER_MENU);
+    view_dispatcher_remove_view(app->view_dispatcher, VIEW_DISPATCHER_SEND);
+    view_dispatcher_remove_view(app->view_dispatcher, VIEW_DISPATCHER_RECEIVE);
+    view_dispatcher_remove_view(app->view_dispatcher, VIEW_DISPATCHER_POPUP);
+
     view_dispatcher_free(instance->view_dispatcher);
     furi_record_close(RECORD_GUI);
 
