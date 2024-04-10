@@ -770,7 +770,7 @@ static void lrfinfo_view_draw_callback(Canvas *canvas, void *model) {
      right-hand side */
   canvas_draw_frame(canvas, 77, 52, 51, 12);
   canvas_draw_icon(canvas, 79, 54, &I_ok_button);
-  canvas_draw_str(canvas, 103, 62, "Read");
+  canvas_draw_str(canvas, 102, 62, "Read");
 
   /* Draw a dividing line between the LRF information and the bottom line */
   canvas_draw_line(canvas, 0, 48, 128, 48);
@@ -871,7 +871,7 @@ static void about_view_draw_callback(Canvas *canvas, void *model) {
 
       /* Draw the title */
       canvas_set_font(canvas, FontPrimary);
-      canvas_draw_str(canvas, 15, 8, "Noptel LRF sampler");
+      canvas_draw_str(canvas, 15, 8, "Noptel LRF Sampler");
       canvas_draw_line(canvas, 15, 10, 113, 10);
 
       /* Draw the URL */
@@ -899,6 +899,7 @@ static void about_view_draw_callback(Canvas *canvas, void *model) {
       /* Superimpose the heading */
       canvas_set_font(canvas, FontPrimary);
       canvas_draw_str(canvas, 11, 8, "GPIO pin connections");
+      canvas_draw_line(canvas, 11, 10, 115, 10);
 
       /* Write "LRF" over the LRF side of the pinout diagram */
       canvas_set_font(canvas, FontSecondary);
