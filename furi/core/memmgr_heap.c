@@ -246,6 +246,11 @@ extern void* pvPortAllocAligned(size_t xSize, size_t xAlignment) {
         furi_crash("memmgt in ISR");
     }
 
+    // alignment must be power of 2
+    if((xAlignment & (xAlignment - 1)) != 0) {
+        furi_crash("invalid alignment");
+    }
+
     memmgr_lock();
 
     // allocate block
