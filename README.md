@@ -109,8 +109,6 @@ Gives information about the app and the GPIO pin connections needed to connect a
 
 - Additionally, LRX rangefinders are usually configured as RS232 or RS422 serial devices, not as UART serial devices. In that case, a UART-to-RS232 or UART-to-RS422 converter is required between the Flipper Zero and the rangefinder.
 
-- The configuration is not retained when the app is closed
-
 
 
 ## License
