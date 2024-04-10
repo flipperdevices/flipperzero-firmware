@@ -59,7 +59,7 @@ static void test_memmgr_malloc(const size_t allocation_size) {
     free(ptr);
 
     // test that memory is zero-initialized after free
-    // allocator can use this memory for inner purposes
+    // we know that allocator can use this memory for inner purposes
     // so we check that memory at least partially zero-initialized
 
 #pragma GCC diagnostic push
@@ -74,9 +74,97 @@ static void test_memmgr_malloc(const size_t allocation_size) {
 
 #pragma GCC diagnostic pop
 
-    // chech that at least 75% of memory is zero-initialized
+    // check that at least 75% of memory is zero-initialized
     if(zero_count < (allocation_size * 0.75)) {
-        error_message = "seems memory is not zero-initialized after free";
+        error_message = "seems that memory is not zero-initialized after free";
+    }
+
+    FURI_CRITICAL_EXIT();
+
+    if(error_message != NULL) {
+        mu_fail(error_message);
+    }
+}
+
+static void test_memmgr_realloc(const size_t allocation_size) {
+    uint8_t* ptr = NULL;
+    const char* error_message = NULL;
+
+    FURI_CRITICAL_ENTER();
+
+    ptr = realloc(ptr, allocation_size);
+
+    // test that we can allocate memory
+    if(ptr == NULL) {
+        error_message = "realloc(NULL) failed";
+    }
+
+    // test that memory is zero-initialized after allocation
+    for(size_t i = 0; i < allocation_size; i++) {
+        if(ptr[i] != 0) {
+            error_message = "memory is not zero-initialized after realloc(NULL)";
+            break;
+        }
+    }
+
+    memset(ptr, 0x55, allocation_size);
+
+    ptr = realloc(ptr, allocation_size * 2);
+
+    // test that we can reallocate memory
+    if(ptr == NULL) {
+        error_message = "realloc failed";
+    }
+
+    // test that memory content is preserved
+    for(size_t i = 0; i < allocation_size; i++) {
+        if(ptr[i] != 0x55) {
+            error_message = "memory is not reallocated after realloc";
+            break;
+        }
+    }
+
+    // test that remaining memory is zero-initialized
+    size_t non_zero_count = 0;
+    for(size_t i = allocation_size; i < allocation_size * 2; i++) {
+        if(ptr[i] != 0) {
+            non_zero_count += 1;
+        }
+    }
+
+    // check that at most of memory is zero-initialized
+    // we know that allocator not always can restore content size from a pointer
+    // so we check against small threshold
+    if(non_zero_count > 4) {
+        error_message = "seems that memory is not zero-initialized after realloc";
+    }
+
+    uint8_t* null_ptr = realloc(ptr, 0);
+
+    // test that we can free memory
+    if(null_ptr != NULL) {
+        error_message = "realloc(0) failed";
+    }
+
+    // test that memory is zero-initialized after realloc(0)
+    // we know that allocator can use this memory for inner purposes
+    // so we check that memory at least partially zero-initialized
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuse-after-free"
+
+    size_t zero_count = 0;
+    for(size_t i = 0; i < allocation_size; i++) {
+        if(ptr[i] == 0) {
+            zero_count++;
+        }
+    }
+
+#pragma GCC diagnostic pop
+
+    // check that at least 75% of memory is zero-initialized
+    if(zero_count < (allocation_size * 0.75)) {
+        error_message = "seems that memory is not zero-initialized after realloc(0)";
     }
 
     FURI_CRITICAL_EXIT();
@@ -87,10 +175,46 @@ static void test_memmgr_malloc(const size_t allocation_size) {
 }
 
 void test_furi_memmgr_advanced(void) {
-    test_memmgr_malloc(50);
-    test_memmgr_malloc(100);
-    test_memmgr_malloc(500);
-    test_memmgr_malloc(1000);
-    test_memmgr_malloc(5000);
-    test_memmgr_malloc(10000);
+    const size_t sizes[] = {50, 100, 500, 1000, 5000, 10000};
+    const size_t sizes_count = sizeof(sizes) / sizeof(sizes[0]);
+
+    // do test without memory fragmentation
+    {
+        for(size_t i = 0; i < sizes_count; i++) {
+            test_memmgr_malloc(sizes[i]);
+        }
+
+        for(size_t i = 0; i < sizes_count; i++) {
+            test_memmgr_realloc(sizes[i]);
+        }
+    }
+
+    // do test with memory fragmentation
+    {
+        void* blocks[sizes_count];
+        void* guards[sizes_count - 1];
+
+        for(size_t i = 0; i < sizes_count; i++) {
+            blocks[i] = malloc(sizes[i]);
+            if(i < sizes_count - 1) {
+                guards[i] = malloc(sizes[i]);
+            }
+        }
+
+        for(size_t i = 0; i < sizes_count; i++) {
+            free(blocks[i]);
+        }
+
+        for(size_t i = 0; i < sizes_count; i++) {
+            test_memmgr_malloc(sizes[i]);
+        }
+
+        for(size_t i = 0; i < sizes_count; i++) {
+            test_memmgr_realloc(sizes[i]);
+        }
+
+        for(size_t i = 0; i < sizes_count - 1; i++) {
+            free(guards[i]);
+        }
+    }
 }
