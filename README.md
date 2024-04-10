@@ -10,7 +10,7 @@ Flipper Zero app to get range measurements from a [Noptel](https://noptel.fi/) [
 
 ![Noptel rangefinders](screenshots/lrf.png)
 
-https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/e14cb0f0-6c36-47b1-ba0d-2a1234165151
+https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/7f0caad4-b797-40db-9667-f74e8b94f0de
 
 
 
