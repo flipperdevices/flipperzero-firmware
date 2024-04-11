@@ -3,30 +3,26 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-static bool ac_remote_app_custom_event_callback(void *context, uint32_t event)
-{
+static bool ac_remote_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
-    AC_RemoteApp *app = context;
+    AC_RemoteApp* app = context;
     return scene_manager_handle_custom_event(app->scene_manager, event);
 }
 
-static bool ac_remote_app_back_event_callback(void *context)
-{
+static bool ac_remote_app_back_event_callback(void* context) {
     furi_assert(context);
-    AC_RemoteApp *app = context;
+    AC_RemoteApp* app = context;
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-static void ac_remote_app_tick_event_callback(void *context)
-{
+static void ac_remote_app_tick_event_callback(void* context) {
     furi_assert(context);
-    AC_RemoteApp *app = context;
+    AC_RemoteApp* app = context;
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-AC_RemoteApp *ac_remote_app_alloc()
-{
-    AC_RemoteApp *app = malloc(sizeof(AC_RemoteApp));
+AC_RemoteApp* ac_remote_app_alloc() {
+    AC_RemoteApp* app = malloc(sizeof(AC_RemoteApp));
 
     app->gui = furi_record_open(RECORD_GUI);
 
@@ -50,12 +46,11 @@ AC_RemoteApp *ac_remote_app_alloc()
 
     app->ac_remote_panel = ac_remote_panel_alloc();
 
-    scene_manager_next_scene(app->scene_manager, AC_RemoteSceneStart);
+    scene_manager_next_scene(app->scene_manager, AC_RemoteSceneMitsubishi);
     return app;
 }
 
-void ac_remote_app_free(AC_RemoteApp *app)
-{
+void ac_remote_app_free(AC_RemoteApp* app) {
     furi_assert(app);
 
     // Views
@@ -72,10 +67,9 @@ void ac_remote_app_free(AC_RemoteApp *app)
     free(app);
 }
 
-int32_t ac_remote_app(void *p)
-{
+int32_t ac_remote_app(void* p) {
     UNUSED(p);
-    AC_RemoteApp *ac_remote_app = ac_remote_app_alloc();
+    AC_RemoteApp* ac_remote_app = ac_remote_app_alloc();
     view_dispatcher_run(ac_remote_app->view_dispatcher);
     ac_remote_app_free(ac_remote_app);
     return 0;

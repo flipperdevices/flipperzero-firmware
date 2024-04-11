@@ -13,11 +13,11 @@
 
 typedef struct {
     // uint16_t to support multi-screen, wide button panel
-    int id;
+    int index;
     uint16_t x;
     uint16_t y;
     Font font;
-    FuriString* str;
+    const char* str;
 } LabelElement;
 
 LIST_DEF(LabelList, LabelElement, M_POD_OPLIST)
@@ -30,16 +30,17 @@ typedef struct {
     const Icon* name_selected;
 } IconElement;
 
-typedef struct VariableButtonItem {
-    uint16_t id;
-    uint8_t current_value_index;
-    uint8_t values_count;
-    VariableButtonItemCallback callback;
+LIST_DEF(IconList, IconElement, M_POD_OPLIST)
+#define M_OPL_IconList_t() LIST_OPLIST(IconList)
+
+typedef struct ButtonItem {
+    uint16_t index;
+    ButtonItemCallback callback;
     IconElement icon;
     void* callback_context;
-} VariableButtonItem;
+} ButtonItem;
 
-ARRAY_DEF(ButtonArray, VariableButtonItem*, M_PTR_OPLIST);
+ARRAY_DEF(ButtonArray, ButtonItem*, M_PTR_OPLIST);
 #define M_OPL_ButtonArray_t() ARRAY_OPLIST(ButtonArray, M_PTR_OPLIST)
 ARRAY_DEF(ButtonMatrix, ButtonArray_t);
 #define M_OPL_ButtonMatrix_t() ARRAY_OPLIST(ButtonMatrix, M_OPL_ButtonArray_t())
@@ -50,6 +51,7 @@ struct ACRemotePanel {
 
 typedef struct {
     ButtonMatrix_t button_matrix;
+    IconList_t icons;
     LabelList_t labels;
     uint16_t reserve_x;
     uint16_t reserve_y;
@@ -57,7 +59,7 @@ typedef struct {
     uint16_t selected_item_y;
 } ACRemotePanelModel;
 
-static VariableButtonItem** ac_remote_panel_get_item(ACRemotePanelModel* model, size_t x, size_t y);
+static ButtonItem** ac_remote_panel_get_item(ACRemotePanelModel* model, size_t x, size_t y);
 static void ac_remote_panel_process_up(ACRemotePanel* ac_remote_panel);
 static void ac_remote_panel_process_down(ACRemotePanel* ac_remote_panel);
 static void ac_remote_panel_process_left(ACRemotePanel* ac_remote_panel);
@@ -117,7 +119,6 @@ void ac_remote_panel_reserve(ACRemotePanel* ac_remote_panel, size_t reserve_x, s
                 ButtonArray_t* array = ButtonMatrix_get(model->button_matrix, i);
                 ButtonArray_init(*array);
                 ButtonArray_reserve(*array, reserve_x);
-                // TODO: do we need to clear allocated memory of ptr-s to VariableButtonItem ??
             }
             LabelList_init(model->labels);
         },
@@ -133,11 +134,6 @@ void ac_remote_panel_free(ACRemotePanel* ac_remote_panel) {
         ac_remote_panel->view,
         ACRemotePanelModel * model,
         {
-            LabelList_it_t it;
-            for(LabelList_it(it, model->labels); !LabelList_end_p(it);
-                LabelList_next(it)) {
-                furi_string_free(LabelList_ref(it)->str);
-            }
             LabelList_clear(model->labels);
             ButtonMatrix_clear(model->button_matrix);
         },
@@ -156,9 +152,9 @@ void ac_remote_panel_reset(ACRemotePanel* ac_remote_panel) {
         {
             for(size_t x = 0; x < model->reserve_x; ++x) {
                 for(size_t y = 0; y < model->reserve_y; ++y) {
-                    VariableButtonItem** item = ac_remote_panel_get_item(model, x, y);
-                    free(*item);
-                    *item = NULL;
+                    ButtonItem** button_item = ac_remote_panel_get_item(model, x, y);
+                    free(*button_item);
+                    *button_item = NULL;
                 }
             }
             model->reserve_x = 0;
@@ -166,33 +162,32 @@ void ac_remote_panel_reset(ACRemotePanel* ac_remote_panel) {
             model->selected_item_x = 0;
             model->selected_item_y = 0;
             LabelList_reset(model->labels);
+            IconList_reset(model->icons);
             ButtonMatrix_reset(model->button_matrix);
         },
         true);
 }
 
-static VariableButtonItem** ac_remote_panel_get_item(ACRemotePanelModel* model, size_t x, size_t y) {
+static ButtonItem** ac_remote_panel_get_item(ACRemotePanelModel* model, size_t x, size_t y) {
     furi_assert(model);
 
     furi_check(x < model->reserve_x);
     furi_check(y < model->reserve_y);
     ButtonArray_t* button_array = ButtonMatrix_safe_get(model->button_matrix, x);
-    VariableButtonItem** item = ButtonArray_safe_get(*button_array, y);
+    ButtonItem** item = ButtonArray_safe_get(*button_array, y);
     return item;
 }
 
 void ac_remote_panel_add_item(
     ACRemotePanel* ac_remote_panel,
-    uint16_t id,
-    uint8_t current_value_index,
-    uint8_t values_count,
+    uint16_t index,
     uint16_t matrix_place_x,
     uint16_t matrix_place_y,
     uint16_t x,
     uint16_t y,
     const Icon* icon_name,
     const Icon* icon_name_selected,
-    VariableButtonItemCallback callback,
+    ButtonItemCallback callback,
     void* callback_context) {
     furi_assert(ac_remote_panel);
 
@@ -200,20 +195,18 @@ void ac_remote_panel_add_item(
         ac_remote_panel->view,
         ACRemotePanelModel * model,
         {
-            VariableButtonItem** item_ptr =
+            ButtonItem** item_ptr =
                 ac_remote_panel_get_item(model, matrix_place_x, matrix_place_y);
             furi_check(*item_ptr == NULL);
-            *item_ptr = malloc(sizeof(VariableButtonItem));
-            VariableButtonItem* item = *item_ptr;
+            *item_ptr = malloc(sizeof(ButtonItem));
+            ButtonItem* item = *item_ptr;
             item->callback = callback;
             item->callback_context = callback_context;
             item->icon.x = x;
             item->icon.y = y;
             item->icon.name = icon_name;
             item->icon.name_selected = icon_name_selected;
-            item->values_count = values_count;
-            item->current_value_index = current_value_index;
-            item->id = id;
+            item->index = index;
         },
         true);
 }
@@ -232,21 +225,29 @@ static void ac_remote_panel_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
+    for
+        M_EACH(icon, model->icons, IconList_t) {
+            canvas_draw_icon(canvas, icon->x, icon->y, icon->name);
+        }
+
     for(size_t x = 0; x < model->reserve_x; ++x) {
         for(size_t y = 0; y < model->reserve_y; ++y) {
-            VariableButtonItem* item = *ac_remote_panel_get_item(model, x, y);
-            const Icon* icon_name = item->icon.name;
-            if((model->selected_item_x == x) && (model->selected_item_y == y)) {
-                icon_name = item->icon.name_selected;
+            ButtonItem* button_item = *ac_remote_panel_get_item(model, x, y);
+            if(!button_item) {
+                continue;
             }
-            canvas_draw_icon(canvas, item->icon.x, item->icon.y, icon_name);
+            const Icon* icon_name = button_item->icon.name;
+            if((model->selected_item_x == x) && (model->selected_item_y == y)) {
+                icon_name = button_item->icon.name_selected;
+            }
+            canvas_draw_icon(canvas, button_item->icon.x, button_item->icon.y, icon_name);
         }
     }
 
     for
         M_EACH(label, model->labels, LabelList_t) {
             canvas_set_font(canvas, label->font);
-            canvas_draw_str(canvas, label->x, label->y, furi_string_get_cstr(label->str));
+            canvas_draw_str(canvas, label->x, label->y, label->str);
         }
 }
 
@@ -359,26 +360,20 @@ static void ac_remote_panel_process_right(ACRemotePanel* ac_remote_panel) {
 }
 
 void ac_remote_panel_process_ok(ACRemotePanel* ac_remote_panel) {
-    VariableButtonItem* item = NULL;
+    ButtonItem* button_item = NULL;
 
     with_view_model(
         ac_remote_panel->view,
         ACRemotePanelModel * model,
         {
-            item =
+            button_item =
                 *ac_remote_panel_get_item(model, model->selected_item_x, model->selected_item_y);
         },
         true);
 
-    if(item->current_value_index < (item->values_count - 1)) {
-        item->current_value_index++;
-    } else {
-        item->current_value_index = 0;
-    };
-
-    if(item && item->callback) {
-        item->callback(item);
-    };
+    if(button_item && button_item->callback) {
+        button_item->callback(button_item->callback_context, button_item->index);
+    }
 }
 
 static bool ac_remote_panel_view_input_callback(InputEvent* event, void* context) {
@@ -418,7 +413,7 @@ static bool ac_remote_panel_view_input_callback(InputEvent* event, void* context
 
 void ac_remote_panel_add_label(
     ACRemotePanel* ac_remote_panel,
-    int id,
+    int index,
     uint16_t x,
     uint16_t y,
     Font font,
@@ -430,44 +425,74 @@ void ac_remote_panel_add_label(
         ACRemotePanelModel * model,
         {
             LabelElement* label = LabelList_push_raw(model->labels);
-            label->id = id;
+            label->index = index;
             label->x = x;
             label->y = y;
             label->font = font;
-            label->str = furi_string_alloc();
-            furi_string_set(label->str, label_str);
+            label->str = label_str;
         },
         true);
 }
 
-uint16_t ac_remote_panel_item_get_index(VariableButtonItem* item) {
-    return item->id;
+void ac_remote_panel_add_icon(
+    ACRemotePanel* ac_remote_panel,
+    uint16_t x,
+    uint16_t y,
+    const Icon* icon_name) {
+    furi_assert(ac_remote_panel);
+
+    with_view_model( //-V773
+        ac_remote_panel->view,
+        ACRemotePanelModel * model,
+        {
+            IconElement* icon = IconList_push_raw(model->icons);
+            icon->x = x;
+            icon->y = y;
+            icon->name = icon_name;
+            icon->name_selected = icon_name;
+        },
+        true);
 }
 
-uint8_t ac_remote_panel_item_get_current_value_index(VariableButtonItem* item) {
-    return item->current_value_index;
+void ac_remote_panel_item_set_icons(
+    ACRemotePanel* ac_remote_panel,
+    uint32_t index,
+    const Icon* icon_name,
+    const Icon* icon_name_selected) {
+    furi_assert(ac_remote_panel);
+
+    with_view_model(
+        ac_remote_panel->view,
+        ACRemotePanelModel * model,
+        {
+            for(size_t x = 0; x < model->reserve_x; ++x) {
+                for(size_t y = 0; y < model->reserve_y; ++y) {
+                    ButtonItem** button_item = ac_remote_panel_get_item(model, x, y);
+                    ButtonItem* item = *button_item;
+                    if(item->index == index) {
+                        item->icon.name = icon_name;
+                        item->icon.name_selected = icon_name_selected;
+                    }
+                }
+            }
+        },
+        true);
 }
 
-void* ac_remote_panel_item_get_context(VariableButtonItem* item) {
-    return item->callback_context;
-}
-
-void ac_remote_panel_item_set_icon_name(VariableButtonItem* item, const Icon* icon_name, const Icon* icon_name_selected) {
-    item->icon.name = icon_name;
-    item->icon.name_selected = icon_name_selected;
-}
-
-void ac_remote_panel_label_set_string(ACRemotePanel* ac_remote_panel, int id, const char* label_str) {
+void ac_remote_panel_label_set_string(
+    ACRemotePanel* ac_remote_panel,
+    int index,
+    const char* label_str) {
     with_view_model(
         ac_remote_panel->view,
         ACRemotePanelModel * model,
         {
             for
                 M_EACH(label, model->labels, LabelList_t) {
-                    if (label->id == id) {
-                        furi_string_set(label->str, label_str);
+                    if(label->index == index) {
+                        label->str = label_str;
                     }
-            }
+                }
         },
         true);
 }

@@ -1,1 +1,1 @@
-ADD_SCENE(ac_remote, start, Start)
+ADD_SCENE(ac_remote, mitsubishi, Mitsubishi)

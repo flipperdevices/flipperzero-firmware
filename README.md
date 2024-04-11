@@ -2,7 +2,17 @@
 
 Mitsubishi Electric AC remote control for Flipper Zero.
 
-## Build
+![Screenshot](screenshot.png)
 
-1. Clone this repository into `flipperzero-firmware/application_user`
-2. Deploy on flipper: `fbt launch APPSRC=mitsubishi_ac_remote`
+## Building
+```shell
+# Clone repository
+git clone https://github.com/achistyakov/mitsubishi_ac_remote.git
+cd mitsubishi_ac_remote
+
+# Build the application
+ufbt build
+
+# Build and launch the application
+ufbt launch
+```

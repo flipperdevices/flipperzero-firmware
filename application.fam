@@ -10,9 +10,19 @@ App(
         "gui",
         "infrared",
     ],
-    stack_size=1 * 1024,
+    stack_size=1 * 2048,
     order=90,
+    fap_description="Mitsubishi Electric AC remote control",
+    fap_version="1.0",
     fap_icon="ac_remote.png",
     fap_category="Infrared",
     fap_icon_assets="assets",
+    fap_private_libs=[
+        Lib(
+            name="hvac_mitsubishi",
+            sources=[
+                "hvac_mitsubishi.c",
+            ],
+        ),
+    ],
 )

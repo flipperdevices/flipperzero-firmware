@@ -1,8 +1,9 @@
 #pragma once
 
-typedef enum {
-    AC_RemoteEventTypeSendCommand,
-} AC_RemoteCustomEventType;
+enum AC_RemoteCustomEventType {
+    AC_RemoteCustomEventTypeButtonSelected,
+    AC_RemoteCustomEventTypeSendCommand,
+};
 
 #pragma pack(push, 1)
 typedef union {
