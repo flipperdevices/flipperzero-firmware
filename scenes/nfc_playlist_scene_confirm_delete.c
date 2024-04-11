@@ -21,7 +21,7 @@ void nfc_playlist_confirm_delete_scene_on_enter(void* context) {
 
    furi_string_free(temp_str);
 
-   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ConfirmDelete);
+   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_ConfirmDelete);
 }
 
 bool nfc_playlist_confirm_delete_scene_on_event(void* context, SceneManagerEvent event) {

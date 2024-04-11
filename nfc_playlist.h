@@ -28,19 +28,6 @@
 
 #include "scenes/nfc_playlist_scene.h"
 
-typedef enum {
-   NfcPlaylistView_Menu,
-   NfcPlaylistView_Settings,
-   NfcPlaylistView_Popup,
-   NfcPlaylistView_PlaylistSelect,
-   NfcPlaylistView_FileEdit,
-   NfcPlaylistView_FileRename,
-   NfcPlaylistView_ConfirmDelete,
-   NfcPlaylistView_ViewPlaylistContent,
-   NfcPlaylistView_NfcSelect,
-   NfcPlaylistView_NameNewFile
-} NfcPlayScenesView;
-
 typedef struct {
    FuriString* file_path;
    bool playlist_selected;

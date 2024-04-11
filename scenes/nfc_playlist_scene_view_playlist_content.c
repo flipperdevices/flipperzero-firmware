@@ -24,7 +24,7 @@ void nfc_playlist_view_playlist_content_scene_on_enter(void* context) {
    storage_file_free(file);
    furi_record_close(RECORD_STORAGE);
 
-   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ViewPlaylistContent);
+   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_ViewPlaylistContent);
 }
 
 bool nfc_playlist_view_playlist_content_scene_on_event(void* context, SceneManagerEvent event) {

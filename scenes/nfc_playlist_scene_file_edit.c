@@ -61,7 +61,7 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
       furi_string_empty(nfc_playlist->settings.file_path),
       "No\nplaylist\nselected");
 
-   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit);
+   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_FileEdit);
 }
 
 bool nfc_playlist_file_edit_scene_on_event(void* context, SceneManagerEvent event) {
