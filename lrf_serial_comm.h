@@ -17,15 +17,15 @@
 
 /** LRF command **/
 typedef enum {
-  smm,
-  cmm_1hz,
-  cmm_4hz,
-  cmm_10hz,
-  cmm_20hz,
-  cmm_100hz,
-  cmm_200hz,
-  cmm_break,
-  send_ident
+  smm = 0,
+  cmm_1hz = 1,
+  cmm_4hz = 4,
+  cmm_10hz = 10,
+  cmm_20hz = 29,
+  cmm_100hz = 100,
+  cmm_200hz = 200,
+  cmm_break = -1,
+  send_ident = -2,
 } LRFCommand;
 
 
