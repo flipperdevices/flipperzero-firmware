@@ -61,7 +61,7 @@ typedef struct {
     uint16_t history_item;
     WSReceiverBarShow bar_show;
     uint8_t u_rssi;
-    bool external_redio;
+    bool external_radio;
 } WSReceiverModel;
 
 void ws_view_receiver_set_rssi(WSReceiver* instance, float rssi) {
@@ -165,7 +165,7 @@ void ws_view_receiver_add_data_statusbar(
             furi_string_set_str(model->frequency_str, frequency_str);
             furi_string_set_str(model->preset_str, preset_str);
             furi_string_set_str(model->history_stat_str, history_stat_str);
-            model->external_redio = external;
+            model->external_radio = external;
         },
         true);
 }
@@ -205,8 +205,6 @@ void ws_view_receiver_draw(Canvas* canvas, WSReceiverModel* model) {
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
-    // bool ext_module = furi_hal_subghz_get_radio_type();
-
     WSReceiverMenuItem* item_menu;
 
     for(size_t i = 0; i < MIN(model->history_item, MENU_ITEMS); ++i) {
@@ -232,11 +230,11 @@ void ws_view_receiver_draw(Canvas* canvas, WSReceiverModel* model) {
 
     if(model->history_item == 0) {
         canvas_draw_icon(
-            canvas, 0, 0, model->external_redio ? &I_Fishing_123x52 : &I_Scanning_123x52);
+            canvas, 0, 0, model->external_radio ? &I_Fishing_123x52 : &I_Scanning_123x52);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 63, 46, "Scanning...");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 44, 10, model->external_redio ? "Ext" : "Int");
+        canvas_draw_str(canvas, 44, 10, model->external_radio ? "Ext" : "Int");
     }
 
     // Draw RSSI
@@ -412,7 +410,7 @@ WSReceiver* ws_view_receiver_alloc() {
             model->history_stat_str = furi_string_alloc();
             model->bar_show = WSReceiverBarShowDefault;
             model->history = malloc(sizeof(WSReceiverHistory));
-            model->external_redio = false;
+            model->external_radio = false;
             WSReceiverMenuItemArray_init(model->history->data);
         },
         true);
