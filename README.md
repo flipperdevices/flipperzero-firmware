@@ -44,7 +44,7 @@ Select the **Sample** option to start sampling the LRF.
 
 #### Single measurement mode
 
-In single measurement mode, press the **OK** button to get one measurement.
+In single measurement mode, press the **OK** button to get another measurement.
 
 ![Sampling in single measurement mode](screenshots/2-sample_smm.png)
 
@@ -72,7 +72,7 @@ If an averaging time is configured, the average distances and amplitudes over th
 
 ### LRF information
 
-Select the **LRF information** option to view the LRF's identification information. Press the **OK** button to read the identification.
+Select the **LRF information** option to view the LRF's identification information. Press the **OK** button to re-read the information, or read another LRF's.
 
 ![GPIO pin connections](screenshots/3-lrf_information.png)
 
@@ -103,13 +103,9 @@ Gives information about the app and the GPIO pin connections needed to connect a
 
 ## Notes
 
-- Laser-diode-equipped LRF rangefinder, such as the LRF12x or LRF200 series, can be powered with 5Vdc and don't draw too much power. Those rangefinders may be powered by the Flipper Zero's internal battery through the +5V pin (Pin #1). If your particular LRF draws too much power however, it may crash the Flipper Zero. If this happens, disconnect the LRF's Vdc line from the Flipper Zero's +5V pin and supply power to the LRF from an external power supply.
+- Pin #15 (C1) may be used to control the LRF's power supply through a power MOSFET or a relay for example. If used, the app will turn on the rangefinder upon starting and turn it back off when exiting. This is useful if the LRF is battery-powered to keep the rangefinder connected to the Flipper Zero and conserve the battery when not in use. The use of this pin is entirely optional.
 
-- High-power LRX rangefinders, such as the LRX-20A or LRX-25A, can also be used with this app. However, they require between 7Vdc and 30Vdc to operate and need more power than the Flipper Zero can supply. Therefore an external power supply is compulsory with those rangefinders.
-
-- Additionally, LRX rangefinders are usually configured as RS232 or RS422 serial devices, not as UART serial devices. In that case, a UART-to-RS232 or UART-to-RS422 converter is required between the Flipper Zero and the rangefinder.
-
-- A fully charged Flipper Zero can power an LRF200 sampling at 1 Hz continuously for about 4.5 hours, or 16,000 measurements.
+- LRX-series rangefinders may also be used with the app. However, they are usually configured as RS232 or RS422 serial devices, not as UART serial devices. Therefore, a UART-to-RS232 or UART-to-RS422 converter is usually required to connect the Flipper Zero's UART lines to an LRX rangefinder.
 
 
 
