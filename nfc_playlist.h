@@ -19,34 +19,14 @@
 
 #include <notification/notification_messages.h>
 
-#include <nfc_playlist_worker.h>
+#include <storage/storage.h>
 
-typedef enum {
-   NfcPlaylistView_Menu,
-   NfcPlaylistView_Settings,
-   NfcPlaylistView_Popup,
-   NfcPlaylistView_PlaylistSelect,
-   NfcPlaylistView_FileEdit,
-   NfcPlaylistView_FileRename,
-   NfcPlaylistView_ConfirmDelete,
-   NfcPlaylistView_ViewPlaylistContent,
-   NfcPlaylistView_NfcSelect,
-   NfcPlaylistView_NameNewFile
-} NfcPlayScenesView;
+#include <toolbox/stream/stream.h>
+#include <toolbox/stream/file_stream.h>
 
-typedef enum {
-   NfcPlaylistScene_MainMenu,
-   NfcPlaylistScene_Settings,
-   NfcPlaylistScene_EmulatingPopup,
-   NfcPlaylistScene_PlaylistSelect,
-   NfcPlaylistScene_FileEdit,
-   NfcPlaylistScene_FileRename,
-   NfcPlaylistScene_ConfirmDelete,
-   NfcPlaylistScene_ViewPlaylistContent,
-   NfcPlaylistScene_NfcSelect,
-   NfcPlaylistScene_NameNewFile,
-   NfcPlaylistScene_count
-} NfcPlaylistScene;
+#include "lib/worker/nfc_playlist_worker.h"
+
+#include "scenes/nfc_playlist_scene.h"
 
 typedef struct {
    FuriString* file_path;
@@ -82,3 +62,11 @@ static const bool default_emulate_led_indicator = true;
 
 #define PLAYLIST_LOCATION "/ext/apps_data/nfc_playlist/"
 #define PLAYLIST_DIR "/ext/apps_data/nfc_playlist"
+
+typedef enum NfcPlaylistLedState {
+   NfcPlaylistLedState_Normal,
+   NfcPlaylistLedState_Error
+} NfcPlaylistLedState;
+
+void start_blink(NfcPlaylist* nfc_playlist, int state);
+void stop_blink(NfcPlaylist* nfc_playlist);

@@ -1,5 +1,4 @@
-#include "nfc_playlist.h"
-#include "scenes/playlist_select.h"
+#include "../nfc_playlist.h"
 
 void nfc_playlist_playlist_select_menu_callback(void* context) {
    NfcPlaylist* nfc_playlist = context;
@@ -18,7 +17,7 @@ void nfc_playlist_playlist_select_scene_on_enter(void* context) {
       true,
       &I_Nfc_10px,
       true);
-   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_PlaylistSelect);
+   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_PlaylistSelect);
    file_browser_set_callback(nfc_playlist->playlist_file_browser, nfc_playlist_playlist_select_menu_callback, nfc_playlist);
    FuriString* tmp_str = furi_string_alloc_set_str(PLAYLIST_LOCATION);
    file_browser_start(nfc_playlist->playlist_file_browser, tmp_str);

@@ -1,5 +1,18 @@
-#include "nfc_playlist.h"
-#include "scenes/main_menu.h"
+#include "../nfc_playlist.h"
+
+typedef enum {
+   NfcPlaylistEvent_ShowEmulation,
+   NfcPlaylistEvent_ShowPlaylistSelect,
+   NfcPlaylistEvent_ShowFileEdit,
+   NfcPlaylistEvent_ShowSettings
+} NfcPlaylistMainMenuEvent;
+
+typedef enum {
+   NfcPlaylistMenuSelection_Start,
+   NfcPlaylistMenuSelection_PlaylistSelect,
+   NfcPlaylistMenuSelection_FileEdit,
+   NfcPlaylistMenuSelection_Settings
+} NfcPlaylistMainMenuMenuSelection;
 
 void nfc_playlist_main_menu_menu_callback(void* context, uint32_t index) {
    NfcPlaylist* nfc_playlist = context;
@@ -48,7 +61,7 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_Settings,
       nfc_playlist_main_menu_menu_callback,
       nfc_playlist);
-   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Menu);
+   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_MainMenu);
 }
 
 bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
@@ -56,8 +69,8 @@ bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent even
    bool consumed = false;
    if (event.type == SceneManagerEventTypeCustom) {
       switch(event.event) {
-         case NfcPlaylistEvent_ShowEmulatingPopup:
-            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_EmulatingPopup);
+         case NfcPlaylistEvent_ShowEmulation:
+            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_Emulation);
             consumed = true;
             break;
          case NfcPlaylistEvent_ShowPlaylistSelect:

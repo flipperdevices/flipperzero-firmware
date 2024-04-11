@@ -1,51 +1,4 @@
 #include "nfc_playlist.h"
-#include "nfc_playlist_i.h"
-
-static void (*const nfc_playlist_scene_on_enter_handlers[])(void*) = {
-   nfc_playlist_main_menu_scene_on_enter,
-   nfc_playlist_settings_scene_on_enter,
-   nfc_playlist_emulation_scene_on_enter,
-   nfc_playlist_playlist_select_scene_on_enter,
-   nfc_playlist_file_edit_scene_on_enter,
-   nfc_playlist_file_rename_scene_on_enter,
-   nfc_playlist_confirm_delete_scene_on_enter,
-   nfc_playlist_view_playlist_content_scene_on_enter,
-   nfc_playlist_nfc_select_scene_on_enter,
-   nfc_playlist_name_new_file_scene_on_enter
-};
-
-static bool (*const nfc_playlist_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
-   nfc_playlist_main_menu_scene_on_event,
-   nfc_playlist_settings_scene_on_event,
-   nfc_playlist_emulation_scene_on_event,
-   nfc_playlist_playlist_select_scene_on_event,
-   nfc_playlist_file_edit_scene_on_event,
-   nfc_playlist_file_rename_scene_on_event,
-   nfc_playlist_confirm_delete_scene_on_event,
-   nfc_playlist_view_playlist_content_scene_on_event,
-   nfc_playlist_nfc_select_scene_on_event,
-   nfc_playlist_name_new_file_scene_on_event
-};
-
-static void (*const nfc_playlist_scene_on_exit_handlers[])(void*) = {
-   nfc_playlist_main_menu_scene_on_exit,
-   nfc_playlist_settings_scene_on_exit,
-   nfc_playlist_emulation_scene_on_exit,
-   nfc_playlist_playlist_select_scene_on_exit,
-   nfc_playlist_file_edit_scene_on_exit,
-   nfc_playlist_file_rename_scene_on_exit,
-   nfc_playlist_confirm_delete_scene_on_exit,
-   nfc_playlist_view_playlist_content_scene_on_exit,
-   nfc_playlist_nfc_select_scene_on_exit,
-   nfc_playlist_name_new_file_scene_on_exit
-};
-
-static const SceneManagerHandlers nfc_playlist_scene_manager_handlers = {
-   .on_enter_handlers = nfc_playlist_scene_on_enter_handlers,
-   .on_event_handlers = nfc_playlist_scene_on_event_handlers,
-   .on_exit_handlers = nfc_playlist_scene_on_exit_handlers,
-   .scene_num = NfcPlaylistScene_count
-};
 
 static bool nfc_playlist_custom_callback(void* context, uint32_t custom_event) {
    furi_assert(context);
@@ -62,7 +15,7 @@ static bool nfc_playlist_back_event_callback(void* context) {
 static NfcPlaylist* nfc_playlist_alloc() {
    NfcPlaylist* nfc_playlist = malloc(sizeof(NfcPlaylist));
    furi_assert(nfc_playlist);
-   nfc_playlist->scene_manager = scene_manager_alloc(&nfc_playlist_scene_manager_handlers, nfc_playlist);
+   nfc_playlist->scene_manager = scene_manager_alloc(&nfc_playlist_scene_handlers, nfc_playlist);
    nfc_playlist->view_dispatcher = view_dispatcher_alloc();
    view_dispatcher_enable_queue(nfc_playlist->view_dispatcher);
    nfc_playlist->variable_item_list = variable_item_list_alloc();
@@ -86,16 +39,16 @@ static NfcPlaylist* nfc_playlist_alloc() {
    view_dispatcher_set_event_callback_context(nfc_playlist->view_dispatcher, nfc_playlist);
    view_dispatcher_set_custom_event_callback(nfc_playlist->view_dispatcher, nfc_playlist_custom_callback);
    view_dispatcher_set_navigation_event_callback(nfc_playlist->view_dispatcher, nfc_playlist_back_event_callback);
-   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Menu, submenu_get_view(nfc_playlist->submenu));
-   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Settings, variable_item_list_get_view(nfc_playlist->variable_item_list));
-   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup, popup_get_view(nfc_playlist->popup));
-   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_PlaylistSelect, file_browser_get_view(nfc_playlist->playlist_file_browser));
-   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit, submenu_get_view(nfc_playlist->submenu));
-   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileRename, text_input_get_view(nfc_playlist->text_input));
-   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ConfirmDelete, widget_get_view(nfc_playlist->widget));
-   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ViewPlaylistContent, widget_get_view(nfc_playlist->widget));
-   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_NfcSelect, file_browser_get_view(nfc_playlist->nfc_file_browser));
-   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_NameNewFile, text_input_get_view(nfc_playlist->text_input));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_MainMenu, submenu_get_view(nfc_playlist->submenu));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_Settings, variable_item_list_get_view(nfc_playlist->variable_item_list));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_Emulation, popup_get_view(nfc_playlist->popup));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_PlaylistSelect, file_browser_get_view(nfc_playlist->playlist_file_browser));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_FileEdit, submenu_get_view(nfc_playlist->submenu));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_FileRename, text_input_get_view(nfc_playlist->text_input));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_ConfirmDelete, widget_get_view(nfc_playlist->widget));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_ViewPlaylistContent, widget_get_view(nfc_playlist->widget));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_NfcSelect, file_browser_get_view(nfc_playlist->nfc_file_browser));
+   view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_NameNewFile, text_input_get_view(nfc_playlist->text_input));
 
    Storage* storage = furi_record_open(RECORD_STORAGE);
    if (!storage_common_exists(storage, PLAYLIST_DIR)) {
@@ -109,16 +62,16 @@ static NfcPlaylist* nfc_playlist_alloc() {
 static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
    furi_assert(nfc_playlist);
 
-   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Menu);
-   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Settings);
-   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup);
-   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_PlaylistSelect);
-   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit);
-   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileRename);
-   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ConfirmDelete);
-   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ViewPlaylistContent);
-   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_NfcSelect);
-   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_NameNewFile);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_MainMenu);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_Settings);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_Emulation);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_PlaylistSelect);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_FileEdit);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_FileRename);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_ConfirmDelete);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_ViewPlaylistContent);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_NfcSelect);
+   view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_NameNewFile);
 
    scene_manager_free(nfc_playlist->scene_manager);
    view_dispatcher_free(nfc_playlist->view_dispatcher);
@@ -161,4 +114,45 @@ int32_t nfc_playlist_main(void* p) {
    nfc_playlist_free(nfc_playlist);
 
    return 0;
+}
+
+NotificationMessage blink_message_normal = {
+   .type = NotificationMessageTypeLedBlinkStart,
+   .data.led_blink.color = LightBlue | LightGreen,
+   .data.led_blink.on_time = 10,
+   .data.led_blink.period = 100
+};
+const NotificationSequence blink_sequence_normal = {
+   &blink_message_normal,
+   &message_do_not_reset,
+   NULL
+};
+
+NotificationMessage blink_message_error = {
+   .type = NotificationMessageTypeLedBlinkStart,
+   .data.led_blink.color = LightRed,
+   .data.led_blink.on_time = 10,
+   .data.led_blink.period = 100
+};
+
+const NotificationSequence blink_sequence_error = {
+   &blink_message_error,
+   &message_do_not_reset,
+   NULL
+};
+
+void start_blink(NfcPlaylist* nfc_playlist, int state) {
+   if (nfc_playlist->settings.emulate_led_indicator) {
+      if (state == NfcPlaylistLedState_Normal) {
+         notification_message_block(nfc_playlist->notification, &blink_sequence_normal);
+      } else if (state == NfcPlaylistLedState_Error) {
+         notification_message_block(nfc_playlist->notification, &blink_sequence_error);
+      }
+   }
+}
+
+void stop_blink(NfcPlaylist* nfc_playlist) {
+   if (nfc_playlist->settings.emulate_led_indicator) {
+      notification_message_block(nfc_playlist->notification, &sequence_blink_stop);
+   }
 }
