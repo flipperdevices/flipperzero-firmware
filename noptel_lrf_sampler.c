@@ -242,28 +242,28 @@ static double ms_tick_time_diff(uint32_t tstamp1, uint32_t tstamp2) {
 
 
 /** Turn the LRF on or off
-    Control the LRF using the PC1 pin **/
+    Control the LRF using the C1 pin **/
 static void power_lrf(bool on) {
 
   /* Should we turn the LRF on? */
   if(on) {
 
-    /* Set PC1 to output with push-pull resistors */
+    /* Set pin C1 to output with push-pull resistors */
     furi_hal_gpio_init_simple(&gpio_ext_pc1, GpioModeOutputPushPull);
 
     /* Set the pin to true so it outputs 3.3V */
     furi_hal_gpio_write(&gpio_ext_pc1, true);
 
-    /* Wait a bit to let the LRF boot up and be ready */
+    /* Wait a bit to let the LRF boot up and be ready to accept commands */
     furi_delay_ms(300);
   }
 
   else {
 
-    /* Set the pin to false so it outputs 0V */
+    /* Set the C1 pin to false so it outputs 0V */
     furi_hal_gpio_write(&gpio_ext_pc1, false);
 
-    /* Reset the PC1 pin to its default state */
+    /* Reset the pin to its default state */
     furi_hal_gpio_init_simple(&gpio_ext_pc1, GpioModeAnalog);
   }
 
