@@ -70,6 +70,10 @@ bool picopass_scene_read_factory_success_on_event(void* context, SceneManagerEve
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteKey);
             consumed = true;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_search_and_switch_to_previous_scene(
+            picopass->scene_manager, PicopassSceneStart);
+        consumed = true;
     }
     return consumed;
 }
