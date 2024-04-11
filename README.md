@@ -7,7 +7,7 @@ Mitsubishi Electric AC remote control for Flipper Zero.
 ## Building
 ```shell
 # Clone repository
-git clone https://github.com/achistyakov/mitsubishi_ac_remote.git
+git clone https://github.com/achistyakov/flipperzero-mitsubishi-ac-remote.git
 cd mitsubishi_ac_remote
 
 # Build the application
