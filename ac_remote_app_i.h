@@ -14,7 +14,7 @@
 #include "scenes/ac_remote_scene.h"
 #include "ac_remote_custom_event.h"
 #include "views/ac_remote_panel.h"
-#include "mitsubishi_ac_remote_dev_icons.h"
+#include "mitsubishi_ac_remote_icons.h"
 
 #define AC_REMOTE_APP_SETTINGS APP_DATA_PATH("settings.txt")
 
