@@ -1,5 +1,5 @@
 #include "nfc_playlist.h"
-#include "scences/settings.h"
+#include "scenes/settings.h"
 
 void nfc_playlist_settings_menu_callback(void* context, uint32_t index) {
    NfcPlaylist* nfc_playlist = context;

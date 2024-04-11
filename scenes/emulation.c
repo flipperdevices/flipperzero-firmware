@@ -1,5 +1,5 @@
 #include "nfc_playlist.h"
-#include "scences/emulation.h"
+#include "scenes/emulation.h"
 
 NfcPlaylistEmulationState EmulationState = NfcPlaylistEmulationState_Stopped;
 

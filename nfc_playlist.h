@@ -1,9 +1,12 @@
 #pragma once
 #include <furi.h>
 #include <furi_hal.h>
+
 #include <string.h>
-#include <gui/gui.h>
+
 #include <assets_icons.h>
+
+#include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/popup.h>
@@ -13,7 +16,9 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/widget.h>
 #include <gui/modules/widget_elements/widget_element.h>
+
 #include <notification/notification_messages.h>
+
 #include <nfc_playlist_worker.h>
 
 typedef enum {

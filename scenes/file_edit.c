@@ -1,5 +1,5 @@
 #include "nfc_playlist.h"
-#include "scences/file_edit.h"
+#include "scenes/file_edit.h"
 
 void nfc_playlist_file_edit_menu_callback(void* context, uint32_t index) {
    NfcPlaylist* nfc_playlist = context;
