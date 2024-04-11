@@ -1,5 +1,12 @@
-#include "nfc_playlist.h"
-#include "scenes/file_edit.h"
+#include "../nfc_playlist.h"
+
+typedef enum {
+   NfcPlaylistMenuSelection_CreatePlaylist,
+   NfcPlaylistMenuSelection_DeletePlaylist,
+   NfcPlaylistMenuSelection_RenamePlaylist,
+   NfcPlaylistMenuSelection_ViewPlaylistContent,
+   NfcPlaylistMenuSelection_AddNfcItem
+} NfcPlaylistFileEditMenuSelection;
 
 void nfc_playlist_file_edit_menu_callback(void* context, uint32_t index) {
    NfcPlaylist* nfc_playlist = context;

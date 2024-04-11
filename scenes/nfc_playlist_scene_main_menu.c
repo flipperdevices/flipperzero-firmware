@@ -1,5 +1,18 @@
-#include "nfc_playlist.h"
-#include "scenes/main_menu.h"
+#include "../nfc_playlist.h"
+
+typedef enum {
+   NfcPlaylistEvent_ShowEmulatingPopup,
+   NfcPlaylistEvent_ShowPlaylistSelect,
+   NfcPlaylistEvent_ShowFileEdit,
+   NfcPlaylistEvent_ShowSettings
+} NfcPlaylistMainMenuEvent;
+
+typedef enum {
+   NfcPlaylistMenuSelection_Start,
+   NfcPlaylistMenuSelection_PlaylistSelect,
+   NfcPlaylistMenuSelection_FileEdit,
+   NfcPlaylistMenuSelection_Settings
+} NfcPlaylistMainMenuMenuSelection;
 
 void nfc_playlist_main_menu_menu_callback(void* context, uint32_t index) {
    NfcPlaylist* nfc_playlist = context;

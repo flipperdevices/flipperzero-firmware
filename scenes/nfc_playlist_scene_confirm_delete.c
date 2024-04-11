@@ -1,5 +1,4 @@
-#include "nfc_playlist.h"
-#include "scenes/confirm_delete.h"
+#include "../nfc_playlist.h"
 
 void nfc_playlist_confirm_delete_menu_callback(GuiButtonType result, InputType type, void* context) {
    NfcPlaylist* nfc_playlist = context;

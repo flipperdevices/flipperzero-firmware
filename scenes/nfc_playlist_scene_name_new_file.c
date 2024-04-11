@@ -1,5 +1,4 @@
-#include "nfc_playlist.h"
-#include "scenes/name_new_file.h"
+#include "../nfc_playlist.h"
 
 void nfc_playlist_name_new_file_menu_callback(void* context) {
    NfcPlaylist* nfc_playlist = context;

@@ -1,5 +1,6 @@
-#include "nfc_playlist.h"
-#include "scenes/view_playlist_content.h"
+#include "../nfc_playlist.h"
+
+#define MAX_PLAYLIST_SIZE 1000
 
 void nfc_playlist_view_playlist_content_scene_on_enter(void* context) {
    NfcPlaylist* nfc_playlist = context;

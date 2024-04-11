@@ -1,5 +1,11 @@
-#include "nfc_playlist.h"
-#include "scenes/settings.h"
+#include "../nfc_playlist.h"
+
+typedef enum {
+   NfcPlaylistSettings_Timeout,
+   NfcPlaylistSettings_Delay,
+   NfcPlaylistSettings_LedIndicator,
+   NfcPlaylistSettings_Reset
+} NfcPlaylistSettingsMenuSelection;
 
 void nfc_playlist_settings_menu_callback(void* context, uint32_t index) {
    NfcPlaylist* nfc_playlist = context;

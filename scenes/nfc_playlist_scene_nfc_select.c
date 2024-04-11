@@ -1,5 +1,6 @@
-#include "nfc_playlist.h"
-#include "scenes/nfc_select.h"
+#include "../nfc_playlist.h"
+
+#define MAX_PLAYLIST_SIZE 1000
 
 void nfc_playlist_nfc_select_menu_callback(void* context) {
    NfcPlaylist* nfc_playlist = context;

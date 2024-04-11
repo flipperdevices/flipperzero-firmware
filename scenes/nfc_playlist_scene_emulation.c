@@ -1,5 +1,10 @@
-#include "nfc_playlist.h"
-#include "scenes/emulation.h"
+#include "../nfc_playlist.h"
+
+typedef enum NfcPlaylistEmulationState {
+   NfcPlaylistEmulationState_Emulating,
+   NfcPlaylistEmulationState_Stopped,
+   NfcPlaylistEmulationState_Canceled
+} NfcPlaylistEmulationState;
 
 NfcPlaylistEmulationState EmulationState = NfcPlaylistEmulationState_Stopped;
 
