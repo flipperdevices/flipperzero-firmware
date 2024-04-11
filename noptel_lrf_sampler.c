@@ -8,6 +8,7 @@
 /*** Includes ***/
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_gpio.h>
 #include <storage/storage.h>
 #include <gui/gui.h>
 #include <gui/view.h>
@@ -38,7 +39,8 @@ static const char *config_file = STORAGE_APP_DATA_PATH_PREFIX
 				"/noptel_lrf_sampler.save";
 
 static const char *config_freq_label = "Frequency";
-static int16_t config_freq_values[] = {-1, 1, 4, 10, 20, 100, 200};
+static int16_t config_freq_values[] = {smm, cmm_1hz, cmm_4hz, cmm_10hz,
+					cmm_20hz, cmm_100hz, cmm_200hz};
 static char *config_freq_names[] = {"SMM", "1 Hz", "4 Hz", "10 Hz",
 					"20 Hz", "100 Hz", "200 Hz"};
 
@@ -64,16 +66,19 @@ static uint16_t sample_view_update_every = 150; /*ms*/
 typedef enum {
 
   /* Configuration view */
-  submenu_config,
+  submenu_config = 0,
 
   /* Sample view */
-  submenu_sample,
+  submenu_sample = 1,
 
   /* LRF info view */
-  submenu_lrfinfo,
+  submenu_lrfinfo = 2,
 
   /* About view */
-  submenu_about,
+  submenu_about = 3,
+
+  /* Total number of items */
+  total_submenu_items = 4,
 
 } SubmenuIndex;
 
@@ -112,6 +117,9 @@ typedef struct {
 
   /* Beep option */
   uint8_t beep;
+
+  /* Last selected submenu item */
+  uint8_t sitem;
 
 } Config;
 
@@ -233,6 +241,36 @@ static double ms_tick_time_diff(uint32_t tstamp1, uint32_t tstamp2) {
 
 
 
+/** Turn the LRF on or off
+    Control the LRF using the PC1 pin **/
+static void power_lrf(bool on) {
+
+  /* Should we turn the LRF on? */
+  if(on) {
+
+    /* Set PC1 to output with push-pull resistors */
+    furi_hal_gpio_init_simple(&gpio_ext_pc1, GpioModeOutputPushPull);
+
+    /* Set the pin to true so it outputs 3.3V */
+    furi_hal_gpio_write(&gpio_ext_pc1, true);
+
+    /* Wait a bit to let the LRF boot up and be ready */
+    furi_delay_ms(300);
+  }
+
+  else {
+
+    /* Set the pin to false so it outputs 0V */
+    furi_hal_gpio_write(&gpio_ext_pc1, false);
+
+    /* Reset the PC1 pin to its default state */
+    furi_hal_gpio_init_simple(&gpio_ext_pc1, GpioModeAnalog);
+  }
+
+}
+
+
+
 /** Load saved configuration options
     Silently fail **/
 static void load_configuration(App *app) {
@@ -311,6 +349,13 @@ static void load_configuration(App *app) {
     return;
   }
 
+  /* Check that the submenu item selection exists */
+  if(read_config.sitem >= total_submenu_items) {
+    FURI_LOG_I(TAG, "Invalid submenu item %d in config file %s",
+			read_config.sitem, config_file);
+    return;
+  }
+
   /* Configure the frequency from the read value */
   sampler_model->config.freq = read_config.freq;
   variable_item_set_current_value_index(app->item_freq, freq_idx);
@@ -329,9 +374,14 @@ static void load_configuration(App *app) {
   variable_item_set_current_value_text(app->item_beep,
 					config_beep_names[beep_idx]);
 
-  FURI_LOG_I(TAG, "Restored config frequency %s, averaging time %s, beep %s",
+  /* Restore the saved last selected submenu item */
+  sampler_model->config.sitem = read_config.sitem;
+  submenu_set_selected_item(app->submenu, read_config.sitem);
+
+  FURI_LOG_I(TAG, "Restored config frequency %s, averaging time %s, beep %s, "
+			"selected submenu item %d",
 		config_freq_names[freq_idx], config_avg_names[avg_idx],
-		config_beep_names[beep_idx]);
+		config_beep_names[beep_idx], read_config.sitem);
 }
 
 
@@ -543,7 +593,7 @@ static void sample_view_draw_callback(Canvas *canvas, void *model) {
      continuous measurement, and whether continuous measurement is started */
   canvas_draw_frame(canvas, 77, 52, 51, 12);
   canvas_draw_icon(canvas, 79, 54, &I_ok_button);
-  if(sampler_model->config.freq < 0)
+  if(sampler_model->config.freq == smm)
     canvas_draw_str(canvas, 90, 62, "Sample");
   else
     if(sampler_model->cmm_started)
@@ -596,7 +646,7 @@ static bool sample_view_input_callback(InputEvent *evt, void *ctx) {
     FURI_LOG_I(TAG, "OK button pressed");
 
     /* Are we doing single measurement? */
-    if(sampler_model->config.freq < 0)
+    if(sampler_model->config.freq == smm)
 
       /* Send a SMM command (exec mode) */
       send_lrf_command(app->lrf_serial_comm_app, smm);
@@ -614,42 +664,12 @@ static bool sample_view_input_callback(InputEvent *evt, void *ctx) {
 
         sampler_model->cmm_started = false;
       }
+
       /* continuous measurement isn't yet started */
       else {
 
-        /* Send the appropriate start-CMM command */
-        switch(sampler_model->config.freq) {
-
-          /* Send a start-CMM command at 1Hz (exec mode) */
-          case 1:
-            send_lrf_command(app->lrf_serial_comm_app, cmm_1hz);
-            break;
-
-          /* Send a start-CMM command at 4Hz (exec mode) */
-          case 4:
-            send_lrf_command(app->lrf_serial_comm_app, cmm_4hz);
-            break;
-
-          /* Send a start-CMM command at 10Hz (exec mode) */
-          case 10:
-            send_lrf_command(app->lrf_serial_comm_app, cmm_10hz);
-            break;
-
-          /* Send a start-CMM command at 20Hz (exec mode) */
-          case 20:
-            send_lrf_command(app->lrf_serial_comm_app, cmm_20hz);
-            break;
-
-          /* Send a start-CMM command at 100Hz (exec mode) */
-          case 100:
-            send_lrf_command(app->lrf_serial_comm_app, cmm_100hz);
-            break;
-
-          /* Send a start-CMM command at 200Hz (exec mode) */
-          case 200:
-            send_lrf_command(app->lrf_serial_comm_app, cmm_200hz);
-            break;
-        }
+        /* Send the appropriate start-CMM command (exec mode) */
+        send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.freq);
 
         sampler_model->cmm_started = true;
       }
@@ -708,8 +728,21 @@ static void sample_view_enter_callback(void *ctx) {
 	  /* Initialize the displayed effective sampling frequency */
 	  sampler_model->eff_freq = -1;
 
-	  /* Mark continuous measurement as not currently started */
-	  sampler_model->cmm_started = false;
+	  /* Are we doing single measurement? */
+	  if(sampler_model->config.freq == smm)
+
+	    /* Send a SMM command (exec mode) */
+	    send_lrf_command(app->lrf_serial_comm_app, smm);
+
+	  /* We're doing continuous measurement */
+	  else {
+
+            /* Send the appropriate start-CMM command (exec mode) */
+	    send_lrf_command(app->lrf_serial_comm_app,
+				sampler_model->config.freq);
+
+	    sampler_model->cmm_started = true;
+	  }
 	},
 	false);
 
@@ -836,6 +869,9 @@ static void lrfinfo_view_enter_callback(void *ctx) {
 	{
 	  /* Invalidate the current identification - if any */
 	  lrfinfo_model->has_ident = false;
+
+	  /* Send a send-identification-frame command */
+	  send_lrf_command(app->lrf_serial_comm_app, send_ident);
 	},
 	true);
 }
@@ -872,7 +908,6 @@ static void about_view_draw_callback(Canvas *canvas, void *model) {
       /* Draw the title */
       canvas_set_font(canvas, FontPrimary);
       canvas_draw_str(canvas, 15, 8, "Noptel LRF Sampler");
-      canvas_draw_line(canvas, 15, 10, 113, 10);
 
       /* Draw the URL */
       canvas_draw_str(canvas, 25, 62, "https://noptel.fi");
@@ -899,17 +934,18 @@ static void about_view_draw_callback(Canvas *canvas, void *model) {
       /* Draw the title */
       canvas_set_font(canvas, FontPrimary);
       canvas_draw_str(canvas, 11, 8, "GPIO pin connections");
-      canvas_draw_line(canvas, 11, 10, 115, 10);
+
+      /* Draw a left arrow at the top left */
+      canvas_draw_icon(canvas, 0, 0, &I_arrow_left);
+
+      canvas_set_font(canvas, FontSecondary);
+      canvas_invert_color(canvas);
 
       /* Draw "LRF" over the LRF side of the pinout diagram */
-      canvas_set_font(canvas, FontSecondary);
       canvas_draw_str(canvas, 56, 22, "LRF");
 
       /* Draw "Flipper Zero" under the Flipper side of the pinout diagram */
       canvas_draw_str(canvas, 39, 62, "Flipper Zero");
-
-      /* Draw a left arrow at the top left */
-      canvas_draw_icon(canvas, 0, 0, &I_arrow_left);
 
       break;
   }
@@ -1041,30 +1077,35 @@ static void speaker_control_timer_callback(void *ctx) {
 static void submenu_callback(void *ctx, uint32_t idx) {
 
   App *app = (App *)ctx;
+  SamplerModel *sampler_model = view_get_model(app->sample_view);
 
   switch(idx) {
 
     /* Switch to the configuration view */
     case submenu_config:
       view_dispatcher_switch_to_view(app->view_dispatcher, view_config);
+      sampler_model->config.sitem = submenu_config;
       FURI_LOG_I(TAG, "Switch to configuration view");
       break;
 
     /* Switch to the sample view */
     case submenu_sample:
       view_dispatcher_switch_to_view(app->view_dispatcher, view_sample);
+      sampler_model->config.sitem = submenu_sample;
       FURI_LOG_I(TAG, "Switch to sample view");
       break;
 
     /* Switch to the LRF info view */
     case submenu_lrfinfo:
       view_dispatcher_switch_to_view(app->view_dispatcher, view_lrfinfo);
+      sampler_model->config.sitem = submenu_lrfinfo;
       FURI_LOG_I(TAG, "Switch to LRF info view");
       break;
 
     /* Switch to the about view */
     case submenu_about:
       view_dispatcher_switch_to_view(app->view_dispatcher, view_about);
+      sampler_model->config.sitem = submenu_about;
       FURI_LOG_I(TAG, "Switch to about view");
       break;
 
@@ -1485,6 +1526,9 @@ static App *app_init() {
   variable_item_set_current_value_index(app->item_beep, 0);
   variable_item_set_current_value_text(app->item_beep, config_beep_names[0]);
 
+  /* Set the default submenu item */
+  sampler_model->config.sitem = submenu_config;
+
   /* Try to load the configuration file and restore the configuration from the
      saved values */
   load_configuration(app);
@@ -1581,26 +1625,12 @@ int32_t noptel_lrf_sampler_app(void *p) {
 
   UNUSED(p);
 
-  uint8_t lrf_power_on_attempts = 0;
-  bool lrf_powered_on = false;
-
   /* Set the log level */
   set_log_level();
 
-  /* Turn on the LRF if we're running on battery */
+  /* Turn on the LRF */
   FURI_LOG_I(TAG, "LRF power on");
-  while(lrf_power_on_attempts < 5) {
-    lrf_powered_on = furi_hal_power_is_otg_enabled();
-    if(lrf_powered_on)
-      break;
-    furi_hal_power_enable_otg();
-    furi_delay_ms(10);
-    lrf_power_on_attempts++;
-  }
-
-  /* If the LRF was powered on, give the device some time to boot */
-  if(lrf_powered_on)
-    furi_delay_ms(500);
+  power_lrf(true);
 
   /* Initialize the app */
   App *app = app_init();
@@ -1618,9 +1648,9 @@ int32_t noptel_lrf_sampler_app(void *p) {
   /* Free up the space for the app */
   app_free(app);
 
-  /* Turn off the LRF if we're running on battery */
+  /* Turn off the LRF */
   FURI_LOG_I(TAG, "LRF power off");
-  furi_hal_power_disable_otg();
+  power_lrf(false);
 
   return 0;
 }
