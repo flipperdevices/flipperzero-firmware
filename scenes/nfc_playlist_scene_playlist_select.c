@@ -10,18 +10,19 @@ void nfc_playlist_playlist_select_menu_callback(void* context) {
 void nfc_playlist_playlist_select_scene_on_enter(void* context) {
    NfcPlaylist* nfc_playlist = context;
    file_browser_configure(
-      nfc_playlist->playlist_file_browser,
+      nfc_playlist->file_browser,
       ".txt",
       PLAYLIST_LOCATION,
       true,
       true,
       &I_Nfc_10px,
       true);
-   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_PlaylistSelect);
-   file_browser_set_callback(nfc_playlist->playlist_file_browser, nfc_playlist_playlist_select_menu_callback, nfc_playlist);
+   file_browser_set_callback(nfc_playlist->file_browser, nfc_playlist_playlist_select_menu_callback, nfc_playlist);
    FuriString* tmp_str = furi_string_alloc_set_str(PLAYLIST_LOCATION);
-   file_browser_start(nfc_playlist->playlist_file_browser, tmp_str);
+   file_browser_start(nfc_playlist->file_browser, tmp_str);
    furi_string_free(tmp_str);
+   
+   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileBrowser);
 }
 
 bool nfc_playlist_playlist_select_scene_on_event(void* context, SceneManagerEvent event) {
@@ -32,5 +33,5 @@ bool nfc_playlist_playlist_select_scene_on_event(void* context, SceneManagerEven
 
 void nfc_playlist_playlist_select_scene_on_exit(void* context) {
    NfcPlaylist* nfc_playlist = context;
-   file_browser_stop(nfc_playlist->playlist_file_browser);
+   file_browser_stop(nfc_playlist->file_browser);
 }

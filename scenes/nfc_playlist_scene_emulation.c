@@ -16,7 +16,8 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
    popup_reset(nfc_playlist->popup);
    popup_set_context(nfc_playlist->popup, nfc_playlist);
-   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistScene_Emulation);
+   
+   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup);
 
    if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
       EmulationState = NfcPlaylistEmulationState_Emulating;

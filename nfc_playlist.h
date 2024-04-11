@@ -28,6 +28,15 @@
 
 #include "scenes/nfc_playlist_scene.h"
 
+typedef enum {
+   NfcPlaylistView_Submenu,
+   NfcPlaylistView_Popup,
+   NfcPlaylistView_Widget,
+   NfcPlaylistView_VariableItemList,
+   NfcPlaylistView_FileBrowser,
+   NfcPlaylistView_TextInput
+} NfcPlaylistView;
+
 typedef struct {
    FuriString* file_path;
    bool playlist_selected;
@@ -39,15 +48,14 @@ typedef struct {
 typedef struct {
    SceneManager* scene_manager;
    ViewDispatcher* view_dispatcher;
-   VariableItemList* variable_item_list;
-   FileBrowser* playlist_file_browser;
-   FileBrowser* nfc_file_browser;
-   FuriString* file_browser_output;
-   TextInput* text_input;
-   char* text_input_output;
    Submenu* submenu;
    Popup* popup;
    Widget* widget;
+   VariableItemList* variable_item_list;
+   FileBrowser* file_browser;
+   FuriString* file_browser_output;
+   TextInput* text_input;
+   char* text_input_output;
    NotificationApp* notification;
    FuriThread* thread;
    NfcPlaylistWorker* nfc_playlist_worker;
