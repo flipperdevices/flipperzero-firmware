@@ -16,18 +16,16 @@ https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/6a348e
 
 ## Usage
 
-Start the application in **Apps ▶ GPIO**
-
-![Location of the Noptel LRF sampler app in the GPIO menu](screenshots/10-gpio_menu.png)
+Start the application in **Apps ▶ GPIO**.
 
 The main menu opens:
 
-![Main menu](screenshots/09-main_menu.png)
+![Main menu](screenshots/9-main_menu.png)
 
 
 ### Configuration
 
-![Configuration menu](screenshots/08-configuration_menu.png)
+![Configuration menu](screenshots/8-configuration_menu.png)
 
 In the configuration menu, select the sampling mode:
 
@@ -46,7 +44,7 @@ Select the **Sample** option to start sampling the LRF.
 
 In single measurement mode, press the **OK** button to get another measurement.
 
-![Sampling in single measurement mode](screenshots/02-sample_smm.png)
+![Sampling in single measurement mode](screenshots/2-sample_smm.png)
 
 Up to 3 distances can be measured in one sample (several targets in the line of sight).
 
@@ -58,7 +56,7 @@ The associated amplitude (i.e. signal strength) is displayed as a small number n
 
 In continuous measurement mode, press the **OK** button to start and stop the measurements.
 
-![Sampling in continuous measurement mode](screenshots/01-sample_cmm.png)
+![Sampling in continuous measurement mode](screenshots/1-sample_cmm.png)
 
 Distances and amplitudes are displayed like in single measurement mode.
 
@@ -68,30 +66,30 @@ The effective sampling rate is calculated and displayed at the bottom.
 
 If an averaging time is configured, the average distances and amplitudes over that period of time are displayed instead of the last samples.
 
-![Sample averaging](screenshots/00-sample_averaging.png)
+![Sample averaging](screenshots/0-sample_averaging.png)
 
 
 ### Pointer ON/OFF
 
 Select the **Pointer ON/OFF** toggle to turn the pointer on and off if your rangefinder is equipped with a pointer.
 
-![Pointer ON/OFF toggle](screenshots/07-pointer_on_off_toggle.png)
+![Pointer ON/OFF toggle](screenshots/7-pointer_on_off_toggle.png)
 
 ### LRF information
 
 Select the **LRF information** option to view the LRF's identification information. Press the **OK** button to re-read the information, or read another LRF's.
 
-![GPIO pin connections](screenshots/03-lrf_information.png)
+![GPIO pin connections](screenshots/3-lrf_information.png)
 
 ### About
 
 Gives information about the app and the GPIO pin connections needed to connect an LRF rangefinder to the Flipper Zero. Use the **OK** button or the arrows to switch pages.
 
-![App version](screenshots/04-splash_version.png)
+![App version](screenshots/4-splash_version.png)
 
-![App description](screenshots/05-app_description.png)
+![App description](screenshots/5-app_description.png)
 
-![GPIO pin connections](screenshots/06-gpio_pin_connections.png)
+![GPIO pin connections](screenshots/6-gpio_pin_connections.png)
 
 
 
