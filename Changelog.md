@@ -1,6 +1,7 @@
 ## Version 1.2 - 12/04/2024
 
 - Changed the power control pin from pin #1 (+5V) to #15 (C1)
+- Added Pointer ON/OFF toggle
 - Automatically start sampling when entering Sample
 - Automatically read the LRF's identification when entering LRF information
 - Save and restore the last selected submenu option
