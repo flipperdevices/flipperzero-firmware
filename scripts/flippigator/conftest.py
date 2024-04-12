@@ -112,7 +112,8 @@ def pytest_configure(config):
         time.sleep(10)
     else:
         if config.getoption("--port"):
-            reboot_flipper(config.getoption("--port"))
+            pass
+            #reboot_flipper(config.getoption("--port"))
         if config.getoption("--bench-ibutton-ir"):
             reboot_flipper(config.getoption("--flipper-r-port"))
             reboot_flipper(config.getoption("--flipper-k-port"))
@@ -610,7 +611,7 @@ def reader_indala(reader_serial, gator, request) -> Reader:
         return reader
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session", autouse=False)
 def relay(relay_serial, gator, request) -> Relay:
     bench = request.config.getoption("--bench-ibutton-ir")
     if bench:
