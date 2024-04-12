@@ -71,23 +71,17 @@ If an averaging time is configured, the average distances and amplitudes over th
 ![Sample averaging](screenshots/00-sample_averaging.png)
 
 
-
 ### Pointer ON/OFF
 
 Select the **Pointer ON/OFF** toggle to turn the pointer on and off.
 
 ![Pointer ON/OFF toggle](screenshots/07-pointer_on_off_toggle.png)
 
-
-
 ### LRF information
 
 Select the **LRF information** option to view the LRF's identification information. Press the **OK** button to re-read the information, or read another LRF's.
 
 ![GPIO pin connections](screenshots/03-lrf_information.png)
-
-
-
 
 ### About
 
