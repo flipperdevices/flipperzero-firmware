@@ -26,6 +26,8 @@ typedef enum {
   cmm_200hz = 200,
   cmm_break = -1,
   send_ident = -2,
+  pointer_on = -3,
+  pointer_off = -4,
 } LRFCommand;
 
 

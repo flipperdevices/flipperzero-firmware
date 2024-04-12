@@ -32,6 +32,8 @@ static uint8_t cmd_cmm_100hz[] = "\xcc\x05\x00\x00\x81";
 static uint8_t cmd_cmm_200hz[] = "\xcc\x06\x00\x00\x82";
 static uint8_t cmd_cmm_break[] = "\xc6\x96";
 static uint8_t cmd_send_ident[] = "\xc0\x90";
+static uint8_t cmd_pointer_on[] = "\xc5\x02\x97";
+static uint8_t cmd_pointer_off[] = "\xc5\x00\x95";
 
 
 
@@ -535,6 +537,18 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
     case send_ident:
       uart_tx(app, cmd_send_ident, sizeof(cmd_send_ident));
       FURI_LOG_I(TAG, "Send identification frame command sent");
+      break;
+
+    /* Send a pointer-on command */
+    case pointer_on:
+      uart_tx(app, cmd_pointer_on, sizeof(cmd_pointer_on));
+      FURI_LOG_I(TAG, "Pointer ON command sent");
+      break;
+
+    /* Send a pointer-off command */
+    case pointer_off:
+      uart_tx(app, cmd_pointer_off, sizeof(cmd_pointer_off));
+      FURI_LOG_I(TAG, "Pointer OFF command sent");
       break;
   }
 }

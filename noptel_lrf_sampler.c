@@ -71,14 +71,17 @@ typedef enum {
   /* Sample view */
   submenu_sample = 1,
 
+  /* Pointer ON/OFF toggle */
+  submenu_pointeronoff = 2,
+
   /* LRF info view */
-  submenu_lrfinfo = 2,
+  submenu_lrfinfo = 3,
 
   /* About view */
-  submenu_about = 3,
+  submenu_about = 4,
 
   /* Total number of items */
-  total_submenu_items = 4,
+  total_submenu_items = 5,
 
 } SubmenuIndex;
 
@@ -154,6 +157,9 @@ typedef struct {
   /* Flag to play a beep, and whether a beep is already playing */
   bool play_beep;
   bool beep_playing;
+
+  /* Whether the pointer is on or off */
+  bool pointer_is_on;
 
 } SamplerModel;
 
@@ -1095,6 +1101,16 @@ static void submenu_callback(void *ctx, uint32_t idx) {
       FURI_LOG_I(TAG, "Switch to sample view");
       break;
 
+    /* Turn the pointer on and off */
+    case submenu_pointeronoff:
+      send_lrf_command(app->lrf_serial_comm_app,
+			sampler_model->pointer_is_on? pointer_off : pointer_on);
+      FURI_LOG_I(TAG, "Turned the pointer %s",
+			sampler_model->pointer_is_on? "OFF" : "ON");
+      sampler_model->config.sitem = submenu_pointeronoff;
+      sampler_model->pointer_is_on = !sampler_model->pointer_is_on;
+      break;
+
     /* Switch to the LRF info view */
     case submenu_lrfinfo:
       view_dispatcher_switch_to_view(app->view_dispatcher, view_lrfinfo);
@@ -1364,6 +1380,9 @@ static App *app_init() {
   submenu_add_item(app->submenu, "Sample",
 			submenu_sample, submenu_callback, app);
 
+  submenu_add_item(app->submenu, "Pointer ON/OFF",
+			submenu_pointeronoff, submenu_callback, app);
+
   submenu_add_item(app->submenu, "LRF information",
 			submenu_lrfinfo, submenu_callback, app);
 
@@ -1528,6 +1547,9 @@ static App *app_init() {
 
   /* Set the default submenu item */
   sampler_model->config.sitem = submenu_config;
+
+  /* Assume the pointer is off */
+  sampler_model->pointer_is_on = false;
 
   /* Try to load the configuration file and restore the configuration from the
      saved values */
