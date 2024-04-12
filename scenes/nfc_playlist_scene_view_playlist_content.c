@@ -22,6 +22,8 @@ void nfc_playlist_view_playlist_content_scene_on_enter(void* context) {
 
       furi_string_free(playlist_content);
       storage_file_close(file);
+   } else {
+      widget_add_text_box_element(nfc_playlist->widget, 0, 0, 128, 64, AlignCenter, AlignCenter, "\eFailed to open playlist\n\nPress back\e", false);
    }
 
    storage_file_free(file);

@@ -4,15 +4,18 @@ void nfc_playlist_name_new_file_menu_callback(void* context) {
    NfcPlaylist* nfc_playlist = context;
    Storage* storage = furi_record_open(RECORD_STORAGE);
    FuriString* file_name = furi_string_alloc();
+
    furi_string_printf(file_name, "/ext/apps_data/nfc_playlist/%s.txt", nfc_playlist->text_input_output);
-   FURI_LOG_I("Creating file: %s", furi_string_get_cstr(file_name));
+
    if (!storage_common_exists(storage, furi_string_get_cstr(file_name))) {
       File* file = storage_file_alloc(storage);
-      storage_file_open(file, furi_string_get_cstr(file_name), FSAM_READ_WRITE, FSOM_CREATE_NEW);
-      storage_file_close(file);
+      if (storage_file_open(file, furi_string_get_cstr(file_name), FSAM_READ_WRITE, FSOM_CREATE_NEW)) {
+         storage_file_close(file);
+         furi_string_move(nfc_playlist->settings.file_path, file_name);
+      }
       storage_file_free(file);
    }
-   furi_string_move(nfc_playlist->settings.file_path, file_name);
+
    furi_string_free(file_name);
    furi_record_close(RECORD_STORAGE);
    scene_manager_previous_scene(nfc_playlist->scene_manager);
