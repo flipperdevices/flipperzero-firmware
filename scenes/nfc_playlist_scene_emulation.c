@@ -88,7 +88,6 @@ int32_t nfc_playlist_emulation_task(void* context) {
             nfc_playlist_worker_stop(nfc_playlist->nfc_playlist_worker);
             nfc_playlist_worker_clear_nfc_data(nfc_playlist->nfc_playlist_worker);
          }
-         free(file_path);
       }
       popup_reset(nfc_playlist->popup);
       popup_set_header(nfc_playlist->popup, EmulationState == NfcPlaylistEmulationState_Canceled ? "Emulation stopped" : "Emulation finished", 64, 10, AlignCenter, AlignTop);

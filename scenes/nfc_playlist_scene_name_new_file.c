@@ -11,7 +11,7 @@ void nfc_playlist_name_new_file_menu_callback(void* context) {
       File* file = storage_file_alloc(storage);
       if (storage_file_open(file, furi_string_get_cstr(file_name), FSAM_READ_WRITE, FSOM_CREATE_NEW)) {
          storage_file_close(file);
-         furi_string_move(nfc_playlist->settings.file_path, file_name);
+         furi_string_swap(nfc_playlist->settings.file_path, file_name);
       }
       storage_file_free(file);
    }
