@@ -1,5 +1,10 @@
-#include "nfc_playlist.h"
-#include "scences/emulation.h"
+#include "../nfc_playlist.h"
+
+typedef enum NfcPlaylistEmulationState {
+   NfcPlaylistEmulationState_Emulating,
+   NfcPlaylistEmulationState_Stopped,
+   NfcPlaylistEmulationState_Canceled
+} NfcPlaylistEmulationState;
 
 NfcPlaylistEmulationState EmulationState = NfcPlaylistEmulationState_Stopped;
 
@@ -8,17 +13,20 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
    Storage* storage = furi_record_open(RECORD_STORAGE);
    Stream* stream = file_stream_alloc(storage);
-   FuriString* line = furi_string_alloc();
-   FuriString* tmp_header_str = furi_string_alloc();
-   FuriString* tmp_counter_str = furi_string_alloc();
 
    popup_reset(nfc_playlist->popup);
    popup_set_context(nfc_playlist->popup, nfc_playlist);
+   
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup);
 
-   if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ, FSOM_OPEN_EXISTING) && nfc_playlist->settings.file_selected_check) {
+   if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
       EmulationState = NfcPlaylistEmulationState_Emulating;
       int file_position = 0;
+
+      FuriString* line = furi_string_alloc();
+      FuriString* tmp_header_str = furi_string_alloc();
+      FuriString* tmp_counter_str = furi_string_alloc();
+
       while(stream_read_line(stream, line) && EmulationState == NfcPlaylistEmulationState_Emulating) {
 
          char* file_path = (char*)furi_string_get_cstr(line);
@@ -80,21 +88,22 @@ int32_t nfc_playlist_emulation_task(void* context) {
             nfc_playlist_worker_stop(nfc_playlist->nfc_playlist_worker);
             nfc_playlist_worker_clear_nfc_data(nfc_playlist->nfc_playlist_worker);
          }
-         free(file_path);
       }
       popup_reset(nfc_playlist->popup);
       popup_set_header(nfc_playlist->popup, EmulationState == NfcPlaylistEmulationState_Canceled ? "Emulation stopped" : "Emulation finished", 64, 10, AlignCenter, AlignTop);
       popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
       stop_blink(nfc_playlist);
+
       EmulationState = NfcPlaylistEmulationState_Stopped;
+      furi_string_free(line);
+      furi_string_free(tmp_header_str);
+      furi_string_free(tmp_counter_str);
+
    } else {
       popup_set_header(nfc_playlist->popup, "Failed to open playlist", 64, 10, AlignCenter, AlignTop);
       popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
    }
 
-   furi_string_free(line);
-   furi_string_free(tmp_header_str);
-   furi_string_free(tmp_counter_str);
    file_stream_close(stream);
    furi_record_close(RECORD_STORAGE);
    stream_free(stream);

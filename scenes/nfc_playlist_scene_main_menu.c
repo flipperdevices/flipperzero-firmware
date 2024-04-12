@@ -1,5 +1,18 @@
-#include "nfc_playlist.h"
-#include "scences/main_menu.h"
+#include "../nfc_playlist.h"
+
+typedef enum {
+   NfcPlaylistEvent_ShowEmulation,
+   NfcPlaylistEvent_ShowPlaylistSelect,
+   NfcPlaylistEvent_ShowFileEdit,
+   NfcPlaylistEvent_ShowSettings
+} NfcPlaylistMainMenuEvent;
+
+typedef enum {
+   NfcPlaylistMenuSelection_Start,
+   NfcPlaylistMenuSelection_PlaylistSelect,
+   NfcPlaylistMenuSelection_FileEdit,
+   NfcPlaylistMenuSelection_Settings
+} NfcPlaylistMainMenuMenuSelection;
 
 void nfc_playlist_main_menu_menu_callback(void* context, uint32_t index) {
    NfcPlaylist* nfc_playlist = context;
@@ -8,13 +21,16 @@ void nfc_playlist_main_menu_menu_callback(void* context, uint32_t index) {
 
 void nfc_playlist_main_menu_scene_on_enter(void* context) {
    NfcPlaylist* nfc_playlist = context;
-   if (!nfc_playlist->settings.file_selected) {
-      nfc_playlist->settings.file_selected = true;
-      scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileSelect);
+   if (!nfc_playlist->settings.playlist_selected) {
+      nfc_playlist->settings.playlist_selected = true;
+      scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_PlaylistSelect);
       return;
    }
 
-   submenu_set_header(nfc_playlist->submenu, "NFC Playlist");
+   FuriString* tmp_str = furi_string_alloc();
+   furi_string_printf(tmp_str, "NFC Playlist v%s", FAP_VERSION);
+   submenu_set_header(nfc_playlist->submenu, furi_string_get_cstr(tmp_str));
+   furi_string_free(tmp_str);
 
    submenu_add_lockable_item(
       nfc_playlist->submenu,
@@ -22,13 +38,13 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_Start,
       nfc_playlist_main_menu_menu_callback,
       nfc_playlist,
-      !nfc_playlist->settings.file_selected_check,
+      furi_string_empty(nfc_playlist->settings.file_path),
       "No\nplaylist\nselected");
 
    submenu_add_item(
       nfc_playlist->submenu,
       "Select playlist",
-      NfcPlaylistMenuSelection_FileSelect,
+      NfcPlaylistMenuSelection_PlaylistSelect,
       nfc_playlist_main_menu_menu_callback,
       nfc_playlist);
 
@@ -45,7 +61,8 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_Settings,
       nfc_playlist_main_menu_menu_callback,
       nfc_playlist);
-   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Menu);
+      
+   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Submenu);
 }
 
 bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
@@ -53,12 +70,12 @@ bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent even
    bool consumed = false;
    if (event.type == SceneManagerEventTypeCustom) {
       switch(event.event) {
-         case NfcPlaylistEvent_ShowEmulatingPopup:
-            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_EmulatingPopup);
+         case NfcPlaylistEvent_ShowEmulation:
+            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_Emulation);
             consumed = true;
             break;
-         case NfcPlaylistEvent_ShowFileSelect:
-            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileSelect);
+         case NfcPlaylistEvent_ShowPlaylistSelect:
+            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_PlaylistSelect);
             consumed = true;
             break;
          case NfcPlaylistEvent_ShowFileEdit:

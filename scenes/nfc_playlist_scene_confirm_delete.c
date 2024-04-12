@@ -1,5 +1,4 @@
-#include "nfc_playlist.h"
-#include "scences/confirm_delete.h"
+#include "../nfc_playlist.h"
 
 void nfc_playlist_confirm_delete_menu_callback(GuiButtonType result, InputType type, void* context) {
    NfcPlaylist* nfc_playlist = context;
@@ -22,7 +21,7 @@ void nfc_playlist_confirm_delete_scene_on_enter(void* context) {
 
    furi_string_free(temp_str);
 
-   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_ConfirmDelete);
+   view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Widget);
 }
 
 bool nfc_playlist_confirm_delete_scene_on_event(void* context, SceneManagerEvent event) {
@@ -33,9 +32,8 @@ bool nfc_playlist_confirm_delete_scene_on_event(void* context, SceneManagerEvent
          case GuiButtonTypeRight:
             Storage* storage = furi_record_open(RECORD_STORAGE);
             storage_simply_remove(storage, furi_string_get_cstr(nfc_playlist->settings.file_path));
-            nfc_playlist->settings.file_selected = false;
-            nfc_playlist->settings.file_selected_check = false;
-            nfc_playlist->settings.file_path = nfc_playlist->settings.base_file_path;
+            nfc_playlist->settings.playlist_selected = false;
+            furi_string_reset(nfc_playlist->settings.file_path);
             furi_record_close(RECORD_STORAGE);
             consumed = true;
             break;
