@@ -73,7 +73,7 @@ If an averaging time is configured, the average distances and amplitudes over th
 
 ### Pointer ON/OFF
 
-Select the **Pointer ON/OFF** toggle to turn the pointer on and off.
+Select the **Pointer ON/OFF** toggle to turn the pointer on and off if your rangefinder is equipped with a pointer.
 
 ![Pointer ON/OFF toggle](screenshots/07-pointer_on_off_toggle.png)
 
