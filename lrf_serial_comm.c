@@ -576,7 +576,7 @@ LRFSerialCommApp *lrf_serial_comm_app_init() {
   app->rx_thread = furi_thread_alloc();
 
   /* Initialize the UART receive thread */
-  furi_thread_set_name(app->rx_thread, "LRFSerialCommUARTRxThread");
+  furi_thread_set_name(app->rx_thread, "uart_rx");
   furi_thread_set_stack_size(app->rx_thread, 1024);
   furi_thread_set_context(app->rx_thread, app);
   furi_thread_set_callback(app->rx_thread, uart_rx_thread);
