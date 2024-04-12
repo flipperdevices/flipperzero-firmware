@@ -14,7 +14,6 @@ This app was design, built and tested using the <a href="https://github.com/Flip
 ## Supported Firmwares
 As i know these firmwares are supported and working if you know any more please let me know
 - <a href="https://github.com/Flipper-XFW/Xtreme-Firmware">Xtreme</a>
-- <a href="https://github.com/Next-Flip/Momentum-Firmware">Momentum</a>
 - <a href="https://github.com/RogueMaster/flipperzero-firmware-wPlugins">RogueMaster</a>
 ## Settings:
 - Emulate time (How long the NFC card will be emulated for)
