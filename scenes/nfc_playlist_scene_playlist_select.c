@@ -2,7 +2,7 @@
 
 void nfc_playlist_playlist_select_menu_callback(void* context) {
    NfcPlaylist* nfc_playlist = context;
-   furi_string_move(nfc_playlist->settings.file_path, nfc_playlist->file_browser_output);
+   furi_string_swap(nfc_playlist->settings.file_path, nfc_playlist->file_browser_output);
    furi_string_reset(nfc_playlist->file_browser_output);
    scene_manager_previous_scene(nfc_playlist->scene_manager);
 }
