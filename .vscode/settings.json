@@ -14,7 +14,8 @@
         "*.scons": "python",
         "SConscript": "python",
         "SConstruct": "python",
-        "*.fam": "python"
+        "*.fam": "python",
+        "mitsubishi_ac_remote_icons.h": "c"
     },
     "cortex-debug.registerUseNaturalFormat": false,
     "python.analysis.typeCheckingMode": "off",
