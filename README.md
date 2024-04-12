@@ -70,6 +70,10 @@ If an averaging time is configured, the average distances and amplitudes over th
 
 ![Sample averaging](screenshots/0-sample_averaging.png)
 
+### Pointer ON/OFF
+
+Select the **Pointer ON/OFF** toggle to turn the pointer on and off.
+
 ### LRF information
 
 Select the **LRF information** option to view the LRF's identification information. Press the **OK** button to re-read the information, or read another LRF's.
