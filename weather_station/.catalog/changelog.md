@@ -1,3 +1,5 @@
+## 1.7
+ - Added external CC1101 radio modules support
 ## 1.6
  - Add protocol Acurite 5n1 Weather Station
 ## 1.5
