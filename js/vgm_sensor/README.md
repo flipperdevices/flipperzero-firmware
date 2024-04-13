@@ -8,6 +8,9 @@ The [tone_rotate.js](./tone_rotate.js) script will play a tone using the speaker
 
 Copy the [a_demo.js](./a_demo.js) and [tone_rotate.js](./tone_rotate.js) files to your `SD Card/apps/Scripts` directory.  You can then run the scripts from the Flipper Zero (`Apps`, `Scripts`, `a_demo.js`).
 
+## Prebuilt apps
+You can copy one of the FAL files from [prebuilt](./prebuilt/) onto `SD Card/apps_data/js_app/plugins/js_vgm.fal` and then you will be able to do `let vgm = require("vgm");`.  The prebuilt files exposes the 4 APIs (getPitch, getRoll, getYaw, deltaYaw) from the video and they also expose a (`play(440,1.0,250);`) command -- since I wanted to see what would happen if I used furi_hal_speaker APIs in my module code.  If you use the wrong one for your firmware, you will get `"vgm" module load fail`.  You can also copy [tone_rotate_native.js](./prebuilt/tone_rotate_native.js) to the `SD Card/apps/Scripts/tone_rotate_native.js`.  Running the script (`Apps`, `Scripts`, `tone_rotate_native`) should play tones as you rotate your Flipper with the VGM attached.
+
 ## Installing the JS speaker_api module
 We wrote the speaker_api module in JavaScript (using furi_hal_xxx APIs to expose a new speaker module).  This file [speaker_api.js](./speaker_api.js) should be copied to your `SD Card/apps/Scripts` directory.  Once copied, your scripts can do a `let speaker = load(__dirpath + "/speaker_api.js");` and then `speaker.playTone(440, 1.0, 500);` to play a 440Hz tone, at full volume for 500ms.  This file is a good example of how to use FFI to extend the Flipper Zero.  If your APIs are part of the firmware, and don't use enumeration values, this is a good technqiue to use.  (If they use enumeration values, it's possible that the values will change in the future, and your script will reference the improper id values.)
 
