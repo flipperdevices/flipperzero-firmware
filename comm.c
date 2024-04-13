@@ -46,14 +46,14 @@ void comm_free(Comm* comm) {
 
 void comm_send_no_data(Comm* comm, NfcRelayPacketType typ) {
     NfcRelayPacket* packet;
-    packet = packet_no_data_alloc(typ);
+    packet = packet_alloc_empty(typ);
     comm_write_packet(comm, packet);
     free(packet);
 }
 
 void comm_send_pingpong(Comm* comm, NfcRelayPacketType typ, NfcRelayRole who) {
     NfcRelayPacket* packet;
-    packet = packet_alloc(typ, 1, &who);
+    packet = packet_alloc_data(typ, 1, &who);
     comm_write_packet(comm, packet);
     free(packet);
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <furi.h>
+#include <nfc/nfc_poller.h>
 #include "nfc_relay.h"
 #include "comm.h"
 
@@ -7,6 +8,7 @@ typedef enum {
     AsReaderWorkerStateWaitPong,
     AsReaderWorkerStateCardSearch,
     AsReaderWorkerStateCardFound,
+    AsReaderWorkerStateInteractive,
 } AsReaderWorkerState;
 
 typedef bool (*AsReaderWorkerCallback)(AsReaderWorkerState event, void* context);
@@ -14,6 +16,11 @@ typedef bool (*AsReaderWorkerCallback)(AsReaderWorkerState event, void* context)
 typedef struct AsReaderWorker {
     FuriThread* thread;
     AsReaderWorkerState state;
+    Nfc* nfc;
+    NfcPoller* poller;
+    BitBuffer* bitbuffer_rx;
+    BitBuffer* bitbuffer_tx;
+    bool apdu_ready;
     Comm* comm;
     NfcRelay* nfc_relay;
     AsReaderWorkerCallback callback;

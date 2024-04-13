@@ -22,7 +22,7 @@ typedef enum {
 } NfcRelayMode;
 
 typedef struct NfcRelayConfigUart {
-    FuriHalUartId uartId;
+    FuriHalSerialId serialId;
     uint32_t baudrate;
 } NfcRelayConfigUart;
 

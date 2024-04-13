@@ -1,6 +1,4 @@
 #include "uart_worker.h"
-#include <furi_hal_console.h>
-#include <furi_hal_uart.h>
 
 #define TAG "UartWorker"
 
@@ -8,15 +6,18 @@ void uart_worker_change_state(UartWorker* uart_worker, UartWorkerState state) {
     furi_assert(uart_worker);
 
     uart_worker->state = state;
+    furi_thread_flags_set(furi_thread_get_id(uart_worker->thread), 1);
 }
 
 void uart_worker_change_rx_sub_state(UartWorker* uart_worker, UartWorkerStateRxSub rx_sub_state) {
     furi_assert(uart_worker);
 
     uart_worker->rxSubState = rx_sub_state;
+    furi_thread_flags_set(furi_thread_get_id(uart_worker->thread), 1);
 }
 
 UartWorker* uart_worker_alloc(NfcRelayConfigUart config) {
+    FURI_LOG_D(TAG, "uart_worker_alloc");
     UartWorker* uart_worker = malloc(sizeof(UartWorker));
 
     uart_worker->thread = furi_thread_alloc_ex("UartWorker", 2048, uart_worker_task, uart_worker);
@@ -32,6 +33,7 @@ UartWorker* uart_worker_alloc(NfcRelayConfigUart config) {
 
 void uart_worker_free(UartWorker* uart_worker) {
     furi_assert(uart_worker);
+    FURI_LOG_D(TAG, "uart_worker_free");
 
     furi_thread_free(uart_worker->thread);
     furi_stream_buffer_free(uart_worker->rx_stream);
@@ -41,24 +43,29 @@ void uart_worker_free(UartWorker* uart_worker) {
 
 void uart_worker_stop(UartWorker* uart_worker) {
     furi_assert(uart_worker);
+    FURI_LOG_D(TAG, "uart_worker_stop");
 
     uart_worker_change_state(uart_worker, UartWorkerStateStop);
 
-    furi_hal_uart_set_irq_cb(uart_worker->config.uartId, NULL, NULL);
-    if(uart_worker->config.uartId == FuriHalUartIdUSART1) {
-        furi_hal_console_enable();
-    } else if(uart_worker->config.uartId == FuriHalUartIdLPUART1) {
-        furi_hal_uart_deinit(FuriHalUartIdLPUART1);
-    }
+    //furi_hal_uart_set_irq_cb(uart_worker->config.uartId, NULL, NULL);
+    //if(uart_worker->config.uartId == FuriHalUartIdUSART1) {
+    //    furi_hal_console_enable();
+    //} else if(uart_worker->config.uartId == FuriHalUartIdLPUART1) {
+    //    furi_hal_uart_deinit(FuriHalUartIdLPUART1);
+    //}
+    furi_hal_serial_deinit(uart_worker->serial);
+    furi_hal_serial_control_release(uart_worker->serial);
 
     furi_thread_join(uart_worker->thread);
 }
 
-static void uart_worker_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void
+    uart_worker_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     furi_assert(context);
     UartWorker* uart_worker = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(uart_worker->rx_stream, &data, 1, 0);
         //furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
         uart_worker_change_state(uart_worker, UartWorkerStateRx);
@@ -67,13 +74,17 @@ static void uart_worker_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) 
 
 void uart_worker_start(UartWorker* uart_worker) {
     furi_assert(uart_worker);
-    if(uart_worker->config.uartId == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
-        furi_hal_uart_set_br(FuriHalUartIdUSART1, uart_worker->config.baudrate);
-    } else if(uart_worker->config.uartId == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(FuriHalUartIdLPUART1, uart_worker->config.baudrate);
-    }
-    furi_hal_uart_set_irq_cb(uart_worker->config.uartId, uart_worker_on_irq_cb, uart_worker);
+    //if(uart_worker->config.uartId == FuriHalUartIdUSART1) {
+    //    furi_hal_console_disable();
+    //    furi_hal_uart_set_br(FuriHalUartIdUSART1, uart_worker->config.baudrate);
+    //} else if(uart_worker->config.uartId == FuriHalUartIdLPUART1) {
+    //    furi_hal_uart_init(FuriHalUartIdLPUART1, uart_worker->config.baudrate);
+    //}
+    //furi_hal_uart_set_irq_cb(uart_worker->config.uartId, uart_worker_on_irq_cb, uart_worker);
+    uart_worker->serial = furi_hal_serial_control_acquire(uart_worker->config.serialId);
+    furi_check(uart_worker->serial);
+    furi_hal_serial_init(uart_worker->serial, uart_worker->config.baudrate);
+    furi_hal_serial_async_rx_start(uart_worker->serial, uart_worker_on_irq_cb, uart_worker, true);
 
     furi_thread_start(uart_worker->thread);
 }
@@ -82,7 +93,8 @@ void uart_worker_tx(UartWorker* uart_worker, uint8_t* data, size_t len) {
     furi_assert(uart_worker);
     furi_assert(data);
 
-    furi_hal_uart_tx(uart_worker->config.uartId, data, len);
+    //furi_hal_uart_tx(uart_worker->config.uartId, data, len);
+    furi_hal_serial_tx(uart_worker->serial, data, len);
 }
 
 void uart_worker_tx_packet(UartWorker* uart_worker, NfcRelayPacket* packet) {
@@ -112,6 +124,8 @@ int32_t uart_worker_task(void* context) {
     uint8_t tmpdata[256];
     uint8_t recv_len = 0;
     while(1) {
+        furi_thread_flags_wait(1, FuriFlagWaitAny, FuriWaitForever);
+        FURI_LOG_D(TAG, "uart_worker_task one round");
         if(uart_worker->state == UartWorkerStateStop) break;
 
         if(uart_worker->rxSubState == UartWorkerStateRxSubReadTyp && (!uart_worker->packet)) {
@@ -163,6 +177,7 @@ int32_t uart_worker_task(void* context) {
             continue;
         }
     }
+    FURI_LOG_D(TAG, "uart_worker_task return");
 
     return 0;
 }
