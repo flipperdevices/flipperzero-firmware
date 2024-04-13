@@ -7,6 +7,7 @@
 
 /*** Includes ***/
 #include <furi_hal.h>
+#include <expansion/expansion.h>
 
 #include "lrf_serial_comm.h"
 
@@ -584,7 +585,11 @@ LRFSerialCommApp *lrf_serial_comm_app_init() {
   /* Start the UART receive thread */
   furi_thread_start(app->rx_thread);
 
-  /* Get the serial handle */
+  /* Disable support for expansion modules */
+  expansion_disable(furi_record_open(RECORD_EXPANSION));
+  furi_record_close(RECORD_EXPANSION);
+
+  /* Acquire the UART */
   app->serial_handle = furi_hal_serial_control_acquire(app->serial_channel);
   furi_check(app->serial_handle);
   furi_hal_serial_init(app->serial_handle, BAUDRATE);
@@ -611,6 +616,10 @@ void lrf_serial_comm_app_free(LRFSerialCommApp *app) {
   furi_thread_flags_set(furi_thread_get_id(app->rx_thread), stop);
   furi_thread_join(app->rx_thread);
   furi_thread_free(app->rx_thread);
+
+  /* Re-enable support for expansion modules */
+  expansion_enable(furi_record_open(RECORD_EXPANSION));
+  furi_record_close(RECORD_EXPANSION);
 
   /* Free the LRF serial communication app's structure */
   free(app);
