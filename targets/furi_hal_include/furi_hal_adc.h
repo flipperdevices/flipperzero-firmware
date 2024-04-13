@@ -12,9 +12,7 @@
  * 2. furi_hal_adc_configure - configure ADC block
  * 3. furi_hal_adc_read - read some values
  * 4. furi_hal_adc_release - release ADC to the system
- * 
- * 
- * 
+ *
  */
 
 #pragma once
@@ -33,6 +31,29 @@ typedef enum {
     FuriHalAdcScale2048, /**< 2.048V scale */
     FuriHalAdcScale2500, /**< 2.5V scale */
 } FuriHalAdcScale;
+
+typedef enum {
+    FuriHalAdcOversample2, /**< ADC will take 2 samples per each value */
+    FuriHalAdcOversample4, /**< ADC will take 4 samples per each value */
+    FuriHalAdcOversample8, /**< ADC will take 8 samples per each value */
+    FuriHalAdcOversample16, /**< ADC will take 16 samples per each value */
+    FuriHalAdcOversample32, /**< ADC will take 32 samples per each value */
+    FuriHalAdcOversample64, /**< ADC will take 64 samples per each value */
+    FuriHalAdcOversample128, /**< ADC will take 128 samples per each value */
+    FuriHalAdcOversample256, /**< ADC will take 256 samples per each value */
+    FuriHalAdcOversampleNone, /**< disable oversampling */
+} FuriHalAdcOversample;
+
+typedef enum {
+    FuriHalAdcSamplingtime2_5, /**< Sampling time 2.5 ADC clock */
+    FuriHalAdcSamplingtime6_5, /**< Sampling time 6.5 ADC clock */
+    FuriHalAdcSamplingtime12_5, /**< Sampling time 12.5 ADC clock */
+    FuriHalAdcSamplingtime24_5, /**< Sampling time 24.5 ADC clock */
+    FuriHalAdcSamplingtime47_5, /**< Sampling time 47.5 ADC clock */
+    FuriHalAdcSamplingtime92_5, /**< Sampling time 92.5 ADC clock */
+    FuriHalAdcSamplingtime247_5, /**< Sampling time 247.5 ADC clock */
+    FuriHalAdcSamplingtime640_5, /**< Sampling time 640.5 ADC clock */
+} FuriHalAdcSamplingTime;
 
 typedef enum {
     /* Channels 0 - 5 are fast channels */
@@ -82,11 +103,31 @@ FuriHalAdcHandle* furi_hal_adc_acquire(void);
 void furi_hal_adc_release(FuriHalAdcHandle* handle);
 
 /** Configure ADC
+ * 
+ * default parameters:
+ * - FuriHalAdcScale2500
+ * - FuriHalAdcOversample16
+ * - FuriHalAdcSamplingtime92_5
  *
  * @param      handle  The ADC handle
- * @param[in]  scale   The voltage scale
  */
-void furi_hal_adc_configure(FuriHalAdcHandle* handle, FuriHalAdcScale scale);
+void furi_hal_adc_configure(FuriHalAdcHandle* handle);
+
+/** Configure ADC with extended options
+ *
+ * @warning    Please carefully read STM32WB series reference manual. Setting
+ *             incorrect parameters leads to poor results.
+ *
+ * @param      handle         The ADC handle
+ * @param[in]  scale          The voltage scale
+ * @param[in]  oversample     The oversample mode
+ * @param[in]  sampling_time  The sampling time
+ */
+void furi_hal_adc_configure_ex(
+    FuriHalAdcHandle* handle,
+    FuriHalAdcScale scale,
+    FuriHalAdcOversample oversample,
+    FuriHalAdcSamplingTime sampling_time);
 
 /** Read single ADC value
  *

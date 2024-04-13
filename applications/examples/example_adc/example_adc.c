@@ -145,7 +145,7 @@ int32_t example_adc_main(void* p) {
 
     // Initialize ADC
     FuriHalAdcHandle* adc_handle = furi_hal_adc_acquire();
-    furi_hal_adc_configure(adc_handle, FuriHalAdcScale2048);
+    furi_hal_adc_configure(adc_handle);
 
     // Process events
     InputEvent event;

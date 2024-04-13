@@ -13,6 +13,39 @@ struct FuriHalAdcHandle {
     uint32_t full_scale;
 };
 
+static const uint32_t furi_hal_adc_oversample_ratio[] = {
+    [FuriHalAdcOversample2] = LL_ADC_OVS_RATIO_2,
+    [FuriHalAdcOversample4] = LL_ADC_OVS_RATIO_4,
+    [FuriHalAdcOversample8] = LL_ADC_OVS_RATIO_8,
+    [FuriHalAdcOversample16] = LL_ADC_OVS_RATIO_16,
+    [FuriHalAdcOversample32] = LL_ADC_OVS_RATIO_32,
+    [FuriHalAdcOversample64] = LL_ADC_OVS_RATIO_64,
+    [FuriHalAdcOversample128] = LL_ADC_OVS_RATIO_128,
+    [FuriHalAdcOversample256] = LL_ADC_OVS_RATIO_256,
+};
+
+static const uint32_t furi_hal_adc_oversample_shift[] = {
+    [FuriHalAdcOversample2] = LL_ADC_OVS_SHIFT_RIGHT_1,
+    [FuriHalAdcOversample4] = LL_ADC_OVS_SHIFT_RIGHT_2,
+    [FuriHalAdcOversample8] = LL_ADC_OVS_SHIFT_RIGHT_3,
+    [FuriHalAdcOversample16] = LL_ADC_OVS_SHIFT_RIGHT_4,
+    [FuriHalAdcOversample32] = LL_ADC_OVS_SHIFT_RIGHT_5,
+    [FuriHalAdcOversample64] = LL_ADC_OVS_SHIFT_RIGHT_6,
+    [FuriHalAdcOversample128] = LL_ADC_OVS_SHIFT_RIGHT_7,
+    [FuriHalAdcOversample256] = LL_ADC_OVS_SHIFT_RIGHT_8,
+};
+
+static const uint32_t furi_hal_adc_sampling_time[] = {
+    [FuriHalAdcSamplingtime2_5] = LL_ADC_SAMPLINGTIME_2CYCLES_5,
+    [FuriHalAdcSamplingtime6_5] = LL_ADC_SAMPLINGTIME_6CYCLES_5,
+    [FuriHalAdcSamplingtime12_5] = LL_ADC_SAMPLINGTIME_12CYCLES_5,
+    [FuriHalAdcSamplingtime24_5] = LL_ADC_SAMPLINGTIME_24CYCLES_5,
+    [FuriHalAdcSamplingtime47_5] = LL_ADC_SAMPLINGTIME_47CYCLES_5,
+    [FuriHalAdcSamplingtime92_5] = LL_ADC_SAMPLINGTIME_92CYCLES_5,
+    [FuriHalAdcSamplingtime247_5] = LL_ADC_SAMPLINGTIME_247CYCLES_5,
+    [FuriHalAdcSamplingtime640_5] = LL_ADC_SAMPLINGTIME_640CYCLES_5,
+};
+
 static const uint32_t furi_hal_adc_channel_map[] = {
     [FuriHalAdcChannel0] = LL_ADC_CHANNEL_0,
     [FuriHalAdcChannel1] = LL_ADC_CHANNEL_1,
@@ -51,13 +84,22 @@ FuriHalAdcHandle* furi_hal_adc_acquire(void) {
     return furi_hal_adc_handle;
 }
 
-void furi_hal_adc_configure(FuriHalAdcHandle* handle, FuriHalAdcScale scale) {
+void furi_hal_adc_configure(FuriHalAdcHandle* handle) {
+    furi_hal_adc_configure_ex(
+        handle, FuriHalAdcScale2500, FuriHalAdcOversample16, FuriHalAdcSamplingtime92_5);
+}
+
+void furi_hal_adc_configure_ex(
+    FuriHalAdcHandle* handle,
+    FuriHalAdcScale scale,
+    FuriHalAdcOversample oversample,
+    FuriHalAdcSamplingTime sampling_time) {
     furi_check(handle);
     furi_check(scale == FuriHalAdcScale2048 || scale == FuriHalAdcScale2500);
+    furi_check(oversample <= FuriHalAdcOversampleNone);
+    furi_check(sampling_time <= FuriHalAdcSamplingtime640_5);
 
     FuriHalCortexTimer timer;
-
-    LL_SYSCFG_EnableAnalogBooster();
 
     if(furi_hal_bus_is_enabled(FuriHalBusADC)) furi_hal_bus_disable(FuriHalBusADC);
 
@@ -100,14 +142,14 @@ void furi_hal_adc_configure(FuriHalAdcHandle* handle, FuriHalAdcScale scale) {
 
     // ADC config part 1
     LL_ADC_InitTypeDef ADC_InitStruct = {0};
-    ADC_InitStruct.Resolution = LL_ADC_RESOLUTION_12B;
+    ADC_InitStruct.Resolution = LL_ADC_RESOLUTION_12B; //-V1048
     ADC_InitStruct.DataAlignment = LL_ADC_DATA_ALIGN_RIGHT;
     ADC_InitStruct.LowPowerMode = LL_ADC_LP_MODE_NONE;
     furi_check(LL_ADC_Init(handle->adc, &ADC_InitStruct) == SUCCESS);
 
     // ADC config part 2: groups parameters
     LL_ADC_REG_InitTypeDef ADC_REG_InitStruct = {0};
-    ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
+    ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE; //-V1048
     ADC_REG_InitStruct.SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE;
     ADC_REG_InitStruct.SequencerDiscont = LL_ADC_REG_SEQ_DISCONT_DISABLE;
     ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_SINGLE;
@@ -116,14 +158,23 @@ void furi_hal_adc_configure(FuriHalAdcHandle* handle, FuriHalAdcScale scale) {
     furi_check(LL_ADC_REG_Init(handle->adc, &ADC_REG_InitStruct) == SUCCESS);
 
     // ADC config part 3: sequencer and channels
-    LL_ADC_SetOverSamplingScope(handle->adc, LL_ADC_OVS_GRP_REGULAR_CONTINUED);
-    LL_ADC_ConfigOverSamplingRatioShift(
-        handle->adc, LL_ADC_OVS_RATIO_32, LL_ADC_OVS_SHIFT_RIGHT_5);
+    if(oversample == FuriHalAdcOversampleNone) {
+        LL_ADC_SetOverSamplingScope(handle->adc, LL_ADC_OVS_DISABLE);
+    } else {
+        LL_ADC_SetOverSamplingScope(handle->adc, LL_ADC_OVS_GRP_REGULAR_CONTINUED);
+        LL_ADC_ConfigOverSamplingRatioShift(
+            handle->adc,
+            furi_hal_adc_oversample_ratio[oversample],
+            furi_hal_adc_oversample_shift[oversample]);
+    }
 
     for(FuriHalAdcChannel channel = FuriHalAdcChannel0; channel < FuriHalAdcChannelNone;
         channel++) {
+        // 47.5 cycles on 64MHz is first meaningful value for internal sources sampling
         LL_ADC_SetChannelSamplingTime(
-            handle->adc, furi_hal_adc_channel_map[channel], LL_ADC_SAMPLINGTIME_92CYCLES_5);
+            handle->adc,
+            furi_hal_adc_channel_map[channel],
+            furi_hal_adc_sampling_time[sampling_time]);
         LL_ADC_SetChannelSingleDiff(
             handle->adc, furi_hal_adc_channel_map[channel], LL_ADC_SINGLE_ENDED);
     }
@@ -162,7 +213,6 @@ void furi_hal_adc_release(FuriHalAdcHandle* handle) {
 
     LL_VREFBUF_Disable();
     LL_VREFBUF_EnableHIZ();
-    LL_SYSCFG_DisableAnalogBooster();
 
     furi_check(furi_mutex_release(furi_hal_adc_handle->mutex) == FuriStatusOk);
 }
@@ -186,16 +236,16 @@ uint16_t furi_hal_adc_read(FuriHalAdcHandle* handle, FuriHalAdcChannel channel) 
 }
 
 float furi_hal_adc_convert_to_voltage(FuriHalAdcHandle* handle, uint16_t value) {
-    return __LL_ADC_CALC_DATA_TO_VOLTAGE(handle->full_scale, value, LL_ADC_RESOLUTION_12B);
+    return (float)__LL_ADC_CALC_DATA_TO_VOLTAGE(handle->full_scale, value, LL_ADC_RESOLUTION_12B);
 }
 
 float furi_hal_adc_convert_vref(FuriHalAdcHandle* handle, uint16_t value) {
     UNUSED(handle);
-    return __LL_ADC_CALC_VREFANALOG_VOLTAGE(value, LL_ADC_RESOLUTION_12B);
+    return (float)__LL_ADC_CALC_VREFANALOG_VOLTAGE(value, LL_ADC_RESOLUTION_12B);
 }
 
 float furi_hal_adc_convert_temp(FuriHalAdcHandle* handle, uint16_t value) {
-    return __LL_ADC_CALC_TEMPERATURE(handle->full_scale, value, LL_ADC_RESOLUTION_12B);
+    return (float)__LL_ADC_CALC_TEMPERATURE(handle->full_scale, value, LL_ADC_RESOLUTION_12B);
 }
 
 float furi_hal_adc_convert_vbat(FuriHalAdcHandle* handle, uint16_t value) {
