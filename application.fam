@@ -8,7 +8,7 @@ App(
     fap_icon="icons/app_10x10.png",
     fap_category="Tools",
     fap_author="mdaskalov",
-    fap_weburl="https://github.com/mdaskalov/flipperzero_clock",
+    fap_weburl="https://github.com/mdaskalov/flipperzero-clock",
     fap_version="1.0",
     fap_description="Customizable FlipperZero Clock"
 )
