@@ -1,9 +1,14 @@
 App(
-    appid="flipperzero_analog_clock",
-    name="Analog Clock",
+    appid="flipperzero_clock",
+    name="FlippeZero Clock",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="analog_clock_main",
-    requires=["gui", "core"],
+    entry_point="clock_main",
+    requires=["gui"],
     stack_size=1 * 1024,
-    fap_category="Examples",
+    fap_icon="icons/app_10x10.png",
+    fap_category="Tools",
+    fap_author="mdaskalov",
+    fap_weburl="https://github.com/mdaskalov/flipperzero_clock",
+    fap_version="1.0",
+    fap_description="Customizable FlipperZero Clock"
 )
