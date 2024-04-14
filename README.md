@@ -1,4 +1,4 @@
-Displays customizable clock in full-screen or split-view with date and weekday.
+Displays customizable clock in full-screen or split-view with date and weekday. Customizations are saved in a configuration file and retrieved on next application start.
 
 ## Usage
 
