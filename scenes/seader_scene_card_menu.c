@@ -6,6 +6,7 @@ enum SubmenuIndex {
     SubmenuIndexSaveRFID,
     SubmenuIndexSaveSR,
     SubmenuIndexSaveMFC,
+    SubmenuIndexParse,
 };
 
 void seader_scene_card_menu_submenu_callback(void* context, uint32_t index) {
@@ -17,6 +18,7 @@ void seader_scene_card_menu_submenu_callback(void* context, uint32_t index) {
 void seader_scene_card_menu_on_enter(void* context) {
     Seader* seader = context;
     SeaderCredential* credential = seader->credential;
+    PluginWiegand* plugin = seader->plugin_wiegand;
     Submenu* submenu = seader->submenu;
 
     submenu_add_item(
@@ -43,6 +45,18 @@ void seader_scene_card_menu_on_enter(void* context) {
     }
     submenu_add_item(
         submenu, "Save MFC", SubmenuIndexSaveMFC, seader_scene_card_menu_submenu_callback, seader);
+
+    if(plugin) {
+        size_t format_count = plugin->count(credential->bit_length, credential->credential);
+        if(format_count > 0) {
+            submenu_add_item(
+                submenu,
+                "Parse",
+                SubmenuIndexParse,
+                seader_scene_card_menu_submenu_callback,
+                seader);
+        }
+    }
 
     submenu_set_selected_item(
         seader->submenu,
@@ -84,6 +98,11 @@ bool seader_scene_card_menu_on_event(void* context, SceneManagerEvent event) {
                 seader->scene_manager, SeaderSceneCardMenu, SubmenuIndexSaveMFC);
             seader->credential->save_format = SeaderCredentialSaveFormatMFC;
             scene_manager_next_scene(seader->scene_manager, SeaderSceneSaveName);
+            consumed = true;
+        } else if(event.event == SubmenuIndexParse) {
+            scene_manager_set_scene_state(
+                seader->scene_manager, SeaderSceneCardMenu, SubmenuIndexParse);
+            scene_manager_next_scene(seader->scene_manager, SeaderSceneFormats);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {

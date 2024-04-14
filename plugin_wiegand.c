@@ -6,15 +6,18 @@
 static int wiegand_format_count(uint8_t bit_length, uint64_t bits) {
     UNUSED(bit_length);
     UNUSED(bits);
-    return 1337;
+    return 0;
 }
 
-static int wiegand_format_description(uint8_t bit_length, uint64_t bits, size_t index) {
+static void wiegand_format_description(
+    uint8_t bit_length,
+    uint64_t bits,
+    size_t index,
+    FuriString* description) {
     UNUSED(bit_length);
     UNUSED(bits);
     UNUSED(index);
-
-    return 0;
+    UNUSED(description);
 }
 
 /* Actual implementation of app<>plugin interface */

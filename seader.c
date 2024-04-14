@@ -94,12 +94,22 @@ Seader* seader_alloc() {
     seader->plugin_manager =
         plugin_manager_alloc(PLUGIN_APP_ID, PLUGIN_API_VERSION, firmware_api_interface);
 
+    seader->plugin_wiegand = NULL;
     if(plugin_manager_load_all(seader->plugin_manager, APP_DATA_PATH("plugins")) !=
        PluginManagerErrorNone) {
         FURI_LOG_E(TAG, "Failed to load all libs");
     } else {
         uint32_t plugin_count = plugin_manager_get_count(seader->plugin_manager);
         FURI_LOG_I(TAG, "Loaded %lu plugin(s)", plugin_count);
+
+        for(uint32_t i = 0; i < plugin_count; i++) {
+            const PluginWiegand* plugin = plugin_manager_get_ep(seader->plugin_manager, i);
+            FURI_LOG_I(TAG, "plugin name: %s", plugin->name);
+            if(strcmp(plugin->name, PLUGIN_APP_ID) == 0) {
+                // Have to cast to drop "const" qualifier
+                seader->plugin_wiegand = (PluginWiegand*)plugin;
+            }
+        }
     }
 
     return seader;
