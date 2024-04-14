@@ -70,6 +70,7 @@ static const bool default_emulate_led_indicator = true;
 
 #define PLAYLIST_LOCATION "/ext/apps_data/nfc_playlist/"
 #define PLAYLIST_DIR "/ext/apps_data/nfc_playlist"
+#define PLAYLIST_VIEW_MAX_SIZE 1000
 
 typedef enum NfcPlaylistLedState {
    NfcPlaylistLedState_Normal,

@@ -1,7 +1,5 @@
 #include "../nfc_playlist.h"
 
-#define MAX_PLAYLIST_SIZE 1000
-
 void nfc_playlist_view_playlist_content_scene_on_enter(void* context) {
    NfcPlaylist* nfc_playlist = context;
 
@@ -9,8 +7,8 @@ void nfc_playlist_view_playlist_content_scene_on_enter(void* context) {
    File* file = storage_file_alloc(storage);
    
    if (storage_file_open(file, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-      uint8_t buffer[MAX_PLAYLIST_SIZE];
-      uint16_t read_count = storage_file_read(file, buffer, MAX_PLAYLIST_SIZE);
+      uint8_t buffer[PLAYLIST_VIEW_MAX_SIZE];
+      uint16_t read_count = storage_file_read(file, buffer, PLAYLIST_VIEW_MAX_SIZE);
       FuriString* playlist_content = furi_string_alloc();
 
       for(uint16_t i = 0; i < read_count; i++) {
