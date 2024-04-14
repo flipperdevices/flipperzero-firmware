@@ -105,7 +105,7 @@ Seader* seader_alloc() {
         for(uint32_t i = 0; i < plugin_count; i++) {
             const PluginWiegand* plugin = plugin_manager_get_ep(seader->plugin_manager, i);
             FURI_LOG_I(TAG, "plugin name: %s", plugin->name);
-            if(strcmp(plugin->name, PLUGIN_APP_ID) == 0) {
+            if(strcmp(plugin->name, "Plugin Wiegand") == 0) {
                 // Have to cast to drop "const" qualifier
                 seader->plugin_wiegand = (PluginWiegand*)plugin;
             }

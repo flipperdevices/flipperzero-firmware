@@ -6,7 +6,9 @@
 static int wiegand_format_count(uint8_t bit_length, uint64_t bits) {
     UNUSED(bit_length);
     UNUSED(bits);
-    return 0;
+
+    FURI_LOG_I(PLUGIN_APP_ID, "count");
+    return 1;
 }
 
 static void wiegand_format_description(
@@ -14,10 +16,11 @@ static void wiegand_format_description(
     uint64_t bits,
     size_t index,
     FuriString* description) {
+    FURI_LOG_I(PLUGIN_APP_ID, "description %d", index);
     UNUSED(bit_length);
     UNUSED(bits);
-    UNUSED(index);
-    UNUSED(description);
+
+    furi_string_cat_printf(description, "[%i] <name> FC: CN:", index);
 }
 
 /* Actual implementation of app<>plugin interface */
