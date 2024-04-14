@@ -127,18 +127,24 @@ void furi_hal_adc_release(FuriHalAdcHandle* handle);
  *
  * Parameters used:
  * - FuriHalAdcScale2048 - 2.048V VREF Scale. Your signal should be in 0 -
- *   2.048V.
- * - FuriHalAdcClockSync64 - Clocked from sysclk bus at 64MHz in bus synchronous
+ *   2.048V range.
+ * - FuriHalAdcClockSync64 - Clocked from sysclk bus at 64MHz in synchronous
  *   mode. Fast, no delay on data bus access.
- * - FuriHalAdcOversample64 - Going to sample and average 64 acquisitions.
- * - FuriHalAdcSamplingtime247_5 - Sampling time is 247.5 ADC clocks:
- *   (1/64)*247.5 = 3.8671875us. For sampling relatively slowly or not changing
- *   signals.
+ * - FuriHalAdcOversample64 - Going to acquire and average 64 samples. For
+ *   circuits with slowly or not changing signal. Total time per one read:
+ *   (1/64)*(12.5+247.5)*64 = 260us. The best results you'll get if your signal
+ *   will stay on the same level all this time.
+ * - FuriHalAdcSamplingtime247_5 - Sampling(transfer from source to internal
+ *   sampling capacitor) time is 247.5 ADC clocks: (1/64)*247.5 = 3.8671875us.
+ *   For relatively high impedance circuits.
  *
- * Total time per one read: (1/64)*(12.5+247.5)*64 = 260us. The best results
- * you'll get if your signal will stay on the same level all this time.
- * 
- * Those parameters were optimized for 0 - 2.048 voltage measurement with ~0.1% precision.
+ * Also keep your measurement circuit impedance under 10KOhm or oversampling
+ * results will be compromised. Verify your signal with oscilloscope(you may
+ * need fast oscilloscope: 200MHz bandwidth, 125MS/s), ensure that signal is not
+ * distorted by sampling.
+ *
+ * Those parameters were optimized for 0 - 2.048 voltage measurement with ~0.1%
+ * precision. You can get more, but it will require some magic.
  *
  * @param      handle  The ADC handle
  */
@@ -146,9 +152,16 @@ void furi_hal_adc_configure(FuriHalAdcHandle* handle);
 
 /** Configure with extended parameters and enable ADC
  *
- * @warning    Please carefully read STM32WB series reference manual. Setting
- *             incorrect parameters leads to poor results. Also internal
- *             channels require special settings.
+ * General advice is to start with default parameters, figure out what exactly
+ * is not working for you and then tune it. Also in some cases changing
+ * circuit(adding caps, lowering impedance, adding opamp) may be better than changing
+ * parameters.
+ *
+ * @warning    In general ADC is a world of magic: make sure that you understand
+ *             how your circuit and ADC works. Then carefully read STM32WB
+ *             series reference manual. Setting incorrect parameters leads to
+ *             very poor results. Also internal channels require special
+ *             settings.
  *
  * @param      handle         The ADC handle
  * @param[in]  scale          The ADC voltage scale
