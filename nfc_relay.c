@@ -130,3 +130,26 @@ int32_t nfc_relay_app(void* p) {
 
     return 0;
 }
+
+void trace_bit_buffer_hexdump(char* tag, char* prompt, BitBuffer* bitbuffer) {
+#ifdef TRACE_TRX
+    FuriString* debug_buf;
+    debug_buf = furi_string_alloc();
+    for(size_t i = 0; i < bit_buffer_get_size_bytes(bitbuffer); i++) {
+        furi_string_cat_printf(debug_buf, " %02X", bit_buffer_get_byte(bitbuffer, i));
+    }
+    furi_string_trim(debug_buf);
+    FURI_LOG_T(
+        tag,
+        "%s (%d): %s",
+        prompt,
+        bit_buffer_get_size(bitbuffer),
+        furi_string_get_cstr(debug_buf));
+    furi_string_free(debug_buf);
+#else
+    UNUSED(tag);
+    UNUSED(prompt);
+    UNUSED(bitbuffer);
+#endif
+    return;
+}

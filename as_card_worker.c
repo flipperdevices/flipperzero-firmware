@@ -116,21 +116,7 @@ NfcCommand emu_callback(NfcGenericEvent event, void* context) {
         FURI_LOG_E(TAG, "bit_buffer_get_size_bytes(iso14443_4a_event->data->buffer) == 0");
         return NfcCommandContinue;
     }
-#ifdef FURI_DEBUG
-    FuriString* debug_buf;
-    debug_buf = furi_string_alloc();
-    for(size_t i = 0; i < bit_buffer_get_size_bytes(iso14443_4a_event->data->buffer); i++) {
-        furi_string_cat_printf(
-            debug_buf, " %02X", bit_buffer_get_byte(iso14443_4a_event->data->buffer, i));
-    }
-    furi_string_trim(debug_buf);
-    FURI_LOG_T(
-        TAG,
-        "Emu RX (%d): %s",
-        bit_buffer_get_size(iso14443_4a_event->data->buffer),
-        furi_string_get_cstr(debug_buf));
-    furi_string_reset(debug_buf);
-#endif
+    trace_bit_buffer_hexdump(TAG, "Emu Card RX", iso14443_4a_event->data->buffer);
     uint8_t rx_bytes = bit_buffer_get_size_bytes(iso14443_4a_event->data->buffer);
     const uint8_t* buff_rx = bit_buffer_get_data(iso14443_4a_event->data->buffer);
     uint8_t pcb = buff_rx[0];
@@ -182,20 +168,7 @@ NfcCommand emu_callback(NfcGenericEvent event, void* context) {
                 as_card_worker->buff_tx,
                 as_card_worker->apdu_buf_len + 2);
             //nfc_iso14443a_listener_tx_custom_parity(emu_card_worker->nfc, emu_card_worker->bitbuffer);
-#ifdef FURI_DEBUG
-            debug_buf = furi_string_alloc();
-            for(size_t i = 0; i < bit_buffer_get_size_bytes(as_card_worker->bitbuffer); ++i) {
-                furi_string_cat_printf(
-                    debug_buf, "%02x ", bit_buffer_get_byte(as_card_worker->bitbuffer, i));
-            }
-            furi_string_trim(debug_buf);
-            FURI_LOG_T(
-                TAG,
-                "Emu TX (%d): %s",
-                bit_buffer_get_size(as_card_worker->bitbuffer),
-                furi_string_get_cstr(debug_buf));
-            furi_string_reset(debug_buf);
-#endif
+            trace_bit_buffer_hexdump(TAG, "Emu Card TX", as_card_worker->bitbuffer);
             NfcError error = nfc_listener_tx(as_card_worker->nfc, as_card_worker->bitbuffer);
             if(error != NfcErrorNone) {
                 FURI_LOG_E(TAG, "Tx error: %d", error);

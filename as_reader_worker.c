@@ -170,21 +170,7 @@ int32_t as_reader_worker_task(void* context) {
             // drop PCB
             bit_buffer_copy_bytes(
                 as_reader_worker->bitbuffer_tx, &recv_packet->buf[1], recv_packet->len - 1);
-#ifdef FURI_DEBUG
-            FuriString* debug_buf;
-            debug_buf = furi_string_alloc();
-            for(size_t i = 0; i < bit_buffer_get_size_bytes(as_reader_worker->bitbuffer_tx); i++) {
-                furi_string_cat_printf(
-                    debug_buf, " %02X", bit_buffer_get_byte(as_reader_worker->bitbuffer_tx, i));
-            }
-            furi_string_trim(debug_buf);
-            FURI_LOG_T(
-                TAG,
-                "TX (%d): %s",
-                bit_buffer_get_size(as_reader_worker->bitbuffer_tx),
-                furi_string_get_cstr(debug_buf));
-            furi_string_free(debug_buf);
-#endif
+            trace_bit_buffer_hexdump(TAG, "Emu Reader TX", as_reader_worker->bitbuffer_tx);
             free(recv_packet);
             recv_packet = NULL;
             as_reader_worker->apdu_ready = true;
