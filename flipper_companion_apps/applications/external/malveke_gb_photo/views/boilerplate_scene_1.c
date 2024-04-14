@@ -79,12 +79,19 @@ void boilerplate_scene_1_draw(Canvas* canvas, BoilerplateScene1Model* model) {
         canvas_set_font(canvas, FontPrimary);
         elements_button_center(canvas, "OK");
     } else {
-        int count = (app->page + 1) * 0x1000;
+        // int count = (app->page) * 0x1000;
+        
+        int count = GB_FIRST_PHOTO_OFFSET + app->page * GB_PHOTO_SIZE;
+
+        FURI_LOG_I(TAG, "Page \"%d\"\n", app->page);
+        FURI_LOG_I(TAG, "Read Index \"%d\" \n", count);
+
+
         if(app->camera_ram_sav) {
-            storage_file_seek(app->camera_ram_sav, count - 0x1b1, true);
+            storage_file_seek(app->camera_ram_sav, (app->page) + 0x11B2, true);
             uint8_t status;
             storage_file_read(app->camera_ram_sav, &status, 1);
-
+            FURI_LOG_I(TAG, "Status/Nº Photo \"%x\"\n", status);
             storage_file_seek(app->camera_ram_sav, count, true);
 
             for(int y = app->pos_y; y < 14; y++) {
@@ -137,7 +144,7 @@ void save_image(void* context) {
         storage_simply_mkdir(app->storage, MALVEKE_APP_FOLDER_PHOTOS);
     }
 
-    int count = (app->page + 1) * 0x1000;
+    int count = GB_FIRST_PHOTO_OFFSET + app->page * GB_PHOTO_SIZE;
     storage_file_seek(app->camera_ram_sav, count, true);
     // create file name
     FuriString* file_name = furi_string_alloc();

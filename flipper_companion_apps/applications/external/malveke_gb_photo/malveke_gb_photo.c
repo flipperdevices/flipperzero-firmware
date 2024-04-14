@@ -52,7 +52,7 @@ Boilerplate* boilerplate_app_alloc() {
 
     app->file_path = furi_string_alloc();
     app->camera_ram_sav = storage_file_alloc(app->storage);
-    app->page = 1;
+    app->page = 0;
     app->pos_x = 0;
     app->pos_y = 0;
     app->show_instructions = true;

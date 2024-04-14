@@ -14,6 +14,10 @@
 #define FRAME_WIDTH 128
 #define FRAME_HEIGTH 64
 
+#define GB_FIRST_PHOTO_OFFSET	0x2000
+#define GB_PHOTO_SIZE			0x1000
+
+
 typedef struct BoilerplateScene1 BoilerplateScene1;
 
 typedef void (*BoilerplateScene1Callback)(BoilerplateCustomEvent event, void* context);
