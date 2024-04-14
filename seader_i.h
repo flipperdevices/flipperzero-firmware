@@ -18,6 +18,7 @@
 #include <gui/modules/popup.h>
 #include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
 
 #include <input/input.h>
@@ -108,6 +109,7 @@ struct Seader {
     Popup* popup;
     Loading* loading;
     TextInput* text_input;
+    TextBox* text_box;
     Widget* widget;
 
     Nfc* nfc;
@@ -117,6 +119,7 @@ struct Seader {
     NfcDevice* nfc_device;
 
     PluginManager* plugin_manager;
+    PluginWiegand* plugin_wiegand;
 };
 
 struct SeaderPollerContainer {
@@ -129,6 +132,7 @@ typedef enum {
     SeaderViewPopup,
     SeaderViewLoading,
     SeaderViewTextInput,
+    SeaderViewTextBox,
     SeaderViewWidget,
     SeaderViewUart,
 } SeaderView;

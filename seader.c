@@ -80,6 +80,12 @@ Seader* seader_alloc() {
     view_dispatcher_add_view(
         seader->view_dispatcher, SeaderViewTextInput, text_input_get_view(seader->text_input));
 
+    // TextBox
+    seader->text_box = text_box_alloc();
+    view_dispatcher_add_view(
+        seader->view_dispatcher, SeaderViewTextBox, text_box_get_view(seader->text_box));
+    seader->text_box_store = furi_string_alloc();
+
     // Custom Widget
     seader->widget = widget_alloc();
     view_dispatcher_add_view(
@@ -132,6 +138,11 @@ void seader_free(Seader* seader) {
     // TextInput
     view_dispatcher_remove_view(seader->view_dispatcher, SeaderViewTextInput);
     text_input_free(seader->text_input);
+
+    // TextBox
+    view_dispatcher_remove_view(seader->view_dispatcher, SeaderViewTextBox);
+    text_box_free(seader->text_box);
+    furi_string_free(seader->text_box_store);
 
     // Custom Widget
     view_dispatcher_remove_view(seader->view_dispatcher, SeaderViewWidget);
