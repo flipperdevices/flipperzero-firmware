@@ -40,6 +40,11 @@
 #include <Payload.h>
 #include <FrameProtocol.h>
 
+#include "plugin_interface.h"
+#include <flipper_application/flipper_application.h>
+#include <flipper_application/plugins/plugin_manager.h>
+#include <loader/firmware_api/firmware_api.h>
+
 #include "protocol/picopass_poller.h"
 #include "scenes/seader_scene.h"
 
@@ -110,6 +115,8 @@ struct Seader {
     PicopassPoller* picopass_poller;
 
     NfcDevice* nfc_device;
+
+    PluginManager* plugin_manager;
 };
 
 struct SeaderPollerContainer {

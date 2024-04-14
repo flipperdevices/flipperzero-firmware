@@ -85,6 +85,17 @@ Seader* seader_alloc() {
     view_dispatcher_add_view(
         seader->view_dispatcher, SeaderViewWidget, widget_get_view(seader->widget));
 
+    seader->plugin_manager =
+        plugin_manager_alloc(PLUGIN_APP_ID, PLUGIN_API_VERSION, firmware_api_interface);
+
+    if(plugin_manager_load_all(seader->plugin_manager, APP_DATA_PATH("plugins")) !=
+       PluginManagerErrorNone) {
+        FURI_LOG_E(TAG, "Failed to load all libs");
+    } else {
+        uint32_t plugin_count = plugin_manager_get_count(seader->plugin_manager);
+        FURI_LOG_I(TAG, "Loaded %lu plugin(s)", plugin_count);
+    }
+
     return seader;
 }
 
@@ -143,6 +154,8 @@ void seader_free(Seader* seader) {
     // Notifications
     furi_record_close(RECORD_NOTIFICATION);
     seader->notifications = NULL;
+
+    plugin_manager_free(seader->plugin_manager);
 
     free(seader);
 }
