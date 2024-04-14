@@ -12,8 +12,8 @@ typedef enum {
 } FaceType;
 
 typedef struct {
-    uint8_t x;
-    uint8_t y;
+    int8_t x;
+    int8_t y;
 } Point;
 
 typedef struct {
@@ -22,35 +22,20 @@ typedef struct {
 } Line;
 
 typedef struct {
-    LocaleTimeFormat time_fmt;
-    Point ctr;
-    Line minute_lines[60];
-    Point hour_points[12];
+    Line minutes[60];
+    Point hours[12];
 } ClockFace;
 
 typedef struct {
     bool split;
-    FaceType face_type;
-    uint8_t digits_mod;
     uint8_t width;
+    uint8_t digits_mod;
+    FaceType face_type;
+    Point ofs;
     ClockFace face;
 } ClockConfig;
 
-char* clock_number_str(uint8_t number);
-void set_clock_hour_point(ClockConfig* cfg, uint8_t idx, float x, float y);
-void set_clock_minute_line(
-    ClockConfig* cfg,
-    uint8_t idx,
-    float start_x,
-    float start_y,
-    float end_x,
-    float end_y);
 void calc_clock_face(ClockConfig* cfg);
-
-void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt);
-void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms);
-void draw_date(Canvas* canvas, ClockConfig* cfg, DateTime* dt);
-
 void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms);
 
 void init_clock_config(ClockConfig* cfg);

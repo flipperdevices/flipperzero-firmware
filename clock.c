@@ -2,311 +2,211 @@
 
 #include "clock.h"
 
-#define CLOCK_OFS_X 63.5
-#define CLOCK_OFS_Y 31.5
+#define CLOCK_OFS_X 63
+#define CLOCK_OFS_Y 31
 
-#define M_RAD 28
 #define H_RAD 17
-#define HM_OFS 8
-#define HM_WIDTH 5
+#define M_RAD 26
 #define S_RAD 29
-#define S_EXT 7
+#define HMS_OFS 8
 
-#define FACE_RADIUS 31.0
-#define FACE_HEIGHT 31.0
+#define FACE_RADIUS 31
 
 #define FACE_DEFAULT_WIDTH 54
 
-#define LO_TRESHOLD (1.0 / 32.0)
-#define HI_TRESHOLD (1.0 - LO_TRESHOLD)
+const char* WEEKDAYS[] =
+    {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+const char* MONTHS[] =
+    {"JAN", "FEB", "MAR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 
-char* WEEKDAYS[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-char* MONTHS[] =
-    {"Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-
-float wide_line_distance(float xpax, float ypay, float bax, float bay) {
-    float h = fmaxf(fminf((xpax * bax + ypay * bay) / (bax * bax + bay * bay), 1.0f), 0.0f);
-    float dx = xpax - bax * h, dy = ypay - bay * h;
-    return sqrtf(dx * dx + dy * dy);
-}
-
-void draw_wide_line(Canvas* c, float ax, float ay, float bx, float by, float wd) {
-    if((fabsf(ax - bx) < 0.01f) && (fabsf(ay - by) < 0.01f)) bx += 0.01f; // Avoid divide by zero
-
-    // Find line bounding box
-    float r = wd / 2;
-    int x0 = (int)floorf(fminf(ax - r, bx - r));
-    int x1 = (int)ceilf(fmaxf(ax + r, bx + r));
-    int y0 = (int)floorf(fminf(ay - r, by - r));
-    int y1 = (int)ceilf(fmaxf(ay + r, by + r));
-
-    // Establish x start and y start
-    int ys = ay;
-    if((ax - r) > (bx - r)) ys = by;
-
-    float alpha = 1.0f;
-    r += 0.5;
-
-    float xpax, ypay, bax = bx - ax, bay = by - ay;
-
-    int xs = x0;
-    // Scan bounding box from ys down, calculate pixel intensity from distance to line
-    for(int yp = ys; yp <= y1; yp++) {
-        bool endX = false; // Flag to skip pixels
-        ypay = yp - ay;
-        for(int xp = xs; xp <= x1; xp++) {
-            if(endX && (alpha <= LO_TRESHOLD)) break; // Skip right side
-            xpax = xp - ax;
-            alpha = r - wide_line_distance(xpax, ypay, bax, bay);
-            if(alpha <= LO_TRESHOLD) continue;
-            // Track edge to minimise calculations
-            if(!endX) {
-                endX = true;
-                xs = xp;
-            }
-            if(alpha > HI_TRESHOLD) canvas_draw_dot(c, xp, yp);
+void draw_line(Canvas* c, Point* ofs, Line* l, bool thick) { // Bresenham-Algorithm
+    int8_t x = l->start.x, y = l->start.y;
+    int8_t dx = abs(l->end.x - x), sx = x < l->end.x ? 1 : -1;
+    int8_t dy = -abs(l->end.y - y), sy = y < l->end.y ? 1 : -1;
+    int8_t error = dx + dy, e2;
+    while(true) {
+        if(thick)
+            canvas_draw_disc(c, x + ofs->x, y + ofs->y, 1);
+        else
+            canvas_draw_dot(c, x + ofs->x, y + ofs->y);
+        if((x == l->end.x) && (y == l->end.y)) break;
+        e2 = 2 * error;
+        if(e2 > dy) {
+            error += dy;
+            x += sx;
         }
-    }
-
-    // Reset x start to left side of box
-    xs = x0;
-    // Scan bounding box from ys-1 up, calculate pixel intensity from distance to line
-    for(int yp = ys - 1; yp >= y0; yp--) {
-        bool endX = false; // Flag to skip pixels
-        ypay = yp - ay;
-        for(int xp = xs; xp <= x1; xp++) {
-            if(endX && (alpha <= LO_TRESHOLD)) break; // Skip right side of drawn line
-            xpax = xp - ax;
-            alpha = r - wide_line_distance(xpax, ypay, bax, bay);
-            if(alpha <= LO_TRESHOLD) continue;
-            // Track line boundary
-            if(!endX) {
-                endX = true;
-                xs = xp;
-            }
-            if(alpha > HI_TRESHOLD) canvas_draw_dot(c, xp, yp);
+        if(e2 < dx) {
+            error += dx;
+            y += sy;
         }
     }
 }
 
-char* clock_number_str(uint8_t number) {
-    // itoa(number % 100, str, 10);
-    static char str[3];
+void set_point(Point* p, float x, float y) {
+    p->x = round(x);
+    p->y = round(y);
+}
 
-    if(number == 0) number = 12;
-    str[0] = '0' + (number / 10) % 10;
-    str[1] = '0' + number % 10;
-    str[2] = 0;
-    if(str[0] == '0') {
-        str[0] = str[1];
-        str[1] = 0;
+void set_point_at(Point* p, float ang, double radius) {
+    set_point(p, sin(ang) * radius, -cos(ang) * radius);
+}
+
+void intersect_at(Point* p, float ang, uint8_t width, uint8_t height) { // Quadrant I only
+    float t = tan(ang), x = height * t, y = width / t;
+    p->x = round(x > width ? width : x);
+    p->y = -round(y > height ? height : y);
+}
+
+void copy_point(Point* p, Point* from, bool flip_x, bool flip_y) {
+    p->x = flip_x ? -from->x : from->x;
+    p->y = flip_y ? -from->y : from->y;
+}
+
+void set_line(Line* l, float xs, float ys, float xe, float ye) {
+    set_point(&l->start, xs, ys);
+    set_point(&l->end, xe, ye);
+}
+
+void set_line_at(Line* l, float ang, float start_rad, float end_rad) {
+    float s = sin(ang), c = -cos(ang);
+    set_line(l, s * start_rad, c * start_rad, s * end_rad, c * end_rad);
+}
+
+void copy_line(Line* l, Line* from, float flip_x, float flip_y) {
+    copy_point(&l->start, &from->start, flip_x, flip_y);
+    copy_point(&l->end, &from->end, flip_x, flip_y);
+}
+
+void draw_hand(Canvas* canvas, ClockConfig* cfg, float ang, int radius, bool thick) {
+    Line l;
+    set_line_at(&l, ang, thick ? HMS_OFS : -HMS_OFS, radius);
+    draw_line(canvas, &cfg->ofs, &l, thick);
+    if(thick) {
+        set_point(&l.end, 0, 0);
+        draw_line(canvas, &cfg->ofs, &l, false);
     }
-    return str;
-}
-
-void draw_hand(Canvas* canvas, float x, float y, float ang, float width, int radius, int ofs) {
-    float s = sin(ang);
-    float c = -cos(ang);
-    canvas_draw_line(canvas, x, y, round(s * ofs + x), round(c * ofs + y));
-    draw_wide_line(canvas, s * ofs + x, c * ofs + y, s * radius + x, c * radius + y, width);
-}
-
-void draw_sec_hand(Canvas* canvas, float x, float y, float ang, float radius, float ext) {
-    float s = sin(ang);
-    float c = -cos(ang);
-    canvas_draw_line(
-        canvas,
-        round(s * -ext + x),
-        round(c * -ext + y),
-        round(s * radius + x),
-        round(c * radius + y));
-}
-
-float intersect_x(float tan, float width, float height) {
-    float x = height / tan;
-    return x > width ? width : x;
-}
-
-float intersect_y(float tan, float width, float height) {
-    float y = width * tan;
-    return y > height ? height : y;
-}
-
-inline void set_clock_minute_line(
-    ClockConfig* cfg,
-    uint8_t idx,
-    float start_x,
-    float start_y,
-    float end_x,
-    float end_y) {
-    furi_assert(cfg);
-    furi_assert(idx < 60);
-    round(cfg->face.minute_lines[idx].start.x = start_x + cfg->face.ctr.x);
-    round(cfg->face.minute_lines[idx].start.y = start_y + cfg->face.ctr.y);
-    round(cfg->face.minute_lines[idx].end.x = end_x + cfg->face.ctr.x);
-    round(cfg->face.minute_lines[idx].end.y = end_y + cfg->face.ctr.y);
-}
-
-inline void set_clock_hour_point(ClockConfig* cfg, uint8_t idx, float x, float y) {
-    furi_assert(cfg);
-    furi_assert(idx < 12);
-    round(cfg->face.hour_points[idx].x = x + cfg->face.ctr.x);
-    round(cfg->face.hour_points[idx].y = y + cfg->face.ctr.y + 1);
 }
 
 void calc_clock_face(ClockConfig* cfg) {
-    furi_assert(cfg);
-
     bool digital = (cfg->face_type == DigitalRectangular) || (cfg->face_type == DigitalRound);
-    bool roundFace = (cfg->face_type == Round) || (cfg->face_type == DigitalRound);
-    bool round = cfg->split ? roundFace : false;
+    bool round = ((cfg->face_type == Round) || (cfg->face_type == DigitalRound)) && cfg->split;
     bool dots = digital && cfg->split;
 
-    float width = cfg->split ? FACE_HEIGHT : cfg->width;
-    float horOfs = round ? FACE_RADIUS : FACE_HEIGHT;
-    float verOfs = round ? FACE_RADIUS : width;
+    set_point(&cfg->ofs, cfg->split ? CLOCK_OFS_X / 2 : CLOCK_OFS_X, CLOCK_OFS_Y);
 
-    cfg->face.time_fmt = locale_get_time_format();
-    cfg->face.ctr.x = cfg->split ? CLOCK_OFS_X / 2.0 : CLOCK_OFS_X;
-    cfg->face.ctr.y = CLOCK_OFS_Y;
+    uint8_t width = cfg->split ? FACE_RADIUS : cfg->width;
+    uint8_t hor_ofs = round ? FACE_RADIUS : width;
 
-    float shortLineLen = dots ? 0.0 : round ? 1.0 : 2.0;
-    float longLineLen = dots ? 0.0 : round ? 3.5 : 6.5;
-    float digitsOfs = round ? 10.0 : 13.0;
+    float short_lin_ofs = dots ? 0.0 : round ? 1.5 : 2.0;
+    float long_lin_ofs = dots ? 0.0 : round ? 5.0 : 7.0;
+    float dig_ofs = round ? 11.0 : 12.5;
 
-    set_clock_minute_line(cfg, 0, 0, -horOfs, 0, longLineLen - horOfs);
-    set_clock_minute_line(cfg, 15, verOfs, 0, verOfs - longLineLen, 0);
-    set_clock_minute_line(cfg, 30, 0, horOfs, 0, horOfs - longLineLen);
-    set_clock_minute_line(cfg, 45, -verOfs, 0, longLineLen - verOfs, 0);
+    set_line(&cfg->face.minutes[0], 0, -FACE_RADIUS, 0, long_lin_ofs - FACE_RADIUS);
+    set_line(&cfg->face.minutes[15], hor_ofs, 0, hor_ofs - long_lin_ofs, 0);
+    copy_line(&cfg->face.minutes[30], &cfg->face.minutes[0], false, true);
+    copy_line(&cfg->face.minutes[45], &cfg->face.minutes[15], true, false);
 
-    set_clock_hour_point(cfg, 0, 0, digitsOfs - horOfs);
-    set_clock_hour_point(cfg, 3, verOfs - digitsOfs, 0);
-    set_clock_hour_point(cfg, 6, 0, horOfs - digitsOfs);
-    set_clock_hour_point(cfg, 9, digitsOfs - verOfs, 0);
+    set_point(&cfg->face.hours[0], 0, dig_ofs - FACE_RADIUS);
+    set_point(&cfg->face.hours[3], hor_ofs - dig_ofs, 0);
+    copy_point(&cfg->face.hours[6], &cfg->face.hours[0], false, true);
+    copy_point(&cfg->face.hours[9], &cfg->face.hours[3], true, false);
 
-    float inc = M_PI / 30;
-    float ang = inc;
-    for(int i = 1; i < 15; i++) { // 1/4 circle
-        bool atHour = (i % 5 == 0);
+    float ang = M_PI / 30; // 2*PI / 60
+    for(uint8_t min = 1; min < 15; min++, ang += M_PI / 30) { // 1/4 circle (14 min)
+        bool at_hour = (min % 5 == 0);
+        float lin_ofs = at_hour ? long_lin_ofs : short_lin_ofs;
 
-        float lineLen = atHour ? longLineLen : shortLineLen;
-
-        float startPtX, startPtY;
-        float endPtX, endPtY;
-        float digitPosX, digitPosY;
-
-        if(round) {
-            float c = cos(ang);
-            float s = sin(ang);
-            startPtX = c * FACE_RADIUS;
-            startPtY = s * FACE_RADIUS;
-            endPtX = c * (FACE_RADIUS - lineLen);
-            endPtY = s * (FACE_RADIUS - lineLen);
-            digitPosX = c * (FACE_RADIUS - digitsOfs);
-            digitPosY = s * (FACE_RADIUS - digitsOfs);
-        } else {
-            float t = tan(ang);
-            startPtX = intersect_x(t, width, FACE_HEIGHT);
-            startPtY = intersect_y(t, width, FACE_HEIGHT);
-            endPtX = intersect_x(t, width - lineLen, FACE_HEIGHT - lineLen);
-            endPtY = intersect_y(t, width - lineLen, FACE_HEIGHT - lineLen);
-            digitPosX = intersect_x(t, width - digitsOfs, FACE_HEIGHT - digitsOfs);
-            digitPosY = intersect_y(t, width - digitsOfs, FACE_HEIGHT - digitsOfs);
+        if(round)
+            set_line_at(&cfg->face.minutes[min], ang, FACE_RADIUS, FACE_RADIUS - lin_ofs);
+        else {
+            intersect_at(&cfg->face.minutes[min].start, ang, width, FACE_RADIUS);
+            intersect_at(&cfg->face.minutes[min].end, ang, width - lin_ofs, FACE_RADIUS - lin_ofs);
         }
 
-        set_clock_minute_line(cfg, 15 - i, startPtX, -startPtY, endPtX, -endPtY);
-        set_clock_minute_line(cfg, i + 15, startPtX, startPtY, endPtX, endPtY);
-        set_clock_minute_line(cfg, 45 - i, -startPtX, startPtY, -endPtX, endPtY);
-        set_clock_minute_line(cfg, i + 45, -startPtX, -startPtY, -endPtX, -endPtY);
+        copy_line(&cfg->face.minutes[30 - min], &cfg->face.minutes[min], false, true);
+        copy_line(&cfg->face.minutes[30 + min], &cfg->face.minutes[min], true, true);
+        copy_line(&cfg->face.minutes[60 - min], &cfg->face.minutes[min], true, false);
 
-        if(atHour) {
-            int hour = i / 5;
-            set_clock_hour_point(cfg, 3 - hour, digitPosX, -digitPosY);
-            set_clock_hour_point(cfg, hour + 3, digitPosX, digitPosY);
-            set_clock_hour_point(cfg, 9 - hour, -digitPosX, digitPosY);
-            set_clock_hour_point(cfg, hour + 9, -digitPosX, -digitPosY);
+        if(at_hour) {
+            uint8_t hour = min / 5;
+            if(round)
+                set_point_at(&cfg->face.hours[hour], ang, FACE_RADIUS - dig_ofs);
+            else
+                intersect_at(&cfg->face.hours[hour], ang, width - dig_ofs, FACE_RADIUS - dig_ofs);
+            copy_point(&cfg->face.hours[6 - hour], &cfg->face.hours[hour], false, true);
+            copy_point(&cfg->face.hours[6 + hour], &cfg->face.hours[hour], true, true);
+            copy_point(&cfg->face.hours[12 - hour], &cfg->face.hours[hour], true, false);
         }
-        ang += inc; // minute
     }
 }
 
 void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt) {
     uint8_t hour = dt->hour;
-    if(cfg->face.time_fmt == LocaleTimeFormat12h) {
+    uint8_t x = cfg->ofs.x;
+    uint8_t y = cfg->ofs.y;
+    if(locale_get_time_format() == LocaleTimeFormat12h) {
         hour = hour % 12 == 0 ? 12 : hour % 12;
-        uint8_t x = cfg->face.ctr.x;
-        uint8_t y = cfg->face.ctr.y;
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(
             canvas, x, y - 10, AlignCenter, AlignBottom, (dt->hour >= 12 ? "PM" : "AM"));
     }
-
     FuriString* time = furi_string_alloc();
     furi_string_printf(time, "%2u:%02u", hour, dt->minute);
     canvas_set_font(canvas, FontBigNumbers);
-    const char* buf = furi_string_get_cstr(time);
-    canvas_draw_str_aligned(
-        canvas, cfg->face.ctr.x, cfg->face.ctr.y, AlignCenter, AlignCenter, buf);
+    canvas_draw_str_aligned(canvas, x, y, AlignCenter, AlignCenter, furi_string_get_cstr(time));
     furi_string_free(time);
-
-    for(int i = 0; i <= 45; i++) {
-        int idx = (dt->second - i + 60) % 60;
-        canvas_draw_line(
-            canvas,
-            cfg->face.minute_lines[idx].start.x,
-            cfg->face.minute_lines[idx].start.y,
-            cfg->face.minute_lines[idx].end.x,
-            cfg->face.minute_lines[idx].end.y);
-    }
+    for(int i = 0; i < 45; i++)
+        draw_line(canvas, &cfg->ofs, &cfg->face.minutes[(dt->second - i + 60) % 60], false);
 }
 
 void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms) {
-    float secAng = M_PI / 30.0 * dt->second + M_PI / 30000.0 * ms;
-    float minAng = M_PI / 30.0 * dt->minute + M_PI / 1800.0 * dt->second;
-    float hourAng = M_PI / 6.0 * (dt->hour % 12) + M_PI / 360.0 * dt->minute;
-
+    float s_ang = M_PI / 30.0 * dt->second + M_PI / 30000.0 * ms;
+    float m_ang = M_PI / 30.0 * dt->minute + M_PI / 1800.0 * dt->second;
+    float h_ang = M_PI / 6.0 * (dt->hour % 12) + M_PI / 360.0 * dt->minute;
     canvas_set_font(canvas, FontSecondary);
+    FuriString* num = furi_string_alloc();
     for(int i = 0; i < 60; i++) {
         if(i % 5 == 0) {
             int hour = i / 5;
-            if((cfg->digits_mod <= 12) && (hour % cfg->digits_mod == 0))
+            if((cfg->digits_mod <= 12) && (hour % cfg->digits_mod == 0)) {
+                Point* h = &cfg->face.hours[hour];
+                uint8_t x = cfg->ofs.x + h->x;
+                uint8_t y = cfg->ofs.y + h->y + 1;
+                furi_string_printf(num, "%u", hour == 0 ? 12 : hour);
                 canvas_draw_str_aligned(
-                    canvas,
-                    cfg->face.hour_points[hour].x,
-                    cfg->face.hour_points[hour].y,
-                    AlignCenter,
-                    AlignCenter,
-                    clock_number_str(hour));
+                    canvas, x, y, AlignCenter, AlignCenter, furi_string_get_cstr(num));
+            }
         }
-        canvas_draw_line(
-            canvas,
-            cfg->face.minute_lines[i].start.x,
-            cfg->face.minute_lines[i].start.y,
-            cfg->face.minute_lines[i].end.x,
-            cfg->face.minute_lines[i].end.y);
+        draw_line(canvas, &cfg->ofs, &cfg->face.minutes[i], false);
     }
-
-    draw_hand(canvas, cfg->face.ctr.x, cfg->face.ctr.y, hourAng, HM_WIDTH, H_RAD, HM_OFS);
-    draw_hand(canvas, cfg->face.ctr.x, cfg->face.ctr.y, minAng, HM_WIDTH, M_RAD, HM_OFS);
-    draw_sec_hand(canvas, cfg->face.ctr.x, cfg->face.ctr.y, secAng, S_RAD, S_EXT);
-    canvas_draw_disc(canvas, cfg->face.ctr.x, cfg->face.ctr.y, 2);
+    furi_string_free(num);
+    draw_hand(canvas, cfg, h_ang, H_RAD, true);
+    draw_hand(canvas, cfg, m_ang, M_RAD, true);
+    draw_hand(canvas, cfg, s_ang, S_RAD, false);
+    canvas_draw_disc(canvas, cfg->ofs.x, cfg->ofs.y, 2);
 }
 
 void draw_date(Canvas* canvas, ClockConfig* cfg, DateTime* dt) {
-    uint8_t x = 96;
-    uint8_t y = cfg->face.ctr.y;
+    uint8_t x = 96, y = cfg->ofs.y;
     FuriString* dat = furi_string_alloc();
     furi_string_printf(dat, "%2u", dt->day);
-    canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, x - 2, y, AlignRight, AlignCenter, furi_string_get_cstr(dat));
-    furi_string_free(dat);
-
+    const char* day = furi_string_get_cstr(dat);
     const char* month = MONTHS[(dt->month - 1) % 12];
     const char* weekday = WEEKDAYS[(dt->weekday - 1) % 7];
+    int8_t x_ofs = 2;
+    Align day_align = AlignLeft, month_align = AlignRight;
+    if(locale_get_date_format() == LocaleDateFormatDMY) {
+        x_ofs = -2;
+        day_align = AlignRight;
+        month_align = AlignLeft;
+    }
+    canvas_set_font(canvas, FontBigNumbers);
+    canvas_draw_str_aligned(canvas, x + x_ofs, y, day_align, AlignCenter, day);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, x + 2, y + 3, AlignLeft, AlignCenter, month);
+    canvas_draw_str_aligned(canvas, x - x_ofs, y + 3, month_align, AlignCenter, month);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, x, y + 10, AlignCenter, AlignTop, weekday);
+    furi_string_free(dat);
 }
 
 void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms) {
@@ -320,9 +220,9 @@ void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms) {
 
 void init_clock_config(ClockConfig* cfg) {
     cfg->split = false;
-    cfg->face_type = Rectangular;
-    cfg->digits_mod = 1;
     cfg->width = FACE_DEFAULT_WIDTH;
+    cfg->digits_mod = 3;
+    cfg->face_type = Rectangular;
 }
 
 void modify_clock_up(ClockConfig* cfg) {
@@ -343,7 +243,7 @@ void modify_clock_left(ClockConfig* cfg) {
     if(cfg->split) {
         cfg->face_type = (cfg->face_type + 1) % FACE_TYPES;
     } else
-        cfg->width = cfg->width <= 32 ? 32 : cfg->width - 1;
+        cfg->width = cfg->width <= FACE_RADIUS ? FACE_RADIUS : cfg->width - 1;
 }
 
 void modify_clock_right(ClockConfig* cfg) {
