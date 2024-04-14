@@ -1,12 +1,12 @@
 #include "../seader_i.h"
 
 enum SubmenuIndex {
+    SubmenuIndexParse,
     SubmenuIndexSave,
     SubmenuIndexSavePicopass,
     SubmenuIndexSaveRFID,
     SubmenuIndexSaveSR,
     SubmenuIndexSaveMFC,
-    SubmenuIndexParse,
 };
 
 void seader_scene_card_menu_submenu_callback(void* context, uint32_t index) {
@@ -20,6 +20,18 @@ void seader_scene_card_menu_on_enter(void* context) {
     SeaderCredential* credential = seader->credential;
     PluginWiegand* plugin = seader->plugin_wiegand;
     Submenu* submenu = seader->submenu;
+
+    if(plugin) {
+        size_t format_count = plugin->count(credential->bit_length, credential->credential);
+        if(format_count > 0) {
+            submenu_add_item(
+                submenu,
+                "Parse",
+                SubmenuIndexParse,
+                seader_scene_card_menu_submenu_callback,
+                seader);
+        }
+    }
 
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, seader_scene_card_menu_submenu_callback, seader);
@@ -45,18 +57,6 @@ void seader_scene_card_menu_on_enter(void* context) {
     }
     submenu_add_item(
         submenu, "Save MFC", SubmenuIndexSaveMFC, seader_scene_card_menu_submenu_callback, seader);
-
-    if(plugin) {
-        size_t format_count = plugin->count(credential->bit_length, credential->credential);
-        if(format_count > 0) {
-            submenu_add_item(
-                submenu,
-                "Parse",
-                SubmenuIndexParse,
-                seader_scene_card_menu_submenu_callback,
-                seader);
-        }
-    }
 
     submenu_set_selected_item(
         seader->submenu,
