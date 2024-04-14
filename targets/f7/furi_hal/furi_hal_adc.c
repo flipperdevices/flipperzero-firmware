@@ -13,6 +13,18 @@ struct FuriHalAdcHandle {
     uint32_t full_scale;
 };
 
+static const uint32_t furi_hal_adc_clock[] = {
+    [FuriHalAdcClockSync16] = LL_ADC_CLOCK_SYNC_PCLK_DIV4,
+    [FuriHalAdcClockSync32] = LL_ADC_CLOCK_SYNC_PCLK_DIV2,
+    [FuriHalAdcClockSync64] = LL_ADC_CLOCK_SYNC_PCLK_DIV1,
+};
+
+static const uint8_t furi_hal_adc_clock_div[] = {
+    [FuriHalAdcClockSync16] = 4,
+    [FuriHalAdcClockSync32] = 2,
+    [FuriHalAdcClockSync64] = 1,
+};
+
 static const uint32_t furi_hal_adc_oversample_ratio[] = {
     [FuriHalAdcOversample2] = LL_ADC_OVS_RATIO_2,
     [FuriHalAdcOversample4] = LL_ADC_OVS_RATIO_4,
@@ -81,21 +93,28 @@ void furi_hal_adc_init(void) {
 
 FuriHalAdcHandle* furi_hal_adc_acquire(void) {
     furi_check(furi_mutex_acquire(furi_hal_adc_handle->mutex, FuriWaitForever) == FuriStatusOk);
+    furi_hal_bus_enable(FuriHalBusADC);
     return furi_hal_adc_handle;
 }
 
 void furi_hal_adc_configure(FuriHalAdcHandle* handle) {
     furi_hal_adc_configure_ex(
-        handle, FuriHalAdcScale2500, FuriHalAdcOversample16, FuriHalAdcSamplingtime92_5);
+        handle,
+        FuriHalAdcScale2048,
+        FuriHalAdcClockSync64,
+        FuriHalAdcOversample64,
+        FuriHalAdcSamplingtime247_5);
 }
 
 void furi_hal_adc_configure_ex(
     FuriHalAdcHandle* handle,
     FuriHalAdcScale scale,
+    FuriHalAdcClock clock,
     FuriHalAdcOversample oversample,
     FuriHalAdcSamplingTime sampling_time) {
     furi_check(handle);
     furi_check(scale == FuriHalAdcScale2048 || scale == FuriHalAdcScale2500);
+    furi_check(clock <= FuriHalAdcClockSync64);
     furi_check(oversample <= FuriHalAdcOversampleNone);
     furi_check(sampling_time <= FuriHalAdcSamplingtime640_5);
 
@@ -131,7 +150,7 @@ void furi_hal_adc_configure_ex(
 
     // ADC Common config
     LL_ADC_CommonInitTypeDef ADC_CommonInitStruct = {0};
-    ADC_CommonInitStruct.CommonClock = LL_ADC_CLOCK_SYNC_PCLK_DIV1;
+    ADC_CommonInitStruct.CommonClock = furi_hal_adc_clock[clock];
     furi_check(
         LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(handle->adc), &ADC_CommonInitStruct) ==
         SUCCESS);
@@ -190,12 +209,13 @@ void furi_hal_adc_configure_ex(
         ;
 
     // Run ADC self calibration
-    LL_ADC_StartCalibration(handle->adc, LL_ADC_BOTH_SINGLE_DIFF_ENDED);
+    LL_ADC_StartCalibration(handle->adc, LL_ADC_SINGLE_ENDED);
     // Poll for ADC effectively calibrated
     while(LL_ADC_IsCalibrationOnGoing(handle->adc) != 0)
         ;
     // Delay between ADC end of calibration and ADC enable
-    size_t end = DWT->CYCCNT + (LL_ADC_DELAY_CALIB_ENABLE_ADC_CYCLES);
+    size_t end =
+        DWT->CYCCNT + (LL_ADC_DELAY_CALIB_ENABLE_ADC_CYCLES * furi_hal_adc_clock_div[clock]);
     while(DWT->CYCCNT < end)
         ;
 
@@ -231,8 +251,9 @@ uint16_t furi_hal_adc_read(FuriHalAdcHandle* handle, FuriHalAdcChannel channel) 
 
     while(LL_ADC_IsActiveFlag_EOC(handle->adc) == 0)
         ;
+    uint16_t value = LL_ADC_REG_ReadConversionData12(handle->adc);
 
-    return LL_ADC_REG_ReadConversionData12(handle->adc);
+    return value;
 }
 
 float furi_hal_adc_convert_to_voltage(FuriHalAdcHandle* handle, uint16_t value) {

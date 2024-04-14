@@ -1,18 +1,33 @@
 /**
  * @file furi_hal_adc.h
- * @brief ADC HAL API
+ * @brief      ADC HAL API
  * 
- * For the sake of simplicity this API implements only small subset of what ADC is actually capable.
- * Feel free to visit Reference Manual for STM32WB series and implement any other modes by your self.
- * 
- * How to use:
- * 
- * 0. Configure your pins to 
- * 1. furi_hal_adc_acquire - acquire ADC handle to work with
- * 2. furi_hal_adc_configure - configure ADC block
- * 3. furi_hal_adc_read - read some values
- * 4. furi_hal_adc_release - release ADC to the system
+ * For the sake of simplicity this API implements only small subset
+ * of what ADC is actually capable of. Feel free to visit Reference
+ * Manual for STM32WB series and implement any other modes by your
+ * self.
  *
+ * Couple things to keep in mind:
+ *
+ * - ADC resolution is 12 bits, but effective number of bits is ~10 at the best
+ *   and further depends on how you use and configure it.
+ * - Analog domain is fed from SMPS which is quite noisy.
+ * - Because of that we use internal on-chip voltage reference for ADC.
+ * - It's capable of producing 2 voltages: 2.5V and 2.048V. This is the scale
+ *   for your signal.
+ * - Only single ended mode is available. But you can implement differential one
+ *   by using low level controls directly.
+ * - No DMA or interrupt API available at this point. But can be implemented
+ *   with low level controls.
+ *
+ *
+ * How to use:
+ *
+ * - furi_hal_gpio_init - Configure your pins in `GpioModeAnalog`
+ * - furi_hal_adc_acquire - acquire ADC handle to work with
+ * - furi_hal_adc_configure - configure ADC block
+ * - furi_hal_adc_read - read value
+ * - furi_hal_adc_release - release ADC handle
  */
 
 #pragma once
@@ -31,6 +46,12 @@ typedef enum {
     FuriHalAdcScale2048, /**< 2.048V scale */
     FuriHalAdcScale2500, /**< 2.5V scale */
 } FuriHalAdcScale;
+
+typedef enum {
+    FuriHalAdcClockSync16, /**< 16MHZ, synchronous */
+    FuriHalAdcClockSync32, /**< 32MHZ, synchronous */
+    FuriHalAdcClockSync64, /**< 64MHz, synchronous */
+} FuriHalAdcClock;
 
 typedef enum {
     FuriHalAdcOversample2, /**< ADC will take 2 samples per each value */
@@ -90,7 +111,7 @@ void furi_hal_adc_init(void);
 
 /** Acquire ADC handle
  *
- * Enables appropriate power and clocking domains, enables VREF with `FuriHalAdcScale2500`
+ * Enables appropriate power and clocking domains
  *
  * @return     FuriHalAdcHandle pointer
  */
@@ -98,34 +119,47 @@ FuriHalAdcHandle* furi_hal_adc_acquire(void);
 
 /** Release ADC handle
  *
- * @param      handle  The handle
+ * @param      handle  The ADC handle
  */
 void furi_hal_adc_release(FuriHalAdcHandle* handle);
 
-/** Configure ADC
+/** Configure with default parameters and enable ADC
+ *
+ * Parameters used:
+ * - FuriHalAdcScale2048 - 2.048V VREF Scale. Your signal should be in 0 -
+ *   2.048V.
+ * - FuriHalAdcClockSync64 - Clocked from sysclk bus at 64MHz in bus synchronous
+ *   mode. Fast, no delay on data bus access.
+ * - FuriHalAdcOversample64 - Going to sample and average 64 acquisitions.
+ * - FuriHalAdcSamplingtime247_5 - Sampling time is 247.5 ADC clocks:
+ *   (1/64)*247.5 = 3.8671875us. For sampling relatively slowly or not changing
+ *   signals.
+ *
+ * Total time per one read: (1/64)*(12.5+247.5)*64 = 260us. The best results
+ * you'll get if your signal will stay on the same level all this time.
  * 
- * default parameters:
- * - FuriHalAdcScale2500
- * - FuriHalAdcOversample16
- * - FuriHalAdcSamplingtime92_5
+ * Those parameters were optimized for 0 - 2.048 voltage measurement with ~0.1% precision.
  *
  * @param      handle  The ADC handle
  */
 void furi_hal_adc_configure(FuriHalAdcHandle* handle);
 
-/** Configure ADC with extended options
+/** Configure with extended parameters and enable ADC
  *
  * @warning    Please carefully read STM32WB series reference manual. Setting
- *             incorrect parameters leads to poor results.
+ *             incorrect parameters leads to poor results. Also internal
+ *             channels require special settings.
  *
  * @param      handle         The ADC handle
- * @param[in]  scale          The voltage scale
- * @param[in]  oversample     The oversample mode
- * @param[in]  sampling_time  The sampling time
+ * @param[in]  scale          The ADC voltage scale
+ * @param[in]  clock          The ADC clock
+ * @param[in]  oversample     The ADC oversample mode
+ * @param[in]  sampling_time  The ADC sampling time
  */
 void furi_hal_adc_configure_ex(
     FuriHalAdcHandle* handle,
     FuriHalAdcScale scale,
+    FuriHalAdcClock clock,
     FuriHalAdcOversample oversample,
     FuriHalAdcSamplingTime sampling_time);
 
@@ -140,7 +174,7 @@ uint16_t furi_hal_adc_read(FuriHalAdcHandle* handle, FuriHalAdcChannel channel);
 
 /** Convert sampled value to voltage
  *
- * @param      handle  The handle
+ * @param      handle  The ADC handle
  * @param[in]  value   The value acquired with `furi_hal_adc_read`
  *
  * @return     Voltage in mV
@@ -149,8 +183,9 @@ float furi_hal_adc_convert_to_voltage(FuriHalAdcHandle* handle, uint16_t value);
 
 /** Convert sampled VREFINT value to voltage
  *
- * @param      handle  The handle
- * @param[in]  value   The value acquired with `furi_hal_adc_read` for `FuriHalAdcChannelVREFINT` channel
+ * @param      handle  The ADC handle
+ * @param[in]  value   The value acquired with `furi_hal_adc_read` for
+ *                     `FuriHalAdcChannelVREFINT` channel
  *
  * @return     Voltage in mV
  */
@@ -158,8 +193,9 @@ float furi_hal_adc_convert_vref(FuriHalAdcHandle* handle, uint16_t value);
 
 /** Convert sampled TEMPSENSOR value to temperature
  *
- * @param      handle  The handle
- * @param[in]  value   The value acquired with `furi_hal_adc_read` for `FuriHalAdcChannelTEMPSENSOR` channel
+ * @param      handle  The ADC handle
+ * @param[in]  value   The value acquired with `furi_hal_adc_read` for
+ *                     `FuriHalAdcChannelTEMPSENSOR` channel
  *
  * @return     temperature in degree C
  */
@@ -167,8 +203,9 @@ float furi_hal_adc_convert_temp(FuriHalAdcHandle* handle, uint16_t value);
 
 /** Convert sampled VBAT value to voltage
  *
- * @param      handle  The handle
- * @param[in]  value   The value acquired with `furi_hal_adc_read` for `FuriHalAdcChannelVBAT` channel
+ * @param      handle  The ADC handle
+ * @param[in]  value   The value acquired with `furi_hal_adc_read` for
+ *                     `FuriHalAdcChannelVBAT` channel
  *
  * @return     Voltage in mV
  */

@@ -1089,7 +1089,7 @@ Function,+,furi_event_flag_wait,uint32_t,"FuriEventFlag*, uint32_t, uint32_t, ui
 Function,+,furi_get_tick,uint32_t,
 Function,+,furi_hal_adc_acquire,FuriHalAdcHandle*,
 Function,+,furi_hal_adc_configure,void,FuriHalAdcHandle*
-Function,+,furi_hal_adc_configure_ex,void,"FuriHalAdcHandle*, FuriHalAdcScale, FuriHalAdcOversample, FuriHalAdcSamplingTime"
+Function,+,furi_hal_adc_configure_ex,void,"FuriHalAdcHandle*, FuriHalAdcScale, FuriHalAdcClock, FuriHalAdcOversample, FuriHalAdcSamplingTime"
 Function,+,furi_hal_adc_convert_temp,float,"FuriHalAdcHandle*, uint16_t"
 Function,+,furi_hal_adc_convert_to_voltage,float,"FuriHalAdcHandle*, uint16_t"
 Function,+,furi_hal_adc_convert_vbat,float,"FuriHalAdcHandle*, uint16_t"
