@@ -85,8 +85,6 @@ int32_t clock_main(void* p) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message_block(notification, &sequence_display_backlight_enforce_on);
 
-    furi_hal_gpio_init(&gpio_ext_pa4, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-
     InputEvent event;
     bool state = 0;
     bool terminate = false;
