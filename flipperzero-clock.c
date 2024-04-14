@@ -55,10 +55,11 @@ static void cfg_save(File* file, ClockConfig* cfg) {
     storage_file_close(file);
 }
 
-int32_t analog_clock_main(void* p) {
+int32_t clock_main(void* p) {
     UNUSED(p);
 
     AppData* app = malloc(sizeof(AppData));
+    furi_assert(app);
 
     app->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     app->second = 0;
