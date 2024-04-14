@@ -1,4 +1,4 @@
-Displays customizable clock in full-screen or split view.
+Displays customizable clock in full-screen or split view with date and weekday.
 
 ## Usage
 
