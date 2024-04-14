@@ -80,12 +80,11 @@ void boilerplate_scene_1_draw(Canvas* canvas, BoilerplateScene1Model* model) {
         elements_button_center(canvas, "OK");
     } else {
         // int count = (app->page) * 0x1000;
-        
+
         int count = GB_FIRST_PHOTO_OFFSET + app->page * GB_PHOTO_SIZE;
 
         FURI_LOG_I(TAG, "Page \"%d\"\n", app->page);
         FURI_LOG_I(TAG, "Read Index \"%d\" \n", count);
-
 
         if(app->camera_ram_sav) {
             storage_file_seek(app->camera_ram_sav, (app->page) + 0x11B2, true);
