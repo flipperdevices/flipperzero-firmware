@@ -6,4 +6,4 @@ Use the ok key to switch between split-view and full-screen mode.
 
 In split-view mode use the left key to select the desired clock face. In full-screen mode use the left and right keys to change the width.
 
-Use the up and down arrow keys to select which hour digits are shown for the analog view.
+Use the up and down arrow keys to select which hour digits are shown for the analog faces.
