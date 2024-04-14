@@ -100,7 +100,7 @@ typedef enum {
     FuriHalAdcChannel18, /**< Internal channel, see `FuriHalAdcChannelVBAT`. */
     /* Special Channels: combines one of the 0-18 channel and additional internal peripherals */
     FuriHalAdcChannelVREFINT, /**< Special channel for VREFINT, used for calibration and self test */
-    FuriHalAdcChannelTEMPSENSOR, /**< Special channel for on-die temperature sensor */
+    FuriHalAdcChannelTEMPSENSOR, /**< Special channel for on-die temperature sensor, requires at least 5us of sampling time */
     FuriHalAdcChannelVBAT, /**< Special channel for VBAT/3 voltage. */
     /* Special value to indicate that pin is not connected to ADC */
     FuriHalAdcChannelNone, /**< No channel */
