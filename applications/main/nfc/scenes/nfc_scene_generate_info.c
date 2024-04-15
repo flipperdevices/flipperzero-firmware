@@ -1,4 +1,5 @@
 #include "../nfc_app_i.h"
+#include <nfc_icons.h>
 
 void nfc_scene_generate_info_widget_callback(GuiButtonType result, InputType type, void* context) {
     NfcApp* instance = context;

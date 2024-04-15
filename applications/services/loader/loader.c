@@ -61,6 +61,7 @@ LoaderStatus
 
 static void
     loader_show_gui_error(LoaderStatus status, const char* name, FuriString* error_message) {
+    FlipperApplicationFlag flags = FlipperApplicationFlagDefault;
     if(status == LoaderStatusErrorUnknownApp &&
        loader_find_external_application_by_name(name, &flags) != NULL) {
         // Special case for external apps

@@ -1,4 +1,5 @@
 #include "nfc_protocol_support_unlock_helper.h"
+#include <nfc_icons.h>
 
 static void nfc_scene_read_setup_view(NfcApp* instance) {
     Popup* popup = instance->popup;

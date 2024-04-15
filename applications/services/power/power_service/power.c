@@ -286,9 +286,11 @@ static void power_loader_callback(const void* message, void* context) {
     Power* power = context;
     const LoaderEvent* event = message;
 
-    if(event->type == LoaderEventTypeApplicationStarted) {
+    if(event->type == LoaderEventTypeApplicationBeforeLoad) {
         power_auto_shutdown_inhibit(power);
-    } else if(event->type == LoaderEventTypeApplicationStopped) {
+    } else if(
+        event->type == LoaderEventTypeApplicationLoadFailed ||
+        event->type == LoaderEventTypeApplicationStopped) {
         power_auto_shutdown_arm(power);
     }
 }

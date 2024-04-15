@@ -114,6 +114,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &power_cli,
 };
 
-const FlipperAppPluginDescriptor* power_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* power_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0329-0318-0.100.2-f601860](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-04 05:54 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-04 05:54 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-15 19:00 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-15 19:00 EST`
 - OFW: [Bad USB: fix crash when selecting a keyboard layout #3555 (By vanguacamolie)](https://github.com/flipperdevices/flipperzero-firmware/pull/3555)
 - OFW: [IR: Remember OTG state #3549 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3549)
 - OFW: [Mifare Ultralight naming fix #3551 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3551)
@@ -48,6 +48,18 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Flizzer Tracker v0.8 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - Updated: [Mfkey v2.2 (By noproto)](https://github.com/noproto/FlipperMfkey) Changes (By Willy-JL)
 - Updated: [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
+- OFW: [IR: Fix crash on duty_cycle=1 #3568 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3568) (Was Already in RM)
+- OFW: [Furi: Add 'out of memory' and 'malloc(0)' crash messages #3574 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3574)
+- OFW: [Explain RNG differences, add FURI_HAL_RANDOM_MAX #3565 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3565) (Was Already in RM)
+- OFW: [Move crypto1 to helpers, add it to the public API #3567 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3567)
+- OFW: [Update radio stack to v1.19.0 #3545 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3545)
+- OFW: [JS Documentation #3535 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3535)
+- OFW: [Desktop/Loader: Unload animations before loading FAPs #3573 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3573)
+- OFW: [Status output !TX/RX on the GDO2 CC1101 pin #3571 (By quen0n)](https://github.com/flipperdevices/flipperzero-firmware/pull/3571)
+- OFW: [Felica poller #3570 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3570)
+- UL: [Merge Fixes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1d8ed22720fcb56749fbdacf031d7266782777e1)
+- [JS App Updates and Fixes for CLI (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b8843d481b36acaeeaa1a82eb3bcc715b626aac6)
+- SubGHz: [GPS Updates, Fixes & Merge Fixes (By Willy-JL & Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f1fc288228d362b86e572c78973cf3ad8761931a)
 
 <a name="release">
 
