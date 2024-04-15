@@ -1,0 +1,3 @@
+[submodule "plugin"]
+	path = plugin
+	url = git@gitlab.com:bettse/flipper-wiegand-plugin.git
