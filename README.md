@@ -2,7 +2,7 @@
 
 Mitsubishi Electric AC remote control for Flipper Zero.
 
-![Screenshot](screenshot.png)
+![Screenshot](img/screenshot.png)
 
 ## Building
 ```shell

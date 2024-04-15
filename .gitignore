@@ -4,3 +4,4 @@ dist/*
 .editorconfig
 .env
 .ufbt
+.DS_Store
