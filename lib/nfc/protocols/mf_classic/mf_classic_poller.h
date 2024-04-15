@@ -315,6 +315,30 @@ MfClassicError mf_classic_poller_value_cmd(
  */
 MfClassicError mf_classic_poller_value_transfer(MfClassicPoller* instance, uint8_t block_num);
 
+MfClassicError mf_classic_poller_send_standard_frame(
+    MfClassicPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt_fc);
+
+MfClassicError mf_classoc_poller_send_frame(
+    MfClassicPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt_fc);
+
+MfClassicError mf_classic_poller_send_custom_parity_frame(
+    MfClassicPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt_fc);
+
+MfClassicError mf_classic_poller_send_encrypted_frame(
+    MfClassicPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt_fc);
+
 #ifdef __cplusplus
 }
 #endif
