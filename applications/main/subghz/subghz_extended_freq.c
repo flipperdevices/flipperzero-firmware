@@ -26,8 +26,5 @@ void subghz_extended_freq() {
     SubGhzLastSettings* last_settings = subghz_last_settings_alloc();
     subghz_last_settings_load(last_settings, 0);
 
-    // Set globally in furi hal
-    furi_hal_subghz_set_ext_power_amp(last_settings->external_module_power_amp);
-
     subghz_last_settings_free(last_settings);
 }

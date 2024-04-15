@@ -478,72 +478,6 @@ static void js_widget_add_glyph(struct mjs* mjs) {
     mjs_return(mjs, mjs_mk_number(mjs, component->id));
 }
 
-static void widget_icon_draw(Canvas* canvas, void* model) {
-    IconElement* element = model;
-    canvas_draw_icon(canvas, element->x, element->y, element->icon);
-}
-
-static void widget_icon_free(WidgetComponent* component) {
-    IconElement* element = component->model;
-    free(element);
-    free(component);
-}
-
-static void js_widget_add_icon(struct mjs* mjs) {
-    JsWidgetInst* widget = get_this_ctx(mjs);
-    if(!check_arg_count(mjs, 3)) {
-        return;
-    }
-
-    int32_t x = mjs_get_int32(mjs, mjs_arg(mjs, 0));
-    int32_t y = mjs_get_int32(mjs, mjs_arg(mjs, 1));
-    mjs_val_t icon_arg = mjs_arg(mjs, 2);
-    size_t icon_len = 0;
-    const char* icon_name = mjs_get_string(mjs, &icon_arg, &icon_len);
-    if(!icon_name) {
-        ret_bad_args(mjs, "Icon name must be a string");
-        return;
-    }
-
-    const Icon* icon = NULL;
-    // for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
-    // if(ICON_PATHS[i].path == NULL) continue;
-    // const char* iter_name = strrchr(ICON_PATHS[i].path, '/');
-    // if(iter_name++ == NULL) continue;
-    // if(strnlen(iter_name, icon_len + 1) == icon_len &&
-    // strncmp(iter_name, icon_name, icon_len) == 0) {
-    // icon = ICON_PATHS[i].icon;
-    // break;
-    // }
-    // }
-
-    if(icon == NULL) {
-        ret_bad_args(mjs, "Unknown icon name");
-        return;
-    }
-
-    WidgetComponent* component = malloc(sizeof(WidgetComponent));
-    component->draw = widget_icon_draw;
-    component->free = widget_icon_free;
-    component->model = malloc(sizeof(IconElement));
-    IconElement* element = component->model;
-    element->x = x;
-    element->y = y;
-    element->icon = icon;
-
-    with_view_model(
-        widget->view,
-        WidgetModel * model,
-        {
-            ++model->max_assigned_id;
-            component->id = model->max_assigned_id;
-            ComponentArray_push_back(model->component, component);
-        },
-        true);
-
-    mjs_return(mjs, mjs_mk_number(mjs, component->id));
-}
-
 static void widget_line_draw(Canvas* canvas, void* model) {
     LineElement* element = model;
     canvas_draw_line(canvas, element->x1, element->y1, element->x2, element->y2);
@@ -971,8 +905,6 @@ static void* js_widget_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, widget_obj, "addFrame", ~0, MJS_MK_FN(js_widget_add_frame));
     // addGlyph(x: number, y: number, ch: number): number (returns id of the added component)
     mjs_set(mjs, widget_obj, "addGlyph", ~0, MJS_MK_FN(js_widget_add_glyph));
-    // addIcon(x: number, y: number, icon: string): number (returns id of the added component)
-    mjs_set(mjs, widget_obj, "addIcon", ~0, MJS_MK_FN(js_widget_add_icon));
     // addLine(x1: number, y1: number, x2: number, y2: number): number (returns id of the added component)
     mjs_set(mjs, widget_obj, "addLine", ~0, MJS_MK_FN(js_widget_add_line));
     // addRbox(x: number, y: number, w: number, h: number, r: number): number (returns id of the added component)
