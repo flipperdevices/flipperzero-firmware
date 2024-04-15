@@ -1,3 +1,6 @@
+## 1.8
+ - Ultralight Various fixes and improvements
+
 ## 1.7
  - Gen2/CUID write support
 

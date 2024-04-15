@@ -43,8 +43,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Explain RNG differences, Fix JS Math.random() (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c79e356e0ff610eeef974afa28f97f5d4734d4da)
 - OFW: [Desktop: ensure that animation is unloaded before app start #3569 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3569)
 - Updated: [Mfkey v2.2 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- Updated: [NFC Magic v1.7 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
-- Updated: [Weather Station v1.6 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 - Updated: [Flizzer Tracker v0.8 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - Updated: [Mfkey v2.2 (By noproto)](https://github.com/noproto/FlipperMfkey) Changes (By Willy-JL)
 - Updated: [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
@@ -60,6 +58,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Merge Fixes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1d8ed22720fcb56749fbdacf031d7266782777e1)
 - [JS App Updates and Fixes for CLI (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b8843d481b36acaeeaa1a82eb3bcc715b626aac6)
 - SubGHz: [GPS Updates, Fixes & Merge Fixes (By Willy-JL & Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f1fc288228d362b86e572c78973cf3ad8761931a)
+- Updated: [NFC Magic v1.8 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
+- Updated: [Weather Station v1.7 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
+- Updated: [PicoPass (iClass) v1.13 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
 
 <a name="release">
 
@@ -479,7 +480,7 @@ $ ./fbt dolphin_ext
 - [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Mx2125 Step Counter v1.0 (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
-- [NFC Magic v1.7 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
+- [NFC Magic v1.8 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Seader v2.6 (By bettse)](https://github.com/bettse/seader)
@@ -561,7 +562,7 @@ $ ./fbt dolphin_ext
 - [WAV Player v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work.  [Updated by xMasterX](https://github.com/DarkFlippers/unleashed-firmware/commit/76d3f84a5eb069b749e3ad20df6fdbbc785eb253)
 - [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - [WHC SWIO Flasher v1.1 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
-- [Weather Station v1.6 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
+- [Weather Station v1.7 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 - [Wiegand Reader v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266`
 - [WiFi (Marauder) v0.7.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/justcallmekoko/ESP32Marauder/releases/latest)

@@ -162,6 +162,7 @@ NfcCommand picopass_poller_check_security(PicopassPoller* instance) {
     case PICOPASS_FUSE_CRYPT0:
         FURI_LOG_D(TAG, "Non-secured page, skipping auth");
         instance->secured = false;
+        instance->data->auth = PicopassDeviceAuthMethodNone;
         picopass_poller_prepare_read(instance);
         instance->state = PicopassPollerStateReadBlock;
         return command;
@@ -193,6 +194,8 @@ NfcCommand picopass_poller_check_security(PicopassPoller* instance) {
         FURI_LOG_D(TAG, "SE enabled");
     }
 
+    // Assume failure since we must auth, correct value will be set on success
+    instance->data->auth = PicopassDeviceAuthMethodFailed;
     if(instance->mode == PicopassPollerModeRead) {
         // Always try the NR-MAC auth in case we have the file.
         instance->state = PicopassPollerStateNrMacAuth;
@@ -295,6 +298,7 @@ NfcCommand picopass_poller_nr_mac_auth(PicopassPoller* instance) {
         PicopassCheckResp check_resp = {};
         error = picopass_poller_check(instance, nr_mac, &mac, &check_resp);
         if(error == PicopassErrorNone) {
+            instance->data->auth = PicopassDeviceAuthMethodNrMac;
             memcpy(instance->mac.data, mac.data, sizeof(PicopassMac));
             if(instance->mode == PicopassPollerModeRead) {
                 picopass_poller_prepare_read(instance);
@@ -383,6 +387,7 @@ NfcCommand picopass_poller_auth_handler(PicopassPoller* instance) {
         error = picopass_poller_check(instance, NULL, &mac, &check_resp);
         if(error == PicopassErrorNone) {
             FURI_LOG_I(TAG, "Found key");
+            instance->data->auth = PicopassDeviceAuthMethodKey;
             memcpy(instance->mac.data, mac.data, sizeof(PicopassMac));
             if(instance->mode == PicopassPollerModeRead) {
                 memcpy(
@@ -463,7 +468,7 @@ NfcCommand picopass_poller_parse_credential_handler(PicopassPoller* instance) {
 NfcCommand picopass_poller_parse_wiegand_handler(PicopassPoller* instance) {
     NfcCommand command = NfcCommandContinue;
 
-    picopass_device_parse_wiegand(instance->data->pacs.credential, &instance->data->pacs);
+    picopass_device_parse_wiegand(&instance->data->pacs);
     instance->state = PicopassPollerStateSuccess;
     return command;
 }
