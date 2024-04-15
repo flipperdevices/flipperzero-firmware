@@ -34,9 +34,23 @@ App(
 )
 
 App(
+    appid="js_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_cli_plugin_ep",
+    requires=["cli"],
+    sources=[
+        "*.c*",
+        "!modules",
+        "modules/js_flipper.c",
+    ],
+)
+
+App(
     appid="js_app_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="js_app_on_system_start",
+    sources=["js_start.c"],
     order=160,
 )
 
