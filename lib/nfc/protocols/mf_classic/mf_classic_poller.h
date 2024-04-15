@@ -349,7 +349,7 @@ MfClassicError mf_classic_poller_send_standard_frame(
  * @param[in] fwt frame wait time (response timeout), in carrier cycles.
  * @return MfClassicErrorNone on success, an error code on failure.
  */
-MfClassicError mf_classoc_poller_send_frame(
+MfClassicError mf_classic_poller_send_frame(
     MfClassicPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,

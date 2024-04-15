@@ -481,7 +481,7 @@ MfClassicError mf_classic_poller_send_standard_frame(
     return mf_classic_process_error(error);
 }
 
-MfClassicError mf_classoc_poller_send_frame(
+MfClassicError mf_classic_poller_send_frame(
     MfClassicPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,

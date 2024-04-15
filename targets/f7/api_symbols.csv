@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,60.8,,
+Version,v,60.8,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -2437,6 +2437,7 @@ Function,+,mf_classic_poller_halt,MfClassicError,MfClassicPoller*
 Function,+,mf_classic_poller_read_block,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicBlock*"
 Function,+,mf_classic_poller_send_custom_parity_frame,MfClassicError,"MfClassicPoller*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,mf_classic_poller_send_encrypted_frame,MfClassicError,"MfClassicPoller*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,+,mf_classic_poller_send_frame,MfClassicError,"MfClassicPoller*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,mf_classic_poller_send_standard_frame,MfClassicError,"MfClassicPoller*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,mf_classic_poller_sync_auth,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
 Function,+,mf_classic_poller_sync_change_value,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, int32_t, int32_t*"
@@ -2457,7 +2458,6 @@ Function,+,mf_classic_set_key_not_found,void,"MfClassicData*, uint8_t, MfClassic
 Function,+,mf_classic_set_uid,_Bool,"MfClassicData*, const uint8_t*, size_t"
 Function,+,mf_classic_value_to_block,void,"int32_t, uint8_t, MfClassicBlock*"
 Function,+,mf_classic_verify,_Bool,"MfClassicData*, const FuriString*"
-Function,+,mf_classoc_poller_send_frame,MfClassicError,"MfClassicPoller*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,mf_desfire_alloc,MfDesfireData*,
 Function,+,mf_desfire_copy,void,"MfDesfireData*, const MfDesfireData*"
 Function,+,mf_desfire_free,void,MfDesfireData*
