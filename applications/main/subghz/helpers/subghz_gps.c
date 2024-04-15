@@ -1,6 +1,17 @@
 #include "subghz_gps.h"
 #include "minmea.h"
 
+#include <cfw/cfw.h>
+
+#define UART_CH (cfw_settings.uart_nmea_channel)
+
+typedef enum {
+    WorkerEvtStop = (1 << 0),
+    WorkerEvtRxDone = (1 << 1),
+} WorkerEvtFlags;
+
+#define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
+
 static void subghz_gps_uart_parse_nmea(SubGhzGPS* subghz_gps, char* line) {
     switch(minmea_sentence_id(line, false)) {
     case MINMEA_SENTENCE_RMC: {
@@ -113,9 +124,86 @@ static int32_t subghz_gps_uart_worker(void* context) {
     return 0;
 }
 
-SubGhzGPS* subghz_gps_init() {
-    SubGhzGPS* subghz_gps = malloc(sizeof(SubGhzGPS));
+static void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
+    furi_assert(subghz_gps);
 
+    furi_thread_flags_set(furi_thread_get_id(subghz_gps->thread), WorkerEvtStop);
+    furi_thread_join(subghz_gps->thread);
+
+    furi_hal_serial_async_rx_stop(subghz_gps->serial_handle);
+    furi_hal_serial_deinit(subghz_gps->serial_handle);
+    furi_hal_serial_control_release(subghz_gps->serial_handle);
+
+    furi_thread_free(subghz_gps->thread);
+
+    furi_stream_buffer_free(subghz_gps->rx_stream);
+}
+
+static float subghz_gps_deg2rad(float deg) {
+    return (deg * M_PI / 180);
+}
+
+static float subghz_gps_calc_distance(float lat1d, float lon1d, float lat2d, float lon2d) {
+    float lat1r, lon1r, lat2r, lon2r;
+    double u, v;
+    lat1r = subghz_gps_deg2rad(lat1d);
+    lon1r = subghz_gps_deg2rad(lon1d);
+    lat2r = subghz_gps_deg2rad(lat2d);
+    lon2r = subghz_gps_deg2rad(lon2d);
+    u = sin((lat2r - lat1r) / 2);
+    v = sin((lon2r - lon1r) / 2);
+    return 2 * 6371 * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+}
+
+static float subghz_gps_calc_angle(float lat1, float lon1, float lat2, float lon2) {
+    return atan2(lat1 - lat2, lon1 - lon2) * 180 / (double)M_PI;
+}
+
+static void subghz_gps_cat_realtime(
+    SubGhzGPS* subghz_gps,
+    FuriString* descr,
+    float latitude,
+    float longitude) {
+    float distance =
+        subghz_gps_calc_distance(latitude, longitude, subghz_gps->latitude, subghz_gps->longitude);
+
+    float angle =
+        subghz_gps_calc_angle(latitude, longitude, subghz_gps->latitude, subghz_gps->longitude);
+
+    char* angle_str = "?";
+    if(angle > -22.5 && angle <= 22.5) {
+        angle_str = "E";
+    } else if(angle > 22.5 && angle <= 67.5) {
+        angle_str = "NE";
+    } else if(angle > 67.5 && angle <= 112.5) {
+        angle_str = "N";
+    } else if(angle > 112.5 && angle <= 157.5) {
+        angle_str = "NW";
+    } else if(angle < -22.5 && angle >= -67.5) {
+        angle_str = "SE";
+    } else if(angle < -67.5 && angle >= -112.5) {
+        angle_str = "S";
+    } else if(angle < -112.5 && angle >= -157.5) {
+        angle_str = "SW";
+    } else if(angle < -157.5 || angle >= 157.5) {
+        angle_str = "W";
+    }
+
+    furi_string_cat_printf(
+        descr,
+        "Realtime:  Sats: %d\r\n"
+        "Distance: %.2f%s Dir: %s\r\n"
+        "GPS time: %02d:%02d:%02d UTC",
+        subghz_gps->satellites,
+        (double)(subghz_gps->satellites > 0 ? distance > 1 ? distance : distance * 1000 : 0),
+        distance > 1 ? "km" : "m",
+        angle_str,
+        subghz_gps->fix_hour,
+        subghz_gps->fix_minute,
+        subghz_gps->fix_second);
+}
+
+static void subghz_gps_init(SubGhzGPS* subghz_gps, uint32_t baudrate) {
     subghz_gps->latitude = NAN;
     subghz_gps->longitude = NAN;
     subghz_gps->satellites = 0;
@@ -125,69 +213,29 @@ SubGhzGPS* subghz_gps_init() {
 
     subghz_gps->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
 
-    subghz_gps->thread = furi_thread_alloc();
-    furi_thread_set_name(subghz_gps->thread, "SubGhzGPSWorker");
-    furi_thread_set_stack_size(subghz_gps->thread, 1024);
-    furi_thread_set_context(subghz_gps->thread, subghz_gps);
-    furi_thread_set_callback(subghz_gps->thread, subghz_gps_uart_worker);
-
-    subghz_gps->expansion = furi_record_open(RECORD_EXPANSION);
-    expansion_disable(subghz_gps->expansion);
+    subghz_gps->thread =
+        furi_thread_alloc_ex("SubGhzGPSWorker", 1024, subghz_gps_uart_worker, subghz_gps);
+    furi_thread_start(subghz_gps->thread);
 
     subghz_gps->serial_handle = furi_hal_serial_control_acquire(UART_CH);
     furi_check(subghz_gps->serial_handle);
-    furi_hal_serial_init(subghz_gps->serial_handle, 9600);
+    furi_hal_serial_init(subghz_gps->serial_handle, baudrate);
 
     furi_hal_serial_async_rx_start(
         subghz_gps->serial_handle, subghz_gps_uart_on_irq_cb, subghz_gps, false);
 
-    return subghz_gps;
+    subghz_gps->deinit = &subghz_gps_deinit;
+    subghz_gps->cat_realtime = &subghz_gps_cat_realtime;
 }
 
-void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
-    furi_assert(subghz_gps);
+#include <flipper_application/flipper_application.h>
 
-    furi_hal_serial_async_rx_stop(subghz_gps->serial_handle);
-    furi_hal_serial_deinit(subghz_gps->serial_handle);
-    furi_hal_serial_control_release(subghz_gps->serial_handle);
+static const FlipperAppPluginDescriptor plugin_descriptor = {
+    .appid = "subghz_gps",
+    .ep_api_version = 1,
+    .entry_point = &subghz_gps_init,
+};
 
-    expansion_enable(subghz_gps->expansion);
-    furi_record_close(RECORD_EXPANSION);
-
-    furi_thread_free(subghz_gps->thread);
-    furi_stream_buffer_free(subghz_gps->rx_stream);
-
-    free(subghz_gps);
-}
-
-void subghz_gps_start(SubGhzGPS* subghz_gps) {
-    furi_thread_start(subghz_gps->thread);
-}
-
-void subghz_gps_stop(SubGhzGPS* subghz_gps) {
-    furi_thread_flags_set(furi_thread_get_id(subghz_gps->thread), WorkerEvtStop);
-    furi_thread_join(subghz_gps->thread);
-}
-
-void subghz_gps_set_baudrate(SubGhzGPS* subghz_gps, uint32_t baudrate) {
-    furi_hal_serial_set_br(subghz_gps->serial_handle, baudrate);
-}
-
-double subghz_gps_deg2rad(double deg) {
-    return (deg * (double)M_PI / 180);
-}
-
-double subghz_gps_calc_distance(double lat1d, double lon1d, double lat2d, double lon2d) {
-    double lat1r, lon1r, lat2r, lon2r, u, v;
-    lat1r = subghz_gps_deg2rad(lat1d);
-    lon1r = subghz_gps_deg2rad(lon1d);
-    lat2r = subghz_gps_deg2rad(lat2d);
-    lon2r = subghz_gps_deg2rad(lon2d);
-    u = sin((lat2r - lat1r) / 2);
-    v = sin((lon2r - lon1r) / 2);
-    return 2 * 6371 * asin(sqrt(u * u + cos((double)lat1r) * cos((double)lat2r) * v * v));
-}
-
-double subghz_gps_calc_angle(double lat1, double lon1, double lat2, double lon2) {
-    return atan2(lat1 - lat2, lon1 - lon2) * 180 / (double)M_PI;
+const FlipperAppPluginDescriptor* subghz_gps_plugin_ep(void) {
+    return &plugin_descriptor;
 }

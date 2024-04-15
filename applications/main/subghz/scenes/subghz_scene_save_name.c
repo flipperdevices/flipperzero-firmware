@@ -27,26 +27,14 @@ void subghz_scene_save_name_on_enter(void* context) {
     subghz->save_datetime_set = false;
     if(!subghz_path_is_file(subghz->file_path)) {
         SubGhzProtocolDecoderBase* decoder_result = subghz_txrx_get_decoder(subghz->txrx);
-
-        bool skip_dec_is_present = false;
-        if(decoder_result != 0x0) {
-            if(decoder_result != NULL) {
-                if(strlen(decoder_result->protocol->name) != 0 &&
-                   subghz->last_settings->protocol_file_names) {
-                    if(!scene_manager_has_previous_scene(
-                           subghz->scene_manager, SubGhzSceneSetType)) {
-                        name_generator_make_auto_datetime(
-                            file_name_buf,
-                            SUBGHZ_MAX_LEN_NAME,
-                            decoder_result->protocol->name,
-                            datetime);
-                        skip_dec_is_present = true;
-                    }
-                }
-            }
-        }
-        if(!skip_dec_is_present) {
-            name_generator_make_auto_datetime(file_name_buf, SUBGHZ_MAX_LEN_NAME, NULL, datetime);
+        if(subghz->last_settings->protocol_file_names && decoder_result != NULL &&
+           strlen(decoder_result->protocol->name) != 0 &&
+           !scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneSetType)) {
+            name_generator_make_auto_datetime(
+                file_name_buf, SUBGHZ_MAX_LEN_NAME, decoder_result->protocol->name, datetime);
+        } else {
+            name_generator_make_auto_datetime(
+                file_name_buf, SUBGHZ_MAX_LEN_NAME, SUBGHZ_APP_FILENAME_PREFIX, datetime);
         }
         furi_string_set(file_name, file_name_buf);
         furi_string_set(subghz->file_path, SUBGHZ_APP_FOLDER);

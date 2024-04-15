@@ -244,10 +244,8 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     //Init Error_str
     subghz->error_str = furi_string_alloc();
 
-    subghz->gps = subghz_gps_init();
     if(subghz->last_settings->gps_baudrate != 0) {
-        subghz_gps_set_baudrate(subghz->gps, subghz->last_settings->gps_baudrate);
-        subghz_gps_start(subghz->gps);
+        subghz->gps = subghz_gps_plugin_init(subghz->last_settings->gps_baudrate);
     }
 
     return subghz;
@@ -345,10 +343,9 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
     furi_string_free(subghz->file_path_tmp);
 
     // GPS
-    if(subghz->last_settings->gps_baudrate != 0) {
-        subghz_gps_stop(subghz->gps);
+    if(subghz->gps) {
+        subghz_gps_plugin_deinit(subghz->gps);
     }
-    subghz_gps_deinit(subghz->gps);
 
     subghz_last_settings_free(subghz->last_settings);
 

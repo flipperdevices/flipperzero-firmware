@@ -92,16 +92,20 @@ void subghz_txrx_get_frequency_and_modulation(
     bool long_name);
 
 /**
- * Get string latitude and longitude
- * 
+ * Get latitude value
+ *
  * @param instance Pointer to a SubGhzTxRx
- * @param latitude Pointer to a string latitude
- * @param longitude Pointer to a string longitude
+ * @return latitude
 */
-void subghz_txrx_get_latitude_and_longitude(
-    SubGhzTxRx* instance,
-    FuriString* latitude,
-    FuriString* longitude);
+float subghz_txrx_get_latitude(SubGhzTxRx* instance);
+
+/**
+ * Get longitude value
+ *
+ * @param instance Pointer to a SubGhzTxRx
+ * @return longitude
+*/
+float subghz_txrx_get_longitude(SubGhzTxRx* instance);
 
 /**
  * Start TX CC1101

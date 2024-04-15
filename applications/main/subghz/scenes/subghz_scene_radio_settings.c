@@ -126,16 +126,16 @@ static void subghz_scene_receiver_config_set_gps(VariableItem* item) {
     }
     subghz_last_settings_save(subghz->last_settings);
 
+    if(subghz->gps) {
+        subghz_gps_plugin_deinit(subghz->gps);
+        subghz->gps = NULL;
+    }
     if(subghz->last_settings->gps_baudrate != 0) {
-        subghz_gps_stop(subghz->gps);
-        subghz_gps_set_baudrate(subghz->gps, subghz->last_settings->gps_baudrate);
-        subghz_gps_start(subghz->gps);
-    } else {
-        subghz_gps_stop(subghz->gps);
+        subghz->gps = subghz_gps_plugin_init(subghz->last_settings->gps_baudrate);
     }
 }
 
-static void subghz_scene_receiver_config_set_timestamp_file_names(VariableItem* item) {
+static void subghz_scene_receiver_config_set_protocol_file_names(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 

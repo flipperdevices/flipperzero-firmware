@@ -54,7 +54,7 @@ void name_generator_make_random_prefixed(char* name, size_t max_name_size, const
     snprintf(
         name,
         max_name_size,
-        "%s%s%s_%s",
+        "%s%s%s-%s",
         prefix ? prefix : "",
         prefix ? "_" : "",
         name_generator_left[name_generator_left_i],
@@ -75,6 +75,7 @@ void name_generator_make_detailed_datetime(
     DateTime* custom_time) {
     furi_check(name);
     furi_check(max_name_size);
+    furi_check(prefix);
 
     DateTime dateTime;
     if(custom_time) {
@@ -82,7 +83,6 @@ void name_generator_make_detailed_datetime(
     } else {
         furi_hal_rtc_get_datetime(&dateTime);
     }
-
     snprintf(
         name,
         max_name_size,

@@ -158,18 +158,14 @@ void subghz_txrx_get_frequency_and_modulation(
     }
 }
 
-void subghz_txrx_get_latitude_and_longitude(
-    SubGhzTxRx* instance,
-    FuriString* latitude,
-    FuriString* longitude) {
+float subghz_txrx_get_latitude(SubGhzTxRx* instance) {
     furi_assert(instance);
-    SubGhzRadioPreset* preset = instance->preset;
-    if(latitude != NULL) {
-        furi_string_printf(latitude, "%f", (double)preset->latitude);
-    }
-    if(longitude != NULL) {
-        furi_string_printf(longitude, "%f", (double)preset->longitude);
-    }
+    return instance->preset->latitude;
+}
+
+float subghz_txrx_get_longitude(SubGhzTxRx* instance) {
+    furi_assert(instance);
+    return instance->preset->longitude;
 }
 
 static void subghz_txrx_begin(SubGhzTxRx* instance, uint8_t* preset_data) {

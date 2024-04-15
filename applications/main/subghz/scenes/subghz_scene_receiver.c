@@ -53,7 +53,7 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
     if(!subghz_history_get_text_space_left(
            subghz->history,
            history_stat_str,
-           subghz->gps->satellites,
+           subghz->gps ? subghz->gps->satellites : 0,
            subghz->last_settings->delete_old_signals)) {
         FuriString* frequency_str = furi_string_alloc();
         FuriString* modulation_str = furi_string_alloc();
@@ -131,8 +131,13 @@ static void subghz_scene_add_to_history_callback(
     uint16_t idx = subghz_history_get_item(history);
 
     SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
-    preset.latitude = subghz->gps->latitude;
-    preset.longitude = subghz->gps->longitude;
+    if(subghz->gps) {
+        preset.latitude = subghz->gps->latitude;
+        preset.longitude = subghz->gps->longitude;
+    } else {
+        preset.latitude = 0;
+        preset.longitude = 0;
+    }
 
     if(subghz->last_settings->delete_old_signals && subghz_history_full(subghz->history)) {
         subghz_view_receiver_disable_draw_callback(subghz->subghz_receiver);
@@ -480,7 +485,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             SubGhzThresholdRssiData ret_rssi = subghz_threshold_get_rssi_data(
                 subghz->threshold_rssi, subghz_txrx_radio_device_get_rssi(subghz->txrx));
 
-            if(subghz->last_settings->gps_baudrate != 0) {
+            if(subghz->gps) {
                 DateTime datetime;
                 furi_hal_rtc_get_datetime(&datetime);
                 if((datetime.second - subghz->gps->fix_second) > 15) {
@@ -502,7 +507,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
 
         switch(subghz->state_notifications) {
         case SubGhzNotificationStateRx:
-            if(subghz->last_settings->gps_baudrate != 0) {
+            if(subghz->gps) {
                 if(subghz->gps->satellites > 0) {
                     notification_message(subghz->notifications, &sequence_blink_green_10);
                 } else {

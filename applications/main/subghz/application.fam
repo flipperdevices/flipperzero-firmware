@@ -10,6 +10,8 @@ App(
     # Sources separation breaks linking with subghz on internal, commented for now
     # sources=[
     #     "*.c",
+    #     "!helpers/subghz_gps.c",
+    #     "!helpers/minmea.c",
     #     "!subghz_cli.c",
     #     "!helpers/subghz_chat.c",
     #     "!subghz_extended_freq.c",
@@ -23,13 +25,22 @@ App(
 
 App(
     appid="subghz_fap",
-    name="SubGHz",
+    name="Sub-GHz",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="subghz_fap",
     stack_size=3 * 1024,
     sources=["subghz_fap.c"],
     fap_icon="icon.png",
     fap_category="Sub-GHz",
+)
+
+App(
+    appid="subghz_gps",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="subghz_gps_plugin_ep",
+    requires=["subghz"],
+    sources=["helpers/subghz_gps.c", "helpers/minmea.c"],
 )
 
 App(
