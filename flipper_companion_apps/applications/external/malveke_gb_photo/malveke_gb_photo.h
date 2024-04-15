@@ -30,6 +30,9 @@
 #define MALVEKE_APP_FOLDER_RAMS MALVEKE_APP_FOLDER "/rams"
 #define MALVEKE_APP_FOLDER_PHOTOS MALVEKE_APP_FOLDER "/photos"
 
+#define GB_FIRST_PHOTO_OFFSET 0x2000
+#define GB_PHOTO_SIZE 0x1000
+
 typedef struct {
     Gui* gui;
     NotificationApp* notification;
