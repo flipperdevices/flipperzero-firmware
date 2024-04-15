@@ -81,7 +81,9 @@ static NfcCommand as_reader_worker_poller_trx_callback(NfcGenericEvent event, vo
                     event.instance,
                     as_reader_worker->bitbuffer_tx,
                     as_reader_worker->bitbuffer_rx);
+                trace_bit_buffer_hexdump(TAG, "Emu Reader TX", as_reader_worker->bitbuffer_tx);
                 if(err == Iso14443_4aErrorNone) {
+                    trace_bit_buffer_hexdump(TAG, "Emu Reader RX", as_reader_worker->bitbuffer_rx);
                     FURI_LOG_D(TAG, "Card Found, Recv RX");
                     NfcRelayPacket* packet = packet_alloc_data(
                         NfcRelayPacketApduResp,
@@ -170,7 +172,7 @@ int32_t as_reader_worker_task(void* context) {
             // drop PCB
             bit_buffer_copy_bytes(
                 as_reader_worker->bitbuffer_tx, &recv_packet->buf[1], recv_packet->len - 1);
-            trace_bit_buffer_hexdump(TAG, "Emu Reader TX", as_reader_worker->bitbuffer_tx);
+            trace_bit_buffer_hexdump(TAG, "Reader apdu recv", as_reader_worker->bitbuffer_tx);
             free(recv_packet);
             recv_packet = NULL;
             as_reader_worker->apdu_ready = true;

@@ -46,7 +46,10 @@ AsCardWorker* as_card_worker_alloc(NfcRelay* nfc_relay) {
     as_card_worker->dev_data = iso14443_4a_alloc();
     as_card_worker->bitbuffer = bit_buffer_alloc(256);
     as_card_worker->buff_tx = malloc(256);
-    as_card_worker->delayus = 2000;
+    // TODO: Make the following two configurable
+    as_card_worker->delayus = 3500;
+    CMD_14A_WTX[1] = 1;
+    nfca_append_crc16(&CMD_14A_WTX[0], 2);
 
     return as_card_worker;
 }
