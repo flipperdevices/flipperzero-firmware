@@ -1,5 +1,5 @@
 
-#include "plugin_interface.h"
+#include "interface.h"
 
 #include <lib/bit_lib/bit_lib.h>
 #include <flipper_application/flipper_application.h>
