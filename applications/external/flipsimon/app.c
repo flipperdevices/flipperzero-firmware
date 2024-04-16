@@ -7,6 +7,7 @@
 #include "./common/flipboard_model.h"
 #include "./common/flipboard_model_ref.h"
 #include "./common/leds.h"
+#include "flipboard_simon_rm_icons.h"
 
 #define MAX_SONG_LENGTH 12
 #define SIMON_TEACH_DELAY_MS 1000
@@ -463,7 +464,7 @@ int32_t flipboard_simon_app(void* p) {
 
     Flipboard* app = flipboard_alloc(
         FLIPBOARD_APP_NAME,
-        FLIPBOARD_PRIMARY_ITEM_NAME,
+        &I_qr_github,
         ABOUT_TEXT,
         fields,
         single_mode_button,

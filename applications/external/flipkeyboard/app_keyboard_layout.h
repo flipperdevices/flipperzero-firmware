@@ -94,6 +94,19 @@ KeystrokeSelectorKey shift_keys[] = {
     {},
     {},
     //
+    {.code = HID_KEYBOARD_APOSTROPHE | KEY_MOD_LEFT_SHIFT, .ch = '"', .icon = NULL},
+    {.code = HID_KEYBOARD_OPEN_BRACKET | KEY_MOD_LEFT_SHIFT, .ch = '{', .icon = NULL},
+    {.code = HID_KEYBOARD_CLOSE_BRACKET | KEY_MOD_LEFT_SHIFT, .ch = '}', .icon = NULL},
+    {.code = HID_KEYBOARD_DELETE_FORWARD | KEY_MOD_LEFT_SHIFT, .ch = 0, .icon = &I_delfwsh_5x10},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    //
 };
 
 KeystrokeSelectorKey keys[] = {
@@ -187,4 +200,17 @@ KeystrokeSelectorKey keys[] = {
     {.code = HID_KEYBOARD_POWER, .ch = 0, .icon = &I_power_25x10},
     {.code = HID_KEYBOARD_POWER, .ch = 0, .icon = &I_power_25x10},
     {.code = HID_KEYBOARD_POWER, .ch = 0, .icon = &I_power_25x10},
+
+    {.code = HID_KEYBOARD_APOSTROPHE, .ch = '\'', .icon = NULL},
+    {.code = HID_KEYBOARD_OPEN_BRACKET, .ch = '[', .icon = NULL},
+    {.code = HID_KEYBOARD_CLOSE_BRACKET, .ch = ']', .icon = NULL},
+    {.code = HID_KEYBOARD_DELETE_FORWARD, .ch = 0, .icon = &I_delfw_5x10},
+    {.code = HID_KEYBOARD_HOME, .ch = 0, .icon = &I_home_15x10},
+    {.code = HID_KEYBOARD_HOME, .ch = 0, .icon = &I_home_15x10},
+    {.code = HID_KEYBOARD_END, .ch = 0, .icon = &I_end_15x10},
+    {.code = HID_KEYBOARD_END, .ch = 0, .icon = &I_end_15x10},
+    {.code = HID_KEYBOARD_PAGE_UP, .ch = 0, .icon = &I_pgup_15x10},
+    {.code = HID_KEYBOARD_PAGE_UP, .ch = 0, .icon = &I_pgup_15x10},
+    {.code = HID_KEYBOARD_PAGE_DOWN, .ch = 0, .icon = &I_pgdn_15x10},
+    {.code = HID_KEYBOARD_PAGE_DOWN, .ch = 0, .icon = &I_pgdn_15x10},
 };

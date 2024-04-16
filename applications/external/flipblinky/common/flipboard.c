@@ -3,7 +3,7 @@
 /**
  * @brief Allocates a new Flipboard application.
  * @param app_name The name of the application.
- * @param primary_item_name The name of the primary action (the purpose of your app).
+ * @param qr_icon The icon to display in the qr view.
  * @param about_text The text to display in the about view.
  * @param fields The fields to display in the button model.
  * @param single_mode_button Whether to display the button model in single mode.
@@ -16,7 +16,7 @@
 */
 Flipboard* flipboard_alloc(
     char* app_name,
-    char* primary_item_name,
+    const Icon* qr_icon,
     char* about_text,
     ActionModelFields fields,
     bool single_mode_button,
@@ -51,17 +51,25 @@ Flipboard* flipboard_alloc(
 
     app->app_menu = app_menu_alloc(app->view_dispatcher);
     app_menu_add_item(
+        app->app_menu, "Start application", app->view_primary, FlipboardViewPrimaryId);
+
+    app_menu_add_item(
         app->app_menu,
-        "Config",
+        "Configure application",
         action_config_get_view(app->action_config),
         action_config_get_view_id(app->action_config));
-
-    app_menu_add_item(app->app_menu, primary_item_name, app->view_primary, FlipboardViewPrimaryId);
 
     app->widget_about = widget_alloc();
     widget_add_text_scroll_element(app->widget_about, 0, 0, 128, 64, about_text);
     app_menu_add_item(
         app->app_menu, "About", widget_get_view(app->widget_about), FlipboardViewAboutId);
+
+    app->widget_qr = widget_alloc();
+    widget_add_icon_element(app->widget_qr, 0, 0, qr_icon);
+    widget_add_text_scroll_element(
+        app->widget_qr, 70, 5, 128, 64, "Scan this\nQR code\nto access\nGitHub\ninstructions.");
+    app_menu_add_item(
+        app->app_menu, "Instructions QR Code", widget_get_view(app->widget_qr), FlipboardViewQRId);
 
     app_menu_show(app->app_menu);
     flipboard_leds_update(flipboard_model_get_leds(app->model));
@@ -81,6 +89,7 @@ void flipboard_free(Flipboard* app) {
         action_config_free(app->action_config);
     }
     widget_free(app->widget_about);
+    widget_free(app->widget_qr);
     app_menu_free(app->app_menu);
 
     view_dispatcher_free(app->view_dispatcher);

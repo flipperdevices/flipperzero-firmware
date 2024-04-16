@@ -1,0 +1,6 @@
+Filetype: QRCode
+Version: 1
+QRMode: A
+QRVersion: 11
+QRECC: L
+Message: https://github.com/jamisonderek/flipboard/blob/main/README.md#starting-out

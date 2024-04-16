@@ -65,6 +65,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - [JS: BadUSB Demo, Speaker API and VGM Module (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/js/)
 - Updated: [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
 - Updated: [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- Updated: [FlipBoard Blinky v2.2 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Keyboard v2.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Signal v3.2 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Simon v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 
 <a name="release">
 
@@ -421,10 +425,10 @@ $ ./fbt dolphin_ext
 - [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - [Flashlight v1.1 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
-- [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- [FlipBoard Simon v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Blinky v2.2 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Keyboard v2.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Signal v3.2 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Simon v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
 - [Flipper Doctor v0.1 (By julandealb)](https://github.com/julandealb/flipperdoc)
