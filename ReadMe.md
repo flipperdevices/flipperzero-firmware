@@ -77,6 +77,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed: [Connect Wires 2 v1.0 (By HappyAmos)](https://github.com/HappyAmos/Flipper_FAPS) (Changes Accepted to Main App)
 - Updated: [FAP Boilerplate v1.1 (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - Updated: [Cross Remote v2.5 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
+- Updated: [Restaurant Pager Trigger v1.6 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 
 <a name="release">
 
@@ -531,7 +532,7 @@ $ ./fbt dolphin_ext
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
 - [Resistance Calculator v1.2 (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
-- [Restaurant Pager Trigger v1.4 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- [Restaurant Pager Trigger v1.6 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
 - [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - [RFID Fuzzer v1.3 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245)
