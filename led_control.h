@@ -39,7 +39,7 @@ typedef struct {
 void set_led_control(LEDControl *, uint16_t);
 
 /** Release the LED control **/
-void release_led_control(void);
+void release_led_control(LEDControl *);
 
-/** Set the color of the LED and schedule its extinction */
+/** Start a LED flash of a certain color and schedule its extinction */
 void start_led_flash(LEDControl *, uint8_t);

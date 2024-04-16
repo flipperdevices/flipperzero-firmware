@@ -667,7 +667,7 @@ void lrf_serial_comm_app_free(LRFSerialCommApp *app) {
   furi_record_close(RECORD_EXPANSION);
 
   /* Release the LED control */
-  release_led_control();
+  release_led_control(&app->led_control);
 
   /* Free the LRF serial communication app's structure */
   free(app);

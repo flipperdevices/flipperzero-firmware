@@ -16,7 +16,7 @@
 /*** Routines ***/
 
 /** Timer callback to turn off the LED **/
-void led_off_timer_callback(void *ctx) {
+static void led_off_timer_callback(void *ctx) {
 
   LEDControl *ldc = (LEDControl *)ctx;
 
@@ -42,7 +42,14 @@ void set_led_control(LEDControl *ldc, uint16_t min_led_flash_duration) {
 
 
 /** Release the LED control **/
-void release_led_control(void) {
+void release_led_control(LEDControl *ldc) {
+
+  /* Stop and free the timer callback to turn off the LED */
+  furi_timer_stop(ldc->led_off_timer);
+  furi_timer_free(ldc->led_off_timer);
+
+  /* Make sure the LED is turned off */
+  notification_message(ldc->notifications, &sequence_reset_rgb);
 
   /* Disable notifications */
   furi_record_close(RECORD_NOTIFICATION);
@@ -50,7 +57,7 @@ void release_led_control(void) {
 
 
 
-/** Set the color of the LED and schedule its extinction */
+/** Start a LED flash of a certain color and schedule its extinction */
 void start_led_flash(LEDControl *ldc, uint8_t color) {
 
   /* Turn on the red led if required */
