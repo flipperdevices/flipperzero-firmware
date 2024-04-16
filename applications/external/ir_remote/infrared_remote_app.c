@@ -1,15 +1,14 @@
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_infrared.h>
 
 #include <infrared_worker.h>
 
 #include <gui/gui.h>
+#include <gui/elements.h>
 #include <input/input.h>
 #include <dialogs/dialogs.h>
 #include <ir_remote_icons.h>
-
-#include <infrared/infrared_app.h>
-#include <toolbox/saved_struct.h>
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
@@ -44,24 +43,39 @@ typedef struct {
     FuriString* left_hold_button;
     FuriString* right_hold_button;
     FuriString* ok_hold_button;
+    FuriString* temp_button;
     bool repeat_signal;
+    bool multiple_remote;
+    bool external;
     InfraredWorker* infrared_worker;
 } IRApp;
 
 // Screen is 128x64 px
 static void app_draw_callback(Canvas* canvas, void* ctx) {
     // Show config is incorrect when cannot read the remote file
-    // Showing button string in the screen, upper part is short press, lower part is long press
     IRApp* app = ctx;
-    if(app->status) {
+    if(app->status == 1) {
         canvas_clear(canvas);
         view_port_set_orientation(app->view_port, ViewPortOrientationHorizontal);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 62, 5, AlignCenter, AlignTop, "Config is incorrect.");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 62, 30, AlignCenter, AlignTop, "Please configure map.");
+        canvas_draw_str_aligned(
+            canvas, 62, 30, AlignCenter, AlignTop, "Please configure mapping file.");
         canvas_draw_str_aligned(canvas, 62, 60, AlignCenter, AlignBottom, "Press Back to Exit.");
+    } else if(app->status == 2) {
+        // Showing dialog for choosing internal or external
+        canvas_clear(canvas);
+        view_port_set_orientation(app->view_port, ViewPortOrientationHorizontal);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 62, 5, AlignCenter, AlignTop, "Internal or External?");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(
+            canvas, 62, 30, AlignCenter, AlignTop, "Left internal, Right external");
+        elements_button_left(canvas, "Internal");
+        elements_button_right(canvas, "External");
     } else {
+        // Showing button string in the screen, upper part is short press, lower part is long press
         canvas_clear(canvas);
         view_port_set_orientation(app->view_port, ViewPortOrientationVertical);
         canvas_draw_icon(canvas, 1, 5, &I_ButtonUp_7x4);
@@ -167,7 +181,6 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
 
 static void app_input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
-
     FuriMessageQueue* event_queue = ctx;
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
@@ -189,8 +202,12 @@ int32_t infrared_remote_app(void* p) {
     app->left_hold_button = furi_string_alloc();
     app->right_hold_button = furi_string_alloc();
     app->ok_hold_button = furi_string_alloc();
+    // Temporary string button for reading
+    app->temp_button = furi_string_alloc();
     // Default repeat signal when hold
     app->repeat_signal = true;
+    //
+    app->external = false;
     app->view_port = view_port_alloc();
     app->infrared_worker = infrared_worker_alloc();
 
@@ -237,6 +254,7 @@ int32_t infrared_remote_app(void* p) {
         furi_string_free(app->left_hold_button);
         furi_string_free(app->right_hold_button);
         furi_string_free(app->ok_hold_button);
+        furi_string_free(app->temp_button);
 
         view_port_enabled_set(app->view_port, false);
         gui_remove_view_port(gui, app->view_port);
@@ -248,20 +266,21 @@ int32_t infrared_remote_app(void* p) {
         return 255;
     }
 
-    InfraredRemote* remote = infrared_remote_alloc();
+    // Maximum 11 different remotes
+    InfraredRemote* remote[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     FuriString* remote_path = furi_string_alloc();
 
-    InfraredSignal* up_signal = infrared_signal_alloc();
-    InfraredSignal* down_signal = infrared_signal_alloc();
-    InfraredSignal* left_signal = infrared_signal_alloc();
-    InfraredSignal* right_signal = infrared_signal_alloc();
-    InfraredSignal* ok_signal = infrared_signal_alloc();
-    InfraredSignal* back_signal = infrared_signal_alloc();
-    InfraredSignal* up_hold_signal = infrared_signal_alloc();
-    InfraredSignal* down_hold_signal = infrared_signal_alloc();
-    InfraredSignal* left_hold_signal = infrared_signal_alloc();
-    InfraredSignal* right_hold_signal = infrared_signal_alloc();
-    InfraredSignal* ok_hold_signal = infrared_signal_alloc();
+    InfraredSignal* up_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InfraredSignal* down_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InfraredSignal* left_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InfraredSignal* right_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InfraredSignal* ok_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InfraredSignal* back_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InfraredSignal* up_hold_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InfraredSignal* down_hold_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InfraredSignal* left_hold_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InfraredSignal* right_hold_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InfraredSignal* ok_hold_signals[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     InfraredSignal* active_signal = NULL;
     bool is_transmitting = false;
@@ -278,201 +297,280 @@ int32_t infrared_remote_app(void* p) {
     bool right_hold_enabled = false;
     bool ok_hold_enabled = false;
 
+    int numOfRemote = 0;
+
     if(!flipper_format_file_open_existing(ff, furi_string_get_cstr(map_file))) {
         FURI_LOG_E(TAG, "Could not open MAP file %s", furi_string_get_cstr(map_file));
         app->status = 1;
     } else {
-        //Filename Assignment/Check Start
-
-        if(!flipper_format_read_string(ff, "REMOTE", remote_path)) {
-            FURI_LOG_E(TAG, "Could not read REMOTE string");
-            app->status = 1;
-        } else {
-            if(!infrared_remote_load(remote, remote_path)) {
-                FURI_LOG_E(TAG, "Could not load ir file: %s", furi_string_get_cstr(remote_path));
-                app->status = 1;
+        // Loop 11 different remotes
+        for(int i = 0; i < 11; ++i) {
+            if(!flipper_format_read_string(ff, "REMOTE", remote_path)) {
+                FURI_LOG_E(TAG, "Could not read REMOTE string");
+                // If no remote loaded, show config error
+                if(!i) app->status = 1;
+                break;
             } else {
-                FURI_LOG_I(TAG, "Loaded REMOTE file: %s", furi_string_get_cstr(remote_path));
+                remote[i] = infrared_remote_alloc();
+                if(!infrared_remote_load(remote[i], remote_path)) {
+                    FURI_LOG_E(
+                        TAG, "Could not load ir file: %s", furi_string_get_cstr(remote_path));
+                    if(!i) app->status = 1;
+                    break;
+                } else {
+                    FURI_LOG_I(TAG, "Loaded REMOTE file: %s", furi_string_get_cstr(remote_path));
+                    // If more than 1 remote, not repeat signal
+                    if(!app->multiple_remote && i) {
+                        app->multiple_remote = true;
+                        app->repeat_signal = false;
+                    }
+                }
+            }
+
+            numOfRemote++;
+            //assign variables to values within map file
+            //set missing filenames to N/A
+            //assign button signals
+            size_t index = 0;
+
+            if(!flipper_format_read_string(ff, "UP", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read UP string");
+                if(!up_enabled) furi_string_set(app->up_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    up_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!up_enabled) furi_string_set(app->up_button, app->temp_button);
+                    up_enabled = true;
+                }
+            }
+
+            // Add rewind to fix the string ordering issue
+            flipper_format_rewind(ff);
+            for(int j = 0; j < i + 1; ++j) {
+                // Seek to the corresponding remote number
+                flipper_format_read_string(ff, "REMOTE", remote_path);
+            }
+            if(!flipper_format_read_string(ff, "DOWN", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read DOWN string");
+                if(!down_enabled) furi_string_set(app->down_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    down_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!down_enabled) furi_string_set(app->down_button, app->temp_button);
+                    down_enabled = true;
+                }
+            }
+
+            flipper_format_rewind(ff);
+            for(int j = 0; j < i + 1; ++j) {
+                // Seek to the corresponding remote number
+                flipper_format_read_string(ff, "REMOTE", remote_path);
+            }
+            if(!flipper_format_read_string(ff, "LEFT", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read LEFT string");
+                if(!left_enabled) furi_string_set(app->left_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    left_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!left_enabled) furi_string_set(app->left_button, app->temp_button);
+                    left_enabled = true;
+                }
+            }
+
+            flipper_format_rewind(ff);
+            for(int j = 0; j < i + 1; ++j) {
+                // Seek to the corresponding remote number
+                flipper_format_read_string(ff, "REMOTE", remote_path);
+            }
+            if(!flipper_format_read_string(ff, "RIGHT", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read RIGHT string");
+                if(!right_enabled) furi_string_set(app->right_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    right_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!right_enabled) furi_string_set(app->right_button, app->temp_button);
+                    right_enabled = true;
+                }
+            }
+
+            flipper_format_rewind(ff);
+            for(int j = 0; j < i + 1; ++j) {
+                // Seek to the corresponding remote number
+                flipper_format_read_string(ff, "REMOTE", remote_path);
+            }
+            if(!flipper_format_read_string(ff, "OK", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read OK string");
+                if(!ok_enabled) furi_string_set(app->ok_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    ok_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!ok_enabled) furi_string_set(app->ok_button, app->temp_button);
+                    ok_enabled = true;
+                }
+            }
+
+            flipper_format_rewind(ff);
+            for(int j = 0; j < i + 1; ++j) {
+                // Seek to the corresponding remote number
+                flipper_format_read_string(ff, "REMOTE", remote_path);
+            }
+            if(!flipper_format_read_string(ff, "BACK", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read BACK string");
+                if(!back_enabled) furi_string_set(app->back_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    back_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!back_enabled) furi_string_set(app->back_button, app->temp_button);
+                    back_enabled = true;
+                }
+            }
+
+            flipper_format_rewind(ff);
+            for(int j = 0; j < i + 1; ++j) {
+                // Seek to the corresponding remote number
+                flipper_format_read_string(ff, "REMOTE", remote_path);
+            }
+            if(!flipper_format_read_string(ff, "UPHOLD", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read UPHOLD string");
+                if(!up_hold_enabled) furi_string_set(app->up_hold_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    up_hold_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!up_hold_enabled) furi_string_set(app->up_hold_button, app->temp_button);
+                    up_hold_enabled = true;
+                }
+            }
+
+            flipper_format_rewind(ff);
+            for(int j = 0; j < i + 1; ++j) {
+                // Seek to the corresponding remote number
+                flipper_format_read_string(ff, "REMOTE", remote_path);
+            }
+            if(!flipper_format_read_string(ff, "DOWNHOLD", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read DOWNHOLD string");
+                if(!down_hold_enabled) furi_string_set(app->down_hold_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    down_hold_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!down_hold_enabled)
+                        furi_string_set(app->down_hold_button, app->temp_button);
+                    down_hold_enabled = true;
+                }
+            }
+
+            flipper_format_rewind(ff);
+            for(int j = 0; j < i + 1; ++j) {
+                // Seek to the corresponding remote number
+                flipper_format_read_string(ff, "REMOTE", remote_path);
+            }
+            if(!flipper_format_read_string(ff, "LEFTHOLD", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read LEFTHOLD string");
+                if(!left_hold_enabled) furi_string_set(app->left_hold_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    left_hold_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!left_hold_enabled)
+                        furi_string_set(app->left_hold_button, app->temp_button);
+                    left_hold_enabled = true;
+                }
+            }
+
+            flipper_format_rewind(ff);
+            for(int j = 0; j < i + 1; ++j) {
+                // Seek to the corresponding remote number
+                flipper_format_read_string(ff, "REMOTE", remote_path);
+            }
+            if(!flipper_format_read_string(ff, "RIGHTHOLD", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read RIGHTHOLD string");
+                if(!right_hold_enabled) furi_string_set(app->right_hold_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    right_hold_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!right_hold_enabled)
+                        furi_string_set(app->right_hold_button, app->temp_button);
+                    right_hold_enabled = true;
+                }
+            }
+
+            flipper_format_rewind(ff);
+            for(int j = 0; j < i + 1; ++j) {
+                // Seek to the corresponding remote number
+                flipper_format_read_string(ff, "REMOTE", remote_path);
+            }
+            if(!flipper_format_read_string(ff, "OKHOLD", app->temp_button)) {
+                FURI_LOG_W(TAG, "Could not read OKHOLD string");
+                if(!ok_hold_enabled) furi_string_set(app->ok_hold_button, "N/A");
+            } else {
+                if(!infrared_remote_find_button_by_name(
+                       remote[i], furi_string_get_cstr(app->temp_button), &index)) {
+                    FURI_LOG_W(TAG, "Error");
+                } else {
+                    ok_hold_signals[i] = infrared_remote_button_get_signal(
+                        infrared_remote_get_button(remote[i], index));
+                    if(!ok_hold_enabled) furi_string_set(app->ok_hold_button, app->temp_button);
+                    ok_hold_enabled = true;
+                }
             }
         }
 
-        //assign variables to values within map file
-        //set missing filenames to N/A
-        //assign button signals
-        size_t index = 0;
-        // Add rewind to fix the string ordering issue
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "UP", app->up_button)) {
-            FURI_LOG_W(TAG, "Could not read UP string");
-            furi_string_set(app->up_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->up_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                up_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                up_enabled = true;
+        if(!app->status) {
+            flipper_format_rewind(ff);
+            // Not repeat if mulitiple remotes
+            if(!app->multiple_remote) {
+                // Find REPEATSIGNAL in the txt file, else default set to true
+                if(!flipper_format_read_bool(ff, "REPEATSIGNAL", &app->repeat_signal, 1)) {
+                    FURI_LOG_W(TAG, "Could not read REPEATSIGNAL string");
+                }
+            }
+
+            // Show dialog when EXTERNAL is not explicitly written in the config
+            if(!flipper_format_read_bool(ff, "EXTERNAL", &app->external, 1)) {
+                FURI_LOG_W(TAG, "Could not read EXTERNAL string");
+                app->status = 2;
             }
         }
 
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "DOWN", app->down_button)) {
-            FURI_LOG_W(TAG, "Could not read DOWN string");
-            furi_string_set(app->down_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->down_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                down_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                down_enabled = true;
-            }
-        }
-
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "LEFT", app->left_button)) {
-            FURI_LOG_W(TAG, "Could not read LEFT string");
-            furi_string_set(app->left_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->left_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                left_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                left_enabled = true;
-            }
-        }
-
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "RIGHT", app->right_button)) {
-            FURI_LOG_W(TAG, "Could not read RIGHT string");
-            furi_string_set(app->right_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->right_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                right_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                right_enabled = true;
-            }
-        }
-
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "OK", app->ok_button)) {
-            FURI_LOG_W(TAG, "Could not read OK string");
-            furi_string_set(app->ok_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->ok_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                ok_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                ok_enabled = true;
-            }
-        }
-
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "BACK", app->back_button)) {
-            FURI_LOG_W(TAG, "Could not read BACK string");
-            furi_string_set(app->back_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->back_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                back_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                back_enabled = true;
-            }
-        }
-
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "UPHOLD", app->up_hold_button)) {
-            FURI_LOG_W(TAG, "Could not read UPHOLD string");
-            furi_string_set(app->up_hold_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->up_hold_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                up_hold_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                up_hold_enabled = true;
-            }
-        }
-
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "DOWNHOLD", app->down_hold_button)) {
-            FURI_LOG_W(TAG, "Could not read DOWNHOLD string");
-            furi_string_set(app->down_hold_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->down_hold_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                down_hold_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                down_hold_enabled = true;
-            }
-        }
-
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "LEFTHOLD", app->left_hold_button)) {
-            FURI_LOG_W(TAG, "Could not read LEFTHOLD string");
-            furi_string_set(app->left_hold_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->left_hold_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                left_hold_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                left_hold_enabled = true;
-            }
-        }
-
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "RIGHTHOLD", app->right_hold_button)) {
-            FURI_LOG_W(TAG, "Could not read RIGHTHOLD string");
-            furi_string_set(app->right_hold_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->right_hold_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                right_hold_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                right_hold_enabled = true;
-            }
-        }
-
-        flipper_format_rewind(ff);
-        if(!flipper_format_read_string(ff, "OKHOLD", app->ok_hold_button)) {
-            FURI_LOG_W(TAG, "Could not read OKHOLD string");
-            furi_string_set(app->ok_hold_button, "N/A");
-        } else {
-            if(!infrared_remote_find_button_by_name(
-                   remote, furi_string_get_cstr(app->ok_hold_button), &index)) {
-                FURI_LOG_W(TAG, "Error");
-            } else {
-                ok_hold_signal =
-                    infrared_remote_button_get_signal(infrared_remote_get_button(remote, index));
-                ok_hold_enabled = true;
-            }
-        }
-
-        flipper_format_rewind(ff);
-        // Find REPEATSIGNAL in the txt file, else default set to true
-        if(!flipper_format_read_bool(ff, "REPEATSIGNAL", &app->repeat_signal, 1)) {
-            FURI_LOG_W(TAG, "Could not read REPEATSIGNAL string");
-        }
-
-        //Debug
+        // Debug
         if(app->repeat_signal) {
             FURI_LOG_W(TAG, "repeat");
         } else {
@@ -485,35 +583,12 @@ int32_t infrared_remote_app(void* p) {
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
 
-    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
-    InfraredSettings settings = {0};
-    saved_struct_load(
-        INFRARED_SETTINGS_PATH,
-        &settings,
-        sizeof(InfraredSettings),
-        INFRARED_SETTINGS_MAGIC,
-        INFRARED_SETTINGS_VERSION);
-    if(settings.tx_pin < FuriHalInfraredTxPinMax) {
-        furi_hal_infrared_set_tx_output(settings.tx_pin);
-        if(settings.otg_enabled != otg_was_enabled) {
-            if(settings.otg_enabled) {
-                furi_hal_power_enable_otg();
-            } else {
-                furi_hal_power_disable_otg();
-            }
-        }
-    } else {
-        FuriHalInfraredTxPin tx_pin_detected = furi_hal_infrared_detect_tx_output();
-        furi_hal_infrared_set_tx_output(tx_pin_detected);
-        if(tx_pin_detected != FuriHalInfraredTxPinInternal) {
-            furi_hal_power_enable_otg();
-        }
-    }
-
     bool running = true;
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
-    if(app->status) {
+    if(app->status == 1) {
+        // Fix orientation issue
+        view_port_set_orientation(app->view_port, ViewPortOrientationHorizontal);
         view_port_update(app->view_port);
         while(running) {
             if(furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
@@ -529,6 +604,47 @@ int32_t infrared_remote_app(void* p) {
             }
         }
     } else {
+        // Show dialog to choose internal or external
+        // Press left for internal and right for external
+        if(app->status == 2) {
+            // Fix orientation issue
+            view_port_set_orientation(app->view_port, ViewPortOrientationHorizontal);
+            view_port_update(app->view_port);
+            while(running) {
+                if(furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
+                    if(event.type == InputTypeShort) {
+                        switch(event.key) {
+                        case InputKeyLeft:
+                            app->external = 0;
+                            running = false;
+                            break;
+                        case InputKeyRight:
+                            app->external = 1;
+                            running = false;
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                }
+            }
+            running = true;
+            app->status = 0;
+        }
+        if(app->external) {
+            // Enable external and turn on 5V
+            // furi_hal_infrared_set_debug_out(1);
+            for(int i = 0; i < 5 && !furi_hal_power_is_otg_enabled(); i++) {
+                furi_hal_power_enable_otg();
+                furi_delay_ms(10);
+            }
+        } else {
+            // Enable internal and turn off 5v
+            // furi_hal_infrared_set_debug_out(0);
+            if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
+        }
+        // Fix orientation issue
+        view_port_set_orientation(app->view_port, ViewPortOrientationVertical);
         view_port_update(app->view_port);
         if(app->repeat_signal) {
             // Repeat signal when hold
@@ -539,37 +655,37 @@ int32_t infrared_remote_app(void* p) {
                         switch(event.key) {
                         case InputKeyUp:
                             if(up_enabled) {
-                                active_signal = up_signal;
+                                active_signal = up_signals[0];
                                 FURI_LOG_I(TAG, "up");
                             }
                             break;
                         case InputKeyDown:
                             if(down_enabled) {
-                                active_signal = down_signal;
+                                active_signal = down_signals[0];
                                 FURI_LOG_I(TAG, "down");
                             }
                             break;
                         case InputKeyRight:
                             if(right_enabled) {
-                                active_signal = right_signal;
+                                active_signal = right_signals[0];
                                 FURI_LOG_I(TAG, "right");
                             }
                             break;
                         case InputKeyLeft:
                             if(left_enabled) {
-                                active_signal = left_signal;
+                                active_signal = left_signals[0];
                                 FURI_LOG_I(TAG, "left");
                             }
                             break;
                         case InputKeyOk:
                             if(ok_enabled) {
-                                active_signal = ok_signal;
+                                active_signal = ok_signals[0];
                                 FURI_LOG_I(TAG, "ok");
                             }
                             break;
                         case InputKeyBack:
                             if(back_enabled) {
-                                active_signal = back_signal;
+                                active_signal = back_signals[0];
                                 FURI_LOG_I(TAG, "back");
                             }
                             break;
@@ -582,31 +698,31 @@ int32_t infrared_remote_app(void* p) {
                         switch(event.key) {
                         case InputKeyUp:
                             if(up_hold_enabled) {
-                                active_signal = up_hold_signal;
+                                active_signal = up_hold_signals[0];
                                 FURI_LOG_I(TAG, "up!");
                             }
                             break;
                         case InputKeyDown:
                             if(down_hold_enabled) {
-                                active_signal = down_hold_signal;
+                                active_signal = down_hold_signals[0];
                                 FURI_LOG_I(TAG, "down!");
                             }
                             break;
                         case InputKeyRight:
                             if(right_hold_enabled) {
-                                active_signal = right_hold_signal;
+                                active_signal = right_hold_signals[0];
                                 FURI_LOG_I(TAG, "right!");
                             }
                             break;
                         case InputKeyLeft:
                             if(left_hold_enabled) {
-                                active_signal = left_hold_signal;
+                                active_signal = left_hold_signals[0];
                                 FURI_LOG_I(TAG, "left!");
                             }
                             break;
                         case InputKeyOk:
                             if(ok_hold_enabled) {
-                                active_signal = ok_hold_signal;
+                                active_signal = ok_hold_signals[0];
                                 FURI_LOG_I(TAG, "ok!");
                             }
                             break;
@@ -653,6 +769,7 @@ int32_t infrared_remote_app(void* p) {
             }
         } else {
             // Not repeat signal when hold
+            // sending all remotes signal in the signal array
             while(running) {
                 if(furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
                     // short press signal
@@ -660,44 +777,69 @@ int32_t infrared_remote_app(void* p) {
                         switch(event.key) {
                         case InputKeyUp:
                             if(up_enabled) {
-                                infrared_signal_transmit(up_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "up");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "up");
+                                    if(up_signals[i] != NULL) {
+                                        infrared_signal_transmit(up_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         case InputKeyDown:
                             if(down_enabled) {
-                                infrared_signal_transmit(down_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "down");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "down");
+                                    if(down_signals[i] != NULL) {
+                                        infrared_signal_transmit(down_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         case InputKeyRight:
                             if(right_enabled) {
-                                infrared_signal_transmit(right_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "right");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "right");
+                                    if(right_signals[i] != NULL) {
+                                        infrared_signal_transmit(right_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         case InputKeyLeft:
                             if(left_enabled) {
-                                infrared_signal_transmit(left_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "left");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "left");
+                                    if(left_signals[i] != NULL) {
+                                        infrared_signal_transmit(left_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         case InputKeyOk:
                             if(ok_enabled) {
-                                infrared_signal_transmit(ok_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "ok");
+                                FURI_LOG_I(TAG, "clicked ok");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "ok");
+                                    if(ok_signals[i] != NULL) {
+                                        infrared_signal_transmit(ok_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         case InputKeyBack:
                             if(back_enabled) {
-                                infrared_signal_transmit(back_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "back");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "back");
+                                    if(back_signals[i] != NULL) {
+                                        infrared_signal_transmit(back_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         default:
@@ -709,37 +851,57 @@ int32_t infrared_remote_app(void* p) {
                         switch(event.key) {
                         case InputKeyUp:
                             if(up_hold_enabled) {
-                                infrared_signal_transmit(up_hold_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "up!");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "up!");
+                                    if(up_hold_signals[i] != NULL) {
+                                        infrared_signal_transmit(up_hold_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         case InputKeyDown:
                             if(down_hold_enabled) {
-                                infrared_signal_transmit(down_hold_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "down!");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "down!");
+                                    if(down_hold_signals[i] != NULL) {
+                                        infrared_signal_transmit(down_hold_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         case InputKeyRight:
                             if(right_hold_enabled) {
-                                infrared_signal_transmit(right_hold_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "right!");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "right!");
+                                    if(right_hold_signals[i] != NULL) {
+                                        infrared_signal_transmit(right_hold_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         case InputKeyLeft:
                             if(left_hold_enabled) {
-                                infrared_signal_transmit(left_hold_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "left!");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "left!");
+                                    if(left_hold_signals[i] != NULL) {
+                                        infrared_signal_transmit(left_hold_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         case InputKeyOk:
                             if(ok_hold_enabled) {
-                                infrared_signal_transmit(ok_hold_signal);
                                 notification_message(notification, &sequence_blink_start_magenta);
-                                FURI_LOG_I(TAG, "ok!");
+                                for(int i = 0; i < numOfRemote; ++i) {
+                                    FURI_LOG_I(TAG, "ok!");
+                                    if(ok_hold_signals[i] != NULL) {
+                                        infrared_signal_transmit(ok_hold_signals[i]);
+                                    }
+                                }
                             }
                             break;
                         default:
@@ -766,6 +928,7 @@ int32_t infrared_remote_app(void* p) {
     furi_string_free(app->left_hold_button);
     furi_string_free(app->right_hold_button);
     furi_string_free(app->ok_hold_button);
+    furi_string_free(app->temp_button);
 
     if(is_transmitting) {
         infrared_worker_tx_stop(app->infrared_worker);
@@ -773,10 +936,18 @@ int32_t infrared_remote_app(void* p) {
     }
     infrared_worker_free(app->infrared_worker);
 
-    infrared_remote_free(remote);
+    for(int i = 0; i < 11; ++i) {
+        if(remote[i] != NULL) infrared_remote_free(remote[i]);
+    }
     view_port_enabled_set(app->view_port, false);
     gui_remove_view_port(gui, app->view_port);
     view_port_free(app->view_port);
+
+    if(app->external) {
+        // turn off 5V when exit to save battery
+        if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
+    }
+
     free(app);
     furi_message_queue_free(event_queue);
 

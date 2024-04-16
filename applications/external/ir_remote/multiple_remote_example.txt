@@ -1,0 +1,16 @@
+REMOTE: /ext/infrared/My_fan.ir
+OKHOLD: ON/OFF
+UP: SPEED 1
+DOWN: SPEED 2
+LEFT: SPEED 3
+#
+REMOTE: /ext/infrared/Panasonic_CWA75C4179.ir
+OKHOLD: ON
+OK: OFF
+#
+REMOTE: /ext/infrared/Deka_G3.ir
+OK: OFF
+UP: SPEED 1
+DOWN: SPEED 2
+LEFT: SPEED 3
+EXTERNAL: true
