@@ -6,8 +6,6 @@
 ***/
 
 /*** Includes ***/
-#include <notification/notification_messages.h>
-
 #include "noptel_lrf_sampler.h"
 #include "noptel_lrf_sampler_icons.h"	/* Generated from images in assets */
 
@@ -234,8 +232,7 @@ void sample_view_enter_callback(void *ctx) {
   set_lrf_sample_handler(app->lrf_serial_comm_app, lrf_sample_handler, app);
 
   /* Set the backlight on all the time */
-  notification_message(app->notifications,
-			&sequence_display_backlight_enforce_on);
+  set_backlight(&app->backlight_control, BL_ON);
 
   with_view_model(app->sample_view, SamplerModel* sampler_model,
 	{
@@ -289,9 +286,8 @@ void sample_view_exit_callback(void *ctx) {
   send_lrf_command(app->lrf_serial_comm_app, cmm_break);
   send_lrf_command(app->lrf_serial_comm_app, cmm_break);
 
-  /* Set the backlight control back to auto */
-  notification_message(app->notifications,
-			&sequence_display_backlight_enforce_auto);
+  /* Set the backlight on all the time */
+  set_backlight(&app->backlight_control, BL_AUTO);
 
   /* Unset the callback to receive decoded LRF samples */
   set_lrf_sample_handler(app->lrf_serial_comm_app, NULL, app);

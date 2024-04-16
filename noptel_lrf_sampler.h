@@ -6,11 +6,11 @@
 ***/
 
 /*** Includes ***/
-#include <notification/notification.h>
 #include <gui/modules/submenu.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/variable_item_list.h>
 
+#include "backlight_control.h"
 #include "speaker_control.h"
 #include "lrf_serial_comm.h"
 
@@ -152,9 +152,6 @@ typedef struct {
 /** App structure **/
 typedef struct {
 
-  /* App notifications */
-  NotificationApp *notifications;
-
   /* View dispatcher */
   ViewDispatcher *view_dispatcher;
 
@@ -178,6 +175,9 @@ typedef struct {
 
   /* Timer to update the sample view */
   FuriTimer *sample_view_timer;
+
+  /* Backlight control */
+  BacklightControl backlight_control;
 
   /* Speaker control */
   SpeakerControl speaker_control;

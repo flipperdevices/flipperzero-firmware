@@ -263,16 +263,14 @@ static App *app_init() {
 
 
 
+  /* Setup the backlight control */
+  set_backlight_control(&app->backlight_control);
+
   /* Setup the speaker control */
   set_speaker_control(&app->speaker_control, min_beep_duration);
 
   /* Initialize the LRF serial communication app */
   app->lrf_serial_comm_app = lrf_serial_comm_app_init(min_led_flash_duration);
-
-
-
-  /* Enable notifications */
-  app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
   return app;
 }
@@ -284,14 +282,14 @@ static void app_free(App *app) {
 
   FURI_LOG_I(TAG, "App free");
 
-  /* Release the speaker control */
-  release_speaker_control(&app->speaker_control);
-
   /* Stop and free up the LRF serial communication app */
   lrf_serial_comm_app_free(app->lrf_serial_comm_app);
 
-  /* Disable notifications */
-  furi_record_close(RECORD_NOTIFICATION);
+  /* Release the speaker control */
+  release_speaker_control(&app->speaker_control);
+
+  /* Release the backlight control */
+  release_backlight_control();
 
   /* Try to save the configuration */
   save_configuration(app);
