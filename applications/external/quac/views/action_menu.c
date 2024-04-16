@@ -24,9 +24,11 @@ static const Icon* ActionMenuIcons[] = {
     [ActionMenuItemTypeSubGHz] = &I_SubGHz_10px,
     [ActionMenuItemTypeRFID] = &I_RFID_10px,
     [ActionMenuItemTypeIR] = &I_IR_10px,
+    [ActionMenuItemTypeNFC] = &I_NFC_10px,
     [ActionMenuItemTypePlaylist] = &I_Playlist_10px,
     [ActionMenuItemTypeGroup] = &I_Directory_10px,
     [ActionMenuItemTypeSettings] = &I_Settings_10px,
+    [ActionMenuItemTypeUnknown] = &I_Unknown_10px,
 };
 
 struct ActionMenuItem {
@@ -308,7 +310,8 @@ static bool action_menu_view_input_callback(InputEvent* event, void* context) {
         case InputKeyRight:
             break;
         default:
-            FURI_LOG_E("AM", "Unknown key!");
+            // FURI_LOG_E("AM", "Unknown key!");
+            break;
         }
     } else if(event->type == InputTypeLong) {
         if(event->key == InputKeyRight) {

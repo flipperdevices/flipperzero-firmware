@@ -3,17 +3,17 @@
 #include <flipper_format/flipper_format.h>
 
 // Quac Settings File Info
-// "/ext/apps_data/quac/.quac.conf"
-#define QUAC_SETTINGS_FILENAME QUAC_DATA_PATH "/.quac.conf"
 #define QUAC_SETTINGS_FILE_TYPE "Quac Settings File"
 #define QUAC_SETTINGS_FILE_VERSION 1
 
 void quac_set_default_settings(App* app) {
-    app->settings.rfid_duration = 2500;
     app->settings.layout = QUAC_APP_LANDSCAPE;
     app->settings.show_icons = true;
     app->settings.show_headers = true;
+    app->settings.rfid_duration = 2500;
+    app->settings.nfc_duration = 1000;
     app->settings.subghz_use_ext_antenna = false;
+    app->settings.show_hidden = false;
 }
 
 void quac_load_settings(App* app) {
@@ -22,11 +22,13 @@ void quac_load_settings(App* app) {
     temp_str = furi_string_alloc();
     uint32_t temp_data32 = 0;
 
-    FURI_LOG_I(TAG, "SETTINGS: Reading: %s", QUAC_SETTINGS_FILENAME);
-    bool successful = false;
+    // Initialize settings to the defaults
+    quac_set_default_settings(app);
+
+    FURI_LOG_I(TAG, "SETTINGS: Reading: %s", QUAC_SETTINGS_PATH);
     do {
-        if(!flipper_format_file_open_existing(fff_settings, QUAC_SETTINGS_FILENAME)) {
-            FURI_LOG_I(TAG, "SETTINGS: File not found, loading defaults");
+        if(!flipper_format_file_open_existing(fff_settings, QUAC_SETTINGS_PATH)) {
+            FURI_LOG_I(TAG, "SETTINGS: File not found, using defaults");
             break;
         }
 
@@ -44,48 +46,53 @@ void quac_load_settings(App* app) {
 
         // Now read actual values we care about
         if(!flipper_format_read_string(fff_settings, "Layout", temp_str)) {
-            FURI_LOG_E(TAG, "SETTINGS: Missing Layout");
-            break;
-        }
-        if(!strcmp(furi_string_get_cstr(temp_str), "Landscape")) {
-            app->settings.layout = QUAC_APP_LANDSCAPE;
-        } else if(!strcmp(furi_string_get_cstr(temp_str), "Portrait")) {
-            app->settings.layout = QUAC_APP_PORTRAIT;
+            FURI_LOG_W(TAG, "SETTINGS: Missing Layout");
         } else {
-            FURI_LOG_E(TAG, "SETTINGS: Invalid Layout");
-            break;
+            if(!strcmp(furi_string_get_cstr(temp_str), "Landscape")) {
+                app->settings.layout = QUAC_APP_LANDSCAPE;
+            } else if(!strcmp(furi_string_get_cstr(temp_str), "Portrait")) {
+                app->settings.layout = QUAC_APP_PORTRAIT;
+            } else {
+                FURI_LOG_E(TAG, "SETTINGS: Invalid Layout");
+            }
         }
 
         if(!flipper_format_read_uint32(fff_settings, "Show Icons", &temp_data32, 1)) {
-            FURI_LOG_E(TAG, "SETTINGS: Missing 'Show Icons'");
-            break;
+            FURI_LOG_W(TAG, "SETTINGS: Missing 'Show Icons'");
+        } else {
+            app->settings.show_icons = (temp_data32 == 0) ? false : true;
         }
-        app->settings.show_icons = (temp_data32 == 0) ? false : true;
 
         if(!flipper_format_read_uint32(fff_settings, "Show Headers", &temp_data32, 1)) {
-            FURI_LOG_E(TAG, "SETTINGS: Missing 'Show Headers'");
-            break;
+            FURI_LOG_W(TAG, "SETTINGS: Missing 'Show Headers'");
+        } else {
+            app->settings.show_headers = (temp_data32 == 1) ? true : false;
         }
-        app->settings.show_headers = (temp_data32 == 0) ? false : true;
 
         if(!flipper_format_read_uint32(fff_settings, "RFID Duration", &temp_data32, 1)) {
-            FURI_LOG_E(TAG, "SETTINGS: Missing 'RFID Duration'");
-            break;
+            FURI_LOG_W(TAG, "SETTINGS: Missing 'RFID Duration'");
+        } else {
+            app->settings.rfid_duration = temp_data32;
         }
-        app->settings.rfid_duration = temp_data32;
+
+        if(!flipper_format_read_uint32(fff_settings, "NFC Duration", &temp_data32, 1)) {
+            FURI_LOG_W(TAG, "SETTINGS: Missing 'NFC Duration'");
+        } else {
+            app->settings.nfc_duration = temp_data32;
+        }
 
         if(!flipper_format_read_uint32(fff_settings, "SubGHz Ext Antenna", &temp_data32, 1)) {
-            FURI_LOG_E(TAG, "SETTINGS: Missing 'SubGHz Ext Antenna'");
-            break;
+            FURI_LOG_W(TAG, "SETTINGS: Missing 'SubGHz Ext Antenna'");
+        } else {
+            app->settings.subghz_use_ext_antenna = (temp_data32 == 1) ? true : false;
         }
-        app->settings.subghz_use_ext_antenna = (temp_data32 == 1) ? true : false;
 
-        successful = true;
+        if(!flipper_format_read_uint32(fff_settings, "Show Hidden", &temp_data32, 1)) {
+            FURI_LOG_W(TAG, "SETTINGS: Missing 'Show Hidden'");
+        } else {
+            app->settings.show_hidden = (temp_data32 == 1) ? true : false;
+        }
     } while(false);
-
-    if(!successful) {
-        quac_set_default_settings(app);
-    }
 
     furi_string_free(temp_str);
     flipper_format_free(fff_settings);
@@ -98,7 +105,7 @@ void quac_save_settings(App* app) {
     FURI_LOG_I(TAG, "SETTINGS: Saving");
     bool successful = false;
     do {
-        if(!flipper_format_file_open_always(fff_settings, QUAC_SETTINGS_FILENAME)) {
+        if(!flipper_format_file_open_always(fff_settings, QUAC_SETTINGS_PATH)) {
             FURI_LOG_E(TAG, "SETTINGS: Unable to open file for save!!");
             break;
         }
@@ -132,11 +139,22 @@ void quac_save_settings(App* app) {
             FURI_LOG_E(TAG, "SETTINGS: Failed to write 'RFID Duration'");
             break;
         }
+        if(!flipper_format_write_uint32(
+               fff_settings, "NFC Duration", &app->settings.nfc_duration, 1)) {
+            FURI_LOG_E(TAG, "SETTINGS: Failed to write 'NFC Duration'");
+            break;
+        }
         temp_data32 = app->settings.subghz_use_ext_antenna ? 1 : 0;
         if(!flipper_format_write_uint32(fff_settings, "SubGHz Ext Antenna", &temp_data32, 1)) {
             FURI_LOG_E(TAG, "SETTINGS: Failed to write 'SubGHz Ext Antenna'");
             break;
         }
+        temp_data32 = app->settings.show_hidden ? 1 : 0;
+        if(!flipper_format_write_uint32(fff_settings, "Show Hidden", &temp_data32, 1)) {
+            FURI_LOG_E(TAG, "SETTINGS: Failed to write 'Show Hidden'");
+            break;
+        }
+
         successful = true;
     } while(false);
 

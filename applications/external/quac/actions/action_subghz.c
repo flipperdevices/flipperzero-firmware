@@ -36,7 +36,7 @@ static FuriHalSubGhzPreset action_subghz_get_preset_name(const char* preset_name
 static const SubGhzDevice* action_subghz_get_device(uint32_t* device_ind) {
     const SubGhzDevice* device = NULL;
     switch(*device_ind) {
-    case 1:
+    case 1: {
         // Power on the external antenna
         uint8_t attempts = 5;
         while(--attempts > 0) {
@@ -52,6 +52,7 @@ static const SubGhzDevice* action_subghz_get_device(uint32_t* device_ind) {
         }
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
         break;
+    }
     default:
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
         break;
@@ -74,7 +75,7 @@ static const SubGhzDevice* action_subghz_get_device(uint32_t* device_ind) {
 void action_subghz_tx(void* context, const FuriString* action_path, FuriString* error) {
     App* app = context;
     const char* file_name = furi_string_get_cstr(action_path);
-    uint32_t repeat = 1; //
+    uint32_t repeat = 1; // This is set to 10 in the cli - why?
     uint32_t device_ind = app->settings.subghz_use_ext_antenna ? 1 : 0;
 
     FlipperFormat* fff_data_file = flipper_format_file_alloc(app->storage);
@@ -113,15 +114,6 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
             ACTION_SET_ERROR("SUBGHZ: Device not found");
             break;
         }
-
-        // // SUBGHZ_DEVICE_CC1101_INT_NAME = "cc1101_int"
-        // device = subghz_devices_get_by_name("cc1101_int");
-        // if(!subghz_devices_is_connect(device)) {
-        //     // power off
-        //     if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
-        //     device = subghz_devices_get_by_name("cc1101_int");
-        //     // device_ind = 0;
-        // }
 
         if(!flipper_format_file_open_existing(fff_data_file, file_name)) {
             FURI_LOG_E(TAG, "Error opening %s", file_name);
@@ -244,6 +236,7 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
                 status = subghz_transmitter_deserialize(transmitter, fff_data_file);
                 if(status != SubGhzProtocolStatusOk) {
                     FURI_LOG_E(TAG, "Error deserialize protocol");
+                    ACTION_SET_ERROR("SUBGHZ: Protocol error");
                     is_init_protocol = false;
                 }
             }

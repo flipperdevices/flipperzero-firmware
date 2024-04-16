@@ -21,9 +21,11 @@ typedef enum {
     ActionMenuItemTypeSubGHz,
     ActionMenuItemTypeRFID,
     ActionMenuItemTypeIR,
+    ActionMenuItemTypeNFC,
     ActionMenuItemTypePlaylist,
     ActionMenuItemTypeGroup,
     ActionMenuItemTypeSettings,
+    ActionMenuItemTypeUnknown,
     ActionMenuItemType_count
 } ActionMenuItemType;
 

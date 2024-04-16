@@ -18,9 +18,11 @@ static const ActionMenuItemType ItemToMenuItem[] = {
     [Item_SubGhz] = ActionMenuItemTypeSubGHz,
     [Item_RFID] = ActionMenuItemTypeRFID,
     [Item_IR] = ActionMenuItemTypeIR,
+    [Item_NFC] = ActionMenuItemTypeNFC,
     [Item_Playlist] = ActionMenuItemTypePlaylist,
     [Item_Group] = ActionMenuItemTypeGroup,
     [Item_Settings] = ActionMenuItemTypeSettings,
+    [Item_Unknown] = ActionMenuItemTypeUnknown,
 };
 
 void scene_items_item_callback(void* context, int32_t index, InputType type) {
@@ -126,10 +128,8 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
 
                     if(furi_string_size(error)) {
                         FURI_LOG_E(TAG, furi_string_get_cstr(error));
-                        // Change LED to Red and Vibrate!
+                        // Fire up the LED and vibrate!
                         notification_message(app->notifications, &sequence_error);
-
-                        // Display DialogEx popup or something?
                     }
 
                     furi_string_free(error);

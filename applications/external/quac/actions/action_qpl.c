@@ -30,8 +30,9 @@
 void action_qpl_tx(void* context, const FuriString* action_path, FuriString* error) {
     App* app = context;
 
-    // Save the current RFID Duration, in case it is changed during playback
+    // Save the current RFID and NFC Durations, in case the are changed during playback
     uint32_t orig_rfid_duration = app->settings.rfid_duration;
+    uint32_t orig_nfc_duration = app->settings.nfc_duration;
 
     FuriString* buffer;
     buffer = furi_string_alloc();
@@ -83,13 +84,6 @@ void action_qpl_tx(void* context, const FuriString* action_path, FuriString* err
                     break;
                 }
 
-                // FURI_LOG_I(TAG, "Still checking for commands...");
-                // FURI_LOG_I(
-                //     TAG,
-                //     "args_temp: '%s', buffer: '%s'",
-                //     furi_string_get_cstr(args_tmp),
-                //     furi_string_get_cstr(buffer));
-
                 // First token wasn't "pause", so maybe args_tmp is a .rfid filename followed
                 // by a transmit duration in ms in buffer
                 // Note: Not using path_extract_extension since it expects to find slashes in the
@@ -101,12 +95,19 @@ void action_qpl_tx(void* context, const FuriString* action_path, FuriString* err
                 }
 
                 // FURI_LOG_I(TAG, " - Found extension of %s", ext);
-                uint32_t rfid_duration = 0;
+
                 if(!strcmp(ext, ".rfid")) {
+                    uint32_t rfid_duration = 0;
                     // FURI_LOG_I(TAG, "RFID file with duration");
                     if(sscanf(furi_string_get_cstr(buffer), "%lu", &rfid_duration) == 1) {
                         FURI_LOG_I(TAG, "RFID duration = %lu", rfid_duration);
                         app->settings.rfid_duration = rfid_duration;
+                    }
+                } else if(!strcmp(ext, ".nfc")) {
+                    uint32_t nfc_duration = 0;
+                    if(sscanf(furi_string_get_cstr(buffer), "%lu", &nfc_duration) == 1) {
+                        FURI_LOG_I(TAG, "NFC duration = %lu", nfc_duration);
+                        app->settings.nfc_duration = nfc_duration;
                     }
                 }
 
@@ -140,6 +141,10 @@ void action_qpl_tx(void* context, const FuriString* action_path, FuriString* err
                 app->settings.rfid_duration = orig_rfid_duration;
             } else if(!strcmp(ext, ".ir")) {
                 action_ir_tx(context, buffer, error);
+            } else if(!strcmp(ext, ".nfc")) {
+                action_nfc_tx(context, buffer, error);
+                // Reset our default duration back - in case it was changed during playback
+                app->settings.nfc_duration = orig_nfc_duration;
             } else if(!strcmp(ext, ".qpl")) {
                 ACTION_SET_ERROR("Playlist: Can't call playlist from playlist");
             } else {

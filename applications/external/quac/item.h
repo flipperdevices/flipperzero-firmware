@@ -15,9 +15,11 @@ typedef enum {
     Item_SubGhz,
     Item_RFID,
     Item_IR,
+    Item_NFC,
     Item_Playlist,
     Item_Group,
     Item_Settings,
+    Item_Unknown,
     Item_count
 } ItemType;
 

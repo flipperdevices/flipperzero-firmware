@@ -7,25 +7,25 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/popup.h>
 #include <dialogs/dialogs.h>
 
 #include <storage/storage.h>
 #include <notification/notification_messages.h>
 
 #include "views/action_menu.h"
-
 #include "item.h"
 
-// #pragma GCC push_options
-// #pragma GCC optimize("O0")
-
 #define QUAC_NAME "Quac!"
+#define QUAC_VERSION "v0.6"
+#define QUAC_ABOUT                                    \
+    "Quick Action remote control\n" QUAC_VERSION "\n" \
+    "github.com/rdefeo/quac"
 #define TAG "Quac" // log statement id
 
 // Location of our actions and folders
-#define QUAC_PATH "apps_data/quac"
-// Full path to actions
-#define QUAC_DATA_PATH EXT_PATH(QUAC_PATH)
+#define QUAC_SETTINGS_FILENAME ".quac.conf"
+#define QUAC_SETTINGS_PATH APP_DATA_PATH(QUAC_SETTINGS_FILENAME)
 
 typedef enum { QUAC_APP_PORTRAIT, QUAC_APP_LANDSCAPE } QuacAppLayout;
 
@@ -38,6 +38,7 @@ typedef struct App {
     DialogsApp* dialog;
     Submenu* sub_menu;
     TextInput* text_input;
+    Popup* popup;
 
     Storage* storage;
     NotificationApp* notifications;
@@ -54,7 +55,9 @@ typedef struct App {
         bool show_icons; // Defaults to True
         bool show_headers; // Defaults to True
         uint32_t rfid_duration; // Defaults to 2500 ms
+        uint32_t nfc_duration; // Defaults to 1000 ms
         bool subghz_use_ext_antenna; // Defaults to False
+        bool show_hidden; // Defaults to False
     } settings;
 
 } App;

@@ -36,7 +36,7 @@ void scene_action_rename_on_enter(void* context) {
         text, scene_action_rename_callback, app, app->temp_cstr, MAX_NAME_LEN, false);
 
     furi_string_free(file_name);
-    view_dispatcher_switch_to_view(app->view_dispatcher, QView_ActionTextInput);
+    view_dispatcher_switch_to_view(app->view_dispatcher, QView_TextInput);
 }
 
 bool scene_action_rename_on_event(void* context, SceneManagerEvent event) {

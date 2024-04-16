@@ -14,17 +14,25 @@
 
 #include <lib/toolbox/path.h>
 
+typedef enum {
+    SceneSettingsLayout,
+    SceneSettingsIcons,
+    SceneSettingsHeaders,
+    SceneSettingsRFIDDuration,
+    SceneSettingsNFCDuration,
+    SceneSettingsSubGHzExtAnt,
+    SceneSettingsHidden,
+    SceneSettingsAbout
+} SceneSettingsIndex;
+
 static const char* const layout_text[2] = {"Vert", "Horiz"};
 static const uint32_t layout_value[2] = {QUAC_APP_PORTRAIT, QUAC_APP_LANDSCAPE};
 
-static const char* const show_icons_text[2] = {"OFF", "ON"};
-static const uint32_t show_icons_value[2] = {false, true};
+static const char* const show_offon_text[2] = {"OFF", "ON"};
+static const uint32_t show_offon_value[2] = {false, true};
 
-static const char* const show_headers_text[2] = {"OFF", "ON"};
-static const uint32_t show_headers_value[2] = {false, true};
-
-#define V_RFID_DURATION_COUNT 8
-static const char* const rfid_duration_text[V_RFID_DURATION_COUNT] = {
+#define V_DURATION_COUNT 8
+static const char* const duration_text[V_DURATION_COUNT] = {
     "500 ms",
     "1 sec",
     "1.5 sec",
@@ -34,7 +42,7 @@ static const char* const rfid_duration_text[V_RFID_DURATION_COUNT] = {
     "5 sec",
     "10 sec",
 };
-static const uint32_t rfid_duration_value[V_RFID_DURATION_COUNT] = {
+static const uint32_t duration_value[V_DURATION_COUNT] = {
     500,
     1000,
     1500,
@@ -58,22 +66,29 @@ static void scene_settings_layout_changed(VariableItem* item) {
 static void scene_settings_show_icons_changed(VariableItem* item) {
     App* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, show_icons_text[index]);
-    app->settings.show_icons = show_icons_value[index];
+    variable_item_set_current_value_text(item, show_offon_text[index]);
+    app->settings.show_icons = show_offon_value[index];
 }
 
 static void scene_settings_show_headers_changed(VariableItem* item) {
     App* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, show_headers_text[index]);
-    app->settings.show_headers = show_headers_value[index];
+    variable_item_set_current_value_text(item, show_offon_text[index]);
+    app->settings.show_headers = show_offon_value[index];
 }
 
 static void scene_settings_rfid_duration_changed(VariableItem* item) {
     App* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, rfid_duration_text[index]);
-    app->settings.rfid_duration = rfid_duration_value[index];
+    variable_item_set_current_value_text(item, duration_text[index]);
+    app->settings.rfid_duration = duration_value[index];
+}
+
+static void scene_settings_nfc_duration_changed(VariableItem* item) {
+    App* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, duration_text[index]);
+    app->settings.nfc_duration = duration_value[index];
 }
 
 static void scene_settings_subghz_ext_changed(VariableItem* item) {
@@ -81,6 +96,18 @@ static void scene_settings_subghz_ext_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, subghz_ext_text[index]);
     app->settings.subghz_use_ext_antenna = subghz_ext_value[index];
+}
+
+static void scene_settings_show_hidden_changed(VariableItem* item) {
+    App* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, show_offon_text[index]);
+    app->settings.show_hidden = show_offon_value[index];
+}
+
+static void scene_settings_enter_callback(void* context, uint32_t index) {
+    App* app = context;
+    view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
 // For each scene, implement handler callbacks
@@ -99,22 +126,28 @@ void scene_settings_on_enter(void* context) {
     variable_item_set_current_value_text(item, layout_text[value_index]);
 
     item = variable_item_list_add(vil, "Show Icons", 2, scene_settings_show_icons_changed, app);
-    value_index = value_index_uint32(app->settings.show_icons, show_icons_value, 2);
+    value_index = value_index_uint32(app->settings.show_icons, show_offon_value, 2);
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, show_icons_text[value_index]);
+    variable_item_set_current_value_text(item, show_offon_text[value_index]);
 
     item =
         variable_item_list_add(vil, "Show Headers", 2, scene_settings_show_headers_changed, app);
-    value_index = value_index_uint32(app->settings.show_headers, show_headers_value, 2);
+    value_index = value_index_uint32(app->settings.show_headers, show_offon_value, 2);
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, show_headers_text[value_index]);
+    variable_item_set_current_value_text(item, show_offon_text[value_index]);
 
     item = variable_item_list_add(
-        vil, "RFID Duration", V_RFID_DURATION_COUNT, scene_settings_rfid_duration_changed, app);
-    value_index = value_index_uint32(
-        app->settings.rfid_duration, rfid_duration_value, V_RFID_DURATION_COUNT);
+        vil, "RFID Duration", V_DURATION_COUNT, scene_settings_rfid_duration_changed, app);
+    value_index =
+        value_index_uint32(app->settings.rfid_duration, duration_value, V_DURATION_COUNT);
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, rfid_duration_text[value_index]);
+    variable_item_set_current_value_text(item, duration_text[value_index]);
+
+    item = variable_item_list_add(
+        vil, "NFC Duration", V_DURATION_COUNT, scene_settings_nfc_duration_changed, app);
+    value_index = value_index_uint32(app->settings.nfc_duration, duration_value, V_DURATION_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, duration_text[value_index]);
 
     item =
         variable_item_list_add(vil, "SubGHz Ext Ant", 2, scene_settings_subghz_ext_changed, app);
@@ -122,16 +155,34 @@ void scene_settings_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, subghz_ext_text[value_index]);
 
-    // TODO: Set Enter callback here - why?? All settings have custom callbacks
-    // variable_item_list_set_enter_callback(vil, my_cb, app);
+    item = variable_item_list_add(vil, "Show Hidden", 2, scene_settings_show_hidden_changed, app);
+    value_index = value_index_uint32(app->settings.show_hidden, show_offon_value, 2);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, show_offon_text[value_index]);
+
+    // Last item is always "About"
+    item = variable_item_list_add(vil, "About", 1, NULL, NULL);
+    variable_item_list_set_enter_callback(vil, scene_settings_enter_callback, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, QView_Settings);
 }
-bool scene_settings_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
 
-    return false;
+bool scene_settings_on_event(void* context, SceneManagerEvent event) {
+    App* app = context;
+    bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        switch(event.event) {
+        case SceneSettingsAbout:
+            consumed = true;
+            scene_manager_next_scene(app->scene_manager, QScene_About);
+            break;
+        default:
+            break;
+        }
+    }
+
+    return consumed;
 }
 
 void scene_settings_on_exit(void* context) {

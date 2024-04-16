@@ -78,6 +78,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FAP Boilerplate v1.1 (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - Updated: [Cross Remote v2.5 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - Updated: [Restaurant Pager Trigger v1.6 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac)
 
 <a name="release">
 
@@ -525,7 +526,7 @@ $ ./fbt dolphin_ext
 - [Programmer Calculator v0.9.2 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
 - [QR Code v2.0 (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
-- [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
+- [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac)
 - [Radar Scanner v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
 - [Radiation Sensor (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
 - [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)

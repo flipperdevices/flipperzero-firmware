@@ -9,6 +9,6 @@ App(
     fap_icon_assets="images",
     fap_author="Roberto De Feo",
     fap_weburl="https://github.com/rdefeo/quac",
-    fap_version="0.4",
+    fap_version="0.6",
     fap_description="Quick Action remote control app",
 )

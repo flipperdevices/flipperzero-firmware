@@ -16,9 +16,12 @@ ItemsView* item_get_items_view_from_path(void* context, const FuriString* input_
     // Handle the app start condition
     FuriString* in_path;
     if(input_path == NULL) {
-        in_path = furi_string_alloc_set_str(QUAC_DATA_PATH);
+        in_path = furi_string_alloc_set_str(APP_DATA_PATH(""));
     } else {
         in_path = furi_string_alloc_set(input_path);
+    }
+    if(furi_string_get_char(in_path, furi_string_size(in_path) - 1) == '/') {
+        furi_string_left(in_path, furi_string_size(in_path) - 1);
     }
     const char* cpath = furi_string_get_cstr(in_path);
 
@@ -50,10 +53,15 @@ ItemsView* item_get_items_view_from_path(void* context, const FuriString* input_
             // FURI_LOG_I(TAG, "> dir_walk: %s", furi_string_get_cstr(path));
             const char* cpath = furi_string_get_cstr(path);
 
-            // Skip "hidden" files
             path_extract_filename(path, filename_tmp, false);
+            // Always skip our .quac.conf file!
+            if(!furi_string_cmp_str(filename_tmp, QUAC_SETTINGS_FILENAME)) {
+                continue;
+            }
+
+            // Skip "hidden" files
             char first_char = furi_string_get_char(filename_tmp, 0);
-            if(first_char == '.') {
+            if(first_char == '.' && !app->settings.show_hidden) {
                 // FURI_LOG_I(TAG, ">> skipping hidden file: %s", furi_string_get_cstr(filename_tmp));
                 continue;
             }
@@ -88,10 +96,16 @@ ItemsView* item_get_items_view_from_path(void* context, const FuriString* input_
 
         Item* item = ItemArray_push_new(iview->items);
 
-        // Action files have extensions, so item->ext starts with '.'
-        item->ext[0] = 0;
-        path_extract_extension(path, item->ext, MAX_EXT_LEN);
-        item->type = item_get_item_type_from_extension(item->ext);
+        FileInfo fileinfo;
+        if(storage_common_stat(app->storage, found_path, &fileinfo) == FSE_OK &&
+           file_info_is_dir(&fileinfo)) {
+            item->type = Item_Group;
+        } else {
+            // Action files have extensions, so item->ext starts with '.'
+            item->ext[0] = 0;
+            path_extract_extension(path, item->ext, MAX_EXT_LEN);
+            item->type = item_get_item_type_from_extension(item->ext);
+        }
 
         item->name = furi_string_alloc();
         path_extract_filename_no_ext(found_path, item->name);
@@ -134,12 +148,12 @@ void item_prettify_name(FuriString* name) {
             }
         }
     }
-    furi_string_replace_str(name, "_", " ", 0);
+    furi_string_replace_all_str(name, "_", " ");
     // FURI_LOG_I(TAG, "... %s", furi_string_get_cstr(name));
 }
 
 ItemType item_get_item_type_from_extension(const char* ext) {
-    ItemType type = Item_Group;
+    ItemType type = Item_Unknown;
 
     if(!strcmp(ext, ".sub")) {
         type = Item_SubGhz;
@@ -147,6 +161,8 @@ ItemType item_get_item_type_from_extension(const char* ext) {
         type = Item_RFID;
     } else if(!strcmp(ext, ".ir")) {
         type = Item_IR;
+    } else if(!strcmp(ext, ".nfc")) {
+        type = Item_NFC;
     } else if(!strcmp(ext, ".qpl")) {
         type = Item_Playlist;
     }
