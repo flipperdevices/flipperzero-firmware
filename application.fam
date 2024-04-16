@@ -1,6 +1,6 @@
 App(
     appid="flipperzero_clock",
-    name="FlippeZero Clock",
+    name="FlipperZero Clock",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="clock_main",
     requires=["gui"],
@@ -9,6 +9,6 @@ App(
     fap_category="Tools",
     fap_author="mdaskalov",
     fap_weburl="https://github.com/mdaskalov/flipperzero-clock",
-    fap_version="1.0",
+    fap_version="1.1",
     fap_description="FlipperZero Customizable Clock"
 )
