@@ -1,6 +1,5 @@
 #include "../bad_kb_app_i.h"
 #include "furi_hal_power.h"
-#include "furi_hal_usb.h"
 #include <storage/storage.h>
 
 static bool bad_kb_layout_select(BadKbApp* bad_kb) {

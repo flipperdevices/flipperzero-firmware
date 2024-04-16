@@ -205,8 +205,6 @@ void ws_view_receiver_draw(Canvas* canvas, WSReceiverModel* model) {
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
-    // bool ext_module = furi_hal_subghz_get_radio_type();
-
     WSReceiverMenuItem* item_menu;
 
     for(size_t i = 0; i < MIN(model->history_item, MENU_ITEMS); ++i) {

@@ -48,6 +48,17 @@ static int32_t ducky_fnc_strdelay(BadKbScript* bad_kb, const char* line, int32_t
     return 0;
 }
 
+static int32_t ducky_fnc_defstrdelay(BadKbScript* bad_kb, const char* line, int32_t param) {
+    UNUSED(param);
+
+    line = &line[ducky_get_command_len(line) + 1];
+    bool state = ducky_get_number(line, &bad_kb->defstringdelay);
+    if(!state) {
+        return ducky_error(bad_kb, "Invalid number %s", line);
+    }
+    return 0;
+}
+
 static int32_t ducky_fnc_string(BadKbScript* bad_kb, const char* line, int32_t param) {
     line = &line[ducky_get_command_len(line) + 1];
     furi_string_set_str(bad_kb->string_print, line);
@@ -55,7 +66,8 @@ static int32_t ducky_fnc_string(BadKbScript* bad_kb, const char* line, int32_t p
         furi_string_cat(bad_kb->string_print, "\n");
     }
 
-    if(bad_kb->stringdelay == 0) { // stringdelay not set - run command immediately
+    if(bad_kb->stringdelay == 0 &&
+       bad_kb->defstringdelay == 0) { // stringdelay not set - run command immediately
         bool state = ducky_string(bad_kb, furi_string_get_cstr(bad_kb->string_print));
         if(!state) {
             return ducky_error(bad_kb, "Invalid string %s", line);
@@ -171,10 +183,11 @@ static int32_t ducky_fnc_media(BadKbScript* bad_kb, const char* line, int32_t pa
     }
     if(bad_kb->bt) {
         ble_profile_hid_kb_press(bad_kb->app->ble_hid, key);
+        furi_delay_ms(bt_timeout);
         ble_profile_hid_kb_release(bad_kb->app->ble_hid, key);
     } else {
-        furi_hal_hid_consumer_key_press(key);
-        furi_hal_hid_consumer_key_release(key);
+        furi_hal_hid_kb_press(key);
+        furi_hal_hid_kb_release(key);
     }
     return 0;
 }
@@ -191,6 +204,7 @@ static int32_t ducky_fnc_globe(BadKbScript* bad_kb, const char* line, int32_t pa
     if(bad_kb->bt) {
         ble_profile_hid_consumer_key_press(bad_kb->app->ble_hid, HID_CONSUMER_FN_GLOBE);
         ble_profile_hid_kb_press(bad_kb->app->ble_hid, key);
+        furi_delay_ms(bt_timeout);
         ble_profile_hid_kb_release(bad_kb->app->ble_hid, key);
         ble_profile_hid_consumer_key_release(bad_kb->app->ble_hid, HID_CONSUMER_FN_GLOBE);
     } else {
@@ -221,6 +235,8 @@ static const DuckyCmd ducky_commands[] = {
     {"DEFAULTDELAY", ducky_fnc_defdelay, -1},
     {"STRINGDELAY", ducky_fnc_strdelay, -1},
     {"STRING_DELAY", ducky_fnc_strdelay, -1},
+    {"DEFAULT_STRING_DELAY", ducky_fnc_defstrdelay, -1},
+    {"DEFAULTSTRINGDELAY", ducky_fnc_defstrdelay, -1},
     {"REPEAT", ducky_fnc_repeat, -1},
     {"SYSRQ", ducky_fnc_sysrq, -1},
     {"ALTCHAR", ducky_fnc_altchar, -1},
@@ -233,7 +249,7 @@ static const DuckyCmd ducky_commands[] = {
     {"GLOBE", ducky_fnc_globe, -1},
 };
 
-#define TAG "BadKB"
+#define TAG "BadKb"
 #define WORKER_TAG TAG "Worker"
 
 int32_t ducky_execute_cmd(BadKbScript* bad_kb, const char* line) {

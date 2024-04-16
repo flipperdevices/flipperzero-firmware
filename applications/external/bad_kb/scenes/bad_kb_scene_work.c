@@ -16,7 +16,7 @@ bool bad_kb_scene_work_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InputKeyLeft) {
-            if(bad_kb_is_idle_state(app->bad_kb_view)) {
+            if(bad_kb_view_is_idle_state(app->bad_kb_view)) {
                 scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
             }
             consumed = true;
@@ -28,7 +28,7 @@ bool bad_kb_scene_work_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
-        bad_kb_set_state(app->bad_kb_view, bad_kb_script_get_state(app->bad_kb_script));
+        bad_kb_view_set_state(app->bad_kb_view, bad_kb_script_get_state(app->bad_kb_script));
     }
     return consumed;
 }
@@ -39,18 +39,18 @@ void bad_kb_scene_work_on_enter(void* context) {
     FuriString* file_name;
     file_name = furi_string_alloc();
     path_extract_filename(app->file_path, file_name, true);
-    bad_kb_set_file_name(app->bad_kb_view, furi_string_get_cstr(file_name));
+    bad_kb_view_set_file_name(app->bad_kb_view, furi_string_get_cstr(file_name));
     furi_string_free(file_name);
 
     FuriString* layout;
     layout = furi_string_alloc();
     path_extract_filename(app->keyboard_layout, layout, true);
-    bad_kb_set_layout(app->bad_kb_view, furi_string_get_cstr(layout));
+    bad_kb_view_set_layout(app->bad_kb_view, furi_string_get_cstr(layout));
     furi_string_free(layout);
 
-    bad_kb_set_state(app->bad_kb_view, bad_kb_script_get_state(app->bad_kb_script));
+    bad_kb_view_set_state(app->bad_kb_view, bad_kb_script_get_state(app->bad_kb_script));
 
-    bad_kb_set_button_callback(app->bad_kb_view, bad_kb_scene_work_button_callback, app);
+    bad_kb_view_set_button_callback(app->bad_kb_view, bad_kb_scene_work_button_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, BadKbAppViewWork);
 }
 
