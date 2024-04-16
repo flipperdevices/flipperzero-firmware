@@ -86,7 +86,6 @@ int32_t clock_main(void* p) {
     notification_message_block(notification, &sequence_display_backlight_enforce_on);
 
     InputEvent event;
-    bool state = 0;
     bool terminate = false;
     while(!terminate) {
         if(furi_message_queue_get(event_queue, &event, FRAME_MS) == FuriStatusOk) {
@@ -117,8 +116,6 @@ int32_t clock_main(void* p) {
             }
         }
         view_port_update(view_port);
-        furi_hal_gpio_write(&gpio_ext_pa4, state);
-        state = !state;
     }
 
     notification_message_block(notification, &sequence_display_backlight_enforce_auto);
