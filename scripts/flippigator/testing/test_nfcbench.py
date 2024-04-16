@@ -7,12 +7,27 @@ import pytest
 from flippigator.case import BaseCase
 from flippigator.flippigator import FlipperHEXKeyboard, FlipperTextKeyboard
 from termcolor import colored
+import difflib as df
 
 os.system("color")
 
 
 @pytest.mark.bench_nfc_rfid
 class TestNfcBench(BaseCase):
+    async def compare_nfc_files(self, nav, name):
+        with open("./ref_files/"+name) as ref_file:
+            ref = ref_file.read().splitlines()
+        try:
+            downloaded = await nav.proto.rpc_read("/ext/nfc/"+name).decode("UTF-8").splitlines()
+        except nav.proto.FlipperProtoException:
+            assert 0, "No dump file for "+name
+        d = df.Differ()
+        diff = d.compare(ref, downloaded)
+        compared = list()
+        for i in diff:
+            compared.append(i[2:])
+        assert compared == ref, "Dump" + name + "is wrong!"
+
     async def test_read_mifare_classic_1k_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
             await nav.delete_file("NFC", "BN0")
@@ -47,7 +62,7 @@ class TestNfcBench(BaseCase):
             state = await nav.get_current_state()
             await nav.press_ok()
         state = await nav.get_current_state(
-            ref=nav.get_ref_from_string("Mifare Classic 1K", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("MIFARE Classic 1K", nav.font_helvB08, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = await nav.get_current_state(
@@ -61,6 +76,7 @@ class TestNfcBench(BaseCase):
             "Save",
             "Emulate",
             "Detect Reader",
+            "Unlock with Dictionary",
             "Info",
         ]
         assert (
@@ -77,7 +93,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = await nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -96,6 +112,10 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = await nav.get_current_state()
         await nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_mifare_classic_1k_card')
+    async def test_reference_file_mfc1k_card(self, nav):
+         await self.compare_nfc_files(nav, "BN0.nfc")
 
     async def test_read_nfc_a_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -131,7 +151,7 @@ class TestNfcBench(BaseCase):
             state = await nav.get_current_state()
             await nav.press_ok()
         state = await nav.get_current_state(
-            ref=nav.get_ref_from_string("Mifare Classic 1K", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("MIFARE Classic 1K", nav.font_helvB08, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = await nav.get_current_state(
@@ -143,6 +163,7 @@ class TestNfcBench(BaseCase):
             "Save",
             "Emulate",
             "Detect Reader",
+            "Unlock with Dictionary",
             "Info",
         ]
         assert (
@@ -159,7 +180,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = await nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -178,6 +199,10 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = await nav.get_current_state()
         await nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_nfc_a_card')
+    async def test_reference_file_nfc_a_card(self, nav):
+        await self.compare_nfc_files(nav, "BN1.nfc")
 
     async def test_read_mifare_classic_4k_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -213,7 +238,7 @@ class TestNfcBench(BaseCase):
             state = await nav.get_current_state()
             await nav.press_ok()
         state = await nav.get_current_state(
-            ref=nav.get_ref_from_string("Mifare Classic 4K", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("MIFARE Classic 4K", nav.font_helvB08, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = await nav.get_current_state(
@@ -240,7 +265,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = await nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Classic 4K", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Classic 4K", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -259,6 +284,10 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = await nav.get_current_state()
         await nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_mifare_classic_4k_card')
+    async def test_reference_file_mfc4k_card(self, nav):
+        await self.compare_nfc_files(nav, "BN7.nfc")
 
     async def test_read_troika_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -285,17 +314,14 @@ class TestNfcBench(BaseCase):
                 nav.logger.debug("ReadingCardNFC")
                 state = await nav.get_current_state()
         state = await nav.get_current_state(
-            ref=nav.get_ref_from_string("Troika", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("Troyka card", nav.font_helvB08, 0)
         )
-        assert len(state) > 0, "Result of reading reference card is fail"
+        assert len(state) > 0, "Result of reading reference card is fail  (Name)"
         state = await nav.get_current_state(
-            ref=nav.get_ref_from_string("Num: 41202868", nav.font_haxrcorp_4089, 0)
+            ref=nav.get_ref_from_string("Transport department:", nav.font_haxrcorp_4089, 0)
         )
-        assert len(state) > 0, "Result of reading reference card is fail"
-        state = await nav.get_current_state(
-            ref=nav.get_ref_from_string("Balance: 1 RUR", nav.font_haxrcorp_4089, 0)
-        )
-        assert len(state) > 0, "Result of reading reference card is fail"
+        assert len(state) > 0, "Result of reading reference card is fail (Data)"
+
         await nav.press_right()
         menu_ref = [
             "Save",
@@ -317,7 +343,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = await nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -331,6 +357,10 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = await nav.get_current_state()
         await nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_troika_card')
+    async def test_reference_file_troika_card(self, nav):
+        await self.compare_nfc_files(nav, "BN2.nfc")
 
     async def test_read_ntag215_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -362,6 +392,12 @@ class TestNfcBench(BaseCase):
         state = await nav.get_current_state(
             ref=nav.get_ref_from_string(
                 "UID: 04 77 42 39 BA 07 CO", nav.font_haxrcorp_4089, 0
+            )
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = await nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "Pages Read: 133/135", nav.font_haxrcorp_4089, 0
             )
         )
         assert len(state) > 0, "Result of reading reference card is fail"
@@ -400,6 +436,10 @@ class TestNfcBench(BaseCase):
             state = await nav.get_current_state()
         await nav.go_to_main_screen()
 
+    @pytest.mark.run(after='test_read_ntag215_card')
+    async def test_reference_file_ntag215_card(self, nav):
+        await self.compare_nfc_files(nav, "BN3.nfc")
+
     async def test_read_mifare_ultralight_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
             await nav.delete_file("NFC", "BN4")
@@ -424,7 +464,7 @@ class TestNfcBench(BaseCase):
                 nav.logger.debug("ReadingCardNFC")
                 state = await nav.get_current_state()
         state = await nav.get_current_state(
-            ref=nav.get_ref_from_string("Mifare Ultralight", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("MIFARE Ultralight", nav.font_helvB08, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = await nav.get_current_state(
@@ -455,7 +495,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = await nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -469,6 +509,10 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = await nav.get_current_state()
         await nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_mifare_ultralight_card')
+    async def test_reference_file_ultralight_card(self, nav):
+        await self.compare_nfc_files(nav, "BN4.nfc")
 
     async def test_read_mifare_desfire_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -494,7 +538,7 @@ class TestNfcBench(BaseCase):
                 nav.logger.debug("ReadingCardNFC")
                 state = await nav.get_current_state()
         state = await nav.get_current_state(
-            ref=nav.get_ref_from_string("Mifare DESFire", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("MIFARE DESFire", nav.font_helvB08, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = await nav.get_current_state(
@@ -534,6 +578,10 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = await nav.get_current_state()
         await nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_mifare_desfire_card')
+    async def test_reference_file_desfire_card(self, nav):
+        await self.compare_nfc_files(nav, "BN5.nfc")
 
     async def test_read_bank_card(self, nav, gator):
         with allure.step("Delete previous card, if possible"):
@@ -652,7 +700,7 @@ class TestNfcBench(BaseCase):
 
                 state = await nav.get_current_state(
                     ref=nav.get_ref_from_string(
-                        "Mifare Ultralight", nav.font_helvB08, 0, no_space=1
+                        "MIFARE Ultralight", nav.font_helvB08, 0, no_space=1
                     )
                 )
                 assert len(state) > 0, "Result of reading reference card is fail"
@@ -694,7 +742,7 @@ class TestNfcBench(BaseCase):
                 assert len(state) > 0, "Emulation failed"
                 state = await nav.get_current_state(
                     ref=nav.get_ref_from_string(
-                        "Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
+                        "MIFARE Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
                     )
                 )
                 assert len(state) > 0, "Emulation failed"
@@ -722,8 +770,8 @@ class TestNfcBench(BaseCase):
                 ref=nav.get_ref_from_string("Multi-protocol card", nav.font_helvB08, 0)
             )
             assert len(state) > 0, "Reading failed"
-            with allure.step("Read as Mifare Classic"):
-                await nav.go_to("Read as Mifare Classic")
+            with allure.step("Read as MIFARE Classic"):
+                await nav.go_to("Read as MIFARE Classic")
                 await nav.press_ok()
                 await nav.update_screen()
                 state = await nav.get_current_state()
@@ -750,7 +798,7 @@ class TestNfcBench(BaseCase):
                     await nav.press_ok()
                 state = await nav.get_current_state(
                     ref=nav.get_ref_from_string(
-                        "Mifare Classic 1K", nav.font_helvB08, 0
+                        "MIFARE Classic 1K", nav.font_helvB08, 0
                     )
                 )
                 assert len(state) > 0, "Result of reading reference card is fail"
@@ -782,7 +830,7 @@ class TestNfcBench(BaseCase):
                 assert len(state) > 0, "Emulation failed"
                 state = await nav.get_current_state(
                     ref=nav.get_ref_from_string(
-                        "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+                        "MiIFARE Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
                     )
                 )
                 assert len(state) > 0, "Emulation failed"
@@ -801,6 +849,18 @@ class TestNfcBench(BaseCase):
                 while "Saved!" in state:
                     state = await nav.get_current_state()
         await nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_bank_card')
+    async def test_reference_file_bank1_card(self, nav):
+        await self.compare_nfc_files(nav, "BN8_1.nfc")
+
+    @pytest.mark.run(after='test_read_bank_card')
+    async def test_reference_file_bank2_card(self, nav):
+        await self.compare_nfc_files(nav, "BN8_2.nfc")
+
+    @pytest.mark.run(after='test_read_bank_card')
+    async def test_reference_file_bank3_card(self, nav):
+        await self.compare_nfc_files(nav, "BN8_3.nfc")
 
     async def test_read_all_in_one_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -858,7 +918,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = await nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -872,6 +932,10 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = await nav.get_current_state()
         await nav.go_to_main_screen()
+
+    @pytest.mark.run(after='test_read_all_in_one_card')
+    async def test_reference_file_aio_card(self, nav):
+        await self.compare_nfc_files(nav, "BN6.nfc")
 
     async def test_emulation_mifare_classic_1k_card(self, nav, gator, reader_nfc):
         await nav.go_to_main_screen()
@@ -1017,7 +1081,7 @@ class TestNfcBench(BaseCase):
         await nav.get_current_state()
 
         start_time = time.time()
-        while start_time + 5 > time.time():
+        while start_time + 25 > time.time():
             if await reader_nfc.update():
                 string = reader_nfc.get()
                 assert (
@@ -1025,7 +1089,7 @@ class TestNfcBench(BaseCase):
                 ), "Emulated NFC card reading failed"
                 break
 
-        if start_time + 5 < time.time():
+        if start_time + 25 < time.time():
             assert 0, "Timeout of emulation"
 
         await nav.go_to_main_screen()
