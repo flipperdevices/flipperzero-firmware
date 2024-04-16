@@ -18,6 +18,7 @@
 #include <gui/modules/popup.h>
 #include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
 
 #include <input/input.h>
@@ -39,6 +40,11 @@
 
 #include <Payload.h>
 #include <FrameProtocol.h>
+
+#include "plugin/interface.h"
+#include <flipper_application/flipper_application.h>
+#include <flipper_application/plugins/plugin_manager.h>
+#include <loader/firmware_api/firmware_api.h>
 
 #include "protocol/picopass_poller.h"
 #include "scenes/seader_scene.h"
@@ -103,6 +109,7 @@ struct Seader {
     Popup* popup;
     Loading* loading;
     TextInput* text_input;
+    TextBox* text_box;
     Widget* widget;
 
     Nfc* nfc;
@@ -110,6 +117,9 @@ struct Seader {
     PicopassPoller* picopass_poller;
 
     NfcDevice* nfc_device;
+
+    PluginManager* plugin_manager;
+    PluginWiegand* plugin_wiegand;
 };
 
 struct SeaderPollerContainer {
@@ -122,6 +132,7 @@ typedef enum {
     SeaderViewPopup,
     SeaderViewLoading,
     SeaderViewTextInput,
+    SeaderViewTextBox,
     SeaderViewWidget,
     SeaderViewUart,
 } SeaderView;

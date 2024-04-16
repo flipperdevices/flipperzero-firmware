@@ -61,9 +61,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Magic v1.8 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - Updated: [Weather Station v1.7 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 - Updated: [PicoPass (iClass) v1.13 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
-- Updated: [NFC Seader v2.6 (By bettse)](https://github.com/bettse/seader)
 - Updated: [Cookie Clicker v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
 - [JS: BadUSB Demo, Speaker API and VGM Module (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/js/)
+- Updated: [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
@@ -487,7 +487,7 @@ $ ./fbt dolphin_ext
 - [NFC Magic v1.8 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- [NFC Seader v2.6 (By bettse)](https://github.com/bettse/seader)
+- [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
