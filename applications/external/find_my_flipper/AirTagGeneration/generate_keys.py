@@ -93,7 +93,9 @@ def main():
                 print(
                     "Place the .keys file onto your Flipper in the Apps_Data->FindMyFlipper folder or input the MAC and Payload manually."
                 )
-                print("To get location reports follow the steps in the LocationReports folder of my repo!")
+                print(
+                    "To get location reports follow the steps in the LocationReports folder of my repo!"
+                )
                 print()
 
                 with open(f"keys/{fname}", "w") as f:

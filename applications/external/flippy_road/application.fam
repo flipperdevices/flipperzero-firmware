@@ -11,4 +11,4 @@ App(
     fap_weburl="https://github.com/rkilpadi/flippy-road",
     fap_version="1.0",
     fap_description="Flippy Road Game",
-) 
+)

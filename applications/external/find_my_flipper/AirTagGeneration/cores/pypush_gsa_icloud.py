@@ -27,14 +27,14 @@ import urllib3
 
 # urllib3.disable_warnings()
 
-ANISETTE_URL = 'http://localhost:6969'  # https://github.com/Dadoum/anisette-v3-server
+ANISETTE_URL = "http://localhost:6969"  # https://github.com/Dadoum/anisette-v3-server
 
 
-def icloud_login_mobileme(username='', password='', second_factor='sms'):
+def icloud_login_mobileme(username="", password="", second_factor="sms"):
     if not username:
-        username = getpass('Apple ID: ')
+        username = getpass("Apple ID: ")
     if not password:
-        password = getpass('Password: ')
+        password = getpass("Password: ")
 
     g = gsa_authenticate(username, password, second_factor)
     pet = g["t"]["com.apple.gs.idms.pet"]["token"]
@@ -51,7 +51,7 @@ def icloud_login_mobileme(username='', password='', second_factor='sms'):
     headers = {
         "X-Apple-ADSID": adsid,
         "User-Agent": "com.apple.iCloudHelper/282 CFNetwork/1408.0.4 Darwin/22.5.0",
-        "X-Mme-Client-Info": '<MacBookPro18,3> <Mac OS X;13.4.1;22F8> <com.apple.AOSKit/282 (com.apple.accountsd/113)>'
+        "X-Mme-Client-Info": "<MacBookPro18,3> <Mac OS X;13.4.1;22F8> <com.apple.AOSKit/282 (com.apple.accountsd/113)>",
     }
     headers.update(generate_anisette_headers())
 
@@ -66,12 +66,14 @@ def icloud_login_mobileme(username='', password='', second_factor='sms'):
     return plist.loads(r.content)
 
 
-def gsa_authenticate(username, password, second_factor='sms'):
+def gsa_authenticate(username, password, second_factor="sms"):
     # Password is None as we'll provide it later
     usr = srp.User(username, bytes(), hash_alg=srp.SHA256, ng_type=srp.NG_2048)
     _, A = usr.start_authentication()
 
-    r = gsa_authenticated_request({"A2k": A, "ps": ["s2k", "s2k_fo"], "u": username, "o": "init"})
+    r = gsa_authenticated_request(
+        {"A2k": A, "ps": ["s2k", "s2k_fo"], "u": username, "o": "init"}
+    )
     if "sp" not in r:
         print("Authentication Failed. Check your Apple ID and password.")
         raise Exception("AuthenticationError")
@@ -89,7 +91,9 @@ def gsa_authenticate(username, password, second_factor='sms'):
         print("Failed to process challenge")
         return
 
-    r = gsa_authenticated_request({"c": r["c"], "M1": M, "u": username, "o": "complete"})
+    r = gsa_authenticated_request(
+        {"c": r["c"], "M1": M, "u": username, "o": "complete"}
+    )
 
     # Make sure that the server's session key matches our session key (and thus that they are not an imposter)
     usr.verify_session(r["M2"])
@@ -105,15 +109,18 @@ def gsa_authenticate(username, password, second_factor='sms'):
 """
     spd = plist.loads(PLISTHEADER + spd)
 
-    if "au" in r["Status"] and r["Status"]["au"] in ["trustedDeviceSecondaryAuth", "secondaryAuth"]:
+    if "au" in r["Status"] and r["Status"]["au"] in [
+        "trustedDeviceSecondaryAuth",
+        "secondaryAuth",
+    ]:
         print("2FA required, requesting code")
         # Replace bytes with strings
         for k, v in spd.items():
             if isinstance(v, bytes):
                 spd[k] = base64.b64encode(v).decode()
-        if second_factor == 'sms':
+        if second_factor == "sms":
             sms_second_factor(spd["adsid"], spd["GsIdmsToken"])
-        elif second_factor == 'trusted_device':
+        elif second_factor == "trusted_device":
             trusted_second_factor(spd["adsid"], spd["GsIdmsToken"])
         return gsa_authenticate(username, password)
     elif "au" in r["Status"]:
@@ -134,7 +141,7 @@ def gsa_authenticated_request(parameters):
         "Content-Type": "text/x-xml-plist",
         "Accept": "*/*",
         "User-Agent": "akd/1.0 CFNetwork/978.0.7 Darwin/18.7.0",
-        "X-MMe-Client-Info": '<MacBookPro18,3> <Mac OS X;13.4.1;22F8> <com.apple.AOSKit/282 (com.apple.dt.Xcode/3594.4.19)>'
+        "X-MMe-Client-Info": "<MacBookPro18,3> <Mac OS X;13.4.1;22F8> <com.apple.AOSKit/282 (com.apple.dt.Xcode/3594.4.19)>",
     }
 
     resp = requests.post(
@@ -167,6 +174,7 @@ def generate_anisette_headers():
         import pyprovision
         from ctypes import c_ulonglong
         import secrets
+
         adi = pyprovision.ADI("./anisette/")
         adi.provisioning_path = "./anisette/"
         device = pyprovision.Device("./anisette/device.json")
@@ -184,10 +192,14 @@ def generate_anisette_headers():
             provisioning_session = pyprovision.ProvisioningSession(adi, device)
             provisioning_session.provision(dsid)
         otp = adi.request_otp(dsid)
-        a = {"X-Apple-I-MD": base64.b64encode(bytes(otp.one_time_password)).decode(),
-             "X-Apple-I-MD-M": base64.b64encode(bytes(otp.machine_identifier)).decode()}
+        a = {
+            "X-Apple-I-MD": base64.b64encode(bytes(otp.one_time_password)).decode(),
+            "X-Apple-I-MD-M": base64.b64encode(bytes(otp.machine_identifier)).decode(),
+        }
     except ImportError:
-        print(f'pyprovision is not installed, querying {ANISETTE_URL} for an anisette server')
+        print(
+            f"pyprovision is not installed, querying {ANISETTE_URL} for an anisette server"
+        )
         h = json.loads(requests.get(ANISETTE_URL, timeout=5).text)
         a = {"X-Apple-I-MD": h["X-Apple-I-MD"], "X-Apple-I-MD-M": h["X-Apple-I-MD-M"]}
     a.update(generate_meta_headers(user_id=USER_ID, device_id=DEVICE_ID))
@@ -196,7 +208,8 @@ def generate_anisette_headers():
 
 def generate_meta_headers(serial="0", user_id=uuid.uuid4(), device_id=uuid.uuid4()):
     return {
-        "X-Apple-I-Client-Time": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
+        "X-Apple-I-Client-Time": datetime.utcnow().replace(microsecond=0).isoformat()
+        + "Z",
         "X-Apple-I-TimeZone": str(datetime.utcnow().astimezone().tzinfo),
         "loc": locale.getdefaultlocale()[0] or "en_US",
         "X-Apple-Locale": locale.getdefaultlocale()[0] or "en_US",
@@ -245,7 +258,7 @@ def trusted_second_factor(dsid, idms_token):
         "X-Apple-Identity-Token": identity_token,
         "X-Apple-App-Info": "com.apple.gs.xcode.auth",
         "X-Xcode-Version": "11.2 (11B41)",
-        "X-Mme-Client-Info": '<MacBookPro18,3> <Mac OS X;13.4.1;22F8> <com.apple.AOSKit/282 (com.apple.dt.Xcode/3594.4.19)>'
+        "X-Mme-Client-Info": "<MacBookPro18,3> <Mac OS X;13.4.1;22F8> <com.apple.AOSKit/282 (com.apple.dt.Xcode/3594.4.19)>",
     }
 
     headers.update(generate_anisette_headers())
@@ -280,7 +293,7 @@ def sms_second_factor(dsid, idms_token):
 
     # TODO: Actually do this request to get user prompt data
     # a = requests.get("https://gsa.apple.com/auth", verify=False)
-    # This request isn't strictly necessary though, 
+    # This request isn't strictly necessary though,
     # and most accounts should have their id 1 SMS, if not contribute ;)
 
     headers = {
@@ -289,7 +302,7 @@ def sms_second_factor(dsid, idms_token):
         "X-Apple-Identity-Token": identity_token,
         "X-Apple-App-Info": "com.apple.gs.xcode.auth",
         "X-Xcode-Version": "11.2 (11B41)",
-        "X-Mme-Client-Info": '<MacBookPro18,3> <Mac OS X;13.4.1;22F8> <com.apple.AOSKit/282 (com.apple.dt.Xcode/3594.4.19)>'
+        "X-Mme-Client-Info": "<MacBookPro18,3> <Mac OS X;13.4.1;22F8> <com.apple.AOSKit/282 (com.apple.dt.Xcode/3594.4.19)>",
     }
 
     headers.update(generate_anisette_headers())
@@ -305,12 +318,12 @@ def sms_second_factor(dsid, idms_token):
         json=body,
         headers=headers,
         verify=False,
-        timeout=5
+        timeout=5,
     )
     # Prompt for the 2FA code. It's just a string like '123456', no dashes or spaces
     code = input("Enter 2FA code: ")
 
-    body['securityCode'] = {'code': code}
+    body["securityCode"] = {"code": code}
 
     # Send the 2FA code to Apple
     resp = requests.post(
