@@ -81,44 +81,8 @@ typedef struct {
 
 
 /** App structure **/
-typedef struct {
-
-  /* App notifications */
-  NotificationApp *notifications;
-
-  /* UART receive thread */
-  FuriThread *rx_thread;
-
-  /* UART receive stream buffer */
-  FuriStreamBuffer *rx_stream;
-
-  /* Receive buffer */
-  uint8_t rx_buf[RX_BUF_SIZE];
-
-  /* LRF frame decoding buffer */
-  uint8_t dec_buf[128];
-
-  /* Callback to send a decoded LRF sample to and the context
-     we should pass it */
-  void (*lrf_sample_handler)(LRFSample *, void *);
-  void *lrf_sample_handler_ctx;
-
-  /* Callback to send a decoded LRF identification frakme to and the context
-     we should pass it */
-  void (*lrf_ident_handler)(LRFIdent *, void *);
-  void *lrf_ident_handler_ctx;
-
-  /* UART channel and handle */
-  FuriHalSerialId serial_channel;
-  FuriHalSerialHandle *serial_handle;
-
-  /* Minimum LED flashing duration */
-  uint16_t min_led_flash_duration;
-
-  /* Timer to turn off the LED */
-  FuriTimer *led_off_timer;
-
-} LRFSerialCommApp;
+struct _LRFSerialCommApp;
+typedef struct _LRFSerialCommApp LRFSerialCommApp;
 
 
 
