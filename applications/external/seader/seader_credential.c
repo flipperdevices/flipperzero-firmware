@@ -397,6 +397,7 @@ bool seader_credential_save_picopass(SeaderCredential* cred, const char* name) {
     FlipperFormat* file = flipper_format_file_alloc(cred->storage);
     FuriString* temp_str = furi_string_alloc();
 
+    storage_simply_mkdir(cred->storage, EXT_PATH("apps_data/picopass"));
     if(use_load_path && !furi_string_empty(cred->load_path)) {
         // Get directory name
         path_extract_dirname(furi_string_get_cstr(cred->load_path), temp_str);
