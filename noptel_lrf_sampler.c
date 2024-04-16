@@ -55,6 +55,7 @@ static uint8_t config_beep_values[] = {0, 1};
 static char *config_beep_names[] = {"Off", "On"};
 
 static uint16_t min_beep_duration = 70; /*ms*/
+static uint16_t min_led_flash_duration = 15; /*ms*/
 
 static uint16_t sample_view_update_every = 150; /*ms*/
 
@@ -1584,7 +1585,7 @@ static App *app_init() {
 
 
   /* Initialize the LRF serial communication app */
-  app->lrf_serial_comm_app = lrf_serial_comm_app_init();
+  app->lrf_serial_comm_app = lrf_serial_comm_app_init(min_led_flash_duration);
 
 
 

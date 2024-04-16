@@ -83,6 +83,9 @@ typedef struct {
 /** App structure **/
 typedef struct {
 
+  /* App notifications */
+  NotificationApp *notifications;
+
   /* UART receive thread */
   FuriThread *rx_thread;
 
@@ -109,6 +112,12 @@ typedef struct {
   FuriHalSerialId serial_channel;
   FuriHalSerialHandle *serial_handle;
 
+  /* Minimum LED flashing duration */
+  uint16_t min_led_flash_duration;
+
+  /* Timer to turn off the LED */
+  FuriTimer *led_off_timer;
+
 } LRFSerialCommApp;
 
 
@@ -127,7 +136,7 @@ void set_lrf_ident_handler(LRFSerialCommApp *, void (*)(LRFIdent *, void *),
 void send_lrf_command(LRFSerialCommApp*, LRFCommand);
 
 /** Initialize the LRF serial communication app **/
-LRFSerialCommApp *lrf_serial_comm_app_init();
+LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t);
 
 /** Stop the UART receive thread and free up the space allocated for the LRF
     communication app **/
