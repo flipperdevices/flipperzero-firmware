@@ -26,7 +26,7 @@ typedef struct {
   /* Minimum LED flashing duration */
   uint16_t min_led_flash_duration;
 
-  /* Timer to turn off the LED */
+  /* Timer callback to turn off the LED */
   FuriTimer *led_off_timer;
 
 } LEDControl;
