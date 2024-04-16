@@ -5,7 +5,7 @@ App(
     entry_point="quac_app",
     stack_size=2 * 1024,
     fap_category="Tools",
-    fap_icon="quac.png",
+    fap_icon="images/quac.png",
     fap_icon_assets="images",
     fap_author="Roberto De Feo",
     fap_weburl="https://github.com/rdefeo/quac",
