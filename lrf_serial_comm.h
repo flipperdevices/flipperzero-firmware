@@ -100,7 +100,7 @@ void set_lrf_ident_handler(LRFSerialCommApp *, void (*)(LRFIdent *, void *),
 void send_lrf_command(LRFSerialCommApp*, LRFCommand);
 
 /** Initialize the LRF serial communication app **/
-LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t);
+LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t, uint16_t);
 
 /** Stop the UART receive thread and free up the space allocated for the LRF
     communication app **/

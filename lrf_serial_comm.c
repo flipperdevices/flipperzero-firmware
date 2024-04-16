@@ -48,6 +48,9 @@ struct _LRFSerialCommApp {
   /* UART receive stream buffer */
   FuriStreamBuffer *rx_stream;
 
+  /* UART receive timeout */
+  uint16_t uart_rx_timeout;
+
   /* Receive buffer */
   uint8_t rx_buf[RX_BUF_SIZE];
 
@@ -147,14 +150,28 @@ static uint8_t checkbyte(uint8_t *data, uint16_t len) {
 
 
 
+/** Time difference in milliseconds between system ticks in milliseconds,
+    taking the timestamp overflow into account **/
+static uint32_t ms_tick_time_diff_ms(uint32_t tstamp1, uint32_t tstamp2) {
+
+  if(tstamp1 >= tstamp2)
+    return tstamp1 - tstamp2;
+
+  else
+    return 0xffffffff - tstamp2 + 1 + tstamp1;
+}
+
+
+
 /** UART receive thread **/
 static int32_t uart_rx_thread(void *ctx) {
 
   LRFSerialCommApp *app = (LRFSerialCommApp *)ctx;
   uint32_t evts;
+  uint32_t last_rx_tstamp_ms = 0, now_ms;
   size_t rx_buf_len;
   uint16_t dec_buf_len = 0;
-  uint16_t wait_dec_buf_len;
+  uint16_t wait_dec_buf_len = 0;
   bool is_little_endian;
   LRFSample lrf_sample;
   LRFIdent lrf_ident;
@@ -204,6 +221,17 @@ static int32_t uart_rx_thread(void *ctx) {
 
         /* Start a green LED flash */
         start_led_flash(&app->led_control, GREEN);
+
+        /* Get the current timestamp */
+        now_ms = furi_get_tick();
+
+        /* If too much time has passed since the previous data was received,
+           reset the decode buffer */
+        if(ms_tick_time_diff_ms(now_ms, last_rx_tstamp_ms) >=
+		app->uart_rx_timeout)
+          dec_buf_len = 0;
+
+        last_rx_tstamp_ms = now_ms;
 
         /* Process the data we're received */
         for(i=0; i < rx_buf_len; i++)
@@ -343,7 +371,7 @@ static int32_t uart_rx_thread(void *ctx) {
                   }
 
                   /* Timestamp the sample */
-                  lrf_sample.tstamp_ms = furi_get_tick();
+                  lrf_sample.tstamp_ms = now_ms;
 
                   /* If we have a callback to handle the decoded LRF sample,
                      call it and pass it the sample */
@@ -522,7 +550,7 @@ static void uart_tx(LRFSerialCommApp *app, uint8_t *data, size_t len) {
 /** Send a command to the LRF **/
 void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
 
-  /* Start a green LED flash */
+  /* Start a red LED flash */
   start_led_flash(&app->led_control, RED);
 
   /* Send the correct sequence of bytes to the LRF depending on the command */
@@ -599,7 +627,8 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
 
 
 /** Initialize the LRF serial communication app **/
-LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration) {
+LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration,
+						uint16_t uart_rx_timeout) {
 
   FURI_LOG_I(TAG, "App init");
 
@@ -630,6 +659,9 @@ LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration) {
   furi_thread_set_stack_size(app->rx_thread, 1024);
   furi_thread_set_context(app->rx_thread, app);
   furi_thread_set_callback(app->rx_thread, uart_rx_thread);
+
+  /* Set the UART receive timeout */
+  app->uart_rx_timeout = uart_rx_timeout;
 
   /* Start the UART receive thread */
   furi_thread_start(app->rx_thread);

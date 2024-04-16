@@ -42,6 +42,8 @@ const uint8_t config_beep_values[] = {0, 1};
 const char *config_beep_names[] = {"Off", "On"};
 const uint8_t nb_config_beep_values = COUNT_OF(config_beep_values);
 
+const uint16_t uart_rx_timeout = 500; /*ms*/
+
 const uint16_t min_beep_duration = 70; /*ms*/
 static const uint16_t min_led_flash_duration = 15; /*ms*/
 
@@ -270,7 +272,8 @@ static App *app_init() {
   set_speaker_control(&app->speaker_control, min_beep_duration);
 
   /* Initialize the LRF serial communication app */
-  app->lrf_serial_comm_app = lrf_serial_comm_app_init(min_led_flash_duration);
+  app->lrf_serial_comm_app = lrf_serial_comm_app_init(min_led_flash_duration,
+							uart_rx_timeout);
 
   return app;
 }
