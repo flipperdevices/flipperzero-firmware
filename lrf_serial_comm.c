@@ -8,10 +8,9 @@
 /*** Includes ***/
 #include <furi_hal.h>
 #include <expansion/expansion.h>
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
 
 #include "lrf_serial_comm.h"
+#include "led_control.h"
 
 
 #define TAG "lrf_serial_comm"
@@ -43,9 +42,6 @@ static uint8_t cmd_pointer_off[] = "\xc5\x00\x95";
 /** App structure **/
 struct _LRFSerialCommApp {
 
-  /* App notifications */
-  NotificationApp *notifications;
-
   /* UART receive thread */
   FuriThread *rx_thread;
 
@@ -72,11 +68,8 @@ struct _LRFSerialCommApp {
   FuriHalSerialId serial_channel;
   FuriHalSerialHandle *serial_handle;
 
-  /* Minimum LED flashing duration */
-  uint16_t min_led_flash_duration;
-
-  /* Timer to turn off the LED */
-  FuriTimer *led_off_timer;
+  /* LED control */
+  LEDControl led_control;
 
 };
 
@@ -154,16 +147,6 @@ static uint8_t checkbyte(uint8_t *data, uint16_t len) {
 
 
 
-/** Timer callback to turn off the LED **/
-static void led_off_timer_callback(void *ctx) {
-
-  LRFSerialCommApp *app = (LRFSerialCommApp *)ctx;
-
-  notification_message(app->notifications, &sequence_reset_red);
-}
-
-
-
 /** UART receive thread **/
 static int32_t uart_rx_thread(void *ctx) {
 
@@ -219,9 +202,8 @@ static int32_t uart_rx_thread(void *ctx) {
       /* Did we actually get something? */
       if(rx_buf_len > 0) {
 
-        /* Turn on the green LED and schedule turning it off */
-        notification_message(app->notifications, &sequence_set_only_green_255);
-        furi_timer_start(app->led_off_timer, app->min_led_flash_duration);
+        /* Start a green LED flash */
+        start_led_flash(&app->led_control, GREEN);
 
         /* Process the data we're received */
         for(i=0; i < rx_buf_len; i++)
@@ -540,9 +522,8 @@ static void uart_tx(LRFSerialCommApp *app, uint8_t *data, size_t len) {
 /** Send a command to the LRF **/
 void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
 
-  /* Turn on the red LED and schedule turning it off */
-  notification_message(app->notifications, &sequence_set_only_red_255);
-  furi_timer_start(app->led_off_timer, app->min_led_flash_duration);
+  /* Start a green LED flash */
+  start_led_flash(&app->led_control, RED);
 
   /* Send the correct sequence of bytes to the LRF depending on the command */
   switch(cmd) {
@@ -637,15 +618,8 @@ LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration) {
   /* Allocate space for the UART receive thread */
   app->rx_thread = furi_thread_alloc();
 
-  /* Configure the minimum LED flashing duration */
-  app->min_led_flash_duration = min_led_flash_duration;
-
-  /* Setup the timer to turn off the LED */
-  app->led_off_timer = furi_timer_alloc(led_off_timer_callback,
-					FuriTimerTypeOnce, app);
-
-  /* Enable notifications */
-  app->notifications = furi_record_open(RECORD_NOTIFICATION);
+  /* Setup the LED control */
+  set_led_control(&app->led_control, min_led_flash_duration);
 
   /* Disable support for expansion modules */
   expansion_disable(furi_record_open(RECORD_EXPANSION));
@@ -692,8 +666,8 @@ void lrf_serial_comm_app_free(LRFSerialCommApp *app) {
   expansion_enable(furi_record_open(RECORD_EXPANSION));
   furi_record_close(RECORD_EXPANSION);
 
-  /* Disable notifications */
-  furi_record_close(RECORD_NOTIFICATION);
+  /* Release the LED control */
+  release_led_control();
 
   /* Free the LRF serial communication app's structure */
   free(app);
