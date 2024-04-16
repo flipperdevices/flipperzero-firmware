@@ -44,7 +44,8 @@ const uint8_t nb_config_beep_values = COUNT_OF(config_beep_values);
 
 const uint16_t uart_rx_timeout = 500; /*ms*/
 
-const uint16_t min_beep_duration = 70; /*ms*/
+const uint16_t beep_frequency = 1000; /*Hz*/
+const uint16_t min_beep_duration = 25; /*ms*/
 static const uint16_t min_led_flash_duration = 15; /*ms*/
 
 const uint16_t sample_view_update_every = 150; /*ms*/

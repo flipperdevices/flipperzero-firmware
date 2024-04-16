@@ -42,6 +42,7 @@ extern const uint8_t config_beep_values[];
 extern const char *config_beep_names[];
 extern const uint8_t nb_config_beep_values;
 
+extern const uint16_t beep_frequency;
 extern const uint16_t min_beep_duration;
 extern const uint16_t sample_view_update_every;
 

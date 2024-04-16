@@ -24,7 +24,7 @@ static void speaker_control_timer_callback(void *ctx) {
 
     /* Start the speaker beeping if it wasn't beeping already */
     if(!spc->beep_playing && furi_hal_speaker_acquire(500)) {
-      furi_hal_speaker_start(1000, 1);
+      furi_hal_speaker_start(beep_frequency, 1);
       spc->beep_playing = true;
     }
 
