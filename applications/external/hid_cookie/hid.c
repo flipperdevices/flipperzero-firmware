@@ -1,4 +1,6 @@
 #include "hid.h"
+#include <extra_profiles/hid_profile.h>
+#include <profiles/serial_profile.h>
 #include "views.h"
 #include <notification/notification_messages.h>
 
@@ -8,8 +10,19 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexInstructions,
     HidSubmenuConfigure,
     HidSubmenuIndexClicker,
+    HidSubmenuIndexRemovePairing,
     HidSubmenuIndexCredits,
 };
+
+static void bt_hid_remove_pairing(Hid* hid) {
+    bt_disconnect(hid->bt);
+    furi_delay_ms(200);
+    furi_hal_bt_stop_advertising();
+    bt_forget_bonded_devices(hid->bt);
+    furi_hal_bt_start_advertising();
+    hid->ble = NULL;
+    notification_message(hid->notifications, &sequence_success);
+}
 
 static void hid_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -23,6 +36,8 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexCredits) {
         app->view_id = BtHidViewCredits;
         view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
+    } else if(index == HidSubmenuIndexRemovePairing) {
+        bt_hid_remove_pairing(app);
     } else if(index == HidSubmenuConfigure) {
         app->view_id = BtHidViewConfigure;
         view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
@@ -77,6 +92,8 @@ Hid* hid_alloc() {
         app->submenu, "Configuration", HidSubmenuConfigure, hid_submenu_callback, app);
     submenu_add_item(
         app->submenu, "BT Phone Clicker", HidSubmenuIndexClicker, hid_submenu_callback, app);
+    submenu_add_item(
+        app->submenu, "Remove Pairing", HidSubmenuIndexRemovePairing, hid_submenu_callback, app);
     submenu_add_item(app->submenu, "Credits", HidSubmenuIndexCredits, hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), hid_exit);
     view_dispatcher_add_view(app->view_dispatcher, HidViewSubmenu, submenu_get_view(app->submenu));
@@ -197,8 +214,8 @@ Hid* hid_app_alloc_view(void* context) {
     app->offset_y = 80;
     item = variable_item_list_add(
         app->variable_item_list, "Multiplier", 20, hid_setting_change_repeat, app);
-    variable_item_set_current_value_index(item, 2); // 1,2,3,4,...
-    variable_item_set_current_value_text(item, "3");
+    variable_item_set_current_value_index(item, 0); // 1,2,3,4,...
+    variable_item_set_current_value_text(item, "1");
     app->offset_repeat = 3;
     item = variable_item_list_add(
         app->variable_item_list, "CursorSpeed", 50, hid_setting_change_speed, app);
@@ -275,22 +292,30 @@ void hid_free(Hid* app) {
 
 void hid_hal_mouse_move(Hid* instance, int8_t dx, int8_t dy) {
     furi_assert(instance);
-    furi_hal_bt_hid_mouse_move(dx, dy);
+    if(instance->ble) {
+        ble_profile_hid_mouse_move(instance->ble, dx, dy);
+    }
 }
 
 void hid_hal_mouse_press(Hid* instance, uint16_t event) {
     furi_assert(instance);
-    furi_hal_bt_hid_mouse_press(event);
+    if(instance->ble) {
+        ble_profile_hid_mouse_press(instance->ble, event);
+    }
 }
 
 void hid_hal_mouse_release(Hid* instance, uint16_t event) {
     furi_assert(instance);
-    furi_hal_bt_hid_mouse_release(event);
+    if(instance->ble) {
+        ble_profile_hid_mouse_release(instance->ble, event);
+    }
 }
 
 void hid_hal_mouse_release_all(Hid* instance) {
     furi_assert(instance);
-    furi_hal_bt_hid_mouse_release_all();
+    if(instance->ble) {
+        ble_profile_hid_mouse_release_all(instance->ble);
+    }
 }
 
 int32_t hid_cookie_ble_app(void* p) {
@@ -308,15 +333,16 @@ int32_t hid_cookie_ble_app(void* p) {
 
     storage_common_migrate(
         storage,
-        EXT_PATH("apps/Tools/" HID_BT_KEYS_STORAGE_NAME),
+        EXT_PATH("apps/Bluetooth/" HID_BT_KEYS_STORAGE_NAME),
         APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
 
     bt_keys_storage_set_storage_path(app->bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
 
     furi_record_close(RECORD_STORAGE);
 
-    if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
-        FURI_LOG_E(TAG, "Failed to switch to HID profile");
+    app->ble = bt_profile_start(app->bt, ble_profile_hid, NULL);
+    if(!app->ble) {
+        FURI_LOG_E(TAG, "Failed to start BLE profile");
     }
 
     furi_hal_bt_start_advertising();
@@ -333,7 +359,7 @@ int32_t hid_cookie_ble_app(void* p) {
 
     bt_keys_storage_set_default_path(app->bt);
 
-    if(!bt_set_profile(app->bt, BtProfileSerial)) {
+    if(!bt_profile_restore_default(app->bt)) {
         FURI_LOG_E(TAG, "Failed to switch to Serial profile");
     }
 
