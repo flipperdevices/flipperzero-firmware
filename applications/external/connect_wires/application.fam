@@ -8,6 +8,6 @@ App(
     fap_icon="flipper_game_connect_wires_10x.png",
     fap_author="AlexTaran",
     fap_weburl="https://github.com/AlexTaran/flipperzero",
-    fap_version=(1, 0),
+    fap_version=(1, 2),
     fap_description="A puzzle game about rotating differently shaped wires to connect power source with consumers.",
 )

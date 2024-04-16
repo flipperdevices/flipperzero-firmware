@@ -5,3 +5,4 @@ You have a rectangular field of elements and your task is to turn each of them s
 to the power source.
 
 The game ends when all the wires are used and deliver power to all lamps.
+Controls are intuitive. Use long press Ok to change default rotation direction.
