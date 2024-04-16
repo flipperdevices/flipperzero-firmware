@@ -8,7 +8,6 @@
 /*** Includes ***/
 #include <notification/notification_messages.h>
 
-#include "lrf_serial_comm.h"
 #include "led_control.h"
 
 
