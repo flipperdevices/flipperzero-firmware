@@ -12,9 +12,9 @@ class App:
         self._navi = navi
         self._name = name
 
-    def go_into(self):
-        self._navi.go_to_main_screen()
+    async def go_into(self):
+        await self._navi.go_to_main_screen()
         sleep(1)
-        self._navi.press_ok()
-        self._navi.go_to(self._name)
-        self._navi.press_ok()
+        await self._navi.press_ok()
+        await self._navi.go_to(self._name)
+        await self._navi.press_ok()

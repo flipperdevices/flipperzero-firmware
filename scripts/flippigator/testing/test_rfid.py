@@ -11,8 +11,8 @@ os.system("color")
 @pytest.mark.rfid
 class TestRfid(BaseCase):
     @pytest.mark.smoke
-    def test_rfid_menu(self, nav):
-        nav.rfid.go_into()
+    async def test_rfid_menu(self, nav):
+        await nav.rfid.go_into()
         menu_ref = [
             "Read",
             "Saved",
@@ -21,24 +21,24 @@ class TestRfid(BaseCase):
         ]
 
         assert (
-            nav.get_menu_list(
+            await nav.get_menu_list(
                 ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
             )
             == menu_ref
         ), "RFID menu list is wrong"
 
-        nav.go_to_main_screen()
+        await nav.go_to_main_screen()
 
     @pytest.mark.smoke
-    def test_read(self, nav):
-        nav.rfid.go_into()
-        nav.go_to("Read")
-        nav.press_ok()
-        state = nav.get_current_state()
+    async def test_read(self, nav):
+        await nav.rfid.go_into()
+        await nav.go_to("Read")
+        await nav.press_ok()
+        state = await nav.get_current_state()
 
         assert "ReadingRFID" in state, "RFID Reading failed"
 
-        nav.go_to_main_screen()
+        await nav.go_to_main_screen()
 
     """
     I think that it's time to del all handy test from this repo
@@ -103,20 +103,20 @@ class TestRfid(BaseCase):
     """
 
     @pytest.mark.smoke
-    def test_saved(self, nav):
-        nav.rfid.go_into()
-        nav.go_to("Saved")
-        nav.press_ok()
-        state = nav.get_current_state()
+    async def test_saved(self, nav):
+        await nav.rfid.go_into()
+        await nav.go_to("Saved")
+        await nav.press_ok()
+        state = await nav.get_current_state()
 
         assert "FileBrowserLevelUp" in state, "File browser in 'Saved' was not opened"
 
-        nav.go_to_main_screen()
+        await nav.go_to_main_screen()
 
-    def test_add_manually(self, nav):
-        nav.rfid.go_into()
-        nav.go_to("Add Manually")
-        nav.press_ok()
+    async def test_add_manually(self, nav):
+        await nav.rfid.go_into()
+        await nav.go_to("Add Manually")
+        await nav.press_ok()
         menu_ref = [
             "EM-Micro EM4100",
             "EM-Micro EM4100/32",
@@ -141,19 +141,19 @@ class TestRfid(BaseCase):
         ]
 
         assert (
-            nav.get_menu_list(
+            await nav.get_menu_list(
                 ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
             )
             == menu_ref
         ), "RFID Add manually option list is wrong"
 
-        nav.go_to_main_screen()
+        await nav.go_to_main_screen()
 
     @pytest.mark.smoke
-    def test_add_manually_smoke(self, nav):
-        nav.rfid.go_into()
-        nav.go_to("Add Manually")
-        nav.press_ok()
+    async def test_add_manually_smoke(self, nav):
+        await nav.rfid.go_into()
+        await nav.go_to("Add Manually")
+        await nav.press_ok()
         menu_ref = [
             "EM-Micro EM4100",
             "EM-Micro EM4100/32",
@@ -178,19 +178,19 @@ class TestRfid(BaseCase):
         ]
 
         assert (
-            nav.get_menu_list(
+            await nav.get_menu_list(
                 ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
             )
             == menu_ref
         ), "RFID Add manually option list is wrong"
 
-        nav.go_to_main_screen()
+        await nav.go_to_main_screen()
 
     @pytest.mark.smoke
-    def test_extra_options(self, nav):
-        nav.rfid.go_into()
-        nav.go_to("Extra Actions")
-        nav.press_ok()
+    async def test_extra_options(self, nav):
+        await nav.rfid.go_into()
+        await nav.go_to("Extra Actions")
+        await nav.press_ok()
         menu_ref = [
             "Read ASK (Animal, Ordina...",
             "Read PSK (Indala)",
@@ -198,10 +198,10 @@ class TestRfid(BaseCase):
         ]
 
         assert (
-            nav.get_menu_list(
+            await nav.get_menu_list(
                 ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
             )
             == menu_ref
         ), "RFID Add manually option list is wrong"
 
-        nav.go_to_main_screen()
+        await nav.go_to_main_screen()

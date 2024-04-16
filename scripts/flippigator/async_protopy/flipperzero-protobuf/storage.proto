@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package PB_Storage;
+option java_package = "com.flipperdevices.protobuf.storage";
+
+message File {
+    enum FileType {
+        FILE = 0;   // default value
+        DIR = 1;
+    }
+    FileType type = 1;
+    string name = 2;
+    uint32 size = 3;
+    bytes data = 4;
+    string md5sum = 5;
+}
+
+message InfoRequest {
+    string path = 1;
+}
+
+message InfoResponse {
+    uint64 total_space = 1;
+    uint64 free_space = 2;
+}
+
+message TimestampRequest {
+    string path = 1;
+}
+
+message TimestampResponse {
+    uint32 timestamp = 1;
+}
+
+message StatRequest {
+    string path = 1;
+}
+
+message StatResponse {
+    File file = 1;
+}
+
+message ListRequest {
+    string path = 1;
+    bool include_md5 = 2;
+    uint32 filter_max_size = 3;
+}
+
+message ListResponse {
+    repeated File file = 1;
+}
+
+message ReadRequest {
+    string path = 1;
+}
+
+message ReadResponse {
+    File file = 1;
+}
+
+message WriteRequest {
+    string path = 1;
+    File file = 2;
+}
+
+message DeleteRequest {
+    string path = 1;
+    bool recursive = 2;
+}
+
+message MkdirRequest {
+    string path = 1;
+}
+
+message Md5sumRequest {
+    string path = 1;
+}
+
+message Md5sumResponse {
+    string md5sum = 1;
+}
+
+message RenameRequest {
+    string old_path = 1;
+    string new_path = 2;
+}
+
+message BackupCreateRequest {
+    string archive_path = 1;
+}
+
+message BackupRestoreRequest {
+    string archive_path = 1;
+}

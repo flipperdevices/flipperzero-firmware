@@ -12,12 +12,14 @@ numpy==1.24.2
 opencv-python==4.7.0.72
 packaging==23.0
 pathspec==0.11.0
+Pillow==9.5.0
 platformdirs==3.1.1
 pluggy==1.0.0
-protobuf==4.21.12
+protobuf==4.23.1
 pyserial==3.5
+pyserial-asyncio==0.6
 pytest==7.2.0
-pillow==9.5.0
+pytest-asyncio==0.23.6
 six==1.16.0
 termcolor==2.1.0
 tomli==2.0.1

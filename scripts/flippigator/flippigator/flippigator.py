@@ -18,6 +18,8 @@ from flippigator.modules.subghz import AppSubGhz
 from flippigator.modules.u2f import AppU2f
 from PIL import Image, ImageDraw, ImageFont
 
+from async_protopy.commands.gui_commands import StartScreenStreamRequestCommand
+
 # APPLY_TEMPLATE_THRESHOLD = 0.99
 SCREEN_H = 128
 SCREEN_W = 64
@@ -37,6 +39,7 @@ class Navigator:
     ):
         self.imRef = dict()
         self.proto = proto
+        self.screen_stream = None
         self._debugFlag = debug
         self._guiFlag = gui
         self._scale = scale
@@ -75,8 +78,13 @@ class Navigator:
     def __del__(self):
         pass
 
-    def update_screen(self):
-        data = self.proto.rpc_gui_snapshot_screen()
+    async def update_screen(self):
+        if self.screen_stream is None:
+            self.screen_stream = await self.proto.stream(StartScreenStreamRequestCommand(), command_id=0)
+            await self.screen_stream.__anext__()
+
+        screen_response = await self.screen_stream.__anext__()
+        data = screen_response.gui_screen_frame.data
 
         def get_bin(x):
             return format(x, "b")
@@ -262,14 +270,14 @@ class Navigator:
 
         return found_ic
 
-    def get_current_state(self, timeout: float = 2, ref=None, area=(0, 64, 0, 128)):
+    async def get_current_state(self, timeout: float = 2, ref=None, area=(0, 64, 0, 128)):
         if ref is None:
             ref = self.imRef
-        self.update_screen()
+        await self.update_screen()
         state = self.recog_ref(ref, area)
         start_time = time.time()
         while len(state) == 0:
-            self.update_screen()
+            await self.update_screen()
             state = self.recog_ref(ref, area)
             if time.time() - start_time > timeout:
                 self.logger.error("Recognition timeout! Screenshot will be saved!")
@@ -278,10 +286,10 @@ class Navigator:
                 break
         return state
 
-    def wait_for_state(self, state, timeout=5) -> int:
+    async def wait_for_state(self, state, timeout=5) -> int:
         start_time = time.time()
         while start_time + timeout > time.time():
-            cur_state = self.get_current_state(timeout=0.1)
+            cur_state = await self.get_current_state(timeout=0.1)
             if state in cur_state:
                 return 0
         return -1
@@ -290,32 +298,46 @@ class Navigator:
         self.logger.info("Save screenshot: " + str(filename))
         cv.imwrite(f"img/{filename}", self.screen_image)
 
-    def press_down(self):
-        self.proto.rpc_gui_send_input("SHORT DOWN")
+    async def press_down(self):
+        await self.proto.gui.send_input_event_request(key='DOWN', itype='PRESS')
+        await self.proto.gui.send_input_event_request(key='DOWN', itype='SHORT')
+        await self.proto.gui.send_input_event_request(key='DOWN', itype='RELEASE')
         self.logger.debug("Press DOWN")
 
-    def press_up(self):
-        self.proto.rpc_gui_send_input("SHORT UP")
+    async def press_up(self):
+        await self.proto.gui.send_input_event_request(key='UP', itype='PRESS')
+        await self.proto.gui.send_input_event_request(key='UP', itype='SHORT')
+        await self.proto.gui.send_input_event_request(key='UP', itype='RELEASE')
         self.logger.debug("Press UP")
 
-    def press_left(self):
-        self.proto.rpc_gui_send_input("SHORT LEFT")
+    async def press_left(self):
+        await self.proto.gui.send_input_event_request(key='LEFT', itype='PRESS')
+        await self.proto.gui.send_input_event_request(key='LEFT', itype='SHORT')
+        await self.proto.gui.send_input_event_request(key='LEFT', itype='RELEASE')
         self.logger.debug("Press LEFT")
 
-    def press_right(self):
-        self.proto.rpc_gui_send_input("SHORT RIGHT")
+    async def press_right(self):
+        await self.proto.gui.send_input_event_request(key='RIGHT', itype='PRESS')
+        await self.proto.gui.send_input_event_request(key='RIGHT', itype='SHORT')
+        await self.proto.gui.send_input_event_request(key='RIGHT', itype='RELEASE')
         self.logger.debug("Press RIGHT")
 
-    def press_ok(self):
-        self.proto.rpc_gui_send_input("SHORT OK")
+    async def press_ok(self):
+        await self.proto.gui.send_input_event_request(key='OK', itype='PRESS')
+        await self.proto.gui.send_input_event_request(key='OK', itype='SHORT')
+        await self.proto.gui.send_input_event_request(key='OK', itype='RELEASE')
         self.logger.debug("Press OK")
 
-    def press_long_ok(self):
-        self.proto.rpc_gui_send_input("LONG OK")
+    async def press_long_ok(self):
+        await self.proto.gui.send_input_event_request(key='OK', itype='PRESS')
+        await self.proto.gui.send_input_event_request(key='OK', itype='LONG')
+        await self.proto.gui.send_input_event_request(key='OK', itype='RELEASE')
         self.logger.debug("Press LONG OK")
 
-    def press_back(self):
-        self.proto.rpc_gui_send_input("SHORT BACK")
+    async def press_back(self):
+        await self.proto.gui.send_input_event_request(key='BACK', itype='PRESS')
+        await self.proto.gui.send_input_event_request(key='BACK', itype='SHORT')
+        await self.proto.gui.send_input_event_request(key='BACK', itype='RELEASE')
         self.logger.debug("Press BACK")
 
     def press(self, duration: str = "SHORT", button: str = "OK"):
@@ -326,16 +348,16 @@ class Navigator:
         self.proto.rpc_gui_send_input(f"{duration} {button}")
         self.logger.debug("Press " + button)
 
-    def get_menu_list(self, ref=None):
+    async def get_menu_list(self, ref=None):
         if ref == None:
             ref = self.imRef
         time.sleep(0.2)
         self.logger.info("Scanning menu list")
         menus = list()
-        self.get_current_state(timeout=0.2, ref=ref)
+        await self.get_current_state(timeout=0.2, ref=ref)
 
         while True:
-            cur = self.get_current_state(timeout=0.2, ref=ref)
+            cur = await self.get_current_state(timeout=0.2, ref=ref)
             if not (cur == []):
                 if cur[0] in menus:
                     break
@@ -344,29 +366,29 @@ class Navigator:
             else:
                 menus.append("Missed template!!")
                 self.logger.warning("Found undescribed item")
-            self.press_down()
+            await self.press_down()
 
         self.logger.info("Found menus: " + str(menus))
         return menus
 
-    def get_first_item(self, browser: Optional[bool] = False):
+    async def get_first_item(self, browser: Optional[bool] = False):
         """
         Get first item in menu
         browser: if True, will skip first item (folder UP icon"
         """
         time.sleep(0.2)
         menus = list()
-        cur = self.get_current_state()
+        cur = await self.get_current_state()
 
         if browser:
             if not (cur == []):
-                self.press_down()
-                cur = self.get_current_state()
+                await self.press_down()
+                cur = await self.get_current_state()
                 menus.append(cur[0])
 
         return menus
 
-    def go_to(
+    async def go_to(
         self,
         target,
         area=(0, 64, 0, 128),
@@ -377,64 +399,67 @@ class Navigator:
             self.logger.info("Going to " + target)
             self.logger.info("No ref for target, generating from text" + target)
             ref = self.get_ref_all_fonts(target)
-            state = self.get_current_state(area=area, timeout=0.1, ref=ref)
+            state = await self.get_current_state(area=area, timeout=0.1, ref=ref)
 
             start_time = time.time()
             while start_time + timeout > time.time():
-                state = self.get_current_state(area=area, timeout=0.1, ref=ref)
+                state = await self.get_current_state(area=area, timeout=0.1, ref=ref)
                 if len(state) != 0:
                     return 0
                 if direction == "down":
-                    self.press_down()
+                    await self.press_down()
                 elif direction == "up":
-                    self.press_up()
+                    await self.press_up()
             return -1
         else:
-            state = self.get_current_state(area=area, timeout=0.3)
+            state = await self.get_current_state(area=area, timeout=0.3)
             self.logger.info("Going to " + target)
 
             start_time = time.time()
             while start_time + timeout > time.time():
-                state = self.get_current_state(area=area, timeout=0.5)
+                state = await self.get_current_state(area=area, timeout=0.5)
                 if target in state:
                     return 0
                 if direction == "down":
-                    self.press_down()
+                    await self.press_down()
                 elif direction == "up":
-                    self.press_up()
+                    await self.press_up()
             return -1
 
-    def open(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
-        self.go_to(target, area, direction)
-        self.press_ok()
+    async def open(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
+        await self.go_to(target, area, direction)
+        await self.press_ok()
 
-    def go_to_main_screen(self):
-        self.press_back()
-        self.press_back()
-        self.press_back()
+    async def go_to_main_screen(self):
+        self.logger.error('no back 1')
+
+        await self.press_back()
+        await self.press_back()
+        await self.press_back()
+        self.logger.error('no back')
         time.sleep(0.1)  # try to fix freeze while emilating Mfc1K
-        state = self.get_current_state(timeout=0.1)
+        state = await self.get_current_state(timeout=0.1)
         while not ("SDcardIcon" in state):
-            state = self.get_current_state(timeout=0.1)
+            state = await self.get_current_state(timeout=0.1)
             if "ExitLeft" in state:
-                self.press_left()
+                await self.press_left()
             else:
-                self.press_back()
+                await self.press_back()
 
         time.sleep(1.5)  # wait for some time, because of missing key pressing
 
-    def open_file(self, module, filename):
+    async def open_file(self, module, filename):
         self.logger.info("Opening file '" + filename + "' in module '" + module + "'")
-        self.go_to_main_screen()
+        await self.go_to_main_screen()
         time.sleep(1)
-        self.press_down()
+        await self.press_down()
         time.sleep(0.4)  # some waste "heads" going at the opening of browser
 
         heads = list()
         start_time = time.time()
 
         while start_time + 10 > time.time():
-            cur = self.get_current_state(area=(0, 16, 0, 128))
+            cur = await self.get_current_state(area=(0, 16, 0, 128))
             if not cur == []:
                 if cur[0] == ("browser_head_" + module):
                     break
@@ -442,7 +467,7 @@ class Navigator:
                     self.logger.warning("Module not found!")
                     return -1
                 heads.append(cur[0])
-                self.press_right()
+                await self.press_right()
         if start_time + 10 <= time.time():
             self.logger.warning("Module not found! (timeout)")
             return -1
@@ -450,28 +475,28 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        result = self.go_to(filename, area=(15, 64, 0, 128), timeout=15)
+        result = await self.go_to(filename, area=(15, 64, 0, 128), timeout=15)
         if result == -1:
             self.logger.warning("File not found!")
             return -1
 
-        self.press_ok()
-        self.go_to("browser_Run in app", area=(15, 64, 0, 128))
-        self.press_ok()
+        await self.press_ok()
+        await self.go_to("browser_Run in app", area=(15, 64, 0, 128))
+        await self.press_ok()
         self.logger.info("File opened")
 
-    def delete_file(self, module, filename):
+    async def delete_file(self, module, filename):
         self.logger.info("Deleting file '" + filename + "' in module '" + module + "'")
-        self.go_to_main_screen()
+        await self.go_to_main_screen()
         time.sleep(1)
-        self.press_down()
+        await self.press_down()
         time.sleep(0.4)
 
         heads = list()
         start_time = time.time()
 
         while start_time + 10 > time.time():
-            cur = self.get_current_state(area=(0, 16, 0, 128))
+            cur = await self.get_current_state(area=(0, 16, 0, 128))
 
             if not cur == []:
                 if cur[0] == ("browser_head_" + module):
@@ -480,7 +505,7 @@ class Navigator:
                     self.logger.warning("Module not found!")
                     return -1
                 heads.append(cur[0])
-                self.press_right()
+                await self.press_right()
             if start_time + 10 <= time.time():
                 self.logger.warning("Module not found! (timeout)")
                 return -1
@@ -493,12 +518,12 @@ class Navigator:
             self.logger.warning("File not found! (timeout)")
             return -1
 
-        self.press_ok()
-        self.go_to("browser_Delete", area=(15, 64, 0, 128))
-        self.press_ok()
-        self.press_right()
+        await self.press_ok()
+        await self.go_to("browser_Delete", area=(15, 64, 0, 128))
+        await self.press_ok()
+        await self.press_right()
         self.logger.info("File deleted")
-        self.go_to_main_screen()
+        await self.go_to_main_screen()
 
 
 class Gator:
@@ -520,23 +545,23 @@ class Gator:
     def __del__(self):
         pass
 
-    def home(self):
-        self._serial.reset_output_buffer()
-        self._serial.reset_input_buffer()
+    async def home(self):
+        await self._serial.drain()
+        await self._serial.clear_read_buffer()
         time.sleep(0.2)
-        self._serial.write(("$H\n").encode("ASCII"))
-        status = self._serial.readline()
+        await self._serial.write(("$H\n").encode("ASCII"))
+        status = await self._serial.readline()
         self.logger.info("Homing in progress")
         while status.decode("ASCII").find("ok") == -1:
-            status = self._serial.readline()
+            status = await self._serial.readline()
             time.sleep(0.2)
 
     def transform(self, x, y, speed=3000):
         return (-x - self._x_size, -y - self._y_size, speed)
 
-    def swim_to(self, x, y, speed=3000):
-        self._serial.reset_output_buffer()
-        self._serial.write(
+    async def swim_to(self, x, y, speed=3000):
+        await self._serial.drain()
+        await self._serial.write(
             ("$J = X" + str(x) + " Y" + str(y) + " F" + str(speed) + "\n").encode(
                 "ASCII"
             )
@@ -544,14 +569,14 @@ class Gator:
         if self._debugFlag == True:
             self.logger.info("Moving to X" + str(x) + " Y" + str(y) + " F" + str(speed))
         time.sleep(0.2)
-        self._serial.reset_input_buffer()
-        self._serial.write(("?\n").encode("ASCII"))
-        status = self._serial.readline()
+        await self._serial.clear_read_buffer()
+        await self._serial.write(("?\n").encode("ASCII"))
+        status = await self._serial.readline()
         while status.decode("ASCII").find("Idle") == -1:
             self.logger.debug("Moving in process")
-            self._serial.reset_input_buffer()
-            self._serial.write(("?\n").encode("ASCII"))
-            status = self._serial.readline()
+            await self._serial.clear_read_buffer()
+            await self._serial.write(("?\n").encode("ASCII"))
+            status = await self._serial.readline()
             time.sleep(0.2)
 
 
@@ -578,9 +603,9 @@ class Reader:
     def __del__(self):
         pass
 
-    def go_to_place(self) -> None:
+    async def go_to_place(self) -> None:
         self.logger.info("Moving to reader")
-        self._gator.swim_to(self._x_coord, self._y_coord, 15000)
+        await self._gator.swim_to(self._x_coord, self._y_coord, 15000)
 
     def is_available(self) -> bool:
         if self._recieved_data:
@@ -588,16 +613,16 @@ class Reader:
         else:
             return False
 
-    def update(self) -> bool:
-        line = self._serial.readline()
+    async def update(self) -> bool:
+        line = await self._serial.readline()
         if len(line):
             self._recieved_data = line.decode("utf-8")
             return True
         else:
             return False
 
-    def clear(self) -> None:
-        self._serial.flushInput()
+    async def clear(self) -> None:
+        await self._serial.clear_read_buffer()
         self._recieved_data = 0
 
     def get(self) -> str:
@@ -616,7 +641,7 @@ class Relay:
         self._recieved_data = 0
         self._curent_reader = 0
         self._curent_key = 0
-        self._serial.reset_output_buffer()
+        self._serial.reset_output_buffer() # TODO: move it out
 
         self._serial.write(("R0K0\n").encode("ASCII"))
         self.logger = logging.getLogger("Relay")
@@ -626,15 +651,15 @@ class Relay:
     def __del__(self):
         pass
 
-    def set_reader(self, reader):
-        self._serial.write(
+    async def set_reader(self, reader):
+        await self._serial.write(
             ("R" + str(reader) + "K" + str(self._curent_key) + "\n").encode("ASCII")
         )
         self._curent_reader = reader
         self.logger.info("Selected reader: " + str(self._curent_reader))
 
-    def set_key(self, key):
-        self._serial.write(
+    async def set_key(self, key):
+        await self._serial.write(
             ("R" + str(self._curent_reader) + "K" + str(key) + "\n").encode("ASCII")
         )
         self._curent_key = key
@@ -646,8 +671,8 @@ class Relay:
     def get_key(self) -> int:
         return self._curent_key
 
-    def reset(self):
-        self._serial.write(("R0K0\n").encode("ASCII"))
+    async def reset(self):
+        await self._serial.write(("R0K0\n").encode("ASCII"))
         self._curent_reader = 0
         self._curent_key = 0
         self.logger.info("Reset relay module")
@@ -677,7 +702,7 @@ class FlipperTextKeyboard:
         else:
             return (col_index, row_index)
 
-    def send(self, text):
+    async def send(self, text):
         self.nav.logger.info("Printing on Text keyboard: " + text)
         current_x, current_y = self._coord("\n")
         text = text + "\n"
@@ -698,12 +723,12 @@ class FlipperTextKeyboard:
             for _ in range(step_y):
                 if dir_up:
                     current_y -= 1
-                    self.nav.press_up()
+                    await self.nav.press_up()
                     if self.keeb[current_y][current_x] == "\0":
                         step_x += 1
                 else:
                     current_y += 1
-                    self.nav.press_down()
+                    await self.nav.press_down()
                     if self.keeb[current_y][current_x] == "\0":
                         step_x -= 1
 
@@ -711,16 +736,16 @@ class FlipperTextKeyboard:
                 if dir_left:
                     current_x -= 1
                     if self.keeb[current_y][current_x] != "\0":
-                        self.nav.press_left()
+                        await self.nav.press_left()
                 else:
                     current_x += 1
                     if self.keeb[current_y][current_x] != "\0":
-                        self.nav.press_right()
+                        await self.nav.press_right()
 
             if letter.isupper():
-                self.nav.press_long_ok()
+                await self.nav.press_long_ok()
             else:
-                self.nav.press_ok()
+                await self.nav.press_ok()
 
 
 class FlipperHEXKeyboard:
@@ -746,7 +771,7 @@ class FlipperHEXKeyboard:
         else:
             return (col_index, row_index)
 
-    def send(self, text):
+    async def send(self, text):
         self.nav.logger.info("Printing on HEX keyboard: " + text)
         current_x, current_y = self._coord("0")
         text = text + "\n"
@@ -767,20 +792,20 @@ class FlipperHEXKeyboard:
             for _ in range(step_y):
                 if dir_up:
                     current_y -= 1
-                    self.nav.press_up()
+                    await self.nav.press_up()
                 else:
                     current_y += 1
-                    self.nav.press_down()
+                    await self.nav.press_down()
 
             for _ in range(step_x):
                 if dir_left:
                     current_x -= 1
-                    self.nav.press_left()
+                    await self.nav.press_left()
                 else:
                     current_x += 1
-                    self.nav.press_right()
+                    await self.nav.press_right()
 
-            self.nav.press_ok()
+            await self.nav.press_ok()
 
 
 class FlippigatorException(Exception):
