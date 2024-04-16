@@ -51,5 +51,5 @@ void picopass_scene_more_info_on_exit(void* context) {
     Picopass* picopass = context;
 
     // Clear views
-    widget_reset(picopass->widget);
+    text_box_reset(picopass->text_box);
 }
