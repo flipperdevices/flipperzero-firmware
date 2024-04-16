@@ -821,7 +821,7 @@ static void pp_model_callback(void* _ctx, uint32_t index) {
     switch(index) {
     case 0:
         payload->mode = PayloadModeRandom;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     case pp_models_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpModelCustom);
@@ -832,14 +832,14 @@ static void pp_model_callback(void* _ctx, uint32_t index) {
         payload->bruteforce.value = cfg->data.proximity_pair.model;
         payload->bruteforce.size = 2;
         cfg->data.proximity_pair.bruteforce_mode = ContinuityPpBruteforceModel;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     default:
         if(payload->mode != PayloadModeBruteforce ||
            cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceModel)
             payload->mode = PayloadModeValue;
         cfg->data.proximity_pair.model = pp_models[index - 1].value;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     }
 }
@@ -881,8 +881,11 @@ void scene_continuity_pp_model_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
 }
 bool scene_continuity_pp_model_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_continuity_pp_model_on_exit(void* _ctx) {
@@ -898,8 +901,7 @@ static void pp_model_custom_callback(void* _ctx) {
        cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceModel)
         payload->mode = PayloadModeValue;
     cfg->data.proximity_pair.model = (ctx->byte_store[0] << 0x08) + (ctx->byte_store[1] << 0x00);
-    scene_manager_previous_scene(ctx->scene_manager);
-    scene_manager_previous_scene(ctx->scene_manager);
+    view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
 }
 void scene_continuity_pp_model_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
@@ -918,8 +920,12 @@ void scene_continuity_pp_model_custom_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
 bool scene_continuity_pp_model_custom_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_continuity_pp_model_custom_on_exit(void* _ctx) {
@@ -950,13 +956,13 @@ static void pp_color_callback(void* _ctx, uint32_t index) {
         payload->bruteforce.value = cfg->data.proximity_pair.color;
         payload->bruteforce.size = 1;
         cfg->data.proximity_pair.bruteforce_mode = ContinuityPpBruteforceColor;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
     } else {
         if(payload->mode != PayloadModeBruteforce ||
            cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceColor)
             payload->mode = PayloadModeValue;
         cfg->data.proximity_pair.color = pp_models[model_index].colors[index].value;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
     }
 }
 void scene_continuity_pp_color_on_enter(void* _ctx) {
@@ -1005,8 +1011,11 @@ void scene_continuity_pp_color_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
 }
 bool scene_continuity_pp_color_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_continuity_pp_color_on_exit(void* _ctx) {
@@ -1022,8 +1031,7 @@ static void pp_color_custom_callback(void* _ctx) {
        cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceColor)
         payload->mode = PayloadModeValue;
     cfg->data.proximity_pair.color = (ctx->byte_store[0] << 0x00);
-    scene_manager_previous_scene(ctx->scene_manager);
-    scene_manager_previous_scene(ctx->scene_manager);
+    view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
 }
 void scene_continuity_pp_color_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
@@ -1041,8 +1049,12 @@ void scene_continuity_pp_color_custom_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
 bool scene_continuity_pp_color_custom_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_continuity_pp_color_custom_on_exit(void* _ctx) {
@@ -1056,14 +1068,14 @@ static void pp_prefix_callback(void* _ctx, uint32_t index) {
     switch(index) {
     case 0:
         cfg->data.proximity_pair.prefix = 0x00;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     case pp_prefixes_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpPrefixCustom);
         break;
     default:
         cfg->data.proximity_pair.prefix = pp_prefixes[index - 1].value;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     }
 }
@@ -1098,8 +1110,11 @@ void scene_continuity_pp_prefix_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
 }
 bool scene_continuity_pp_prefix_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_continuity_pp_prefix_on_exit(void* _ctx) {
@@ -1112,8 +1127,7 @@ static void pp_prefix_custom_callback(void* _ctx) {
     Payload* payload = &ctx->attack->payload;
     ContinuityCfg* cfg = &payload->cfg.continuity;
     cfg->data.proximity_pair.prefix = (ctx->byte_store[0] << 0x00);
-    scene_manager_previous_scene(ctx->scene_manager);
-    scene_manager_previous_scene(ctx->scene_manager);
+    view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
 }
 void scene_continuity_pp_prefix_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
@@ -1131,8 +1145,12 @@ void scene_continuity_pp_prefix_custom_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
 bool scene_continuity_pp_prefix_custom_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_continuity_pp_prefix_custom_on_exit(void* _ctx) {
@@ -1146,7 +1164,7 @@ static void na_action_callback(void* _ctx, uint32_t index) {
     switch(index) {
     case 0:
         payload->mode = PayloadModeRandom;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     case na_actions_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneContinuityNaActionCustom);
@@ -1156,12 +1174,12 @@ static void na_action_callback(void* _ctx, uint32_t index) {
         payload->bruteforce.counter = 0;
         payload->bruteforce.value = cfg->data.nearby_action.action;
         payload->bruteforce.size = 1;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     default:
         payload->mode = PayloadModeValue;
         cfg->data.nearby_action.action = na_actions[index - 1].value;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     }
 }
@@ -1201,8 +1219,11 @@ void scene_continuity_na_action_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
 }
 bool scene_continuity_na_action_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_continuity_na_action_on_exit(void* _ctx) {
@@ -1216,8 +1237,7 @@ static void na_action_custom_callback(void* _ctx) {
     ContinuityCfg* cfg = &payload->cfg.continuity;
     payload->mode = PayloadModeValue;
     cfg->data.nearby_action.action = (ctx->byte_store[0] << 0x00);
-    scene_manager_previous_scene(ctx->scene_manager);
-    scene_manager_previous_scene(ctx->scene_manager);
+    view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
 }
 void scene_continuity_na_action_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
@@ -1235,8 +1255,12 @@ void scene_continuity_na_action_custom_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
 bool scene_continuity_na_action_custom_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_continuity_na_action_custom_on_exit(void* _ctx) {
@@ -1245,7 +1269,7 @@ void scene_continuity_na_action_custom_on_exit(void* _ctx) {
 
 static void na_flags_callback(void* _ctx) {
     Ctx* ctx = _ctx;
-    scene_manager_previous_scene(ctx->scene_manager);
+    view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
 }
 void scene_continuity_na_flags_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
@@ -1264,6 +1288,10 @@ void scene_continuity_na_flags_on_enter(void* _ctx) {
 }
 bool scene_continuity_na_flags_on_event(void* _ctx, SceneManagerEvent event) {
     Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     if(event.type == SceneManagerEventTypeBack) {
         ctx->byte_store[0] = 0x00;
     }

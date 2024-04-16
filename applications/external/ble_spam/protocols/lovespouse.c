@@ -195,7 +195,7 @@ static void mode_callback(void* _ctx, uint32_t index) {
     LovespouseCfg* cfg = &payload->cfg.lovespouse;
     if(index == 0) {
         payload->mode = PayloadModeRandom;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
     } else if(index == modes[cfg->state].count + 1U) {
         scene_manager_next_scene(ctx->scene_manager, SceneLovespouseModeCustom);
     } else if(modes[cfg->state].count + 2U) {
@@ -203,11 +203,11 @@ static void mode_callback(void* _ctx, uint32_t index) {
         payload->bruteforce.counter = 0;
         payload->bruteforce.value = cfg->mode;
         payload->bruteforce.size = 3;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
     } else {
         payload->mode = PayloadModeValue;
         cfg->mode = modes[cfg->state].modes[index - 1].value;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
     }
 }
 void scene_lovespouse_mode_on_enter(void* _ctx) {
@@ -246,8 +246,11 @@ void scene_lovespouse_mode_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
 }
 bool scene_lovespouse_mode_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_lovespouse_mode_on_exit(void* _ctx) {
@@ -262,8 +265,7 @@ static void mode_custom_callback(void* _ctx) {
     payload->mode = PayloadModeValue;
     cfg->mode =
         (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
-    scene_manager_previous_scene(ctx->scene_manager);
-    scene_manager_previous_scene(ctx->scene_manager);
+    view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
 }
 void scene_lovespouse_mode_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
@@ -283,8 +285,12 @@ void scene_lovespouse_mode_custom_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
 bool scene_lovespouse_mode_custom_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_lovespouse_mode_custom_on_exit(void* _ctx) {
