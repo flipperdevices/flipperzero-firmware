@@ -96,11 +96,19 @@ void boilerplate_app_free(Boilerplate* app) {
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdScene1);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdScene2);
+    view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdScene3);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdSettings);
+    view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdStartscreen);
     submenu_free(app->submenu);
+    variable_item_list_free(app->variable_item_list);
+    boilerplate_scene_1_free(app->boilerplate_scene_1);
+    boilerplate_scene_2_free(app->boilerplate_scene_2);
+    boilerplate_startscreen_free(app->boilerplate_startscreen);
 
     view_dispatcher_free(app->view_dispatcher);
+
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
 
     app->gui = NULL;
     app->notification = NULL;
