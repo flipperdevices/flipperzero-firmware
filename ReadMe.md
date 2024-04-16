@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0329-0318-0.100.2-f601860](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-16 02:30 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-16 02:30 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-16 03:25 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-16 03:25 EST`
 - OFW: [Bad USB: fix crash when selecting a keyboard layout #3555 (By vanguacamolie)](https://github.com/flipperdevices/flipperzero-firmware/pull/3555)
 - OFW: [IR: Remember OTG state #3549 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3549)
 - OFW: [Mifare Ultralight naming fix #3551 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3551)
@@ -85,6 +85,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [J305 Geiger Counter v1.3 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [NFC Magic v1.8 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) (Gen4 changes from UL)
 - Updated: [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)
+- UL: [Other apps updated (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7dc3af7bead18d70a980e8adf05f7e7a3b9b38ed)
 
 <a name="release">
 
