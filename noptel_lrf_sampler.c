@@ -191,7 +191,7 @@ typedef struct {
 /** App structure **/
 typedef struct {
 
-  /* App notifications (used for backlight control) */
+  /* App notifications */
   NotificationApp *notifications;
 
   /* View dispatcher */
@@ -520,8 +520,10 @@ void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
      play a beep */
   if(sampler_model->config.beep && (lrf_sample->dist1 > 0.5 ||
 					lrf_sample->dist2 > 0.5 ||
-					lrf_sample->dist3 > 0.5))
+					lrf_sample->dist3 > 0.5)) {
     sampler_model->play_beep = true;
+    furi_timer_start(app->speaker_control_timer, 1);
+  }
 
   /* Find the next spot in the samples ring buffer */
   prev_samples_end_i = sampler_model->samples_end_i;
@@ -1273,17 +1275,12 @@ static void speaker_control_timer_callback(void *ctx) {
     furi_timer_start(app->speaker_control_timer, min_beep_duration);
   }
 
-  /* If the speaker is beeping, stop it */
+  /* If the speaker is beeping, stop it and don't reschedule ourselves */
   else
-  {
     if(sampler_model->beep_playing && furi_hal_speaker_is_mine()) {
       furi_hal_speaker_stop();
       furi_hal_speaker_release();
       sampler_model->beep_playing = false;
-    }
-
-    /* Reschedule ourselves in 10 ms, so we can start a new beep asap */
-    furi_timer_start(app->speaker_control_timer, 10);
   }
 }
 
@@ -1578,12 +1575,11 @@ static App *app_init() {
 
 
 
-  /* Setup and start the timer to control the speaker */
+  /* Setup the timer to control the speaker */
   sampler_model->play_beep = false;
   sampler_model->beep_playing = false;
   app->speaker_control_timer = furi_timer_alloc(speaker_control_timer_callback,
 						FuriTimerTypeOnce, app);
-  furi_timer_start(app->speaker_control_timer, 10);
 
 
 
