@@ -495,6 +495,196 @@ static void config_beep_change(VariableItem *item) {
 
 
 
+/** LRF sample handler
+    Called when a LRF sample is available from the LRF serial
+    communication app **/
+void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
+
+  App *app = (App *)ctx;
+  SamplerModel *sampler_model = view_get_model(app->sample_view);
+  uint16_t prev_samples_end_i;
+  float avg_dist1;
+  float avg_dist2;
+  float avg_dist3;
+  uint32_t avg_ampl1;
+  uint32_t avg_ampl2;
+  uint32_t avg_ampl3;
+  uint16_t nb_valid_samples_dist1;
+  uint16_t nb_valid_samples_dist2;
+  uint16_t nb_valid_samples_dist3;
+  uint16_t nb_samples;
+  float timediff;
+  uint16_t i;
+
+  /* If beeps are enabled and any distance in the new LRF sample is valid,
+     play a beep */
+  if(sampler_model->config.beep && (lrf_sample->dist1 > 0.5 ||
+					lrf_sample->dist2 > 0.5 ||
+					lrf_sample->dist3 > 0.5))
+    sampler_model->play_beep = true;
+
+  /* Find the next spot in the samples ring buffer */
+  prev_samples_end_i = sampler_model->samples_end_i;
+  i = prev_samples_end_i + 1;
+  if(i >= SAMPLES_RING_BUFFER_SIZE)
+    i = 0;
+
+  /* If we have room in the ring buffer, insert the new sample */
+  if(i != sampler_model->samples_start_i) {
+    memcpy(&(sampler_model->samples[sampler_model->samples_end_i]),
+		lrf_sample, sizeof(LRFSample));
+    sampler_model->samples_end_i = i;
+  }
+
+  /* Remove samples that are too old from the ring buffer - but always try
+     to keep at least 0.75 seconds worth of samples, or 2 samples, for more
+     accurate effective frequency calculation, even if we don't
+     average samples */
+  while(sampler_model->samples_start_i != prev_samples_end_i &&
+	ms_tick_time_diff(
+		sampler_model->samples[prev_samples_end_i].tstamp_ms,
+		sampler_model->samples[sampler_model->samples_start_i].tstamp_ms
+	) > (double)(sampler_model->config.avg > 0.75?
+			sampler_model->config.avg : 0.75)) {
+    i = sampler_model->samples_start_i + 1;
+    if(i >= SAMPLES_RING_BUFFER_SIZE)
+      i = 0;
+    if(i == prev_samples_end_i)
+      break;
+    sampler_model->samples_start_i = i;
+  }
+
+  /* Calculate the number of samples in the ring buffer */
+  if(sampler_model->samples_end_i >= sampler_model->samples_start_i)
+    nb_samples = sampler_model->samples_end_i - sampler_model->samples_start_i;
+  else
+    nb_samples = SAMPLES_RING_BUFFER_SIZE - sampler_model->samples_start_i +
+			sampler_model->samples_end_i;
+
+  /* Only one sample in the ring buffer */
+  if(nb_samples == 1) {
+
+    /* We can't calculate the effective frequency */
+    sampler_model->eff_freq = -1;
+
+    /* Display that sample directly */
+    memcpy(&(sampler_model->disp_sample),
+		&(sampler_model->samples[prev_samples_end_i]),
+		sizeof(LRFSample));
+  }
+
+  /* We have more than one sample in the ring buffer */
+  else {
+
+    /* If we have at least 0.25 seconds between the oldest and the latest
+       samples' timestamps, calculate the effective sampling frequency */
+    timediff = ms_tick_time_diff(
+			sampler_model->samples[prev_samples_end_i].tstamp_ms,
+			sampler_model->samples[sampler_model->samples_start_i].
+				tstamp_ms);
+    if(timediff >= 0.25)
+      sampler_model->eff_freq = (nb_samples - 1) / timediff;
+    else
+      sampler_model->eff_freq = - 1;
+
+    /* If we don't average samples, display the last sample directly */
+    if(sampler_model->config.avg == 0)
+      memcpy(&(sampler_model->disp_sample),
+		&(sampler_model->samples[prev_samples_end_i]),
+		sizeof(LRFSample));
+
+    /* ...otherwise calculate the average of the valid distances and amplitudes
+       in the ring buffer and display the averages instead */
+    else {
+      avg_dist1 = 0;
+      avg_dist2 = 0;
+      avg_dist3 = 0;
+      avg_ampl1 = 0;
+      avg_ampl2 = 0;
+      avg_ampl3 = 0;
+
+      nb_valid_samples_dist1 = 0;
+      nb_valid_samples_dist2 = 0;
+      nb_valid_samples_dist3 = 0;
+
+      nb_samples = 0;
+
+      i = sampler_model->samples_start_i;
+      while(i != sampler_model->samples_end_i) {
+
+        if(sampler_model->samples[i].dist1 > 0.5) {
+          avg_dist1 += sampler_model->samples[i].dist1;
+          avg_ampl1 += sampler_model->samples[i].ampl1;
+          nb_valid_samples_dist1++;
+        }
+
+        if(sampler_model->samples[i].dist2 > 0.5) {
+          avg_dist2 += sampler_model->samples[i].dist2;
+          avg_ampl2 += sampler_model->samples[i].ampl2;
+          nb_valid_samples_dist2++;
+        }
+
+        if(sampler_model->samples[i].dist3 > 0.5) {
+          avg_dist3 += sampler_model->samples[i].dist3;
+          avg_ampl3 += sampler_model->samples[i].ampl3;
+          nb_valid_samples_dist3++;
+        }
+
+        nb_samples++;
+
+        i++;
+        if(i >= SAMPLES_RING_BUFFER_SIZE)
+          i = 0;
+      }
+
+      if(nb_valid_samples_dist1 > 0) {
+        sampler_model->disp_sample.dist1 = avg_dist1 / nb_valid_samples_dist1;
+        sampler_model->disp_sample.ampl1 = avg_ampl1 / nb_valid_samples_dist1;
+      }
+      else
+        sampler_model->disp_sample.dist1 = NO_AVERAGE;
+
+      if(nb_valid_samples_dist2 > 0) {
+        sampler_model->disp_sample.dist2 = avg_dist2 / nb_valid_samples_dist2;
+        sampler_model->disp_sample.ampl2 = avg_ampl2 / nb_valid_samples_dist2;
+      }
+      else
+        sampler_model->disp_sample.dist2 = NO_AVERAGE;
+
+      if(nb_valid_samples_dist3 > 0) {
+        sampler_model->disp_sample.dist3 = avg_dist3 / nb_valid_samples_dist3;
+        sampler_model->disp_sample.ampl3 = avg_ampl3 / nb_valid_samples_dist3;
+      }
+      else
+        sampler_model->disp_sample.dist3 = NO_AVERAGE;
+    }
+  }
+
+  /* Mark the samples as updated */
+  sampler_model->samples_updated = true;
+}
+
+
+
+/** LRF identification handler
+    Called when a LRF identification frame is available from the LRF serial
+    communication app **/
+void lrf_ident_handler(LRFIdent *lrf_ident, void *ctx) {
+
+  App *app = (App *)ctx;
+  LRFInfoModel *lrfinfo_model = view_get_model(app->lrfinfo_view);
+
+  /* Copy the identification and mark it as valid */
+  memcpy(&(lrfinfo_model->ident), lrf_ident, sizeof(LRFIdent));
+  lrfinfo_model->has_ident = true;
+
+  /* Trigger an LRF info view redraw */
+  with_view_model(app->lrfinfo_view, LRFInfoModel* _model,
+			{UNUSED(_model);}, true);
+}
+
+
+
 /** Draw callback for the sample view **/
 static void sample_view_draw_callback(Canvas *canvas, void *model) {
 
@@ -715,6 +905,9 @@ static void sample_view_enter_callback(void *ctx) {
   App *app = (App *)ctx;
   uint32_t period = furi_ms_to_ticks(sample_view_update_every);
 
+  /* Setup the callback to receive decoded LRF samples */
+  set_lrf_sample_handler(app->lrf_serial_comm_app, lrf_sample_handler, app);
+
   /* Set the backlight on all the time */
   notification_message(app->notifications,
 			&sequence_display_backlight_enforce_on);
@@ -774,6 +967,9 @@ static void sample_view_exit_callback(void *ctx) {
   /* Set the backlight control back to auto */
   notification_message(app->notifications,
 			&sequence_display_backlight_enforce_auto);
+
+  /* Unset the callback to receive decoded LRF samples */
+  set_lrf_sample_handler(app->lrf_serial_comm_app, NULL, app);
 
   /* Stop and free the view update timer */
   furi_timer_stop(app->sample_view_timer);
@@ -871,6 +1067,9 @@ static void lrfinfo_view_enter_callback(void *ctx) {
 
   App *app = (App *)ctx;
 
+  /* Setup the callback to receive decoded LRF identification frames */
+  set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler, app);
+
   with_view_model(app->lrfinfo_view, LRFInfoModel* lrfinfo_model,
 	{
 	  /* Invalidate the current identification - if any */
@@ -880,6 +1079,17 @@ static void lrfinfo_view_enter_callback(void *ctx) {
 	  send_lrf_command(app->lrf_serial_comm_app, send_ident);
 	},
 	true);
+}
+
+
+
+/** LRF info view exit callback **/
+static void lrfinfo_view_exit_callback(void *ctx) {
+
+  App *app = (App *)ctx;
+
+  /* Unset the callback to receive decoded LRF identification frames */
+  set_lrf_ident_handler(app->lrf_serial_comm_app, NULL, app);
 }
 
 
@@ -1156,196 +1366,6 @@ static uint32_t submenu_exit_callback(void *ctx) {
 
 
 
-/** LRF sample handler
-    Called when a LRF sample is available from the LRF serial
-    communication app **/
-void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
-
-  App *app = (App *)ctx;
-  SamplerModel *sampler_model = view_get_model(app->sample_view);
-  uint16_t prev_samples_end_i;
-  float avg_dist1;
-  float avg_dist2;
-  float avg_dist3;
-  uint32_t avg_ampl1;
-  uint32_t avg_ampl2;
-  uint32_t avg_ampl3;
-  uint16_t nb_valid_samples_dist1;
-  uint16_t nb_valid_samples_dist2;
-  uint16_t nb_valid_samples_dist3;
-  uint16_t nb_samples;
-  float timediff;
-  uint16_t i;
-
-  /* If beeps are enabled and any distance in the new LRF sample is valid,
-     play a beep */
-  if(sampler_model->config.beep && (lrf_sample->dist1 > 0.5 ||
-					lrf_sample->dist2 > 0.5 ||
-					lrf_sample->dist3 > 0.5))
-    sampler_model->play_beep = true;
-
-  /* Find the next spot in the samples ring buffer */
-  prev_samples_end_i = sampler_model->samples_end_i;
-  i = prev_samples_end_i + 1;
-  if(i >= SAMPLES_RING_BUFFER_SIZE)
-    i = 0;
-
-  /* If we have room in the ring buffer, insert the new sample */
-  if(i != sampler_model->samples_start_i) {
-    memcpy(&(sampler_model->samples[sampler_model->samples_end_i]),
-		lrf_sample, sizeof(LRFSample));
-    sampler_model->samples_end_i = i;
-  }
-
-  /* Remove samples that are too old from the ring buffer - but always try
-     to keep at least 0.75 seconds worth of samples, or 2 samples, for more
-     accurate effective frequency calculation, even if we don't
-     average samples */
-  while(sampler_model->samples_start_i != prev_samples_end_i &&
-	ms_tick_time_diff(
-		sampler_model->samples[prev_samples_end_i].tstamp_ms,
-		sampler_model->samples[sampler_model->samples_start_i].tstamp_ms
-	) > (double)(sampler_model->config.avg > 0.75?
-			sampler_model->config.avg : 0.75)) {
-    i = sampler_model->samples_start_i + 1;
-    if(i >= SAMPLES_RING_BUFFER_SIZE)
-      i = 0;
-    if(i == prev_samples_end_i)
-      break;
-    sampler_model->samples_start_i = i;
-  }
-
-  /* Calculate the number of samples in the ring buffer */
-  if(sampler_model->samples_end_i >= sampler_model->samples_start_i)
-    nb_samples = sampler_model->samples_end_i - sampler_model->samples_start_i;
-  else
-    nb_samples = SAMPLES_RING_BUFFER_SIZE - sampler_model->samples_start_i +
-			sampler_model->samples_end_i;
-
-  /* Only one sample in the ring buffer */
-  if(nb_samples == 1) {
-
-    /* We can't calculate the effective frequency */
-    sampler_model->eff_freq = -1;
-
-    /* Display that sample directly */
-    memcpy(&(sampler_model->disp_sample),
-		&(sampler_model->samples[prev_samples_end_i]),
-		sizeof(LRFSample));
-  }
-
-  /* We have more than one sample in the ring buffer */
-  else {
-
-    /* If we have at least 0.25 seconds between the oldest and the latest
-       samples' timestamps, calculate the effective sampling frequency */
-    timediff = ms_tick_time_diff(
-			sampler_model->samples[prev_samples_end_i].tstamp_ms,
-			sampler_model->samples[sampler_model->samples_start_i].
-				tstamp_ms);
-    if(timediff >= 0.25)
-      sampler_model->eff_freq = (nb_samples - 1) / timediff;
-    else
-      sampler_model->eff_freq = - 1;
-
-    /* If we don't average samples, display the last sample directly */
-    if(sampler_model->config.avg == 0)
-      memcpy(&(sampler_model->disp_sample),
-		&(sampler_model->samples[prev_samples_end_i]),
-		sizeof(LRFSample));
-
-    /* ...otherwise calculate the average of the valid distances and amplitudes
-       in the ring buffer and display the averages instead */
-    else {
-      avg_dist1 = 0;
-      avg_dist2 = 0;
-      avg_dist3 = 0;
-      avg_ampl1 = 0;
-      avg_ampl2 = 0;
-      avg_ampl3 = 0;
-
-      nb_valid_samples_dist1 = 0;
-      nb_valid_samples_dist2 = 0;
-      nb_valid_samples_dist3 = 0;
-
-      nb_samples = 0;
-
-      i = sampler_model->samples_start_i;
-      while(i != sampler_model->samples_end_i) {
-
-        if(sampler_model->samples[i].dist1 > 0.5) {
-          avg_dist1 += sampler_model->samples[i].dist1;
-          avg_ampl1 += sampler_model->samples[i].ampl1;
-          nb_valid_samples_dist1++;
-        }
-
-        if(sampler_model->samples[i].dist2 > 0.5) {
-          avg_dist2 += sampler_model->samples[i].dist2;
-          avg_ampl2 += sampler_model->samples[i].ampl2;
-          nb_valid_samples_dist2++;
-        }
-
-        if(sampler_model->samples[i].dist3 > 0.5) {
-          avg_dist3 += sampler_model->samples[i].dist3;
-          avg_ampl3 += sampler_model->samples[i].ampl3;
-          nb_valid_samples_dist3++;
-        }
-
-        nb_samples++;
-
-        i++;
-        if(i >= SAMPLES_RING_BUFFER_SIZE)
-          i = 0;
-      }
-
-      if(nb_valid_samples_dist1 > 0) {
-        sampler_model->disp_sample.dist1 = avg_dist1 / nb_valid_samples_dist1;
-        sampler_model->disp_sample.ampl1 = avg_ampl1 / nb_valid_samples_dist1;
-      }
-      else
-        sampler_model->disp_sample.dist1 = NO_AVERAGE;
-
-      if(nb_valid_samples_dist2 > 0) {
-        sampler_model->disp_sample.dist2 = avg_dist2 / nb_valid_samples_dist2;
-        sampler_model->disp_sample.ampl2 = avg_ampl2 / nb_valid_samples_dist2;
-      }
-      else
-        sampler_model->disp_sample.dist2 = NO_AVERAGE;
-
-      if(nb_valid_samples_dist3 > 0) {
-        sampler_model->disp_sample.dist3 = avg_dist3 / nb_valid_samples_dist3;
-        sampler_model->disp_sample.ampl3 = avg_ampl3 / nb_valid_samples_dist3;
-      }
-      else
-        sampler_model->disp_sample.dist3 = NO_AVERAGE;
-    }
-  }
-
-  /* Mark the samples as updated */
-  sampler_model->samples_updated = true;
-}
-
-
-
-/** LRF identification handler
-    Called when a LRF identification frame is available from the LRF serial
-    communication app **/
-void lrf_ident_handler(LRFIdent *lrf_ident, void *ctx) {
-
-  App *app = (App *)ctx;
-  LRFInfoModel *lrfinfo_model = view_get_model(app->lrfinfo_view);
-
-  /* Copy the identification and mark it as valid */
-  memcpy(&(lrfinfo_model->ident), lrf_ident, sizeof(LRFIdent));
-  lrfinfo_model->has_ident = true;
-
-  /* Trigger an LRF info view redraw */
-  with_view_model(app->lrfinfo_view, LRFInfoModel* _model,
-			{UNUSED(_model);}, true);
-}
-
-
-
 /** Initialize the app **/
 static App *app_init() {
 
@@ -1478,8 +1498,9 @@ static App *app_init() {
   /* Configure the "previous" callback for the LRF info view */
   view_set_previous_callback(app->lrfinfo_view, return_to_submenu_callback);
 
-  /* Configure the enter callback for the LRF info view */
+  /* Configure the enter and exit callbacks for the LRF info view */
   view_set_enter_callback(app->lrfinfo_view, lrfinfo_view_enter_callback);
+  view_set_exit_callback(app->lrfinfo_view, lrfinfo_view_exit_callback);
 
   /* Set the context for the LRF info view callbacks */
   view_set_context(app->lrfinfo_view, app);
@@ -1656,12 +1677,6 @@ int32_t noptel_lrf_sampler_app(void *p) {
 
   /* Initialize the app */
   App *app = app_init();
-
-  /* Setup the callback to receive decoded LRF samples */
-  set_lrf_sample_handler(app->lrf_serial_comm_app, lrf_sample_handler, app);
-
-  /* Setup the callback to receive decoded LRF identification frames */
-  set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler, app);
 
   /* Run the view dispatcher */
   FURI_LOG_I(TAG, "Run view dispatcher");
