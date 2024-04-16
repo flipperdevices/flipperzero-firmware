@@ -10,6 +10,8 @@
 #include <gui/modules/submenu.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/variable_item_list.h>
+
+#include "speaker_control.h"
 #include "lrf_serial_comm.h"
 
 
@@ -117,10 +119,6 @@ typedef struct {
   /* Flag to indicate whether the sample data was updated */
   bool samples_updated;
 
-  /* Flag to play a beep, and whether a beep is already playing */
-  bool play_beep;
-  bool beep_playing;
-
   /* Whether the pointer is on or off */
   bool pointer_is_on;
 
@@ -181,8 +179,8 @@ typedef struct {
   /* Timer to update the sample view */
   FuriTimer *sample_view_timer;
 
-  /* Timer to control the speaker */
-  FuriTimer *speaker_control_timer;
+  /* Speaker control */
+  SpeakerControl speaker_control;
 
   /* LRF serial communication app */
   LRFSerialCommApp *lrf_serial_comm_app;

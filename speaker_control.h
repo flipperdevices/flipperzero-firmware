@@ -5,7 +5,30 @@
  * Speaker control
 ***/
 
+/*** Types ***/
+typedef struct {
+
+  /* Minimum beep duration */
+  uint16_t min_beep_duration;
+
+  /* Flag to play a beep, and whether a beep is already playing */
+  bool play_beep;
+  bool beep_playing;
+
+  /* Timer callback to control the speaker */
+  FuriTimer *speaker_control_timer;
+
+} SpeakerControl;
+
+
+
 /*** Routines ***/
 
-/** Speaker control timer callback **/
-void speaker_control_timer_callback(void *);
+/** Setup the speaker control **/
+void set_speaker_control(SpeakerControl *, uint16_t);
+
+/** Release the speaker control **/
+void release_speaker_control(SpeakerControl *);
+
+/** Start a beep **/
+void start_beep(SpeakerControl *);

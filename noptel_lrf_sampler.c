@@ -11,7 +11,6 @@
 #include "noptel_lrf_sampler.h"
 #include "config_save_restore.h"
 #include "lrf_power_control.h"
-#include "speaker_control.h"
 #include "config_view.h"
 #include "sample_view.h"
 #include "lrf_info_view.h"
@@ -264,13 +263,8 @@ static App *app_init() {
 
 
 
-  /* Setup the timer to control the speaker */
-  sampler_model->play_beep = false;
-  sampler_model->beep_playing = false;
-  app->speaker_control_timer = furi_timer_alloc(speaker_control_timer_callback,
-						FuriTimerTypeOnce, app);
-
-
+  /* Setup the speaker control */
+  set_speaker_control(&app->speaker_control, min_beep_duration);
 
   /* Initialize the LRF serial communication app */
   app->lrf_serial_comm_app = lrf_serial_comm_app_init(min_led_flash_duration);
@@ -290,9 +284,8 @@ static void app_free(App *app) {
 
   FURI_LOG_I(TAG, "App free");
 
-  /* Stop and free the speaker control timer */
-  furi_timer_stop(app->speaker_control_timer);
-  furi_timer_free(app->speaker_control_timer);
+  /* Release the speaker control */
+  release_speaker_control(&app->speaker_control);
 
   /* Stop and free up the LRF serial communication app */
   lrf_serial_comm_app_free(app->lrf_serial_comm_app);

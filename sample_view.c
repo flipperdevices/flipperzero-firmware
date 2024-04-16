@@ -58,8 +58,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   if(sampler_model->config.beep && (lrf_sample->dist1 > 0.5 ||
 					lrf_sample->dist2 > 0.5 ||
 					lrf_sample->dist3 > 0.5)) {
-    sampler_model->play_beep = true;
-    furi_timer_start(app->speaker_control_timer, 1);
+    start_beep(&app->speaker_control);
   }
 
   /* Find the next spot in the samples ring buffer */
