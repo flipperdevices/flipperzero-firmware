@@ -1,10 +1,4 @@
 #include "../nfc_magic_app_i.h"
-#include "core/string.h"
-#include "gui/modules/widget_elements/widget_element.h"
-#include "gui/scene_manager.h"
-
-#include <bit_lib.h>
-#include <stdbool.h>
 
 void nfc_magic_scene_gen4_show_info_widget_callback(
     GuiButtonType result,

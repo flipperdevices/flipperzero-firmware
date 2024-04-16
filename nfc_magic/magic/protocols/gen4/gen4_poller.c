@@ -1,7 +1,8 @@
 #include "bit_buffer.h"
+#include "core/check.h"
 #include "gen4_poller_i.h"
-#include "protocols/gen4/gen4.h"
-#include "protocols/gen4/gen4_poller.h"
+#include "magic/protocols/gen4/gen4.h"
+#include "magic/protocols/gen4/gen4_poller.h"
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 #include <nfc/nfc_poller.h>
@@ -202,8 +203,7 @@ NfcCommand gen4_poller_idle_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     instance->current_block = 0;
-    //TODO: FOR WHAT?
-    //memset(instance->config, 0, sizeof(instance->config));
+
     instance->gen4_event.type = Gen4PollerEventTypeCardDetected;
     command = instance->callback(instance->gen4_event, instance->context);
     instance->state = Gen4PollerStateRequestMode;
@@ -254,7 +254,7 @@ NfcCommand gen4_poller_wipe_handler(Gen4Poller* instance) {
                 instance->state = Gen4PollerStateFail;
                 break;
             }
-            instance->password.value = 0;
+            gen4_password_reset(&instance->password);
             error = gen4_poller_write_block(
                 instance, instance->password, instance->current_block, gen4_poller_default_block_0);
             if(error != Gen4PollerErrorNone) {
@@ -378,15 +378,25 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
             case MfUltralightTypeNTAGI2C2K:
             case MfUltralightTypeNTAGI2CPlus1K:
             case MfUltralightTypeNTAGI2CPlus2K:
+                FURI_LOG_D(TAG, "NTAG type");
                 instance->config.data_parsed.mfu_mode = Gen4UltralightModeNTAG;
                 instance->total_blocks = 64 * 2;
                 break;
 
+            case MfUltralightTypeUnknown:
+                FURI_LOG_D(TAG, "Ultralight type");
+                instance->config.data_parsed.mfu_mode = Gen4UltralightModeUL;
+                break;
+
+            case MfUltralightTypeMfulC:
+                FURI_LOG_D(TAG, "MfulC type");
+                instance->config.data_parsed.mfu_mode = Gen4UltralightModeUL_C;
+                break;
+
             case MfUltralightTypeUL11:
             case MfUltralightTypeUL21:
-                // UL-C?
-                // UL?
             default:
+                FURI_LOG_D(TAG, "EV1 type");
                 instance->config.data_parsed.mfu_mode = Gen4UltralightModeUL_EV1;
                 break;
             }
@@ -405,7 +415,6 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
             instance->config.data_parsed.atqa[0] = iso3_data->atqa[0];
             instance->config.data_parsed.atqa[1] = iso3_data->atqa[1];
             instance->config.data_parsed.sak = iso3_data->sak;
-            //instance->config.data_parsed.mfu_mode = Gen4UltralightModeUL_EV1;
             instance->config.data_parsed.total_blocks = instance->total_blocks - 1;
             instance->config.data_parsed.direct_write_mode = Gen4DirectWriteBlock0ModeDisabled;
 
@@ -435,81 +444,104 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
         } else {
             uint8_t block[GEN4_POLLER_BLOCK_SIZE] = {};
             bool write_success = true;
-            for(size_t i = 0; i < 8; i++) {
-                memcpy(block, &mfu_data->signature.data[i * 4], 4); //-V1086
-                Gen4PollerError error =
-                    gen4_poller_write_block(instance, instance->password, 0xF2 + i, block);
-                if(error != Gen4PollerErrorNone) {
-                    write_success = false;
+
+            if(mf_ultralight_support_feature(
+                   mf_ultralight_get_feature_support_set(mfu_data->type),
+                   MfUltralightFeatureSupportReadSignature)) {
+                FURI_LOG_D(TAG, "Writing Signature");
+                for(size_t i = 0; i < 8; i++) {
+                    memcpy(block, &mfu_data->signature.data[i * 4], 4); //-V1086
+                    Gen4PollerError error =
+                        gen4_poller_write_block(instance, instance->password, 0xF2 + i, block);
+                    if(error != Gen4PollerErrorNone) {
+                        write_success = false;
+                        break;
+                    }
+                }
+                if(!write_success) {
+                    FURI_LOG_E(TAG, "Failed to write Signature");
+                    instance->state = Gen4PollerStateFail;
                     break;
                 }
-            }
-            if(!write_success) {
-                FURI_LOG_E(TAG, "Failed to write Signature");
-                instance->state = Gen4PollerStateFail;
-                break;
+            } else {
+                FURI_LOG_D(TAG, "Signature is not supported, skipping");
             }
 
-            block[0] = mfu_data->version.header;
-            block[1] = mfu_data->version.vendor_id;
-            block[2] = mfu_data->version.prod_type;
-            block[3] = mfu_data->version.prod_subtype;
-            Gen4PollerError error =
-                gen4_poller_write_block(instance, instance->password, 0xFA, block);
-            if(error != Gen4PollerErrorNone) {
-                FURI_LOG_E(TAG, "Failed to write 1st part Version");
-                instance->state = Gen4PollerStateFail;
-                break;
+            if(mf_ultralight_support_feature(
+                   mf_ultralight_get_feature_support_set(mfu_data->type),
+                   MfUltralightFeatureSupportReadVersion)) {
+                FURI_LOG_D(TAG, "Writing Version part 1");
+                block[0] = mfu_data->version.header;
+                block[1] = mfu_data->version.vendor_id;
+                block[2] = mfu_data->version.prod_type;
+                block[3] = mfu_data->version.prod_subtype;
+                Gen4PollerError error =
+                    gen4_poller_write_block(instance, instance->password, 0xFA, block);
+                if(error != Gen4PollerErrorNone) {
+                    FURI_LOG_E(TAG, "Failed to write 1st part Version");
+                    instance->state = Gen4PollerStateFail;
+                    break;
+                }
+
+                FURI_LOG_D(TAG, "Writing Version part 2");
+                block[0] = mfu_data->version.prod_ver_major;
+                block[1] = mfu_data->version.prod_ver_minor;
+                block[2] = mfu_data->version.storage_size;
+                block[3] = mfu_data->version.protocol_type;
+                error = gen4_poller_write_block(instance, instance->password, 0xFB, block);
+                if(error != Gen4PollerErrorNone) {
+                    FURI_LOG_E(TAG, "Failed to write 2nd part Version");
+                    instance->state = Gen4PollerStateFail;
+                    break;
+                }
+            } else {
+                FURI_LOG_D(TAG, "Version is not supported, skipping");
             }
 
-            block[0] = mfu_data->version.prod_ver_major;
-            block[1] = mfu_data->version.prod_ver_minor;
-            block[2] = mfu_data->version.storage_size;
-            block[3] = mfu_data->version.protocol_type;
-            error = gen4_poller_write_block(instance, instance->password, 0xFB, block);
-            if(error != Gen4PollerErrorNone) {
-                FURI_LOG_E(TAG, "Failed to write 2nd part Version");
-                instance->state = Gen4PollerStateFail;
-                break;
-            }
+            if(mf_ultralight_support_feature(
+                   mf_ultralight_get_feature_support_set(mfu_data->type),
+                   MfUltralightFeatureSupportPasswordAuth)) {
+                FURI_LOG_D(TAG, "Writing Password");
+                MfUltralightConfigPages* config_pages = NULL;
+                if(mf_ultralight_get_config_page(mfu_data, &config_pages)) {
+                    block[0] = config_pages->password.data[0];
+                    block[1] = config_pages->password.data[1];
+                    block[2] = config_pages->password.data[2];
+                    block[3] = config_pages->password.data[3];
+                    Gen4PollerError error =
+                        gen4_poller_write_block(instance, instance->password, 0xE5, block);
+                    if(error != Gen4PollerErrorNone) {
+                        FURI_LOG_E(TAG, "Failed to write Password to sector E5");
+                        instance->state = Gen4PollerStateFail;
+                        break;
+                    }
+                    error = gen4_poller_write_block(instance, instance->password, 0xF0, block);
+                    if(error != Gen4PollerErrorNone) {
+                        FURI_LOG_E(TAG, "Failed to write Password to sector F0");
+                        instance->state = Gen4PollerStateFail;
+                        break;
+                    }
 
-            // Password
-            MfUltralightConfigPages* config_pages = NULL;
-            mf_ultralight_get_config_page(mfu_data, &config_pages);
-
-            block[0] = config_pages->password.data[0];
-            block[1] = config_pages->password.data[1];
-            block[2] = config_pages->password.data[2];
-            block[3] = config_pages->password.data[3];
-            error = gen4_poller_write_block(instance, instance->password, 0xE5, block);
-            if(error != Gen4PollerErrorNone) {
-                FURI_LOG_E(TAG, "Failed to write Password to sector E5");
-                instance->state = Gen4PollerStateFail;
-                break;
-            }
-            error = gen4_poller_write_block(instance, instance->password, 0xF0, block);
-            if(error != Gen4PollerErrorNone) {
-                FURI_LOG_E(TAG, "Failed to write Password to sector F0");
-                instance->state = Gen4PollerStateFail;
-                break;
-            }
-
-            // PACK
-            block[0] = config_pages->pack.data[0];
-            block[1] = config_pages->pack.data[1];
-            block[2] = 0x00;
-            block[3] = 0x00;
-            error = gen4_poller_write_block(instance, instance->password, 0xE6, block);
-            if(error != Gen4PollerErrorNone) {
-                FURI_LOG_E(TAG, "Failed to write PACK to sector E6");
-                instance->state = Gen4PollerStateFail;
-                break;
-            }
-            error = gen4_poller_write_block(instance, instance->password, 0xF1, block);
-            if(error != Gen4PollerErrorNone) {
-                FURI_LOG_E(TAG, "Failed to write PACK to sector F1");
-                instance->state = Gen4PollerStateFail;
-                break;
+                    FURI_LOG_D(TAG, "Writing PACK");
+                    block[0] = config_pages->pack.data[0];
+                    block[1] = config_pages->pack.data[1];
+                    block[2] = 0x00;
+                    block[3] = 0x00;
+                    error = gen4_poller_write_block(instance, instance->password, 0xE6, block);
+                    if(error != Gen4PollerErrorNone) {
+                        FURI_LOG_E(TAG, "Failed to write PACK to sector E6");
+                        instance->state = Gen4PollerStateFail;
+                        break;
+                    }
+                    error = gen4_poller_write_block(instance, instance->password, 0xF1, block);
+                    if(error != Gen4PollerErrorNone) {
+                        FURI_LOG_E(TAG, "Failed to write PACK to sector F1");
+                        instance->state = Gen4PollerStateFail;
+                        break;
+                    }
+                }
+            } else {
+                FURI_LOG_D(TAG, "Password is not supported, skipping");
             }
 
             instance->state = Gen4PollerStateSuccess;
@@ -768,4 +800,21 @@ void gen4_poller_stop(Gen4Poller* instance) {
     furi_assert(instance);
 
     nfc_poller_stop(instance->poller);
+}
+
+const Gen4* gen4_poller_get_gen4_data(const Gen4Poller* instance) {
+    furi_assert(instance);
+    return instance->gen4_data;
+}
+
+void gen4_poller_struct_set_direct_write_block_0_mode(
+    Gen4Poller* instance,
+    Gen4DirectWriteBlock0Mode mode) {
+    furi_assert(instance);
+    instance->direct_write_block_0_mode = mode;
+}
+
+void gen4_poller_struct_set_shadow_mode(Gen4Poller* instance, Gen4ShadowMode mode) {
+    furi_assert(instance);
+    instance->shadow_mode = mode;
 }

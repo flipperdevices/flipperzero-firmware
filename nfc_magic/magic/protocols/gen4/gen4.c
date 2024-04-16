@@ -7,23 +7,35 @@ Gen4* gen4_alloc() {
 }
 
 void gen4_free(Gen4* instance) {
-    furi_check(instance != NULL);
+    furi_check(instance);
     free(instance);
 }
 
 void gen4_reset(Gen4* instance) {
-    furi_check(instance != NULL);
+    furi_check(instance);
     memset(&instance->config, 0, sizeof(Gen4Config));
     memset(&instance->revision, 0, sizeof(Gen4Revision));
 }
 
 void gen4_copy(Gen4* dest, const Gen4* source) {
-    furi_check(dest != NULL);
-    furi_check(source != NULL);
+    furi_check(dest);
+    furi_check(source);
     memcpy(dest, source, sizeof(Gen4));
 }
 
-char* gen4_get_shadow_mode_name(Gen4ShadowMode mode) {
+bool gen4_password_is_set(const Gen4Password* instance) {
+    return (instance->bytes[0] || instance->bytes[1] || instance->bytes[2] || instance->bytes[3]);
+}
+
+void gen4_password_reset(Gen4Password* instance) {
+    memset(instance->bytes, 0, GEN4_PASSWORD_LEN);
+}
+
+void gen4_password_copy(Gen4Password* dest, const Gen4Password* source) {
+    memcpy(dest->bytes, source->bytes, GEN4_PASSWORD_LEN);
+}
+
+const char* gen4_get_shadow_mode_name(Gen4ShadowMode mode) {
     switch(mode) {
     case Gen4ShadowModePreWrite:
         return "Pre-Write";
@@ -40,7 +52,7 @@ char* gen4_get_shadow_mode_name(Gen4ShadowMode mode) {
     }
 }
 
-char* gen4_get_direct_write_mode_name(Gen4DirectWriteBlock0Mode mode) {
+const char* gen4_get_direct_write_mode_name(Gen4DirectWriteBlock0Mode mode) {
     switch(mode) {
     case Gen4DirectWriteBlock0ModeEnabled:
         return "Enabled";
@@ -53,7 +65,7 @@ char* gen4_get_direct_write_mode_name(Gen4DirectWriteBlock0Mode mode) {
     }
 }
 
-char* gen4_get_uid_len_num(Gen4UIDLength code) {
+const char* gen4_get_uid_len_num(Gen4UIDLength code) {
     switch(code) {
     case Gen4UIDLengthSingle:
         return "4";
@@ -66,7 +78,7 @@ char* gen4_get_uid_len_num(Gen4UIDLength code) {
     }
 }
 
-char* gen4_get_configuration_name(const Gen4Config* config) {
+const char* gen4_get_configuration_name(const Gen4Config* config) {
     switch(config->data_parsed.protocol) {
     case Gen4ProtocolMfClassic: {
         switch(config->data_parsed.total_blocks) {

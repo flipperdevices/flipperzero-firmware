@@ -1,3 +1,9 @@
+## 1.8
+ - Ultralight Various fixes and improvements
+
+## 1.7
+ - Gen2/CUID write support
+
 ## 1.6
  - Rework with new bit lib API
 

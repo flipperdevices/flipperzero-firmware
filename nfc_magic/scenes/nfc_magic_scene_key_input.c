@@ -1,9 +1,5 @@
 #include "../nfc_magic_app_i.h"
 
-#include "protocols/gen4/gen4.h"
-#include <bit_lib.h>
-#include <string.h>
-
 void nfc_magic_scene_key_input_byte_input_callback(void* context) {
     NfcMagicApp* instance = context;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "protocols/gen4/gen4.h"
+#include "gen4.h"
 #include <nfc/nfc.h>
 #include <nfc/protocols/nfc_protocol.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
@@ -87,6 +87,14 @@ void gen4_poller_set_password(Gen4Poller* instance, Gen4Password password);
 void gen4_poller_start(Gen4Poller* instance, Gen4PollerCallback callback, void* context);
 
 void gen4_poller_stop(Gen4Poller* instance);
+
+const Gen4* gen4_poller_get_gen4_data(const Gen4Poller* instance);
+
+void gen4_poller_struct_set_direct_write_block_0_mode(
+    Gen4Poller* instance,
+    Gen4DirectWriteBlock0Mode mode);
+
+void gen4_poller_struct_set_shadow_mode(Gen4Poller* instance, Gen4ShadowMode mode);
 
 #ifdef __cplusplus
 }

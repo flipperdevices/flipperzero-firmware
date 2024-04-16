@@ -9,7 +9,7 @@ App(
     fap_file_assets="assets",
     fap_author="@Willy-JL @ECTO-1A @Spooks4576",
     fap_weburl="https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam",
-    fap_version="6.2",
+    fap_version="6.3",
     fap_description="Flood BLE advertisements to cause spammy and annoying popups/notifications",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="ble_spam",

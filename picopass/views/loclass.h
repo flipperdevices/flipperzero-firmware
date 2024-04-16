@@ -19,4 +19,6 @@ void loclass_set_callback(Loclass* loclass, LoclassCallback callback, void* cont
 
 void loclass_set_header(Loclass* loclass, const char* header);
 
+void loclass_set_subheader(Loclass* loclass, const char* subheader);
+
 void loclass_set_num_macs(Loclass* loclass, uint16_t num_macs);

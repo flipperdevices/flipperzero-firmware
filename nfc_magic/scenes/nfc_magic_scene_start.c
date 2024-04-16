@@ -27,7 +27,7 @@ void nfc_magic_scene_start_on_enter(void* context) {
         nfc_magic_scene_start_submenu_callback,
         instance);
 
-    instance->gen4_password.value = 0;
+    gen4_password_reset(&instance->gen4_password);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(instance->scene_manager, NfcMagicSceneStart));

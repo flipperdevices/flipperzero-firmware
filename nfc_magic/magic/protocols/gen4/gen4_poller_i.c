@@ -1,8 +1,7 @@
 #include "gen4_poller_i.h"
 
 #include "bit_buffer.h"
-#include "protocols/gen4/gen4.h"
-#include "protocols/gen4/gen4_poller.h"
+#include "magic/protocols/gen4/gen4_poller.h"
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 
 #define GEN4_CMD_PREFIX (0xCF)
@@ -256,9 +255,16 @@ Gen4PollerError gen4_poller_change_password(
 
         FURI_LOG_D(
             TAG,
-            "Trying to change password from 0x%08lX to 0x%08lX. Card response: 0x%02X",
-            pwd_current.value,
-            pwd_new.value,
+            "Trying to change password from 0x%02X %02X %02X %02X to "
+            "0x%02X %02X %02X %02X. Card response: 0x%02X",
+            pwd_current.bytes[0],
+            pwd_current.bytes[1],
+            pwd_current.bytes[2],
+            pwd_current.bytes[3],
+            pwd_new.bytes[0],
+            pwd_new.bytes[1],
+            pwd_new.bytes[2],
+            pwd_new.bytes[3],
             response);
 
         if(response != GEN4_RESPONSE_SUCCESS) {

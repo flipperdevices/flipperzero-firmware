@@ -1,5 +1,4 @@
 #include "../nfc_magic_app_i.h"
-#include "protocols/gen4/gen4_poller_i.h"
 
 enum SubmenuIndex {
     SubmenuIndexPreWriteMode,

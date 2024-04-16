@@ -1,6 +1,4 @@
 #include "../nfc_magic_app_i.h"
-#include "protocols/gen4/gen4.h"
-#include "protocols/gen4/gen4_poller_i.h"
 
 void nfc_magic_scene_gen4_show_cfg_widget_callback(
     GuiButtonType result,

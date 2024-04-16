@@ -1,6 +1,5 @@
 #include "../nfc_magic_app_i.h"
-#include "../lib/magic/protocols/gen4/gen4_poller_i.h"
-#include "gui/scene_manager.h"
+#include "magic/protocols/gen4/gen4_poller.h"
 
 enum {
     NfcMagicSceneGen4SetDirectWriteBlock0ModeStateCardSearch,
@@ -66,7 +65,9 @@ void nfc_magic_scene_gen4_set_direct_write_block_0_mode_on_enter(void* context) 
 
     instance->gen4_poller = gen4_poller_alloc(instance->nfc);
     gen4_poller_set_password(instance->gen4_poller, instance->gen4_password);
-    instance->gen4_poller->direct_write_block_0_mode = direct_write_block_0_mode;
+
+    gen4_poller_struct_set_direct_write_block_0_mode(
+        instance->gen4_poller, direct_write_block_0_mode);
 
     gen4_poller_start(
         instance->gen4_poller,

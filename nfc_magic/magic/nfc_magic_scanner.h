@@ -40,7 +40,7 @@ void nfc_magic_scanner_start(
 
 void nfc_magic_scanner_stop(NfcMagicScanner* instance);
 
-Gen4* nfc_magic_scanner_get_gen4_data(NfcMagicScanner* instance);
+const Gen4* nfc_magic_scanner_get_gen4_data(NfcMagicScanner* instance);
 
 #ifdef __cplusplus
 }
