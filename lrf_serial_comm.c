@@ -59,7 +59,7 @@ struct _LRFSerialCommApp {
   void (*lrf_sample_handler)(LRFSample *, void *);
   void *lrf_sample_handler_ctx;
 
-  /* Callback to send a decoded LRF identification frakme to and the context
+  /* Callback to send a decoded LRF identification frame to and the context
      we should pass it */
   void (*lrf_ident_handler)(LRFIdent *, void *);
   void *lrf_ident_handler_ctx;
