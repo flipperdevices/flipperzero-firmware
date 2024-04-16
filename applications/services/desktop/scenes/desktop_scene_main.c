@@ -92,7 +92,7 @@ static void desktop_scene_main_open_fav_or_profile(Desktop* desktop, FavoriteApp
     }
     // In case of "default" setting
     if(!load_ok) {
-        loader_start_detached_with_gui_error(desktop->loader, "Passport", NULL);
+        loader_start_detached_with_gui_error(desktop->loader, PASSPORT_APP, NULL);
     }
 }
 
