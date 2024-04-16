@@ -1,25 +1,6 @@
 #include "../malveke_gb_photo.h"
 #include <storage/storage.h>
 
-// static int32_t game_boy_camera_worker(void* context) {
-//     Boilerplate* app = context;
-
-//     if(!storage_file_open(
-//                 app->camera_ram_sav,
-//                 furi_string_get_cstr(app->file_path),
-//                 FSAM_READ,
-//                 FSOM_OPEN_EXISTING)) {
-
-//                     return 1;
-//     }
-
-//     storage_file_read(app->camera_ram_sav, app->scratchpad1, sizeof(app->scratchpad1));
-//     scene_manager_next_scene(app->scene_manager, BoilerplateSceneMenu);
-
-//     return 0;
-
-// }
-
 static bool file_select(Boilerplate* app) {
     furi_assert(app);
 
@@ -53,7 +34,6 @@ void boilerplate_scene_fileselect_on_enter(void* context) {
                furi_string_get_cstr(app->file_path),
                FSAM_READ,
                FSOM_OPEN_EXISTING)) {
-            storage_file_read(app->camera_ram_sav, app->scratchpad1, sizeof(app->scratchpad1));
             scene_manager_next_scene(app->scene_manager, BoilerplateSceneMenu);
         }
     } else {

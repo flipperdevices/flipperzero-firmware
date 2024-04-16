@@ -135,30 +135,34 @@ GBCartridge* gb_cartridge_app_app_alloc() {
 void gb_cartridge_app_app_free(GBCartridge* app) {
     furi_assert(app);
 
-    // View Dispatcher
+    // Views
     view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdScene1);
     view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdScene2);
+    view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdScene3);
+    view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdScene4);
+    view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdScene5);
     view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdSettings);
+    view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdStartscreen);
+
     variable_item_list_free(app->submenu);
 
-    // storage_file_free(app->file_path);
-
+    // View Dispatcher
     view_dispatcher_free(app->view_dispatcher);
+    // Scene manager
     scene_manager_free(app->scene_manager);
-
-    app->gui = NULL;
-    app->notification = NULL;
-    app->storage = NULL;
 
     //
     uart_free(app->uart);
     uart_free(app->lp_uart);
-    // Close File Browser
+
     furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_STORAGE);
-    // furi_string_free(app->file_path);
+
+    app->gui = NULL;
+    app->notification = NULL;
+    app->storage = NULL;
 
     //Remove whatever is left
     free(app);

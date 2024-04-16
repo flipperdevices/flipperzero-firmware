@@ -33,7 +33,9 @@ void draw_thumbnail(void* context, Canvas* canvas, int page) {
     UNUSED(app);
     //  Gallery
     // for (int s=0;s< 8 * (page+1);s++) {
-    int count = ((page + 2) * 0x1000) + 0x0e00;
+    // int count = ((page + 2) * 0x1000) + 0x0e00;
+    int count = ((page + 2) * GB_PHOTO_SIZE) + 0x0e00;
+
     storage_file_seek(app->camera_ram_sav, count, true);
     for(int y = 0; y < 4; y++) {
         for(int x = 0; x < 4; x++) {
@@ -109,7 +111,7 @@ void save_all_image(void* context) {
     }
 
     for(int page = 0; page < 30; page++) {
-        int count = (page + 1) * 0x1000;
+        int count = GB_FIRST_PHOTO_OFFSET + page * GB_PHOTO_SIZE;
         storage_file_seek(app->camera_ram_sav, count, true);
         // create file name
         FuriString* file_name = furi_string_alloc();
@@ -193,10 +195,10 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
         case InputKeyBack:
             instance->callback(BoilerplateCustomEventScene2Back, instance->context);
             break;
-        case InputKeyUp:
-        case InputKeyDown:
         case InputKeyLeft:
         case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
         case InputKeyMAX:
             break;
         }

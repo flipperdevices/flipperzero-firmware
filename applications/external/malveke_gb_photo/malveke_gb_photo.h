@@ -30,6 +30,9 @@
 #define MALVEKE_APP_FOLDER_RAMS MALVEKE_APP_FOLDER "/rams"
 #define MALVEKE_APP_FOLDER_PHOTOS MALVEKE_APP_FOLDER "/photos"
 
+#define GB_FIRST_PHOTO_OFFSET 0x2000
+#define GB_PHOTO_SIZE 0x1000
+
 typedef struct {
     Gui* gui;
     NotificationApp* notification;
@@ -51,7 +54,6 @@ typedef struct {
     int pos_y;
     bool show_instructions;
     uint8_t tile_data[16];
-    uint8_t scratchpad1[0x11FC]; // 0000 - 11fb
 
     unsigned long palette_color_hex_a;
     unsigned long palette_color_hex_b;
@@ -70,9 +72,6 @@ typedef enum {
     BoilerplateViewIdMenu,
     BoilerplateViewIdScene1,
     BoilerplateViewIdScene2,
-    // BoilerplateViewIdScene3,
-    // BoilerplateViewIdScene4,
-    // BoilerplateViewIdScene5,
     BoilerplateViewIdSettings,
 } BoilerplateViewId;
 

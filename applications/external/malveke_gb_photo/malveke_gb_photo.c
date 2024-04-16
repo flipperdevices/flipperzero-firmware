@@ -52,7 +52,7 @@ Boilerplate* boilerplate_app_alloc() {
 
     app->file_path = furi_string_alloc();
     app->camera_ram_sav = storage_file_alloc(app->storage);
-    app->page = 1;
+    app->page = 0;
     app->pos_x = 0;
     app->pos_y = 0;
     app->show_instructions = true;
@@ -93,17 +93,20 @@ Boilerplate* boilerplate_app_alloc() {
 void boilerplate_app_free(Boilerplate* app) {
     furi_assert(app);
 
-    // Scene manager
-    scene_manager_free(app->scene_manager);
-
-    // View Dispatcher
+    // Views
+    view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdStartscreen);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdScene1);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdScene2);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdSettings);
+
     submenu_free(app->submenu);
 
+    // View Dispatcher
     view_dispatcher_free(app->view_dispatcher);
+
+    // Scene manager
+    scene_manager_free(app->scene_manager);
 
     if(app->camera_ram_sav && storage_file_is_open(app->camera_ram_sav)) {
         storage_file_close(app->camera_ram_sav);

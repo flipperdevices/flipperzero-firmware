@@ -79,34 +79,44 @@ void boilerplate_scene_1_draw(Canvas* canvas, BoilerplateScene1Model* model) {
         canvas_set_font(canvas, FontPrimary);
         elements_button_center(canvas, "OK");
     } else {
-        int count = (app->page + 1) * 0x1000;
-        uint8_t status = app->scratchpad1[0x11B2 + app->page];
+        // int count = (app->page) * 0x1000;
 
-        storage_file_seek(app->camera_ram_sav, count, true);
+        int count = GB_FIRST_PHOTO_OFFSET + app->page * GB_PHOTO_SIZE;
 
-        for(int y = app->pos_y; y < 14; y++) {
-            for(int x = app->pos_x; x < 16; x++) {
-                storage_file_read(app->camera_ram_sav, app->tile_data, sizeof(app->tile_data));
-                for(int row = 0; row < 8; row++) {
-                    uint8_t temp1 = app->tile_data[row * 2];
-                    uint8_t temp2 = app->tile_data[row * 2 + 1];
-                    for(int pixel = 7; pixel >= 0; pixel--) {
-                        if(((temp1 & 1) + ((temp2 & 1) * 2)) >= 2) {
-                            canvas_draw_dot(canvas, (x * 8) + pixel, (y * 8) + row);
+        FURI_LOG_I(TAG, "Page \"%d\"\n", app->page);
+        FURI_LOG_I(TAG, "Read Index \"%d\" \n", count);
+
+        if(app->camera_ram_sav) {
+            storage_file_seek(app->camera_ram_sav, (app->page) + 0x11B2, true);
+            uint8_t status;
+            storage_file_read(app->camera_ram_sav, &status, 1);
+            FURI_LOG_I(TAG, "Status/Nº Photo \"%x\"\n", status);
+            storage_file_seek(app->camera_ram_sav, count, true);
+
+            for(int y = app->pos_y; y < 14; y++) {
+                for(int x = app->pos_x; x < 16; x++) {
+                    storage_file_read(app->camera_ram_sav, app->tile_data, sizeof(app->tile_data));
+                    for(int row = 0; row < 8; row++) {
+                        uint8_t temp1 = app->tile_data[row * 2];
+                        uint8_t temp2 = app->tile_data[row * 2 + 1];
+                        for(int pixel = 7; pixel >= 0; pixel--) {
+                            if(((temp1 & 1) + ((temp2 & 1) * 2)) >= 2) {
+                                canvas_draw_dot(canvas, (x * 8) + pixel, (y * 8) + row);
+                            }
+                            temp1 >>= 1;
+                            temp2 >>= 1;
                         }
-                        temp1 >>= 1;
-                        temp2 >>= 1;
                     }
                 }
             }
-        }
 
-        if(app->info) {
-            if(status == 0xFF) {
-                canvas_draw_rbox(canvas, 100, 4, 20, 11, 4);
-                canvas_invert_color(canvas);
-                canvas_draw_str_aligned(canvas, 110, 10, AlignCenter, AlignCenter, "D");
-                canvas_invert_color(canvas);
+            if(app->info) {
+                if(status == 0xFF) { // DELETED
+                    canvas_draw_rbox(canvas, 100, 4, 20, 11, 4);
+                    canvas_invert_color(canvas);
+                    canvas_draw_str_aligned(canvas, 110, 10, AlignCenter, AlignCenter, "D");
+                    canvas_invert_color(canvas);
+                }
             }
         }
     }
@@ -133,7 +143,7 @@ void save_image(void* context) {
         storage_simply_mkdir(app->storage, MALVEKE_APP_FOLDER_PHOTOS);
     }
 
-    int count = (app->page + 1) * 0x1000;
+    int count = GB_FIRST_PHOTO_OFFSET + app->page * GB_PHOTO_SIZE;
     storage_file_seek(app->camera_ram_sav, count, true);
     // create file name
     FuriString* file_name = furi_string_alloc();
