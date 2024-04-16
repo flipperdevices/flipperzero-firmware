@@ -1,0 +1,14 @@
+App(
+    appid="kcline",
+    name="KC Line",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="kcline_main",
+    stack_size=6 * 1024,
+    fap_category="Games",
+    fap_icon="icons/kcline.png",
+    fap_icon_assets="icons",
+    fap_author="Andrew Diamond",
+    fap_weburl="https://github.com/HappyAmos/Flipper_FAPS/tree/master/kcline",
+    fap_version=(1, 2),
+    fap_description="One line dot munching game!",
+)
