@@ -1,7 +1,7 @@
 [![FAP Build](https://github.com/MrModd/Matagotchi/actions/workflows/build.yml/badge.svg)](https://github.com/MrModd/Matagotchi/actions/workflows/build.yml)
 
 # Matagotchi
-Tamagotchi like game for Flipper Zero
+Tamagotchi(R) like game for Flipper Zero
 
 ![Home](images/home_screen.png)
 ![About](images/about_screen.png)
@@ -47,9 +47,10 @@ You need to cure him with a pill.
 He can also get sick.
 
 # Disclamer
-This application is still under initial development
+Tamagotchi is a trademark of Bandai Co., Ltd.. We are not affiliated with,
+endorsed by, or sponsored by Bandai Co., Ltd., and the use of their trademark
+is solely for descriptive purposes within this application.
 
 # TODO
-
 * Add animations for stage up
 * Add happyness feature
