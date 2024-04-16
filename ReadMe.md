@@ -76,6 +76,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [KC Line v1.2 (By HappyAmos)](https://github.com/HappyAmos/Flipper_FAPS/tree/master/kcline)
 - Removed: [Connect Wires 2 v1.0 (By HappyAmos)](https://github.com/HappyAmos/Flipper_FAPS) (Changes Accepted to Main App)
 - Updated: [FAP Boilerplate v1.1 (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
+- Updated: [Cross Remote v2.5 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 
 <a name="release">
 
@@ -396,7 +397,7 @@ $ ./fbt dolphin_ext
 - [Cookie Clicker v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
 - [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
-- [Cross Remote v2.4 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
+- [Cross Remote v2.5 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
 - [Dab Timer v1.9.1 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [DAP Link v1.2 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)

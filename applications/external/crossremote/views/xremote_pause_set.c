@@ -127,3 +127,12 @@ View* xremote_pause_set_get_view(XRemotePauseSet* instance) {
     furi_assert(instance);
     return instance->view;
 }
+
+void xremote_pause_set_free(XRemotePauseSet* instance) {
+    furi_assert(instance);
+
+    with_view_model(
+        instance->view, XRemotePauseSetModel * model, { UNUSED(model); }, true);
+    view_free(instance->view);
+    free(instance);
+}
