@@ -43,6 +43,3 @@ void release_led_control(void);
 
 /** Set the color of the LED and schedule its extinction */
 void start_led_flash(LEDControl *, uint8_t);
-
-/** Timer callback to turn off the LED **/
-void led_off_timer_callback(void *);
