@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0329-0318-0.100.2-f601860](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-15 19:00 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-15 19:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-16 02:30 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-16 02:30 EST`
 - OFW: [Bad USB: fix crash when selecting a keyboard layout #3555 (By vanguacamolie)](https://github.com/flipperdevices/flipperzero-firmware/pull/3555)
 - OFW: [IR: Remember OTG state #3549 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3549)
 - OFW: [Mifare Ultralight naming fix #3551 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3551)
@@ -79,6 +79,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Cross Remote v2.5 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - Updated: [Restaurant Pager Trigger v1.6 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac)
+- OFW: [NFC: Mf Desfire multiple file rights support #3576 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3576)
 
 <a name="release">
 
