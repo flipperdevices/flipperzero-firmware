@@ -372,7 +372,6 @@ static void gap_init_svc(Gap* gap) {
     // Set default PHY
     hci_le_set_default_phy(ALL_PHYS_PREFERENCE, TX_2M_PREFERRED, RX_2M_PREFERRED);
     // Set I/O capability
-    bool bonding_mode = gap->config->bonding_mode;
     uint8_t cfg_mitm_protection = CFG_MITM_PROTECTION;
     uint8_t cfg_used_fixed_pin = CFG_USED_FIXED_PIN;
     bool keypress_supported = false;
@@ -383,7 +382,6 @@ static void gap_init_svc(Gap* gap) {
         keypress_supported = true;
     } else if(gap->config->pairing_method == GapPairingNone) {
         // "Just works" pairing method (iOS accepts it, it seems Android and Linux don't)
-        bonding_mode = false;
         cfg_mitm_protection = MITM_PROTECTION_NOT_REQUIRED;
         cfg_used_fixed_pin = USE_FIXED_PIN_FOR_PAIRING_ALLOWED;
         // If "just works" isn't supported, we want the numeric comparaison method
@@ -392,7 +390,7 @@ static void gap_init_svc(Gap* gap) {
     }
     // Setup  authentication
     aci_gap_set_authentication_requirement(
-        bonding_mode,
+        gap->config->bonding_mode,
         cfg_mitm_protection,
         CFG_SC_SUPPORT,
         keypress_supported,
