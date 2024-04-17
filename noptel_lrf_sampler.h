@@ -154,6 +154,12 @@ typedef struct {
   /* Diagnostic data */
   LRFDiag lrf_diag;
 
+  /* Whether diagnostic data is being downloaded */
+  bool download_in_progress;
+
+  /* Whether diagnostic data is being saved */
+  bool save_in_progress;
+
   /* Progress (0 -> 1) */
   float progress;
 

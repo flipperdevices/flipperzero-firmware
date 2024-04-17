@@ -63,16 +63,22 @@ static void diag_data_handler(LRFDiag *lrf_diag, void *ctx) {
   /* Copy the diagnostic data */
   memcpy(&(savediag_model->lrf_diag), lrf_diag, sizeof(LRFDiag));
 
+  savediag_model->download_in_progress = true;
+  savediag_model->save_in_progress = false;
+
   /* Calculate the first half of the progress: downloading */
   savediag_model->progress = ((float)savediag_model->lrf_diag.nb_vals /
 				(float)savediag_model->lrf_diag.total_vals)
 				/ 2;
-
   /* Do we have all the diagnostic data values? */
   if(savediag_model->lrf_diag.nb_vals == savediag_model->lrf_diag.total_vals) {
 
+    savediag_model->download_in_progress = false;
+
     /* Do we have LRF identification data? */
     if(savediag_model->has_ident) {
+
+      savediag_model->save_in_progress = true;
 
       /* Trigger a save diagnostic view redraw to bring the progress bar to
          50% before saving */
@@ -230,6 +236,8 @@ static void diag_data_handler(LRFDiag *lrf_diag, void *ctx) {
       snprintf(savediag_model->status_msg2, sizeof(savediag_model->status_msg2),
 		"Missing LRF identification");
     }
+
+    savediag_model->save_in_progress = false;
   }
 
   /* Trigger a save diagnostic view redraw */
@@ -261,6 +269,8 @@ void savediag_view_enter_callback(void *ctx) {
 
 	  /* Clear the progress */
 	  savediag_model->progress = -1;
+	  savediag_model->download_in_progress = false;
+	  savediag_model->save_in_progress = false;
 
           /* Clear the status message */
 	  savediag_model->status_msg1[0] = 0;
@@ -331,12 +341,15 @@ void savediag_view_draw_callback(Canvas *canvas, void *model) {
     canvas_draw_str(canvas, 0, 43, savediag_model->status_msg3);
   }
 
-  /* Print the OK button symbol followed by "Read" in a frame at the
-     right-hand side */
-  canvas_set_font(canvas, FontPrimary);
-  canvas_draw_frame(canvas, 77, 52, 51, 12);
-  canvas_draw_icon(canvas, 79, 54, &I_ok_button);
-  canvas_draw_str(canvas, 102, 62, "Save");
+  /* If no operation  is in progress, print the OK button symbol followed
+     by "Read" in a frame at the right-hand side */
+  if(!savediag_model->download_in_progress &&
+		!savediag_model->save_in_progress) {
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_frame(canvas, 77, 52, 51, 12);
+    canvas_draw_icon(canvas, 79, 54, &I_ok_button);
+    canvas_draw_str(canvas, 102, 62, "Save");
+  }
 
   /* Draw a dividing line between the LRF information and the bottom line */
   canvas_draw_line(canvas, 0, 48, 128, 48);
@@ -349,31 +362,48 @@ bool savediag_view_input_callback(InputEvent *evt, void *ctx) {
   App *app = (App *)ctx;
   SaveDiagModel *savediag_model = view_get_model(app->savediag_view);
 
+  /* If diagnostic data is being saved, disable all user input altogether */
+  if(savediag_model->save_in_progress) {
+    FURI_LOG_I(TAG, "User input disabled while diagnostic data is being saved");
+    return true;
+  }
+
   /* If the user pressed the OK button, tell the LRF to send diagnostic data */
   if(evt->type == InputTypePress && evt->key == InputKeyOk) {
-    FURI_LOG_I(TAG, "OK button pressed");
 
-    /* Invalidate the current identification - if any */
-    savediag_model->has_ident = false;
+    /* If no diagnostic data is being downloaded, trigger a new save sequence */
+    if(!savediag_model->download_in_progress) {
 
-    /* Clear the progress */
-    savediag_model->progress = -1;
+      FURI_LOG_I(TAG, "OK button pressed");
 
-    /* Clear the status message */
-    savediag_model->status_msg1[0] = 0;
-    savediag_model->status_msg2[0] = 0;
-    savediag_model->status_msg3[0] = 0;
+      /* Invalidate the current identification - if any */
+      savediag_model->has_ident = false;
 
-    /* Trigger a save diagnostic view redraw to clear the information currently
-       displayed - if any */
-    with_view_model(app->savediag_view, SaveDiagModel* _model,
+      /* Clear the progress */
+      savediag_model->progress = -1;
+      savediag_model->download_in_progress = false;
+      savediag_model->save_in_progress = false;
+
+      /* Clear the status message */
+      savediag_model->status_msg1[0] = 0;
+      savediag_model->status_msg2[0] = 0;
+      savediag_model->status_msg3[0] = 0;
+
+      /* Trigger a save diagnostic view redraw to clear the information
+         currently displayed - if any */
+      with_view_model(app->savediag_view, SaveDiagModel* _model,
 			{UNUSED(_model);}, true);
 
-    /* Send a send-identification-frame command */
-    send_lrf_command(app->lrf_serial_comm_app, send_ident);
+      /* Send a send-identification-frame command */
+      send_lrf_command(app->lrf_serial_comm_app, send_ident);
 
-    /* Send a read-diagnostic-data command */
-    send_lrf_command(app->lrf_serial_comm_app, read_diag);
+      /* Send a read-diagnostic-data command */
+      send_lrf_command(app->lrf_serial_comm_app, read_diag);
+    }
+
+    else
+      FURI_LOG_I(TAG, "OK button pressed, but diagnostic data is being "
+			"downloaded, so ignored");
 
     return true;
   }
