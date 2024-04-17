@@ -3,13 +3,12 @@ App(
     name="LaserCat",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="main_fap",
-    cdefines=["APP_lasercat"],
-    requires=[
-        "gui",
-    ],
     stack_size=1 * 1024,
-    order=90,
     fap_icon="icon.png",
-    fap_category="Examples",
     fap_icon_assets="images",
+    fap_category="GPIO",
+    fap_author="DroWez",
+    fap_weburl="https://github.com/DroWez/LaserCat",
+    fap_version="0.1",
+    fap_description="Application to turn on a GPIO laser.",
 )
