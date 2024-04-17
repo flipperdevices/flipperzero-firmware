@@ -137,7 +137,7 @@ def pytest_unconfigure(config):
     # here you can add teardown after session!
     pass
 
-def reboot_flipper(port):
+async def reboot_flipper(port):
     try:
         flipper_serial = serial.Serial(port, timeout=1)
         flipper_serial.write("power reboot\n\r".encode())
@@ -176,17 +176,12 @@ def update_firmware(port, channel):
         flipper_serial = serial.Serial(port, timeout=1)
     except serial.serialutil.SerialException:
         raise Exception('NoFlipper', 'There are no flipper on defined port, or it is unavailable')
-    proto = FlipperProto(serial_port=flipper_serial, debug=True)
-    proto.start_rpc_session()
-    nav = Navigator(proto, gui = False)
-    nav.update_screen()
-    nav.go_to_main_screen()
     flipper_serial.close()
 
     #update flipper's firmware via ufbt
     os.system("ufbt dotenv_create")
     os.system("ufbt update --channel=" + channel)
-    os.system("ufbt flash_usb FLIP_PORT=" + port)
+    os.system("ufbt flash_usb FLIP_PORT=" + str(port))
     time.sleep(2)
 
     start_time = time.time()
@@ -295,7 +290,6 @@ async def bench_serial(request):
 
     await asyncio.sleep(3)
 
-    await bench_serial.drain()
     await bench_serial.clear_read_buffer()
 
     logging.debug("NFC and RFID bench serial port opened on" + port)
@@ -317,7 +311,6 @@ async def reader_serial(request):
 
     await asyncio.sleep(3)
 
-    await bench_serial.drain()
     await bench_serial.clear_read_buffer()
 
     logging.debug("NFC and RFID Readers serial port opened on" + port)
@@ -339,7 +332,6 @@ async def flipper_reader_serial(request):
 
     await asyncio.sleep(3)
 
-    await bench_serial.drain()
     await bench_serial.clear_read_buffer()
 
     logging.debug("Flipper 'reader' serial port opened on" + port)
@@ -361,7 +353,6 @@ async def flipper_key_serial(request):
 
     await asyncio.sleep(3)
 
-    await bench_serial.drain()
     await bench_serial.clear_read_buffer()
 
     logging.debug("Flipper 'key' serial port opened on" + port)
@@ -383,7 +374,6 @@ async def relay_serial(request):
 
     await asyncio.sleep(3)
 
-    await bench_serial.drain()
     await bench_serial.clear_read_buffer()
 
     logging.debug("Relay serial port opened on" + port)
@@ -392,48 +382,6 @@ async def relay_serial(request):
 
 @pytest.fixture(scope="session")
 async def nav(flipper_serial, request):
-    if request.config.getoption("--update_flippers"):
-        port = request.config.getoption("--port")
-        if port:
-            pass
-        elif is_windows():
-            port = "COM4"
-        else:
-            port = "/dev/ttyACM0"
-
-        os.system("ufbt dotenv_create")
-        os.system("ufbt update --channel=dev")
-        os.system("ufbt flash_usb FLIP_PORT=" + port)
-        await asyncio.sleep(2)
-
-        start_time = time.time()
-        while time.time() - start_time < 120:
-            try:
-                flipper_serial = SerialConnector(url=port, baud_rate=230400, timeout=1)
-            except serial.serialutil.SerialException:
-                await asyncio.sleep(1)
-                print(
-                    "Waiting for flipper boot after update "
-                    + str(int(time.time() - start_time))
-                    + "s"
-                )
-                logging.debug(
-                    "Waiting for flipper boot after update "
-                    + str(int(time.time() - start_time))
-                    + "s"
-                )
-                if time.time() - start_time > 120:
-                    logging.error("can not open serial port")
-                    sys.exit(0)
-                    break
-            else:
-                break
-
-        await bench_serial.drain()
-        await bench_serial.clear_read_buffer()
-        # flipper_serial.timeout = 5 # TODO change serial timeout
-        logging.debug("Flipper serial port opened on" + port)
-
     proto = FlipperProtobufClient(flipper_serial)
     await proto.start()
     logging.debug("RPC session of main flipper started")
@@ -498,25 +446,6 @@ def px(request):
 
 @pytest.fixture(scope="session")
 async def nav_reader(flipper_reader_serial, request):
-    if request.config.getoption("--update_flippers"):
-        port = request.config.getoption("--flipper_r_port")
-        if port:
-            pass
-        elif is_windows():
-            port = "COM7"
-        else:
-            port = "/dev/ttyACM2"
-
-        os.system("ufbt dotenv_create")
-        os.system("ufbt update --channel=dev")
-        os.system("ufbt flash_usb FLIP_PORT=" + port)
-        await asyncio.sleep(2)
-
-        await bench_serial.drain()
-        await bench_serial.clear_read_buffer()
-        # flipper_serial.timeout = 5  # TODO: change serial timeout
-        logging.debug("Flipper 'reader' serial port opened on" + port)
-
     proto = FlipperProtobufClient(flipper_reader_serial)
     await proto.start()
     logging.debug("RPC session of flipper 'reader' started")
@@ -573,25 +502,6 @@ async def nav_reader(flipper_reader_serial, request):
 
 @pytest.fixture(scope="session")
 async def nav_key(flipper_key_serial, request):
-    if request.config.getoption("--update_flippers"):
-        port = request.config.getoption("--flipper_k_port")
-        if port:
-            pass
-        elif is_windows():
-            port = "COM8"
-        else:
-            port = "/dev/ttyACM3"
-
-        os.system("ufbt dotenv_create")
-        os.system("ufbt update --channel=dev")
-        os.system("ufbt flash_usb FLIP_PORT=" + port)
-        await asyncio.sleep(2)
-
-        await bench_serial.drain()
-        await bench_serial.clear_read_buffer()
-        # flipper_serial.timeout = 5 # TODO: change serial timeout
-        logging.debug("Flipper 'key' serial port opened on" + port)
-
     proto = FlipperProtobufClient(flipper_key_serial)
     await proto.start()
     logging.debug("RPC session of flipper 'key' started")

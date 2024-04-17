@@ -229,21 +229,21 @@ class TestRfidBench(BaseCase):
                 state = await nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
-        await state = nav.get_current_state(
+        state = await nav.get_current_state(
             ref=nav.get_ref_from_string(
                 "HID H10301", nav.font_helvB08, 0, no_space=1
             )
         )
         assert len(state) > 0, "Result of reading reference card is fail"
-        await state = nav.get_current_state(
+        state = await nav.get_current_state(
             ref=nav.get_ref_from_string("Hex: F8 C8 8A", nav.font_haxrcorp_4089, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
-        await state = nav.get_current_state(
+        state = await nav.get_current_state(
             ref=nav.get_ref_from_string("FC: 248", nav.font_haxrcorp_4089, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
-        await state = nav.get_current_state(
+        state = await nav.get_current_state(
             ref=nav.get_ref_from_string("Card: 51338", nav.font_haxrcorp_4089, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"

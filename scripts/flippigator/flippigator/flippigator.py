@@ -286,7 +286,7 @@ class Navigator:
                 break
         return state
 
-    async def wait_for_state(self, state, timeout=5) -> int:
+    async def wait_for_state(self, state, timeout=2) -> int:
         start_time = time.time()
         while start_time + timeout > time.time():
             cur_state = await self.get_current_state(timeout=0.1)
@@ -475,7 +475,7 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        result = await self.go_to(filename, area=(15, 64, 0, 128), timeout=15)
+        result = await self.go_to(filename, area=(15, 64, 0, 128), timeout=2)
         if result == -1:
             self.logger.warning("File not found!")
             return -1
@@ -513,7 +513,7 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        result = self.go_to(filename, area=(15, 64, 0, 128), timeout=15)
+        result = self.go_to(filename, area=(15, 64, 0, 128), timeout=2)
         if result == -1:
             self.logger.warning("File not found! (timeout)")
             return -1
