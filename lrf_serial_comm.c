@@ -13,6 +13,8 @@
 #include "led_control.h"
 
 
+
+/*** Defines ***/
 #define TAG "lrf_serial_comm"
 #define CR 13
 #define LF 10
@@ -35,6 +37,7 @@ static uint8_t cmd_pointer_on[] = "\xc5\x02\x97";
 static uint8_t cmd_pointer_off[] = "\xc5\x00\x95";
 static uint8_t cmd_send_ident[] = "\xc0\x90";
 static uint8_t cmd_read_diag[] = "\xdc\x8c";
+
 
 
 /*** Types ***/

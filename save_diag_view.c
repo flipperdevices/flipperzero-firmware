@@ -29,7 +29,6 @@ static uint32_t ms_tick_time_diff_ms(uint32_t tstamp1, uint32_t tstamp2) {
 
 
 
-
 /** LRF identification handler
     Called when a LRF identification frame is available from the LRF serial
     communication app **/
@@ -354,6 +353,7 @@ void savediag_view_draw_callback(Canvas *canvas, void *model) {
   /* Draw a dividing line between the LRF information and the bottom line */
   canvas_draw_line(canvas, 0, 48, 128, 48);
 }
+
 
 
 /** Input callback for the save diagnostic view **/

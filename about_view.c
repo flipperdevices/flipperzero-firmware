@@ -102,6 +102,7 @@ void about_view_draw_callback(Canvas *canvas, void *model) {
 }
 
 
+
 /** Input callback for the about view**/
 bool about_view_input_callback(InputEvent *evt, void *ctx) {
 

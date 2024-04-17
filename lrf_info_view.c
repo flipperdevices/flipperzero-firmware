@@ -117,6 +117,7 @@ void lrfinfo_view_draw_callback(Canvas *canvas, void *model) {
 }
 
 
+
 /** Input callback for the LRF info view **/
 bool lrfinfo_view_input_callback(InputEvent *evt, void *ctx) {
 
