@@ -23,7 +23,7 @@ void about_view_enter_callback(void *ctx) {
 	  /* Start at the first screen */
 	  about_model->screen = 0;
 	},
-	true);
+	false);
 }
 
 

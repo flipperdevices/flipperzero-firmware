@@ -62,7 +62,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   /* Find the next spot in the samples ring buffer */
   prev_samples_end_i = sampler_model->samples_end_i;
   i = prev_samples_end_i + 1;
-  if(i >= SAMPLES_RING_BUFFER_SIZE)
+  if(i >= sampler_model->max_samples)
     i = 0;
 
   /* If we have room in the ring buffer, insert the new sample */
@@ -83,7 +83,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 	) > (double)(sampler_model->config.avg > 0.75?
 			sampler_model->config.avg : 0.75)) {
     i = sampler_model->samples_start_i + 1;
-    if(i >= SAMPLES_RING_BUFFER_SIZE)
+    if(i >= sampler_model->max_samples)
       i = 0;
     if(i == prev_samples_end_i)
       break;
@@ -94,7 +94,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   if(sampler_model->samples_end_i >= sampler_model->samples_start_i)
     nb_samples = sampler_model->samples_end_i - sampler_model->samples_start_i;
   else
-    nb_samples = SAMPLES_RING_BUFFER_SIZE - sampler_model->samples_start_i +
+    nb_samples = sampler_model->max_samples - sampler_model->samples_start_i +
 			sampler_model->samples_end_i;
 
   /* Only one sample in the ring buffer */
@@ -169,7 +169,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
         nb_samples++;
 
         i++;
-        if(i >= SAMPLES_RING_BUFFER_SIZE)
+        if(i >= sampler_model->max_samples)
           i = 0;
       }
 

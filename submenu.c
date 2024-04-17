@@ -52,6 +52,13 @@ void submenu_callback(void *ctx, uint32_t idx) {
       FURI_LOG_I(TAG, "Switch to LRF info view");
       break;
 
+    /* Switch to the save diagnostic view */
+    case submenu_savediag:
+      view_dispatcher_switch_to_view(app->view_dispatcher, view_savediag);
+      sampler_model->config.sitem = submenu_savediag;
+      FURI_LOG_I(TAG, "Switch to save diagnostic view");
+      break;
+
     /* Switch to the about view */
     case submenu_about:
       view_dispatcher_switch_to_view(app->view_dispatcher, view_about);

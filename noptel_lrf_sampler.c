@@ -14,6 +14,7 @@
 #include "config_view.h"
 #include "sample_view.h"
 #include "lrf_info_view.h"
+#include "save_diag_view.h"
 #include "about_view.h"
 #include "submenu.h"
 
@@ -94,6 +95,9 @@ static App *app_init() {
   submenu_add_item(app->submenu, "LRF information",
 			submenu_lrfinfo, submenu_callback, app);
 
+  submenu_add_item(app->submenu, "Save LRF diagnostic",
+			submenu_savediag, submenu_callback, app);
+
   submenu_add_item(app->submenu, "About",
 			submenu_about, submenu_callback, app);
 
@@ -167,6 +171,12 @@ static App *app_init() {
 			sizeof(SamplerModel));
   SamplerModel *sampler_model = view_get_model(app->sample_view);
 
+  /* Point the LRF sample ring buffer to the shared storage area */
+  sampler_model->samples = (LRFSample *)app->shared_storage;
+  sampler_model->max_samples = sizeof(app->shared_storage) / sizeof(LRFSample);
+  FURI_LOG_I(TAG, "Sampler ring buffer size: %d samples",
+		sampler_model->max_samples);
+
   /* Add the sample view */
   view_dispatcher_add_view(app->view_dispatcher, view_sample, app->sample_view);
 
@@ -200,6 +210,37 @@ static App *app_init() {
   /* Add the LRF info view */
   view_dispatcher_add_view(app->view_dispatcher, view_lrfinfo,
 				app->lrfinfo_view);
+
+
+
+  /* Setup the save diagnostic view */
+
+  /* Allocate space for the save diagnostic view */
+  app->savediag_view = view_alloc();
+
+  /* Setup the draw callback for the save diagnostic view */
+  view_set_draw_callback(app->savediag_view, savediag_view_draw_callback);
+
+  /* Setup the input callback for the save diagnostic view */
+  view_set_input_callback(app->savediag_view, savediag_view_input_callback);
+
+  /* Configure the "previous" callback for the save diagnostic view */
+  view_set_previous_callback(app->savediag_view, return_to_submenu_callback);
+
+  /* Configure the enter and exit callbacks for the save diagnostic view */
+  view_set_enter_callback(app->savediag_view, savediag_view_enter_callback);
+  view_set_exit_callback(app->savediag_view, savediag_view_exit_callback);
+
+  /* Set the context for the save diagnostic view callbacks */
+  view_set_context(app->savediag_view, app);
+
+  /* Allocate the save diagnostic model */
+  view_allocate_model(app->savediag_view, ViewModelTypeLockFree,
+			sizeof(SaveDiagModel));
+
+  /* Add the save diagnostic view */
+  view_dispatcher_add_view(app->view_dispatcher, view_savediag,
+				app->savediag_view);
 
 
 
@@ -273,8 +314,11 @@ static App *app_init() {
   set_speaker_control(&app->speaker_control, min_beep_duration);
 
   /* Initialize the LRF serial communication app */
-  app->lrf_serial_comm_app = lrf_serial_comm_app_init(min_led_flash_duration,
-							uart_rx_timeout);
+  app->lrf_serial_comm_app =
+		lrf_serial_comm_app_init(min_led_flash_duration,
+						uart_rx_timeout,
+						app->shared_storage,
+						sizeof(app->shared_storage));
 
   return app;
 }

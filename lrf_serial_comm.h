@@ -10,6 +10,7 @@
 /*** Defines ***/
 #define BAUDRATE 115200
 #define RX_BUF_SIZE 2048
+#define DIAG_PROGRESS_UPDATE_EVERY 250 /*ms*/
 
 
 
@@ -25,9 +26,10 @@ typedef enum {
   cmm_100hz = 100,
   cmm_200hz = 200,
   cmm_break = -1,
-  send_ident = -2,
-  pointer_on = -3,
-  pointer_off = -4,
+  pointer_on = -2,
+  pointer_off = -3,
+  send_ident = -4,
+  read_diag = -5,
 } LRFCommand;
 
 
@@ -67,6 +69,9 @@ typedef struct {
   /* Firmware version */
   char fwversion[16];
 
+  /* Whether the firmware is newer than x.4.x */
+  bool is_fw_newer_than_x4;
+
   /* Electronics type */
   char electronics[4];
 
@@ -77,6 +82,22 @@ typedef struct {
   char builddate[32];
 
 } LRFIdent;
+
+
+
+/** LRF diagnostic data **/
+typedef struct {
+
+  /* Diagnostic data values */
+  uint16_t *vals;
+
+  /* Number of values currently read */
+  uint16_t nb_vals;
+
+  /* Total number of values */
+  uint16_t total_vals;
+
+} LRFDiag;
 
 
 
@@ -96,11 +117,20 @@ void set_lrf_sample_handler(LRFSerialCommApp *, void (*)(LRFSample *, void *),
 void set_lrf_ident_handler(LRFSerialCommApp *, void (*)(LRFIdent *, void *),
 				void *);
 
+/** Set the callback to handle received diagnostic data **/
+void set_diag_data_handler(LRFSerialCommApp *, void (*)(LRFDiag *, void *),
+				void *);
+
+/** Enable or disable the use of the share storage space as LRF frame decode
+    buffer **/
+void enable_shared_storage_dec_buf(LRFSerialCommApp *, bool);
+
 /** Send a command to the LRF **/
 void send_lrf_command(LRFSerialCommApp*, LRFCommand);
 
 /** Initialize the LRF serial communication app **/
-LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t, uint16_t);
+LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t, uint16_t,
+						uint8_t *, uint16_t);
 
 /** Stop the UART receive thread and free up the space allocated for the LRF
     communication app **/

@@ -19,8 +19,6 @@
 /*** Defines ***/
 #define VERSION "1.2"
 #define TAG "noptel_lrf_sampler"
-#define SAMPLES_RING_BUFFER_SIZE 2500	/* Should hold at least 10 seconds worth
-					   of samples at 200 Hz */
 #define NO_AVERAGE -1		/* This distance will be displayed as
 				   "NO AVERAGE" */
 #define NO_DISTANCE_DISPLAY -2	/* This distance will be displayed as a blank */
@@ -65,11 +63,14 @@ typedef enum {
   /* LRF info view */
   submenu_lrfinfo = 3,
 
+  /* LRF info view */
+  submenu_savediag = 4,
+
   /* About view */
-  submenu_about = 4,
+  submenu_about = 5,
 
   /* Total number of items */
-  total_submenu_items = 5,
+  total_submenu_items = 6,
 
 } SubmenuIndex;
 
@@ -104,7 +105,8 @@ typedef struct {
   char spstr[32];
 
   /* LRF sample ring buffer */
-  LRFSample samples[SAMPLES_RING_BUFFER_SIZE];
+  LRFSample *samples;
+  uint16_t max_samples;
   uint16_t samples_start_i;
   uint16_t samples_end_i;
 
@@ -140,6 +142,38 @@ typedef struct {
 
 
 
+/** Save diagnostic model **/
+typedef struct {
+
+  /* LRF identification */
+  LRFIdent ident;
+
+  /* Whether we have a valid identification */
+  bool has_ident;
+
+  /* Diagnostic data */
+  LRFDiag lrf_diag;
+
+  /* Progress (0 -> 1) */
+  float progress;
+
+  /* Diagnostic file name and path */
+  char dsp_fname_pt1[16];
+  char dsp_fname_pt2[32];
+  char dsp_fpath[128];
+
+  /* Scratchpad string */
+  char spstr[32];
+
+  /* Status message */
+  char status_msg1[8];
+  char status_msg2[48];
+  char status_msg3[48];
+
+} SaveDiagModel;
+
+
+
 /** About view model **/
 typedef struct {
 
@@ -152,6 +186,12 @@ typedef struct {
 
 /** App structure **/
 typedef struct {
+
+  /* Large storage space shared between various parts of the app, because
+     the Flipper Zero doesn't have enough memory for separate storage areas.
+     Should be large enough to hold 2000 LRFSample samples (and then some)
+     or a full LRF diagnostic frame */
+  uint8_t shared_storage[60000];	/* Holds 2500 samples */
 
   /* View dispatcher */
   ViewDispatcher *view_dispatcher;
@@ -170,6 +210,9 @@ typedef struct {
 
   /* LRF info view */
   View *lrfinfo_view;
+
+  /* Save diagnostic view */
+  View *savediag_view;
 
   /* About view  */
   View *about_view;

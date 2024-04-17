@@ -22,6 +22,9 @@ typedef enum {
   /* LRF info view */
   view_lrfinfo,
 
+  /* Save diagnostic view */
+  view_savediag,
+
   /* About view */
   view_about,
 

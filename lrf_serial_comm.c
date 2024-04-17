@@ -31,16 +31,20 @@ static uint8_t cmd_cmm_20hz[] = "\xcc\x04\x00\x00\x80";
 static uint8_t cmd_cmm_100hz[] = "\xcc\x05\x00\x00\x81";
 static uint8_t cmd_cmm_200hz[] = "\xcc\x06\x00\x00\x82";
 static uint8_t cmd_cmm_break[] = "\xc6\x96";
-static uint8_t cmd_send_ident[] = "\xc0\x90";
 static uint8_t cmd_pointer_on[] = "\xc5\x02\x97";
 static uint8_t cmd_pointer_off[] = "\xc5\x00\x95";
-
+static uint8_t cmd_send_ident[] = "\xc0\x90";
+static uint8_t cmd_read_diag[] = "\xdc\x8c";
 
 
 /*** Types ***/
 
 /** App structure **/
 struct _LRFSerialCommApp {
+
+  /* Shared storage space and size */
+  uint8_t *shared_storage;
+  uint16_t shared_storage_size;
 
   /* UART receive thread */
   FuriThread *rx_thread;
@@ -54,8 +58,13 @@ struct _LRFSerialCommApp {
   /* Receive buffer */
   uint8_t rx_buf[RX_BUF_SIZE];
 
-  /* LRF frame decoding buffer */
-  uint8_t dec_buf[128];
+  /* Default LRF frame decode buffer */
+  uint8_t default_dec_buf[128];
+
+  /* Actual LRF frame decode buffer */
+  uint8_t *dec_buf;
+  uint16_t nb_dec_buf;
+  uint16_t dec_buf_size;
 
   /* Callback to send a decoded LRF sample to and the context
      we should pass it */
@@ -66,6 +75,10 @@ struct _LRFSerialCommApp {
      we should pass it */
   void (*lrf_ident_handler)(LRFIdent *, void *);
   void *lrf_ident_handler_ctx;
+
+  /* Callback to send diagnostic data to and the context we should pass it */
+  void (*diag_data_handler)(LRFDiag *, void *);
+  void *diag_data_handler_ctx;
 
   /* UART channel and handle */
   FuriHalSerialId serial_channel;
@@ -102,6 +115,35 @@ void set_lrf_ident_handler(LRFSerialCommApp *app,
 				void (*cb)(LRFIdent *, void *), void *ctx) {
   app->lrf_ident_handler = cb;
   app->lrf_ident_handler_ctx = ctx;
+}
+
+
+
+/** Set the callback to handle received diagnostic data **/
+void set_diag_data_handler(LRFSerialCommApp *app,
+				void (*cb)(LRFDiag *, void *), void *ctx) {
+  app->diag_data_handler = cb;
+  app->diag_data_handler_ctx = ctx;
+}
+
+
+
+/** Enable or disable the use of the share storage space as LRF frame decode
+    buffer **/
+void enable_shared_storage_dec_buf(LRFSerialCommApp *app, bool enabled) {
+
+  /* Switch the decode buffer pointer and size as needed */
+  if(enabled) {
+    app->dec_buf = app->shared_storage;
+    app->dec_buf_size = app->shared_storage_size;
+  }
+  else {
+    app->dec_buf = app->default_dec_buf;
+    app->dec_buf_size = sizeof(app->default_dec_buf);
+  }
+
+  /* Reset the decode buffer */
+  app->nb_dec_buf = 0;
 }
 
 
@@ -170,15 +212,15 @@ static int32_t uart_rx_thread(void *ctx) {
   uint32_t evts;
   uint32_t last_rx_tstamp_ms = 0, now_ms;
   size_t rx_buf_len;
-  uint16_t dec_buf_len = 0;
-  uint16_t wait_dec_buf_len = 0;
+  uint32_t wait_nb_dec_buf = 0;
   bool is_little_endian;
   LRFSample lrf_sample;
   LRFIdent lrf_ident;
   uint8_t electronics;
   uint8_t fw_major, fw_minor, fw_micro, fw_build;
-  bool is_fw_newer_than_x4;
-  uint16_t i;
+  LRFDiag lrf_diag = {NULL, 0, 0};
+  uint32_t last_update_diag_handler = 0;
+  uint16_t i, j;
 
   /* Union to convert bytes to float, initialized with the endianness test value
      of 1234.0 */
@@ -227,21 +269,23 @@ static int32_t uart_rx_thread(void *ctx) {
 
         /* If too much time has passed since the previous data was received,
            reset the decode buffer */
-        if(ms_tick_time_diff_ms(now_ms, last_rx_tstamp_ms) >=
-		app->uart_rx_timeout)
-          dec_buf_len = 0;
+        if(app->nb_dec_buf && ms_tick_time_diff_ms(now_ms, last_rx_tstamp_ms) >=
+				app->uart_rx_timeout) {
+          FURI_LOG_I(TAG, "RX timeout");
+          app->nb_dec_buf = 0;
+        }
 
         last_rx_tstamp_ms = now_ms;
 
         /* Process the data we're received */
-        for(i=0; i < rx_buf_len; i++)
+        for(i = 0; i < rx_buf_len; i++) {
 
-          switch(dec_buf_len) {
+          switch(app->nb_dec_buf) {
 
 	    /* We're waiting for a sync byte */
             case 0:
               if(app->rx_buf[i] == 0x59)
-                app->dec_buf[dec_buf_len++] = app->rx_buf[i];
+                app->dec_buf[app->nb_dec_buf++] = app->rx_buf[i];
               break;
 
 	    /* We're waiting for a command byte */
@@ -252,37 +296,122 @@ static int32_t uart_rx_thread(void *ctx) {
 
                 /* We got an exec range measurement response */
                 case 0xcc:
-                  app->dec_buf[dec_buf_len++] = app->rx_buf[i];
-                  wait_dec_buf_len = 22;	/* We need to get 22 bytes total
-						   for this frame */
+                  app->dec_buf[app->nb_dec_buf++] = app->rx_buf[i];
+                  wait_nb_dec_buf = 22;	/* We need to get 22 bytes total
+					   for this frame */
                   break;
 
                 /* We got an identification frame response */
                 case 0xc0:
-                  app->dec_buf[dec_buf_len++] = app->rx_buf[i];
-                  wait_dec_buf_len = 73;	/* We need to get 73 bytes total
-						   for this frame */
+                  app->dec_buf[app->nb_dec_buf++] = app->rx_buf[i];
+                  wait_nb_dec_buf = 73;	/* We need to get 73 bytes total
+					   for this frame */
+                  break;
+
+                /* We got a read diagnostic data response */
+                case 0xdc:
+                  app->dec_buf[app->nb_dec_buf++] = app->rx_buf[i];
+                  wait_nb_dec_buf = 6;	/* We need to get 4 more bytes to know
+					   how many we need to get in total */
                   break;
 
                 /* We got an unknown command byte: reset the decode buffer */
                 default:
-                  dec_buf_len = 0;
+                  app->nb_dec_buf = 0;
               }
               break;
 
             /* We're decoding a command */
             default:
 
-              /* Keep filling up the decode buffer until we have enough bytes */
-              app->dec_buf[dec_buf_len++] = app->rx_buf[i];
-              if(dec_buf_len < wait_dec_buf_len)
+              /* Add the byte to the decode buffer, making sure the it doesn't
+                 overflow */
+              app->dec_buf[app->nb_dec_buf++] = app->rx_buf[i];
+              if(app->nb_dec_buf >= app->dec_buf_size)
+                app->nb_dec_buf--;
+
+              /* Do we still not have all the expected data? */
+              if(app->nb_dec_buf < wait_nb_dec_buf) {
+
+                /* If we have a diagnostic data handler, we're receiving the
+                   bulk of a diagnostic data frame, we have an even number of
+                   bytes and we're due to send an update update on the progress
+                   of the download to the diagnostic data handler, do so */
+                if(app->diag_data_handler && app->dec_buf[1] == 0xdc &&
+			wait_nb_dec_buf > 6 && !(app->nb_dec_buf & 1) &&
+			ms_tick_time_diff_ms(now_ms, last_update_diag_handler) >
+				DIAG_PROGRESS_UPDATE_EVERY) {
+                  lrf_diag.nb_vals = (app->nb_dec_buf - 2) / 2;
+                  app->diag_data_handler(&lrf_diag, app->diag_data_handler_ctx);
+                  last_update_diag_handler = now_ms;
+                }
+
+                /* Continue getting data into the decode buffer */
                 break;
+              }
+
+              /* If we're receiving diagnostic data and we only have the start
+                 of the frame, recalculate the total number of bytes we need
+                 to get */
+              if(wait_nb_dec_buf == 6) {
+
+                if(is_little_endian) {
+
+                  /* Decode the data count before the histogram */
+                  usiun.bytes[0] = app->dec_buf[2];
+                  usiun.bytes[1] = app->dec_buf[3];
+                  wait_nb_dec_buf += (usiun.usi - 1) * 2;
+
+                  /* Decode the histogram length */
+                  usiun.bytes[0] = app->dec_buf[4];
+                  usiun.bytes[1] = app->dec_buf[5];
+                  wait_nb_dec_buf += usiun.usi * 2;
+                }
+
+                else {
+
+                  /* Decode the data count before the histogram */
+                  usiun.bytes[0] = app->dec_buf[3];
+                  usiun.bytes[1] = app->dec_buf[2];
+                  wait_nb_dec_buf += (usiun.usi - 1) * 2;
+
+                  /* Decode the histogram length */
+                  usiun.bytes[0] = app->dec_buf[5];
+                  usiun.bytes[1] = app->dec_buf[4];
+                  wait_nb_dec_buf += usiun.usi * 2;
+                }
+
+                wait_nb_dec_buf++;	/* One last byte for the checkbyte */
+
+                /* If the new number of bytes to get is too low or exceeds the
+                   size of the decode buffer, reset the decode buffer */
+                if(wait_nb_dec_buf <= 6 ||
+			wait_nb_dec_buf > app->dec_buf_size) {
+                  app->nb_dec_buf = 0;
+                  break;
+                }
+
+                /* Initialize the LRF diagnostic data: for now set vals to NULL
+                   since the download isn't complete */
+                lrf_diag.vals = NULL;
+                lrf_diag.nb_vals = (app->nb_dec_buf - 2) / 2;
+                lrf_diag.total_vals = (wait_nb_dec_buf - 2 - 1) / 2;
+
+                /* If we have a diagnostic data handler, inform it of the
+                   progress of the download for the first time */
+                if(app->diag_data_handler) {
+                  app->diag_data_handler(&lrf_diag, app->diag_data_handler_ctx);
+                  last_update_diag_handler = now_ms;
+                }
+
+                break;
+              }
 
               /* We have enough bytes: if the frame's checksum doesn't match,
                  discard the frame */
-              if(app->dec_buf[dec_buf_len - 1] !=
-				checkbyte(app->dec_buf, dec_buf_len - 1)) {
-                dec_buf_len = 0;
+              if(app->dec_buf[app->nb_dec_buf - 1] !=
+				checkbyte(app->dec_buf, app->nb_dec_buf - 1)) {
+                app->nb_dec_buf = 0;
                 break;
               }
 
@@ -373,12 +502,6 @@ static int32_t uart_rx_thread(void *ctx) {
                   /* Timestamp the sample */
                   lrf_sample.tstamp_ms = now_ms;
 
-                  /* If we have a callback to handle the decoded LRF sample,
-                     call it and pass it the sample */
-                  if(app->lrf_sample_handler)
-                    app->lrf_sample_handler(&lrf_sample,
-						app->lrf_sample_handler_ctx);
-
                   FURI_LOG_I(TAG, "LRF sample received: "
 					"dist1=%f, dist2=%f, dist3=%f, "
 					"ampl1=%d, ampl2=%d, ampl3=%d",
@@ -388,6 +511,12 @@ static int32_t uart_rx_thread(void *ctx) {
 				lrf_sample.ampl1,
 				lrf_sample.ampl2,
 				lrf_sample.ampl3);
+
+                  /* If we have a callback to handle the decoded LRF sample,
+                     call it and pass it the sample */
+                  if(app->lrf_sample_handler)
+                    app->lrf_sample_handler(&lrf_sample,
+						app->lrf_sample_handler_ctx);
 
                   break;
 
@@ -439,12 +568,12 @@ static int32_t uart_rx_thread(void *ctx) {
                   fw_major = usiun.usi >> 12;
                   fw_minor = (usiun.usi & 0xf00) >> 8;
                   fw_micro = usiun.usi & 0xff;
-                  is_fw_newer_than_x4 = fw_minor > 4 ||
+                  lrf_ident.is_fw_newer_than_x4 = fw_minor > 4 ||
 					(fw_minor == 4 && fw_micro > 0);
 
                   /* Extract the firmware's build number from the electronics
                      type if the firmware is a newer version */
-                  if (is_fw_newer_than_x4) {
+                  if (lrf_ident.is_fw_newer_than_x4) {
                     fw_build = electronics;
                     electronics = 0;
                   }
@@ -506,13 +635,6 @@ static int32_t uart_rx_thread(void *ctx) {
 				app->dec_buf[65], app->dec_buf[66],
 				app->dec_buf[68], app->dec_buf[69]);
 
-                  /* If we have a callback to handle the decoded LRF
-                     identification frame, call it and pass it the
-                     identification */
-                  if(app->lrf_ident_handler)
-                    app->lrf_ident_handler(&lrf_ident,
-						app->lrf_ident_handler_ctx);
-
                   FURI_LOG_I(TAG, "LRF identification frame received: "
 					"lrfid=%s, addinfo=%s, serial=%s, "
 					"fwversion=%s, electronics=%s, "
@@ -522,12 +644,51 @@ static int32_t uart_rx_thread(void *ctx) {
 				lrf_ident.electronics, lrf_ident.optics,
 				lrf_ident.builddate);
 
+                  /* If we have a callback to handle the decoded LRF
+                     identification frame, call it and pass it the
+                     identification */
+                  if(app->lrf_ident_handler)
+                    app->lrf_ident_handler(&lrf_ident,
+						app->lrf_ident_handler_ctx);
+
+                  break;
+
+                /* We got a read diagnostic data response */
+                case 0xdc:
+
+                  /* Point the diagnostic values to the decode buffer */
+                  lrf_diag.vals = (uint16_t *)(app->dec_buf + 2) ;
+
+                  /* Update the number of values received */
+                  lrf_diag.nb_vals = lrf_diag.total_vals;
+
+                  /* Fix up the diagnostic values' endianness if needed */
+                  if(!is_little_endian) {
+                    for(j = 0; j < lrf_diag.nb_vals; j++)
+                      lrf_diag.vals[j] = (lrf_diag.vals[j] & 0xff00) >> 8 |
+						(lrf_diag.vals[j] & 0xff) << 8;
+                  }
+
+                  FURI_LOG_I(TAG, "LRF diagnostic data received: %d bytes / "
+					"%d diagnostic values",
+				app->nb_dec_buf, lrf_diag.total_vals);
+
+                  /*  If we have a diagnostic data handler, update the it one
+                     last time, this time passing it the actual diagnostic
+                     values to save */
+                  if(app->diag_data_handler)
+                    app->diag_data_handler(&lrf_diag,
+						app->diag_data_handler_ctx);
+
                   break;
               }
 
               /* Clear the decode buffer */
-              dec_buf_len = 0;
-           }
+              app->nb_dec_buf = 0;
+
+              break;
+          }
+        }
       }
     }
   }
@@ -604,12 +765,6 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
       FURI_LOG_I(TAG, "CMM break command sent");
       break;
 
-    /* Send a send-identification-frame command */
-    case send_ident:
-      uart_tx(app, cmd_send_ident, sizeof(cmd_send_ident));
-      FURI_LOG_I(TAG, "Send identification frame command sent");
-      break;
-
     /* Send a pointer-on command */
     case pointer_on:
       uart_tx(app, cmd_pointer_on, sizeof(cmd_pointer_on));
@@ -621,6 +776,18 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
       uart_tx(app, cmd_pointer_off, sizeof(cmd_pointer_off));
       FURI_LOG_I(TAG, "Pointer OFF command sent");
       break;
+
+    /* Send a send-identification-frame command */
+    case send_ident:
+      uart_tx(app, cmd_send_ident, sizeof(cmd_send_ident));
+      FURI_LOG_I(TAG, "Send identification frame command sent");
+      break;
+
+    /* Send a read-diagnostic-data command */
+    case read_diag:
+      uart_tx(app, cmd_read_diag, sizeof(cmd_read_diag));
+      FURI_LOG_I(TAG, "Read diagnostic data command sent");
+      break;
   }
 }
 
@@ -628,18 +795,30 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
 
 /** Initialize the LRF serial communication app **/
 LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration,
-						uint16_t uart_rx_timeout) {
+						uint16_t uart_rx_timeout,
+						uint8_t *shared_storage,
+						uint16_t shared_storage_size) {
 
   FURI_LOG_I(TAG, "App init");
 
   /* Allocate space for the app's structure */
   LRFSerialCommApp *app = malloc(sizeof(LRFSerialCommApp));
 
+  /* Save the shared storage location and size */
+  app->shared_storage = shared_storage;
+  app->shared_storage_size = shared_storage_size;
+
   /* No received LRF data handler callback setup yet */
   app->lrf_sample_handler = NULL;
 
-  /* No received LRF data identification frame callback setup yet */
+  /* No received LRF data identification frame handler callback setup yet */
   app->lrf_ident_handler = NULL;
+
+  /* No received diagnostic data handler callback setup yet */
+  app->diag_data_handler = NULL;
+
+  /* Use the default decode buffer to start with */
+  enable_shared_storage_dec_buf(app, false);
 
   /* Allocate space for the UART receive stream buffer */
   app->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
