@@ -1,0 +1,13 @@
+REM Credit: @Mr-Proxy-source and @Willy-JL
+
+GUI h
+DELAY 1000
+GUI SPACE
+DELAY 250
+STRING https://github.com/Next-Flip/Momentum-Firmware
+DELAY 75
+TAB
+DELAY 75
+ENTER
+DELAY 150
+ENTER

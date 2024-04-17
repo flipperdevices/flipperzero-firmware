@@ -10,4 +10,5 @@ App(
     fap_icon="images/badkb_10px.png",
     fap_icon_assets="images",
     fap_icon_assets_symbol="bad_kb",
+    resources="resources",
 )
