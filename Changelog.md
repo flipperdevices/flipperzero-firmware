@@ -1,4 +1,6 @@
-- Added menu option to save the LRF diagnostic data into a file
+## Version 1.3 - 17/04/2024
+
+- Added menu option to save the LRF diagnostic data
 - LED flashes to show serial port activity
 - Modularized the code
 
