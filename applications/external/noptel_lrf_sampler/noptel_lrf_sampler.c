@@ -645,7 +645,7 @@ static void sample_view_timer_callback(void* ctx) {
     if(sampler_model->samples_updated) {
         /* Trigger a sample view redraw */
         with_view_model(
-            app->sample_view, SamplerModel * _model, {  UNUSED(_model); }, true);
+            app->sample_view, SamplerModel * _model, { UNUSED(_model); }, true);
 
         sampler_model->samples_updated = false;
     }
@@ -779,7 +779,7 @@ static bool lrfinfo_view_input_callback(InputEvent* evt, void* ctx) {
         /* Trigger an LRF info view redraw to clear the information currently
        displayed - if any */
         with_view_model(
-            app->lrfinfo_view, LRFInfoModel * _model, {  UNUSED(_model); }, true);
+            app->lrfinfo_view, LRFInfoModel * _model, { UNUSED(_model); }, true);
 
         /* Send a send-identification-frame command */
         send_lrf_command(app->lrf_serial_comm_app, send_ident);
@@ -936,7 +936,7 @@ static bool about_view_input_callback(InputEvent* evt, void* ctx) {
 
     /* Trigger an about view redraw */
     with_view_model(
-        app->about_view, AboutModel * _model, {  UNUSED(_model); }, true);
+        app->about_view, AboutModel * _model, { UNUSED(_model); }, true);
 
     /* We handled the event */
     return true;
@@ -1226,7 +1226,7 @@ void lrf_ident_handler(LRFIdent* lrf_ident, void* ctx) {
 
     /* Trigger an LRF info view redraw */
     with_view_model(
-        app->lrfinfo_view, LRFInfoModel * _model, {  UNUSED(_model); }, true);
+        app->lrfinfo_view, LRFInfoModel * _model, { UNUSED(_model); }, true);
 }
 
 /** Initialize the app **/
