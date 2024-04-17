@@ -20,8 +20,7 @@ static void u2f_view_draw_callback(Canvas* canvas, void* _model) {
 
     if(model->display_msg == U2fMsgNotConnected) {
         canvas_draw_icon(canvas, 22, 15, &I_Connect_me_62x31);
-        canvas_draw_str_aligned(
-            canvas, 128 / 2, 3, AlignCenter, AlignTop, "Connect me to computer");
+        canvas_draw_str_aligned(canvas, 128 / 2, 3, AlignCenter, AlignTop, "Connect to a device");
     } else if(model->display_msg == U2fMsgIdle) {
         canvas_draw_icon(canvas, 22, 15, &I_Connected_62x31);
         canvas_draw_str_aligned(canvas, 128 / 2, 3, AlignCenter, AlignTop, "Connected!");

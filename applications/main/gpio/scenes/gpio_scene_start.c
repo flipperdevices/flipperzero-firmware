@@ -1,3 +1,6 @@
+#ifndef __GPIO_SCENE_START_H__
+#define __GPIO_SCENE_START_H__
+
 #include "../gpio_app_i.h"
 #include <furi_hal_power.h>
 #include <furi_hal_usb.h>
@@ -7,6 +10,8 @@ enum GpioItem {
     GpioItemUsbUart,
     GpioItemTest,
     GpioItemOtg,
+    GpioItemI2CScanner,
+    GpioItemI2CSfp,
 };
 
 enum GpioOtg {
@@ -27,6 +32,10 @@ static void gpio_scene_start_var_list_enter_callback(void* context, uint32_t ind
         view_dispatcher_send_custom_event(app->view_dispatcher, GpioStartEventManualControl);
     } else if(index == GpioItemUsbUart) {
         view_dispatcher_send_custom_event(app->view_dispatcher, GpioStartEventUsbUart);
+    } else if(index == GpioItemI2CScanner) {
+        view_dispatcher_send_custom_event(app->view_dispatcher, GpioStartEventI2CScanner);
+    } else if(index == GpioItemI2CSfp) {
+        view_dispatcher_send_custom_event(app->view_dispatcher, GpioStartEventI2CSfp);
     }
 }
 
@@ -60,13 +69,18 @@ void gpio_scene_start_on_enter(void* context) {
         GpioOtgSettingsNum,
         gpio_scene_start_var_list_change_callback,
         app);
-    if(furi_hal_power_is_otg_enabled()) {
+    if(furi_hal_power_is_charging()) {
+        variable_item_set_locked(item, true, "Unplug USB!");
+    } else if(furi_hal_power_is_otg_enabled()) {
         variable_item_set_current_value_index(item, GpioOtgOn);
         variable_item_set_current_value_text(item, gpio_otg_text[GpioOtgOn]);
     } else {
         variable_item_set_current_value_index(item, GpioOtgOff);
         variable_item_set_current_value_text(item, gpio_otg_text[GpioOtgOff]);
     }
+
+    variable_item_list_add(var_item_list, "I2C-Scanner", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "I2C-SFP", 0, NULL, NULL);
 
     variable_item_list_set_selected_item(
         var_item_list, scene_manager_get_scene_state(app->scene_manager, GpioSceneStart));
@@ -86,6 +100,12 @@ bool gpio_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == GpioStartEventManualControl) {
             scene_manager_set_scene_state(app->scene_manager, GpioSceneStart, GpioItemTest);
             scene_manager_next_scene(app->scene_manager, GpioSceneTest);
+        } else if(event.event == GpioStartEventI2CScanner) {
+            scene_manager_set_scene_state(app->scene_manager, GpioSceneStart, GpioItemI2CScanner);
+            scene_manager_next_scene(app->scene_manager, GpioSceneI2CScanner);
+        } else if(event.event == GpioStartEventI2CSfp) {
+            scene_manager_set_scene_state(app->scene_manager, GpioSceneStart, GpioItemI2CSfp);
+            scene_manager_next_scene(app->scene_manager, GpioSceneI2CSfp);
         } else if(event.event == GpioStartEventUsbUart) {
             scene_manager_set_scene_state(app->scene_manager, GpioSceneStart, GpioItemUsbUart);
             if(!furi_hal_usb_is_locked()) {
@@ -104,3 +124,5 @@ void gpio_scene_start_on_exit(void* context) {
     GpioApp* app = context;
     variable_item_list_reset(app->var_item_list);
 }
+
+#endif // __GPIO_SCENE_START_H__

@@ -577,6 +577,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &lfrfid_cli,
 };
 
-const FlipperAppPluginDescriptor* lfrfid_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* lfrfid_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }
