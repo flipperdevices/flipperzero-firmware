@@ -344,6 +344,10 @@ static bool ducky_set_bt_id(BadKbScript* bad_kb, const char* line) {
 
     strlcpy(cfg->ble.name, line + mac_len, sizeof(cfg->ble.name));
     FURI_LOG_D(WORKER_TAG, "set bt id: %s", line);
+
+    // Can't set bonding and pairing via BT_ID, sync with user choice instead
+    cfg->ble.bonding = bad_kb->app->config.ble.bonding;
+    cfg->ble.pairing = bad_kb->app->config.ble.pairing;
     return true;
 }
 

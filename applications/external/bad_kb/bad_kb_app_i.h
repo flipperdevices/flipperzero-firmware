@@ -72,7 +72,6 @@ struct BadKbApp {
 
     Bt* bt;
     bool is_bt;
-    bool bt_remember;
     BadKbConfig config; // User options
     BadKbConfig id_config; // ID and BT_ID values
 
