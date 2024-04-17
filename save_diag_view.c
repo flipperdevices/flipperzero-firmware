@@ -69,6 +69,7 @@ static void diag_data_handler(LRFDiag *lrf_diag, void *ctx) {
   savediag_model->progress = ((float)savediag_model->lrf_diag.nb_vals /
 				(float)savediag_model->lrf_diag.total_vals)
 				/ 2;
+
   /* Do we have all the diagnostic data values? */
   if(savediag_model->lrf_diag.nb_vals == savediag_model->lrf_diag.total_vals) {
 
@@ -368,7 +369,7 @@ bool savediag_view_input_callback(InputEvent *evt, void *ctx) {
     return true;
   }
 
-  /* If the user pressed the OK button, tell the LRF to send diagnostic data */
+  /* Did the user press the OK button? */
   if(evt->type == InputTypePress && evt->key == InputKeyOk) {
 
     /* If no diagnostic data is being downloaded, trigger a new save sequence */
