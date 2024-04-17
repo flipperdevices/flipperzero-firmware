@@ -169,7 +169,7 @@ FuriHalUsbInterface* furi_hal_usb_get_config(void) {
     return return_data.void_value;
 }
 
-void* furi_hal_usb_get_config_context() {
+void* furi_hal_usb_get_config_context(void) {
     UsbApiEventReturnData return_data = {
         .void_value = NULL,
     };

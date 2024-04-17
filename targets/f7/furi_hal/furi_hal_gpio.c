@@ -65,8 +65,8 @@ void furi_hal_gpio_init(
     const GpioPull pull,
     const GpioSpeed speed) {
     // we cannot set alternate mode in this function
-    furi_assert(mode != GpioModeAltFunctionPushPull);
-    furi_assert(mode != GpioModeAltFunctionOpenDrain);
+    furi_check(mode != GpioModeAltFunctionPushPull);
+    furi_check(mode != GpioModeAltFunctionOpenDrain);
 
     furi_hal_gpio_init_ex(gpio, mode, pull, speed, GpioAltFnUnused);
 }

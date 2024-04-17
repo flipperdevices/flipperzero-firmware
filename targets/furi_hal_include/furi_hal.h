@@ -49,7 +49,7 @@ extern "C" {
 void furi_hal_set_is_normal_boot(bool value);
 
 /** True if booting normally with all subsystems */
-bool furi_hal_is_normal_boot();
+bool furi_hal_is_normal_boot(void);
 
 /** Early FuriHal init, only essential subsystems */
 void furi_hal_init_early(void);

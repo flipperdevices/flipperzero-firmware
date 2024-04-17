@@ -262,7 +262,7 @@ FuriHalVersionRegion furi_hal_version_get_hw_region(void) {
     return furi_hal_version.board_region;
 }
 
-FuriHalVersionRegion furi_hal_version_get_hw_region_otp() {
+FuriHalVersionRegion furi_hal_version_get_hw_region_otp(void) {
     return furi_hal_version_get_hw_region();
 }
 

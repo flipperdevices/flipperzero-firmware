@@ -12,7 +12,7 @@ void furi_hal_set_is_normal_boot(bool value) {
     normal_boot = value;
 }
 
-bool furi_hal_is_normal_boot() {
+bool furi_hal_is_normal_boot(void) {
     if((normal_boot != false) && (normal_boot != true)) {
         normal_boot = false;
     }
