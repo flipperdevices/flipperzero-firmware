@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0416-0359-0.100.4-22e2176](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-16 21:03 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-16 21:03 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-17 00:57 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-17 00:57 EST`
 - [Fixed issue with passport FAP opening (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/65d2d7b43db804f57aeba6278b48b5bf05b0d1ef)
 - Added: [MODBUS v0.1 (By ElectronicCats)](https://github.com/ElectronicCats/flipper-rs485modbus) `Req: Modbus By ElectronicCats`
 - Added: [LaserCat v1.0 (By DroWez)](https://github.com/DroWez/LaserCat)
@@ -40,6 +40,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [DVD Screensaver v1.0 (By shantih19)](https://github.com/shantih19/flipper_dvd_screensaver)
 - OFW: PR: [TLSF memory allocator. Less free flash, moar free ram. #3572 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3572)
 - OFW: PR: [NFC: add support for S(WTX) request in iso14443_4a_poller #3590 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3590)
+- [BadKB now with resources (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae276785b50009ba1b4fe81c593fab4815a564f1)
+- [Many main app tweaks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9b0b5496d375cf3962a56f9ebe5178f7898b3db)
 
 <a name="release">
 
