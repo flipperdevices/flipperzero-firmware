@@ -3,7 +3,7 @@ App(
     name="MODBUS",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="Modbus_app",
-    stack_size= 5 * 1024,
+    stack_size=5 * 1024,
     fap_icon="modbus.png",
     fap_category="GPIO",
     fap_author="ElectronicCats",

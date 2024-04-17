@@ -9,5 +9,5 @@ App(
     fap_author="mdaskalov",
     fap_weburl="https://github.com/mdaskalov/flipperzero-clock",
     fap_version="1.1",
-    fap_description="FlipperZero Customizable Clock"
+    fap_description="FlipperZero Customizable Clock",
 )
