@@ -1,19 +1,14 @@
 App(
     appid="noptel_lrf_sampler",
-    name="Noptel LRF sampler",
+    name="Noptel LRF Sampler",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="noptel_lrf_sampler_app",
     stack_size=4 * 1024,
-    requires=[
-        "gui",
-    ],
-    order=10,
+    fap_icon="assets/noptel_lrf_sampler.png",
+    fap_icon_assets="assets",
     fap_category="GPIO",
-    # Optional values
-    fap_version="1.2",
-    fap_icon="assets/noptel_lrf_sampler.png",  # 10x10 1-bit PNG
-    fap_description="Noptel LRF rangefinder sampler",
     fap_author="Giraut",
     fap_weburl="https://github.com/Giraut/flipper_zero_noptel_lrf_sampler",
-    fap_icon_assets="assets",  # Image assets to compile for this application
+    fap_version="1.2",
+    fap_description="Noptel LRF rangefinder sampler",
 )
