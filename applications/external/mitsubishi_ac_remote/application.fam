@@ -1,0 +1,28 @@
+App(
+    appid="mitsubishi_ac_remote",
+    name="Mitsubishi AC Remote",
+    apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
+    entry_point="ac_remote_app",
+    cdefines=["APP_MITSUBISHI_AC_REMOTE"],
+    requires=[
+        "storage",
+        "gui",
+        "infrared",
+    ],
+    stack_size=1 * 2048,
+    order=90,
+    fap_description="Mitsubishi Electric Air Conditioner remote control",
+    fap_version="1.0",
+    fap_icon="ac_remote.png",
+    fap_category="Infrared",
+    fap_icon_assets="assets",
+    fap_private_libs=[
+        Lib(
+            name="hvac_mitsubishi",
+            sources=[
+                "hvac_mitsubishi.c",
+            ],
+        ),
+    ],
+)
