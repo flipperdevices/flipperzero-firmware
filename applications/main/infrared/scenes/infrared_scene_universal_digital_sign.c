@@ -69,9 +69,6 @@ void infrared_scene_universal_digital_sign_on_enter(void* context) {
 
     button_panel_add_label(button_panel, 1, 11, FontPrimary, "Digital Signs");
 
-    view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
-    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
-
     infrared_scene_universal_common_on_enter(context);
 }
 

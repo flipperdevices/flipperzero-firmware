@@ -43,14 +43,23 @@ void infrared_scene_start_on_enter(void* context) {
         SubmenuIndexGpioSettings,
         infrared_scene_start_submenu_callback,
         infrared);
-    submenu_add_item(
+
+    submenu_add_lockable_item(
         submenu,
         "Learn New Remote RAW",
         SubmenuIndexLearnNewRemoteRaw,
         infrared_scene_start_submenu_callback,
-        infrared);
-    submenu_add_item(
-        submenu, "Debug RX", SubmenuIndexDebug, infrared_scene_start_submenu_callback, infrared);
+        infrared,
+        !infrared->app_state.is_debug_enabled,
+        "Enable\nDebug!");
+    submenu_add_lockable_item(
+        submenu,
+        "Debug RX",
+        SubmenuIndexDebug,
+        infrared_scene_start_submenu_callback,
+        infrared,
+        !infrared->app_state.is_debug_enabled,
+        "Enable\nDebug!");
 
     const uint32_t submenu_index =
         scene_manager_get_scene_state(scene_manager, InfraredSceneStart);
@@ -78,7 +87,6 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
             // disable automatic signal decoding if "Learn New Remote (RAW)"
             infrared_worker_rx_enable_signal_decoding(
                 infrared->worker, submenu_index == SubmenuIndexLearnNewRemote);
-
             infrared->app_state.is_learning_new_remote = true;
             scene_manager_next_scene(scene_manager, InfraredSceneLearn);
         } else if(submenu_index == SubmenuIndexSavedRemotes) {

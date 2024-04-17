@@ -553,6 +553,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &infrared_cli_start_ir,
 };
 
-const FlipperAppPluginDescriptor* infrared_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* infrared_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }
