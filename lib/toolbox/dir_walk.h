@@ -44,6 +44,14 @@ void dir_walk_set_recursive(DirWalk* dir_walk, bool recursive);
 void dir_walk_set_filter_cb(DirWalk* dir_walk, DirWalkFilterCb cb, void* context);
 
 /**
+ * Set recurse filtered paths
+ * @param dir_walk 
+ * @param array 
+ * @param count 
+ */
+void dir_walk_set_recurse_filter(DirWalk* dir_walk, const char** array, size_t count);
+
+/**
  * Open directory 
  * @param dir_walk 
  * @param path 

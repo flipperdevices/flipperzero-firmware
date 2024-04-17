@@ -203,9 +203,48 @@ uint8_t rgb_backlight_get_rainbow_saturation(void) {
     return rainbow_saturation;
 }
 
-static void rainbow_timer(void* ctx) {
+void rainbow_timer(void* ctx) {
+    if(!rgb_state.settings_loaded) return;
+    furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
+
+    if(!rgb_state.enabled || rgb_settings.rainbow_mode == RGBBacklightRainbowModeOff ||
+       !rgb_state.last_brightness) {
+        furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
+        return;
+    }
+
+    rgb_state.rainbow_hsv.h += rgb_settings.rainbow_speed;
+
+    RgbColor rgb;
+    hsv2rgb(&rgb_state.rainbow_hsv, &rgb);
+
+    switch(rgb_settings.rainbow_mode) {
+    case RGBBacklightRainbowModeWave: {
+        HsvColor hsv = rgb_state.rainbow_hsv;
+        for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
+            if(i) {
+                hsv.h += (50 * i);
+                hsv2rgb(&hsv, &rgb);
+            }
+            SK6805_set_led_color(i, rgb.r, rgb.g, rgb.b);
+        }
+        break;
+    }
+
+    case RGBBacklightRainbowModeSolid:
+        for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
+            SK6805_set_led_color(i, rgb.r, rgb.g, rgb.b);
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    SK6805_update();
+
+    furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
     UNUSED(ctx);
-    rgb_backlight_update(rgb_state.last_brightness, true);
 }
 
 void rgb_backlight_reconfigure(bool enabled) {
@@ -226,16 +265,16 @@ void rgb_backlight_reconfigure(bool enabled) {
         rgb_state.rainbow_timer = NULL;
     }
     rgb_state.rainbow_hsv.s = rgb_settings.rainbow_saturation;
-    rgb_backlight_update(rgb_state.last_brightness, false);
+    rgb_backlight_update(rgb_state.last_brightness, true);
 
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
 
-void rgb_backlight_update(uint8_t brightness, bool tick) {
+void rgb_backlight_update(uint8_t brightness, bool forced) {
     if(!rgb_state.settings_loaded) return;
     furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
 
-    if(!rgb_state.enabled) {
+    if(!rgb_state.enabled || (brightness == rgb_state.last_brightness && !forced)) {
         furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
         return;
     }
@@ -255,29 +294,14 @@ void rgb_backlight_update(uint8_t brightness, bool tick) {
 
     case RGBBacklightRainbowModeWave:
     case RGBBacklightRainbowModeSolid: {
-        if(tick && brightness) {
-            rgb_state.rainbow_hsv.h += rgb_settings.rainbow_speed;
-        } else {
-            rgb_state.rainbow_hsv.v = brightness;
-        }
-
-        RgbColor rgb;
-        hsv2rgb(&rgb_state.rainbow_hsv, &rgb);
-
-        if(rgb_settings.rainbow_mode == RGBBacklightRainbowModeWave) {
-            HsvColor hsv = rgb_state.rainbow_hsv;
+        if(!brightness) {
+            furi_timer_stop(rgb_state.rainbow_timer);
             for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
-                if(i) {
-                    hsv.h += (50 * i);
-                    hsv2rgb(&hsv, &rgb);
-                }
-                SK6805_set_led_color(i, rgb.r, rgb.g, rgb.b);
+                SK6805_set_led_color(i, 0, 0, 0);
             }
-        } else {
-            for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
-                SK6805_set_led_color(i, rgb.r, rgb.g, rgb.b);
-            }
-        }
+        } else if(!rgb_state.last_brightness)
+            furi_timer_start(rgb_state.rainbow_timer, rgb_settings.rainbow_interval);
+        rgb_state.rainbow_hsv.v = brightness;
         break;
     }
 

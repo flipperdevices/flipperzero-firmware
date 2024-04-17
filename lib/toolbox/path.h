@@ -23,6 +23,14 @@ void path_extract_filename_no_ext(const char* path, FuriString* filename);
 void path_extract_filename(FuriString* path, FuriString* filename, bool trim_ext);
 
 /**
+ * @brief Extract file extension string from path.
+ * 
+ * @param path path string
+ * @param ext output extension furi string
+ */
+void path_extract_ext_str(FuriString* path, FuriString* ext);
+
+/**
  * @brief Extract file extension from path.
  * 
  * @param path path string

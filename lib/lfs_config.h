@@ -2,12 +2,12 @@
 
 #include <furi.h>
 
-#ifdef FURI_NDEBUG
-#define LFS_NO_ASSERT
-#define LFS_ASSERT(x)
-#else
+// #ifdef FURI_NDEBUG
+// #define LFS_NO_ASSERT
+// #define LFS_ASSERT(x)
+// #else
 #define LFS_ASSERT furi_assert
-#endif
+// #endif
 
 #define LFS_TAG "Lfs"
 

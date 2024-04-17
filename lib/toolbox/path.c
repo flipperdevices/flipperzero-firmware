@@ -40,6 +40,18 @@ void path_extract_filename(FuriString* path, FuriString* name, bool trim_ext) {
     }
 }
 
+void path_extract_ext_str(FuriString* path, FuriString* ext) {
+    size_t dot = furi_string_search_rchar(path, '.');
+    size_t filename_start = furi_string_search_rchar(path, '/');
+
+    if(dot != FURI_STRING_FAILURE && filename_start != FURI_STRING_FAILURE &&
+       filename_start < dot) {
+        furi_string_set_n(ext, path, dot, furi_string_size(path) - dot);
+    } else {
+        furi_string_reset(ext);
+    }
+}
+
 void path_extract_extension(FuriString* path, char* ext, size_t ext_len_max) {
     furi_check(path);
     furi_check(ext);

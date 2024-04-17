@@ -88,12 +88,17 @@ bool saved_struct_load(const char* path, void* data, size_t size, uint8_t magic,
     }
 
     if(result) {
-        size_t bytes_count = storage_file_read(file, &header, sizeof(SavedStructHeader));
-        bytes_count += storage_file_read(file, data_read, size);
+        size_t bytes_expected = sizeof(SavedStructHeader) + size;
+        uint64_t bytes_file = storage_file_size(file);
+        result = bytes_file == bytes_expected;
+        if(result) {
+            size_t bytes_count = storage_file_read(file, &header, sizeof(SavedStructHeader));
+            bytes_count += storage_file_read(file, data_read, size);
+            result = bytes_count == bytes_expected;
+        }
 
-        if(bytes_count != (sizeof(SavedStructHeader) + size)) {
+        if(!result) {
             FURI_LOG_E(TAG, "Size mismatch of file \"%s\"", path);
-            result = false;
         }
     }
 

@@ -24,7 +24,7 @@
 /* Настройки */
 #define SK6805_LED_PIN &led_pin // LED connection port
 
-#ifdef FURI_DEBUG
+#if false
 #define DEBUG_PIN &gpio_ext_pa7
 #define DEBUG_INIT() \
     furi_hal_gpio_init(DEBUG_PIN, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh)

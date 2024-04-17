@@ -5371,7 +5371,7 @@ FRESULT f_mkfs (
 	/* Pre-determine the FAT type */
 	do {
 		if (_FS_EXFAT && (opt & FM_EXFAT)) {	/* exFAT possible? */
-			if ((opt & FM_ANY) == FM_EXFAT || sz_vol >= 0x4000000 || au > 128) {	/* exFAT only, vol >= 64Ms or au > 128s ? */
+			if ((opt & FM_ANY) == FM_EXFAT || sz_vol >= 0x2000000 || au > 128) {	/* exFAT only, vol >= 32Ms or au > 128s ? */
 				fmt = FS_EXFAT; break;
 			}
 		}

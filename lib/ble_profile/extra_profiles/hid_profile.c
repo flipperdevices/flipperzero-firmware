@@ -404,13 +404,17 @@ static void ble_profile_hid_get_config(GapConfig* config, FuriHalBleProfileParam
 
     // Set advertise name
     memset(config->adv_name, 0, sizeof(config->adv_name));
-    FuriString* name = furi_string_alloc_set(furi_hal_version_get_ble_local_device_name_ptr());
 
     const char* clicker_str = "Control";
     if(hid_profile_params && hid_profile_params->device_name_prefix) {
         clicker_str = hid_profile_params->device_name_prefix;
     }
-    furi_string_replace_str(name, "Flipper", clicker_str);
+    // We don't have Flipper in BLE name, use printf instead of replace
+    FuriString* name = furi_string_alloc_printf(
+        "%c%s %s",
+        furi_hal_version_get_ble_local_device_name_ptr()[0],
+        clicker_str,
+        furi_hal_version_get_ble_local_device_name_ptr() + 1);
     if(furi_string_size(name) >= sizeof(config->adv_name)) {
         furi_string_left(name, sizeof(config->adv_name) - 1);
     }

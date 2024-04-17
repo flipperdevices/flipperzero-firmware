@@ -951,6 +951,7 @@ Function,+,dir_walk_get_error,FS_Error,DirWalk*
 Function,+,dir_walk_open,_Bool,"DirWalk*, const char*"
 Function,+,dir_walk_read,DirWalkResult,"DirWalk*, FuriString*, FileInfo*"
 Function,+,dir_walk_set_filter_cb,void,"DirWalk*, DirWalkFilterCb, void*"
+Function,+,dir_walk_set_recurse_filter,void,"DirWalk*, const char**, size_t"
 Function,+,dir_walk_set_recursive,void,"DirWalk*, _Bool"
 Function,-,div,div_t,"int, int"
 Function,+,dolphin_deed,void,DolphinDeed
@@ -2854,6 +2855,7 @@ Function,+,path_concat,void,"const char*, const char*, FuriString*"
 Function,+,path_contains_only_ascii,_Bool,const char*
 Function,+,path_extract_basename,void,"const char*, FuriString*"
 Function,+,path_extract_dirname,void,"const char*, FuriString*"
+Function,+,path_extract_ext_str,void,"FuriString*, FuriString*"
 Function,+,path_extract_extension,void,"FuriString*, char*, size_t"
 Function,+,path_extract_filename,void,"FuriString*, FuriString*, _Bool"
 Function,+,path_extract_filename_no_ext,void,"const char*, FuriString*"
@@ -2924,8 +2926,8 @@ Function,+,powf,float,"float, float"
 Function,-,powl,long double,"long double, long double"
 Function,+,pretty_format_bytes_hex_canonical,void,"FuriString*, size_t, const char*, const uint8_t*, size_t"
 Function,-,printf,int,"const char*, ..."
-Function,+,process_favorite_launch,_Bool,char**
 Function,+,prng_successor,uint32_t,"uint32_t, uint32_t"
+Function,+,process_favorite_launch,_Bool,char**
 Function,+,property_value_out,void,"PropertyValueContext*, const char*, unsigned int, ..."
 Function,+,protocol_dict_alloc,ProtocolDict*,"const ProtocolBase**, size_t"
 Function,+,protocol_dict_decoders_feed,ProtocolId,"ProtocolDict*, _Bool, uint32_t"

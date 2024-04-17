@@ -11,6 +11,8 @@
 
 #define TAG "PluginManager"
 
+#define MAX_NAME_LEN 254
+
 ARRAY_DEF(FlipperApplicationList, FlipperApplication*, M_PTR_OPLIST)
 #define M_OPL_FlipperApplicationList_t() ARRAY_OPLIST(FlipperApplicationList, M_PTR_OPLIST)
 
@@ -108,7 +110,7 @@ PluginManagerError plugin_manager_load_single(PluginManager* manager, const char
 PluginManagerError plugin_manager_load_all(PluginManager* manager, const char* path) {
     furi_check(manager);
     File* directory = storage_file_alloc(manager->storage);
-    char file_name_buffer[256];
+    char file_name_buffer[MAX_NAME_LEN];
     FuriString* file_name = furi_string_alloc();
     do {
         if(!storage_dir_open(directory, path)) {
