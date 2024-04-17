@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [NFC: add support for S(WTX) request in iso14443_4a_poller #3590 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3590)
 - [BadKB now with resources (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae276785b50009ba1b4fe81c593fab4815a564f1)
 - [Many main app tweaks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9b0b5496d375cf3962a56f9ebe5178f7898b3db)
+- Updated: [Bad KB (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3d5eafe86857df41a764bfc42769ac9b9a05e3c4)
 
 <a name="release">
 

@@ -324,6 +324,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &crypto_cli,
 };
 
-const FlipperAppPluginDescriptor* crypto_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* crypto_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

@@ -233,6 +233,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &bt_cli,
 };
 
-const FlipperAppPluginDescriptor* bt_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* bt_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }
