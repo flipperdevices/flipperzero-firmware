@@ -1,7 +1,6 @@
 #include "fatfs.h"
 #include "../filesystem_api_internal.h"
 #include "storage_ext.h"
-#include "storage/storage_glue.h"
 #include <furi_hal.h>
 #include "sd_notify.h"
 #include <furi_hal_sd.h>

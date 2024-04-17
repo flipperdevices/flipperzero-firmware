@@ -44,7 +44,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Many main app tweaks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9b0b5496d375cf3962a56f9ebe5178f7898b3db)
 - Updated: [Bad KB (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3d5eafe86857df41a764bfc42769ac9b9a05e3c4)
 - [Fix FATfs drive IDs (0=/ext 1=/mnt) (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/17d2ee1f66f36a78cfcec981ad46fea2cc8ec605)
-- [Storage: Default volume label DOLPHIN added to virtual storage (By jetblk)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/30fa5d667c9f47b5879c7d93d2f504cebc00713f)
+- [Storage: Default volume label added to virtual storage (By jetblk)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/30fa5d667c9f47b5879c7d93d2f504cebc00713f)
+- [Storage: Default volume label added to virtual storage improved (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9e5cb5cbdb1fecb97669eda5055410033191219d)
 
 <a name="release">
 
