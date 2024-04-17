@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Noptel LRF Sampler v1.2 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Added: [Mitsubishi AC Remote v1.0 (By achistyakov)](https://github.com/achistyakov/flipperzero-mitsubishi-ac-remote)
 - Added: [DVD Screensaver v1.0 (By shantih19)](https://github.com/shantih19/flipper_dvd_screensaver)
+- OFW: PR: [TLSF memory allocator. Less free flash, moar free ram. #3572 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3572)
 
 <a name="release">
 
