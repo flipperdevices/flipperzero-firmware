@@ -121,7 +121,7 @@ void set_lrf_ident_handler(LRFSerialCommApp *, void (*)(LRFIdent *, void *),
 void set_diag_data_handler(LRFSerialCommApp *, void (*)(LRFDiag *, void *),
 				void *);
 
-/** Enable or disable the use of the share storage space as LRF frame decode
+/** Enable or disable the use of the shared storage space as LRF frame decode
     buffer **/
 void enable_shared_storage_dec_buf(LRFSerialCommApp *, bool);
 

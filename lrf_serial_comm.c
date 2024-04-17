@@ -131,7 +131,7 @@ void set_diag_data_handler(LRFSerialCommApp *app,
 
 
 
-/** Enable or disable the use of the share storage space as LRF frame decode
+/** Enable or disable the use of the shared storage space as LRF frame decode
     buffer **/
 void enable_shared_storage_dec_buf(LRFSerialCommApp *app, bool enabled) {
 
@@ -676,7 +676,7 @@ static int32_t uart_rx_thread(void *ctx) {
 					"%d diagnostic values",
 				app->nb_dec_buf, lrf_diag.total_vals);
 
-                  /*  If we have a diagnostic data handler, update the it one
+                  /* If we have a diagnostic data handler, update the it one
                      last time, this time passing it the actual diagnostic
                      values to save */
                   if(app->diag_data_handler)
