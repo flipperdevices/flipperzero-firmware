@@ -1,6 +1,7 @@
 #include <furi_hal_adc.h>
 #include <furi_hal_bus.h>
 #include <furi_hal_cortex.h>
+#include <furi_hal_power.h>
 
 #include <furi.h>
 
@@ -93,8 +94,25 @@ void furi_hal_adc_init(void) {
 
 FuriHalAdcHandle* furi_hal_adc_acquire(void) {
     furi_check(furi_mutex_acquire(furi_hal_adc_handle->mutex, FuriWaitForever) == FuriStatusOk);
+
+    furi_hal_power_insomnia_enter();
+
     furi_hal_bus_enable(FuriHalBusADC);
+
     return furi_hal_adc_handle;
+}
+
+void furi_hal_adc_release(FuriHalAdcHandle* handle) {
+    furi_check(handle);
+
+    if(furi_hal_bus_is_enabled(FuriHalBusADC)) furi_hal_bus_disable(FuriHalBusADC);
+
+    LL_VREFBUF_Disable();
+    LL_VREFBUF_EnableHIZ();
+
+    furi_hal_power_insomnia_exit();
+
+    furi_check(furi_mutex_release(furi_hal_adc_handle->mutex) == FuriStatusOk);
 }
 
 void furi_hal_adc_configure(FuriHalAdcHandle* handle) {
@@ -224,17 +242,6 @@ void furi_hal_adc_configure_ex(
     LL_ADC_Enable(handle->adc);
     while(LL_ADC_IsActiveFlag_ADRDY(handle->adc) == 0)
         ;
-}
-
-void furi_hal_adc_release(FuriHalAdcHandle* handle) {
-    furi_check(handle);
-
-    if(furi_hal_bus_is_enabled(FuriHalBusADC)) furi_hal_bus_disable(FuriHalBusADC);
-
-    LL_VREFBUF_Disable();
-    LL_VREFBUF_EnableHIZ();
-
-    furi_check(furi_mutex_release(furi_hal_adc_handle->mutex) == FuriStatusOk);
 }
 
 uint16_t furi_hal_adc_read(FuriHalAdcHandle* handle, FuriHalAdcChannel channel) {
