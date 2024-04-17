@@ -745,7 +745,7 @@ void CFG_Scene_OnExit(void* context) {
     if(app->uart->cfg->saveLOG) {
         strcpy(
             app->logFilePath, sequential_file_resolve_path(app->storage, PATHLOGS, "Log", "log"));
-        if(app->logFilePath != NULL) {
+        if(strlen(app->logFilePath) > 0) {
             if(storage_file_open(app->LOGfile, app->logFilePath, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
                 furi_string_reset(app->text);
                 app->LOGfileReady = true;

@@ -1,0 +1,13 @@
+App(
+    appid="modbus",
+    name="MODBUS",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="Modbus_app",
+    stack_size= 5 * 1024,
+    fap_icon="modbus.png",
+    fap_category="GPIO",
+    fap_author="ElectronicCats",
+    fap_weburl="https://github.com/ElectronicCats/flipper-rs485modbus",
+    fap_version="0.1",
+    fap_description="A Flipper plugin with helpful Modbus RTU features, you will be able to read and write data into a Mobus RTU network. Requires the Electronic Cats Flipper Addon Modbus.",
+)
