@@ -35,6 +35,7 @@ void storage_file_init(StorageFile* obj);
 void storage_file_init_set(StorageFile* obj, const StorageFile* src);
 void storage_file_set(StorageFile* obj, const StorageFile* src);
 void storage_file_clear(StorageFile* obj);
+const char* storage_file_get_path(File* file, StorageData* storage);
 
 void storage_data_init(StorageData* storage);
 StorageStatus storage_data_status(StorageData* storage);

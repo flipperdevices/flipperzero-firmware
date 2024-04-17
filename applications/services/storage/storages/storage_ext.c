@@ -1,9 +1,11 @@
 #include "fatfs.h"
 #include "../filesystem_api_internal.h"
 #include "storage_ext.h"
+#include "storage/storage_glue.h"
 #include <furi_hal.h>
 #include "sd_notify.h"
 #include <furi_hal_sd.h>
+#include <toolbox/path.h>
 
 typedef FIL SDFile;
 typedef DIR SDDir;
@@ -721,11 +723,22 @@ FS_Error storage_process_virtual_format(StorageData* storage) {
     SDData* sd_data = storage->data;
     uint8_t* work = malloc(_MAX_SS);
     SDError error = f_mkfs(sd_data->path, FM_ANY, 0, work, _MAX_SS);
-    storage_process_virtual_mount(storage);
-    f_setlabel("DOLPHIN");
-    storage_process_virtual_unmount(storage);
     free(work);
     if(error != FR_OK) return FSE_INTERNAL;
+
+    if(storage_process_virtual_mount(storage) == FSE_OK) {
+        // Image file path
+        const char* img_path = storage_file_get_path(mnt_image, mnt_image_storage);
+        // Image file name
+        FuriString* img_name = furi_string_alloc();
+        path_extract_filename_no_ext(img_path, img_name);
+        // Label with drive id prefix
+        char* label = storage_ext_drive_path(storage, furi_string_get_cstr(img_name));
+        furi_string_free(img_name);
+        f_setlabel(label);
+        free(label);
+        storage_process_virtual_unmount(storage);
+    }
     return FSE_OK;
 #endif
 }

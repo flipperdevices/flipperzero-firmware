@@ -156,3 +156,9 @@ size_t storage_open_files_count(StorageData* storage) {
     size_t count = StorageFileList_size(storage->files);
     return count;
 }
+
+const char* storage_file_get_path(File* file, StorageData* storage) {
+    StorageFile* storage_file_ref = storage_get_file(file, storage);
+    if(!storage_file_ref) return "";
+    return furi_string_get_cstr(storage_file_ref->path);
+}
