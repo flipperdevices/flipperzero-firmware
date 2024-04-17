@@ -157,10 +157,8 @@ int32_t example_adc_main(void* p) {
             }
         } else {
             for(size_t i = 0; i < data.count; i++) {
-                if(data.items[i].converter) {
-                    data.items[i].value = data.items[i].converter(
-                        adc_handle, furi_hal_adc_read(adc_handle, data.items[i].pin->channel));
-                }
+                data.items[i].value = data.items[i].converter(
+                    adc_handle, furi_hal_adc_read(adc_handle, data.items[i].pin->channel));
             }
             view_port_update(view_port);
         }
