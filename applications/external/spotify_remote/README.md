@@ -17,7 +17,7 @@ You will also need to install my [ESP32 Spotify Remote](https://github.com/benja
 1. Go to the [Spotify Developer Site](https://developer.spotify.com/) and make an account
 2. Go to your dashboard and make a new app
 3. Copy your Client ID and Client Secret into the [ESP32 Code](https://github.com/benjamindrussell/esp32-spotify-remote)
-4. You will have to add http://IP_ADDRESS/callback as a reirect uri, where IP_ADDRESS is the ip that appears on the Flipper Screen for each new ip since I wasn't able to have it work with a static ip on the ESP32
+4. You will have to add http://IP_ADDRESS/callback as a reirect uri in your spotify dashboard, where IP_ADDRESS is the ip that appears on the Flipper Screen for each new ip since I wasn't able to have it work with a static ip on the ESP32
 <img width="536" alt="image" src="https://github.com/benjamindrussell/flipper-spotify-remote/assets/46113261/7116d5d3-048f-4c29-b4f5-e02061d8fe7a">
 
 
