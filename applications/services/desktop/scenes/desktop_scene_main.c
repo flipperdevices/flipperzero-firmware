@@ -77,7 +77,7 @@ static inline bool desktop_scene_main_check_none(const char* str) {
 
 static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char* path) {
     if(loader_start_with_gui_error(desktop->loader, path, NULL) != LoaderStatusOk) {
-        loader_start(desktop->loader, PASSPORT_APP, NULL, NULL);
+        loader_start_detached_with_gui_error(desktop->loader, PASSPORT_APP, NULL);
     }
 }
 

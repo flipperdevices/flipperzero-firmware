@@ -3,7 +3,7 @@
 #include <applications.h>
 #include <storage/storage.h>
 #include <furi_hal.h>
-#include <cfw/cfw.h>
+#include <assets_icons.h>
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>
 #include <flipper_application/flipper_application.h>
@@ -11,7 +11,7 @@
 #include <toolbox/stream/file_stream.h>
 #include <core/dangerous_defines.h>
 #include <gui/icon_i.h>
-#include <assets_icons.h>
+#include <cfw/cfw.h>
 
 #define TAG "Loader"
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
@@ -22,14 +22,14 @@ static const char*
     loader_find_external_application_by_name(const char* app_name, FlipperApplicationFlag* flags) {
     for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
         if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
-            *flags = FLIPPER_EXTERNAL_APPS[i].flags;
+            if(flags) *flags = FLIPPER_EXTERNAL_APPS[i].flags;
             return FLIPPER_EXTERNAL_APPS[i].path;
         }
     }
 
     for(size_t i = 0; i < FLIPPER_EXTSETTINGS_APPS_COUNT; i++) {
         if(strcmp(FLIPPER_EXTSETTINGS_APPS[i].name, app_name) == 0) {
-            *flags = FLIPPER_EXTSETTINGS_APPS[i].flags;
+            if(flags) *flags = FLIPPER_EXTSETTINGS_APPS[i].flags;
             return FLIPPER_EXTSETTINGS_APPS[i].path;
         }
     }
@@ -684,8 +684,6 @@ static LoaderStatus loader_start_external_app(
         }
 
         loader_start_app_thread(loader, flags);
-
-        return status;
     } while(0);
 
     if(status != LoaderStatusOk) {
