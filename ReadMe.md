@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0416-0415-0.100.4-22e2176.tgz&channel=RM0416-0415-0.100.4-22e2176&version=0.100.4)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0417-0550-0.100.4-b199163.tgz&channel=RM0417-0550-0.100.4-b199163&version=0.100.4)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,21 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-17 05:00 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-17 05:00 EST`
-- [Fixed issue with passport FAP opening (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/65d2d7b43db804f57aeba6278b48b5bf05b0d1ef)
-- Added: [MODBUS v0.1 (By ElectronicCats)](https://github.com/ElectronicCats/flipper-rs485modbus) `Req: Modbus By ElectronicCats`
-- Added: [LaserCat v1.0 (By DroWez)](https://github.com/DroWez/LaserCat)
-- Added: [FlipperZero Clock v1.1 (By mdaskalov)](https://github.com/mdaskalov/flipperzero-clock)
-- Added: [Noptel LRF Sampler v1.2 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
-- Added: [Mitsubishi AC Remote v1.0 (By achistyakov)](https://github.com/achistyakov/flipperzero-mitsubishi-ac-remote)
-- Added: [DVD Screensaver v1.0 (By shantih19)](https://github.com/shantih19/flipper_dvd_screensaver)
-- OFW: PR: [TLSF memory allocator. Less free flash, moar free ram. #3572 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3572)
-- OFW: PR: [NFC: add support for S(WTX) request in iso14443_4a_poller #3590 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3590)
-- [BadKB now with resources (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae276785b50009ba1b4fe81c593fab4815a564f1)
-- [Many main app tweaks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9b0b5496d375cf3962a56f9ebe5178f7898b3db)
-- Updated: [Bad KB (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3d5eafe86857df41a764bfc42769ac9b9a05e3c4)
-- [Fix FATfs drive IDs (0=/ext 1=/mnt) (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/17d2ee1f66f36a78cfcec981ad46fea2cc8ec605)
-- [Storage: Default volume label added to virtual storage (By jetblk)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/30fa5d667c9f47b5879c7d93d2f504cebc00713f)
-- [Storage: Default volume label added to virtual storage improved (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9e5cb5cbdb1fecb97669eda5055410033191219d)
 
 <a name="release">
 
@@ -587,4 +572,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0416-0415-0.100.4-22e2176.tgz&channel=RM0416-0415-0.100.4-22e2176&version=0.100.4)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0417-0550-0.100.4-b199163.tgz&channel=RM0417-0550-0.100.4-b199163&version=0.100.4)
