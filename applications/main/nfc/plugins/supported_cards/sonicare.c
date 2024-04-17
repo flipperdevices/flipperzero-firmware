@@ -106,6 +106,6 @@ static const FlipperAppPluginDescriptor sonicare_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* sonicare_plugin_ep() {
+const FlipperAppPluginDescriptor* sonicare_plugin_ep(void) {
     return &sonicare_plugin_descriptor;
 }

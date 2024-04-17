@@ -866,6 +866,6 @@ static const FlipperAppPluginDescriptor skylanders_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* skylanders_plugin_ep() {
+const FlipperAppPluginDescriptor* skylanders_plugin_ep(void) {
     return &skylanders_plugin_descriptor;
 }

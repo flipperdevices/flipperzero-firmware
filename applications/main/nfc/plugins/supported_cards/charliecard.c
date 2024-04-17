@@ -657,11 +657,11 @@ static bool get_map_item(uint16_t id, const IdMapping* map, size_t sz, const cha
     return false;
 }
 
-uint32_t time_now() {
+uint32_t time_now(void) {
     return furi_hal_rtc_get_timestamp();
 }
 
-static bool is_debug() {
+static bool is_debug(void) {
     return furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
 }
 

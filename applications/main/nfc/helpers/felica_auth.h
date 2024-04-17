@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-FelicaAuthenticationContext* felica_auth_alloc();
+FelicaAuthenticationContext* felica_auth_alloc(void);
 
 void felica_auth_free(FelicaAuthenticationContext* instance);
 

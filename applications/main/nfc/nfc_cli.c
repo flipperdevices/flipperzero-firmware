@@ -71,6 +71,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &nfc_cli,
 };
 
-const FlipperAppPluginDescriptor* nfc_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* nfc_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

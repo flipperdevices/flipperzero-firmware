@@ -4,7 +4,7 @@
 #include <subghz/subghz_last_settings.h>
 #include <flipper_format/flipper_format_i.h>
 
-void subghz_extended_freq() {
+void subghz_extended_freq(void) {
     bool is_extended_i = false;
     bool is_bypassed_i = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);

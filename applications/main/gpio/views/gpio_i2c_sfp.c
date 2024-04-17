@@ -87,7 +87,7 @@ static bool gpio_i2c_sfp_process_ok(GpioI2CSfp* gpio_i2c_sfp, InputEvent* event)
     return consumed;
 }
 
-GpioI2CSfp* gpio_i2c_sfp_alloc() {
+GpioI2CSfp* gpio_i2c_sfp_alloc(void) {
     GpioI2CSfp* gpio_i2c_sfp = malloc(sizeof(GpioI2CSfp));
 
     gpio_i2c_sfp->view = view_alloc();

@@ -1,6 +1,6 @@
 #include "felica_auth.h"
 
-FelicaAuthenticationContext* felica_auth_alloc() {
+FelicaAuthenticationContext* felica_auth_alloc(void) {
     FelicaAuthenticationContext* instance = malloc(sizeof(FelicaAuthenticationContext));
     memset(instance->card_key.data, 0, FELICA_DATA_BLOCK_SIZE);
     instance->skip_auth = true;

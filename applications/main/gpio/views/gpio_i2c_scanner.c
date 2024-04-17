@@ -81,7 +81,7 @@ static bool gpio_i2c_scanner_process_ok(GpioI2CScanner* gpio_i2c_scanner, InputE
     return consumed;
 }
 
-GpioI2CScanner* gpio_i2c_scanner_alloc() {
+GpioI2CScanner* gpio_i2c_scanner_alloc(void) {
     GpioI2CScanner* gpio_i2c_scanner = malloc(sizeof(GpioI2CScanner));
 
     gpio_i2c_scanner->view = view_alloc();

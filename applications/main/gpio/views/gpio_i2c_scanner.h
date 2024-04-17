@@ -6,7 +6,7 @@
 typedef struct GpioI2CScanner GpioI2CScanner;
 typedef void (*GpioI2CScannerOkCallback)(InputType type, void* context);
 
-GpioI2CScanner* gpio_i2c_scanner_alloc();
+GpioI2CScanner* gpio_i2c_scanner_alloc(void);
 
 void gpio_i2c_scanner_free(GpioI2CScanner* gpio_i2c_scanner);
 

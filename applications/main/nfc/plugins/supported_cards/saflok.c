@@ -169,6 +169,6 @@ static const FlipperAppPluginDescriptor saflok_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* saflok_plugin_ep() {
+const FlipperAppPluginDescriptor* saflok_plugin_ep(void) {
     return &saflok_plugin_descriptor;
 }

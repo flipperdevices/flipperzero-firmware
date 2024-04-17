@@ -6,7 +6,7 @@
 typedef struct GpioI2CSfp GpioI2CSfp;
 typedef void (*GpioI2CSfpOkCallback)(InputType type, void* context);
 
-GpioI2CSfp* gpio_i2c_sfp_alloc();
+GpioI2CSfp* gpio_i2c_sfp_alloc(void);
 
 void gpio_i2c_sfp_free(GpioI2CSfp* gpio_i2c_sfp);
 

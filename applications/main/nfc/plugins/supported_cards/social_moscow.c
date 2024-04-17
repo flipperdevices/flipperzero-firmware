@@ -1182,6 +1182,6 @@ static const FlipperAppPluginDescriptor social_moscow_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* social_moscow_plugin_ep() {
+const FlipperAppPluginDescriptor* social_moscow_plugin_ep(void) {
     return &social_moscow_plugin_descriptor;
 }
