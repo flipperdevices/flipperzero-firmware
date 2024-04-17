@@ -348,22 +348,31 @@ static void gap_init_svc(Gap* gap) {
     // Set default PHY
     hci_le_set_default_phy(ALL_PHYS_PREFERENCE, TX_2M_PREFERRED, RX_2M_PREFERRED);
     // Set I/O capability
+    uint8_t cfg_mitm_protection = CFG_MITM_PROTECTION;
+    uint8_t cfg_used_fixed_pin = CFG_USED_FIXED_PIN;
     bool keypress_supported = false;
     if(gap->config->pairing_method == GapPairingPinCodeShow) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
     } else if(gap->config->pairing_method == GapPairingPinCodeVerifyYesNo) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
         keypress_supported = true;
+    } else if(gap->config->pairing_method == GapPairingNone) {
+        // "Just works" pairing method (iOS accepts it, it seems Android and Linux don't)
+        cfg_mitm_protection = MITM_PROTECTION_NOT_REQUIRED;
+        cfg_used_fixed_pin = USE_FIXED_PIN_FOR_PAIRING_ALLOWED;
+        // If "just works" isn't supported, we want the numeric comparaison method
+        aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
+        keypress_supported = true;
     }
     // Setup  authentication
     aci_gap_set_authentication_requirement(
         gap->config->bonding_mode,
-        CFG_MITM_PROTECTION,
+        cfg_mitm_protection,
         CFG_SC_SUPPORT,
         keypress_supported,
         CFG_ENCRYPTION_KEY_SIZE_MIN,
         CFG_ENCRYPTION_KEY_SIZE_MAX,
-        CFG_USED_FIXED_PIN,
+        cfg_used_fixed_pin,
         0,
         CFG_IDENTITY_ADDRESS);
     // Configure whitelist
