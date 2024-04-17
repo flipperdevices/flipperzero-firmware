@@ -1,3 +1,7 @@
+- Added menu option to save the LRF diagnostic data into a file
+- LED flashes to show serial port activity
+- Modularized the code
+
 ## Version 1.2 - 12/04/2024
 
 - Changed the power control pin from pin #1 (+5V) to #15 (C1)
