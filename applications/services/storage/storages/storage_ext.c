@@ -721,6 +721,9 @@ FS_Error storage_process_virtual_format(StorageData* storage) {
     SDData* sd_data = storage->data;
     uint8_t* work = malloc(_MAX_SS);
     SDError error = f_mkfs(sd_data->path, FM_ANY, 0, work, _MAX_SS);
+    storage_process_virtual_mount(storage);
+    f_setlabel("DOLPHIN");
+    storage_process_virtual_unmount(storage);
     free(work);
     if(error != FR_OK) return FSE_INTERNAL;
     return FSE_OK;
