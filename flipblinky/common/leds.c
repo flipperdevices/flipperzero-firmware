@@ -91,7 +91,6 @@ void flipboard_leds_update(FlipboardLeds* leds) {
         led_driver_set_led(leds->led_driver, i, leds->color[i]);
     }
     led_driver_transmit(leds->led_driver);
-    led_driver_transmit(leds->led_driver);
     resources_release(leds->resources, ResourceIdLedDriver);
 #else
     furi_hal_gpio_write(pin_ws2812_leds, false);

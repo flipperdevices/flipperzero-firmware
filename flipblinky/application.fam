@@ -10,7 +10,7 @@ App(
     requires=["gui"],
     order=10,
     resources="resources",
-    fap_version=(2, 2),
+    fap_version=(2, 3),
     fap_icon="flipblinky.png",
     fap_category="GPIO/FlipBoard",
     fap_icon_assets="assets",
