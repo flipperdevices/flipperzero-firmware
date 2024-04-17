@@ -9,6 +9,6 @@ App(
     fap_category="GPIO",
     fap_author="DroWez",
     fap_weburl="https://github.com/DroWez/LaserCat",
-    fap_version="0.1",
+    fap_version="1.0",
     fap_description="Application to turn on a GPIO laser.",
 )
