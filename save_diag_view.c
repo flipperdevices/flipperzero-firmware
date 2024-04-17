@@ -98,8 +98,8 @@ static void diag_data_handler(LRFDiag *lrf_diag, void *ctx) {
       snprintf(savediag_model->dsp_fname_pt2,
 		sizeof(savediag_model->dsp_fname_pt2),
 		"%04d.%02d.%02d-%02d.%02d.%02d.dsp",
-	        datetime.year, datetime.month, datetime.day,
-          	datetime.hour, datetime.minute, datetime.second);
+		datetime.year, datetime.month, datetime.day,
+		datetime.hour, datetime.minute, datetime.second);
 
       snprintf(savediag_model->dsp_fpath, sizeof(savediag_model->dsp_fpath),
 		"%s/%s%s",
@@ -123,8 +123,8 @@ static void diag_data_handler(LRFDiag *lrf_diag, void *ctx) {
           if(i == savediag_model->lrf_diag.vals[0])
             snprintf(savediag_model->spstr, sizeof(savediag_model->spstr),
 			"\r\n%02d/%02d/%04d %02d:%02d:%02d",
-		        datetime.day, datetime.month, datetime.year,
-          		datetime.hour, datetime.minute, datetime.second);
+			datetime.day, datetime.month, datetime.year,
+			datetime.hour, datetime.minute, datetime.second);
 
           /* Otherwise transform the value into a signed or unsigned zero-padded
              number string depending on the version of the firmware */

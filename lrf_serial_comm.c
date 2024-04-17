@@ -285,13 +285,13 @@ static int32_t uart_rx_thread(void *ctx) {
 
           switch(app->nb_dec_buf) {
 
-	    /* We're waiting for a sync byte */
+            /* We're waiting for a sync byte */
             case 0:
               if(app->rx_buf[i] == 0x59)
                 app->dec_buf[app->nb_dec_buf++] = app->rx_buf[i];
               break;
 
-	    /* We're waiting for a command byte */
+            /* We're waiting for a command byte */
             case 1:
 
               /* What command byte did we get? */
