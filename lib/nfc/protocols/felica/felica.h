@@ -12,6 +12,12 @@ extern "C" {
 #define FELICA_PMM_SIZE (8U)
 #define FELICA_DATA_BLOCK_SIZE (16U)
 
+#define FELICA_CMD_READ_WITHOUT_ENCRYPTION (0x06U)
+#define FELICA_CMD_WRITE_WITHOUT_ENCRYPTION (0x08U)
+
+#define FELICA_SERVICE_RW_ACCESS (0x0009U)
+#define FELICA_SERVICE_RO_ACCESS (0x000BU)
+
 #define FELICA_BLOCKS_TOTAL_COUNT (27U)
 #define FELICA_BLOCK_INDEX_REG (0x0EU)
 #define FELICA_BLOCK_INDEX_RC (0x80U)
@@ -127,6 +133,60 @@ typedef struct {
     uint8_t blocks_read;
     FelicaFSUnion data;
 } FelicaData;
+
+#pragma pack(push, 1)
+typedef struct {
+    uint8_t code;
+    FelicaIDm idm;
+    uint8_t service_num;
+    uint16_t service_code;
+    uint8_t block_count;
+} FelicaCommandHeader;
+#pragma pack(pop)
+
+typedef struct {
+    uint8_t service_code : 4;
+    uint8_t access_mode : 3;
+    uint8_t length : 1;
+    uint8_t block_number;
+} FelicaBlockListElement;
+
+typedef struct {
+    uint8_t length;
+    uint8_t response_code;
+    FelicaIDm idm;
+    uint8_t SF1;
+    uint8_t SF2;
+    uint8_t block_count;
+    uint8_t data[];
+} FelicaPollerReadCommandResponse;
+
+typedef struct {
+    uint8_t length;
+    uint8_t response_code;
+    FelicaIDm idm;
+    uint8_t SF1;
+    uint8_t SF2;
+    uint8_t block_count;
+    uint8_t data[];
+} FelicaListenerReadCommandResponse;
+
+typedef struct {
+    uint8_t length;
+    uint8_t response_code;
+    FelicaIDm idm;
+    uint8_t SF1;
+    uint8_t SF2;
+} FelicaCommandResponseHeader;
+
+typedef FelicaCommandResponseHeader FelicaPollerWriteCommandResponse;
+/* typedef struct {
+    uint8_t length;
+    uint8_t response_code;
+    FelicaIDm idm;
+    uint8_t SF1;
+    uint8_t SF2;
+} FelicaPollerWriteCommandResponse; */
 
 extern const NfcDeviceBase nfc_device_felica;
 
