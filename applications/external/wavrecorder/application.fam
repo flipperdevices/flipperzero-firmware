@@ -5,11 +5,9 @@ App(
     entry_point="wav_recorder_app",
     stack_size=2 * 1024,
     fap_category="GPIO",
-    # Optional values
-    fap_version=(0, 1),
     fap_icon="wav_recorder.png",
-    # fap_description="WAV Sound Player app",
-    # fap_author="DrZlo13?",
-    # fap_weburl="https://github.com/user/wav_recorder",
-    # fap_icon_assets="images",
+    fap_author="scrolltex",
+    fap_weburl="https://github.com/scrolltex/flipper-wav-recorder",
+    fap_version=(0, 2),
+    fap_description="WAV Sound Player app",
 )
