@@ -57,7 +57,7 @@ static void diag_data_handler(LRFDiag *lrf_diag, void *ctx) {
   uint32_t bytes_to_write, bytes_written, total_bytes_written;
   int32_t val;
   uint32_t now_ms, last_update_display;
-  int i;
+  uint32_t i;
 
   /* Copy the diagnostic data */
   memcpy(&(savediag_model->lrf_diag), lrf_diag, sizeof(LRFDiag));
@@ -117,13 +117,16 @@ static void diag_data_handler(LRFDiag *lrf_diag, void *ctx) {
 				FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
 
         /* Write the DSP file */
-        for(i = 0; i < savediag_model->lrf_diag.nb_vals; i++) {
+        bytes_to_write = 0;
+        i = 0;
+        while(i < savediag_model->lrf_diag.nb_vals) {
 
           /* If we're at the last value in the header, create a date / time
              marker */
           if(i == savediag_model->lrf_diag.vals[0])
-            snprintf(savediag_model->spstr, sizeof(savediag_model->spstr),
-			"\r\n%02d/%02d/%04d %02d:%02d:%02d",
+            snprintf(savediag_model->spstr + bytes_to_write,
+			sizeof(savediag_model->spstr) - bytes_to_write,
+			"%02d/%02d/%04d %02d:%02d:%02d\r\n",
 			datetime.day, datetime.month, datetime.year,
 			datetime.hour, datetime.minute, datetime.second);
 
@@ -134,34 +137,39 @@ static void diag_data_handler(LRFDiag *lrf_diag, void *ctx) {
 				(int16_t)savediag_model->lrf_diag.vals[i] :
 				(uint16_t)savediag_model->lrf_diag.vals[i];
 
-            snprintf(savediag_model->spstr, sizeof(savediag_model->spstr),
-			"%s%s%05d",
-			i? "\r\n" : "",
-			val < 0? "-" : "",
-			abs(val));
+            snprintf(savediag_model->spstr + bytes_to_write,
+			sizeof(savediag_model->spstr) - bytes_to_write,
+			"%s%05d\r\n", val < 0? "-" : "", abs(val));
           }
 
-          /* Write the string into the file */
-          bytes_to_write = strlen(savediag_model->spstr);
-          bytes_written = storage_file_write(file, &savediag_model->spstr,
+          bytes_to_write += strlen(savediag_model->spstr + bytes_to_write);
+
+          i++;
+
+          /* Write into the file in batches of 30 strings */
+          if(i % 30 == 0 || i == savediag_model->lrf_diag.nb_vals) {
+            bytes_written = storage_file_write(file, &savediag_model->spstr,
 						bytes_to_write);
-          total_bytes_written += bytes_written;
+            total_bytes_written += bytes_written;
 
-          /* If all the bytes couldn't be written, stop and report an error */
-          if(bytes_written != bytes_to_write) {
-            FURI_LOG_I(TAG, "Wrote %ld bytes to DSP file %s but %ld expected",
-			bytes_written, savediag_model->dsp_fpath,
-			bytes_to_write);
+            /* If all the bytes couldn't be written, stop and report an error */
+            if(bytes_written != bytes_to_write) {
+              FURI_LOG_I(TAG, "Wrote %ld bytes to DSP file %s but %ld expected",
+				bytes_written, savediag_model->dsp_fpath,
+				bytes_to_write);
 
-            snprintf(savediag_model->status_msg1,
+              snprintf(savediag_model->status_msg1,
 			sizeof(savediag_model->status_msg1),
 			"Error!");
 
-            snprintf(savediag_model->status_msg2,
+              snprintf(savediag_model->status_msg2,
 			sizeof(savediag_model->status_msg2),
 			"Error writing %s", savediag_model->dsp_fname_pt1);
 
-            break;
+              break;
+            }
+
+            bytes_to_write = 0;
           }
 
           /* Get the current timestamp */
@@ -169,7 +177,7 @@ static void diag_data_handler(LRFDiag *lrf_diag, void *ctx) {
 
           /* Calculate the second half of the progress: saving */
           savediag_model->progress =
-				((float)(i + 1) /
+				((float)i /
 				(float)savediag_model->lrf_diag.total_vals)
 				/ 2 + 0.5;
 
