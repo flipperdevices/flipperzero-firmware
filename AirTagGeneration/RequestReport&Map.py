@@ -101,13 +101,17 @@ if __name__ == "__main__":
             timestamp = int.from_bytes(data[0:4], 'big') + 978307200
 
             if timestamp >= startdate:
-                eph_key = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP224R1(), data[5:62])
+                # check if NULL bytes are present in the data
+                adj = len(data) - 88
+
+                # If so slice the data accordingly | Thanks, @c4pitalSteez!
+                eph_key = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP224R1(), data[5+adj:62+adj])
                 shared_key = ec.derive_private_key(priv, ec.SECP224R1(), default_backend()).exchange(ec.ECDH(), eph_key)
-                symmetric_key = sha256(shared_key + b'\x00\x00\x00\x01' + data[5:62])
+                symmetric_key = sha256(shared_key + b'\x00\x00\x00\x01' + data[5+adj:62+adj])
                 decryption_key = symmetric_key[:16]
                 iv = symmetric_key[16:]
-                enc_data = data[62:72]
-                auth_tag = data[72:]
+                enc_data = data[62+adj:72+adj]
+                auth_tag = data[72+adj:]
 
                 decrypted = decrypt(enc_data, algorithms.AES(decryption_key), modes.GCM(iv, auth_tag))
                 tag = decode_tag(decrypted)
