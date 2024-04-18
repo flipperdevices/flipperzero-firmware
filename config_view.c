@@ -11,10 +11,6 @@
 
 
 
-/*** Parameters ***/
-
-
-
 /*** Routines ***/
 
 /** Frequency setting change function **/
