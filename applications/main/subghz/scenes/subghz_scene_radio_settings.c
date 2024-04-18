@@ -162,7 +162,7 @@ static void subghz_scene_receiver_config_set_gps(VariableItem* item) {
     }
 }
 
-static void subghz_scene_receiver_config_set_timestamp_file_names(VariableItem* item) {
+static void subghz_scene_receiver_config_set_protocol_file_names(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
