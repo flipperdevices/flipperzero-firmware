@@ -290,6 +290,7 @@ async def bench_serial(request):
 
     await asyncio.sleep(3)
 
+    await bench_serial.drain()
     await bench_serial.clear_read_buffer()
 
     logging.debug("NFC and RFID bench serial port opened on" + port)
@@ -311,7 +312,8 @@ async def reader_serial(request):
 
     await asyncio.sleep(3)
 
-    await bench_serial.clear_read_buffer()
+    await reader_serial.drain()
+    await reader_serial.clear_read_buffer()
 
     logging.debug("NFC and RFID Readers serial port opened on" + port)
     return reader_serial
@@ -332,7 +334,8 @@ async def flipper_reader_serial(request):
 
     await asyncio.sleep(3)
 
-    await bench_serial.clear_read_buffer()
+    await flipper_reader_serial.drain()
+    await flipper_reader_serial.clear_read_buffer()
 
     logging.debug("Flipper 'reader' serial port opened on" + port)
     return flipper_reader_serial
@@ -353,7 +356,8 @@ async def flipper_key_serial(request):
 
     await asyncio.sleep(3)
 
-    await bench_serial.clear_read_buffer()
+    await flipper_key_serial.drain()
+    await flipper_key_serial.clear_read_buffer()
 
     logging.debug("Flipper 'key' serial port opened on" + port)
     return flipper_key_serial
@@ -374,7 +378,8 @@ async def relay_serial(request):
 
     await asyncio.sleep(3)
 
-    await bench_serial.clear_read_buffer()
+    await relay_serial.drain()
+    await relay_serial.clear_read_buffer()
 
     logging.debug("Relay serial port opened on" + port)
     return relay_serial
