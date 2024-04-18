@@ -35,8 +35,10 @@ class TestIbuttonBench(BaseCase):
                 nav_key.go_to_main_screen()
                 nav_key.open_file("iButton", "BI0")
         with allure.step("Reading original key by reader_flipper"):
+            relay.set_reader(0)
             nav_reader.ibutton.go_into()
             nav_reader.go_to("Read")
+            relay.set_reader(3)
             nav_reader.press_ok()
 
             assert (
@@ -71,7 +73,7 @@ class TestIbuttonBench(BaseCase):
 
     def test_metakom(self, nav_reader, nav_key, relay):
         relay.reset()
-        with allure.step("Choosing Metakom key"):
+        with allure.step("Choosing Cyfral key"):
             relay.set_key(10)
         with allure.step("Choosing flipper reader"):
             relay.set_reader(3)
@@ -97,8 +99,10 @@ class TestIbuttonBench(BaseCase):
                 relay.set_reader(3)
                 assert nav_key.open_file("iButton", "BI1") == 0, "File not found"
         with allure.step("Reading original key by reader_flipper"):
+            relay.set_reader(0)
             nav_reader.ibutton.go_into()
             nav_reader.go_to("Read")
+            relay.set_reader(3)
             nav_reader.press_ok()
             assert (
                 nav_reader.wait_for_state("key_Metakom_bench", timeout=5) == 0
@@ -155,8 +159,10 @@ class TestIbuttonBench(BaseCase):
                 relay.set_reader(3)
                 assert nav_key.open_file("iButton", "BI2") == 0, "File not found"
         with allure.step("Reading original key by reader_flipper"):
+            relay.set_reader(0)
             nav_reader.ibutton.go_into()
             nav_reader.go_to("Read")
+            relay.set_reader(3)
             nav_reader.press_ok()
             assert (
                 nav_reader.wait_for_state("key_DS1992_bench", timeout=5) == 0
@@ -174,9 +180,9 @@ class TestIbuttonBench(BaseCase):
             menu_ref = [
                 "Save",
                 "Emulate",
-                "View Data",
-                "Write Blank",
-                "Write Copy",
+                "Write ID",
+                "Full Write on Same Type",
+                "Data info",
             ]
             assert (
                 nav_reader.get_menu_list(
@@ -216,8 +222,10 @@ class TestIbuttonBench(BaseCase):
                 relay.set_reader(3)
                 assert nav_key.open_file("iButton", "BI3") == 0, "File not found"
         with allure.step("Reading original key by reader_flipper"):
+            relay.set_reader(0)
             nav_reader.ibutton.go_into()
             nav_reader.go_to("Read")
+            relay.set_reader(3)
             nav_reader.press_ok()
             assert (
                 nav_reader.wait_for_state("key_DS1996_bench", timeout=5) == 0
@@ -235,8 +243,8 @@ class TestIbuttonBench(BaseCase):
             menu_ref = [
                 "Save",
                 "Emulate",
-                "View Data",
-                "Write Copy",
+                "Full Write on Same Type",
+                "Data Info",
             ]
             assert (
                 nav_reader.get_menu_list(
@@ -276,8 +284,10 @@ class TestIbuttonBench(BaseCase):
                 relay.set_reader(3)
                 assert nav_key.open_file("iButton", "BI4") == 0, "File not found"
         with allure.step("Reading original key by reader_flipper"):
+            relay.set_reader(0)
             nav_reader.ibutton.go_into()
             nav_reader.go_to("Read")
+            relay.set_reader(3)
             nav_reader.press_ok()
             assert (
                 nav_reader.wait_for_state("key_DS1971_bench", timeout=5) == 0
@@ -295,8 +305,8 @@ class TestIbuttonBench(BaseCase):
             menu_ref = [
                 "Save",
                 "Emulate",
-                "View Data",
-                "Write Copy",
+                "Full Write on Same Type",
+                "Data Info",
             ]
             assert (
                 nav_reader.get_menu_list(
