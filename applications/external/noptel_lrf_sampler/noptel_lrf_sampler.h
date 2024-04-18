@@ -152,7 +152,7 @@ typedef struct {
     char dsp_fpath[128];
 
     /* Scratchpad string */
-    char spstr[32];
+    char spstr[256];
 
     /* Status message */
     char status_msg1[8];

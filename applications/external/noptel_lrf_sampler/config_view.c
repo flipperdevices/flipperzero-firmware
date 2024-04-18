@@ -9,8 +9,6 @@
 #include "config_view.h"
 #include "noptel_lrf_sampler.h"
 
-/*** Parameters ***/
-
 /*** Routines ***/
 
 /** Frequency setting change function **/
