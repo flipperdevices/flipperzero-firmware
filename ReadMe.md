@@ -46,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Updated: [WAV Recorder v0.2 (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - Updated: [Battery Checker v0.2 (By Programistich)](https://github.com/Programistich/battery_checker)
+- [Revert Fix for CC1101 & Some SubGHz Optimizations and Tweaks Removed (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1058)
 
 <a name="release">
 
