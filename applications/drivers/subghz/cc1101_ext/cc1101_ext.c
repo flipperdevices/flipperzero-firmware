@@ -183,14 +183,6 @@ static bool subghz_device_cc1101_ext_check_init(void) {
         furi_hal_gpio_init(
             subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
-        // Reset GDO2 (!TX/RX) to floating state
-        cc1101_status = cc1101_write_reg(
-            subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHighImpedance);
-        if(cc1101_status.CHIP_RDYn != 0) {
-            //timeout or error
-            break;
-        }
-
         // Go to sleep
         cc1101_status = cc1101_shutdown(subghz_device_cc1101_ext->spi_bus_handle);
         if(cc1101_status.CHIP_RDYn != 0) {
@@ -237,7 +229,10 @@ bool subghz_device_cc1101_ext_alloc(SubGhzDeviceConf* conf) {
                                                         &furi_hal_spi_bus_handle_external_extra);
 
     // this is needed if multiple SPI devices are connected to the same bus but with different CS pins
-    if(cfw_settings.spi_cc1101_handle == SpiExtra) {
+    if(cfw_settings.spi_cc1101_handle == SpiDefault && !furi_hal_subghz_get_ext_power_amp()) {
+        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
+        furi_hal_gpio_write(&gpio_ext_pc3, true);
+    } else if(cfw_settings.spi_cc1101_handle == SpiExtra) {
         furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
         furi_hal_gpio_write(&gpio_ext_pa4, true);
     }
@@ -434,9 +429,6 @@ void subghz_device_cc1101_ext_reset(void) {
     // Warning: push pull cc1101 clock output on GD0
     cc1101_write_reg(
         subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
-    // Reset GDO2 (!TX/RX) to floating state
-    cc1101_write_reg(
-        subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHighImpedance);
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
 }
 
@@ -446,9 +438,6 @@ void subghz_device_cc1101_ext_idle(void) {
     //waiting for the chip to switch to IDLE mode
     furi_check(cc1101_wait_status_state(
         subghz_device_cc1101_ext->spi_bus_handle, CC1101StateIDLE, 10000));
-    // Reset GDO2 (!TX/RX) to floating state
-    cc1101_write_reg(
-        subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHighImpedance);
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
     if(subghz_device_cc1101_ext->power_amp) {
         furi_hal_gpio_write(SUBGHZ_DEVICE_CC1101_EXT_E07M20S_AMP_GPIO, 0);
@@ -461,10 +450,6 @@ void subghz_device_cc1101_ext_rx(void) {
     //waiting for the chip to switch to Rx mode
     furi_check(
         cc1101_wait_status_state(subghz_device_cc1101_ext->spi_bus_handle, CC1101StateRX, 10000));
-    // Go GDO2 (!TX/RX) to high (RX state)
-    cc1101_write_reg(
-        subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
-
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
     if(subghz_device_cc1101_ext->power_amp) {
         furi_hal_gpio_write(SUBGHZ_DEVICE_CC1101_EXT_E07M20S_AMP_GPIO, 0);
@@ -478,8 +463,6 @@ bool subghz_device_cc1101_ext_tx(void) {
     //waiting for the chip to switch to Tx mode
     furi_check(
         cc1101_wait_status_state(subghz_device_cc1101_ext->spi_bus_handle, CC1101StateTX, 10000));
-    // Go GDO2 (!TX/RX) to low (TX state)
-    cc1101_write_reg(subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHW);
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
     if(subghz_device_cc1101_ext->power_amp) {
         furi_hal_gpio_write(SUBGHZ_DEVICE_CC1101_EXT_E07M20S_AMP_GPIO, 1);

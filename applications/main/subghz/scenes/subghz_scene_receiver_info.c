@@ -17,7 +17,9 @@ void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, v
     } else if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneReceiverInfoSave);
-    } else if((result == GuiButtonTypeLeft) && (type == InputTypeShort) && subghz->gps) {
+    } else if(
+        (result == GuiButtonTypeLeft) && (type == InputTypeShort) &&
+        subghz->last_settings->gps_baudrate != 0) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneReceiverInfoSats);
     }
@@ -79,7 +81,7 @@ void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
         widget_add_string_multiline_element(
             subghz->widget, 0, 0, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(text));
 
-        if(subghz->gps) {
+        if(subghz->last_settings->gps_baudrate != 0) {
             widget_add_button_element(
                 subghz->widget,
                 GuiButtonTypeLeft,
@@ -187,8 +189,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             }
             return true;
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoSats) {
-            if(subghz->gps) {
-                scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneShowGps, false);
+            if(subghz->last_settings->gps_baudrate != 0) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowGps);
                 return true;
             } else {
@@ -204,7 +205,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             notification_message(subghz->notifications, &sequence_blink_magenta_10);
             break;
         case SubGhzNotificationStateRx:
-            if(subghz->gps) {
+            if(subghz->last_settings->gps_baudrate != 0) {
                 if(subghz->gps->satellites > 0) {
                     notification_message(subghz->notifications, &sequence_blink_green_10);
                 } else {
