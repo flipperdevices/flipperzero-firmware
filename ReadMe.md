@@ -29,14 +29,20 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0417-0500-0.100.4-aa81756](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-17 05:00 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-17 05:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-17 21:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-17 21:45 EST`
 - [Lib Updates (By Willy-JL/ MNTM)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9872e133c2f2f03d73da3402ab207acaa0a76303)
-- [WAV Player: Impl favorite/direct-launch functionality #5 (By zacharyweiss)](https://github.com/Next-Flip/Momentum-Apps/pull/5)
+- [WAV Player: Impl favorite/direct-launch functionality (By zacharyweiss)](https://github.com/Next-Flip/Momentum-Apps/pull/5)
 - Updated: [FlipBoard Blinky v2.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Keyboard v2.4 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v3.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Simon v1.4 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- OFW: [FuriHal: add ADC API #3583 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3583)
+- OFW: [iButton new UI #3471 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3471)
+- OFW: [Update tv.ir #3584 (By KRukus9)](https://github.com/flipperdevices/flipperzero-firmware/pull/3584)
+- OFW: [Allow setting view_dispatcher callbacks to NULL again #3580 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/3580) (Was Already in RM)
+- OFW: [NFC: fix BIP plugin #3595 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3595)
+- OFW: [BLE: Add GapPairingNone support #3596 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3596) (Was Already in RM)
 
 <a name="release">
 

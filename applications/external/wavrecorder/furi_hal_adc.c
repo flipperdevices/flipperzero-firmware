@@ -21,7 +21,7 @@ void furi_hal_adc_set_vref(FuriHalVref vref) {
     LL_VREFBUF_SetTrimming(trim_value);
 }
 
-void furi_hal_adc_init() {
+void _furi_hal_adc_init(void) {
     LL_VREFBUF_Enable();
     LL_VREFBUF_DisableHIZ();
 
@@ -57,7 +57,7 @@ void furi_hal_adc_init() {
     furi_delay_us(100);
 }
 
-void furi_hal_adc_enable() {
+void furi_hal_adc_enable(void) {
     LL_ADC_Enable(ADC1);
     while(LL_ADC_IsActiveFlag_ADRDY(ADC1) == 0) {
         // TODO: add timeout
@@ -79,14 +79,14 @@ void furi_hal_adc_enable() {
  * Prerequisites: ADC conversions must be stopped.
  * 
  */
-void furi_hal_adc_disable() {
+void furi_hal_adc_disable(void) {
     LL_ADC_Disable(ADC1);
     while(LL_ADC_IsEnabled(ADC1)) {
         // TODO: add timeout
     }
 }
 
-void furi_hal_adc_deinit() {
+void furi_hal_adc_deinit(void) {
     LL_ADC_DisableInternalRegulator(ADC1);
     LL_ADC_EnableDeepPowerDown(ADC1);
     LL_VREFBUF_EnableHIZ();
@@ -112,7 +112,7 @@ void furi_hal_adc_set_single_channel(FuriHalAdcChannel channel) {
  * 
  * @return uint32_t ADC value
  */
-uint32_t furi_hal_adc_read_sw() {
+uint32_t furi_hal_adc_read_sw(void) {
     LL_ADC_REG_StartConversion(ADC1);
     while(LL_ADC_IsActiveFlag_EOC(ADC1) == 0) {
     }

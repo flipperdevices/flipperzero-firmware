@@ -104,31 +104,6 @@ void furi_hal_adc_deinit() {
     LL_VREFBUF_Disable();
 }
 
-typedef enum {
-    FuriHalAdcChannel0 = LL_ADC_CHANNEL_0,
-    FuriHalAdcChannel1 = LL_ADC_CHANNEL_1,
-    FuriHalAdcChannel2 = LL_ADC_CHANNEL_2,
-    FuriHalAdcChannel3 = LL_ADC_CHANNEL_3,
-    FuriHalAdcChannel4 = LL_ADC_CHANNEL_4,
-    FuriHalAdcChannel5 = LL_ADC_CHANNEL_5,
-    FuriHalAdcChannel6 = LL_ADC_CHANNEL_6,
-    FuriHalAdcChannel7 = LL_ADC_CHANNEL_7,
-    FuriHalAdcChannel8 = LL_ADC_CHANNEL_8,
-    FuriHalAdcChannel9 = LL_ADC_CHANNEL_9,
-    FuriHalAdcChannel10 = LL_ADC_CHANNEL_10,
-    FuriHalAdcChannel11 = LL_ADC_CHANNEL_11,
-    FuriHalAdcChannel12 = LL_ADC_CHANNEL_12,
-    FuriHalAdcChannel13 = LL_ADC_CHANNEL_13,
-    FuriHalAdcChannel14 = LL_ADC_CHANNEL_14,
-    FuriHalAdcChannel15 = LL_ADC_CHANNEL_15,
-    FuriHalAdcChannel16 = LL_ADC_CHANNEL_16,
-    FuriHalAdcChannel17 = LL_ADC_CHANNEL_17,
-    FuriHalAdcChannel18 = LL_ADC_CHANNEL_18,
-    FuriHalAdcChannelVREFINT = LL_ADC_CHANNEL_VREFINT,
-    FuriHalAdcChannelTEMPSENSOR = LL_ADC_CHANNEL_TEMPSENSOR,
-    FuriHalAdcChannelVBAT = LL_ADC_CHANNEL_VBAT,
-} FuriHalAdcChannel;
-
 /**
  * @brief Set single channel for ADC
  * ADC has a 18 channels, and channels 0-5 are "fast" channels.
