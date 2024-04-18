@@ -70,6 +70,8 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     Gui* gui;
     NotificationApp* notification;
+
+    FuriString* path;
 } WavPlayerApp;
 
 WavParser* wav_parser_alloc();
