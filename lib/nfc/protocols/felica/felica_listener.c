@@ -2,7 +2,7 @@
 
 #include "nfc/protocols/nfc_listener_base.h"
 
-#define FELICA_LISTENER_MAX_BUFFER_SIZE (64)
+#define FELICA_LISTENER_MAX_BUFFER_SIZE (128)
 #define TAG "Felica"
 
 FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
