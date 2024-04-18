@@ -142,9 +142,7 @@ FuriHalNfcError furi_hal_nfc_felica_listener_tx(
     FuriHalSpiBusHandle* handle,
     const uint8_t* tx_data,
     size_t tx_bits) {
-    UNUSED(handle);
-    UNUSED(tx_data);
-    UNUSED(tx_bits);
+    furi_hal_nfc_common_fifo_tx(handle, tx_data, tx_bits);
     return FuriHalNfcErrorNone;
 }
 
