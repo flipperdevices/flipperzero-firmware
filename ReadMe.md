@@ -32,6 +32,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-17 05:00 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-17 05:00 EST`
 - [Lib Updates (By Willy-JL/ MNTM)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9872e133c2f2f03d73da3402ab207acaa0a76303)
+- [WAV Player: Impl favorite/direct-launch functionality #5 (By zacharyweiss)](https://github.com/Next-Flip/Momentum-Apps/pull/5)
+- Updated: [FlipBoard Blinky v2.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Keyboard v2.4 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Signal v3.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Simon v1.4 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 
 <a name="release">
 
@@ -389,10 +394,10 @@ $ ./fbt dolphin_ext
 - [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - [Flashlight v1.1 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
-- [FlipBoard Blinky v2.2 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- [FlipBoard Keyboard v2.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- [FlipBoard Signal v3.2 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- [FlipBoard Simon v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Blinky v2.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Keyboard v2.4 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Signal v3.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Simon v1.4 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
 - [Flipper Doctor v0.1 (By julandealb)](https://github.com/julandealb/flipperdoc)

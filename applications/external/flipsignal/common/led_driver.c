@@ -7,7 +7,7 @@ struct LedDriver {
     const GpioPin* gpio;
     uint32_t gpio_buf[2]; // On/Off for GPIO
 
-    uint8_t timer_buffer[LED_DRIVER_BUFFER_SIZE + 2];
+    uint16_t timer_buffer[LED_DRIVER_BUFFER_SIZE + 2];
     uint32_t write_pos;
     uint32_t read_pos;
 
@@ -56,7 +56,7 @@ static void led_driver_init_dma_led_transition_timer(LedDriver* led_driver) {
     led_driver->dma_led_transition_timer.MemoryOrM2MDstAddress =
         (uint32_t)led_driver->timer_buffer;
     led_driver->dma_led_transition_timer.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    led_driver->dma_led_transition_timer.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE;
+    led_driver->dma_led_transition_timer.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_HALFWORD;
     // Data
     led_driver->dma_led_transition_timer.Mode = LL_DMA_MODE_NORMAL;
     led_driver->dma_led_transition_timer.NbData = LED_DRIVER_BUFFER_SIZE;
@@ -204,7 +204,7 @@ static void led_driver_spin_lock(LedDriver* led_driver) {
         if((DWT->CYCCNT - prev_timer > wait_time)) {
             FURI_LOG_E(
                 TAG,
-                "0x%02x not found (ARR 0x%08lx, read %lu)",
+                "0x%04x not found (ARR 0x%08lx, read %lu)",
                 LED_DRIVER_TIMER_SETINEL,
                 TIM2->ARR,
                 led_driver->read_pos);
@@ -228,7 +228,7 @@ static void led_driver_add_period(LedDriver* led_driver, uint16_t duration_ns) {
         FURI_LOG_E(TAG, "reload_value: %ld", reload_value);
     }
     furi_check(reload_value > 0);
-    furi_check(reload_value < 256);
+    furi_check(reload_value < 256 * 256);
 
     led_driver_add_period_length(led_driver, reload_value - 1);
 }
@@ -275,6 +275,7 @@ void led_driver_transmit(LedDriver* led_driver) {
     for(size_t i = 0; i < led_driver->count_leds; i++) {
         led_driver_add_color(led_driver, led_driver->led_data[i]);
     }
+    led_driver_add_period(led_driver, LED_DRIVER_TDONE);
     led_driver->dma_led_transition_timer.NbData = led_driver->write_pos + 1;
 
     FURI_CRITICAL_ENTER();
