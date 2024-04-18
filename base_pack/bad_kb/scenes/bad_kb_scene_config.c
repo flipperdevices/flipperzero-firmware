@@ -8,6 +8,7 @@ enum VarItemListIndex {
 
 enum VarItemListIndexBt {
     VarItemListIndexBtRemember = VarItemListIndexConnection + 1,
+    VarItemListIndexBtPairing,
     VarItemListIndexBtDeviceName,
     VarItemListIndexBtMacAddress,
     VarItemListIndexBtRandomizeMac,
@@ -29,9 +30,33 @@ void bad_kb_scene_config_connection_callback(VariableItem* item) {
 
 void bad_kb_scene_config_bt_remember_callback(VariableItem* item) {
     BadKbApp* bad_kb = variable_item_get_context(item);
-    bad_kb->bt_remember = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
+    bool value = variable_item_get_current_value_index(item);
+    // Set user config and remember
+    bad_kb->config.ble.bonding = value;
+    // Apply to ID config so its temporarily overridden (currently can't set bonding with BT_ID anyway)
+    if(bad_kb->set_bt_id) {
+        bad_kb->id_config.ble.bonding = value;
+    }
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     view_dispatcher_send_custom_event(bad_kb->view_dispatcher, VarItemListIndexBtRemember);
+}
+
+const char* const bt_pairing_names[GapPairingCount] = {
+    "YesNo",
+    "PIN Type",
+    "PIN Y/N",
+};
+void bad_kb_scene_config_bt_pairing_callback(VariableItem* item) {
+    BadKbApp* bad_kb = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    // Set user config and remember
+    bad_kb->config.ble.pairing = index;
+    // Apply to ID config so its temporarily overridden (currently can't set pairing with BT_ID anyway)
+    if(bad_kb->set_bt_id) {
+        bad_kb->id_config.ble.pairing = index;
+    }
+    variable_item_set_current_value_text(item, bt_pairing_names[index]);
+    view_dispatcher_send_custom_event(bad_kb->view_dispatcher, VarItemListIndexBtPairing);
 }
 
 void bad_kb_scene_config_var_item_list_callback(void* context, uint32_t index) {
@@ -52,20 +77,31 @@ void bad_kb_scene_config_on_enter(void* context) {
     variable_item_set_current_value_text(item, bad_kb->is_bt ? "BT" : "USB");
 
     if(bad_kb->is_bt) {
+        BadKbConfig* cfg = bad_kb->set_bt_id ? &bad_kb->id_config : &bad_kb->config;
+
         item = variable_item_list_add(
             var_item_list, "BT Remember", 2, bad_kb_scene_config_bt_remember_callback, bad_kb);
-        variable_item_set_current_value_index(item, bad_kb->bt_remember);
-        variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
+        variable_item_set_current_value_index(item, cfg->ble.bonding);
+        variable_item_set_current_value_text(item, cfg->ble.bonding ? "ON" : "OFF");
+
+        item = variable_item_list_add(
+            var_item_list,
+            "BT Pairing",
+            GapPairingCount,
+            bad_kb_scene_config_bt_pairing_callback,
+            bad_kb);
+        variable_item_set_current_value_index(item, cfg->ble.pairing);
+        variable_item_set_current_value_text(item, bt_pairing_names[cfg->ble.pairing]);
 
         item = variable_item_list_add(var_item_list, "BT Device Name", 0, NULL, bad_kb);
 
         item = variable_item_list_add(var_item_list, "BT MAC Address", 0, NULL, bad_kb);
-        if(bad_kb->bt_remember) {
+        if(cfg->ble.bonding) {
             variable_item_set_locked(item, true, "Remember\nmust be Off!");
         }
 
         item = variable_item_list_add(var_item_list, "Randomize BT MAC", 0, NULL, bad_kb);
-        if(bad_kb->bt_remember) {
+        if(cfg->ble.bonding) {
             variable_item_set_locked(item, true, "Remember\nmust be Off!");
         }
     } else {
@@ -107,6 +143,9 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
         if(bad_kb->is_bt) {
             switch(event.event) {
             case VarItemListIndexBtRemember:
+                bad_kb_config_refresh(bad_kb);
+                break;
+            case VarItemListIndexBtPairing:
                 bad_kb_config_refresh(bad_kb);
                 break;
             case VarItemListIndexBtDeviceName:

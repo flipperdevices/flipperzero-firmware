@@ -36,6 +36,7 @@ void bad_kb_load_settings(BadKbApp* app) {
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(file, BAD_KB_SETTINGS_PATH)) {
         FuriString* tmp_str = furi_string_alloc();
+        uint32_t tmp_uint = 0;
 
         if(!flipper_format_read_string(file, "Keyboard_Layout", app->keyboard_layout)) {
             furi_string_reset(app->keyboard_layout);
@@ -47,10 +48,16 @@ void bad_kb_load_settings(BadKbApp* app) {
             flipper_format_rewind(file);
         }
 
-        if(!flipper_format_read_bool(file, "Bt_Remember", &app->bt_remember, 1)) {
-            app->bt_remember = false;
+        if(!flipper_format_read_bool(file, "Bt_Remember", &cfg->ble.bonding, 1)) {
+            cfg->ble.bonding = false;
             flipper_format_rewind(file);
         }
+
+        if(!flipper_format_read_uint32(file, "Bt_Pairing", &tmp_uint, 1)) {
+            tmp_uint = GapPairingNone;
+            flipper_format_rewind(file);
+        }
+        cfg->ble.pairing = tmp_uint;
 
         if(flipper_format_read_string(file, "Bt_Name", tmp_str)) {
             strlcpy(cfg->ble.name, furi_string_get_cstr(tmp_str), sizeof(cfg->ble.name));
@@ -115,9 +122,12 @@ static void bad_kb_save_settings(BadKbApp* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_always(file, BAD_KB_SETTINGS_PATH)) {
+        uint32_t tmp_uint = 0;
         flipper_format_write_string(file, "Keyboard_Layout", app->keyboard_layout);
         flipper_format_write_bool(file, "Is_Bt", &app->is_bt, 1);
-        flipper_format_write_bool(file, "Bt_Remember", &app->bt_remember, 1);
+        flipper_format_write_bool(file, "Bt_Remember", &cfg->ble.bonding, 1);
+        tmp_uint = cfg->ble.pairing;
+        flipper_format_write_uint32(file, "Bt_Pairing", &tmp_uint, 1);
         flipper_format_write_string_cstr(file, "Bt_Name", cfg->ble.name);
         flipper_format_write_hex(file, "Bt_Mac", (uint8_t*)&cfg->ble.mac, sizeof(cfg->ble.mac));
         flipper_format_write_string_cstr(file, "Usb_Manuf", cfg->usb.manuf);
@@ -143,21 +153,20 @@ void bad_kb_app_show_loading_popup(BadKbApp* app, bool show) {
 
 int32_t bad_kb_conn_apply(BadKbApp* app) {
     if(app->is_bt) {
+        // Setup profile config
+        BadKbConfig* cfg = app->set_bt_id ? &app->id_config : &app->config;
+        memcpy(&app->cur_ble_cfg, &cfg->ble, sizeof(cfg->ble));
+        if(app->cur_ble_cfg.bonding) {
+            // Hardcode mac for remember mode
+            // Change in config copy to preserve user choice for non-remember mode
+            memcpy(app->cur_ble_cfg.mac, BAD_KB_BOUND_MAC, sizeof(BAD_KB_BOUND_MAC));
+        }
+
+        // Prepare for new profile
         bt_timeout = bt_hid_delays[LevelRssi39_0];
         bt_disconnect(app->bt);
         furi_delay_ms(200);
         bt_keys_storage_set_storage_path(app->bt, BAD_KB_KEYS_PATH);
-
-        // Setup new config
-        BadKbConfig* cfg = app->set_bt_id ? &app->id_config : &app->config;
-        memcpy(&app->cur_ble_cfg, &cfg->ble, sizeof(cfg->ble));
-        app->cur_ble_cfg.bonding = app->bt_remember;
-        if(app->bt_remember) {
-            app->cur_ble_cfg.pairing = GapPairingPinCodeVerifyYesNo;
-        } else {
-            app->cur_ble_cfg.pairing = GapPairingNone;
-            memcpy(app->cur_ble_cfg.mac, BAD_KB_BOUND_MAC, sizeof(BAD_KB_BOUND_MAC));
-        }
 
         // Set profile
         app->ble_hid = bt_profile_start(app->bt, ble_profile_hid, &app->cur_ble_cfg);
@@ -246,7 +255,8 @@ void bad_kb_config_refresh(BadKbApp* app) {
             bad_kb_conn_reset(app);
         } else {
             BleProfileHidParams* cur = &app->cur_ble_cfg;
-            apply = apply || cfg->ble.bonding != app->bt_remember;
+            apply = apply || cfg->ble.bonding != cur->bonding;
+            apply = apply || cfg->ble.pairing != cur->pairing;
             apply = apply || strncmp(cfg->ble.name, cur->name, sizeof(cfg->ble.name));
             apply = apply || memcmp(cfg->ble.mac, cur->mac, sizeof(cfg->ble.mac));
         }
