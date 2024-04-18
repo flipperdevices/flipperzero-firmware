@@ -1,5 +1,5 @@
 # Noptel LRF rangefinder sampler app for the Flipper Zero
-### Version 1.2
+### Version 1.3
 
 * [Usage](#Usage)
 * [Installation](#Installation)
@@ -8,7 +8,7 @@
 
 Flipper Zero app to get range measurements from a [Noptel](https://noptel.fi/) [LRF rangefinder](https://noptel.fi/rangefinderhome).
 
-https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/6a348eff-2909-4667-b35a-fc58f6944f01
+https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/b974edca-b4ba-41a2-a545-af92c660ae58
 
 
 
@@ -69,7 +69,7 @@ If an averaging time is configured, the average distances and amplitudes over th
 
 ### Pointer ON/OFF
 
-Select the **Pointer ON/OFF** toggle to turn the pointer on and off if your rangefinder is equipped with a pointer.
+Select the **Pointer ON/OFF** toggle to turn the pointer on and off if the rangefinder is equipped with a pointer.
 
 ![Pointer ON/OFF toggle](screenshots/7-pointer_on_off_toggle.png)
 
@@ -78,6 +78,18 @@ Select the **Pointer ON/OFF** toggle to turn the pointer on and off if your rang
 Select the **LRF information** option to view the LRF's identification information. Press the **OK** button to re-read the information, or read another LRF's.
 
 ![GPIO pin connections](screenshots/3-lrf_information.png)
+
+### Save LRF diagnostic
+
+Select the **Save LRF diagnostic** option to save the LRF's diagnostic data after a failed ot incorrect measurement. Press the **OK** button to save another set of diagnostic data, or save another LRF's.
+
+![Save LRF diagnostic](screenshots/10-save_lrf_diagnostic.png)
+
+DSP files may be submitted to Noptel for analysis, along with a description of the problem with the rangefinder.
+
+To recover the DSP files from the Flipper Zero, connect the Flipper Zero to the computer with a USB cable and use [qFlipper](https://docs.flipper.net/qflipper) to download the files saved in **SD Card/apps_data/noptel_lrf_sampler/**
+
+![Download DSP files](screenshots/11-download_dsp_file.png)
 
 ### About
 
@@ -95,7 +107,7 @@ Gives information about the app and the GPIO pin connections needed to connect a
 
 - Clone this repository
 - Install [uFBT](https://github.com/flipperdevices/flipperzero-ufbt)
-- Connect your Flipper Zero to the computer with a USB cable
+- Connect the Flipper Zero to the computer with a USB cable
 - cd into the repository
 - Invoke `ufbt launch` to install the app in the **Apps ▶ GPIO** menu and run it for the first time
 

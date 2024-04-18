@@ -43,6 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Allow setting view_dispatcher callbacks to NULL again #3580 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/3580) (Was Already in RM)
 - OFW: [NFC: fix BIP plugin #3595 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3595)
 - OFW: [BLE: Add GapPairingNone support #3596 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3596) (Was Already in RM)
+- Updated: [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 
 <a name="release">
 
@@ -473,7 +474,7 @@ $ ./fbt dolphin_ext
 - [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
-- [Noptel LRF Sampler v1.2 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
+- [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [NRF Sniffer for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/nrfsniff_ms) `Req: NRF24`
