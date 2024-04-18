@@ -20,7 +20,7 @@
 #define MAX_FIELD_HEIGHT 8
 
 #define SCREEN_WIDTH 128
-#define SCREEN_HIGHT 64
+#define SCREEN_HEIGHT 64
 
 #define LOG_TAG "connect_wires" // For logging
 
@@ -476,7 +476,7 @@ uint8_t determine_element_size(Coord fieldSize) {
   const uint8_t availableSizes[] = {12, 10};
   uint8_t n = sizeof(availableSizes) / sizeof(availableSizes[0]);
   for (uint8_t i = 0; i < n; ++i) {
-    if (SCREEN_WIDTH / availableSizes[i] >= fieldSize.x && SCREEN_HIGHT / availableSizes[i] >= fieldSize.y) {
+    if (SCREEN_WIDTH / availableSizes[i] >= fieldSize.x && SCREEN_HEIGHT / availableSizes[i] >= fieldSize.y) {
       return availableSizes[i];
     }
   }
@@ -484,7 +484,7 @@ uint8_t determine_element_size(Coord fieldSize) {
 }
 
 void draw_grid(Canvas* canvas, GameState* gs, uint8_t elementSize) {
-  Coord startCorner = createCoord(SCREEN_WIDTH/2 - gs->fieldSize.x * elementSize/2, SCREEN_HIGHT/2 - gs->fieldSize.y * elementSize/2);
+  Coord startCorner = createCoord(SCREEN_WIDTH/2 - gs->fieldSize.x * elementSize/2, SCREEN_HEIGHT/2 - gs->fieldSize.y * elementSize/2);
   for (uint8_t i = 0; i < gs->fieldSize.x; ++i) {
     for (uint8_t j = 0; j < gs->fieldSize.y; ++j) {
       if (elementSize == 10) {
@@ -512,13 +512,13 @@ void draw_menu(Canvas* canvas, const MenuEntry* menu, uint8_t selectedIndex) {
   for (uint8_t i = 0; i < nitems; ++i) {
     canvas_set_color(canvas, ColorBlack);
     if (i == selectedIndex) {
-      canvas_draw_box(canvas, SCREEN_WIDTH/2-max_width/2, SCREEN_HIGHT/2-item_h*nitems/2+i*item_h, max_width, item_h);
+      canvas_draw_box(canvas, SCREEN_WIDTH/2-max_width/2, SCREEN_HEIGHT/2-item_h*nitems/2+i*item_h, max_width, item_h);
     }
     canvas_set_color(canvas, i == selectedIndex ? ColorWhite : ColorBlack);
-    canvas_draw_str_aligned(canvas, SCREEN_WIDTH/2, SCREEN_HIGHT/2-item_h*nitems/2+i*item_h+item_h/2, AlignCenter, AlignCenter, menu[i].text);
+    canvas_draw_str_aligned(canvas, SCREEN_WIDTH/2, SCREEN_HEIGHT/2-item_h*nitems/2+i*item_h+item_h/2, AlignCenter, AlignCenter, menu[i].text);
   }
   canvas_set_color(canvas, ColorBlack);
-  canvas_draw_rframe(canvas, SCREEN_WIDTH/2-max_width/2-DLT_FRAME, SCREEN_HIGHT/2-item_h*nitems/2-DLT_FRAME, max_width+DLT_FRAME*2, item_h*nitems+DLT_FRAME*2, 2);
+  canvas_draw_rframe(canvas, SCREEN_WIDTH/2-max_width/2-DLT_FRAME, SCREEN_HEIGHT/2-item_h*nitems/2-DLT_FRAME, max_width+DLT_FRAME*2, item_h*nitems+DLT_FRAME*2, 2);
 }
 
 void draw_about(Canvas* canvas) {
@@ -536,7 +536,7 @@ void draw_about(Canvas* canvas) {
   canvas_set_color(canvas, ColorBlack);
   for (uint8_t i = 0; i < nitems; ++i) {
     canvas_set_font(canvas, i == 0 ? FontPrimary : FontSecondary);
-    canvas_draw_str_aligned(canvas, SCREEN_WIDTH/2-max_width/2, SCREEN_HIGHT/2-item_h*nitems/2+i*item_h+item_h/2, AlignLeft, AlignCenter, AboutStrings[i]);
+    canvas_draw_str_aligned(canvas, SCREEN_WIDTH/2-max_width/2, SCREEN_HEIGHT/2-item_h*nitems/2+i*item_h+item_h/2, AlignLeft, AlignCenter, AboutStrings[i]);
   }
 }
 
@@ -554,11 +554,11 @@ void draw_winning(Canvas* canvas, GameState* gs) {
     const int paddingH = 4;
 
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, SCREEN_WIDTH/2 - w/2 - paddingH, SCREEN_HIGHT/2 - h/2 - paddingV, w + paddingH*2, h + paddingV*2 + canvas_current_font_height(canvas));
+    canvas_draw_box(canvas, SCREEN_WIDTH/2 - w/2 - paddingH, SCREEN_HEIGHT/2 - h/2 - paddingV, w + paddingH*2, h + paddingV*2 + canvas_current_font_height(canvas));
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_rframe(canvas, SCREEN_WIDTH/2 - w/2 - paddingH, SCREEN_HIGHT/2 - h/2 - paddingV, w + paddingH*2, h + paddingV*2 + canvas_current_font_height(canvas), 2);
-    canvas_draw_str_aligned(canvas, SCREEN_WIDTH/2, SCREEN_HIGHT/2, AlignCenter, AlignCenter, WINNING_MESSAGE);
-    canvas_draw_str_aligned(canvas, SCREEN_WIDTH/2, (SCREEN_HIGHT/2) + canvas_current_font_height(canvas), AlignCenter, AlignCenter, moves);
+    canvas_draw_rframe(canvas, SCREEN_WIDTH/2 - w/2 - paddingH, SCREEN_HEIGHT/2 - h/2 - paddingV, w + paddingH*2, h + paddingV*2 + canvas_current_font_height(canvas), 2);
+    canvas_draw_str_aligned(canvas, SCREEN_WIDTH/2, SCREEN_HEIGHT/2, AlignCenter, AlignCenter, WINNING_MESSAGE);
+    canvas_draw_str_aligned(canvas, SCREEN_WIDTH/2, (SCREEN_HEIGHT/2) + canvas_current_font_height(canvas), AlignCenter, AlignCenter, moves);
 }
 
 
