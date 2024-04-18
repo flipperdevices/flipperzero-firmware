@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0417-0500-0.100.4-aa81756](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-17 21:45 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-17 21:45 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-18 05:24 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-18 05:24 EST`
 - [Lib Updates (By Willy-JL/ MNTM)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9872e133c2f2f03d73da3402ab207acaa0a76303)
 - [WAV Player: Impl favorite/direct-launch functionality (By zacharyweiss)](https://github.com/Next-Flip/Momentum-Apps/pull/5)
 - Updated: [FlipBoard Blinky v2.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
