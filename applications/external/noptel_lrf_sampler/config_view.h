@@ -8,15 +8,13 @@
 /*** Includes ***/
 #include <gui/modules/variable_item_list.h>
 
-
-
 /*** Routines ***/
 
 /** Frequency setting change function **/
-void config_freq_change(VariableItem *);
+void config_freq_change(VariableItem*);
 
 /** Averaging time change function **/
-void config_avg_change(VariableItem *);
+void config_avg_change(VariableItem*);
 
 /** Beep option change function **/
-void config_beep_change(VariableItem *);
+void config_beep_change(VariableItem*);
