@@ -142,7 +142,7 @@ static void name_callback(void* _ctx) {
     Ctx* ctx = _ctx;
     Payload* payload = &ctx->attack->payload;
     payload->mode = PayloadModeValue;
-    scene_manager_previous_scene(ctx->scene_manager);
+    view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
 }
 void scene_nameflood_name_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
@@ -162,6 +162,10 @@ void scene_nameflood_name_on_enter(void* _ctx) {
 bool scene_nameflood_name_on_event(void* _ctx, SceneManagerEvent event) {
     Ctx* ctx = _ctx;
     Payload* payload = &ctx->attack->payload;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     if(event.type == SceneManagerEventTypeBack) {
         payload->mode = PayloadModeRandom;
     }

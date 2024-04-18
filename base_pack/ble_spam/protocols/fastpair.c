@@ -725,7 +725,7 @@ static void model_callback(void* _ctx, uint32_t index) {
     switch(index) {
     case 0:
         payload->mode = PayloadModeRandom;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     case models_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneFastpairModelCustom);
@@ -735,12 +735,12 @@ static void model_callback(void* _ctx, uint32_t index) {
         payload->bruteforce.counter = 0;
         payload->bruteforce.value = cfg->model;
         payload->bruteforce.size = 3;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     default:
         payload->mode = PayloadModeValue;
         cfg->model = models[index - 1].value;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         break;
     }
 }
@@ -779,8 +779,11 @@ void scene_fastpair_model_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
 }
 bool scene_fastpair_model_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_fastpair_model_on_exit(void* _ctx) {
@@ -795,8 +798,7 @@ static void model_custom_callback(void* _ctx) {
     payload->mode = PayloadModeValue;
     cfg->model =
         (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
-    scene_manager_previous_scene(ctx->scene_manager);
-    scene_manager_previous_scene(ctx->scene_manager);
+    view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
 }
 void scene_fastpair_model_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
@@ -816,8 +818,12 @@ void scene_fastpair_model_custom_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
 }
 bool scene_fastpair_model_custom_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 void scene_fastpair_model_custom_on_exit(void* _ctx) {

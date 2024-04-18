@@ -30,7 +30,7 @@ static void config_callback(void* _ctx, uint32_t index) {
         break;
     case ConfigLockKeyboard:
         ctx->lock_keyboard = true;
-        scene_manager_previous_scene(ctx->scene_manager);
+        view_dispatcher_send_custom_event(ctx->view_dispatcher, 0);
         notification_message_block(ctx->notification, &sequence_display_backlight_off);
         break;
     default:
@@ -66,8 +66,11 @@ void scene_config_on_enter(void* _ctx) {
 }
 
 bool scene_config_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_previous_scene(ctx->scene_manager);
+        return true;
+    }
     return false;
 }
 
