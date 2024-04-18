@@ -90,11 +90,11 @@ void gen4_reset(Gen4* instance);
 
 void gen4_copy(Gen4* dest, const Gen4* source);
 
-bool gen4_password_is_set (const Gen4Password* instance);
+bool gen4_password_is_set(const Gen4Password* instance);
 
-void gen4_password_reset (Gen4Password* instance);
+void gen4_password_reset(Gen4Password* instance);
 
-void gen4_password_copy (Gen4Password* dest, const Gen4Password* source);
+void gen4_password_copy(Gen4Password* dest, const Gen4Password* source);
 
 const char* gen4_get_shadow_mode_name(Gen4ShadowMode mode);
 

@@ -2,17 +2,20 @@
 #include "core/check.h"
 
 Gen4* gen4_alloc() {
-    Gen4* instance = (Gen4*)malloc(sizeof(Gen4));
+    Gen4* instance = malloc(sizeof(Gen4));
+
     return instance;
 }
 
 void gen4_free(Gen4* instance) {
     furi_check(instance);
+
     free(instance);
 }
 
 void gen4_reset(Gen4* instance) {
     furi_check(instance);
+
     memset(&instance->config, 0, sizeof(Gen4Config));
     memset(&instance->revision, 0, sizeof(Gen4Revision));
 }
@@ -20,18 +23,26 @@ void gen4_reset(Gen4* instance) {
 void gen4_copy(Gen4* dest, const Gen4* source) {
     furi_check(dest);
     furi_check(source);
+
     memcpy(dest, source, sizeof(Gen4));
 }
 
-bool gen4_password_is_set (const Gen4Password* instance){
+bool gen4_password_is_set(const Gen4Password* instance) {
+    furi_check(instance);
+
     return (instance->bytes[0] || instance->bytes[1] || instance->bytes[2] || instance->bytes[3]);
 }
 
-void gen4_password_reset (Gen4Password* instance){
+void gen4_password_reset(Gen4Password* instance) {
+    furi_check(instance);
+
     memset(instance->bytes, 0, GEN4_PASSWORD_LEN);
 }
 
-void gen4_password_copy (Gen4Password* dest, const Gen4Password* source){
+void gen4_password_copy(Gen4Password* dest, const Gen4Password* source) {
+    furi_check(dest);
+    furi_check(source);
+
     memcpy(dest->bytes, source->bytes, GEN4_PASSWORD_LEN);
 }
 
