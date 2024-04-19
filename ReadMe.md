@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Revert Fix for CC1101 & Some SubGHz Optimizations and Tweaks Removed (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1058)
 - Updated: [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - Updated: [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
+- Updated: [Connect Wires v1.2 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 
 <a name="release">
 
