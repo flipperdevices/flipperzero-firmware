@@ -1,6 +1,6 @@
 App(
-    appid="rad_sens",
-    name="Radiation Sensor",
+    appid="radsens",
+    name="RadSens",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="rad_sens_app",
     requires=[
@@ -10,7 +10,10 @@ App(
     ],
     stack_size=1 * 1024,
     order=90,
-	fap_icon="rad_sens.png",
-    fap_category="Misc",
+	fap_icon="radsens.png",
+    fap_category="GPIO",
     fap_icon_assets="icons",
+    fap_description="App for RadSens module",
+    fap_version="1.0",
+    fap_author="@sionyx",
 )
