@@ -107,9 +107,11 @@ static void menu_enter(void* context) {
         menu->view,
         MenuModel * model,
         {
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
+            if(MenuItemArray_size(model->items)) {
+                MenuItem* item = MenuItemArray_get(model->items, model->position);
+                if(item->icon) {
+                    icon_animation_start(item->icon);
+                }
             }
         },
         false);
@@ -121,7 +123,7 @@ static void menu_exit(void* context) {
         menu->view,
         MenuModel * model,
         {
-            if(model->position < MenuItemArray_size(model->items)) {
+            if(MenuItemArray_size(model->items)) {
                 MenuItem* item = MenuItemArray_get(model->items, model->position);
                 if(item->icon) {
                     icon_animation_stop(item->icon);
@@ -232,20 +234,22 @@ static void menu_process_up(Menu* menu) {
         menu->view,
         MenuModel * model,
         {
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
-            }
+            if(MenuItemArray_size(model->items)) {
+                MenuItem* item = MenuItemArray_get(model->items, model->position);
+                if(item->icon) {
+                    icon_animation_stop(item->icon);
+                }
 
-            if(model->position > 0) {
-                model->position--;
-            } else {
-                model->position = MenuItemArray_size(model->items) - 1;
-            }
+                if(model->position > 0) {
+                    model->position--;
+                } else {
+                    model->position = MenuItemArray_size(model->items) - 1;
+                }
 
-            item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
+                item = MenuItemArray_get(model->items, model->position);
+                if(item->icon) {
+                    icon_animation_start(item->icon);
+                }
             }
         },
         true);
@@ -256,20 +260,22 @@ static void menu_process_down(Menu* menu) {
         menu->view,
         MenuModel * model,
         {
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
-            }
+            if(MenuItemArray_size(model->items)) {
+                MenuItem* item = MenuItemArray_get(model->items, model->position);
+                if(item->icon) {
+                    icon_animation_stop(item->icon);
+                }
 
-            if(model->position < MenuItemArray_size(model->items) - 1) {
-                model->position++;
-            } else {
-                model->position = 0;
-            }
+                if(model->position < MenuItemArray_size(model->items) - 1) {
+                    model->position++;
+                } else {
+                    model->position = 0;
+                }
 
-            item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
+                item = MenuItemArray_get(model->items, model->position);
+                if(item->icon) {
+                    icon_animation_start(item->icon);
+                }
             }
         },
         true);
@@ -281,12 +287,12 @@ static void menu_process_ok(Menu* menu) {
         menu->view,
         MenuModel * model,
         {
-            if(model->position < MenuItemArray_size(model->items)) {
+            if(MenuItemArray_size(model->items)) {
                 item = MenuItemArray_get(model->items, model->position);
             }
         },
         true);
-    if(item && item->callback) {
+    if(item->callback) {
         item->callback(item->callback_context, item->index);
     }
 }
