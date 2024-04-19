@@ -4,6 +4,9 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="picopass_app",
+    sources=[
+      "*.c", "!plugin/*.c",
+    ],
     requires=[
         "storage",
         "gui",
@@ -22,4 +25,12 @@ App(
     ],
     fap_icon_assets="icons",
     fap_file_assets="files",
+)
+
+App(
+    appid="plugin_wiegand",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="plugin_wiegand_ep",
+    requires=["picopass"],
+    sources=["plugin/wiegand.c"],
 )
