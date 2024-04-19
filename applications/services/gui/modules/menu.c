@@ -292,7 +292,7 @@ static void menu_process_ok(Menu* menu) {
             }
         },
         true);
-    if(item->callback) {
+    if(item && item->callback) {
         item->callback(item->callback_context, item->index);
     }
 }
