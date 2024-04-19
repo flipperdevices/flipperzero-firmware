@@ -1,8 +1,8 @@
 #include "../seader_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexDelete,
     SubmenuIndexInfo,
+    SubmenuIndexDelete,
     SubmenuIndexVirtual,
 };
 
@@ -18,9 +18,9 @@ void seader_scene_saved_menu_on_enter(void* context) {
     Submenu* submenu = seader->submenu;
 
     submenu_add_item(
-        submenu, "Delete", SubmenuIndexDelete, seader_scene_saved_menu_submenu_callback, seader);
-    submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, seader_scene_saved_menu_submenu_callback, seader);
+    submenu_add_item(
+        submenu, "Delete", SubmenuIndexDelete, seader_scene_saved_menu_submenu_callback, seader);
 
     if(credential->sio[0] == 0x30) {
         submenu_add_item(
