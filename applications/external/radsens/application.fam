@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="rad_sens_app",
     stack_size=1 * 1024,
-    fap_icon="rad_sens.png",
+    fap_icon="radsens.png",
     fap_category="GPIO/Sensors",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="rad_sens",

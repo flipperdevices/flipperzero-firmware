@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [GUI: Fix array out of bounds in menu exit #3604 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3604)
 - OFW: [NFC: add Plantain legacy keys #3602 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3602)
 - Updated: [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
+- Updated: [Radiation Sensor v1.0 (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
 
 <a name="release">
 
@@ -509,7 +510,7 @@ $ ./fbt dolphin_ext
 - [QR Code v2.0 (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac)
 - [Radar Scanner v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
-- [Radiation Sensor (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
+- [Radiation Sensor v1.0 (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
 - [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)

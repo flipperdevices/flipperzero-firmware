@@ -26,7 +26,7 @@ static void rad_sens_view_draw_info(Canvas* canvas, RadSensModel* model) {
         furi_string_alloc_printf("%0.1f", ((double)model->dyn_intensity / 10));
     FuriString* stat_intensity = furi_string_alloc_printf(
         "Static intensity: %0.1f uR/h", ((double)model->stat_intensity / 10));
-    FuriString* impulse_count = furi_string_alloc_printf("Impulses: %d", model->impulse_count);
+    FuriString* impulse_count = furi_string_alloc_printf("Impulses: %ld", model->impulse_count);
 
     canvas_set_font(canvas, FontSecondary);
     uint8_t height = canvas_current_font_height(canvas);

@@ -29,7 +29,7 @@ struct RadSensModel {
     uint32_t dyn_intensity;
     uint32_t stat_intensity;
     uint16_t new_impulse_count;
-    uint16_t impulse_count;
+    uint32_t impulse_count;
     bool vibro_on;
     bool show_history;
     uint32_t dyn_intensity_history[HISTORY_LENGTH];
