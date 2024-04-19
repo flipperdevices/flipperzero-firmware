@@ -67,9 +67,10 @@ static int wiegand_h10301_parse(uint8_t bit_length, uint64_t bits, FuriString* d
     uint8_t eBit = (eBitMask & bits) >> 25;
     uint8_t oBit = (oBitMask & bits) >> 0;
 
-    bool eParity = bit_lib_test_parity_32((bits & eParityMask) >> 13, BitLibParityEven) &&
-                   eBit == 1;
-    bool oParity = bit_lib_test_parity_32((bits & oParityMask) >> 1, BitLibParityOdd) && oBit == 1;
+    bool eParity = bit_lib_test_parity_32((bits & eParityMask) >> 13, BitLibParityEven) ==
+                   (eBit == 1);
+    bool oParity = bit_lib_test_parity_32((bits & oParityMask) >> 1, BitLibParityOdd) ==
+                   (oBit == 1);
 
     FURI_LOG_D(
         PLUGIN_APP_ID,

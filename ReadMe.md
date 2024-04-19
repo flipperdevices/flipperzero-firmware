@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Battery Checker v0.2 (By Programistich)](https://github.com/Programistich/battery_checker)
 - [Revert Fix for CC1101 & Some SubGHz Optimizations and Tweaks Removed (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1058)
 - Updated: [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
+- Updated: [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 

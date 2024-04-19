@@ -16,17 +16,13 @@ void seader_scene_credential_info_widget_callback(
 void seader_scene_credential_info_on_enter(void* context) {
     Seader* seader = context;
     SeaderCredential* credential = seader->credential;
+    PluginWiegand* plugin = seader->plugin_wiegand;
     Widget* widget = seader->widget;
 
     FuriString* type_str = furi_string_alloc();
     FuriString* bitlength_str = furi_string_alloc();
     FuriString* credential_str = furi_string_alloc();
     FuriString* sio_str = furi_string_alloc();
-
-    dolphin_deed(DolphinDeedNfcReadSuccess);
-
-    // Send notification
-    notification_message(seader->notifications, &sequence_success);
 
     furi_string_set(credential_str, "");
     furi_string_set(bitlength_str, "");
@@ -52,6 +48,18 @@ void seader_scene_credential_info_on_enter(void* context) {
         "Back",
         seader_scene_credential_info_widget_callback,
         seader);
+
+    if(plugin) {
+        size_t format_count = plugin->count(credential->bit_length, credential->credential);
+        if(format_count > 0) {
+            widget_add_button_element(
+                seader->widget,
+                GuiButtonTypeCenter,
+                "Parse",
+                seader_scene_credential_info_widget_callback,
+                seader);
+        }
+    }
 
     widget_add_string_element(
         widget, 64, 5, AlignCenter, AlignCenter, FontPrimary, furi_string_get_cstr(type_str));
@@ -93,6 +101,9 @@ bool seader_scene_credential_info_on_event(void* context, SceneManagerEvent even
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
             consumed = scene_manager_previous_scene(seader->scene_manager);
+        } else if(event.event == GuiButtonTypeCenter) {
+            scene_manager_next_scene(seader->scene_manager, SeaderSceneFormats);
+            consumed = true;
         } else if(event.event == SeaderCustomEventViewExit) {
             view_dispatcher_switch_to_view(seader->view_dispatcher, SeaderViewWidget);
             consumed = true;
