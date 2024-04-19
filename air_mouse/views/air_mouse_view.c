@@ -14,12 +14,56 @@ struct AirMouseView {
 };
 
 typedef struct {
-    bool left_pressed;
-    bool up_pressed;
-    bool ok_pressed;
+    bool mouse_left_pressed;
+    bool mouse_wheel_pressed;
+    bool mouse_right_pressed;
+    bool mouse_scroll_pressed;
     bool connected;
     bool show_ble_icon;
 } AirMouseModel;
+
+#define CONTROLS_X ((64 - 47) / 2)
+#define CONTROLS_Y (32u)
+
+static void air_mouse_view_draw_controls(Canvas* canvas, AirMouseModel* model) {
+    canvas_draw_icon(canvas, CONTROLS_X, CONTROLS_Y, &I_Circles_47x47);
+
+    if(model->mouse_left_pressed) {
+        canvas_set_bitmap_mode(canvas, 1);
+        canvas_draw_icon(canvas, CONTROLS_X + 1, CONTROLS_Y + 17, &I_Pressed_Button_13x13);
+        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    canvas_draw_icon(canvas, CONTROLS_X + 3, CONTROLS_Y + 19, &I_Left_mouse_icon_9x9);
+    canvas_set_color(canvas, ColorBlack);
+
+    if(model->mouse_wheel_pressed) {
+        canvas_set_bitmap_mode(canvas, 1);
+        canvas_draw_icon(canvas, CONTROLS_X + 17, CONTROLS_Y + 17, &I_Pressed_Button_13x13);
+        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    canvas_draw_icon(canvas, CONTROLS_X + 19, CONTROLS_Y + 19, &I_Wheel_mouse_icon_9x9);
+    canvas_set_color(canvas, ColorBlack);
+
+    if(model->mouse_right_pressed) {
+        canvas_set_bitmap_mode(canvas, 1);
+        canvas_draw_icon(canvas, CONTROLS_X + 33, CONTROLS_Y + 17, &I_Pressed_Button_13x13);
+        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    canvas_draw_icon(canvas, CONTROLS_X + 35, CONTROLS_Y + 19, &I_Right_mouse_icon_9x9);
+    canvas_set_color(canvas, ColorBlack);
+
+    if(model->mouse_scroll_pressed) {
+        canvas_set_bitmap_mode(canvas, 1);
+        canvas_draw_icon(canvas, CONTROLS_X + 17, CONTROLS_Y + 1, &I_Pressed_Button_13x13);
+        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    canvas_draw_icon(canvas, CONTROLS_X + 19, CONTROLS_Y + 3, &I_Scroll_icon_9x9);
+    canvas_set_color(canvas, ColorBlack);
+}
 
 static void air_mouse_view_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
@@ -29,45 +73,19 @@ static void air_mouse_view_draw_callback(Canvas* canvas, void* context) {
 
     if(model->show_ble_icon) {
         if(model->connected) {
-            canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
+            canvas_draw_icon(canvas, 64 / 2 - 15 / 2, 90, &I_Ble_connected_15x15);
         } else {
-            canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
+            canvas_draw_icon(canvas, 64 / 2 - 15 / 2, 90, &I_Ble_disconnected_15x15);
         }
     }
 
-    canvas_draw_icon(canvas, 78, 8, &I_Circles_47x47);
-
-    if(model->ok_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 95, 25, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
-        canvas_set_color(canvas, ColorWhite);
-    }
-    canvas_draw_icon(canvas, 97, 27, &I_Left_mouse_icon_9x9);
-    canvas_set_color(canvas, ColorBlack);
-
-    if(model->up_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 95, 9, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
-        canvas_set_color(canvas, ColorWhite);
-    }
-    canvas_draw_icon(canvas, 97, 11, &I_Right_mouse_icon_9x9);
-    canvas_set_color(canvas, ColorBlack);
-
-    if(model->left_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 79, 25, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
-        canvas_set_color(canvas, ColorWhite);
-    }
-    canvas_draw_icon(canvas, 81, 27, &I_Scroll_icon_9x9);
-    canvas_set_color(canvas, ColorBlack);
-
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 17, 12, "Air Mouse");
+    canvas_draw_str_aligned(canvas, 32, 12, AlignCenter, AlignBottom, "Air Mouse");
+
+    air_mouse_view_draw_controls(canvas, model);
+
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 0, 56, "Press Back to exit");
+    canvas_draw_str_aligned(canvas, 32, 127, AlignCenter, AlignBottom, "Back to exit");
 }
 
 static bool air_mouse_view_input_callback(InputEvent* event, void* context) {
@@ -75,28 +93,48 @@ static bool air_mouse_view_input_callback(InputEvent* event, void* context) {
     AirMouseView* air_mouse = context;
     bool consumed = false;
 
-    if(event->key == InputKeyOk) {
+    if(event->key == InputKeyLeft) {
         if((event->type == InputTypePress) || (event->type == InputTypeRelease)) {
             bool state = (event->type == InputTypePress);
             imu_mouse_key_press(air_mouse->imu, ImuMouseKeyLeft, state);
             with_view_model(
-                air_mouse->view, AirMouseModel * model, { model->ok_pressed = state; }, true);
+                air_mouse->view,
+                AirMouseModel * model,
+                { model->mouse_left_pressed = state; },
+                true);
+        }
+        consumed = true;
+    } else if(event->key == InputKeyOk) {
+        if((event->type == InputTypePress) || (event->type == InputTypeRelease)) {
+            bool state = (event->type == InputTypePress);
+            imu_mouse_key_press(air_mouse->imu, ImuMouseKeyWheel, state);
+            with_view_model(
+                air_mouse->view,
+                AirMouseModel * model,
+                { model->mouse_wheel_pressed = state; },
+                true);
+        }
+        consumed = true;
+    } else if(event->key == InputKeyRight) {
+        if((event->type == InputTypePress) || (event->type == InputTypeRelease)) {
+            bool state = (event->type == InputTypePress);
+            imu_mouse_key_press(air_mouse->imu, ImuMouseKeyRight, state);
+            with_view_model(
+                air_mouse->view,
+                AirMouseModel * model,
+                { model->mouse_right_pressed = state; },
+                true);
         }
         consumed = true;
     } else if(event->key == InputKeyUp) {
         if((event->type == InputTypePress) || (event->type == InputTypeRelease)) {
             bool state = (event->type == InputTypePress);
-            imu_mouse_key_press(air_mouse->imu, ImuMouseKeyRight, state);
-            with_view_model(
-                air_mouse->view, AirMouseModel * model, { model->up_pressed = state; }, true);
-        }
-        consumed = true;
-    } else if(event->key == InputKeyLeft) {
-        if((event->type == InputTypePress) || (event->type == InputTypeRelease)) {
-            bool state = (event->type == InputTypePress);
             imu_mouse_scroll_mode(air_mouse->imu, state);
             with_view_model(
-                air_mouse->view, AirMouseModel * model, { model->left_pressed = state; }, true);
+                air_mouse->view,
+                AirMouseModel * model,
+                { model->mouse_scroll_pressed = state; },
+                true);
         }
         consumed = true;
     }
@@ -132,6 +170,7 @@ AirMouseView* air_mouse_view_alloc(AirMouseViewExit exit_callback, void* context
     view_set_input_callback(air_mouse->view, air_mouse_view_input_callback);
     view_set_enter_callback(air_mouse->view, air_mouse_view_enter);
     view_set_exit_callback(air_mouse->view, air_mouse_view_exit);
+    view_set_orientation(air_mouse->view, ViewOrientationVerticalFlip);
 
     with_view_model(
         air_mouse->view, AirMouseModel * model, { model->connected = true; }, true);
