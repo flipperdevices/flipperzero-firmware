@@ -25,13 +25,11 @@ jobs:
     needs: build
 
     steps:
-    - name: Download built extension
-      uses: actions/download-artifact@v2
-      with:
-        name: extension
+    - name: Download built fap
+      uses: actions/download-artifact@v3
     - name: Upload extension to release
       uses: skx/github-action-publish-binaries@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        args: '*'
+        args: '*.fap'
