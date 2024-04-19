@@ -1,12 +1,10 @@
 #include <gui/modules/text_box.h>
-#include <gui/view_dispatcher.h>
-#include <gui/view.h>
+#include <gui/view_holder.h>
 #include "../js_modules.h"
 
 typedef struct {
     TextBox* text_box;
-    ViewDispatcher* view_dispatcher;
-    FuriThread* thread;
+    ViewHolder* view_holder;
     FuriString* text;
 } JsTextboxInst;
 
@@ -114,18 +112,16 @@ static void js_textbox_is_open(struct mjs* mjs) {
     JsTextboxInst* textbox = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 0)) return;
 
-    mjs_return(mjs, mjs_mk_boolean(mjs, !!textbox->thread));
+    mjs_return(mjs, mjs_mk_boolean(mjs, !!textbox->view_holder));
 }
 
 static void textbox_deinit(void* context) {
     JsTextboxInst* textbox = context;
-    furi_thread_join(textbox->thread);
-    furi_thread_free(textbox->thread);
-    textbox->thread = NULL;
 
-    view_dispatcher_remove_view(textbox->view_dispatcher, 0);
-    view_dispatcher_free(textbox->view_dispatcher);
-    textbox->view_dispatcher = NULL;
+    view_holder_stop(textbox->view_holder);
+    view_holder_free(textbox->view_holder);
+    textbox->view_holder = NULL;
+
     furi_record_close(RECORD_GUI);
 
     text_box_reset(textbox->text_box);
@@ -137,35 +133,28 @@ static void textbox_callback(void* context, uint32_t arg) {
     textbox_deinit(context);
 }
 
-static bool textbox_exit(void* context) {
+static void textbox_exit(void* context) {
     JsTextboxInst* textbox = context;
-    view_dispatcher_stop(textbox->view_dispatcher);
     furi_timer_pending_callback(textbox_callback, textbox, 0);
-    return true;
-}
-
-static int32_t textbox_thread(void* context) {
-    ViewDispatcher* view_dispatcher = context;
-    view_dispatcher_run(view_dispatcher);
-    return 0;
 }
 
 static void js_textbox_show(struct mjs* mjs) {
     JsTextboxInst* textbox = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 0)) return;
 
-    Gui* gui = furi_record_open(RECORD_GUI);
-    textbox->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(textbox->view_dispatcher);
-    view_dispatcher_add_view(textbox->view_dispatcher, 0, text_box_get_view(textbox->text_box));
-    view_dispatcher_set_event_callback_context(textbox->view_dispatcher, textbox);
-    view_dispatcher_set_navigation_event_callback(textbox->view_dispatcher, textbox_exit);
-    view_dispatcher_attach_to_gui(textbox->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-    view_dispatcher_switch_to_view(textbox->view_dispatcher, 0);
+    if(textbox->view_holder) {
+        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Textbox is already shown");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
 
-    textbox->thread =
-        furi_thread_alloc_ex("JsTextbox", 1024, textbox_thread, textbox->view_dispatcher);
-    furi_thread_start(textbox->thread);
+    Gui* gui = furi_record_open(RECORD_GUI);
+    textbox->view_holder = view_holder_alloc();
+    view_holder_attach_to_gui(textbox->view_holder, gui);
+    view_holder_set_back_callback(textbox->view_holder, textbox_exit, textbox);
+
+    view_holder_set_view(textbox->view_holder, text_box_get_view(textbox->text_box));
+    view_holder_start(textbox->view_holder);
 
     mjs_return(mjs, MJS_UNDEFINED);
 }
@@ -174,8 +163,7 @@ static void js_textbox_close(struct mjs* mjs) {
     JsTextboxInst* textbox = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 0)) return;
 
-    if(textbox->thread) {
-        view_dispatcher_stop(textbox->view_dispatcher);
+    if(textbox->view_holder) {
         textbox_deinit(textbox);
     }
 
@@ -200,8 +188,7 @@ static void* js_textbox_create(struct mjs* mjs, mjs_val_t* object) {
 
 static void js_textbox_destroy(void* inst) {
     JsTextboxInst* textbox = inst;
-    if(textbox->thread) {
-        view_dispatcher_stop(textbox->view_dispatcher);
+    if(textbox->view_holder) {
         textbox_deinit(textbox);
     }
     text_box_free(textbox->text_box);
