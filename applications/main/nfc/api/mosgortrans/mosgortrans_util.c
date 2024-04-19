@@ -465,6 +465,9 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
     BlockData data_block = {};
     const uint16_t valid_departments[] = {0x106, 0x108, 0x10A, 0x10E, 0x110, 0x117};
     uint16_t transport_departament = bit_lib_get_bits_16(block->data, 0, 10);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        furi_string_cat_printf(result, "Transport departament: %x\n", transport_departament);
+    }
     bool departament_valid = false;
     for(uint8_t i = 0; i < 6; i++) {
         if(transport_departament == valid_departments[i]) {
@@ -475,14 +478,17 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
     if(!departament_valid) {
         return false;
     }
-    FURI_LOG_I(TAG, "Transport departament: %x", transport_departament);
+    FURI_LOG_D(TAG, "Transport departament: %x", transport_departament);
     uint16_t layout_type = bit_lib_get_bits_16(block->data, 52, 4);
     if(layout_type == 0xE) {
         layout_type = bit_lib_get_bits_16(block->data, 52, 9);
     } else if(layout_type == 0xF) {
         layout_type = bit_lib_get_bits_16(block->data, 52, 14);
     }
-    FURI_LOG_I(TAG, "Layout type %x", layout_type);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        furi_string_cat_printf(result, "Layout: %x\n", layout_type);
+    }
+    FURI_LOG_D(TAG, "Layout type %x", layout_type);
     switch(layout_type) {
     case 0x02: {
         parse_layout_2(&data_block, block);
@@ -995,7 +1001,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.month,
             card_use_before_date_s.year);
         // remaining_funds
-        furi_string_cat_printf(result, "Balance: %ld rub\n", data_block.remaining_funds);
+        furi_string_cat_printf(result, "Balance: %lu rub\n", data_block.remaining_funds);
         // start_trip_minutes
         DateTime card_start_trip_minutes_s = {0};
         from_minutes_to_datetime(data_block.start_trip_minutes, &card_start_trip_minutes_s, 2016);
@@ -1050,7 +1056,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.month,
             card_use_before_date_s.year);
         // remaining_funds
-        furi_string_cat_printf(result, "Balance: %ld rub\n", data_block.remaining_funds);
+        furi_string_cat_printf(result, "Balance: %lu rub\n", data_block.remaining_funds);
         // valid_from_date
         DateTime card_use_from_date_s = {0};
         from_days_to_datetime(data_block.valid_from_date, &card_use_from_date_s, 2016);

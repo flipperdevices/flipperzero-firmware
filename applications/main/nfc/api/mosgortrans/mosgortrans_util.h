@@ -4,6 +4,7 @@
 #include <datetime.h>
 #include <furi/core/string.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
+#include <furi_hal_rtc.h>
 
 #ifdef __cplusplus
 extern "C" {
