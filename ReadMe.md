@@ -43,7 +43,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Allow setting view_dispatcher callbacks to NULL again #3580 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/3580) (Was Already in RM)
 - OFW: [NFC: fix BIP plugin #3595 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3595)
 - OFW: [BLE: Add GapPairingNone support #3596 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3596) (Was Already in RM)
-- Updated: [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Updated: [WAV Recorder v0.2 (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - Updated: [Battery Checker v0.2 (By Programistich)](https://github.com/Programistich/battery_checker)
 - [Revert Fix for CC1101 & Some SubGHz Optimizations and Tweaks Removed (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1058)
@@ -54,6 +53,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [add support for S(WTX) request in iso14443_4a_poller #3590 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3590)
 - OFW: [GUI: Fix array out of bounds in menu exit #3604 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3604)
 - OFW: [NFC: add Plantain legacy keys #3602 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3602)
+- Updated: [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 
 <a name="release">
 

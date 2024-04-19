@@ -292,6 +292,10 @@ static void app_free(App* app) {
     view_dispatcher_remove_view(app->view_dispatcher, view_about);
     view_free(app->about_view);
 
+    /* Remove the save diagnostic view */
+    view_dispatcher_remove_view(app->view_dispatcher, view_savediag);
+    view_free(app->savediag_view);
+
     /* Remove the LRF info view */
     view_dispatcher_remove_view(app->view_dispatcher, view_lrfinfo);
     view_free(app->lrfinfo_view);
