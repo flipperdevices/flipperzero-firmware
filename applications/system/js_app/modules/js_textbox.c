@@ -97,7 +97,7 @@ static void js_textbox_add_text(struct mjs* mjs) {
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-static void js_textbox_empty_text(struct mjs* mjs) {
+static void js_textbox_clear_text(struct mjs* mjs) {
     JsTextboxInst* textbox = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 0)) return;
 
@@ -176,7 +176,7 @@ static void* js_textbox_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, textbox_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, textbox));
     mjs_set(mjs, textbox_obj, "setConfig", ~0, MJS_MK_FN(js_textbox_set_config));
     mjs_set(mjs, textbox_obj, "addText", ~0, MJS_MK_FN(js_textbox_add_text));
-    mjs_set(mjs, textbox_obj, "emptyText", ~0, MJS_MK_FN(js_textbox_empty_text));
+    mjs_set(mjs, textbox_obj, "clearText", ~0, MJS_MK_FN(js_textbox_clear_text));
     mjs_set(mjs, textbox_obj, "isOpen", ~0, MJS_MK_FN(js_textbox_is_open));
     mjs_set(mjs, textbox_obj, "show", ~0, MJS_MK_FN(js_textbox_show));
     mjs_set(mjs, textbox_obj, "close", ~0, MJS_MK_FN(js_textbox_close));
