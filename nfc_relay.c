@@ -23,15 +23,13 @@ void nfc_relay_tick_event_callback(void* context) {
 
 void nfc_relay_show_loading_popup(void* context, bool show) {
     NfcRelay* nfc_relay = context;
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
-
     if(show) {
         // Raise timer priority so that animations can play
-        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
         view_dispatcher_switch_to_view(nfc_relay->view_dispatcher, NfcRelayViewLoading);
     } else {
         // Restore default timer priority
-        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
     }
 }
 
@@ -47,9 +45,6 @@ NfcRelay* nfc_relay_alloc() {
         nfc_relay->view_dispatcher, nfc_relay_back_event_callback);
     view_dispatcher_set_tick_event_callback(
         nfc_relay->view_dispatcher, nfc_relay_tick_event_callback, 100);
-
-    view_dispatcher_set_navigation_event_callback(
-        nfc_relay->view_dispatcher, nfc_relay_back_event_callback);
 
     nfc_relay->gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(
@@ -87,7 +82,7 @@ NfcRelay* nfc_relay_alloc() {
     nfc_relay->config = malloc(sizeof(NfcRelayConfig));
     nfc_relay->config->mode = NfcRelayModeUart;
     nfc_relay->config->uart_config.baudrate = 38400; //115200;
-    nfc_relay->config->uart_config.uartId = FuriHalUartIdLPUART1;
+    nfc_relay->config->uart_config.serialId = FuriHalSerialIdLpuart;
 
     return nfc_relay;
 }
@@ -134,4 +129,27 @@ int32_t nfc_relay_app(void* p) {
     nfc_relay_free(nfc_relay);
 
     return 0;
+}
+
+void trace_bit_buffer_hexdump(char* tag, char* prompt, BitBuffer* bitbuffer) {
+#ifdef TRACE_TRX
+    FuriString* debug_buf;
+    debug_buf = furi_string_alloc();
+    for(size_t i = 0; i < bit_buffer_get_size_bytes(bitbuffer); i++) {
+        furi_string_cat_printf(debug_buf, " %02X", bit_buffer_get_byte(bitbuffer, i));
+    }
+    furi_string_trim(debug_buf);
+    FURI_LOG_T(
+        tag,
+        "%s (%d): %s",
+        prompt,
+        bit_buffer_get_size(bitbuffer),
+        furi_string_get_cstr(debug_buf));
+    furi_string_free(debug_buf);
+#else
+    UNUSED(tag);
+    UNUSED(prompt);
+    UNUSED(bitbuffer);
+#endif
+    return;
 }

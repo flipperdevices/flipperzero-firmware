@@ -14,6 +14,7 @@
 #include "nfc_relay_icons.h"
 
 #include <furi_hal.h>
+#include <bit_buffer.h>
 
 #include <lib/nfc/nfc_device.h>
 
@@ -22,7 +23,7 @@ typedef enum {
 } NfcRelayMode;
 
 typedef struct NfcRelayConfigUart {
-    FuriHalUartId uartId;
+    FuriHalSerialId serialId;
     uint32_t baudrate;
 } NfcRelayConfigUart;
 
@@ -57,3 +58,6 @@ typedef enum {
     NfcRelayViewTextInput,
     NfcRelayViewWidget,
 } NfcRelayView;
+
+#define TRACE_TRX
+void trace_bit_buffer_hexdump(char* tag, char* prompt, BitBuffer* bitbuffer);
