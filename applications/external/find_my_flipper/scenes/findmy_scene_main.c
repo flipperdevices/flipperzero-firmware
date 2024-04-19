@@ -10,7 +10,6 @@ void findmy_scene_main_on_enter(void* context) {
     FindMy* app = context;
 
     findmy_main_set_callback(app->findmy_main, findmy_scene_main_callback, app);
-
     view_dispatcher_switch_to_view(app->view_dispatcher, FindMyViewMain);
 }
 
