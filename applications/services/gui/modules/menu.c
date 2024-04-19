@@ -462,7 +462,7 @@ static bool menu_input_callback(InputEvent* event, void* context) {
         }
     }
 
-    if(event->type == InputTypeShort) {
+    if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
         switch(event->key) {
         case InputKeyUp:
             menu_process_up(menu);
@@ -477,25 +477,9 @@ static bool menu_input_callback(InputEvent* event, void* context) {
             menu_process_right(menu);
             break;
         case InputKeyOk:
-            menu_process_ok(menu);
-            break;
-        default:
-            consumed = false;
-            break;
-        }
-    } else if(event->type == InputTypeRepeat) {
-        switch(event->key) {
-        case InputKeyUp:
-            menu_process_up(menu);
-            break;
-        case InputKeyDown:
-            menu_process_down(menu);
-            break;
-        case InputKeyLeft:
-            menu_process_left(menu);
-            break;
-        case InputKeyRight:
-            menu_process_right(menu);
+            if(event->type != InputTypeRepeat) {
+                menu_process_ok(menu);
+            }
             break;
         default:
             consumed = false;
@@ -536,9 +520,14 @@ static void menu_exit(void* context) {
         menu->view,
         MenuModel * model,
         {
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
+            // If menu_reset() is called before view exit, model->items is reset
+            // But for some reason, even with size 0, array get() returns a non-null pointer?
+            // MLIB docs have no mention of out of bounds condition, seems weird
+            if(model->position < MenuItemArray_size(model->items)) {
+                MenuItem* item = MenuItemArray_get(model->items, model->position);
+                if(item && item->icon) {
+                    icon_animation_stop(item->icon);
+                }
             }
         },
         false);

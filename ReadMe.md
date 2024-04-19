@@ -50,6 +50,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - Updated: [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
 - Updated: [Connect Wires v1.2 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
+- OFW: [Mosgortrans parser output fixes #3554 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3554)
+- OFW: [add support for S(WTX) request in iso14443_4a_poller #3590 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3590)
+- OFW: [GUI: Fix array out of bounds in menu exit #3604 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3604)
+- OFW: [NFC: add Plantain legacy keys #3602 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3602)
 
 <a name="release">
 
