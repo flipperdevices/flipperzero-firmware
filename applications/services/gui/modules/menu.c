@@ -121,9 +121,11 @@ static void menu_exit(void* context) {
         menu->view,
         MenuModel * model,
         {
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
+            if(model->position < MenuItemArray_size(model->items)) {
+                MenuItem* item = MenuItemArray_get(model->items, model->position);
+                if(item->icon) {
+                    icon_animation_stop(item->icon);
+                }
             }
         },
         false);
