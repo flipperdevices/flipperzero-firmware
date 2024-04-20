@@ -3,7 +3,7 @@ App(
     name="Noptel LRF sampler",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="noptel_lrf_sampler_app",
-    stack_size=2 * 1024,
+    stack_size=4 * 1024,
     requires=[
         "gui",
     ],

@@ -125,6 +125,9 @@ typedef struct {
   /* Displayed effective sampling frequency */
   double eff_freq;
 
+  /* Displayed return rate */
+  double return_rate;
+
   /* Whether continuous measurement is started */
   bool continuous_meas_started;
 
