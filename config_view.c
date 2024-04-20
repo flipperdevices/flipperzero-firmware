@@ -27,7 +27,7 @@ void config_freq_change(VariableItem *item) {
   sampler_model->config.freq = config_freq_values[idx];
   variable_item_set_current_value_text(item, config_freq_names[idx]);
 
-  FURI_LOG_I(TAG, "Frequency change: %s", config_freq_names[idx]);
+  FURI_LOG_D(TAG, "Frequency change: %s", config_freq_names[idx]);
 }
 
 
@@ -46,7 +46,7 @@ void config_avg_change(VariableItem *item) {
   sampler_model->config.avg = config_avg_values[idx];
   variable_item_set_current_value_text(item, config_avg_names[idx]);
 
-  FURI_LOG_I(TAG, "Averaging time change: %s", config_avg_names[idx]);
+  FURI_LOG_D(TAG, "Averaging time change: %s", config_avg_names[idx]);
 }
 
 
@@ -65,5 +65,5 @@ void config_beep_change(VariableItem *item) {
   sampler_model->config.beep = config_beep_values[idx] != 0;
   variable_item_set_current_value_text(item, config_beep_names[idx]);
 
-  FURI_LOG_I(TAG, "Beep option change: %s", config_beep_names[idx]);
+  FURI_LOG_D(TAG, "Beep option change: %s", config_beep_names[idx]);
 }

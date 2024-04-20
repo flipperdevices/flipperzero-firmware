@@ -118,14 +118,14 @@ bool about_view_input_callback(InputEvent *evt, void *ctx) {
 
       /* OK button: cycle screens */
       case InputKeyOk:
-        FURI_LOG_I(TAG, "OK button pressed");
+        FURI_LOG_D(TAG, "OK button pressed");
         about_model->screen = (about_model->screen + 1) % 3;
         evt_handled = true;
         break;
 
       /* Right button: go to the next screen */
       case InputKeyRight:
-        FURI_LOG_I(TAG, "Right button pressed");
+        FURI_LOG_D(TAG, "Right button pressed");
         about_model->screen = about_model->screen < 2? about_model->screen + 1 :
 							about_model->screen;
         evt_handled = true;
@@ -133,7 +133,7 @@ bool about_view_input_callback(InputEvent *evt, void *ctx) {
 
       /* Down button: go to the next screen */
       case InputKeyDown:
-        FURI_LOG_I(TAG, "Down button pressed");
+        FURI_LOG_D(TAG, "Down button pressed");
         about_model->screen = about_model->screen < 2? about_model->screen + 1 :
 							about_model->screen;
         evt_handled = true;
@@ -141,7 +141,7 @@ bool about_view_input_callback(InputEvent *evt, void *ctx) {
 
       /* Left button: go to the previous screen */
       case InputKeyLeft:
-        FURI_LOG_I(TAG, "Left button pressed");
+        FURI_LOG_D(TAG, "Left button pressed");
         about_model->screen = about_model->screen > 0? about_model->screen - 1 :
 							about_model->screen;
         evt_handled = true;
@@ -149,7 +149,7 @@ bool about_view_input_callback(InputEvent *evt, void *ctx) {
 
       /* Up button: go to the previous screen */
       case InputKeyUp:
-        FURI_LOG_I(TAG, "Up button pressed");
+        FURI_LOG_D(TAG, "Up button pressed");
         about_model->screen = about_model->screen > 0? about_model->screen - 1 :
 							about_model->screen;
         evt_handled = true;

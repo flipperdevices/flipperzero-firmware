@@ -319,7 +319,7 @@ static int32_t uart_rx_thread(void *ctx) {
            reset the decode buffer */
         if(app->nb_dec_buf && ms_tick_time_diff_ms(now_ms, last_rx_tstamp_ms) >=
 				app->uart_rx_timeout) {
-          FURI_LOG_I(TAG, "RX timeout");
+          FURI_LOG_T(TAG, "RX timeout");
           app->nb_dec_buf = 0;
         }
 
@@ -550,7 +550,7 @@ static int32_t uart_rx_thread(void *ctx) {
                   /* Timestamp the sample */
                   lrf_sample.tstamp_ms = now_ms;
 
-                  FURI_LOG_I(TAG, "LRF sample received: "
+                  FURI_LOG_T(TAG, "LRF sample received: "
 					"dist1=%f, dist2=%f, dist3=%f, "
 					"ampl1=%d, ampl2=%d, ampl3=%d",
 				(double)lrf_sample.dist1,
@@ -683,7 +683,7 @@ static int32_t uart_rx_thread(void *ctx) {
 				app->dec_buf[65], app->dec_buf[66],
 				app->dec_buf[68], app->dec_buf[69]);
 
-                  FURI_LOG_I(TAG, "LRF identification frame received: "
+                  FURI_LOG_T(TAG, "LRF identification frame received: "
 					"lrfid=%s, addinfo=%s, serial=%s, "
 					"fwversion=%s, electronics=%s, "
 					"optics=%s, builddate=%s",
@@ -717,7 +717,7 @@ static int32_t uart_rx_thread(void *ctx) {
 						(lrf_diag.vals[j] & 0xff) << 8;
                   }
 
-                  FURI_LOG_I(TAG, "LRF diagnostic data received: %d bytes / "
+                  FURI_LOG_T(TAG, "LRF diagnostic data received: %d bytes / "
 					"%d diagnostic values",
 				app->nb_dec_buf, lrf_diag.total_vals);
 
@@ -764,7 +764,7 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
 
   /* Send the correct sequence of bytes to the LRF depending on the command */
   uart_tx(app, lrf_cmds[cmd], lrf_cmds_len[cmd]);
-  FURI_LOG_I(TAG, "%s command sent", lrf_cmds_desc[cmd]);
+  FURI_LOG_T(TAG, "%s command sent", lrf_cmds_desc[cmd]);
 }
 
 

@@ -373,7 +373,7 @@ bool savediag_view_input_callback(InputEvent *evt, void *ctx) {
 
   /* If diagnostic data is being saved, disable all user input altogether */
   if(savediag_model->save_in_progress) {
-    FURI_LOG_I(TAG, "User input disabled while diagnostic data is being saved");
+    FURI_LOG_D(TAG, "User input disabled while diagnostic data is being saved");
     return true;
   }
 
@@ -383,7 +383,7 @@ bool savediag_view_input_callback(InputEvent *evt, void *ctx) {
     /* If no diagnostic data is being downloaded, trigger a new save sequence */
     if(!savediag_model->download_in_progress) {
 
-      FURI_LOG_I(TAG, "OK button pressed");
+      FURI_LOG_D(TAG, "OK button pressed");
 
       /* Invalidate the current identification - if any */
       savediag_model->has_ident = false;
@@ -411,7 +411,7 @@ bool savediag_view_input_callback(InputEvent *evt, void *ctx) {
     }
 
     else
-      FURI_LOG_I(TAG, "OK button pressed, but diagnostic data is being "
+      FURI_LOG_D(TAG, "OK button pressed, but diagnostic data is being "
 			"downloaded, so ignored");
 
     return true;

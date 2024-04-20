@@ -127,7 +127,7 @@ bool lrfinfo_view_input_callback(InputEvent *evt, void *ctx) {
   /* If the user pressed the OK button, tell the LRF to send its identification
      information */
   if(evt->type == InputTypePress && evt->key == InputKeyOk) {
-    FURI_LOG_I(TAG, "OK button pressed");
+    FURI_LOG_D(TAG, "OK button pressed");
 
     /* Invalidate the current identification - if any */
     lrfinfo_model->has_ident = false;

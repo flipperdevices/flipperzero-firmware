@@ -176,7 +176,7 @@ static App *app_init() {
   /* Point the LRF sample ring buffer to the shared storage area */
   sampler_model->samples = (LRFSample *)app->shared_storage;
   sampler_model->max_samples = sizeof(app->shared_storage) / sizeof(LRFSample);
-  FURI_LOG_I(TAG, "Sampler ring buffer size: %d samples",
+  FURI_LOG_D(TAG, "Sampler ring buffer size: %d samples",
 		sampler_model->max_samples);
 
   /* Add the sample view */
@@ -382,24 +382,10 @@ static void app_free(App *app) {
 
 
 
-/** Set the log level **/
-static void set_log_level() {
-#ifdef FURI_DEBUG
-  furi_log_set_level(FuriLogLevelTrace);
-#else
-  furi_log_set_level(FuriLogLevelInfo);
-#endif
-}
-
-
-
 /** App entry point **/
 int32_t noptel_lrf_sampler_app(void *p) {
 
   UNUSED(p);
-
-  /* Set the log level */
-  set_log_level();
 
   /* Turn on the LRF */
   FURI_LOG_I(TAG, "LRF power on");
@@ -409,7 +395,7 @@ int32_t noptel_lrf_sampler_app(void *p) {
   App *app = app_init();
 
   /* Run the view dispatcher */
-  FURI_LOG_I(TAG, "Run view dispatcher");
+  FURI_LOG_D(TAG, "Run view dispatcher");
   view_dispatcher_run(app->view_dispatcher);
 
   /* Free up the space for the app */

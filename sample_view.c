@@ -539,7 +539,7 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
      measurement or start/stop continuous measurement */
   if(evt->type == InputTypePress && evt->key == InputKeyOk) {
 
-    FURI_LOG_I(TAG, "OK button pressed");
+    FURI_LOG_D(TAG, "OK button pressed");
 
     /* Are we doing single measurement (manual or automatic)? */
     if((sampler_model->config.freq & 0xff) == smm) {
