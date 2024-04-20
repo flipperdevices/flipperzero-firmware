@@ -19,6 +19,7 @@ This tutorial is a guide to controlling the FlipBoard using JavaScript on Flippe
 - Navigate to `SD Card`/`apps`/`Scripts` folder.
 - Right click and choose `New Folder` and name it `flipboard`.
 - Navigate into the `flipboard` folder.
+- Copy the files from the [sub](./sub) folder into the `SD Card`/`subghz` folder; or capture your own Sub-GHz signals and save them as `Light_on.sub` and `Light_off.sub`.  Alternately, you can edit the [subghz_fb.js](./scripts/subghz_fb.js) file to use different signals.
 - Copy all of the files from the [scripts](./scripts/) into the `flipboard` folder.
 - Navigate to the `SD Card`/`apps_data`/`js_app`/`plugins` folder.
 - Copy the files from the [fal](./fal) folder that matches your firmware (for example if you are on Momentum dev branch from mid-April [mntm-dev-2024-04-19-a2fc553](./fal/mntm-dev-2024-04-19-a2fc553/)) into the `plugins` folder.
