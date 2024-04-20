@@ -1,8 +1,0 @@
-Filetype: IR signals file
-Version: 1
-# 
-name: Power
-type: parsed
-protocol: NECext
-address: 01 FF 00 00
-command: 12 ED 00 00

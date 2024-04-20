@@ -1,0 +1,12 @@
+App(
+    appid="ir_decoder",
+    name="IR Decoder",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="ir_decoder_app",
+    stack_size=2 * 1024,
+    fap_category="Infrared",
+    fap_author="prplecake",
+    fap_weburl="https://github.com/prplecake/f0/tree/master/infrared/apps/ir_decoder",
+    fap_version=(1, 0),
+    fap_description="Shows the same address and command values as the standard IR app, but without any of that silly remote nonsense! Also shows a value that may be usable with lirc.",
+)

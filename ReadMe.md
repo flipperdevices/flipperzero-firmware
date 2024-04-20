@@ -60,6 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [JS: Fix widget sometimes MemCrash on exit. (By jamisonderek)](https://github.com/Next-Flip/Momentum-Firmware/pull/103)
 - Updated: [VGM Air Mouse v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688, or Video Game Module By Flipper Devices` [AirMouse: various improvements #206 (By skotopes)](https://github.com/flipperdevices/flipperzero-good-faps/pull/206)
 - Updated: [PicoPass (iClass) v1.14 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Add wiegand parsing plugin #205 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/205) [Cleanup #201 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/201)
+- Added: [IR Decoder v1.0 (By prplecake)](https://github.com/prplecake/f0/tree/master/infrared/apps/ir_decoder)
 
 <a name="release">
 
@@ -445,6 +446,7 @@ $ ./fbt dolphin_ext
 - [ID Card v1.0 (By alanretgue)](https://github.com/alanretgue/Flipper_Zero-id_card)
 - [IFTTT Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
+- [IR Decoder v1.0 (By prplecake)](https://github.com/prplecake/f0/tree/master/infrared/apps/ir_decoder)
 - [IR Intervalometer for Sony Cameras v1.2 (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer) `works for Sony cameras`
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - [IR Scope (By kallanreed)](https://github.com/kallanreed/unleashed-firmware/tree/dev/applications/external/ir_scope)
