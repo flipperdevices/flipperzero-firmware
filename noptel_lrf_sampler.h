@@ -28,7 +28,7 @@
 /*** Parameters ***/
 extern const char *config_file;
 
-extern const int16_t config_freq_values[];
+extern const uint16_t config_freq_values[];
 extern const char *config_freq_names[];
 extern const uint8_t nb_config_freq_values;
 
@@ -110,6 +110,12 @@ typedef struct {
   uint16_t samples_start_i;
   uint16_t samples_end_i;
 
+  /* Time difference between the oldest and newest samples in the ring buffer */
+  double samples_time_span;
+
+  /* Flag to indicate the ring buffer should be reset */
+  bool flush_samples;
+
   /* Displayed distances and amplitudes */
   LRFSample disp_sample;
 
@@ -117,7 +123,7 @@ typedef struct {
   double eff_freq;
 
   /* Whether continuous measurement is started */
-  bool cmm_started;
+  bool continuous_meas_started;
 
   /* Flag to indicate whether the sample data was updated */
   bool samples_updated;

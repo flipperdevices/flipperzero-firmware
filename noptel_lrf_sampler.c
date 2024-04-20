@@ -25,10 +25,12 @@ const char *config_file = STORAGE_APP_DATA_PATH_PREFIX
 				"/noptel_lrf_sampler.save";
 
 static const char *config_freq_label = "Frequency";
-const int16_t config_freq_values[] = {smm, cmm_1hz, cmm_4hz, cmm_10hz,
-					cmm_20hz, cmm_100hz, cmm_200hz};
-const char *config_freq_names[] = {"SMM", "1 Hz", "4 Hz", "10 Hz",
-					"20 Hz", "100 Hz", "200 Hz"};
+const uint16_t config_freq_values[] = {smm, smm | 0x100, cmm_1hz, cmm_4hz,
+					cmm_10hz, cmm_20hz, cmm_100hz,
+					cmm_200hz};
+const char *config_freq_names[] = {"SMM", "Auto SMM", "1 Hz", "4 Hz",
+					"10 Hz", "20 Hz", "100 Hz",
+					"200 Hz"};
 const uint8_t nb_config_freq_values = COUNT_OF(config_freq_values);
 
 static const char *config_avg_label = "Averaging time";
