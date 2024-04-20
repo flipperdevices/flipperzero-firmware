@@ -1,0 +1,41 @@
+name: "ir_decoder: Build and lint"
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - ".github/workflows/build_ir_decoder.yaml"
+      - "infrared/apps/ir_decoder/**"
+  pull_request:
+    branches: [ master ]
+    paths:
+      - ".github/workflows/build_ir_decoder.yaml"
+      - "infrared/apps/ir_decoder/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        sdk-version: ["release", "dev", "rc"]
+    runs-on: ubuntu-latest
+    name: 'ufbt: Build for ${{ matrix.sdk-version }} Branch'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with ufbt
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        id: build-app
+        with:
+          sdk-channel: ${{ matrix.sdk-version }}
+          app-dir: infrared/apps/ir_decoder
+      - name: Upload app artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: "ir_decoder-${{ matrix.sdk-version }}-${{ steps.build-app.outputs.suffix }}"
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
+      - name: Lint sources
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        with:
+          skip-setup: true
+          task: lint
+          app-dir: infrared/apps/ir_decoder

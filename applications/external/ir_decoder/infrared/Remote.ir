@@ -1,0 +1,32 @@
+Filetype: IR signals file
+Version: 1
+# 
+name: Power
+type: parsed
+protocol: NECext
+address: 08 F5 00 00
+command: 11 EE 00 00
+# 
+name: Up
+type: parsed
+protocol: NECext
+address: 08 F5 00 00
+command: 0E F1 00 00
+# 
+name: 1
+type: parsed
+protocol: NECext
+address: 08 F5 00 00
+command: 11 EE 00 00
+# 
+name: 2
+type: parsed
+protocol: NECext
+address: 08 F5 00 00
+command: 11 EE 00 00
+# 
+name: 3
+type: parsed
+protocol: NECext
+address: 08 F5 00 00
+command: 11 EE 00 00
