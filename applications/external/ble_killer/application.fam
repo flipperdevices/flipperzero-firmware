@@ -5,7 +5,7 @@ App(
     entry_point="main_entry",
     stack_size=1 * 2048,
     fap_icon="icon.png",
-    fap_category="Bluetooth",
+    fap_category="GPIO/ESP32",
     fap_author="H4lo",
     fap_weburl="https://github.com/H4lo/flipper_zero_ble_killer",
     fap_version="1.0",
