@@ -32,9 +32,9 @@ extern const uint16_t config_freq_values[];
 extern const char *config_freq_names[];
 extern const uint8_t nb_config_freq_values;
 
-extern const uint8_t config_avg_values[];
-extern const char *config_avg_names[];
-extern const uint8_t nb_config_avg_values;
+extern const int16_t config_buf_values[];
+extern const char *config_buf_names[];
+extern const uint8_t nb_config_buf_values;
 
 extern const uint8_t config_beep_values[];
 extern const char *config_beep_names[];
@@ -79,11 +79,11 @@ typedef enum {
 /** Saved configuration values **/
 typedef struct {
 
-  /* LRF frequency */
+  /* LRF frequency setting */
   int16_t freq;
 
-  /* Samples averaging time */
-  uint8_t avg;
+  /* Samples buffering setting */
+  int16_t buf;
 
   /* Beep option */
   uint8_t beep;
@@ -109,6 +109,9 @@ typedef struct {
   uint16_t max_samples;
   uint16_t samples_start_i;
   uint16_t samples_end_i;
+
+  /* Number of samples in the ring buffer */
+  uint16_t nb_samples;
 
   /* Time difference between the oldest and newest samples in the ring buffer */
   double samples_time_span;
@@ -214,7 +217,7 @@ typedef struct {
   /* Configuration items */
   VariableItemList *config_list;
   VariableItem *item_freq;
-  VariableItem *item_avg;
+  VariableItem *item_buf;
   VariableItem *item_beep;
 
   /* Sample view */

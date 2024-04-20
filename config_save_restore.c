@@ -25,7 +25,7 @@ void load_configuration(App *app) {
   Config read_config;
   bool file_read = false;
   uint16_t bytes_read = 0;
-  uint8_t freq_idx, avg_idx, beep_idx;
+  uint8_t freq_idx, buf_idx, beep_idx;
 
   /* Open storage and allocate space for the file*/
   storage = furi_record_open(RECORD_STORAGE);
@@ -60,7 +60,7 @@ void load_configuration(App *app) {
     return;
   }
 
-  /* Check that the frequency exists */
+  /* Check that the frequency setting exists */
   for(freq_idx = 0; freq_idx < nb_config_freq_values &&
 			read_config.freq != config_freq_values[freq_idx];
 	freq_idx++);
@@ -71,14 +71,14 @@ void load_configuration(App *app) {
     return;
   }
 
-  /* Check that the averaging time exists */
-  for(avg_idx = 0; avg_idx < nb_config_avg_values &&
-			read_config.avg != config_avg_values[avg_idx];
-	avg_idx++);
+  /* Check that the buffering setting exists */
+  for(buf_idx = 0; buf_idx < nb_config_buf_values &&
+			read_config.buf != config_buf_values[buf_idx];
+	buf_idx++);
 
-  if(avg_idx >= nb_config_avg_values) {
-    FURI_LOG_I(TAG, "Invalid averaging time value %d in config file %s",
-			read_config.avg, config_file);
+  if(buf_idx >= nb_config_buf_values) {
+    FURI_LOG_I(TAG, "Invalid buffering value %d in config file %s",
+			read_config.buf, config_file);
     return;
   }
 
@@ -100,17 +100,17 @@ void load_configuration(App *app) {
     return;
   }
 
-  /* Configure the frequency from the read value */
+  /* Configure the frequency setting from the read value */
   sampler_model->config.freq = read_config.freq;
   variable_item_set_current_value_index(app->item_freq, freq_idx);
   variable_item_set_current_value_text(app->item_freq,
 					config_freq_names[freq_idx]);
 
-  /* Configure the averaging time from the read value */
-  sampler_model->config.avg = read_config.avg;
-  variable_item_set_current_value_index(app->item_avg, avg_idx);
-  variable_item_set_current_value_text(app->item_avg,
-					config_avg_names[avg_idx]);
+  /* Configure the buffering setting from the read value */
+  sampler_model->config.buf = read_config.buf;
+  variable_item_set_current_value_index(app->item_buf, buf_idx);
+  variable_item_set_current_value_text(app->item_buf,
+					config_buf_names[buf_idx]);
 
   /* Configure the beep option from the read value */
   sampler_model->config.beep = read_config.beep;
@@ -122,9 +122,9 @@ void load_configuration(App *app) {
   sampler_model->config.sitem = read_config.sitem;
   submenu_set_selected_item(app->submenu, read_config.sitem);
 
-  FURI_LOG_I(TAG, "Restored config frequency %s, averaging time %s, beep %s, "
+  FURI_LOG_I(TAG, "Restored config frequency %s, buffering %s, beep %s, "
 			"selected submenu item %d",
-		config_freq_names[freq_idx], config_avg_names[avg_idx],
+		config_freq_names[freq_idx], config_buf_names[buf_idx],
 		config_beep_names[beep_idx], read_config.sitem);
 }
 

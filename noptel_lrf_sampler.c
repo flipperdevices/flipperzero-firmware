@@ -33,12 +33,15 @@ const char *config_freq_names[] = {"SMM", "Auto SMM", "1 Hz", "4 Hz",
 					"200 Hz"};
 const uint8_t nb_config_freq_values = COUNT_OF(config_freq_values);
 
-static const char *config_avg_label = "Averaging time";
-const uint8_t config_avg_values[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-const char *config_avg_names[] = {"None", "1 s", "2 s", "3 s",
+static const char *config_buf_label = "Buffering";
+const int16_t config_buf_values[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+					-5, -10, -100, -1000};
+const char *config_buf_names[] = {"None", "1 s", "2 s", "3 s",
 					"4 s", "5 s", "6 s", "7 s",
-					"8 s", "9 s", "10 s"};
-const uint8_t nb_config_avg_values = COUNT_OF(config_avg_values);
+					"8 s", "9 s", "10 s",
+					"5 spl", "10 spl", "100 spl",
+					"1000 spl"};
+const uint8_t nb_config_buf_values = COUNT_OF(config_buf_values);
 
 static const char *config_beep_label = "Beep";
 const uint8_t config_beep_values[] = {0, 1};
@@ -119,17 +122,17 @@ static App *app_init() {
   app->config_list = variable_item_list_alloc();
   variable_item_list_reset(app->config_list);
 
-  /* Add configuration frequency list items */
+  /* Add frequency setting list items */
   app->item_freq = variable_item_list_add(app->config_list,
 						config_freq_label,
 						nb_config_freq_values,
 						config_freq_change, app);
 
-  /* Add configuration averaging list items */
-  app->item_avg = variable_item_list_add(app->config_list,
-						config_avg_label,
-						nb_config_avg_values,
-						config_avg_change, app);
+  /* Add buffering setting list items */
+  app->item_buf = variable_item_list_add(app->config_list,
+						config_buf_label,
+						nb_config_buf_values,
+						config_buf_change, app);
 
   /* Add beep option list items */
   app->item_beep = variable_item_list_add(app->config_list,
@@ -282,15 +285,15 @@ static App *app_init() {
 
   /* Setup the default configuration */
 
-  /* Set the default frequency */
+  /* Set the default frequency setting */
   sampler_model->config.freq = config_freq_values[0];
   variable_item_set_current_value_index(app->item_freq, 0);
   variable_item_set_current_value_text(app->item_freq, config_freq_names[0]);
 
-  /* Set the default averaging time */
-  sampler_model->config.avg = config_avg_values[0];
-  variable_item_set_current_value_index(app->item_avg, 0);
-  variable_item_set_current_value_text(app->item_avg, config_avg_names[0]);
+  /* Set the default buffering setting */
+  sampler_model->config.buf = config_buf_values[0];
+  variable_item_set_current_value_index(app->item_buf, 0);
+  variable_item_set_current_value_text(app->item_buf, config_buf_names[0]);
 
   /* Set the default beep option */
   sampler_model->config.beep = config_beep_values[0] != 0;

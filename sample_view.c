@@ -38,6 +38,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   App *app = (App *)ctx;
   SamplerModel *sampler_model = view_get_model(app->sample_view);
   uint16_t prev_samples_end_i;
+  uint16_t start_i_for_avg;
   float avg_dist1;
   float avg_dist2;
   float avg_dist3;
@@ -47,7 +48,6 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   uint16_t nb_valid_samples_dist1;
   uint16_t nb_valid_samples_dist2;
   uint16_t nb_valid_samples_dist3;
-  uint16_t nb_samples;
   float timediff;
   uint16_t i;
 
@@ -93,6 +93,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   if(sampler_model->flush_samples || sampler_model->config.freq == smm) {
     sampler_model->samples_start_i = 0;
     sampler_model->samples_end_i = 0;
+    sampler_model->nb_samples = 0;
     sampler_model->flush_samples = false;
   }
 
@@ -107,36 +108,68 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
     memcpy(&(sampler_model->samples[sampler_model->samples_end_i]),
 		lrf_sample, sizeof(LRFSample));
     sampler_model->samples_end_i = i;
+    sampler_model->nb_samples++;
   }
 
-  /* Remove samples that are too old from the ring buffer, but try to keep at
-     least 0.75 seconds worth of samples, or 2 samples, for more accurate
-     effective frequency calculation, even if we don't average samples.
-     Keep samples that are a slightly older than we should to avoid decimating
-     samples that have come in a bit late */
-  while(sampler_model->samples_start_i != prev_samples_end_i &&
-	(sampler_model->samples_time_span = ms_tick_time_diff(
-		sampler_model->samples[prev_samples_end_i].tstamp_ms,
-		sampler_model->samples[sampler_model->samples_start_i].tstamp_ms
-	)) > (double)(sampler_model->config.avg > 0.75?
-			sampler_model->config.avg + 0.2L : 0.75)) {
-    i = sampler_model->samples_start_i + 1;
-    if(i >= sampler_model->max_samples)
-      i = 0;
-    if(i == prev_samples_end_i)
-      break;
-    sampler_model->samples_start_i = i;
+  /* Do we buffer samples for a set amount of time? */
+  if(sampler_model->config.buf > 0) {
+
+    /* Remove samples that are too old but try to keep at least 0.75 seconds
+       worth of samples, or 2 samples, for more accurate effective frequency
+       calculation, even if we don't do buffering at all.
+       Keep samples that are a slightly older than we should to avoid decimating
+       samples that have come in a bit late */
+    while(sampler_model->samples_start_i != prev_samples_end_i &&
+
+		(sampler_model->samples_time_span = ms_tick_time_diff(
+			sampler_model->samples[prev_samples_end_i].tstamp_ms,
+			sampler_model->samples[sampler_model->samples_start_i].
+								tstamp_ms
+			)) > (double)(sampler_model->config.buf > 0.75?
+				sampler_model->config.buf + 0.2L : 0.75)) {
+
+      i = sampler_model->samples_start_i + 1;
+      if(i >= sampler_model->max_samples)
+        i = 0;
+
+      if(i == prev_samples_end_i)
+        break;
+
+      sampler_model->nb_samples--;
+      sampler_model->samples_start_i = i;
+    }
   }
 
-  /* Calculate the number of samples in the ring buffer */
-  if(sampler_model->samples_end_i >= sampler_model->samples_start_i)
-    nb_samples = sampler_model->samples_end_i - sampler_model->samples_start_i;
-  else
-    nb_samples = sampler_model->max_samples - sampler_model->samples_start_i +
-			sampler_model->samples_end_i;
+  /* We buffer a set number of samples */
+  else {
+
+    /* Remove samples in excess but try to keep at least 0.75 seconds worth of
+       samples, or 2 samples, for more accurate effective frequency calculation,
+       even if we don't do buffering at all. */
+    while(sampler_model->samples_start_i != prev_samples_end_i &&
+
+		sampler_model->nb_samples > -sampler_model->config.buf &&
+
+		(sampler_model->samples_time_span = ms_tick_time_diff(
+			sampler_model->samples[prev_samples_end_i].tstamp_ms,
+			sampler_model->samples[sampler_model->samples_start_i].
+								tstamp_ms
+			)) > 0.75L) {
+
+      i = sampler_model->samples_start_i + 1;
+      if(i >= sampler_model->max_samples)
+        i = 0;
+
+      if(i == prev_samples_end_i)
+        break;
+
+      sampler_model->samples_start_i = i;
+      sampler_model->nb_samples--;
+    }
+  }
 
   /* Only one sample in the ring buffer */
-  if(nb_samples == 1) {
+  if(sampler_model->nb_samples == 1) {
 
     sampler_model->samples_time_span = 0;
 
@@ -149,7 +182,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 		sizeof(LRFSample));
   }
 
-  /* We have more than one sample in the ring buffer */
+  /* More than one sample in the ring buffer */
   else {
 
     /* If we have at least 0.25 seconds between the oldest and the latest
@@ -159,12 +192,12 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 			sampler_model->samples[sampler_model->samples_start_i].
 				tstamp_ms);
     if(timediff >= 0.25)
-      sampler_model->eff_freq = (nb_samples - 1) / timediff;
+      sampler_model->eff_freq = (sampler_model->nb_samples - 1) / timediff;
     else
       sampler_model->eff_freq = - 1;
 
-    /* If we don't average samples, display the last sample directly */
-    if(sampler_model->config.avg == 0) {
+    /* If we don't buffer samples, display the last sample directly */
+    if(sampler_model->config.buf == 0) {
 
       sampler_model->samples_time_span = 0;
 
@@ -173,27 +206,48 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 		sizeof(LRFSample));
     }
 
-    /* Otherwise calculate the average of the valid distances and amplitudes
-       in the ring buffer and display the averages instead */
+    /* We buffer samples */
     else {
 
-      /* Remove all samples that are too old from the ring buffer without
-         exceptions this time, but still keep samples that are slightly older
-         than we should to avoid decimating samples that have come in a bit
-         late */
-      while((sampler_model->samples_time_span = ms_tick_time_diff(
-		sampler_model->samples[prev_samples_end_i].tstamp_ms,
-		sampler_model->samples[sampler_model->samples_start_i].tstamp_ms
-		)) > (double)sampler_model->config.avg + 0.2L) {
-        i = sampler_model->samples_start_i + 1;
-        if(i >= sampler_model->max_samples)
-          i = 0;
-        sampler_model->samples_start_i = i;
-        nb_samples--;
+      start_i_for_avg = sampler_model->samples_start_i;
+
+      /* Do we buffer samples for a set amount of time? */
+      if(sampler_model->config.buf > 0) {
+
+        /* Just to calculate averages, disregard all samples that are too old
+           from the ring buffer without exceptions this time, but still keep
+           samples that are slightly older than we should to avoid decimating
+           samples that have come in a bit late */
+        while(ms_tick_time_diff(
+			sampler_model->samples[prev_samples_end_i].tstamp_ms,
+			sampler_model->samples[start_i_for_avg].tstamp_ms
+		) > (double)sampler_model->config.buf + 0.2L) {
+
+          start_i_for_avg++;
+          if(i >= sampler_model->max_samples)
+            start_i_for_avg = 0;
+        }
       }
 
-      /* Calculate the average of the valid distances and amplitudes in the
-         ring buffer */
+      /* We buffer a set number of samples */
+      else {
+
+        /* Just to calculate averages, disregard samples in excess without
+           exceptions this time */
+        if(sampler_model->nb_samples > -sampler_model->config.buf) {
+          start_i_for_avg += sampler_model->nb_samples +
+				sampler_model->config.buf;
+          if(start_i_for_avg >= sampler_model->max_samples)
+            start_i_for_avg -= sampler_model->max_samples;
+        }
+
+        sampler_model->samples_time_span = ms_tick_time_diff(
+			sampler_model->samples[prev_samples_end_i].tstamp_ms,
+			sampler_model->samples[start_i_for_avg].tstamp_ms);
+      }
+
+      /* Calculate the average of the valid distances and amplitudes in that
+         subset of samples in the ring buffer */
       avg_dist1 = 0;
       avg_dist2 = 0;
       avg_dist3 = 0;
@@ -205,9 +259,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
       nb_valid_samples_dist2 = 0;
       nb_valid_samples_dist3 = 0;
 
-      nb_samples = 0;
-
-      i = sampler_model->samples_start_i;
+      i = start_i_for_avg;
       while(i != sampler_model->samples_end_i) {
 
         if(sampler_model->samples[i].dist1 > 0.5) {
@@ -227,8 +279,6 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
           avg_ampl3 += sampler_model->samples[i].ampl3;
           nb_valid_samples_dist3++;
         }
-
-        nb_samples++;
 
         i++;
         if(i >= sampler_model->max_samples)
@@ -307,6 +357,7 @@ void sample_view_enter_callback(void *ctx) {
 
 	  /* Reset the samples ring buffer */
 	  sampler_model->flush_samples = true;
+	  sampler_model->nb_samples = 0;
 	  sampler_model->samples_time_span = 0;
 
 	  /* Initialize the displayed effective sampling frequency */
@@ -362,7 +413,7 @@ void sample_view_exit_callback(void *ctx) {
 void sample_view_draw_callback(Canvas *canvas, void *model) {
 
   SamplerModel *sampler_model = (SamplerModel *)model;
-  double avg_time_coverage;
+  double buf_coverage;
   uint8_t y;
 
   /* First print all the things we need to print in the FontBigNumber font */
@@ -510,13 +561,24 @@ void sample_view_draw_callback(Canvas *canvas, void *model) {
     canvas_draw_str(canvas, 105, 39, sampler_model->spstr);
   }
 
-  /* If we do continuous measurement and we average samples, display how much
-     of the averaging time the samples we have in the ring buffer currently
-     cover as a small bar at the lower left */
-  if(sampler_model->config.freq != smm && sampler_model->config.avg) {
-    avg_time_coverage = sampler_model->samples_time_span /
-				sampler_model->config.avg;
-    y = avg_time_coverage > 1.0L ?  49 : 63 - 14 * avg_time_coverage;
+  /* If we do continuous measurement and we buffer samples, display how much
+     of the configured buffering time or samples we hold in the ring buffer
+     as a small bar at the lower left */
+  if(sampler_model->config.freq != smm && sampler_model->config.buf != 0) {
+
+    /* Do we buffer samples for a set amount of time? */
+    if(sampler_model->config.buf > 0)
+      buf_coverage = sampler_model->samples_time_span /
+			sampler_model->config.buf ;
+
+    /* We buffer a set number of samples */
+    else
+      buf_coverage = (double)sampler_model->nb_samples /
+			-sampler_model->config.buf;
+
+    buf_coverage = buf_coverage > 1.0L? 1.0L : buf_coverage;
+
+    y = 63 - 14 * buf_coverage;
     canvas_draw_line(canvas, 0, 63, 0, y);
     canvas_draw_line(canvas, 1, 63, 1, y);
     canvas_draw_line(canvas, 2, 63, 2, y);

@@ -15,8 +15,8 @@
 /** Frequency setting change function **/
 void config_freq_change(VariableItem *);
 
-/** Averaging time change function **/
-void config_avg_change(VariableItem *);
+/** Buffering setting change function **/
+void config_buf_change(VariableItem *);
 
 /** Beep option change function **/
 void config_beep_change(VariableItem *);
