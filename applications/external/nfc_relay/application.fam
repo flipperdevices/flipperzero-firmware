@@ -7,5 +7,8 @@ App(
     fap_icon="Nfc_10px.png",
     fap_category="NFC",
     fap_icon_assets="assets",
-    fap_icon_assets_symbol="nfc_relay",
+    fap_author="leommxj",
+    fap_weburl="https://github.com/leommxj/nfc_relay",
+    fap_version=(0, 2),
+    fap_description="Brainfuck language interpreter",
 )

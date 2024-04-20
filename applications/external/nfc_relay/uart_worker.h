@@ -23,6 +23,7 @@ typedef struct UartWorker {
     UartWorkerStateRxSub rxSubState;
     FuriStreamBuffer* rx_stream;
     NfcRelayPacket* packet;
+    FuriHalSerialHandle* serial;
 
     NfcRelayConfigUart config;
 } UartWorker;

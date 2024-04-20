@@ -56,6 +56,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Updated: [Radiation Sensor v1.0 (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
 - OFW: PR: [PoC skylanders plugin #3315 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3315)
+- Updated: [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
 
 <a name="release">
 
@@ -484,6 +485,7 @@ $ ./fbt dolphin_ext
 - [NFC Magic v1.8 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
@@ -581,7 +583,6 @@ $ ./fbt dolphin_ext
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [BT Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
-- [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [SCD30 Carbon Dioxide Sensor (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
 - [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
