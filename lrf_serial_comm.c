@@ -24,7 +24,7 @@
 
 /*** Parameters ***/
 
-/** Prebuilt LRF Commands (exec mode) **/
+/** Prebuilt LRF Commands **/
 static uint8_t cmd_smm[] = "\xcc\x00\x00\x00\x9c";
 static uint8_t cmd_cmm_1hz[] = "\xcc\x01\x00\x00\x9d";
 static uint8_t cmd_cmm_4hz[] = "\xcc\x02\x00\x00\x9e";
@@ -37,6 +37,51 @@ static uint8_t cmd_pointer_on[] = "\xc5\x02\x97";
 static uint8_t cmd_pointer_off[] = "\xc5\x00\x95";
 static uint8_t cmd_send_ident[] = "\xc0\x90";
 static uint8_t cmd_read_diag[] = "\xdc\x8c";
+
+static uint8_t *lrf_cmds[] = {
+	  cmd_smm,		/* smm */
+	  cmd_cmm_1hz,		/* cmm_1hz */
+	  cmd_cmm_4hz,		/* cmm_4hz */
+	  cmd_cmm_10hz,		/* cmm_10hz */
+	  cmd_cmm_20hz,		/* cmm_20hz */
+	  cmd_cmm_100hz,	/* cmm_100hz */
+	  cmd_cmm_200hz,	/* cmm_200hz */
+	  cmd_cmm_break,	/* cmm_break */
+	  cmd_pointer_on,	/* pointer_on */
+	  cmd_pointer_off,	/* pointer_off */
+	  cmd_send_ident,	/* send_ident */
+	  cmd_read_diag,	/* read_diag */
+	};
+
+static const uint8_t lrf_cmds_len[] = {
+	  sizeof(cmd_smm),		/* smm */
+	  sizeof(cmd_cmm_1hz),		/* cmm_1hz */
+	  sizeof(cmd_cmm_4hz),		/* cmm_4hz */
+	  sizeof(cmd_cmm_10hz),		/* cmm_10hz */
+	  sizeof(cmd_cmm_20hz),		/* cmm_20hz */
+	  sizeof(cmd_cmm_100hz),	/* cmm_100hz */
+	  sizeof(cmd_cmm_200hz),	/* cmm_200hz */
+	  sizeof(cmd_cmm_break),	/* cmm_break */
+	  sizeof(cmd_pointer_on),	/* pointer_on */
+	  sizeof(cmd_pointer_off),	/* pointer_off */
+	  sizeof(cmd_send_ident),	/* send_ident */
+	  sizeof(cmd_read_diag),	/* read_diag */
+	};
+
+static const char *lrf_cmds_desc[] = {
+	  "SMM command",		/* smm */
+	  "Start CMM at 1Hz",		/* cmm_1hz */
+	  "Start CMM at 4Hz",		/* cmm_4hz */
+	  "Start CMM at 10Hz",		/* cmm_10hz */
+	  "Start CMM at 20Hz",		/* cmm_20hz */
+	  "Start CMM at 100Hz",		/* cmm_100hz */
+	  "Start CMM at 200Hz",		/* cmm_200hz */
+	  "CMM break",			/* cmm_break */
+	  "Pointer ON",			/* pointer_on */
+	  "Pointer OFF",		/* pointer_off */
+	  "Send identification frame",	/* send_ident */
+	  "Read diagnostic data",	/* read_diag */
+	};
 
 
 
@@ -718,80 +763,8 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
   start_led_flash(&app->led_control, RED);
 
   /* Send the correct sequence of bytes to the LRF depending on the command */
-  switch(cmd) {
-
-    /* Send an SMM command (exec mode) */
-    case smm:
-      uart_tx(app, cmd_smm, sizeof(cmd_smm));
-      FURI_LOG_I(TAG, "SMM command sent");
-      break;
-
-    /* Send a start-CMM command at 1Hz (exec mode) */
-    case cmm_1hz:
-      uart_tx(app, cmd_cmm_1hz, sizeof(cmd_cmm_1hz));
-      FURI_LOG_I(TAG, "Start CMM at 1Hz command sent");
-      break;
-
-    /* Send a start-CMM command at 4Hz (exec mode) */
-    case cmm_4hz:
-      uart_tx(app, cmd_cmm_4hz, sizeof(cmd_cmm_4hz));
-      FURI_LOG_I(TAG, "Start CMM at 4Hz command sent");
-      break;
-
-    /* Send a start-CMM command at 10Hz (exec mode) */
-    case cmm_10hz:
-      uart_tx(app, cmd_cmm_10hz, sizeof(cmd_cmm_10hz));
-      FURI_LOG_I(TAG, "Start CMM at 10Hz command sent");
-      break;
-
-    /* Send a start-CMM command at 20Hz (exec mode) */
-    case cmm_20hz:
-      uart_tx(app, cmd_cmm_20hz, sizeof(cmd_cmm_20hz));
-      FURI_LOG_I(TAG, "Start CMM at 20Hz command sent");
-      break;
-
-    /* Send a start-CMM command at 100Hz (exec mode) */
-    case cmm_100hz:
-      uart_tx(app, cmd_cmm_100hz, sizeof(cmd_cmm_100hz));
-      FURI_LOG_I(TAG, "Start CMM at 100Hz command sent");
-      break;
-
-    /* Send a start-CMM command at 200Hz (exec mode) */
-    case cmm_200hz:
-      uart_tx(app, cmd_cmm_200hz, sizeof(cmd_cmm_200hz));
-      FURI_LOG_I(TAG, "Start CMM at 200Hz command sent");
-      break;
-
-    /* Send a CMM-break command */
-    case cmm_break:
-      uart_tx(app, cmd_cmm_break, sizeof(cmd_cmm_break));
-      FURI_LOG_I(TAG, "CMM break command sent");
-      break;
-
-    /* Send a pointer-on command */
-    case pointer_on:
-      uart_tx(app, cmd_pointer_on, sizeof(cmd_pointer_on));
-      FURI_LOG_I(TAG, "Pointer ON command sent");
-      break;
-
-    /* Send a pointer-off command */
-    case pointer_off:
-      uart_tx(app, cmd_pointer_off, sizeof(cmd_pointer_off));
-      FURI_LOG_I(TAG, "Pointer OFF command sent");
-      break;
-
-    /* Send a send-identification-frame command */
-    case send_ident:
-      uart_tx(app, cmd_send_ident, sizeof(cmd_send_ident));
-      FURI_LOG_I(TAG, "Send identification frame command sent");
-      break;
-
-    /* Send a read-diagnostic-data command */
-    case read_diag:
-      uart_tx(app, cmd_read_diag, sizeof(cmd_read_diag));
-      FURI_LOG_I(TAG, "Read diagnostic data command sent");
-      break;
-  }
+  uart_tx(app, lrf_cmds[cmd], lrf_cmds_len[cmd]);
+  FURI_LOG_I(TAG, "%s command sent", lrf_cmds_desc[cmd]);
 }
 
 
