@@ -40,33 +40,36 @@ void transmit_view_handle_input(InputEvent* event, void* app) {
 
     SI4713App* ctx = app;
 
-    switch (event->key){
+    switch(event->key) {
     case InputKeyUp:
-        if (ctx->state.tx_power >= SI4713_TXPOWER_LIMIT) break;
+        if(ctx->state.tx_power >= SI4713_TXPOWER_LIMIT) break;
 
         // i figured that if the repeat is going to be
         // executed a lot of times then i should have it
         // be evalauted first (i love else ifs)
-        if (event->type == InputTypeRepeat)
-            ctx->state.tx_power = MIN(SI4713_TXPOWER_LIMIT, ctx->state.tx_power + TXPOWER_HOLD_INCREMENT);
-        else if (event->type == InputTypeShort)
+        if(event->type == InputTypeRepeat)
+            ctx->state.tx_power =
+                MIN(SI4713_TXPOWER_LIMIT, ctx->state.tx_power + TXPOWER_HOLD_INCREMENT);
+        else if(event->type == InputTypeShort)
             ctx->state.tx_power++;
-        else break;
+        else
+            break;
 
-        if (ctx->state.working == DeviceOn)
-            si4713_set_tx_power(ctx->device,ctx->state.tx_power,0);
+        if(ctx->state.working == DeviceOn)
+            si4713_set_tx_power(ctx->device, ctx->state.tx_power, 0);
 
         break;
     case InputKeyDown:
-        if (ctx->state.tx_power <= 0) break;
+        if(ctx->state.tx_power <= 0) break;
 
-        if (event->type == InputTypeRepeat)
+        if(event->type == InputTypeRepeat)
             ctx->state.tx_power = MAX(0, ctx->state.tx_power - TXPOWER_HOLD_INCREMENT);
-        else if (event->type == InputTypeShort)
+        else if(event->type == InputTypeShort)
             ctx->state.tx_power--;
-        else break;
+        else
+            break;
 
-        if (ctx->state.working == DeviceOn)
+        if(ctx->state.working == DeviceOn)
             si4713_set_tx_power(ctx->device, ctx->state.tx_power, 0);
 
         break;

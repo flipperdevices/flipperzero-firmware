@@ -4,6 +4,4 @@
 //
 //} ;
 
-void si4713_begin_rds(SI4713Device* device,
-                      uint16_t program_id);
-
+void si4713_begin_rds(SI4713Device* device, uint16_t program_id);

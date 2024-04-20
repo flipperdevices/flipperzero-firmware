@@ -48,17 +48,18 @@ typedef struct {
 } SI4713Device;
 
 // sends an array of 8 bit commands of length size
-void si4713_send_command(SI4713Device* device,
-                         const uint8_t* commands, uint8_t length);
+void si4713_send_command(SI4713Device* device, const uint8_t* commands, uint8_t length);
 
 // sends an array of 8 bit commands of length size and anticipates
 // rx_length 8 bit numbers to return
-void si4713_trx_command(SI4713Device* device,
-                            const uint8_t* commands, uint8_t length,
-                            uint8_t* rx, uint8_t rx_length);
+void si4713_trx_command(
+    SI4713Device* device,
+    const uint8_t* commands,
+    uint8_t length,
+    uint8_t* rx,
+    uint8_t rx_length);
 
-void si4713_set_property(SI4713Device* device,
-                         uint16_t property, uint16_t value);
+void si4713_set_property(SI4713Device* device, uint16_t property, uint16_t value);
 
 uint8_t si4713_get_status(SI4713Device* device);
 
@@ -70,12 +71,9 @@ void si4713_reset(SI4713Device* device);
 
 void si4713_powerup(SI4713Device* device);
 
-void si4713_set_tx_power(SI4713Device* device, 
-                         uint8_t power, 
-                         uint8_t antcap);
+void si4713_set_tx_power(SI4713Device* device, uint8_t power, uint8_t antcap);
 
-void si4713_tune_fm(SI4713Device* device,
-                    uint16_t freq);
+void si4713_tune_fm(SI4713Device* device, uint16_t freq);
 
 SI4713Device* si4713_alloc(uint8_t addr, const GpioPin* reset, bool initialize);
 

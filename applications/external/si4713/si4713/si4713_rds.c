@@ -15,4 +15,3 @@ void si4713_begin_rds(SI4713Device* device, uint16_t program_id) {
     si4713_set_property(device, SI4713_PROP_TX_RDS_FIFO_SIZE, 0);
     si4713_set_property(device, SI4713_PROP_TX_COMPONENT_ENABLE, 0x0007);
 }
-

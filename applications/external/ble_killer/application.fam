@@ -1,0 +1,13 @@
+App(
+    appid="ble_killer",
+    name="BLE Killer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="main_entry",
+    stack_size=1 * 2048,
+    fap_icon="icon.png",
+    fap_category="Bluetooth",
+    fap_author="H4lo",
+    fap_weburl="https://github.com/H4lo/flipper_zero_ble_killer",
+    fap_version="1.0",
+    fap_description="A Bluetooth expansion board based on flipper zero to scan surrounding low-power Bluetooth devices and Bluetooth device controllers",
+)
