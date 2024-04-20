@@ -5,7 +5,8 @@ App(
     targets=["f7"],
     entry_point="picopass_app",
     sources=[
-      "*.c", "!plugin/*.c",
+        "*.c",
+        "!plugin/*.c",
     ],
     stack_size=4 * 1024,
     fap_icon="125_10px.png",
