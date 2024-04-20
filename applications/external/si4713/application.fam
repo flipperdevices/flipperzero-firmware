@@ -1,18 +1,14 @@
-# For details & more options, see documentation/AppManifests.md in firmware repo
-
 App(
-    appid="si4713tuner",  # Must be unique
-    name="SI4713 Tuner",  # Displayed in menus
+    appid="si4713tuner",
+    name="SI4713 Tuner",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="si4713fmtuner_app",
     stack_size=2 * 1024,
     fap_category="GPIO",
-    requires=["gui"],
-    # Optional values
-    # fap_version="0.1",
-    # fap_icon="si4713tuner.png",  # 10x10 1-bit PNG
-    # fap_description="A simple app",
-    # fap_author="J. Doe",
-    # fap_weburl="https://github.com/user/si4713tuner",
-    fap_icon_assets="images",  # Image assets to compile for this application
+    fap_icon="si4713tuner.png",
+    fap_icon_assets="images",
+    fap_author="rullinoiz",
+    fap_weburl="https://github.com/rullinoiz/flipper-si4713",
+    fap_version="0.1",
+    fap_description="Basic Adafruit SI4713 tuner for the Flipper Zero",
 )
