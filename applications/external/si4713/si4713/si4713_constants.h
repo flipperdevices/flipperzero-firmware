@@ -6,8 +6,8 @@
 
 /* COMMANDS */
 #define SI4710_CMD_POWER_UP \
-    0x01 ///< Power up device and mode selection. Modes include FM transmit and \
-        ///< analog/digital audio interface configuration.
+    0x01 ///< Power up device and mode selection. Modes include FM transmit and
+///< analog/digital audio interface configuration.
 #define SI4710_CMD_GET_REV 0x10 ///< Returns revision information on the device.
 #define SI4710_CMD_POWER_DOWN 0x11 ///< Power down device
 #define SI4710_CMD_SET_PROPERTY 0x12 ///< Sets the value of a property.
@@ -21,12 +21,12 @@
 #define SI4710_CMD_TX_TUNE_MEASURE \
     0x32 ///< Measure the received noise level at the specified frequency.
 #define SI4710_CMD_TX_TUNE_STATUS \
-    0x33 ///< Queries the status of a previously sent TX Tune Freq, TX Tune Power, \
-        ///< or TX Tune Measure command.
+    0x33 ///< Queries the status of a previously sent TX Tune Freq, TX Tune Power,
+///< or TX Tune Measure command.
 #define SI4710_CMD_TX_ASQ_STATUS 0x34 ///< Queries the TX status and input audio signal metrics.
 #define SI4710_CMD_TX_RDS_BUFF \
-    0x35 ///< Queries the status of the RDS Group Buffer and loads new data into \
-        ///< buffer.
+    0x35 ///< Queries the status of the RDS Group Buffer and loads new data into
+///< buffer.
 #define SI4710_CMD_TX_RDS_PS 0x36 ///< Set up default PS strings
 #define SI4710_CMD_GPO_CTL 0x80 ///< Configures GPO3 as output or Hi-Z.
 #define SI4710_CMD_GPO_SET 0x81 ///< Sets GPO3 output level (low or high).
@@ -35,31 +35,31 @@
 #define SI4713_PROP_GPO_IEN 0x0001 ///< Enables interrupt sources.
 #define SI4713_PROP_DIGITAL_INPUT_FORMAT 0x0101 ///< Configures the digital input format.
 #define SI4713_PROP_DIGITAL_INPUT_SAMPLE_RATE \
-    0x0103 ///< Configures the digital input sample rate in 10 Hz steps. Default \
-        ///< is 0.
+    0x0103 ///< Configures the digital input sample rate in 10 Hz steps. Default
+///< is 0.
 #define SI4713_PROP_REFCLK_FREQ \
-    0x0201 ///< Sets frequency of the reference clock in Hz. The range is 31130 to \
-        ///< 34406 Hz, or 0 to disable the AFC. Default is 32768 Hz.
+    0x0201 ///< Sets frequency of the reference clock in Hz. The range is 31130 to
+///< 34406 Hz, or 0 to disable the AFC. Default is 32768 Hz.
 #define SI4713_PROP_REFCLK_PRESCALE 0x0202 ///< Sets the prescaler value for the reference clock.
 #define SI4713_PROP_TX_COMPONENT_ENABLE \
-    0x2100 ///< Enable transmit multiplex signal components. Default has pilot and \
-        ///< L-R enabled.
+    0x2100 ///< Enable transmit multiplex signal components. Default has pilot and
+///< L-R enabled.
 #define SI4713_PROP_TX_AUDIO_DEVIATION \
-    0x2101 ///< Configures audio frequency deviation level. Units are in 10 Hz \
-        ///< increments. Default is 6285 (68.25 kHz).
+    0x2101 ///< Configures audio frequency deviation level. Units are in 10 Hz
+///< increments. Default is 6285 (68.25 kHz).
 #define SI4713_PROP_TX_PILOT_DEVIATION \
-    0x2102 ///< Configures pilot tone frequency deviation level. Units are in 10 \
-        ///< Hz increments. Default is 675 (6.75 kHz)
+    0x2102 ///< Configures pilot tone frequency deviation level. Units are in 10
+///< Hz increments. Default is 675 (6.75 kHz)
 #define SI4713_PROP_TX_RDS_DEVIATION \
-    0x2103 ///< Configures the RDS/RBDS frequency deviation level. Units are in 10 \
-        ///< Hz increments. Default is 2 kHz.
+    0x2103 ///< Configures the RDS/RBDS frequency deviation level. Units are in 10
+///< Hz increments. Default is 2 kHz.
 #define SI4713_PROP_TX_LINE_LEVEL_INPUT_LEVEL \
-    0x2104 ///< Configures maximum analog line input level to the LIN/RIN pins to \
-        ///< reach the maximum deviation level pro- grammed into the audio        \
-        ///< deviation property TX Audio Deviation. Default is 636 mVPK.
+    0x2104 ///< Configures maximum analog line input level to the LIN/RIN pins to
+///< reach the maximum deviation level pro- grammed into the audio
+///< deviation property TX Audio Deviation. Default is 636 mVPK.
 #define SI4713_PROP_TX_LINE_INPUT_MUTE \
-    0x2105 ///< Sets line input mute. L and R inputs may be indepen- dently muted. \
-        ///< Default is not muted.
+    0x2105 ///< Sets line input mute. L and R inputs may be indepen- dently muted.
+///< Default is not muted.
 #define SI4713_PROP_TX_PREEMPHASIS \
     0x2106 ///< Configures pre-emphasis time constant. Default is 0 (75 μS).
 #define SI4713_PROP_TX_PILOT_FREQUENCY \
@@ -67,33 +67,33 @@
 #define SI4713_PROP_TX_ACOMP_ENABLE \
     0x2200 ///< Enables audio dynamic range control. Default is 0 (disabled).
 #define SI4713_PROP_TX_ACOMP_THRESHOLD \
-    0x2201 ///< Sets the threshold level for audio dynamic range control. Default \
-        ///< is –40 dB.
+    0x2201 ///< Sets the threshold level for audio dynamic range control. Default
+///< is –40 dB.
 #define SI4713_PROP_TX_ATTACK_TIME \
-    0x2202 ///< Sets the attack time for audio dynamic range control. Default is 0 \
-        ///< (0.5 ms).
+    0x2202 ///< Sets the attack time for audio dynamic range control. Default is 0
+///< (0.5 ms).
 #define SI4713_PROP_TX_RELEASE_TIME \
-    0x2203 ///< Sets the release time for audio dynamic range control. Default is \
-        ///< 4 (1000 ms).
+    0x2203 ///< Sets the release time for audio dynamic range control. Default is
+///< 4 (1000 ms).
 #define SI4713_PROP_TX_ACOMP_GAIN \
     0x2204 ///< Sets the gain for audio dynamic range control. Default is 15 dB.
 #define SI4713_PROP_TX_LIMITER_RELEASE_TIME \
     0x2205 ///< Sets the limiter release time. Default is 102 (5.01 ms)
 #define SI4713_PROP_TX_ASQ_INTERRUPT_SOURCE \
-    0x2300 ///< Configures measurements related to signal quality met- rics. \
-        ///< Default is none selected.
+    0x2300 ///< Configures measurements related to signal quality met- rics.
+///< Default is none selected.
 #define SI4713_PROP_TX_ASQ_LEVEL_LOW \
-    0x2301 ///< Configures low audio input level detection threshold. This \
-        ///< threshold can be used to detect silence on the incoming audio.
+    0x2301 ///< Configures low audio input level detection threshold. This
+///< threshold can be used to detect silence on the incoming audio.
 #define SI4713_PROP_TX_ASQ_DURATION_LOW \
-    0x2302 ///< Configures the duration which the input audio level must be below \
-        ///< the low threshold in order to detect a low audio condition.
+    0x2302 ///< Configures the duration which the input audio level must be below
+///< the low threshold in order to detect a low audio condition.
 #define SI4713_PROP_TX_AQS_LEVEL_HIGH \
-    0x2303 ///< Configures high audio input level detection threshold. This \
-        ///< threshold can be used to detect activity on the incoming audio.
+    0x2303 ///< Configures high audio input level detection threshold. This
+///< threshold can be used to detect activity on the incoming audio.
 #define SI4713_PROP_TX_AQS_DURATION_HIGH \
-    0x2304 ///< Configures the duration which the input audio level must be above \
-        ///< the high threshold in order to detect a high audio condition.
+    0x2304 ///< Configures the duration which the input audio level must be above
+///< the high threshold in order to detect a high audio condition.
 #define SI4713_PROP_TX_RDS_INTERRUPT_SOURCE \
     0x2C00 ///< Configure RDS interrupt sources. Default is none selected.
 #define SI4713_PROP_TX_RDS_PI 0x2C01 ///< Sets transmit RDS program identifier.
@@ -101,14 +101,14 @@
 #define SI4713_PROP_TX_RDS_PS_MISC \
     0x2C03 ///< Miscellaneous bits to transmit along with RDS_PS Groups.
 #define SI4713_PROP_TX_RDS_PS_REPEAT_COUNT \
-    0x2C04 ///< Number of times to repeat transmission of a PS message before \
-        ///< transmitting the next PS mes- sage.
+    0x2C04 ///< Number of times to repeat transmission of a PS message before
+///< transmitting the next PS mes- sage.
 #define SI4713_PROP_TX_RDS_MESSAGE_COUNT 0x2C05 ///< Number of PS messages in use.
 #define SI4713_PROP_TX_RDS_PS_AF \
-    0x2C06 ///< RDS Program Service Alternate Fre- quency. This provides the   \
-        ///< ability to inform the receiver of a single alternate frequency    \
-        ///< using AF Method A coding and is transmitted along with the RDS_PS \
-        ///< Groups.
+    0x2C06 ///< RDS Program Service Alternate Fre- quency. This provides the
+///< ability to inform the receiver of a single alternate frequency
+///< using AF Method A coding and is transmitted along with the RDS_PS
+///< Groups.
 #define SI4713_PROP_TX_RDS_FIFO_SIZE \
-    0x2C07 ///< Number of blocks reserved for the FIFO. Note that the value \
-        ///< written must be one larger than the desired FIFO size.
+    0x2C07 ///< Number of blocks reserved for the FIFO. Note that the value
+///< written must be one larger than the desired FIFO size.
