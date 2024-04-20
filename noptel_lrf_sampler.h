@@ -28,9 +28,9 @@
 /*** Parameters ***/
 extern const char *config_file;
 
-extern const uint16_t config_freq_values[];
-extern const char *config_freq_names[];
-extern const uint8_t nb_config_freq_values;
+extern const uint16_t config_mode_values[];
+extern const char *config_mode_names[];
+extern const uint8_t nb_config_mode_values;
 
 extern const int16_t config_buf_values[];
 extern const char *config_buf_names[];
@@ -79,8 +79,8 @@ typedef enum {
 /** Saved configuration values **/
 typedef struct {
 
-  /* LRF frequency setting */
-  int16_t freq;
+  /* LRF sampling mode setting */
+  int16_t mode;
 
   /* Samples buffering setting */
   int16_t buf;
@@ -219,7 +219,7 @@ typedef struct {
 
   /* Configuration items */
   VariableItemList *config_list;
-  VariableItem *item_freq;
+  VariableItem *item_mode;
   VariableItem *item_buf;
   VariableItem *item_beep;
 

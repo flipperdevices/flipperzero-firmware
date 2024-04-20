@@ -12,8 +12,8 @@
 
 /*** Routines ***/
 
-/** Frequency setting change function **/
-void config_freq_change(VariableItem *);
+/** Sampling mode setting change function **/
+void config_mode_change(VariableItem *);
 
 /** Buffering setting change function **/
 void config_buf_change(VariableItem *);

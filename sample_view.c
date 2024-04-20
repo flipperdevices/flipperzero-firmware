@@ -56,7 +56,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 
 
   /* Do we do automatic single measurement? */
-  if(sampler_model->config.freq == (smm | 0x100)) {
+  if(sampler_model->config.mode == (smm | 0x100)) {
 
     /* Is continuous measurement still enabled? */
     if(sampler_model->continuous_meas_started) {
@@ -93,7 +93,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   }
 
   /* Reset the ring buffer if required, or if we do single measurement */
-  if(sampler_model->flush_samples || sampler_model->config.freq == smm) {
+  if(sampler_model->flush_samples || sampler_model->config.mode == smm) {
     sampler_model->samples_start_i = 0;
     sampler_model->samples_end_i = 0;
     sampler_model->nb_samples = 0;
@@ -391,11 +391,11 @@ void sample_view_enter_callback(void *ctx) {
 
 	  /* Send the appropriate initial measurement command */
 	  send_lrf_command(app->lrf_serial_comm_app,
-				sampler_model->config.freq & 0xff);
+				sampler_model->config.mode & 0xff);
 
 	  /* Mark continuous measurement started as needed */
 	  sampler_model->continuous_meas_started =
-				sampler_model->config.freq == smm? false : true;
+				sampler_model->config.mode == smm? false : true;
 	},
 	false);
 
@@ -553,7 +553,7 @@ void sample_view_draw_callback(Canvas *canvas, void *model) {
      continuous measurement, and whether continuous measurement is started */
   canvas_draw_frame(canvas, 77, 52, 51, 12);
   canvas_draw_icon(canvas, 79, 54, &I_ok_button);
-  if(sampler_model->config.freq == smm)
+  if(sampler_model->config.mode == smm)
     canvas_draw_str(canvas, 90, 62, "Sample");
   else
     if(sampler_model->continuous_meas_started)
@@ -591,7 +591,7 @@ void sample_view_draw_callback(Canvas *canvas, void *model) {
      of the configured buffering time or samples we hold in the ring buffer
      as a small bar at the lower left, and display the return rate as a
      second small bar at the right of it */
-  if(sampler_model->config.freq != smm && sampler_model->config.buf != 0) {
+  if(sampler_model->config.mode != smm && sampler_model->config.buf != 0) {
 
     /* Do we buffer samples for a set amount of time? */
     if(sampler_model->config.buf > 0)
@@ -639,14 +639,14 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
     FURI_LOG_D(TAG, "OK button pressed");
 
     /* Are we doing single measurement (manual or automatic)? */
-    if((sampler_model->config.freq & 0xff) == smm) {
+    if((sampler_model->config.mode & 0xff) == smm) {
 
       /* If continuous measurement is stopped? send a SMM command (exec mode) */
       if(!sampler_model->continuous_meas_started)
         send_lrf_command(app->lrf_serial_comm_app, smm);
 
       /* If we do automatic single measurement, flip the started flag */
-      if(sampler_model->config.freq != smm)
+      if(sampler_model->config.mode != smm)
         sampler_model->continuous_meas_started =
 				!sampler_model->continuous_meas_started;
     }
@@ -672,7 +672,7 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
         sampler_model->flush_samples = true;
 
         /* Send the appropriate start-CMM command (exec mode) */
-        send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.freq);
+        send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.mode);
 
         sampler_model->continuous_meas_started = true;
       }
