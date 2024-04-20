@@ -96,7 +96,7 @@ static const ImuHidApi hid_api_ble = {
     .mouse_key_press = ble_hid_mouse_key_press,
     .mouse_key_release = ble_hid_mouse_key_release,
     .mouse_scroll = ble_hid_mouse_scroll,
-    .report_rate_max = 30,
+    .report_rate_max = 200,
 };
 
 static void ble_hid_remove_pairing(void) {

@@ -10,5 +10,5 @@ App(
     fap_author="leommxj",
     fap_weburl="https://github.com/leommxj/nfc_relay",
     fap_version=(0, 2),
-    fap_description="Brainfuck language interpreter",
+    fap_description="NFC Relay app for flipper zero, relay NFCA APDU and response between two flipper.",
 )
