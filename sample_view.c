@@ -192,8 +192,6 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
         nb_samples--;
       }
 
-      FURI_LOG_I(TAG, "nb_samples: %d, span: %lf", nb_samples, sampler_model->samples_time_span);
-
       /* Calculate the average of the valid distances and amplitudes in the
          ring buffer */
       avg_dist1 = 0;
