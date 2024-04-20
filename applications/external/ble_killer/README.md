@@ -8,30 +8,6 @@
 
 需要安装两个程序，一个是flipper zero的app，也就是.fap格式，另外一个是ble扩展板的程序（基于esp32）。
 
-### flipper zero fap应用
-
-新建目录，将ble_killer源码和application.fam放在同一目录下，使用ufbt命令进行编译：
-
-```bash
-➜  ble_killer git:(0cfdb530a) ✗ ls
-application.fam ble_killer.c    dist            icon.png        uart.h
-➜  ble_killer git:(0cfdb530a) ✗ ufbt
-scons: Entering directory `/Users/h4lo/.ufbt/current/scripts/ufbt'
-        INSTALL /Volumes/T7/dev/Xtreme-Firmware/applications/external/ble_killer/dist/ble_killer.fap
-        INSTALL /Volumes/T7/dev/Xtreme-Firmware/applications/external/ble_killer/dist/debug/ble_killer_d.elf
-        CDB     /Volumes/T7/dev/Xtreme-Firmware/applications/external/ble_killer/.vscode/compile_commands.json
-        APPCHK  /Users/h4lo/.ufbt/build/ble_killer.fap
-                Target: 7, API: 54.0
-```
-
-- ufbt可以使用pip进行安装：
-
-  ```
-  pip3 install ufbt
-  ```
-
-或者使用ufbt launch命令直接将编译后的fap程序在flipper zero中跑起来。
-
 ### ble扩展板
 
 基于arduino开发，在arduino IDE中，新建项目，将esp32目录下的.ino源代码复制进去，选择Board类型为ESP32 DEV Module，同时安装BLEDevice库，找一个usb转ttl工具，接上tx、rx、gnd，再点击编译上传即可。
@@ -60,7 +36,7 @@ scons: Entering directory `/Users/h4lo/.ufbt/current/scripts/ufbt'
 
 esp32输出的串口信息。
 
-![Screenshot-20240316-115228](README.assets/Screenshot-20240316-115228.png)
+![Screenshot-20240316-115228](.page_assets/Screenshot-20240316-115228.png)
 
 ## 视频参考
 
