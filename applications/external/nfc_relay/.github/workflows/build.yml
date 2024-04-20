@@ -1,0 +1,37 @@
+name: "build nfc_relay fap"
+on:
+  release:
+    types: [ created ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: 'ufbt: Build for release branch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build with ufbt
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        id: build-app
+        with:
+          sdk-channel: release
+      - name: Upload app artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' }}
+    needs: build
+
+    steps:
+    - name: Download built fap
+      uses: actions/download-artifact@v3
+    - name: let us find out
+      run: ls -alR
+    - name: Upload extension to release
+      uses: skx/github-action-publish-binaries@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: '*/*.fap'
