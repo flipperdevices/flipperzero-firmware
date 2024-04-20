@@ -55,6 +55,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: add Plantain legacy keys #3602 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3602)
 - Updated: [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Updated: [Radiation Sensor v1.0 (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
+- OFW: PR: [PoC skylanders plugin #3315 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3315)
 
 <a name="release">
 
