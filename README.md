@@ -28,9 +28,13 @@ The main menu opens:
 In the configuration menu, select the sampling mode:
 
 - **SMM**: single measurement mode (default)
+- **Auto SMM**: single measurement mode, auto-repeating
 - **1 Hz** ▶ **200 Hz**: continuous measurement mode at the selected sampling rate
 
-Set **Averaging time** to average the distances / amplitudes of the samples over that time (default: no averaging).
+Set **Buffering** to buffer samples in automatic SMM or continuous measurement mode for either:
+
+- **1 s** to **10 s**
+- **5 samples**, **10 samples**, **100 samples** or **1000 samples**
 
 Enable **Beep** to hear a short beep when a valid sample is received.
 
@@ -52,26 +56,41 @@ The associated amplitude (i.e. signal strength) is displayed as a small number n
 
 #### Continuous measurement mode
 
-In continuous measurement mode, press the **OK** button to start and stop the measurements.
+In continuous measurement mode or automatic SMM mode, press the **OK** button to start and stop the measurements.
 
 ![Sampling in continuous measurement mode](screenshots/1-sample_cmm.png)
 
 Distances and amplitudes are displayed like in single measurement mode.
 
-The effective sampling rate is calculated and displayed at the bottom.
+The effective sampling rate in Hz is calculated and displayed at the bottom.
 
-#### Averaging
+#### Buffering
 
-If an averaging time is configured, the average distances and amplitudes over that period of time are displayed instead of the last samples.
+If buffering is enabled, the following information is calculated:
 
-![Sample averaging](screenshots/0-sample_averaging.png)
+- Average distances for all valid samples
+- Average amplitudes (i.e. average signal strengths) for all valid samples
+- Return rate (i.e. number of samples containing any measured distance vs. total number of sampling attempts)
 
+The average distances and amplitudes are displayed instead of the last samples.
+
+![Sample buffering](screenshots/0-sample_buffering.png)
+
+The buffering state is displayed at the bottom left: the bar is all the way up when the buffer is full.
+
+The return rate is indicated next to the buffering state: the bar is all the way up when the return rate is 100% (meaning no missed measurements).
+
+![Sample buffering bars](screenshots/12-sample_buffering_bars.png)
+
+The buffering state and the return rate indicators are useful to determine the rangefinder's extinction ratio: when the buffer is full, the return rate bar should look about 3/4 full at extinction ratio.
 
 ### Pointer ON/OFF
 
 Select the **Pointer ON/OFF** toggle to turn the pointer on and off if the rangefinder is equipped with a pointer.
 
 ![Pointer ON/OFF toggle](screenshots/7-pointer_on_off_toggle.png)
+
+The pointer is useful to line up the rangefinder on a short distance target.
 
 ### LRF information
 
