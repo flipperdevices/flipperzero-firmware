@@ -1,4 +1,4 @@
-## Version 1.x - xx/xx/2024
+## Version 1.4 - 21/04/2024
 
 - Added automatic SMM sampling mode
 - Sampling buffer sizeable by number of samples as well as time
