@@ -216,6 +216,7 @@ void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms) {
 }
 
 void init_clock_config(ClockConfig* cfg) {
+    cfg->version = CONFIG_VERSION;
     cfg->split = false;
     cfg->width = FACE_DEFAULT_WIDTH;
     cfg->digits_mod = 3;
