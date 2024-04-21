@@ -35,14 +35,8 @@ void draw_line(Canvas* c, Point* ofs, Line* l, LineType type) { // Bresenham-Alg
         }
         if((x == l->end.x) && (y == l->end.y)) break;
         e2 = 2 * error;
-        if(e2 > dy) {
-            error += dy;
-            x += sx;
-        }
-        if(e2 < dx) {
-            error += dx;
-            y += sy;
-        }
+        if(e2 > dy) x += sx, error += dy;
+        if(e2 < dx) y += sy, error += dx;
     }
 }
 
@@ -77,8 +71,7 @@ void draw_hand(Canvas* canvas, ClockConfig* cfg, float ang, int radius, bool thi
     set_line(&l, ang, thick ? HMS_OFS : -HMS_OFS, radius);
     draw_line(canvas, &cfg->ofs, &l, thick ? Thick : Normal);
     if(thick) {
-        l.end.x = 0;
-        l.end.y = 0;
+        l.end.x = 0, l.end.y = 0;
         draw_line(canvas, &cfg->ofs, &l, Normal);
     }
 }
@@ -88,8 +81,7 @@ void calc_clock_face(ClockConfig* cfg) {
     bool round = ((cfg->face_type == Round) || (cfg->face_type == DigitalRound)) && cfg->split;
     bool dots = digital && cfg->split;
 
-    cfg->ofs.x = cfg->split ? CLOCK_OFS_X / 2 : CLOCK_OFS_X;
-    cfg->ofs.y = CLOCK_OFS_Y;
+    cfg->ofs.x = cfg->split ? CLOCK_OFS_X / 2 : CLOCK_OFS_X, cfg->ofs.y = CLOCK_OFS_Y;
 
     uint8_t width = cfg->split || round ? FACE_RADIUS : cfg->width;
     uint8_t height = FACE_RADIUS;
@@ -138,9 +130,7 @@ void calc_clock_face(ClockConfig* cfg) {
 }
 
 void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt) {
-    uint8_t hour = dt->hour;
-    uint8_t x = cfg->ofs.x;
-    uint8_t y = cfg->ofs.y;
+    uint8_t hour = dt->hour, x = cfg->ofs.x, y = cfg->ofs.y;
     if(locale_get_time_format() == LocaleTimeFormat12h) {
         hour = hour % 12 == 0 ? 12 : hour % 12;
         canvas_set_font(canvas, FontSecondary);
@@ -192,11 +182,8 @@ void draw_date(Canvas* canvas, ClockConfig* cfg, DateTime* dt) {
     const char* weekday = WEEKDAYS[(dt->weekday - 1) % 7];
     int8_t x_ofs = 2;
     Align day_align = AlignLeft, month_align = AlignRight;
-    if(locale_get_date_format() == LocaleDateFormatDMY) {
-        x_ofs = -2;
-        day_align = AlignRight;
-        month_align = AlignLeft;
-    }
+    if(locale_get_date_format() == LocaleDateFormatDMY)
+        x_ofs = -2, day_align = AlignRight, month_align = AlignLeft;
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(canvas, x + x_ofs, y, day_align, AlignCenter, day);
     canvas_set_font(canvas, FontPrimary);
