@@ -91,20 +91,20 @@ void calc_clock_face(ClockConfig* cfg) {
     cfg->ofs.x = cfg->split ? CLOCK_OFS_X / 2 : CLOCK_OFS_X;
     cfg->ofs.y = CLOCK_OFS_Y;
 
-    uint8_t width = cfg->split ? FACE_RADIUS : cfg->width;
-    uint8_t hor_ofs = round ? FACE_RADIUS : width;
+    uint8_t width = cfg->split || round ? FACE_RADIUS : cfg->width;
+    uint8_t height = FACE_RADIUS;
 
     float short_lin_ofs = dots ? 0.0 : round ? 1.5 : 2.0;
     float long_lin_ofs = dots ? 0.0 : round ? 5.0 : 7.0;
     float dig_ofs = round ? 11.0 : 12.5;
 
-    set_line(&cfg->face.minutes[0], 0, FACE_RADIUS, FACE_RADIUS - long_lin_ofs);
-    set_line(&cfg->face.minutes[15], M_PI_2, hor_ofs, hor_ofs - long_lin_ofs);
+    set_line(&cfg->face.minutes[0], 0, height, height - long_lin_ofs);
+    set_line(&cfg->face.minutes[15], M_PI_2, width, width - long_lin_ofs);
     copy_line(&cfg->face.minutes[30], &cfg->face.minutes[0], false, true);
     copy_line(&cfg->face.minutes[45], &cfg->face.minutes[15], true, false);
 
-    set_point(&cfg->face.hours[0], 0, FACE_RADIUS - dig_ofs);
-    set_point(&cfg->face.hours[3], M_PI_2, hor_ofs - dig_ofs);
+    set_point(&cfg->face.hours[0], 0, height - dig_ofs);
+    set_point(&cfg->face.hours[3], M_PI_2, width - dig_ofs);
     copy_point(&cfg->face.hours[6], &cfg->face.hours[0], false, true);
     copy_point(&cfg->face.hours[9], &cfg->face.hours[3], true, false);
 
@@ -116,8 +116,8 @@ void calc_clock_face(ClockConfig* cfg) {
         if(round)
             set_line(&cfg->face.minutes[min], ang, FACE_RADIUS, FACE_RADIUS - lin_ofs);
         else {
-            intersect(&cfg->face.minutes[min].start, ang, width, FACE_RADIUS);
-            intersect(&cfg->face.minutes[min].end, ang, width - lin_ofs, FACE_RADIUS - lin_ofs);
+            intersect(&cfg->face.minutes[min].start, ang, width, height);
+            intersect(&cfg->face.minutes[min].end, ang, width - lin_ofs, height - lin_ofs);
         }
 
         copy_line(&cfg->face.minutes[30 - min], &cfg->face.minutes[min], false, true);
@@ -127,9 +127,9 @@ void calc_clock_face(ClockConfig* cfg) {
         if(at_hour) {
             uint8_t hour = min / 5;
             if(round)
-                set_point(&cfg->face.hours[hour], ang, FACE_RADIUS - dig_ofs);
+                set_point(&cfg->face.hours[hour], ang, height - dig_ofs);
             else
-                intersect(&cfg->face.hours[hour], ang, width - dig_ofs, FACE_RADIUS - dig_ofs);
+                intersect(&cfg->face.hours[hour], ang, width - dig_ofs, height - dig_ofs);
             copy_point(&cfg->face.hours[6 - hour], &cfg->face.hours[hour], false, true);
             copy_point(&cfg->face.hours[6 + hour], &cfg->face.hours[hour], true, true);
             copy_point(&cfg->face.hours[12 - hour], &cfg->face.hours[hour], true, false);
