@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.3
+ * Version: 1.4
  *
  * Configuration saving / restoring
 ***/
@@ -22,7 +22,7 @@ void load_configuration(App* app) {
     Config read_config;
     bool file_read = false;
     uint16_t bytes_read = 0;
-    uint8_t freq_idx, buf_idx, beep_idx;
+    uint8_t mode_idx, buf_idx, beep_idx;
 
     /* Open storage and allocate space for the file*/
     storage = furi_record_open(RECORD_STORAGE);
@@ -58,15 +58,15 @@ void load_configuration(App* app) {
         return;
     }
 
-    /* Check that the frequency setting exists */
-    for(freq_idx = 0;
-        freq_idx < nb_config_freq_values && read_config.freq != config_freq_values[freq_idx];
-        freq_idx++)
+    /* Check that the sampling mode setting exists */
+    for(mode_idx = 0;
+        mode_idx < nb_config_mode_values && read_config.mode != config_mode_values[mode_idx];
+        mode_idx++)
         ;
 
-    if(freq_idx >= nb_config_freq_values) {
+    if(mode_idx >= nb_config_mode_values) {
         FURI_LOG_I(
-            TAG, "Invalid frequency value %d in config file %s", read_config.freq, config_file);
+            TAG, "Invalid sampling mode value %d in config file %s", read_config.mode, config_file);
         return;
     }
 
@@ -100,10 +100,10 @@ void load_configuration(App* app) {
         return;
     }
 
-    /* Configure the frequency setting from the read value */
-    sampler_model->config.freq = read_config.freq;
-    variable_item_set_current_value_index(app->item_freq, freq_idx);
-    variable_item_set_current_value_text(app->item_freq, config_freq_names[freq_idx]);
+    /* Configure the sampling mode setting from the read value */
+    sampler_model->config.mode = read_config.mode;
+    variable_item_set_current_value_index(app->item_mode, mode_idx);
+    variable_item_set_current_value_text(app->item_mode, config_mode_names[mode_idx]);
 
     /* Configure the buffering setting from the read value */
     sampler_model->config.buf = read_config.buf;
@@ -121,9 +121,9 @@ void load_configuration(App* app) {
 
     FURI_LOG_I(
         TAG,
-        "Restored config frequency %s, buffering %s, beep %s, "
+        "Restored config sampling mode %s, buffering %s, beep %s, "
         "selected submenu item %d",
-        config_freq_names[freq_idx],
+        config_mode_names[mode_idx],
         config_buf_names[buf_idx],
         config_beep_names[beep_idx],
         read_config.sitem);

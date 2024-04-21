@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.3
+ * Version: 1.4
  *
  * Configuration view
 ***/
@@ -11,20 +11,20 @@
 
 /*** Routines ***/
 
-/** Frequency setting change function **/
-void config_freq_change(VariableItem* item) {
+/** Sampling mode setting change function **/
+void config_mode_change(VariableItem* item) {
     App* app = variable_item_get_context(item);
     SamplerModel* sampler_model = view_get_model(app->sample_view);
     uint8_t idx;
 
-    /* Get the new frequency setting item index */
+    /* Get the new sampling mode setting item index */
     idx = variable_item_get_current_value_index(item);
 
-    /* Set the new frequency setting */
-    sampler_model->config.freq = config_freq_values[idx];
-    variable_item_set_current_value_text(item, config_freq_names[idx]);
+    /* Set the new sampling mode setting */
+    sampler_model->config.mode = config_mode_values[idx];
+    variable_item_set_current_value_text(item, config_mode_names[idx]);
 
-    FURI_LOG_D(TAG, "Frequency setting change: %s", config_freq_names[idx]);
+    FURI_LOG_D(TAG, "Sampling mode setting change: %s", config_mode_names[idx]);
 }
 
 /** Buffering setting change function **/

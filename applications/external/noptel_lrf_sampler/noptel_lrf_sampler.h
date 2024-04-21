@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.3
+ * Version: 1.4
  *
  * Main app
 ***/
@@ -15,7 +15,7 @@
 #include "lrf_serial_comm.h"
 
 /*** Defines ***/
-#define VERSION "1.3"
+#define VERSION "1.4"
 #define TAG "noptel_lrf_sampler"
 #define NO_AVERAGE \
     -1 /* This distance will be displayed as
@@ -25,9 +25,11 @@
 /*** Parameters ***/
 extern const char* config_file;
 
-extern const uint16_t config_freq_values[];
-extern const char* config_freq_names[];
-extern const uint8_t nb_config_freq_values;
+extern const char* dsp_files_dir;
+
+extern const uint16_t config_mode_values[];
+extern const char* config_mode_names[];
+extern const uint8_t nb_config_mode_values;
 
 extern const int16_t config_buf_values[];
 extern const char* config_buf_names[];
@@ -71,8 +73,8 @@ typedef enum {
 
 /** Saved configuration values **/
 typedef struct {
-    /* LRF frequency setting */
-    int16_t freq;
+    /* LRF sampling mode setting */
+    int16_t mode;
 
     /* Samples buffering setting */
     int16_t buf;
@@ -113,6 +115,9 @@ typedef struct {
 
     /* Displayed effective sampling frequency */
     double eff_freq;
+
+    /* Displayed return rate */
+    double return_rate;
 
     /* Whether continuous measurement is started */
     bool continuous_meas_started;
@@ -193,7 +198,7 @@ typedef struct {
 
     /* Configuration items */
     VariableItemList* config_list;
-    VariableItem* item_freq;
+    VariableItem* item_mode;
     VariableItem* item_buf;
     VariableItem* item_beep;
 

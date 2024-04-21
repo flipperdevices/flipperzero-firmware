@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.3
+ * Version: 1.4
  *
  * Main app
 ***/
@@ -21,12 +21,14 @@
 /*** Parameters ***/
 const char* config_file = STORAGE_APP_DATA_PATH_PREFIX "/noptel_lrf_sampler.save";
 
-static const char* config_freq_label = "Frequency";
-const uint16_t config_freq_values[] =
+const char* dsp_files_dir = ANY_PATH("noptel_lrf_diag");
+
+static const char* config_mode_label = "Sampling mode";
+const uint16_t config_mode_values[] =
     {smm, smm | 0x100, cmm_1hz, cmm_4hz, cmm_10hz, cmm_20hz, cmm_100hz, cmm_200hz};
-const char* config_freq_names[] =
+const char* config_mode_names[] =
     {"SMM", "Auto SMM", "1 Hz", "4 Hz", "10 Hz", "20 Hz", "100 Hz", "200 Hz"};
-const uint8_t nb_config_freq_values = COUNT_OF(config_freq_values);
+const uint8_t nb_config_mode_values = COUNT_OF(config_mode_values);
 
 static const char* config_buf_label = "Buffering";
 const int16_t config_buf_values[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -5, -10, -100, -1000};
@@ -111,9 +113,9 @@ static App* app_init() {
     app->config_list = variable_item_list_alloc();
     variable_item_list_reset(app->config_list);
 
-    /* Add frequency setting list items */
-    app->item_freq = variable_item_list_add(
-        app->config_list, config_freq_label, nb_config_freq_values, config_freq_change, app);
+    /* Add sampling mode setting list items */
+    app->item_mode = variable_item_list_add(
+        app->config_list, config_mode_label, nb_config_mode_values, config_mode_change, app);
 
     /* Add buffering setting list items */
     app->item_buf = variable_item_list_add(
@@ -249,10 +251,10 @@ static App* app_init() {
 
     /* Setup the default configuration */
 
-    /* Set the default frequency setting */
-    sampler_model->config.freq = config_freq_values[0];
-    variable_item_set_current_value_index(app->item_freq, 0);
-    variable_item_set_current_value_text(app->item_freq, config_freq_names[0]);
+    /* Set the default sampling mode setting */
+    sampler_model->config.mode = config_mode_values[0];
+    variable_item_set_current_value_index(app->item_mode, 0);
+    variable_item_set_current_value_text(app->item_mode, config_mode_names[0]);
 
     /* Set the default buffering setting */
     sampler_model->config.buf = config_buf_values[0];

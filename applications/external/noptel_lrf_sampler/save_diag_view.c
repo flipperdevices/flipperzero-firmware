@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.3
+ * Version: 1.4
  *
  * Save diagnostic view
 ***/
@@ -45,7 +45,8 @@ static void diag_data_handler(LRFDiag* lrf_diag, void* ctx) {
     DateTime datetime;
     Storage* storage;
     File* file;
-    uint32_t bytes_to_write, bytes_written, total_bytes_written;
+    uint32_t bytes_to_write, bytes_written;
+    uint32_t total_bytes_written = 0;
     int32_t val;
     uint32_t now_ms, last_update_display;
     uint32_t i;
@@ -100,7 +101,7 @@ static void diag_data_handler(LRFDiag* lrf_diag, void* ctx) {
                 savediag_model->dsp_fpath,
                 sizeof(savediag_model->dsp_fpath),
                 "%s/%s%s",
-                STORAGE_APP_DATA_PATH_PREFIX,
+                dsp_files_dir,
                 savediag_model->dsp_fname_pt1,
                 savediag_model->dsp_fname_pt2);
 
@@ -108,104 +109,138 @@ static void diag_data_handler(LRFDiag* lrf_diag, void* ctx) {
             storage = furi_record_open(RECORD_STORAGE);
             file = storage_file_alloc(storage);
 
-            /* Attempt to open the DSP file */
-            total_bytes_written = 0;
-            if(storage_file_open(file, savediag_model->dsp_fpath, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-                /* Write the DSP file */
-                bytes_to_write = 0;
-                i = 0;
-                while(i < savediag_model->lrf_diag.nb_vals) {
-                    /* If we're at the last value in the header, create a date / time
-             marker */
-                    if(i == savediag_model->lrf_diag.vals[0])
-                        snprintf(
-                            savediag_model->spstr + bytes_to_write,
-                            sizeof(savediag_model->spstr) - bytes_to_write,
-                            "%02d/%02d/%04d %02d:%02d:%02d\r\n",
-                            datetime.day,
-                            datetime.month,
-                            datetime.year,
-                            datetime.hour,
-                            datetime.minute,
-                            datetime.second);
+            /* Create the destination directory */
+            if(storage_simply_mkdir(storage, dsp_files_dir)) {
+                /* Attempt to open the DSP file */
+                if(storage_file_open(
+                       file, savediag_model->dsp_fpath, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                    /* Write the DSP file */
+                    bytes_to_write = 0;
+                    i = 0;
+                    while(i < savediag_model->lrf_diag.nb_vals) {
+                        /* If we're at the last value in the header, create a date / time
+               marker */
+                        if(i == savediag_model->lrf_diag.vals[0])
+                            snprintf(
+                                savediag_model->spstr + bytes_to_write,
+                                sizeof(savediag_model->spstr) - bytes_to_write,
+                                "%02d/%02d/%04d %02d:%02d:%02d\r\n",
+                                datetime.day,
+                                datetime.month,
+                                datetime.year,
+                                datetime.hour,
+                                datetime.minute,
+                                datetime.second);
 
-                    /* Otherwise transform the value into a signed or unsigned zero-padded
-             number string depending on the version of the firmware */
-                    else {
-                        val = savediag_model->ident.is_fw_newer_than_x4 ?
-                                  (int16_t)savediag_model->lrf_diag.vals[i] :
-                                  (uint16_t)savediag_model->lrf_diag.vals[i];
-
-                        snprintf(
-                            savediag_model->spstr + bytes_to_write,
-                            sizeof(savediag_model->spstr) - bytes_to_write,
-                            "%s%05d\r\n",
-                            val < 0 ? "-" : "",
-                            abs(val));
-                    }
-
-                    bytes_to_write += strlen(savediag_model->spstr + bytes_to_write);
-
-                    i++;
-
-                    /* Write into the file in batches of 30 strings */
-                    if(i % 30 == 0 || i == savediag_model->lrf_diag.nb_vals) {
-                        bytes_written =
-                            storage_file_write(file, &savediag_model->spstr, bytes_to_write);
-                        total_bytes_written += bytes_written;
-
-                        /* If all the bytes couldn't be written, stop and report an error */
-                        if(bytes_written != bytes_to_write) {
-                            FURI_LOG_I(
-                                TAG,
-                                "Wrote %ld bytes to DSP file %s but %ld expected",
-                                bytes_written,
-                                savediag_model->dsp_fpath,
-                                bytes_to_write);
+                        /* Otherwise transform the value into a signed or unsigned zero-
+               padded number string depending on the version of the firmware */
+                        else {
+                            val = savediag_model->ident.is_fw_newer_than_x4 ?
+                                      (int16_t)savediag_model->lrf_diag.vals[i] :
+                                      (uint16_t)savediag_model->lrf_diag.vals[i];
 
                             snprintf(
-                                savediag_model->status_msg1,
-                                sizeof(savediag_model->status_msg1),
-                                "Error!");
-
-                            snprintf(
-                                savediag_model->status_msg2,
-                                sizeof(savediag_model->status_msg2),
-                                "Error writing %s",
-                                savediag_model->dsp_fname_pt1);
-
-                            break;
+                                savediag_model->spstr + bytes_to_write,
+                                sizeof(savediag_model->spstr) - bytes_to_write,
+                                "%s%05d\r\n",
+                                val < 0 ? "-" : "",
+                                abs(val));
                         }
 
-                        bytes_to_write = 0;
+                        bytes_to_write += strlen(savediag_model->spstr + bytes_to_write);
+
+                        i++;
+
+                        /* Write into the file in batches of 30 strings */
+                        if(i % 30 == 0 || i == savediag_model->lrf_diag.nb_vals) {
+                            bytes_written =
+                                storage_file_write(file, &savediag_model->spstr, bytes_to_write);
+                            total_bytes_written += bytes_written;
+
+                            /* If all the bytes couldn't be written, stop and report an
+                 error */
+                            if(bytes_written != bytes_to_write) {
+                                FURI_LOG_I(
+                                    TAG,
+                                    "Wrote %ld bytes to DSP file %s but %ld "
+                                    "expected",
+                                    bytes_written,
+                                    savediag_model->dsp_fpath,
+                                    bytes_to_write);
+
+                                snprintf(
+                                    savediag_model->status_msg1,
+                                    sizeof(savediag_model->status_msg1),
+                                    "Error!");
+
+                                snprintf(
+                                    savediag_model->status_msg2,
+                                    sizeof(savediag_model->status_msg2),
+                                    "Error writing %s",
+                                    savediag_model->dsp_fname_pt1);
+
+                                snprintf(
+                                    savediag_model->status_msg3,
+                                    sizeof(savediag_model->status_msg3),
+                                    savediag_model->dsp_fname_pt2);
+
+                                break;
+                            }
+
+                            bytes_to_write = 0;
+                        }
+
+                        /* Get the current timestamp */
+                        now_ms = furi_get_tick();
+
+                        /* Calculate the second half of the progress: saving */
+                        savediag_model->progress =
+                            ((float)i / (float)savediag_model->lrf_diag.total_vals) / 2 + 0.5;
+
+                        /* Should we update the display? */
+                        if(ms_tick_time_diff_ms(now_ms, last_update_display) >
+                           DIAG_PROGRESS_UPDATE_EVERY) {
+                            /* Trigger a save diagnostic view redraw to update the progress
+                 bar */
+                            with_view_model(
+                                app->savediag_view,
+                                SaveDiagModel * _model,
+                                { UNUSED(_model); },
+                                true);
+                            last_update_display = now_ms;
+                        }
                     }
 
-                    /* Get the current timestamp */
-                    now_ms = furi_get_tick();
-
-                    /* Calculate the second half of the progress: saving */
-                    savediag_model->progress =
-                        ((float)i / (float)savediag_model->lrf_diag.total_vals) / 2 + 0.5;
-
-                    /* Should we update the display? */
-                    if(ms_tick_time_diff_ms(now_ms, last_update_display) >
-                       DIAG_PROGRESS_UPDATE_EVERY) {
-                        /* Trigger a save diagnostic view redraw to update the progress
-               bar */
-                        with_view_model(
-                            app->savediag_view, SaveDiagModel * _model, { UNUSED(_model); }, true);
-                        last_update_display = now_ms;
-                    }
+                    /* Close the DSP file */
+                    storage_file_close(file);
                 }
 
-                /* Close the DSP file */
-                storage_file_close(file);
+                /* Error opening the DSP file: report an error */
+                else {
+                    FURI_LOG_I(
+                        TAG, "Could not open DSP file %s for writing", savediag_model->dsp_fpath);
+
+                    snprintf(
+                        savediag_model->status_msg1,
+                        sizeof(savediag_model->status_msg1),
+                        "Error!");
+
+                    snprintf(
+                        savediag_model->status_msg2,
+                        sizeof(savediag_model->status_msg2),
+                        "Could not open %s",
+                        savediag_model->dsp_fname_pt1);
+
+                    snprintf(
+                        savediag_model->status_msg3,
+                        sizeof(savediag_model->status_msg3),
+                        savediag_model->dsp_fname_pt2);
+                }
             }
 
-            /* Error opening the DSP file: report an error */
+            /* Error creating the destination directory */
             else {
-                FURI_LOG_I(
-                    TAG, "Could not open DSP file %s for writing", savediag_model->dsp_fpath);
+                FURI_LOG_I(TAG, "Could not create destination directory %s", dsp_files_dir);
 
                 snprintf(
                     savediag_model->status_msg1, sizeof(savediag_model->status_msg1), "Error!");
@@ -213,8 +248,12 @@ static void diag_data_handler(LRFDiag* lrf_diag, void* ctx) {
                 snprintf(
                     savediag_model->status_msg2,
                     sizeof(savediag_model->status_msg2),
-                    "Could not open %s",
-                    savediag_model->dsp_fname_pt1);
+                    "Could not create directory");
+
+                snprintf(
+                    savediag_model->status_msg3,
+                    sizeof(savediag_model->status_msg3),
+                    dsp_files_dir);
             }
 
             /* Free the file and close storage */
@@ -236,12 +275,12 @@ static void diag_data_handler(LRFDiag* lrf_diag, void* ctx) {
                     sizeof(savediag_model->status_msg2),
                     "Data saved in %s",
                     savediag_model->dsp_fname_pt1);
-            }
 
-            snprintf(
-                savediag_model->status_msg3,
-                sizeof(savediag_model->status_msg3),
-                savediag_model->dsp_fname_pt2);
+                snprintf(
+                    savediag_model->status_msg3,
+                    sizeof(savediag_model->status_msg3),
+                    savediag_model->dsp_fname_pt2);
+            }
         }
 
         /* If the LRF identification data is missing, report an error */

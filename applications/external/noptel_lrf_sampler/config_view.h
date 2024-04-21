@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.3
+ * Version: 1.4
  *
  * Configuration view
 ***/
@@ -10,8 +10,8 @@
 
 /*** Routines ***/
 
-/** Frequency setting change function **/
-void config_freq_change(VariableItem*);
+/** Sampling mode setting change function **/
+void config_mode_change(VariableItem*);
 
 /** Buffering setting change function **/
 void config_buf_change(VariableItem*);
