@@ -5,8 +5,6 @@
  * Submenu
 ***/
 
-/*** Types */
-
 /** Views **/
 typedef enum {
 
