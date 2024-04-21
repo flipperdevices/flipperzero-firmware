@@ -174,15 +174,23 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   /* Only one sample in the ring buffer */
   if(sampler_model->nb_samples == 1) {
 
+    /* Display that sample directly */
+    memcpy(&(sampler_model->disp_sample),
+		&(sampler_model->samples[prev_samples_end_i]),
+		sizeof(LRFSample));
+
+    /* There is no time between the sample and itself */
     sampler_model->samples_time_span = 0;
 
     /* We can't calculate the effective frequency */
     sampler_model->eff_freq = -1;
 
-    /* Display that sample directly */
-    memcpy(&(sampler_model->disp_sample),
-		&(sampler_model->samples[prev_samples_end_i]),
-		sizeof(LRFSample));
+    /* The return rate is 0 or 100% depending on whether the sample has any
+       distance or not */
+    sampler_model->return_rate =
+		sampler_model->disp_sample.dist1 > 0.5 ||
+		sampler_model->disp_sample.dist2 > 0.5 ||
+		sampler_model->disp_sample.dist3 > 0.5;
   }
 
   /* More than one sample in the ring buffer */
@@ -200,14 +208,10 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
       sampler_model->eff_freq = - 1;
 
     /* If we don't buffer samples, display the last sample directly */
-    if(sampler_model->config.buf == 0) {
-
-      sampler_model->samples_time_span = 0;
-
+    if(sampler_model->config.buf == 0)
       memcpy(&(sampler_model->disp_sample),
 		&(sampler_model->samples[prev_samples_end_i]),
 		sizeof(LRFSample));
-    }
 
     /* We buffer samples */
     else {
