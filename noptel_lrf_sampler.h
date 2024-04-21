@@ -28,6 +28,8 @@
 /*** Parameters ***/
 extern const char *config_file;
 
+extern const char *dsp_files_dir;
+
 extern const uint16_t config_mode_values[];
 extern const char *config_mode_names[];
 extern const uint8_t nb_config_mode_values;

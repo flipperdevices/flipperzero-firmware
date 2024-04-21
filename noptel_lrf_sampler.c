@@ -24,6 +24,8 @@
 const char *config_file = STORAGE_APP_DATA_PATH_PREFIX
 				"/noptel_lrf_sampler.save";
 
+const char *dsp_files_dir = ANY_PATH("noptel_lrf_diag");
+
 static const char *config_mode_label = "Sampling mode";
 const uint16_t config_mode_values[] = {smm, smm | 0x100, cmm_1hz, cmm_4hz,
 					cmm_10hz, cmm_20hz, cmm_100hz,
