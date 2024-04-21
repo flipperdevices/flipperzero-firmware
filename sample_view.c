@@ -55,6 +55,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   uint16_t i;
 
 
+
   /* Do we do automatic single measurement? */
   if(sampler_model->config.mode == (smm | 0x100)) {
 
