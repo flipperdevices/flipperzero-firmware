@@ -66,14 +66,11 @@ void copy_line(Line* l, Line* from, float flip_x, float flip_y) {
     copy_point(&l->end, &from->end, flip_x, flip_y);
 }
 
-void draw_hand(Canvas* canvas, ClockConfig* cfg, float ang, int radius, bool thick) {
+void draw_hand(Canvas* canvas, Point* ofs, float ang, int radius, bool thick) {
     Line l;
     set_line(&l, ang, thick ? HMS_OFS : -HMS_OFS, radius);
-    draw_line(canvas, &cfg->ofs, &l, thick ? Thick : Normal);
-    if(thick) {
-        l.end.x = 0, l.end.y = 0;
-        draw_line(canvas, &cfg->ofs, &l, Normal);
-    }
+    draw_line(canvas, ofs, &l, thick ? Thick : Normal);
+    if(thick) l.end.x = 0, l.end.y = 0, draw_line(canvas, ofs, &l, Normal);
 }
 
 void calc_clock_face(ClockConfig* cfg) {
@@ -81,35 +78,32 @@ void calc_clock_face(ClockConfig* cfg) {
     bool round = ((cfg->face_type == Round) || (cfg->face_type == DigitalRound)) && cfg->split;
     bool dots = digital && cfg->split;
 
-    cfg->ofs.x = cfg->split ? CLOCK_OFS_X / 2 : CLOCK_OFS_X, cfg->ofs.y = CLOCK_OFS_Y;
+    uint8_t width = cfg->split || round ? FACE_RADIUS : cfg->width, height = FACE_RADIUS;
 
-    uint8_t width = cfg->split || round ? FACE_RADIUS : cfg->width;
-    uint8_t height = FACE_RADIUS;
+    float short_ofs = dots ? 0.0 : round ? 1.5 : 2.0;
+    float long_ofs = dots ? 0.0 : round ? 5.0 : 7.0;
+    float hour_ofs = round ? 11.0 : 12.5;
 
-    float short_lin_ofs = dots ? 0.0 : round ? 1.5 : 2.0;
-    float long_lin_ofs = dots ? 0.0 : round ? 5.0 : 7.0;
-    float dig_ofs = round ? 11.0 : 12.5;
-
-    set_line(&cfg->face.minutes[0], 0, height, height - long_lin_ofs);
-    set_line(&cfg->face.minutes[15], M_PI_2, width, width - long_lin_ofs);
+    set_line(&cfg->face.minutes[0], 0, height, height - long_ofs);
+    set_line(&cfg->face.minutes[15], M_PI_2, width, width - long_ofs);
     copy_line(&cfg->face.minutes[30], &cfg->face.minutes[0], false, true);
     copy_line(&cfg->face.minutes[45], &cfg->face.minutes[15], true, false);
 
-    set_point(&cfg->face.hours[0], 0, height - dig_ofs);
-    set_point(&cfg->face.hours[3], M_PI_2, width - dig_ofs);
+    set_point(&cfg->face.hours[0], 0, height - hour_ofs);
+    set_point(&cfg->face.hours[3], M_PI_2, width - hour_ofs);
     copy_point(&cfg->face.hours[6], &cfg->face.hours[0], false, true);
     copy_point(&cfg->face.hours[9], &cfg->face.hours[3], true, false);
 
     float ang = M_TWOPI / 60;
     for(uint8_t min = 1; min < 15; min++, ang += M_TWOPI / 60) { // 1/4 circle (14 min)
         bool at_hour = (min % 5 == 0);
-        float lin_ofs = at_hour ? long_lin_ofs : short_lin_ofs;
+        float ofs = at_hour ? long_ofs : short_ofs;
 
         if(round)
-            set_line(&cfg->face.minutes[min], ang, FACE_RADIUS, FACE_RADIUS - lin_ofs);
+            set_line(&cfg->face.minutes[min], ang, FACE_RADIUS, FACE_RADIUS - ofs);
         else {
             intersect(&cfg->face.minutes[min].start, ang, width, height);
-            intersect(&cfg->face.minutes[min].end, ang, width - lin_ofs, height - lin_ofs);
+            intersect(&cfg->face.minutes[min].end, ang, width - ofs, height - ofs);
         }
 
         copy_line(&cfg->face.minutes[30 - min], &cfg->face.minutes[min], false, true);
@@ -119,9 +113,9 @@ void calc_clock_face(ClockConfig* cfg) {
         if(at_hour) {
             uint8_t hour = min / 5;
             if(round)
-                set_point(&cfg->face.hours[hour], ang, height - dig_ofs);
+                set_point(&cfg->face.hours[hour], ang, height - hour_ofs);
             else
-                intersect(&cfg->face.hours[hour], ang, width - dig_ofs, height - dig_ofs);
+                intersect(&cfg->face.hours[hour], ang, width - hour_ofs, height - hour_ofs);
             copy_point(&cfg->face.hours[6 - hour], &cfg->face.hours[hour], false, true);
             copy_point(&cfg->face.hours[6 + hour], &cfg->face.hours[hour], true, true);
             copy_point(&cfg->face.hours[12 - hour], &cfg->face.hours[hour], true, false);
@@ -167,14 +161,14 @@ void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms) {
     float s_ang = M_PI / 30.0 * dt->second + M_PI / 30000.0 * ms;
     float m_ang = M_PI / 30.0 * dt->minute + M_PI / 1800.0 * dt->second;
     float h_ang = M_PI / 6.0 * (dt->hour % 12) + M_PI / 360.0 * dt->minute;
-    draw_hand(canvas, cfg, h_ang, H_RAD, true);
-    draw_hand(canvas, cfg, m_ang, M_RAD, true);
-    draw_hand(canvas, cfg, s_ang, S_RAD, false);
+    draw_hand(canvas, &cfg->ofs, h_ang, H_RAD, true);
+    draw_hand(canvas, &cfg->ofs, m_ang, M_RAD, true);
+    draw_hand(canvas, &cfg->ofs, s_ang, S_RAD, false);
     canvas_draw_disc(canvas, cfg->ofs.x, cfg->ofs.y, 2);
 }
 
-void draw_date(Canvas* canvas, ClockConfig* cfg, DateTime* dt) {
-    uint8_t x = 96, y = cfg->ofs.y;
+void draw_date(Canvas* canvas, DateTime* dt) {
+    uint8_t x = CLOCK_OFS_X + CLOCK_OFS_X / 2, y = CLOCK_OFS_Y;
     FuriString* dat = furi_string_alloc();
     furi_string_printf(dat, "%2u", dt->day);
     const char* day = furi_string_get_cstr(dat);
@@ -199,7 +193,7 @@ void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms) {
         draw_digital_clock(canvas, cfg, dt);
     else
         draw_analog_clock(canvas, cfg, dt, ms);
-    if(cfg->split) draw_date(canvas, cfg, dt);
+    if(cfg->split) draw_date(canvas, dt);
 }
 
 void init_clock_config(ClockConfig* cfg) {
@@ -208,6 +202,7 @@ void init_clock_config(ClockConfig* cfg) {
     cfg->width = FACE_DEFAULT_WIDTH;
     cfg->digits_mod = 3;
     cfg->face_type = Rectangular;
+    cfg->ofs.x = CLOCK_OFS_X, cfg->ofs.y = CLOCK_OFS_Y;
 }
 
 void modify_clock_up(ClockConfig* cfg) {
@@ -225,9 +220,9 @@ void modify_clock_down(ClockConfig* cfg) {
 }
 
 void modify_clock_left(ClockConfig* cfg) {
-    if(cfg->split) {
+    if(cfg->split)
         cfg->face_type = (cfg->face_type + 1) % FACE_TYPES;
-    } else
+    else
         cfg->width = cfg->width <= FACE_RADIUS ? FACE_RADIUS : cfg->width - 1;
 }
 
@@ -237,4 +232,5 @@ void modify_clock_right(ClockConfig* cfg) {
 
 void modify_clock_ok(ClockConfig* cfg) {
     cfg->split = !cfg->split;
+    cfg->ofs.x = cfg->split ? CLOCK_OFS_X / 2 : CLOCK_OFS_X;
 }
