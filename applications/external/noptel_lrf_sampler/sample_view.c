@@ -32,6 +32,7 @@ static void lrf_sample_handler(LRFSample* lrf_sample, void* ctx) {
     App* app = (App*)ctx;
     SamplerModel* sampler_model = view_get_model(app->sample_view);
     uint16_t prev_samples_end_i;
+    uint16_t start_i_for_avg;
     float avg_dist1;
     float avg_dist2;
     float avg_dist3;
@@ -41,15 +42,46 @@ static void lrf_sample_handler(LRFSample* lrf_sample, void* ctx) {
     uint16_t nb_valid_samples_dist1;
     uint16_t nb_valid_samples_dist2;
     uint16_t nb_valid_samples_dist3;
-    uint16_t nb_samples;
     float timediff;
     uint16_t i;
+
+    /* Do we do automatic single measurement? */
+    if(sampler_model->config.freq == (smm | 0x100)) {
+        /* Is continuous measurement still enabled? */
+        if(sampler_model->continuous_meas_started) {
+            /* Has the LRF encountered an error or hit the eye safety limit? */
+            if(lrf_sample->dist1 == 0.5 || lrf_sample->dist2 == 0.5 || lrf_sample->dist3 == 0.5) {
+                /* Wait a bit for the LRF to "cool off" before triggering another
+           measurement */
+                furi_delay_ms(500);
+
+                /* Send a new SMM command if continuous measurement wasn't stopped
+           during the wait */
+                if(sampler_model->continuous_meas_started)
+                    send_lrf_command(app->lrf_serial_comm_app, smm);
+
+                /* Discard the measurement */
+                return;
+            }
+
+            /* Send a new SMM command */
+            send_lrf_command(app->lrf_serial_comm_app, smm);
+        }
+    }
 
     /* If beeps are enabled and any distance in the new LRF sample is valid,
      play a beep */
     if(sampler_model->config.beep &&
        (lrf_sample->dist1 > 0.5 || lrf_sample->dist2 > 0.5 || lrf_sample->dist3 > 0.5)) {
         start_beep(&app->speaker_control);
+    }
+
+    /* Reset the ring buffer if required, or if we do single measurement */
+    if(sampler_model->flush_samples || sampler_model->config.freq == smm) {
+        sampler_model->samples_start_i = 0;
+        sampler_model->samples_end_i = 0;
+        sampler_model->nb_samples = 0;
+        sampler_model->flush_samples = false;
     }
 
     /* Find the next spot in the samples ring buffer */
@@ -64,32 +96,59 @@ static void lrf_sample_handler(LRFSample* lrf_sample, void* ctx) {
             lrf_sample,
             sizeof(LRFSample));
         sampler_model->samples_end_i = i;
+        sampler_model->nb_samples++;
     }
 
-    /* Remove samples that are too old from the ring buffer - but always try
-     to keep at least 0.75 seconds worth of samples, or 2 samples, for more
-     accurate effective frequency calculation, even if we don't
-     average samples */
-    while(sampler_model->samples_start_i != prev_samples_end_i &&
-          ms_tick_time_diff(
-              sampler_model->samples[prev_samples_end_i].tstamp_ms,
-              sampler_model->samples[sampler_model->samples_start_i].tstamp_ms) >
-              (double)(sampler_model->config.avg > 0.75 ? sampler_model->config.avg : 0.75)) {
-        i = sampler_model->samples_start_i + 1;
-        if(i >= sampler_model->max_samples) i = 0;
-        if(i == prev_samples_end_i) break;
-        sampler_model->samples_start_i = i;
+    /* Do we buffer samples for a set amount of time? */
+    if(sampler_model->config.buf > 0) {
+        /* Remove samples that are too old but try to keep at least 0.75 seconds
+       worth of samples, or 2 samples, for more accurate effective frequency
+       calculation, even if we don't do buffering at all.
+       Keep samples that are a slightly older than we should to avoid decimating
+       samples that have come in a bit late */
+        while(sampler_model->samples_start_i != prev_samples_end_i &&
+
+              (sampler_model->samples_time_span = ms_tick_time_diff(
+                   sampler_model->samples[prev_samples_end_i].tstamp_ms,
+                   sampler_model->samples[sampler_model->samples_start_i].tstamp_ms)) >
+                  (double)(sampler_model->config.buf > 0.75 ? sampler_model->config.buf + 0.2L :
+                                                              0.75)) {
+            i = sampler_model->samples_start_i + 1;
+            if(i >= sampler_model->max_samples) i = 0;
+
+            if(i == prev_samples_end_i) break;
+
+            sampler_model->nb_samples--;
+            sampler_model->samples_start_i = i;
+        }
     }
 
-    /* Calculate the number of samples in the ring buffer */
-    if(sampler_model->samples_end_i >= sampler_model->samples_start_i)
-        nb_samples = sampler_model->samples_end_i - sampler_model->samples_start_i;
-    else
-        nb_samples = sampler_model->max_samples - sampler_model->samples_start_i +
-                     sampler_model->samples_end_i;
+    /* We buffer a set number of samples */
+    else {
+        /* Remove samples in excess but try to keep at least 0.75 seconds worth of
+       samples, or 2 samples, for more accurate effective frequency calculation,
+       even if we don't do buffering at all. */
+        while(sampler_model->samples_start_i != prev_samples_end_i &&
+
+              sampler_model->nb_samples > -sampler_model->config.buf &&
+
+              (sampler_model->samples_time_span = ms_tick_time_diff(
+                   sampler_model->samples[prev_samples_end_i].tstamp_ms,
+                   sampler_model->samples[sampler_model->samples_start_i].tstamp_ms)) > 0.75L) {
+            i = sampler_model->samples_start_i + 1;
+            if(i >= sampler_model->max_samples) i = 0;
+
+            if(i == prev_samples_end_i) break;
+
+            sampler_model->samples_start_i = i;
+            sampler_model->nb_samples--;
+        }
+    }
 
     /* Only one sample in the ring buffer */
-    if(nb_samples == 1) {
+    if(sampler_model->nb_samples == 1) {
+        sampler_model->samples_time_span = 0;
+
         /* We can't calculate the effective frequency */
         sampler_model->eff_freq = -1;
 
@@ -100,7 +159,7 @@ static void lrf_sample_handler(LRFSample* lrf_sample, void* ctx) {
             sizeof(LRFSample));
     }
 
-    /* We have more than one sample in the ring buffer */
+    /* More than one sample in the ring buffer */
     else {
         /* If we have at least 0.25 seconds between the oldest and the latest
        samples' timestamps, calculate the effective sampling frequency */
@@ -108,20 +167,56 @@ static void lrf_sample_handler(LRFSample* lrf_sample, void* ctx) {
             sampler_model->samples[prev_samples_end_i].tstamp_ms,
             sampler_model->samples[sampler_model->samples_start_i].tstamp_ms);
         if(timediff >= 0.25)
-            sampler_model->eff_freq = (nb_samples - 1) / timediff;
+            sampler_model->eff_freq = (sampler_model->nb_samples - 1) / timediff;
         else
             sampler_model->eff_freq = -1;
 
-        /* If we don't average samples, display the last sample directly */
-        if(sampler_model->config.avg == 0)
+        /* If we don't buffer samples, display the last sample directly */
+        if(sampler_model->config.buf == 0) {
+            sampler_model->samples_time_span = 0;
+
             memcpy(
                 &(sampler_model->disp_sample),
                 &(sampler_model->samples[prev_samples_end_i]),
                 sizeof(LRFSample));
+        }
 
-        /* ...otherwise calculate the average of the valid distances and amplitudes
-       in the ring buffer and display the averages instead */
+        /* We buffer samples */
         else {
+            start_i_for_avg = sampler_model->samples_start_i;
+
+            /* Do we buffer samples for a set amount of time? */
+            if(sampler_model->config.buf > 0) {
+                /* Just to calculate averages, disregard all samples that are too old
+           from the ring buffer without exceptions this time, but still keep
+           samples that are slightly older than we should to avoid decimating
+           samples that have come in a bit late */
+                while(ms_tick_time_diff(
+                          sampler_model->samples[prev_samples_end_i].tstamp_ms,
+                          sampler_model->samples[start_i_for_avg].tstamp_ms) >
+                      (double)sampler_model->config.buf + 0.2L) {
+                    start_i_for_avg++;
+                    if(i >= sampler_model->max_samples) start_i_for_avg = 0;
+                }
+            }
+
+            /* We buffer a set number of samples */
+            else {
+                /* Just to calculate averages, disregard samples in excess without
+           exceptions this time */
+                if(sampler_model->nb_samples > -sampler_model->config.buf) {
+                    start_i_for_avg += sampler_model->nb_samples + sampler_model->config.buf;
+                    if(start_i_for_avg >= sampler_model->max_samples)
+                        start_i_for_avg -= sampler_model->max_samples;
+                }
+
+                sampler_model->samples_time_span = ms_tick_time_diff(
+                    sampler_model->samples[prev_samples_end_i].tstamp_ms,
+                    sampler_model->samples[start_i_for_avg].tstamp_ms);
+            }
+
+            /* Calculate the average of the valid distances and amplitudes in that
+         subset of samples in the ring buffer */
             avg_dist1 = 0;
             avg_dist2 = 0;
             avg_dist3 = 0;
@@ -133,9 +228,7 @@ static void lrf_sample_handler(LRFSample* lrf_sample, void* ctx) {
             nb_valid_samples_dist2 = 0;
             nb_valid_samples_dist3 = 0;
 
-            nb_samples = 0;
-
-            i = sampler_model->samples_start_i;
+            i = start_i_for_avg;
             while(i != sampler_model->samples_end_i) {
                 if(sampler_model->samples[i].dist1 > 0.5) {
                     avg_dist1 += sampler_model->samples[i].dist1;
@@ -154,8 +247,6 @@ static void lrf_sample_handler(LRFSample* lrf_sample, void* ctx) {
                     avg_ampl3 += sampler_model->samples[i].ampl3;
                     nb_valid_samples_dist3++;
                 }
-
-                nb_samples++;
 
                 i++;
                 if(i >= sampler_model->max_samples) i = 0;
@@ -216,30 +307,27 @@ void sample_view_enter_callback(void* ctx) {
         app->sample_view,
         SamplerModel * sampler_model,
         {
+            sampler_model->samples_updated = false;
+
             /* Initialize the displayed distances */
             sampler_model->disp_sample.dist1 = NO_DISTANCE_DISPLAY;
             sampler_model->disp_sample.dist2 = NO_DISTANCE_DISPLAY;
             sampler_model->disp_sample.dist3 = NO_DISTANCE_DISPLAY;
 
             /* Reset the samples ring buffer */
-            sampler_model->samples_start_i = 0;
-            sampler_model->samples_end_i = 0;
-            sampler_model->samples_updated = false;
+            sampler_model->flush_samples = true;
+            sampler_model->nb_samples = 0;
+            sampler_model->samples_time_span = 0;
 
             /* Initialize the displayed effective sampling frequency */
             sampler_model->eff_freq = -1;
 
-            /* Are we doing single measurement? */
-            if(sampler_model->config.freq == smm) /* Send a SMM command (exec mode) */
-                send_lrf_command(app->lrf_serial_comm_app, smm);
+            /* Send the appropriate initial measurement command */
+            send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.freq & 0xff);
 
-            /* We're doing continuous measurement */
-            else {
-                /* Send the appropriate start-CMM command (exec mode) */
-                send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.freq);
-
-                sampler_model->cmm_started = true;
-            }
+            /* Mark continuous measurement started as needed */
+            sampler_model->continuous_meas_started = sampler_model->config.freq == smm ? false :
+                                                                                         true;
         },
         false);
 
@@ -253,6 +341,10 @@ void sample_view_enter_callback(void* ctx) {
     Stop the timer to update the sample view **/
 void sample_view_exit_callback(void* ctx) {
     App* app = (App*)ctx;
+    SamplerModel* sampler_model = view_get_model(app->sample_view);
+
+    /* Stop continuous measurement unconditionally */
+    sampler_model->continuous_meas_started = false;
 
     /* Send a CMM-break command unconditionally - 3 times to be sure */
     send_lrf_command(app->lrf_serial_comm_app, cmm_break);
@@ -273,6 +365,8 @@ void sample_view_exit_callback(void* ctx) {
 /** Draw callback for the sample view **/
 void sample_view_draw_callback(Canvas* canvas, void* model) {
     SamplerModel* sampler_model = (SamplerModel*)model;
+    double buf_coverage;
+    uint8_t y;
 
     /* First print all the things we need to print in the FontBigNumber font */
     canvas_set_font(canvas, FontBigNumbers);
@@ -307,15 +401,28 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
 
     /* If we have an effective sampling frequency, print it at the bottom */
     if(sampler_model->eff_freq >= 0) {
-        snprintf(
-            sampler_model->spstr,
-            (volatile size_t){sizeof(sampler_model->spstr)},
-            "%5.1f",
-            sampler_model->eff_freq);
-        canvas_draw_str(canvas, 0, 64, sampler_model->spstr);
+        /* If the frequency value is below 60 Hz, display it with one decimal */
+        if(sampler_model->eff_freq < 60) {
+            snprintf(
+                sampler_model->spstr,
+                (volatile size_t){sizeof(sampler_model->spstr)},
+                "%4.1f",
+                sampler_model->eff_freq);
+            canvas_draw_str(canvas, 10, 64, sampler_model->spstr);
+        }
+
+        /* Otherwise display it rounded to the nearest integer */
+        else {
+            snprintf(
+                sampler_model->spstr,
+                (volatile size_t){sizeof(sampler_model->spstr)},
+                "%3.0f",
+                sampler_model->eff_freq);
+            canvas_draw_str(canvas, 16, 64, sampler_model->spstr);
+        }
     }
 
-    /* Second print all the things we need to print in the FontPrimary font
+    /* Secondly print all the things we need to print in the FontPrimary font
      (bold, proportional) */
     canvas_set_font(canvas, FontPrimary);
 
@@ -364,7 +471,8 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
 
     /* If we have an effective sampling frequency, print "Hz" right of
      the value */
-    if(sampler_model->eff_freq >= 0) canvas_draw_str(canvas, 59, 64, "Hz");
+    if(sampler_model->eff_freq >= 0)
+        canvas_draw_str(canvas, sampler_model->eff_freq < 60 ? 57 : 51, 64, "Hz");
 
     /* Print the OK button symbol followed by "Sample", "Start" or "Stop"
      in a frame at the right-hand side depending on whether we do single or
@@ -373,7 +481,7 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
     canvas_draw_icon(canvas, 79, 54, &I_ok_button);
     if(sampler_model->config.freq == smm)
         canvas_draw_str(canvas, 90, 62, "Sample");
-    else if(sampler_model->cmm_started)
+    else if(sampler_model->continuous_meas_started)
         canvas_draw_str(canvas, 102, 62, "Stop");
     else
         canvas_draw_str(canvas, 102, 62, "Start");
@@ -410,6 +518,26 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 105, 39, sampler_model->spstr);
     }
 
+    /* If we do continuous measurement and we buffer samples, display how much
+     of the configured buffering time or samples we hold in the ring buffer
+     as a small bar at the lower left */
+    if(sampler_model->config.freq != smm && sampler_model->config.buf != 0) {
+        /* Do we buffer samples for a set amount of time? */
+        if(sampler_model->config.buf > 0)
+            buf_coverage = sampler_model->samples_time_span / sampler_model->config.buf;
+
+        /* We buffer a set number of samples */
+        else
+            buf_coverage = (double)sampler_model->nb_samples / -sampler_model->config.buf;
+
+        buf_coverage = buf_coverage > 1.0L ? 1.0L : buf_coverage;
+
+        y = 63 - 14 * buf_coverage;
+        canvas_draw_line(canvas, 0, 63, 0, y);
+        canvas_draw_line(canvas, 1, 63, 1, y);
+        canvas_draw_line(canvas, 2, 63, 2, y);
+    }
+
     /* Draw a dividing line between the distances / amplitudes and the bottom
      line */
     canvas_draw_line(canvas, 0, 48, 128, 48);
@@ -423,32 +551,42 @@ bool sample_view_input_callback(InputEvent* evt, void* ctx) {
     /* If the user pressed the OK button, tell the LRF to grab a single
      measurement or start/stop continuous measurement */
     if(evt->type == InputTypePress && evt->key == InputKeyOk) {
-        FURI_LOG_I(TAG, "OK button pressed");
+        FURI_LOG_D(TAG, "OK button pressed");
 
-        /* Are we doing single measurement? */
-        if(sampler_model->config.freq == smm) /* Send a SMM command (exec mode) */
-            send_lrf_command(app->lrf_serial_comm_app, smm);
+        /* Are we doing single measurement (manual or automatic)? */
+        if((sampler_model->config.freq & 0xff) == smm) {
+            /* If continuous measurement is stopped? send a SMM command (exec mode) */
+            if(!sampler_model->continuous_meas_started)
+                send_lrf_command(app->lrf_serial_comm_app, smm);
+
+            /* If we do automatic single measurement, flip the started flag */
+            if(sampler_model->config.freq != smm)
+                sampler_model->continuous_meas_started = !sampler_model->continuous_meas_started;
+        }
 
         /* We're doing continuous measurement */
-        else
-
+        else {
             /* Is continuous measurement already started? */
-            if(sampler_model->cmm_started) {
+            if(sampler_model->continuous_meas_started) {
                 /* Send a CMM-break command - 3 times to be sure */
                 send_lrf_command(app->lrf_serial_comm_app, cmm_break);
                 send_lrf_command(app->lrf_serial_comm_app, cmm_break);
                 send_lrf_command(app->lrf_serial_comm_app, cmm_break);
 
-                sampler_model->cmm_started = false;
+                sampler_model->continuous_meas_started = false;
             }
 
             /* continuous measurement isn't yet started */
             else {
+                /* Reset the samples ring buffer */
+                sampler_model->flush_samples = true;
+
                 /* Send the appropriate start-CMM command (exec mode) */
                 send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.freq);
 
-                sampler_model->cmm_started = true;
+                sampler_model->continuous_meas_started = true;
             }
+        }
 
         return true;
     }

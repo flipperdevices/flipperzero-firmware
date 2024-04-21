@@ -53,7 +53,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [add support for S(WTX) request in iso14443_4a_poller #3590 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3590)
 - OFW: [GUI: Fix array out of bounds in menu exit #3604 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3604)
 - OFW: [NFC: add Plantain legacy keys #3602 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3602)
-- Updated: [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Updated: [Radiation Sensor v1.0 (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
 - OFW: PR: [PoC skylanders plugin #3315 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3315)
 - Updated: [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
@@ -66,6 +65,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: Infrared: Assets for Toto and BioBidet bidets.
 - Added: BadUSB: [Assets for CVE-2024-1086 on LINUX targets (By hed0rah & ComradeOrion)](https://github.com/Notselwyn/CVE-2024-1086)
 - Updated: [Flizzer Tracker v0.9 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
+- Updated: [Noptel LRF Sampler v1.3 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 
 <a name="release">
 

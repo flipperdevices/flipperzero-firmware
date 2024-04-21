@@ -16,18 +16,43 @@
 
 /** LRF command **/
 typedef enum {
+
+    /* Trigger one SMM measurement */
     smm = 0,
+
+    /* Start continuous measurement at 1 Hz */
     cmm_1hz = 1,
-    cmm_4hz = 4,
-    cmm_10hz = 10,
-    cmm_20hz = 29,
-    cmm_100hz = 100,
-    cmm_200hz = 200,
-    cmm_break = -1,
-    pointer_on = -2,
-    pointer_off = -3,
-    send_ident = -4,
-    read_diag = -5,
+
+    /* Start continuous measurement at 4 Hz */
+    cmm_4hz = 2,
+
+    /* Start continuous measurement at 10 Hz */
+    cmm_10hz = 3,
+
+    /* Start continuous measurement at 20 Hz */
+    cmm_20hz = 4,
+
+    /* Start continuous measurement at 100 Hz */
+    cmm_100hz = 5,
+
+    /* Start continuous measurement at 200 Hz */
+    cmm_200hz = 6,
+
+    /* Stop continuous measurement */
+    cmm_break = 7,
+
+    /* Turn the pointer on */
+    pointer_on = 8,
+
+    /* Turn the pointer off */
+    pointer_off = 9,
+
+    /* Send identification information */
+    send_ident = 10,
+
+    /* Read diagnostic data */
+    read_diag = 11,
+
 } LRFCommand;
 
 /** LRF sample **/
