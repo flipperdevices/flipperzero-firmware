@@ -381,10 +381,11 @@ void sample_view_enter_callback(void *ctx) {
 	  sampler_model->disp_sample.dist2 = NO_DISTANCE_DISPLAY;
 	  sampler_model->disp_sample.dist3 = NO_DISTANCE_DISPLAY;
 
-	  /* Reset the samples ring buffer */
+	  /* Reset the samples ring buffer and associated calculated values */
 	  sampler_model->flush_samples = true;
 	  sampler_model->nb_samples = 0;
 	  sampler_model->samples_time_span = 0;
+	  sampler_model->return_rate = 0;
 
 	  /* Initialize the displayed effective sampling frequency */
 	  sampler_model->eff_freq = -1;
