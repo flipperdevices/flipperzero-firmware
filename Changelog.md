@@ -1,3 +1,11 @@
+## Version 1.x - xx/xx/2024
+
+- Added automatic SMM sampling mode
+- Sampling buffer sizeable by number of samples as well as time
+- Added buffering indicator
+- Added return rate indicator
+- Save diagnostic data files in a dedicated folder
+
 ## Version 1.3 - 17/04/2024
 
 - Added menu option to save the LRF diagnostic data
