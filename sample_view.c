@@ -646,9 +646,15 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
     /* Are we doing single measurement (manual or automatic)? */
     if((sampler_model->config.mode & 0xff) == smm) {
 
-      /* If continuous measurement is stopped? send a SMM command (exec mode) */
-      if(!sampler_model->continuous_meas_started)
+      /* Is continuous measurement stopped? */
+      if(!sampler_model->continuous_meas_started) {
+
+        /* Reset the samples ring buffer */
+        sampler_model->flush_samples = true;
+
+        /* Send a SMM command (exec mode) */
         send_lrf_command(app->lrf_serial_comm_app, smm);
+      }
 
       /* If we do automatic single measurement, flip the started flag */
       if(sampler_model->config.mode != smm)
