@@ -11,6 +11,8 @@ typedef enum {
     DigitalRound,
 } FaceType;
 
+typedef enum { Normal = 0, CopyHor, CopyVer, CopyBoth, Thick } LineType;
+
 typedef struct {
     int8_t x;
     int8_t y;
