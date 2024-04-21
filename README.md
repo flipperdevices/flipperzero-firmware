@@ -52,7 +52,7 @@ Up to 3 distances can be measured in one sample (several targets in the line of 
 
 Each measured distance is displayed on one line.
 
-The associated amplitude (i.e. signal strength) is displayed as a small number next to the distance.
+The associated amplitude - i.e. signal strength - is displayed as a small number next to the distance.
 
 #### Continuous measurement mode
 
@@ -62,27 +62,27 @@ In continuous measurement mode or automatic SMM mode, press the **OK** button to
 
 Distances and amplitudes are displayed like in single measurement mode.
 
-The effective sampling rate in Hz is calculated and displayed at the bottom.
+The effective sampling rate in Hertz is calculated and displayed at the bottom.
 
 #### Buffering
 
 If buffering is enabled, the following information is calculated:
 
 - Average distances for all valid samples
-- Average amplitudes (i.e. average signal strengths) for all valid samples
-- Return rate (i.e. number of samples containing any measured distance vs. total number of sampling attempts)
+- Average amplitudes - i.e. average signal strengths - for all valid samples
+- Return rate - i.e. number of samples containing any measured distance vs. total number of sampling attempts)
 
-The average distances and amplitudes are displayed instead of the last samples.
+The average distances and amplitudes are displayed instead of the last sample's.
 
 ![Sample buffering](screenshots/0-sample_buffering.png)
 
 The buffering state is displayed at the bottom left: the bar is all the way up when the buffer is full.
 
-The return rate is indicated next to the buffering state: the bar is all the way up when the return rate is 100% (meaning no missed measurements).
+The return rate is indicated next to the buffering state: the bar is all the way up when the return rate is 100% - meaning no missed measurements.
 
-![Sample buffering bars](screenshots/12-sample_buffering_bars.png)
+![Sample buffering bars](screenshots/13-sample_buffering_bars.png)
 
-The buffering state and the return rate indicators are useful to determine the rangefinder's extinction ratio: when the buffer is full, the return rate bar should look about 3/4 full at extinction ratio.
+The buffering state and the return rate indicators are useful to determine the rangefinder's extinction ratio: when the buffer is full, the return rate bar should look about ¾ full at extinction ratio.
 
 ### Pointer ON/OFF
 
@@ -90,7 +90,7 @@ Select the **Pointer ON/OFF** toggle to turn the pointer on and off if the range
 
 ![Pointer ON/OFF toggle](screenshots/7-pointer_on_off_toggle.png)
 
-The pointer is useful to line up the rangefinder on a short distance target.
+The pointer is useful to train the rangefinder on a short distance target.
 
 ### LRF information
 
@@ -100,15 +100,19 @@ Select the **LRF information** option to view the LRF's identification informati
 
 ### Save LRF diagnostic
 
-Select the **Save LRF diagnostic** option to save the LRF's diagnostic data after a failed ot incorrect measurement. Press the **OK** button to save another set of diagnostic data, or save another LRF's.
+Select the **Save LRF diagnostic** option to save the LRF's diagnostic data after a failed ot incorrect measurement. Press the **OK** button to save another set of diagnostic data or another LRF's.
 
 ![Save LRF diagnostic](screenshots/10-save_lrf_diagnostic.png)
 
 DSP files may be submitted to Noptel for analysis, along with a description of the problem with the rangefinder.
 
-To recover the DSP files from the Flipper Zero, connect the Flipper Zero to the computer with a USB cable and use [qFlipper](https://docs.flipper.net/qflipper) to download the files saved in **SD Card/apps_data/noptel_lrf_sampler/**
+To recover the DSP files, connect the Flipper Zero to the computer with a USB cable and use [qFlipper](https://docs.flipper.net/qflipper) to download the the **noptel_lrf_diag** directory:
 
-![Download DSP files](screenshots/11-download_dsp_file.png)
+![Download DSP directory](screenshots/11-download_dsp_directory.png)
+
+DSP files inside the **noptel_lrf_diag** directory may be downloaded individually also:
+
+![Download DSP file](screenshots/12-download_dsp_file.png)
 
 ### About
 
