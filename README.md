@@ -5,7 +5,7 @@ NFC Relay app for flipper zero, relay NFCA APDU and response between two flipper
 ## TODO or LIMITATIONS
 
 * TODO
-  * configurable UART pin and baudrate (Right now is hardcored using 16/17 and 38400)
+  * configurable UART pin and baudrate (Right now is hardcored using `15/16 aka. C1/C0` and 38400)
     * baudrate bigger than 38400 will case data lost
   * other method for flipper zero to communicate.
 * limitations
