@@ -118,7 +118,7 @@ Gen4PollerError
 
         size_t rx_bytes = bit_buffer_get_size_bytes(instance->rx_buffer);
 
-        if((rx_bytes != GEN4_CONFIG_SIZE)) {
+        if(rx_bytes != GEN4_CONFIG_SIZE) {
             ret = Gen4PollerErrorProtocol;
             break;
         }

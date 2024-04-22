@@ -27,6 +27,8 @@ void nfc_magic_scene_gen4_show_info_on_enter(void* context) {
 
     FuriString* output = furi_string_alloc();
 
+    furi_string_printf(output, "\e#Gen4\n");
+
     // Revision
     furi_string_cat_printf(
         output, "Revision: %02X %02X\n", gen4->revision.data[3], gen4->revision.data[4]);
@@ -83,9 +85,7 @@ void nfc_magic_scene_gen4_show_info_on_enter(void* context) {
         "Total blocks: %u",
         gen4->config.data_parsed.total_blocks + 1); // config stores the number of the last block
 
-    widget_add_string_element(widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Gen4 Info");
-
-    widget_add_text_scroll_element(widget, 3, 17, 124, 50, furi_string_get_cstr(output));
+    widget_add_text_scroll_element(widget, 0, 0, 128, 64, furi_string_get_cstr(output));
 
     widget_add_button_element(
         widget,
