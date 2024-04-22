@@ -1,6 +1,7 @@
 
 #include "sam_api.h"
 #include <toolbox/path.h>
+#include <bit_lib/bit_lib.h>
 
 #define TAG "SAMAPI"
 
@@ -749,13 +750,12 @@ void seader_mfc_transmit(
     BitBuffer* rx_buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
 
     do {
-        bit_buffer_append_bytes(tx_buffer, buffer, len);
         if(format[0] == 0x00 && format[1] == 0xC0 && format[2] == 0x00) {
-            // MfClassicError error = mf_classic_poller_send_standard_frame(mfc_poller,tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
+            bit_buffer_append_bytes(tx_buffer, buffer, len);
             MfClassicError error =
                 mf_classic_poller_send_frame(mfc_poller, tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
             if(error != MfClassicErrorNone) {
-                FURI_LOG_W(TAG, "mf_classic_poller_send_standard_frame error %d", error);
+                FURI_LOG_W(TAG, "mf_classic_poller_send_frame error %d", error);
                 seader_worker->stage = SeaderPollerEventTypeFail;
                 break;
             }
@@ -763,9 +763,51 @@ void seader_mfc_transmit(
             (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x40) ||
             (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x24) ||
             (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x44)) {
-            FURI_LOG_W(TAG, "TODO");
+            //bit_buffer_copy_bytes_with_parity(tx_buffer, buffer, len * 8);
+
+            uint8_t tx_parity = 0;
+
+            // Don't forget to swap the bits of buffer[8]
+            for(size_t i = 0; i < 8 + 1; i++) {
+                bit_lib_reverse_bits(buffer + i, 0, 8);
+            }
+
+            // Pull out parity bits
+            for(size_t i = 0; i < 8; i++) {
+                bool val = bit_lib_get_bit(buffer + i + 1, i);
+                bit_lib_set_bit(&tx_parity, i, val);
+            }
+
+            for(size_t i = 0; i < 8; i++) {
+                buffer[i] = (buffer[i] << i) | (buffer[i + 1] >> (8 - i));
+            }
+            bit_buffer_append_bytes(tx_buffer, buffer, 8);
+
+            for(size_t i = 0; i < 8; i++) {
+                bit_lib_reverse_bits(buffer + i, 0, 8);
+                bit_buffer_set_byte_with_parity(
+                    tx_buffer, i, buffer[i], bit_lib_get_bit(&tx_parity, i));
+            }
+
+            MfClassicError error = mf_classic_poller_send_custom_parity_frame(
+                mfc_poller, tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
+            if(error != MfClassicErrorNone) {
+                FURI_LOG_W(TAG, "mf_classic_poller_send_encrypted_frame error %d", error);
+                seader_worker->stage = SeaderPollerEventTypeFail;
+                break;
+            }
+
+            /*
+            uint8_t b[SEADER_POLLER_MAX_BUFFER_SIZE];
+            memset(b, 0, SEADER_POLLER_MAX_BUFFER_SIZE);
+            size_t bits_written = 0;
+            bit_buffer_write_bytes_with_parity(rx_buffer, b, SEADER_POLLER_MAX_BUFFER_SIZE, &bits_written);
+
+            seader_send_nfc_rx(seader_uart, b, bits_written/8);
+        */
+        } else {
+            FURI_LOG_W(TAG, "UNHANDLED FORMAT");
         }
-        FURI_LOG_W(TAG, "mf_classic_poller_send_standard_frame success");
 
         seader_send_nfc_rx(
             seader_uart,
