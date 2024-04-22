@@ -1,7 +1,5 @@
 #include "../nfc_magic_app_i.h"
 
-#include <bit_lib/bit_lib.h>
-
 void nfc_magic_scene_key_input_byte_input_callback(void* context) {
     NfcMagicApp* instance = context;
 
@@ -31,13 +29,16 @@ bool nfc_magic_scene_key_input_on_event(void* context, SceneManagerEvent event) 
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcMagicAppCustomEventByteInputDone) {
+            // TODO: NEED TEST
             if(scene_manager_has_previous_scene(instance->scene_manager, NfcMagicSceneGen4Menu)) {
-                instance->gen4_password_new = bit_lib_bytes_to_num_be(
-                    instance->byte_input_store, NFC_MAGIC_APP_BYTE_INPUT_STORE_SIZE);
+                memcpy(
+                    instance->gen4_password_new.bytes,
+                    instance->byte_input_store,
+                    GEN4_PASSWORD_LEN);
                 scene_manager_next_scene(instance->scene_manager, NfcMagicSceneChangeKey);
             } else {
-                instance->gen4_password = bit_lib_bytes_to_num_be(
-                    instance->byte_input_store, NFC_MAGIC_APP_BYTE_INPUT_STORE_SIZE);
+                memcpy(
+                    instance->gen4_password.bytes, instance->byte_input_store, GEN4_PASSWORD_LEN);
                 scene_manager_next_scene(instance->scene_manager, NfcMagicSceneCheck);
             }
             consumed = true;

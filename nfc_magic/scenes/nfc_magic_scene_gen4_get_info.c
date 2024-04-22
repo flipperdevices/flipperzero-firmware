@@ -1,11 +1,11 @@
 #include "../nfc_magic_app_i.h"
 
 enum {
-    NfcMagicSceneGen4GetCFGStateCardSearch,
-    NfcMagicSceneGen4GetCFGStateCardFound,
+    NfcMagicSceneGen4GetInfoStateCardSearch,
+    NfcMagicSceneGen4GetInfoStateCardFound,
 };
 
-NfcCommand nfc_mafic_scene_gen4_get_cfg_poller_callback(Gen4PollerEvent event, void* context) {
+NfcCommand nfc_mafic_scene_gen4_get_info_poller_callback(Gen4PollerEvent event, void* context) {
     NfcMagicApp* instance = context;
     furi_assert(event.data);
 
@@ -15,13 +15,10 @@ NfcCommand nfc_mafic_scene_gen4_get_cfg_poller_callback(Gen4PollerEvent event, v
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcMagicCustomEventCardDetected);
     } else if(event.type == Gen4PollerEventTypeRequestMode) {
-        event.data->request_mode.mode = Gen4PollerModeGetCFG;
+        event.data->request_mode.mode = Gen4PollerModeGetInfo;
     } else if(event.type == Gen4PollerEventTypeSuccess) {
-        // Copy config from event to main instance to display it on success scene
-        memcpy(
-            instance->gen4_config_display,
-            event.data->display_config,
-            sizeof(event.data->display_config));
+        // Copy data from event to main instance
+        gen4_copy(instance->gen4_data, gen4_poller_get_gen4_data(instance->gen4_poller));
 
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcMagicCustomEventWorkerSuccess);
@@ -35,13 +32,13 @@ NfcCommand nfc_mafic_scene_gen4_get_cfg_poller_callback(Gen4PollerEvent event, v
     return command;
 }
 
-static void nfc_magic_scene_gen4_get_cfg_setup_view(NfcMagicApp* instance) {
+static void nfc_magic_scene_gen4_get_info_setup_view(NfcMagicApp* instance) {
     Popup* popup = instance->popup;
     popup_reset(popup);
     uint32_t state =
-        scene_manager_get_scene_state(instance->scene_manager, NfcMagicSceneGen4GetCFG);
+        scene_manager_get_scene_state(instance->scene_manager, NfcMagicSceneGen4GetInfo);
 
-    if(state == NfcMagicSceneGen4GetCFGStateCardSearch) {
+    if(state == NfcMagicSceneGen4GetInfoStateCardSearch) {
         popup_set_icon(instance->popup, 0, 8, &I_NFC_manual_60x50);
         popup_set_text(
             instance->popup, "Apply the\ncard\nto the back", 128, 32, AlignRight, AlignCenter);
@@ -53,22 +50,24 @@ static void nfc_magic_scene_gen4_get_cfg_setup_view(NfcMagicApp* instance) {
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewPopup);
 }
 
-void nfc_magic_scene_gen4_get_cfg_on_enter(void* context) {
+void nfc_magic_scene_gen4_get_info_on_enter(void* context) {
     NfcMagicApp* instance = context;
 
     scene_manager_set_scene_state(
-        instance->scene_manager, NfcMagicSceneGen4GetCFG, NfcMagicSceneGen4GetCFGStateCardSearch);
-    nfc_magic_scene_gen4_get_cfg_setup_view(instance);
+        instance->scene_manager,
+        NfcMagicSceneGen4GetInfo,
+        NfcMagicSceneGen4GetInfoStateCardSearch);
+    nfc_magic_scene_gen4_get_info_setup_view(instance);
 
     nfc_magic_app_blink_start(instance);
 
     instance->gen4_poller = gen4_poller_alloc(instance->nfc);
     gen4_poller_set_password(instance->gen4_poller, instance->gen4_password);
     gen4_poller_start(
-        instance->gen4_poller, nfc_mafic_scene_gen4_get_cfg_poller_callback, instance);
+        instance->gen4_poller, nfc_mafic_scene_gen4_get_info_poller_callback, instance);
 }
 
-bool nfc_magic_scene_gen4_get_cfg_on_event(void* context, SceneManagerEvent event) {
+bool nfc_magic_scene_gen4_get_info_on_event(void* context, SceneManagerEvent event) {
     NfcMagicApp* instance = context;
     bool consumed = false;
 
@@ -76,19 +75,22 @@ bool nfc_magic_scene_gen4_get_cfg_on_event(void* context, SceneManagerEvent even
         if(event.event == NfcMagicCustomEventCardDetected) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
-                NfcMagicSceneGen4GetCFG,
-                NfcMagicSceneGen4GetCFGStateCardFound);
-            nfc_magic_scene_gen4_get_cfg_setup_view(instance);
+                NfcMagicSceneGen4GetInfo,
+                NfcMagicSceneGen4GetInfoStateCardFound);
+            nfc_magic_scene_gen4_get_info_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventCardLost) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
-                NfcMagicSceneGen4GetCFG,
-                NfcMagicSceneGen4GetCFGStateCardSearch);
-            nfc_magic_scene_gen4_get_cfg_setup_view(instance);
+                NfcMagicSceneGen4GetInfo,
+                NfcMagicSceneGen4GetInfoStateCardSearch);
+            nfc_magic_scene_gen4_get_info_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventWorkerSuccess) {
-            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4ShowCFG);
+            // for notification message
+            scene_manager_set_scene_state(
+                instance->scene_manager, NfcMagicSceneGen4ShowInfo, true);
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4ShowInfo);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventWorkerFail) {
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4Fail);
@@ -99,13 +101,15 @@ bool nfc_magic_scene_gen4_get_cfg_on_event(void* context, SceneManagerEvent even
     return consumed;
 }
 
-void nfc_magic_scene_gen4_get_cfg_on_exit(void* context) {
+void nfc_magic_scene_gen4_get_info_on_exit(void* context) {
     NfcMagicApp* instance = context;
 
     gen4_poller_stop(instance->gen4_poller);
     gen4_poller_free(instance->gen4_poller);
     scene_manager_set_scene_state(
-        instance->scene_manager, NfcMagicSceneGen4GetCFG, NfcMagicSceneGen4GetCFGStateCardSearch);
+        instance->scene_manager,
+        NfcMagicSceneGen4GetInfo,
+        NfcMagicSceneGen4GetInfoStateCardSearch);
     // Clear view
     popup_reset(instance->popup);
 
