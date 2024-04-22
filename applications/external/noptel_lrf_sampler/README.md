@@ -33,6 +33,7 @@ In the configuration menu, select the sampling mode:
 
 Set **Buffering** to buffer samples in automatic SMM or continuous measurement mode for either:
 
+- **None**: no buffering (default)
 - **1 s** ▶ **10 s**
 - **5 samples**, **10 samples**, **100 samples** or **1000 samples**
 
@@ -70,7 +71,7 @@ If buffering is enabled, the following information is calculated:
 
 - Average distances for all valid samples
 - Average amplitudes - i.e. average signal strengths - for all valid samples
-- Return rate - i.e. number of samples containing any measured distance vs. total number of sampling attempts)
+- Return rate - i.e. number of samples containing any measured distance vs. total number of samples
 
 The average distances and amplitudes are displayed instead of the last sample's.
 
