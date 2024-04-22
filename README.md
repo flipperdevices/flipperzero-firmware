@@ -33,6 +33,7 @@ In the configuration menu, select the sampling mode:
 
 Set **Buffering** to buffer samples in automatic SMM or continuous measurement mode for either:
 
+- **None**: no buffering (default)
 - **1 s** ▶ **10 s**
 - **5 samples**, **10 samples**, **100 samples** or **1000 samples**
 
