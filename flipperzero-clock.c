@@ -40,19 +40,21 @@ static void app_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-static bool cfg_load(File* file, ClockConfig* cfg) {
+static bool cfg_load(File* file, AppData* app) {
     size_t readed = 0;
     if(storage_file_open(file, CFG_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING))
-        readed = storage_file_read(file, cfg, sizeof(ClockConfig));
+        readed = storage_file_read(file, &app->cfg, sizeof(ClockConfig));
     storage_file_close(file);
-    return readed == sizeof(ClockConfig) && cfg->version == CONFIG_VERSION;
+    return readed == sizeof(ClockConfig) && app->cfg.version == CONFIG_VERSION;
 }
 
-static void cfg_save(File* file, ClockConfig* cfg) {
-    calc_clock_face(cfg);
+static void cfg_save(File* file, AppData* app) {
+    if(furi_mutex_acquire(app->mutex, FuriWaitForever) != FuriStatusOk) return;
+    calc_clock_face(&app->cfg);
     if(storage_file_open(file, CFG_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS))
-        storage_file_write(file, cfg, sizeof(ClockConfig));
+        storage_file_write(file, &app->cfg, sizeof(ClockConfig));
     storage_file_close(file);
+    furi_mutex_release(app->mutex);
 }
 
 int32_t clock_main(void* p) {
@@ -68,9 +70,9 @@ int32_t clock_main(void* p) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
-    if(!cfg_load(file, &app->cfg)) {
+    if(!cfg_load(file, app)) {
         init_clock_config(&app->cfg);
-        cfg_save(file, &app->cfg);
+        cfg_save(file, app);
     }
 
     ViewPort* view_port = view_port_alloc();
@@ -112,7 +114,7 @@ int32_t clock_main(void* p) {
                 default:
                     break;
                 }
-                if(!terminate) cfg_save(file, &app->cfg);
+                if(!terminate) cfg_save(file, app);
             }
         }
         view_port_update(view_port);
