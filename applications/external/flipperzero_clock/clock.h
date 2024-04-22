@@ -40,7 +40,7 @@ typedef struct {
 } ClockConfig;
 
 void calc_clock_face(ClockConfig* cfg);
-void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms);
+void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t ms);
 
 void init_clock_config(ClockConfig* cfg);
 void modify_clock_up(ClockConfig* cfg);

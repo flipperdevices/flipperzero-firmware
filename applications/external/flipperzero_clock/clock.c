@@ -78,10 +78,11 @@ void calc_clock_face(ClockConfig* cfg) {
     bool round = ((cfg->face_type == Round) || (cfg->face_type == DigitalRound)) && cfg->split;
     bool dots = digital && cfg->split;
 
-    uint8_t width = cfg->split || round ? FACE_RADIUS : cfg->width, height = FACE_RADIUS;
+    uint8_t width = cfg->split || round ? FACE_RADIUS : cfg->width;
+    uint8_t height = FACE_RADIUS;
 
-    float short_ofs = dots ? 0.0 : round ? 1.5 : 2.0;
-    float long_ofs = dots ? 0.0 : round ? 5.0 : 7.0;
+    float short_ofs = dots ? 1.0 : round ? 1.5 : 2.0;
+    float long_ofs = dots ? 1.0 : round ? 5.0 : 7.0;
     float hour_ofs = round ? 11.0 : 12.5;
 
     set_line(&cfg->face.minutes[0], 0, height, height - long_ofs);
@@ -105,13 +106,13 @@ void calc_clock_face(ClockConfig* cfg) {
             intersect(&cfg->face.minutes[min].start, ang, width, height);
             intersect(&cfg->face.minutes[min].end, ang, width - ofs, height - ofs);
         }
-
         copy_line(&cfg->face.minutes[30 - min], &cfg->face.minutes[min], false, true);
         copy_line(&cfg->face.minutes[30 + min], &cfg->face.minutes[min], true, true);
         copy_line(&cfg->face.minutes[60 - min], &cfg->face.minutes[min], true, false);
 
         if(at_hour) {
             uint8_t hour = min / 5;
+
             if(round)
                 set_point(&cfg->face.hours[hour], ang, height - hour_ofs);
             else
@@ -123,7 +124,8 @@ void calc_clock_face(ClockConfig* cfg) {
     }
 }
 
-void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt) {
+void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t ms) {
+    static char buf[8];
     uint8_t hour = dt->hour, x = cfg->ofs.x, y = cfg->ofs.y;
     if(locale_get_time_format() == LocaleTimeFormat12h) {
         hour = hour % 12 == 0 ? 12 : hour % 12;
@@ -131,36 +133,53 @@ void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt) {
         canvas_draw_str_aligned(
             canvas, x, y - 10, AlignCenter, AlignBottom, (dt->hour >= 12 ? "PM" : "AM"));
     }
-    FuriString* time = furi_string_alloc();
-    furi_string_printf(time, "%2u:%02u", hour, dt->minute);
+    snprintf(buf, 8, "%2u:%02u", hour, dt->minute);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, x, y, AlignCenter, AlignCenter, furi_string_get_cstr(time));
-    furi_string_free(time);
-    for(int i = 0; i < 45; i++)
-        draw_line(canvas, &cfg->ofs, &cfg->face.minutes[(dt->second - i + 60) % 60], Normal);
+    canvas_draw_str_aligned(canvas, x, y, AlignCenter, AlignCenter, buf);
+    if(cfg->face_type == DigitalRectangular) {
+        for(uint8_t i = 0; i < 45; i++)
+            draw_line(canvas, &cfg->ofs, &cfg->face.minutes[(dt->second - i + 60) % 60], Normal);
+    } else {
+        Line l;
+        for(uint8_t i = 10; i > 0; i--) {
+            Line* prev = &cfg->face.minutes[(dt->second - i - 1 + 60) % 60];
+            l = cfg->face.minutes[(dt->second - i + 60) % 60];
+            if(i > 3)
+                canvas_draw_dot(canvas, cfg->ofs.x + l.start.x, cfg->ofs.y - l.start.y);
+            else {
+                l.end = prev->start;
+                draw_line(canvas, &cfg->ofs, &l, Normal);
+            }
+        }
+        float s_ang = M_TWOPI / 60.0 * dt->second + M_TWOPI / 60000.0 * ms;
+        set_point(&l.end, s_ang, FACE_RADIUS - 1);
+        draw_line(canvas, &cfg->ofs, &l, Normal);
+        canvas_draw_disc(canvas, cfg->ofs.x + l.end.x, cfg->ofs.y - l.end.y, 1);
+    }
 }
 
-void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms) {
-    for(int i = 1; i < 15; i++) draw_line(canvas, &cfg->ofs, &cfg->face.minutes[i], CopyBoth);
+void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t ms) {
+    static char buf[3];
     draw_line(canvas, &cfg->ofs, &cfg->face.minutes[0], CopyVer);
     draw_line(canvas, &cfg->ofs, &cfg->face.minutes[15], CopyHor);
+    Line* m = &cfg->face.minutes[1];
+    Point* o = &cfg->ofs;
     if(cfg->digits_mod <= 12) {
         canvas_set_font(canvas, FontSecondary);
-        FuriString* num = furi_string_alloc();
-        for(int hour = 0; hour < 12; hour++)
-            if(hour % cfg->digits_mod == 0) {
-                Point* h = &cfg->face.hours[hour];
-                uint8_t x = cfg->ofs.x + h->x;
-                uint8_t y = cfg->ofs.y - h->y + 1;
-                furi_string_printf(num, "%u", hour == 0 ? 12 : hour);
+        Point* h = &cfg->face.hours[0];
+        for(uint8_t i = 0; i < 14; i++, h++, m++) {
+            if((i < 12) && (i % cfg->digits_mod == 0)) {
+                snprintf(buf, 3, "%2u", i == 0 ? 12 : i);
                 canvas_draw_str_aligned(
-                    canvas, x, y, AlignCenter, AlignCenter, furi_string_get_cstr(num));
+                    canvas, o->x + h->x, o->y - h->y + 1, AlignCenter, AlignCenter, buf);
             }
-        furi_string_free(num);
-    }
-    float s_ang = M_PI / 30.0 * dt->second + M_PI / 30000.0 * ms;
-    float m_ang = M_PI / 30.0 * dt->minute + M_PI / 1800.0 * dt->second;
-    float h_ang = M_PI / 6.0 * (dt->hour % 12) + M_PI / 360.0 * dt->minute;
+            draw_line(canvas, &cfg->ofs, m, CopyBoth);
+        }
+    } else
+        for(uint8_t i = 0; i < 14; i++, m++) draw_line(canvas, o, m, CopyBoth);
+    float s_ang = M_TWOPI / 60.0 * dt->second + M_TWOPI / 60000.0 * ms;
+    float m_ang = M_TWOPI / 60.0 * dt->minute + M_TWOPI / 3600.0 * dt->second;
+    float h_ang = M_TWOPI / 12.0 * (dt->hour % 12) + M_TWOPI / 720.0 * dt->minute;
     draw_hand(canvas, &cfg->ofs, h_ang, H_RAD, true);
     draw_hand(canvas, &cfg->ofs, m_ang, M_RAD, true);
     draw_hand(canvas, &cfg->ofs, s_ang, S_RAD, false);
@@ -187,10 +206,10 @@ void draw_date(Canvas* canvas, DateTime* dt) {
     furi_string_free(dat);
 }
 
-void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, int ms) {
+void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t ms) {
     bool digital = (cfg->face_type == DigitalRectangular) || (cfg->face_type == DigitalRound);
     if(cfg->split && digital)
-        draw_digital_clock(canvas, cfg, dt);
+        draw_digital_clock(canvas, cfg, dt, ms);
     else
         draw_analog_clock(canvas, cfg, dt, ms);
     if(cfg->split) draw_date(canvas, dt);
