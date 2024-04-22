@@ -55,15 +55,6 @@ static void menu_short_name(MenuItem* item, FuriString* name) {
     }
 }
 
-static void menu_string_to_upper_case(FuriString* str) {
-    for(size_t i = 0; i < furi_string_size(str); i++) {
-        char c = furi_string_get_char(str, i);
-        if(c >= 'a' && c <= 'z') {
-            furi_string_set_char(str, i, c - 'a' + 'A');
-        }
-    }
-}
-
 static void menu_centered_icon(
     Canvas* canvas,
     MenuItem* item,
@@ -328,36 +319,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 }
             }
 
-            break;
-        }
-        case MenuStyleEurocorp: {
-#ifdef CANVAS_HAS_FONT_EUROCORP
-            canvas_set_font(canvas, FontEurocorp);
-#else
-            canvas_set_font(canvas, FontPrimary);
-#endif
-            for(uint8_t i = 0; i < 3; i++) {
-                canvas_set_color(canvas, ColorBlack);
-                shift_position = (position + items_count + i - 1) % items_count;
-                item = MenuItemArray_get(model->items, shift_position);
-                menu_short_name(item, name);
-                menu_string_to_upper_case(name);
-                size_t scroll_counter = menu_scroll_counter(model, i == 1);
-                if(i == 1) {
-                    canvas_draw_box(canvas, 0, 22, 128, 22);
-                    canvas_set_color(canvas, ColorWhite);
-                    // Clip corner
-                    for(uint8_t i = 0; i < 6; i++) {
-                        for(uint8_t j = 0; j < 6; j++) {
-                            if(j - i >= 0) {
-                                canvas_draw_dot(canvas, 128 - i, 22 + j - i);
-                            }
-                        }
-                    }
-                }
-                elements_scrollable_text_line(
-                    canvas, 2, 19 + 22 * i, 128 - 3, name, scroll_counter, false, false);
-            }
             break;
         }
         case MenuStyleCompact: {
@@ -671,7 +632,6 @@ static void menu_process_up(Menu* menu) {
 
             switch(my_menu_style) {
             case MenuStyleList:
-            case MenuStyleEurocorp:
             case MenuStyleTerminal:
                 if(position > 0) {
                     position--;
@@ -723,7 +683,6 @@ static void menu_process_down(Menu* menu) {
 
             switch(my_menu_style) {
             case MenuStyleList:
-            case MenuStyleEurocorp:
             case MenuStyleTerminal:
                 if(position < count - 1) {
                     position++;

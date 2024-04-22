@@ -13,7 +13,6 @@ const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontKeyboard] = {.leading_default = 11, .leading_min = 9, .height = 7, .descender = 2},
     [FontBigNumbers] = {.leading_default = 18, .leading_min = 16, .height = 15, .descender = 0},
     [FontBatteryPercent] = {.leading_default = 11, .leading_min = 9, .height = 6, .descender = 0},
-    [FontEurocorp] = {.leading_default = 12, .leading_min = 11, .height = 16, .descender = 2},
 };
 
 Canvas* canvas_init(void) {
@@ -189,9 +188,6 @@ void canvas_set_font(Canvas* canvas, Font font) {
         break;
     case FontBatteryPercent:
         u8g2_SetFont(&canvas->fb, u8g2_font_5x7_tr); //u8g2_font_micro_tr);
-        break;
-    case FontEurocorp:
-        u8g2_SetFont(&canvas->fb, u8g2_font_eurocorp_tr);
         break;
     default:
         furi_crash();
