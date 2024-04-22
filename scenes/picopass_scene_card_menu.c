@@ -21,16 +21,17 @@ void picopass_scene_card_menu_on_enter(void* context) {
     Submenu* submenu = picopass->submenu;
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     PicopassBlock* card_data = picopass->dev->dev_data.card_data;
+    PicopassDeviceAuthMethod auth = picopass->dev->dev_data.auth;
 
-    bool sio = 0x30 == card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
+    bool SE = card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].valid &&
+              0x30 == card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
+    bool SR = card_data[10].valid && 0x30 == card_data[10].data[0];
+    bool has_sio = SE || SR;
     bool secured = (card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
                    PICOPASS_FUSE_CRYPT0;
-    bool zero_config = picopass_is_memset(
-        card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
     bool no_credential = picopass_is_memset(pacs->credential, 0x00, sizeof(pacs->credential));
-    bool no_key = !card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].valid;
 
-    if(secured && zero_config) {
+    if(auth == PicopassDeviceAuthMethodFailed) {
         submenu_add_item(
             submenu,
             "Save Partial",
@@ -42,7 +43,7 @@ void picopass_scene_card_menu_on_enter(void* context) {
             submenu, "Save", SubmenuIndexSave, picopass_scene_card_menu_submenu_callback, picopass);
     }
 
-    if(secured && (sio || pacs->sio)) {
+    if(secured && has_sio) {
         submenu_add_item(
             submenu,
             "Save in Seader fmt",
@@ -60,7 +61,7 @@ void picopass_scene_card_menu_on_enter(void* context) {
             picopass);
     }
 
-    if(!zero_config && !no_key) {
+    if(auth == PicopassDeviceAuthMethodNone || auth == PicopassDeviceAuthMethodKey) {
         submenu_add_item(
             submenu,
             "Write",
