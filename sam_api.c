@@ -768,7 +768,7 @@ void seader_mfc_transmit(
             uint8_t tx_parity = 0;
 
             // Don't forget to swap the bits of buffer[8]
-            for(size_t i = 0; i < 8 + 1; i++) {
+            for(size_t i = 0; i < len; i++) {
                 bit_lib_reverse_bits(buffer + i, 0, 8);
             }
 
@@ -797,14 +797,59 @@ void seader_mfc_transmit(
                 break;
             }
 
-            /*
-            uint8_t b[SEADER_POLLER_MAX_BUFFER_SIZE];
-            memset(b, 0, SEADER_POLLER_MAX_BUFFER_SIZE);
-            size_t bits_written = 0;
-            bit_buffer_write_bytes_with_parity(rx_buffer, b, SEADER_POLLER_MAX_BUFFER_SIZE, &bits_written);
+            size_t length = bit_buffer_get_size_bytes(rx_buffer);
+            const uint8_t* rx_parity = bit_buffer_get_parity(rx_buffer);
 
-            seader_send_nfc_rx(seader_uart, b, bits_written/8);
-        */
+            memset(display, 0, sizeof(display));
+            for(uint8_t i = 0; i < length; i++) {
+                snprintf(
+                    display + (i * 2), sizeof(display), "%02x", bit_buffer_get_byte(rx_buffer, i));
+            }
+            FURI_LOG_D(TAG, "NFC Response %d: %s [%02x]", length, display, rx_parity[0]);
+
+            uint8_t with_parity[SEADER_POLLER_MAX_BUFFER_SIZE];
+            memset(with_parity, 0, sizeof(with_parity));
+
+            for(size_t i = 0; i < length; i++) {
+                uint8_t b = bit_buffer_get_byte(rx_buffer, i);
+                bit_lib_reverse_bits(&b, 0, 8);
+                bit_buffer_set_byte(rx_buffer, i, b);
+            }
+
+            length = length + (length / 8) + 1;
+
+            uint8_t parts = 1 + length / 9;
+            for(size_t p = 0; p < parts; p++) {
+                uint8_t doffset = p * 9;
+                uint8_t soffset = p * 8;
+
+                for(size_t i = 0; i < 9; i++) {
+                    with_parity[i + doffset] = bit_buffer_get_byte(rx_buffer, i + soffset) >> i;
+                    if(i > 0) {
+                        with_parity[i + doffset] |= bit_buffer_get_byte(rx_buffer, i + soffset - 1)
+                                                    << (9 - i);
+                    }
+
+                    if(i > 0) {
+                        bool val = bit_lib_get_bit(rx_parity, i - 1);
+                        bit_lib_set_bit(with_parity + i, i - 1, val);
+                    }
+                }
+            }
+
+            for(size_t i = 0; i < length; i++) {
+                bit_lib_reverse_bits(with_parity + i, 0, 8);
+            }
+
+            bit_buffer_copy_bytes(rx_buffer, with_parity, length);
+
+            memset(display, 0, sizeof(display));
+            for(uint8_t i = 0; i < length; i++) {
+                snprintf(
+                    display + (i * 2), sizeof(display), "%02x", bit_buffer_get_byte(rx_buffer, i));
+            }
+            FURI_LOG_D(TAG, "NFC Response %d: %s [%02x]", length, display, rx_parity[0]);
+
         } else {
             FURI_LOG_W(TAG, "UNHANDLED FORMAT");
         }
