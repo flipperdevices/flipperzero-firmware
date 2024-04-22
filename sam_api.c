@@ -751,22 +751,21 @@ void seader_mfc_transmit(
     do {
         bit_buffer_append_bytes(tx_buffer, buffer, len);
         if(format[0] == 0x00 && format[1] == 0xC0 && format[2] == 0x00) {
-            //iso14443_3a_poller_standard_frame_exchange
+            // MfClassicError error = mf_classic_poller_send_standard_frame(mfc_poller,tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
+            MfClassicError error =
+                mf_classic_poller_send_frame(mfc_poller, tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
+            if(error != MfClassicErrorNone) {
+                FURI_LOG_W(TAG, "mf_classic_poller_send_standard_frame error %d", error);
+                seader_worker->stage = SeaderPollerEventTypeFail;
+                break;
+            }
         } else if(
             (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x40) ||
             (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x24) ||
             (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x44)) {
-            /*
-            Iso14443_3aPoller* iso14443_3a_poller = (MfClassicPoller)mfc_poller->iso14443_3a_poller;
-            Iso14443_3aError error = iso14443_3a_poller_txrx_custom_parity(iso14443_3a_poller,tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
-              if(error == Iso14443_3aErrorWrongCrc) {
-                  if(bit_buffer_get_size_bytes(rx_buffer) != sizeof(MfClassicNt)) {
-                      FURI_LOG_W(TAG, "iso14443_3a_poller_txrx_custom_parity error %d", error);
-                      seader_worker->stage = SeaderPollerEventTypeFail;
-                  }
-              }
-          */
+            FURI_LOG_W(TAG, "TODO");
         }
+        FURI_LOG_W(TAG, "mf_classic_poller_send_standard_frame success");
 
         seader_send_nfc_rx(
             seader_uart,

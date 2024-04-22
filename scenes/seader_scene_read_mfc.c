@@ -1,6 +1,8 @@
 #include "../seader_i.h"
 #include <dolphin/dolphin.h>
 
+#define TAG "SceneReadNfc"
+
 void seader_scene_read_mfc_on_enter(void* context) {
     Seader* seader = context;
     dolphin_deed(DolphinDeedNfcRead);
@@ -18,6 +20,8 @@ void seader_scene_read_mfc_on_enter(void* context) {
     seader->worker->stage = SeaderPollerEventTypeCardDetect;
     seader_credential_clear(seader->credential);
     seader->credential->type = SeaderCredentialTypeMifareClassic;
+
+    FURI_LOG_W(TAG, "Start poller");
     nfc_poller_start(seader->poller, seader_worker_poller_callback_mfc, seader);
 
     seader_blink_start(seader);
