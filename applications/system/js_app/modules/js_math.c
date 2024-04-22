@@ -23,7 +23,7 @@ void js_math_abs(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    mjs_return(mjs, x < 0 ? mjs_mk_number(mjs, -x) : mjs_arg(mjs, 0));
+    mjs_return(mjs, x < (double)0. ? mjs_mk_number(mjs, -x) : mjs_arg(mjs, 0));
 }
 
 void js_math_acos(struct mjs* mjs) {
@@ -31,11 +31,12 @@ void js_math_acos(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    if(x < -1 || x > 1) {
+    if(x < (double)-1. || x > (double)1.) {
         ret_bad_args(mjs, "Invalid input value for Math.acos");
         mjs_return(mjs, MJS_UNDEFINED);
     }
-    mjs_return(mjs, mjs_mk_number(mjs, JS_MATH_PI / (double)2 - atan(x / sqrt(1 - x * x))));
+    mjs_return(
+        mjs, mjs_mk_number(mjs, JS_MATH_PI / (double)2. - atan(x / sqrt((double).1 - x * x))));
 }
 
 void js_math_acosh(struct mjs* mjs) {
@@ -43,11 +44,11 @@ void js_math_acosh(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    if(x < 1) {
+    if(x < (double)1.) {
         ret_bad_args(mjs, "Invalid input value for Math.acosh");
         mjs_return(mjs, MJS_UNDEFINED);
     }
-    mjs_return(mjs, mjs_mk_number(mjs, log(x + sqrt(x * x - 1))));
+    mjs_return(mjs, mjs_mk_number(mjs, log(x + sqrt(x * x - (double)1.))));
 }
 
 void js_math_asin(struct mjs* mjs) {
@@ -55,7 +56,7 @@ void js_math_asin(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    mjs_return(mjs, mjs_mk_number(mjs, atan(x / sqrt(1 - x * x))));
+    mjs_return(mjs, mjs_mk_number(mjs, atan(x / sqrt((double)1. - x * x))));
 }
 
 void js_math_asinh(struct mjs* mjs) {
@@ -63,7 +64,7 @@ void js_math_asinh(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    mjs_return(mjs, mjs_mk_number(mjs, log(x + sqrt(x * x + 1))));
+    mjs_return(mjs, mjs_mk_number(mjs, log(x + sqrt(x * x + (double)1.))));
 }
 
 void js_math_atan(struct mjs* mjs) {
@@ -89,11 +90,11 @@ void js_math_atanh(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    if(x <= -1 || x >= 1) {
+    if(x <= (double)-1. || x >= (double)1.) {
         ret_bad_args(mjs, "Invalid input value for Math.atanh");
         mjs_return(mjs, MJS_UNDEFINED);
     }
-    mjs_return(mjs, mjs_mk_number(mjs, (double)0.5 * log((1 + x) / (1 - x))));
+    mjs_return(mjs, mjs_mk_number(mjs, (double)0.5 * log(((double)1. + x) / ((double)1. - x))));
 }
 
 void js_math_cbrt(struct mjs* mjs) {
@@ -101,7 +102,7 @@ void js_math_cbrt(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    mjs_return(mjs, mjs_mk_number(mjs, pow(x, 1.0 / 3.0)));
+    mjs_return(mjs, mjs_mk_number(mjs, pow(x, (double)1.0 / (double)3.0)));
 }
 
 void js_math_ceil(struct mjs* mjs) {
@@ -138,8 +139,8 @@ void js_math_exp(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    double result = 1;
-    double term = 1;
+    double result = 1.;
+    double term = 1.;
     for(int i = 1; i < 100; i++) {
         term *= x / i;
         result += term;
@@ -164,7 +165,7 @@ void js_math_log(struct mjs* mjs) {
         ret_bad_args(mjs, "Invalid input value for Math.log");
         mjs_return(mjs, MJS_UNDEFINED);
     }
-    double result = 0;
+    double result = 0.;
     while(x >= JS_MATH_E) {
         x /= JS_MATH_E;
         result++;
@@ -199,7 +200,7 @@ void js_math_pow(struct mjs* mjs) {
     }
     double base = mjs_get_double(mjs, mjs_arg(mjs, 0));
     double exponent = mjs_get_double(mjs, mjs_arg(mjs, 1));
-    double result = 1;
+    double result = 1.;
     for(int i = 0; i < exponent; i++) {
         result *= base;
     }
@@ -211,7 +212,7 @@ void js_math_random(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     const uint32_t random_val = furi_hal_random_get();
-    double rnd = (double)random_val / FURI_HAL_RANDOM_MAX;
+    double rnd = (double)random_val / (double)FURI_HAL_RANDOM_MAX;
     mjs_return(mjs, mjs_mk_number(mjs, rnd));
 }
 
@@ -220,7 +221,7 @@ void js_math_sign(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    mjs_return(mjs, mjs_mk_number(mjs, x == 0 ? 0 : (x < 0 ? -1 : 1)));
+    mjs_return(mjs, mjs_mk_number(mjs, x == (double)0. ? 0 : (x < (double)0. ? -1 : 1)));
 }
 
 void js_math_sin(struct mjs* mjs) {
@@ -231,7 +232,7 @@ void js_math_sin(struct mjs* mjs) {
     double result = x;
     double term = x;
     for(int i = 1; i < 10; i++) {
-        term *= -x * x / ((2 * i) * (2 * i + 1));
+        term *= -x * x / (double)((2 * i) * (2 * i + 1));
         result += term;
     }
     mjs_return(mjs, mjs_mk_number(mjs, result));
@@ -242,11 +243,11 @@ void js_math_sqrt(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    if(x < 0) {
+    if(x < (double)0.) {
         ret_bad_args(mjs, "Invalid input value for Math.sqrt");
         mjs_return(mjs, MJS_UNDEFINED);
     }
-    double result = 1;
+    double result = 1.;
     while(result * result < x) {
         result += (double)0.001;
     }
@@ -258,7 +259,7 @@ void js_math_trunc(struct mjs* mjs) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    mjs_return(mjs, mjs_mk_number(mjs, x < 0 ? ceil(x) : floor(x)));
+    mjs_return(mjs, mjs_mk_number(mjs, x < (double)0. ? ceil(x) : floor(x)));
 }
 
 static void* js_math_create(struct mjs* mjs, mjs_val_t* object) {
