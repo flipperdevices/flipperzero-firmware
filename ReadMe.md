@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0417-0550-0.100.4-b199163.tgz&channel=RM0417-0550-0.100.4-b199163&version=0.100.4)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0422-0318-0.101.1-7a97c3d.tgz&channel=RM0422-0318-0.101.1-7a97c3d&version=0.101.1)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,43 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-22 03:03 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-22 03:03 EST`
-- [Lib Updates (By Willy-JL/ MNTM)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9872e133c2f2f03d73da3402ab207acaa0a76303)
-- [WAV Player: Impl favorite/direct-launch functionality (By zacharyweiss)](https://github.com/Next-Flip/Momentum-Apps/pull/5)
-- Updated: [FlipBoard Blinky v2.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Keyboard v2.4 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Signal v3.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Simon v1.4 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- OFW: [FuriHal: add ADC API #3583 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3583)
-- OFW: [iButton new UI #3471 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3471)
-- OFW: [Update tv.ir #3584 (By KRukus9)](https://github.com/flipperdevices/flipperzero-firmware/pull/3584)
-- OFW: [Allow setting view_dispatcher callbacks to NULL again #3580 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/3580) (Was Already in RM)
-- OFW: [NFC: fix BIP plugin #3595 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3595)
-- OFW: [BLE: Add GapPairingNone support #3596 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3596) (Was Already in RM)
-- Updated: [WAV Recorder v0.2 (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
-- Updated: [Battery Checker v0.2 (By Programistich)](https://github.com/Programistich/battery_checker)
-- [Revert Fix for CC1101 & Some SubGHz Optimizations and Tweaks Removed (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1058)
-- Updated: [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
-- Updated: [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
-- Updated: [Connect Wires v1.2 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
-- OFW: [Mosgortrans parser output fixes #3554 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3554)
-- OFW: [add support for S(WTX) request in iso14443_4a_poller #3590 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3590)
-- OFW: [GUI: Fix array out of bounds in menu exit #3604 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3604)
-- OFW: [NFC: add Plantain legacy keys #3602 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3602)
-- Updated: [Radiation Sensor v1.0 (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
-- OFW: PR: [PoC skylanders plugin #3315 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3315)
-- Updated: [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
-- [JS: Fix widget sometimes MemCrash on exit. (By jamisonderek)](https://github.com/Next-Flip/Momentum-Firmware/pull/103)
-- Updated: [VGM Air Mouse v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688, or Video Game Module By Flipper Devices` [AirMouse: various improvements #206 (By skotopes)](https://github.com/flipperdevices/flipperzero-good-faps/pull/206)
-- Updated: [PicoPass (iClass) v1.14 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Add wiegand parsing plugin #205 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/205) [Cleanup #201 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/201)
-- Added: [IR Decoder v1.0 (By prplecake)](https://github.com/prplecake/f0/tree/master/infrared/apps/ir_decoder)
-- Added: [SI4713 Tuner v0.1 (By rullinoiz)](https://github.com/rullinoiz/flipper-si4713)
-- Added: [BLE Killer v1.0 (By H4lo)](https://github.com/H4lo/flipper_zero_ble_killer) `Req: ESP32`
-- Added: Infrared: Assets for Toto and BioBidet bidets.
-- Added: BadUSB: [Assets for CVE-2024-1086 on LINUX targets (By hed0rah & ComradeOrion)](https://github.com/Notselwyn/CVE-2024-1086)
-- Updated: [Flizzer Tracker v0.9 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
-- Updated: [Noptel LRF Sampler v1.4 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
-- Updated: [FlipperZero Clock v1.1 (By mdaskalov)](https://github.com/mdaskalov/flipperzero-clock)
-- Version increment like OFW.
 
 <a name="release">
 
@@ -613,4 +576,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0417-0550-0.100.4-b199163.tgz&channel=RM0417-0550-0.100.4-b199163&version=0.100.4)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0422-0318-0.101.1-7a97c3d.tgz&channel=RM0422-0318-0.101.1-7a97c3d&version=0.101.1)
