@@ -45,7 +45,7 @@ static bool cfg_load(File* file, ClockConfig* cfg) {
     if(storage_file_open(file, CFG_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING))
         readed = storage_file_read(file, cfg, sizeof(ClockConfig));
     storage_file_close(file);
-    return readed == sizeof(ClockConfig);
+    return readed == sizeof(ClockConfig) && cfg->version == CONFIG_VERSION;
 }
 
 static void cfg_save(File* file, ClockConfig* cfg) {
