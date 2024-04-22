@@ -26,6 +26,7 @@ CfwSettings cfw_settings = {
     .vgm_color_mode = VgmColorModeDefault, // Default
     .vgm_color_fg.value = 0x0000, // Default Black
     .vgm_color_bg.value = 0xFC00, // Default Orange
+    .spoof_color = FuriHalVersionColorUnknown, // Real
 };
 
 void CFW_SETTINGS_LOAD(void) {
@@ -78,6 +79,8 @@ void CFW_SETTINGS_LOAD(void) {
         flipper_format_read_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
         flipper_format_rewind(file);
         flipper_format_read_uint32(file, "lcd_style", (uint32_t*)&x->lcd_style, 1);
+        flipper_format_rewind(file);
+        flipper_format_read_uint32(file, "spoof_color", (uint32_t*)&x->spoof_color, 1);
     }
     furi_string_free(manifest_name);
     flipper_format_free(file);
@@ -118,6 +121,7 @@ void CFW_SETTINGS_SAVE() {
             file, "uart_nmea_channel", (uint32_t*)&x->uart_nmea_channel, 1);
         flipper_format_write_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
         flipper_format_write_uint32(file, "lcd_style", (uint32_t*)&x->lcd_style, 1);
+        flipper_format_write_uint32(file, "spoof_color", (uint32_t*)&x->spoof_color, 1);
         furi_string_free(manifest_name);
     }
     flipper_format_free(file);

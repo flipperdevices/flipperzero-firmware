@@ -5,7 +5,24 @@ enum VarItemListIndex {
     VarItemListIndexVgm,
     VarItemListIndexChangeDeviceName,
     VarItemListIndexChargeCap,
+    VarItemListIndexShellColor,
 };
+
+const char* const shell_color_names[FuriHalVersionColorCount] = {
+    "Real",
+    "Black",
+    "White",
+    "Transparent",
+};
+
+static void cfw_app_scene_misc_spoof_shell_color_changed(VariableItem* item) {
+    CfwApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, shell_color_names[index]);
+    cfw_settings.spoof_color = index;
+    app->save_settings = true;
+    app->require_reboot = true;
+}
 
 void cfw_app_scene_misc_var_item_list_callback(void* context, uint32_t index) {
     CfwApp* app = context;
@@ -48,6 +65,15 @@ void cfw_app_scene_misc_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, value_index - 1);
     variable_item_set_current_value_text(item, cap_str);
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Shell Color",
+        FuriHalVersionColorCount,
+        cfw_app_scene_misc_spoof_shell_color_changed,
+        app);
+    variable_item_set_current_value_index(item, cfw_settings.spoof_color);
+    variable_item_set_current_value_text(item, shell_color_names[cfw_settings.spoof_color]);
 
     variable_item_list_set_enter_callback(
         var_item_list, cfw_app_scene_misc_var_item_list_callback, app);

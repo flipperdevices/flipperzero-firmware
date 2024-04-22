@@ -35,6 +35,7 @@ typedef enum {
     FuriHalVersionColorBlack = 0x01,
     FuriHalVersionColorWhite = 0x02,
     FuriHalVersionColorTransparent = 0x03,
+    FuriHalVersionColorCount,
 } FuriHalVersionColor;
 
 /** Device Regions */

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <furi_hal_serial_types.h>
+#include <furi_hal_version.h>
 #include <toolbox/colors.h>
 // #include <gui/icon_i.h>
 // #include <power/power_service/power.h>
@@ -65,6 +66,7 @@ typedef struct {
     Rgb565Color vgm_color_bg;
     bool rgb_backlight;
     uint32_t lcd_style;
+    FuriHalVersionColor spoof_color;
 } CfwSettings;
 
 void CFW_SETTINGS_SAVE(void);
