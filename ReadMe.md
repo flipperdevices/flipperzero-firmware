@@ -34,6 +34,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Noptel LRF Sampler v1.4 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Updated: [NFC Magic v1.9 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [NFC Magic: New functions for Gen4 cards (DW to block 0/shadow mode) #98 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/98)
 - Removed Eurocorp font to make space internally.
+- [CFW Settings: Allow Spoof Shell Color (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0ba9124de55b32dcdda4dbf963226bffdef633a0)
 
 <a name="release">
 
