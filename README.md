@@ -71,7 +71,7 @@ If buffering is enabled, the following information is calculated:
 
 - Average distances for all valid samples
 - Average amplitudes - i.e. average signal strengths - for all valid samples
-- Return rate - i.e. number of samples containing any measured distance vs. total number of sampling attempts)
+- Return rate - i.e. number of samples containing any measured distance vs. total number of samples
 
 The average distances and amplitudes are displayed instead of the last sample's.
 
