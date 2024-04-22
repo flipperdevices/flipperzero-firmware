@@ -763,9 +763,15 @@ void seader_mfc_transmit(
             (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x40) ||
             (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x24) ||
             (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x44)) {
-            //bit_buffer_copy_bytes_with_parity(tx_buffer, buffer, len * 8);
+            memset(display, 0, sizeof(display));
+            for(uint8_t i = 0; i < len; i++) {
+                snprintf(display + (i * 2), sizeof(display), "%02x", buffer[i]);
+            }
+            FURI_LOG_D(TAG, "NFC Send with parity %d: %s", len, display);
 
+            // Only handles message up to 8 data bytes
             uint8_t tx_parity = 0;
+            uint8_t len_without_parity = len - 1;
 
             // Don't forget to swap the bits of buffer[8]
             for(size_t i = 0; i < len; i++) {
@@ -773,21 +779,33 @@ void seader_mfc_transmit(
             }
 
             // Pull out parity bits
-            for(size_t i = 0; i < 8; i++) {
+            for(size_t i = 0; i < len_without_parity; i++) {
                 bool val = bit_lib_get_bit(buffer + i + 1, i);
                 bit_lib_set_bit(&tx_parity, i, val);
             }
 
-            for(size_t i = 0; i < 8; i++) {
+            for(size_t i = 0; i < len_without_parity; i++) {
                 buffer[i] = (buffer[i] << i) | (buffer[i + 1] >> (8 - i));
             }
-            bit_buffer_append_bytes(tx_buffer, buffer, 8);
+            bit_buffer_append_bytes(tx_buffer, buffer, len_without_parity);
 
-            for(size_t i = 0; i < 8; i++) {
+            for(size_t i = 0; i < len_without_parity; i++) {
                 bit_lib_reverse_bits(buffer + i, 0, 8);
                 bit_buffer_set_byte_with_parity(
                     tx_buffer, i, buffer[i], bit_lib_get_bit(&tx_parity, i));
             }
+
+            memset(display, 0, sizeof(display));
+            for(uint8_t i = 0; i < bit_buffer_get_size_bytes(tx_buffer); i++) {
+                snprintf(
+                    display + (i * 2), sizeof(display), "%02x", bit_buffer_get_byte(tx_buffer, i));
+            }
+            FURI_LOG_D(
+                TAG,
+                "NFC Send without parity %d: %s [%02x]",
+                bit_buffer_get_size_bytes(tx_buffer),
+                display,
+                tx_parity);
 
             MfClassicError error = mf_classic_poller_send_custom_parity_frame(
                 mfc_poller, tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
@@ -805,7 +823,8 @@ void seader_mfc_transmit(
                 snprintf(
                     display + (i * 2), sizeof(display), "%02x", bit_buffer_get_byte(rx_buffer, i));
             }
-            FURI_LOG_D(TAG, "NFC Response %d: %s [%02x]", length, display, rx_parity[0]);
+            FURI_LOG_D(
+                TAG, "NFC Response without parity %d: %s [%02x]", length, display, rx_parity[0]);
 
             uint8_t with_parity[SEADER_POLLER_MAX_BUFFER_SIZE];
             memset(with_parity, 0, sizeof(with_parity));
@@ -848,7 +867,8 @@ void seader_mfc_transmit(
                 snprintf(
                     display + (i * 2), sizeof(display), "%02x", bit_buffer_get_byte(rx_buffer, i));
             }
-            FURI_LOG_D(TAG, "NFC Response %d: %s [%02x]", length, display, rx_parity[0]);
+            FURI_LOG_D(
+                TAG, "NFC Response with parity %d: %s [%02x]", length, display, rx_parity[0]);
 
         } else {
             FURI_LOG_W(TAG, "UNHANDLED FORMAT");
