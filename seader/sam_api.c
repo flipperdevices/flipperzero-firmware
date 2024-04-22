@@ -855,6 +855,12 @@ bool seader_process_success_response_i(
     if(rval.code == RC_OK) {
 #ifdef ASN1_DEBUG
         if(online == false) {
+            memset(display, 0, sizeof(display));
+            for(uint8_t i = 0; i < len - 6; i++) {
+                snprintf(display + (i * 2), sizeof(display), "%02x", apdu[i + 6]);
+            }
+            FURI_LOG_D(TAG, "incoming APDU %s", display);
+
             char payloadDebug[384] = {0};
             memset(payloadDebug, 0, sizeof(payloadDebug));
             (&asn_DEF_Payload)
