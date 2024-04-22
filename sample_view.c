@@ -62,26 +62,21 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
     /* Is continuous measurement still enabled? */
     if(sampler_model->continuous_meas_started) {
 
-      /* Has the LRF encountered an error or hit the eye safety limit? */
+      /* Wait a bit for the LRF to "cool off" before triggering another
+       measurement */
+      furi_delay_ms(1000);
+
+      /* Send a new SMM command if continuous measurement wasn't stopped
+         during the wait */
+      if(sampler_model->continuous_meas_started)
+        send_lrf_command(app->lrf_serial_comm_app, smm);
+
+      /* Discard the sample if the LRF encountered an error or hit the eye
+         safety limit */
       if(lrf_sample->dist1 == 0.5 ||
 		lrf_sample->dist2 == 0.5 ||
-		lrf_sample->dist3 == 0.5) {
-
-        /* Wait a bit for the LRF to "cool off" before triggering another
-           measurement */
-        furi_delay_ms(500);
-
-        /* Send a new SMM command if continuous measurement wasn't stopped
-           during the wait */
-        if(sampler_model->continuous_meas_started)
-          send_lrf_command(app->lrf_serial_comm_app, smm);
-
-        /* Discard the measurement */
+		lrf_sample->dist3 == 0.5)
         return;
-      }
-
-      /* Send a new SMM command */
-      send_lrf_command(app->lrf_serial_comm_app, smm);
     }
   }
 
@@ -203,8 +198,10 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 			sampler_model->samples[prev_samples_end_i].tstamp_ms,
 			sampler_model->samples[sampler_model->samples_start_i].
 				tstamp_ms);
-    if(timediff >= 0.25)
+    if(timediff >= 0.25) {
       sampler_model->eff_freq = (sampler_model->nb_samples - 1) / timediff;
+      FURI_LOG_T(TAG, "Effective frequency: %lf", sampler_model->eff_freq);
+    }
     else
       sampler_model->eff_freq = - 1;
 
