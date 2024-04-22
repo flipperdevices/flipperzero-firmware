@@ -11,7 +11,6 @@
 #define HMS_OFS 8
 
 #define FACE_RADIUS 31
-
 #define FACE_DEFAULT_WIDTH 54
 
 const char* WEEKDAYS[] =
@@ -164,7 +163,9 @@ void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t 
     draw_line(canvas, &cfg->ofs, &cfg->face.minutes[15], CopyHor);
     Line* m = &cfg->face.minutes[1];
     Point* o = &cfg->ofs;
-    if(cfg->digits_mod <= 12) {
+    if(cfg->digits_mod > 12)
+        for(uint8_t i = 0; i < 14; i++, m++) draw_line(canvas, o, m, CopyBoth);
+    else {
         canvas_set_font(canvas, FontSecondary);
         Point* h = &cfg->face.hours[0];
         for(uint8_t i = 0; i < 14; i++, h++, m++) {
@@ -175,8 +176,7 @@ void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t 
             }
             draw_line(canvas, &cfg->ofs, m, CopyBoth);
         }
-    } else
-        for(uint8_t i = 0; i < 14; i++, m++) draw_line(canvas, o, m, CopyBoth);
+    }
     float s_ang = M_TWOPI / 60.0 * dt->second + M_TWOPI / 60000.0 * ms;
     float m_ang = M_TWOPI / 60.0 * dt->minute + M_TWOPI / 3600.0 * dt->second;
     float h_ang = M_TWOPI / 12.0 * (dt->hour % 12) + M_TWOPI / 720.0 * dt->minute;
