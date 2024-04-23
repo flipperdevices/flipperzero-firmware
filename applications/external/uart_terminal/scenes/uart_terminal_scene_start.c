@@ -158,23 +158,23 @@ bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) 
         if(event.event == UART_TerminalEventSetup) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneSetup);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewSetup);
         } else if(event.event == UART_TerminalEventStartKeyboardText) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneUART_TextInput);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewTextInput);
         } else if(event.event == UART_TerminalEventStartKeyboardHex) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneUART_HexInput);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewHexInput);
         } else if(event.event == UART_TerminalEventStartConsole) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneConsoleOutput);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewConsoleOutput);
         } else if(event.event == UART_TerminalEventStartHelp) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneHelp);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewHelp);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {

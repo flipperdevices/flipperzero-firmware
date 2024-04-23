@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipperZero Clock v1.1 (By mdaskalov)](https://github.com/mdaskalov/flipperzero-clock)
 - Updated: [Minesweeper Redux v1.4 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - UL: [faac rc add button B (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3108f07a4b74e91c0b83f388c190477f9785a38f)
+- Updated: [UART Terminal v1.4 (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
 
 <a name="release">
 
