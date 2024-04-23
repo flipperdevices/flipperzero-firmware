@@ -95,7 +95,7 @@ void calc_clock_face(ClockConfig* cfg) {
     copy_point(&cfg->face.hours[9], &cfg->face.hours[3], true, false);
 
     float ang = M_TWOPI / 60;
-    for(uint8_t min = 1; min < 15; min++, ang += M_TWOPI / 60) { // 1/4 circle (14 min)
+    for(uint8_t min = 1; min < 15; min++, ang += M_TWOPI / 60) { // 1/4 circle (13 min)
         bool at_hour = (min % 5 == 0);
         float ofs = at_hour ? long_ofs : short_ofs;
 
@@ -124,7 +124,7 @@ void calc_clock_face(ClockConfig* cfg) {
 }
 
 void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t ms) {
-    static char buf[8];
+    static char buf[6];
     uint8_t hour = dt->hour, x = cfg->ofs.x, y = cfg->ofs.y;
     if(locale_get_time_format() == LocaleTimeFormat12h) {
         hour = hour % 12 == 0 ? 12 : hour % 12;
@@ -132,7 +132,7 @@ void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t
         canvas_draw_str_aligned(
             canvas, x, y - 10, AlignCenter, AlignBottom, (dt->hour >= 12 ? "PM" : "AM"));
     }
-    snprintf(buf, 8, "%2u:%02u", hour, dt->minute);
+    snprintf(buf, 6, "%2u:%02u", hour % 24, dt->minute % 60);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(canvas, x, y, AlignCenter, AlignCenter, buf);
     if(cfg->face_type == DigitalRectangular) {
@@ -159,31 +159,31 @@ void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t
 
 void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t ms) {
     static char buf[3];
-    draw_line(canvas, &cfg->ofs, &cfg->face.minutes[0], CopyVer);
-    draw_line(canvas, &cfg->ofs, &cfg->face.minutes[15], CopyHor);
     Line* m = &cfg->face.minutes[1];
     Point* o = &cfg->ofs;
-    if(cfg->digits_mod > 12)
-        for(uint8_t i = 0; i < 14; i++, m++) draw_line(canvas, o, m, CopyBoth);
-    else {
+    uint8_t i = 0;
+    if(cfg->digits_mod <= 12) {
         canvas_set_font(canvas, FontSecondary);
         Point* h = &cfg->face.hours[0];
-        for(uint8_t i = 0; i < 14; i++, h++, m++) {
-            if((i < 12) && (i % cfg->digits_mod == 0)) {
+        for(; i < 12; i++, m++, h++) {
+            if(i % cfg->digits_mod == 0) {
                 snprintf(buf, 3, "%2u", i == 0 ? 12 : i);
                 canvas_draw_str_aligned(
                     canvas, o->x + h->x, o->y - h->y + 1, AlignCenter, AlignCenter, buf);
             }
-            draw_line(canvas, &cfg->ofs, m, CopyBoth);
+            draw_line(canvas, o, m, CopyBoth);
         }
     }
+    for(; i < 14; i++, m++) draw_line(canvas, o, m, CopyBoth);
+    draw_line(canvas, o, &cfg->face.minutes[0], CopyVer);
+    draw_line(canvas, o, &cfg->face.minutes[15], CopyHor);
     float s_ang = M_TWOPI / 60.0 * dt->second + M_TWOPI / 60000.0 * ms;
     float m_ang = M_TWOPI / 60.0 * dt->minute + M_TWOPI / 3600.0 * dt->second;
     float h_ang = M_TWOPI / 12.0 * (dt->hour % 12) + M_TWOPI / 720.0 * dt->minute;
-    draw_hand(canvas, &cfg->ofs, h_ang, H_RAD, true);
-    draw_hand(canvas, &cfg->ofs, m_ang, M_RAD, true);
-    draw_hand(canvas, &cfg->ofs, s_ang, S_RAD, false);
-    canvas_draw_disc(canvas, cfg->ofs.x, cfg->ofs.y, 2);
+    draw_hand(canvas, o, h_ang, H_RAD, true);
+    draw_hand(canvas, o, m_ang, M_RAD, true);
+    draw_hand(canvas, o, s_ang, S_RAD, false);
+    canvas_draw_disc(canvas, o->x, o->y, 2);
 }
 
 void draw_date(Canvas* canvas, DateTime* dt) {
