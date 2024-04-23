@@ -470,7 +470,9 @@ void do_command(
     }
 
     case TE_EFFECT_TRIGGER_RELEASE: {
-        sound_engine_enable_gate(tracker_engine->sound_engine, se_channel, 0);
+        if(tick == (opcode & 0xff)) {
+            sound_engine_enable_gate(tracker_engine->sound_engine, se_channel, 0);
+        }
 
         break;
     }
