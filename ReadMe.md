@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [faac rc add button B (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3108f07a4b74e91c0b83f388c190477f9785a38f)
 - Updated: [UART Terminal v1.4 (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
 - Updated: [Authenticator/TOTP v5.14.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [IR Remote v1.1 (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 
 <a name="release">
 
@@ -430,7 +431,7 @@ $ ./fbt dolphin_ext
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [IR Decoder v1.0 (By prplecake)](https://github.com/prplecake/f0/tree/master/infrared/apps/ir_decoder)
 - [IR Intervalometer for Sony Cameras v1.2 (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer) `works for Sony cameras`
-- [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
+- [IR Remote v1.1 (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - [IR Scope (By kallanreed)](https://github.com/kallanreed/unleashed-firmware/tree/dev/applications/external/ir_scope)
 - [IR Xbox Controller v1.2 (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 - [J305 Geiger Counter v1.3 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
