@@ -34,7 +34,6 @@ typedef struct {
     size_t token_name_length;
     char* token_secret;
     size_t token_secret_length;
-    bool saved;
     Control selected_control;
     int16_t screen_y_offset;
     TokenHashAlgo algo;
@@ -98,7 +97,14 @@ static void ask_user_input(
         strlcpy(input_result.user_input, *user_input, INPUT_BUFFER_SIZE);
     }
 
+    if(plugin_state->idle_timeout_context != NULL) {
+        idle_timeout_pause(plugin_state->idle_timeout_context);
+    }
     totp_input_text(plugin_state->gui, header, &input_result);
+    if(plugin_state->idle_timeout_context != NULL) {
+        idle_timeout_report_activity(plugin_state->idle_timeout_context);
+        idle_timeout_resume(plugin_state->idle_timeout_context);
+    }
     if(input_result.success) {
         if(*user_input != NULL) {
             free(*user_input);
@@ -139,11 +145,14 @@ void totp_scene_add_new_token_activate(PluginState* plugin_state) {
     SceneState* scene_state = malloc(sizeof(SceneState));
     furi_check(scene_state != NULL);
     plugin_state->current_scene_state = scene_state;
-    scene_state->token_name = "Name";
+    scene_state->token_name = strdup("Name");
+    furi_check(scene_state->token_name != NULL);
     scene_state->token_name_length = strlen(scene_state->token_name);
-    scene_state->token_secret = "Secret";
+    scene_state->token_secret = strdup("Secret");
+    furi_check(scene_state->token_secret != NULL);
     scene_state->token_secret_length = strlen(scene_state->token_secret);
-    scene_state->initial_counter = "Counter";
+    scene_state->initial_counter = strdup("Counter");
+    furi_check(scene_state->initial_counter != NULL);
     scene_state->initial_counter_length = strlen(scene_state->initial_counter);
 
     scene_state->screen_y_offset = 0;
@@ -372,7 +381,7 @@ bool totp_scene_add_new_token_handle_event(
             break;
         }
         case InputKeyBack:
-            totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
+            totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu);
             break;
         default:
             break;
@@ -384,7 +393,7 @@ bool totp_scene_add_new_token_handle_event(
 
 void totp_scene_add_new_token_deactivate(PluginState* plugin_state) {
     if(plugin_state->current_scene_state == NULL) return;
-    SceneState* scene_state = (SceneState*)plugin_state->current_scene_state;
+    SceneState* scene_state = plugin_state->current_scene_state;
     free(scene_state->token_name);
     free(scene_state->token_secret);
 
