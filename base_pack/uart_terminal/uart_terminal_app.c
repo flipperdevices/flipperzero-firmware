@@ -96,6 +96,7 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewVarItemList);
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewSetup);
+    view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewHelp);
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewConsoleOutput);
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewTextInput);
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewHexInput);
