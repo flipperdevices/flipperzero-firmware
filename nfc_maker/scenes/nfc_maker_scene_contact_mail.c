@@ -16,7 +16,7 @@ void nfc_maker_scene_contact_mail_on_enter(void* context) {
 
     text_input_set_header_text(text_input, "Enter Mail Address:");
 
-    strlcpy(app->mail_buf, "ben.dover@yourmom.zip", MAIL_INPUT_LEN);
+    strlcpy(app->mail_buf, "johnsmith@email.com", MAIL_INPUT_LEN);
 
     text_input_set_result_callback(
         text_input,
