@@ -114,7 +114,7 @@ static App *app_init() {
   submenu_add_item(app->submenu, "Save LRF diagnostic",
 			submenu_savediag, submenu_callback, app);
 
-  submenu_add_item(app->submenu, "Test laser",
+  submenu_add_item(app->submenu, "Test LRX laser",
 			submenu_testlaser, submenu_callback, app);
 
   submenu_add_item(app->submenu, "Test IR pointer",
