@@ -157,13 +157,13 @@ Gives information about the app and the GPIO pin connections needed to connect a
 
 - LRX-series rangefinders may also be used with the app. However, they are usually configured as RS232 or RS422 serial devices, not as UART serial devices. Therefore, a UART-to-RS232 or UART-to-RS422 converter is usually required to connect the Flipper Zero's UART lines to an LRX rangefinder.
 
-- Only powerful pumped lasers used in LRX devices such as the LRX-25A or LRX-20, and laser diodes found in some LRF devices such as the LRF-127 or LRF-200, may be tested using the **Test LRX laser** function. The reason is that, despite being designed to receive near-infrared (950 nm), the Flipper Zero's [infrared receiver](https://www.vishay.com/docs/82495/tsop753.pdf) is just sensitive enough to detect the far infrared emitted by the 1.5 µm range of Noptel rangefinders, provided the laser is powerful and focused enough.
+- Only certain rangefinger models' lasers can be tested with the **Test LRX laser** function, most notably LRX-class rangefinders - hence the name of the function - but also certain LRF rangefinders. Depending on the particular model, despite nominally working in the far-infrared, 1.5 µm lasers can leak near-infrared light around 950 nm that can be picked up by the Flipper Zero's [infrared receiver](https://www.vishay.com/docs/82495/tsop753.pdf) at close range.
 
-    Nevertheless, the Flipper Zero's infrared receiver is used completely outside of its specifications, so this may or may not work with your particular rangefinder and your particular Flipper Zero: if your rangefinder's laser isn't detected, do not assume it is malfunctioning! If it is detected however, you can be quite sure it is functioning well.
+    Your particular rangefinder may be detected by the Flipper Zero, but there is no guarantee that it will be, as this function exploits a side effect of the laser diode that the rangefinders' design doesn't account for. If your rangefinder's laser isn't detected, do not assume it is malfunctioning! If it is detected however, you can be quite sure it is functioning well.
 
-    LRF devices that work in the near-infrared however, such as the LRF125 that works at 905 nm, are easily detected by the Flipper Zero at a distance despite using a lower power laser diode, and can be reliably diagnosed using the Flipper Zero.
+    LRF rangefinders such as the LRF125 that work in the near-infrared are easily detected by the Flipper Zero despite using a lower power laser diode, and can be reliably diagnosed using the Flipper Zero.
 
-- Some rangefinders are equipped with low power, near-infrared pointers instead of visible light (red) pointers. Those pointers can be easily detected and reliably diagnosed by the Flipper Zero also, using the **Test IR pointer** function.
+- Some rangefinders are equipped with a low power, near-infrared pointer instead of a visible light pointer. Near-infrared pointers can be easily detected and reliably diagnosed by the Flipper Zero also, using the **Test IR pointer** function.
 
 
 
