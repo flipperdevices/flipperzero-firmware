@@ -10,7 +10,7 @@ void nfc_playlist_playlist_select_menu_callback(void* context) {
 void nfc_playlist_playlist_select_scene_on_enter(void* context) {
     NfcPlaylist* nfc_playlist = context;
     file_browser_configure(
-        nfc_playlist->file_browser, ".txt", PLAYLIST_LOCATION, true, true, &I_Nfc_10px, true);
+        nfc_playlist->file_browser, ".txt", PLAYLIST_LOCATION, true, true, &I_unknown_10px, true);
     file_browser_set_callback(
         nfc_playlist->file_browser, nfc_playlist_playlist_select_menu_callback, nfc_playlist);
     FuriString* tmp_str = furi_string_alloc_set_str(PLAYLIST_LOCATION);
