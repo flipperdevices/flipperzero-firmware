@@ -16,6 +16,7 @@
 #include "lrf_info_view.h"
 #include "save_diag_view.h"
 #include "test_laser_view.h"
+#include "test_pointer_view.h"
 #include "about_view.h"
 #include "submenu.h"
 
@@ -63,6 +64,8 @@ const uint16_t sample_view_update_every = 150; /*ms*/
 const uint16_t test_laser_view_update_every = 150; /*ms*/
 const uint16_t test_laser_restart_cmm_every = 500; /*ms*/
 
+const uint16_t test_pointer_view_update_every = 150; /*ms*/
+const uint16_t test_pointer_jiggle_every = 50; /*ms*/
 
 
 /*** Routines ***/
@@ -110,8 +113,11 @@ static App *app_init() {
   submenu_add_item(app->submenu, "Save LRF diagnostic",
 			submenu_savediag, submenu_callback, app);
 
-  submenu_add_item(app->submenu, "Test laser transmitter",
+  submenu_add_item(app->submenu, "Test laser",
 			submenu_testlaser, submenu_callback, app);
+
+  submenu_add_item(app->submenu, "Test IR pointer",
+			submenu_testpointer, submenu_callback, app);
 
   submenu_add_item(app->submenu, "About",
 			submenu_about, submenu_callback, app);
@@ -287,6 +293,36 @@ static App *app_init() {
 
 
 
+  /* Setup the test pointer view */
+
+  /* Allocate space for the test pointer view */
+  app->testpointer_view = view_alloc();
+
+  /* Setup the draw callback for the test pointer view */
+  view_set_draw_callback(app->testpointer_view, testpointer_view_draw_callback);
+
+  /* Configure the "previous" callback for the test pointer view */
+  view_set_previous_callback(app->testpointer_view, return_to_submenu_callback);
+
+  /* Configure the enter and exit callbacks for the test pointer view */
+  view_set_enter_callback(app->testpointer_view,
+				testpointer_view_enter_callback);
+  view_set_exit_callback(app->testpointer_view,
+				testpointer_view_exit_callback);
+
+  /* Set the context for the test pointer view callbacks */
+  view_set_context(app->testpointer_view, app);
+
+  /* Allocate the test pointer model */
+  view_allocate_model(app->testpointer_view, ViewModelTypeLockFree,
+			sizeof(TestPointerModel));
+
+  /* Add the test pointer view */
+  view_dispatcher_add_view(app->view_dispatcher, view_testpointer,
+				app->testpointer_view);
+
+
+
   /* Setup the about view */
 
   /* Allocate space for the sample view */
@@ -388,6 +424,10 @@ static void app_free(App *app) {
   /* Remove the about view */
   view_dispatcher_remove_view(app->view_dispatcher, view_about);
   view_free(app->about_view);
+
+  /* Remove the test pointer view */
+  view_dispatcher_remove_view(app->view_dispatcher, view_testpointer);
+  view_free(app->testpointer_view);
 
   /* Remove the test laser view */
   view_dispatcher_remove_view(app->view_dispatcher, view_testlaser);

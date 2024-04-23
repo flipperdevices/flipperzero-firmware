@@ -51,6 +51,9 @@ extern const uint16_t sample_view_update_every;
 extern const uint16_t test_laser_view_update_every;
 extern const uint16_t test_laser_restart_cmm_every;
 
+extern const uint16_t test_pointer_view_update_every;
+extern const uint16_t test_pointer_jiggle_every;
+
 
 
 /*** Types */
@@ -76,11 +79,14 @@ typedef enum {
   /* Test laser view */
   submenu_testlaser = 5,
 
+  /* Test pointer view */
+  submenu_testpointer = 6,
+
   /* About view */
-  submenu_about = 6,
+  submenu_about = 7,
 
   /* Total number of items */
-  total_submenu_items = 7,
+  total_submenu_items = 8,
 
 } SubmenuIndex;
 
@@ -215,13 +221,30 @@ typedef struct {
   /* Flag to indicate that CMM should be restarted */
   bool restart_cmm;
 
+  /* Beep option */
+  uint8_t beep;
+
+} TestLaserModel;
+
+
+
+/** Test pointer model **/
+typedef struct {
+
+  /* Whether the IR port is busy */
+  bool ir_busy;
+
+  /* Whether IR signal was received */
+  bool ir_received_prev;
+  bool ir_received;
+
   /* Current state of the pointer */
   bool pointer_on;
 
   /* Beep option */
   uint8_t beep;
 
-} TestLaserModel;
+} TestPointerModel;
 
 
 
@@ -268,17 +291,26 @@ typedef struct {
   /* Test laser view */
   View *testlaser_view;
 
+  /* Test pointer view */
+  View *testpointer_view;
+
   /* About view  */
   View *about_view;
 
   /* Timer to update the sample view */
   FuriTimer *sample_view_timer;
 
-  /* Timer to update the test_laser view */
+  /* Timer to update the test laser view */
   FuriTimer *test_laser_view_timer;
 
-  /* Timer to periodically check if CMM needs restarting */
+  /* Timer to check if CMM needs restarting in the test laser view*/
   FuriTimer *test_laser_restart_cmm_timer;
+
+  /* Timer to update the pointer laser view */
+  FuriTimer *test_pointer_view_timer;
+
+  /* Timer to control the pointer in the test pointer view */
+  FuriTimer *test_pointer_control_timer;
 
   /* Backlight control */
   BacklightControl backlight_control;

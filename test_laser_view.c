@@ -160,6 +160,10 @@ void testlaser_view_exit_callback(void *ctx) {
   if(testlaser_model->ir_busy)
     return;
 
+  /* Stop and free the CMM restart timer */
+  furi_timer_stop(app->test_laser_restart_cmm_timer);
+  furi_timer_free(app->test_laser_restart_cmm_timer);
+
   /* Send a CMM-break command unconditionally - 3 times to be sure */
   send_lrf_command(app->lrf_serial_comm_app, cmm_break);
   send_lrf_command(app->lrf_serial_comm_app, cmm_break);
@@ -176,10 +180,6 @@ void testlaser_view_exit_callback(void *ctx) {
 
   /* Stop the IR receiver */
   furi_hal_infrared_async_rx_stop();
-
-  /* Stop and free the CMM restart timer */
-  furi_timer_stop(app->test_laser_restart_cmm_timer);
-  furi_timer_free(app->test_laser_restart_cmm_timer);
 
   /* Stop and free the view update timer */
   furi_timer_stop(app->test_laser_view_timer);

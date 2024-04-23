@@ -66,6 +66,13 @@ void submenu_callback(void *ctx, uint32_t idx) {
       FURI_LOG_D(TAG, "Switch to test laser view");
       break;
 
+    /* Switch to the test pointer view */
+    case submenu_testpointer:
+      view_dispatcher_switch_to_view(app->view_dispatcher, view_testpointer);
+      sampler_model->config.sitem = submenu_testpointer;
+      FURI_LOG_D(TAG, "Switch to test pointer view");
+      break;
+
     /* Switch to the about view */
     case submenu_about:
       view_dispatcher_switch_to_view(app->view_dispatcher, view_about);

@@ -26,6 +26,9 @@ typedef enum {
   /* Test laser view */
   view_testlaser,
 
+  /* Test pointer view */
+  view_testpointer,
+
   /* About view */
   view_about,
 
