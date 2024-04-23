@@ -169,7 +169,7 @@ void nfc_scene_mf_classic_dict_attack_on_enter(void* context) {
     dict_attack_set_card_state(instance->dict_attack, true);
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewDictAttack);
     nfc_blink_read_start(instance);
-    notification_message(instance->notifications, &sequence_display_backlight_enforce_on);
+    // notification_message(instance->notifications, &sequence_display_backlight_enforce_on);
 
     instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfClassic);
     nfc_poller_start(instance->poller, nfc_dict_attack_worker_callback, instance);
@@ -277,5 +277,5 @@ void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
     instance->nfc_dict_context.is_card_present = false;
 
     nfc_blink_stop(instance);
-    notification_message(instance->notifications, &sequence_display_backlight_enforce_auto);
+    // notification_message(instance->notifications, &sequence_display_backlight_enforce_auto);
 }

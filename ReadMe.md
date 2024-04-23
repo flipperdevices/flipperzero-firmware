@@ -43,6 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [IR Remote v1.1 (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - Updated: [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Added: [Icons for FAPPED Settings (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6504c6988c05e80e7a772c7532857bc9a069a121)
+- [NFC: Allow backlight off in dict attack (By Willy-JL)]()
 
 <a name="release">
 
