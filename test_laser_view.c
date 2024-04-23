@@ -197,7 +197,7 @@ void testlaser_view_draw_callback(Canvas *canvas, void *model) {
 
   /* Draw the icon to prompt the user to line up the LRF's laser transmitter
      and the Flipper's IR port */
-  canvas_draw_icon(canvas, 9, 0, &I_align_lrf_and_flipper);
+  canvas_draw_icon(canvas, 9, 0, &I_align_laser_and_flipper);
 
   /* If IR signal was received, display the laser radiation */
   if(testlaser_model->ir_received) {
