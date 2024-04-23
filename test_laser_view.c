@@ -54,7 +54,7 @@ static void test_laser_view_timer_callback(void *ctx) {
     testlaser_model->ir_received_prev = testlaser_model->ir_received;
   }
 
-  /* If IR signal was received and beeping is enabled, start a beep */
+  /* If an IR signal was received and beeping is enabled, start a beep */
   if(testlaser_model->ir_received && testlaser_model->beep)
     start_beep(&app->speaker_control, test_laser_view_update_every + 50);
 }
@@ -74,7 +74,7 @@ static void restart_cmm_timer_callback(void *ctx) {
   }
 
   /* Set ourselves up to restart CMM the next time we get called: if any sample
-     is received before that, the flag will get cleared */
+     is received before that, the flag will be cleared and we won't */
   testlaser_model->restart_cmm = true;
 }
 
@@ -199,7 +199,7 @@ void testlaser_view_draw_callback(Canvas *canvas, void *model) {
      and the Flipper's IR port */
   canvas_draw_icon(canvas, 9, 0, &I_align_laser_and_flipper);
 
-  /* If IR signal was received, display the laser radiation */
+  /* If any IR signal was received, display the laser radiation icon */
   if(testlaser_model->ir_received) {
     canvas_draw_icon(canvas, 0, 22, &I_laser_radiation);
     FURI_LOG_T(TAG, "IR signal received");
@@ -207,10 +207,10 @@ void testlaser_view_draw_callback(Canvas *canvas, void *model) {
   else
     FURI_LOG_T(TAG, "No IR signal received");
 
-  /* Draw a dividing line between the icon and the bottom line */
+  /* Draw a dividing line between the icons and the bottom line */
   canvas_draw_line(canvas, 0, 48, 128, 48);
 
-  /* If the IR sensor was found busy, tell the user and stop */
+  /* If the IR sensor is busy, tell the user and stop */
   if(testlaser_model->ir_busy) {
     canvas_draw_str(canvas, 32, 61, "IR port busy!");
     return;

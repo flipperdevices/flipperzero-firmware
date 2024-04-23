@@ -54,7 +54,7 @@ static void test_pointer_view_timer_callback(void *ctx) {
     testpointer_model->ir_received_prev = testpointer_model->ir_received;
   }
 
-  /* If IR signal was received and beeping is enabled, start a beep */
+  /* If an IR signal was received and beeping is enabled, start a beep */
   if(testpointer_model->ir_received && testpointer_model->beep)
     start_beep(&app->speaker_control, test_pointer_view_update_every + 50);
 }
@@ -71,6 +71,7 @@ static void pointer_control_timer_callback(void *ctx) {
   testpointer_model->pointer_on = !testpointer_model->pointer_on;
   send_lrf_command(app->lrf_serial_comm_app, testpointer_model->pointer_on?
 						pointer_on : pointer_off);
+
   FURI_LOG_T(TAG, "Pointer %s", testpointer_model->pointer_on? "ON" : "OFF");
 }
 
@@ -169,7 +170,7 @@ void testpointer_view_draw_callback(Canvas *canvas, void *model) {
      Flipper's IR port */
   canvas_draw_icon(canvas, 9, 0, &I_align_pointer_and_flipper);
 
-  /* If IR signal was received, display the laser radiation */
+  /* If any IR signal was received, display the laser radiation icon */
   if(testpointer_model->ir_received) {
     canvas_draw_icon(canvas, 0, 22, &I_laser_radiation);
     FURI_LOG_T(TAG, "IR signal received");
@@ -177,10 +178,10 @@ void testpointer_view_draw_callback(Canvas *canvas, void *model) {
   else
     FURI_LOG_T(TAG, "No IR signal received");
 
-  /* Draw a dividing line between the icon and the bottom line */
+  /* Draw a dividing line between the icons and the bottom line */
   canvas_draw_line(canvas, 0, 48, 128, 48);
 
-  /* If the IR sensor was found busy, tell the user and stop */
+  /* If the IR sensor is busy, tell the user and stop */
   if(testpointer_model->ir_busy) {
     canvas_draw_str(canvas, 32, 61, "IR port busy!");
     return;
