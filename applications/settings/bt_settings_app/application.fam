@@ -11,5 +11,6 @@ App(
     flags=["InsomniaSafe"],
     order=10,
     fap_category="Settings",
+    fap_icon="update_10px.png",
     fap_libs=["assets"],
 )

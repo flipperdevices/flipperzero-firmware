@@ -8,4 +8,5 @@ App(
     stack_size=1 * 1024,
     order=70,
     fap_category="Settings",
+    fap_icon="update_10px.png",
 )

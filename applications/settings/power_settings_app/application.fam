@@ -12,5 +12,6 @@ App(
     stack_size=1 * 1024,
     order=40,
     fap_category="Settings",
+    fap_icon="update_10px.png",
     fap_libs=["assets"],
 )
