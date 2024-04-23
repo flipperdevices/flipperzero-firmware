@@ -550,7 +550,13 @@ static uint16_t bfs_tile_clear(
         uint16_t curr_pos_1d = curr_pos.x * board_width + curr_pos.y;
 
         // If in visited set
-        if(point_set_cget(set, pos) != NULL) {
+        if (point_set_cget(set, pos) != NULL) {
+            continue;
+        } 
+        
+        // If it is cleared continue
+        if (board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateCleared || 
+            board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateFlagged) {
             continue;
         }
 

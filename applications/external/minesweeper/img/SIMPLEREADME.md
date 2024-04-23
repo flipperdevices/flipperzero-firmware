@@ -1,5 +1,3 @@
-# Minesweeper Implementation for the Flipper Zero.
-
 ## Added features unique to this implementation:
 -	Enable board verifier for board generation to ensure unambiguous boards!
 -	Set board width and height
@@ -20,6 +18,7 @@
 	- Change board height
 	- Change difficulty
 	- Ensure Solvable (**Important!**)- This option will enable the board verifier for board generation and can significantly increase wait times for generating a board. Currently this may lock up the view port on the loading animation, but it should eventually resolve and return to the game.
+    -Enable Feedback - This option toggles the haptic and sound feedback for the game.
 
 ## IMPORTANT NOTICE:
 The way I set the board up leaves the corners as safe starting positions!

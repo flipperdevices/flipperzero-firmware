@@ -36,6 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed Eurocorp font to make space internally.
 - [CFW Settings: Allow Spoof Shell Color (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0ba9124de55b32dcdda4dbf963226bffdef633a0)
 - Updated: [FlipperZero Clock v1.1 (By mdaskalov)](https://github.com/mdaskalov/flipperzero-clock)
+- Updated: [Minesweeper Redux v1.4 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 
 <a name="release">
 
