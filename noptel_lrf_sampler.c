@@ -15,6 +15,7 @@
 #include "sample_view.h"
 #include "lrf_info_view.h"
 #include "save_diag_view.h"
+#include "test_laser_view.h"
 #include "about_view.h"
 #include "submenu.h"
 
@@ -53,10 +54,14 @@ const uint8_t nb_config_beep_values = COUNT_OF(config_beep_values);
 const uint16_t uart_rx_timeout = 500; /*ms*/
 
 const uint16_t beep_frequency = 1000; /*Hz*/
-const uint16_t min_beep_duration = 25; /*ms*/
+const uint16_t sample_received_beep_duration = 25; /*ms*/
+
 static const uint16_t min_led_flash_duration = 15; /*ms*/
 
 const uint16_t sample_view_update_every = 150; /*ms*/
+
+const uint16_t test_laser_view_update_every = 150; /*ms*/
+const uint16_t test_laser_restart_cmm_every = 500; /*ms*/
 
 
 
@@ -104,6 +109,9 @@ static App *app_init() {
 
   submenu_add_item(app->submenu, "Save LRF diagnostic",
 			submenu_savediag, submenu_callback, app);
+
+  submenu_add_item(app->submenu, "Test laser transmitter",
+			submenu_testlaser, submenu_callback, app);
 
   submenu_add_item(app->submenu, "About",
 			submenu_about, submenu_callback, app);
@@ -251,6 +259,34 @@ static App *app_init() {
 
 
 
+  /* Setup the test laser view */
+
+  /* Allocate space for the test laser view */
+  app->testlaser_view = view_alloc();
+
+  /* Setup the draw callback for the test laser view */
+  view_set_draw_callback(app->testlaser_view, testlaser_view_draw_callback);
+
+  /* Configure the "previous" callback for the test laser view */
+  view_set_previous_callback(app->testlaser_view, return_to_submenu_callback);
+
+  /* Configure the enter and exit callbacks for the test laser view */
+  view_set_enter_callback(app->testlaser_view, testlaser_view_enter_callback);
+  view_set_exit_callback(app->testlaser_view, testlaser_view_exit_callback);
+
+  /* Set the context for the test laser view callbacks */
+  view_set_context(app->testlaser_view, app);
+
+  /* Allocate the test laser model */
+  view_allocate_model(app->testlaser_view, ViewModelTypeLockFree,
+			sizeof(TestLaserModel));
+
+  /* Add the test laser view */
+  view_dispatcher_add_view(app->view_dispatcher, view_testlaser,
+				app->testlaser_view);
+
+
+
   /* Setup the about view */
 
   /* Allocate space for the sample view */
@@ -318,7 +354,7 @@ static App *app_init() {
   set_backlight_control(&app->backlight_control);
 
   /* Setup the speaker control */
-  set_speaker_control(&app->speaker_control, min_beep_duration);
+  set_speaker_control(&app->speaker_control);
 
   /* Initialize the LRF serial communication app */
   app->lrf_serial_comm_app =
@@ -352,6 +388,10 @@ static void app_free(App *app) {
   /* Remove the about view */
   view_dispatcher_remove_view(app->view_dispatcher, view_about);
   view_free(app->about_view);
+
+  /* Remove the test laser view */
+  view_dispatcher_remove_view(app->view_dispatcher, view_testlaser);
+  view_free(app->testlaser_view);
 
   /* Remove the save diagnostic view */
   view_dispatcher_remove_view(app->view_dispatcher, view_savediag);

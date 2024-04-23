@@ -8,8 +8,8 @@
 /*** Types ***/
 typedef struct {
 
-  /* Minimum beep duration */
-  uint16_t min_beep_duration;
+  /* Beep duration */
+  uint16_t beep_duration;
 
   /* Flag to play a beep, and whether a beep is already playing */
   bool play_beep;
@@ -25,10 +25,10 @@ typedef struct {
 /*** Routines ***/
 
 /** Setup the speaker control **/
-void set_speaker_control(SpeakerControl *, uint16_t);
+void set_speaker_control(SpeakerControl *);
 
 /** Release the speaker control **/
 void release_speaker_control(SpeakerControl *);
 
 /** Start a beep **/
-void start_beep(SpeakerControl *);
+void start_beep(SpeakerControl *, uint16_t);

@@ -23,6 +23,9 @@ typedef enum {
   /* Save diagnostic view */
   view_savediag,
 
+  /* Test laser view */
+  view_testlaser,
+
   /* About view */
   view_about,
 

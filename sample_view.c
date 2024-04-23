@@ -85,7 +85,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   if(sampler_model->config.beep && (lrf_sample->dist1 > 0.5 ||
 					lrf_sample->dist2 > 0.5 ||
 					lrf_sample->dist3 > 0.5)) {
-    start_beep(&app->speaker_control);
+    start_beep(&app->speaker_control, sample_received_beep_duration);
   }
 
   /* Reset the ring buffer if required, or if we do single measurement */

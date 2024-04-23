@@ -59,6 +59,13 @@ void submenu_callback(void *ctx, uint32_t idx) {
       FURI_LOG_D(TAG, "Switch to save diagnostic view");
       break;
 
+    /* Switch to the test laser view */
+    case submenu_testlaser:
+      view_dispatcher_switch_to_view(app->view_dispatcher, view_testlaser);
+      sampler_model->config.sitem = submenu_testlaser;
+      FURI_LOG_D(TAG, "Switch to test laser view");
+      break;
+
     /* Switch to the about view */
     case submenu_about:
       view_dispatcher_switch_to_view(app->view_dispatcher, view_about);
