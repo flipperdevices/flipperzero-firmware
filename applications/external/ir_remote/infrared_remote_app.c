@@ -172,8 +172,7 @@ static void app_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-int32_t infrared_remote_app(void* p) {
-    UNUSED(p);
+int32_t infrared_remote_app(char* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     // App button string
@@ -204,21 +203,26 @@ int32_t infrared_remote_app(void* p) {
 
     InputEvent event;
 
+    FuriString* map_file = furi_string_alloc();
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
-
-    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
-    DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, ".txt", &I_sub1_10px);
-    FuriString* map_file = furi_string_alloc();
-    furi_string_set(map_file, IR_REMOTE_PATH);
     if(!storage_file_exists(storage, IR_REMOTE_PATH)) {
         storage_common_mkdir(storage, IR_REMOTE_PATH); //Make Folder If dir not exist
     }
 
-    bool res = dialog_file_browser_show(dialogs, map_file, map_file, &browser_options);
-
-    furi_record_close(RECORD_DIALOGS);
+    bool res;
+    if(p && strlen(p)) {
+        furi_string_set(map_file, p);
+        res = true;
+    } else {
+        DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+        DialogsFileBrowserOptions browser_options;
+        dialog_file_browser_set_basic_options(&browser_options, ".txt", &I_sub1_10px);
+        browser_options.base_path = IR_REMOTE_PATH;
+        furi_string_set(map_file, IR_REMOTE_PATH);
+        res = dialog_file_browser_show(dialogs, map_file, map_file, &browser_options);
+        furi_record_close(RECORD_DIALOGS);
+    }
 
     // if user didn't choose anything, free everything and exit
     if(!res) {
@@ -751,6 +755,15 @@ int32_t infrared_remote_app(void* p) {
                     }
                 }
             }
+        }
+    }
+
+    furi_hal_infrared_set_tx_output(FuriHalInfraredTxPinInternal);
+    if(furi_hal_power_is_otg_enabled() != otg_was_enabled) {
+        if(otg_was_enabled) {
+            furi_hal_power_enable_otg();
+        } else {
+            furi_hal_power_disable_otg();
         }
     }
 
