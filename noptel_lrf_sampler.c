@@ -287,6 +287,7 @@ static App *app_init() {
   /* Allocate the test laser model */
   view_allocate_model(app->testlaser_view, ViewModelTypeLockFree,
 			sizeof(TestLaserModel));
+  TestLaserModel *testlaser_model = view_get_model(app->testlaser_view);
 
   /* Add the test laser view */
   view_dispatcher_add_view(app->view_dispatcher, view_testlaser,
@@ -317,6 +318,7 @@ static App *app_init() {
   /* Allocate the test pointer model */
   view_allocate_model(app->testpointer_view, ViewModelTypeLockFree,
 			sizeof(TestPointerModel));
+  TestPointerModel *testpointer_model = view_get_model(app->testpointer_view);
 
   /* Add the test pointer view */
   view_dispatcher_add_view(app->view_dispatcher, view_testpointer,
@@ -372,6 +374,8 @@ static App *app_init() {
 
   /* Set the default beep option */
   sampler_model->config.beep = config_beep_values[0] != 0;
+  testlaser_model->beep = sampler_model->config.beep;
+  testpointer_model->beep = sampler_model->config.beep;
   variable_item_set_current_value_index(app->item_beep, 0);
   variable_item_set_current_value_text(app->item_beep, config_beep_names[0]);
 
