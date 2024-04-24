@@ -278,6 +278,7 @@ $ ./fbt dolphin_ext
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - [Five Nights at Flipper's v1.2 (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - [Flappy Bird v1.1 (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
+- [Flight Assault v0.1 (By evillero)](https://github.com/evillero/flight_assault)
 - [Flipper Hero v1.2 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 - [Flippy Road v1.0 (By rkilpadi)](https://github.com/rkilpadi/flippy-road)
 - [Game of Life v1.1 (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
