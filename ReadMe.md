@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [Fix the retry/exit confirmation prompts in iButton #3613 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3613)
 - Updated: [Noptel LRF Sampler v1.5 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Added: [Flight Assault v0.1 (By evillero)](https://github.com/evillero/flight_assault)
+- OFW: PR: [Desktop: cleanup error popups #3615 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3615)
 
 <a name="release">
 

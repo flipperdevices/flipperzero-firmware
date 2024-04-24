@@ -571,7 +571,7 @@ Desktop* desktop_alloc(void) {
         desktop->view_dispatcher, desktop_back_event_callback);
 
     desktop->lock_menu = desktop_lock_menu_alloc();
-    desktop->hw_mismatch_popup = popup_alloc();
+    desktop->popup = popup_alloc();
     desktop->locked_view = desktop_view_locked_alloc();
     desktop->pin_input_view = desktop_view_pin_input_alloc();
     desktop->pin_timeout_view = desktop_view_pin_timeout_alloc();
@@ -605,9 +605,7 @@ Desktop* desktop_alloc(void) {
         DesktopViewIdLockMenu,
         desktop_lock_menu_get_view(desktop->lock_menu));
     view_dispatcher_add_view(
-        desktop->view_dispatcher,
-        DesktopViewIdHwMismatch,
-        popup_get_view(desktop->hw_mismatch_popup));
+        desktop->view_dispatcher, DesktopViewIdPopup, popup_get_view(desktop->popup));
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewIdPinTimeout,
@@ -891,6 +889,23 @@ int32_t desktop_srv(void* p) {
 
     if(furi_hal_rtc_get_fault_data()) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneFault);
+    }
+
+    uint8_t keys_total, keys_valid;
+    if(!furi_hal_crypto_enclave_verify(&keys_total, &keys_valid)) {
+        FURI_LOG_E(
+            TAG,
+            "Secure Enclave verification failed: total %hhu, valid %hhu",
+            keys_total,
+            keys_valid);
+
+        scene_manager_next_scene(desktop->scene_manager, DesktopSceneSecureEnclave);
+    }
+
+    // Special case: autostart application is already running
+    if(loader_is_locked(desktop->loader) &&
+       animation_manager_is_animation_loaded(desktop->animation_manager)) {
+        animation_manager_unload_and_stall_animation(desktop->animation_manager);
     }
 
     view_dispatcher_run(desktop->view_dispatcher);
