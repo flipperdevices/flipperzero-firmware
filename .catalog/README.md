@@ -26,4 +26,4 @@ This game was developed by @evillero
 
 For any inquiries or feedback reporting bugs, you can contact the author via email or discord: 
 ldpm1402@gmail.com
-Discord invite: NsjCvqwPAd
+Discord invite: https://discord.com/invite/NsjCvqwPAd
