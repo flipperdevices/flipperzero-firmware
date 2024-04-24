@@ -47,7 +47,7 @@ static void test_laser_view_timer_callback(void *ctx) {
   /* Did the IR receiver change state? */
   if(testlaser_model->ir_received != testlaser_model->ir_received_prev) {
 
-    /* Trigger a sample view redraw */
+    /* Trigger a test laser view redraw */
     with_view_model(app->testlaser_view, TestLaserModel* _model,
 			{UNUSED(_model);}, true);
 

@@ -47,7 +47,7 @@ static void test_pointer_view_timer_callback(void *ctx) {
   /* Did the IR receiver change state? */
   if(testpointer_model->ir_received != testpointer_model->ir_received_prev) {
 
-    /* Trigger a sample view redraw */
+    /* Trigger a test pointer view redraw */
     with_view_model(app->testpointer_view, TestPointerModel* _model,
 			{UNUSED(_model);}, true);
 
