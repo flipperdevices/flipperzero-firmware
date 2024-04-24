@@ -348,22 +348,31 @@ static void gap_init_svc(Gap* gap) {
     // Set default PHY
     hci_le_set_default_phy(ALL_PHYS_PREFERENCE, TX_2M_PREFERRED, RX_2M_PREFERRED);
     // Set I/O capability
+    uint8_t auth_req_mitm_mode = MITM_PROTECTION_REQUIRED;
+    uint8_t auth_req_use_fixed_pin = USE_FIXED_PIN_FOR_PAIRING_FORBIDDEN;
     bool keypress_supported = false;
     if(gap->config->pairing_method == GapPairingPinCodeShow) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
     } else if(gap->config->pairing_method == GapPairingPinCodeVerifyYesNo) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
         keypress_supported = true;
+    } else if(gap->config->pairing_method == GapPairingNone) {
+        // "Just works" pairing method (iOS accepts it, it seems Android and Linux don't)
+        auth_req_mitm_mode = MITM_PROTECTION_NOT_REQUIRED;
+        auth_req_use_fixed_pin = USE_FIXED_PIN_FOR_PAIRING_ALLOWED;
+        // If "just works" isn't supported, we want the numeric comparaison method
+        aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
+        keypress_supported = true;
     }
     // Setup  authentication
     aci_gap_set_authentication_requirement(
         gap->config->bonding_mode,
-        CFG_MITM_PROTECTION,
+        auth_req_mitm_mode,
         CFG_SC_SUPPORT,
         keypress_supported,
         CFG_ENCRYPTION_KEY_SIZE_MIN,
         CFG_ENCRYPTION_KEY_SIZE_MAX,
-        CFG_USED_FIXED_PIN,
+        auth_req_use_fixed_pin,
         0,
         CFG_IDENTITY_ADDRESS);
     // Configure whitelist
@@ -375,7 +384,7 @@ static void gap_advertise_start(GapState new_state) {
     uint16_t min_interval;
     uint16_t max_interval;
 
-    FURI_LOG_I(TAG, "Start: %d", new_state);
+    FURI_LOG_D(TAG, "Start: %d", new_state);
 
     if(new_state == GapStateAdvFast) {
         min_interval = 0x80; // 80 ms
@@ -420,7 +429,7 @@ static void gap_advertise_start(GapState new_state) {
 }
 
 static void gap_advertise_stop(void) {
-    FURI_LOG_I(TAG, "Stop");
+    FURI_LOG_D(TAG, "Stop");
     tBleStatus ret;
     if(gap->state > GapStateIdle) {
         if(gap->state == GapStateConnected) {
