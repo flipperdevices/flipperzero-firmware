@@ -1,6 +1,6 @@
 # Flight Assault
 
-Flight Assault is a dynamic action game where players control a spacecraft engaged in combat against enemy ships approaching from different directions.
+Flight Assault is a dynamic action game for flipperzero where players control a spacecraft engaged in combat against enemy ships approaching from different directions.
 
 ## How to play
 
