@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.4
+ * Version: 1.5
  *
  * Submenu
 ***/
@@ -52,6 +52,20 @@ void submenu_callback(void* ctx, uint32_t idx) {
         view_dispatcher_switch_to_view(app->view_dispatcher, view_savediag);
         sampler_model->config.sitem = submenu_savediag;
         FURI_LOG_D(TAG, "Switch to save diagnostic view");
+        break;
+
+    /* Switch to the test laser view */
+    case submenu_testlaser:
+        view_dispatcher_switch_to_view(app->view_dispatcher, view_testlaser);
+        sampler_model->config.sitem = submenu_testlaser;
+        FURI_LOG_D(TAG, "Switch to test laser view");
+        break;
+
+    /* Switch to the test pointer view */
+    case submenu_testpointer:
+        view_dispatcher_switch_to_view(app->view_dispatcher, view_testpointer);
+        sampler_model->config.sitem = submenu_testpointer;
+        FURI_LOG_D(TAG, "Switch to test pointer view");
         break;
 
     /* Switch to the about view */

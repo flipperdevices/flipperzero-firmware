@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.4
+ * Version: 1.5
  *
  * Configuration saving / restoring
 ***/
@@ -17,6 +17,8 @@
     Silently fail **/
 void load_configuration(App* app) {
     SamplerModel* sampler_model = view_get_model(app->sample_view);
+    TestLaserModel* testlaser_model = view_get_model(app->testlaser_view);
+    TestPointerModel* testpointer_model = view_get_model(app->testpointer_view);
     Storage* storage;
     File* file;
     Config read_config;
@@ -112,6 +114,8 @@ void load_configuration(App* app) {
 
     /* Configure the beep option from the read value */
     sampler_model->config.beep = read_config.beep;
+    testlaser_model->beep = read_config.beep;
+    testpointer_model->beep = read_config.beep;
     variable_item_set_current_value_index(app->item_beep, beep_idx);
     variable_item_set_current_value_text(app->item_beep, config_beep_names[beep_idx]);
 

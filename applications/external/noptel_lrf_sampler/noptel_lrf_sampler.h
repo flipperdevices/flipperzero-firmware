@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.4
+ * Version: 1.5
  *
  * Main app
 ***/
@@ -15,7 +15,7 @@
 #include "lrf_serial_comm.h"
 
 /*** Defines ***/
-#define VERSION "1.4"
+#define VERSION "1.5"
 #define TAG "noptel_lrf_sampler"
 #define NO_AVERAGE \
     -1 /* This distance will be displayed as
@@ -41,7 +41,15 @@ extern const uint8_t nb_config_beep_values;
 
 extern const uint16_t beep_frequency;
 extern const uint16_t min_beep_duration;
+extern const uint16_t sample_received_beep_duration;
+
 extern const uint16_t sample_view_update_every;
+
+extern const uint16_t test_laser_view_update_every;
+extern const uint16_t test_laser_restart_cmm_every;
+
+extern const uint16_t test_pointer_view_update_every;
+extern const uint16_t test_pointer_jiggle_every;
 
 /*** Types */
 
@@ -60,14 +68,20 @@ typedef enum {
     /* LRF info view */
     submenu_lrfinfo = 3,
 
-    /* LRF info view */
+    /* Save diagnostic view */
     submenu_savediag = 4,
 
+    /* Test laser view */
+    submenu_testlaser = 5,
+
+    /* Test pointer view */
+    submenu_testpointer = 6,
+
     /* About view */
-    submenu_about = 5,
+    submenu_about = 7,
 
     /* Total number of items */
-    total_submenu_items = 6,
+    total_submenu_items = 8,
 
 } SubmenuIndex;
 
@@ -175,6 +189,40 @@ typedef struct {
 
 } SaveDiagModel;
 
+/** Test laser model **/
+typedef struct {
+    /* Whether the IR port is busy */
+    bool ir_busy;
+
+    /* Whether IR signal was received */
+    bool ir_received_prev;
+    bool ir_received;
+
+    /* Flag to indicate that CMM should be restarted */
+    bool restart_cmm;
+
+    /* Beep option */
+    uint8_t beep;
+
+} TestLaserModel;
+
+/** Test pointer model **/
+typedef struct {
+    /* Whether the IR port is busy */
+    bool ir_busy;
+
+    /* Whether IR signal was received */
+    bool ir_received_prev;
+    bool ir_received;
+
+    /* Current state of the pointer */
+    bool pointer_on;
+
+    /* Beep option */
+    uint8_t beep;
+
+} TestPointerModel;
+
 /** About view model **/
 typedef struct {
     /* Displayed screen number */
@@ -211,11 +259,29 @@ typedef struct {
     /* Save diagnostic view */
     View* savediag_view;
 
+    /* Test laser view */
+    View* testlaser_view;
+
+    /* Test pointer view */
+    View* testpointer_view;
+
     /* About view  */
     View* about_view;
 
     /* Timer to update the sample view */
     FuriTimer* sample_view_timer;
+
+    /* Timer to update the test laser view */
+    FuriTimer* test_laser_view_timer;
+
+    /* Timer to check if CMM needs restarting in the test laser view*/
+    FuriTimer* test_laser_restart_cmm_timer;
+
+    /* Timer to update the pointer laser view */
+    FuriTimer* test_pointer_view_timer;
+
+    /* Timer to control the pointer in the test pointer view */
+    FuriTimer* test_pointer_control_timer;
 
     /* Backlight control */
     BacklightControl backlight_control;

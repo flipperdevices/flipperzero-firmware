@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.4
+ * Version: 1.5
  *
  * Configuration view
 ***/
@@ -47,6 +47,8 @@ void config_buf_change(VariableItem* item) {
 void config_beep_change(VariableItem* item) {
     App* app = variable_item_get_context(item);
     SamplerModel* sampler_model = view_get_model(app->sample_view);
+    TestLaserModel* testlaser_model = view_get_model(app->testlaser_view);
+    TestPointerModel* testpointer_model = view_get_model(app->testpointer_view);
     uint8_t idx;
 
     /* Get the new beep option item index */
@@ -54,6 +56,8 @@ void config_beep_change(VariableItem* item) {
 
     /* Set the new beep option */
     sampler_model->config.beep = config_beep_values[idx] != 0;
+    testlaser_model->beep = sampler_model->config.beep;
+    testpointer_model->beep = sampler_model->config.beep;
     variable_item_set_current_value_text(item, config_beep_names[idx]);
 
     FURI_LOG_D(TAG, "Beep option change: %s", config_beep_names[idx]);

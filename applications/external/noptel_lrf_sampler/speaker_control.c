@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.4
+ * Version: 1.5
  *
  * Speaker control
 ***/
@@ -26,8 +26,8 @@ static void speaker_control_timer_callback(void* ctx) {
 
         spc->play_beep = false;
 
-        /* Reschedule ourselves in one minimum beep duration */
-        furi_timer_start(spc->speaker_control_timer, min_beep_duration);
+        /* Reschedule ourselves in one beep duration */
+        furi_timer_start(spc->speaker_control_timer, spc->beep_duration);
     }
 
     /* If the speaker is beeping, stop it and don't reschedule ourselves */
@@ -39,13 +39,11 @@ static void speaker_control_timer_callback(void* ctx) {
 }
 
 /** Setup the speaker control **/
-void set_speaker_control(SpeakerControl* spc, uint16_t min_beep_duration) {
-    /* Configure the minimum beep duration duration */
-    spc->min_beep_duration = min_beep_duration;
-
+void set_speaker_control(SpeakerControl* spc) {
     /* No beep is currently playing */
     spc->play_beep = false;
     spc->beep_playing = false;
+    spc->beep_duration = 0;
 
     /* Setup the timer to control the speaker */
     spc->speaker_control_timer =
@@ -56,7 +54,7 @@ void set_speaker_control(SpeakerControl* spc, uint16_t min_beep_duration) {
 void release_speaker_control(SpeakerControl* spc) {
     /* Make sure the speaker has stopped beeping */
     spc->play_beep = false;
-    furi_delay_ms(min_beep_duration * 2);
+    if(spc->beep_duration) furi_delay_ms(spc->beep_duration * 2);
 
     /* Stop and free the speaker control timer callback */
     furi_timer_stop(spc->speaker_control_timer);
@@ -64,7 +62,10 @@ void release_speaker_control(SpeakerControl* spc) {
 }
 
 /** Start a beep **/
-void start_beep(SpeakerControl* spc) {
+void start_beep(SpeakerControl* spc, uint16_t duration) {
+    /* Store how long this beep should last */
+    spc->beep_duration = duration;
+
     /* Raise the flag for the speaker control timer callback to start a beep */
     spc->play_beep = true;
 

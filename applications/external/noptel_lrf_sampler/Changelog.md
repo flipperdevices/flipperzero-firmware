@@ -1,3 +1,8 @@
+## Version 1.5 - 24/04/2024
+
+- Added LRX laser tester
+- Added IR pointer tester
+
 ## Version 1.4 - 21/04/2024
 
 - Added automatic SMM sampling mode
