@@ -19,9 +19,8 @@ void desktop_scene_secure_enclave_on_enter(void* context) {
         popup, "No Factory Keys Found", 64, 12 + STATUS_BAR_Y_SHIFT, AlignCenter, AlignBottom);
     popup_set_text(
         popup,
-        "Secure Enclave is damaged\n"
-        "or\n"
-        "device is counterfeit.",
+        "Secure Enclave is damaged.\n"
+        "Some apps will not work.",
         64,
         33 + STATUS_BAR_Y_SHIFT,
         AlignCenter,
