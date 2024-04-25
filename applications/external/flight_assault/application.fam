@@ -2,7 +2,7 @@ App(
     appid="flight_assault",
     name="Flight Assault",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="flight_assault", 
+    entry_point="flight_assault",
     stack_size=1 * 1024,
     fap_icon="iconimage.png",
     fap_category="Games",
