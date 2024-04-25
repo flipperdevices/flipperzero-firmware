@@ -43,4 +43,5 @@ App(
     entry_point="plugin_wiegand_ep",
     requires=["seader"],
     sources=["plugin/wiegand.c"],
+    fal_embedded=True,
 )
