@@ -1,4 +1,5 @@
 #include "mag_i.h"
+#include <expansion/expansion.h>
 
 #define TAG "Mag"
 
@@ -92,11 +93,6 @@ static Mag* mag_alloc() {
     view_dispatcher_add_view(
         mag->view_dispatcher, MagViewTextInput, text_input_get_view(mag->text_input));
 
-    // Custom Mag Text Input
-    mag->mag_text_input = mag_text_input_alloc();
-    view_dispatcher_add_view(
-        mag->view_dispatcher, MagViewMagTextInput, mag_text_input_get_view(mag->mag_text_input));
-
     return mag;
 }
 
@@ -148,10 +144,6 @@ static void mag_free(Mag* mag) {
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewTextInput);
     text_input_free(mag->text_input);
 
-    // Custom Mag TextInput
-    view_dispatcher_remove_view(mag->view_dispatcher, MagViewMagTextInput);
-    mag_text_input_free(mag->mag_text_input);
-
     // View Dispatcher
     view_dispatcher_free(mag->view_dispatcher);
 
@@ -174,17 +166,39 @@ static void mag_free(Mag* mag) {
 
 // entry point for app
 int32_t mag_app(void* p) {
-    Mag* mag = mag_alloc();
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
+    Mag* mag = mag_alloc();
+
     mag_make_app_folder(mag);
+
+    // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
 
     view_dispatcher_attach_to_gui(mag->view_dispatcher, mag->gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(mag->scene_manager, MagSceneStart);
 
     view_dispatcher_run(mag->view_dispatcher);
 
+    // Disable 5v power
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
+
     mag_free(mag);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
@@ -231,14 +245,13 @@ void mag_text_input_callback(void* context) {
 
 void mag_show_loading_popup(void* context, bool show) {
     Mag* mag = context;
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
 
     if(show) {
         // Raise timer priority so that animations can play
-        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
         view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewLoading);
     } else {
         // Restore default timer priority
-        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
     }
 }
