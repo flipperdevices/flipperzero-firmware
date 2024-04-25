@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0422-0318-0.101.1-7a97c3d.tgz&channel=RM0422-0318-0.101.1-7a97c3d&version=0.101.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0425-0104-0.101.2-4c63703.tgz&channel=RM0425-0104-0.101.2-4c63703&version=0.101.2)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,25 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-25 00:46 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-25 00:46 EST`
-- Updated: [NFC Magic v1.9 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [NFC Magic: New functions for Gen4 cards (DW to block 0/shadow mode) #98 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/98)
-- Removed Eurocorp font to make space internally.
-- [CFW Settings: Allow Spoof Shell Color (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0ba9124de55b32dcdda4dbf963226bffdef633a0)
-- Updated: [FlipperZero Clock v1.1 (By mdaskalov)](https://github.com/mdaskalov/flipperzero-clock)
-- Updated: [Minesweeper Redux v1.4 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
-- UL: [faac rc add button B (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3108f07a4b74e91c0b83f388c190477f9785a38f)
-- Updated: [UART Terminal v1.4 (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
-- Updated: [Authenticator/TOTP v5.14.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [IR Remote v1.1 (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
-- Updated: [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- Added: [Icons for FAPPED Settings (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6504c6988c05e80e7a772c7532857bc9a069a121)
-- [NFC: Allow backlight off in dict attack (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e31e11ec5df57fd1c58b8a55977a2349af2648b1)
-- OFW: PR: [Troika parser visual fixes #3614 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3614)
-- OFW: PR: [Fix the retry/exit confirmation prompts in iButton #3613 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3613)
-- Updated: [Noptel LRF Sampler v1.5 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
-- Added: [Flight Assault v0.1 (By evillero)](https://github.com/evillero/flight_assault)
-- OFW: PR: [Desktop: cleanup error popups #3615 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3615)
-- [Game mode app load fixed (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/aa3be332de735eed5b6566f920fd2994b87ad07a)
-- Increment version with OFW
 
 <a name="release">
 
@@ -596,4 +577,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0422-0318-0.101.1-7a97c3d.tgz&channel=RM0422-0318-0.101.1-7a97c3d&version=0.101.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0425-0104-0.101.2-4c63703.tgz&channel=RM0425-0104-0.101.2-4c63703&version=0.101.2)
