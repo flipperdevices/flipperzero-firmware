@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Flight Assault v0.1 (By evillero)](https://github.com/evillero/flight_assault)
 - OFW: PR: [Desktop: cleanup error popups #3615 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3615)
 - [Game mode app load fixed (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/aa3be332de735eed5b6566f920fd2994b87ad07a)
+- Increment version with OFW
 
 <a name="release">
 
