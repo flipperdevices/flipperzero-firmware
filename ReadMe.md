@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0423-1246-0.101.1-bca8534](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-24 10:01 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-24 10:01 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-25 00:30 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-25 00:30 EST`
 - Updated: [NFC Magic v1.9 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [NFC Magic: New functions for Gen4 cards (DW to block 0/shadow mode) #98 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/98)
 - Removed Eurocorp font to make space internally.
 - [CFW Settings: Allow Spoof Shell Color (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0ba9124de55b32dcdda4dbf963226bffdef633a0)
