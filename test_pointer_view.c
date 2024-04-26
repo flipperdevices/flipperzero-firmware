@@ -70,7 +70,8 @@ static void pointer_control_timer_callback(void *ctx) {
   /* Jiggle the pointer */
   testpointer_model->pointer_on = !testpointer_model->pointer_on;
   send_lrf_command(app->lrf_serial_comm_app, testpointer_model->pointer_on?
-						pointer_on : pointer_off);
+						pointer_on : pointer_off,
+			NULL, 0);
 
   FURI_LOG_T(TAG, "Pointer %s", testpointer_model->pointer_on? "ON" : "OFF");
 }
@@ -141,7 +142,7 @@ void testpointer_view_exit_callback(void *ctx) {
   furi_timer_free(app->test_pointer_control_timer);
 
   /* Turn off the pointer */
-  send_lrf_command(app->lrf_serial_comm_app, pointer_off);
+  send_lrf_command(app->lrf_serial_comm_app, pointer_off, NULL, 0);
 
   /* Unset the IR sensor timeout callback */
   furi_hal_infrared_async_rx_set_timeout_isr_callback(NULL, NULL);
