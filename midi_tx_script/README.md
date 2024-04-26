@@ -1,3 +1,5 @@
+Send MIDI message via Serial Port.
+
 ```
 pip install mido pyserial
 ```
