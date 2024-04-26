@@ -33,4 +33,5 @@ App(
     entry_point="plugin_wiegand_ep",
     requires=["picopass"],
     sources=["plugin/wiegand.c"],
+    fal_embedded=True,
 )
