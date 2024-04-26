@@ -23,6 +23,7 @@ void picopass_scene_device_info_on_enter(void* context) {
     // Setup view
     PicopassBlock* card_data = picopass->dev->dev_data.card_data;
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
+    PluginWiegand* plugin = picopass->plugin_wiegand;
     Widget* widget = picopass->widget;
 
     uint8_t csn[PICOPASS_BLOCK_LEN] = {0};
@@ -77,10 +78,27 @@ void picopass_scene_device_info_on_enter(void* context) {
         "Back",
         picopass_scene_device_info_widget_callback,
         picopass);
+
+    if(plugin) {
+        // Convert from byte array to uint64_t
+        uint64_t credential = 0;
+        memcpy(&credential, pacs->credential, sizeof(uint64_t));
+        credential = __builtin_bswap64(credential);
+
+        size_t format_count = plugin->count(pacs->bitLength, credential);
+        if(format_count > 0) {
+            widget_add_button_element(
+                picopass->widget,
+                GuiButtonTypeCenter,
+                "Parse",
+                picopass_scene_device_info_widget_callback,
+                picopass);
+        }
+    }
     widget_add_button_element(
         picopass->widget,
         GuiButtonTypeRight,
-        "More",
+        "Raw",
         picopass_scene_device_info_widget_callback,
         picopass);
 
@@ -96,6 +114,9 @@ bool picopass_scene_device_info_on_event(void* context, SceneManagerEvent event)
             consumed = scene_manager_previous_scene(picopass->scene_manager);
         } else if(event.event == GuiButtonTypeRight) {
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneMoreInfo);
+            consumed = true;
+        } else if(event.event == GuiButtonTypeCenter) {
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneFormats);
             consumed = true;
         } else if(event.event == PicopassCustomEventViewExit) {
             view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewWidget);

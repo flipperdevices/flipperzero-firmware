@@ -1,3 +1,6 @@
 [submodule "air_arkanoid/engine"]
 	path = air_arkanoid/engine
 	url = https://github.com/flipperdevices/flipperzero-game-engine.git
+[submodule "picopass/plugin"]
+	path = picopass/plugin
+	url = https://gitlab.com/bettse/flipper-wiegand-plugin.git
