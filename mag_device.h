@@ -44,6 +44,8 @@ void mag_device_set_name(MagDevice* mag_dev, const char* name);
 
 bool mag_device_save(MagDevice* mag_dev, const char* dev_name);
 
+bool mag_device_load_data(MagDevice* mag_dev, FuriString* path, bool show_dialog);
+
 bool mag_file_select(MagDevice* mag_dev);
 
 void mag_device_data_clear(MagDeviceData* dev_data);

@@ -118,8 +118,13 @@ bool mag_device_save(MagDevice* mag_dev, const char* dev_name) {
     return mag_device_save_file(mag_dev, dev_name, MAG_APP_FOLDER, MAG_APP_EXTENSION, true);
 }
 
-static bool mag_device_load_data(MagDevice* mag_dev, FuriString* path, bool show_dialog) {
+bool mag_device_load_data(MagDevice* mag_dev, FuriString* path, bool show_dialog) {
     bool parsed = false;
+
+    FuriString* filename;
+    filename = furi_string_alloc();
+    path_extract_filename(path, filename, true);
+    strncpy(mag_dev->dev_name, furi_string_get_cstr(filename), MAG_DEV_NAME_MAX_LEN);
 
     FlipperFormat* file = flipper_format_file_alloc(mag_dev->storage);
     FuriString* temp_str;
@@ -168,6 +173,7 @@ static bool mag_device_load_data(MagDevice* mag_dev, FuriString* path, bool show
     }
 
     furi_string_free(temp_str);
+    furi_string_free(filename);
     flipper_format_free(file);
 
     return parsed;
@@ -189,15 +195,10 @@ bool mag_file_select(MagDevice* mag_dev) {
 
     furi_string_free(mag_app_folder);
     if(res) {
-        FuriString* filename;
-        filename = furi_string_alloc();
-        path_extract_filename(mag_dev->load_path, filename, true);
-        strncpy(mag_dev->dev_name, furi_string_get_cstr(filename), MAG_DEV_NAME_MAX_LEN);
         res = mag_device_load_data(mag_dev, mag_dev->load_path, true);
         if(res) {
             mag_device_set_name(mag_dev, mag_dev->dev_name);
         }
-        furi_string_free(filename);
     }
 
     return res;
