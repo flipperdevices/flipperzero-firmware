@@ -50,11 +50,18 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
   uint16_t nb_valid_samples_dist2;
   uint16_t nb_valid_samples_dist3;
   uint16_t nb_valid_samples_any_dist;
+  bool sampling_error;
   bool one_dist_valid;
   float timediff;
   uint16_t i;
 
 
+
+  /* Determine if the rangefinder encountered an error or hit the eye safety
+     limit */
+  sampling_error = lrf_sample->dist1 == 0.5 ||
+			lrf_sample->dist2 == 0.5 ||
+			lrf_sample->dist3 == 0.5;
 
   /* Do we do automatic single measurement? */
   if(sampler_model->config.mode == (smm | 0x100)) {
@@ -64,18 +71,23 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 
       /* Wait a bit for the LRF to "cool off" before triggering another
        measurement */
-      furi_delay_ms(1000);
+      furi_delay_ms(sampling_error? 1000 : 200);
 
       /* Send a new SMM command if continuous measurement wasn't stopped
          during the wait */
-      if(sampler_model->continuous_meas_started)
-        send_lrf_command(app->lrf_serial_comm_app, smm);
+      if(sampler_model->continuous_meas_started) {
+        if(sampler_model->config.smm_pfx) {
+          send_lrf_command(app->lrf_serial_comm_app, smm,
+				sampler_model->config.smm_pfx_sequence,
+				sizeof(sampler_model->config.smm_pfx_sequence));
+        }
+        else
+          send_lrf_command(app->lrf_serial_comm_app, smm, NULL, 0);
+      }
 
       /* Discard the sample if the LRF encountered an error or hit the eye
          safety limit */
-      if(lrf_sample->dist1 == 0.5 ||
-		lrf_sample->dist2 == 0.5 ||
-		lrf_sample->dist3 == 0.5)
+      if(sampling_error)
         return;
     }
   }
@@ -394,7 +406,7 @@ void sample_view_enter_callback(void *ctx) {
 
 	  /* Send the appropriate initial measurement command */
 	  send_lrf_command(app->lrf_serial_comm_app,
-				sampler_model->config.mode & 0xff);
+				sampler_model->config.mode & 0xff, NULL, 0);
 
 	  /* Mark continuous measurement started as needed */
 	  sampler_model->continuous_meas_started =
@@ -421,9 +433,9 @@ void sample_view_exit_callback(void *ctx) {
   sampler_model->continuous_meas_started = false;
 
   /* Send a CMM-break command unconditionally - 3 times to be sure */
-  send_lrf_command(app->lrf_serial_comm_app, cmm_break);
-  send_lrf_command(app->lrf_serial_comm_app, cmm_break);
-  send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+  send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
+  send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
+  send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
 
   /* Set the backlight on all the time */
   set_backlight(&app->backlight_control, BL_AUTO);
@@ -651,7 +663,13 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
         sampler_model->flush_samples = true;
 
         /* Send a SMM command (exec mode) */
-        send_lrf_command(app->lrf_serial_comm_app, smm);
+        if(sampler_model->config.smm_pfx) {
+          send_lrf_command(app->lrf_serial_comm_app, smm,
+				sampler_model->config.smm_pfx_sequence,
+				sizeof(sampler_model->config.smm_pfx_sequence));
+        }
+        else
+          send_lrf_command(app->lrf_serial_comm_app, smm, NULL, 0);
       }
 
       /* If we do automatic single measurement, flip the started flag */
@@ -667,9 +685,9 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
       if(sampler_model->continuous_meas_started) {
 
         /* Send a CMM-break command - 3 times to be sure */
-        send_lrf_command(app->lrf_serial_comm_app, cmm_break);
-        send_lrf_command(app->lrf_serial_comm_app, cmm_break);
-        send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+        send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
+        send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
+        send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
 
         sampler_model->continuous_meas_started = false;
       }
@@ -681,7 +699,8 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
         sampler_model->flush_samples = true;
 
         /* Send the appropriate start-CMM command (exec mode) */
-        send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.mode);
+        send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.mode,
+				NULL, 0);
 
         sampler_model->continuous_meas_started = true;
       }
