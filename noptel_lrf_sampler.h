@@ -42,6 +42,9 @@ extern const uint8_t config_beep_values[];
 extern const char *config_beep_names[];
 extern const uint8_t nb_config_beep_values;
 
+extern const uint8_t config_smm_pfx_values[];
+extern const uint8_t nb_config_smm_pfx_values;
+
 extern const uint16_t beep_frequency;
 extern const uint16_t min_beep_duration;
 extern const uint16_t sample_received_beep_duration;
@@ -104,8 +107,17 @@ typedef struct {
   /* Beep option */
   uint8_t beep;
 
+  /* SMM prefix option */
+  uint8_t smm_pfx;
+
   /* Last selected submenu item */
   uint8_t sitem;
+
+  /* Optional SMM prefix sequence, SMM prefix configuration menu item and
+     configuration choice names */
+  uint8_t smm_pfx_sequence[8];
+  char config_smm_pfx_label[17];
+  char config_smm_pfx_names[2][10];
 
 } Config;
 
@@ -278,6 +290,7 @@ typedef struct {
   VariableItem *item_mode;
   VariableItem *item_buf;
   VariableItem *item_beep;
+  VariableItem *item_smm_pfx;
 
   /* Sample view */
   View *sample_view;

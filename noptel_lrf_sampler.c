@@ -47,6 +47,9 @@ const char *config_buf_names[] = {"None", "1 s", "2 s", "3 s",
 					"1000 spl"};
 const uint8_t nb_config_buf_values = COUNT_OF(config_buf_values);
 
+const uint8_t config_smm_pfx_values[] = {0, 1};
+const uint8_t nb_config_smm_pfx_values = COUNT_OF(config_smm_pfx_values);
+
 static const char *config_beep_label = "Beep";
 const uint8_t config_beep_values[] = {0, 1};
 const char *config_beep_names[] = {"Off", "On"};
@@ -73,6 +76,8 @@ const uint16_t test_pointer_jiggle_every = 50; /*ms*/
 
 /** Initialize the app **/
 static App *app_init() {
+
+  uint8_t i;
 
   FURI_LOG_I(TAG, "App init");
 
@@ -373,17 +378,36 @@ static App *app_init() {
   variable_item_set_current_value_text(app->item_buf, config_buf_names[0]);
 
   /* Set the default beep option */
-  sampler_model->config.beep = config_beep_values[0] != 0;
+  sampler_model->config.beep = config_beep_values[0];
   testlaser_model->beep = sampler_model->config.beep;
   testpointer_model->beep = sampler_model->config.beep;
   variable_item_set_current_value_index(app->item_beep, 0);
   variable_item_set_current_value_text(app->item_beep, config_beep_names[0]);
 
+  /* Set the default SMM prefix option */
+  sampler_model->config.smm_pfx = config_smm_pfx_values[0];
+
   /* Set the default submenu item */
   sampler_model->config.sitem = submenu_config;
 
+  /* Set the default SMM prefix configuration menu item (i.e. none) */
+  for(i=0; i < sizeof(sampler_model->config.config_smm_pfx_label); i++)
+    sampler_model->config.config_smm_pfx_label[i] = 0;
+
+  /* Set the default SMM prefix configuration menu choice names (i.e. none) */
+  sampler_model->config.config_smm_pfx_names[0][0] = 0;
+  sampler_model->config.config_smm_pfx_names[0][1] = 0;
+
+  /* Set the default SMM command prefix sequence (i.e. none) */
+  for(i=0; i < sizeof(sampler_model->config.smm_pfx_sequence); i++)
+    sampler_model->config.smm_pfx_sequence[i] = 0;
+
+
+
   /* Assume the pointer is off */
   sampler_model->pointer_is_on = false;
+
+
 
   /* Try to load the configuration file and restore the configuration from the
      saved values */

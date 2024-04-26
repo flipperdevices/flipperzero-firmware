@@ -71,3 +71,25 @@ void config_beep_change(VariableItem *item) {
 
   FURI_LOG_D(TAG, "Beep option change: %s", config_beep_names[idx]);
 }
+
+
+
+/** SMM prefix option change function **/
+void config_smm_pfx_change(VariableItem *item) {
+
+  App *app = variable_item_get_context(item);
+  SamplerModel *sampler_model = view_get_model(app->sample_view);
+  uint8_t idx;
+
+  /* Get the new SMM prefix option item index */
+  idx = variable_item_get_current_value_index(item);
+
+  /* Set the new SMM prefix option */
+  sampler_model->config.smm_pfx = config_smm_pfx_values[idx] != 0;
+  variable_item_set_current_value_text(
+			item,
+			sampler_model->config.config_smm_pfx_names[idx]);
+
+  FURI_LOG_D(TAG, "SMM prefix option change: %s",
+			sampler_model->config.config_smm_pfx_names[idx]);
+}
