@@ -1,0 +1,9 @@
+App(
+    appid="lfrfid_adc",
+    name="LF-RFID ADC",
+    fap_category="Debug",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="lfrfid_adc_app",
+    stack_size=1 * 1024,
+    fap_libs=["stm32wb"],
+)
