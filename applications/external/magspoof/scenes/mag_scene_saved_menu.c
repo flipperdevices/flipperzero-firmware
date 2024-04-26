@@ -36,7 +36,7 @@ void mag_scene_saved_menu_on_enter(void* context) {
     } // TODO: what happens if no track data present?
 
     submenu_add_item(
-        submenu, "Emulate (WIP)", SubmenuIndexEmulate, mag_scene_saved_menu_submenu_callback, mag);
+        submenu, "Emulate", SubmenuIndexEmulate, mag_scene_saved_menu_submenu_callback, mag);
     //submenu_add_item(
     //    submenu, "Edit (WIP)", SubmenuIndexEdit, mag_scene_saved_menu_submenu_callback, mag);
     submenu_add_item(
