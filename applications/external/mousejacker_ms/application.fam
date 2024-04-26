@@ -18,6 +18,6 @@ App(
     ],
     fap_author="coded-with-claws",
     fap_weburl="https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/mousejacker_ms",
-    fap_version=(1, 1),
+    fap_version=(1, 2),
     fap_description="Applications Mousejacker for Microsoft mouse (hardcoded)",
 )
