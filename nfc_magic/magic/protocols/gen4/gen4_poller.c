@@ -193,8 +193,9 @@ Gen4PollerError gen4_poller_detect(Nfc* nfc, Gen4Password password, Gen4* gen4_d
     bit_buffer_free(gen4_poller_detect_ctx.tx_buffer);
     bit_buffer_free(gen4_poller_detect_ctx.rx_buffer);
 
-    if(gen4_poller_detect_ctx.error == Gen4PollerErrorNone)
+    if(gen4_poller_detect_ctx.error == Gen4PollerErrorNone) {
         gen4_copy(gen4_data, &gen4_poller_detect_ctx.gen4_data);
+    }
 
     return gen4_poller_detect_ctx.error;
 }
@@ -623,7 +624,7 @@ NfcCommand gen4_poller_get_current_cfg_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     do {
-        Gen4Config config;
+        Gen4Config config = {};
 
         Gen4PollerError error = gen4_poller_get_config(instance, instance->password, &config);
         if(error != Gen4PollerErrorNone) {
@@ -644,7 +645,7 @@ NfcCommand gen4_poller_get_revision_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     do {
-        Gen4Revision revision;
+        Gen4Revision revision = {};
         Gen4PollerError error = gen4_poller_get_revision(instance, instance->password, &revision);
         if(error != Gen4PollerErrorNone) {
             FURI_LOG_E(TAG, "Failed to get revision: %d", error);
@@ -804,6 +805,7 @@ void gen4_poller_stop(Gen4Poller* instance) {
 
 const Gen4* gen4_poller_get_gen4_data(const Gen4Poller* instance) {
     furi_assert(instance);
+
     return instance->gen4_data;
 }
 
@@ -811,10 +813,12 @@ void gen4_poller_struct_set_direct_write_block_0_mode(
     Gen4Poller* instance,
     Gen4DirectWriteBlock0Mode mode) {
     furi_assert(instance);
+
     instance->direct_write_block_0_mode = mode;
 }
 
 void gen4_poller_struct_set_shadow_mode(Gen4Poller* instance, Gen4ShadowMode mode) {
     furi_assert(instance);
+
     instance->shadow_mode = mode;
 }
