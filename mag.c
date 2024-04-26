@@ -29,6 +29,7 @@ static MagSetting* mag_setting_alloc() {
     setting->tx = SETTING_DEFAULT_TX_RFID;
     setting->us_clock = SETTING_DEFAULT_US_CLOCK;
     setting->us_interpacket = SETTING_DEFAULT_US_INTERPACKET;
+    setting->is_debug = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
 
     return setting;
 }

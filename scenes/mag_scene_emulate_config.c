@@ -188,13 +188,13 @@ void mag_scene_emulate_config_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    // TX
+    // Clock
     item = variable_item_list_add(
-        mag->variable_item_list, "TX via:", TX_COUNT, mag_scene_emulate_config_set_tx, mag);
-    value_index = value_index_uint32(mag->setting->tx, tx_value, TX_COUNT);
+        mag->variable_item_list, "Clock:", CLOCK_COUNT, mag_scene_emulate_config_set_clock, mag);
+    value_index = value_index_uint32(mag->setting->us_clock, clock_value, CLOCK_COUNT);
     scene_manager_set_scene_state(mag->scene_manager, MagSceneEmulateConfig, (uint32_t)item);
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, tx_text[value_index]);
+    variable_item_set_current_value_text(item, clock_text[value_index]);
 
     // Track
     item = variable_item_list_add(
@@ -217,14 +217,21 @@ void mag_scene_emulate_config_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, reverse_text[value_index]);
 
-    // Clock
-    item = variable_item_list_add(
-        mag->variable_item_list, "Clock:", CLOCK_COUNT, mag_scene_emulate_config_set_clock, mag);
-    value_index = value_index_uint32(mag->setting->us_clock, clock_value, CLOCK_COUNT);
-    scene_manager_set_scene_state(mag->scene_manager, MagSceneEmulateConfig, (uint32_t)item);
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, clock_text[value_index]);
-
+    // TX
+#ifdef FW_ORIGIN_Official
+    if(mag->setting->is_debug) {
+#endif
+        item = variable_item_list_add(
+            mag->variable_item_list, "TX via:", TX_COUNT, mag_scene_emulate_config_set_tx, mag);
+        value_index = value_index_uint32(mag->setting->tx, tx_value, TX_COUNT);
+        scene_manager_set_scene_state(mag->scene_manager, MagSceneEmulateConfig, (uint32_t)item);
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, tx_text[value_index]);
+#ifdef FW_ORIGIN_Official
+    }
+#else
+    variable_item_set_locked(item, !mag->setting->is_debug, "Enable Debug!");
+#endif
     // Interpacket
     /*
     item = variable_item_list_add(

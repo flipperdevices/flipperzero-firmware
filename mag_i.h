@@ -36,6 +36,16 @@
 
 #define MAG_TEXT_STORE_SIZE 150
 
+// CFWs have `submenue_add_lockable_item`; OFW doesn't,
+// replace with conditional submenu item
+#ifdef FW_ORIGIN_Official
+#define submenu_add_lockable_item(                                             \
+    submenu, label, index, callback, callback_context, locked, locked_message) \
+    if(!locked) {                                                              \
+        submenu_add_item(submenu, label, index, callback, callback_context)    \
+    }
+#endif
+
 enum MagCustomEvent {
     MagEventNext = 100,
     MagEventExit,
@@ -48,6 +58,7 @@ typedef struct {
     MagReverseState reverse;
     uint32_t us_clock;
     uint32_t us_interpacket;
+    bool is_debug;
 } MagSetting;
 
 typedef struct {

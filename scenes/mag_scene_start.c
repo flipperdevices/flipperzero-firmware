@@ -18,7 +18,14 @@ void mag_scene_start_on_enter(void* context) {
     Submenu* submenu = mag->submenu;
 
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, mag_scene_start_submenu_callback, mag);
-    submenu_add_item(submenu, "Read", SubmenuIndexRead, mag_scene_start_submenu_callback, mag);
+    submenu_add_lockable_item(
+        submenu,
+        "Read",
+        SubmenuIndexRead,
+        mag_scene_start_submenu_callback,
+        mag,
+        !mag->setting->is_debug,
+        "Enable Debug!");
     //submenu_add_item(
     //    submenu, "Add Manually", SubmenuIndexAddManually, mag_scene_start_submenu_callback, mag);
     submenu_add_item(submenu, "About", SubmenuIndexAbout, mag_scene_start_submenu_callback, mag);
