@@ -757,10 +757,17 @@ static void uart_tx(LRFSerialCommApp *app, uint8_t *data, size_t len) {
 
 
 /** Send a command to the LRF **/
-void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
+void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd,
+			uint8_t *prefix, uint8_t prefix_len) {
 
   /* Start a red LED flash */
   start_led_flash(&app->led_control, RED);
+
+  /* If we have a prefix, send the prefix */
+  if(prefix) {
+    uart_tx(app, prefix, prefix_len);
+    FURI_LOG_T(TAG, "%s command prefix sent", lrf_cmds_desc[cmd]);
+  }
 
   /* Send the correct sequence of bytes to the LRF depending on the command */
   uart_tx(app, lrf_cmds[cmd], lrf_cmds_len[cmd]);

@@ -151,7 +151,8 @@ void set_diag_data_handler(LRFSerialCommApp *, void (*)(LRFDiag *, void *),
 void enable_shared_storage_dec_buf(LRFSerialCommApp *, bool);
 
 /** Send a command to the LRF **/
-void send_lrf_command(LRFSerialCommApp*, LRFCommand);
+void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd,
+			uint8_t *, uint8_t);
 
 /** Initialize the LRF serial communication app **/
 LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t, uint16_t,
