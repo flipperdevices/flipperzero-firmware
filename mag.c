@@ -5,7 +5,7 @@
 
 #define SETTING_DEFAULT_REVERSE MagReverseStateOff
 #define SETTING_DEFAULT_TRACK MagTrackStateOneAndTwo
-#define SETTING_DEFAULT_TX_RFID MagTxStateGPIO
+#define SETTING_DEFAULT_TX MagTxStateGPIO
 #define SETTING_DEFAULT_US_CLOCK 240
 #define SETTING_DEFAULT_US_INTERPACKET 10
 
@@ -26,7 +26,7 @@ static MagSetting* mag_setting_alloc() {
     MagSetting* setting = malloc(sizeof(MagSetting));
     setting->reverse = SETTING_DEFAULT_REVERSE;
     setting->track = SETTING_DEFAULT_TRACK;
-    setting->tx = SETTING_DEFAULT_TX_RFID;
+    setting->tx = SETTING_DEFAULT_TX;
     setting->us_clock = SETTING_DEFAULT_US_CLOCK;
     setting->us_interpacket = SETTING_DEFAULT_US_INTERPACKET;
     setting->is_debug = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
