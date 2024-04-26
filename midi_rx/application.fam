@@ -1,0 +1,11 @@
+App(
+    appid="midi_rx",
+    name="midi_rx",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="midi_rx_app",
+    stack_size=8 * 1024,
+    fap_category="Media",
+    # fap_version="0.1",
+    fap_icon="midi_rx.png",
+    fap_icon_assets="icons",
+)
