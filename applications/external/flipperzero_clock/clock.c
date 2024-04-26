@@ -2,8 +2,10 @@
 
 #include "clock.h"
 
-#define CLOCK_OFS_X 63
-#define CLOCK_OFS_Y 31
+#define OFS_LEFT_X 31
+#define OFS_MID_X 63
+#define OFS_RIGHT_X 96
+#define OFS_Y 31
 
 #define H_RAD 17
 #define M_RAD 26
@@ -18,19 +20,19 @@ const char* WEEKDAYS[] =
 const char* MONTHS[] =
     {"JAN", "FEB", "MAR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 
-void draw_line(Canvas* c, Point* ofs, Line* l, LineType type) { // Bresenham-Algorithm
+void draw_line(Canvas* c, uint8_t ofs_x, Line* l, LineType type) { // Bresenham-Algorithm
     int8_t x = l->start.x, y = l->start.y;
     int8_t dx = abs(l->end.x - x), sx = x < l->end.x ? 1 : -1;
     int8_t dy = -abs(l->end.y - y), sy = y < l->end.y ? 1 : -1;
     int8_t error = dx + dy, e2;
     while(true) {
         if(type == Thick)
-            canvas_draw_disc(c, ofs->x + x, ofs->y - y, 1);
+            canvas_draw_disc(c, ofs_x + x, OFS_Y - y, 1);
         else {
-            canvas_draw_dot(c, ofs->x + x, ofs->y - y);
-            if(type & 1) canvas_draw_dot(c, ofs->x - x, ofs->y - y); // copy hor or both
-            if(type & 2) canvas_draw_dot(c, ofs->x + x, ofs->y + y); // copy ver or both
-            if(type == CopyBoth) canvas_draw_dot(c, ofs->x - x, ofs->y + y);
+            canvas_draw_dot(c, ofs_x + x, OFS_Y - y);
+            if(type & 1) canvas_draw_dot(c, ofs_x - x, OFS_Y - y); // copy hor or both
+            if(type & 2) canvas_draw_dot(c, ofs_x + x, OFS_Y + y); // copy ver or both
+            if(type == CopyBoth) canvas_draw_dot(c, ofs_x - x, OFS_Y + y);
         }
         if((x == l->end.x) && (y == l->end.y)) break;
         e2 = 2 * error;
@@ -65,11 +67,11 @@ void copy_line(Line* l, Line* from, float flip_x, float flip_y) {
     copy_point(&l->end, &from->end, flip_x, flip_y);
 }
 
-void draw_hand(Canvas* canvas, Point* ofs, float ang, int radius, bool thick) {
+void draw_hand(Canvas* canvas, uint8_t ofs_x, float ang, int radius, bool thick) {
     Line l;
     set_line(&l, ang, thick ? HMS_OFS : -HMS_OFS, radius);
-    draw_line(canvas, ofs, &l, thick ? Thick : Normal);
-    if(thick) l.end.x = 0, l.end.y = 0, draw_line(canvas, ofs, &l, Normal);
+    draw_line(canvas, ofs_x, &l, thick ? Thick : Normal);
+    if(thick) l.end.x = 0, l.end.y = 0, draw_line(canvas, ofs_x, &l, Normal);
 }
 
 void calc_clock_face(ClockConfig* cfg) {
@@ -105,6 +107,7 @@ void calc_clock_face(ClockConfig* cfg) {
             intersect(&cfg->face.minutes[min].start, ang, width, height);
             intersect(&cfg->face.minutes[min].end, ang, width - ofs, height - ofs);
         }
+
         copy_line(&cfg->face.minutes[30 - min], &cfg->face.minutes[min], false, true);
         copy_line(&cfg->face.minutes[30 + min], &cfg->face.minutes[min], true, true);
         copy_line(&cfg->face.minutes[60 - min], &cfg->face.minutes[min], true, false);
@@ -116,6 +119,7 @@ void calc_clock_face(ClockConfig* cfg) {
                 set_point(&cfg->face.hours[hour], ang, height - hour_ofs);
             else
                 intersect(&cfg->face.hours[hour], ang, width - hour_ofs, height - hour_ofs);
+
             copy_point(&cfg->face.hours[6 - hour], &cfg->face.hours[hour], false, true);
             copy_point(&cfg->face.hours[6 + hour], &cfg->face.hours[hour], true, true);
             copy_point(&cfg->face.hours[12 - hour], &cfg->face.hours[hour], true, false);
@@ -125,42 +129,41 @@ void calc_clock_face(ClockConfig* cfg) {
 
 void draw_digital_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t ms) {
     static char buf[6];
-    uint8_t hour = dt->hour, x = cfg->ofs.x, y = cfg->ofs.y;
+    uint8_t hour = dt->hour;
     if(locale_get_time_format() == LocaleTimeFormat12h) {
+        char* pm = hour >= 12 ? "PM" : "AM";
         hour = hour % 12 == 0 ? 12 : hour % 12;
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(
-            canvas, x, y - 10, AlignCenter, AlignBottom, (dt->hour >= 12 ? "PM" : "AM"));
+        canvas_draw_str_aligned(canvas, cfg->ofs_x, OFS_Y - 10, AlignCenter, AlignBottom, pm);
     }
     snprintf(buf, 6, "%2u:%02u", hour % 24, dt->minute % 60);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, x, y, AlignCenter, AlignCenter, buf);
+    canvas_draw_str_aligned(canvas, cfg->ofs_x, OFS_Y, AlignCenter, AlignCenter, buf);
     if(cfg->face_type == DigitalRectangular) {
         for(uint8_t i = 0; i < 45; i++)
-            draw_line(canvas, &cfg->ofs, &cfg->face.minutes[(dt->second - i + 60) % 60], Normal);
+            draw_line(canvas, cfg->ofs_x, &cfg->face.minutes[(dt->second - i + 60) % 60], Normal);
     } else {
         Line l;
         for(uint8_t i = 10; i > 0; i--) {
             Line* prev = &cfg->face.minutes[(dt->second - i - 1 + 60) % 60];
             l = cfg->face.minutes[(dt->second - i + 60) % 60];
             if(i > 3)
-                canvas_draw_dot(canvas, cfg->ofs.x + l.start.x, cfg->ofs.y - l.start.y);
+                canvas_draw_dot(canvas, cfg->ofs_x + l.start.x, OFS_Y - l.start.y);
             else {
                 l.end = prev->start;
-                draw_line(canvas, &cfg->ofs, &l, Normal);
+                draw_line(canvas, cfg->ofs_x, &l, Normal);
             }
         }
         float s_ang = M_TWOPI / 60.0 * dt->second + M_TWOPI / 60000.0 * ms;
         set_point(&l.end, s_ang, FACE_RADIUS - 1);
-        draw_line(canvas, &cfg->ofs, &l, Normal);
-        canvas_draw_disc(canvas, cfg->ofs.x + l.end.x, cfg->ofs.y - l.end.y, 1);
+        draw_line(canvas, cfg->ofs_x, &l, Normal);
+        canvas_draw_disc(canvas, cfg->ofs_x + l.end.x, OFS_Y - l.end.y, 1);
     }
 }
 
 void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t ms) {
     static char buf[3];
     Line* m = &cfg->face.minutes[1];
-    Point* o = &cfg->ofs;
     uint8_t i = 0;
     if(cfg->digits_mod <= 12) {
         canvas_set_font(canvas, FontSecondary);
@@ -169,41 +172,39 @@ void draw_analog_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t 
             if(i % cfg->digits_mod == 0) {
                 snprintf(buf, 3, "%2u", i == 0 ? 12 : i);
                 canvas_draw_str_aligned(
-                    canvas, o->x + h->x, o->y - h->y + 1, AlignCenter, AlignCenter, buf);
+                    canvas, cfg->ofs_x + h->x, OFS_Y - h->y + 1, AlignCenter, AlignCenter, buf);
             }
-            draw_line(canvas, o, m, CopyBoth);
+            draw_line(canvas, cfg->ofs_x, m, CopyBoth);
         }
     }
-    for(; i < 14; i++, m++) draw_line(canvas, o, m, CopyBoth);
-    draw_line(canvas, o, &cfg->face.minutes[0], CopyVer);
-    draw_line(canvas, o, &cfg->face.minutes[15], CopyHor);
+    for(; i < 14; i++, m++) draw_line(canvas, cfg->ofs_x, m, CopyBoth);
+    draw_line(canvas, cfg->ofs_x, &cfg->face.minutes[0], CopyVer);
+    draw_line(canvas, cfg->ofs_x, &cfg->face.minutes[15], CopyHor);
     float s_ang = M_TWOPI / 60.0 * dt->second + M_TWOPI / 60000.0 * ms;
     float m_ang = M_TWOPI / 60.0 * dt->minute + M_TWOPI / 3600.0 * dt->second;
     float h_ang = M_TWOPI / 12.0 * (dt->hour % 12) + M_TWOPI / 720.0 * dt->minute;
-    draw_hand(canvas, o, h_ang, H_RAD, true);
-    draw_hand(canvas, o, m_ang, M_RAD, true);
-    draw_hand(canvas, o, s_ang, S_RAD, false);
-    canvas_draw_disc(canvas, o->x, o->y, 2);
+    draw_hand(canvas, cfg->ofs_x, h_ang, H_RAD, true);
+    draw_hand(canvas, cfg->ofs_x, m_ang, M_RAD, true);
+    draw_hand(canvas, cfg->ofs_x, s_ang, S_RAD, false);
+    canvas_draw_disc(canvas, cfg->ofs_x, OFS_Y, 2);
 }
 
 void draw_date(Canvas* canvas, DateTime* dt) {
-    uint8_t x = CLOCK_OFS_X + CLOCK_OFS_X / 2, y = CLOCK_OFS_Y;
-    FuriString* dat = furi_string_alloc();
-    furi_string_printf(dat, "%2u", dt->day);
-    const char* day = furi_string_get_cstr(dat);
+    static char day[3];
+    snprintf(day, 3, "%2u", dt->day % 32);
     const char* month = MONTHS[(dt->month - 1) % 12];
     const char* weekday = WEEKDAYS[(dt->weekday - 1) % 7];
-    int8_t x_ofs = 2;
-    Align day_align = AlignLeft, month_align = AlignRight;
+    int8_t ofs_x = 2;
+    Align d_align = AlignLeft;
+    Align m_align = AlignRight;
     if(locale_get_date_format() == LocaleDateFormatDMY)
-        x_ofs = -2, day_align = AlignRight, month_align = AlignLeft;
+        ofs_x = -2, d_align = AlignRight, m_align = AlignLeft;
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, x + x_ofs, y, day_align, AlignCenter, day);
+    canvas_draw_str_aligned(canvas, OFS_RIGHT_X + ofs_x, OFS_Y, d_align, AlignCenter, day);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, x - x_ofs, y + 3, month_align, AlignCenter, month);
+    canvas_draw_str_aligned(canvas, OFS_RIGHT_X - ofs_x, OFS_Y + 3, m_align, AlignCenter, month);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, x, y + 10, AlignCenter, AlignTop, weekday);
-    furi_string_free(dat);
+    canvas_draw_str_aligned(canvas, OFS_RIGHT_X, OFS_Y + 10, AlignCenter, AlignTop, weekday);
 }
 
 void draw_clock(Canvas* canvas, ClockConfig* cfg, DateTime* dt, uint16_t ms) {
@@ -221,7 +222,6 @@ void init_clock_config(ClockConfig* cfg) {
     cfg->width = FACE_DEFAULT_WIDTH;
     cfg->digits_mod = 3;
     cfg->face_type = Rectangular;
-    cfg->ofs.x = CLOCK_OFS_X, cfg->ofs.y = CLOCK_OFS_Y;
 }
 
 void modify_clock_up(ClockConfig* cfg) {
@@ -246,10 +246,10 @@ void modify_clock_left(ClockConfig* cfg) {
 }
 
 void modify_clock_right(ClockConfig* cfg) {
-    if(!cfg->split) cfg->width = cfg->width >= 63 ? 63 : cfg->width + 1;
+    if(!cfg->split) cfg->width = cfg->width >= OFS_MID_X ? OFS_MID_X : cfg->width + 1;
 }
 
 void modify_clock_ok(ClockConfig* cfg) {
     cfg->split = !cfg->split;
-    cfg->ofs.x = cfg->split ? CLOCK_OFS_X / 2 : CLOCK_OFS_X;
+    cfg->ofs_x = cfg->split ? OFS_LEFT_X : OFS_MID_X;
 }

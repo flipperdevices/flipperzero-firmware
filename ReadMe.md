@@ -35,6 +35,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [MagSpoof v0.6 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper) Works without NFC.
 - Updated: [ESP Flasher assetts for Wifi Marauder v0.13.10 (By justcallmekoko)](https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.10)
 - Updated: [Mouse Jacker for MS Mouse v1.2 (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/mousejacker_ms) `Req: NRF24`
+- Updated: [FlipperZero Clock v1.1 (By mdaskalov)](https://github.com/mdaskalov/flipperzero-clock)
 
 <a name="release">
 
