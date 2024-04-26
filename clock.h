@@ -35,7 +35,7 @@ typedef struct {
     uint8_t width;
     uint8_t digits_mod;
     FaceType face_type;
-    Point ofs;
+    uint8_t ofs_x;
     ClockFace face;
 } ClockConfig;
 
