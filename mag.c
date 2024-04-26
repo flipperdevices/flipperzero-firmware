@@ -1,5 +1,4 @@
 #include "mag_i.h"
-#include <expansion/expansion.h>
 
 #define TAG "Mag"
 
@@ -42,6 +41,7 @@ static Mag* mag_alloc() {
 
     mag->file_name = furi_string_alloc();
     mag->file_path = furi_string_alloc_set(MAG_APP_FOLDER);
+    mag->args = furi_string_alloc();
 
     mag->view_dispatcher = view_dispatcher_alloc();
     mag->scene_manager = scene_manager_alloc(&mag_scene_handlers, mag);
@@ -94,6 +94,10 @@ static Mag* mag_alloc() {
     view_dispatcher_add_view(
         mag->view_dispatcher, MagViewTextInput, text_input_get_view(mag->text_input));
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    mag->expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(mag->expansion);
+
     return mag;
 }
 
@@ -108,6 +112,7 @@ static void mag_free(Mag* mag) {
 
     furi_string_free(mag->file_name);
     furi_string_free(mag->file_path);
+    furi_string_free(mag->args);
 
     // Mag device
     mag_device_free(mag->mag_dev);
@@ -159,6 +164,10 @@ static void mag_free(Mag* mag) {
     furi_record_close(RECORD_NOTIFICATION);
     mag->notifications = NULL;
 
+    // Return previous state of expansion
+    expansion_enable(mag->expansion);
+    furi_record_close(RECORD_EXPANSION);
+
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_DIALOGS);
 
@@ -167,13 +176,13 @@ static void mag_free(Mag* mag) {
 
 // entry point for app
 int32_t mag_app(void* p) {
-    UNUSED(p);
-
-    // Disable expansion protocol to avoid interference with UART Handle
-    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
-    expansion_disable(expansion);
+    const char* args = p;
 
     Mag* mag = mag_alloc();
+
+    if(args && strlen(args)) {
+        furi_string_set(mag->args, args);
+    }
 
     mag_make_app_folder(mag);
 
@@ -186,7 +195,13 @@ int32_t mag_app(void* p) {
     }
 
     view_dispatcher_attach_to_gui(mag->view_dispatcher, mag->gui, ViewDispatcherTypeFullscreen);
-    scene_manager_next_scene(mag->scene_manager, MagSceneStart);
+
+    if(furi_string_empty(mag->args)) {
+        scene_manager_next_scene(mag->scene_manager, MagSceneStart);
+    } else {
+        mag_device_load_data(mag->mag_dev, mag->args, true);
+        scene_manager_next_scene(mag->scene_manager, MagSceneEmulate);
+    }
 
     view_dispatcher_run(mag->view_dispatcher);
 
@@ -196,10 +211,6 @@ int32_t mag_app(void* p) {
     }
 
     mag_free(mag);
-
-    // Return previous state of expansion
-    expansion_enable(expansion);
-    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

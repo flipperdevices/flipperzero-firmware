@@ -69,7 +69,7 @@ void play_halfbit(bool value, MagSetting* setting) {
 
         if(last_value == 2 || value != (bool)last_value) {
             //furi_hal_nfc_ll_txrx_on();
-            //furi_delay_us(64);
+            furi_delay_us(64);
             //furi_hal_nfc_ll_txrx_off();
         }
         break;

@@ -9,6 +9,7 @@
 #include <furi/core/log.h>
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
+#include <expansion/expansion.h>
 
 #include <gui/gui.h>
 #include <gui/view.h>
@@ -73,6 +74,7 @@ typedef struct {
     char text_store[MAG_TEXT_STORE_SIZE + 1];
     FuriString* file_path;
     FuriString* file_name;
+    FuriString* args;
 
     MagSetting* setting;
 
@@ -86,6 +88,7 @@ typedef struct {
     VariableItemList* variable_item_list;
 
     // UART
+    Expansion* expansion;
     FuriThread* uart_rx_thread;
     FuriStreamBuffer* uart_rx_stream;
     uint8_t uart_rx_buf[UART_RX_BUF_SIZE + 1];

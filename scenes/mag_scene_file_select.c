@@ -3,7 +3,6 @@
 
 void mag_scene_file_select_on_enter(void* context) {
     Mag* mag = context;
-    //UNUSED(mag);
     mag_device_set_loading_callback(mag->mag_dev, mag_show_loading_popup, mag);
     if(mag_file_select(mag->mag_dev)) {
         scene_manager_next_scene(mag->scene_manager, MagSceneSavedMenu);
