@@ -319,10 +319,10 @@ void savediag_view_enter_callback(void *ctx) {
 	  savediag_model->status_msg3[0] = 0;
 
           /* Send a send-identification-frame command */
-          send_lrf_command(app->lrf_serial_comm_app, send_ident, NULL, 0);
+          send_lrf_command(app->lrf_serial_comm_app, send_ident);
 
 	  /* Send a read-diagnostic-data command */
-	  send_lrf_command(app->lrf_serial_comm_app, read_diag, NULL, 0);
+	  send_lrf_command(app->lrf_serial_comm_app, read_diag);
 	},
 	false);
 }
@@ -437,10 +437,10 @@ bool savediag_view_input_callback(InputEvent *evt, void *ctx) {
 			{UNUSED(_model);}, true);
 
       /* Send a send-identification-frame command */
-      send_lrf_command(app->lrf_serial_comm_app, send_ident, NULL, 0);
+      send_lrf_command(app->lrf_serial_comm_app, send_ident);
 
       /* Send a read-diagnostic-data command */
-      send_lrf_command(app->lrf_serial_comm_app, read_diag, NULL, 0);
+      send_lrf_command(app->lrf_serial_comm_app, read_diag);
     }
 
     else

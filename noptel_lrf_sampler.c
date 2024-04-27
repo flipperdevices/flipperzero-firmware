@@ -416,6 +416,7 @@ static App *app_init() {
   /* Initialize the LRF serial communication app */
   app->lrf_serial_comm_app =
 		lrf_serial_comm_app_init(min_led_flash_duration,
+						BAUDRATE,
 						uart_rx_timeout,
 						app->shared_storage,
 						sizeof(app->shared_storage));

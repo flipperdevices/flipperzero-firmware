@@ -46,7 +46,7 @@ void lrfinfo_view_enter_callback(void *ctx) {
 	  lrfinfo_model->has_ident = false;
 
 	  /* Send a send-identification-frame command */
-	  send_lrf_command(app->lrf_serial_comm_app, send_ident, NULL, 0);
+	  send_lrf_command(app->lrf_serial_comm_app, send_ident);
 	},
 	false);
 }
@@ -138,7 +138,7 @@ bool lrfinfo_view_input_callback(InputEvent *evt, void *ctx) {
 			{UNUSED(_model);}, true);
 
     /* Send a send-identification-frame command */
-    send_lrf_command(app->lrf_serial_comm_app, send_ident, NULL, 0);
+    send_lrf_command(app->lrf_serial_comm_app, send_ident);
 
     return true;
   }

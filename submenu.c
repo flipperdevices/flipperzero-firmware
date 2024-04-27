@@ -38,8 +38,7 @@ void submenu_callback(void *ctx, uint32_t idx) {
     /* Turn the pointer on and off */
     case submenu_pointeronoff:
       send_lrf_command(app->lrf_serial_comm_app,
-			sampler_model->pointer_is_on? pointer_off : pointer_on,
-			NULL, 0);
+			sampler_model->pointer_is_on? pointer_off : pointer_on);
       FURI_LOG_D(TAG, "Turned the pointer %s",
 			sampler_model->pointer_is_on? "OFF" : "ON");
       sampler_model->config.sitem = submenu_pointeronoff;

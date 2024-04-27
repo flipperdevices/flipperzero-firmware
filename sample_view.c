@@ -76,13 +76,15 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
       /* Send a new SMM command if continuous measurement wasn't stopped
          during the wait */
       if(sampler_model->continuous_meas_started) {
-        if(sampler_model->config.smm_pfx) {
-          send_lrf_command(app->lrf_serial_comm_app, smm,
-				app->smm_pfx_config.smm_pfx_sequence,
-				sizeof(app->smm_pfx_config.smm_pfx_sequence));
-        }
-        else
-          send_lrf_command(app->lrf_serial_comm_app, smm, NULL, 0);
+
+        /* Send the SMM prefix if it's enabled */
+        if(sampler_model->config.smm_pfx)
+          uart_tx(app->lrf_serial_comm_app,
+			app->smm_pfx_config.smm_pfx_sequence,
+			sizeof(app->smm_pfx_config.smm_pfx_sequence));
+
+        /* Send the SMM command */
+        send_lrf_command(app->lrf_serial_comm_app, smm);
       }
 
       /* Discard the sample if the LRF encountered an error or hit the eye
@@ -402,14 +404,9 @@ void sample_view_enter_callback(void *ctx) {
 	{
 	  sampler_model->samples_updated = false;
 
-          /* Organize blinking the OK button symbol or not depending on whether
-             we do SMM and sending the SMM prefix */
+	  /* Don't blink the OK button symbol by default */
 	  sampler_model->symbol_reversed = false;
-	  if((sampler_model->config.mode & (AUTO_RESTART - 1)) == smm &&
-		sampler_model->config.smm_pfx)
-	    sampler_model->symbol_blinking_ctr = 0;
-          else
-	    sampler_model->symbol_blinking_ctr = -1;
+	  sampler_model->symbol_blinking_ctr = -1;
 
 	  /* Initialize the displayed distances */
 	  sampler_model->disp_sample.dist1 = NO_DISTANCE_DISPLAY;
@@ -425,10 +422,29 @@ void sample_view_enter_callback(void *ctx) {
 	  /* Initialize the displayed effective sampling frequency */
 	  sampler_model->eff_freq = -1;
 
-	  /* Send the appropriate initial measurement command */
-	  send_lrf_command(app->lrf_serial_comm_app,
-				sampler_model->config.mode & (AUTO_RESTART - 1),
-				NULL, 0);
+	  /* Are we doing single measurement (manual or automatic)? */
+	  if((sampler_model->config.mode & (AUTO_RESTART - 1)) == smm) {
+
+	    /* Is the SMM prefix enabled? */
+	    if(sampler_model->config.smm_pfx) {
+
+	      /* Set up the OK button symbol for blinking */
+	      sampler_model->symbol_blinking_ctr = 0;
+
+	      /* Send the SMM prefix */
+	      uart_tx(app->lrf_serial_comm_app,
+				app->smm_pfx_config.smm_pfx_sequence,
+				sizeof(app->smm_pfx_config.smm_pfx_sequence));
+	    }
+
+	    /* Send the SMM command */
+	    send_lrf_command(app->lrf_serial_comm_app, smm);
+	  }
+
+	  /* Otherwise send the appropriate CMM command */
+	  else
+	    send_lrf_command(app->lrf_serial_comm_app,
+				sampler_model->config.mode);
 
 	  /* Mark continuous measurement started as needed */
 	  sampler_model->continuous_meas_started =
@@ -455,9 +471,9 @@ void sample_view_exit_callback(void *ctx) {
   sampler_model->continuous_meas_started = false;
 
   /* Send a CMM-break command unconditionally - 3 times to be sure */
-  send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
-  send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
-  send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
+  send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+  send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+  send_lrf_command(app->lrf_serial_comm_app, cmm_break);
 
   /* Set the backlight back to automatic */
   set_backlight(&app->backlight_control, BL_AUTO);
@@ -688,7 +704,7 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
     FURI_LOG_D(TAG, "OK button pressed");
 
     /* Are we doing single measurement (manual or automatic)? */
-    if((sampler_model->config.mode & 0xff) == smm) {
+    if((sampler_model->config.mode & (AUTO_RESTART - 1)) == smm) {
 
       /* Is continuous measurement stopped? */
       if(!sampler_model->continuous_meas_started) {
@@ -696,14 +712,14 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
         /* Reset the samples ring buffer */
         sampler_model->flush_samples = true;
 
-        /* Send a SMM command (exec mode) */
-        if(sampler_model->config.smm_pfx) {
-          send_lrf_command(app->lrf_serial_comm_app, smm,
-				app->smm_pfx_config.smm_pfx_sequence,
-				sizeof(app->smm_pfx_config.smm_pfx_sequence));
-        }
-        else
-          send_lrf_command(app->lrf_serial_comm_app, smm, NULL, 0);
+        /* Send the SMM prefix if it's enabled */
+        if(sampler_model->config.smm_pfx)
+          uart_tx(app->lrf_serial_comm_app,
+			app->smm_pfx_config.smm_pfx_sequence,
+			sizeof(app->smm_pfx_config.smm_pfx_sequence));
+
+        /* Send the SMM command */
+        send_lrf_command(app->lrf_serial_comm_app, smm);
       }
 
       /* If we do automatic single measurement, flip the started flag */
@@ -719,9 +735,9 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
       if(sampler_model->continuous_meas_started) {
 
         /* Send a CMM-break command - 3 times to be sure */
-        send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
-        send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
-        send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
+        send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+        send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+        send_lrf_command(app->lrf_serial_comm_app, cmm_break);
 
         sampler_model->continuous_meas_started = false;
       }
@@ -732,9 +748,8 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
         /* Reset the samples ring buffer */
         sampler_model->flush_samples = true;
 
-        /* Send the appropriate start-CMM command (exec mode) */
-        send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.mode,
-				NULL, 0);
+        /* Send the appropriate start-CMM command */
+        send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.mode);
 
         sampler_model->continuous_meas_started = true;
       }

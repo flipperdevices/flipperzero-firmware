@@ -69,7 +69,7 @@ static void restart_cmm_timer_callback(void *ctx) {
 
   /* Restart CMM if needed */
   if(testlaser_model->restart_cmm) {
-    send_lrf_command(app->lrf_serial_comm_app, cmm_10hz, NULL, 0);
+    send_lrf_command(app->lrf_serial_comm_app, cmm_10hz);
     FURI_LOG_T(TAG, "CMM restart");
   }
 
@@ -129,7 +129,7 @@ void testlaser_view_enter_callback(void *ctx) {
   set_lrf_sample_handler(app->lrf_serial_comm_app, lrf_sample_handler, app);
 
   /* Start CMM rightaway */
-  send_lrf_command(app->lrf_serial_comm_app, cmm_10hz, NULL, 0);
+  send_lrf_command(app->lrf_serial_comm_app, cmm_10hz);
   FURI_LOG_T(TAG, "CMM start");
 
   /* Setup and start the view update timer */
@@ -171,9 +171,9 @@ void testlaser_view_exit_callback(void *ctx) {
   furi_timer_free(app->test_laser_restart_cmm_timer);
 
   /* Send a CMM-break command unconditionally - 3 times to be sure */
-  send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
-  send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
-  send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
+  send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+  send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+  send_lrf_command(app->lrf_serial_comm_app, cmm_break);
 
   /* Unset the callback to receive decoded LRF samples */
   set_lrf_sample_handler(app->lrf_serial_comm_app, NULL, app);

@@ -750,24 +750,17 @@ static int32_t uart_rx_thread(void *ctx) {
 
 
 /** UART send function **/
-static void uart_tx(LRFSerialCommApp *app, uint8_t *data, size_t len) {
+void uart_tx(LRFSerialCommApp *app, uint8_t *data, size_t len) {
   furi_hal_serial_tx(app->serial_handle, data, len);
 }
 
 
 
 /** Send a command to the LRF **/
-void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd,
-			uint8_t *prefix, uint8_t prefix_len) {
+void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
 
   /* Start a red LED flash */
   start_led_flash(&app->led_control, RED);
-
-  /* If we have a prefix, send the prefix */
-  if(prefix) {
-    uart_tx(app, prefix, prefix_len);
-    FURI_LOG_T(TAG, "%s command prefix sent", lrf_cmds_desc[cmd]);
-  }
 
   /* Send the correct sequence of bytes to the LRF depending on the command */
   uart_tx(app, lrf_cmds[cmd], lrf_cmds_len[cmd]);
@@ -778,6 +771,7 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd,
 
 /** Initialize the LRF serial communication app **/
 LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration,
+						uint32_t baudrate,
 						uint16_t uart_rx_timeout,
 						uint8_t *shared_storage,
 						uint16_t shared_storage_size) {
@@ -831,7 +825,7 @@ LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration,
   /* Acquire the UART */
   app->serial_handle = furi_hal_serial_control_acquire(app->serial_channel);
   furi_check(app->serial_handle);
-  furi_hal_serial_init(app->serial_handle, BAUDRATE);
+  furi_hal_serial_init(app->serial_handle, baudrate);
   furi_hal_serial_async_rx_start(app->serial_handle, on_uart_irq_callback,
 					app, false);
 
