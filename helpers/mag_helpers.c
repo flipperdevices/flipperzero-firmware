@@ -19,6 +19,29 @@ const int sublen[] = {32, 48, 48};
 
 uint8_t last_value = 2;
 
+const GpioPin* mag_gpio_enum_to_pin(MagSettingPin pin) {
+    switch(pin) {
+    case MagSettingPinA7:
+        return &gpio_ext_pa7;
+    case MagSettingPinA6:
+        return &gpio_ext_pa6;
+    case MagSettingPinA4:
+        return &gpio_ext_pa4;
+    case MagSettingPinB3:
+        return &gpio_ext_pb3;
+    case MagSettingPinB2:
+        return &gpio_ext_pb2;
+    case MagSettingPinC3:
+        return &gpio_ext_pc3;
+    case MagSettingPinC1:
+        return &gpio_ext_pc1;
+    case MagSettingPinC0:
+        return &gpio_ext_pc0;
+    default:
+        return NULL;
+    }
+}
+
 void play_halfbit(bool value, MagSetting* setting) {
     switch(setting->tx) {
     case MagTxStateRFID:

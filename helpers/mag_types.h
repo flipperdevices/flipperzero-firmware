@@ -15,6 +15,17 @@ typedef enum {
 } MagView;
 
 typedef enum {
+    MagSettingPinA7,
+    MagSettingPinA6,
+    MagSettingPinA4,
+    MagSettingPinB3,
+    MagSettingPinB2,
+    MagSettingPinC3,
+    MagSettingPinC1,
+    MagSettingPinC0,
+} MagSettingPin;
+
+typedef enum {
     MagReverseStateOff,
     MagReverseStateOn,
 } MagReverseState;

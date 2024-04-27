@@ -2,12 +2,12 @@
 
 #define TAG "MagSceneEmulateConfig"
 
-enum MagSettingIndex {
-    MagSettingIndexTx,
-    MagSettingIndexTrack,
-    MagSettingIndexReverse,
-    MagSettingIndexClock,
-    MagSettingIndexInterpacket,
+enum MagEmulateConfigIndex {
+    MagEmulateConfigIndexTx,
+    MagEmulateConfigIndexTrack,
+    MagEmulateConfigIndexReverse,
+    MagEmulateConfigIndexClock,
+    MagEmulateConfigIndexInterpacket,
 };
 
 #define TX_COUNT 7

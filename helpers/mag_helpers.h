@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+const GpioPin* mag_gpio_enum_to_pin(MagSettingPin pin);
+
 void play_halfbit(bool value, MagSetting* setting);
 void play_track(uint8_t* bits_manchester, uint16_t n_bits, MagSetting* setting, bool reverse);
 

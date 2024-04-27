@@ -47,6 +47,15 @@
     }
 #endif
 
+#define SETTING_DEFAULT_REVERSE MagReverseStateOff
+#define SETTING_DEFAULT_TRACK MagTrackStateOneAndTwo
+#define SETTING_DEFAULT_TX MagTxStateGPIO
+#define SETTING_DEFAULT_US_CLOCK 240
+#define SETTING_DEFAULT_US_INTERPACKET 10
+#define SETTING_DEFAULT_PIN_INPUT MagSettingPinA7
+#define SETTING_DEFAULT_PIN_OUTPUT MagSettingPinA6
+#define SETTING_DEFAULT_PIN_ENABLE MagSettingPinA4
+
 enum MagCustomEvent {
     MagEventNext = 100,
     MagEventExit,
@@ -59,6 +68,9 @@ typedef struct {
     MagReverseState reverse;
     uint32_t us_clock;
     uint32_t us_interpacket;
+    MagSettingPin pin_input;
+    MagSettingPin pin_output;
+    MagSettingPin pin_enable;
     bool is_debug;
 } MagSetting;
 

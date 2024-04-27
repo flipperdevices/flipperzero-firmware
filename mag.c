@@ -2,12 +2,6 @@
 
 #define TAG "Mag"
 
-#define SETTING_DEFAULT_REVERSE MagReverseStateOff
-#define SETTING_DEFAULT_TRACK MagTrackStateOneAndTwo
-#define SETTING_DEFAULT_TX MagTxStateGPIO
-#define SETTING_DEFAULT_US_CLOCK 240
-#define SETTING_DEFAULT_US_INTERPACKET 10
-
 static bool mag_debug_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Mag* mag = context;
@@ -28,6 +22,11 @@ static MagSetting* mag_setting_alloc() {
     setting->tx = SETTING_DEFAULT_TX;
     setting->us_clock = SETTING_DEFAULT_US_CLOCK;
     setting->us_interpacket = SETTING_DEFAULT_US_INTERPACKET;
+
+    setting->pin_input = SETTING_DEFAULT_PIN_INPUT;
+    setting->pin_output = SETTING_DEFAULT_PIN_OUTPUT;
+    setting->pin_enable = SETTING_DEFAULT_PIN_ENABLE;
+
     setting->is_debug = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
 
     return setting;
