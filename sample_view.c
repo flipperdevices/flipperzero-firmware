@@ -64,7 +64,7 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 			lrf_sample->dist3 == 0.5;
 
   /* Do we do automatic single measurement? */
-  if(sampler_model->config.mode == (smm | 0x100)) {
+  if(sampler_model->config.mode == (smm | AUTO_RESTART)) {
 
     /* Is continuous measurement still enabled? */
     if(sampler_model->continuous_meas_started) {
@@ -78,8 +78,8 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
       if(sampler_model->continuous_meas_started) {
         if(sampler_model->config.smm_pfx) {
           send_lrf_command(app->lrf_serial_comm_app, smm,
-				sampler_model->config.smm_pfx_sequence,
-				sizeof(sampler_model->config.smm_pfx_sequence));
+				app->smm_pfx_config.smm_pfx_sequence,
+				sizeof(app->smm_pfx_config.smm_pfx_sequence));
         }
         else
           send_lrf_command(app->lrf_serial_comm_app, smm, NULL, 0);
@@ -406,7 +406,8 @@ void sample_view_enter_callback(void *ctx) {
 
 	  /* Send the appropriate initial measurement command */
 	  send_lrf_command(app->lrf_serial_comm_app,
-				sampler_model->config.mode & 0xff, NULL, 0);
+				sampler_model->config.mode & (AUTO_RESTART - 1),
+				NULL, 0);
 
 	  /* Mark continuous measurement started as needed */
 	  sampler_model->continuous_meas_started =
@@ -665,8 +666,8 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
         /* Send a SMM command (exec mode) */
         if(sampler_model->config.smm_pfx) {
           send_lrf_command(app->lrf_serial_comm_app, smm,
-				sampler_model->config.smm_pfx_sequence,
-				sizeof(sampler_model->config.smm_pfx_sequence));
+				app->smm_pfx_config.smm_pfx_sequence,
+				sizeof(app->smm_pfx_config.smm_pfx_sequence));
         }
         else
           send_lrf_command(app->lrf_serial_comm_app, smm, NULL, 0);
