@@ -8,3 +8,14 @@ App(
     requires=["gui", "storage"],
     fap_libs=["stm32wb"],
 )
+
+App(
+    appid="lfrfid_plotter",
+    name="LF-RFID Plotter",
+    fap_category="Debug",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="lfrfid_plotter_app",
+    stack_size=1 * 1024,
+    requires=["gui"],
+    fap_libs=["stm32wb"],
+)
