@@ -58,6 +58,7 @@ extern const uint16_t min_beep_duration;
 extern const uint16_t sample_received_beep_duration;
 
 extern const uint16_t sample_view_update_every;
+extern const uint8_t sample_view_smm_prefix_enabled_blink_every;
 
 extern const uint16_t test_laser_view_update_every;
 extern const uint16_t test_laser_restart_cmm_every;
@@ -179,6 +180,12 @@ typedef struct {
 
   /* Flag to indicate whether the sample data was updated */
   bool samples_updated;
+
+  /* Whether the OK button symbol should be displayed in reverse video */
+  bool symbol_reversed;
+
+  /* OK button symbol blinking counter */
+  int8_t symbol_blinking_ctr;
 
   /* Whether the pointer is on or off */
   bool pointer_is_on;

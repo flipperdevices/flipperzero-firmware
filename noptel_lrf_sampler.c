@@ -65,6 +65,7 @@ const uint16_t sample_received_beep_duration = 25; /*ms*/
 static const uint16_t min_led_flash_duration = 15; /*ms*/
 
 const uint16_t sample_view_update_every = 150; /*ms*/
+const uint8_t sample_view_smm_prefix_enabled_blink_every = 3; /*view updates*/
 
 const uint16_t test_laser_view_update_every = 150; /*ms*/
 const uint16_t test_laser_restart_cmm_every = 500; /*ms*/

@@ -360,8 +360,16 @@ static void sample_view_timer_callback(void *ctx) {
   App *app = (App *)ctx;
   SamplerModel *sampler_model = view_get_model(app->sample_view);
 
-  /* Were the samples updated? */
-  if(sampler_model->samples_updated) {
+  /* Were the samples updated, or does the display need updating to make the
+     OK button symbol blink? */
+  if(sampler_model->samples_updated || !sampler_model->symbol_blinking_ctr) {
+
+    /* Reverse the symbol's colors and reset the blinker counter if needed  */
+    if(!sampler_model->symbol_blinking_ctr) {
+      sampler_model->symbol_reversed = !sampler_model->symbol_reversed;
+      sampler_model->symbol_blinking_ctr =
+				sample_view_smm_prefix_enabled_blink_every;
+    }
 
     /* Trigger a sample view redraw */
     with_view_model(app->sample_view, SamplerModel* _model,
@@ -369,6 +377,10 @@ static void sample_view_timer_callback(void *ctx) {
 
     sampler_model->samples_updated = false;
   }
+
+  /* Count down the blinking counter if it's not disabled */
+  if(sampler_model->symbol_blinking_ctr >= 0)
+    sampler_model->symbol_blinking_ctr--;
 }
 
 
@@ -389,6 +401,15 @@ void sample_view_enter_callback(void *ctx) {
   with_view_model(app->sample_view, SamplerModel* sampler_model,
 	{
 	  sampler_model->samples_updated = false;
+
+          /* Organize blinking the OK button symbol or not depending on whether
+             we do SMM and sending the SMM prefix */
+	  sampler_model->symbol_reversed = false;
+	  if((sampler_model->config.mode & (AUTO_RESTART - 1)) == smm &&
+		sampler_model->config.smm_pfx)
+	    sampler_model->symbol_blinking_ctr = 0;
+          else
+	    sampler_model->symbol_blinking_ctr = -1;
 
 	  /* Initialize the displayed distances */
 	  sampler_model->disp_sample.dist1 = NO_DISTANCE_DISPLAY;
@@ -566,9 +587,21 @@ void sample_view_draw_callback(Canvas *canvas, void *model) {
 
   /* Print the OK button symbol followed by "Sample", "Start" or "Stop"
      in a frame at the right-hand side depending on whether we do single or
-     continuous measurement, and whether continuous measurement is started */
+     continuous measurement, and whether continuous measurement is started.
+     Draw the button symbol in reverse video if needed */
   canvas_draw_frame(canvas, 77, 52, 51, 12);
+
+  if(sampler_model->symbol_reversed) {
+    canvas_draw_frame(canvas, 78, 53, 10, 10);
+    canvas_draw_line(canvas, 88, 53, 88, 63);
+    canvas_invert_color(canvas);
+  }
+
   canvas_draw_icon(canvas, 79, 54, &I_ok_button);
+
+  if(sampler_model->symbol_reversed)
+    canvas_invert_color(canvas);
+
   if(sampler_model->config.mode == smm)
     canvas_draw_str(canvas, 90, 62, "Sample");
   else
