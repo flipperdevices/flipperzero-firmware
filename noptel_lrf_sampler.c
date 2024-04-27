@@ -70,7 +70,7 @@ const uint8_t nb_config_beep_values = COUNT_OF(config_beep_values);
 /** Baudrate setting parameters **/
 const char *config_baudrate_label = "Baudrate";
 const uint32_t config_baudrate_values[] = {115200, 57600, 38400, 19200, 9600};
-const char *config_baudrate_names[] = {"115200", "56600", "38400",
+const char *config_baudrate_names[] = {"115200", "57600", "38400",
 					"19200", "9600"};
 const uint8_t nb_config_baudrate_values = COUNT_OF(config_baudrate_values);
 
