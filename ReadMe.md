@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fix for LEFTY mode (By aryn832)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1063) ($100 ETH BOUNTY WINNER)
 - OFW: PR: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
 - OFW: PR: [iButton: fix crash when deleting some keys #3617 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3617)
+- [Fix for GPS Overlay (By MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1064)
 
 <a name="release">
 

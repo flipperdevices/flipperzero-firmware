@@ -213,7 +213,7 @@ GpsUart* gps_uart_enable() {
     gps_uart->backlight_on = false;
     gps_uart->changing_baudrate = false;
     gps_uart->deep_sleep_enabled = false;
-
+    gps_uart->view_state = NORMAL;
     gps_uart_init_thread(gps_uart);
 
     return gps_uart;

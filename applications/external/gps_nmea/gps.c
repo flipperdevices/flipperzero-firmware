@@ -23,13 +23,6 @@ static void render_callback(Canvas* const canvas, void* context) {
     furi_mutex_acquire(gps_uart->mutex, FuriWaitForever);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(
-        canvas,
-        64,
-        32,
-        AlignCenter,
-        AlignBottom,
-        gps_uart->deep_sleep_enabled ? "Deep sleep enabled" : "Deep sleep disabled");
 
     if(!gps_uart->changing_baudrate) {
         canvas_set_font(canvas, FontPrimary);
@@ -81,7 +74,19 @@ static void render_callback(Canvas* const canvas, void* context) {
             gps_uart->status.time_minutes,
             gps_uart->status.time_seconds);
         canvas_draw_str_aligned(canvas, 96, 62, AlignCenter, AlignBottom, buffer);
-    } else {
+    }
+    if(gps_uart->changing_deepsleep) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_clear(canvas);
+        canvas_draw_str_aligned(
+            canvas,
+            64,
+            32,
+            AlignCenter,
+            AlignBottom,
+            gps_uart->deep_sleep_enabled ? "Deep sleep enabled" : "Deep sleep disabled");
+    }
+    if(gps_uart->changing_baudrate) {
         char buffer[64];
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignBottom, "Baudrate set to:");
@@ -214,7 +219,7 @@ int32_t gps_app(void* p) {
                             gps_uart->serial_handle,
                             (uint8_t*)"$PMTK161,0*28\r\n",
                             strlen("$PMTK161,0*28\r\n"));
-
+                        gps_uart->changing_deepsleep = true;
                         furi_mutex_release(gps_uart->mutex);
                         view_port_update(view_port);
                         furi_delay_ms(1000);
@@ -228,12 +233,13 @@ int32_t gps_app(void* p) {
                 }
             }
         }
-        if(!gps_uart->changing_baudrate) {
+        if((!gps_uart->changing_baudrate) && (!gps_uart->changing_deepsleep)) {
             furi_mutex_release(gps_uart->mutex);
             view_port_update(view_port);
         } else {
             furi_delay_ms(1000);
             gps_uart->changing_baudrate = false;
+            gps_uart->changing_deepsleep = false;
         }
     }
 
