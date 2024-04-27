@@ -67,6 +67,10 @@ static void view_port_map_input(InputEvent* event, ViewPortOrientation orientati
         return;
     }
 
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+      orientation = 1;
+    }
+
     if(orientation == ViewPortOrientationHorizontal ||
        orientation == ViewPortOrientationHorizontalFlip) {
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
