@@ -37,6 +37,9 @@ void lrfinfo_view_enter_callback(void *ctx) {
 
   App *app = (App *)ctx;
 
+  /* Start the UART at the correct baudrate */
+  start_uart(app->lrf_serial_comm_app, BAUDRATE);
+
   /* Setup the callback to receive decoded LRF identification frames */
   set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler, app);
 
@@ -60,6 +63,9 @@ void lrfinfo_view_exit_callback(void *ctx) {
 
   /* Unset the callback to receive decoded LRF identification frames */
   set_lrf_ident_handler(app->lrf_serial_comm_app, NULL, app);
+
+  /* Stop the UART */
+  stop_uart(app->lrf_serial_comm_app);
 }
 
 

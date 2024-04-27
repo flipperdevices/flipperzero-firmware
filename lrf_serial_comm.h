@@ -157,8 +157,14 @@ void uart_tx(LRFSerialCommApp *, uint8_t *, size_t);
 void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd);
 
 /** Initialize the LRF serial communication app **/
-LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t, uint32_t, uint16_t,
+LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t, uint16_t,
 						uint8_t *, uint16_t);
+
+/** Start the UART **/
+void start_uart(LRFSerialCommApp *, uint32_t);
+
+/** Stop the UART **/
+void stop_uart(LRFSerialCommApp *);
 
 /** Stop the UART receive thread and free up the space allocated for the LRF
     communication app **/

@@ -771,7 +771,6 @@ void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd) {
 
 /** Initialize the LRF serial communication app **/
 LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration,
-						uint32_t baudrate,
 						uint16_t uart_rx_timeout,
 						uint8_t *shared_storage,
 						uint16_t shared_storage_size) {
@@ -825,11 +824,36 @@ LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration,
   /* Acquire the UART */
   app->serial_handle = furi_hal_serial_control_acquire(app->serial_channel);
   furi_check(app->serial_handle);
-  furi_hal_serial_init(app->serial_handle, baudrate);
-  furi_hal_serial_async_rx_start(app->serial_handle, on_uart_irq_callback,
-					app, false);
 
   return app;
+}
+
+
+
+/** Start the UART **/
+void start_uart(LRFSerialCommApp *app, uint32_t baudrate) {
+
+  /* Initialize the UART with the required baudrate */
+  furi_hal_serial_init(app->serial_handle, baudrate);
+
+  /* Start receiving */
+  furi_hal_serial_async_rx_start(app->serial_handle, on_uart_irq_callback,
+					app, false);
+}
+
+
+
+/** Stop the UART **/
+void stop_uart(LRFSerialCommApp *app) {
+
+  /* Wait a bit to flush the write buffer */
+  furi_delay_ms(100);
+
+  /* Stop receiving */
+  furi_hal_serial_async_rx_stop(app->serial_handle);
+
+  /* Deinitialize the UART */
+  furi_hal_serial_deinit(app->serial_handle);
 }
 
 
@@ -840,9 +864,7 @@ void lrf_serial_comm_app_free(LRFSerialCommApp *app) {
 
   FURI_LOG_I(TAG, "App free");
 
-  /* Stop UART receive and release the UART */
-  furi_hal_serial_async_rx_stop(app->serial_handle);
-  furi_hal_serial_deinit(app->serial_handle);
+  /* Release the UART */
   furi_hal_serial_control_release(app->serial_handle);
 
   /* Stop and free the UART receive thread */

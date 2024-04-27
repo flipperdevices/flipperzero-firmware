@@ -394,6 +394,9 @@ void sample_view_enter_callback(void *ctx) {
   App *app = (App *)ctx;
   uint32_t period = furi_ms_to_ticks(sample_view_update_every);
 
+  /* Start the UART at the correct baudrate */
+  start_uart(app->lrf_serial_comm_app, BAUDRATE);
+
   /* Setup the callback to receive decoded LRF samples */
   set_lrf_sample_handler(app->lrf_serial_comm_app, lrf_sample_handler, app);
 
@@ -484,6 +487,9 @@ void sample_view_exit_callback(void *ctx) {
   /* Stop and free the view update timer */
   furi_timer_stop(app->sample_view_timer);
   furi_timer_free(app->sample_view_timer);
+
+  /* Stop the UART */
+  stop_uart(app->lrf_serial_comm_app);
 }
 
 

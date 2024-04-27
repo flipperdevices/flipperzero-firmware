@@ -113,6 +113,9 @@ void testlaser_view_enter_callback(void *ctx) {
   testlaser_model->ir_received_prev = false;
   testlaser_model->ir_received = false;
 
+  /* Start the UART at the correct baudrate */
+  start_uart(app->lrf_serial_comm_app, BAUDRATE);
+
   /* Set up the callback to catch an IR sensor level change */
   furi_hal_infrared_async_rx_set_capture_isr_callback(ir_capture_callback,
 							testlaser_model);
@@ -177,6 +180,9 @@ void testlaser_view_exit_callback(void *ctx) {
 
   /* Unset the callback to receive decoded LRF samples */
   set_lrf_sample_handler(app->lrf_serial_comm_app, NULL, app);
+
+  /* Stop the UART */
+  stop_uart(app->lrf_serial_comm_app);
 
   /* Unset the IR sensor timeout callback */
   furi_hal_infrared_async_rx_set_timeout_isr_callback(NULL, NULL);

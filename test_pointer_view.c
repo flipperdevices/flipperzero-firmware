@@ -82,7 +82,8 @@ void testpointer_view_enter_callback(void *ctx) {
 
   App *app = (App *)ctx;
   TestPointerModel *testpointer_model = view_get_model(app->testpointer_view);
-  uint32_t period_view_update = furi_ms_to_ticks(test_pointer_view_update_every);
+  uint32_t period_view_update =
+			furi_ms_to_ticks(test_pointer_view_update_every);
   uint32_t period_jiggle_pointer = furi_ms_to_ticks(test_pointer_jiggle_every);
 
   /* Make sure the IR receiver isn't busy */
@@ -94,6 +95,9 @@ void testpointer_view_enter_callback(void *ctx) {
 
   testpointer_model->ir_received_prev = false;
   testpointer_model->ir_received = false;
+
+  /* Start the UART at the correct baudrate */
+  start_uart(app->lrf_serial_comm_app, BAUDRATE);
 
   /* Set up the callback to catch an IR sensor level change */
   furi_hal_infrared_async_rx_set_capture_isr_callback(ir_capture_callback,
@@ -148,6 +152,9 @@ void testpointer_view_exit_callback(void *ctx) {
 
   /* Turn off the pointer */
   send_lrf_command(app->lrf_serial_comm_app, pointer_off);
+
+  /* Stop the UART */
+  stop_uart(app->lrf_serial_comm_app);
 
   /* Unset the IR sensor timeout callback */
   furi_hal_infrared_async_rx_set_timeout_isr_callback(NULL, NULL);
