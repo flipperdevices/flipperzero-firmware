@@ -459,7 +459,7 @@ void sample_view_exit_callback(void *ctx) {
   send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
   send_lrf_command(app->lrf_serial_comm_app, cmm_break, NULL, 0);
 
-  /* Set the backlight on all the time */
+  /* Set the backlight back to automatic */
   set_backlight(&app->backlight_control, BL_AUTO);
 
   /* Unset the callback to receive decoded LRF samples */
