@@ -87,9 +87,9 @@ void config_smm_pfx_change(VariableItem *item) {
   /* Set the new SMM prefix option */
   sampler_model->config.smm_pfx = config_smm_pfx_values[idx] != 0;
   variable_item_set_current_value_text(
-			item,
-			sampler_model->config.config_smm_pfx_names[idx]);
+				item,
+				app->smm_pfx_config.config_smm_pfx_names[idx]);
 
   FURI_LOG_D(TAG, "SMM prefix option change: %s",
-			sampler_model->config.config_smm_pfx_names[idx]);
+				app->smm_pfx_config.config_smm_pfx_names[idx]);
 }

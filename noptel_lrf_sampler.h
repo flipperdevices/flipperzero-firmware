@@ -19,18 +19,26 @@
 /*** Defines ***/
 #define VERSION "1.5"
 #define TAG "noptel_lrf_sampler"
+
+#define CONFIG_FILE "noptel_lrf_sampler.save"
+#define SMM_PREFIX_CONFIG_DEFINITION_FILE "smm_prefix_config.def"
+
 #define NO_AVERAGE -1		/* This distance will be displayed as
 				   "NO AVERAGE" */
 #define NO_DISTANCE_DISPLAY -2	/* This distance will be displayed as a blank */
+
+#define AUTO_RESTART 0x80
 
 
 
 /*** Parameters ***/
 extern const char *config_file;
 
+extern const char *smm_pfx_config_definition_file;
+
 extern const char *dsp_files_dir;
 
-extern const uint16_t config_mode_values[];
+extern const uint8_t config_mode_values[];
 extern const char *config_mode_names[];
 extern const uint8_t nb_config_mode_values;
 
@@ -99,27 +107,37 @@ typedef enum {
 typedef struct {
 
   /* LRF sampling mode setting */
-  int16_t mode;
+  uint16_t mode;
 
   /* Samples buffering setting */
   int16_t buf;
 
   /* Beep option */
-  uint8_t beep;
+  uint16_t beep;
 
   /* SMM prefix option */
-  uint8_t smm_pfx;
+  uint16_t smm_pfx;
 
   /* Last selected submenu item */
-  uint8_t sitem;
-
-  /* Optional SMM prefix sequence, SMM prefix configuration menu item and
-     configuration choice names */
-  uint8_t smm_pfx_sequence[8];
-  char config_smm_pfx_label[17];
-  char config_smm_pfx_names[2][10];
+  uint16_t sitem;
 
 } Config;
+
+
+
+/** SMM prefix configuration option values **/
+typedef struct {
+
+  /* SMM prefix byte sequence */
+  uint8_t smm_pfx_sequence[8];
+
+  /* SMM prefix configuration option label */
+  char config_smm_pfx_label[16];
+
+  /* SMM prefix configuration choice names */
+  char config_smm_pfx_names[2][16];
+
+} SMMPfxConfig;
 
 
 
@@ -284,6 +302,9 @@ typedef struct {
 
   /* Submenu */
   Submenu *submenu;
+
+  /* SMM prefix configuration option values */
+  SMMPfxConfig smm_pfx_config;
 
   /* Configuration items */
   VariableItemList *config_list;

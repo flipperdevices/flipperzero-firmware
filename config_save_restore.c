@@ -26,16 +26,110 @@ void load_configuration(App *app) {
   Storage* storage;
   File* file;
   Config read_config;
-  bool file_read = false;
+  SMMPfxConfig read_smm_pfx_config;
+  bool file_read;
   uint16_t bytes_read = 0;
   uint8_t mode_idx, buf_idx, beep_idx, smm_pfx_idx;
   uint8_t i;
 
-  /* Open storage and allocate space for the file*/
+  /* Open storage */
   storage = furi_record_open(RECORD_STORAGE);
+
+  /* Allocate space for the SMM prefix configuration definition file */
   file = storage_file_alloc(storage);
 
-  /* Attempt to open the file */
+  /* Attempt to open the SMM prefix configuration definition file */
+  file_read = false;
+  if(storage_file_open(file, smm_pfx_config_definition_file, FSAM_READ,
+			FSOM_OPEN_EXISTING)) {
+
+    /* Read the file */
+    bytes_read = storage_file_read(file, &read_smm_pfx_config,
+					sizeof(SMMPfxConfig));
+
+    /* Close the file */
+    storage_file_close(file);
+
+    file_read = true;
+  }
+
+  /* Free the file */
+  storage_file_free(file);
+
+  /* Could we read the file? */
+  if(file_read) {
+
+    /* Did we read enough bytes? */
+    if(file_read && bytes_read == sizeof(SMMPfxConfig)) {
+
+      /* Do we have a valid SMM prefix configuration label? */
+      for(i = 0; i < sizeof(read_smm_pfx_config.config_smm_pfx_label) &&
+			read_smm_pfx_config.config_smm_pfx_label[i] >= 32 &&
+			read_smm_pfx_config.config_smm_pfx_label[i] < 127; i++);
+
+      if(i > 0 && !read_smm_pfx_config.config_smm_pfx_label[i]) {
+
+        /* Do we have a valid first SMM prefix configuration choice name? */
+        for(i = 0; i < sizeof(read_smm_pfx_config.config_smm_pfx_names[0]) &&
+			read_smm_pfx_config.config_smm_pfx_names[0][i] >= 32 &&
+			read_smm_pfx_config.config_smm_pfx_names[0][i] < 127;
+			i++);
+
+        if(i > 0 && !read_smm_pfx_config.config_smm_pfx_names[0][i]) {
+
+          /* Do we have a valid second SMM prefix configuration choice name? */
+          for(i = 0; i < sizeof(read_smm_pfx_config.config_smm_pfx_names[1]) &&
+			read_smm_pfx_config.config_smm_pfx_names[1][i] >= 32 &&
+			read_smm_pfx_config.config_smm_pfx_names[1][i] < 127;
+			i++);
+
+          if(i > 0 && !read_smm_pfx_config.config_smm_pfx_names[1][i]) {
+
+            /* Store the SMM prefix configuration option values */
+            memcpy(&app->smm_pfx_config, &read_smm_pfx_config,
+			sizeof(SMMPfxConfig));
+
+            /* Add the item to the configuration menu */
+            app->item_smm_pfx =
+			variable_item_list_add(
+				app->config_list,
+				app->smm_pfx_config.config_smm_pfx_label,
+				nb_config_smm_pfx_values,
+				config_smm_pfx_change, app);
+
+            /* Configure the default SMM prefix option */
+            variable_item_set_current_value_index(app->item_smm_pfx, 0);
+            variable_item_set_current_value_text(
+				app->item_smm_pfx,
+				app->smm_pfx_config.config_smm_pfx_names[0]);
+          }
+          else
+          FURI_LOG_I(TAG, "Invalid second SMM prefix config choice name in SMM "
+				"prefix config definition file %s",
+			smm_pfx_config_definition_file);
+        }
+        else
+        FURI_LOG_I(TAG, "Invalid first SMM prefix config choice name in SMM "
+				"prefix config definition file %s",
+			smm_pfx_config_definition_file);
+      }
+      else
+        FURI_LOG_I(TAG, "Invalid SMM prefix config label in SMM "
+				"prefix config definition file %s",
+			smm_pfx_config_definition_file);
+    }
+    else
+      FURI_LOG_I(TAG, "Read %d bytes from SMM prefix config definition file %s "
+				"but %d expected",
+				bytes_read, smm_pfx_config_definition_file,
+				sizeof(SMMPfxConfig));
+  }
+
+  /* Allocate space for the configuration file */
+  file = storage_file_alloc(storage);
+
+  /* Attempt to open the configuration file */
+  file_read = false;
   if(storage_file_open(file, config_file, FSAM_READ, FSOM_OPEN_EXISTING)) {
 
     /* Read the file */
@@ -49,11 +143,13 @@ void load_configuration(App *app) {
   else
     FURI_LOG_I(TAG, "Could not read config file %s", config_file);
 
-  /* Free the file and close storage */
+  /* Free the file */
   storage_file_free(file);
+
+  /* Close storage */
   furi_record_close(RECORD_STORAGE);
 
-  /* If we couldn't read the file, give up */
+  /* If we couldn't read the configuration file, give up */
   if(!file_read)
     return;
 
@@ -62,84 +158,6 @@ void load_configuration(App *app) {
     FURI_LOG_I(TAG, "Read %d bytes from config file %s but %d expected",
 			bytes_read, config_file, sizeof(Config));
     return;
-  }
-
-  /* Do we have a SMM prefix sequence? */
-  if(read_config.smm_pfx_sequence[0]) {
-
-    /* Do we have a valid SMM prefix configuration label? */
-    for(i = 0; i < sizeof(read_config.config_smm_pfx_label) &&
-		read_config.config_smm_pfx_label[i] >= 32 &&
-		read_config.config_smm_pfx_label[i] < 127; i++);
-
-    if(i > 0 && !read_config.config_smm_pfx_label[i]) {
-
-      /* Do we have a valid first SMM prefix configuration choice name? */
-      for(i = 0; i < sizeof(read_config.config_smm_pfx_names[0]) &&
-			read_config.config_smm_pfx_names[0][i] >= 32 &&
-			read_config.config_smm_pfx_names[0][i] < 127;
-			i++);
-
-      if(i > 0 && !read_config.config_smm_pfx_names[0][i]) {
-
-        /* Do we have a valid second SMM prefix configuration choice name? */
-        for(i = 0; i < sizeof(read_config.config_smm_pfx_names[1]) &&
-			read_config.config_smm_pfx_names[1][i] >= 32 &&
-			read_config.config_smm_pfx_names[1][i] < 127; i++);
-
-        if(i > 0 && !read_config.config_smm_pfx_names[1][i]) {
-
-          /* Store the SMM prefix sequence in the sampler model */
-          memcpy(sampler_model->config.smm_pfx_sequence,
-			read_config.smm_pfx_sequence,
-			sizeof(read_config.smm_pfx_sequence));
-
-          /* Store the configuration menu item string in the sampler model */
-          memcpy(sampler_model->config.config_smm_pfx_label,
-			read_config.config_smm_pfx_label,
-			sizeof(read_config.config_smm_pfx_label));
-
-          /* Store the configuration choice names in the sampler model */
-          memcpy(sampler_model->config.config_smm_pfx_names[0],
-			read_config.config_smm_pfx_names[0],
-			sizeof(read_config.config_smm_pfx_names[0]));
-
-          memcpy(sampler_model->config.config_smm_pfx_names[1],
-			read_config.config_smm_pfx_names[1],
-			sizeof(read_config.config_smm_pfx_names[1]));
-
-          /* Add the item to the configuration menu */
-          app->item_smm_pfx =
-		variable_item_list_add(
-				app->config_list,
-				sampler_model->config.config_smm_pfx_label,
-				nb_config_smm_pfx_values,
-				config_smm_pfx_change, app);
-
-          /* Check that the SMM prefix option exists */
-          for(smm_pfx_idx = 0; smm_pfx_idx < nb_config_smm_pfx_values &&
-		read_config.smm_pfx != config_smm_pfx_values[smm_pfx_idx];
-		smm_pfx_idx++);
-
-          if(smm_pfx_idx >= nb_config_smm_pfx_values) {
-            FURI_LOG_I(TAG, "Invalid SMM prefix option %d in config file %s",
-				read_config.smm_pfx, config_file);
-            return;
-          }
-
-          /* Configure the SMM prefix option from the read value */
-          sampler_model->config.smm_pfx = read_config.smm_pfx;
-          variable_item_set_current_value_index(app->item_smm_pfx, smm_pfx_idx);
-          variable_item_set_current_value_text(
-				app->item_smm_pfx,
-				read_config.config_smm_pfx_names[smm_pfx_idx]);
-
-          FURI_LOG_I(TAG, "Restored config %s %s",
-				read_config.config_smm_pfx_label,
-				read_config.config_smm_pfx_names[smm_pfx_idx]);
-        }
-      }
-    }
   }
 
   /* Check that the sampling mode setting exists */
@@ -172,6 +190,17 @@ void load_configuration(App *app) {
   if(beep_idx >= nb_config_beep_values) {
     FURI_LOG_I(TAG, "Invalid beep option %d in config file %s",
 			read_config.beep, config_file);
+    return;
+  }
+
+  /* Check that the SMM prefix option exists */
+  for(smm_pfx_idx = 0; smm_pfx_idx < nb_config_smm_pfx_values &&
+	read_config.smm_pfx != config_smm_pfx_values[smm_pfx_idx];
+	smm_pfx_idx++);
+
+  if(smm_pfx_idx >= nb_config_smm_pfx_values) {
+    FURI_LOG_I(TAG, "Invalid SMM prefix option %d in config file %s",
+		read_config.smm_pfx, config_file);
     return;
   }
 
@@ -210,6 +239,21 @@ void load_configuration(App *app) {
 			"selected submenu item %d",
 		config_mode_names[mode_idx], config_buf_names[buf_idx],
 		config_beep_names[beep_idx], read_config.sitem);
+
+  /* Is the SMM prefix configuration option enabled? */
+  if(app->smm_pfx_config.config_smm_pfx_label[0]) {
+
+    /* Configure the SMM prefix option from the read value */
+    sampler_model->config.smm_pfx = read_config.smm_pfx;
+    variable_item_set_current_value_index(app->item_smm_pfx, smm_pfx_idx);
+    variable_item_set_current_value_text(
+			app->item_smm_pfx,
+			app->smm_pfx_config.config_smm_pfx_names[smm_pfx_idx]);
+
+    FURI_LOG_I(TAG, "Restored config %s %s",
+		app->smm_pfx_config.config_smm_pfx_label,
+		app->smm_pfx_config.config_smm_pfx_names[smm_pfx_idx]);
+  }
 }
 
 

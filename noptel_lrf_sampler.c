@@ -23,15 +23,17 @@
 
 
 /*** Parameters ***/
-const char *config_file = STORAGE_APP_DATA_PATH_PREFIX
-				"/noptel_lrf_sampler.save";
+const char *config_file = STORAGE_APP_DATA_PATH_PREFIX "/" CONFIG_FILE;
+
+const char *smm_pfx_config_definition_file = STORAGE_APP_DATA_PATH_PREFIX "/"
+					SMM_PREFIX_CONFIG_DEFINITION_FILE;
 
 const char *dsp_files_dir = ANY_PATH("noptel_lrf_diag");
 
 static const char *config_mode_label = "Sampling mode";
-const uint16_t config_mode_values[] = {smm, smm | 0x100, cmm_1hz, cmm_4hz,
-					cmm_10hz, cmm_20hz, cmm_100hz,
-					cmm_200hz};
+const uint8_t config_mode_values[] = {smm, smm | AUTO_RESTART, cmm_1hz,
+					cmm_4hz, cmm_10hz, cmm_20hz,
+					cmm_100hz, cmm_200hz};
 const char *config_mode_names[] = {"SMM", "Auto SMM", "1 Hz", "4 Hz",
 					"10 Hz", "20 Hz", "100 Hz",
 					"200 Hz"};
@@ -76,8 +78,6 @@ const uint16_t test_pointer_jiggle_every = 50; /*ms*/
 
 /** Initialize the app **/
 static App *app_init() {
-
-  uint8_t i;
 
   FURI_LOG_I(TAG, "App init");
 
@@ -367,6 +367,11 @@ static App *app_init() {
 
   /* Setup the default configuration */
 
+  /* Set the default SMM prefix configuration option values (i.e. none) */
+  app->smm_pfx_config.config_smm_pfx_label[0] = 0;
+  app->smm_pfx_config.config_smm_pfx_names[0][0] = 0;
+  app->smm_pfx_config.config_smm_pfx_names[0][1] = 0;
+
   /* Set the default sampling mode setting */
   sampler_model->config.mode = config_mode_values[0];
   variable_item_set_current_value_index(app->item_mode, 0);
@@ -389,20 +394,6 @@ static App *app_init() {
 
   /* Set the default submenu item */
   sampler_model->config.sitem = submenu_config;
-
-  /* Set the default SMM prefix configuration menu item (i.e. none) */
-  for(i=0; i < sizeof(sampler_model->config.config_smm_pfx_label); i++)
-    sampler_model->config.config_smm_pfx_label[i] = 0;
-
-  /* Set the default SMM prefix configuration menu choice names (i.e. none) */
-  sampler_model->config.config_smm_pfx_names[0][0] = 0;
-  sampler_model->config.config_smm_pfx_names[0][1] = 0;
-
-  /* Set the default SMM command prefix sequence (i.e. none) */
-  for(i=0; i < sizeof(sampler_model->config.smm_pfx_sequence); i++)
-    sampler_model->config.smm_pfx_sequence[i] = 0;
-
-
 
   /* Assume the pointer is off */
   sampler_model->pointer_is_on = false;
