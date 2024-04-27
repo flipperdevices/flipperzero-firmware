@@ -46,6 +46,8 @@ typedef struct {
     bool backlight_on;
     bool changing_baudrate;
     bool deep_sleep_enabled;
+    bool changing_deepsleep;
+
     SpeedUnit speed_units;
 
     FuriHalSerialHandle* serial_handle;
