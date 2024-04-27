@@ -143,6 +143,9 @@ void testlaser_view_enter_callback(void *ctx) {
 						FuriTimerTypePeriodic, ctx);
   furi_timer_start(app->test_laser_restart_cmm_timer, period_restart_cmm);
 
+  /* Set the backlight on all the time */
+  set_backlight(&app->backlight_control, BL_ON);
+
   with_view_model(app->testlaser_view, TestLaserModel* _model,
 			{UNUSED(_model);}, false);
 
@@ -159,6 +162,9 @@ void testlaser_view_exit_callback(void *ctx) {
   /* If the IR sensor is busy, we have nothing to do */
   if(testlaser_model->ir_busy)
     return;
+
+  /* Set the backlight back to automatic */
+  set_backlight(&app->backlight_control, BL_AUTO);
 
   /* Stop and free the CMM restart timer */
   furi_timer_stop(app->test_laser_restart_cmm_timer);

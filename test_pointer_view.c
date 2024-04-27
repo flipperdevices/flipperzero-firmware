@@ -120,6 +120,9 @@ void testpointer_view_enter_callback(void *ctx) {
 						FuriTimerTypePeriodic, ctx);
   furi_timer_start(app->test_pointer_control_timer, period_jiggle_pointer);
 
+  /* Set the backlight on all the time */
+  set_backlight(&app->backlight_control, BL_ON);
+
   with_view_model(app->testpointer_view, TestPointerModel* _model,
 			{UNUSED(_model);}, false);
 
@@ -136,6 +139,9 @@ void testpointer_view_exit_callback(void *ctx) {
   /* If the IR sensor is busy, we have nothing to do */
   if(testpointer_model->ir_busy)
     return;
+
+  /* Set the backlight back to automatic */
+  set_backlight(&app->backlight_control, BL_AUTO);
 
   /* Stop and free the pointer control timer */
   furi_timer_stop(app->test_pointer_control_timer);
