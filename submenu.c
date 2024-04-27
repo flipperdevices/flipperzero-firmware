@@ -44,8 +44,6 @@ void submenu_callback(void *ctx, uint32_t idx) {
       /* Send the pointer command */
       send_lrf_command(app->lrf_serial_comm_app,
 			sampler_model->pointer_is_on? pointer_off : pointer_on);
-      /* Wait a bit for the command to be sent out */
-      furi_delay_ms(100);
 
       /* Stop the UART */
       stop_uart(app->lrf_serial_comm_app);
