@@ -23,14 +23,25 @@
 
 
 /*** Parameters ***/
-const char *config_file = STORAGE_APP_DATA_PATH_PREFIX "/" CONFIG_FILE;
 
+/** Files and paths **/
+const char *config_file = STORAGE_APP_DATA_PATH_PREFIX "/" CONFIG_FILE;
 const char *smm_pfx_config_definition_file = STORAGE_APP_DATA_PATH_PREFIX "/"
 					SMM_PREFIX_CONFIG_DEFINITION_FILE;
-
 const char *dsp_files_dir = ANY_PATH("noptel_lrf_diag");
 
-static const char *config_mode_label = "Sampling mode";
+/** Submenu item names **/
+const char *submenu_item_names[] = {"Configuration",
+					"Sample",
+					"Pointer ON/OFF",
+					"LRF information",
+					"Save LRF diagnostic",
+					"Test LRX laser",
+					"Test IR pointer",
+					"About"};
+
+/** Sampling mode setting parameters **/
+const char *config_mode_label = "Sampling mode";
 const uint8_t config_mode_values[] = {smm, smm | AUTO_RESTART, cmm_1hz,
 					cmm_4hz, cmm_10hz, cmm_20hz,
 					cmm_100hz, cmm_200hz};
@@ -39,7 +50,8 @@ const char *config_mode_names[] = {"SMM", "Auto SMM", "1 Hz", "4 Hz",
 					"200 Hz"};
 const uint8_t nb_config_mode_values = COUNT_OF(config_mode_values);
 
-static const char *config_buf_label = "Buffering";
+/** Buffering setting parameters **/
+const char *config_buf_label = "Buffering";
 const int16_t config_buf_values[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 					-5, -10, -100, -1000};
 const char *config_buf_names[] = {"None", "1 s", "2 s", "3 s",
@@ -49,27 +61,42 @@ const char *config_buf_names[] = {"None", "1 s", "2 s", "3 s",
 					"1000 spl"};
 const uint8_t nb_config_buf_values = COUNT_OF(config_buf_values);
 
-const uint8_t config_smm_pfx_values[] = {0, 1};
-const uint8_t nb_config_smm_pfx_values = COUNT_OF(config_smm_pfx_values);
-
-static const char *config_beep_label = "Beep";
+/** Beep setting parameters **/
+const char *config_beep_label = "Beep";
 const uint8_t config_beep_values[] = {0, 1};
 const char *config_beep_names[] = {"Off", "On"};
 const uint8_t nb_config_beep_values = COUNT_OF(config_beep_values);
 
-const uint16_t uart_rx_timeout = 500; /*ms*/
+/** Baudrate setting parameters **/
+const char *config_baudrate_label = "Baudrate";
+const uint32_t config_baudrate_values[] = {115200, 57600, 38400, 19200, 9600};
+const char *config_baudrate_names[] = {"115200", "56600", "38400",
+					"19200", "9600"};
+const uint8_t nb_config_baudrate_values = COUNT_OF(config_baudrate_values);
 
+/** Partial SMM prefix setting parameters (the rest is in the .def file) **/
+const uint8_t config_smm_pfx_values[] = {0, 1};
+const uint8_t nb_config_smm_pfx_values = COUNT_OF(config_smm_pfx_values);
+
+/** UART receive timeout **/
+static const uint16_t uart_rx_timeout = 500; /*ms*/
+
+/** Speaker parameters **/
 const uint16_t beep_frequency = 1000; /*Hz*/
 const uint16_t sample_received_beep_duration = 25; /*ms*/
 
+/** LED parameters **/
 static const uint16_t min_led_flash_duration = 15; /*ms*/
 
+/** Sample view timings **/
 const uint16_t sample_view_update_every = 150; /*ms*/
 const uint8_t sample_view_smm_prefix_enabled_blink_every = 3; /*view updates*/
 
+/** Test laser view timings **/
 const uint16_t test_laser_view_update_every = 150; /*ms*/
 const uint16_t test_laser_restart_cmm_every = 500; /*ms*/
 
+/** Test pointer view timings **/
 const uint16_t test_pointer_view_update_every = 150; /*ms*/
 const uint16_t test_pointer_jiggle_every = 50; /*ms*/
 
@@ -105,28 +132,28 @@ static App *app_init() {
   app->submenu = submenu_alloc();
 
   /* Add submenu items */
-  submenu_add_item(app->submenu, "Configuration",
+  submenu_add_item(app->submenu, submenu_item_names[submenu_config],
 			submenu_config, submenu_callback, app);
 
-  submenu_add_item(app->submenu, "Sample",
+  submenu_add_item(app->submenu, submenu_item_names[submenu_sample],
 			submenu_sample, submenu_callback, app);
 
-  submenu_add_item(app->submenu, "Pointer ON/OFF",
+  submenu_add_item(app->submenu, submenu_item_names[submenu_pointeronoff],
 			submenu_pointeronoff, submenu_callback, app);
 
-  submenu_add_item(app->submenu, "LRF information",
+  submenu_add_item(app->submenu, submenu_item_names[submenu_lrfinfo],
 			submenu_lrfinfo, submenu_callback, app);
 
-  submenu_add_item(app->submenu, "Save LRF diagnostic",
+  submenu_add_item(app->submenu, submenu_item_names[submenu_savediag],
 			submenu_savediag, submenu_callback, app);
 
-  submenu_add_item(app->submenu, "Test LRX laser",
+  submenu_add_item(app->submenu, submenu_item_names[submenu_testlaser],
 			submenu_testlaser, submenu_callback, app);
 
-  submenu_add_item(app->submenu, "Test IR pointer",
+  submenu_add_item(app->submenu, submenu_item_names[submenu_testpointer],
 			submenu_testpointer, submenu_callback, app);
 
-  submenu_add_item(app->submenu, "About",
+  submenu_add_item(app->submenu, submenu_item_names[submenu_about],
 			submenu_about, submenu_callback, app);
 
   /* Configure the "previous" callback for the submenu, which exits the app */
@@ -162,6 +189,12 @@ static App *app_init() {
 						config_beep_label,
 						nb_config_beep_values,
 						config_beep_change, app);
+
+  /* Add baudrate option list items */
+  app->item_baudrate = variable_item_list_add(app->config_list,
+						config_baudrate_label,
+						nb_config_baudrate_values,
+						config_baudrate_change, app);
 
   /* Configure the "previous" callback for the configuration view */
   view_set_previous_callback(variable_item_list_get_view(app->config_list),
@@ -389,6 +422,14 @@ static App *app_init() {
   testpointer_model->beep = sampler_model->config.beep;
   variable_item_set_current_value_index(app->item_beep, 0);
   variable_item_set_current_value_text(app->item_beep, config_beep_names[0]);
+
+  /* Set the default baudrate option */
+  sampler_model->config.baudrate = config_baudrate_values[0];
+  testlaser_model->baudrate = sampler_model->config.baudrate;
+  testpointer_model->baudrate = sampler_model->config.baudrate;
+  variable_item_set_current_value_index(app->item_baudrate, 0);
+  variable_item_set_current_value_text(app->item_baudrate,
+					config_baudrate_names[0]);
 
   /* Set the default SMM prefix option */
   sampler_model->config.smm_pfx = config_smm_pfx_values[0];

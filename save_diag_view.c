@@ -293,21 +293,23 @@ void savediag_view_enter_callback(void *ctx) {
 
   App *app = (App *)ctx;
 
-  /* Start the UART at the correct baudrate */
-  start_uart(app->lrf_serial_comm_app, BAUDRATE);
-
-  /* Setup the callback to receive decoded LRF identification frames */
-  set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler, app);
-
-  /* Setup the callback to receive diagnostic data */
-  set_diag_data_handler(app->lrf_serial_comm_app, diag_data_handler, app);
-
-  /* Let the LRF serial communication thread use the larger shared storage
-     space so it can receive a complete diagnostic frame */
-  enable_shared_storage_dec_buf(app->lrf_serial_comm_app, true);
-
   with_view_model(app->savediag_view, SaveDiagModel* savediag_model,
 	{
+	  /* Start the UART at the correct baudrate */
+	  start_uart(app->lrf_serial_comm_app, savediag_model->baudrate);
+
+	  /* Setup the callback to receive decoded LRF identification frames */
+	  set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler,
+				app);
+
+	  /* Setup the callback to receive diagnostic data */
+	  set_diag_data_handler(app->lrf_serial_comm_app, diag_data_handler,
+				app);
+
+	  /* Let the LRF serial communication thread use the larger shared
+	     storage space so it can receive a complete diagnostic frame */
+	  enable_shared_storage_dec_buf(app->lrf_serial_comm_app, true);
+
 	  /* Invalidate the current identification - if any */
 	  savediag_model->has_ident = false;
 

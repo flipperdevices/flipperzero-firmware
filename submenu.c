@@ -39,7 +39,7 @@ void submenu_callback(void *ctx, uint32_t idx) {
     case submenu_pointeronoff:
 
       /* Start the UART at the correct baudrate */
-      start_uart(app->lrf_serial_comm_app, BAUDRATE);
+      start_uart(app->lrf_serial_comm_app, sampler_model->config.baudrate);
 
       /* Send the pointer command */
       send_lrf_command(app->lrf_serial_comm_app,

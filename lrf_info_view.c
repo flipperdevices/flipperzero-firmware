@@ -37,14 +37,15 @@ void lrfinfo_view_enter_callback(void *ctx) {
 
   App *app = (App *)ctx;
 
-  /* Start the UART at the correct baudrate */
-  start_uart(app->lrf_serial_comm_app, BAUDRATE);
-
-  /* Setup the callback to receive decoded LRF identification frames */
-  set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler, app);
-
   with_view_model(app->lrfinfo_view, LRFInfoModel* lrfinfo_model,
 	{
+	  /* Start the UART at the correct baudrate */
+	  start_uart(app->lrf_serial_comm_app, lrfinfo_model->baudrate);
+
+	  /* Setup the callback to receive decoded LRF identification frames */
+	  set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler,
+				app);
+
 	  /* Invalidate the current identification - if any */
 	  lrfinfo_model->has_ident = false;
 

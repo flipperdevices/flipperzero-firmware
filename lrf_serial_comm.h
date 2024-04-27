@@ -9,7 +9,7 @@
 
 /*** Defines ***/
 #define BAUDRATE 115200
-#define RX_BUF_SIZE 2048
+#define RX_BUF_SIZE 256
 #define DIAG_PROGRESS_UPDATE_EVERY 250 /*ms*/
 
 

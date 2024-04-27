@@ -352,6 +352,12 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 
   /* Mark the samples as updated */
   sampler_model->samples_updated = true;
+
+  /* Give the sample view update timer callback a chance to run if the LRF is
+     sending samples with no delay between each samples - i.e. maxxing out the
+     serial bandwidth by trying (and failing) to sample at 200 Hz and sending
+     the samples at 38400 bps */
+  furi_delay_ms(1);
 }
 
 
@@ -394,17 +400,18 @@ void sample_view_enter_callback(void *ctx) {
   App *app = (App *)ctx;
   uint32_t period = furi_ms_to_ticks(sample_view_update_every);
 
-  /* Start the UART at the correct baudrate */
-  start_uart(app->lrf_serial_comm_app, BAUDRATE);
-
-  /* Setup the callback to receive decoded LRF samples */
-  set_lrf_sample_handler(app->lrf_serial_comm_app, lrf_sample_handler, app);
-
-  /* Set the backlight on all the time */
-  set_backlight(&app->backlight_control, BL_ON);
-
   with_view_model(app->sample_view, SamplerModel* sampler_model,
 	{
+	  /* Start the UART at the correct baudrate */
+	  start_uart(app->lrf_serial_comm_app, sampler_model->config.baudrate);
+
+	  /* Setup the callback to receive decoded LRF samples */
+	  set_lrf_sample_handler(app->lrf_serial_comm_app, lrf_sample_handler,
+					app);
+
+	  /* Set the backlight on all the time */
+	  set_backlight(&app->backlight_control, BL_ON);
+
 	  sampler_model->samples_updated = false;
 
 	  /* Don't blink the OK button symbol by default */

@@ -97,7 +97,7 @@ void testpointer_view_enter_callback(void *ctx) {
   testpointer_model->ir_received = false;
 
   /* Start the UART at the correct baudrate */
-  start_uart(app->lrf_serial_comm_app, BAUDRATE);
+  start_uart(app->lrf_serial_comm_app, testpointer_model->baudrate);
 
   /* Set up the callback to catch an IR sensor level change */
   furi_hal_infrared_async_rx_set_capture_isr_callback(ir_capture_callback,

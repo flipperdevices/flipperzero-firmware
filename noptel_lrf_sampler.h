@@ -32,37 +32,56 @@
 
 
 /*** Parameters ***/
+
+/** Files and paths **/
 extern const char *config_file;
-
 extern const char *smm_pfx_config_definition_file;
-
 extern const char *dsp_files_dir;
 
+/** Submenu item names **/
+extern const char *submenu_item_names[];
+
+/** Sampling mode setting parameters **/
+extern const char *config_mode_label;
 extern const uint8_t config_mode_values[];
 extern const char *config_mode_names[];
 extern const uint8_t nb_config_mode_values;
 
+/** Buffering setting parameters **/
+extern const char *config_buf_label;
 extern const int16_t config_buf_values[];
 extern const char *config_buf_names[];
 extern const uint8_t nb_config_buf_values;
 
+/** Beep setting parameters **/
+extern const char *config_beep_label;
 extern const uint8_t config_beep_values[];
 extern const char *config_beep_names[];
 extern const uint8_t nb_config_beep_values;
 
+/** Baudrate setting parameters **/
+extern const char *config_baudrate_label;
+extern const uint32_t config_baudrate_values[];
+extern const char *config_baudrate_names[];
+extern const uint8_t nb_config_baudrate_values;
+
+/** Partial SMM prefix setting parameters (the rest is in the .def file) **/
 extern const uint8_t config_smm_pfx_values[];
 extern const uint8_t nb_config_smm_pfx_values;
 
+/** Speaker parameters **/
 extern const uint16_t beep_frequency;
-extern const uint16_t min_beep_duration;
 extern const uint16_t sample_received_beep_duration;
 
+/** Sample view timings **/
 extern const uint16_t sample_view_update_every;
 extern const uint8_t sample_view_smm_prefix_enabled_blink_every;
 
+/** Test laser view timings **/
 extern const uint16_t test_laser_view_update_every;
 extern const uint16_t test_laser_restart_cmm_every;
 
+/** Test pointer view timings **/
 extern const uint16_t test_pointer_view_update_every;
 extern const uint16_t test_pointer_jiggle_every;
 
@@ -108,19 +127,22 @@ typedef enum {
 typedef struct {
 
   /* LRF sampling mode setting */
-  uint16_t mode;
+  uint8_t mode;
 
   /* Samples buffering setting */
   int16_t buf;
 
   /* Beep option */
-  uint16_t beep;
+  uint8_t beep;
+
+  /* Baudrate option */
+  uint32_t baudrate;
 
   /* SMM prefix option */
-  uint16_t smm_pfx;
+  uint8_t smm_pfx;
 
   /* Last selected submenu item */
-  uint16_t sitem;
+  uint8_t sitem;
 
 } Config;
 
@@ -197,6 +219,9 @@ typedef struct {
 /** LRF info model **/
 typedef struct {
 
+  /* Baudrate */
+  uint32_t baudrate;
+
   /* LRF identification */
   LRFIdent ident;
 
@@ -209,6 +234,9 @@ typedef struct {
 
 /** Save diagnostic model **/
 typedef struct {
+
+  /* Baudrate */
+  uint32_t baudrate;
 
   /* LRF identification */
   LRFIdent ident;
@@ -248,6 +276,9 @@ typedef struct {
 /** Test laser model **/
 typedef struct {
 
+  /* Baudrate */
+  uint32_t baudrate;
+
   /* Whether the IR port is busy */
   bool ir_busy;
 
@@ -267,6 +298,9 @@ typedef struct {
 
 /** Test pointer model **/
 typedef struct {
+
+  /* Baudrate */
+  uint32_t baudrate;
 
   /* Whether the IR port is busy */
   bool ir_busy;
@@ -318,6 +352,7 @@ typedef struct {
   VariableItem *item_mode;
   VariableItem *item_buf;
   VariableItem *item_beep;
+  VariableItem *item_baudrate;
   VariableItem *item_smm_pfx;
 
   /* Sample view */

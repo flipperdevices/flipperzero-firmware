@@ -21,5 +21,8 @@ void config_buf_change(VariableItem *);
 /** Beep option change function **/
 void config_beep_change(VariableItem *);
 
+/** Baudrate option change function **/
+void config_baudrate_change(VariableItem *);
+
 /** SMM prefix option change function **/
-void config_smm_pfx_change(VariableItem *item);
+void config_smm_pfx_change(VariableItem *);
