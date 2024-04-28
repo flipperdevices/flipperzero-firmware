@@ -37,6 +37,7 @@ typedef enum {
 #define MAG_STATE_DEFAULT_PIN_INPUT MagPinA7
 #define MAG_STATE_DEFAULT_PIN_OUTPUT MagPinA6
 #define MAG_STATE_DEFAULT_PIN_ENABLE MagPinA4
+#define MAG_STATE_DEFAULT_ALLOW_UART false
 
 typedef struct {
     MagTxState tx;
@@ -47,6 +48,7 @@ typedef struct {
     MagPin pin_input;
     MagPin pin_output;
     MagPin pin_enable;
+    bool allow_uart;
     bool is_debug;
 } MagState;
 

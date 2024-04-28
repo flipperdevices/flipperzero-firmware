@@ -25,7 +25,7 @@ void mag_scene_start_on_enter(void* context) {
         SubmenuIndexRead,
         mag_scene_start_submenu_callback,
         mag,
-        !mag->state.is_debug,
+        (!mag->state.is_debug && !mag->state.allow_uart),
         "Enable Debug!");
     //submenu_add_item(
     //    submenu, "Add Manually", SubmenuIndexAddManually, mag_scene_start_submenu_callback, mag);

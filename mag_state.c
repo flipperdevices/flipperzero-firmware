@@ -58,6 +58,7 @@ bool mag_state_load(MagState* out_state) {
             state.pin_output = tmp;
             if(!flipper_format_read_uint32(file, "pin_enable", &tmp, 1)) break;
             state.pin_enable = tmp;
+            if(!flipper_format_read_bool(file, "allow_uart", &state.allow_uart, 1)) break;
 
             loaded_from_file = true;
         } while(0);
@@ -68,8 +69,13 @@ bool mag_state_load(MagState* out_state) {
     // If could not be read from file
     // Or file GPIO config is invalid (pins overlap)
     // Set defaults
+    // Additionally raise message to user?
     if(!loaded_from_file || !mag_state_gpio_is_valid(&state)) {
         mag_state_gpio_reset(&state);
+    }
+
+    if(!loaded_from_file) {
+        state.allow_uart = MAG_STATE_DEFAULT_ALLOW_UART;
     }
 
     // set defaults we don't save
@@ -102,6 +108,7 @@ void mag_state_save(MagState* state) {
         if(!flipper_format_write_uint32(file, "pin_output", &tmp, 1)) break;
         tmp = state->pin_enable;
         if(!flipper_format_write_uint32(file, "pin_enable", &tmp, 1)) break;
+        if(!flipper_format_write_bool(file, "allow_uart", &state->allow_uart, 1)) break;
 
     } while(0);
     flipper_format_free(file);
