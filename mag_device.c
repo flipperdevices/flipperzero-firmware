@@ -301,6 +301,27 @@ bool mag_device_parse_card_string(MagDevice* mag_dev, FuriString* f_card_str) {
     return true;
 }
 
+MagTrackState mag_device_autoselect_track_state(MagDevice* mag_dev) {
+    // messy code to quickly check which tracks are available for emulation/display
+    bool is_empty_t1 = furi_string_empty(mag_dev->dev_data.track[0].str);
+    bool is_empty_t2 = furi_string_empty(mag_dev->dev_data.track[1].str);
+    bool is_empty_t3 = furi_string_empty(mag_dev->dev_data.track[2].str);
+
+    if(!is_empty_t1 && !is_empty_t2) {
+        return MagTrackStateOneAndTwo;
+    } else if(!is_empty_t1) {
+        return MagTrackStateOne;
+    } else if(!is_empty_t2) {
+        return MagTrackStateTwo;
+    } else if(!is_empty_t3) {
+        return MagTrackStateThree;
+    }
+
+    // if all empty (or something wrong with the above code)
+    // return default value
+    return MAG_STATE_DEFAULT_TRACK;
+}
+
 void mag_device_set_loading_callback(
     MagDevice* mag_dev,
     MagLoadingCallback callback,

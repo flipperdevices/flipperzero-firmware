@@ -5,16 +5,6 @@
 #define MAG_GITHUB "github.com/zacharyweiss/magspoof_flipper"
 
 typedef enum {
-    MagViewSubmenu,
-    MagViewDialogEx,
-    MagViewPopup,
-    MagViewLoading,
-    MagViewWidget,
-    MagViewVariableItemList,
-    MagViewTextInput,
-} MagView;
-
-typedef enum {
     MagReverseStateOff,
     MagReverseStateOn,
 } MagReverseState;
@@ -35,6 +25,37 @@ typedef enum {
     MagTxCC1101_434,
     MagTxCC1101_868,
 } MagTxState;
+
+typedef enum {
+    MagPinA7,
+    MagPinA6,
+    MagPinA4,
+    MagPinB3,
+    MagPinB2,
+    MagPinC3,
+    MagPinC1,
+    MagPinC0,
+} MagPin;
+
+#define MAG_STATE_DEFAULT_REVERSE MagReverseStateOff
+#define MAG_STATE_DEFAULT_TRACK MagTrackStateOneAndTwo
+#define MAG_STATE_DEFAULT_TX MagTxStateGPIO
+#define MAG_STATE_DEFAULT_US_CLOCK 240
+#define MAG_STATE_DEFAULT_US_INTERPACKET 10
+#define MAG_STATE_DEFAULT_PIN_INPUT MagPinA7
+#define MAG_STATE_DEFAULT_PIN_OUTPUT MagPinA6
+#define MAG_STATE_DEFAULT_PIN_ENABLE MagPinA4
+#define MAG_STATE_DEFAULT_ALLOW_UART false
+
+typedef enum {
+    MagViewSubmenu,
+    MagViewDialogEx,
+    MagViewPopup,
+    MagViewLoading,
+    MagViewWidget,
+    MagViewVariableItemList,
+    MagViewTextInput,
+} MagView;
 
 typedef enum {
     UART_TerminalEventRefreshConsoleOutput = 0,

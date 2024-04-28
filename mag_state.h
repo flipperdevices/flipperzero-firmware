@@ -18,27 +18,6 @@
 #define MAG_STATE_DIR STORAGE_APP_DATA_PATH_PREFIX
 #define MAG_STATE_PATH MAG_STATE_DIR "/mag_state.txt"
 
-typedef enum {
-    MagPinA7,
-    MagPinA6,
-    MagPinA4,
-    MagPinB3,
-    MagPinB2,
-    MagPinC3,
-    MagPinC1,
-    MagPinC0,
-} MagPin;
-
-#define MAG_STATE_DEFAULT_REVERSE MagReverseStateOff
-#define MAG_STATE_DEFAULT_TRACK MagTrackStateOneAndTwo
-#define MAG_STATE_DEFAULT_TX MagTxStateGPIO
-#define MAG_STATE_DEFAULT_US_CLOCK 240
-#define MAG_STATE_DEFAULT_US_INTERPACKET 10
-#define MAG_STATE_DEFAULT_PIN_INPUT MagPinA7
-#define MAG_STATE_DEFAULT_PIN_OUTPUT MagPinA6
-#define MAG_STATE_DEFAULT_PIN_ENABLE MagPinA4
-#define MAG_STATE_DEFAULT_ALLOW_UART false
-
 typedef struct {
     MagTxState tx;
     MagTrackState track;

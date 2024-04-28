@@ -164,6 +164,10 @@ int32_t mag_app(void* p) {
         scene_manager_next_scene(mag->scene_manager, MagSceneStart);
     } else {
         mag_device_load_data(mag->mag_dev, mag->args, true);
+        MagTrackState auto_track = mag_device_autoselect_track_state(mag->mag_dev);
+        if(auto_track) {
+            mag->state.track = auto_track;
+        }
         scene_manager_next_scene(mag->scene_manager, MagSceneEmulate);
     }
 
