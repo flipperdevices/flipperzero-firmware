@@ -2,12 +2,6 @@
 
 #define TAG "MagHelpers"
 
-// Haviv Board - pins gpio_ext_pa7 & gpio_ext_pa6 was swapped.
-#define GPIO_PIN_A &gpio_ext_pa7
-#define GPIO_PIN_B &gpio_ext_pa6
-#define GPIO_PIN_ENABLE &gpio_ext_pa4
-#define RFID_PIN_OUT &gpio_rfid_carrier_out
-
 #define ZERO_PREFIX 25 // n zeros prefix
 #define ZERO_BETWEEN 53 // n zeros between tracks
 #define ZERO_SUFFIX 25 // n zeros suffix
@@ -22,15 +16,15 @@ uint8_t last_value = 2;
 void play_halfbit(bool value, MagState* state) {
     switch(state->tx) {
     case MagTxStateRFID:
-        furi_hal_gpio_write(RFID_PIN_OUT, value);
+        furi_hal_gpio_write(&gpio_rfid_carrier_out, value);
         /*furi_hal_gpio_write(RFID_PIN_OUT, !value);
         furi_hal_gpio_write(RFID_PIN_OUT, value);
         furi_hal_gpio_write(RFID_PIN_OUT, !value);
         furi_hal_gpio_write(RFID_PIN_OUT, value);*/
         break;
     case MagTxStateGPIO:
-        furi_hal_gpio_write(GPIO_PIN_A, value);
-        furi_hal_gpio_write(GPIO_PIN_B, !value);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_input), value);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_output), !value);
         break;
     case MagTxStatePiezo:
         furi_hal_gpio_write(&gpio_speaker, value);
@@ -41,7 +35,7 @@ void play_halfbit(bool value, MagState* state) {
 
         break;
     case MagTxStateLF_P:
-        furi_hal_gpio_write(RFID_PIN_OUT, value);
+        furi_hal_gpio_write(&gpio_rfid_carrier_out, value);
         furi_hal_gpio_write(&gpio_speaker, value);
 
         /* // Weaker but cleaner signal
@@ -143,14 +137,14 @@ void tx_init_rfid() {
     furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_write(&gpio_nfc_irq_rfid_pull, false);
 
-    furi_hal_gpio_init(RFID_PIN_OUT, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 
     furi_delay_ms(300);
 }
 
 void tx_deinit_rfid() {
     // reset RFID system
-    furi_hal_gpio_write(RFID_PIN_OUT, 0);
+    furi_hal_gpio_write(&gpio_rfid_carrier_out, 0);
 
     furi_hal_rfid_pins_reset();
 }
@@ -187,11 +181,23 @@ bool tx_init(MagState* state) {
         break;
     case MagTxStateGPIO:
         // gpio_item_configure_all_pins(GpioModeOutputPushPull);
-        furi_hal_gpio_init(GPIO_PIN_A, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-        furi_hal_gpio_init(GPIO_PIN_B, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-        furi_hal_gpio_init(GPIO_PIN_ENABLE, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_input),
+            GpioModeOutputPushPull,
+            GpioPullNo,
+            GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_output),
+            GpioModeOutputPushPull,
+            GpioPullNo,
+            GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_enable),
+            GpioModeOutputPushPull,
+            GpioPullNo,
+            GpioSpeedLow);
 
-        furi_hal_gpio_write(GPIO_PIN_ENABLE, 1);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_enable), 1);
 
         // had some issues with ~300; bumped higher temporarily
         furi_delay_ms(500);
@@ -226,14 +232,17 @@ bool tx_deinit(MagState* state) {
         tx_deinit_rfid();
         break;
     case MagTxStateGPIO:
-        furi_hal_gpio_write(GPIO_PIN_A, 0);
-        furi_hal_gpio_write(GPIO_PIN_B, 0);
-        furi_hal_gpio_write(GPIO_PIN_ENABLE, 0);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_input), 0);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_output), 0);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_enable), 0);
 
         // set back to analog output mode? - YES
-        furi_hal_gpio_init(GPIO_PIN_A, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        furi_hal_gpio_init(GPIO_PIN_B, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        furi_hal_gpio_init(GPIO_PIN_ENABLE, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_input), GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_output), GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_enable), GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
         //gpio_item_configure_all_pins(GpioModeAnalog);
         break;
