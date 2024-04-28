@@ -2,12 +2,6 @@
 
 #define TAG "MagHelpers"
 
-// Haviv Board - pins gpio_ext_pa7 & gpio_ext_pa6 was swapped.
-#define GPIO_PIN_A &gpio_ext_pa7
-#define GPIO_PIN_B &gpio_ext_pa6
-#define GPIO_PIN_ENABLE &gpio_ext_pa4
-#define RFID_PIN_OUT &gpio_rfid_carrier_out
-
 #define ZERO_PREFIX 25 // n zeros prefix
 #define ZERO_BETWEEN 53 // n zeros between tracks
 #define ZERO_SUFFIX 25 // n zeros suffix
@@ -19,18 +13,18 @@ const int sublen[] = {32, 48, 48};
 
 uint8_t last_value = 2;
 
-void play_halfbit(bool value, MagSetting* setting) {
-    switch(setting->tx) {
+void play_halfbit(bool value, MagState* state) {
+    switch(state->tx) {
     case MagTxStateRFID:
-        furi_hal_gpio_write(RFID_PIN_OUT, value);
+        furi_hal_gpio_write(&gpio_rfid_carrier_out, value);
         /*furi_hal_gpio_write(RFID_PIN_OUT, !value);
         furi_hal_gpio_write(RFID_PIN_OUT, value);
         furi_hal_gpio_write(RFID_PIN_OUT, !value);
         furi_hal_gpio_write(RFID_PIN_OUT, value);*/
         break;
     case MagTxStateGPIO:
-        furi_hal_gpio_write(GPIO_PIN_A, value);
-        furi_hal_gpio_write(GPIO_PIN_B, !value);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_input), value);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_output), !value);
         break;
     case MagTxStatePiezo:
         furi_hal_gpio_write(&gpio_speaker, value);
@@ -41,7 +35,7 @@ void play_halfbit(bool value, MagSetting* setting) {
 
         break;
     case MagTxStateLF_P:
-        furi_hal_gpio_write(RFID_PIN_OUT, value);
+        furi_hal_gpio_write(&gpio_rfid_carrier_out, value);
         furi_hal_gpio_write(&gpio_speaker, value);
 
         /* // Weaker but cleaner signal
@@ -88,7 +82,7 @@ void play_halfbit(bool value, MagSetting* setting) {
     last_value = value;
 }
 
-void play_track(uint8_t* bits_manchester, uint16_t n_bits, MagSetting* setting, bool reverse) {
+void play_track(uint8_t* bits_manchester, uint16_t n_bits, MagState* state, bool reverse) {
     for(uint16_t i = 0; i < n_bits; i++) {
         uint16_t j = (reverse) ? (n_bits - i - 1) : i;
         uint8_t byte = j / 8;
@@ -117,9 +111,9 @@ void play_track(uint8_t* bits_manchester, uint16_t n_bits, MagSetting* setting, 
         // for DWT->CYCCNT. Note timer is aliased to 64us as per
         // #define FURI_HAL_CORTEX_INSTRUCTIONS_PER_MICROSECOND (SystemCoreClock / 1000000) | furi_hal_cortex.c
 
-        play_halfbit(bit, setting);
-        furi_delay_us(setting->us_clock);
-        // if (i % 2 == 1) furi_delay_us(setting->us_interpacket);
+        play_halfbit(bit, state);
+        furi_delay_us(state->us_clock);
+        // if (i % 2 == 1) furi_delay_us(state->us_interpacket);
     }
 }
 
@@ -131,7 +125,7 @@ void tx_init_rfid() {
     // furi_hal_ibutton_start_drive();
     furi_hal_ibutton_pin_write(false);
 
-    // Initializing at GpioSpeedLow seems sufficient for our needs; no improvements seen by increasing speed setting
+    // Initializing at GpioSpeedLow seems sufficient for our needs; no improvements seen by increasing speed state
 
     // this doesn't seem to make a difference, leaving it in
     furi_hal_gpio_init(&gpio_rfid_data_in, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -143,14 +137,14 @@ void tx_init_rfid() {
     furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_write(&gpio_nfc_irq_rfid_pull, false);
 
-    furi_hal_gpio_init(RFID_PIN_OUT, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 
     furi_delay_ms(300);
 }
 
 void tx_deinit_rfid() {
     // reset RFID system
-    furi_hal_gpio_write(RFID_PIN_OUT, 0);
+    furi_hal_gpio_write(&gpio_rfid_carrier_out, 0);
 
     furi_hal_rfid_pins_reset();
 }
@@ -179,19 +173,31 @@ void tx_deinit_piezo() {
     furi_hal_gpio_init(&gpio_speaker, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
-bool tx_init(MagSetting* setting) {
+bool tx_init(MagState* state) {
     // Initialize configured TX method
-    switch(setting->tx) {
+    switch(state->tx) {
     case MagTxStateRFID:
         tx_init_rfid();
         break;
     case MagTxStateGPIO:
         // gpio_item_configure_all_pins(GpioModeOutputPushPull);
-        furi_hal_gpio_init(GPIO_PIN_A, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-        furi_hal_gpio_init(GPIO_PIN_B, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-        furi_hal_gpio_init(GPIO_PIN_ENABLE, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_input),
+            GpioModeOutputPushPull,
+            GpioPullNo,
+            GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_output),
+            GpioModeOutputPushPull,
+            GpioPullNo,
+            GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_enable),
+            GpioModeOutputPushPull,
+            GpioPullNo,
+            GpioSpeedLow);
 
-        furi_hal_gpio_write(GPIO_PIN_ENABLE, 1);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_enable), 1);
 
         // had some issues with ~300; bumped higher temporarily
         furi_delay_ms(500);
@@ -219,21 +225,24 @@ bool tx_init(MagSetting* setting) {
     return true;
 }
 
-bool tx_deinit(MagSetting* setting) {
+bool tx_deinit(MagState* state) {
     // Reset configured TX method
-    switch(setting->tx) {
+    switch(state->tx) {
     case MagTxStateRFID:
         tx_deinit_rfid();
         break;
     case MagTxStateGPIO:
-        furi_hal_gpio_write(GPIO_PIN_A, 0);
-        furi_hal_gpio_write(GPIO_PIN_B, 0);
-        furi_hal_gpio_write(GPIO_PIN_ENABLE, 0);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_input), 0);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_output), 0);
+        furi_hal_gpio_write(mag_state_enum_to_pin(state->pin_enable), 0);
 
         // set back to analog output mode? - YES
-        furi_hal_gpio_init(GPIO_PIN_A, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        furi_hal_gpio_init(GPIO_PIN_B, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        furi_hal_gpio_init(GPIO_PIN_ENABLE, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_input), GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_output), GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(
+            mag_state_enum_to_pin(state->pin_enable), GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
         //gpio_item_configure_all_pins(GpioModeAnalog);
         break;
@@ -262,7 +271,7 @@ bool tx_deinit(MagSetting* setting) {
 }
 
 void mag_spoof(Mag* mag) {
-    MagSetting* setting = mag->setting;
+    MagState* state = &mag->state;
 
     // TODO: cleanup this section. Possibly move precompute + tx_init to emulate_on_enter?
     FuriString* ft1 = mag->mag_dev->dev_data.track[0].str;
@@ -320,47 +329,47 @@ void mag_spoof(Mag* mag) {
     last_value = 2;
     bool bit = false;
 
-    if(!tx_init(setting)) return;
+    if(!tx_init(state)) return;
 
     FURI_CRITICAL_ENTER();
     for(uint16_t i = 0; i < (ZERO_PREFIX * 2); i++) {
         // is this right?
         if(!!(i % 2)) bit ^= 1;
-        play_halfbit(bit, setting);
-        furi_delay_us(setting->us_clock);
+        play_halfbit(bit, state);
+        furi_delay_us(state->us_clock);
     }
 
-    if((setting->track == MagTrackStateOneAndTwo) || (setting->track == MagTrackStateOne))
-        play_track((uint8_t*)bits_t1_manchester, bits_t1_count, setting, false);
+    if((state->track == MagTrackStateOneAndTwo) || (state->track == MagTrackStateOne))
+        play_track((uint8_t*)bits_t1_manchester, bits_t1_count, state, false);
 
-    if((setting->track == MagTrackStateOneAndTwo))
+    if((state->track == MagTrackStateOneAndTwo))
         for(uint16_t i = 0; i < (ZERO_BETWEEN * 2); i++) {
             if(!!(i % 2)) bit ^= 1;
-            play_halfbit(bit, setting);
-            furi_delay_us(setting->us_clock);
+            play_halfbit(bit, state);
+            furi_delay_us(state->us_clock);
         }
 
-    if((setting->track == MagTrackStateOneAndTwo) || (setting->track == MagTrackStateTwo))
+    if((state->track == MagTrackStateOneAndTwo) || (state->track == MagTrackStateTwo))
         play_track(
             (uint8_t*)bits_t2_manchester,
             bits_t2_count,
-            setting,
-            (setting->reverse == MagReverseStateOn));
+            state,
+            (state->reverse == MagReverseStateOn));
 
-    if((setting->track == MagTrackStateThree))
-        play_track((uint8_t*)bits_t3_manchester, bits_t3_count, setting, false);
+    if((state->track == MagTrackStateThree))
+        play_track((uint8_t*)bits_t3_manchester, bits_t3_count, state, false);
 
     for(uint16_t i = 0; i < (ZERO_SUFFIX * 2); i++) {
         if(!!(i % 2)) bit ^= 1;
-        play_halfbit(bit, setting);
-        furi_delay_us(setting->us_clock);
+        play_halfbit(bit, state);
+        furi_delay_us(state->us_clock);
     }
     FURI_CRITICAL_EXIT();
 
     free(data1);
     free(data2);
     free(data3);
-    tx_deinit(setting);
+    tx_deinit(state);
 }
 
 uint16_t add_bit(bool value, uint8_t* out, uint16_t count) {

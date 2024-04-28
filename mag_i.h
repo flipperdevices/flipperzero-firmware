@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mag_device.h"
+#include "mag_state.h"
 //#include "helpers/mag_helpers.h"
 #include "helpers/mag_types.h"
 
@@ -54,15 +55,6 @@ enum MagCustomEvent {
 };
 
 typedef struct {
-    MagTxState tx;
-    MagTrackState track;
-    MagReverseState reverse;
-    uint32_t us_clock;
-    uint32_t us_interpacket;
-    bool is_debug;
-} MagSetting;
-
-typedef struct {
     ViewDispatcher* view_dispatcher;
     Gui* gui;
     NotificationApp* notifications;
@@ -76,7 +68,7 @@ typedef struct {
     FuriString* file_name;
     FuriString* args;
 
-    MagSetting* setting;
+    MagState state;
 
     // Common views
     Submenu* submenu;
