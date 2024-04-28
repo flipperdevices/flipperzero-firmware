@@ -63,14 +63,43 @@ void mag_scene_settings_on_enter(void* context) {
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewVariableItemList);
 }
 
+void mag_scene_invalid_dialog(Mag* mag) {
+    SceneManager* scene_manager = mag->scene_manager;
+
+    DialogMessage* message = dialog_message_alloc();
+
+    dialog_message_set_header(message, "Invalid Pin Configuration!", 64, 0, AlignCenter, AlignTop);
+    dialog_message_set_buttons(message, "Modify", NULL, "Reset");
+    dialog_message_set_text(
+        message,
+        "Pins cannot overlap\nChange, or reset to defaults.",
+        64,
+        32,
+        AlignCenter,
+        AlignCenter);
+    DialogMessageButton res = dialog_message_show(furi_record_open(RECORD_DIALOGS), message);
+    dialog_message_free(message);
+    furi_record_close(RECORD_DIALOGS);
+    if(res == DialogMessageButtonRight) {
+        mag_state_gpio_reset(&mag->state);
+        scene_manager_previous_scene(scene_manager);
+    }
+}
+
 bool mag_scene_settings_on_event(void* context, SceneManagerEvent event) {
     Mag* mag = context;
     SceneManager* scene_manager = mag->scene_manager;
     bool consumed = false;
 
-    UNUSED(mag);
-    UNUSED(scene_manager);
-    UNUSED(event);
+    if(event.type == SceneManagerEventTypeBack) {
+        consumed = true;
+
+        if(!mag_state_gpio_is_valid(&mag->state)) {
+            mag_scene_invalid_dialog(mag);
+        } else {
+            scene_manager_previous_scene(scene_manager);
+        }
+    }
 
     return consumed;
 }
@@ -79,10 +108,6 @@ void mag_scene_settings_on_exit(void* context) {
     Mag* mag = context;
 
     variable_item_list_reset(mag->variable_item_list);
-
-    if(!mag_state_gpio_is_valid(&mag->state)) {
-        scene_manager_next_scene(mag->scene_manager, MagSceneSettingsInvalid);
-    }
 
     mag_state_save(&mag->state);
 }
