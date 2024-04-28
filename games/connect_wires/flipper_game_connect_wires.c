@@ -641,8 +641,8 @@ int32_t flipper_game_connect_wires(void* p) {
 
     dolphin_deed(DolphinDeedPluginGameStart);
 
-
-    while(1) {
+    bool isFinishing = false;
+    while (!isFinishing) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
         if ((event.type != InputTypeShort) && (event.type != InputTypeLong)) continue;
@@ -687,7 +687,7 @@ int32_t flipper_game_connect_wires(void* p) {
           int sz = menuSize(MainMenu);
           if (event.key == InputKeyBack) {
             if (appState->gameState.fieldSize.x == 0 && appState->gameState.fieldSize.y == 0) {
-              break;
+              isFinishing = true;
             }
             appState->status = ST_PLAYING;
           } else if (event.key == InputKeyUp) {
@@ -702,7 +702,7 @@ int32_t flipper_game_connect_wires(void* p) {
             } else if (id == MN_ABOUT) {
               appState->status = ST_ABOUT;
             } else if (id == MN_EXIT) {
-              break;
+              isFinishing = true;
             }
           }
         } else if (appState->status == ST_SELECTION_MENU) {
@@ -731,9 +731,6 @@ int32_t flipper_game_connect_wires(void* p) {
         furi_mutex_release(appState->mutex);
     }
 
-    furi_mutex_free(appState->mutex);
-    free(appState);
-
     furi_message_queue_free(event_queue);
 
     gui_remove_view_port(gui, view_port);
@@ -741,5 +738,8 @@ int32_t flipper_game_connect_wires(void* p) {
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
 
+    // Should happen after freeing viewport because draw callback could try to acquire mutex.
+    furi_mutex_free(appState->mutex);
+    free(appState);
     return 0;
 }
