@@ -1,44 +1,46 @@
 #include "../mag_i.h"
+#include "../mag_state.h"
+#include "../helpers/mag_helpers.h"
 
 #define TAG "MagSceneEmulateConfig"
 
-#define GPIO_COUNT 8
-static const char* gpio[GPIO_COUNT] = {
-    [MagSettingPinA7] = "2 (A7)",
-    [MagSettingPinA6] = "3 (A6)",
-    [MagSettingPinA4] = "4 (A4)",
-    [MagSettingPinB3] = "5 (B3)",
-    [MagSettingPinB2] = "6 (B2)",
-    [MagSettingPinC3] = "7 (C3)",
-    [MagSettingPinC1] = "15 (C1)",
-    [MagSettingPinC0] = "16 (C0)",
+static const char* gpio[] = {
+    [MagPinA7] = "2 (A7)",
+    [MagPinA6] = "3 (A6)",
+    [MagPinA4] = "4 (A4)",
+    [MagPinB3] = "5 (B3)",
+    [MagPinB2] = "6 (B2)",
+    [MagPinC3] = "7 (C3)",
+    [MagPinC1] = "15 (C1)",
+    [MagPinC0] = "16 (C0)",
 };
+const uint8_t GPIO_COUNT = COUNT_OF(gpio);
 
-static void mag_scene_settings_set_gpio(VariableItem* item, MagSettingPin* pin_to_set) {
-    MagSettingPin pin = variable_item_get_current_value_index(item);
+static void mag_scene_settings_set_gpio(VariableItem* item, MagPin* pin_out) {
+    MagPin pin = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, gpio[pin]);
-    *pin_to_set = pin;
+    *pin_out = pin;
 }
 
 static void mag_scene_settings_set_gpio_input(VariableItem* item) {
     Mag* mag = variable_item_get_context(item);
-    mag_scene_settings_set_gpio(item, &mag->setting->pin_input);
+    mag_scene_settings_set_gpio(item, &mag->state.pin_input);
 };
 
 static void mag_scene_settings_set_gpio_output(VariableItem* item) {
     Mag* mag = variable_item_get_context(item);
-    mag_scene_settings_set_gpio(item, &mag->setting->pin_output);
+    mag_scene_settings_set_gpio(item, &mag->state.pin_output);
 };
 
 static void mag_scene_settings_set_gpio_enable(VariableItem* item) {
     Mag* mag = variable_item_get_context(item);
-    mag_scene_settings_set_gpio(item, &mag->setting->pin_enable);
+    mag_scene_settings_set_gpio(item, &mag->state.pin_enable);
 };
 
 static void mag_pin_variable_item_list_add(
     Mag* mag,
     const char* label,
-    MagSettingPin pin,
+    MagPin pin,
     VariableItemChangeCallback change_callback) {
     VariableItem* item =
         variable_item_list_add(mag->variable_item_list, label, GPIO_COUNT, change_callback, mag);
@@ -52,11 +54,11 @@ void mag_scene_settings_on_enter(void* context) {
     Mag* mag = context;
 
     mag_pin_variable_item_list_add(
-        mag, "Input pin:", mag->setting->pin_input, mag_scene_settings_set_gpio_input);
+        mag, "Input pin:", mag->state.pin_input, mag_scene_settings_set_gpio_input);
     mag_pin_variable_item_list_add(
-        mag, "Output pin:", mag->setting->pin_output, mag_scene_settings_set_gpio_output);
+        mag, "Output pin:", mag->state.pin_output, mag_scene_settings_set_gpio_output);
     mag_pin_variable_item_list_add(
-        mag, "Enable pin:", mag->setting->pin_enable, mag_scene_settings_set_gpio_enable);
+        mag, "Enable pin:", mag->state.pin_enable, mag_scene_settings_set_gpio_enable);
 
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewVariableItemList);
 }
@@ -75,6 +77,12 @@ bool mag_scene_settings_on_event(void* context, SceneManagerEvent event) {
 
 void mag_scene_settings_on_exit(void* context) {
     Mag* mag = context;
-    variable_item_list_set_selected_item(mag->variable_item_list, 0);
+
     variable_item_list_reset(mag->variable_item_list);
+
+    if(!mag_state_gpio_is_valid(&mag->state)) {
+        scene_manager_next_scene(mag->scene_manager, MagSceneSettingsInvalid);
+    }
+
+    mag_state_save(&mag->state);
 }

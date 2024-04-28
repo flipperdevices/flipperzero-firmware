@@ -128,17 +128,17 @@ static void mag_scene_emulate_config_set_tx(VariableItem* item) {
 
     variable_item_set_current_value_text(item, tx_text[index]);
 
-    mag->setting->tx = tx_value[index];
+    mag->state.tx = tx_value[index];
 };
 
 static void mag_scene_emulate_config_set_track(VariableItem* item) {
     Mag* mag = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    if(mag->setting->reverse == MagReverseStateOff) {
+    if(mag->state.reverse == MagReverseStateOff) {
         variable_item_set_current_value_text(item, track_text[index]);
-        mag->setting->track = track_value[index];
-    } else if(mag->setting->reverse == MagReverseStateOn) {
+        mag->state.track = track_value[index];
+    } else if(mag->state.reverse == MagReverseStateOn) {
         variable_item_set_current_value_index(
             item, value_index_uint32(MagTrackStateOneAndTwo, track_value, TRACK_COUNT));
     }
@@ -151,10 +151,10 @@ static void mag_scene_emulate_config_set_reverse(VariableItem* item) {
     Mag* mag = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    if(mag->setting->track == MagTrackStateOneAndTwo) {
+    if(mag->state.track == MagTrackStateOneAndTwo) {
         // only allow reverse track to be set when playing both 1 and 2
         variable_item_set_current_value_text(item, reverse_text[index]);
-        mag->setting->reverse = reverse_value[index];
+        mag->state.reverse = reverse_value[index];
         //FURI_LOG_D(TAG, "%s", reverse_text[index]);
         //FURI_LOG_D(TAG, "%d", mag->setting->reverse);
     } else {
@@ -169,7 +169,7 @@ static void mag_scene_emulate_config_set_clock(VariableItem* item) {
 
     variable_item_set_current_value_text(item, clock_text[index]);
 
-    mag->setting->us_clock = clock_value[index];
+    mag->state.us_clock = clock_value[index];
 };
 
 static void mag_scene_emulate_config_set_interpacket(VariableItem* item) {
@@ -178,7 +178,7 @@ static void mag_scene_emulate_config_set_interpacket(VariableItem* item) {
 
     variable_item_set_current_value_text(item, interpacket_text[index]);
 
-    mag->setting->us_interpacket = interpacket_value[index];
+    mag->state.us_interpacket = interpacket_value[index];
 };
 
 void mag_scene_emulate_config_on_enter(void* context) {
@@ -191,7 +191,7 @@ void mag_scene_emulate_config_on_enter(void* context) {
     // Clock
     item = variable_item_list_add(
         mag->variable_item_list, "Clock:", CLOCK_COUNT, mag_scene_emulate_config_set_clock, mag);
-    value_index = value_index_uint32(mag->setting->us_clock, clock_value, CLOCK_COUNT);
+    value_index = value_index_uint32(mag->state.us_clock, clock_value, CLOCK_COUNT);
     scene_manager_set_scene_state(mag->scene_manager, MagSceneEmulateConfig, (uint32_t)item);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, clock_text[value_index]);
@@ -199,7 +199,7 @@ void mag_scene_emulate_config_on_enter(void* context) {
     // Track
     item = variable_item_list_add(
         mag->variable_item_list, "Track:", TRACK_COUNT, mag_scene_emulate_config_set_track, mag);
-    value_index = value_index_uint32(mag->setting->track, track_value, TRACK_COUNT);
+    value_index = value_index_uint32(mag->state.track, track_value, TRACK_COUNT);
     scene_manager_set_scene_state(mag->scene_manager, MagSceneEmulateConfig, (uint32_t)item);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, track_text[value_index]);
@@ -212,25 +212,25 @@ void mag_scene_emulate_config_on_enter(void* context) {
         REVERSE_COUNT,
         mag_scene_emulate_config_set_reverse,
         mag);
-    value_index = value_index_uint32(mag->setting->reverse, reverse_value, REVERSE_COUNT);
+    value_index = value_index_uint32(mag->state.reverse, reverse_value, REVERSE_COUNT);
     scene_manager_set_scene_state(mag->scene_manager, MagSceneEmulateConfig, (uint32_t)item);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, reverse_text[value_index]);
 
     // TX
 #ifdef FW_ORIGIN_Official
-    if(mag->setting->is_debug) {
+    if(mag->state.is_debug) {
 #endif
         item = variable_item_list_add(
             mag->variable_item_list, "TX via:", TX_COUNT, mag_scene_emulate_config_set_tx, mag);
-        value_index = value_index_uint32(mag->setting->tx, tx_value, TX_COUNT);
+        value_index = value_index_uint32(mag->state.tx, tx_value, TX_COUNT);
         scene_manager_set_scene_state(mag->scene_manager, MagSceneEmulateConfig, (uint32_t)item);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, tx_text[value_index]);
 #ifdef FW_ORIGIN_Official
     }
 #else
-    variable_item_set_locked(item, !mag->setting->is_debug, "Enable Debug!");
+    variable_item_set_locked(item, !mag->state.is_debug, "Enable Debug!");
 #endif
     // Interpacket
     /*

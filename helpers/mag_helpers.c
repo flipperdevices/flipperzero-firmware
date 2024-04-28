@@ -19,31 +19,8 @@ const int sublen[] = {32, 48, 48};
 
 uint8_t last_value = 2;
 
-const GpioPin* mag_gpio_enum_to_pin(MagSettingPin pin) {
-    switch(pin) {
-    case MagSettingPinA7:
-        return &gpio_ext_pa7;
-    case MagSettingPinA6:
-        return &gpio_ext_pa6;
-    case MagSettingPinA4:
-        return &gpio_ext_pa4;
-    case MagSettingPinB3:
-        return &gpio_ext_pb3;
-    case MagSettingPinB2:
-        return &gpio_ext_pb2;
-    case MagSettingPinC3:
-        return &gpio_ext_pc3;
-    case MagSettingPinC1:
-        return &gpio_ext_pc1;
-    case MagSettingPinC0:
-        return &gpio_ext_pc0;
-    default:
-        return NULL;
-    }
-}
-
-void play_halfbit(bool value, MagSetting* setting) {
-    switch(setting->tx) {
+void play_halfbit(bool value, MagState* state) {
+    switch(state->tx) {
     case MagTxStateRFID:
         furi_hal_gpio_write(RFID_PIN_OUT, value);
         /*furi_hal_gpio_write(RFID_PIN_OUT, !value);
@@ -111,7 +88,7 @@ void play_halfbit(bool value, MagSetting* setting) {
     last_value = value;
 }
 
-void play_track(uint8_t* bits_manchester, uint16_t n_bits, MagSetting* setting, bool reverse) {
+void play_track(uint8_t* bits_manchester, uint16_t n_bits, MagState* state, bool reverse) {
     for(uint16_t i = 0; i < n_bits; i++) {
         uint16_t j = (reverse) ? (n_bits - i - 1) : i;
         uint8_t byte = j / 8;
@@ -140,9 +117,9 @@ void play_track(uint8_t* bits_manchester, uint16_t n_bits, MagSetting* setting, 
         // for DWT->CYCCNT. Note timer is aliased to 64us as per
         // #define FURI_HAL_CORTEX_INSTRUCTIONS_PER_MICROSECOND (SystemCoreClock / 1000000) | furi_hal_cortex.c
 
-        play_halfbit(bit, setting);
-        furi_delay_us(setting->us_clock);
-        // if (i % 2 == 1) furi_delay_us(setting->us_interpacket);
+        play_halfbit(bit, state);
+        furi_delay_us(state->us_clock);
+        // if (i % 2 == 1) furi_delay_us(state->us_interpacket);
     }
 }
 
@@ -154,7 +131,7 @@ void tx_init_rfid() {
     // furi_hal_ibutton_start_drive();
     furi_hal_ibutton_pin_write(false);
 
-    // Initializing at GpioSpeedLow seems sufficient for our needs; no improvements seen by increasing speed setting
+    // Initializing at GpioSpeedLow seems sufficient for our needs; no improvements seen by increasing speed state
 
     // this doesn't seem to make a difference, leaving it in
     furi_hal_gpio_init(&gpio_rfid_data_in, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -202,9 +179,9 @@ void tx_deinit_piezo() {
     furi_hal_gpio_init(&gpio_speaker, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
-bool tx_init(MagSetting* setting) {
+bool tx_init(MagState* state) {
     // Initialize configured TX method
-    switch(setting->tx) {
+    switch(state->tx) {
     case MagTxStateRFID:
         tx_init_rfid();
         break;
@@ -242,9 +219,9 @@ bool tx_init(MagSetting* setting) {
     return true;
 }
 
-bool tx_deinit(MagSetting* setting) {
+bool tx_deinit(MagState* state) {
     // Reset configured TX method
-    switch(setting->tx) {
+    switch(state->tx) {
     case MagTxStateRFID:
         tx_deinit_rfid();
         break;
@@ -285,7 +262,7 @@ bool tx_deinit(MagSetting* setting) {
 }
 
 void mag_spoof(Mag* mag) {
-    MagSetting* setting = mag->setting;
+    MagState* state = &mag->state;
 
     // TODO: cleanup this section. Possibly move precompute + tx_init to emulate_on_enter?
     FuriString* ft1 = mag->mag_dev->dev_data.track[0].str;
@@ -343,47 +320,47 @@ void mag_spoof(Mag* mag) {
     last_value = 2;
     bool bit = false;
 
-    if(!tx_init(setting)) return;
+    if(!tx_init(state)) return;
 
     FURI_CRITICAL_ENTER();
     for(uint16_t i = 0; i < (ZERO_PREFIX * 2); i++) {
         // is this right?
         if(!!(i % 2)) bit ^= 1;
-        play_halfbit(bit, setting);
-        furi_delay_us(setting->us_clock);
+        play_halfbit(bit, state);
+        furi_delay_us(state->us_clock);
     }
 
-    if((setting->track == MagTrackStateOneAndTwo) || (setting->track == MagTrackStateOne))
-        play_track((uint8_t*)bits_t1_manchester, bits_t1_count, setting, false);
+    if((state->track == MagTrackStateOneAndTwo) || (state->track == MagTrackStateOne))
+        play_track((uint8_t*)bits_t1_manchester, bits_t1_count, state, false);
 
-    if((setting->track == MagTrackStateOneAndTwo))
+    if((state->track == MagTrackStateOneAndTwo))
         for(uint16_t i = 0; i < (ZERO_BETWEEN * 2); i++) {
             if(!!(i % 2)) bit ^= 1;
-            play_halfbit(bit, setting);
-            furi_delay_us(setting->us_clock);
+            play_halfbit(bit, state);
+            furi_delay_us(state->us_clock);
         }
 
-    if((setting->track == MagTrackStateOneAndTwo) || (setting->track == MagTrackStateTwo))
+    if((state->track == MagTrackStateOneAndTwo) || (state->track == MagTrackStateTwo))
         play_track(
             (uint8_t*)bits_t2_manchester,
             bits_t2_count,
-            setting,
-            (setting->reverse == MagReverseStateOn));
+            state,
+            (state->reverse == MagReverseStateOn));
 
-    if((setting->track == MagTrackStateThree))
-        play_track((uint8_t*)bits_t3_manchester, bits_t3_count, setting, false);
+    if((state->track == MagTrackStateThree))
+        play_track((uint8_t*)bits_t3_manchester, bits_t3_count, state, false);
 
     for(uint16_t i = 0; i < (ZERO_SUFFIX * 2); i++) {
         if(!!(i % 2)) bit ^= 1;
-        play_halfbit(bit, setting);
-        furi_delay_us(setting->us_clock);
+        play_halfbit(bit, state);
+        furi_delay_us(state->us_clock);
     }
     FURI_CRITICAL_EXIT();
 
     free(data1);
     free(data2);
     free(data3);
-    tx_deinit(setting);
+    tx_deinit(state);
 }
 
 uint16_t add_bit(bool value, uint8_t* out, uint16_t count) {

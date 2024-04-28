@@ -14,24 +14,6 @@ static bool mag_debug_back_event_callback(void* context) {
     return scene_manager_handle_back_event(mag->scene_manager);
 }
 
-static MagSetting* mag_setting_alloc() {
-    // temp hardcoded defaults
-    MagSetting* setting = malloc(sizeof(MagSetting));
-    setting->reverse = SETTING_DEFAULT_REVERSE;
-    setting->track = SETTING_DEFAULT_TRACK;
-    setting->tx = SETTING_DEFAULT_TX;
-    setting->us_clock = SETTING_DEFAULT_US_CLOCK;
-    setting->us_interpacket = SETTING_DEFAULT_US_INTERPACKET;
-
-    setting->pin_input = SETTING_DEFAULT_PIN_INPUT;
-    setting->pin_output = SETTING_DEFAULT_PIN_OUTPUT;
-    setting->pin_enable = SETTING_DEFAULT_PIN_ENABLE;
-
-    setting->is_debug = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
-
-    return setting;
-}
-
 static Mag* mag_alloc() {
     Mag* mag = malloc(sizeof(Mag));
 
@@ -52,7 +34,7 @@ static Mag* mag_alloc() {
         mag->view_dispatcher, mag_debug_back_event_callback);
 
     mag->mag_dev = mag_device_alloc();
-    mag->setting = mag_setting_alloc();
+    mag_state_load(&mag->state);
 
     // Open GUI record
     mag->gui = furi_record_open(RECORD_GUI);
@@ -97,13 +79,9 @@ static Mag* mag_alloc() {
     mag->expansion = furi_record_open(RECORD_EXPANSION);
     expansion_disable(mag->expansion);
 
+    // Move UART here? conditional upon setting?
+
     return mag;
-}
-
-static void mag_setting_free(MagSetting* setting) {
-    furi_assert(setting);
-
-    free(setting);
 }
 
 static void mag_free(Mag* mag) {
@@ -116,10 +94,6 @@ static void mag_free(Mag* mag) {
     // Mag device
     mag_device_free(mag->mag_dev);
     mag->mag_dev = NULL;
-
-    // Mag setting
-    mag_setting_free(mag->setting);
-    mag->setting = NULL;
 
     // Submenu
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewSubmenu);
