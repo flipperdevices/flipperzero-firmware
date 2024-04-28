@@ -161,7 +161,7 @@ LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t, uint16_t,
 						uint8_t *, uint16_t);
 
 /** Start the UART **/
-void start_uart(LRFSerialCommApp *, uint32_t);
+void start_uart(LRFSerialCommApp*, uint32_t);
 
 /** Stop the UART **/
 void stop_uart(LRFSerialCommApp *);
