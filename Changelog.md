@@ -1,4 +1,5 @@
 - Added baudrate setting
+- Faster automatic SMM sampling rate
 - Keep the backlight on when testing the LRX laser or the IR pointer
 - Undocumented feature can be enabled with a special configuration file (manufacturer only)
 
