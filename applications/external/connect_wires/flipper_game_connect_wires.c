@@ -597,10 +597,10 @@ void draw_about(Canvas* canvas) {
 void draw_winning(Canvas* canvas, GameState* gs) {
     canvas_set_font(canvas, FontPrimary);
 
-    size_t s = snprintf(NULL, 0, "%s:%u", SCORE_MESSAGE, gs->gameMoves);
-    char moves[s];
+    size_t s = snprintf(NULL, 0, SCORE_MESSAGE, gs->gameMoves);
+    char moves[s + 1];
     // Use snprintf to combine the score message and the actual score
-    snprintf(moves, s, SCORE_MESSAGE, gs->gameMoves);
+    snprintf(moves, s + 1, SCORE_MESSAGE, gs->gameMoves);
 
     int w = canvas_string_width(canvas, WINNING_MESSAGE);
     int h = canvas_current_font_height(canvas) * 2;
@@ -707,7 +707,8 @@ int32_t flipper_game_connect_wires(void* p) {
 
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
-    while(1) {
+    bool isFinishing = false;
+    while(!isFinishing) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
         if((event.type != InputTypeShort) && (event.type != InputTypeLong)) continue;
@@ -752,7 +753,7 @@ int32_t flipper_game_connect_wires(void* p) {
             int sz = menuSize(MainMenu);
             if(event.key == InputKeyBack) {
                 if(appState->gameState.fieldSize.x == 0 && appState->gameState.fieldSize.y == 0) {
-                    break;
+                    isFinishing = true;
                 }
                 appState->status = ST_PLAYING;
             } else if(event.key == InputKeyUp) {
@@ -769,7 +770,7 @@ int32_t flipper_game_connect_wires(void* p) {
                 } else if(id == MN_ABOUT) {
                     appState->status = ST_ABOUT;
                 } else if(id == MN_EXIT) {
-                    break;
+                    isFinishing = true;
                 }
             }
         } else if(appState->status == ST_SELECTION_MENU) {
@@ -800,9 +801,6 @@ int32_t flipper_game_connect_wires(void* p) {
         furi_mutex_release(appState->mutex);
     }
 
-    furi_mutex_free(appState->mutex);
-    free(appState);
-
     furi_message_queue_free(event_queue);
 
     gui_remove_view_port(gui, view_port);
@@ -810,5 +808,8 @@ int32_t flipper_game_connect_wires(void* p) {
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
 
+    // Should happen after freeing viewport because draw callback could try to acquire mutex.
+    furi_mutex_free(appState->mutex);
+    free(appState);
     return 0;
 }
