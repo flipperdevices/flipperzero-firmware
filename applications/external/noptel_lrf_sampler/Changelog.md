@@ -1,3 +1,10 @@
+## Version 1.6 - 28/04/2024
+
+- Added baudrate setting
+- Faster automatic SMM sampling rate
+- Keep the backlight on when testing the LRX laser or the IR pointer
+- Undocumented feature can be enabled with a special configuration file (manufacturer only)
+
 ## Version 1.5 - 24/04/2024
 
 - Added LRX laser tester

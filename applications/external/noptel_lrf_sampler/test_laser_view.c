@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.5
+ * Version: 1.6
  *
  * Test laser view
 ***/
@@ -94,6 +94,9 @@ void testlaser_view_enter_callback(void* ctx) {
     testlaser_model->ir_received_prev = false;
     testlaser_model->ir_received = false;
 
+    /* Start the UART at the correct baudrate */
+    start_uart(app->lrf_serial_comm_app, testlaser_model->baudrate);
+
     /* Set up the callback to catch an IR sensor level change */
     furi_hal_infrared_async_rx_set_capture_isr_callback(ir_capture_callback, testlaser_model);
 
@@ -121,6 +124,9 @@ void testlaser_view_enter_callback(void* ctx) {
         furi_timer_alloc(restart_cmm_timer_callback, FuriTimerTypePeriodic, ctx);
     furi_timer_start(app->test_laser_restart_cmm_timer, period_restart_cmm);
 
+    /* Set the backlight on all the time */
+    set_backlight(&app->backlight_control, BL_ON);
+
     with_view_model(
         app->testlaser_view, TestLaserModel * _model, { UNUSED(_model); }, false);
 }
@@ -133,6 +139,9 @@ void testlaser_view_exit_callback(void* ctx) {
     /* If the IR sensor is busy, we have nothing to do */
     if(testlaser_model->ir_busy) return;
 
+    /* Set the backlight back to automatic */
+    set_backlight(&app->backlight_control, BL_AUTO);
+
     /* Stop and free the CMM restart timer */
     furi_timer_stop(app->test_laser_restart_cmm_timer);
     furi_timer_free(app->test_laser_restart_cmm_timer);
@@ -144,6 +153,9 @@ void testlaser_view_exit_callback(void* ctx) {
 
     /* Unset the callback to receive decoded LRF samples */
     set_lrf_sample_handler(app->lrf_serial_comm_app, NULL, app);
+
+    /* Stop the UART */
+    stop_uart(app->lrf_serial_comm_app);
 
     /* Unset the IR sensor timeout callback */
     furi_hal_infrared_async_rx_set_timeout_isr_callback(NULL, NULL);

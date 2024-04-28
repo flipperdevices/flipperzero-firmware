@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.5
+ * Version: 1.6
  *
  * LRF information view
 ***/
@@ -31,13 +31,16 @@ static void lrf_ident_handler(LRFIdent* lrf_ident, void* ctx) {
 void lrfinfo_view_enter_callback(void* ctx) {
     App* app = (App*)ctx;
 
-    /* Setup the callback to receive decoded LRF identification frames */
-    set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler, app);
-
     with_view_model(
         app->lrfinfo_view,
         LRFInfoModel * lrfinfo_model,
         {
+            /* Start the UART at the correct baudrate */
+            start_uart(app->lrf_serial_comm_app, lrfinfo_model->baudrate);
+
+            /* Setup the callback to receive decoded LRF identification frames */
+            set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler, app);
+
             /* Invalidate the current identification - if any */
             lrfinfo_model->has_ident = false;
 
@@ -53,6 +56,9 @@ void lrfinfo_view_exit_callback(void* ctx) {
 
     /* Unset the callback to receive decoded LRF identification frames */
     set_lrf_ident_handler(app->lrf_serial_comm_app, NULL, app);
+
+    /* Stop the UART */
+    stop_uart(app->lrf_serial_comm_app);
 }
 
 /** Draw callback for the LRF info view **/

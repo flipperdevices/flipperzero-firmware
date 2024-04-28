@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.5
+ * Version: 1.6
  *
  * Sample View
 ***/
@@ -44,27 +44,41 @@ static void lrf_sample_handler(LRFSample* lrf_sample, void* ctx) {
     uint16_t nb_valid_samples_dist2;
     uint16_t nb_valid_samples_dist3;
     uint16_t nb_valid_samples_any_dist;
+    bool sampling_error;
     bool one_dist_valid;
     float timediff;
     uint16_t i;
 
+    /* Determine if the rangefinder encountered an error or hit the eye safety
+     limit */
+    sampling_error = lrf_sample->dist1 == 0.5 || lrf_sample->dist2 == 0.5 ||
+                     lrf_sample->dist3 == 0.5;
+
     /* Do we do automatic single measurement? */
-    if(sampler_model->config.mode == (smm | 0x100)) {
+    if(sampler_model->config.mode == (smm | AUTO_RESTART)) {
         /* Is continuous measurement still enabled? */
         if(sampler_model->continuous_meas_started) {
             /* Wait a bit for the LRF to "cool off" before triggering another
        measurement */
-            furi_delay_ms(1000);
+            furi_delay_ms(sampling_error ? 1000 : 200);
 
             /* Send a new SMM command if continuous measurement wasn't stopped
          during the wait */
-            if(sampler_model->continuous_meas_started)
+            if(sampler_model->continuous_meas_started) {
+                /* Send the SMM prefix if it's enabled */
+                if(sampler_model->config.smm_pfx)
+                    uart_tx(
+                        app->lrf_serial_comm_app,
+                        app->smm_pfx_config.smm_pfx_sequence,
+                        sizeof(app->smm_pfx_config.smm_pfx_sequence));
+
+                /* Send the SMM command */
                 send_lrf_command(app->lrf_serial_comm_app, smm);
+            }
 
             /* Discard the sample if the LRF encountered an error or hit the eye
          safety limit */
-            if(lrf_sample->dist1 == 0.5 || lrf_sample->dist2 == 0.5 || lrf_sample->dist3 == 0.5)
-                return;
+            if(sampling_error) return;
         }
     }
 
@@ -298,6 +312,12 @@ static void lrf_sample_handler(LRFSample* lrf_sample, void* ctx) {
 
     /* Mark the samples as updated */
     sampler_model->samples_updated = true;
+
+    /* Give the sample view update timer callback a chance to run if the LRF is
+     sending samples with no delay between each samples - i.e. maxxing out the
+     serial bandwidth by trying (and failing) to sample at 200 Hz and sending
+     the samples at 38400 bps */
+    furi_delay_ms(1);
 }
 
 /** Sample view update timer callback **/
@@ -305,14 +325,23 @@ static void sample_view_timer_callback(void* ctx) {
     App* app = (App*)ctx;
     SamplerModel* sampler_model = view_get_model(app->sample_view);
 
-    /* Were the samples updated? */
-    if(sampler_model->samples_updated) {
+    /* Were the samples updated or should make the OK button symbol blink? */
+    if(sampler_model->samples_updated || !sampler_model->symbol_blinking_ctr) {
+        /* Reverse the symbol's colors and reset the blinker counter if needed  */
+        if(!sampler_model->symbol_blinking_ctr) {
+            sampler_model->symbol_reversed = !sampler_model->symbol_reversed;
+            sampler_model->symbol_blinking_ctr = sample_view_smm_prefix_enabled_blink_every;
+        }
+
         /* Trigger a sample view redraw */
         with_view_model(
             app->sample_view, SamplerModel * _model, { UNUSED(_model); }, true);
 
         sampler_model->samples_updated = false;
     }
+
+    /* Count down the blinking counter if it's not disabled */
+    if(sampler_model->symbol_blinking_ctr >= 0) sampler_model->symbol_blinking_ctr--;
 }
 
 /** Sample view enter callback
@@ -321,17 +350,24 @@ void sample_view_enter_callback(void* ctx) {
     App* app = (App*)ctx;
     uint32_t period = furi_ms_to_ticks(sample_view_update_every);
 
-    /* Setup the callback to receive decoded LRF samples */
-    set_lrf_sample_handler(app->lrf_serial_comm_app, lrf_sample_handler, app);
-
-    /* Set the backlight on all the time */
-    set_backlight(&app->backlight_control, BL_ON);
-
     with_view_model(
         app->sample_view,
         SamplerModel * sampler_model,
         {
+            /* Start the UART at the correct baudrate */
+            start_uart(app->lrf_serial_comm_app, sampler_model->config.baudrate);
+
+            /* Setup the callback to receive decoded LRF samples */
+            set_lrf_sample_handler(app->lrf_serial_comm_app, lrf_sample_handler, app);
+
+            /* Set the backlight on all the time */
+            set_backlight(&app->backlight_control, BL_ON);
+
             sampler_model->samples_updated = false;
+
+            /* Don't blink the OK button symbol by default */
+            sampler_model->symbol_reversed = false;
+            sampler_model->symbol_blinking_ctr = -1;
 
             /* Initialize the displayed distances */
             sampler_model->disp_sample.dist1 = NO_DISTANCE_DISPLAY;
@@ -347,8 +383,27 @@ void sample_view_enter_callback(void* ctx) {
             /* Initialize the displayed effective sampling frequency */
             sampler_model->eff_freq = -1;
 
-            /* Send the appropriate initial measurement command */
-            send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.mode & 0xff);
+            /* Are we doing single measurement (manual or automatic)? */
+            if((sampler_model->config.mode & (AUTO_RESTART - 1)) == smm) {
+                /* Is the SMM prefix enabled? */
+                if(sampler_model->config.smm_pfx) {
+                    /* Set up the OK button symbol for blinking */
+                    sampler_model->symbol_blinking_ctr = 0;
+
+                    /* Send the SMM prefix */
+                    uart_tx(
+                        app->lrf_serial_comm_app,
+                        app->smm_pfx_config.smm_pfx_sequence,
+                        sizeof(app->smm_pfx_config.smm_pfx_sequence));
+                }
+
+                /* Send the SMM command */
+                send_lrf_command(app->lrf_serial_comm_app, smm);
+            }
+
+            /* Otherwise send the appropriate CMM command */
+            else
+                send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.mode);
 
             /* Mark continuous measurement started as needed */
             sampler_model->continuous_meas_started = sampler_model->config.mode == smm ? false :
@@ -376,7 +431,7 @@ void sample_view_exit_callback(void* ctx) {
     send_lrf_command(app->lrf_serial_comm_app, cmm_break);
     send_lrf_command(app->lrf_serial_comm_app, cmm_break);
 
-    /* Set the backlight on all the time */
+    /* Set the backlight back to automatic */
     set_backlight(&app->backlight_control, BL_AUTO);
 
     /* Unset the callback to receive decoded LRF samples */
@@ -385,6 +440,9 @@ void sample_view_exit_callback(void* ctx) {
     /* Stop and free the view update timer */
     furi_timer_stop(app->sample_view_timer);
     furi_timer_free(app->sample_view_timer);
+
+    /* Stop the UART */
+    stop_uart(app->lrf_serial_comm_app);
 }
 
 /** Draw callback for the sample view **/
@@ -426,8 +484,8 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
 
     /* If we have an effective sampling frequency, print it at the bottom */
     if(sampler_model->eff_freq >= 0) {
-        /* If the frequency value is below 60 Hz, display it with one decimal */
-        if(sampler_model->eff_freq < 60) {
+        /* If the frequency value is below 90 Hz, display it with one decimal */
+        if(sampler_model->eff_freq < 90) {
             snprintf(
                 sampler_model->spstr,
                 (volatile size_t){sizeof(sampler_model->spstr)},
@@ -497,13 +555,24 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
     /* If we have an effective sampling frequency, print "Hz" right of
      the value */
     if(sampler_model->eff_freq >= 0)
-        canvas_draw_str(canvas, sampler_model->eff_freq < 60 ? 59 : 53, 64, "Hz");
+        canvas_draw_str(canvas, sampler_model->eff_freq < 90 ? 59 : 53, 64, "Hz");
 
     /* Print the OK button symbol followed by "Sample", "Start" or "Stop"
      in a frame at the right-hand side depending on whether we do single or
-     continuous measurement, and whether continuous measurement is started */
+     continuous measurement, and whether continuous measurement is started.
+     Draw the button symbol in reverse video if needed */
     canvas_draw_frame(canvas, 77, 52, 51, 12);
+
+    if(sampler_model->symbol_reversed) {
+        canvas_draw_frame(canvas, 78, 53, 10, 10);
+        canvas_draw_line(canvas, 88, 53, 88, 63);
+        canvas_invert_color(canvas);
+    }
+
     canvas_draw_icon(canvas, 79, 54, &I_ok_button);
+
+    if(sampler_model->symbol_reversed) canvas_invert_color(canvas);
+
     if(sampler_model->config.mode == smm)
         canvas_draw_str(canvas, 90, 62, "Sample");
     else if(sampler_model->continuous_meas_started)
@@ -588,13 +657,20 @@ bool sample_view_input_callback(InputEvent* evt, void* ctx) {
         FURI_LOG_D(TAG, "OK button pressed");
 
         /* Are we doing single measurement (manual or automatic)? */
-        if((sampler_model->config.mode & 0xff) == smm) {
+        if((sampler_model->config.mode & (AUTO_RESTART - 1)) == smm) {
             /* Is continuous measurement stopped? */
             if(!sampler_model->continuous_meas_started) {
                 /* Reset the samples ring buffer */
                 sampler_model->flush_samples = true;
 
-                /* Send a SMM command (exec mode) */
+                /* Send the SMM prefix if it's enabled */
+                if(sampler_model->config.smm_pfx)
+                    uart_tx(
+                        app->lrf_serial_comm_app,
+                        app->smm_pfx_config.smm_pfx_sequence,
+                        sizeof(app->smm_pfx_config.smm_pfx_sequence));
+
+                /* Send the SMM command */
                 send_lrf_command(app->lrf_serial_comm_app, smm);
             }
 
@@ -620,7 +696,7 @@ bool sample_view_input_callback(InputEvent* evt, void* ctx) {
                 /* Reset the samples ring buffer */
                 sampler_model->flush_samples = true;
 
-                /* Send the appropriate start-CMM command (exec mode) */
+                /* Send the appropriate start-CMM command */
                 send_lrf_command(app->lrf_serial_comm_app, sampler_model->config.mode);
 
                 sampler_model->continuous_meas_started = true;

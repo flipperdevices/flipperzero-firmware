@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.5
+ * Version: 1.6
  *
  * LRF Serial communication app
 ***/
@@ -292,7 +292,7 @@ static int32_t uart_rx_thread(void* ctx) {
 
                         /* What command byte did we get? */
                         switch(app->rx_buf[i]) {
-                        /* We got an exec range measurement response */
+                        /* We got a range measurement response */
                         case 0xcc:
                             app->dec_buf[app->nb_dec_buf++] = app->rx_buf[i];
                             wait_nb_dec_buf = 22; /* We need to get 22 bytes total
@@ -409,7 +409,7 @@ static int32_t uart_rx_thread(void* ctx) {
 
                         /* Decode the frame */
                         switch(app->dec_buf[1]) {
-                        /* We got an exec range measurement response */
+                        /* We got a range measurement response */
                         case 0xcc:
 
                             if(is_little_endian) {
@@ -712,7 +712,7 @@ static int32_t uart_rx_thread(void* ctx) {
 }
 
 /** UART send function **/
-static void uart_tx(LRFSerialCommApp* app, uint8_t* data, size_t len) {
+void uart_tx(LRFSerialCommApp* app, uint8_t* data, size_t len) {
     furi_hal_serial_tx(app->serial_handle, data, len);
 }
 
@@ -781,10 +781,29 @@ LRFSerialCommApp* lrf_serial_comm_app_init(
     /* Acquire the UART */
     app->serial_handle = furi_hal_serial_control_acquire(app->serial_channel);
     furi_check(app->serial_handle);
-    furi_hal_serial_init(app->serial_handle, BAUDRATE);
-    furi_hal_serial_async_rx_start(app->serial_handle, on_uart_irq_callback, app, false);
 
     return app;
+}
+
+/** Start the UART **/
+void start_uart(LRFSerialCommApp* app, uint32_t baudrate) {
+    /* Initialize the UART with the required baudrate */
+    furi_hal_serial_init(app->serial_handle, baudrate);
+
+    /* Start receiving */
+    furi_hal_serial_async_rx_start(app->serial_handle, on_uart_irq_callback, app, false);
+}
+
+/** Stop the UART **/
+void stop_uart(LRFSerialCommApp* app) {
+    /* Wait a bit to flush the write buffer */
+    furi_delay_ms(100);
+
+    /* Stop receiving */
+    furi_hal_serial_async_rx_stop(app->serial_handle);
+
+    /* Deinitialize the UART */
+    furi_hal_serial_deinit(app->serial_handle);
 }
 
 /** Stop the UART receive thread and free up the space allocated for the LRF
@@ -792,9 +811,7 @@ LRFSerialCommApp* lrf_serial_comm_app_init(
 void lrf_serial_comm_app_free(LRFSerialCommApp* app) {
     FURI_LOG_I(TAG, "App free");
 
-    /* Stop UART receive and release the UART */
-    furi_hal_serial_async_rx_stop(app->serial_handle);
-    furi_hal_serial_deinit(app->serial_handle);
+    /* Release the UART */
     furi_hal_serial_control_release(app->serial_handle);
 
     /* Stop and free the UART receive thread */

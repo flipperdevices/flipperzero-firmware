@@ -1,5 +1,5 @@
 # Noptel LRF rangefinder sampler app for the Flipper Zero
-### Version 1.5
+### Version 1.6
 
 * [Usage](#Usage)
 * [Installation](#Installation)
@@ -38,6 +38,14 @@ Set **Buffering** to buffer samples in automatic SMM or continuous measurement m
 - **5 samples**, **10 samples**, **100 samples** or **1000 samples**
 
 Enable **Beep** to hear a short beep when a valid sample is received.
+
+Set **Baudrate** to either:
+
+- **115200** bps (default)
+- **57600** bps
+- **38400** bps
+- **19200** bps
+- **9600** bps
 
 ### Sample
 
@@ -164,6 +172,14 @@ Gives information about the app and the GPIO pin connections needed to connect a
     LRF rangefinders such as the LRF125 that work in the near-infrared are easily detected by the Flipper Zero despite using a lower power laser diode, and can be reliably diagnosed using the Flipper Zero.
 
 - Some rangefinders are equipped with a low power, near-infrared pointer instead of a visible light pointer. Near-infrared pointers can be easily detected and reliably diagnosed by the Flipper Zero also, using the **Test IR pointer** function.
+
+- Each sample requires 220 bits to transfer over serial. If the baudrate is too low, the serial link may not provide enough bandwidth to sustain the desired rate of sampling:
+
+  - At 38400 bps, the sampling rate is capped at 174 Hz
+  - At 19200 bps, the sampling rate is capped at 87 Hz
+  - At 9600 bps, the sampling rate is capped at 43.5 Hz
+
+- The lower the baudrate, the longer saving diagnostic data takes. At 9600 bps, it takes upward of 50 seconds, while it only takes 5 seconds at 115200 bps
 
 
 

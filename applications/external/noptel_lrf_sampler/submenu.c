@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.5
+ * Version: 1.6
  *
  * Submenu
 ***/
@@ -33,11 +33,20 @@ void submenu_callback(void* ctx, uint32_t idx) {
 
     /* Turn the pointer on and off */
     case submenu_pointeronoff:
+
+        /* Start the UART at the correct baudrate */
+        start_uart(app->lrf_serial_comm_app, sampler_model->config.baudrate);
+
+        /* Send the pointer command */
         send_lrf_command(
             app->lrf_serial_comm_app, sampler_model->pointer_is_on ? pointer_off : pointer_on);
-        FURI_LOG_D(TAG, "Turned the pointer %s", sampler_model->pointer_is_on ? "OFF" : "ON");
+
+        /* Stop the UART */
+        stop_uart(app->lrf_serial_comm_app);
+
         sampler_model->config.sitem = submenu_pointeronoff;
         sampler_model->pointer_is_on = !sampler_model->pointer_is_on;
+        FURI_LOG_D(TAG, "Turned the pointer %s", sampler_model->pointer_is_on ? "OFF" : "ON");
         break;
 
     /* Switch to the LRF info view */

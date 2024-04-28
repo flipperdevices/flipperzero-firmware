@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.5
+ * Version: 1.6
  *
  * Test pointer view
 ***/
@@ -79,6 +79,9 @@ void testpointer_view_enter_callback(void* ctx) {
     testpointer_model->ir_received_prev = false;
     testpointer_model->ir_received = false;
 
+    /* Start the UART at the correct baudrate */
+    start_uart(app->lrf_serial_comm_app, testpointer_model->baudrate);
+
     /* Set up the callback to catch an IR sensor level change */
     furi_hal_infrared_async_rx_set_capture_isr_callback(ir_capture_callback, testpointer_model);
 
@@ -99,6 +102,9 @@ void testpointer_view_enter_callback(void* ctx) {
         furi_timer_alloc(pointer_control_timer_callback, FuriTimerTypePeriodic, ctx);
     furi_timer_start(app->test_pointer_control_timer, period_jiggle_pointer);
 
+    /* Set the backlight on all the time */
+    set_backlight(&app->backlight_control, BL_ON);
+
     with_view_model(
         app->testpointer_view, TestPointerModel * _model, { UNUSED(_model); }, false);
 }
@@ -111,12 +117,18 @@ void testpointer_view_exit_callback(void* ctx) {
     /* If the IR sensor is busy, we have nothing to do */
     if(testpointer_model->ir_busy) return;
 
+    /* Set the backlight back to automatic */
+    set_backlight(&app->backlight_control, BL_AUTO);
+
     /* Stop and free the pointer control timer */
     furi_timer_stop(app->test_pointer_control_timer);
     furi_timer_free(app->test_pointer_control_timer);
 
     /* Turn off the pointer */
     send_lrf_command(app->lrf_serial_comm_app, pointer_off);
+
+    /* Stop the UART */
+    stop_uart(app->lrf_serial_comm_app);
 
     /* Unset the IR sensor timeout callback */
     furi_hal_infrared_async_rx_set_timeout_isr_callback(NULL, NULL);
