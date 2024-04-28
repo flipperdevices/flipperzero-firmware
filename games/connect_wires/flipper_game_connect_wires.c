@@ -543,10 +543,10 @@ void draw_about(Canvas* canvas) {
 void draw_winning(Canvas* canvas, GameState* gs) {
     canvas_set_font(canvas, FontPrimary);
 
-    size_t s = snprintf(NULL, 0, "%s:%u", SCORE_MESSAGE, gs->gameMoves);
-    char moves[s];
+    size_t s = snprintf(NULL, 0, SCORE_MESSAGE, gs->gameMoves);
+    char moves[s + 1];
     // Use snprintf to combine the score message and the actual score
-    snprintf(moves, s, SCORE_MESSAGE, gs->gameMoves);
+    snprintf(moves, s + 1, SCORE_MESSAGE, gs->gameMoves);
 
     int w = canvas_string_width(canvas, WINNING_MESSAGE);
     int h = canvas_current_font_height(canvas) * 2;
