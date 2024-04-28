@@ -536,8 +536,8 @@ void sample_view_draw_callback(Canvas *canvas, void *model) {
   /* If we have an effective sampling frequency, print it at the bottom */
   if(sampler_model->eff_freq >= 0) {
 
-    /* If the frequency value is below 60 Hz, display it with one decimal */
-    if(sampler_model->eff_freq < 60) {
+    /* If the frequency value is below 90 Hz, display it with one decimal */
+    if(sampler_model->eff_freq < 90) {
       snprintf(sampler_model->spstr,
 		(volatile size_t){sizeof(sampler_model->spstr)},
 		"%4.1f", sampler_model->eff_freq);
@@ -612,7 +612,7 @@ void sample_view_draw_callback(Canvas *canvas, void *model) {
   /* If we have an effective sampling frequency, print "Hz" right of
      the value */
   if(sampler_model->eff_freq >= 0)
-    canvas_draw_str(canvas, sampler_model->eff_freq < 60 ? 59 : 53, 64, "Hz");
+    canvas_draw_str(canvas, sampler_model->eff_freq < 90 ? 59 : 53, 64, "Hz");
 
   /* Print the OK button symbol followed by "Sample", "Start" or "Stop"
      in a frame at the right-hand side depending on whether we do single or
