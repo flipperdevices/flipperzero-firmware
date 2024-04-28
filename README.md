@@ -39,7 +39,13 @@ Set **Buffering** to buffer samples in automatic SMM or continuous measurement m
 
 Enable **Beep** to hear a short beep when a valid sample is received.
 
-Set **Baudrate** to **57600**, **38400**, **19200** or **9600** bps if your LRF is not configured at the default **115200** bps
+Set **Baudrate** to either:
+
+- **115200** bps (default)
+- **57600** bps
+- **38400** bps
+- **19200** bps
+- **9600** bps
 
 ### Sample
 
@@ -166,6 +172,11 @@ Gives information about the app and the GPIO pin connections needed to connect a
     LRF rangefinders such as the LRF125 that work in the near-infrared are easily detected by the Flipper Zero despite using a lower power laser diode, and can be reliably diagnosed using the Flipper Zero.
 
 - Some rangefinders are equipped with a low power, near-infrared pointer instead of a visible light pointer. Near-infrared pointers can be easily detected and reliably diagnosed by the Flipper Zero also, using the **Test IR pointer** function.
+
+- Each sample requires 220 bits to transfer over serial. If the baudrate is too low, the serial link may not provide enough bandwidth to sustain the desired rate of sampling:
+  - At 38400 bps, the sampling rate is capped at 174 Hz
+  - At 19200 bps, the sampling rate is capped at 87 Hz
+  - At 9600 bps, the sampling rate is capped at 43.5 Hz
 
 
 
