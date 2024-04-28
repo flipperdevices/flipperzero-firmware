@@ -34,7 +34,6 @@ bool findmy_state_load(FindMyState* out_state) {
                 flipper_format_rewind(file);
             }
             state.tag_type = tmp;
-            
 
             if(!flipper_format_read_bool(file, "show_mac", &state.show_mac, 1)) {
                 // Support migrating from old config
