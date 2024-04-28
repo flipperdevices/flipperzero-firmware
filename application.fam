@@ -10,7 +10,7 @@ App(
     order=10,
     fap_category="GPIO",
     # Optional values
-    fap_version="1.5",
+    fap_version="1.6",
     fap_icon="assets/noptel_lrf_sampler.png",  # 10x10 1-bit PNG
     fap_description="Noptel LRF rangefinder sampler",
     fap_author="Giraut",
