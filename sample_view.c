@@ -368,8 +368,7 @@ static void sample_view_timer_callback(void *ctx) {
   App *app = (App *)ctx;
   SamplerModel *sampler_model = view_get_model(app->sample_view);
 
-  /* Were the samples updated, or does the display need updating to make the
-     OK button symbol blink? */
+  /* Were the samples updated or should make the OK button symbol blink? */
   if(sampler_model->samples_updated || !sampler_model->symbol_blinking_ctr) {
 
     /* Reverse the symbol's colors and reset the blinker counter if needed  */
