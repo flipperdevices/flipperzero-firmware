@@ -72,7 +72,7 @@ void mag_scene_invalid_dialog(Mag* mag) {
     dialog_message_set_buttons(message, "Modify", NULL, "Reset");
     dialog_message_set_text(
         message,
-        "Pins cannot overlap\nChange, or reset to defaults.",
+        "Pins cannot overlap.\nChange, or reset to defaults.",
         64,
         32,
         AlignCenter,

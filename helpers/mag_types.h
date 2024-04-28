@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAG_VERSION_APP "0.06"
+#define MAG_VERSION_APP "0.07"
 #define MAG_DEVELOPER "Zachary Weiss"
 #define MAG_GITHUB "github.com/zacharyweiss/magspoof_flipper"
 
