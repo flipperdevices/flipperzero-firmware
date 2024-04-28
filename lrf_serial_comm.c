@@ -342,7 +342,7 @@ static int32_t uart_rx_thread(void *ctx) {
               /* What command byte did we get? */
               switch(app->rx_buf[i]) {
 
-                /* We got an exec range measurement response */
+                /* We got a range measurement response */
                 case 0xcc:
                   app->dec_buf[app->nb_dec_buf++] = app->rx_buf[i];
                   wait_nb_dec_buf = 22;	/* We need to get 22 bytes total
@@ -466,7 +466,7 @@ static int32_t uart_rx_thread(void *ctx) {
               /* Decode the frame */
               switch(app->dec_buf[1]) {
 
-                /* We got an exec range measurement response */
+                /* We got a range measurement response */
                 case 0xcc:
 
                   if(is_little_endian) {
