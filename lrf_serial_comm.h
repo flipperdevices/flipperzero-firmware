@@ -154,7 +154,7 @@ void enable_shared_storage_dec_buf(LRFSerialCommApp *, bool);
 void uart_tx(LRFSerialCommApp *, uint8_t *, size_t);
 
 /** Send a command to the LRF **/
-void send_lrf_command(LRFSerialCommApp *app, LRFCommand cmd);
+void send_lrf_command(LRFSerialCommApp *, LRFCommand);
 
 /** Initialize the LRF serial communication app **/
 LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t, uint16_t,
