@@ -1,6 +1,6 @@
 - Added baudrate setting
 - Keep the backlight on when testing the LRX laser or the IR pointer
-- Undocumented feature be enabled with a special configuration file (manufacturer only)
+- Undocumented feature can be enabled with a special configuration file (manufacturer only)
 
 ## Version 1.5 - 24/04/2024
 
