@@ -68,7 +68,7 @@ void mag_scene_invalid_dialog(Mag* mag) {
 
     DialogMessage* message = dialog_message_alloc();
 
-    dialog_message_set_header(message, "Invalid Pin Configuration!", 64, 0, AlignCenter, AlignTop);
+    dialog_message_set_header(message, "Invalid Pin Config!", 64, 0, AlignCenter, AlignTop);
     dialog_message_set_buttons(message, "Modify", NULL, "Reset");
     dialog_message_set_text(
         message,

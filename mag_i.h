@@ -72,7 +72,6 @@ typedef struct {
 
     // Common views
     Submenu* submenu;
-    DialogEx* dialog_ex;
     Popup* popup;
     Loading* loading;
     TextInput* text_input;

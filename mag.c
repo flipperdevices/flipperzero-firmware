@@ -46,11 +46,6 @@ static Mag* mag_alloc() {
     mag->submenu = submenu_alloc();
     view_dispatcher_add_view(mag->view_dispatcher, MagViewSubmenu, submenu_get_view(mag->submenu));
 
-    // Dialog
-    mag->dialog_ex = dialog_ex_alloc();
-    view_dispatcher_add_view(
-        mag->view_dispatcher, MagViewDialogEx, dialog_ex_get_view(mag->dialog_ex));
-
     // Popup
     mag->popup = popup_alloc();
     view_dispatcher_add_view(mag->view_dispatcher, MagViewPopup, popup_get_view(mag->popup));
@@ -98,10 +93,6 @@ static void mag_free(Mag* mag) {
     // Submenu
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewSubmenu);
     submenu_free(mag->submenu);
-
-    // DialogEx
-    view_dispatcher_remove_view(mag->view_dispatcher, MagViewDialogEx);
-    dialog_ex_free(mag->dialog_ex);
 
     // Popup
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewPopup);
