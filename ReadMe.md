@@ -40,11 +40,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
 - OFW: PR: [iButton: fix crash when deleting some keys #3617 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3617)
 - [Fix for GPS Overlay (By MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1064)
-- Updated: [Noptel LRF Sampler v1.6 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Updated: [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - Updated: [Connect Wires v1.2 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 - Version incremented like OFW
 - OFW: [iButton: fix crash when deleting some keys #3617 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3617)
+- Updated: [Noptel LRF Sampler v1.6 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
+- Added: [Hanoi Towers v1.0 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 
 <a name="release">
 
@@ -282,6 +283,7 @@ $ ./fbt dolphin_ext
 - [Game of Life v1.1 (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Guess The Number v1.2 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
 - [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game) [With Anime Dictionary (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9f0385f14547be5a3bdbc85323399e8b01b27607)
+- [Hanoi Towers v1.0 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 - [Heap Defence v1.2 (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc776446de9fdd553b221c02668b925b689378d8) [(original by wquinoa & Vedmein)](https://github.com/Vedmein/flipperzero-firmware/tree/hd/svisto-perdelki)
 - [JetPack v1.1 (by timstrasser)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)
 - [KC Line v1.2 (By HappyAmos)](https://github.com/HappyAmos/Flipper_FAPS/tree/master/kcline)

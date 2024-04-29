@@ -1,0 +1,13 @@
+App(
+    appid="hanoi_towers",
+    name="Hanoi Towers",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_game_hanoi_towers",
+    stack_size=8 * 1024,
+    fap_icon="flipper_game_hanoi_towers_10x.png",
+    fap_category="Games",
+    fap_author="AlexTaran",
+    fap_weburl="https://github.com/AlexTaran/flipperzero",
+    fap_version="1.0",
+    fap_description="In this classic puzzle game, your objective is to move all disks to another stick. You are allowed to move one disk at once. You cannot put a bigger disk on a smaller disk.",
+)
