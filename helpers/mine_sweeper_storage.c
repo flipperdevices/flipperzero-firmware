@@ -127,8 +127,8 @@ bool mine_sweeper_read_settings(void* context) {
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_FEEDBACK, &f, 1);
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_WRAP, &wr, 1);
 
-    w  = clamp(16, 31, w);
-    h  = clamp(7, 31, h);
+    w  = clamp(16, 32, w);
+    h  = clamp(7, 32, h);
     d  = clamp(0, 2, d);
     f  = clamp(0, 1, f);
     wr = clamp(0, 1, wr);
