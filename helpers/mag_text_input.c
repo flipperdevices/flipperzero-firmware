@@ -203,13 +203,13 @@ static void mag_text_input_view_draw_callback(Canvas* canvas, void* _model) {
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
-                        &I_KeySaveSelected_22x11);
+                        &I_KeySaveSelected_24x11);
                 } else {
                     canvas_draw_icon(
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
-                        &I_KeySave_22x11);
+                        &I_KeySave_24x11);
                 }
             } else if(keys[column].text == BACKSPACE_KEY) {
                 canvas_set_color(canvas, ColorBlack);
@@ -218,13 +218,13 @@ static void mag_text_input_view_draw_callback(Canvas* canvas, void* _model) {
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
-                        &I_KeyBackspaceSelected_17x11);
+                        &I_KeyBackspaceSelected_16x9);
                 } else {
                     canvas_draw_icon(
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
-                        &I_KeyBackspace_17x11);
+                        &I_KeyBackspace_16x9);
                 }
             } else {
                 if(model->selected_row == row && model->selected_column == column) {
