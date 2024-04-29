@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - Updated: [Connect Wires v1.2 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 - Version incremented like OFW
+- OFW: [iButton: fix crash when deleting some keys #3617 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3617)
 
 <a name="release">
 
