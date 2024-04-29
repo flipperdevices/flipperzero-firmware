@@ -10,7 +10,7 @@ App(
         "gui",
         "storage",                     # Require if we do any r/w to storage
     ],
-    stack_size=2 * 1024,
+    stack_size=(2 * 1024),
 
     fap_libs=["assets"],                # Not sure if needed
     fap_icon_assets="assets",           # Image assets to compile for this application
@@ -19,7 +19,7 @@ App(
     fap_category="Games",
    
     # Optional values
-    fap_version="1.4",
+    fap_version="1.5",
     fap_description="Flipper Zero Minesweeper Implementation",
     fap_author="Alexander Rodriguez",
     fap_weburl="https://github.com/squee72564/F0_Minesweeper_Fap",
