@@ -8,7 +8,7 @@
 /*** Includes ***/
 #include <furi_hal.h>
 
-#include "noptel_lrf_sampler.h"
+#include "common.h"
 
 /*** Routines ***/
 

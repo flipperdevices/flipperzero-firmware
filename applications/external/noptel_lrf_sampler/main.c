@@ -8,7 +8,7 @@
 /*** Includes ***/
 #include <storage/storage.h>
 
-#include "noptel_lrf_sampler.h"
+#include "common.h"
 #include "config_save_restore.h"
 #include "lrf_power_control.h"
 #include "config_view.h"
@@ -109,7 +109,7 @@ const uint16_t test_pointer_jiggle_every = 50; /*ms*/
 /*** Routines ***/
 
 /** Initialize the app **/
-static App* app_init() {
+static App* noptel_lrf_sampler_app_init() {
     FURI_LOG_I(TAG, "App init");
 
     /* Allocate space for the app's structure */
@@ -436,7 +436,7 @@ static App* app_init() {
 }
 
 /** Free up the space allocated for the app **/
-static void app_free(App* app) {
+static void noptel_lrf_sampler_app_free(App* app) {
     FURI_LOG_I(TAG, "App free");
 
     /* Stop and free up the LRF serial communication app */
@@ -496,7 +496,7 @@ static void app_free(App* app) {
 }
 
 /** App entry point **/
-int32_t noptel_lrf_sampler_app(void* p) {
+int32_t noptel_lrf_sampler_app_entry(void* p) {
     UNUSED(p);
 
     /* Turn on the LRF */
@@ -504,14 +504,14 @@ int32_t noptel_lrf_sampler_app(void* p) {
     power_lrf(true);
 
     /* Initialize the app */
-    App* app = app_init();
+    App* app = noptel_lrf_sampler_app_init();
 
     /* Run the view dispatcher */
     FURI_LOG_D(TAG, "Run view dispatcher");
     view_dispatcher_run(app->view_dispatcher);
 
     /* Free up the space for the app */
-    app_free(app);
+    noptel_lrf_sampler_app_free(app);
 
     /* Turn off the LRF */
     FURI_LOG_I(TAG, "LRF power off");

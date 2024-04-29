@@ -211,6 +211,15 @@ typedef struct {
     /* Whether we have a valid identification */
     bool has_ident;
 
+    /* LRF information */
+    LRFInfo info;
+
+    /* Whether we have valid information */
+    bool has_info;
+
+    /* Scratchpad string */
+    char spstr[8];
+
 } LRFInfoModel;
 
 /** Save diagnostic model **/

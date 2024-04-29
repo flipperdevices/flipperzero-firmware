@@ -9,7 +9,7 @@
 #include <furi_hal_infrared.h>
 #include <storage/storage.h>
 
-#include "noptel_lrf_sampler.h"
+#include "common.h"
 #include "noptel_lrf_sampler_icons.h" /* Generated from images in assets */
 
 /*** Routines ***/

@@ -6,8 +6,8 @@
 ***/
 
 /*** Includes ***/
+#include "common.h"
 #include "config_view.h"
-#include "noptel_lrf_sampler.h"
 
 /*** Routines ***/
 
