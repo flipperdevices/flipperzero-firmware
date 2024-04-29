@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0425-0104-0.101.2-4c63703.tgz&channel=RM0425-0104-0.101.2-4c63703&version=0.101.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0429-1240-0.101.3-a5550b3.tgz&channel=RM0429-1240-0.101.3-a5550b3&version=0.101.3)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,21 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-29 11:41 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-29 11:41 EST`
-- Updated: [PicoPass (iClass) v1.14 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
-- Updated: [MagSpoof v0.6 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper) Works without NFC.
-- Updated: [ESP Flasher assetts for Wifi Marauder v0.13.10 (By justcallmekoko)](https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.10)
-- Updated: [Mouse Jacker for MS Mouse v1.2 (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/mousejacker_ms) `Req: NRF24`
-- Updated: [FlipperZero Clock v1.1 (By mdaskalov)](https://github.com/mdaskalov/flipperzero-clock)
-- [Fix for LEFTY mode (By aryn832)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1063) ($100 ETH BOUNTY WINNER)
-- OFW: PR: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
-- OFW: PR: [iButton: fix crash when deleting some keys #3617 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3617)
-- [Fix for GPS Overlay (By MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1064)
-- Updated: [FindMy Flipper v3.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
-- Updated: [Connect Wires v1.2 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
-- Version incremented like OFW
-- OFW: [iButton: fix crash when deleting some keys #3617 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3617)
-- Updated: [Noptel LRF Sampler v1.6 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
-- Added: [Hanoi Towers v1.0 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 
 <a name="release">
 
@@ -593,4 +578,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0425-0104-0.101.2-4c63703.tgz&channel=RM0425-0104-0.101.2-4c63703&version=0.101.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0429-1240-0.101.3-a5550b3.tgz&channel=RM0429-1240-0.101.3-a5550b3&version=0.101.3)
