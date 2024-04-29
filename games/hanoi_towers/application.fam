@@ -1,0 +1,11 @@
+App(
+    appid="game_hanoi_towers",
+    name="Hanoi Towers",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_game_hanoi_towers",
+    requires=["gui"],
+    stack_size=8 * 1024,
+    fap_version="1.0",
+    fap_category="Games",
+    fap_icon="flipper_game_hanoi_towers_10x.png",
+)
