@@ -338,8 +338,8 @@ static bool check_board_with_verifier(
 
             // Pop point and get 1d position in buffer
             point_deq_pop_front(&pos, deq);
-            Point curr_pos = pointobj_get_point(pos);
-            uint16_t curr_pos_1d = curr_pos.x * board_width + curr_pos.y;
+            const Point curr_pos = pointobj_get_point(pos);
+            const uint16_t curr_pos_1d = curr_pos.x * board_width + curr_pos.y;
 
             // Get tile at 1d position
             MineSweeperTile tile = board[curr_pos_1d];
@@ -350,17 +350,17 @@ static bool check_board_with_verifier(
             uint8_t num_flagged_tiles = 0;
 
             for (uint8_t j = 0; j < 8; j++) {
-                int16_t dx = curr_pos.x + (int16_t)offsets[j][0];
-                int16_t dy = curr_pos.y + (int16_t)offsets[j][1];
+                const int16_t dx = curr_pos.x + (int16_t)offsets[j][0];
+                const int16_t dy = curr_pos.y + (int16_t)offsets[j][1];
 
                 if (dx < 0 || dy < 0 || dx >= board_height || dy >= board_width) {
                     continue;
                 }
 
-                uint16_t pos = dx * board_width + dy;
-                if (board[pos].tile_state == MineSweeperGameScreenTileStateUncleared) {
+                const uint16_t pos_1d = dx * board_width + dy;
+                if (board[pos_1d].tile_state == MineSweeperGameScreenTileStateUncleared) {
                     num_surrounding_tiles++;
-                } else if (board[pos].tile_state == MineSweeperGameScreenTileStateFlagged) {
+                } else if (board[pos_1d].tile_state == MineSweeperGameScreenTileStateFlagged) {
                     num_surrounding_tiles++;
                     num_flagged_tiles++;
                 }
@@ -373,15 +373,15 @@ static bool check_board_with_verifier(
                 // pushing new unvisited edges on deq
 
                 for (uint8_t j = 0; j < 8; j++) {
-                    int16_t dx = curr_pos.x + (int16_t)offsets[j][0];
-                    int16_t dy = curr_pos.y + (int16_t)offsets[j][1];
+                    const int16_t dx = curr_pos.x + (int16_t)offsets[j][0];
+                    const int16_t dy = curr_pos.y + (int16_t)offsets[j][1];
 
                     if (dx < 0 || dy < 0 || dx >= board_height || dy >= board_width) {
                         continue;
                     }
 
-                    uint16_t pos = dx * board_width + dy;
-                    if (board[pos].tile_state == MineSweeperGameScreenTileStateUncleared) {
+                    const uint16_t pos_1d = dx * board_width + dy;
+                    if (board[pos_1d].tile_state == MineSweeperGameScreenTileStateUncleared) {
                         bfs_tile_clear_verifier(board, board_width, board_height, dx, dy, &deq, &visited);
                     }
 
@@ -395,16 +395,16 @@ static bool check_board_with_verifier(
                 // decrement the mine count appropriately and check win condition, and then mark stuck as false
 
                 for (uint8_t j = 0; j < 8; j++) {
-                    int16_t dx = curr_pos.x + (int16_t)offsets[j][0];
-                    int16_t dy = curr_pos.y + (int16_t)offsets[j][1];
+                    const int16_t dx = curr_pos.x + (int16_t)offsets[j][0];
+                    const int16_t dy = curr_pos.y + (int16_t)offsets[j][1];
 
                     if (dx < 0 || dy < 0 || dx >= board_height || dy >= board_width) {
                         continue;
                     }
 
-                    uint16_t pos = dx * board_width + dy;
-                    if (board[pos].tile_state == MineSweeperGameScreenTileStateUncleared) {
-                        board[pos].tile_state = MineSweeperGameScreenTileStateFlagged;
+                    const uint16_t pos_1d = dx * board_width + dy;
+                    if (board[pos_1d].tile_state == MineSweeperGameScreenTileStateUncleared) {
+                        board[pos_1d].tile_state = MineSweeperGameScreenTileStateFlagged;
                     }
                 }
 
@@ -456,13 +456,10 @@ static void bfs_tile_clear_verifier(
     furi_assert(edges);
     furi_assert(visited);
     
-    // Init both the set and dequeue
+    // Init dequeue
     point_deq_t deq;
-    point_set_t set;
-
     point_deq_init(deq);
-    point_set_init(set);
-
+    
     // Point_t pos will be used to keep track of the current point
     Point_t pos;
     pointobj_init(pos);
@@ -479,35 +476,29 @@ static void bfs_tile_clear_verifier(
         Point curr_pos = pointobj_get_point(pos);
         uint16_t curr_pos_1d = curr_pos.x * board_width + curr_pos.y;
         
-        // If in visited set
-        if (point_set_cget(set, pos) != NULL || point_set_cget(*visited, pos) != NULL) {
+        // If in visited set or it is cleared continue
+        if (point_set_cget(*visited, pos) != NULL ||
+            board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateCleared ) {
             continue;
         } 
-        
-        // If it is cleared continue
-        if (board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateCleared) {
-            continue;
-        }
-        
+
+        // Add point to visited set
+        point_set_push(*visited, pos);
+
         // Else set tile to cleared
         board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
         
-        // Add point to visited set
-        point_set_push(set, pos);
 
         // When we hit a potential edge
         if (board[curr_pos_1d].tile_type != MineSweeperGameScreenTileZero) {
 
-            // We can push this edge into edges if it is not in visited, as it is a new edge
-            // and also add to the visited set
-            if (point_set_cget(*visited, pos) == NULL) {
-                point_deq_push_back(*edges, pos);
-                point_set_push(*visited, pos);
-            }
+            // Add to our passed in deq of edges
+            point_deq_push_back(*edges, pos);
 
             // Continue processing next point for bfs tile clear
             continue;
         }
+
 
         // Process all surrounding neighbors and add valid to dequeue
         for (uint8_t i = 0; i < 8; i++) {
@@ -521,13 +512,12 @@ static void bfs_tile_clear_verifier(
             Point neighbor = (Point) {.x = dx, .y = dy};
             pointobj_set_point(pos, neighbor);
 
-            if (point_set_cget(set, pos) != NULL || point_set_cget(*visited, pos) != NULL) continue;
+            if (point_set_cget(*visited, pos) != NULL) continue;
 
             point_deq_push_back(deq, pos);
         }
     }
 
-    point_set_clear(set);
     point_deq_clear(deq);
 }
 
@@ -569,13 +559,9 @@ static uint16_t bfs_tile_clear(
         Point curr_pos = pointobj_get_point(pos);
         uint16_t curr_pos_1d = curr_pos.x * board_width + curr_pos.y;
         
-        // If in visited set
-        if (point_set_cget(set, pos) != NULL) {
-            continue;
-        } 
-        
-        // If it is cleared continue
-        if (board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateCleared || 
+        // If it has been visited cleared or flagged continue
+        if (point_set_cget(set, pos) != NULL ||
+            board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateCleared || 
             board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateFlagged) {
             continue;
         }
@@ -1075,12 +1061,6 @@ static int8_t handle_long_ok_input(MineSweeperGameScreen* instance, MineSweeperG
         is_win_condition_triggered = true;
     }
 
-    // We need to check if it is ok to play this or else we conflict
-    // with the lose effect and crash
-    if (!is_win_condition_triggered && !is_lose_condition_triggered &&
-        type != MineSweeperGameScreenTileZero) {
-    }
-
     if (is_lose_condition_triggered) {
         mine_sweeper_lose_effect(instance);
         return -1;
@@ -1303,7 +1283,7 @@ static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, voi
     }
 
     // Left border
-    if ((model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH) == 0) {
+    if (model->right_boundary == MINESWEEPER_SCREEN_TILE_WIDTH) {
         canvas_draw_line(canvas, 0,0,0,63-8);
     }
 
@@ -1313,7 +1293,7 @@ static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, voi
     }
 
     // Top border
-    if ((model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT) == 0) {
+    if (model->bottom_boundary == MINESWEEPER_SCREEN_TILE_HEIGHT) {
         canvas_draw_line(canvas, 0,0,127,0);
     }
 
@@ -1501,7 +1481,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                     
                     if (state == MineSweeperGameScreenTileStateCleared) {
 
-                        // BFS to set user position to a close uncovered position
+                        // BFS to set user position to a closest covered tile 
                         bfs_to_closest_tile(instance, model);
 
                         model->is_holding_down_button = true;
@@ -1529,6 +1509,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                     consumed = true;
 
                 }
+
             } else if (event->type == InputTypePress || event->type == InputTypeRepeat) { // Finally handle move
                 consumed = handle_player_move(instance, model, event, false);
             }
