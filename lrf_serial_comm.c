@@ -274,17 +274,40 @@ static int32_t uart_rx_thread(void *ctx) {
      of 1234.0 */
   union {
     uint8_t bytes[4];
-    float f;
-  } fun = {.bytes = {0x00, 0x40, 0x9a, 0x44}};
+    float val;
+  } float_union = {.bytes = {0x00, 0x40, 0x9a, 0x44}};
 
-  /* Union to convert bytes to uint16_t */
+  /* Union to convert bytes to uint16_t or int16_t */
   union {
     uint8_t bytes[2];
-    uint16_t usi;
-  } usiun;
+    uint16_t unsigned_val;
+    int16_t signed_val;
+  } int16_union;
 
   /* Test endianness */
-  is_little_endian = fun.f == 1234.0;
+  is_little_endian = float_union.val == 1234.0;
+
+  /* Endian-independent value decoding macros */
+  #define LE2LE_FLOAT_AT_OFFSET(offset) \
+	float_union.bytes[0] = app->dec_buf[offset]; \
+	float_union.bytes[1] = app->dec_buf[offset + 1]; \
+	float_union.bytes[2] = app->dec_buf[offset + 2]; \
+	float_union.bytes[3] = app->dec_buf[offset + 3]; \
+
+  #define LE2BE_FLOAT_AT_OFFSET(offset) \
+	float_union.bytes[3] = app->dec_buf[offset]; \
+	float_union.bytes[2] = app->dec_buf[offset + 1]; \
+	float_union.bytes[1] = app->dec_buf[offset + 2]; \
+	float_union.bytes[0] = app->dec_buf[offset + 3]; \
+
+  #define LE2LE_INT16_AT_OFFSET(offset) \
+	int16_union.bytes[0] = app->dec_buf[offset]; \
+	int16_union.bytes[1] = app->dec_buf[offset + 1];
+
+  #define LE2BE_INT16_AT_OFFSET(offset) \
+	int16_union.bytes[1] = app->dec_buf[offset]; \
+	int16_union.bytes[0] = app->dec_buf[offset + 1];
+
 
   while(1) {
 
@@ -406,27 +429,23 @@ static int32_t uart_rx_thread(void *ctx) {
                 if(is_little_endian) {
 
                   /* Decode the data count before the histogram */
-                  usiun.bytes[0] = app->dec_buf[2];
-                  usiun.bytes[1] = app->dec_buf[3];
-                  wait_nb_dec_buf += (usiun.usi - 1) * 2;
+                  LE2LE_INT16_AT_OFFSET(2);
+                  wait_nb_dec_buf += (int16_union.unsigned_val - 1) * 2;
 
                   /* Decode the histogram length */
-                  usiun.bytes[0] = app->dec_buf[4];
-                  usiun.bytes[1] = app->dec_buf[5];
-                  wait_nb_dec_buf += usiun.usi * 2;
+                  LE2LE_INT16_AT_OFFSET(4);
+                  wait_nb_dec_buf += int16_union.unsigned_val * 2;
                 }
 
                 else {
 
                   /* Decode the data count before the histogram */
-                  usiun.bytes[0] = app->dec_buf[3];
-                  usiun.bytes[1] = app->dec_buf[2];
-                  wait_nb_dec_buf += (usiun.usi - 1) * 2;
+                  LE2BE_INT16_AT_OFFSET(2);
+                  wait_nb_dec_buf += (int16_union.unsigned_val - 1) * 2;
 
                   /* Decode the histogram length */
-                  usiun.bytes[0] = app->dec_buf[5];
-                  usiun.bytes[1] = app->dec_buf[4];
-                  wait_nb_dec_buf += usiun.usi * 2;
+                  LE2BE_INT16_AT_OFFSET(4);
+                  wait_nb_dec_buf += int16_union.unsigned_val * 2;
                 }
 
                 wait_nb_dec_buf++;	/* One last byte for the checkbyte */
@@ -472,79 +491,55 @@ static int32_t uart_rx_thread(void *ctx) {
                   if(is_little_endian) {
 
                     /* Decode the 1st distance */
-                    fun.bytes[0] = app->dec_buf[2];
-                    fun.bytes[1] = app->dec_buf[3];
-                    fun.bytes[2] = app->dec_buf[4];
-                    fun.bytes[3] = app->dec_buf[5];
-                    lrf_sample.dist1 = fun.f;
+                    LE2LE_FLOAT_AT_OFFSET(2)
+                    lrf_sample.dist1 = float_union.val;
 
                     /* Decode the 1st amplitude */
-                    usiun.bytes[0] = app->dec_buf[6];
-                    usiun.bytes[1] = app->dec_buf[7];
-                    lrf_sample.ampl1 = usiun.usi;
+                    LE2LE_INT16_AT_OFFSET(6);
+                    lrf_sample.ampl1 = int16_union.unsigned_val;
 
                     /* Decode the 2nd distance */
-                    fun.bytes[0] = app->dec_buf[8];
-                    fun.bytes[1] = app->dec_buf[9];
-                    fun.bytes[2] = app->dec_buf[10];
-                    fun.bytes[3] = app->dec_buf[11];
-                    lrf_sample.dist2 = fun.f;
+                    LE2LE_FLOAT_AT_OFFSET(8)
+                    lrf_sample.dist2 = float_union.val;
 
                     /* Decode the 2nd amplitude */
-                    usiun.bytes[0] = app->dec_buf[12];
-                    usiun.bytes[1] = app->dec_buf[13];
-                    lrf_sample.ampl2 = usiun.usi;
+                    LE2LE_INT16_AT_OFFSET(12);
+                    lrf_sample.ampl2 = int16_union.unsigned_val;
 
                     /* Decode the 3rd distance */
-                    fun.bytes[0] = app->dec_buf[14];
-                    fun.bytes[1] = app->dec_buf[15];
-                    fun.bytes[2] = app->dec_buf[16];
-                    fun.bytes[3] = app->dec_buf[17];
-                    lrf_sample.dist3 = fun.f;
+                    LE2LE_FLOAT_AT_OFFSET(14)
+                    lrf_sample.dist3 = float_union.val;
 
                     /* Decode the 3rd amplitude */
-                    usiun.bytes[0] = app->dec_buf[18];
-                    usiun.bytes[1] = app->dec_buf[19];
-                    lrf_sample.ampl3 = usiun.usi;
+                    LE2LE_INT16_AT_OFFSET(18);
+                    lrf_sample.ampl3 = int16_union.unsigned_val;
                   }
 
                   else {
 
                     /* Decode the 1st distance */
-                    fun.bytes[3] = app->dec_buf[2];
-                    fun.bytes[2] = app->dec_buf[3];
-                    fun.bytes[1] = app->dec_buf[4];
-                    fun.bytes[0] = app->dec_buf[5];
-                    lrf_sample.dist1 = fun.f;
+                    LE2BE_FLOAT_AT_OFFSET(2)
+                    lrf_sample.dist1 = float_union.val;
 
                     /* Decode the 1st amplitude */
-                    usiun.bytes[1] = app->dec_buf[6];
-                    usiun.bytes[0] = app->dec_buf[7];
-                    lrf_sample.ampl1 = usiun.usi;
+                    LE2BE_INT16_AT_OFFSET(6);
+                    lrf_sample.ampl1 = int16_union.unsigned_val;
 
                     /* Decode the 2nd distance */
-                    fun.bytes[3] = app->dec_buf[8];
-                    fun.bytes[2] = app->dec_buf[9];
-                    fun.bytes[1] = app->dec_buf[10];
-                    fun.bytes[0] = app->dec_buf[11];
-                    lrf_sample.dist2 = fun.f;
+                    LE2BE_FLOAT_AT_OFFSET(8)
+                    lrf_sample.dist2 = float_union.val;
 
                     /* Decode the 2nd amplitude */
-                    usiun.bytes[1] = app->dec_buf[12];
-                    usiun.bytes[0] = app->dec_buf[13];
-                    lrf_sample.ampl2 = usiun.usi;
+                    LE2BE_INT16_AT_OFFSET(12);
+                    lrf_sample.ampl2 = int16_union.unsigned_val;
 
                     /* Decode the 3rd distance */
-                    fun.bytes[3] = app->dec_buf[14];
-                    fun.bytes[2] = app->dec_buf[15];
-                    fun.bytes[1] = app->dec_buf[16];
-                    fun.bytes[0] = app->dec_buf[17];
-                    lrf_sample.dist3 = fun.f;
+                    LE2BE_FLOAT_AT_OFFSET(14)
+                    lrf_sample.dist3 = float_union.val;
 
                     /* Decode the 3rd amplitude */
-                    usiun.bytes[1] = app->dec_buf[18];
-                    usiun.bytes[0] = app->dec_buf[19];
-                    lrf_sample.ampl3 = usiun.usi;
+                    LE2BE_INT16_AT_OFFSET(18);
+                    lrf_sample.ampl3 = int16_union.unsigned_val;
                   }
 
                   /* Timestamp the sample */
@@ -598,12 +593,10 @@ static int32_t uart_rx_thread(void *ctx) {
 
                   /* Decode the firmware version number */
                   if(is_little_endian) {
-                    usiun.bytes[0] = app->dec_buf[48];
-                    usiun.bytes[1] = app->dec_buf[49];
+                    LE2LE_INT16_AT_OFFSET(48);
                   }
                   else {
-                    usiun.bytes[1] = app->dec_buf[48];
-                    usiun.bytes[0] = app->dec_buf[49];
+                    LE2BE_INT16_AT_OFFSET(48);
                   }
 
                   /* Get the electronics type */
@@ -613,9 +606,9 @@ static int32_t uart_rx_thread(void *ctx) {
                   snprintf(lrf_ident.optics, 4, "%d", app->dec_buf[51]);
 
                   /* Interpret the firmware version information */
-                  fw_major = usiun.usi >> 12;
-                  fw_minor = (usiun.usi & 0xf00) >> 8;
-                  fw_micro = usiun.usi & 0xff;
+                  fw_major = int16_union.unsigned_val >> 12;
+                  fw_minor = (int16_union.unsigned_val & 0xf00) >> 8;
+                  fw_micro = int16_union.unsigned_val & 0xff;
                   lrf_ident.is_fw_newer_than_x4 = fw_minor > 4 ||
 					(fw_minor == 4 && fw_micro > 0);
 
