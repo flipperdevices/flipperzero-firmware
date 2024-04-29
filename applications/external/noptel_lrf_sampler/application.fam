@@ -2,7 +2,7 @@ App(
     appid="noptel_lrf_sampler",
     name="Noptel LRF Sampler",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="noptel_lrf_sampler_app",
+    entry_point="noptel_lrf_sampler_app_entry",
     stack_size=4 * 1024,
     fap_icon="assets/noptel_lrf_sampler.png",
     fap_icon_assets="assets",
