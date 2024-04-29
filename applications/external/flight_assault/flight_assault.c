@@ -17,6 +17,7 @@ static const uint8_t player_bitmap[] = {0x07, 0x00, 0x09, 0x00, 0x11, 0x00, 0x21
                                         0x11, 0x00, 0x09, 0x00, 0x07, 0x00};
 int player_x = 16; // Changed starting position
 int player_y = SCREEN_HEIGHT / 2 - PLAYER_HEIGHT / 2;
+int player_lives = 3; // Player lives
 
 // Ball properties
 int x = SCREEN_WIDTH / 2;
@@ -64,6 +65,9 @@ static const uint8_t enemy2_bitmap[] = {0x70, 0x48, 0x66, 0x33, 0x66, 0x48, 0x70
 // Bullet bitmap
 static const uint8_t bullet_bitmap[] = {0x07, 0x07, 0x07};
 
+// Player life icon
+static const uint8_t life_icon[] = {0x36, 0x49, 0x41, 0x22, 0x14, 0x08};
+
 // Declare running variable globally
 bool running = true;
 
@@ -101,6 +105,13 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
             canvas_draw_xbm(canvas, bullet_center_x, bullet_center_y, 3, 3, bullet_bitmap);
             canvas_set_bitmap_mode(canvas, false);
         }
+    }
+
+    // Draw player lives
+    canvas_set_bitmap_mode(canvas, true);
+    for(int i = 0; i < player_lives; ++i) {
+        canvas_draw_xbm(
+            canvas, SCREEN_WIDTH - (i + 1) * 12, 0, 7, 6, life_icon); // Adjusted size to match icon
     }
 
     // Draw score
@@ -234,8 +245,14 @@ int32_t flight_assault(void* p) {
             // Check for collision with player
             if((player_x + PLAYER_WIDTH >= enemy_x[i] && player_x <= enemy_x[i] + 9) &&
                (player_y + PLAYER_HEIGHT >= enemy_y[i] && player_y <= enemy_y[i] + 6)) {
-                game_state = GAME_OVER;
-                running = false;
+                if(player_lives > 0) {
+                    player_lives--; // Decrease player lives
+                    if(player_lives == 0) {
+                        game_state = GAME_OVER; // Game over if no lives left
+                        running = false;
+                    }
+                    enemy_x[i] = SCREEN_WIDTH; // Move the enemy off screen
+                }
             }
         }
 
@@ -255,8 +272,14 @@ int32_t flight_assault(void* p) {
                 // Check for collision with player
                 if((player_x + PLAYER_WIDTH >= enemy2_x[i] && player_x <= enemy2_x[i] + 7) &&
                    (player_y + PLAYER_HEIGHT >= enemy2_y[i] && player_y <= enemy2_y[i] + 7)) {
-                    game_state = GAME_OVER;
-                    running = false;
+                    if(player_lives > 0) {
+                        player_lives--; // Decrease player lives
+                        if(player_lives == 0) {
+                            game_state = GAME_OVER; // Game over if no lives left
+                            running = false;
+                        }
+                        enemy2_x[i] = SCREEN_WIDTH; // Move the enemy2 off screen
+                    }
                 }
             }
         }
