@@ -6,7 +6,7 @@ App(
     stack_size=4 * 1024,
     fap_icon="assets/noptel_lrf_sampler.png",
     fap_icon_assets="assets",
-    sources = [
+    sources=[
         "about_view.c",
         "backlight_control.c",
         "config_save_restore.c",
