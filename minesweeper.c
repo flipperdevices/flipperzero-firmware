@@ -1,5 +1,4 @@
 #include "minesweeper.h"
-//#include <args.h>
 
 static bool minesweeper_custom_event_callback(void* context, uint32_t custom_event) {
     furi_assert(context);
@@ -54,11 +53,13 @@ static MineSweeperApp* app_alloc() {
         app->settings_info.board_height = 7;
         app->settings_info.difficulty = 0;
         app->feedback_enabled = 1;
+        app->wrap_enabled = 1;
 
         mine_sweeper_save_settings(app);
     } else {
         FURI_LOG_I(TAG, "Save file loaded sucessfully");
     }
+
 
     // Alloc views and add to view dispatcher
     app->start_screen = start_screen_alloc();
@@ -74,7 +75,8 @@ static MineSweeperApp* app_alloc() {
             app->settings_info.board_width,
             app->settings_info.board_height,
             app->settings_info.difficulty,
-            false);
+            false,
+            app->wrap_enabled);
 
     view_dispatcher_add_view(
         app->view_dispatcher,
