@@ -28,6 +28,14 @@ void mine_sweeper_play_oob_bump(void* context) {
     notification_message(app->notification, &sequence_reset_vibro);
 }
 
+void mine_sweeper_play_wrap_bump(void* context) {
+    MineSweeperApp* app = context;
+
+    if(app->feedback_enabled) notification_message(app->notification, &sequence_set_vibro_on);
+    furi_thread_flags_wait(0, FuriFlagWaitAny, 20);
+    notification_message(app->notification, &sequence_reset_vibro);
+}
+
 void mine_sweeper_play_lose_bump(void* context) {
     MineSweeperApp* app = context;
 

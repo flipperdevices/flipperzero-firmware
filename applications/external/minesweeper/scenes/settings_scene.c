@@ -22,6 +22,7 @@ typedef enum {
     MineSweeperSettingsScreenEventSolvableChange,
     MineSweeperSettingsScreenEventInfoChange,
     MineSweeperSettingsScreenEventFeedbackChange,
+    MineSweeperSettingsScreenEventWrapChange,
 } MineSweeperSettingsScreenEvent;
 
 static const char* settings_screen_difficulty_text[MineSweeperSettingsScreenDifficultyTypeNum] = {
@@ -55,8 +56,6 @@ static void minesweeper_scene_settings_screen_set_difficulty(VariableItem* item)
 static void minesweeper_scene_settings_screen_set_width(VariableItem* item) {
     char source[5];
     uint8_t index = 0;
-    uint8_t curr_board_height = 7;
-    bool is_over_max_tiles = false;
 
     furi_assert(item);
 
@@ -65,31 +64,6 @@ static void minesweeper_scene_settings_screen_set_width(VariableItem* item) {
 
     index = variable_item_get_current_value_index(app->t_settings_info.width_item);
     app->t_settings_info.board_width = index + 16;
-
-    curr_board_height = app->t_settings_info.board_height;
-
-    is_over_max_tiles = (app->t_settings_info.board_width * curr_board_height) >
-                        MINESWEEPER_BOARD_MAX_TILES;
-    if(is_over_max_tiles) {
-        do {
-            is_over_max_tiles = (app->t_settings_info.board_width * --curr_board_height) >
-                                MINESWEEPER_BOARD_MAX_TILES;
-        } while(is_over_max_tiles);
-
-        app->t_settings_info.board_height = curr_board_height;
-
-        snprintf(source, 5, "%" PRIu8, curr_board_height);
-        source[4] = '\0';
-
-        furi_string_set_strn(app->t_settings_info.height_str, source, 5);
-
-        variable_item_set_current_value_index(
-            app->t_settings_info.height_item, app->t_settings_info.board_height - 7);
-
-        variable_item_set_current_value_text(
-            app->t_settings_info.height_item,
-            furi_string_get_cstr(app->t_settings_info.height_str));
-    }
 
     snprintf(source, 5, "%" PRIu8, index + 16);
     source[4] = '\0';
@@ -106,8 +80,6 @@ static void minesweeper_scene_settings_screen_set_width(VariableItem* item) {
 static void minesweeper_scene_settings_screen_set_height(VariableItem* item) {
     char source[5];
     uint8_t index = 0;
-    uint8_t curr_board_width = 16;
-    bool is_over_max_tiles = false;
 
     furi_assert(item);
 
@@ -116,30 +88,6 @@ static void minesweeper_scene_settings_screen_set_height(VariableItem* item) {
 
     index = variable_item_get_current_value_index(app->t_settings_info.height_item);
     app->t_settings_info.board_height = index + 7;
-
-    curr_board_width = app->t_settings_info.board_width;
-
-    is_over_max_tiles = (app->t_settings_info.board_height * curr_board_width) >
-                        MINESWEEPER_BOARD_MAX_TILES;
-    if(is_over_max_tiles) {
-        do {
-            is_over_max_tiles = (app->t_settings_info.board_height * --curr_board_width) >
-                                MINESWEEPER_BOARD_MAX_TILES;
-        } while(is_over_max_tiles);
-
-        app->t_settings_info.board_width = curr_board_width;
-
-        snprintf(source, 5, "%" PRIu8, curr_board_width);
-        source[4] = '\0';
-
-        furi_string_set_strn(app->t_settings_info.width_str, source, 5);
-
-        variable_item_set_current_value_index(
-            app->t_settings_info.width_item, app->t_settings_info.board_width - 16);
-
-        variable_item_set_current_value_text(
-            app->t_settings_info.width_item, furi_string_get_cstr(app->t_settings_info.width_str));
-    }
 
     snprintf(source, 5, "%" PRIu8, index + 7);
     source[4] = '\0';
@@ -173,16 +121,29 @@ static void minesweeper_scene_settings_screen_set_feedback(VariableItem* item) {
 
     MineSweeperApp* app = variable_item_get_context(item);
 
-    uint8_t index = variable_item_get_current_value_index(item);
+    uint8_t value = variable_item_get_current_value_index(item);
 
-    app->feedback_enabled = index;
+    app->feedback_enabled = value;
 
-    FURI_LOG_I(TAG, "FEEDBACK CALLBACK INDEX %d", app->feedback_enabled);
-
-    variable_item_set_current_value_text(item, ((index) ? "Enabled" : "Disabled"));
+    variable_item_set_current_value_text(item, ((value) ? "Enabled" : "Disabled"));
 
     view_dispatcher_send_custom_event(
         app->view_dispatcher, MineSweeperSettingsScreenEventFeedbackChange);
+}
+
+static void minesweeper_scene_settings_screen_set_wrap(VariableItem* item) {
+    furi_assert(item);
+
+    MineSweeperApp* app = variable_item_get_context(item);
+
+    uint8_t value = variable_item_get_current_value_index(item);
+
+    app->wrap_enabled = value;
+
+    variable_item_set_current_value_text(item, ((value) ? "Enabled" : "Disabled"));
+
+    view_dispatcher_send_custom_event(
+        app->view_dispatcher, MineSweeperSettingsScreenEventWrapChange);
 }
 
 static void minesweeper_scene_settings_screen_set_info(VariableItem* item) {
@@ -265,13 +226,20 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
 
     variable_item_set_current_value_text(item, settings_screen_verifier_text[idx]);
 
-    // Set sound feedback item
+    // Set feedback item
     item = variable_item_list_add(
         va, "Feedback", 2, minesweeper_scene_settings_screen_set_feedback, app);
 
     variable_item_set_current_value_index(item, app->feedback_enabled);
 
     variable_item_set_current_value_text(item, ((app->feedback_enabled) ? "Enabled" : "Disabled"));
+
+    // Set wrap item
+    item = variable_item_list_add(va, "Wrap", 2, minesweeper_scene_settings_screen_set_wrap, app);
+
+    variable_item_set_current_value_index(item, app->wrap_enabled);
+
+    variable_item_set_current_value_text(item, ((app->wrap_enabled) ? "Enabled" : "Disabled"));
 
     // Set info item
     item = variable_item_list_add(
@@ -320,10 +288,15 @@ bool minesweeper_scene_settings_screen_on_event(void* context, SceneManagerEvent
             scene_manager_next_scene(app->scene_manager, MineSweeperSceneInfoScreen);
             break;
 
+        case MineSweeperSettingsScreenEventWrapChange:
+            mine_sweeper_save_settings(app);
+            mine_sweeper_game_screen_set_wrap_enable(app->game_screen, app->wrap_enabled);
+            break;
+
         case MineSweeperSettingsScreenEventFeedbackChange:
-            // If only the feedback option is changed we can just save without restarting
             mine_sweeper_save_settings(app);
             break;
+
         default:
             break;
         };

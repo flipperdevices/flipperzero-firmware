@@ -39,6 +39,18 @@ void mine_sweeper_play_oob_sound(void* context) {
     }
 }
 
+void mine_sweeper_play_wrap_sound(void* context) {
+    MineSweeperApp* app = context;
+
+    if(!app->feedback_enabled) {
+        return;
+    }
+
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+        furi_hal_speaker_start(NOTE_WRAP, volume - 0.3f);
+    }
+}
+
 void mine_sweeper_play_win_sound(void* context) {
     MineSweeperApp* app = context;
 

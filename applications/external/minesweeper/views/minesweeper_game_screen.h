@@ -61,7 +61,8 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(
     uint8_t width,
     uint8_t height,
     uint8_t difficulty,
-    bool ensure_solvable);
+    bool ensure_solvable,
+    uint8_t wrap_enable);
 
 /** Deinitialize and free Start Screen view
  *
@@ -104,6 +105,9 @@ View* mine_sweeper_game_screen_get_view(MineSweeperGameScreen* instance);
  */
 void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void* context);
 
+void mine_sweeper_game_screen_set_wrap_enable(
+    MineSweeperGameScreen* instance,
+    uint8_t wrap_enabled);
 #define inverted_canvas_white_to_black(canvas, code) \
     {                                                \
         canvas_set_color(canvas, ColorWhite);        \

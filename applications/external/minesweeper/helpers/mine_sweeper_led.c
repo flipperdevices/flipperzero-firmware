@@ -35,6 +35,15 @@ void mine_sweeper_led_blink_red(void* context) {
         0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
 }
 
+void mine_sweeper_led_blink_yellow(void* context) {
+    furi_assert(context);
+    MineSweeperApp* app = context;
+
+    notification_message(app->notification, &sequence_blink_yellow_100);
+    furi_thread_flags_wait(
+        0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
+}
+
 void mine_sweeper_led_blink_magenta(void* context) {
     furi_assert(context);
     MineSweeperApp* app = context;

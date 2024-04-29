@@ -2,7 +2,7 @@ App(
     appid="minesweeper_redux",
     name="Minesweeper Redux",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="minesweeper_redux_app",
+    entry_point="minesweeper_app",
     stack_size=2 * 1024,
     fap_icon_assets="assets",
     fap_icon="assets/minesweeper.png",
@@ -10,6 +10,6 @@ App(
     fap_author="squee72564",
     #  fap_author="Alexander Rodriguez",
     fap_weburl="https://github.com/squee72564/F0_Minesweeper_Fap",
-    fap_version="1.4",
+    fap_version="1.5",
     fap_description="Flipper Zero Minesweeper Implementation",
 )

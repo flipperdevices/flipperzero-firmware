@@ -60,6 +60,7 @@ typedef struct MineSweeperApp {
     bool ensure_map_solvable;
 
     uint8_t feedback_enabled;
+    uint8_t wrap_enabled;
 } MineSweeperApp;
 
 // View Id Enumeration
