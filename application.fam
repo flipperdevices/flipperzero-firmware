@@ -1,19 +1,39 @@
 App(
-    appid="noptel_lrf_sampler",
-    name="Noptel LRF sampler",
-    apptype=FlipperAppType.EXTERNAL,
-    entry_point="noptel_lrf_sampler_app",
-    stack_size=4 * 1024,
-    requires=[
-        "gui",
+    appid = "noptel_lrf_sampler",
+    name = "Noptel LRF sampler",
+    apptype = FlipperAppType.EXTERNAL,
+    entry_point = "noptel_lrf_sampler_app_entry",
+    stack_size = 4 * 1024,
+    requires = [
+	"gui",
     ],
-    order=10,
-    fap_category="GPIO",
+    order = 10,
+    fap_category = "GPIO",
+
     # Optional values
-    fap_version="1.6",
-    fap_icon="assets/noptel_lrf_sampler.png",  # 10x10 1-bit PNG
-    fap_description="Noptel LRF rangefinder sampler",
-    fap_author="Giraut",
-    fap_weburl="https://github.com/Giraut/flipper_zero_noptel_lrf_sampler",
-    fap_icon_assets="assets",  # Image assets to compile for this application
+    fap_version = "1.6",
+    fap_icon = "assets/noptel_lrf_sampler.png",  # 10x10 1-bit PNG
+    fap_description = "Noptel LRF rangefinder sampler",
+    fap_author = "Giraut",
+    fap_weburl = "https://github.com/Giraut/flipper_zero_noptel_lrf_sampler",
+
+    sources = [
+        "about_view.c",
+        "backlight_control.c",
+        "config_save_restore.c",
+        "config_view.c",
+        "led_control.c",
+        "lrf_info_view.c",
+        "lrf_power_control.c",
+        "lrf_serial_comm.c",
+        "main.c",
+        "sample_view.c",
+        "save_diag_view.c",
+        "speaker_control.c",
+        "submenu.c",
+        "test_laser_view.c",
+        "test_pointer_view.c",
+    ],
+
+    fap_icon_assets="assets"
 )
