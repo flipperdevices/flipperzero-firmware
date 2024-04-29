@@ -12,6 +12,7 @@ Flight Assault is a dynamic action game for flipperzero where players control a 
 
 ## Version history
 
+- 0.2 - Added lives 
 - 0.1 - Initial release by @evillero
 
 ## Other
