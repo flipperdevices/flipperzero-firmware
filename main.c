@@ -8,7 +8,7 @@
 /*** Includes ***/
 #include <storage/storage.h>
 
-#include "noptel_lrf_sampler.h"
+#include "common.h"
 #include "config_save_restore.h"
 #include "lrf_power_control.h"
 #include "config_view.h"

@@ -9,7 +9,7 @@
 #include <storage/storage.h>
 #include <gui/view.h>
 
-#include "noptel_lrf_sampler.h"
+#include "common.h"
 #include "config_view.h"
 
 
