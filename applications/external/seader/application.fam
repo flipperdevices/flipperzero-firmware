@@ -3,7 +3,7 @@ App(
     name="Seader",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="seader_app",
-    stack_size=7 * 1024,
+    stack_size=5 * 1024,
     sources=[
         "*.c",
         "aeabi_uldivmod.sx",
