@@ -3,7 +3,7 @@
 ![Tests](https://github.com/ObKo/stm32-cmake/workflows/Tests/badge.svg)
 
 This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx MCUs.
-It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports C0 F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U5 WB WL device families.
+It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports C0 F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U0 U5 WB WL device families.
 
 ## Requirements
 
@@ -56,7 +56,7 @@ The most important set of variables which needs to be set can be found in the fo
 These configuration options need to be set for the build process to work properly:
 
 * `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one
-   of `C0 F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U5 WB WL` **default**: `/opt/STM32Cube<FAMILY>`
+   of `C0 F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U0 U5 WB WL` **default**: `/opt/STM32Cube<FAMILY>`
 
 These configuration variables are optional:
 
