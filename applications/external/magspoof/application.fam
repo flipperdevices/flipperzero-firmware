@@ -8,10 +8,11 @@ App(
     fap_category="GPIO",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="mag",
-    fap_version=(0, 6),
-    fap_description="WIP MagSpoof port using the RFID subsystem",
+    fap_version=(0, 7),
+    fap_description="Enables wireless transmission of magstripe data",
     fap_author="Zachary Weiss",
     fap_weburl="https://github.com/zacharyweiss/magspoof_flipper",
     # Read By hummusec
     # fap_weburl="https://github.com/hummusec/magspoof_flipper", # READ mode
+    # [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper) Works without NFC.
 )

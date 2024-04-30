@@ -28,7 +28,7 @@ App(
 )
 
 App(
-    appid="pico_plugin_wiegand",
+    appid="picopass_plugin_wiegand",
     apptype=FlipperAppType.PLUGIN,
     entry_point="plugin_wiegand_ep",
     requires=["picopass"],

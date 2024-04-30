@@ -26,13 +26,13 @@ void mag_scene_saved_menu_on_enter(void* context) {
     bool is_empty_t3 = furi_string_empty(mag->mag_dev->dev_data.track[2].str);
 
     if(!is_empty_t1 && !is_empty_t2) {
-        mag->setting->track = MagTrackStateOneAndTwo;
+        mag->state.track = MagTrackStateOneAndTwo;
     } else if(!is_empty_t1) {
-        mag->setting->track = MagTrackStateOne;
+        mag->state.track = MagTrackStateOne;
     } else if(!is_empty_t2) {
-        mag->setting->track = MagTrackStateTwo;
+        mag->state.track = MagTrackStateTwo;
     } else if(!is_empty_t3) {
-        mag->setting->track = MagTrackStateThree;
+        mag->state.track = MagTrackStateThree;
     } // TODO: what happens if no track data present?
 
     submenu_add_item(
