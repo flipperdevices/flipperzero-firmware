@@ -11,10 +11,10 @@ typedef enum {
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
 static void
-    gps_uart_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
+    gps_uart_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent ev, void* context) {
     GpsUart* gps_uart = (GpsUart*)context;
 
-    if(event == FuriHalSerialRxEventData) {
+    if(ev == FuriHalSerialRxEventData) {
         uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(gps_uart->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(gps_uart->thread), WorkerEvtRxDone);
@@ -22,6 +22,8 @@ static void
 }
 
 static void gps_uart_serial_init(GpsUart* gps_uart) {
+    furi_assert(!gps_uart->serial_handle);
+
     gps_uart->serial_handle = furi_hal_serial_control_acquire(UART_CH);
     furi_check(gps_uart->serial_handle);
     furi_hal_serial_init(gps_uart->serial_handle, gps_uart->baudrate);
@@ -32,10 +34,11 @@ static void gps_uart_serial_init(GpsUart* gps_uart) {
 }
 
 static void gps_uart_serial_deinit(GpsUart* gps_uart) {
-    UNUSED(gps_uart);
+    furi_assert(gps_uart->serial_handle);
     furi_hal_serial_async_rx_stop(gps_uart->serial_handle);
     furi_hal_serial_deinit(gps_uart->serial_handle);
     furi_hal_serial_control_release(gps_uart->serial_handle);
+    gps_uart->serial_handle = NULL;
 }
 
 static void gps_uart_parse_nmea(GpsUart* gps_uart, char* line) {
@@ -209,8 +212,8 @@ GpsUart* gps_uart_enable() {
     gps_uart->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     gps_uart->baudrate = gps_baudrates[current_gps_baudrate];
+    gps_uart->backlight_on = false;
     gps_uart->speed_units = KNOTS;
-    gps_uart->backlight_enabled = false;
     gps_uart->deep_sleep_enabled = false;
     gps_uart->view_state = NORMAL;
 

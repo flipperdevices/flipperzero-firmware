@@ -30,7 +30,7 @@ void mag_scene_emulate_on_enter(void* context) {
         widget, 13, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp_str));
     furi_string_reset(tmp_str);
 
-    FURI_LOG_D(TAG, "%d", mag->setting->reverse);
+    FURI_LOG_D(TAG, "%d", mag->state.reverse);
 
     // print relevant data
     uint8_t cat_count = 0;
@@ -39,7 +39,7 @@ void mag_scene_emulate_on_enter(void* context) {
 
         // still messy / dumb way to do this, but slightly cleaner than before.
         // will clean up more later
-        switch(mag->setting->track) {
+        switch(mag->state.track) {
         case MagTrackStateOne:
             if(i == 0) cat_trackstr(tmp_str, cat_count++, i, trackstr);
             break;

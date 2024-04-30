@@ -36,6 +36,11 @@
 #include "protocol/picopass_poller.h"
 #include "protocol/picopass_listener.h"
 
+#include "plugin/interface.h"
+#include <flipper_application/flipper_application.h>
+#include <flipper_application/plugins/plugin_manager.h>
+#include <loader/firmware_api/firmware_api.h>
+
 #define PICOPASS_TEXT_STORE_SIZE 129
 
 #define PICOPASS_ICLASS_ELITE_DICT_FLIPPER_NAME APP_ASSETS_PATH("iclass_elite_dict.txt")
@@ -108,6 +113,9 @@ struct Picopass {
     Widget* widget;
     DictAttack* dict_attack;
     Loclass* loclass;
+
+    PluginManager* plugin_manager;
+    PluginWiegand* plugin_wiegand;
 
     PicopassDictAttackContext dict_attack_ctx;
     PicopassWriteKeyContext write_key_context;

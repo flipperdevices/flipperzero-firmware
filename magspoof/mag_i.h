@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mag_device.h"
+#include "mag_state.h"
 //#include "helpers/mag_helpers.h"
 #include "helpers/mag_types.h"
 
@@ -9,6 +10,7 @@
 #include <furi/core/log.h>
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
+#include <expansion/expansion.h>
 
 #include <gui/gui.h>
 #include <gui/view.h>
@@ -36,19 +38,21 @@
 
 #define MAG_TEXT_STORE_SIZE 150
 
+// CFWs have `submenue_add_lockable_item`; OFW doesn't,
+// replace with conditional submenu item
+#ifdef FW_ORIGIN_Official
+#define submenu_add_lockable_item(                                             \
+    submenu, label, index, callback, callback_context, locked, locked_message) \
+    if(!locked) {                                                              \
+        submenu_add_item(submenu, label, index, callback, callback_context)    \
+    }
+#endif
+
 enum MagCustomEvent {
     MagEventNext = 100,
     MagEventExit,
     MagEventPopupClosed,
 };
-
-typedef struct {
-    MagTxState tx;
-    MagTrackState track;
-    MagReverseState reverse;
-    uint32_t us_clock;
-    uint32_t us_interpacket;
-} MagSetting;
 
 typedef struct {
     ViewDispatcher* view_dispatcher;
@@ -62,12 +66,12 @@ typedef struct {
     char text_store[MAG_TEXT_STORE_SIZE + 1];
     FuriString* file_path;
     FuriString* file_name;
+    FuriString* args;
 
-    MagSetting* setting;
+    MagState state;
 
     // Common views
     Submenu* submenu;
-    DialogEx* dialog_ex;
     Popup* popup;
     Loading* loading;
     TextInput* text_input;
@@ -75,6 +79,7 @@ typedef struct {
     VariableItemList* variable_item_list;
 
     // UART
+    Expansion* expansion;
     FuriThread* uart_rx_thread;
     FuriStreamBuffer* uart_rx_stream;
     uint8_t uart_rx_buf[UART_RX_BUF_SIZE + 1];

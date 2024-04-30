@@ -1,13 +1,6 @@
 #include "mag_i.h"
-#include <expansion/expansion.h>
 
 #define TAG "Mag"
-
-#define SETTING_DEFAULT_REVERSE MagReverseStateOff
-#define SETTING_DEFAULT_TRACK MagTrackStateOneAndTwo
-#define SETTING_DEFAULT_TX_RFID MagTxStateGPIO
-#define SETTING_DEFAULT_US_CLOCK 240
-#define SETTING_DEFAULT_US_INTERPACKET 10
 
 static bool mag_debug_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -21,18 +14,6 @@ static bool mag_debug_back_event_callback(void* context) {
     return scene_manager_handle_back_event(mag->scene_manager);
 }
 
-static MagSetting* mag_setting_alloc() {
-    // temp hardcoded defaults
-    MagSetting* setting = malloc(sizeof(MagSetting));
-    setting->reverse = SETTING_DEFAULT_REVERSE;
-    setting->track = SETTING_DEFAULT_TRACK;
-    setting->tx = SETTING_DEFAULT_TX_RFID;
-    setting->us_clock = SETTING_DEFAULT_US_CLOCK;
-    setting->us_interpacket = SETTING_DEFAULT_US_INTERPACKET;
-
-    return setting;
-}
-
 static Mag* mag_alloc() {
     Mag* mag = malloc(sizeof(Mag));
 
@@ -41,6 +22,7 @@ static Mag* mag_alloc() {
 
     mag->file_name = furi_string_alloc();
     mag->file_path = furi_string_alloc_set(MAG_APP_FOLDER);
+    mag->args = furi_string_alloc();
 
     mag->view_dispatcher = view_dispatcher_alloc();
     mag->scene_manager = scene_manager_alloc(&mag_scene_handlers, mag);
@@ -52,7 +34,7 @@ static Mag* mag_alloc() {
         mag->view_dispatcher, mag_debug_back_event_callback);
 
     mag->mag_dev = mag_device_alloc();
-    mag->setting = mag_setting_alloc();
+    mag_state_load(&mag->state);
 
     // Open GUI record
     mag->gui = furi_record_open(RECORD_GUI);
@@ -63,11 +45,6 @@ static Mag* mag_alloc() {
     // Submenu
     mag->submenu = submenu_alloc();
     view_dispatcher_add_view(mag->view_dispatcher, MagViewSubmenu, submenu_get_view(mag->submenu));
-
-    // Dialog
-    mag->dialog_ex = dialog_ex_alloc();
-    view_dispatcher_add_view(
-        mag->view_dispatcher, MagViewDialogEx, dialog_ex_get_view(mag->dialog_ex));
 
     // Popup
     mag->popup = popup_alloc();
@@ -93,13 +70,13 @@ static Mag* mag_alloc() {
     view_dispatcher_add_view(
         mag->view_dispatcher, MagViewTextInput, text_input_get_view(mag->text_input));
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    mag->expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(mag->expansion);
+
+    // Move UART here? conditional upon setting?
+
     return mag;
-}
-
-static void mag_setting_free(MagSetting* setting) {
-    furi_assert(setting);
-
-    free(setting);
 }
 
 static void mag_free(Mag* mag) {
@@ -107,22 +84,15 @@ static void mag_free(Mag* mag) {
 
     furi_string_free(mag->file_name);
     furi_string_free(mag->file_path);
+    furi_string_free(mag->args);
 
     // Mag device
     mag_device_free(mag->mag_dev);
     mag->mag_dev = NULL;
 
-    // Mag setting
-    mag_setting_free(mag->setting);
-    mag->setting = NULL;
-
     // Submenu
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewSubmenu);
     submenu_free(mag->submenu);
-
-    // DialogEx
-    view_dispatcher_remove_view(mag->view_dispatcher, MagViewDialogEx);
-    dialog_ex_free(mag->dialog_ex);
 
     // Popup
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewPopup);
@@ -158,6 +128,10 @@ static void mag_free(Mag* mag) {
     furi_record_close(RECORD_NOTIFICATION);
     mag->notifications = NULL;
 
+    // Return previous state of expansion
+    expansion_enable(mag->expansion);
+    furi_record_close(RECORD_EXPANSION);
+
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_DIALOGS);
 
@@ -166,13 +140,13 @@ static void mag_free(Mag* mag) {
 
 // entry point for app
 int32_t mag_app(void* p) {
-    UNUSED(p);
-
-    // Disable expansion protocol to avoid interference with UART Handle
-    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
-    expansion_disable(expansion);
+    const char* args = p;
 
     Mag* mag = mag_alloc();
+
+    if(args && strlen(args)) {
+        furi_string_set(mag->args, args);
+    }
 
     mag_make_app_folder(mag);
 
@@ -185,7 +159,17 @@ int32_t mag_app(void* p) {
     }
 
     view_dispatcher_attach_to_gui(mag->view_dispatcher, mag->gui, ViewDispatcherTypeFullscreen);
-    scene_manager_next_scene(mag->scene_manager, MagSceneStart);
+
+    if(furi_string_empty(mag->args)) {
+        scene_manager_next_scene(mag->scene_manager, MagSceneStart);
+    } else {
+        mag_device_load_data(mag->mag_dev, mag->args, true);
+        MagTrackState auto_track = mag_device_autoselect_track_state(mag->mag_dev);
+        if(auto_track) {
+            mag->state.track = auto_track;
+        }
+        scene_manager_next_scene(mag->scene_manager, MagSceneEmulate);
+    }
 
     view_dispatcher_run(mag->view_dispatcher);
 
@@ -195,10 +179,6 @@ int32_t mag_app(void* p) {
     }
 
     mag_free(mag);
-
-    // Return previous state of expansion
-    expansion_enable(expansion);
-    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
