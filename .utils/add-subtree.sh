@@ -24,7 +24,7 @@ if [ "${subdir}" = "" ]; then
     subdir="/"
     git subtree add -P "${path}" "${repo}" "${branch}" -m "Add ${path} from ${repo}"
 else
-    bash .utils/subtree-subdir-helper.sh "${path}" "${repo}" "${branch}" "${subdir}" add
+    bash .utils/.subtree-subdir-helper.sh "${path}" "${repo}" "${branch}" "${subdir}" add
 fi
 
 gitsubtree="${path}/.gitsubtree"

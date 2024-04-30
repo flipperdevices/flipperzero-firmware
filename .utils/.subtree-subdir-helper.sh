@@ -16,7 +16,7 @@ branch="${3}"
 subdir="${4}"
 action="${5}"
 
-prev="$(git branch --show-current)"
+prevbranch="$(git branch --show-current)"
 temp="$(rev <<< "${repo%/}" | cut -d/ -f1,2 | rev | tr / -)-$(tr / - <<< "${branch}")"
 fetch="_fetch-${temp}"
 split="_split-${temp}-$(tr / - <<< "${subdir}")"
@@ -44,9 +44,15 @@ else
     if grep "^fatal: " <<< "$result" > /dev/null; then
         ok=false
     fi
-    git checkout "${prev}"
+    git checkout "${prevbranch}"
     if $ok; then
-        git subtree "${action}" -P "${path}" "${split}" -m "${action^} ${path} from ${repo}"
+        prevhead="$(git rev-parse HEAD)"
+        exec {capture}>&1
+        result="$(git subtree "${action}" -P "${path}" "${split}" -m "${action^} ${path} from ${repo}" 2>&1 | tee /proc/self/fd/$capture)"
+        bash .utils/.check-merge.sh "${path}" "${repo}" "${result}"
+        if [ "${prevhead}" = "$(git rev-parse HEAD)" ]; then
+            ok=false
+        fi
     fi
 fi
 if $ok; then
