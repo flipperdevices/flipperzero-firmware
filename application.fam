@@ -9,7 +9,7 @@ App(
     requires=[
         "gui", "storage", "nfc",
     ],
-    stack_size=7 * 1024,
+    stack_size=5 * 1024,
     order=20,
     sources=[
       "*.c",

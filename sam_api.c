@@ -1,6 +1,7 @@
 
 #include "sam_api.h"
 #include <toolbox/path.h>
+#include <bit_lib/bit_lib.h>
 
 #define TAG "SAMAPI"
 
@@ -728,6 +729,161 @@ void seader_iso14443a_transmit(
     bit_buffer_free(rx_buffer);
 }
 
+/* Assumes this is called in the context of the NFC API callback */
+#define MF_CLASSIC_FWT_FC (60000)
+void seader_mfc_transmit(
+    Seader* seader,
+    MfClassicPoller* mfc_poller,
+    uint8_t* buffer,
+    size_t len,
+    uint16_t timeout,
+    uint8_t format[3]) {
+    UNUSED(timeout);
+
+    furi_assert(seader);
+    furi_assert(buffer);
+    furi_assert(mfc_poller);
+    SeaderWorker* seader_worker = seader->worker;
+    SeaderUartBridge* seader_uart = seader_worker->uart;
+
+    BitBuffer* tx_buffer = bit_buffer_alloc(len);
+    BitBuffer* rx_buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
+
+    do {
+        if(format[0] == 0x00 && format[1] == 0xC0 && format[2] == 0x00) {
+            bit_buffer_append_bytes(tx_buffer, buffer, len);
+            MfClassicError error =
+                mf_classic_poller_send_frame(mfc_poller, tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
+            if(error != MfClassicErrorNone) {
+                FURI_LOG_W(TAG, "mf_classic_poller_send_frame error %d", error);
+                seader_worker->stage = SeaderPollerEventTypeFail;
+                break;
+            }
+        } else if(
+            (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x40) ||
+            (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x24) ||
+            (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x44)) {
+            memset(display, 0, sizeof(display));
+            for(uint8_t i = 0; i < len; i++) {
+                snprintf(display + (i * 2), sizeof(display), "%02x", buffer[i]);
+            }
+            FURI_LOG_D(TAG, "NFC Send with parity %d: %s", len, display);
+
+            // Only handles message up to 8 data bytes
+            uint8_t tx_parity = 0;
+            uint8_t len_without_parity = len - 1;
+
+            // Don't forget to swap the bits of buffer[8]
+            for(size_t i = 0; i < len; i++) {
+                bit_lib_reverse_bits(buffer + i, 0, 8);
+            }
+
+            // Pull out parity bits
+            for(size_t i = 0; i < len_without_parity; i++) {
+                bool val = bit_lib_get_bit(buffer + i + 1, i);
+                bit_lib_set_bit(&tx_parity, i, val);
+            }
+
+            for(size_t i = 0; i < len_without_parity; i++) {
+                buffer[i] = (buffer[i] << i) | (buffer[i + 1] >> (8 - i));
+            }
+            bit_buffer_append_bytes(tx_buffer, buffer, len_without_parity);
+
+            for(size_t i = 0; i < len_without_parity; i++) {
+                bit_lib_reverse_bits(buffer + i, 0, 8);
+                bit_buffer_set_byte_with_parity(
+                    tx_buffer, i, buffer[i], bit_lib_get_bit(&tx_parity, i));
+            }
+
+            memset(display, 0, sizeof(display));
+            for(uint8_t i = 0; i < bit_buffer_get_size_bytes(tx_buffer); i++) {
+                snprintf(
+                    display + (i * 2), sizeof(display), "%02x", bit_buffer_get_byte(tx_buffer, i));
+            }
+            FURI_LOG_D(
+                TAG,
+                "NFC Send without parity %d: %s [%02x]",
+                bit_buffer_get_size_bytes(tx_buffer),
+                display,
+                tx_parity);
+
+            MfClassicError error = mf_classic_poller_send_custom_parity_frame(
+                mfc_poller, tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
+            if(error != MfClassicErrorNone) {
+                FURI_LOG_W(TAG, "mf_classic_poller_send_encrypted_frame error %d", error);
+                seader_worker->stage = SeaderPollerEventTypeFail;
+                break;
+            }
+
+            size_t length = bit_buffer_get_size_bytes(rx_buffer);
+            const uint8_t* rx_parity = bit_buffer_get_parity(rx_buffer);
+
+            memset(display, 0, sizeof(display));
+            for(uint8_t i = 0; i < length; i++) {
+                snprintf(
+                    display + (i * 2), sizeof(display), "%02x", bit_buffer_get_byte(rx_buffer, i));
+            }
+            FURI_LOG_D(
+                TAG, "NFC Response without parity %d: %s [%02x]", length, display, rx_parity[0]);
+
+            uint8_t with_parity[SEADER_POLLER_MAX_BUFFER_SIZE];
+            memset(with_parity, 0, sizeof(with_parity));
+
+            for(size_t i = 0; i < length; i++) {
+                uint8_t b = bit_buffer_get_byte(rx_buffer, i);
+                bit_lib_reverse_bits(&b, 0, 8);
+                bit_buffer_set_byte(rx_buffer, i, b);
+            }
+
+            length = length + (length / 8) + 1;
+
+            uint8_t parts = 1 + length / 9;
+            for(size_t p = 0; p < parts; p++) {
+                uint8_t doffset = p * 9;
+                uint8_t soffset = p * 8;
+
+                for(size_t i = 0; i < 9; i++) {
+                    with_parity[i + doffset] = bit_buffer_get_byte(rx_buffer, i + soffset) >> i;
+                    if(i > 0) {
+                        with_parity[i + doffset] |= bit_buffer_get_byte(rx_buffer, i + soffset - 1)
+                                                    << (9 - i);
+                    }
+
+                    if(i > 0) {
+                        bool val = bit_lib_get_bit(rx_parity, i - 1);
+                        bit_lib_set_bit(with_parity + i, i - 1, val);
+                    }
+                }
+            }
+
+            for(size_t i = 0; i < length; i++) {
+                bit_lib_reverse_bits(with_parity + i, 0, 8);
+            }
+
+            bit_buffer_copy_bytes(rx_buffer, with_parity, length);
+
+            memset(display, 0, sizeof(display));
+            for(uint8_t i = 0; i < length; i++) {
+                snprintf(
+                    display + (i * 2), sizeof(display), "%02x", bit_buffer_get_byte(rx_buffer, i));
+            }
+            FURI_LOG_D(
+                TAG, "NFC Response with parity %d: %s [%02x]", length, display, rx_parity[0]);
+
+        } else {
+            FURI_LOG_W(TAG, "UNHANDLED FORMAT");
+        }
+
+        seader_send_nfc_rx(
+            seader_uart,
+            (uint8_t*)bit_buffer_get_data(rx_buffer),
+            bit_buffer_get_size_bytes(rx_buffer));
+
+    } while(false);
+    bit_buffer_free(tx_buffer);
+    bit_buffer_free(rx_buffer);
+}
+
 void seader_parse_nfc_command_transmit(
     Seader* seader,
     NFCSend_t* nfcSend,
@@ -757,13 +913,23 @@ void seader_parse_nfc_command_transmit(
         seader_iso15693_transmit(
             seader, spc->picopass_poller, nfcSend->data.buf, nfcSend->data.size);
     } else if(frameProtocol == FrameProtocol_nfc) {
-        seader_iso14443a_transmit(
-            seader,
-            spc->iso14443_4a_poller,
-            nfcSend->data.buf,
-            nfcSend->data.size,
-            (uint16_t)timeOut,
-            nfcSend->format->buf);
+        if(spc->iso14443_4a_poller) {
+            seader_iso14443a_transmit(
+                seader,
+                spc->iso14443_4a_poller,
+                nfcSend->data.buf,
+                nfcSend->data.size,
+                (uint16_t)timeOut,
+                nfcSend->format->buf);
+        } else if(spc->mfc_poller) {
+            seader_mfc_transmit(
+                seader,
+                spc->mfc_poller,
+                nfcSend->data.buf,
+                nfcSend->data.size,
+                (uint16_t)timeOut,
+                nfcSend->format->buf);
+        }
     } else {
         FURI_LOG_W(TAG, "unknown frame protocol %lx", frameProtocol);
     }
@@ -911,18 +1077,22 @@ NfcCommand seader_worker_card_detect(
     OCTET_STRING_t atqa_string = {.buf = atqa, .size = 2};
     uint8_t protocol_bytes[] = {0x00, 0x00};
 
-    if(sak == 0 && atqa == NULL) {
+    if(sak == 0 && atqa == NULL) { // picopass
         protocol_bytes[1] = FrameProtocol_iclass;
         OCTET_STRING_fromBuf(
             &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
         memcpy(credential->diversifier, uid, uid_len);
         credential->diversifier_len = uid_len;
         credential->isDesfire = false;
-    } else {
+    } else if(atqa == 0) { // MFC
         protocol_bytes[1] = FrameProtocol_nfc;
         OCTET_STRING_fromBuf(
             &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
-
+        cardDetails->sak = &sak_string;
+    } else { // type 4
+        protocol_bytes[1] = FrameProtocol_nfc;
+        OCTET_STRING_fromBuf(
+            &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
         cardDetails->sak = &sak_string;
         cardDetails->atqa = &atqa_string;
         credential->isDesfire = seader_mf_df_check_card_type(atqa[0], atqa[1], sak);
