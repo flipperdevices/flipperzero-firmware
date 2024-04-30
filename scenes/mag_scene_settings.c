@@ -8,7 +8,9 @@ enum VarItemListIndex {
     VarItemListIndexPinInput,
     VarItemListIndexPinOutput,
     VarItemListIndexPinEnable,
+#ifndef FW_ORIGIN_Official
     VarItemListIndexAllowUART,
+#endif
 };
 
 static const char* gpio[] = {
@@ -64,7 +66,6 @@ static void mag_pin_variable_item_list_add(
 
 void mag_scene_settings_on_enter(void* context) {
     Mag* mag = context;
-    VariableItem* item;
     VariableItemList* var_item_list = mag->variable_item_list;
 
     mag_pin_variable_item_list_add(
@@ -74,8 +75,10 @@ void mag_scene_settings_on_enter(void* context) {
     mag_pin_variable_item_list_add(
         mag, "Enable pin:", mag->state.pin_enable, mag_scene_settings_set_gpio_enable);
 
-    item = variable_item_list_add(var_item_list, "UART MSR: ", 1, NULL, mag);
+#ifndef FW_ORIGIN_Official
+    VariableItem* item = variable_item_list_add(var_item_list, "UART MSR: ", 1, NULL, mag);
     variable_item_set_current_value_text(item, mag->state.allow_uart ? "ON" : "OFF");
+#endif
 
     variable_item_list_set_enter_callback(
         var_item_list, mag_scene_settings_var_item_list_callback, mag);
@@ -109,6 +112,7 @@ void mag_scene_settings_dialog_invalid_pins(Mag* mag) {
     }
 }
 
+#ifndef FW_ORIGIN_Official
 void mag_scene_settings_dialog_allow_uart(Mag* mag) {
     bool change = mag->state.allow_uart;
     if(!change) {
@@ -136,6 +140,7 @@ void mag_scene_settings_dialog_allow_uart(Mag* mag) {
             mag->state.allow_uart ? "ON" : "OFF");
     }
 }
+#endif
 
 bool mag_scene_settings_on_event(void* context, SceneManagerEvent event) {
     Mag* mag = context;
@@ -154,6 +159,7 @@ bool mag_scene_settings_on_event(void* context, SceneManagerEvent event) {
             scene_manager_previous_scene(scene_manager);
         }
         break;
+#ifndef FW_ORIGIN_Official
     case SceneManagerEventTypeCustom:
         scene_manager_set_scene_state(mag->scene_manager, MagSceneSettings, event.event);
         consumed = true;
@@ -161,6 +167,7 @@ bool mag_scene_settings_on_event(void* context, SceneManagerEvent event) {
             mag_scene_settings_dialog_allow_uart(mag);
         }
         break;
+#endif
     default:
         break;
     }
