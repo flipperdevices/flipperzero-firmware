@@ -87,14 +87,14 @@ void submenu_reset(Submenu* submenu);
 void submenu_set_selected_item(Submenu* submenu, uint32_t index);
 
 /** Set optional header for submenu
- * Must be called before adding items OR after adding items but also call set_selected_item() after set_header()
+ * Must be called before adding items OR after adding items and before set_selected_item()
  *
  * @param      submenu  Submenu instance
  * @param      header   header to set
  */
 void submenu_set_header(Submenu* submenu, const char* header);
 
-/** Set Orientation
+/** Set submenu orientation
  *
  * @param      submenu  Submenu instance
  * @param      orientation  either vertical or horizontal
