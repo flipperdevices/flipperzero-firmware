@@ -32,6 +32,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeLFRFID] = &I_125_10px,
     [ArchiveFileTypeInfrared] = &I_ir_10px,
     [ArchiveFileTypeBadUsb] = &I_badusb_10px,
+    [ArchiveFileTypeMag] = &I_mag_card_10px,
     [ArchiveFileTypeU2f] = &I_u2f_10px,
     [ArchiveFileTypeApplication] = &I_Apps_10px,
     [ArchiveFileTypeUpdateManifest] = &I_update_10px,

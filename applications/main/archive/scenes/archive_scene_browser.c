@@ -28,6 +28,8 @@ static const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
         return "Infrared";
     case ArchiveFileTypeBadUsb:
         return "Bad USB";
+    case ArchiveFileTypeMag:
+        return EXT_PATH("apps/GPIO/magspoof.fap");
     case ArchiveFileTypeU2f:
         return "U2F";
     case ArchiveFileTypeUpdateManifest:
