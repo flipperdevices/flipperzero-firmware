@@ -14,6 +14,10 @@
 #define MAG_APP_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define MAG_APP_EXTENSION ".mag"
 
+#define MAG_EXAMPLE_FILE_1 "TestMagstripe.mag"
+#define MAG_EXAMPLE_FILE_2 "SamyExpiredCard.mag"
+#define MAG_EXAMPLE_FILE_3 "SamyExampleImage.mag"
+
 typedef void (*MagLoadingCallback)(void* context, bool state);
 
 typedef struct {
