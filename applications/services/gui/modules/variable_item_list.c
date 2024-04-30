@@ -45,9 +45,9 @@ static void variable_item_list_process_left(VariableItemList* variable_item_list
 static void variable_item_list_process_right(VariableItemList* variable_item_list);
 static void variable_item_list_process_ok(VariableItemList* variable_item_list);
 
-static size_t variable_item_list_items_on_screen(bool header) {
+static size_t variable_item_list_items_on_screen(VariableItemListModel* model) {
     size_t res = 4;
-    return (header) ? res - 1 : res;
+    return (furi_string_empty(model->header)) ? res : res - 1;
 }
 
 static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
@@ -63,15 +63,14 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str(canvas, 4, 11, furi_string_get_cstr(model->header));
     }
 
-    canvas_set_font(canvas, FontSecondary);
-
     uint8_t position = 0;
     VariableItemArray_it_t it;
+
+    canvas_set_font(canvas, FontSecondary);
     for(VariableItemArray_it(it, model->items); !VariableItemArray_end_p(it);
         VariableItemArray_next(it)) {
         uint8_t item_position = position - model->window_position;
-        uint8_t items_on_screen =
-            variable_item_list_items_on_screen(!furi_string_empty(model->header));
+        uint8_t items_on_screen = variable_item_list_items_on_screen(model);
         uint8_t y_offset = furi_string_empty(model->header) ? 0 : item_height;
 
         if(item_position < items_on_screen) {
@@ -85,7 +84,7 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
                 elements_slightly_rounded_box(canvas, 0, item_y + 1, item_width, item_height - 2);
                 canvas_set_color(canvas, ColorWhite);
                 scroll_counter = model->scroll_counter;
-                if(scroll_counter < 1) {
+                if(scroll_counter < 1) { // Show text beginning a little longer
                     scroll_counter = 0;
                 } else {
                     scroll_counter -= 1;
@@ -94,37 +93,41 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
                 canvas_set_color(canvas, ColorBlack);
             }
 
-            uint8_t temp_x_default = 73;
-            uint8_t temp_w_default = 66;
-            if(item->current_value_index == 0 && furi_string_empty(item->current_value_text)) {
-                // Only left text, no right text
-                canvas_draw_str(canvas, 6, item_text_y, furi_string_get_cstr(item->label));
-            } else {
-                if(furi_string_size(item->current_value_text) < (size_t)4) {
-                    temp_x_default = 80;
-                    temp_w_default = 71;
-                }
-                elements_scrollable_text_line_str(
-                    canvas,
-                    6,
-                    item_text_y,
-                    temp_w_default,
-                    furi_string_get_cstr(item->label),
-                    scroll_counter,
-                    false,
-                    false);
+            uint8_t value_pos_x = 73;
+            uint8_t label_width = 66;
+            if(item->locked) {
+                // Span label up to lock icon
+                value_pos_x = 110;
+                label_width = 100;
+            } else if(item->current_value_index == 0 && furi_string_empty(item->current_value_text)) {
+                // Only label text, no value text, show longer label
+                label_width = 109;
+            } else if(furi_string_size(item->current_value_text) < 4U) {
+                // Smaller value section for short values
+                value_pos_x = 80;
+                label_width = 71;
             }
 
+            elements_scrollable_text_line(
+                canvas,
+                6,
+                item_text_y,
+                label_width,
+                item->label,
+                scroll_counter,
+                (position != model->position),
+                false);
+
             if(item->locked) {
-                canvas_draw_icon(canvas, 110, item_text_y - 8, &I_Lock_7x8);
+                canvas_draw_icon(canvas, value_pos_x, item_text_y - 8, &I_Lock_7x8);
             } else {
                 if(item->current_value_index > 0) {
-                    canvas_draw_str(canvas, temp_x_default, item_text_y, "<");
+                    canvas_draw_str(canvas, value_pos_x, item_text_y, "<");
                 }
 
                 elements_scrollable_text_line(
                     canvas,
-                    (115 + temp_x_default) / 2 + 1,
+                    (115 + value_pos_x) / 2 + 1,
                     item_text_y,
                     37,
                     item->current_value_text,
@@ -168,9 +171,10 @@ void variable_item_list_set_selected_item(VariableItemList* variable_item_list, 
         VariableItemListModel * model,
         {
             uint8_t position = index;
-            const size_t items_size = VariableItemArray_size(model->items);
+            const size_t items_count = VariableItemArray_size(model->items);
+            uint8_t items_on_screen = variable_item_list_items_on_screen(model);
 
-            if(position >= items_size) {
+            if(position >= items_count) {
                 position = 0;
             }
 
@@ -181,13 +185,10 @@ void variable_item_list_set_selected_item(VariableItemList* variable_item_list, 
                 model->window_position -= 1;
             }
 
-            uint8_t items_on_screen =
-                variable_item_list_items_on_screen(!furi_string_empty(model->header));
-
-            if(items_size <= items_on_screen) {
+            if(items_count <= items_on_screen) {
                 model->window_position = 0;
             } else {
-                const size_t pos = items_size - items_on_screen;
+                const size_t pos = items_count - items_on_screen;
                 if(model->window_position > pos) {
                     model->window_position = pos;
                 }
@@ -205,7 +206,7 @@ uint8_t variable_item_list_get_selected_item_index(VariableItemList* variable_it
 }
 
 void variable_item_list_set_header(VariableItemList* variable_item_list, const char* header) {
-    furi_assert(variable_item_list);
+    furi_check(variable_item_list);
 
     with_view_model(
         variable_item_list->view,
@@ -232,7 +233,7 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
         { locked_message_visible = model->locked_message_visible; },
         false);
 
-    if((!(event->type == InputTypePress) && !(event->type == InputTypeRelease)) &&
+    if((event->type != InputTypePress && event->type != InputTypeRelease) &&
        locked_message_visible) {
         with_view_model(
             variable_item_list->view,
@@ -295,8 +296,7 @@ void variable_item_list_process_up(VariableItemList* variable_item_list) {
         variable_item_list->view,
         VariableItemListModel * model,
         {
-            uint8_t items_on_screen =
-                variable_item_list_items_on_screen(!furi_string_empty(model->header));
+            uint8_t items_on_screen = variable_item_list_items_on_screen(model);
             if(model->position > 0) {
                 model->position--;
 
@@ -319,8 +319,7 @@ void variable_item_list_process_down(VariableItemList* variable_item_list) {
         variable_item_list->view,
         VariableItemListModel * model,
         {
-            uint8_t items_on_screen =
-                variable_item_list_items_on_screen(!furi_string_empty(model->header));
+            uint8_t items_on_screen = variable_item_list_items_on_screen(model);
             if(model->position < (VariableItemArray_size(model->items) - 1)) {
                 model->position++;
                 if((model->position - model->window_position) > (items_on_screen - 2) &&
@@ -416,6 +415,7 @@ void variable_item_list_process_ok(VariableItemList* variable_item_list) {
 }
 
 static void variable_item_list_scroll_timer_callback(void* context) {
+    furi_assert(context);
     VariableItemList* variable_item_list = context;
     with_view_model(
         variable_item_list->view,
@@ -546,8 +546,8 @@ VariableItem* variable_item_list_add(
 }
 
 VariableItem* variable_item_list_get(VariableItemList* variable_item_list, uint8_t position) {
+    furi_check(variable_item_list);
     VariableItem* item = NULL;
-    furi_assert(variable_item_list);
 
     with_view_model(
         variable_item_list->view,
@@ -589,6 +589,8 @@ void variable_item_set_values_count(VariableItem* item, uint8_t values_count) {
 }
 
 void variable_item_set_item_label(VariableItem* item, const char* label) {
+    furi_check(item);
+    furi_check(label);
     furi_string_set(item->label, label);
 }
 
@@ -598,6 +600,7 @@ void variable_item_set_current_value_text(VariableItem* item, const char* curren
 }
 
 void variable_item_set_locked(VariableItem* item, bool locked, const char* locked_message) {
+    furi_check(item);
     item->locked = locked;
     if(locked_message) {
         furi_string_set(item->locked_message, locked_message);
