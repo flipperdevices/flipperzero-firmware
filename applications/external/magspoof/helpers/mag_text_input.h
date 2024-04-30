@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gui/view.h>
+#include "mag_icons.h"
 // #include "mag_validators.h"
 
 #ifdef __cplusplus
