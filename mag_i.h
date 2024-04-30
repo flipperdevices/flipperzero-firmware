@@ -44,7 +44,7 @@
 #define submenu_add_lockable_item(                                             \
     submenu, label, index, callback, callback_context, locked, locked_message) \
     if(!locked) {                                                              \
-        submenu_add_item(submenu, label, index, callback, callback_context)    \
+        submenu_add_item(submenu, label, index, callback, callback_context);   \
     }
 #endif
 

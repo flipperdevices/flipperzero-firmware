@@ -10,7 +10,7 @@ App(
         "notification",
         "dialogs",
     ],
-    resources="resources",
+    # resources="resources",  # only for use on MTNM; need to find approach for all FWs
     provides=[],
     stack_size=6 * 1024,
     order=64,  # keep it at the bottom of the list while still WIP

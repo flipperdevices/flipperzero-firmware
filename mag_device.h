@@ -8,8 +8,6 @@
 #include "mag_icons.h"
 #include "helpers/mag_types.h"
 
-#include <assets_icons.h>
-
 #define MAG_DEV_NAME_MAX_LEN 22
 #define MAG_DEV_TRACKS 3
 
