@@ -112,7 +112,7 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
                 label_width,
                 item->label,
                 scroll_counter,
-                (position == model->position));
+                (position != model->position));
 
             if(item->locked) {
                 canvas_draw_icon(canvas, value_pos_x, item_text_y - 8, &I_Lock_7x8);
