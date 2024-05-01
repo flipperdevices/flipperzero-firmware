@@ -43,7 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Gui: Cleanup submenu/varitemlist code for PR to OFW (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/727c23a7e448bbe362a151951caee8c6625d298a)
 - [Archive: Favorite .img files (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b6ec80db54bb6b3e29374a493787a59d5c0cc20c)
 - Updated: [FindMy Flipper v3.5 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
-- Updated: [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
+- Updated: [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
@@ -478,7 +478,7 @@ $ ./fbt dolphin_ext
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
-- [NFC Seader v2.7 (By bettse)](https://github.com/bettse/seader)
+- [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Noptel LRF Sampler v1.6 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
