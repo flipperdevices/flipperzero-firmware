@@ -97,9 +97,6 @@ steps:
       - cd ..
       - mkdir extra_pack_build
       - mv unleashed-firmware/artifacts-extra/ extra_pack_build
-      - mkdir -p extra_pack_build/apps_assets/esp_flasher
-      - mv extra_assets/apps_assets/esp_flasher/* extra_pack_build/apps_assets/esp_flasher/
-      - mv extra_assets/apps_assets/esp_flasher/.assets.signature extra_pack_build/apps_assets/esp_flasher/
     environment:
       FBT_TOOLS_CUSTOM_LINK:
         from_secret: fbt_link
