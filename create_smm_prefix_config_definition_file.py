@@ -14,7 +14,7 @@ This utility requires Noptel internal code.
 ## Parameters
 #
 
-app_c_header_file = "noptel_lrf_sampler.h"
+app_c_header_file = "common.h"
 
 
 
