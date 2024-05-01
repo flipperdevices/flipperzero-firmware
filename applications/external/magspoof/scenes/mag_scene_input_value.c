@@ -11,6 +11,8 @@ void mag_scene_input_value_on_enter(void* context) {
     text_input_set_result_callback(
         text_input, mag_text_input_callback, mag, mag->text_store, MAG_TEXT_STORE_SIZE, true);
 
+    // text_input_add_illegal_symbols(text_input);
+
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewTextInput);
 }
 

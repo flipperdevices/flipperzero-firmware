@@ -1,6 +1,5 @@
 #include "mag_text_input.h"
 #include <gui/elements.h>
-#include <mag_icons.h>
 #include <furi.h>
 
 struct Mag_TextInput {

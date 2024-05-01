@@ -3,7 +3,7 @@ App(
     name="MagSpoof",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mag_app",
-    resources="resources",
+    fap_file_assets="resources",
     stack_size=6 * 1024,
     fap_icon="icons/mag_10px.png",
     fap_category="GPIO",

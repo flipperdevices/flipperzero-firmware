@@ -44,7 +44,7 @@
 #define submenu_add_lockable_item(                                             \
     submenu, label, index, callback, callback_context, locked, locked_message) \
     if(!locked) {                                                              \
-        submenu_add_item(submenu, label, index, callback, callback_context)    \
+        submenu_add_item(submenu, label, index, callback, callback_context);   \
     }
 #endif
 
@@ -99,6 +99,8 @@ void mag_text_store_clear(Mag* mag);
 void mag_show_loading_popup(void* context, bool show);
 
 void mag_make_app_folder(Mag* mag);
+
+void mag_migrate_and_copy_files(Mag* mag);
 
 void mag_popup_timeout_callback(void* context);
 

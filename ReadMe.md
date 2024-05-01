@@ -29,11 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0430-1331-0.101.3-b7c60ce](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-01 12:34 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-01 12:34 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-01 13:27 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-01 13:27 EST`
 - Updated: [Flight Assault v0.2 (By evillero)](https://github.com/evillero/flight_assault)
 - Updated: [Minesweeper Redux v1.5 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
-- Updated: [MagSpoof v0.7 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 - Updated: [PicoPass (iClass) v1.14 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
 - Updated: [BLE Spam v6.3 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam)
@@ -47,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [Mifare Plus detection support #3607 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3607)
 - UL [iButton: update DS1420 for latest ibutton changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a57dbe446e654153be05c2602e673247089f14b6)
 - UL [NFC: add temp fix since no proper fix exist at the moment (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75ece9b697d1e3b66a75f2d423e51f369bc387f1)
+- Updated: [MagSpoof v0.7 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 
 <a name="release">
 
