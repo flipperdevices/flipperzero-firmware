@@ -1,5 +1,5 @@
 App(
-    appid="mag",
+    appid="magspoof",
     name="MagSpoof",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mag_app",
@@ -16,8 +16,9 @@ App(
     fap_icon="icons/mag_10px.png",
     fap_category="GPIO",
     fap_icon_assets="icons",
-    fap_version=(0, 5),  # major, minor
-    fap_description="WIP MagSpoof port using the RFID subsystem",
+    fap_icon_assets_symbol="mag",
+    fap_version=(0, 7),  # major, minor
+    fap_description="Enables wireless transmission of magstripe data",
     fap_author="Zachary Weiss",
     fap_weburl="https://github.com/zacharyweiss/magspoof_flipper",
 )

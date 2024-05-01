@@ -4,6 +4,7 @@ typedef enum {
     SubmenuIndexSaved,
     SubmenuIndexRead,
     //SubmenuIndexAddManually,
+    SubmenuIndexSettings,
     SubmenuIndexAbout,
 } SubmenuIndex;
 
@@ -18,9 +19,19 @@ void mag_scene_start_on_enter(void* context) {
     Submenu* submenu = mag->submenu;
 
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, mag_scene_start_submenu_callback, mag);
-    submenu_add_item(submenu, "Read", SubmenuIndexRead, mag_scene_start_submenu_callback, mag);
+    submenu_add_lockable_item(
+        submenu,
+        "Read",
+        SubmenuIndexRead,
+        mag_scene_start_submenu_callback,
+        mag,
+        (!mag->state.is_debug && !mag->state.allow_uart),
+        "Enable Debug!");
     //submenu_add_item(
     //    submenu, "Add Manually", SubmenuIndexAddManually, mag_scene_start_submenu_callback, mag);
+    submenu_add_item(
+        submenu, "Settings", SubmenuIndexSettings, mag_scene_start_submenu_callback, mag);
+
     submenu_add_item(submenu, "About", SubmenuIndexAbout, mag_scene_start_submenu_callback, mag);
 
     submenu_set_selected_item(
@@ -52,6 +63,10 @@ bool mag_scene_start_on_event(void* context, SceneManagerEvent event) {
         //    scene_manager_next_scene(mag->scene_manager, MagSceneInputValue);
         //    consumed = true;
         //    break;
+        case SubmenuIndexSettings:
+            scene_manager_next_scene(mag->scene_manager, MagSceneSettings);
+            consumed = true;
+            break;
         case SubmenuIndexAbout:
             scene_manager_next_scene(mag->scene_manager, MagSceneAbout);
             consumed = true;

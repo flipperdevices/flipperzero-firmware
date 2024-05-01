@@ -118,8 +118,13 @@ bool mag_device_save(MagDevice* mag_dev, const char* dev_name) {
     return mag_device_save_file(mag_dev, dev_name, MAG_APP_FOLDER, MAG_APP_EXTENSION, true);
 }
 
-static bool mag_device_load_data(MagDevice* mag_dev, FuriString* path, bool show_dialog) {
+bool mag_device_load_data(MagDevice* mag_dev, FuriString* path, bool show_dialog) {
     bool parsed = false;
+
+    FuriString* filename;
+    filename = furi_string_alloc();
+    path_extract_filename(path, filename, true);
+    strncpy(mag_dev->dev_name, furi_string_get_cstr(filename), MAG_DEV_NAME_MAX_LEN);
 
     FlipperFormat* file = flipper_format_file_alloc(mag_dev->storage);
     FuriString* temp_str;
@@ -168,6 +173,7 @@ static bool mag_device_load_data(MagDevice* mag_dev, FuriString* path, bool show
     }
 
     furi_string_free(temp_str);
+    furi_string_free(filename);
     flipper_format_free(file);
 
     return parsed;
@@ -189,15 +195,10 @@ bool mag_file_select(MagDevice* mag_dev) {
 
     furi_string_free(mag_app_folder);
     if(res) {
-        FuriString* filename;
-        filename = furi_string_alloc();
-        path_extract_filename(mag_dev->load_path, filename, true);
-        strncpy(mag_dev->dev_name, furi_string_get_cstr(filename), MAG_DEV_NAME_MAX_LEN);
         res = mag_device_load_data(mag_dev, mag_dev->load_path, true);
         if(res) {
             mag_device_set_name(mag_dev, mag_dev->dev_name);
         }
-        furi_string_free(filename);
     }
 
     return res;
@@ -251,7 +252,7 @@ bool mag_device_parse_card_string(MagDevice* mag_dev, FuriString* f_card_str) {
         return false;
     }
     size_t track1_len = track1_end - track1_start;
-    
+
     FURI_LOG_D(TAG, "Track 1: %.*s", track1_len, track1_start);
 
     mag_dev->dev_data.track[0].len = track1_len;
@@ -259,7 +260,7 @@ bool mag_device_parse_card_string(MagDevice* mag_dev, FuriString* f_card_str) {
 
     // Track 2
     const char* track2_start = strchr(track1_end, ';');
-    if (!track2_start) {
+    if(!track2_start) {
         FURI_LOG_D(TAG, "Could not find track 2 start");
         return true;
     }
@@ -279,7 +280,7 @@ bool mag_device_parse_card_string(MagDevice* mag_dev, FuriString* f_card_str) {
 
     // Track 3
     const char* track3_start = strchr(track2_end, ';');
-    if (!track3_start) {
+    if(!track3_start) {
         FURI_LOG_D(TAG, "Could not find track 3 start");
         return true;
     }
@@ -296,10 +297,30 @@ bool mag_device_parse_card_string(MagDevice* mag_dev, FuriString* f_card_str) {
 
     mag_dev->dev_data.track[2].len = track3_len;
     furi_string_printf(mag_dev->dev_data.track[2].str, "%%%.*s?", track3_len, track3_start);
-    
+
     return true;
 }
 
+MagTrackState mag_device_autoselect_track_state(MagDevice* mag_dev) {
+    // messy code to quickly check which tracks are available for emulation/display
+    bool is_empty_t1 = furi_string_empty(mag_dev->dev_data.track[0].str);
+    bool is_empty_t2 = furi_string_empty(mag_dev->dev_data.track[1].str);
+    bool is_empty_t3 = furi_string_empty(mag_dev->dev_data.track[2].str);
+
+    if(!is_empty_t1 && !is_empty_t2) {
+        return MagTrackStateOneAndTwo;
+    } else if(!is_empty_t1) {
+        return MagTrackStateOne;
+    } else if(!is_empty_t2) {
+        return MagTrackStateTwo;
+    } else if(!is_empty_t3) {
+        return MagTrackStateThree;
+    }
+
+    // if all empty (or something wrong with the above code)
+    // return default value
+    return MAG_STATE_DEFAULT_TRACK;
+}
 
 void mag_device_set_loading_callback(
     MagDevice* mag_dev,

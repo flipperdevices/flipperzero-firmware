@@ -11,7 +11,7 @@ void mag_scene_input_value_on_enter(void* context) {
     mag_text_input_set_result_callback(
         mag_text_input, mag_text_input_callback, mag, mag->text_store, MAG_TEXT_STORE_SIZE, true);
 
-    view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewMagTextInput);
+    view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewTextMagInput);
 }
 
 bool mag_scene_input_value_on_event(void* context, SceneManagerEvent event) {
