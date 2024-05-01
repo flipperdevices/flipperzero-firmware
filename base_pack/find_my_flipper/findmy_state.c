@@ -29,18 +29,17 @@ bool findmy_state_load(FindMyState* out_state) {
             if(!flipper_format_read_uint32(file, "transmit_power", &tmp, 1)) break;
             state.transmit_power = tmp;
 
+            if(!flipper_format_read_uint32(file, "tag_type", &tmp, 1)) {
+                tmp = FindMyTypeApple;
+                flipper_format_rewind(file);
+            }
+            state.tag_type = tmp;
+
             if(!flipper_format_read_bool(file, "show_mac", &state.show_mac, 1)) {
                 // Support migrating from old config
                 state.show_mac = false;
                 flipper_format_rewind(file);
             }
-
-            if(!flipper_format_read_uint32(file, "tag_type", &tmp, 1)) {
-                // Support migrating from old config
-                tmp = FindMyTypeApple;
-                flipper_format_rewind(file);
-            }
-            state.tag_type = tmp;
 
             if(!flipper_format_read_hex(file, "mac", state.mac, sizeof(state.mac))) break;
 
@@ -162,6 +161,7 @@ void findmy_state_save(FindMyState* state) {
         if(!flipper_format_write_uint32(file, "transmit_power", &tmp, 1)) break;
 
         tmp = state->tag_type;
+        FURI_LOG_E("tag_type at save", "%ld", tmp);
         if(!flipper_format_write_uint32(file, "tag_type", &tmp, 1)) break;
 
         if(!flipper_format_write_bool(file, "show_mac", &state->show_mac, 1)) break;
