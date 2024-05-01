@@ -101,7 +101,7 @@ Picopass* picopass_alloc() {
         plugin_manager_alloc(PLUGIN_APP_ID, PLUGIN_API_VERSION, firmware_api_interface);
 
     picopass->plugin_wiegand = NULL;
-    if(plugin_manager_load_all(picopass->plugin_manager, APP_DATA_PATH("plugins")) !=
+    if(plugin_manager_load_all(picopass->plugin_manager, APP_ASSETS_PATH("plugins")) !=
        PluginManagerErrorNone) {
         FURI_LOG_E(TAG, "Failed to load all libs");
     } else {
