@@ -1,5 +1,4 @@
 #include "seader_i.h"
-#include <expansion/expansion.h>
 
 #define TAG "Seader"
 
@@ -81,10 +80,37 @@ Seader* seader_alloc() {
     view_dispatcher_add_view(
         seader->view_dispatcher, SeaderViewTextInput, text_input_get_view(seader->text_input));
 
+    // TextBox
+    seader->text_box = text_box_alloc();
+    view_dispatcher_add_view(
+        seader->view_dispatcher, SeaderViewTextBox, text_box_get_view(seader->text_box));
+    seader->text_box_store = furi_string_alloc();
+
     // Custom Widget
     seader->widget = widget_alloc();
     view_dispatcher_add_view(
         seader->view_dispatcher, SeaderViewWidget, widget_get_view(seader->widget));
+
+    seader->plugin_manager =
+        plugin_manager_alloc(PLUGIN_APP_ID, PLUGIN_API_VERSION, firmware_api_interface);
+
+    seader->plugin_wiegand = NULL;
+    if(plugin_manager_load_all(seader->plugin_manager, APP_ASSETS_PATH("plugins")) !=
+       PluginManagerErrorNone) {
+        FURI_LOG_E(TAG, "Failed to load all libs");
+    } else {
+        uint32_t plugin_count = plugin_manager_get_count(seader->plugin_manager);
+        FURI_LOG_I(TAG, "Loaded %lu plugin(s)", plugin_count);
+
+        for(uint32_t i = 0; i < plugin_count; i++) {
+            const PluginWiegand* plugin = plugin_manager_get_ep(seader->plugin_manager, i);
+            FURI_LOG_I(TAG, "plugin name: %s", plugin->name);
+            if(strcmp(plugin->name, "Plugin Wiegand") == 0) {
+                // Have to cast to drop "const" qualifier
+                seader->plugin_wiegand = (PluginWiegand*)plugin;
+            }
+        }
+    }
 
     return seader;
 }
@@ -123,6 +149,11 @@ void seader_free(Seader* seader) {
     view_dispatcher_remove_view(seader->view_dispatcher, SeaderViewTextInput);
     text_input_free(seader->text_input);
 
+    // TextBox
+    view_dispatcher_remove_view(seader->view_dispatcher, SeaderViewTextBox);
+    text_box_free(seader->text_box);
+    furi_string_free(seader->text_box_store);
+
     // Custom Widget
     view_dispatcher_remove_view(seader->view_dispatcher, SeaderViewWidget);
     widget_free(seader->widget);
@@ -144,6 +175,8 @@ void seader_free(Seader* seader) {
     // Notifications
     furi_record_close(RECORD_NOTIFICATION);
     seader->notifications = NULL;
+
+    plugin_manager_free(seader->plugin_manager);
 
     free(seader);
 }
@@ -196,11 +229,6 @@ void seader_show_loading_popup(void* context, bool show) {
 
 int32_t seader_app(void* p) {
     UNUSED(p);
-
-    // Disable expansion protocol to avoid interference with UART Handle
-    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
-    expansion_disable(expansion);
-
     Seader* seader = seader_alloc();
 
     scene_manager_next_scene(seader->scene_manager, SeaderSceneStart);
@@ -208,10 +236,6 @@ int32_t seader_app(void* p) {
     view_dispatcher_run(seader->view_dispatcher);
 
     seader_free(seader);
-
-    // Return previous state of expansion
-    expansion_enable(expansion);
-    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
