@@ -301,6 +301,10 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
             break;
         case Iso14443_4aErrorTimeout:
             break;
+        case Iso14443_4aErrorSendExtra:
+            break;
+        default:
+            break;
         }
     }
 
