@@ -11,7 +11,7 @@ This is a single-screen app, and a few interactions are provided via the
 hardware buttons:
 
 - Long press the up button to change the **baud rate**. The default baud rate
-  is 9600, but 19200, 38400, 57600, and 115200 baud are also supported.
+  is 9600, but 4800, 19200, 38400, 57600, and 115200 baud are also supported.
 - Long press the right button to change **speed units** from knots to
   kilometers per hour.
 - Press the OK button to set the **backlight** to always on mode. Press it

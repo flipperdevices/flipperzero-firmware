@@ -2,6 +2,7 @@
 #include "constants.h"
 
 #include <furi.h>
+#include <furi_hal_power.h>
 #include <gui/gui.h>
 #include <string.h>
 #include <expansion/expansion.h>
@@ -38,7 +39,7 @@ static void render_callback(Canvas* const canvas, void* context) {
             32,
             AlignCenter,
             AlignBottom,
-            gps_uart->backlight_enabled ? "Backlight enabled" : "Backlight disabled");
+            gps_uart->backlight_on ? "Backlight enabled" : "Backlight disabled");
         break;
     case CHANGE_DEEPSLEEP:
         canvas_set_font(canvas, FontPrimary);
@@ -182,16 +183,16 @@ int32_t gps_app(void* p) {
                         processing = false;
                         break;
                     case InputKeyOk:
-                        if(!gps_uart->backlight_enabled) {
+                        if(!gps_uart->backlight_on) {
                             notification_message_block(
                                 gps_uart->notifications, &sequence_display_backlight_enforce_on);
-                            gps_uart->backlight_enabled = true;
+                            gps_uart->backlight_on = true;
                         } else {
                             notification_message_block(
                                 gps_uart->notifications, &sequence_display_backlight_enforce_auto);
                             notification_message(
                                 gps_uart->notifications, &sequence_display_backlight_off);
-                            gps_uart->backlight_enabled = false;
+                            gps_uart->backlight_on = false;
                         }
 
                         gps_uart->view_state = CHANGE_BACKLIGHT;
@@ -217,7 +218,6 @@ int32_t gps_app(void* p) {
 
                         gps_uart_init_thread(gps_uart);
                         gps_uart->view_state = CHANGE_BAUDRATE;
-
                         furi_mutex_release(gps_uart->mutex);
                         view_port_update(view_port);
                         furi_delay_ms(1000);
@@ -259,7 +259,6 @@ int32_t gps_app(void* p) {
                 }
             }
         }
-
         if(gps_uart->view_state == NORMAL) {
             furi_mutex_release(gps_uart->mutex);
             view_port_update(view_port);
