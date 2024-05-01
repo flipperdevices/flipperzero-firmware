@@ -39,8 +39,10 @@ void ui_control_text_box_render(
             1);
     }
 
-    canvas_draw_str_aligned(
-        canvas, TEXT_BOX_MARGIN + 2, TEXT_BOX_MARGIN + 3 + y, AlignLeft, AlignTop, text);
+    if(text != NULL) {
+        canvas_draw_str_aligned(
+            canvas, TEXT_BOX_MARGIN + 2, TEXT_BOX_MARGIN + 3 + y, AlignLeft, AlignTop, text);
+    }
 }
 
 void ui_control_select_render(

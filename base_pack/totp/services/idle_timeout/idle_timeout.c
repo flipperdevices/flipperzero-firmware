@@ -3,7 +3,7 @@
 #include <furi/core/timer.h>
 
 #define IDLE_TIMER_CHECK_PERIODICITY_SEC (1)
-#define SEC_TO_TICKS(sec) ((sec)*1000)
+#define SEC_TO_TICKS(sec) ((sec) * 1000)
 
 struct IdleTimeoutContext {
     FuriTimer* timer;
@@ -13,10 +13,12 @@ struct IdleTimeoutContext {
     uint16_t timeout_sec;
     uint16_t idle_period_sec;
     bool idle_handled;
+    bool is_paused;
 };
 
 static void idle_timer_callback(void* context) {
     IdleTimeoutContext* instance = context;
+    if(instance->is_paused) return;
     if(instance->activity_reported) {
         instance->idle_period_sec = 0;
         instance->idle_handled = false;
@@ -44,6 +46,7 @@ IdleTimeoutContext* idle_timeout_alloc(
     instance->timeout_sec = timeout_sec;
     instance->on_idle_callback = on_idle_callback;
     instance->on_idle_callback_context = on_idle_callback_context;
+    instance->is_paused = false;
     return instance;
 }
 
@@ -53,6 +56,14 @@ void idle_timeout_start(IdleTimeoutContext* context) {
 
 void idle_timeout_stop(IdleTimeoutContext* context) {
     furi_timer_stop(context->timer);
+}
+
+void idle_timeout_pause(IdleTimeoutContext* context) {
+    context->is_paused = true;
+}
+
+void idle_timeout_resume(IdleTimeoutContext* context) {
+    context->is_paused = false;
 }
 
 void idle_timeout_report_activity(IdleTimeoutContext* context) {

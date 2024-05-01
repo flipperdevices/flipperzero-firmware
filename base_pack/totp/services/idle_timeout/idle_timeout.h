@@ -32,6 +32,18 @@ void idle_timeout_start(IdleTimeoutContext* context);
 void idle_timeout_stop(IdleTimeoutContext* context);
 
 /**
+ * @brief Pauses IDLE timeout
+ * @param context IDLE timeout context
+ */
+void idle_timeout_pause(IdleTimeoutContext* context);
+
+/**
+ * @brief Resumes paused IDLE timeout
+ * @param context IDLE timeout context
+ */
+void idle_timeout_resume(IdleTimeoutContext* context);
+
+/**
  * @brief Reports activity to IDLE timeout
  * @param context IDLE timeout context
  */
