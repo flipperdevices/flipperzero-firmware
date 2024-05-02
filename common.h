@@ -6,6 +6,7 @@
 ***/
 
 /*** Includes ***/
+#include <furi_hal_usb_cdc.h>
 #include <gui/modules/submenu.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/variable_item_list.h>
@@ -85,6 +86,12 @@ extern const uint16_t test_laser_restart_cmm_every;
 extern const uint16_t test_pointer_view_update_every;
 extern const uint16_t test_pointer_jiggle_every;
 
+/** USB serial channel to use for the passthrough **/
+extern const uint16_t passthru_vcp_channel;
+
+/** USB serial passthrough view timings **/
+extern const uint16_t passthru_view_update_every;
+
 
 
 /*** Types */
@@ -113,11 +120,14 @@ typedef enum {
   /* Test pointer view */
   submenu_testpointer = 6,
 
+  /* USB passthrough view */
+  submenu_passthru = 7,
+
   /* About view */
-  submenu_about = 7,
+  submenu_about = 8,
 
   /* Total number of items */
-  total_submenu_items = 8,
+  total_submenu_items = 9,
 
 } SubmenuIndex;
 
@@ -328,6 +338,55 @@ typedef struct {
 
 
 
+/** Passthrough model **/
+typedef struct {
+
+  /* Whether the passthrough is enabled */
+  bool enabled;
+
+  /* Whether the virtual COM port is connected */
+  bool vcp_connected;
+
+  /* Whether something has opened the remote end of the virtual COM port */
+  bool vcp_open;
+
+  /* Virtual COM port configuration */
+  struct usb_cdc_line_coding *vcp_config;
+
+  /* UART baudrate and name*/
+  uint32_t uart_baudrate;
+  const char *uart_baudrate_name;
+
+  /* Virtual COM port receive buffer */
+  uint8_t vcp_rx_buf[CDC_DATA_SZ];
+  uint16_t vcp_rx_buf_len;
+
+  /* UART RX buffer */
+  uint8_t uart_rx_buf[CDC_DATA_SZ];
+  uint16_t uart_rx_buf_len;
+
+  /* Virtual COM port RX/TX thread */
+  FuriThread *vcp_rx_tx_thread;
+
+  /* Virtual COM port send semaphore */
+  FuriSemaphore *vcp_tx_sem;
+
+  /* Total number of bytes sent to the LRF */
+  uint32_t total_bytes_sent;
+
+  /* Total number of bytes received from the LRF */
+  uint32_t total_bytes_recv;
+
+  /* Flag to indicate that the display needs updating */
+  bool update_display;
+
+  /* Scratchpad string */
+  char spstr[12];
+
+} PassthruModel;
+
+
+
 /** About view model **/
 typedef struct {
 
@@ -379,6 +438,9 @@ typedef struct {
   /* Test pointer view */
   View *testpointer_view;
 
+  /* USB serial passthrough pointer view */
+  View *passthru_view;
+
   /* About view  */
   View *about_view;
 
@@ -396,6 +458,9 @@ typedef struct {
 
   /* Timer to control the pointer in the test pointer view */
   FuriTimer *test_pointer_control_timer;
+
+  /* Timer to update the passthrough view */
+  FuriTimer *passthru_view_timer;
 
   /* Backlight control */
   BacklightControl backlight_control;

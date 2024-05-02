@@ -9,7 +9,6 @@
 
 /*** Defines ***/
 #define BAUDRATE 115200
-#define RX_BUF_SIZE 256
 #define DIAG_PROGRESS_UPDATE_EVERY 250 /*ms*/
 
 
@@ -195,6 +194,10 @@ typedef struct _LRFSerialCommApp LRFSerialCommApp;
 
 /*** Routines ***/
 
+/** Set the callback to handle raw data received from the LRF **/
+void set_lrf_raw_data_handler(LRFSerialCommApp *,
+				void (*)(uint8_t *, uint16_t, void *), void *);
+
 /** Set the callback to handle one received LRF sample **/
 void set_lrf_sample_handler(LRFSerialCommApp *, void (*)(LRFSample *, void *),
 				void *);
@@ -230,6 +233,9 @@ void start_uart(LRFSerialCommApp *, uint32_t);
 
 /** Stop the UART **/
 void stop_uart(LRFSerialCommApp *);
+
+/** Set the UART's baudrate **/
+void set_uart_baudrate(LRFSerialCommApp *, uint32_t);
 
 /** Stop the UART receive thread and free up the space allocated for the LRF
     communication app **/

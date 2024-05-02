@@ -29,6 +29,9 @@ typedef enum {
   /* Test pointer view */
   view_testpointer,
 
+  /* USB serial passthrough view */
+  view_passthru,
+
   /* About view */
   view_about,
 

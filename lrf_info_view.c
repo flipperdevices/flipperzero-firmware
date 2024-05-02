@@ -67,7 +67,8 @@ void lrfinfo_view_enter_callback(void *ctx) {
 	  lrfinfo_model->has_ident = false;
 
 	  /* Setup the callback to receive decoded LRF identification frames */
-	  set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler, app);
+	  set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler,
+				app);
 
 	  /* Invalidate the current information - if any */
 	  lrfinfo_model->has_info = false;
@@ -200,8 +201,8 @@ bool lrfinfo_view_input_callback(InputEvent *evt, void *ctx) {
   App *app = (App *)ctx;
   LRFInfoModel *lrfinfo_model = view_get_model(app->lrfinfo_view);
 
-  /* If the user pressed the OK button, tell the LRF to send its identification and
-     information */
+  /* If the user pressed the OK button, tell the LRF to send its
+     identification and information */
   if(evt->type == InputTypePress && evt->key == InputKeyOk) {
     FURI_LOG_D(TAG, "OK button pressed");
 

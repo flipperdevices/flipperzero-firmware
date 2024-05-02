@@ -82,6 +82,13 @@ void submenu_callback(void *ctx, uint32_t idx) {
       FURI_LOG_D(TAG, "Switch to test pointer view");
       break;
 
+    /* Switch to the USB serial passthrough view */
+    case submenu_passthru:
+      view_dispatcher_switch_to_view(app->view_dispatcher, view_passthru);
+      sampler_model->config.sitem = submenu_passthru;
+      FURI_LOG_D(TAG, "Switch to USB serial passthrough view");
+      break;
+
     /* Switch to the about view */
     case submenu_about:
       view_dispatcher_switch_to_view(app->view_dispatcher, view_about);
