@@ -1,0 +1,320 @@
+#include  <stdlib.h>
+#include  <stdint.h>
+#include  <stdarg.h>
+
+#include  <furi.h>
+#include  <gui/gui.h>
+#include  <input/input.h>
+#include  <gui/gui_i.h>
+
+#include  "bc_demo.h"
+
+//+============================================================================ ========================================
+// OS Callback : Timer tick
+//
+static
+void  cbTimer (FuriMessageQueue* queue)
+{
+	eventMsg_t  message = {.id = EVID_TICK};
+	furi_message_queue_put(queue, &message, 0);
+}
+
+//+============================================================================ ========================================
+// OS Callback : Keypress
+//
+static
+void  cbInput (InputEvent* event,  FuriMessageQueue* queue)
+{
+	eventMsg_t  message = {.id = EVID_KEY,  .input = *event};
+	furi_message_queue_put(queue, &message, FuriWaitForever);
+}
+
+//+============================================================================ ========================================
+// OS Callback : Draw request
+//
+static
+void  cbDraw (Canvas* const canvas,  void* ctx)
+{
+	state_t*  state;
+
+	if ( !(state = (state_t*)acquire_mutex((ValueMutex*)ctx, 25)) )  return ;
+
+	canvas_draw_frame(canvas, 0, 0, state->cnvW, state->cnvH);
+
+	switch (state->animID) {
+		case ANIM_TEXT:
+			canvas_set_font(canvas, state->font);
+			canvas_draw_str_aligned(canvas, state->x, state->y, AlignLeft, AlignTop, state->text);
+			break;
+
+		case ANIM_BALL:
+			canvas_draw_circle(canvas, state->x, state->y, state->ballR);
+			break;
+
+		default:
+			canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "?");
+			break;
+	}
+
+	release_mutex((ValueMutex*)ctx, state);
+}
+
+//+============================================================================ ========================================
+// Move the x,y anchor position
+//
+static
+bool  move (state_t* state,  dir_t dir)
+{
+	bool  rv   = true;
+
+	switch (dir & (DIR_U | DIR_D)) {
+		case DIR_U:
+			if (state->y > state->minY)  state->y-- ;
+			else                         rv = false ;
+			break;
+		case DIR_D:
+			if (state->y < state->maxY)  state->y++ ;
+			else                         rv = false ;
+			break;
+		default:
+			break;
+	}
+
+	switch (dir & (DIR_L | DIR_R)) {
+		case DIR_L:
+			if (state->x > state->minX)  state->x-- ;
+			else                         rv = false ;
+			break;
+		case DIR_R:
+			if (state->x < state->maxX)  state->x++ ;
+			else                         rv = false ;
+			break;
+		default:
+			break;
+	}
+
+	return rv;
+}
+
+//+============================================================================ ========================================
+// Select and configure an animation
+//
+static
+void  animateSet (animID_t id,  state_t* const state,  const Gui* gui)
+{
+	switch ((state->animID = id)) {
+		default:
+		case ANIM_TEXT:
+			canvas_set_font(gui->canvas, state->font);
+			state->minX  = 1;
+			state->maxX  = (state->cnvW -1) -canvas_string_width(gui->canvas, state->text);
+			state->minY  = 1;
+			state->maxY  = (state->cnvH -1) -canvas_get_font_params(gui->canvas, state->font)->height;
+			break;
+
+		case ANIM_BALL:
+			state->minX  = state->ballR +1;
+			state->maxX  = (state->cnvW -1) -state->ballR -1;
+			state->minY  = state->ballR +1;
+			state->maxY  = (state->cnvH -1) -state->ballR -1;
+			break;
+	}
+}
+
+//+============================================================================ ========================================
+// Enable/Disable animation
+//
+static
+void  animateEn (state_t* state,  bool on)
+{
+	if (on) {
+		if (!state->animate && furi_timer_start(state->timer, state->timerHz/state->fps) == FuriStatusOk) {
+			state->animate = true;
+			state->dir     = ((dir_t[]){DIR_UL, DIR_UR, DIR_DL, DIR_DR})[rand() & 0x3];
+		}
+	} else {
+		if (state->animate && furi_timer_stop(state->timer) == FuriStatusOk)
+        	state->animate = false;
+	}
+}
+
+//+============================================================================ ========================================
+// Animate the logo
+//
+static
+void  animate (state_t* state)
+{
+	if (!state->animate)  return ;
+
+	if (state->dir & DIR_U) {
+		if (!move(state, DIR_U))  state->dir ^= DIR_U | DIR_D ;
+	} else if (state->dir & DIR_D) {
+		if (!move(state, DIR_D))  state->dir ^= DIR_U | DIR_D ;
+	}
+
+	if (state->dir & DIR_L) {
+		if (!move(state, DIR_L))  state->dir ^= DIR_L | DIR_R ;
+	} else if (state->dir & DIR_R) {
+		if (!move(state, DIR_R))  state->dir ^= DIR_L | DIR_R ;
+	}
+}
+
+//+============================================================================ ========================================
+// Event Handler : Tick
+//
+static
+void  evTick (state_t* state)
+{
+	animate(state);
+}
+
+//+============================================================================ ========================================
+// Handle a key press event
+//
+static inline
+bool  evKey (eventMsg_t* msg,  state_t* state, Gui* gui)
+{
+	bool  run = true;  // assume keep running
+
+	switch (msg->input.type) {
+		case InputTypeShort:
+			if (msg->input.key == InputKeyOk)  animateEn(state, !state->animate) ;
+			break;
+
+		case InputTypeLong:
+			if (msg->input.key == InputKeyOk)  animateSet((state->animID +1) % ANIM_CNT, state, gui) ;
+			break;
+
+		case InputTypePress:
+			switch (msg->input.key) {
+				case InputKeyUp:     animateEn(state, false);  break ;
+				case InputKeyDown:   animateEn(state, false);  break ;
+				case InputKeyLeft:   animateEn(state, false);  break ;
+				case InputKeyRight:  animateEn(state, false);  break ;
+
+				case InputKeyOk:
+				case InputKeyBack:
+				default:
+					break;
+			}
+			__attribute__ ((fallthrough));
+
+		case InputTypeRepeat:
+			switch (msg->input.key) {
+				case InputKeyUp:     move(state, DIR_U);  break ;
+				case InputKeyDown:   move(state, DIR_D);  break ;
+				case InputKeyLeft:   move(state, DIR_L);  break ;
+				case InputKeyRight:  move(state, DIR_R);  break ;
+				default:  break ;
+			}
+			break;
+
+		case InputTypeRelease: // Release - after debounce
+			if (msg->input.key == InputKeyBack)  run = false ;  // Signal the plugin to exit
+			break;
+
+		default:
+			break;
+	}
+
+	return run;
+}
+
+//+============================================================================ ========================================
+// Initialise plugin state variables
+//
+static inline
+bool  stateInit (state_t* const state,  const Gui* gui)
+{
+	state->x          = 1;
+	state->y          = 1;
+
+	state->animate    = false;
+	state->dir        = DIR_NONE;
+	state->animID     = ANIM_TEXT;
+
+	state->timer      = NULL;
+	state->timerHz    = furi_kernel_get_tick_frequency();
+	state->fps        = 12;
+
+	state->font       = FontPrimary;
+	if (!(state->text = strdup("BlueChip")))  return false ;
+
+	state->cnvW       = canvas_width(gui->canvas);
+	state->cnvH       = canvas_height(gui->canvas);
+
+	state->ballR      = 5;  // radius
+	animateSet(state->animID, state, gui);
+
+	srand(DWT->CYCCNT);
+
+	return true;
+}
+
+//+============================================================================ ========================================
+// Plugin entry point
+//
+int32_t  bc_demo (void)
+{
+	int32_t            error   = 255;  // assume fail
+	Gui*               gui     = NULL;
+	ViewPort*          vpp     = NULL;
+	state_t*           state   = NULL;
+	ValueMutex         mutex   = {0};
+	FuriMessageQueue*  queue   = NULL;
+	const uint32_t     queueSz = 8;
+	eventMsg_t         msg     = {0};
+	bool               run     = 1;
+
+	if ( !(queue = furi_message_queue_alloc(queueSz, sizeof(msg))) ) goto bail ;
+	if ( !(gui   = furi_record_open("gui")) )                        goto bail ;
+	if ( !(state = malloc(sizeof(state_t))) )                        goto bail ;
+	if ( !stateInit(state, gui) )                                    goto bail ;
+	if ( !init_mutex(&mutex, state, sizeof(state)))                  goto bail ;
+	if ( !(vpp = view_port_alloc()) )                                goto bail ;
+	view_port_input_callback_set(vpp, cbInput, queue);
+	view_port_draw_callback_set(vpp, cbDraw, &mutex);
+	gui_add_view_port(gui, vpp, GuiLayerFullscreen);
+	if ( !(state->timer = furi_timer_alloc(cbTimer, FuriTimerTypePeriodic, queue)) )  goto bail ;
+
+	if (run)  do {
+		FuriStatus  status = FuriStatusErrorTimeout;
+		while ((status = furi_message_queue_get(queue, &msg, 60000)) == FuriStatusErrorTimeout) ;
+		if (status == FuriStatusOk) {
+			if ( !(state = (state_t*)acquire_mutex_block(&mutex)) )  goto bail ;
+
+			switch (msg.id) {
+				case EVID_TICK:
+					evTick(state);  // Animation runs every "tick"
+					break;
+				case EVID_KEY:
+					run = evKey(&msg, state, gui);
+					break;
+				default:
+					break;
+			}
+			view_port_update(vpp);
+
+			if ( !release_mutex(&mutex, state) )  goto bail ;
+		}
+	} while (run);
+	error = 0;
+
+bail:
+	if (state->timer) {
+		(void)furi_timer_stop(state->timer);
+		furi_timer_free(state->timer);
+	}
+	gui_remove_view_port(gui, vpp);
+	if (vpp) {
+		view_port_enabled_set(vpp, false);
+		view_port_free(vpp);
+	}
+	if (mutex.mutex)  delete_mutex(&mutex) ;
+	if (state->text)  free(state->text) ;
+	if (state)        free(state) ;
+	furi_record_close("gui");
+	if (queue)        furi_message_queue_free(queue) ;
+
+	return error;
+}
