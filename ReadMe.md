@@ -47,9 +47,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL [NFC: add temp fix since no proper fix exist at the moment (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75ece9b697d1e3b66a75f2d423e51f369bc387f1)
 - Added: [MIDI RX v0.1 (By crackerjacques)](https://github.com/crackerjacques/flipper_zero_midi_rx)
 - Updated: [Calendar TECHART v1.1 (By techartdev)](https://github.com/techartdev/Calendar) (Version Only)
-- Updated: [MagSpoof v0.7 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - Updated: [BLE Spam v6.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- Updated: [MagSpoof v0.7 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 
 <a name="release">
 
