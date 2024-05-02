@@ -26,10 +26,7 @@
 #include <input/input.h>
 
 #include <lib/nfc/nfc.h>
-#include <lib/nfc/protocols/iso14443_3a/iso14443_3a.h>
-
 #include <nfc/nfc_poller.h>
-
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_data_generator.h>
 
@@ -126,6 +123,7 @@ struct Seader {
 
 struct SeaderPollerContainer {
     Iso14443_4aPoller* iso14443_4a_poller;
+    MfClassicPoller* mfc_poller;
     PicopassPoller* picopass_poller;
 };
 

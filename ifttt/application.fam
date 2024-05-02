@@ -10,5 +10,5 @@ App(
     stack_size=2 * 1024,
     order=20,
     fap_icon="icon.png",
-    fap_category="WiFi",
+    fap_category="GPIO/ESP",
 )

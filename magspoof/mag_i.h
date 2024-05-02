@@ -44,7 +44,7 @@
 #define submenu_add_lockable_item(                                             \
     submenu, label, index, callback, callback_context, locked, locked_message) \
     if(!locked) {                                                              \
-        submenu_add_item(submenu, label, index, callback, callback_context)    \
+        submenu_add_item(submenu, label, index, callback, callback_context);   \
     }
 #endif
 
@@ -89,7 +89,6 @@ typedef struct {
     char uart_text_input_store[UART_TERMINAL_TEXT_INPUT_STORE_SIZE + 1];
     FuriString* uart_text_box_store;
     size_t uart_text_box_store_strlen;
-    // UART_TextInput* text_input;
 } Mag;
 
 void mag_text_store_set(Mag* mag, const char* text, ...);
@@ -99,6 +98,8 @@ void mag_text_store_clear(Mag* mag);
 void mag_show_loading_popup(void* context, bool show);
 
 void mag_make_app_folder(Mag* mag);
+
+void mag_migrate_and_copy_files(Mag* mag);
 
 void mag_popup_timeout_callback(void* context);
 

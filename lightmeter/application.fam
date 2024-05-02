@@ -10,7 +10,7 @@ App(
     order=90,
     fap_version=(1, 2),
     fap_icon="lightmeter.png",
-    fap_category="GPIO",
+    fap_category="GPIO/Sensors",
     fap_private_libs=[
         Lib(
             name="BH1750",

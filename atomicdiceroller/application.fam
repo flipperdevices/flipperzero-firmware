@@ -10,5 +10,5 @@ App(
     stack_size=2 * 1024,
     fap_icon="atomicdiceroller.png",
     fap_libs=["mbedtls"],
-    fap_category="GPIO",
+    fap_category="GPIO/Sensors",
 )

@@ -182,8 +182,6 @@ static void mag_scene_emulate_config_set_interpacket(VariableItem* item) {
 };
 
 void mag_scene_emulate_config_on_enter(void* context) {
-    // TODO: retrieve current values from struct, rather than setting to default on setup
-
     Mag* mag = context;
     VariableItem* item;
     uint8_t value_index;
