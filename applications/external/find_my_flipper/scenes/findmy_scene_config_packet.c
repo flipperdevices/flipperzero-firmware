@@ -40,9 +40,7 @@ bool findmy_scene_config_packet_on_event(void* context, SceneManagerEvent event)
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, FindMySceneConfig);
             memcpy(app->state.data, app->packet_buf, findmy_state_data_size(app->state.tag_type));
-            findmy_state_save(&app->state);
-            furi_check(furi_hal_bt_extra_beacon_set_data(
-                app->state.data, findmy_state_data_size(app->state.tag_type)));
+            findmy_state_save_and_apply(&app->state);
             break;
         default:
             break;

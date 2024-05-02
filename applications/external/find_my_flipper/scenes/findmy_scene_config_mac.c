@@ -40,15 +40,7 @@ bool findmy_scene_config_mac_on_event(void* context, SceneManagerEvent event) {
         case ByteInputResultOk:
             furi_hal_bt_reverse_mac_addr(app->mac_buf);
             memcpy(&app->state.mac, app->mac_buf, sizeof(app->state.mac));
-            findmy_state_sync_config(&app->state);
-            findmy_state_save(&app->state);
-            if(furi_hal_bt_extra_beacon_is_active()) {
-                furi_check(furi_hal_bt_extra_beacon_stop());
-            }
-            furi_check(furi_hal_bt_extra_beacon_set_config(&app->state.config));
-            if(app->state.beacon_active) {
-                furi_check(furi_hal_bt_extra_beacon_start());
-            }
+            findmy_state_save_and_apply(&app->state);
             findmy_main_update_mac(app->findmy_main, app->state.mac);
             scene_manager_next_scene(app->scene_manager, FindMySceneConfigPacket);
             break;
