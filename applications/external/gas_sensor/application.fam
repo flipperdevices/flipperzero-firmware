@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gas_sensor_app",
     stack_size=2 * 1024,
-    fap_category="GPIO",
+    fap_category="GPIO/Sensors",
     fap_icon="gas_sensor.png",
     fap_icon_assets="images",
     fap_author="iancohee",

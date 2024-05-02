@@ -6,7 +6,7 @@ App(
     stack_size=1 * 1024,
     fap_icon="images/flipperdoc.png",
     fap_icon_assets="images",
-    fap_category="Tools",
+    fap_category="Tools/Educational",
     fap_author="JulanDeAlb",
     fap_weburl="https://github.com/julandealb/flipperdoc",
     fap_version="0.1",

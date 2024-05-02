@@ -5,7 +5,7 @@ App(
     entry_point="dap_link_app",
     stack_size=4 * 1024,
     fap_icon="dap_link.png",
-    fap_category="GPIO",
+    fap_category="GPIO/Debug",
     fap_private_libs=[
         Lib(
             name="free-dap",

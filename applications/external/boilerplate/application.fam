@@ -6,7 +6,7 @@ App(
     stack_size=2 * 1024,
     fap_icon="icons/boilerplate_10px.png",
     fap_icon_assets="icons",
-    fap_category="Tools",
+    fap_category="Tools/Educational",
     fap_icon_assets_symbol="boilerplate",
     fap_author="leedave",
     fap_weburl="https://github.com/leedave/flipper-zero-fap-boilerplate",

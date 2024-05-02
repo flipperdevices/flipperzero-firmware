@@ -6,7 +6,7 @@ App(
     stack_size=2 * 1024,
     fap_file_assets="resources",
     fap_icon="icons/app.png",
-    fap_category="GPIO",
+    fap_category="GPIO/Debug",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="swd_probe",
     fap_author="g3gg0 & (fixes by xMasterX)",

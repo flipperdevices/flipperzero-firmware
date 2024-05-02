@@ -5,7 +5,7 @@ App(
     entry_point="avr_isp_app",
     stack_size=4 * 1024,
     fap_icon="images/avr_app_icon_10px.png",
-    fap_category="GPIO",
+    fap_category="GPIO/Debug",
     fap_icon_assets="images",
     fap_private_libs=[
         Lib(

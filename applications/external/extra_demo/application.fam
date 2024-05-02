@@ -5,5 +5,9 @@ App(
     entry_point="extra_demo",
     stack_size=2 * 1024,
     fap_icon="icon.png",
-    fap_category="Tools",
+    fap_category="Tools/Educational",
+    fap_author="Milk-Cool",
+    fap_weburl="https://github.com/Milk-Cool/EXTRA-demo",
+    fap_version="0.4",
+    fap_description="A pack of extra commands for the Flipper Zero (a C library).",
 )

@@ -52,6 +52,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [MagSpoof v0.7 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - Updated: [FindMy Flipper v3.5 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) [FindMy: Fix battery level edge cases (eg. at boot) and cleanup (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5d2f3d49801b32d04b184a1b8f1d16a5889c7eff)
 - Added: [Plugin Demo v1.0 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_plugin_howto)
+- A few apps moved from GPIO into GPIO/Debug or Sensors. (By Willy-JL)
+- A few apps moved from Tools into Tools/Educational. You may want to delete your apps folder to remove duplicates. (By RogueMaster)
 
 <a name="release">
 
@@ -407,7 +409,7 @@ $ ./fbt dolphin_ext
 - [Ethernet W5500 v1.0 (By karasevia)](https://github.com/karasevia/finik_eth) `Req: W5500`
 - [Evil Portal v0.5 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 - [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
-- [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
+- [EXTRA Demo v0.4 (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
 - [FAP Boilerplate v1.1 (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - [Financial Calculator v1.0 (By schaene)](https://github.com/schaene/Flipper-Financial-Calculator)
 - [FindMy Flipper v3.5 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)

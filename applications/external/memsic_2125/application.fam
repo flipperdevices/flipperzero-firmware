@@ -5,6 +5,6 @@ App(
     entry_point="memsic_2125_app",
     stack_size=2 * 1024,
     fap_icon="memsic_2125.png",
-    fap_category="GPIO",
+    fap_category="GPIO/Sensors",
     fap_icon_assets_symbol="memsic_2125",
 )

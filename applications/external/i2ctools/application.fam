@@ -5,7 +5,7 @@ App(
     entry_point="i2ctools_app",
     stack_size=2 * 1024,
     fap_icon="i2ctools.png",
-    fap_category="GPIO",
+    fap_category="GPIO/Debug",
     fap_icon_assets_symbol="i2ctools",
     fap_icon_assets="images",
     fap_author="NaejEL",

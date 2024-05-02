@@ -5,7 +5,7 @@ App(
     entry_point="c_book_app",
     stack_size=10 * 1024,
     fap_icon="icons/c_book_icon.png",
-    fap_category="Tools",
+    fap_category="Tools/Educational",
     fap_icon_assets="icons",
     fap_file_assets="resources",
     fap_author="armixz",
