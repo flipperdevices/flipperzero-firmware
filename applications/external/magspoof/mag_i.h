@@ -89,7 +89,6 @@ typedef struct {
     char uart_text_input_store[UART_TERMINAL_TEXT_INPUT_STORE_SIZE + 1];
     FuriString* uart_text_box_store;
     size_t uart_text_box_store_strlen;
-    // UART_TextInput* text_input;
 } Mag;
 
 void mag_text_store_set(Mag* mag, const char* text, ...);
