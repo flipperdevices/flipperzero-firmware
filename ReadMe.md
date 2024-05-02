@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Calendar TECHART v1.1 (By techartdev)](https://github.com/techartdev/Calendar) (Version Only)
 - Updated: [MagSpoof v0.7 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - Updated: [BLE Spam v6.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam)
+- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 

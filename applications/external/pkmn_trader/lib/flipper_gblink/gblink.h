@@ -10,6 +10,10 @@
 #include <furi_hal.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	/* Flipper drives the clock line */
 	/* Unsupported at this time */
@@ -74,5 +78,9 @@ void gblink_int_disable(void *handle);
 void *gblink_alloc(struct gblink_def *gblink_def);
 
 void gblink_free(void *handle);
+
+#ifdef __cplusplus
+{
+#endif
 
 #endif // __GBLINK_H__
