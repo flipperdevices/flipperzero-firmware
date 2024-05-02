@@ -44,8 +44,6 @@ static void lrf_info_handler(LRFInfo *lrf_info, void *ctx) {
   memcpy(&(lrfinfo_model->info), lrf_info, sizeof(LRFInfo));
   lrfinfo_model->has_info = true;
 
-  FURI_LOG_I(TAG, "HERE");
-
   /* Trigger an LRF info view redraw */
   with_view_model(app->lrfinfo_view, LRFInfoModel* _model,
 			{UNUSED(_model);}, true);
