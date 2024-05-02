@@ -219,7 +219,7 @@ void set_diag_data_handler(LRFSerialCommApp *, void (*)(LRFDiag *, void *),
 void enable_shared_storage_dec_buf(LRFSerialCommApp *, bool);
 
 /** UART send function **/
-void uart_tx(LRFSerialCommApp *, uint8_t *, size_t);
+void uart_tx(LRFSerialCommApp *, uint8_t *, uint16_t);
 
 /** Send a command to the LRF **/
 void send_lrf_command(LRFSerialCommApp *, LRFCommand);
