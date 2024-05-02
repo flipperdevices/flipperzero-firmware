@@ -16,7 +16,6 @@ App(
     fap_private_libs=[
         Lib(
             name="flipper-gblink",
-            sources=["gblink.c"],
         ),
     ],
 )
