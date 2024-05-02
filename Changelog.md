@@ -1,3 +1,5 @@
+- Added USB serial passthrough function
+
 ## Version 1.6 - 29/04/2024
 
 - Added baudrate setting
