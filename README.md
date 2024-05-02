@@ -20,7 +20,7 @@ On an x86<sup>[1]</sup> computer, at a Linux<sup>[2]</sup> command prompt, type:
 mkdir -p ~/flipperZero/official/
 cd ~/flipperZero/official/
 git clone --recursive  https://github.com/flipperdevices/flipperzero-firmware.git  ./
-git submodule update --init --recursive
+( cd assets/protobuf/ && git fetch )
 ./fbt
 ```
 ...and wait while it downloads all the required tools and performs the first build of the code.
