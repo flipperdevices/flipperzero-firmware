@@ -1,16 +1,13 @@
-# qv. https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md
-
 App(
-    appid="bc_demo",
-    name="Bluechip Demo",
+    appid="plugin_demo",
+    name="Plugin Demo",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bc_demo",
-    cdefines=["APP_BC_DEMO"],
-    requires=[
-        "gui",
-    ],
     stack_size=2 * 1024,
-    order=20,
     fap_icon="CS.png",
-    fap_category="Cyborg Systems",
+    fap_category="Tools/Educational",
+    fap_author="csBlueChip",
+    fap_weburl="https://github.com/csBlueChip/FlipperZero_plugin_howto",
+    fap_version="1.0",
+    fap_description="A simple plugin for the FlipperZero written as a tutorial example [ie. excessive documentation & error handling]. See code.",
 )
