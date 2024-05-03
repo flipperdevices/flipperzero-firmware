@@ -142,12 +142,6 @@ static void vcp_on_cdc_tx_complete(void *ctx) {
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
 
-  /* If we just sent the maximum number of bytes we could, tell the virtual
-     COM port RX/TX thread it has more data to send */
-  if(passthru_model->vcp_last_sent == sizeof(passthru_model->vcp_tx_buf_len))
-    furi_thread_flags_set(furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
-				data_to_send);
-
   /* Release the virtual COM port TX semaphore */
   furi_semaphore_release(passthru_model->vcp_tx_sem);
 }
@@ -236,7 +230,7 @@ static void log_serial_bytes(PassthruModel *passthru_model, bool to_lrf,
     }
 
     /* Log the line */
-    FURI_LOG_I(TAG, passthru_model->spstr2);
+    FURI_LOG_T(TAG, passthru_model->spstr2);
   }
 }
 
@@ -295,7 +289,7 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
           passthru_model->update_display = true;
         }
 
-        /* Rell ourselves that more data is available */
+        /* Tell ourselves that more data is available */
         furi_thread_flags_set(
 			furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
 			data_avail);
@@ -315,33 +309,44 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
       if(passthru_model->vcp_tx_buf_len) {
 
         /* Acquire the semaphore so we block at the next round until the
-           transmission is complete */
-        furi_check(furi_semaphore_acquire(passthru_model->vcp_tx_sem,
-							FuriWaitForever)
-			== FuriStatusOk);
+           transmission is complete. Only try for a while so we don't get hung
+           up */
+        if(furi_semaphore_acquire(passthru_model->vcp_tx_sem, 500)
+			== FuriStatusOk) {
 
-        /* Send the UART data */
-        furi_hal_cdc_send(passthru_vcp_channel, passthru_model->vcp_tx_buf,
+          /* Send the UART data */
+          furi_hal_cdc_send(passthru_vcp_channel, passthru_model->vcp_tx_buf,
 				passthru_model->vcp_tx_buf_len);
-        passthru_model->vcp_last_sent = passthru_model->vcp_tx_buf_len;
+          passthru_model->vcp_last_sent = passthru_model->vcp_tx_buf_len;
 
-        /* Update the counter of bytes received from the LRF */
-        passthru_model->total_bytes_recv += passthru_model->vcp_last_sent;
+          /* Update the counter of bytes received from the LRF */
+          passthru_model->total_bytes_recv += passthru_model->vcp_last_sent;
 
-        /* Update the display */
-        passthru_model->update_display = true;
+          /* Update the display */
+          passthru_model->update_display = true;
 
-        /* Log the relayed bytes */
-        log_serial_bytes(passthru_model, false, passthru_model->vcp_tx_buf,
+          /* Log the relayed bytes */
+          log_serial_bytes(passthru_model, false, passthru_model->vcp_tx_buf,
 				passthru_model->vcp_last_sent);
+        }
+
+        /* We failed to acquire the semaphore, so we didn't send anything */
+        else
+          passthru_model->vcp_last_sent = 0;
+
+        /* Tell ourselves that more data is available */
+        furi_thread_flags_set(
+			furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
+			data_to_send);
       }
 
       /* We have nothing to send */
       else {
 
-        /* If we last sent the maximum number of bytes we could, send 0 bytes
-           to signal the end of the transmission */
-        if(passthru_model->vcp_last_sent ==
+        /* Special usbd_ep_write oddity: if the last block of bytes sent was
+           the maximum size allowed (64 bytes), the actual transfer is held up
+           and we need to send 0 bytes to trigger the actual data transfer */
+        if(passthru_model->vcp_last_sent >
 				sizeof(passthru_model->vcp_tx_buf_len)) {
 
           /* Acquire the semaphore so we block at the next round until the
