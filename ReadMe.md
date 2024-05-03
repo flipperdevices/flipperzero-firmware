@@ -535,7 +535,7 @@ $ ./fbt dolphin_ext
 - [Servotester (By spin7ion)](https://github.com/spin7ion/flipper-servotester)
 - [ServoTester (2) (By mhasbini)](https://github.com/mhasbini/ServoTesterApp/tree/master)
 - [ShapShup v1.2 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
-- [SI4713 Tuner v0.1 (By rullinoiz)](https://github.com/rullinoiz/flipper-si4713)
+- [SI4713 Tuner v0.1 (By rullinoiz)](https://github.com/rullinoiz/flipper-si4713) `Req: SI4713`
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
 - [Skeleton App v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app)
 - [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
