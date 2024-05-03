@@ -3,8 +3,9 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#define PCSG_VERSION_APP "0.1"
-#define PCSG_DEVELOPED "@xMasterX & @Shmuma"
+#define PCSG_VERSION_APP FAP_VERSION
+#define PCSG_DEVELOPED \
+    "@xMasterX & @Shmuma\nProtocol improvements by:\n@htotoo\nIcons by:\n@Svaarich"
 #define PCSG_GITHUB "https://github.com/xMasterX/flipper-pager"
 
 #define PCSG_KEY_FILE_VERSION 1
