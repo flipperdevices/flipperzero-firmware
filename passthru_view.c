@@ -304,8 +304,6 @@ static void passthru_view_timer_callback(void *ctx) {
   /* Should the display be updated? */
   if(passthru_model->update_display) {
 
-    FURI_LOG_I(TAG, "DISPLAY UPDATE");
-
     /* Trigger a passthrough view redraw */
     with_view_model(app->passthru_view, PassthruModel* _model,
 			{UNUSED(_model);}, true);
