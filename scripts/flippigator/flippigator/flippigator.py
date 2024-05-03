@@ -6,6 +6,7 @@ from typing import Optional
 
 import cv2 as cv
 import numpy
+import asyncio
 from flippigator.modules.applications import AppApplications
 from flippigator.modules.badusb import AppBadusb
 from flippigator.modules.gpio import AppGpio
@@ -78,13 +79,16 @@ class Navigator:
     def __del__(self):
         pass
 
-    async def update_screen(self):
+    async def update_screen(self, timeout: float = 0.1):
         if self.screen_stream is None:
             self.screen_stream = await self.proto.stream(StartScreenStreamRequestCommand(), command_id=0)
             await self.screen_stream.__anext__()
-
-        screen_response = await self.screen_stream.__anext__()
-        data = screen_response.gui_screen_frame.data
+        try:
+            async with asyncio.timeout(timeout):
+                screen_response = await self.screen_stream.__anext__()
+                data = screen_response.gui_screen_frame.data
+        except TimeoutError:
+            return self.screen_image.copy()
 
         def get_bin(x):
             return format(x, "b")
@@ -351,10 +355,9 @@ class Navigator:
     async def get_menu_list(self, ref=None):
         if ref == None:
             ref = self.imRef
-        time.sleep(0.2)
+        await asyncio.sleep(0.2)
         self.logger.info("Scanning menu list")
         menus = list()
-        await self.get_current_state(timeout=0.2, ref=ref)
 
         while True:
             cur = await self.get_current_state(timeout=0.2, ref=ref)
@@ -376,7 +379,7 @@ class Navigator:
         Get first item in menu
         browser: if True, will skip first item (folder UP icon"
         """
-        time.sleep(0.2)
+        await asyncio.sleep(0.2)
         menus = list()
         cur = await self.get_current_state()
 
@@ -432,6 +435,8 @@ class Navigator:
 
     async def go_to_main_screen(self):
         self.logger.error('no back 1')
+        #import pdb
+        #pdb.set_trace()
 
         await self.press_back()
         await self.press_back()
@@ -451,9 +456,9 @@ class Navigator:
     async def open_file(self, module, filename):
         self.logger.info("Opening file '" + filename + "' in module '" + module + "'")
         await self.go_to_main_screen()
-        time.sleep(1)
+        await asyncio.sleep(1)
         await self.press_down()
-        time.sleep(0.4)  # some waste "heads" going at the opening of browser
+        await asyncio.sleep(0.4)  # some waste "heads" going at the opening of browser
 
         heads = list()
         start_time = time.time()
@@ -641,7 +646,7 @@ class Relay:
         self._recieved_data = 0
         self._curent_reader = 0
         self._curent_key = 0
-        self._serial.reset_output_buffer() # TODO: move it out
+        #self._serial.reset_output_buffer() # TODO: move it out
 
         self._serial.write(("R0K0\n").encode("ASCII"))
         self.logger = logging.getLogger("Relay")
@@ -651,15 +656,15 @@ class Relay:
     def __del__(self):
         pass
 
-    async def set_reader(self, reader):
-        await self._serial.write(
+    def set_reader(self, reader):
+        self._serial.write(
             ("R" + str(reader) + "K" + str(self._curent_key) + "\n").encode("ASCII")
         )
         self._curent_reader = reader
         self.logger.info("Selected reader: " + str(self._curent_reader))
 
-    async def set_key(self, key):
-        await self._serial.write(
+    def set_key(self, key):
+        self._serial.write(
             ("R" + str(self._curent_reader) + "K" + str(key) + "\n").encode("ASCII")
         )
         self._curent_key = key
@@ -671,8 +676,8 @@ class Relay:
     def get_key(self) -> int:
         return self._curent_key
 
-    async def reset(self):
-        await self._serial.write(("R0K0\n").encode("ASCII"))
+    def reset(self):
+        self._serial.write(("R0K0\n").encode("ASCII"))
         self._curent_reader = 0
         self._curent_key = 0
         self.logger.info("Reset relay module")

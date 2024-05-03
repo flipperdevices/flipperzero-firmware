@@ -114,9 +114,14 @@ def pytest_configure(config):
         os.makedirs('reports')
     config.option.htmlpath = 'reports/'+datetime.now().strftime("%d-%m-%Y %H-%M-%S")+".html"
 
-    if config.getoption("--relay-port"):
+    if config.getoption("--relay-port") != None:
+        print("Reboot flippers")
         relay_serial = serial.Serial(config.getoption("--relay-port"), timeout=1)
-        time.sleep(10)
+        relay_serial.baudrate = 115200
+        relay_serial.write(("R9K0\n").encode("ASCII"))
+        time.sleep(0.2)
+        relay_serial.write(("R0K0\n").encode("ASCII"))
+        time.sleep(5)
     else:
         if config.getoption("--port"):
             pass
@@ -262,7 +267,7 @@ def flipper_serial(request):
     elif is_windows():
         port = "COM4"
     else:
-        port = "/dev/ttyACM0"
+        port = "/dev/ttyACM10"
 
     try:
 
@@ -286,12 +291,17 @@ async def bench_serial(request):
     else:
         port = "/dev/ttyUSB0"
 
+    print("bTry to open")
     bench_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)
-
+    print("b"+str(port))
+    await bench_serial.open_connection()
+    print("bDone")
     await asyncio.sleep(3)
 
     await bench_serial.drain()
+    print("bdrain")
     await bench_serial.clear_read_buffer()
+    print("bclear")
 
     logging.debug("NFC and RFID bench serial port opened on" + port)
     return bench_serial
@@ -306,11 +316,12 @@ async def reader_serial(request):
     elif is_windows():
         port = "COM6"
     else:
-        port = "/dev/ttyACM1"
+        port = "/dev/ttyACM11"
 
     reader_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)
 
     await asyncio.sleep(3)
+    #await reader_serial.open_connection()
 
     await reader_serial.drain()
     await reader_serial.clear_read_buffer()
@@ -328,15 +339,20 @@ async def flipper_reader_serial(request):
     elif is_windows():
         port = "COM7"
     else:
-        port = "/dev/ttyACM2"
+        port = "/dev/ttyACM12"
 
-    flipper_reader_serial = SerialConnector(url=port, baud_rate=2304000, timeout=1)
-
-    await asyncio.sleep(3)
-
-    await flipper_reader_serial.drain()
-    await flipper_reader_serial.clear_read_buffer()
-
+    print("Try to open reader flipper serial")
+    flipper_reader_serial = SerialConnector(url=port, baud_rate=2304000)
+    print("Wait for connection")
+    await asyncio.sleep(1)
+    #await flipper_reader_serial.open_connection()
+    print("Connection established")
+    #await flipper_reader_serial.drain()
+    #await flipper_reader_serial.clear_read_buffer()
+    print("Buffer drained")
+    #await asyncio.sleep(1)
+    #import pdb
+    #pdb.set_trace()
     logging.debug("Flipper 'reader' serial port opened on" + port)
     return flipper_reader_serial
 
@@ -350,21 +366,23 @@ async def flipper_key_serial(request):
     elif is_windows():
         port = "COM8"
     else:
-        port = "/dev/ttyACM3"
+        port = "/dev/ttyACM13"
 
-    flipper_key_serial = SerialConnector(url=port, baud_rate=2304000, timeout=1)
-
-    await asyncio.sleep(3)
-
-    await flipper_key_serial.drain()
-    await flipper_key_serial.clear_read_buffer()
-
+    print("Try to open key flipper serial")
+    flipper_key_serial = SerialConnector(url=port, baud_rate=2304000)
+    print("Wait for connection")
+    #await asyncio.sleep(1)
+    #await flipper_key_serial.open_connection()
+    print("Connection established")
+    #await flipper_key_serial.drain()
+    #await flipper_key_serial.clear_read_buffer()
+    print("Buffer drained")
     logging.debug("Flipper 'key' serial port opened on" + port)
     return flipper_key_serial
 
 
 @pytest.fixture(scope="session")
-async def relay_serial(request):
+def relay_serial(request):
     # taking port from config or returning OS based default
     port = request.config.getoption("--relay-port")
     if port:
@@ -372,14 +390,19 @@ async def relay_serial(request):
     elif is_windows():
         port = "COM9"
     else:
-        port = "/dev/ttyACM4"
+        port = "/dev/ttyACM14"
 
-    relay_serial = SerialConnector(url=port, baud_rate=115200, timeout=1)
+    print("Try to open")
+    relay_serial = serial.Serial(port, timeout=1)
+    relay_serial.baudrate = 115200
+    print(str(port))
+    print("Done")
 
-    await asyncio.sleep(3)
 
-    await relay_serial.drain()
-    await relay_serial.clear_read_buffer()
+    relay_serial.flushOutput()
+    print("drain")
+    relay_serial.flushInput()
+    print("clear")
 
     logging.debug("Relay serial port opened on" + port)
     return relay_serial
@@ -406,7 +429,6 @@ async def nav(flipper_serial, request):
         path=path,
         window_name="Main flipper",
     )
-    await nav.update_screen()
 
     if not (request.config.getoption("--no-init")):
         # Enabling of bluetooth
@@ -416,7 +438,6 @@ async def nav(flipper_serial, request):
         await nav.press_ok()
         await nav.go_to("Bluetooth")
         await nav.press_ok()
-        await nav.update_screen()
         menu = await nav.get_menu_list()
         if "BluetoothIsON" in menu:
             pass
@@ -452,7 +473,9 @@ def px(request):
 @pytest.fixture(scope="session")
 async def nav_reader(flipper_reader_serial, request):
     proto = FlipperProtobufClient(flipper_reader_serial)
+    print("Try to start proto: ", end = '')
     await proto.start()
+    print("Done")
     logging.debug("RPC session of flipper 'reader' started")
 
     path = request.config.getoption("--path")
@@ -470,8 +493,12 @@ async def nav_reader(flipper_reader_serial, request):
         path=path,
         window_name="Reader flipper",
     )
+    print("Try to update screen: ", end = '')
     await nav_reader.update_screen()
-    if not (request.config.getoption("--no_init")):
+    nav_reader.draw_screen()
+    nav_reader.draw_screen()
+    print("Done")
+    if not (request.config.getoption("--no-init")):
         # Enabling of bluetooth
         await nav_reader.go_to_main_screen()
         await nav_reader.press_ok()
@@ -479,7 +506,6 @@ async def nav_reader(flipper_reader_serial, request):
         await nav_reader.press_ok()
         await nav_reader.go_to("Bluetooth")
         await nav_reader.press_ok()
-        await nav_reader.update_screen()
         menu = await nav_reader.get_menu_list()
         if "BluetoothIsON" in menu:
             pass
@@ -502,7 +528,7 @@ async def nav_reader(flipper_reader_serial, request):
             raise FlippigatorException("Can not enable debug")
 
     yield nav_reader
-    await proto.start()
+    await proto.stop()
 
 
 @pytest.fixture(scope="session")
@@ -527,7 +553,9 @@ async def nav_key(flipper_key_serial, request):
         window_name="Key flipper",
     )
     await nav_key.update_screen()
-    if not (request.config.getoption("--no_init")):
+    nav_key.draw_screen()
+    nav_key.draw_screen()
+    if not (request.config.getoption("--no-init")):
         # Enabling of bluetooth
         await nav_key.go_to_main_screen()
         await nav_key.press_ok()
@@ -535,7 +563,6 @@ async def nav_key(flipper_key_serial, request):
         await nav_key.press_ok()
         await nav_key.go_to("Bluetooth")
         await nav_key.press_ok()
-        await nav_key.update_screen()
         menu = await nav_key.get_menu_list()
         if "BluetoothIsON" in menu:
             pass
@@ -558,17 +585,19 @@ async def nav_key(flipper_key_serial, request):
             raise FlippigatorException("Can not enable debug")
 
     yield nav_key
-    await proto.start()
+    await proto.stop()
 
 
 @pytest.fixture(scope="session", autouse=False)
 async def gator(bench_serial, request) -> Gator:
-    bench = request.config.getoption("--bench_nfc_rfid")
+    bench = request.config.getoption("--bench-nfc-rfid")
     if bench:
         logging.debug("Gator initialization")
 
         gator = Gator(bench_serial, 900, 900)
+        print("Homing bench")
         await gator.home()
+        print("Homing success")
 
         logging.debug("Gator initialization complete")
         return gator
@@ -611,7 +640,7 @@ def reader_indala(reader_serial, gator, request) -> Reader:
 
 
 @pytest.fixture(scope="session", autouse=False)
-def relay(relay_serial, gator, request) -> Relay:
+def relay(relay_serial, request) -> Relay:
     bench = request.config.getoption("--bench-ibutton-ir")
     if bench:
         logging.debug("Relay module initialization")
