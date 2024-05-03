@@ -1,3 +1,5 @@
+#  [Accelerated Mouse Pointer (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
+#  [Enhance Random Interval and Movement Functionality in HID Mouse Jiggler for Improved Stealth and Human-Like Behavior (By gushmazuko)](https://github.com/DarkFlippers/unleashed-firmware/pull/746)
 App(
     appid="hid_usb",
     name="USB Remote",
