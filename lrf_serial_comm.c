@@ -17,7 +17,6 @@
 
 /*** Defines ***/
 #define TAG "lrf_serial_comm"
-#define RX_STREAM_SIZE 256
 #define CR 13
 #define LF 10
 #define SLASH 47
@@ -110,7 +109,7 @@ struct _LRFSerialCommApp {
   uint16_t uart_rx_timeout;
 
   /* Receive buffer */
-  uint8_t rx_buf[CDC_DATA_SZ];
+  uint8_t rx_buf[UART_RX_BUF_SIZE];
 
   /* Default LRF frame decode buffer */
   uint8_t default_dec_buf[128];
@@ -362,7 +361,7 @@ static int32_t uart_rx_thread(void *ctx) {
       /* Get the data */
       rx_buf_len = furi_stream_buffer_receive(app->rx_stream,
 						app->rx_buf,
-						RX_STREAM_SIZE, 0);
+						UART_RX_BUF_SIZE, 0);
 
       /* Did we actually get something? */
       if(rx_buf_len > 0) {
@@ -961,6 +960,7 @@ static int32_t uart_rx_thread(void *ctx) {
 /** UART send function **/
 void uart_tx(LRFSerialCommApp *app, uint8_t *data, uint16_t len) {
   furi_hal_serial_tx(app->serial_handle, data, len);
+  furi_hal_serial_tx_wait_complete(app->serial_handle);
 }
 
 
@@ -1009,7 +1009,7 @@ LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration,
   enable_shared_storage_dec_buf(app, false);
 
   /* Allocate space for the UART receive stream buffer */
-  app->rx_stream = furi_stream_buffer_alloc(RX_STREAM_SIZE, 1);
+  app->rx_stream = furi_stream_buffer_alloc(UART_RX_BUF_SIZE, 1);
 
   /* Allocate space for the UART receive thread */
   app->rx_thread = furi_thread_alloc();

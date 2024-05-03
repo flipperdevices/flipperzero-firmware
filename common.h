@@ -347,9 +347,6 @@ typedef struct {
   /* Whether the virtual COM port is connected */
   bool vcp_connected;
 
-  /* Whether something has opened the remote end of the virtual COM port */
-  bool vcp_open;
-
   /* Virtual COM port configuration */
   struct usb_cdc_line_coding *vcp_config;
 
@@ -362,7 +359,7 @@ typedef struct {
   uint16_t vcp_rx_buf_len;
 
   /* UART RX buffer */
-  uint8_t uart_rx_buf[CDC_DATA_SZ];
+  uint8_t uart_rx_buf[UART_RX_BUF_SIZE];
   uint16_t uart_rx_buf_len;
 
   /* Virtual COM port RX/TX thread */
@@ -370,6 +367,15 @@ typedef struct {
 
   /* Virtual COM port send semaphore */
   FuriSemaphore *vcp_tx_sem;
+
+  /* Number of bytes transferred to the virtual COM port and their address */
+  uint16_t vcp_bytes_sent;
+  uint8_t *vcp_bytes_sent_addr;
+
+  /* Number of bytes left to transfer to the virtual COM port and their
+     address */
+  int16_t vcp_bytes_left_to_send;
+  uint8_t *vcp_bytes_left_to_send_addr;
 
   /* Total number of bytes sent to the LRF */
   uint32_t total_bytes_sent;
@@ -380,8 +386,12 @@ typedef struct {
   /* Flag to indicate that the display needs updating */
   bool update_display;
 
-  /* Scratchpad string */
-  char spstr[12];
+  /* Serial traffic logging prefix */
+  char traffic_logging_prefix[8];
+
+  /* Scratchpad strings */
+  char spstr1[16];
+  char spstr2[UART_RX_BUF_SIZE * 3 + 8];
 
 } PassthruModel;
 

@@ -16,17 +16,10 @@
 
 
 
-/*** Defines ***/
-#define VCP_DTR_BIT 0
-#define VCP_RTS_BIT 1
-
-
-
 /*** Forward declarations ***/
 static void vcp_on_cdc_tx_complete(void *);
 static void vcp_on_cdc_rx(void *);
-static void vcp_state_callback(void *, uint8_t);
-static void vcp_on_cdc_control_line(void *, uint8_t);
+static void vcp_on_state_change(void *, uint8_t);
 static void vcp_on_line_config(void *, struct usb_cdc_line_coding *);
 
 
@@ -35,8 +28,8 @@ static void vcp_on_line_config(void *, struct usb_cdc_line_coding *);
 static CdcCallbacks cdc_callbacks = {
   vcp_on_cdc_tx_complete,
   vcp_on_cdc_rx,
-  vcp_state_callback,
-  vcp_on_cdc_control_line,
+  vcp_on_state_change,
+  NULL,
   vcp_on_line_config
 };
 
@@ -47,6 +40,7 @@ typedef enum {
   stop = 1,
   data_avail = 2,
   data_to_send = 4,
+  done_sending = 8,
 } vcp_rx_tx_thread_evts;
 
 
@@ -76,14 +70,13 @@ static void lrf_raw_data_handler(uint8_t *data, uint16_t len, void *ctx) {
 
 
 /** Mirror the state of the virtual COM port on the UART: open the UART if the
-    virtual COM port is open and set the same baudrate **/
+    virtual COM port is connected and set the same baudrate **/
 static void mirror_vcp_on_uart(App *app, PassthruModel *passthru_model) {
 
   uint8_t i;
 
-  /* Check that all the conditions are met to start or reconfigure the UART */
-  if(passthru_model->enabled && passthru_model->vcp_connected &&
-	passthru_model->vcp_open)
+  /* Is the virtual COM port connected */
+  if(passthru_model->enabled && passthru_model->vcp_connected)
 
     /* Check that the virtual COM port has a baudrate the LRF supports */
     for(i=0; i < nb_config_baudrate_values &&
@@ -150,8 +143,12 @@ static void vcp_on_cdc_tx_complete(void *ctx) {
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
 
-  /* Release the virtual COM port TX semaphore */
-  furi_semaphore_release(passthru_model->vcp_tx_sem);
+  /* If there is data left to send from the last received UART data, tell the
+     virtual COM port RX/TX thread it has more data to send. Otherwise tell it
+     all the data was sent */
+  furi_thread_flags_set(furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
+			passthru_model->vcp_bytes_left_to_send ?
+						data_to_send : done_sending);
 }
 
 
@@ -170,31 +167,12 @@ static void vcp_on_cdc_rx(void *ctx) {
 
 
 /** Virtual COM port callback for when the port's connected state changes */
-static void vcp_state_callback(void *ctx, uint8_t state) {
+static void vcp_on_state_change(void *ctx, uint8_t state) {
 
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
 
   passthru_model->vcp_connected = state? true : false;
-
-  /* Mirror the virtual COM port on the UART */
-  mirror_vcp_on_uart(app, passthru_model);
-
-  /* Update the display */
-  passthru_model->update_display = true;
-}
-
-
-
-/** Virtual COM port callback for when RTS or DTR change state */
-static void vcp_on_cdc_control_line(void *ctx, uint8_t state) {
-
-  App *app = (App *)ctx;
-  PassthruModel *passthru_model = view_get_model(app->passthru_view);
-
-  /* Something has opened the virtual COM port at the remote end if the virtual
-     DTR line is asserted */
-  passthru_model->vcp_open = state & (1 << VCP_DTR_BIT)? true : false;
 
   /* Mirror the virtual COM port on the UART */
   mirror_vcp_on_uart(app, passthru_model);
@@ -223,6 +201,35 @@ static void vcp_on_line_config(void *ctx, struct usb_cdc_line_coding *vpc_cfg) {
 
 
 
+/** Serial traffic logger */
+static void log_serial_bytes(PassthruModel *passthru_model, bool to_lrf,
+				uint8_t *bytes, uint16_t nb_bytes) {
+
+  uint16_t i, j;
+
+  /* Should we log the relayed bytes? */
+  if(passthru_model->traffic_logging_prefix[0]) {
+
+    /* Initialize the log string */
+    passthru_model->traffic_logging_prefix[0] = to_lrf? '>' : '<';
+    snprintf(passthru_model->spstr2, sizeof(passthru_model->spstr2),
+		"%s: ", passthru_model->traffic_logging_prefix);
+    j = strlen(passthru_model->spstr2);
+
+    /* Add the bytes as hex values */
+    for(i = 0; i < nb_bytes; i++) {
+      snprintf(passthru_model->spstr2 + j, sizeof(passthru_model->spstr2) - j,
+		"%02x ", bytes[i]);
+      j += 3;
+    }
+
+    /* Log the line */
+    FURI_LOG_I(TAG, passthru_model->spstr2);
+  }
+}
+
+
+
 /** Virtual COM port RX/TX thread **/
 static int32_t vcp_rx_tx_thread(void *ctx) {
 
@@ -233,15 +240,23 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
   while(1) {
 
     /* Get events */
-    evts = furi_thread_flags_wait(stop | data_avail | data_to_send,
+    evts = furi_thread_flags_wait(stop | data_avail |
+					data_to_send | done_sending,
 					FuriFlagWaitAny, FuriWaitForever);
 
     /* Check for errors */
     furi_check((evts & FuriFlagError) == 0);
 
     /* Should we stop the thread? */
-    if(evts & stop)
+    if(evts & stop) {
+
+      /* Forcibly release the virtual COM port TX semaphore in the LRF raw data
+         handler is waiting on it, so we don't block the LRF serial comm app */
+      furi_semaphore_release(passthru_model->vcp_tx_sem);
+
+      /* Stop the main loop */
       break;
+    }
 
     /* Should we relay data from the virtual COM port to the UART? */
     if(evts & data_avail) {
@@ -256,10 +271,12 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
       if(passthru_model->vcp_rx_buf_len && passthru_model->uart_baudrate) {
 
         /* Relay the data to the UART */
-        uart_tx(app->lrf_serial_comm_app,
-		passthru_model->vcp_rx_buf, passthru_model->vcp_rx_buf_len);
+        uart_tx(app->lrf_serial_comm_app, passthru_model->vcp_rx_buf,
+				passthru_model->vcp_rx_buf_len);
 
-        FURI_LOG_T(TAG, "UART < VDC: %d bytes", passthru_model->vcp_rx_buf_len);
+        /* Log the relayed bytes */
+        log_serial_bytes(passthru_model, true, passthru_model->vcp_rx_buf,
+				passthru_model->vcp_rx_buf_len);
 
         /* Update the counter of bytes sent to the LRF */
         passthru_model->total_bytes_sent += passthru_model->vcp_rx_buf_len;
@@ -272,21 +289,65 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
     /* Should we relay data from UART to the virtual COM port? */
     if(evts & data_to_send) {
 
-      /* Relay the data to the virtual COM port */
-      furi_hal_cdc_send(passthru_vcp_channel, passthru_model->uart_rx_buf,
-			passthru_model->uart_rx_buf_len);
+      /* If there is no data left to send from the last received UART data, use
+         new data */
+      if(!passthru_model->vcp_bytes_left_to_send) {
+        passthru_model->vcp_bytes_left_to_send_addr =
+					passthru_model->uart_rx_buf;
+        passthru_model->vcp_bytes_left_to_send =
+					passthru_model->uart_rx_buf_len;
+      }
 
-      /* Wait a bit to properly flush the TX buffer, otherwise we risk data
-         corruption at high speed */
-      furi_delay_ms(1);
+      /* Does the data to send exceeed what the virtual COM port can handle? */
+      if(passthru_model->vcp_bytes_left_to_send > CDC_DATA_SZ) {
 
-      FURI_LOG_T(TAG, "UART > VDC: %d bytes", passthru_model->uart_rx_buf_len);
+        /* Only send as much as the virtual COM port can handle */
+        furi_hal_cdc_send(passthru_vcp_channel,
+				passthru_model->vcp_bytes_left_to_send_addr,
+				CDC_DATA_SZ);
+
+        passthru_model->vcp_bytes_sent_addr =
+				passthru_model->vcp_bytes_left_to_send_addr;
+        passthru_model->vcp_bytes_sent = CDC_DATA_SZ;
+
+        /* Schedule the rest of the data to be sent at the next round */
+        passthru_model->vcp_bytes_left_to_send_addr += CDC_DATA_SZ;
+        passthru_model->vcp_bytes_left_to_send -= CDC_DATA_SZ;
+      }
+
+      /* The virtual COM port can send all of the data in one go */
+      else {
+
+        /* Send everything */
+        furi_hal_cdc_send(passthru_vcp_channel,
+				passthru_model->vcp_bytes_left_to_send_addr,
+				passthru_model->vcp_bytes_left_to_send);
+
+        passthru_model->vcp_bytes_sent_addr =
+				passthru_model->vcp_bytes_left_to_send_addr;
+        passthru_model->vcp_bytes_sent = passthru_model->vcp_bytes_left_to_send;
+
+        /* Nothing left to send at the next round */
+        passthru_model->vcp_bytes_left_to_send = 0;
+      }
+
+      /* Update the display */
+      passthru_model->update_display = true;
+    }
+
+    /* Was all the data sent? */
+    if(evts & done_sending) {
 
       /* Update the counter of bytes received from the LRF */
       passthru_model->total_bytes_recv += passthru_model->uart_rx_buf_len;
 
-      /* Update the display */
-      passthru_model->update_display = true;
+      /* Log the relayed bytes */
+      log_serial_bytes(passthru_model, false, passthru_model->uart_rx_buf,
+			passthru_model->uart_rx_buf_len);
+
+      /* Release the virtual COM port TX semaphore so the LRF raw data handler
+         can send some more */
+      furi_semaphore_release(passthru_model->vcp_tx_sem);
     }
   }
 
@@ -324,6 +385,9 @@ void passthru_view_enter_callback(void *ctx) {
 
   with_view_model(app->passthru_view, PassthruModel *passthru_model,
 	{
+	  /* We have no data left to send to the virtual COM port yet */
+	  passthru_model->vcp_bytes_left_to_send = 0;
+
 	  /* Reset the serial traffic counters */
 	  passthru_model->total_bytes_sent = 0;
 	  passthru_model->total_bytes_recv = 0;
@@ -332,10 +396,8 @@ void passthru_view_enter_callback(void *ctx) {
 	     before the previous transmission is finished */
 	  passthru_model->vcp_tx_sem = furi_semaphore_alloc(1, 1);
 
-	  /* Start out assuming the virtual COM port isn't connected and nothing
-	     has opened it on the remote end yet */
+	  /* Start out assuming the virtual COM port isn't connected */
 	  passthru_model->vcp_connected = false;
-	  passthru_model->vcp_open = false;
 
 	  /* Get the current virtual COM port configuration */
 	  passthru_model->vcp_config =
@@ -386,6 +448,15 @@ void passthru_view_enter_callback(void *ctx) {
 
 	  /* Update the display for the first time */
 	  passthru_model->update_display = true;
+
+	  /* Initialise the serial traffic logging prefix to an empty string if
+	     we don't have a console to log to, or a prefix with no direction */
+	  if(passthru_vcp_channel == 0)
+	    passthru_model->traffic_logging_prefix[0] = 0;
+	  else
+	    snprintf(passthru_model->traffic_logging_prefix,
+			sizeof(passthru_model->traffic_logging_prefix),
+			" LRF");
 	},
 	false);
 
@@ -458,16 +529,16 @@ void passthru_view_draw_callback(Canvas *canvas, void *model) {
   canvas_set_font(canvas, FontBigNumbers);
 
   /* Print the number of bytes sent to the LRF */
-  snprintf(passthru_model->spstr, sizeof(passthru_model->spstr),
+  snprintf(passthru_model->spstr1, sizeof(passthru_model->spstr1),
 		"%ld", passthru_model->total_bytes_sent);
   canvas_draw_str_aligned(canvas, 64, 14, AlignCenter, AlignBottom,
-				passthru_model->spstr);
+				passthru_model->spstr1);
 
   /* Print the number of bytes received from the LRF */
-  snprintf(passthru_model->spstr, sizeof(passthru_model->spstr),
+  snprintf(passthru_model->spstr1, sizeof(passthru_model->spstr1),
 		"%ld", passthru_model->total_bytes_recv);
   canvas_draw_str_aligned(canvas, 64, 46, AlignCenter, AlignBottom,
-				passthru_model->spstr);
+				passthru_model->spstr1);
 
   /* Draw the icon to show the directions of serial traffic in-between */
   canvas_draw_icon(canvas, 5, 16, &I_flipper_lrf_serial_traffic);
@@ -481,21 +552,14 @@ void passthru_view_draw_callback(Canvas *canvas, void *model) {
   canvas_draw_icon(canvas, 0, 54, passthru_model->vcp_connected?
 						&I_connected : &I_disconnected);
 
-  /* Show whether something has opened the virtual COM port at the remote end
-     using an icon next to the connected icon if the port is connected */
-  canvas_draw_icon(canvas, 20, 52, passthru_model->vcp_connected &&
-					passthru_model->vcp_open?
-						&I_open : &I_closed);
-
   /* Finally print the bottom line information in the FontPrimary font
      (bold, proportional) */
   canvas_set_font(canvas, FontPrimary);
 
-  /* Print the UART baudrate next to the open icon if the virtual COM port has
-     been opened and we have a baudrate to display */
-  if(passthru_model->vcp_connected && passthru_model->vcp_open &&
-	passthru_model->uart_baudrate_name) {
-    canvas_draw_str(canvas, 31, 62, passthru_model->uart_baudrate_name);
+  /* Print the UART baudrate next to the connected icon if the virtual COM port
+     if connected and we have a baudrate to display */
+  if(passthru_model->vcp_connected && passthru_model->uart_baudrate_name) {
+    canvas_draw_str(canvas, 20, 62, passthru_model->uart_baudrate_name);
   }
 
   /* Print the OK button symbol followed by "Start" or "Stop" in a frame at the
