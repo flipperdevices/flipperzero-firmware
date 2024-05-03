@@ -157,6 +157,7 @@ int32_t mag_app(void* p) {
     }
 
     mag_make_app_folder(mag);
+    mag_migrate_and_copy_files(mag);
 
     // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
     uint8_t attempts = 0;
@@ -196,6 +197,29 @@ void mag_make_app_folder(Mag* mag) {
 
     if(!storage_simply_mkdir(mag->storage, MAG_APP_FOLDER)) {
         dialog_message_show_storage_error(mag->dialogs, "Cannot create\napp folder");
+    }
+}
+
+void mag_migrate_and_copy_files(Mag* mag) {
+    furi_assert(mag);
+    Storage* storage = mag->storage;
+
+    storage_common_migrate(storage, EXT_PATH("magspoof"), STORAGE_APP_DATA_PATH_PREFIX);
+    storage_common_migrate(storage, EXT_PATH("mag"), STORAGE_APP_DATA_PATH_PREFIX);
+
+    if(!storage_common_exists(storage, APP_DATA_PATH(MAG_EXAMPLE_FILE_1))) {
+        storage_common_copy(
+            storage, APP_ASSETS_PATH(MAG_EXAMPLE_FILE_1), APP_DATA_PATH(MAG_EXAMPLE_FILE_1));
+    }
+
+    if(!storage_common_exists(storage, APP_DATA_PATH(MAG_EXAMPLE_FILE_2))) {
+        storage_common_copy(
+            storage, APP_ASSETS_PATH(MAG_EXAMPLE_FILE_2), APP_DATA_PATH(MAG_EXAMPLE_FILE_2));
+    }
+
+    if(!storage_common_exists(storage, APP_DATA_PATH(MAG_EXAMPLE_FILE_3))) {
+        storage_common_copy(
+            storage, APP_ASSETS_PATH(MAG_EXAMPLE_FILE_3), APP_DATA_PATH(MAG_EXAMPLE_FILE_3));
     }
 }
 
