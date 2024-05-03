@@ -345,7 +345,7 @@ static int32_t uart_rx_thread(void *ctx) {
 
   while(1) {
 
-    /* Get until we get either a stop event of we received data */
+    /* Get events */
     evts = furi_thread_flags_wait(stop | rx_done,
 					FuriFlagWaitAny, FuriWaitForever);
 
