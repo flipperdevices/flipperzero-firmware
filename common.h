@@ -474,9 +474,6 @@ typedef struct {
   /* Timer to control the pointer in the test pointer view */
   FuriTimer *test_pointer_control_timer;
 
-  /* Timer to update the passthrough view */
-  FuriTimer *passthru_view_timer;
-
   /* Backlight control */
   BacklightControl backlight_control;
 
