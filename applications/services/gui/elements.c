@@ -648,7 +648,7 @@ void elements_scrollable_text_line_centered(
         // Calculate scroll size
         size_t scroll_size = furi_string_size(line);
         size_t right_width = 0;
-        for(size_t i = scroll_size; i > 0; i--) {
+        for(size_t i = scroll_size - 1; i > 0; i--) {
             right_width += canvas_glyph_width(canvas, furi_string_get_char(line, i));
             if(right_width > width) break;
             scroll_size--;
