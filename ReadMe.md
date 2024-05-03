@@ -48,12 +48,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [MIDI RX v0.1 (By crackerjacques)](https://github.com/crackerjacques/flipper_zero_midi_rx)
 - Updated: [Calendar TECHART v1.1 (By techartdev)](https://github.com/techartdev/Calendar) (Version Only)
 - Updated: [BLE Spam v6.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam)
-- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [MagSpoof v0.7 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - Updated: [FindMy Flipper v3.5 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) [FindMy: Fix battery level edge cases (eg. at boot) and cleanup (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5d2f3d49801b32d04b184a1b8f1d16a5889c7eff)
 - Added: [Plugin Demo v1.0 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_plugin_howto)
 - A few apps moved from GPIO into GPIO/Debug or Sensors. (By Willy-JL)
 - A few apps moved from Tools into Tools/Educational. You may want to delete your apps folder to remove duplicates. (By RogueMaster)
+- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 

@@ -1,5 +1,6 @@
 #include <gui/modules/dialog_ex.h>
 
+#include <pokemon_icons.h>
 #include "pokemon_menu.h"
 #include "../pokemon_app.h"
 #include "../pokemon_data.h"
@@ -36,6 +37,7 @@ void pokemon_exit_confirm_on_enter(void* context) {
         12,
         AlignCenter,
         AlignTop);
+    dialog_ex_set_icon(dialog_ex, 44, 32, &I_surprised_pika);
     dialog_ex_set_context(dialog_ex, pokemon_fap);
     dialog_ex_set_result_callback(dialog_ex, pokemon_exit_confirm_dialog_callback);
 
