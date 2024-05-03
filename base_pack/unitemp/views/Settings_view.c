@@ -158,10 +158,8 @@ void unitemp_Settings_switch(void) {
 }
 
 void unitemp_Settings_free(void) {
-    //Очистка списка элементов
-    variable_item_list_free(variable_item_list);
-    //Очистка вида
-    view_free(view);
     //Удаление вида после обработки
     view_dispatcher_remove_view(app->view_dispatcher, VIEW_ID);
+    //Очистка списка элементов
+    variable_item_list_free(variable_item_list);
 }
