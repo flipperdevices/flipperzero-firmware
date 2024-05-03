@@ -388,6 +388,9 @@ typedef struct {
   /* Flag to indicate that the display needs updating */
   bool update_display;
 
+  /* Time at which the display was last updated */
+  uint32_t last_display_update_tstamp;
+
   /* Serial traffic logging prefix */
   char traffic_logging_prefix[8];
 

@@ -51,6 +51,19 @@ typedef enum {
 
 /*** Routines ***/
 
+/** Time difference in milliseconds between system ticks in milliseconds,
+    taking the timestamp overflow into account **/
+static uint32_t ms_tick_time_diff_ms(uint32_t tstamp1, uint32_t tstamp2) {
+
+  if(tstamp1 >= tstamp2)
+    return tstamp1 - tstamp2;
+
+  else
+    return 0xffffffff - tstamp2 + 1 + tstamp1;
+}
+
+
+
 /** LRF raw data handler
     Called when raw data is read by the LRF serial communication app **/
 static void lrf_raw_data_handler(uint8_t *data, uint16_t len, void *ctx) {
@@ -242,15 +255,40 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
   uint32_t evts;
+  uint32_t now_ms;
+
+  /* Trigger the first passthrough view redraw */
+  with_view_model(app->passthru_view, PassthruModel* _model,
+			{UNUSED(_model);}, true);
+  passthru_model->last_display_update_tstamp = furi_get_tick();
 
   while(1) {
 
     /* Get events */
     evts = furi_thread_flags_wait(stop | data_avail | data_to_send,
-					FuriFlagWaitAny, FuriWaitForever);
+					FuriFlagWaitAny,
+					passthru_view_update_every);
 
     /* Check for errors */
-    furi_check((evts & FuriFlagError) == 0);
+    furi_check(((evts & FuriFlagError) == 0) ||
+		(evts == FuriFlagErrorTimeout));
+
+    /* Get the current timestamp */
+    now_ms = furi_get_tick();
+
+    /* Should we update the display? */
+    if(passthru_model->update_display &&
+	ms_tick_time_diff_ms(now_ms,
+				passthru_model->last_display_update_tstamp) >=
+				passthru_view_update_every) {
+
+      /* Trigger a passthrough view redraw */
+      with_view_model(app->passthru_view, PassthruModel* _model,
+			{UNUSED(_model);}, true);
+      passthru_model->last_display_update_tstamp = now_ms;
+
+      passthru_model->update_display = false;
+    }
 
     /* Should we stop the thread? */
     if(evts & stop) {
@@ -368,32 +406,11 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
 
 
 
-/** USB serial passthrough view update timer callback **/
-static void passthru_view_timer_callback(void *ctx) {
-
-  App *app = (App *)ctx;
-  PassthruModel *passthru_model = view_get_model(app->passthru_view);
-
-  /* Should the display be updated? */
-  if(passthru_model->update_display) {
-
-    /* Trigger a passthrough view redraw */
-    with_view_model(app->passthru_view, PassthruModel* _model,
-			{UNUSED(_model);}, true);
-
-    passthru_model->update_display = false;
-  }
-}
-
-
-
 /** USB serial passthrough view enter callback
-    Configure the virtual COM port, start the RX/TX thread and setup the timer
-    to update the passthrough view regularly **/
+    Configure the virtual COM port and start the RX/TX thread */
 void passthru_view_enter_callback(void *ctx) {
 
   App *app = (App *)ctx;
-  uint32_t period = furi_ms_to_ticks(passthru_view_update_every);
 
   with_view_model(app->passthru_view, PassthruModel *passthru_model,
 	{
@@ -479,24 +496,16 @@ void passthru_view_enter_callback(void *ctx) {
 			" LRF");
 	},
 	false);
-
-  /* Setup and start the view update timer */
-  app->passthru_view_timer = furi_timer_alloc(passthru_view_timer_callback,
-						FuriTimerTypePeriodic, ctx);
-  furi_timer_start(app->passthru_view_timer, period);
 }
 
 
 
 /** USB serial passthrough view exit callback
-    Stop the timer to update the passthrough view regularly, stop the virtual
-    COM port RX/TX thread and release the virtual COM port **/
+    Stop the virtual COM port RX/TX thread and release the virtual COM port **/
 void passthru_view_exit_callback(void *ctx) {
 
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
-
-  UNUSED(passthru_model);
 
   /* If the UART is started, unset the callback to receive raw LRF data and
      stop the UART */
@@ -535,10 +544,6 @@ void passthru_view_exit_callback(void *ctx) {
     /* Reconfigure the USB CDC as single channel */
     furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
   }
-
-  /* Stop and free the view update timer */
-  furi_timer_stop(app->passthru_view_timer);
-  furi_timer_free(app->passthru_view_timer);
 
   /* Free the virtual COM port TX semaphore */
   furi_semaphore_free(passthru_model->vcp_tx_sem);
