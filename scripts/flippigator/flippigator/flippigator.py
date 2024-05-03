@@ -83,12 +83,16 @@ class Navigator:
         if self.screen_stream is None:
             self.screen_stream = await self.proto.stream(StartScreenStreamRequestCommand(), command_id=0)
             await self.screen_stream.__anext__()
+        '''
         try:
             async with asyncio.timeout(timeout):
                 screen_response = await self.screen_stream.__anext__()
                 data = screen_response.gui_screen_frame.data
         except TimeoutError:
             return self.screen_image.copy()
+        '''
+        screen_response = await self.screen_stream.__anext__()
+        data = screen_response.gui_screen_frame.data
 
         def get_bin(x):
             return format(x, "b")
