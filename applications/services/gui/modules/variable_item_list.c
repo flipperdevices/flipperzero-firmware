@@ -121,14 +121,15 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
                     canvas_draw_str(canvas, value_pos_x, item_text_y, "<");
                 }
 
-                elements_scrollable_text_line(
+                elements_scrollable_text_line_centered(
                     canvas,
                     (115 + value_pos_x) / 2 + 1,
                     item_text_y,
                     37,
                     item->current_value_text,
                     scroll_counter,
-                    false);
+                    false,
+                    true);
 
                 if(item->current_value_index < (item->values_count - 1)) {
                     canvas_draw_str(canvas, 115, item_text_y, ">");
