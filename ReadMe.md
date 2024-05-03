@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - A few apps moved from GPIO into GPIO/Debug or Sensors. (By Willy-JL)
 - A few apps moved from Tools into Tools/Educational. You may want to delete your apps folder to remove duplicates. (By RogueMaster)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- Updated: [POCSAG Pager v1.2 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
 
 <a name="release">
 
