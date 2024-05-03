@@ -358,24 +358,19 @@ typedef struct {
   uint8_t vcp_rx_buf[CDC_DATA_SZ];
   uint16_t vcp_rx_buf_len;
 
-  /* UART RX buffer */
-  uint8_t uart_rx_buf[UART_RX_BUF_SIZE];
-  uint16_t uart_rx_buf_len;
+  /* Virtual COM port transmit buffer */
+  uint8_t vcp_tx_buf[CDC_DATA_SZ];
+  uint16_t vcp_tx_buf_len;
+  uint16_t vcp_last_sent;
+
+  /* UART receive stream buffer */
+  FuriStreamBuffer *uart_rx_stream;
 
   /* Virtual COM port RX/TX thread */
   FuriThread *vcp_rx_tx_thread;
 
   /* Virtual COM port send semaphore */
   FuriSemaphore *vcp_tx_sem;
-
-  /* Number of bytes transferred to the virtual COM port and their address */
-  uint16_t vcp_bytes_sent;
-  uint8_t *vcp_bytes_sent_addr;
-
-  /* Number of bytes left to transfer to the virtual COM port and their
-     address */
-  int16_t vcp_bytes_left_to_send;
-  uint8_t *vcp_bytes_left_to_send_addr;
 
   /* Total number of bytes sent to the LRF */
   uint32_t total_bytes_sent;

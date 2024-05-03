@@ -39,8 +39,7 @@ static CdcCallbacks cdc_callbacks = {
 typedef enum {
   stop = 1,
   data_avail = 2,
-  data_to_send = 4,
-  done_sending = 8,
+  data_to_send = 4
 } vcp_rx_tx_thread_evts;
 
 
@@ -54,13 +53,8 @@ static void lrf_raw_data_handler(uint8_t *data, uint16_t len, void *ctx) {
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
 
-  /* Wait until the previous transmission completes */
-  furi_check(furi_semaphore_acquire(passthru_model->vcp_tx_sem, FuriWaitForever)
-		== FuriStatusOk);
-
-  /* Make a copy of the data to send */
-  memcpy(passthru_model->uart_rx_buf, data, len);
-  passthru_model->uart_rx_buf_len = len;
+  /* Send the data to the UART receive stream buffer */
+  furi_stream_buffer_send(passthru_model->uart_rx_stream, data, len, 0);
 
   /* Tell the virtual COM port RX/TX thread it has data to send */
   furi_thread_flags_set(furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
@@ -143,12 +137,14 @@ static void vcp_on_cdc_tx_complete(void *ctx) {
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
 
-  /* If there is data left to send from the last received UART data, tell the
-     virtual COM port RX/TX thread it has more data to send. Otherwise tell it
-     all the data was sent */
-  furi_thread_flags_set(furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
-			passthru_model->vcp_bytes_left_to_send ?
-						data_to_send : done_sending);
+  /* If we just sent the maximum number of bytes we could, tell the virtual
+     COM port RX/TX thread it has more data to send */
+  if(passthru_model->vcp_last_sent == sizeof(passthru_model->vcp_tx_buf_len))
+    furi_thread_flags_set(furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
+				data_to_send);
+
+  /* Release the virtual COM port TX semaphore */
+  furi_semaphore_release(passthru_model->vcp_tx_sem);
 }
 
 
@@ -240,8 +236,7 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
   while(1) {
 
     /* Get events */
-    evts = furi_thread_flags_wait(stop | data_avail |
-					data_to_send | done_sending,
+    evts = furi_thread_flags_wait(stop | data_avail | data_to_send,
 					FuriFlagWaitAny, FuriWaitForever);
 
     /* Check for errors */
@@ -249,10 +244,6 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
 
     /* Should we stop the thread? */
     if(evts & stop) {
-
-      /* Forcibly release the virtual COM port TX semaphore in the LRF raw data
-         handler is waiting on it, so we don't block the LRF serial comm app */
-      furi_semaphore_release(passthru_model->vcp_tx_sem);
 
       /* Stop the main loop */
       break;
@@ -289,65 +280,57 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
     /* Should we relay data from UART to the virtual COM port? */
     if(evts & data_to_send) {
 
-      /* If there is no data left to send from the last received UART data, use
-         new data */
-      if(!passthru_model->vcp_bytes_left_to_send) {
-        passthru_model->vcp_bytes_left_to_send_addr =
-					passthru_model->uart_rx_buf;
-        passthru_model->vcp_bytes_left_to_send =
-					passthru_model->uart_rx_buf_len;
+      /* Get the UART data */
+      passthru_model->vcp_tx_buf_len =
+	furi_stream_buffer_receive(passthru_model->uart_rx_stream,
+					passthru_model->vcp_tx_buf,
+					sizeof(passthru_model->vcp_tx_buf_len),
+					0);
+
+      /* Do we have something to send? */
+      if(passthru_model->vcp_tx_buf_len) {
+
+        /* Acquire the semaphore so we block at the next round until the
+           transmission is complete */
+        furi_check(furi_semaphore_acquire(passthru_model->vcp_tx_sem,
+							FuriWaitForever)
+			== FuriStatusOk);
+
+        /* Send the UART data */
+        furi_hal_cdc_send(passthru_vcp_channel, passthru_model->vcp_tx_buf,
+				passthru_model->vcp_tx_buf_len);
+        passthru_model->vcp_last_sent = passthru_model->vcp_tx_buf_len;
+
+        /* Update the counter of bytes received from the LRF */
+        passthru_model->total_bytes_recv += passthru_model->vcp_last_sent;
+
+        /* Update the display */
+        passthru_model->update_display = true;
+
+        /* Log the relayed bytes */
+        log_serial_bytes(passthru_model, false, passthru_model->vcp_tx_buf,
+				passthru_model->vcp_last_sent);
       }
 
-      /* Does the data to send exceeed what the virtual COM port can handle? */
-      if(passthru_model->vcp_bytes_left_to_send > CDC_DATA_SZ) {
-
-        /* Only send as much as the virtual COM port can handle */
-        furi_hal_cdc_send(passthru_vcp_channel,
-				passthru_model->vcp_bytes_left_to_send_addr,
-				CDC_DATA_SZ);
-
-        passthru_model->vcp_bytes_sent_addr =
-				passthru_model->vcp_bytes_left_to_send_addr;
-        passthru_model->vcp_bytes_sent = CDC_DATA_SZ;
-
-        /* Schedule the rest of the data to be sent at the next round */
-        passthru_model->vcp_bytes_left_to_send_addr += CDC_DATA_SZ;
-        passthru_model->vcp_bytes_left_to_send -= CDC_DATA_SZ;
-      }
-
-      /* The virtual COM port can send all of the data in one go */
+      /* We have nothing to send */
       else {
 
-        /* Send everything */
-        furi_hal_cdc_send(passthru_vcp_channel,
-				passthru_model->vcp_bytes_left_to_send_addr,
-				passthru_model->vcp_bytes_left_to_send);
+        /* If we last sent the maximum number of bytes we could, send 0 bytes
+           to signal the end of the transmission */
+        if(passthru_model->vcp_last_sent ==
+				sizeof(passthru_model->vcp_tx_buf_len)) {
 
-        passthru_model->vcp_bytes_sent_addr =
-				passthru_model->vcp_bytes_left_to_send_addr;
-        passthru_model->vcp_bytes_sent = passthru_model->vcp_bytes_left_to_send;
+          /* Acquire the semaphore so we block at the next round until the
+             transmission is complete */
+          furi_check(furi_semaphore_acquire(passthru_model->vcp_tx_sem,
+							FuriWaitForever)
+			== FuriStatusOk);
 
-        /* Nothing left to send at the next round */
-        passthru_model->vcp_bytes_left_to_send = 0;
+          /* Send 0 bytes */
+          furi_hal_cdc_send(passthru_vcp_channel, NULL, 0);
+          passthru_model->vcp_last_sent = 0;
+        }
       }
-
-      /* Update the display */
-      passthru_model->update_display = true;
-    }
-
-    /* Was all the data sent? */
-    if(evts & done_sending) {
-
-      /* Update the counter of bytes received from the LRF */
-      passthru_model->total_bytes_recv += passthru_model->uart_rx_buf_len;
-
-      /* Log the relayed bytes */
-      log_serial_bytes(passthru_model, false, passthru_model->uart_rx_buf,
-			passthru_model->uart_rx_buf_len);
-
-      /* Release the virtual COM port TX semaphore so the LRF raw data handler
-         can send some more */
-      furi_semaphore_release(passthru_model->vcp_tx_sem);
     }
   }
 
@@ -385,9 +368,6 @@ void passthru_view_enter_callback(void *ctx) {
 
   with_view_model(app->passthru_view, PassthruModel *passthru_model,
 	{
-	  /* We have no data left to send to the virtual COM port yet */
-	  passthru_model->vcp_bytes_left_to_send = 0;
-
 	  /* Reset the serial traffic counters */
 	  passthru_model->total_bytes_sent = 0;
 	  passthru_model->total_bytes_recv = 0;
@@ -429,6 +409,13 @@ void passthru_view_enter_callback(void *ctx) {
 	    /* Make sure the USB CDC is configured as dual channel */
 	    furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
 	  }
+
+	  /* Allocate space for the UART receive stream buffer */
+	  passthru_model->uart_rx_stream =
+				furi_stream_buffer_alloc(UART_RX_BUF_SIZE, 1);
+
+	  /* Nothing sent to the virtual COM port yet */
+	  passthru_model->vcp_last_sent = 0;
 
 	  /* Allocate space for the virtual COM port RX/TX thread */
 	  passthru_model->vcp_rx_tx_thread = furi_thread_alloc();
@@ -493,6 +480,9 @@ void passthru_view_exit_callback(void *ctx) {
 						stop);
   furi_thread_join(passthru_model->vcp_rx_tx_thread);
   furi_thread_free(passthru_model->vcp_rx_tx_thread);
+
+  /* Free the UART receive stream buffer */
+  furi_stream_buffer_free(passthru_model->uart_rx_stream);
 
   /* Were we using channel 0? */
   if(passthru_vcp_channel == 0) {
