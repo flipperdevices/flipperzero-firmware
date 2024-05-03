@@ -8,6 +8,18 @@
 
 Flipper Zero app to get range measurements from a [Noptel](https://noptel.fi/) [LRF rangefinder](https://noptel.fi/rangefinderhome).
 
+#### Functions
+
+- Rangefinding in all modes
+- Distance and amplitude averaging
+- Return rate display
+- Laser pointer control
+- LRF information display
+- Saving diagnostic data
+- Rangefinder laser testing
+- IR laser pointer testing
+- USB serial passthrough
+
 https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/d9bf624f-fd60-463e-9593-9b836e72fbca
 
 
