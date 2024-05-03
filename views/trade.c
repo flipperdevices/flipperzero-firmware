@@ -89,6 +89,8 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+#include <dolphin/dolphin.h>
+
 #include <gui/elements.h>
 #include <gui/view.h>
 #include <pokemon_icons.h>
@@ -311,6 +313,10 @@ static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
     UNUSED(arg);
     struct trade_ctx* trade = context;
 
+    /* Award some XP to the dolphin after a completed trade. This needs to
+     * happen outside of an ISR context, so we slap it here.
+     */
+    dolphin_deed(DolphinDeedPluginGameWin);
     plist_create(&(trade->patch_list), trade->pdata);
 }
 
