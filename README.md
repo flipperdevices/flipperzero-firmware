@@ -56,7 +56,7 @@ cd ~/flipperZero/official/
 ...And/Or (Compile and) Upload with:
 ```
 cd ~/flipperZero/official/
-./fbt launch_app APPSRC=bc_demo
+./fbt launch APPSRC=bc_demo
 ```
 ...Flashing will fail if the FlipperZero is in the applications menu, or running an application!
 
