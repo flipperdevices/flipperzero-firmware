@@ -354,6 +354,16 @@ typedef struct {
   uint32_t uart_baudrate;
   const char *uart_baudrate_name;
 
+  /* UART receive stream buffer */
+  FuriStreamBuffer *uart_rx_stream;
+
+  /* UART transmit buffer */
+  uint8_t uart_tx_buf[CDC_DATA_SZ];
+  uint16_t uart_tx_buf_len;
+
+  /* Virtual COM port receive stream buffer */
+  FuriStreamBuffer *vcp_rx_stream;
+
   /* Virtual COM port receive buffer */
   uint8_t vcp_rx_buf[CDC_DATA_SZ];
   uint16_t vcp_rx_buf_len;
@@ -362,9 +372,6 @@ typedef struct {
   uint8_t vcp_tx_buf[CDC_DATA_SZ];
   uint16_t vcp_tx_buf_len;
   uint16_t vcp_last_sent;
-
-  /* UART receive stream buffer */
-  FuriStreamBuffer *uart_rx_stream;
 
   /* Virtual COM port RX/TX thread */
   FuriThread *vcp_rx_tx_thread;

@@ -16,6 +16,11 @@
 
 
 
+/*** Defines ***/
+#define VCP_RX_STREAM_BUF_SIZE 1024
+
+
+
 /*** Forward declarations ***/
 static void vcp_on_cdc_tx_complete(void *);
 static void vcp_on_cdc_rx(void *);
@@ -155,6 +160,17 @@ static void vcp_on_cdc_rx(void *ctx) {
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
 
+  /* Get the data from the virtual COM port */
+  passthru_model->vcp_rx_buf_len =
+		furi_hal_cdc_receive(passthru_vcp_channel,
+					passthru_model->vcp_rx_buf,
+					sizeof(passthru_model->vcp_rx_buf));
+
+  /* Send the data to the virtual COM port receive stream buffer */
+  furi_stream_buffer_send(passthru_model->vcp_rx_stream,
+				passthru_model->vcp_rx_buf,
+				passthru_model->vcp_rx_buf_len, 0);
+
   /* Tell the virtual COM port RX/TX thread that data is available */
   furi_thread_flags_set(furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
 						data_avail);
@@ -252,40 +268,48 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
     /* Should we relay data from the virtual COM port to the UART? */
     if(evts & data_avail) {
 
-      /* Get the data from the virtual COM port */
-      passthru_model->vcp_rx_buf_len =
-		furi_hal_cdc_receive(passthru_vcp_channel,
-					passthru_model->vcp_rx_buf,
-					sizeof(passthru_model->vcp_rx_buf));
+      /* Get the data from the virtual COM port receive stream buffer */
+      passthru_model->uart_tx_buf_len =
+	furi_stream_buffer_receive(passthru_model->vcp_rx_stream,
+					passthru_model->uart_tx_buf,
+					sizeof(passthru_model->uart_tx_buf), 0);
 
-      /* Did we actually get something, and is the UART started? */
-      if(passthru_model->vcp_rx_buf_len && passthru_model->uart_baudrate) {
+      /* Did we actually get something? */
+      if(passthru_model->uart_tx_buf_len) {
 
-        /* Relay the data to the UART */
-        uart_tx(app->lrf_serial_comm_app, passthru_model->vcp_rx_buf,
-				passthru_model->vcp_rx_buf_len);
+        /* Is the UART started? */
+        if(passthru_model->uart_baudrate) {
 
-        /* Log the relayed bytes */
-        log_serial_bytes(passthru_model, true, passthru_model->vcp_rx_buf,
-				passthru_model->vcp_rx_buf_len);
+          /* Relay the data to the UART */
+          uart_tx(app->lrf_serial_comm_app, passthru_model->uart_tx_buf,
+			passthru_model->uart_tx_buf_len);
 
-        /* Update the counter of bytes sent to the LRF */
-        passthru_model->total_bytes_sent += passthru_model->vcp_rx_buf_len;
+          /* Log the relayed bytes */
+          log_serial_bytes(passthru_model, true, passthru_model->uart_tx_buf,
+				passthru_model->uart_tx_buf_len);
 
-        /* Update the display */
-        passthru_model->update_display = true;
+          /* Update the counter of bytes sent to the LRF */
+          passthru_model->total_bytes_sent += passthru_model->uart_tx_buf_len;
+
+          /* Update the display */
+          passthru_model->update_display = true;
+        }
+
+        /* Rell ourselves that more data is available */
+        furi_thread_flags_set(
+			furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
+			data_avail);
       }
     }
 
     /* Should we relay data from UART to the virtual COM port? */
     if(evts & data_to_send) {
 
-      /* Get the UART data */
+      /* Get the data from the UART receive stream buffer */
       passthru_model->vcp_tx_buf_len =
 	furi_stream_buffer_receive(passthru_model->uart_rx_stream,
 					passthru_model->vcp_tx_buf,
-					sizeof(passthru_model->vcp_tx_buf_len),
-					0);
+					sizeof(passthru_model->vcp_tx_buf), 0);
 
       /* Do we have something to send? */
       if(passthru_model->vcp_tx_buf_len) {
@@ -417,6 +441,10 @@ void passthru_view_enter_callback(void *ctx) {
 	  /* Nothing sent to the virtual COM port yet */
 	  passthru_model->vcp_last_sent = 0;
 
+	  /* Allocate space for the virtual COM port receive stream buffer */
+	  passthru_model->vcp_rx_stream =
+		furi_stream_buffer_alloc(VCP_RX_STREAM_BUF_SIZE, 1);
+
 	  /* Allocate space for the virtual COM port RX/TX thread */
 	  passthru_model->vcp_rx_tx_thread = furi_thread_alloc();
 
@@ -480,6 +508,9 @@ void passthru_view_exit_callback(void *ctx) {
 						stop);
   furi_thread_join(passthru_model->vcp_rx_tx_thread);
   furi_thread_free(passthru_model->vcp_rx_tx_thread);
+
+  /* Free the virtual COM port receive stream buffer */
+  furi_stream_buffer_free(passthru_model->vcp_rx_stream);
 
   /* Free the UART receive stream buffer */
   furi_stream_buffer_free(passthru_model->uart_rx_stream);

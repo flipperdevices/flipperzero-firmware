@@ -17,6 +17,9 @@
 
 /*** Defines ***/
 #define TAG "lrf_serial_comm"
+
+#define UART_RX_STREAM_BUF_SIZE 1024
+
 #define CR 13
 #define LF 10
 #define SLASH 47
@@ -1009,7 +1012,7 @@ LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration,
   enable_shared_storage_dec_buf(app, false);
 
   /* Allocate space for the UART receive stream buffer */
-  app->rx_stream = furi_stream_buffer_alloc(UART_RX_BUF_SIZE, 1);
+  app->rx_stream = furi_stream_buffer_alloc(UART_RX_STREAM_BUF_SIZE, 1);
 
   /* Allocate space for the UART receive thread */
   app->rx_thread = furi_thread_alloc();
