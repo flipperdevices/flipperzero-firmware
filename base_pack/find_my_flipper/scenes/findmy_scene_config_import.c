@@ -64,8 +64,7 @@ static const char* parse_nrf_connect(FindMy* app, const char* path) {
 
         memcpy(app->state.mac, mac, sizeof(app->state.mac));
         memcpy(app->state.data, data, sizeof(app->state.data));
-        findmy_state_sync_config(&app->state);
-        findmy_state_save(&app->state);
+        findmy_state_save_and_apply(&app->state);
 
         error = NULL;
 
@@ -126,8 +125,7 @@ static const char* parse_open_haystack(FindMy* app, const char* path) {
         memcpy(app->state.data, advertisement_template, sizeof(app->state.data));
         memcpy(&app->state.data[7], &public_key[6], decoded_len - 6);
         app->state.data[29] = public_key[0] >> 6;
-        findmy_state_sync_config(&app->state);
-        findmy_state_save(&app->state);
+        findmy_state_save_and_apply(&app->state);
 
         free(public_key);
         error = NULL;

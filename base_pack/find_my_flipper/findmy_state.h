@@ -26,21 +26,12 @@ typedef struct {
     uint8_t mac[EXTRA_BEACON_MAC_ADDR_SIZE];
     uint8_t data[EXTRA_BEACON_MAX_DATA_SIZE];
     FindMyType tag_type;
-
-    // Generated from the other state values
-    GapExtraBeaconConfig config;
-
-    uint8_t battery_level;
 } FindMyState;
 
 bool findmy_state_load(FindMyState* out_state);
 
 void findmy_state_apply(FindMyState* state);
 
-void findmy_state_sync_config(FindMyState* state);
-
-void findmy_state_save(FindMyState* state);
-
-void findmy_update_payload_battery(uint8_t* data, uint8_t battery_level, FindMyType type);
+void findmy_state_save_and_apply(FindMyState* state);
 
 uint8_t findmy_state_data_size(FindMyType type);

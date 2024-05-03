@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <furi_hal_bt.h>
+#include <furi_hal_power.h>
 #include <flipper_format/flipper_format.h>
 
 bool findmy_state_load(FindMyState* out_state) {
@@ -82,13 +83,6 @@ bool findmy_state_load(FindMyState* out_state) {
         *data++ = 0x00; // Hint (0x00)
     }
 
-    // Sync values to config
-    findmy_state_sync_config(&state);
-
-    // Set constants
-    state.config.adv_channel_map = GapAdvChannelMapAll;
-    state.config.address_type = GapAddressTypePublic;
-
     // Copy to caller state before popping stack
     memcpy(out_state, &state, sizeof(state));
 
@@ -96,53 +90,58 @@ bool findmy_state_load(FindMyState* out_state) {
     return state.beacon_active;
 }
 
+static void findmy_state_update_payload_battery(FindMyState* state) {
+    // Update the battery level in the payload
+    if(state->tag_type == FindMyTypeApple) {
+        uint32_t battery_capacity = furi_hal_power_get_battery_full_capacity();
+        uint32_t battery_remaining = furi_hal_power_get_battery_remaining_capacity();
+        uint8_t battery_percent = (battery_remaining * 100) / battery_capacity;
+        uint8_t battery_level;
+
+        if(battery_percent > 80) {
+            battery_level = BATTERY_FULL;
+        } else if(battery_percent > 50) {
+            battery_level = BATTERY_MEDIUM;
+        } else if(battery_percent > 20) {
+            battery_level = BATTERY_LOW;
+        } else {
+            battery_level = BATTERY_CRITICAL;
+        }
+        state->data[6] = battery_level;
+    }
+}
+
 void findmy_state_apply(FindMyState* state) {
-    // This function applies initial state to the beacon (loaded values)
+    // This function applies configured state to the beacon (loaded values)
+
+    // Stop beacon before configuring
     if(furi_hal_bt_extra_beacon_is_active()) {
         furi_check(furi_hal_bt_extra_beacon_stop());
     }
-    furi_check(furi_hal_bt_extra_beacon_set_config(&state->config));
-    findmy_update_payload_battery(state->data, state->battery_level, state->tag_type);
 
+    // Make config struct from configured parameters and set it
+    GapExtraBeaconConfig config = {
+        .min_adv_interval_ms = state->broadcast_interval * 1000, // Converting s to ms
+        .max_adv_interval_ms = (state->broadcast_interval * 1000) + 150,
+        .adv_channel_map = GapAdvChannelMapAll,
+        .adv_power_level = GapAdvPowerLevel_0dBm + state->transmit_power,
+        .address_type = GapAddressTypePublic,
+    };
+    memcpy(config.address, state->mac, sizeof(config.address));
+    furi_check(furi_hal_bt_extra_beacon_set_config(&config));
+
+    // Update data payload with battery level and set it
+    findmy_state_update_payload_battery(state);
     furi_check(
         furi_hal_bt_extra_beacon_set_data(state->data, findmy_state_data_size(state->tag_type)));
+
+    // Start beacon if configured
     if(state->beacon_active) {
         furi_check(furi_hal_bt_extra_beacon_start());
     }
 }
 
-void findmy_state_sync_config(FindMyState* state) {
-    state->config.min_adv_interval_ms = state->broadcast_interval * 1000; // Converting s to ms
-    state->config.max_adv_interval_ms = (state->broadcast_interval * 1000) + 150;
-    state->config.adv_power_level = GapAdvPowerLevel_0dBm + state->transmit_power;
-    memcpy(state->config.address, state->mac, sizeof(state->config.address));
-    findmy_update_payload_battery(state->data, state->battery_level, state->tag_type);
-}
-
-void findmy_update_payload_battery(uint8_t* data, uint8_t battery_level, FindMyType type) {
-    // Update the battery level in the payload
-    if(type == FindMyTypeApple) {
-        switch(battery_level) {
-        case BATTERY_FULL:
-            data[6] = BATTERY_FULL;
-            break;
-        case BATTERY_MEDIUM:
-            data[6] = BATTERY_MEDIUM;
-            break;
-        case BATTERY_LOW:
-            data[6] = BATTERY_LOW;
-            break;
-        case BATTERY_CRITICAL:
-            data[6] = BATTERY_CRITICAL;
-            break;
-        default:
-            FURI_LOG_E("update_bat", "Invalid battery level: %d", battery_level);
-            return;
-        }
-    }
-}
-
-void findmy_state_save(FindMyState* state) {
+static void findmy_state_save(FindMyState* state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     storage_simply_mkdir(storage, FINDMY_STATE_DIR);
     FlipperFormat* file = flipper_format_file_alloc(storage);
@@ -161,19 +160,22 @@ void findmy_state_save(FindMyState* state) {
         if(!flipper_format_write_uint32(file, "transmit_power", &tmp, 1)) break;
 
         tmp = state->tag_type;
-        FURI_LOG_E("tag_type at save", "%ld", tmp);
         if(!flipper_format_write_uint32(file, "tag_type", &tmp, 1)) break;
 
         if(!flipper_format_write_bool(file, "show_mac", &state->show_mac, 1)) break;
 
         if(!flipper_format_write_hex(file, "mac", state->mac, sizeof(state->mac))) break;
-        findmy_update_payload_battery(state->data, state->battery_level, state->tag_type);
         if(!flipper_format_write_hex(
                file, "data", state->data, findmy_state_data_size(state->tag_type)))
             break;
     } while(0);
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
+}
+
+void findmy_state_save_and_apply(FindMyState* state) {
+    findmy_state_apply(state);
+    findmy_state_save(state);
 }
 
 uint8_t findmy_state_data_size(FindMyType type) {

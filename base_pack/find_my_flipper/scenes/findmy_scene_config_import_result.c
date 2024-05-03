@@ -29,7 +29,9 @@ void findmy_scene_config_import_result_on_enter(void* context) {
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, app);
     popup_set_callback(popup, findmy_scene_config_import_result_callback);
-
+    findmy_main_update_active(app->findmy_main, app->state.beacon_active);
+    findmy_main_update_mac(app->findmy_main, app->state.mac);
+    findmy_main_update_type(app->findmy_main, app->state.tag_type);
     view_dispatcher_switch_to_view(app->view_dispatcher, FindMyViewPopup);
 }
 
