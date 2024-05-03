@@ -346,11 +346,12 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
       /* Do we have something to send? */
       if(passthru_model->vcp_tx_buf_len) {
 
-        /* Acquire the semaphore so we block at the next round until the
-           transmission is complete. Only try for a while so we don't get hung
-           up */
-        if(furi_semaphore_acquire(passthru_model->vcp_tx_sem, 500)
-			== FuriStatusOk) {
+        /* If the passthrough is enabled, try to acquire the semaphore so we
+           block at the next round until the transmission is complete. Only try
+           for a while so we don't get hung up */
+        if(passthru_model->enabled &&
+		furi_semaphore_acquire(passthru_model->vcp_tx_sem, 500)
+							== FuriStatusOk) {
 
           /* Send the UART data */
           furi_hal_cdc_send(passthru_vcp_channel, passthru_model->vcp_tx_buf,
@@ -368,7 +369,8 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
 				passthru_model->vcp_last_sent);
         }
 
-        /* We failed to acquire the semaphore, so we didn't send anything */
+        /* The passthrough is disabled or we failed to acquire the semaphore,
+           so we didn't send anything */
         else
           passthru_model->vcp_last_sent = 0;
 
