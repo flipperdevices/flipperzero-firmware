@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0502-1947-0.101.3-0a2206a](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-02 21:33 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-02 21:33 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-03 14:33 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-03 14:33 EST`
 - Updated: [Flight Assault v0.2 (By evillero)](https://github.com/evillero/flight_assault)
 - Updated: [Minesweeper Redux v1.5 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
@@ -55,6 +55,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - A few apps moved from Tools into Tools/Educational. You may want to delete your apps folder to remove duplicates. (By RogueMaster)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [POCSAG Pager v1.2 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
+- UL: Removed: OFW: PR: [Mifare Plus detection support #3607 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3607) Till It Is Ready
+- UL: [ibutton and lfrfid small ui improvements (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/374e96bb7da6c053cb4ed82dbdc1ed1ee502b639)
 
 <a name="release">
 
