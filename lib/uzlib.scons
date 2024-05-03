@@ -1,0 +1,28 @@
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/uzlib/src",
+    ],
+)
+
+libenv = env.Clone(FW_LIB_NAME="uzlib")
+libenv.ApplyLibFlags()
+
+libenv.AppendUnique(
+    CCFLAGS=[
+        "-Wno-redundant-decls",
+        "-Wno-sign-compare",
+    ],
+)
+
+sources = [
+    File("uzlib/src/adler32.c"),
+    File("uzlib/src/crc32.c"),
+    File("uzlib/src/tinfgzip.c"),
+    File("uzlib/src/tinflate.c"),
+]
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

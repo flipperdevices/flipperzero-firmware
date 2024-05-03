@@ -3,12 +3,7 @@
 #include <toolbox/stream/buffered_file_stream.h>
 #include <toolbox/hex.h>
 
-struct ResourceManifestReader {
-    Storage* storage;
-    Stream* stream;
-    FuriString* linebuf;
-    ResourceManifestEntry entry;
-};
+#include "manifest_i.h"
 
 ResourceManifestReader* resource_manifest_reader_alloc(Storage* storage) {
     ResourceManifestReader* resource_manifest =

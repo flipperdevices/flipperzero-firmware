@@ -59,6 +59,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [ibutton and lfrfid small ui improvements (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/374e96bb7da6c053cb4ed82dbdc1ed1ee502b639)
 - Updated: [Bluetooth/USB Remote v1.7 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Enhance Random Interval and Movement Functionality in HID Mouse Jiggler for Improved Stealth and Human-Like Behavior (By gushmazuko)](https://github.com/DarkFlippers/unleashed-firmware/pull/746)
 - UL: [Electra intercom lfrfid protocol (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/750)
+- [Updater: Gzipped resources (220% faster FW upload) + Updater improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b071fa638fabac23e64b38078e921c62a7ed49db)
 
 <a name="release">
 

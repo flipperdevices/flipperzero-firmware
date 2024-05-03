@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import math
+import gzip
 import os
 import shutil
 import tarfile
@@ -146,6 +147,14 @@ class Main(App):
                 self.args.resources, join(self.args.directory, resources_basename)
             ):
                 return 3
+            resources_path = join(self.args.directory, resources_basename)
+            with open(resources_path, "rb") as f_raw:
+                resources_raw = f_raw.read()
+            os.unlink(resources_path)
+            resources_basename += ".gz"
+            resources_path += ".gz"
+            with gzip.open(resources_path, "wb", compresslevel=9) as f_zip:
+                f_zip.write(resources_raw)
 
         if not self.layout_check(dfu_size, radio_addr):
             self.logger.warn("Memory layout looks suspicious")

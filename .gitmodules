@@ -44,3 +44,6 @@
 [submodule "lib/tlsf"]
 	path = lib/tlsf
 	url = https://github.com/espressif/tlsf
+[submodule "lib/uzlib"]
+	path = lib/uzlib
+	url = https://github.com/pfalcon/uzlib.git

@@ -50,6 +50,11 @@ typedef bool (*tar_unpack_file_cb)(const char* name, bool is_directory, void* co
 
 void tar_archive_set_file_callback(TarArchive* archive, tar_unpack_file_cb callback, void* context);
 
+/* Optional read progress callback on unpacking */
+typedef void (*tar_unpack_read_cb)(size_t progress, size_t total, void* context);
+
+void tar_archive_set_read_callback(TarArchive* archive, tar_unpack_read_cb callback, void* context);
+
 /* Low-level API */
 bool tar_archive_dir_add_element(TarArchive* archive, const char* dirpath);
 
