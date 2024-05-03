@@ -12,5 +12,5 @@ App(
     stack_size=2 * 1024,
     order=20,
     fap_icon="CS.png",
-    fap_category="Cyborg Systems",
+    fap_category="Cyborg_Systems",
 )
