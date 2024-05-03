@@ -262,7 +262,7 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
         FURI_LOG_T(TAG, "UART < VDC: %d bytes", passthru_model->vcp_rx_buf_len);
 
         /* Update the counter of bytes sent to the LRF */
-	passthru_model->total_bytes_sent += passthru_model->vcp_rx_buf_len;
+        passthru_model->total_bytes_sent += passthru_model->vcp_rx_buf_len;
 
         /* Update the display */
         passthru_model->update_display = true;
@@ -282,8 +282,8 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
 
       FURI_LOG_T(TAG, "UART > VDC: %d bytes", passthru_model->uart_rx_buf_len);
 
-        /* Update the counter of bytes received from the LRF */
-	passthru_model->total_bytes_recv += passthru_model->uart_rx_buf_len;
+      /* Update the counter of bytes received from the LRF */
+      passthru_model->total_bytes_recv += passthru_model->uart_rx_buf_len;
 
       /* Update the display */
       passthru_model->update_display = true;
