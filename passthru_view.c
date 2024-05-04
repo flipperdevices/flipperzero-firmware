@@ -75,8 +75,7 @@ static void lrf_raw_data_handler(uint8_t *data, uint16_t len, void *ctx) {
   furi_stream_buffer_send(passthru_model->uart_rx_stream, data, len, 0);
 
   /* Tell the virtual COM port RX/TX thread it has data to send */
-  furi_thread_flags_set(furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
-						data_to_send);
+  furi_thread_flags_set(passthru_model->vcp_rx_tx_thread_id, data_to_send);
 }
 
 
@@ -179,8 +178,7 @@ static void vcp_on_cdc_rx(void *ctx) {
 				passthru_model->vcp_rx_buf_len, 0);
 
   /* Tell the virtual COM port RX/TX thread that data is available */
-  furi_thread_flags_set(furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
-						data_avail);
+  furi_thread_flags_set(passthru_model->vcp_rx_tx_thread_id, data_avail);
 }
 
 
@@ -340,9 +338,7 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
         }
 
         /* Tell ourselves that more data is available */
-        furi_thread_flags_set(
-			furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
-			data_avail);
+        furi_thread_flags_set(passthru_model->vcp_rx_tx_thread_id, data_avail);
       }
     }
 
@@ -389,9 +385,8 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
           passthru_model->vcp_last_sent = 0;
 
         /* Tell ourselves that more data is available */
-        furi_thread_flags_set(
-			furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
-			data_to_send);
+        furi_thread_flags_set(passthru_model->vcp_rx_tx_thread_id,
+				data_to_send);
       }
 
       /* We have nothing to send */
@@ -495,7 +490,7 @@ void passthru_view_enter_callback(void *ctx) {
   passthru_model->vcp_rx_tx_thread = furi_thread_alloc();
 
   /* Initialize the virtual COM port RX/TX thread */
-  furi_thread_set_name(passthru_model->vcp_rx_tx_thread, "vcp_rx");
+  furi_thread_set_name(passthru_model->vcp_rx_tx_thread, "vcp_rx_tx");
   furi_thread_set_stack_size(passthru_model->vcp_rx_tx_thread, 1024);
   furi_thread_set_context(passthru_model->vcp_rx_tx_thread, app);
   furi_thread_set_callback(passthru_model->vcp_rx_tx_thread,
@@ -503,6 +498,10 @@ void passthru_view_enter_callback(void *ctx) {
 
   /* Start the virtual COM port RX/TX thread */
   furi_thread_start(passthru_model->vcp_rx_tx_thread);
+
+  /* Get the virtual COM port RX/TX thread ID */
+  passthru_model->vcp_rx_tx_thread_id =
+			furi_thread_get_id(passthru_model->vcp_rx_tx_thread);
 
   /* Set the virtual COM port callbacks */
   furi_hal_cdc_set_callbacks(passthru_vcp_channel, &cdc_callbacks, app);
@@ -528,8 +527,7 @@ void passthru_view_exit_callback(void *ctx) {
   furi_hal_cdc_set_callbacks(passthru_vcp_channel, NULL, NULL);
 
   /* Stop and free the virtual COM port RX/TX thread */
-  furi_thread_flags_set(furi_thread_get_id(passthru_model->vcp_rx_tx_thread),
-						stop);
+  furi_thread_flags_set(passthru_model->vcp_rx_tx_thread_id, stop);
   furi_thread_join(passthru_model->vcp_rx_tx_thread);
   furi_thread_free(passthru_model->vcp_rx_tx_thread);
 

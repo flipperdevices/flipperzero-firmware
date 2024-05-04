@@ -373,8 +373,9 @@ typedef struct {
   uint16_t vcp_tx_buf_len;
   uint16_t vcp_last_sent;
 
-  /* Virtual COM port RX/TX thread */
+  /* Virtual COM port RX/TX thread and its ID */
   FuriThread *vcp_rx_tx_thread;
+  FuriThreadId vcp_rx_tx_thread_id;
 
   /* Virtual COM port send semaphore */
   FuriSemaphore *vcp_tx_sem;
