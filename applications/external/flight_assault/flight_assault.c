@@ -3,6 +3,7 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <stdlib.h>
 
 // Define screen dimensions
 #define SCREEN_WIDTH 128
@@ -15,10 +16,15 @@ static const uint8_t player_bitmap[] = {0x07, 0x00, 0x09, 0x00, 0x11, 0x00, 0x21
                                         0x41, 0x00, 0x81, 0x00, 0x02, 0x03, 0x04, 0x04,
                                         0x02, 0x03, 0x81, 0x00, 0x41, 0x00, 0x21, 0x00,
                                         0x11, 0x00, 0x09, 0x00, 0x07, 0x00};
-int player_x = 16; // Changed starting position
+int player_x = 16;
 int player_y = SCREEN_HEIGHT / 2 - PLAYER_HEIGHT / 2;
-int player_lives = 3; // Player lives
-
+int player_lives = 3;
+#define MAX_LIVES 3
+bool bonus_life_active = false;
+int bonus_life_x = 0;
+int bonus_life_y = 0;
+int bonus_life_timer = 0;
+#define BONUS_LIFE_DURATION_SECONDS 2
 // Ball properties
 int x = SCREEN_WIDTH / 2;
 int y = SCREEN_HEIGHT / 2;
@@ -26,17 +32,17 @@ int velocity_x = 0;
 int velocity_y = 0;
 
 // Enemy properties
-#define MAX_ENEMIES 6 // Increased number of enemies
+#define MAX_ENEMIES 6
 int enemy_count = MAX_ENEMIES;
 int enemy_x[MAX_ENEMIES];
 int enemy_y[MAX_ENEMIES];
-int enemy_speed[MAX_ENEMIES]; // Removed velocity arrays
+int enemy_speed[MAX_ENEMIES];
 
 // Second enemy properties
 int enemy2_x[MAX_ENEMIES];
 int enemy2_y[MAX_ENEMIES];
 int enemy2_speed[MAX_ENEMIES];
-int enemy2_health[MAX_ENEMIES]; // Health for enemy2
+int enemy2_health[MAX_ENEMIES];
 
 // Bullet properties
 #define MAX_BULLETS 5
@@ -67,6 +73,9 @@ static const uint8_t bullet_bitmap[] = {0x07, 0x07, 0x07};
 
 // Player life icon
 static const uint8_t life_icon[] = {0x36, 0x49, 0x41, 0x22, 0x14, 0x08};
+
+// Bonus life icon
+static const uint8_t bonus_life_icon[] = {0x36, 0x49, 0x41, 0x22, 0x14, 0x08};
 
 // Declare running variable globally
 bool running = true;
@@ -110,8 +119,12 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     // Draw player lives
     canvas_set_bitmap_mode(canvas, true);
     for(int i = 0; i < player_lives; ++i) {
-        canvas_draw_xbm(
-            canvas, SCREEN_WIDTH - (i + 1) * 12, 0, 7, 6, life_icon); // Adjusted size to match icon
+        canvas_draw_xbm(canvas, SCREEN_WIDTH - (i + 1) * 12, 0, 7, 7, life_icon);
+    }
+
+    // Draw bonus life icon
+    if(bonus_life_active) {
+        canvas_draw_xbm(canvas, bonus_life_x, bonus_life_y, 7, 7, bonus_life_icon);
     }
 
     // Draw score
@@ -144,9 +157,47 @@ void shoot() {
         if(!bullet_active[i]) {
             bullet_x[i] = player_x + PLAYER_WIDTH / 2; // Spawn bullet at the center of the player
             bullet_y[i] = player_y + PLAYER_HEIGHT / 2;
-            bullet_velocity_x[i] = 2; // Set bullet velocity
+            bullet_velocity_x[i] = 2;
             bullet_active[i] = true;
             break;
+        }
+    }
+}
+
+void update_bonus_life() {
+    if(!bonus_life_active) {
+        // Random chance to spawn a bonus life
+        if(rand() % 1000 == 0) { // Adjust probability as needed
+            bonus_life_x = rand() % (SCREEN_WIDTH - 7); // Random X position
+            bonus_life_y = rand() % (SCREEN_HEIGHT - 6); // Random Y position
+            bonus_life_active = true;
+            bonus_life_timer = 0; // Reset bonus life timer
+        }
+    } else {
+        // Increment bonus life timer
+        bonus_life_timer++;
+        if(bonus_life_timer >=
+           BONUS_LIFE_DURATION_SECONDS *
+               60) { // Check if bonus life duration has elapsed (60 frames per second)
+            bonus_life_active = false;
+            bonus_life_timer = 0; // Reset bonus life timer
+        }
+    }
+}
+
+void check_bonus_life_collision() {
+    if(bonus_life_active) {
+        // Check collision with player
+        if((player_x + PLAYER_WIDTH >= bonus_life_x && player_x <= bonus_life_x + 6) &&
+           (player_y + PLAYER_HEIGHT >= bonus_life_y && player_y <= bonus_life_y + 6)) {
+            // Increase player lives if not exceeding maximum
+            if(player_lives < MAX_LIVES) {
+                player_lives++; // Increase player lives
+            }
+            if(player_lives == MAX_LIVES) { // Add score only when the player has maximum lives
+                score += 10; // Increase score
+            }
+            bonus_life_active = false;
         }
     }
 }
@@ -331,6 +382,11 @@ int32_t flight_assault(void* p) {
         if(player_x > SCREEN_WIDTH - PLAYER_WIDTH) player_x = SCREEN_WIDTH - PLAYER_WIDTH;
         if(player_y < 0) player_y = 0;
         if(player_y > SCREEN_HEIGHT - PLAYER_HEIGHT) player_y = SCREEN_HEIGHT - PLAYER_HEIGHT;
+
+        // Update bonus life
+        update_bonus_life();
+        // Check collision with bonus life
+        check_bonus_life_collision();
 
         // Update viewport
         view_port_update(view_port);
