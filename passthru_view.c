@@ -435,7 +435,7 @@ void passthru_view_enter_callback(void *ctx) {
   passthru_model->total_bytes_recv = 0;
   passthru_model->show_traffic_counters = true;
 
-  /* Are we supposed to use CDC channel 0 */
+  /* Use CDC channel 0? */
   if(passthru_vcp_channel == 0) {
 
     /* Close the CLI */
@@ -447,7 +447,7 @@ void passthru_view_enter_callback(void *ctx) {
     furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
   }
 
-  /* We're supposed to use CDC channel 1 */
+  /* Use CDC channel 1 */
   else {
 
     /* Make sure the USB CDC is configured as dual channel */
