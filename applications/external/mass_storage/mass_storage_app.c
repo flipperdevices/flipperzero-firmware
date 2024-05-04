@@ -98,6 +98,10 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         MassStorageAppViewStart,
         variable_item_list_get_view(app->variable_item_list));
 
+    app->widget = widget_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, MassStorageAppViewWidget, widget_get_view(app->widget));
+
     app->popup = popup_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, MassStorageAppViewPopup, popup_get_view(app->popup));
@@ -121,12 +125,14 @@ void mass_storage_app_free(MassStorageApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewTextInput);
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewStart);
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewLoading);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewWidget);
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewPopup);
 
     mass_storage_free(app->mass_storage_view);
     text_input_free(app->text_input);
     variable_item_list_free(app->variable_item_list);
     loading_free(app->loading);
+    widget_free(app->widget);
     popup_free(app->popup);
 
     // View dispatcher

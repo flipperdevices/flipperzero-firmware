@@ -1,3 +1,7 @@
+#  [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
+#  [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655)
+#  Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix)
+#  [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 App(
     appid="subghz_remote_refactored",
     name="Sub-GHz Remote",

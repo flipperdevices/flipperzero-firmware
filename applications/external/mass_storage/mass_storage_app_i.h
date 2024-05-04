@@ -13,12 +13,13 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/loading.h>
+#include <gui/modules/widget.h>
 #include <gui/modules/popup.h>
 #include <storage/storage.h>
 #include "views/mass_storage_view.h"
 #include <mass_storage_icons.h>
 
-#define MASS_STORAGE_APP_PATH_FOLDER APP_ASSETS_PATH("")
+#define MASS_STORAGE_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define MASS_STORAGE_APP_EXTENSION ".img"
 #define MASS_STORAGE_FILE_NAME_LEN 40
 
@@ -27,6 +28,7 @@ struct MassStorageApp {
     Storage* fs_api;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
+    Widget* widget;
     Popup* popup;
     DialogsApp* dialogs;
     TextInput* text_input;
@@ -52,6 +54,7 @@ typedef enum {
     MassStorageAppViewTextInput,
     MassStorageAppViewWork,
     MassStorageAppViewLoading,
+    MassStorageAppViewWidget,
     MassStorageAppViewPopup,
 } MassStorageAppView;
 

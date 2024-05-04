@@ -6,7 +6,7 @@
 #include <storage/storage.h>
 
 #include <lib/toolbox/path.h>
-#include "subghz_playlist_icons.h"
+#include <subghz_playlist_icons.h>
 
 #include <lib/subghz/protocols/protocol_items.h>
 #include <flipper_format/flipper_format_i.h>
@@ -22,7 +22,6 @@
 #include "playlist_file.h"
 #include "canvas_helper.h"
 
-#define PLAYLIST_FOLDER EXT_PATH("subghz/playlist")
 #define PLAYLIST_EXT ".txt"
 #define TAG "Playlist"
 
@@ -723,9 +722,7 @@ void playlist_free(Playlist* app) {
     free(app);
 }
 
-int32_t playlist_app(void* p) {
-    UNUSED(p);
-
+int32_t playlist_app(char* p) {
     // create playlist folder
     {
         Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -743,11 +740,13 @@ int32_t playlist_app(void* p) {
     furi_hal_power_suppress_charge_enter();
 
     // select playlist file
-    {
+    if(p && strlen(p)) {
+        furi_string_set(app->file_path, p);
+    } else {
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogsFileBrowserOptions browser_options;
         dialog_file_browser_set_basic_options(&browser_options, PLAYLIST_EXT, &I_sub1_10px);
-        browser_options.hide_ext = false;
+        browser_options.base_path = PLAYLIST_FOLDER;
 
         const bool res =
             dialog_file_browser_show(dialogs, app->file_path, app->file_path, &browser_options);

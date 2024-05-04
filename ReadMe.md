@@ -62,6 +62,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updater: [Gzipped resources (220% faster FW upload) + Updater improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0f0b062366af85f614ee0dc1380fc0bc9551063f)
 - UL: [Electra fix protocol naming (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a89a67d1033751b3c5fa9ab2fdac4caaa1afaac4)
 - [ESP Flasher resources updated (By Willy-JL) to include resources for flashing Wardriver, AirTag Scanner & Marauder for MultiBoardS3](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/82b0c93e4b9e90dd8ee95beadefff9f3510d010c)
+- Updater: [Flashlight v1.1 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
+- Updater: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
+- Updater: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage)
+- Updater: [Sub-GHz Playlist v1.0 (By darmiel)](https://github.com/darmiel/flipper-playlist)
+- Updater: [Sub-GHz Remote v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
 
 <a name="release">
 
@@ -552,8 +557,8 @@ $ ./fbt dolphin_ext
 - [Spotify Remote v0.1 (By benjamindrussell)](https://github.com/benjamindrussell/flipper-spotify-remote) `Req: ESP32` with [ESP32 Spotify Remote](https://github.com/benjamindrussell/esp32-spotify-remote)
 - [SPI Mem Manager v1.3 (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager)
 - [Sub-GHz Bruteforcer v3.11.3 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
-- [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
-- [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655) - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
+- [Sub-GHz Playlist v1.0 (By darmiel)](https://github.com/darmiel/flipper-playlist)
+- [Sub-GHz Remote v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
 - [Sub-GHz Rolling Flaws v1.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 - [SWD Probe v1.1 (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 - [T5577 Multiwriter v0.2 (By Leptopt1los)](https://github.com/Leptopt1los/t5577_multiwriter)

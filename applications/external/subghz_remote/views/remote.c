@@ -216,10 +216,8 @@ bool subrem_view_remote_input(InputEvent* event, void* context) {
     furi_assert(context);
     SubRemViewRemote* subrem_view_remote = context;
 
-    /* Want to stop sending if we are sending, exit the app if we are not! */
     if(event->key == InputKeyBack && event->type == InputTypePress) {
         bool is_stopping = false;
-
         with_view_model(
             subrem_view_remote->view,
             SubRemViewRemoteModel * model,
@@ -241,7 +239,6 @@ bool subrem_view_remote_input(InputEvent* event, void* context) {
 
         return true;
     }
-
     // BACK button processing end
 
     if(event->key == InputKeyUp && event->type == InputTypePress) {

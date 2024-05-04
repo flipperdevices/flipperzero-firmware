@@ -6,7 +6,7 @@ App(
     stack_size=2 * 1024,
     icon="A_Sub1ghz_14",
     fap_category="Sub-GHz",
-    fap_icon="playlist_10px.png",
+    fap_icon="subplaylist_10px.png",
     fap_icon_assets="images",
     fap_author="darmiel",
     fap_version=(1, 0),

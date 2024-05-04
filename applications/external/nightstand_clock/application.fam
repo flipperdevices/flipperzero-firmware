@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="clock_app",
     stack_size=2 * 1024,
-    fap_icon="ClockIcon.png",
+    fap_icon="clock.png",
     fap_category="Tools",
     fap_author="nymda & Willy-JL",
     fap_weburl="https://github.com/nymda/FlipperNightStand",
