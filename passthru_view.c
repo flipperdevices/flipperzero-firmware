@@ -416,30 +416,9 @@ void passthru_view_enter_callback(void *ctx) {
 
   with_view_model(app->passthru_view, PassthruModel *passthru_model,
 	{
-	  /* Reset the serial traffic counters */
-	  passthru_model->total_bytes_sent = 0;
-	  passthru_model->total_bytes_recv = 0;
-
-	  /* Create the virtual COM port TX semaphore, to avoid sending data
-	     before the previous transmission is finished */
-	  passthru_model->vcp_tx_sem = furi_semaphore_alloc(1, 1);
-
-	  /* Start out assuming the virtual COM port isn't connected */
-	  passthru_model->vcp_connected = false;
-
-	  /* Get the current virtual COM port configuration */
-	  passthru_model->vcp_config =
-			furi_hal_cdc_get_port_settings(passthru_vcp_channel);
-
-	  /* Mirror the virtual COM port on the UART */
-	  mirror_vcp_on_uart(app, passthru_model);
-
-	  /* Start with the passthrough enabled */
-	  passthru_model->enabled = true;
-
 	  furi_hal_usb_unlock();
 
-	  /* Are we supposed to use channel 0 */
+	  /* Are we supposed to use CDC channel 0 */
 	  if(passthru_vcp_channel == 0) {
 
 	    /* Close the CLI */
@@ -451,19 +430,48 @@ void passthru_view_enter_callback(void *ctx) {
 	    furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
 	  }
 
-	  /* We're supposed to use channel 1 */
+	  /* We're supposed to use CDC channel 1 */
 	  else {
 
 	    /* Make sure the USB CDC is configured as dual channel */
 	    furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
 	  }
 
-	  /* Allocate space for the UART receive stream buffer */
-	  passthru_model->uart_rx_stream =
-				furi_stream_buffer_alloc(UART_RX_BUF_SIZE, 1);
+	  /* Get the current virtual COM port configuration */
+	  passthru_model->vcp_config =
+			furi_hal_cdc_get_port_settings(passthru_vcp_channel);
+
+	  /* Start out with the passthrough enabled, and assume the virtual
+             COM port isn't connected */
+	  passthru_model->enabled = true;
+	  passthru_model->vcp_connected = false;
+
+	  /* Mirror the virtual COM port on the UART */
+	  mirror_vcp_on_uart(app, passthru_model);
+
+	  /* Reset the serial traffic counters */
+	  passthru_model->total_bytes_sent = 0;
+	  passthru_model->total_bytes_recv = 0;
 
 	  /* Nothing sent to the virtual COM port yet */
 	  passthru_model->vcp_last_sent = 0;
+
+	  /* Initialise the serial traffic logging prefix to an empty string if
+	     we don't have a console to log to, or a prefix with no direction */
+	  if(passthru_vcp_channel == 0)
+	    passthru_model->traffic_logging_prefix[0] = 0;
+	  else
+	    snprintf(passthru_model->traffic_logging_prefix,
+			sizeof(passthru_model->traffic_logging_prefix),
+			" LRF");
+
+	  /* Create the virtual COM port TX semaphore, to avoid sending data
+	     before the previous transmission is finished */
+	  passthru_model->vcp_tx_sem = furi_semaphore_alloc(1, 1);
+
+	  /* Allocate space for the UART receive stream buffer */
+	  passthru_model->uart_rx_stream =
+				furi_stream_buffer_alloc(UART_RX_BUF_SIZE, 1);
 
 	  /* Allocate space for the virtual COM port receive stream buffer */
 	  passthru_model->vcp_rx_stream =
@@ -484,15 +492,6 @@ void passthru_view_enter_callback(void *ctx) {
 
 	  /* Set the virtual COM port callbacks */
 	  furi_hal_cdc_set_callbacks(passthru_vcp_channel, &cdc_callbacks, app);
-
-	  /* Initialise the serial traffic logging prefix to an empty string if
-	     we don't have a console to log to, or a prefix with no direction */
-	  if(passthru_vcp_channel == 0)
-	    passthru_model->traffic_logging_prefix[0] = 0;
-	  else
-	    snprintf(passthru_model->traffic_logging_prefix,
-			sizeof(passthru_model->traffic_logging_prefix),
-			" LRF");
 	},
 	false);
 }
@@ -528,7 +527,10 @@ void passthru_view_exit_callback(void *ctx) {
   /* Free the UART receive stream buffer */
   furi_stream_buffer_free(passthru_model->uart_rx_stream);
 
-  /* Were we using channel 0? */
+  /* Free the virtual COM port TX semaphore */
+  furi_semaphore_free(passthru_model->vcp_tx_sem);
+
+  /* Were we using CDC channel 0? */
   if(passthru_vcp_channel == 0) {
 
     /* Restart the CLI on channel 0 */
@@ -537,15 +539,12 @@ void passthru_view_exit_callback(void *ctx) {
     furi_record_close(RECORD_CLI);
   }
 
-  /* We were using channel 1 */
+  /* We were using CDC channel 1 */
   else {
 
     /* Reconfigure the USB CDC as single channel */
     furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
   }
-
-  /* Free the virtual COM port TX semaphore */
-  furi_semaphore_free(passthru_model->vcp_tx_sem);
 }
 
 
