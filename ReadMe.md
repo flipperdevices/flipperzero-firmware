@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Electra intercom lfrfid protocol (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/750)
 - Updater: [Gzipped resources (220% faster FW upload) + Updater improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0f0b062366af85f614ee0dc1380fc0bc9551063f)
 - UL: [Electra fix protocol naming (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a89a67d1033751b3c5fa9ab2fdac4caaa1afaac4)
+- [ESP Flasher resources updated (By Willy-JL) to include resources for flashing Wardriver, AirTag Scanner & Marauder for MultiBoardS3](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/82b0c93e4b9e90dd8ee95beadefff9f3510d010c)
 
 <a name="release">
 
