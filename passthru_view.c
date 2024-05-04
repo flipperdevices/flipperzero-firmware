@@ -398,15 +398,19 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
         if(passthru_model->vcp_last_sent >
 				sizeof(passthru_model->vcp_tx_buf_len)) {
 
-          /* Acquire the semaphore so we block at the next round until the
-             transmission is complete */
-          furi_check(furi_semaphore_acquire(passthru_model->vcp_tx_sem,
-							FuriWaitForever)
-			== FuriStatusOk);
+          /* If the UART is started, the passthrough is enabled and the virtual
+	     COM port is connected, try to acquire the semaphore so we block at
+	     the next round until the transmission is complete. Only try
+             for a while so we don't get hung up */
+          if(passthru_model->uart_baudrate &&
+		passthru_model->enabled && passthru_model->vcp_connected &&
+		furi_semaphore_acquire(passthru_model->vcp_tx_sem, 500)
+							== FuriStatusOk) {
 
-          /* Send 0 bytes */
-          furi_hal_cdc_send(passthru_vcp_channel, NULL, 0);
-          passthru_model->vcp_last_sent = 0;
+            /* Send 0 bytes */
+            furi_hal_cdc_send(passthru_vcp_channel, NULL, 0);
+            passthru_model->vcp_last_sent = 0;
+          }
         }
       }
     }
