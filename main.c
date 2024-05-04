@@ -103,7 +103,7 @@ const uint16_t test_pointer_view_update_every = 150; /*ms*/
 const uint16_t test_pointer_jiggle_every = 50; /*ms*/
 
 /** USB serial channel to use for the passthrough **/
-const uint16_t passthru_vcp_channel = 1; /* 0 Replaces the CLI */
+const uint16_t passthru_vcp_channel = 0; /* 0 Replaces the CLI */
 
 /** USB serial passthrough view timings **/
 const uint16_t passthru_view_update_every = 250; /*ms*/
