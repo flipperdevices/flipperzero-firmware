@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.6
+ * Version: 1.7
  *
  * LRF information view
 ***/
@@ -37,8 +37,6 @@ static void lrf_info_handler(LRFInfo* lrf_info, void* ctx) {
     /* Copy the infoification and mark it as valid */
     memcpy(&(lrfinfo_model->info), lrf_info, sizeof(LRFInfo));
     lrfinfo_model->has_info = true;
-
-    FURI_LOG_I(TAG, "HERE");
 
     /* Trigger an LRF info view redraw */
     with_view_model(
@@ -183,8 +181,8 @@ bool lrfinfo_view_input_callback(InputEvent* evt, void* ctx) {
     App* app = (App*)ctx;
     LRFInfoModel* lrfinfo_model = view_get_model(app->lrfinfo_view);
 
-    /* If the user pressed the OK button, tell the LRF to send its identification and
-     information */
+    /* If the user pressed the OK button, tell the LRF to send its
+     identification and information */
     if(evt->type == InputTypePress && evt->key == InputKeyOk) {
         FURI_LOG_D(TAG, "OK button pressed");
 

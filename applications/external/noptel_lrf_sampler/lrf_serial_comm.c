@@ -1,12 +1,13 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.6
+ * Version: 1.7
  *
  * LRF Serial communication app
 ***/
 
 /*** Includes ***/
 #include <furi_hal.h>
+#include <furi_hal_usb_cdc.h>
 #include <expansion/expansion.h>
 
 #include "lrf_serial_comm.h"
@@ -14,6 +15,9 @@
 
 /*** Defines ***/
 #define TAG "lrf_serial_comm"
+
+#define UART_RX_STREAM_BUF_SIZE 1024
+
 #define CR 13
 #define LF 10
 #define SLASH 47
@@ -91,6 +95,9 @@ struct _LRFSerialCommApp {
     uint8_t* shared_storage;
     uint16_t shared_storage_size;
 
+    /* Whether the UART is initialized */
+    bool is_uart_initialized;
+
     /* UART receive thread */
     FuriThread* rx_thread;
 
@@ -101,7 +108,7 @@ struct _LRFSerialCommApp {
     uint16_t uart_rx_timeout;
 
     /* Receive buffer */
-    uint8_t rx_buf[RX_BUF_SIZE];
+    uint8_t rx_buf[UART_RX_BUF_SIZE];
 
     /* Default LRF frame decode buffer */
     uint8_t default_dec_buf[128];
@@ -111,8 +118,12 @@ struct _LRFSerialCommApp {
     uint16_t nb_dec_buf;
     uint16_t dec_buf_size;
 
-    /* Callback to send a decoded LRF sample to and the context
-     we should pass it */
+    /* Callback to send raw received data to and the context we should pass it */
+    void (*lrf_raw_data_handler)(uint8_t*, uint16_t, void*);
+    void* lrf_raw_data_handler_ctx;
+
+    /* Callback to send a decoded LRF sample to and the context we should
+     pass it */
     void (*lrf_sample_handler)(LRFSample*, void*);
     void* lrf_sample_handler_ctx;
 
@@ -145,6 +156,15 @@ typedef enum {
 } rx_thread_evts;
 
 /*** Routines ***/
+
+/** Set the callback to handle raw data received from the LRF **/
+void set_lrf_raw_data_handler(
+    LRFSerialCommApp* app,
+    void (*cb)(uint8_t*, uint16_t, void*),
+    void* ctx) {
+    app->lrf_raw_data_handler = cb;
+    app->lrf_raw_data_handler_ctx = ctx;
+}
 
 /** Set the callback to handle one received LRF sample **/
 void set_lrf_sample_handler(LRFSerialCommApp* app, void (*cb)(LRFSample*, void*), void* ctx) {
@@ -233,7 +253,7 @@ static int32_t uart_rx_thread(void* ctx) {
     LRFSerialCommApp* app = (LRFSerialCommApp*)ctx;
     uint32_t evts;
     uint32_t last_rx_tstamp_ms = 0, now_ms;
-    size_t rx_buf_len;
+    uint16_t rx_buf_len;
     uint32_t wait_nb_dec_buf = 0;
     bool is_little_endian;
     LRFSample lrf_sample;
@@ -284,7 +304,7 @@ static int32_t uart_rx_thread(void* ctx) {
     int16_union.bytes[0] = app->dec_buf[offset + 1];
 
     while(1) {
-        /* Get until we get either a stop event of we received data */
+        /* Get events */
         evts = furi_thread_flags_wait(stop | rx_done, FuriFlagWaitAny, FuriWaitForever);
 
         /* Check for errors */
@@ -296,7 +316,8 @@ static int32_t uart_rx_thread(void* ctx) {
         /* Have we received data? */
         if(evts & rx_done) {
             /* Get the data */
-            rx_buf_len = furi_stream_buffer_receive(app->rx_stream, app->rx_buf, RX_BUF_SIZE, 0);
+            rx_buf_len =
+                furi_stream_buffer_receive(app->rx_stream, app->rx_buf, UART_RX_BUF_SIZE, 0);
 
             /* Did we actually get something? */
             if(rx_buf_len > 0) {
@@ -315,6 +336,14 @@ static int32_t uart_rx_thread(void* ctx) {
                 }
 
                 last_rx_tstamp_ms = now_ms;
+
+                /* If we have a callback to handle raw LRF data, call it, pass it the
+           data, and don't do any further processing */
+                if(app->lrf_raw_data_handler) {
+                    app->lrf_raw_data_handler(
+                        app->rx_buf, rx_buf_len, app->lrf_raw_data_handler_ctx);
+                    continue;
+                }
 
                 /* Process the data we're received */
                 for(i = 0; i < rx_buf_len; i++) {
@@ -666,8 +695,9 @@ static int32_t uart_rx_thread(void* ctx) {
                                 lrf_ident.optics,
                                 lrf_ident.builddate);
 
-                            /* If we have a callback to handle the decoded LRF identification
-                     frame, call it and pass it the identification */
+                            /* If we have a callback to handle the decoded LRF
+                     identification frame, call it and pass it the
+                     identification */
                             if(app->lrf_ident_handler)
                                 app->lrf_ident_handler(&lrf_ident, app->lrf_ident_handler_ctx);
 
@@ -687,7 +717,7 @@ static int32_t uart_rx_thread(void* ctx) {
                             }
                             lrf_info.txpumptime = int16_union.unsigned_val;
 
-                            /* Decode the number of pulses used for the last measurement */
+                            /* Decode the number of pulses used in the last measurement */
                             if(is_little_endian) {
                                 LE2LE_INT16_AT_OFFSET(5)
                             } else {
@@ -794,11 +824,13 @@ static int32_t uart_rx_thread(void* ctx) {
                             FURI_LOG_T(
                                 TAG,
                                 "LRF information frame received: "
-                                "txretries=%d, txpumptime=%d, pulsesused=%d, "
-                                "txtemp=%d, apdatfirstburst=%d, "
-                                "targetdist1=%d, targetdist2=%d, "
-                                "targetdist3=%d, targetmagnitude1=%d, "
-                                "targetmagnitude2=%d, targetmagnitude3=%d, "
+                                "txretries=%d, txpumptime=%d, "
+                                "pulsesused=%d, txtemp=%d, "
+                                "apdatfirstburst=%d, targetdist1=%d, "
+                                "targetdist2=%d, targetdist3=%d, "
+                                "targetmagnitude1=%d, "
+                                "targetmagnitude2=%d, "
+                                "targetmagnitude3=%d, "
                                 "battvoltage=%0.3f, iovoltage=%0.3f, "
                                 "rxvoltage=%0.2f, txvoltage=%0.3f, "
                                 "rxtemp=%0.2f, statusbyte1=%02x, "
@@ -882,8 +914,9 @@ static int32_t uart_rx_thread(void* ctx) {
 }
 
 /** UART send function **/
-void uart_tx(LRFSerialCommApp* app, uint8_t* data, size_t len) {
+void uart_tx(LRFSerialCommApp* app, uint8_t* data, uint16_t len) {
     furi_hal_serial_tx(app->serial_handle, data, len);
+    furi_hal_serial_tx_wait_complete(app->serial_handle);
 }
 
 /** Send a command to the LRF **/
@@ -907,9 +940,15 @@ LRFSerialCommApp* lrf_serial_comm_app_init(
     /* Allocate space for the app's structure */
     LRFSerialCommApp* app = malloc(sizeof(LRFSerialCommApp));
 
+    /* The UART isn't initialized yet */
+    app->is_uart_initialized = false;
+
     /* Save the shared storage location and size */
     app->shared_storage = shared_storage;
     app->shared_storage_size = shared_storage_size;
+
+    /* No raw LRF data handler callback setup yet */
+    app->lrf_raw_data_handler = NULL;
 
     /* No received LRF data handler callback setup yet */
     app->lrf_sample_handler = NULL;
@@ -924,7 +963,7 @@ LRFSerialCommApp* lrf_serial_comm_app_init(
     enable_shared_storage_dec_buf(app, false);
 
     /* Allocate space for the UART receive stream buffer */
-    app->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
+    app->rx_stream = furi_stream_buffer_alloc(UART_RX_STREAM_BUF_SIZE, 1);
 
     /* Allocate space for the UART receive thread */
     app->rx_thread = furi_thread_alloc();
@@ -957,8 +996,14 @@ LRFSerialCommApp* lrf_serial_comm_app_init(
 
 /** Start the UART **/
 void start_uart(LRFSerialCommApp* app, uint32_t baudrate) {
-    /* Initialize the UART with the required baudrate */
-    furi_hal_serial_init(app->serial_handle, baudrate);
+    /* If the UART is already initialized, only set the baudrate. Otherwise
+     initialize it with the baudrate */
+    if(app->is_uart_initialized)
+        furi_hal_serial_set_br(app->serial_handle, baudrate);
+    else {
+        furi_hal_serial_init(app->serial_handle, baudrate);
+        app->is_uart_initialized = true;
+    }
 
     /* Start receiving */
     furi_hal_serial_async_rx_start(app->serial_handle, on_uart_irq_callback, app, false);
@@ -966,14 +1011,13 @@ void start_uart(LRFSerialCommApp* app, uint32_t baudrate) {
 
 /** Stop the UART **/
 void stop_uart(LRFSerialCommApp* app) {
-    /* Wait a bit to flush the write buffer */
-    furi_delay_ms(100);
-
     /* Stop receiving */
     furi_hal_serial_async_rx_stop(app->serial_handle);
+}
 
-    /* Deinitialize the UART */
-    furi_hal_serial_deinit(app->serial_handle);
+/** Set the UART's baudrate **/
+void set_uart_baudrate(LRFSerialCommApp* app, uint32_t baudrate) {
+    furi_hal_serial_set_br(app->serial_handle, baudrate);
 }
 
 /** Stop the UART receive thread and free up the space allocated for the LRF

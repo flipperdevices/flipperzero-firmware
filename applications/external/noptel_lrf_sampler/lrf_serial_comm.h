@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.6
+ * Version: 1.7
  *
  * LRF Serial communication app
 ***/
@@ -9,7 +9,7 @@
 
 /*** Defines ***/
 #define BAUDRATE 115200
-#define RX_BUF_SIZE 256
+#define UART_RX_BUF_SIZE 256
 #define DIAG_PROGRESS_UPDATE_EVERY 250 /*ms*/
 
 /*** Types ***/
@@ -177,6 +177,9 @@ typedef struct _LRFSerialCommApp LRFSerialCommApp;
 
 /*** Routines ***/
 
+/** Set the callback to handle raw data received from the LRF **/
+void set_lrf_raw_data_handler(LRFSerialCommApp*, void (*)(uint8_t*, uint16_t, void*), void*);
+
 /** Set the callback to handle one received LRF sample **/
 void set_lrf_sample_handler(LRFSerialCommApp*, void (*)(LRFSample*, void*), void*);
 
@@ -194,7 +197,7 @@ void set_diag_data_handler(LRFSerialCommApp*, void (*)(LRFDiag*, void*), void*);
 void enable_shared_storage_dec_buf(LRFSerialCommApp*, bool);
 
 /** UART send function **/
-void uart_tx(LRFSerialCommApp*, uint8_t*, size_t);
+void uart_tx(LRFSerialCommApp*, uint8_t*, uint16_t);
 
 /** Send a command to the LRF **/
 void send_lrf_command(LRFSerialCommApp*, LRFCommand);
@@ -207,6 +210,9 @@ void start_uart(LRFSerialCommApp*, uint32_t);
 
 /** Stop the UART **/
 void stop_uart(LRFSerialCommApp*);
+
+/** Set the UART's baudrate **/
+void set_uart_baudrate(LRFSerialCommApp*, uint32_t);
 
 /** Stop the UART receive thread and free up the space allocated for the LRF
     communication app **/

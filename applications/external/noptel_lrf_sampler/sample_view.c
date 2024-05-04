@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.6
+ * Version: 1.7
  *
  * Sample View
 ***/
@@ -458,7 +458,7 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
     if(sampler_model->disp_sample.dist1 > 0.5) {
         snprintf(
             sampler_model->spstr,
-            (volatile size_t){sizeof(sampler_model->spstr)},
+            sizeof(sampler_model->spstr),
             "%8.2f",
             (double)sampler_model->disp_sample.dist1);
         canvas_draw_str(canvas, 0, 14, sampler_model->spstr);
@@ -467,7 +467,7 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
     if(sampler_model->disp_sample.dist2 > 0.5) {
         snprintf(
             sampler_model->spstr,
-            (volatile size_t){sizeof(sampler_model->spstr)},
+            sizeof(sampler_model->spstr),
             "%8.2f",
             (double)sampler_model->disp_sample.dist2);
         canvas_draw_str(canvas, 0, 30, sampler_model->spstr);
@@ -476,7 +476,7 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
     if(sampler_model->disp_sample.dist3 > 0.5) {
         snprintf(
             sampler_model->spstr,
-            (volatile size_t){sizeof(sampler_model->spstr)},
+            sizeof(sampler_model->spstr),
             "%8.2f",
             (double)sampler_model->disp_sample.dist3);
         canvas_draw_str(canvas, 0, 46, sampler_model->spstr);
@@ -488,7 +488,7 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
         if(sampler_model->eff_freq < 90) {
             snprintf(
                 sampler_model->spstr,
-                (volatile size_t){sizeof(sampler_model->spstr)},
+                sizeof(sampler_model->spstr),
                 "%4.1f",
                 sampler_model->eff_freq);
             canvas_draw_str(canvas, 12, 64, sampler_model->spstr);
@@ -498,7 +498,7 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
         else {
             snprintf(
                 sampler_model->spstr,
-                (volatile size_t){sizeof(sampler_model->spstr)},
+                sizeof(sampler_model->spstr),
                 "%3.0f",
                 sampler_model->eff_freq);
             canvas_draw_str(canvas, 18, 64, sampler_model->spstr);
@@ -588,7 +588,7 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
     if(sampler_model->disp_sample.dist1 > 0.5) {
         snprintf(
             sampler_model->spstr,
-            (volatile size_t){sizeof(sampler_model->spstr)},
+            sizeof(sampler_model->spstr),
             "%4d",
             sampler_model->disp_sample.ampl1);
         canvas_draw_str(canvas, 105, 7, sampler_model->spstr);
@@ -597,7 +597,7 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
     if(sampler_model->disp_sample.dist2 > 0.5) {
         snprintf(
             sampler_model->spstr,
-            (volatile size_t){sizeof(sampler_model->spstr)},
+            sizeof(sampler_model->spstr),
             "%4d",
             sampler_model->disp_sample.ampl2);
         canvas_draw_str(canvas, 105, 23, sampler_model->spstr);
@@ -606,7 +606,7 @@ void sample_view_draw_callback(Canvas* canvas, void* model) {
     if(sampler_model->disp_sample.dist3 > 0.5) {
         snprintf(
             sampler_model->spstr,
-            (volatile size_t){sizeof(sampler_model->spstr)},
+            sizeof(sampler_model->spstr),
             "%4d",
             sampler_model->disp_sample.ampl3);
         canvas_draw_str(canvas, 105, 39, sampler_model->spstr);

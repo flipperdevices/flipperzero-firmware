@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.6
+ * Version: 1.7
  *
  * Submenu
 ***/
@@ -75,6 +75,13 @@ void submenu_callback(void* ctx, uint32_t idx) {
         view_dispatcher_switch_to_view(app->view_dispatcher, view_testpointer);
         sampler_model->config.sitem = submenu_testpointer;
         FURI_LOG_D(TAG, "Switch to test pointer view");
+        break;
+
+    /* Switch to the USB serial passthrough view */
+    case submenu_passthru:
+        view_dispatcher_switch_to_view(app->view_dispatcher, view_passthru);
+        sampler_model->config.sitem = submenu_passthru;
+        FURI_LOG_D(TAG, "Switch to USB serial passthrough view");
         break;
 
     /* Switch to the about view */

@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.6
+ * Version: 1.7
  *
  * Main app
 ***/
@@ -17,6 +17,7 @@
 #include "save_diag_view.h"
 #include "test_laser_view.h"
 #include "test_pointer_view.h"
+#include "passthru_view.h"
 #include "about_view.h"
 #include "submenu.h"
 
@@ -37,6 +38,7 @@ const char* submenu_item_names[] = {
     "Save LRF diagnostic",
     "Test LRX laser",
     "Test IR pointer",
+    "USB serial passthrough",
     "About"};
 
 /** Sampling mode setting parameters **/
@@ -106,6 +108,12 @@ const uint16_t test_laser_restart_cmm_every = 500; /*ms*/
 const uint16_t test_pointer_view_update_every = 150; /*ms*/
 const uint16_t test_pointer_jiggle_every = 50; /*ms*/
 
+/** USB serial channel to use for the passthrough **/
+const uint16_t passthru_vcp_channel = 0; /* 0 Replaces the CLI */
+
+/** USB serial passthrough view timings **/
+const uint16_t passthru_view_update_every = 250; /*ms*/
+
 /*** Routines ***/
 
 /** Initialize the app **/
@@ -166,6 +174,13 @@ static App* noptel_lrf_sampler_app_init() {
         app->submenu,
         submenu_item_names[submenu_testpointer],
         submenu_testpointer,
+        submenu_callback,
+        app);
+
+    submenu_add_item(
+        app->submenu,
+        submenu_item_names[submenu_passthru],
+        submenu_passthru,
         submenu_callback,
         app);
 
@@ -349,6 +364,33 @@ static App* noptel_lrf_sampler_app_init() {
     /* Add the test pointer view */
     view_dispatcher_add_view(app->view_dispatcher, view_testpointer, app->testpointer_view);
 
+    /* Setup the USB serial passthrough */
+
+    /* Allocate space for the passthrough view */
+    app->passthru_view = view_alloc();
+
+    /* Setup the draw callback for the passthrough view */
+    view_set_draw_callback(app->passthru_view, passthru_view_draw_callback);
+
+    /* Setup the input callback for the passthrough view */
+    view_set_input_callback(app->passthru_view, passthru_view_input_callback);
+
+    /* Configure the "previous" callback for the passthrough view */
+    view_set_previous_callback(app->passthru_view, return_to_submenu_callback);
+
+    /* Configure the enter and exit callbacks for the passthrough view */
+    view_set_enter_callback(app->passthru_view, passthru_view_enter_callback);
+    view_set_exit_callback(app->passthru_view, passthru_view_exit_callback);
+
+    /* Set the context for the passthrough view callbacks */
+    view_set_context(app->passthru_view, app);
+
+    /* Allocate the passthrough model */
+    view_allocate_model(app->passthru_view, ViewModelTypeLockFree, sizeof(PassthruModel));
+
+    /* Add the passthrough view */
+    view_dispatcher_add_view(app->view_dispatcher, view_passthru, app->passthru_view);
+
     /* Setup the about view */
 
     /* Allocate space for the sample view */
@@ -454,6 +496,10 @@ static void noptel_lrf_sampler_app_free(App* app) {
     /* Remove the about view */
     view_dispatcher_remove_view(app->view_dispatcher, view_about);
     view_free(app->about_view);
+
+    /* Remove the USB serial passthrough view */
+    view_dispatcher_remove_view(app->view_dispatcher, view_passthru);
+    view_free(app->passthru_view);
 
     /* Remove the test pointer view */
     view_dispatcher_remove_view(app->view_dispatcher, view_testpointer);

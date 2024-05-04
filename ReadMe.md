@@ -68,6 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updater: [Sub-GHz Remote v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
 - Infrared: [Add AC model Pioneer Inverter (By djcas9)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5a438d07b7659b8d10be123357da31136da32ac0)
 - Updated: [Flight Assault v0.3 (By evillero)](https://github.com/evillero/flight_assault)
+- Updated: [Noptel LRF Sampler v1.7 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 
 <a name="release">
 
@@ -506,7 +507,7 @@ $ ./fbt dolphin_ext
 - [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
-- [Noptel LRF Sampler v1.6 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
+- [Noptel LRF Sampler v1.7 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [NRF Sniffer for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/nrfsniff_ms) `Req: NRF24`

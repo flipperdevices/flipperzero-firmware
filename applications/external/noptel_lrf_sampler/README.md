@@ -1,5 +1,5 @@
 # Noptel LRF rangefinder sampler app for the Flipper Zero
-### Version 1.6
+### Version 1.7
 
 * [Usage](#Usage)
 * [Installation](#Installation)
@@ -8,7 +8,19 @@
 
 Flipper Zero app to get range measurements from a [Noptel](https://noptel.fi/) [LRF rangefinder](https://noptel.fi/rangefinderhome).
 
-https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/003b6da3-f35d-4532-896b-64c1d9b1b687
+#### Functions
+
+- Rangefinding in all modes
+- Distance and amplitude averaging
+- Return rate display
+- Laser pointer control
+- LRF information display
+- Saving diagnostic data
+- Rangefinder laser testing
+- IR laser pointer testing
+- USB serial passthrough
+
+https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/bae70910-ead5-4b63-9a32-cbc670b7adfa
 
 
 
@@ -18,7 +30,7 @@ Start the application in **Apps ▶ GPIO**.
 
 The main menu opens:
 
-![Main menu](screenshots/10-main_menu.png)
+![Main menu](screenshots/11-main_menu.png)
 
 
 ### Configuration
@@ -89,7 +101,7 @@ The buffering state is displayed at the bottom left: the bar is all the way up w
 
 The return rate is indicated next to the buffering state: the bar is all the way up when the return rate is 100% - meaning no missed measurements.
 
-![Sample buffering bars](screenshots/15-sample_buffering_bars.png)
+![Sample buffering bars](screenshots/16-sample_buffering_bars.png)
 
 The buffering state and the return rate indicators are useful to determine the rangefinder's extinction ratio: when the buffer is full, the return rate bar should be only about ½ to ¾ full at extinction ratio.
 
@@ -99,7 +111,7 @@ https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/32d813
 
 Select the **Pointer ON/OFF** toggle to turn the pointer on and off if the rangefinder is equipped with a pointer.
 
-![Pointer ON/OFF toggle](screenshots/11-pointer_on_off_toggle.png)
+![Pointer ON/OFF toggle](screenshots/12-pointer_on_off_toggle.png)
 
 The pointer is useful to train the rangefinder on a short distance target.
 
@@ -119,11 +131,11 @@ DSP files may be submitted to Noptel for analysis, along with a description of t
 
 To recover the DSP files, connect the Flipper Zero to the computer with a USB cable and use [qFlipper](https://docs.flipper.net/qflipper) to download the the **noptel_lrf_diag** directory:
 
-![Download DSP directory](screenshots/13-download_dsp_directory.png)
+![Download DSP directory](screenshots/14-download_dsp_directory.png)
 
 DSP files inside the **noptel_lrf_diag** directory may be downloaded individually also:
 
-![Download DSP file](screenshots/14-download_dsp_file.png)
+![Download DSP file](screenshots/15-download_dsp_file.png)
 
 ### Test LRX laser
 
@@ -135,15 +147,21 @@ Select the **Test LRX laser** option to test an LRX's transmitter laser. *(See n
 
 Select the **Test IR pointer** option to test an LRF's infrared pointer. *(See note below)*
 
-![Save LRF diagnostic](screenshots/12-pointer_testing.png)
+![Save LRF diagnostic](screenshots/13-pointer_testing.png)
+
+### USB serial passthrough
+
+The **USB serial passthrough** function lets a computer connected to the Flipper Zero's USB port and running a LRF client software communicate with the LRF as if the LRF was connected directly to the computer with a USB serial cable. The Flipper Zero transparently relays data between the computer and the LRF.
+
+![Save LRF diagnostic](screenshots/5-usb_serial_passthrough.png)
 
 ### About
 
 Gives information about the app and the GPIO pin connections needed to connect an LRF rangefinder to the Flipper Zero. Use the **OK** button or the arrows to switch pages.
 
-![App version](screenshots/5-splash_version.png)
+![App version](screenshots/6-splash_version.png)
 
-![App description](screenshots/6-app_description.png)
+![App description](screenshots/10-app_description.png)
 
 ![GPIO pin connections](screenshots/7-gpio_pin_connections.png)
 

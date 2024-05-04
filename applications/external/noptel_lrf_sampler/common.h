@@ -1,11 +1,12 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.6
+ * Version: 1.7
  *
  * Main app
 ***/
 
 /*** Includes ***/
+#include <furi_hal_usb_cdc.h>
 #include <gui/modules/submenu.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/variable_item_list.h>
@@ -15,7 +16,7 @@
 #include "lrf_serial_comm.h"
 
 /*** Defines ***/
-#define VERSION "1.6"
+#define VERSION "1.7"
 #define TAG "noptel_lrf_sampler"
 
 #define CONFIG_FILE "noptel_lrf_sampler.save"
@@ -82,6 +83,12 @@ extern const uint16_t test_laser_restart_cmm_every;
 extern const uint16_t test_pointer_view_update_every;
 extern const uint16_t test_pointer_jiggle_every;
 
+/** USB serial channel to use for the passthrough **/
+extern const uint16_t passthru_vcp_channel;
+
+/** USB serial passthrough view timings **/
+extern const uint16_t passthru_view_update_every;
+
 /*** Types */
 
 /** Submenu items **/
@@ -108,11 +115,14 @@ typedef enum {
     /* Test pointer view */
     submenu_testpointer = 6,
 
+    /* USB passthrough view */
+    submenu_passthru = 7,
+
     /* About view */
-    submenu_about = 7,
+    submenu_about = 8,
 
     /* Total number of items */
-    total_submenu_items = 8,
+    total_submenu_items = 9,
 
 } SubmenuIndex;
 
@@ -300,6 +310,70 @@ typedef struct {
 
 } TestPointerModel;
 
+/** Passthrough model **/
+typedef struct {
+    /* Whether the passthrough is enabled */
+    bool enabled;
+
+    /* Whether the virtual COM port is connected */
+    bool vcp_connected;
+
+    /* Virtual COM port configuration */
+    struct usb_cdc_line_coding* vcp_config;
+
+    /* UART baudrate and name*/
+    uint32_t uart_baudrate;
+    const char* uart_baudrate_name;
+
+    /* UART receive stream buffer */
+    FuriStreamBuffer* uart_rx_stream;
+
+    /* UART transmit buffer */
+    uint8_t uart_tx_buf[CDC_DATA_SZ];
+    uint16_t uart_tx_buf_len;
+
+    /* Virtual COM port receive stream buffer */
+    FuriStreamBuffer* vcp_rx_stream;
+
+    /* Virtual COM port receive buffer */
+    uint8_t vcp_rx_buf[CDC_DATA_SZ];
+    uint16_t vcp_rx_buf_len;
+
+    /* Virtual COM port transmit buffer */
+    uint8_t vcp_tx_buf[CDC_DATA_SZ];
+    uint16_t vcp_tx_buf_len;
+    uint16_t vcp_last_sent;
+
+    /* Virtual COM port RX/TX thread and its ID */
+    FuriThread* vcp_rx_tx_thread;
+    FuriThreadId vcp_rx_tx_thread_id;
+
+    /* Virtual COM port send semaphore */
+    FuriSemaphore* vcp_tx_sem;
+
+    /* Total number of bytes sent to the LRF */
+    uint32_t total_bytes_sent;
+
+    /* Total number of bytes received from the LRF */
+    uint32_t total_bytes_recv;
+
+    /* Flag to indicate that the display needs updating, and whether the counters
+     should be displayed */
+    bool update_display;
+    bool show_traffic_counters;
+
+    /* Time at which the display was last updated */
+    uint32_t last_display_update_tstamp;
+
+    /* Serial traffic logging prefix */
+    char traffic_logging_prefix[8];
+
+    /* Scratchpad strings */
+    char spstr1[16];
+    char spstr2[UART_RX_BUF_SIZE * 3 + 8];
+
+} PassthruModel;
+
 /** About view model **/
 typedef struct {
     /* Displayed screen number */
@@ -346,6 +420,9 @@ typedef struct {
 
     /* Test pointer view */
     View* testpointer_view;
+
+    /* USB serial passthrough pointer view */
+    View* passthru_view;
 
     /* About view  */
     View* about_view;
