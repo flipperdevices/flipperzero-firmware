@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <gui/elements.h>
 
+#include "flashlight_icons.h"
+
 typedef enum {
     EventTypeTick,
     EventTypeKey,
@@ -28,17 +30,19 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
 
     canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 64, 2, AlignCenter, AlignTop, "Flashlight");
+    elements_multiline_text_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Flashlight");
 
     canvas_set_font(canvas, FontSecondary);
 
+    canvas_draw_icon(canvas, 0, 17, &I_led_connections);
+
     if(!plugin_state->is_on) {
         elements_multiline_text_aligned(
-            canvas, 64, 28, AlignCenter, AlignTop, "Press OK button turn on");
+            canvas, 64, 44, AlignCenter, AlignTop, "Press OK button turn on");
     } else {
-        elements_multiline_text_aligned(canvas, 64, 28, AlignCenter, AlignTop, "Light is on!");
+        elements_multiline_text_aligned(canvas, 64, 38, AlignCenter, AlignTop, "Light is on!");
         elements_multiline_text_aligned(
-            canvas, 64, 40, AlignCenter, AlignTop, "Press OK button to off");
+            canvas, 64, 50, AlignCenter, AlignTop, "Press OK button to off");
     }
 
     furi_mutex_release(plugin_state->mutex);

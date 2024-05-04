@@ -523,7 +523,7 @@ void xremote_app_submenu_alloc(XRemoteApp* app, uint32_t index, ViewNavigationCa
     View* view = submenu_get_view(app->submenu);
     view_set_previous_callback(view, prev_cb);
 
-#if defined(FW_ORIGIN_Unleashed) || defined(FW_ORIGIN_RM)
+#if defined(FW_ORIGIN_Unleashed) || defined(FW_ORIGIN_RM) || defined(FW_ORIGIN_Momentum)
     submenu_set_orientation(app->submenu, settings->orientation);
 #else
     view_set_orientation(view, settings->orientation);

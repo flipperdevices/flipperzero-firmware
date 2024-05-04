@@ -1,6 +1,6 @@
 App(
     appid="uhf_rfid",
-    name="[YRM100] UHF RFID",
+    name="YRM100 UHF RFID",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="uhf_app_main",
