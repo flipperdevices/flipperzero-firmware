@@ -290,12 +290,13 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
       passthru_model->update_display = false;
     }
 
-    /* Should we stop the thread? */
-    if(evts & stop) {
+    /* If we timed out, we have no events to process */
+    if(evts == FuriFlagErrorTimeout)
+      continue;
 
-      /* Stop the main loop */
+    /* Stop the thread if instructed to do so */
+    if(evts & stop)
       break;
-    }
 
     /* Should we relay data from the virtual COM port to the UART? */
     if(evts & data_avail) {
