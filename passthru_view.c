@@ -583,7 +583,7 @@ void passthru_view_draw_callback(Canvas *canvas, void *model) {
 				passthru_model->spstr1);
 
     /* Draw the icon to show the directions of serial traffic in-between */
-    canvas_draw_icon(canvas, 5, 16, &I_flipper_lrf_serial_traffic);
+    canvas_draw_icon(canvas, 0, 16, &I_flipper_lrf_serial_traffic);
   }
 
   /* Draw a dividing line between the serial traffic stats  and the bottom
