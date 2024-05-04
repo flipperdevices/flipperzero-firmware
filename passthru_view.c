@@ -261,6 +261,7 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
   with_view_model(app->passthru_view, PassthruModel* _model,
 			{UNUSED(_model);}, true);
   passthru_model->last_display_update_tstamp = furi_get_tick();
+  passthru_model->update_display = false;
 
   while(1) {
 
@@ -286,7 +287,6 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
       with_view_model(app->passthru_view, PassthruModel* _model,
 			{UNUSED(_model);}, true);
       passthru_model->last_display_update_tstamp = now_ms;
-
       passthru_model->update_display = false;
     }
 
@@ -484,9 +484,6 @@ void passthru_view_enter_callback(void *ctx) {
 
 	  /* Set the virtual COM port callbacks */
 	  furi_hal_cdc_set_callbacks(passthru_vcp_channel, &cdc_callbacks, app);
-
-	  /* Update the display for the first time */
-	  passthru_model->update_display = true;
 
 	  /* Initialise the serial traffic logging prefix to an empty string if
 	     we don't have a console to log to, or a prefix with no direction */
