@@ -40,7 +40,7 @@ static CdcCallbacks cdc_callbacks = {
 
 
 
-/** Virtual COM port RX/TX thread events **/
+/*** Virtual COM port RX/TX thread events ***/
 typedef enum {
   stop = 1,
   data_avail = 2,
