@@ -102,6 +102,9 @@ struct _LRFSerialCommApp {
   uint8_t *shared_storage;
   uint16_t shared_storage_size;
 
+  /* Whether the UART is initialized */
+  bool is_uart_initialized;
+
   /* UART receive thread */
   FuriThread *rx_thread;
 
@@ -992,6 +995,9 @@ LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration,
   /* Allocate space for the app's structure */
   LRFSerialCommApp *app = malloc(sizeof(LRFSerialCommApp));
 
+  /* The UART isn't initialized yet */
+  app->is_uart_initialized = false;
+
   /* Save the shared storage location and size */
   app->shared_storage = shared_storage;
   app->shared_storage_size = shared_storage_size;
@@ -1048,8 +1054,14 @@ LRFSerialCommApp *lrf_serial_comm_app_init(uint16_t min_led_flash_duration,
 /** Start the UART **/
 void start_uart(LRFSerialCommApp *app, uint32_t baudrate) {
 
-  /* Initialize the UART with the required baudrate */
-  furi_hal_serial_init(app->serial_handle, baudrate);
+  /* If the UART is already initialized, only set the baudrate. Otherwise
+     initialize it with the baudrate */
+  if(app->is_uart_initialized)
+    furi_hal_serial_set_br(app->serial_handle, baudrate);
+  else {
+    furi_hal_serial_init(app->serial_handle, baudrate);
+    app->is_uart_initialized = true;
+  }
 
   /* Start receiving */
   furi_hal_serial_async_rx_start(app->serial_handle, on_uart_irq_callback,
@@ -1061,14 +1073,8 @@ void start_uart(LRFSerialCommApp *app, uint32_t baudrate) {
 /** Stop the UART **/
 void stop_uart(LRFSerialCommApp *app) {
 
-  /* Wait a bit to flush the write buffer */
-  furi_delay_ms(100);
-
   /* Stop receiving */
   furi_hal_serial_async_rx_stop(app->serial_handle);
-
-  /* Deinitialize the UART */
-  furi_hal_serial_deinit(app->serial_handle);
 }
 
 
