@@ -294,9 +294,18 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
     if(evts == FuriFlagErrorTimeout)
       continue;
 
-    /* Stop the thread if instructed to do so */
-    if(evts & stop)
+    /* Should we stop the thread? */
+    if(evts & stop) {
+
+      /* Clear the serial traffic counters on the display before stopping, so
+         they don't show up briefly before being reset when the user reenters
+         the view */
+      passthru_model->show_traffic_counters = false;
+      with_view_model(app->passthru_view, PassthruModel* _model,
+			{UNUSED(_model);}, true);
+
       break;
+    }
 
     /* Should we relay data from the virtual COM port to the UART? */
     if(evts & data_avail) {
@@ -414,87 +423,85 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
 void passthru_view_enter_callback(void *ctx) {
 
   App *app = (App *)ctx;
+  PassthruModel *passthru_model = view_get_model(app->passthru_view);
 
-  with_view_model(app->passthru_view, PassthruModel *passthru_model,
-	{
-	  furi_hal_usb_unlock();
+  furi_hal_usb_unlock();
 
-	  /* Are we supposed to use CDC channel 0 */
-	  if(passthru_vcp_channel == 0) {
+  /* Reset the serial traffic counters and enable showing them in the view */
+  passthru_model->total_bytes_sent = 0;
+  passthru_model->total_bytes_recv = 0;
+  passthru_model->show_traffic_counters = true;
 
-	    /* Close the CLI */
-	    Cli *cli = furi_record_open(RECORD_CLI);
-	    cli_session_close(cli);
-	    furi_record_close(RECORD_CLI);
+  /* Are we supposed to use CDC channel 0 */
+  if(passthru_vcp_channel == 0) {
 
-	    /* Make sure the USB CDC is configured as single channel */
-	    furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
-	  }
+    /* Close the CLI */
+    Cli *cli = furi_record_open(RECORD_CLI);
+    cli_session_close(cli);
+    furi_record_close(RECORD_CLI);
 
-	  /* We're supposed to use CDC channel 1 */
-	  else {
+    /* Make sure the USB CDC is configured as single channel */
+    furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
+  }
 
-	    /* Make sure the USB CDC is configured as dual channel */
-	    furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
-	  }
+  /* We're supposed to use CDC channel 1 */
+  else {
 
-	  /* Get the current virtual COM port configuration */
-	  passthru_model->vcp_config =
+    /* Make sure the USB CDC is configured as dual channel */
+    furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
+  }
+
+  /* Get the current virtual COM port configuration */
+  passthru_model->vcp_config =
 			furi_hal_cdc_get_port_settings(passthru_vcp_channel);
 
-	  /* Start out with the passthrough enabled, and assume the virtual
+  /* Start out with the passthrough enabled, and assume the virtual
              COM port isn't connected */
-	  passthru_model->enabled = true;
-	  passthru_model->vcp_connected = false;
+  passthru_model->enabled = true;
+  passthru_model->vcp_connected = false;
 
-	  /* Mirror the virtual COM port on the UART */
-	  mirror_vcp_on_uart(app, passthru_model);
+  /* Mirror the virtual COM port on the UART */
+  mirror_vcp_on_uart(app, passthru_model);
 
-	  /* Reset the serial traffic counters */
-	  passthru_model->total_bytes_sent = 0;
-	  passthru_model->total_bytes_recv = 0;
+  /* Nothing sent to the virtual COM port yet */
+  passthru_model->vcp_last_sent = 0;
 
-	  /* Nothing sent to the virtual COM port yet */
-	  passthru_model->vcp_last_sent = 0;
+  /* Initialise the serial traffic logging prefix to an empty string if
+     we don't have a console to log to, or a prefix with no direction */
+  if(passthru_vcp_channel == 0)
+    passthru_model->traffic_logging_prefix[0] = 0;
+  else
+    snprintf(passthru_model->traffic_logging_prefix,
+		sizeof(passthru_model->traffic_logging_prefix),
+		" LRF");
 
-	  /* Initialise the serial traffic logging prefix to an empty string if
-	     we don't have a console to log to, or a prefix with no direction */
-	  if(passthru_vcp_channel == 0)
-	    passthru_model->traffic_logging_prefix[0] = 0;
-	  else
-	    snprintf(passthru_model->traffic_logging_prefix,
-			sizeof(passthru_model->traffic_logging_prefix),
-			" LRF");
+  /* Create the virtual COM port TX semaphore, to avoid sending data
+     before the previous transmission is finished */
+  passthru_model->vcp_tx_sem = furi_semaphore_alloc(1, 1);
 
-	  /* Create the virtual COM port TX semaphore, to avoid sending data
-	     before the previous transmission is finished */
-	  passthru_model->vcp_tx_sem = furi_semaphore_alloc(1, 1);
+  /* Allocate space for the UART receive stream buffer */
+  passthru_model->uart_rx_stream =
+			furi_stream_buffer_alloc(UART_RX_BUF_SIZE, 1);
 
-	  /* Allocate space for the UART receive stream buffer */
-	  passthru_model->uart_rx_stream =
-				furi_stream_buffer_alloc(UART_RX_BUF_SIZE, 1);
+  /* Allocate space for the virtual COM port receive stream buffer */
+  passthru_model->vcp_rx_stream =
+	furi_stream_buffer_alloc(VCP_RX_STREAM_BUF_SIZE, 1);
 
-	  /* Allocate space for the virtual COM port receive stream buffer */
-	  passthru_model->vcp_rx_stream =
-		furi_stream_buffer_alloc(VCP_RX_STREAM_BUF_SIZE, 1);
+  /* Allocate space for the virtual COM port RX/TX thread */
+  passthru_model->vcp_rx_tx_thread = furi_thread_alloc();
 
-	  /* Allocate space for the virtual COM port RX/TX thread */
-	  passthru_model->vcp_rx_tx_thread = furi_thread_alloc();
+  /* Initialize the virtual COM port RX/TX thread */
+  furi_thread_set_name(passthru_model->vcp_rx_tx_thread, "vcp_rx");
+  furi_thread_set_stack_size(passthru_model->vcp_rx_tx_thread, 1024);
+  furi_thread_set_context(passthru_model->vcp_rx_tx_thread, app);
+  furi_thread_set_callback(passthru_model->vcp_rx_tx_thread,
+				vcp_rx_tx_thread);
 
-	  /* Initialize the virtual COM port RX/TX thread */
-	  furi_thread_set_name(passthru_model->vcp_rx_tx_thread, "vcp_rx");
-	  furi_thread_set_stack_size(passthru_model->vcp_rx_tx_thread, 1024);
-	  furi_thread_set_context(passthru_model->vcp_rx_tx_thread, app);
-	  furi_thread_set_callback(passthru_model->vcp_rx_tx_thread,
-					vcp_rx_tx_thread);
+  /* Start the virtual COM port RX/TX thread */
+  furi_thread_start(passthru_model->vcp_rx_tx_thread);
 
-	  /* Start the virtual COM port RX/TX thread */
-	  furi_thread_start(passthru_model->vcp_rx_tx_thread);
-
-	  /* Set the virtual COM port callbacks */
-	  furi_hal_cdc_set_callbacks(passthru_vcp_channel, &cdc_callbacks, app);
-	},
-	false);
+  /* Set the virtual COM port callbacks */
+  furi_hal_cdc_set_callbacks(passthru_vcp_channel, &cdc_callbacks, app);
 }
 
 
@@ -555,23 +562,27 @@ void passthru_view_draw_callback(Canvas *canvas, void *model) {
 
   PassthruModel *passthru_model = (PassthruModel *)model;
 
-  /* First print all the things we need to print in the FontBigNumber font */
-  canvas_set_font(canvas, FontBigNumbers);
+  /* Should we display the counters at all? */
+  if(passthru_model->show_traffic_counters) {
 
-  /* Print the number of bytes sent to the LRF */
-  snprintf(passthru_model->spstr1, sizeof(passthru_model->spstr1),
+    /* First print all the things we need to print in the FontBigNumber font */
+    canvas_set_font(canvas, FontBigNumbers);
+
+    /* Print the number of bytes sent to the LRF */
+    snprintf(passthru_model->spstr1, sizeof(passthru_model->spstr1),
 		"%ld", passthru_model->total_bytes_sent);
-  canvas_draw_str_aligned(canvas, 64, 14, AlignCenter, AlignBottom,
+    canvas_draw_str_aligned(canvas, 64, 14, AlignCenter, AlignBottom,
 				passthru_model->spstr1);
 
-  /* Print the number of bytes received from the LRF */
-  snprintf(passthru_model->spstr1, sizeof(passthru_model->spstr1),
+    /* Print the number of bytes received from the LRF */
+    snprintf(passthru_model->spstr1, sizeof(passthru_model->spstr1),
 		"%ld", passthru_model->total_bytes_recv);
-  canvas_draw_str_aligned(canvas, 64, 46, AlignCenter, AlignBottom,
+    canvas_draw_str_aligned(canvas, 64, 46, AlignCenter, AlignBottom,
 				passthru_model->spstr1);
 
-  /* Draw the icon to show the directions of serial traffic in-between */
-  canvas_draw_icon(canvas, 5, 16, &I_flipper_lrf_serial_traffic);
+    /* Draw the icon to show the directions of serial traffic in-between */
+    canvas_draw_icon(canvas, 5, 16, &I_flipper_lrf_serial_traffic);
+  }
 
   /* Draw a dividing line between the serial traffic stats  and the bottom
      line */

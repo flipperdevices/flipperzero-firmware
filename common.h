@@ -385,8 +385,10 @@ typedef struct {
   /* Total number of bytes received from the LRF */
   uint32_t total_bytes_recv;
 
-  /* Flag to indicate that the display needs updating */
+  /* Flag to indicate that the display needs updating, and whether the counters
+     should be displayed */
   bool update_display;
+  bool show_traffic_counters;
 
   /* Time at which the display was last updated */
   uint32_t last_display_update_tstamp;
