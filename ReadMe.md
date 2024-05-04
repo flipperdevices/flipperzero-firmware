@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updater: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage)
 - Updater: [Sub-GHz Playlist v1.0 (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - Updater: [Sub-GHz Remote v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
+- Infrared: [Add AC model Pioneer Inverter (By djcas9)]
 
 <a name="release">
 
