@@ -148,7 +148,7 @@ static void mirror_vcp_on_uart(App *app, PassthruModel *passthru_model) {
 
 
 
-/** Virtual COM port callback for when transmission is complete */
+/** Virtual COM port callback for when the transmission is complete */
 static void vcp_on_cdc_tx_complete(void *ctx) {
 
   App *app = (App *)ctx;
