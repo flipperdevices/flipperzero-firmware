@@ -12,5 +12,5 @@ App(
     fap_icon_assets="assets",
     fap_description="Flight Assault is a dynamic action game where players control a spacecraft engaged in combat against enemy ships approaching from different directions.",
     fap_author="@evillero",
-    fap_version="0.2",
+    fap_version="0.3",
 )
