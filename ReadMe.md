@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0503-2020-0.101.3-09760e7](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-04 12:55 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-04 12:55 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-04 14:10 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-04 14:10 EST`
 - Updated: [Minesweeper Redux v1.5 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 - Updated: [PicoPass (iClass) v1.14 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
@@ -39,7 +39,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Archive: Favorite .mag files (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7e6f72730054451406358e4513e68b9474db0e1b)
 - [Gui: Cleanup submenu/varitemlist code for PR to OFW (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/727c23a7e448bbe362a151951caee8c6625d298a)
 - [Archive: Favorite .img files (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b6ec80db54bb6b3e29374a493787a59d5c0cc20c)
-- Updated: [FindMy Flipper v3.5 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - Updated: [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader)
 - OFW: PR: [Mifare Plus detection support #3607 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3607)
 - UL [iButton: update DS1420 for latest ibutton changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a57dbe446e654153be05c2602e673247089f14b6)
