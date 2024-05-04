@@ -319,8 +319,10 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
       /* Did we actually get something? */
       if(passthru_model->uart_tx_buf_len) {
 
-        /* Is the UART started? */
-        if(passthru_model->uart_baudrate) {
+        /* Is the UART started, is the passthrough enabled and is the virtual
+           COM port connected? */
+        if(passthru_model->uart_baudrate &&
+		passthru_model->enabled && passthru_model->vcp_connected) {
 
           /* Relay the data to the UART */
           uart_tx(app->lrf_serial_comm_app, passthru_model->uart_tx_buf,
@@ -356,10 +358,12 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
       /* Do we have something to send? */
       if(passthru_model->vcp_tx_buf_len) {
 
-        /* If the passthrough is enabled, try to acquire the semaphore so we
-           block at the next round until the transmission is complete. Only try
+        /* If the UART is started, the passthrough is enabled and the virtual
+	   COM port is connected, try to acquire the semaphore so we block at
+	   the next round until the transmission is complete. Only try
            for a while so we don't get hung up */
-        if(passthru_model->enabled &&
+        if(passthru_model->uart_baudrate &&
+		passthru_model->enabled && passthru_model->vcp_connected &&
 		furi_semaphore_acquire(passthru_model->vcp_tx_sem, 500)
 							== FuriStatusOk) {
 
