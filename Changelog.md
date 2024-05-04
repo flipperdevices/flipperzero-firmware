@@ -1,3 +1,5 @@
+## Version 1.7 - 04/05/2024
+
 - Added USB serial passthrough function
 
 ## Version 1.6 - 29/04/2024
