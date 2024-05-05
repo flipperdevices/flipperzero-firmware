@@ -75,7 +75,7 @@ static const SubGhzDevice* action_subghz_get_device(uint32_t* device_ind) {
 void action_subghz_tx(void* context, const FuriString* action_path, FuriString* error) {
     App* app = context;
     const char* file_name = furi_string_get_cstr(action_path);
-    uint32_t repeat = 1; // This is set to 10 in the cli - why?
+    uint32_t repeat = app->settings.subghz_repeat; // Defaults to 10 in the CLI
     uint32_t device_ind = app->settings.subghz_use_ext_antenna ? 1 : 0;
 
     FlipperFormat* fff_data_file = flipper_format_file_alloc(app->storage);
@@ -94,10 +94,10 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
     subghz_devices_init();
     SubGhzEnvironment* environment = subghz_environment_alloc();
     if(!subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_NAME)) {
-        FURI_LOG_E(TAG, "Load_keystore keeloq_mfcodes ERROR");
+        FURI_LOG_W(TAG, "Load_keystore keeloq_mfcodes - failed to load");
     }
     if(!subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_USER_NAME)) {
-        FURI_LOG_E(TAG, "Load_keystore keeloq_mfcodes_user ERROR");
+        FURI_LOG_W(TAG, "Load_keystore keeloq_mfcodes_user - failed to load");
     }
     subghz_environment_set_came_atomo_rainbow_table_file_name(
         environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
@@ -154,16 +154,17 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
             break;
         }
 
-        if(action_subghz_get_preset_name(furi_string_get_cstr(temp_str)) ==
-           FuriHalSubGhzPresetIDLE) {
+        FuriHalSubGhzPreset preset = action_subghz_get_preset_name(furi_string_get_cstr(temp_str));
+        if(preset == FuriHalSubGhzPresetIDLE) {
             ACTION_SET_ERROR("SUBGHZ: Unknown preset");
             break;
         }
 
         subghz_devices_begin(device);
         subghz_devices_reset(device);
+        subghz_devices_idle(device);
 
-        if(!strcmp(furi_string_get_cstr(temp_str), "FuriHalSubGhzPresetCustom")) {
+        if(preset == FuriHalSubGhzPresetCustom) {
             uint8_t* custom_preset_data;
             uint32_t custom_preset_data_size;
             if(!flipper_format_get_value_count(fff_data_file, "Custom_preset_data", &temp_data32))
@@ -184,14 +185,10 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
                 ACTION_SET_ERROR("SUBGHZ: Custom_preset_data read error");
                 break;
             }
-            subghz_devices_load_preset(
-                device,
-                action_subghz_get_preset_name(furi_string_get_cstr(temp_str)),
-                custom_preset_data);
+            subghz_devices_load_preset(device, preset, custom_preset_data);
             free(custom_preset_data);
         } else {
-            subghz_devices_load_preset(
-                device, action_subghz_get_preset_name(furi_string_get_cstr(temp_str)), NULL);
+            subghz_devices_load_preset(device, preset, NULL);
         }
 
         subghz_devices_set_frequency(device, frequency);
@@ -205,7 +202,7 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
 
         SubGhzProtocolStatus status;
         bool is_init_protocol = true;
-        if(!strcmp(furi_string_get_cstr(temp_str), "RAW")) {
+        if(furi_string_equal(temp_str, "RAW")) {
             FURI_LOG_I(TAG, "Protocol = RAW");
             subghz_protocol_raw_gen_fff_data(
                 fff_data_raw, file_name, subghz_devices_get_name(device));
@@ -225,7 +222,10 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
             }
         } else { // if not RAW protocol
             FURI_LOG_I(TAG, "Protocol != RAW");
-            flipper_format_insert_or_update_uint32(fff_data_file, "Repeat", &repeat, 1);
+            bool repeat_exists = flipper_format_key_exist(fff_data_file, "Repeat");
+            if(!repeat_exists) {
+                flipper_format_write_uint32(fff_data_file, "Repeat", &repeat, 1);
+            }
             transmitter =
                 subghz_transmitter_alloc_init(environment, furi_string_get_cstr(temp_str));
             if(transmitter == NULL) {
@@ -240,7 +240,9 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
                     is_init_protocol = false;
                 }
             }
-            flipper_format_delete_key(fff_data_file, "Repeat");
+            if(!repeat_exists) {
+                flipper_format_delete_key(fff_data_file, "Repeat");
+            }
         }
 
         if(is_init_protocol) {
@@ -256,6 +258,7 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
 
     if(check_file) {
         furi_hal_power_suppress_charge_enter();
+        subghz_devices_set_tx(device);
         FURI_LOG_I(
             TAG,
             "Transmitting at %s. Frequency=%lu, Protocol=%s",
@@ -263,25 +266,26 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
             frequency,
             furi_string_get_cstr(temp_str));
         do {
-            // delay in downloading files and other preparatory processes
-            furi_delay_ms(200);
+            // FURI_LOG_I(TAG, "delaying 200ms");
+            furi_delay_ms(100); // needed? orig 200
             if(subghz_devices_start_async_tx(device, subghz_transmitter_yield, transmitter)) {
-                while(!(subghz_devices_is_async_complete_tx(
-                    device))) { // || cli_cmd_interrupt_received
-                    furi_delay_ms(333);
+                while(!subghz_devices_is_async_complete_tx(device)) {
+                    // || cli_cmd_interrupt_received
+                    furi_delay_ms(100); // orig 333
                 }
                 subghz_devices_stop_async_tx(device);
             } else {
                 FURI_LOG_W(TAG, "Transmission on this frequency is restricted in your region");
             }
 
-            if(!strcmp(furi_string_get_cstr(temp_str), "RAW")) {
+            if(furi_string_equal(temp_str, "RAW")) {
                 subghz_transmitter_stop(transmitter);
                 repeat--;
+                // FURI_LOG_I(TAG, "decrementing repeat: %lu", repeat);
                 if(repeat) subghz_transmitter_deserialize(transmitter, fff_data_raw);
             }
 
-        } while(repeat && !strcmp(furi_string_get_cstr(temp_str), "RAW"));
+        } while(repeat && furi_string_equal(temp_str, "RAW"));
 
         subghz_devices_sleep(device);
         subghz_devices_end(device);
