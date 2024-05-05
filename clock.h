@@ -6,8 +6,8 @@
 #define FACE_TYPES 4
 typedef enum {
     Rectangular = 0,
-    Round,
     DigitalRectangular,
+    Round,
     DigitalRound,
 } FaceType;
 
