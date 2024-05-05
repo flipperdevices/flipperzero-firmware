@@ -12,6 +12,7 @@ void quac_set_default_settings(App* app) {
     app->settings.show_headers = true;
     app->settings.rfid_duration = 2500;
     app->settings.nfc_duration = 1000;
+    app->settings.subghz_repeat = 10;
     app->settings.subghz_use_ext_antenna = false;
     app->settings.show_hidden = false;
 }
@@ -81,6 +82,12 @@ void quac_load_settings(App* app) {
             app->settings.nfc_duration = temp_data32;
         }
 
+        if(!flipper_format_read_uint32(fff_settings, "SubGHz Repeat", &temp_data32, 1)) {
+            FURI_LOG_W(TAG, "SETTINGS: Missing 'SubGHz Repeat'");
+        } else {
+            app->settings.subghz_repeat = temp_data32;
+        }
+
         if(!flipper_format_read_uint32(fff_settings, "SubGHz Ext Antenna", &temp_data32, 1)) {
             FURI_LOG_W(TAG, "SETTINGS: Missing 'SubGHz Ext Antenna'");
         } else {
@@ -142,6 +149,11 @@ void quac_save_settings(App* app) {
         if(!flipper_format_write_uint32(
                fff_settings, "NFC Duration", &app->settings.nfc_duration, 1)) {
             FURI_LOG_E(TAG, "SETTINGS: Failed to write 'NFC Duration'");
+            break;
+        }
+        if(!flipper_format_write_uint32(
+               fff_settings, "SubGHz Repeat", &app->settings.subghz_repeat, 1)) {
+            FURI_LOG_E(TAG, "SETTINGS: Failed to write 'SubGHz Repeat'");
             break;
         }
         temp_data32 = app->settings.subghz_use_ext_antenna ? 1 : 0;

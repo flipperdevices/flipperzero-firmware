@@ -72,6 +72,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Added 5 GITS Profile Pictures with thanks to Kuronons](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures)
 - SubGHz: [POCSAG, Weather Station & TPMS protocols removed from internal SubGHz and are still supported with their respective applications (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3319a52a9eee4f7c4d61232492eb2d24fd1f3ea9)
 - SubGHz: [Add new protocol: Hormann BiSecur (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e9dc79ab2672e719320dc25990c423bdb044d611)
+- Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac)
 
 <a name="release">
 

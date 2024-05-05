@@ -191,7 +191,7 @@ void* subghz_protocol_encoder_hormann_bisecur_alloc(SubGhzEnvironment* environme
     instance->base.protocol = &subghz_protocol_hormann_bisecur;
     instance->generic.protocol_name = instance->base.protocol->name;
 
-    // TODO insert 504.3ms carrier off delay between repeats with
+    // TODO insert 504.3ms carrier off delay between repeats
     // subghz framework does not support this for FM encoders
     // sending either frequency constantly also seems to work
 

@@ -20,6 +20,7 @@ typedef enum {
     SceneSettingsHeaders,
     SceneSettingsRFIDDuration,
     SceneSettingsNFCDuration,
+    SceneSettingsSubGHzRepeat,
     SceneSettingsSubGHzExtAnt,
     SceneSettingsHidden,
     SceneSettingsAbout
@@ -52,6 +53,19 @@ static const uint32_t duration_value[V_DURATION_COUNT] = {
     5000,
     10000,
 };
+
+#define V_REPEAT_COUNT 9
+static const char* const repeat_text[V_REPEAT_COUNT] = {
+    "1",
+    "2",
+    "3",
+    "5",
+    "8",
+    "10", // default
+    "15",
+    "20",
+    "50"};
+static const uint32_t repeat_value[V_REPEAT_COUNT] = {1, 2, 3, 5, 8, 10, 15, 20, 50};
 
 static const char* const subghz_ext_text[2] = {"Disabled", "Enabled"};
 static const uint32_t subghz_ext_value[2] = {false, true};
@@ -89,6 +103,13 @@ static void scene_settings_nfc_duration_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, duration_text[index]);
     app->settings.nfc_duration = duration_value[index];
+}
+
+static void scene_settings_subghz_repeat_changed(VariableItem* item) {
+    App* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, repeat_text[index]);
+    app->settings.subghz_repeat = repeat_value[index];
 }
 
 static void scene_settings_subghz_ext_changed(VariableItem* item) {
@@ -148,6 +169,12 @@ void scene_settings_on_enter(void* context) {
     value_index = value_index_uint32(app->settings.nfc_duration, duration_value, V_DURATION_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, duration_text[value_index]);
+
+    item = variable_item_list_add(
+        vil, "SubGHz Repeat", V_REPEAT_COUNT, scene_settings_subghz_repeat_changed, app);
+    value_index = value_index_uint32(app->settings.subghz_repeat, repeat_value, V_REPEAT_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, repeat_text[value_index]);
 
     item =
         variable_item_list_add(vil, "SubGHz Ext Ant", 2, scene_settings_subghz_ext_changed, app);
