@@ -222,6 +222,7 @@ void init_clock_config(ClockConfig* cfg) {
     cfg->width = FACE_DEFAULT_WIDTH;
     cfg->digits_mod = 3;
     cfg->face_type = Rectangular;
+    cfg->ofs_x = OFS_MID_X;
 }
 
 void modify_clock_up(ClockConfig* cfg) {
