@@ -245,6 +245,21 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case PIMG_FSOCIETY2:
             canvas_draw_icon(canvas, 11, 2, &I_fsoc_pass);
             break;
+        case PIMG_GITSBAT:
+            canvas_draw_icon(canvas, 11, 2, &I_GITS_Batou);
+            break;
+        case PIMG_GITSISH:
+            canvas_draw_icon(canvas, 11, 2, &I_GITS_Ishikawa);
+            break;
+        case PIMG_GITSKUS:
+            canvas_draw_icon(canvas, 11, 2, &I_GITS_Kusanagi);
+            break;
+        case PIMG_GITSSAI:
+            canvas_draw_icon(canvas, 11, 2, &I_GITS_Saito);
+            break;
+        case PIMG_GITSTOG:
+            canvas_draw_icon(canvas, 11, 2, &I_GITS_Togusa);
+            break;
         case PIMG_GOKUSET:
             canvas_draw_icon(canvas, 11, 2, portrait[passport->tmpLvl]);
             break;
