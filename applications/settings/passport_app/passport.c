@@ -188,6 +188,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case BG_FURI:
             canvas_draw_icon(canvas, 0, 0, &I_passport_Furipass);
             break;
+        case BG_GITS:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_GITS);
+            break;
         case BG_MARIO:
             canvas_draw_icon(canvas, 0, 0, &I_passport_mario);
             break;

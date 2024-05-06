@@ -25,7 +25,7 @@ extern "C" {
 #define MOOD_SET_REGULAR 1
 #define MOOD_SET_420 2
 
-#define PASSPORT_BG_COUNT 14
+#define PASSPORT_BG_COUNT 15
 
 #define BG_NONE 0
 #define BG_ADPOLICE 1
@@ -34,13 +34,14 @@ extern "C" {
 #define BG_DEDSEC 4
 #define BG_STOCK 5
 #define BG_FURI 6
-#define BG_MARIO 7
-#define BG_MEDIEVAL 8
-#define BG_MEMCHIP 9
-#define BG_MOUNTAINS 10
-#define BG_MULTI 11
-#define BG_SCROLL 12
-#define BG_SLUT 13
+#define BG_GITS 7
+#define BG_MARIO 8
+#define BG_MEDIEVAL 9
+#define BG_MEMCHIP 10
+#define BG_MOUNTAINS 11
+#define BG_MULTI 12
+#define BG_SCROLL 13
+#define BG_SLUT 14
 
 #define PROFILE_IMG_COUNT 43
 
