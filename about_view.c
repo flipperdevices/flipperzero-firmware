@@ -157,7 +157,7 @@ bool about_view_input_callback(InputEvent *evt, void *ctx) {
 
       default:
         evt_handled = false;
-  }
+    }
 
   /* If we haven't handled this event, return now */
   if(!evt_handled)
