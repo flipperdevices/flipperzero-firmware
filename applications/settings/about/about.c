@@ -41,7 +41,7 @@ static DialogMessageButton about_screen_product(DialogsApp* dialogs, DialogMessa
 static DialogMessageButton about_screen_address(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    const char* screen_text = "Flipper Devices Inc\n"
+    const char* screen_text = "Flipper Devices Inc.\n"
                               "Suite B #551, 2803\n"
                               "Philadelphia Pike, Claymont\n"
                               "DE, USA 19703\n";
@@ -56,7 +56,7 @@ static DialogMessageButton about_screen_compliance(DialogsApp* dialogs, DialogMe
     DialogMessageButton result;
 
     const char* screen_text = "For all compliance\n"
-                              "certificates please visit:\n"
+                              "certificates, please visit:\n"
                               "www.flipp.dev/compliance";
 
     dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
