@@ -30,6 +30,9 @@
 
 #define AUTO_RESTART 0x80
 
+#define NB_HEX_VALS_IN_PASSTHRU_SCREEN 90 	/* 7 lines of 13 hex values,
+						   minus 1 for the left arrow */
+
 
 
 /*** Parameters ***/
@@ -341,6 +344,9 @@ typedef struct {
 /** Passthrough model **/
 typedef struct {
 
+  /* Displayed screen number */
+  uint8_t screen;
+
   /* Whether the passthrough is enabled */
   bool enabled;
 
@@ -386,16 +392,30 @@ typedef struct {
   /* Total number of bytes received from the LRF */
   uint32_t total_bytes_recv;
 
-  /* Flag to indicate that the display needs updating, and whether the counters
-     should be displayed */
-  bool update_display;
-  bool show_traffic_counters;
+  /* Flag to indicate that the display needs updating, and whether any
+     information about the traffic (counters or bytes) should be displayed */
+  volatile bool update_display;
+  bool show_serial_traffic;
 
   /* Time at which the display was last updated */
   uint32_t last_display_update_tstamp;
 
   /* Serial traffic logging prefix */
   char traffic_logging_prefix[8];
+
+  /* Ring buffer containing the last bytes sent or received, with the MSB
+     encoding whether the byte encoded in the LSB was sent or received */
+  uint16_t traffic_log[NB_HEX_VALS_IN_PASSTHRU_SCREEN];
+  uint8_t traffic_log_start;
+  uint8_t traffic_log_len;
+
+  /* Mutex to access the ring buffer above */
+  FuriMutex* traffic_log_mutex;
+
+  /* Copy of the ring buffer above */
+  uint16_t traffic_log_copy[NB_HEX_VALS_IN_PASSTHRU_SCREEN];
+  uint8_t traffic_log_start_copy;
+  uint8_t traffic_log_len_copy;
 
   /* Scratchpad strings */
   char spstr1[16];
