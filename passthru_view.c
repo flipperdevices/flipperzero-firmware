@@ -461,16 +461,22 @@ void passthru_view_enter_callback(void *ctx) {
 
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
+  Cli *cli;
 
   furi_hal_usb_unlock();
 
+  /* Close the CLI */
+  cli = furi_record_open(RECORD_CLI);
+  cli_session_close(cli);
+  furi_record_close(RECORD_CLI);
+
+  /* Wait a bit for any serial client connected to the CLI to exit gracefully,
+     otherwise we might crash trying to reconfigure the USB CDC as dual channel
+     too soon for some reason - particularly with qFlipper */
+  furi_delay_ms(100);
+
   /* Use CDC channel 0? */
   if(passthru_vcp_channel == 0) {
-
-    /* Close the CLI */
-    Cli *cli = furi_record_open(RECORD_CLI);
-    cli_session_close(cli);
-    furi_record_close(RECORD_CLI);
 
     /* Make sure the USB CDC is configured as single channel */
     furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
@@ -481,6 +487,11 @@ void passthru_view_enter_callback(void *ctx) {
 
     /* Make sure the USB CDC is configured as dual channel */
     furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
+
+    /* Reopen the CLI */
+    cli = furi_record_open(RECORD_CLI);
+    cli_session_open(cli, &cli_vcp);
+    furi_record_close(RECORD_CLI);
   }
 
   /* Get the current virtual COM port configuration */
@@ -563,6 +574,7 @@ void passthru_view_exit_callback(void *ctx) {
 
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
+  Cli *cli;
 
   /* If the UART is started, unset the callback to receive raw LRF data and
      stop the UART */
@@ -595,7 +607,7 @@ void passthru_view_exit_callback(void *ctx) {
   if(passthru_vcp_channel == 0) {
 
     /* Restart the CLI on channel 0 */
-    Cli *cli = furi_record_open(RECORD_CLI);
+    cli = furi_record_open(RECORD_CLI);
     cli_session_open(cli, &cli_vcp);
     furi_record_close(RECORD_CLI);
   }
@@ -603,8 +615,23 @@ void passthru_view_exit_callback(void *ctx) {
   /* We were using CDC channel 1 */
   else {
 
+    /* Close the CLI */
+    cli = furi_record_open(RECORD_CLI);
+    cli_session_close(cli);
+    furi_record_close(RECORD_CLI);
+
+    /* Wait a bit for any serial client connected to the CLI to exit gracefully,
+       otherwise we might crash trying to reconfigure the USB CDC as single
+       channel too soon for some reason - particularly with qFlipper */
+    furi_delay_ms(100);
+
     /* Reconfigure the USB CDC as single channel */
     furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
+
+    /* Reopen the CLI */
+    cli = furi_record_open(RECORD_CLI);
+    cli_session_open(cli, &cli_vcp);
+    furi_record_close(RECORD_CLI);
   }
 }
 
