@@ -7,6 +7,7 @@
 
 /*** Includes ***/
 #include <furi_hal_usb_cdc.h>
+#include <furi_hal_usb.h>
 #include <gui/modules/submenu.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/variable_item_list.h>
@@ -343,6 +344,9 @@ typedef struct {
 
 /** Passthrough model **/
 typedef struct {
+
+  /* The state of the USB interface before reconfiguring it */
+  FuriHalUsbInterface* usb_interface_state_save;
 
   /* Displayed screen number */
   uint8_t screen;

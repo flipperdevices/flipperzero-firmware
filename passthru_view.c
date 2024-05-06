@@ -465,28 +465,48 @@ void passthru_view_enter_callback(void *ctx) {
 
   furi_hal_usb_unlock();
 
+  /* Get the current state of the USB interface */
+  passthru_model->usb_interface_state_save = furi_hal_usb_get_config();
+
   /* Close the CLI */
   cli = furi_record_open(RECORD_CLI);
   cli_session_close(cli);
   furi_record_close(RECORD_CLI);
 
-  /* Wait a bit for any serial client connected to the CLI to exit gracefully,
-     otherwise we might crash trying to reconfigure the USB CDC as dual channel
-     too soon for some reason - particularly with qFlipper */
+  /* Wait a bit before fiddling with the USB interface, otherwise we might crash
+     for some reason */
   furi_delay_ms(100);
 
   /* Use CDC channel 0? */
   if(passthru_vcp_channel == 0) {
 
-    /* Make sure the USB CDC is configured as single channel */
-    furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
+    /* If the USB interface is not configured as CDC single channel,
+       reconfigure it */
+    if(passthru_model->usb_interface_state_save != &usb_cdc_single)
+      furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
+
+    /* The USB interface is already configured as CDC single channel: reinitialize
+       if to knock out any existing serial connection - particularly qFlipper, so
+       if doesn't sit there idling on a dead connection but actively starts trying
+       to reconnect instead */
+    else
+      furi_hal_usb_reinit();
   }
 
   /* Use CDC channel 1 */
   else {
 
-    /* Make sure the USB CDC is configured as dual channel */
-    furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
+    /* If the USB interface is not configured as CDC dual channel,
+       reconfigure it */
+    if(passthru_model->usb_interface_state_save != &usb_cdc_dual)
+      furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
+
+    /* The USB interface is already configured as CDC dual channel: reinitialize
+       if to knock out any existing serial connections - particularly qFlipper, so
+       if doesn't sit there idling on a dead connection but actively starts trying
+       to reconnect instead */
+    else
+      furi_hal_usb_reinit();
 
     /* Reopen the CLI */
     cli = furi_record_open(RECORD_CLI);
@@ -603,36 +623,23 @@ void passthru_view_exit_callback(void *ctx) {
   /* Free the mutex to access the traffic log */
   furi_mutex_free(passthru_model->traffic_log_mutex);
 
-  /* Were we using CDC channel 0? */
-  if(passthru_vcp_channel == 0) {
+  /* Close the CLI */
+  cli = furi_record_open(RECORD_CLI);
+  cli_session_close(cli);
+  furi_record_close(RECORD_CLI);
 
-    /* Restart the CLI on channel 0 */
-    cli = furi_record_open(RECORD_CLI);
-    cli_session_open(cli, &cli_vcp);
-    furi_record_close(RECORD_CLI);
-  }
+  /* Wait a bit before fiddling with the USB interface, otherwise we might crash
+     for some reason */
+  furi_delay_ms(100);
 
-  /* We were using CDC channel 1 */
-  else {
+  /* Restore the USB interface the way we found */
+  furi_check(furi_hal_usb_set_config(passthru_model->usb_interface_state_save,
+					NULL) == true);
 
-    /* Close the CLI */
-    cli = furi_record_open(RECORD_CLI);
-    cli_session_close(cli);
-    furi_record_close(RECORD_CLI);
-
-    /* Wait a bit for any serial client connected to the CLI to exit gracefully,
-       otherwise we might crash trying to reconfigure the USB CDC as single
-       channel too soon for some reason - particularly with qFlipper */
-    furi_delay_ms(100);
-
-    /* Reconfigure the USB CDC as single channel */
-    furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
-
-    /* Reopen the CLI */
-    cli = furi_record_open(RECORD_CLI);
-    cli_session_open(cli, &cli_vcp);
-    furi_record_close(RECORD_CLI);
-  }
+  /* Restart the CLI */
+  cli = furi_record_open(RECORD_CLI);
+  cli_session_open(cli, &cli_vcp);
+  furi_record_close(RECORD_CLI);
 }
 
 
