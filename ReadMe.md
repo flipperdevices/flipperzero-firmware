@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0429-1240-0.101.3-a5550b3.tgz&channel=RM0429-1240-0.101.3-a5550b3&version=0.101.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0506-1236-0.101.3-f0871a4.tgz&channel=RM0506-1236-0.101.3-f0871a4&version=0.101.3)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,49 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-06 09:00 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-06 09:00 EST`
-- Updated: [Minesweeper Redux v1.5 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
-- Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
-- Updated: [PicoPass (iClass) v1.14 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
-- Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) (CMAKE Update)
-- Updated: [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- [Archive: Favorite .mag files (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7e6f72730054451406358e4513e68b9474db0e1b)
-- [Gui: Cleanup submenu/varitemlist code for PR to OFW (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/727c23a7e448bbe362a151951caee8c6625d298a)
-- [Archive: Favorite .img files (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b6ec80db54bb6b3e29374a493787a59d5c0cc20c)
-- Updated: [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader)
-- OFW: PR: [Mifare Plus detection support #3607 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3607)
-- UL [iButton: update DS1420 for latest ibutton changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a57dbe446e654153be05c2602e673247089f14b6)
-- UL [NFC: add temp fix since no proper fix exist at the moment (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75ece9b697d1e3b66a75f2d423e51f369bc387f1)
-- Added: [MIDI RX v0.1 (By crackerjacques)](https://github.com/crackerjacques/flipper_zero_midi_rx)
-- Updated: [Calendar TECHART v1.1 (By techartdev)](https://github.com/techartdev/Calendar) (Version Only)
-- Updated: [BLE Spam v6.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam)
-- Updated: [MagSpoof v0.7 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
-- Updated: [FindMy Flipper v3.5 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) [FindMy: Fix battery level edge cases (eg. at boot) and cleanup (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5d2f3d49801b32d04b184a1b8f1d16a5889c7eff)
-- Added: [Plugin Demo v1.0 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_plugin_howto)
-- A few apps moved from GPIO into GPIO/Debug or Sensors. (By Willy-JL)
-- A few apps moved from Tools into Tools/Educational. You may want to delete your apps folder to remove duplicates. (By RogueMaster)
-- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Updated: [POCSAG Pager v1.2 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
-- UL: Removed: OFW: PR: [Mifare Plus detection support #3607 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3607) Till It Is Ready
-- UL: [ibutton and lfrfid small ui improvements (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/374e96bb7da6c053cb4ed82dbdc1ed1ee502b639)
-- Updated: [Bluetooth/USB Remote v1.7 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Enhance Random Interval and Movement Functionality in HID Mouse Jiggler for Improved Stealth and Human-Like Behavior (By gushmazuko)](https://github.com/DarkFlippers/unleashed-firmware/pull/746)
-- UL: [Electra intercom lfrfid protocol (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/750)
-- Updater: [Gzipped resources (220% faster FW upload) + Updater improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0f0b062366af85f614ee0dc1380fc0bc9551063f)
-- UL: [Electra fix protocol naming (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a89a67d1033751b3c5fa9ab2fdac4caaa1afaac4)
-- [ESP Flasher resources updated (By Willy-JL) to include resources for flashing Wardriver, AirTag Scanner & Marauder for MultiBoardS3](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/82b0c93e4b9e90dd8ee95beadefff9f3510d010c)
-- Updater: [Flashlight v1.1 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
-- Updater: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
-- Updater: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage)
-- Updater: [Sub-GHz Playlist v1.0 (By darmiel)](https://github.com/darmiel/flipper-playlist)
-- Updater: [Sub-GHz Remote v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
-- Infrared: [Add AC model Pioneer Inverter (By djcas9)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5a438d07b7659b8d10be123357da31136da32ac0)
-- Updated: [Flight Assault v0.3 (By evillero)](https://github.com/evillero/flight_assault)
-- Updated: [Noptel LRF Sampler v1.7 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
-- Updated: [FlipperZero Clock v1.1 (By mdaskalov)](https://github.com/mdaskalov/flipperzero-clock)
-- [Added 5 GITS Profile Pictures with thanks to Kuronons](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures)
-- SubGHz: [POCSAG, Weather Station & TPMS protocols removed from internal SubGHz and are still supported with their respective applications (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3319a52a9eee4f7c4d61232492eb2d24fd1f3ea9)
-- SubGHz: [Add new protocol: Hormann BiSecur (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e9dc79ab2672e719320dc25990c423bdb044d611)
-- Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac)
-- [Added GITS Background Profile Picture with thanks to Kuronons](https://github.com/Kuronons/FZ_graphics/blob/main/Passport%20background/Passports%20(.png%20files%20-%20128x64px)/passport_GITS.png)
 
 <a name="release">
 
@@ -622,4 +579,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0429-1240-0.101.3-a5550b3.tgz&channel=RM0429-1240-0.101.3-a5550b3&version=0.101.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0506-1236-0.101.3-f0871a4.tgz&channel=RM0506-1236-0.101.3-f0871a4&version=0.101.3)
