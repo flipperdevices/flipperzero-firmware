@@ -20,7 +20,7 @@ Flipper Zero app to get range measurements from a [Noptel](https://noptel.fi/) [
 - IR laser pointer testing
 - USB serial passthrough
 
-https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/bae70910-ead5-4b63-9a32-cbc670b7adfa
+https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/516b5fe1-e2b0-46e6-aa02-37cff435ff23
 
 
 
