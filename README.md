@@ -67,7 +67,7 @@ Select the **Sample** option to start sampling the LRF.
 
 In single measurement mode, press the **OK** button to get another measurement.
 
-![Sampling in single measurement mode](screenshots/2-sample_smm.png)
+![Sampling in single measurement mode](screenshots/12-sample_smm.png)
 
 Up to 3 distances can be measured in one sample (several targets in the line of sight).
 
@@ -101,7 +101,7 @@ The buffering state is displayed at the bottom left: the bar is all the way up w
 
 The return rate is indicated next to the buffering state: the bar is all the way up when the return rate is 100% - meaning no missed measurements.
 
-![Sample buffering bars](screenshots/16-sample_buffering_bars.png)
+![Sample buffering bars](screenshots/17-sample_buffering_bars.png)
 
 The buffering state and the return rate indicators are useful to determine the rangefinder's extinction ratio: when the buffer is full, the return rate bar should be only about ½ to ¾ full at extinction ratio.
 
@@ -111,7 +111,7 @@ https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/32d813
 
 Select the **Pointer ON/OFF** toggle to turn the pointer on and off if the rangefinder is equipped with a pointer.
 
-![Pointer ON/OFF toggle](screenshots/12-pointer_on_off_toggle.png)
+![Pointer ON/OFF toggle](screenshots/13-pointer_on_off_toggle.png)
 
 The pointer is useful to train the rangefinder on a short distance target.
 
@@ -119,7 +119,7 @@ The pointer is useful to train the rangefinder on a short distance target.
 
 Select the **LRF information** option to view the LRF's identification information. Press the **OK** button to re-read the information, or read another LRF's.
 
-![GPIO pin connections](screenshots/3-lrf_information.png)
+![GPIO pin connections](screenshots/2-lrf_information.png)
 
 ### Save LRF diagnostic
 
@@ -131,29 +131,35 @@ DSP files may be submitted to Noptel for analysis, along with a description of t
 
 To recover the DSP files, connect the Flipper Zero to the computer with a USB cable and use [qFlipper](https://docs.flipper.net/qflipper) to download the the **noptel_lrf_diag** directory:
 
-![Download DSP directory](screenshots/14-download_dsp_directory.png)
+![Download DSP directory](screenshots/15-download_dsp_directory.png)
 
 DSP files inside the **noptel_lrf_diag** directory may be downloaded individually also:
 
-![Download DSP file](screenshots/15-download_dsp_file.png)
+![Download DSP file](screenshots/16-download_dsp_file.png)
 
 ### Test LRX laser
 
 Select the **Test LRX laser** option to test an LRX's transmitter laser. *(See note below)*
 
-![Save LRF diagnostic](screenshots/4-laser_testing.png)
+![Laser testing](screenshots/3-laser_testing.png)
 
 ### Test IR pointer
 
 Select the **Test IR pointer** option to test an LRF's infrared pointer. *(See note below)*
 
-![Save LRF diagnostic](screenshots/13-pointer_testing.png)
+![Pointer testing](screenshots/14-pointer_testing.png)
 
 ### USB serial passthrough
 
 The **USB serial passthrough** function lets a computer connected to the Flipper Zero's USB port and running a LRF client software communicate with the LRF as if the LRF was connected directly to the computer with a USB serial cable. The Flipper Zero transparently relays data between the computer and the LRF.
 
-![Save LRF diagnostic](screenshots/5-usb_serial_passthrough.png)
+The first screen, accessible with the left arrow, shows the overall amount of serial traffic going to and from the LRF:
+
+![Serial passthrough - Traffic volume](screenshots/4-usb_serial_passthrough1.png)
+
+The second screen, accessible with the right arrow, shows the actual traffic: bytes sent to the LRF are showed on a black background while bytes sent by the LRF are showed normally.
+
+![Serial passthrough - Transferred bytes](screenshots/5-usb_serial_passthrough2.png)
 
 ### About
 
