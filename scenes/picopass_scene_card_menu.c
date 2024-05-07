@@ -9,6 +9,7 @@ enum SubmenuIndex {
     SubmenuIndexWrite,
     SubmenuIndexEmulate,
     SubmenuIndexSavePartial,
+    SubmenuIndexSaveLegacy,
 };
 
 void picopass_scene_card_menu_submenu_callback(void* context, uint32_t index) {
@@ -27,7 +28,8 @@ void picopass_scene_card_menu_on_enter(void* context) {
 
     bool SE = card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].valid &&
               0x30 == card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
-    bool SR = card_data[10].valid && 0x30 == card_data[10].data[0];
+    bool SR = card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0] == 0xA3 &&
+              card_data[10].valid && 0x30 == card_data[10].data[0];
     bool has_sio = SE || SR;
     bool secured = (card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
                    PICOPASS_FUSE_CRYPT0;
@@ -61,6 +63,15 @@ void picopass_scene_card_menu_on_enter(void* context) {
             SubmenuIndexSaveAsLF,
             picopass_scene_card_menu_submenu_callback,
             picopass);
+
+        if(SR) {
+            submenu_add_item(
+                submenu,
+                "Save as Legacy",
+                SubmenuIndexSaveLegacy,
+                picopass_scene_card_menu_submenu_callback,
+                picopass);
+        }
 
         if(plugin) {
             // Convert from byte array to uint64_t
@@ -119,7 +130,7 @@ bool picopass_scene_card_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexSave);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneSaveName);
-            picopass->dev->format = PicopassDeviceSaveFormatHF;
+            picopass->dev->format = PicopassDeviceSaveFormatOriginal;
             consumed = true;
         } else if(event.event == SubmenuIndexSavePartial) {
             scene_manager_set_scene_state(
@@ -154,6 +165,12 @@ bool picopass_scene_card_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexParse);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneFormats);
+            consumed = true;
+        } else if(event.event == SubmenuIndexSaveLegacy) {
+            scene_manager_set_scene_state(
+                picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexSaveLegacy);
+            picopass->dev->format = PicopassDeviceSaveFormatLegacy;
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneSaveName);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
