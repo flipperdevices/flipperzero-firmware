@@ -89,116 +89,118 @@ static uint32_t text_box_calculate_lines_num(Canvas* canvas, const char* text) {
     return lines_num;
 }
 
-static bool text_box_get_previous_line_index(Canvas* canvas, TextBoxModel* model, int32_t* index) {
-    bool prev_line_found = false;
+static void text_box_get_next_line_index(
+    Canvas* canvas,
+    const char* text,
+    int32_t start_offset,
+    int32_t* next_line_offset) {
+    size_t i = start_offset;
     size_t line_width = 0;
 
-    if(model->start_line_offset > 0) {
-        size_t i = model->start_line_offset;
-        i--;
-        if(model->text[i] == '\n') {
-            if(i > 0) {
-                i--;
-            }
-        }
-
-        while(!prev_line_found) {
-            if(i == 0) {
-                *index = 0;
-                break;
-            }
-            i--;
-            char symb = model->text[i];
-            if(symb != '\n') {
-                size_t glyph_width = canvas_glyph_width(canvas, symb);
-                if(line_width + glyph_width > TEXT_BOX_TEXT_WIDTH) {
-                    *index = i;
-                    prev_line_found = true;
-                }
-                line_width += glyph_width;
-            } else {
-                *index = i + 1;
-                prev_line_found = true;
-            }
-        }
-    }
-
-    return prev_line_found;
-}
-
-static bool text_box_get_next_line_index(Canvas* canvas, TextBoxModel* model, int32_t* index) {
-    bool next_line_found = false;
-    size_t i = model->start_line_offset;
-    size_t line_width = 0;
-
-    while(!next_line_found) {
-        char symb = model->text[i];
+    while(true) {
+        char symb = text[i];
         if(symb == '\0') {
+            *next_line_offset = i;
             break;
-        } else if(symb != '\n') {
+        } else if(symb == '\n') {
+            *next_line_offset = i + 1;
+            break;
+        } else {
             size_t glyph_width = canvas_glyph_width(canvas, symb);
             if(line_width + glyph_width > TEXT_BOX_TEXT_WIDTH) {
-                *index = i;
-                next_line_found = true;
+                *next_line_offset = i;
+                break;
             }
             line_width += glyph_width;
-        } else {
-            *index = i + 1;
-            next_line_found = true;
+            i++;
         }
-        i++;
     }
-
-    return next_line_found;
 }
 
-static void text_box_update_text_on_screen(Canvas* canvas, TextBoxModel* model) {
-    int32_t line_offset = model->scroll_pos - model->start_line;
+static void text_box_get_prev_line_index(
+    Canvas* canvas,
+    const char* text,
+    int32_t start_offset,
+    int32_t* prev_line_offset) {
+    if(start_offset == 0) {
+        *prev_line_offset = 0;
+    } else {
+        size_t i = start_offset - 1;
 
+        // Ignore newline charachter at the end of previous line
+        if(text[i] == '\n') {
+            i--;
+        }
+
+        // Search for the start of the previous paragraph
+        while(i > 0) {
+            if(text[i--] == '\n') break;
+        }
+
+        // Search for the line offset before given start offset
+        int32_t next_line_offset = 0;
+        while(true) {
+            text_box_get_next_line_index(canvas, text, i, &next_line_offset);
+            if(next_line_offset == start_offset) break;
+            i = next_line_offset;
+        }
+        *prev_line_offset = i;
+    }
+}
+
+static void text_box_move_start_line(Canvas* canvas, TextBoxModel* model, int32_t line_offset) {
     if(line_offset > 0) {
-        int32_t next_line = 0;
+        int32_t next_line_offset = 0;
         for(int32_t i = 0; i < line_offset; i++) {
-            text_box_get_next_line_index(canvas, model, &next_line);
-            model->start_line_offset = next_line;
+            text_box_get_next_line_index(
+                canvas, model->text, model->start_line_offset, &next_line_offset);
+            model->start_line_offset = next_line_offset;
         }
     } else {
-        int32_t next_line = 0;
-        line_offset = -line_offset;
-        for(int32_t i = 0; i < line_offset; i++) {
-            text_box_get_previous_line_index(canvas, model, &next_line);
-            model->start_line_offset = next_line;
+        int32_t prev_line_offset = 0;
+        for(int32_t i = 0; i < (-line_offset); i++) {
+            text_box_get_prev_line_index(
+                canvas, model->text, model->start_line_offset, &prev_line_offset);
+            model->start_line_offset = prev_line_offset;
         }
     }
+}
 
-    // Unoptimized way
+static void text_box_update_screen_text(Canvas* canvas, TextBoxModel* model) {
     furi_string_reset(model->text_on_screen);
     furi_string_reset(model->text_line);
 
     FURI_LOG_D("TB", "Scrol pos: %ld", model->scroll_pos);
-    int32_t save_start_offset = model->start_line_offset;
 
+    int32_t accum_line_offset = model->start_line_offset;
     for(int32_t i = 0; i < model->lines_on_screen; i++) {
-        FURI_LOG_D("TB", "Line: %ld, Current line offset: %ld", i, model->start_line_offset);
+        FURI_LOG_D("TB", "Line: %ld, Current line offset: %ld", i, accum_line_offset);
+
         int32_t next_line_offset = 0;
-        if(!text_box_get_next_line_index(canvas, model, &next_line_offset)) {
-            furi_string_cat_str(model->text_on_screen, &model->text[model->start_line_offset]);
-            break;
+        text_box_get_next_line_index(canvas, model->text, accum_line_offset, &next_line_offset);
+        if(next_line_offset == accum_line_offset) {
+            furi_string_set_str(model->text_line, "\n");
+        } else {
+            furi_string_set_strn(
+                model->text_line,
+                &model->text[accum_line_offset],
+                next_line_offset - accum_line_offset);
         }
 
-        furi_string_set_strn(
-            model->text_line,
-            &model->text[model->start_line_offset],
-            next_line_offset - model->start_line_offset);
         size_t str_len = furi_string_size(model->text_line);
         if(furi_string_get_char(model->text_line, str_len - 1) != '\n') {
             furi_string_push_back(model->text_line, '\n');
         }
         furi_string_cat(model->text_on_screen, model->text_line);
-        model->start_line_offset = next_line_offset;
+        accum_line_offset = next_line_offset;
     }
+}
 
+static void text_box_update_text_on_screen(Canvas* canvas, TextBoxModel* model) {
+    int32_t line_offset = model->scroll_pos - model->start_line;
+    text_box_move_start_line(canvas, model, line_offset);
+    text_box_update_screen_text(canvas, model);
     model->start_line = model->scroll_pos;
-    model->start_line_offset = save_start_offset;
 }
 
 static void text_box_prepare_model(Canvas* canvas, TextBoxModel* model) {
