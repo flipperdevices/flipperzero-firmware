@@ -197,9 +197,9 @@ To use this functionality:
 
 - Configure **Passthru channel** to **1**, so that the CLI remains available on channel 0
 - Enter the **USB serial passthrough** view
-- Start a terminal on the serial device corresponding to channel 0 (e.g. `/dev/ttyACM0` in Linux, `COM3` in Windows) preferrably at the highest possible speed
+- Start a terminal on the serial device corresponding to channel 0 (e.g. `/dev/ttyACM0` in Linux, `COM1` in Windows) preferrably at the highest possible speed
 - In the terminal, enable trace logging using the command `log trace`
-- Use the serial device corresponding to channel 1 (e.g. `/dev/ttyACM1` in Linux, `COM4` in Windows) to interact with the LRF as you would with a regular serial cable. The terminal should show the serial traffic going to and from the LRF like this:
+- Use the serial device corresponding to channel 1 (e.g. `/dev/ttyACM1` in Linux, `COM2` in Windows) to interact with the LRF as you would with a regular serial cable. The terminal should show the serial traffic going to and from the LRF like this:
 
 ```
               _.-------.._                    -,
