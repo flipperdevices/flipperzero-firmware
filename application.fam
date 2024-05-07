@@ -27,6 +27,7 @@ App(
         "lrf_power_control.c",
         "lrf_serial_comm.c",
         "main.c",
+        "parameters.c",
         "passthru_view.c",
         "sample_view.c",
         "save_diag_view.c",
