@@ -31,7 +31,7 @@
 
 #define AUTO_RESTART 0x80
 
-#define NB_HEX_VALS_IN_PASSTHRU_SCREEN 90 	/* 7 lines of 13 hex values,
+#define NB_HEX_VALS_IN_PASSTHRU_SCREEN 90	/* 7 lines of 13 hex values,
 						   minus 1 for the left arrow */
 
 
