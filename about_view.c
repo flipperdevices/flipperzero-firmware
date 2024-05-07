@@ -131,25 +131,9 @@ bool about_view_input_callback(InputEvent *evt, void *ctx) {
         evt_handled = true;
         break;
 
-      /* Down button: go to the next screen */
-      case InputKeyDown:
-        FURI_LOG_D(TAG, "Down button pressed");
-        about_model->screen = about_model->screen < 2? about_model->screen + 1 :
-							about_model->screen;
-        evt_handled = true;
-        break;
-
       /* Left button: go to the previous screen */
       case InputKeyLeft:
         FURI_LOG_D(TAG, "Left button pressed");
-        about_model->screen = about_model->screen > 0? about_model->screen - 1 :
-							about_model->screen;
-        evt_handled = true;
-        break;
-
-      /* Up button: go to the previous screen */
-      case InputKeyUp:
-        FURI_LOG_D(TAG, "Up button pressed");
         about_model->screen = about_model->screen > 0? about_model->screen - 1 :
 							about_model->screen;
         evt_handled = true;
