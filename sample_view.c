@@ -63,6 +63,11 @@ static void lrf_sample_handler(LRFSample *lrf_sample, void *ctx) {
 			lrf_sample->dist2 == 0.5 ||
 			lrf_sample->dist3 == 0.5;
 
+  /* A single mode measurement that didn't generate an error has turned off
+     the pointer */
+  if((app->config.mode & (AUTO_RESTART - 1)) == smm && !sampling_error)
+    app->pointer_is_on = false;
+
   /* Do we do automatic single measurement? */
   if(app->config.mode == (smm | AUTO_RESTART)) {
 
@@ -483,6 +488,7 @@ void sample_view_exit_callback(void *ctx) {
   send_lrf_command(app->lrf_serial_comm_app, cmm_break);
   send_lrf_command(app->lrf_serial_comm_app, cmm_break);
   send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+  app->pointer_is_on = false;	/* A CMM break turns the pointer off */
 
   /* Set the backlight back to automatic */
   set_backlight(&app->backlight_control, BL_AUTO);
@@ -742,6 +748,7 @@ bool sample_view_input_callback(InputEvent *evt, void *ctx) {
         send_lrf_command(app->lrf_serial_comm_app, cmm_break);
         send_lrf_command(app->lrf_serial_comm_app, cmm_break);
         send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+        app->pointer_is_on = false;	/* A CMM break turns the pointer off */
 
         sample_model->continuous_meas_started = false;
       }

@@ -177,6 +177,7 @@ void testlaser_view_exit_callback(void *ctx) {
   send_lrf_command(app->lrf_serial_comm_app, cmm_break);
   send_lrf_command(app->lrf_serial_comm_app, cmm_break);
   send_lrf_command(app->lrf_serial_comm_app, cmm_break);
+  app->pointer_is_on = false;	/* A CMM break turns the pointer off */
 
   /* Unset the callback to receive decoded LRF samples */
   set_lrf_sample_handler(app->lrf_serial_comm_app, NULL, app);
