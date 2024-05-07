@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // VB Lab Migration Assistant for Flipper Zero
-// Copyright (C) 2022  cyanic
+// Copyright (C) 2022-2024  cyanic
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -70,7 +70,6 @@ bool vb_migrate_save_nfc(VbMigrate* inst, const char* dev_name, const char* file
             break;
         }
         furi_string_cat_printf(temp_str, "/%s", file_name);
-        inst->nfc_dev->format = NfcDeviceSaveFormatMifareUl;
         saved = nfc_device_save(inst->nfc_dev, furi_string_get_cstr(temp_str));
     } while(false);
 
@@ -79,13 +78,13 @@ bool vb_migrate_save_nfc(VbMigrate* inst, const char* dev_name, const char* file
 }
 
 bool vb_migrate_load_nfc(VbMigrate* inst, const char* dev_name, const char* file_name) {
-    bool saved = false;
+    bool loaded = false;
     FuriString* temp_str =
         furi_string_alloc_printf("%s/%s/%s", VB_MIGRATE_FOLDER, dev_name, file_name);
-    saved = nfc_device_load(inst->nfc_dev, furi_string_get_cstr(temp_str), true);
+    loaded = nfc_device_load(inst->nfc_dev, furi_string_get_cstr(temp_str));
 
     furi_string_free(temp_str);
-    return saved;
+    return loaded;
 }
 
 bool vb_migrate_delete(VbMigrate* inst, const char* dev_name, bool whole_vb) {
@@ -102,8 +101,7 @@ bool vb_migrate_delete(VbMigrate* inst, const char* dev_name, bool whole_vb) {
             FuriString* file_path = furi_string_alloc();
             while(storage_dir_read(dir_handle, &file_info, name, sizeof(name))) {
                 // Files that is .nfc, but is not template
-                if(!(file_info.flags & FSF_DIRECTORY) &&
-                   strstr(name, NFC_APP_EXTENSION) &&
+                if(!(file_info.flags & FSF_DIRECTORY) && strstr(name, NFC_APP_EXTENSION) &&
                    !strstr(name, VB_MIGRATE_TEMPLATE_NAME)) {
                     furi_string_printf(file_path, "%s/%s", furi_string_get_cstr(dir_path), name);
                     deleted =
@@ -206,8 +204,9 @@ VbMigrate* vb_migrate_alloc() {
     inst->dialogs = furi_record_open(RECORD_DIALOGS);
 
     // NFC
+    inst->nfc = nfc_alloc();
     inst->nfc_dev = nfc_device_alloc();
-    inst->worker = nfc_worker_alloc();
+    inst->data_work = mf_ultralight_alloc();
 
     // Submenu
     inst->submenu = submenu_alloc();
@@ -288,8 +287,9 @@ void vb_migrate_free(VbMigrate* inst) {
     submenu_free(inst->submenu);
 
     // NFC
-    nfc_worker_free(inst->worker);
+    mf_ultralight_free(inst->data_work);
     nfc_device_free(inst->nfc_dev);
+    nfc_free(inst->nfc);
 
     furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_NOTIFICATION);

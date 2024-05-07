@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // VB Lab Migration Assistant for Flipper Zero
-// Copyright (C) 2022  cyanic
+// Copyright (C) 2022-2024  cyanic
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #pragma once
 
 #include <furi.h>
-#include <lib/nfc/nfc_device.h>
+#include <lib/nfc/protocols/mf_ultralight/mf_ultralight.h>
 
 #define BANT_MAGIC (0x544E4142)
 
@@ -60,9 +60,10 @@ typedef enum {
     VbTagOperationSpotCommit,
 } VbTagOperation;
 
-BantBlock* vb_tag_get_bant_block(NfcDeviceData* dev);
+BantBlock* vb_tag_get_bant_block(MfUltralightData* data);
+const BantBlock* vb_tag_get_bant_block_const(const MfUltralightData* data);
 const VbTagProduct* vb_tag_find_product(const BantBlock* bant);
-bool vb_tag_validate_product(NfcDeviceData* dev);
+bool vb_tag_validate_product(const MfUltralightData* data);
 VbTagStatus vb_tag_get_status(const BantBlock* bant);
 void vb_tag_set_status(BantBlock* bant, VbTagStatus status);
 VbTagOperation vb_tag_get_operation(const BantBlock* bant);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // VB Lab Migration Assistant for Flipper Zero
-// Copyright (C) 2022  cyanic
+// Copyright (C) 2022-2024  cyanic
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,7 +36,9 @@ bool vb_migrate_scene_load_on_event(void* context, SceneManagerEvent event) {
         if(vb_migrate_load_nfc(inst, inst->text_store, VB_MIGRATE_TEMPLATE_NAME)) {
             inst->num_captured = vb_migrate_count_captured_mons(inst, inst->text_store);
 
-            BantBlock* bant = vb_tag_get_bant_block(&inst->nfc_dev->dev_data);
+            const MfUltralightData* data =
+                nfc_device_get_data(inst->nfc_dev, NfcProtocolMfUltralight);
+            const BantBlock* bant = vb_tag_get_bant_block_const(data);
             const VbTagProduct* product = vb_tag_find_product(bant);
             inst->orig_product = product;
             if(product) {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // VB Lab Migration Assistant for Flipper Zero
-// Copyright (C) 2022  cyanic
+// Copyright (C) 2022-2024  cyanic
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -114,8 +114,12 @@ static const char* vb_tag_type_names[] = {
     VB_NAME_VBBE_SHORT,
 };
 
-BantBlock* vb_tag_get_bant_block(NfcDeviceData* dev) {
-    return (BantBlock*)&dev->mf_ul_data.data[16];
+BantBlock* vb_tag_get_bant_block(MfUltralightData* data) {
+    return (BantBlock*)&data->page[4].data;
+}
+
+const BantBlock* vb_tag_get_bant_block_const(const MfUltralightData* data) {
+    return (BantBlock*)&data->page[4].data;
 }
 
 const VbTagProduct* vb_tag_find_product(const BantBlock* bant) {
@@ -128,12 +132,11 @@ const VbTagProduct* vb_tag_find_product(const BantBlock* bant) {
     return NULL;
 }
 
-bool vb_tag_validate_product(NfcDeviceData* dev) {
+bool vb_tag_validate_product(const MfUltralightData* data) {
     // Must be NTAG I2C Plus 1k
-    if(dev->protocol != NfcDeviceProtocolMifareUl) return false;
-    if(dev->mf_ul_data.type != MfUltralightTypeNTAGI2CPlus1K) return false;
+    if(data->type != MfUltralightTypeNTAGI2CPlus1K) return false;
     // Must match one of the known product IDs
-    BantBlock* bant = vb_tag_get_bant_block(dev);
+    const BantBlock* bant = vb_tag_get_bant_block_const(data);
     if(bant->common.magic != BANT_MAGIC) return false;
     return vb_tag_find_product(bant) != NULL;
 }

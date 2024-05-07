@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // VB Lab Migration Assistant for Flipper Zero
-// Copyright (C) 2022  cyanic
+// Copyright (C) 2022-2024  cyanic
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,10 @@
 #include <notification/notification.h>
 #include <dialogs/dialogs.h>
 
-#include <lib/nfc/nfc_worker.h>
+#include <lib/nfc/nfc.h>
+#include <lib/nfc/nfc_device.h>
+#include <lib/nfc/nfc_listener.h>
+#include <lib/nfc/nfc_poller.h>
 
 #include "vb_migrate.h"
 #include "scenes/vb_migrate_scene.h"
@@ -42,6 +45,7 @@
 
 #include "vb_migrate_icons.h"
 
+#define NFC_APP_EXTENSION ".nfc"
 #define VB_MIGRATE_TEMPLATE_NAME "template" NFC_APP_EXTENSION
 #define VB_MIGRATE_CAPTURE_FORMAT "%03d%s"
 
@@ -62,10 +66,13 @@ struct VbMigrate {
     TextInput* text_input;
     Loading* loading;
     VariableItemListEx* variable_list;
-    NfcWorker* worker;
+    Nfc* nfc;
+    NfcListener* listener;
+    NfcPoller* poller;
     NfcDevice* nfc_dev;
+    MfUltralightData* data_work;
     char text_store[128];
-    uint8_t captured_pwd[4];
+    uint8_t captured_pwd[MF_ULTRALIGHT_AUTH_PASSWORD_SIZE];
     uint8_t captured_uid[7];
     bool clear_account_id;
     int num_captured;
