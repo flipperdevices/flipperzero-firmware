@@ -267,13 +267,13 @@ static void log_serial_bytes(PassthruModel *passthru_model, bool to_lrf,
     /* Initialize the log string */
     passthru_model->traffic_logging_prefix[0] = to_lrf? '>' : '<';
     snprintf(passthru_model->spstr2, sizeof(passthru_model->spstr2),
-		"%s: ", passthru_model->traffic_logging_prefix);
+		"%s:", passthru_model->traffic_logging_prefix);
     j = strlen(passthru_model->spstr2);
 
     /* Add the bytes as hex values */
     for(i = 0; i < nb_bytes; i++) {
       snprintf(passthru_model->spstr2 + j, sizeof(passthru_model->spstr2) - j,
-		"%02x ", bytes[i]);
+		" %02x", bytes[i]);
       j += 3;
     }
 
