@@ -597,6 +597,10 @@ void passthru_view_exit_callback(void *ctx) {
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
   Cli *cli;
 
+  /* If the second screen is displayed, set the backlight back to automatic */
+  if(passthru_model->screen == 1)
+    set_backlight(&app->backlight_control, BL_AUTO);
+
   /* If the UART is started, unset the callback to receive raw LRF data and
      stop the UART */
   if(passthru_model->uart_baudrate) {
@@ -837,18 +841,26 @@ bool passthru_view_input_callback(InputEvent *evt, void *ctx) {
       /* Right button: go to the next screen */
       case InputKeyRight:
         FURI_LOG_D(TAG, "Right button pressed");
-        passthru_model->screen = passthru_model->screen < 1?
-					passthru_model->screen + 1 :
-					passthru_model->screen;
+
+        /* If the second screen isn't already displayed, set the backlight on all
+           the time */
+        if(passthru_model->screen != 1)
+          set_backlight(&app->backlight_control, BL_ON);
+
+        passthru_model->screen = 1;
         evt_handled = true;
         break;
 
       /* Left button: go to the previous screen */
       case InputKeyLeft:
         FURI_LOG_D(TAG, "Left button pressed");
-        passthru_model->screen = passthru_model->screen > 0?
-					passthru_model->screen - 1 :
-					passthru_model->screen;
+
+        /* If the first screen isn't already displayed, set the backlight back to
+           automatic */
+        if(passthru_model->screen != 0)
+        set_backlight(&app->backlight_control, BL_AUTO);
+
+        passthru_model->screen = 0;
         evt_handled = true;
         break;
 
