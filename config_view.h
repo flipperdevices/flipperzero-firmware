@@ -24,5 +24,8 @@ void config_beep_change(VariableItem *);
 /** Baudrate option change function **/
 void config_baudrate_change(VariableItem *);
 
+/** USB passthrough channel option change function **/
+void config_passthru_chan_change(VariableItem *item);
+
 /** SMM prefix option change function **/
 void config_smm_pfx_change(VariableItem *);
