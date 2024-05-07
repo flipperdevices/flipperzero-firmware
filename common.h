@@ -70,13 +70,25 @@ extern const uint32_t config_baudrate_values[];
 extern const char *config_baudrate_names[];
 extern const uint8_t nb_config_baudrate_values;
 
+/** USB passthrough channel setting parameters **/
+extern const char *config_passthru_chan_label;
+extern const uint8_t config_passthru_chan_values[];
+extern const char *config_passthru_chan_names[];
+extern const uint8_t nb_config_passthru_chan_values;
+
 /** Partial SMM prefix setting parameters (the rest is in the .def file) **/
 extern const uint8_t config_smm_pfx_values[];
 extern const uint8_t nb_config_smm_pfx_values;
 
+/** UART receive timeout **/
+extern const uint16_t uart_rx_timeout;
+
 /** Speaker parameters **/
 extern const uint16_t beep_frequency;
 extern const uint16_t sample_received_beep_duration;
+
+/** LED parameters **/
+extern const uint16_t min_led_flash_duration;
 
 /** Sample view timings **/
 extern const uint16_t sample_view_update_every;
@@ -152,6 +164,9 @@ typedef struct {
   /* Baudrate option */
   uint32_t baudrate;
 
+  /* USB passthrough channel option */
+  uint8_t passthru_chan;
+
   /* SMM prefix option */
   uint8_t smm_pfx;
 
@@ -178,14 +193,10 @@ typedef struct {
 
 
 
-/** Sampler model **/
+/** Sample view model **/
 typedef struct {
 
-  /* Saved configuration values */
-  Config config;
-
-  /* Scratchpad string */
-  char spstr[32];
+  Config *config;
 
   /* LRF sample ring buffer */
   LRFSample *samples;
@@ -226,15 +237,15 @@ typedef struct {
   /* Whether the pointer is on or off */
   bool pointer_is_on;
 
-} SamplerModel;
+  /* Scratchpad string */
+  char spstr[32];
+
+} SampleModel;
 
 
 
-/** LRF info model **/
+/** LRF info view model **/
 typedef struct {
-
-  /* Baudrate */
-  uint32_t baudrate;
 
   /* LRF identification */
   LRFIdent ident;
@@ -257,9 +268,6 @@ typedef struct {
 
 /** Save diagnostic model **/
 typedef struct {
-
-  /* Baudrate */
-  uint32_t baudrate;
 
   /* LRF identification */
   LRFIdent ident;
@@ -284,13 +292,13 @@ typedef struct {
   char dsp_fname_pt2[32];
   char dsp_fpath[128];
 
-  /* Scratchpad string */
-  char spstr[256];
-
   /* Status message */
   char status_msg1[8];
   char status_msg2[48];
   char status_msg3[48];
+
+  /* Scratchpad string */
+  char spstr[256];
 
 } SaveDiagModel;
 
@@ -298,9 +306,6 @@ typedef struct {
 
 /** Test laser model **/
 typedef struct {
-
-  /* Baudrate */
-  uint32_t baudrate;
 
   /* Whether the IR port is busy */
   bool ir_busy;
@@ -312,18 +317,12 @@ typedef struct {
   /* Flag to indicate that CMM should be restarted */
   bool restart_cmm;
 
-  /* Beep option */
-  uint8_t beep;
-
 } TestLaserModel;
 
 
 
-/** Test pointer model **/
+/** Test pointer view model **/
 typedef struct {
-
-  /* Baudrate */
-  uint32_t baudrate;
 
   /* Whether the IR port is busy */
   bool ir_busy;
@@ -333,20 +332,14 @@ typedef struct {
   bool ir_received;
 
   /* Current state of the pointer */
-  bool pointer_on;
-
-  /* Beep option */
-  uint8_t beep;
+  bool pointer_is_on;
 
 } TestPointerModel;
 
 
 
-/** Passthrough model **/
+/** Passthrough view model **/
 typedef struct {
-
-  /* The state of the USB interface before reconfiguring it */
-  FuriHalUsbInterface* usb_interface_state_save;
 
   /* Displayed screen number */
   uint8_t screen;
@@ -356,6 +349,9 @@ typedef struct {
 
   /* Whether the virtual COM port is connected */
   bool vcp_connected;
+
+  /* The state of the USB interface before reconfiguring it */
+  FuriHalUsbInterface* usb_interface_state_save;
 
   /* Virtual COM port configuration */
   struct usb_cdc_line_coding *vcp_config;
@@ -448,6 +444,9 @@ typedef struct {
      or a full LRF diagnostic frame */
   uint8_t shared_storage[60000];	/* Holds 2500 samples */
 
+  /* Saved configuration values */
+  Config config;
+
   /* View dispatcher */
   ViewDispatcher *view_dispatcher;
 
@@ -463,6 +462,7 @@ typedef struct {
   VariableItem *item_buf;
   VariableItem *item_beep;
   VariableItem *item_baudrate;
+  VariableItem *item_passthru_chan;
   VariableItem *item_smm_pfx;
 
   /* Sample view */
@@ -509,5 +509,8 @@ typedef struct {
 
   /* LRF serial communication app */
   LRFSerialCommApp *lrf_serial_comm_app;
+
+  /* Whether the pointer is on or off */
+  bool pointer_is_on;
 
 } App;
