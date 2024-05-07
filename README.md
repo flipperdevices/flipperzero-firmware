@@ -18,7 +18,7 @@ Flipper Zero app to get range measurements from a [Noptel](https://noptel.fi/) [
 - Saving diagnostic data
 - Rangefinder laser testing
 - IR laser pointer testing
-- USB serial passthrough
+- USB serial passthrough with serial traffic display
 
 https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/32f0bf66-ff2f-47e1-9552-5453781482de
 
@@ -58,6 +58,18 @@ Set **Baudrate** to either:
 - **38400** bps
 - **19200** bps
 - **9600** bps
+
+For USB serial passthrough COM port management, set **Passthru channel** to either:
+
+- **0**: the single virtual COM port normally used by the Flipper Zero is repurposed to relay data to / from the LRF
+- **1**: a second virtual COM port is created specifically to relay data to / from the LRF
+
+When using channel 0, the Flipper Zero always appears as one single COM port. However, qFlipper and the CLI become unavailable in the passthrough view.
+
+When using channel 1, depending on whether the passthrough view is started or not, the Flipper Zero appears as one or two COM ports. qFlipper and the CLI remain available on the lower COM port (channel 0).
+
+*See "Serial protocol debugging" below*
+
 
 ### Sample
 
@@ -139,13 +151,17 @@ DSP files inside the **noptel_lrf_diag** directory may be downloaded individuall
 
 ### Test LRX laser
 
-Select the **Test LRX laser** option to test an LRX's transmitter laser. *(See note below)*
+Select the **Test LRX laser** option to test an LRX's transmitter laser.
+
+*See note below*
 
 ![Laser testing](screenshots/3-laser_testing.png)
 
 ### Test IR pointer
 
-Select the **Test IR pointer** option to test an LRF's infrared pointer. *(See note below)*
+Select the **Test IR pointer** option to test an LRF's infrared pointer.
+
+*See note below*
 
 ![Pointer testing](screenshots/14-pointer_testing.png)
 
@@ -173,7 +189,59 @@ Gives information about the app and the GPIO pin connections needed to connect a
 
 
 
+## Serial protocol debugging
+
+If you are developing an LRF application, or you're trying to debug the communication between your computer and the rangefinder, you can of course use the second screen of the **USB serial passthrough** function to view the live serial data traffic on the Flipper Zero's screen. But for more comfortable and more advanced debugging, you can also capture the traffic as a log trace in the Flipper Zero's command line interface (CLI).
+
+To use this functionality:
+
+- Configure **Passthru channel** to **1**, so that the CLI remains available on channel 0
+- Enter the **USB serial passthrough** view
+- Start a terminal on the serial device corresponding to channel 0 (e.g. `/dev/ttyACM0` in Linux, `COM3` in Windows) preferrably at the highest possible speed
+- In the terminal, enable trace logging using the command `log trace`
+- Use the serial device corresponding to channel 1 (e.g. `/dev/ttyACM1` in Linux, `COM4` in Windows) to interact with the LRF as you would with a regular serial cable. The terminal should show the serial traffic going to and from the LRF like this:
+
+```
+              _.-------.._                    -,
+          .-"```"--..,,_/ /`-,               -,  \
+       .:"          /:/  /'\  \     ,_...,  `. |  |
+      /       ,----/:/  /`\ _\~`_-"`     _;
+     '      / /`"""'\ \ \.~`_-'      ,-"'/
+    |      | |  0    | | .-'      ,/`  /
+   |    ,..\ \     ,.-"`       ,/`    /
+  ;    :    `/`""\`           ,/--==,/-----,
+  |    `-...|        -.___-Z:_______J...---;
+  :         `                           _-'
+ _L_  _     ___  ___  ___  ___  ____--"`___  _     ___
+| __|| |   |_ _|| _ \| _ \| __|| _ \   / __|| |   |_ _|
+| _| | |__  | | |  _/|  _/| _| |   /  | (__ | |__  | |
+|_|  |____||___||_|  |_|  |___||_|_\   \___||____||___|
+
+Welcome to Flipper Zero Command Line Interface!
+Read the manual: https://docs.flipper.net/development/cli
+Run `help` or `?` to list available commands
+
+>: log trace
+Current log level: trace
+Use <log ?> to list available log levels
+Press CTRL+C to stop...
+38236253 [T][noptel_lrf_sampler] >LRF: c6 96
+38236275 [T][noptel_lrf_sampler] <LRF: 59 c6 3c 0b
+38236777 [T][noptel_lrf_sampler] >LRF: cc 00 00 00 9c
+38238098 [T][noptel_lrf_sampler] <LRF: 59 cc ca 6f 80 42 2f 01 00 00 01 20 00
+38238098 [T][noptel_lrf_sampler] <LRF: 00 00 00 01 20
+38238102 [T][noptel_lrf_sampler] <LRF: 00 00 00 c2
+```
+
+
+
 ## Installation
+
+### Pre-built app
+
+Install this app from https://lab.flipper.net/apps/noptel_lrf_sampler
+
+### Manually
 
 - Clone this repository
 - Install [uFBT](https://github.com/flipperdevices/flipperzero-ufbt)
