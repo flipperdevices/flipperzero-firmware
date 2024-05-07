@@ -43,7 +43,7 @@ extern "C" {
 #define BG_SCROLL 13
 #define BG_SLUT 14
 
-#define PROFILE_IMG_COUNT 43
+#define PROFILE_IMG_COUNT 47
 
 #define PIMG_NONE 0
 #define PIMG_ADPOLICE 1
@@ -57,37 +57,41 @@ extern "C" {
 #define PIMG_ED209 9
 #define PIMG_FSOCIETY 10
 #define PIMG_FSOCIETY2 11
-#define PIMG_GITSBAT 12
-#define PIMG_GITSISH 13
-#define PIMG_GITSKUS 14
-#define PIMG_GITSSAI 15
-#define PIMG_GITSTOG 16
-#define PIMG_GOKUSET 17
-#define PIMG_GOKUKID 18
-#define PIMG_GOKUADULT 19
-#define PIMG_GOKUSSJ 20
-#define PIMG_GOKUSSJ3 21
-#define PIMG_GUYFAWKES 22
-#define PIMG_LAIN 23
-#define PIMG_LEEROY 24
-#define PIMG_MARIO 25
-#define PIMG_MARVIN 26
-#define PIMG_MORELEELLOO 27
-#define PIMG_NEUROMANCER 28
-#define PIMG_PIKASLEEPY 29
-#define PIMG_PIRATE 30 // Pirate Profile Pic (By cyberartemio)
-#define PIMG_RABBIT 31
-#define PIMG_SHINKAI 32
-#define PIMG_SKULL 33
-#define PIMG_SLIME 34
-#define PIMG_SONIC 35
-#define PIMG_SPIDER 36
-#define PIMG_TANKGIRL 37
-#define PIMG_TOTORO 38
-#define PIMG_WAIFU1 39
-#define PIMG_WAIFU2 40
-#define PIMG_WAIFU3 41
-#define PIMG_WRENCH 42
+#define PIMG_GITSAOI 12
+#define PIMG_GITSARA 13
+#define PIMG_GITSBAT 14
+#define PIMG_GITSHID 15
+#define PIMG_GITSISH 16
+#define PIMG_GITSKUS 17
+#define PIMG_GITSPRO 18
+#define PIMG_GITSSAI 19
+#define PIMG_GITSTOG 20
+#define PIMG_GOKUSET 21
+#define PIMG_GOKUKID 22
+#define PIMG_GOKUADULT 23
+#define PIMG_GOKUSSJ 24
+#define PIMG_GOKUSSJ3 25
+#define PIMG_GUYFAWKES 26
+#define PIMG_LAIN 27
+#define PIMG_LEEROY 28
+#define PIMG_MARIO 29
+#define PIMG_MARVIN 30
+#define PIMG_MORELEELLOO 31
+#define PIMG_NEUROMANCER 32
+#define PIMG_PIKASLEEPY 33
+#define PIMG_PIRATE 34 // Pirate Profile Pic (By cyberartemio)
+#define PIMG_RABBIT 35
+#define PIMG_SHINKAI 36
+#define PIMG_SKULL 37
+#define PIMG_SLIME 38
+#define PIMG_SONIC 39
+#define PIMG_SPIDER 40
+#define PIMG_TANKGIRL 41
+#define PIMG_TOTORO 42
+#define PIMG_WAIFU1 43
+#define PIMG_WAIFU2 44
+#define PIMG_WAIFU3 45
+#define PIMG_WRENCH 46
 
 typedef struct {
     uint8_t background;
