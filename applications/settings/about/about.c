@@ -97,7 +97,7 @@ static DialogMessageButton about_screen_cert_china_0(DialogsApp* dialogs, Dialog
 static DialogMessageButton about_screen_cert_china_1(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    dialog_message_set_icon(message, &I_CertificationChina1_122x47, 3, 3);
+    dialog_message_set_icon(message, &I_CertificationChina1_124x47, 3, 3);
     dialog_message_set_text(
         message, furi_hal_version_get_srrc_id(), 55, 11, AlignLeft, AlignBottom);
     result = dialog_message_show(dialogs, message);
