@@ -187,7 +187,7 @@ static void vcp_on_cdc_rx(void *ctx) {
 
   /* Get the data from the virtual COM port */
   passthru_model->vcp_rx_buf_len =
-		furi_hal_cdc_receive(passthru_vcp_channel,
+		furi_hal_cdc_receive(app->config.passthru_chan,
 					passthru_model->vcp_rx_buf,
 					sizeof(passthru_model->vcp_rx_buf));
 
@@ -401,7 +401,8 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
 							== FuriStatusOk) {
 
           /* Send the UART data */
-          furi_hal_cdc_send(passthru_vcp_channel, passthru_model->vcp_tx_buf,
+          furi_hal_cdc_send(app->config.passthru_chan,
+				passthru_model->vcp_tx_buf,
 				passthru_model->vcp_tx_buf_len);
           passthru_model->vcp_last_sent = passthru_model->vcp_tx_buf_len;
 
@@ -442,7 +443,7 @@ static int32_t vcp_rx_tx_thread(void *ctx) {
 							== FuriStatusOk) {
 
             /* Send 0 bytes */
-            furi_hal_cdc_send(passthru_vcp_channel, NULL, 0);
+            furi_hal_cdc_send(app->config.passthru_chan, NULL, 0);
             passthru_model->vcp_last_sent = 0;
           }
         }
@@ -478,17 +479,17 @@ void passthru_view_enter_callback(void *ctx) {
   furi_delay_ms(100);
 
   /* Use CDC channel 0? */
-  if(passthru_vcp_channel == 0) {
+  if(app->config.passthru_chan == 0) {
 
     /* If the USB interface is not configured as CDC single channel,
        reconfigure it */
     if(passthru_model->usb_interface_state_save != &usb_cdc_single)
       furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
 
-    /* The USB interface is already configured as CDC single channel: reinitialize
-       if to knock out any existing serial connection - particularly qFlipper, so
-       if doesn't sit there idling on a dead connection but actively starts trying
-       to reconnect instead */
+    /* The USB interface is already configured as CDC single channel:
+       reinitialize if to knock out any existing serial connection -
+       particularly qFlipper, so if doesn't sit there idling on a dead
+       connection but actively starts trying to reconnect instead */
     else
       furi_hal_usb_reinit();
   }
@@ -501,10 +502,10 @@ void passthru_view_enter_callback(void *ctx) {
     if(passthru_model->usb_interface_state_save != &usb_cdc_dual)
       furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
 
-    /* The USB interface is already configured as CDC dual channel: reinitialize
-       if to knock out any existing serial connections - particularly qFlipper, so
-       if doesn't sit there idling on a dead connection but actively starts trying
-       to reconnect instead */
+    /* The USB interface is already configured as CDC dual channel:
+       reinitialize if to knock out any existing serial connection -
+       particularly qFlipper, so if doesn't sit there idling on a dead
+       connection but actively starts trying to reconnect instead */
     else
       furi_hal_usb_reinit();
 
@@ -516,7 +517,7 @@ void passthru_view_enter_callback(void *ctx) {
 
   /* Get the current virtual COM port configuration */
   passthru_model->vcp_config =
-			furi_hal_cdc_get_port_settings(passthru_vcp_channel);
+		furi_hal_cdc_get_port_settings(app->config.passthru_chan);
 
   /* Reset the serial traffic counters and enable showing them in the view */
   passthru_model->total_bytes_sent = 0;
@@ -546,7 +547,7 @@ void passthru_view_enter_callback(void *ctx) {
 
   /* Initialise the serial traffic logging prefix to an empty string if
      we don't have a console to log to, or a prefix with no direction */
-  if(passthru_vcp_channel == 0)
+  if(app->config.passthru_chan == 0)
     passthru_model->traffic_logging_prefix[0] = 0;
   else
     snprintf(passthru_model->traffic_logging_prefix,
@@ -583,7 +584,7 @@ void passthru_view_enter_callback(void *ctx) {
 			furi_thread_get_id(passthru_model->vcp_rx_tx_thread);
 
   /* Set the virtual COM port callbacks */
-  furi_hal_cdc_set_callbacks(passthru_vcp_channel, &cdc_callbacks, app);
+  furi_hal_cdc_set_callbacks(app->config.passthru_chan, &cdc_callbacks, app);
 }
 
 
@@ -604,7 +605,7 @@ void passthru_view_exit_callback(void *ctx) {
   }
 
   /* Unset the virtual COM port callbacks */
-  furi_hal_cdc_set_callbacks(passthru_vcp_channel, NULL, NULL);
+  furi_hal_cdc_set_callbacks(app->config.passthru_chan, NULL, NULL);
 
   /* Stop and free the virtual COM port RX/TX thread */
   furi_thread_flags_set(passthru_model->vcp_rx_tx_thread_id, stop);
@@ -632,7 +633,7 @@ void passthru_view_exit_callback(void *ctx) {
      for some reason */
   furi_delay_ms(100);
 
-  /* Restore the USB interface the way we found */
+  /* Restore the USB interface as we found it */
   furi_check(furi_hal_usb_set_config(passthru_model->usb_interface_state_save,
 					NULL) == true);
 
