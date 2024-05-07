@@ -59,7 +59,7 @@ void lrfinfo_view_enter_callback(void *ctx) {
   with_view_model(app->lrfinfo_view, LRFInfoModel* lrfinfo_model,
 	{
 	  /* Start the UART at the correct baudrate */
-	  start_uart(app->lrf_serial_comm_app, lrfinfo_model->baudrate);
+	  start_uart(app->lrf_serial_comm_app, app->config.baudrate);
 
 	  /* Invalidate the current identification - if any */
 	  lrfinfo_model->has_ident = false;
@@ -76,7 +76,6 @@ void lrfinfo_view_enter_callback(void *ctx) {
 
 	  /* Send a send-identification-frame command */
 	  send_lrf_command(app->lrf_serial_comm_app, send_ident);
-
 	  /* Send a send-information-frame command */
 	  send_lrf_command(app->lrf_serial_comm_app, send_info);
 	},

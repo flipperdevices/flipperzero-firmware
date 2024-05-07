@@ -55,7 +55,7 @@ static void test_laser_view_timer_callback(void *ctx) {
   }
 
   /* If an IR signal was received and beeping is enabled, start a beep */
-  if(testlaser_model->ir_received && testlaser_model->beep)
+  if(testlaser_model->ir_received && app->config.beep)
     start_beep(&app->speaker_control, test_laser_view_update_every + 50);
 }
 
@@ -114,7 +114,7 @@ void testlaser_view_enter_callback(void *ctx) {
   testlaser_model->ir_received = false;
 
   /* Start the UART at the correct baudrate */
-  start_uart(app->lrf_serial_comm_app, testlaser_model->baudrate);
+  start_uart(app->lrf_serial_comm_app, app->config.baudrate);
 
   /* Set up the callback to catch an IR sensor level change */
   furi_hal_infrared_async_rx_set_capture_isr_callback(ir_capture_callback,
