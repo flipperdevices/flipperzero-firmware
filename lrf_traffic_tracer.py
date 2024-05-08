@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# PYTHON_ARGCOMPLETE_OK
 """Noptel LRF rangefinder sampler for the Flipper Zero
 Version: 1.7
 
@@ -46,7 +47,7 @@ import serial.tools.list_ports
 
 # Optional bash completion support
 try:
-  import argcomplete	# PYTHON_ARGCOMPLETE_OK
+  import argcomplete
   has_argcomplete = True
 except:
   has_argcomplete = False
