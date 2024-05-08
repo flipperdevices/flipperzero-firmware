@@ -117,7 +117,7 @@ The return rate is indicated next to the buffering state: the bar is all the way
 
 The buffering state and the return rate indicators are useful to determine the rangefinder's extinction ratio: when the buffer is full, the return rate bar should be only about ½ to ¾ full at extinction ratio.
 
-https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/32d81367-356f-4cd8-96aa-deab03e2f29c
+https://github.com/Giraut/flipper_zero_noptel_lrf_sampler/assets/37288252/e55122ff-178d-43d3-911b-0656ed161fe8
 
 ### Pointer ON/OFF
 
