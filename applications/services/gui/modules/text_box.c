@@ -6,6 +6,7 @@
 
 #define TEXT_BOX_TEXT_WIDTH (120)
 #define TEXT_BOX_TEXT_HEIGHT (56)
+#define TEXT_BOX_MAX_LINES_PER_SCREEN (10)
 
 struct TextBox {
     View* view;
@@ -176,11 +177,13 @@ static void text_box_update_text_on_screen(Canvas* canvas, TextBoxModel* model) 
 }
 
 static void text_box_prepare_model(Canvas* canvas, TextBoxModel* model) {
+    model->lines_num = 0;
+    model->start_line_offset = 0;
     model->lines_on_screen = TEXT_BOX_TEXT_HEIGHT / canvas_current_font_height(canvas);
 
     int32_t current_offset = 0;
     int32_t prev_offset = 0;
-    int32_t* window_offset = malloc(sizeof(int32_t) * model->lines_on_screen);
+    int32_t window_offset[TEXT_BOX_MAX_LINES_PER_SCREEN] = {};
     bool endline_reached = false;
     do {
         window_offset[model->lines_num % model->lines_on_screen] = current_offset;
@@ -196,8 +199,6 @@ static void text_box_prepare_model(Canvas* canvas, TextBoxModel* model) {
             model->start_line_offset = window_offset[start_line_offset_index];
         }
     }
-
-    free(window_offset);
 
     if(model->lines_num > model->lines_on_screen - 1) {
         model->scroll_num = model->lines_num - (model->lines_on_screen - 1);
