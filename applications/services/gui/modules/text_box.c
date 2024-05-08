@@ -15,13 +15,11 @@ struct TextBox {
 
 typedef struct {
     const char* text;
-    char* text_pos;
-    FuriString* text_formatted;
+
     int32_t scroll_pos;
     int32_t scroll_num;
     TextBoxFont font;
     TextBoxFocus focus;
-    bool formatted;
 
     FuriString* text_on_screen;
     FuriString* text_line;
@@ -29,6 +27,8 @@ typedef struct {
     int32_t start_line_offset;
     int32_t lines_on_screen;
     int32_t lines_num;
+
+    bool formatted;
 } TextBoxModel;
 
 static void text_box_process_down(TextBox* text_box, uint8_t lines) {
@@ -63,33 +63,7 @@ static void text_box_process_up(TextBox* text_box, uint8_t lines) {
     }
 }
 
-static uint32_t text_box_calculate_lines_num(Canvas* canvas, const char* text) {
-    size_t i = 0;
-    size_t line_width = 0;
-    size_t lines_num = 0;
-
-    while(text[i] != '\0') {
-        char symb = text[i++];
-        if(symb != '\n') {
-            size_t glyph_width = canvas_glyph_width(canvas, symb);
-            if(line_width + glyph_width > TEXT_BOX_TEXT_WIDTH) {
-                lines_num++;
-                line_width = 0;
-            }
-            line_width += glyph_width;
-        } else {
-            lines_num++;
-            line_width = 0;
-        }
-    }
-
-    // Last line is empty
-    lines_num++;
-
-    return lines_num;
-}
-
-static void text_box_get_next_line_index(
+static bool text_box_get_next_line_index(
     Canvas* canvas,
     const char* text,
     int32_t start_offset,
@@ -97,10 +71,13 @@ static void text_box_get_next_line_index(
     size_t i = start_offset;
     size_t line_width = 0;
 
+    bool endline_reached = false;
+
     while(true) {
         char symb = text[i];
         if(symb == '\0') {
             *next_line_offset = i;
+            endline_reached = true;
             break;
         } else if(symb == '\n') {
             *next_line_offset = i + 1;
@@ -115,6 +92,8 @@ static void text_box_get_next_line_index(
             i++;
         }
     }
+
+    return endline_reached;
 }
 
 static void text_box_get_prev_line_index(
@@ -127,7 +106,7 @@ static void text_box_get_prev_line_index(
     } else {
         size_t i = start_offset - 1;
 
-        // Ignore newline charachter at the end of previous line
+        // Ignore newline symbol at the end of previous line
         if(text[i] == '\n') {
             i--;
         }
@@ -138,8 +117,8 @@ static void text_box_get_prev_line_index(
         }
 
         // Search for the line offset before given start offset
-        int32_t next_line_offset = 0;
         while(true) {
+            int32_t next_line_offset = 0;
             text_box_get_next_line_index(canvas, text, i, &next_line_offset);
             if(next_line_offset == start_offset) break;
             i = next_line_offset;
@@ -170,27 +149,20 @@ static void text_box_update_screen_text(Canvas* canvas, TextBoxModel* model) {
     furi_string_reset(model->text_on_screen);
     furi_string_reset(model->text_line);
 
-    FURI_LOG_D("TB", "Scrol pos: %ld", model->scroll_pos);
-
     int32_t accum_line_offset = model->start_line_offset;
     for(int32_t i = 0; i < model->lines_on_screen; i++) {
-        FURI_LOG_D("TB", "Line: %ld, Current line offset: %ld", i, accum_line_offset);
-
         int32_t next_line_offset = 0;
         text_box_get_next_line_index(canvas, model->text, accum_line_offset, &next_line_offset);
-        if(next_line_offset == accum_line_offset) {
-            furi_string_set_str(model->text_line, "\n");
-        } else {
-            furi_string_set_strn(
-                model->text_line,
-                &model->text[accum_line_offset],
-                next_line_offset - accum_line_offset);
-        }
+        furi_string_set_strn(
+            model->text_line,
+            &model->text[accum_line_offset],
+            next_line_offset - accum_line_offset);
 
         size_t str_len = furi_string_size(model->text_line);
         if(furi_string_get_char(model->text_line, str_len - 1) != '\n') {
             furi_string_push_back(model->text_line, '\n');
         }
+
         furi_string_cat(model->text_on_screen, model->text_line);
         accum_line_offset = next_line_offset;
     }
@@ -204,8 +176,28 @@ static void text_box_update_text_on_screen(Canvas* canvas, TextBoxModel* model) 
 }
 
 static void text_box_prepare_model(Canvas* canvas, TextBoxModel* model) {
-    model->lines_num = text_box_calculate_lines_num(canvas, model->text);
     model->lines_on_screen = TEXT_BOX_TEXT_HEIGHT / canvas_current_font_height(canvas);
+
+    int32_t current_offset = 0;
+    int32_t prev_offset = 0;
+    int32_t* window_offset = malloc(sizeof(int32_t) * model->lines_on_screen);
+    bool endline_reached = false;
+    do {
+        window_offset[model->lines_num % model->lines_on_screen] = current_offset;
+        prev_offset = current_offset;
+        endline_reached =
+            text_box_get_next_line_index(canvas, model->text, prev_offset, &current_offset);
+        model->lines_num++;
+    } while(!endline_reached);
+
+    if(model->focus == TextBoxFocusEnd) {
+        if(model->lines_num > model->lines_on_screen) {
+            int32_t start_line_offset_index = model->lines_num % model->lines_on_screen;
+            model->start_line_offset = window_offset[start_line_offset_index];
+        }
+    }
+
+    free(window_offset);
 
     if(model->lines_num > model->lines_on_screen - 1) {
         model->scroll_num = model->lines_num - (model->lines_on_screen - 1);
@@ -215,7 +207,8 @@ static void text_box_prepare_model(Canvas* canvas, TextBoxModel* model) {
         model->scroll_num = 0;
     }
 
-    text_box_update_text_on_screen(canvas, model);
+    text_box_update_screen_text(canvas, model);
+    model->start_line = model->scroll_pos;
 }
 
 static void text_box_view_draw_callback(Canvas* canvas, void* _model) {
@@ -235,7 +228,6 @@ static void text_box_view_draw_callback(Canvas* canvas, void* _model) {
     if(!model->formatted) {
         text_box_prepare_model(canvas, model);
         model->formatted = true;
-        FURI_LOG_I("TB", "Scrol num: %ld, Lines num: %ld", model->scroll_num, model->lines_num);
     }
 
     elements_slightly_rounded_frame(canvas, 0, 0, 124, 64);
@@ -293,9 +285,8 @@ TextBox* text_box_alloc(void) {
         TextBoxModel * model,
         {
             model->text = NULL;
-            model->text_formatted = furi_string_alloc_set("");
-            model->text_on_screen = furi_string_alloc_set_str("");
-            model->text_line = furi_string_alloc_set_str("");
+            model->text_on_screen = furi_string_alloc();
+            model->text_line = furi_string_alloc();
             model->formatted = false;
             model->font = TextBoxFontText;
         },
@@ -311,7 +302,6 @@ void text_box_free(TextBox* text_box) {
         text_box->view,
         TextBoxModel * model,
         {
-            furi_string_free(model->text_formatted);
             furi_string_free(model->text_on_screen);
             furi_string_free(model->text_line);
         },
@@ -333,9 +323,16 @@ void text_box_reset(TextBox* text_box) {
         TextBoxModel * model,
         {
             model->text = NULL;
-            furi_string_set(model->text_formatted, "");
             model->font = TextBoxFontText;
             model->focus = TextBoxFocusStart;
+            furi_string_reset(model->text_line);
+            furi_string_reset(model->text_on_screen);
+            model->start_line = 0;
+            model->start_line_offset = 0;
+            model->lines_num = 0;
+            model->lines_on_screen = 0;
+            model->scroll_num = 0;
+            model->scroll_pos = 0;
             model->formatted = false;
         },
         true);
@@ -344,16 +341,12 @@ void text_box_reset(TextBox* text_box) {
 void text_box_set_text(TextBox* text_box, const char* text) {
     furi_check(text_box);
     furi_check(text);
-    size_t str_length = strlen(text);
-    size_t formating_margin = 0;
 
     with_view_model(
         text_box->view,
         TextBoxModel * model,
         {
             model->text = text;
-            furi_string_reset(model->text_formatted);
-            furi_string_reserve(model->text_formatted, str_length + formating_margin);
             model->formatted = false;
         },
         true);
