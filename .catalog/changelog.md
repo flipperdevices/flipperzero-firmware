@@ -1,3 +1,5 @@
+## 1.15
+ - Add downgrade from iClass SR to iClass Legacy
 ## 1.14
  - Add plugin to parse some wiegand formats
  - Store unknown blocks in picopass file with '??'
