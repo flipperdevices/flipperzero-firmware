@@ -389,6 +389,7 @@ def main():
 
   args = argparser.parse_args()
 
+  print()
   print("LRF traffic tracer")
   print("------------------")
   print()
@@ -479,6 +480,7 @@ def main():
         try:
           clidev.write(b"log trace\r")
           print("Trace log started")
+          print()
 
         except Exception as e:
           print("Error writing to {}: {}".format(args.cli_serial_device, e))
