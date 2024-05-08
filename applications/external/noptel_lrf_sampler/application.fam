@@ -5,7 +5,6 @@ App(
     entry_point="noptel_lrf_sampler_app_entry",
     stack_size=4 * 1024,
     fap_icon="assets/noptel_lrf_sampler.png",
-    fap_icon_assets="assets",
     sources=[
         "about_view.c",
         "backlight_control.c",
@@ -16,6 +15,7 @@ App(
         "lrf_power_control.c",
         "lrf_serial_comm.c",
         "main.c",
+        "parameters.c",
         "passthru_view.c",
         "sample_view.c",
         "save_diag_view.c",
@@ -24,9 +24,10 @@ App(
         "test_laser_view.c",
         "test_pointer_view.c",
     ],
+    fap_icon_assets="assets",
     fap_category="GPIO",
     fap_author="Giraut",
     fap_weburl="https://github.com/Giraut/flipper_zero_noptel_lrf_sampler",
-    fap_version="1.7",
+    fap_version="1.8",
     fap_description="Noptel LRF rangefinder sampler",
 )

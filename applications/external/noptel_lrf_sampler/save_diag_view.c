@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.7
+ * Version: 1.8
  *
  * Save diagnostic view
 ***/
@@ -312,7 +312,7 @@ void savediag_view_enter_callback(void* ctx) {
         SaveDiagModel * savediag_model,
         {
             /* Start the UART at the correct baudrate */
-            start_uart(app->lrf_serial_comm_app, savediag_model->baudrate);
+            start_uart(app->lrf_serial_comm_app, app->config.baudrate);
 
             /* Setup the callback to receive decoded LRF identification frames */
             set_lrf_ident_handler(app->lrf_serial_comm_app, lrf_ident_handler, app);

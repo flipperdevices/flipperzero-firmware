@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.7
+ * Version: 1.8
  *
  * Configuration saving / restoring
 ***/
@@ -17,18 +17,13 @@
 /** Load saved configuration options
     Silently fail **/
 void load_configuration(App* app) {
-    SamplerModel* sampler_model = view_get_model(app->sample_view);
-    LRFInfoModel* lrfinfo_model = view_get_model(app->lrfinfo_view);
-    SaveDiagModel* savediag_model = view_get_model(app->savediag_view);
-    TestLaserModel* testlaser_model = view_get_model(app->testlaser_view);
-    TestPointerModel* testpointer_model = view_get_model(app->testpointer_view);
     Storage* storage;
     File* file;
     Config read_config;
     SMMPfxConfig read_smm_pfx_config;
     bool file_read;
     uint16_t bytes_read = 0;
-    uint8_t mode_idx, buf_idx, beep_idx, baudrate_idx, smm_pfx_idx;
+    uint8_t mode_idx, buf_idx, beep_idx, baudrate_idx, passthru_chan_idx, smm_pfx_idx;
     uint8_t i;
 
     /* Open storage */
@@ -209,6 +204,23 @@ void load_configuration(App* app) {
         return;
     }
 
+    /* Check that the USB passthrough channel option exists */
+    for(passthru_chan_idx = 0;
+        passthru_chan_idx < nb_config_passthru_chan_values &&
+        read_config.passthru_chan != config_passthru_chan_values[passthru_chan_idx];
+        passthru_chan_idx++)
+        ;
+
+    if(passthru_chan_idx >= nb_config_passthru_chan_values) {
+        FURI_LOG_I(
+            TAG,
+            "Invalid USB passthrough channel option %d in config file "
+            "%s",
+            read_config.passthru_chan,
+            config_file);
+        return;
+    }
+
     /* Check that the SMM prefix option exists */
     for(smm_pfx_idx = 0; smm_pfx_idx < nb_config_smm_pfx_values &&
                          read_config.smm_pfx != config_smm_pfx_values[smm_pfx_idx];
@@ -234,37 +246,39 @@ void load_configuration(App* app) {
     FURI_LOG_I(TAG, "Restored configuration:");
 
     /* Configure the sampling mode setting from the read value */
-    sampler_model->config.mode = read_config.mode;
+    app->config.mode = read_config.mode;
     variable_item_set_current_value_index(app->item_mode, mode_idx);
     variable_item_set_current_value_text(app->item_mode, config_mode_names[mode_idx]);
     FURI_LOG_I(TAG, "  %s: %s", config_mode_label, config_mode_names[mode_idx]);
 
     /* Configure the buffering setting from the read value */
-    sampler_model->config.buf = read_config.buf;
+    app->config.buf = read_config.buf;
     variable_item_set_current_value_index(app->item_buf, buf_idx);
     variable_item_set_current_value_text(app->item_buf, config_buf_names[buf_idx]);
     FURI_LOG_I(TAG, "  %s: %s", config_buf_label, config_buf_names[buf_idx]);
 
     /* Configure the beep option from the read value */
-    sampler_model->config.beep = read_config.beep;
-    testlaser_model->beep = read_config.beep;
-    testpointer_model->beep = read_config.beep;
+    app->config.beep = read_config.beep;
     variable_item_set_current_value_index(app->item_beep, beep_idx);
     variable_item_set_current_value_text(app->item_beep, config_beep_names[beep_idx]);
     FURI_LOG_I(TAG, "  %s: %s", config_beep_label, config_beep_names[beep_idx]);
 
     /* Configure the baudrate option from the read value */
-    sampler_model->config.baudrate = read_config.baudrate;
-    lrfinfo_model->baudrate = read_config.baudrate;
-    savediag_model->baudrate = read_config.baudrate;
-    testlaser_model->baudrate = read_config.baudrate;
-    testpointer_model->baudrate = read_config.baudrate;
+    app->config.baudrate = read_config.baudrate;
     variable_item_set_current_value_index(app->item_baudrate, baudrate_idx);
     variable_item_set_current_value_text(app->item_baudrate, config_baudrate_names[baudrate_idx]);
     FURI_LOG_I(TAG, "  %s: %s bps", config_baudrate_label, config_baudrate_names[baudrate_idx]);
 
+    /* Configure the USB passthrough channel option from the read value */
+    app->config.passthru_chan = read_config.passthru_chan;
+    variable_item_set_current_value_index(app->item_passthru_chan, passthru_chan_idx);
+    variable_item_set_current_value_text(
+        app->item_passthru_chan, config_passthru_chan_names[passthru_chan_idx]);
+    FURI_LOG_I(
+        TAG, "  %s: %s", config_passthru_chan_label, config_passthru_chan_names[passthru_chan_idx]);
+
     /* Restore the saved last selected submenu item */
-    sampler_model->config.sitem = read_config.sitem;
+    app->config.sitem = read_config.sitem;
     submenu_set_selected_item(app->submenu, read_config.sitem);
     FURI_LOG_I(TAG, "  %s: %s", "Selected submenu item", submenu_item_names[read_config.sitem]);
     furi_delay_ms(500);
@@ -272,7 +286,7 @@ void load_configuration(App* app) {
     /* Is the SMM prefix configuration option enabled? */
     if(app->smm_pfx_config.config_smm_pfx_label[0]) {
         /* Configure the SMM prefix option from the read value */
-        sampler_model->config.smm_pfx = read_config.smm_pfx;
+        app->config.smm_pfx = read_config.smm_pfx;
         variable_item_set_current_value_index(app->item_smm_pfx, smm_pfx_idx);
         variable_item_set_current_value_text(
             app->item_smm_pfx, app->smm_pfx_config.config_smm_pfx_names[smm_pfx_idx]);
@@ -287,7 +301,6 @@ void load_configuration(App* app) {
 /** Save configuration options
     Silently fail **/
 void save_configuration(App* app) {
-    SamplerModel* sampler_model = view_get_model(app->sample_view);
     Storage* storage;
     File* file;
     bool file_written = false;
@@ -300,7 +313,7 @@ void save_configuration(App* app) {
     /* Attempt to open the file */
     if(storage_file_open(file, config_file, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
         /* Write the file */
-        bytes_written = storage_file_write(file, &sampler_model->config, sizeof(Config));
+        bytes_written = storage_file_write(file, &app->config, sizeof(Config));
         /* Close the file */
         storage_file_close(file);
 

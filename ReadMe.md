@@ -29,10 +29,11 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0508-0125-0.101.3-876d049](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-08 01:25 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-08 01:25 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-08 17:06 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-08 17:06 EST`
 - Updated: [VB Migration Assistant v1.3 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - [Added 4 more GITS Profile Pictures for a total of 9 GITS and 47 in all (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures)
+- Updated: [Noptel LRF Sampler v1.8 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 
 <a name="release">
 
@@ -470,7 +471,7 @@ $ ./fbt dolphin_ext
 - [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
-- [Noptel LRF Sampler v1.7 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
+- [Noptel LRF Sampler v1.8 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [NRF Sniffer for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/nrfsniff_ms) `Req: NRF24`

@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.7
+ * Version: 1.8
  *
  * Test pointer view
 ***/
@@ -45,7 +45,7 @@ static void test_pointer_view_timer_callback(void* ctx) {
     }
 
     /* If an IR signal was received and beeping is enabled, start a beep */
-    if(testpointer_model->ir_received && testpointer_model->beep)
+    if(testpointer_model->ir_received && app->config.beep)
         start_beep(&app->speaker_control, test_pointer_view_update_every + 50);
 }
 
@@ -55,11 +55,11 @@ static void pointer_control_timer_callback(void* ctx) {
     TestPointerModel* testpointer_model = view_get_model(app->testpointer_view);
 
     /* Jiggle the pointer */
-    testpointer_model->pointer_on = !testpointer_model->pointer_on;
+    testpointer_model->pointer_is_on = !testpointer_model->pointer_is_on;
     send_lrf_command(
-        app->lrf_serial_comm_app, testpointer_model->pointer_on ? pointer_on : pointer_off);
+        app->lrf_serial_comm_app, testpointer_model->pointer_is_on ? pointer_on : pointer_off);
 
-    FURI_LOG_T(TAG, "Pointer %s", testpointer_model->pointer_on ? "ON" : "OFF");
+    FURI_LOG_T(TAG, "Pointer %s", testpointer_model->pointer_is_on ? "ON" : "OFF");
 }
 
 /** Test pointer view enter callback **/
@@ -79,8 +79,11 @@ void testpointer_view_enter_callback(void* ctx) {
     testpointer_model->ir_received_prev = false;
     testpointer_model->ir_received = false;
 
+    /* Reflect the current state of the pointer */
+    testpointer_model->pointer_is_on = app->pointer_is_on;
+
     /* Start the UART at the correct baudrate */
-    start_uart(app->lrf_serial_comm_app, testpointer_model->baudrate);
+    start_uart(app->lrf_serial_comm_app, app->config.baudrate);
 
     /* Set up the callback to catch an IR sensor level change */
     furi_hal_infrared_async_rx_set_capture_isr_callback(ir_capture_callback, testpointer_model);
@@ -124,8 +127,9 @@ void testpointer_view_exit_callback(void* ctx) {
     furi_timer_stop(app->test_pointer_control_timer);
     furi_timer_free(app->test_pointer_control_timer);
 
-    /* Turn off the pointer */
-    send_lrf_command(app->lrf_serial_comm_app, pointer_off);
+    /* Restore the pointer as we found it */
+    if(testpointer_model->pointer_is_on != app->pointer_is_on)
+        send_lrf_command(app->lrf_serial_comm_app, app->pointer_is_on ? pointer_on : pointer_off);
 
     /* Stop the UART */
     stop_uart(app->lrf_serial_comm_app);

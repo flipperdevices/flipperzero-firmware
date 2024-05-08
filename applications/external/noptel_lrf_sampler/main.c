@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.7
+ * Version: 1.8
  *
  * Main app
 ***/
@@ -20,99 +20,6 @@
 #include "passthru_view.h"
 #include "about_view.h"
 #include "submenu.h"
-
-/*** Parameters ***/
-
-/** Files and paths **/
-const char* config_file = STORAGE_APP_DATA_PATH_PREFIX "/" CONFIG_FILE;
-const char* smm_pfx_config_definition_file = STORAGE_APP_DATA_PATH_PREFIX
-    "/" SMM_PREFIX_CONFIG_DEFINITION_FILE;
-const char* dsp_files_dir = ANY_PATH("noptel_lrf_diag");
-
-/** Submenu item names **/
-const char* submenu_item_names[] = {
-    "Configuration",
-    "Sample",
-    "Pointer ON/OFF",
-    "LRF information",
-    "Save LRF diagnostic",
-    "Test LRX laser",
-    "Test IR pointer",
-    "USB serial passthrough",
-    "About"};
-
-/** Sampling mode setting parameters **/
-const char* config_mode_label = "Sampling mode";
-const uint8_t config_mode_values[] =
-    {smm, smm | AUTO_RESTART, cmm_1hz, cmm_4hz, cmm_10hz, cmm_20hz, cmm_100hz, cmm_200hz};
-const char* config_mode_names[] =
-    {"SMM", "Auto SMM", "1 Hz", "4 Hz", "10 Hz", "20 Hz", "100 Hz", "200 Hz"};
-const uint8_t nb_config_mode_values = COUNT_OF(config_mode_values);
-
-/** Buffering setting parameters **/
-const char* config_buf_label = "Buffering";
-const int16_t config_buf_values[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -5, -10, -100, -1000};
-const char* config_buf_names[] = {
-    "None",
-    "1 s",
-    "2 s",
-    "3 s",
-    "4 s",
-    "5 s",
-    "6 s",
-    "7 s",
-    "8 s",
-    "9 s",
-    "10 s",
-    "5 spl",
-    "10 spl",
-    "100 spl",
-    "1000 spl"};
-const uint8_t nb_config_buf_values = COUNT_OF(config_buf_values);
-
-/** Beep setting parameters **/
-const char* config_beep_label = "Beep";
-const uint8_t config_beep_values[] = {0, 1};
-const char* config_beep_names[] = {"Off", "On"};
-const uint8_t nb_config_beep_values = COUNT_OF(config_beep_values);
-
-/** Baudrate setting parameters **/
-const char* config_baudrate_label = "Baudrate";
-const uint32_t config_baudrate_values[] = {115200, 57600, 38400, 19200, 9600};
-const char* config_baudrate_names[] = {"115200", "57600", "38400", "19200", "9600"};
-const uint8_t nb_config_baudrate_values = COUNT_OF(config_baudrate_values);
-
-/** Partial SMM prefix setting parameters (the rest is in the .def file) **/
-const uint8_t config_smm_pfx_values[] = {0, 1};
-const uint8_t nb_config_smm_pfx_values = COUNT_OF(config_smm_pfx_values);
-
-/** UART receive timeout **/
-static const uint16_t uart_rx_timeout = 500; /*ms*/
-
-/** Speaker parameters **/
-const uint16_t beep_frequency = 1000; /*Hz*/
-const uint16_t sample_received_beep_duration = 25; /*ms*/
-
-/** LED parameters **/
-static const uint16_t min_led_flash_duration = 15; /*ms*/
-
-/** Sample view timings **/
-const uint16_t sample_view_update_every = 150; /*ms*/
-const uint8_t sample_view_smm_prefix_enabled_blink_every = 3; /*view updates*/
-
-/** Test laser view timings **/
-const uint16_t test_laser_view_update_every = 150; /*ms*/
-const uint16_t test_laser_restart_cmm_every = 500; /*ms*/
-
-/** Test pointer view timings **/
-const uint16_t test_pointer_view_update_every = 150; /*ms*/
-const uint16_t test_pointer_jiggle_every = 50; /*ms*/
-
-/** USB serial channel to use for the passthrough **/
-const uint16_t passthru_vcp_channel = 0; /* 0 Replaces the CLI */
-
-/** USB serial passthrough view timings **/
-const uint16_t passthru_view_update_every = 250; /*ms*/
 
 /*** Routines ***/
 
@@ -219,6 +126,14 @@ static App* noptel_lrf_sampler_app_init() {
         config_baudrate_change,
         app);
 
+    /* Add USB passthrough channel option list items */
+    app->item_passthru_chan = variable_item_list_add(
+        app->config_list,
+        config_passthru_chan_label,
+        nb_config_passthru_chan_values,
+        config_passthru_chan_change,
+        app);
+
     /* Configure the "previous" callback for the configuration view */
     view_set_previous_callback(
         variable_item_list_get_view(app->config_list), return_to_submenu_callback);
@@ -248,14 +163,14 @@ static App* noptel_lrf_sampler_app_init() {
     /* Set the context for the sample view callbacks */
     view_set_context(app->sample_view, app);
 
-    /* Allocate the sampler model */
-    view_allocate_model(app->sample_view, ViewModelTypeLockFree, sizeof(SamplerModel));
-    SamplerModel* sampler_model = view_get_model(app->sample_view);
+    /* Allocate space for the sample view model */
+    view_allocate_model(app->sample_view, ViewModelTypeLockFree, sizeof(SampleModel));
 
     /* Point the LRF sample ring buffer to the shared storage area */
-    sampler_model->samples = (LRFSample*)app->shared_storage;
-    sampler_model->max_samples = sizeof(app->shared_storage) / sizeof(LRFSample);
-    FURI_LOG_D(TAG, "Sampler ring buffer size: %d samples", sampler_model->max_samples);
+    SampleModel* sample_model = view_get_model(app->sample_view);
+    sample_model->samples = (LRFSample*)app->shared_storage;
+    sample_model->max_samples = sizeof(app->shared_storage) / sizeof(LRFSample);
+    FURI_LOG_D(TAG, "Sampler ring buffer size: %d samples", sample_model->max_samples);
 
     /* Add the sample view */
     view_dispatcher_add_view(app->view_dispatcher, view_sample, app->sample_view);
@@ -281,7 +196,7 @@ static App* noptel_lrf_sampler_app_init() {
     /* Set the context for the LRF info view callbacks */
     view_set_context(app->lrfinfo_view, app);
 
-    /* Allocate the LRF info model */
+    /* Allocate space for the LRF info view model */
     view_allocate_model(app->lrfinfo_view, ViewModelTypeLockFree, sizeof(LRFInfoModel));
 
     /* Add the LRF info view */
@@ -308,7 +223,7 @@ static App* noptel_lrf_sampler_app_init() {
     /* Set the context for the save diagnostic view callbacks */
     view_set_context(app->savediag_view, app);
 
-    /* Allocate the save diagnostic model */
+    /* Allocate space for the save diagnostic view model */
     view_allocate_model(app->savediag_view, ViewModelTypeLockFree, sizeof(SaveDiagModel));
 
     /* Add the save diagnostic view */
@@ -332,9 +247,8 @@ static App* noptel_lrf_sampler_app_init() {
     /* Set the context for the test laser view callbacks */
     view_set_context(app->testlaser_view, app);
 
-    /* Allocate the test laser model */
+    /* Allocate space for the test laser view model */
     view_allocate_model(app->testlaser_view, ViewModelTypeLockFree, sizeof(TestLaserModel));
-    TestLaserModel* testlaser_model = view_get_model(app->testlaser_view);
 
     /* Add the test laser view */
     view_dispatcher_add_view(app->view_dispatcher, view_testlaser, app->testlaser_view);
@@ -357,9 +271,8 @@ static App* noptel_lrf_sampler_app_init() {
     /* Set the context for the test pointer view callbacks */
     view_set_context(app->testpointer_view, app);
 
-    /* Allocate the test pointer model */
+    /* Allocate space for the test pointer view model */
     view_allocate_model(app->testpointer_view, ViewModelTypeLockFree, sizeof(TestPointerModel));
-    TestPointerModel* testpointer_model = view_get_model(app->testpointer_view);
 
     /* Add the test pointer view */
     view_dispatcher_add_view(app->view_dispatcher, view_testpointer, app->testpointer_view);
@@ -385,7 +298,7 @@ static App* noptel_lrf_sampler_app_init() {
     /* Set the context for the passthrough view callbacks */
     view_set_context(app->passthru_view, app);
 
-    /* Allocate the passthrough model */
+    /* Allocate space for the USB serial passthrough view model */
     view_allocate_model(app->passthru_view, ViewModelTypeLockFree, sizeof(PassthruModel));
 
     /* Add the passthrough view */
@@ -393,7 +306,7 @@ static App* noptel_lrf_sampler_app_init() {
 
     /* Setup the about view */
 
-    /* Allocate space for the sample view */
+    /* Allocate space for the about view */
     app->about_view = view_alloc();
 
     /* Setup the draw callback for the about view */
@@ -411,7 +324,7 @@ static App* noptel_lrf_sampler_app_init() {
     /* Set the context for the about view callbacks */
     view_set_context(app->about_view, app);
 
-    /* Allocate the about view model */
+    /* Allocate space for the about view model */
     view_allocate_model(app->about_view, ViewModelTypeLockFree, sizeof(AboutModel));
 
     /* Add the about view */
@@ -428,37 +341,38 @@ static App* noptel_lrf_sampler_app_init() {
     app->smm_pfx_config.config_smm_pfx_names[0][1] = 0;
 
     /* Set the default sampling mode setting */
-    sampler_model->config.mode = config_mode_values[0];
+    app->config.mode = config_mode_values[0];
     variable_item_set_current_value_index(app->item_mode, 0);
     variable_item_set_current_value_text(app->item_mode, config_mode_names[0]);
 
     /* Set the default buffering setting */
-    sampler_model->config.buf = config_buf_values[0];
+    app->config.buf = config_buf_values[0];
     variable_item_set_current_value_index(app->item_buf, 0);
     variable_item_set_current_value_text(app->item_buf, config_buf_names[0]);
 
     /* Set the default beep option */
-    sampler_model->config.beep = config_beep_values[0];
-    testlaser_model->beep = sampler_model->config.beep;
-    testpointer_model->beep = sampler_model->config.beep;
+    app->config.beep = config_beep_values[0];
     variable_item_set_current_value_index(app->item_beep, 0);
     variable_item_set_current_value_text(app->item_beep, config_beep_names[0]);
 
     /* Set the default baudrate option */
-    sampler_model->config.baudrate = config_baudrate_values[0];
-    testlaser_model->baudrate = sampler_model->config.baudrate;
-    testpointer_model->baudrate = sampler_model->config.baudrate;
+    app->config.baudrate = config_baudrate_values[0];
     variable_item_set_current_value_index(app->item_baudrate, 0);
     variable_item_set_current_value_text(app->item_baudrate, config_baudrate_names[0]);
 
+    /* Set the default USB passthrough channel option */
+    app->config.passthru_chan = config_passthru_chan_values[0];
+    variable_item_set_current_value_index(app->item_passthru_chan, 0);
+    variable_item_set_current_value_text(app->item_passthru_chan, config_passthru_chan_names[0]);
+
     /* Set the default SMM prefix option */
-    sampler_model->config.smm_pfx = config_smm_pfx_values[0];
+    app->config.smm_pfx = config_smm_pfx_values[0];
 
     /* Set the default submenu item */
-    sampler_model->config.sitem = submenu_config;
+    app->config.sitem = submenu_config;
 
     /* Assume the pointer is off */
-    sampler_model->pointer_is_on = false;
+    app->pointer_is_on = false;
 
     /* Try to load the configuration file and restore the configuration from the
      saved values */

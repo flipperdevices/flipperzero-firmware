@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.7
+ * Version: 1.8
  *
  * LRF Serial communication app
 ***/
@@ -1024,6 +1024,9 @@ void set_uart_baudrate(LRFSerialCommApp* app, uint32_t baudrate) {
     communication app **/
 void lrf_serial_comm_app_free(LRFSerialCommApp* app) {
     FURI_LOG_I(TAG, "App free");
+
+    /* Deinitialize the UART if it's been initialized */
+    if(app->is_uart_initialized) furi_hal_serial_deinit(app->serial_handle);
 
     /* Release the UART */
     furi_hal_serial_control_release(app->serial_handle);
