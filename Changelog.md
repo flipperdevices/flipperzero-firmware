@@ -1,3 +1,6 @@
+- Added serial traffic monitor in the USB serial passthrough view
+- Added utility to decode LRF serial traffic live from the Flipper Zero CLI
+
 ## Version 1.7 - 04/05/2024
 
 - Added USB serial passthrough function
