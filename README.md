@@ -248,7 +248,7 @@ LRF traffic tracer
 Using the full LRF frame decoder
 Ctrl-C to exit...
 
-/dev/ttyACM1 opened at 921600 bps
+/dev/ttyACM0 opened at 921600 bps
 
 Trace log started
 
@@ -269,7 +269,7 @@ LRF traffic tracer
 Using the standalone LRF frame decoder
 Ctrl-C to exit...
 
-/dev/ttyACM1 opened at 921600 bps
+/dev/ttyACM0 opened at 921600 bps
 Trace log started
 
 26620715: <LRF: CMM_BREAK
@@ -288,7 +288,7 @@ LRF traffic tracer
 
 Ctrl-C to exit...
 
-/dev/ttyACM1 opened at 921600 bps
+/dev/ttyACM0 opened at 921600 bps
 
 Trace log started
 
