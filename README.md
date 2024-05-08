@@ -233,6 +233,73 @@ Press CTRL+C to stop...
 38238102 [T][noptel_lrf_sampler] <LRF: 00 00 00 c2
 ```
 
+### lrf_traffic_tracer.py utility
+
+Instead of connecting to the Flipper Zero CLI with a terminal and enabling the trace log manually, you can use the **lrf_traffic_tracer.py** utility to transparently connect to the CLI, enable the trace and decode the LRF traffic in real time.
+
+If Noptel's Python LRF class is installed and imported, by default, the utility will fully decode the traffic:
+
+```
+$ python lrf_traffic_tracer.py /dev/ttyACM0
+
+LRF traffic tracer
+------------------
+
+Using the full LRF frame decoder
+Ctrl-C to exit...
+
+/dev/ttyACM1 opened at 921600 bps
+
+Trace log started
+
+26475365: <LRF: cmd=CMM_BREAK
+26475389: >LRF: cmd=RESP_CMM_BREAK
+26475890: <LRF: cmd=EXEC_RANGE_MEAS, measurementmode=0, extradelaybwpulses=0, burstdivider=0
+26477240: >LRF: cmd=RESP_EXEC_RANGE_MEAS, range1=0.000, signallevel1=0, range2=0.000, signallevel2=0, range3=0.000, signallevel3=0, statusbyte3=32
+```
+
+If Noptel's Python LRF class is not available, the utility will perform basic recognition of LRF commands and responses using a simple standalone decoder:
+
+```
+$ python lrf_traffic_tracer.py /dev/ttyACM0
+
+LRF traffic tracer
+------------------
+
+Using the standalone LRF frame decoder
+Ctrl-C to exit...
+
+/dev/ttyACM1 opened at 921600 bps
+Trace log started
+
+26620715: <LRF: CMM_BREAK
+26620739: >LRF: RESP_CMM_BREAK
+26621240: <LRF: EXEC_RANGE_MEAS
+26622586: >LRF: RESP_EXEC_RANGE_MEAS
+```
+
+If you want to see the LRF serial traffic raw, use the `-r` command line switch:
+
+```
+$ python lrf_traffic_tracer.py /dev/ttyACM0 -r
+
+LRF traffic tracer
+------------------
+
+Ctrl-C to exit...
+
+/dev/ttyACM1 opened at 921600 bps
+
+Trace log started
+
+26769739: <LRF: c6 96 59 c6 3c 0b
+26770264: <LRF: cc 00 00 00 9c
+26771604: >LRF: 59 cc 00 00 01 20 00 00 00 00 01 20 00 00 00 00 01 20 00 00 20
+26771610: >LRF: f8
+```
+
+Note: the **lrf_traffic_tracer.py** utility requires at least Python 3 and the pySerial module, and ideally also Noptel's Python LRF class.
+
 
 
 ## Installation
