@@ -193,7 +193,7 @@ Gives information about the app and the GPIO pin connections needed to connect a
 
 ## Serial protocol debugging
 
-If you are developing an LRF application or you're trying to debug the communication between your computer and the rangefinder, you can of course use the second screen of the **USB serial passthrough** function to view the live serial data traffic on the Flipper Zero's screen.
+If you are developing an LRF application or you're troubleshooting the communication between your computer and the rangefinder, you can of course use the second screen of the **USB serial passthrough** function to view the live serial data traffic on the Flipper Zero's screen.
 
 But for more comfortable and more advanced debugging, you can also capture the traffic as a log trace in the Flipper Zero's command line interface (CLI).
 
