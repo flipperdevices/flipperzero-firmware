@@ -695,7 +695,7 @@ void passthru_view_draw_callback(Canvas *canvas, void *model) {
 
         break;
 
-      /* Draw the screen showing the last bytes sent or received */
+      /* Draw the screen showing the last bytes sent and received */
       case 1:
 
         /* Acquire the mutex to get exclusive access to the traffic log */
@@ -779,7 +779,7 @@ void passthru_view_draw_callback(Canvas *canvas, void *model) {
     }
   }
 
-  /* We don't draw any information about the serial traffic at all */
+  /* Don't draw any information about the serial traffic at all */
   else {
 
     /* Just draw a dividing line between the serial traffic stats and the
@@ -824,7 +824,7 @@ bool passthru_view_input_callback(InputEvent *evt, void *ctx) {
   /* Was the event a button press? */
   if(evt->type == InputTypePress)
 
-    /* Which button press was it? */
+    /* Which button was pressed? */
     switch(evt->key) {
 
       /* OK button: start or stop the passthrough */

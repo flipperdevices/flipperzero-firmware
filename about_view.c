@@ -113,7 +113,7 @@ bool about_view_input_callback(InputEvent *evt, void *ctx) {
   /* Was the event a button press? */
   if(evt->type == InputTypePress)
 
-    /* Which button press was it? */
+    /* Which button was pressed? */
     switch(evt->key) {
 
       /* OK button: cycle screens */
