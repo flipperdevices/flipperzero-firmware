@@ -28,6 +28,8 @@
 #define VREFBUF_STARTUP_DELAY_US (500000UL)
 #define RECEIVE_BUFFER_LEN (32UL * 1024UL)
 
+#define ADC_INPUT_CHANNEL LL_ADC_CHANNEL_14
+
 #define STORAGE_FILE_NAME EXT_PATH("lfrfid_adc.bin")
 
 typedef enum {
@@ -158,10 +160,10 @@ static void lfrfid_adc_app_adc_init(LfRfidAdcApp* app) {
     furi_check(LL_ADC_REG_Init(ADC1, &reg_init_struct) == SUCCESS);
 
     LL_ADC_REG_SetTriggerEdge(ADC1, LL_ADC_REG_TRIG_EXT_FALLING);
-    LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_14);
+    LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, ADC_INPUT_CHANNEL);
 
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_14, LL_ADC_SAMPLINGTIME_2CYCLES_5);
-    LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_14, LL_ADC_SINGLE_ENDED);
+    LL_ADC_SetChannelSamplingTime(ADC1, ADC_INPUT_CHANNEL, LL_ADC_SAMPLINGTIME_6CYCLES_5);
+    LL_ADC_SetChannelSingleDiff(ADC1, ADC_INPUT_CHANNEL, LL_ADC_SINGLE_ENDED);
 
     LL_ADC_DisableDeepPowerDown(ADC1);
     LL_ADC_EnableInternalRegulator(ADC1);
@@ -236,14 +238,21 @@ static void lfrfid_adc_app_comp_init(LfRfidAdcApp* app) {
 
     furi_hal_bus_enable(FuriHalBusTIM2);
     furi_hal_gpio_init_ex(
-        &CARRIER_INPUT_PIN, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
+        &CARRIER_INPUT_PIN,
+        GpioModeAltFunctionPushPull,
+        GpioPullNo,
+        GpioSpeedVeryHigh,
+        GpioAltFn2TIM2);
+    furi_hal_gpio_init_ex(
+        &gpio_ext_pb3, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFn1TIM2);
 
     LL_TIM_InitTypeDef init_struct = {0};
-    init_struct.Autoreload = (SystemCoreClock / CARRIER_FREQ_HZ / 4U) - 1;
+    init_struct.Autoreload = (SystemCoreClock / CARRIER_FREQ_HZ / 4UL) - 6UL;
     LL_TIM_Init(TIM2, &init_struct);
 
-    LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ACTIVEINPUT_DIRECTTI);
-    LL_TIM_SetTriggerInput(TIM2, LL_TIM_TS_TI1FP1);
+    LL_TIM_ConfigETR(
+        TIM2, LL_TIM_ETR_POLARITY_NONINVERTED, LL_TIM_ETR_PRESCALER_DIV1, LL_TIM_ETR_FILTER_FDIV1);
+    LL_TIM_SetTriggerInput(TIM2, LL_TIM_TS_ETRF);
     LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_UPDATE);
     LL_TIM_SetOnePulseMode(TIM2, LL_TIM_ONEPULSEMODE_SINGLE);
     LL_TIM_SetSlaveMode(TIM2, LL_TIM_SLAVEMODE_TRIGGER);
