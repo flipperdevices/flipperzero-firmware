@@ -1,5 +1,5 @@
 # Noptel LRF rangefinder sampler app for the Flipper Zero
-### Version 1.7
+### Version 1.8
 
 * [Usage](#Usage)
 * [Installation](#Installation)
