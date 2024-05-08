@@ -341,7 +341,7 @@ class NullLRFTrafficDecoder:
 
 
 
-## Routine
+## Routines
 #
 
 def device_completer(**kwargs):
@@ -394,7 +394,7 @@ def main():
   print("------------------")
   print()
 
-  # Initialize the right LRF traffic decoder if needed
+  # Initialize the correct traffic decoder
   if args.raw:
     decoder = NullLRFTrafficDecoder()
 
@@ -463,7 +463,7 @@ def main():
           if l:
             break
 
-          # Timeout: send LF to the terminal if the curent line is not empty
+          # Timeout: send LF to the console if the curent line is not empty
           if decoder.chars_in_line:
             print()
             decoder.chars_in_line = 0
@@ -495,7 +495,7 @@ def main():
         d = TO_LRF if m[2] == ">" else FROM_LRF
         data = bytes([int(v, 16) for v in m[3].split()])
 
-        # Decode the received bytes and print it on the console
+        # Decode the received bytes and print the decoded information
         decoder.print_decoded_traffic(timestamp, d, data);
 
   except KeyboardInterrupt:
