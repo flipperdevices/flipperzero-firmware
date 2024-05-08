@@ -26,6 +26,7 @@ python lrf_traffic_tracer.py COMx          (Windows)
 #
 
 cli_serial_device_baudrate = 921600 #bps
+max_line_width = 79 #characters
 
 
 
@@ -136,6 +137,8 @@ class StandaloneBasicLRFTrafficDecoder:
 					for d in (TO_LRF, FROM_LRF)]
     self.frame_i = [0, 0]
 
+    self.chars_in_line = 0
+
 
 
   def print_decoded_traffic(self, timestamp, d, data):
@@ -169,7 +172,10 @@ class StandaloneBasicLRFTrafficDecoder:
             continue
 
           # Print the name of the matching frame
+          if self.chars_in_line:
+            print()
           print("{}: {}LRF: {}".  format(timestamp, "<>"[d], f))
+          self.chars_in_line = 0
 
           # Reset the bytes buffer and the set of potential matching frames
           self.bytes_buf[d].clear()
@@ -178,15 +184,30 @@ class StandaloneBasicLRFTrafficDecoder:
 
           break
 
-      # No potential matches left
+      # No potential matches found
       else:
 
-        # Print the the raw bytes
+        # No potential matches left
         if not self.potential_frame_matches[d]:
-          print("{}: {}LRF: {}".
-			format(timestamp, "<>"[d],
-				" ".join(["{:02x}".format(b) \
-						for b in self.bytes_buf[d]])))
+
+          # Print the raw bytes
+          for b in self.bytes_buf[d]:
+
+            sb = " {:02x}".format(b)
+            lb = len(sb)
+
+            if not self.chars_in_line or \
+			self.chars_in_line + lb > max_line_width:
+
+              if self.chars_in_line:
+                print()
+
+              sh = "{}: {}LRF:".format(timestamp, "<>"[d])
+              print(sh, end = "")
+              self.chars_in_line = len(sh)
+
+            print(sb, end = "")
+            self.chars_in_line += lb
 
           # Reset the bytes buffer and the set of potential matching frames
           self.bytes_buf[d] = []
@@ -223,6 +244,8 @@ class FullLRFTrafficDecoder:
 
     self.lrf = LRF()
     self.lrf.last_command_read_memory_pagecnt = 0
+
+    self.chars_in_line = True
 
 
 
@@ -277,6 +300,43 @@ class FullLRFTrafficDecoder:
 
 
 
+class NullLRFTrafficDecoder:
+  """Decoder that doesn't decode anything, only prints the raw bytes
+  """
+
+  def __init__(self):
+    """Initialize the "decoder"
+    """
+
+    self.chars_in_line = True
+
+
+
+  def print_decoded_traffic(self, timestamp, d, data):
+    """Decode traffic bytes and display the decoded frame names
+    """
+
+    # Print the raw bytes
+    for b in data:
+
+      sb = " {:02x}".format(b)
+      lb = len(sb)
+
+      if not self.chars_in_line or \
+			self.chars_in_line + lb > max_line_width:
+
+        if self.chars_in_line:
+          print()
+
+        sh = "{}: {}LRF:".format(timestamp, "<>"[d])
+        print(sh, end = "")
+        self.chars_in_line = len(sh)
+
+      print(sb, end = "")
+      self.chars_in_line += lb
+
+
+
 ## Routine
 #
 
@@ -304,6 +364,22 @@ def main():
 	  type = str
 	).completer = device_completer
 
+  mutexargs = argparser.add_mutually_exclusive_group(required = False)
+
+  mutexargs.add_argument(
+	  "-s", "--standalone-decoder",
+	  help = "Use the standalone decoder even if the LRF class is "
+			"available",
+	  action = "store_true"
+	)
+
+  mutexargs.add_argument(
+	  "-r", "--raw",
+	  help = "Don't decode the LRF traffic and simply display the "
+			"raw bytes",
+	  action = "store_true"
+	)
+
   if has_argcomplete:
     argcomplete.autocomplete(argparser, always_complete_options = False)
 
@@ -312,20 +388,25 @@ def main():
   print("LRF traffic tracer")
   print("------------------")
   print()
-  print("Using {} decoder".
-	format("LRF class" if has_lrfclass else "standalone"))
-  print("Ctrl-C to exit...")
-  print()
+
+  # Initialize the right LRF traffic decoder if needed
+  if args.raw:
+    decoder = NullLRFTrafficDecoder()
+
+  elif has_lrfclass and not args.standalone_decoder:
+    decoder = FullLRFTrafficDecoder()
+    print("Using the full LRF frame decoder")
+
+  else:
+    decoder = StandaloneBasicLRFTrafficDecoder()
+    print("Using the standalone LRF frame decoder")
 
   # Precompiled regex for a trace log line from the USB serial passthrough
   re_passthru_log_line = re.compile("([0-9]+) .*\[noptel_lrf_sampler\] .*"
 					"([<>])LRF:((?: [0-9a-zA-Z]{2})+)")
 
-  # Initialize the right LRF traffic decoder
-  if has_lrfclass:
-    decoder = FullLRFTrafficDecoder()
-  else:
-    decoder = StandaloneBasicLRFTrafficDecoder()
+  print("Ctrl-C to exit...")
+  print()
 
   clidev = None
   errcode = 0
@@ -357,7 +438,7 @@ def main():
 
         try:
           clidev = Serial(args.cli_serial_device, cli_serial_device_baudrate,
-				timeout = 0.5)
+				timeout = 0.2)
 
         except Exception as e:
           print("Error opening {}: {}".format(args.cli_serial_device, e))
@@ -368,11 +449,19 @@ def main():
 		format(args.cli_serial_device, cli_serial_device_baudrate))
         errcode = 0
 
-      # Read a line from the CLI
       try:
-        l = ""		# We must use a timeout and do that loop because Windows
-        while not l:	# blocks readline() and prevents Ctrl-C from working
+
+        # Read one line from the CLI
+        while True:
+
           l = clidev.readline().rstrip().decode("ascii")
+          if l:
+            break
+
+          # Timeout: send LF to the terminal if the curent line is not empty
+          if decoder.chars_in_line:
+            print()
+            decoder.chars_in_line = 0
 
       except Exception as e:
         print("Error reading from {}: {}".format(args.cli_serial_device, e))
@@ -385,6 +474,7 @@ def main():
         # Enable trace logging
         try:
           clidev.write(b"log trace\r")
+          print("Trace log started")
 
         except Exception as e:
           print("Error writing to {}: {}".format(args.cli_serial_device, e))
