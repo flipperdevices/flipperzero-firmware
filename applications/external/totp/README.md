@@ -20,7 +20,7 @@ It is like [Google Authenticator](https://play.google.com/store/apps/details?id=
 
 ## Companion app
 
-There is a companion app for desktop allowing you to interract with Flipper Authenticator in a more user-friendly way. Latest builds as well as all the information about it can be found in its official repo [here](https://github.com/akopachov/flipper-zero_authenticator-companion)
+There is a companion app for desktop allowing you to interact with Flipper Authenticator in a more user-friendly way. The latest builds as well as all the information about it can be found in its official repo [here](https://github.com/akopachov/flipper-zero_authenticator-companion)
 
 ## SAST Tools
 
