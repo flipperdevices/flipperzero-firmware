@@ -167,15 +167,17 @@ Select the **Test IR pointer** option to test an LRF's infrared pointer.
 
 ### USB serial passthrough
 
-The **USB serial passthrough** function lets a computer connected to the Flipper Zero's USB port and running a LRF client software communicate with the LRF as if the LRF was connected directly to the computer with a USB serial cable. The Flipper Zero transparently relays data between the computer and the LRF.
+The **USB serial passthrough** function lets a computer connected to the Flipper Zero's USB port and running a LRF client software communicate with the LRF as if the LRF was connected directly to the computer with a serial cable. The Flipper Zero transparently relays data between the computer and the LRF.
 
-The first screen, accessible with the left arrow, shows the overall amount of serial traffic going to and from the LRF:
+The first screen shows the overall amount of serial traffic going to and from the LRF:
 
 ![Serial passthrough - Traffic volume](screenshots/4-usb_serial_passthrough1.png)
 
-The second screen, accessible with the right arrow, shows the actual traffic: bytes sent to the LRF are showed on a black background while bytes sent by the LRF are showed normally.
+The second screen, accessible with the right arrow, shows the actual traffic: bytes sent to the LRF are showed in black while bytes returned by the LRF are showed normally.
 
 ![Serial passthrough - Transferred bytes](screenshots/5-usb_serial_passthrough2.png)
+
+*See "Serial protocol debugging" below*
 
 ### About
 
@@ -191,7 +193,9 @@ Gives information about the app and the GPIO pin connections needed to connect a
 
 ## Serial protocol debugging
 
-If you are developing an LRF application, or you're trying to debug the communication between your computer and the rangefinder, you can of course use the second screen of the **USB serial passthrough** function to view the live serial data traffic on the Flipper Zero's screen. But for more comfortable and more advanced debugging, you can also capture the traffic as a log trace in the Flipper Zero's command line interface (CLI).
+If you are developing an LRF application or you're trying to debug the communication between your computer and the rangefinder, you can of course use the second screen of the **USB serial passthrough** function to view the live serial data traffic on the Flipper Zero's screen.
+
+But for more comfortable and more advanced debugging, you can also capture the traffic as a log trace in the Flipper Zero's command line interface (CLI).
 
 To use this functionality:
 
@@ -235,9 +239,9 @@ Press CTRL+C to stop...
 
 ### lrf_traffic_tracer.py utility
 
-Instead of connecting to the Flipper Zero CLI with a terminal and enabling the trace log manually, you can use the **lrf_traffic_tracer.py** utility to transparently connect to the CLI, enable the trace and decode the LRF traffic in real time.
+Instead of accessing the Flipper Zero CLI with a terminal and enabling the trace log manually, you can use the **lrf_traffic_tracer.py** utility to transparently connect to the CLI and decode the LRF traffic in real time.
 
-If Noptel's Python LRF class is installed and imported, by default, the utility will fully decode the traffic:
+If Noptel's LRF Python class is installed and imported, by default, the utility will fully decode the traffic:
 
 ```
 $ python lrf_traffic_tracer.py /dev/ttyACM0
@@ -258,7 +262,7 @@ Trace log started
 26477240: >LRF: cmd=RESP_EXEC_RANGE_MEAS, range1=0.000, signallevel1=0, range2=0.000, signallevel2=0, range3=0.000, signallevel3=0, statusbyte3=32
 ```
 
-If Noptel's Python LRF class is not available, the utility will perform basic recognition of LRF commands and responses using a simple standalone decoder:
+If Noptel's LRF Python class is not available, the utility will perform basic recognition of LRF commands and responses using a simple standalone decoder:
 
 ```
 $ python lrf_traffic_tracer.py /dev/ttyACM0
@@ -278,7 +282,7 @@ Trace log started
 26622586: >LRF: RESP_EXEC_RANGE_MEAS
 ```
 
-If you want to see the LRF serial traffic raw, use the `-r` command line switch:
+If you want to see the raw LRF serial traffic without decoding it, use the `-r` command line switch:
 
 ```
 $ python lrf_traffic_tracer.py /dev/ttyACM0 -r
