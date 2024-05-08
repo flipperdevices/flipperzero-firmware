@@ -842,8 +842,8 @@ bool passthru_view_input_callback(InputEvent *evt, void *ctx) {
       case InputKeyRight:
         FURI_LOG_D(TAG, "Right button pressed");
 
-        /* If the second screen isn't already displayed, set the backlight on all
-           the time */
+        /* If the second screen isn't already displayed, set the backlight on
+           all the time */
         if(passthru_model->screen != 1)
           set_backlight(&app->backlight_control, BL_ON);
 
@@ -855,8 +855,8 @@ bool passthru_view_input_callback(InputEvent *evt, void *ctx) {
       case InputKeyLeft:
         FURI_LOG_D(TAG, "Left button pressed");
 
-        /* If the first screen isn't already displayed, set the backlight back to
-           automatic */
+        /* If the first screen isn't already displayed, set the backlight back
+           to automatic */
         if(passthru_model->screen != 0)
         set_backlight(&app->backlight_control, BL_AUTO);
 
