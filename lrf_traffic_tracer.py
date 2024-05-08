@@ -266,7 +266,7 @@ class FullLRFTrafficDecoder:
 
 
   def print_decoded_traffic(self, timestamp, d, data):
-    """Decode traffic bytes and display the decoded frame names
+    """Decode traffic bytes and display the decoded frames
     """
 
     self.direction = d
@@ -275,7 +275,7 @@ class FullLRFTrafficDecoder:
     get_frame = self.lrf.get_ext_command if d == TO_LRF else \
 		self.lrf.get_lrf_response
 
-    # Try to decode frame until we run out of bytes to decode
+    # Try to decode frames until we run out of bytes to decode
     while True:
 
       try:
@@ -305,7 +305,7 @@ class FullLRFTrafficDecoder:
 
 
 
-class NullLRFTrafficDecoder:
+class DummyLRFTrafficDecoder:
   """Decoder that doesn't decode anything, only prints the raw bytes
   """
 
@@ -397,7 +397,7 @@ def main():
 
   # Initialize the correct traffic decoder
   if args.raw:
-    decoder = NullLRFTrafficDecoder()
+    decoder = DummyLRFTrafficDecoder()
 
   elif has_lrfclass and not args.standalone_decoder:
     decoder = FullLRFTrafficDecoder()
@@ -496,7 +496,7 @@ def main():
         d = TO_LRF if m[2] == ">" else FROM_LRF
         data = bytes([int(v, 16) for v in m[3].split()])
 
-        # Decode the received bytes and print the decoded information
+        # Decode the LRF traffic bytes and print the decoded information
         decoder.print_decoded_traffic(timestamp, d, data);
 
   except KeyboardInterrupt:
