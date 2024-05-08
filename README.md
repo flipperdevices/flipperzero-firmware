@@ -298,7 +298,7 @@ Trace log started
 26771610: >LRF: f8
 ```
 
-Note: the **lrf_traffic_tracer.py** utility requires at least Python 3 and the pySerial module, and ideally also Noptel's Python LRF class.
+*Note: the **lrf_traffic_tracer.py** utility requires at least Python 3 and the pySerial module*
 
 
 
