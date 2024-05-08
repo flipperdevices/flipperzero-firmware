@@ -10,16 +10,20 @@ the Flipper Zero CLI is still available on channel 0
 
 If the LRF class is not present or can't be imported, the utility performs basic
 recognition of LRF commands sent to the LRF and responses sent back by the LRF
+(standalone decoder)
 
 If the LRF class is present and imported, the utility decodes all the frames in
 full and displays the decoded values
 
 Usage:
 
-python lrf_traffic_tracer.py /dev/ttyACMx  (Linux)
-python lrf_traffic_tracer.py COMx          (Windows)
+python lrf_traffic_tracer.py /dev/ttyACMx [-r|-s] (Linux)
+python lrf_traffic_tracer.py COMx [-r|-s]         (Windows)
 
-(/dev/ttyACMx or COMx is the COM port corresponding to the Flipper Zero's CLI)
+/dev/ttyACMx or COMx is the COM port corresponding to the Flipper Zero's CLI
+
+-r turns off the decoder and displays the traffic bytes raw instead
+-s forces the use of the standalone decoder even if the LRF class is available
 """
 
 ## Parameters
