@@ -1,5 +1,6 @@
 .DS_Store
 node_modules/
 /utils
+esp32_marauder/libraries
 flipper_companion_apps/applications/external/transfer
 flipper_companion_apps/applications/external/malveke_christmas
