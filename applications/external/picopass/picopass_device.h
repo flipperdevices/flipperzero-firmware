@@ -68,7 +68,8 @@ typedef enum {
 } PicopassEncryption;
 
 typedef enum {
-    PicopassDeviceSaveFormatHF,
+    PicopassDeviceSaveFormatOriginal,
+    PicopassDeviceSaveFormatLegacy,
     PicopassDeviceSaveFormatLF,
     PicopassDeviceSaveFormatSeader,
     PicopassDeviceSaveFormatPartial,
