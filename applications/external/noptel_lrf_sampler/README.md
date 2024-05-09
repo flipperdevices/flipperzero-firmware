@@ -274,6 +274,7 @@ Using the standalone LRF frame decoder
 Ctrl-C to exit...
 
 /dev/ttyACM0 opened at 921600 bps
+
 Trace log started
 
 26620715: <LRF: CMM_BREAK
