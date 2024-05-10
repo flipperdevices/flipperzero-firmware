@@ -61,11 +61,11 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
             break;
         }
 
-        if(afi_flag) {
-            const uint8_t afi = *data++;
-            // When AFI flag is set, ignore non-matching requests
-            if(afi != instance->data->system_info.afi) break;
-        }
+        // if(afi_flag) {
+        //     const uint8_t afi = *data++;
+        //     // When AFI flag is set, ignore non-matching requests
+        //     if(afi != instance->data->system_info.afi) break;
+        // }
 
         const uint8_t mask_len = *data++;
         const size_t data_size_required = data_size_min + mask_len;
@@ -772,6 +772,7 @@ Iso15693_3Error
 
         Iso15693_3ListenerSessionState* session_state = &instance->session_state;
 
+        FURI_LOG_D("ISO", "Cmd: %02x, state: %d", request->command, instance->state);
         if((request->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5) == 0) {
             session_state->selected = request->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
             session_state->addressed = request->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;

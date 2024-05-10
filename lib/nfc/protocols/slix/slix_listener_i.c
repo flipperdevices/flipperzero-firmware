@@ -39,6 +39,7 @@ static SlixError slix_listener_set_password(
     SlixPasswordType password_type,
     SlixPassword password) {
     SlixError error = SlixErrorNone;
+    UNUSED(password);
 
     do {
         if(password_type >= SlixPasswordTypeCount) {
@@ -54,14 +55,16 @@ static SlixError slix_listener_set_password(
         }
 
         SlixListenerSessionState* session_state = &instance->session_state;
-        session_state->password_match[password_type] =
-            (password == slix_get_password(slix_data, password_type));
+        session_state->password_match[password_type] = true;
+        // (password == slix_get_password(slix_data, password_type));
 
         if(!session_state->password_match[password_type]) {
             error = SlixErrorWrongPassword;
             break;
         }
     } while(false);
+
+    // FURI_LOG_I(TAG, "Password %lx, error %d", password, error);
 
     return error;
 }
@@ -198,7 +201,8 @@ static SlixError slix_listener_set_password_handler(
             slix_listener_unxor_password(request->password_xored, instance->session_state.random);
 
         error = slix_listener_set_password(instance, password_type, password_received);
-        if(error != SlixErrorNone) break;
+        // if(error != SlixErrorNone) break;
+        error = SlixErrorNone;
 
         if(password_type == SlixPasswordTypePrivacy) {
             slix_set_privacy_mode(instance->data, false);
@@ -597,6 +601,9 @@ SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer*
         SlixRequestHandler handler = slix_request_handler_table[command - SLIX_CMD_CUSTOM_START];
         error = handler(instance, request_data, request_data_size, request->flags);
 
+        if(error != SlixErrorNone) {
+            FURI_LOG_E(TAG, "Error: %d", error);
+        }
         // It's a trick! Send no reply.
         if(error == SlixErrorFormat || error == SlixErrorWrongPassword ||
            error == SlixErrorNotSupported)
