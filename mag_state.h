@@ -14,7 +14,7 @@
 #include "helpers/mag_types.h"
 
 #define MAG_STATE_HEADER "Mag State"
-#define MAG_STATE_VER 1
+#define MAG_STATE_VER 2
 #define MAG_STATE_DIR STORAGE_APP_DATA_PATH_PREFIX
 #define MAG_STATE_PATH MAG_STATE_DIR "/mag_state.txt"
 
@@ -29,6 +29,8 @@ typedef struct {
     MagPin pin_enable;
     bool allow_uart;
     bool is_debug;
+    uint8_t n_repeats;
+    bool repeat_mode;
 } MagState;
 
 const GpioPin* mag_state_enum_to_pin(MagPin pin);
