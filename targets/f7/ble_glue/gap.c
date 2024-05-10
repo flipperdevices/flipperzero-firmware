@@ -38,6 +38,7 @@ typedef struct {
     FuriThread* thread;
     FuriMessageQueue* command_queue;
     bool enable_adv;
+    uint8_t negotiation_fail_count;
 } Gap;
 
 typedef enum {
@@ -72,16 +73,26 @@ static void gap_verify_connection_parameters(Gap* gap) {
 
     // Send connection parameters request update if necessary
     GapConnectionParamsRequest* params = &gap->config->conn_param;
-    if(params->conn_int_min > gap->connection_params.conn_interval ||
-       params->conn_int_max < gap->connection_params.conn_interval) {
-        FURI_LOG_W(TAG, "Unsupported connection interval. Request connection parameters update");
+    bool negoatiation_failed = params->conn_int_min > gap->connection_params.conn_interval;
+    if(gap->negotiation_fail_count) {
+        negoatiation_failed |= params->conn_int_max < gap->connection_params.conn_interval;
+    } else {
+        negoatiation_failed |= params->conn_int_min < gap->connection_params.conn_interval;
+    }
+    if(negoatiation_failed) {
+        FURI_LOG_W(
+            TAG,
+            "Connection interval doesn't suite us. Trying to negotiate, round %u",
+            gap->negotiation_fail_count + 1);
         if(aci_l2cap_connection_parameter_update_req(
                gap->service.connection_handle,
                params->conn_int_min,
-               params->conn_int_max,
+               gap->negotiation_fail_count ? params->conn_int_max : params->conn_int_min,
                gap->connection_params.slave_latency,
                gap->connection_params.supervisor_timeout)) {
             FURI_LOG_E(TAG, "Failed to request connection parameters update");
+        } else {
+            gap->negotiation_fail_count++;
         }
     }
 }
@@ -107,6 +118,7 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
         if(disconnection_complete_event->Connection_Handle == gap->service.connection_handle) {
             gap->service.connection_handle = 0;
             gap->state = GapStateIdle;
+            gap->negotiation_fail_count = 0;
             FURI_LOG_I(
                 TAG, "Disconnect from client. Reason: %02X", disconnection_complete_event->Reason);
         }
@@ -253,6 +265,7 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
 
         case ACI_L2CAP_CONNECTION_UPDATE_RESP_VSEVT_CODE:
             FURI_LOG_D(TAG, "Procedure complete event");
+            gap->negotiation_fail_count = 0;
             break;
 
         case ACI_L2CAP_CONNECTION_UPDATE_REQ_VSEVT_CODE: {
