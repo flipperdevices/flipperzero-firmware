@@ -307,13 +307,11 @@ static void handle_time_setting_select(InputKey key, CountDownTimView* cdv) {
         break;
 
     case InputKeyRight:
-        selection--;
-        selection = selection % 3;
+        selection = (3 + selection - 1) % 3;
         break;
 
     case InputKeyLeft:
-        selection++;
-        selection = selection % 3;
+        selection = (3 + selection + 1) % 3;
         break;
 
     default:
