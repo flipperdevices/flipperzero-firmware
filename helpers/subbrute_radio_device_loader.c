@@ -46,6 +46,7 @@ bool subbrute_radio_device_loader_is_connect_external(const char* name) {
     if(!is_otg_enabled) {
         subbrute_radio_device_loader_power_off();
     }
+
     return is_connect;
 }
 

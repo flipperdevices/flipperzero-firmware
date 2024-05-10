@@ -22,7 +22,7 @@ static void setup_extra_td_callback(VariableItem* item) {
     furi_assert(item);
     SubBruteState* instance = variable_item_get_context(item);
     furi_assert(instance);
-    char buf[6];
+    char buf[6] = {0};
 
     const uint8_t index = variable_item_get_current_value_index(item);
     uint8_t val = subbrute_worker_get_timeout(instance->worker);
@@ -76,7 +76,7 @@ static void setup_extra_rep_callback(VariableItem* item) {
     furi_assert(item);
     SubBruteState* instance = variable_item_get_context(item);
     furi_assert(instance);
-    char buf[6];
+    char buf[6] = {0};
 
     const uint8_t index = variable_item_get_current_value_index(item);
     uint8_t val = subbrute_worker_get_repeats(instance->worker);
@@ -130,7 +130,7 @@ static void setup_extra_te_callback(VariableItem* item) {
     furi_assert(item);
     SubBruteState* instance = variable_item_get_context(item);
     furi_assert(instance);
-    char buf[6];
+    char buf[6] = {0};
 
     const uint8_t index = variable_item_get_current_value_index(item);
     uint32_t val = subbrute_worker_get_te(instance->worker);
@@ -182,7 +182,7 @@ static void setup_extra_te_callback(VariableItem* item) {
 
 static void subbrute_scene_setup_extra_init_var_list(SubBruteState* instance, bool on_extra) {
     furi_assert(instance);
-    char str[6];
+    char str[6] = {0};
     VariableItem* item;
     static bool extra = false;
     if(on_extra) {
@@ -254,7 +254,7 @@ static void subbrute_scene_setup_extra_init_var_list(SubBruteState* instance, bo
 
 static void setup_extra_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
-    SubBruteState* instance = context;
+    SubBruteState* instance = (SubBruteState*)context;
 
     if(index == SubBruteVarListIndexRepeatOrOnExtra) {
         subbrute_scene_setup_extra_init_var_list(instance, true);
@@ -263,14 +263,14 @@ static void setup_extra_enter_callback(void* context, uint32_t index) {
 
 void subbrute_scene_setup_extra_on_enter(void* context) {
     furi_assert(context);
-    SubBruteState* instance = context;
+    SubBruteState* instance = (SubBruteState*)context;
 
     subbrute_scene_setup_extra_init_var_list(instance, false);
 }
 
 void subbrute_scene_setup_extra_on_exit(void* context) {
     furi_assert(context);
-    SubBruteState* instance = context;
+    SubBruteState* instance = (SubBruteState*)context;
 
     variable_item_list_reset(instance->var_list);
 }
