@@ -29,8 +29,6 @@
 #include <lib/toolbox/path.h>
 #include <picopass_icons.h>
 
-#include <assets_icons.h>
-
 #include <nfc/nfc.h>
 #include <toolbox/keys_dict.h>
 #include "protocol/picopass_poller.h"

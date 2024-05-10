@@ -21,11 +21,8 @@ SubBruteDevice* subbrute_device_alloc(const SubGhzDevice* radio_device) {
 
     instance->radio_device = radio_device;
 
-    //#ifdef FURI_DEBUG
-    //    subbrute_device_attack_set_default_values(instance, SubBruteAttackLoadFile);
-    //#else
     subbrute_device_attack_set_default_values(instance, SubBruteAttackCAME12bit433);
-    //#endif
+
     return instance;
 }
 

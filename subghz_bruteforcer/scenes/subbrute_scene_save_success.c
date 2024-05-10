@@ -31,6 +31,7 @@ bool subbrute_scene_save_success_on_event(void* context, SceneManagerEvent event
             return true;
         }
     }
+
     return false;
 }
 

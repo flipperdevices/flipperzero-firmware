@@ -1,3 +1,6 @@
+## 1.14
+ - Add plugin to parse some wiegand formats
+ - Store unknown blocks in picopass file with '??'
 ## 1.13
  - Rework loclass writer with datetime lib
 ## 1.12

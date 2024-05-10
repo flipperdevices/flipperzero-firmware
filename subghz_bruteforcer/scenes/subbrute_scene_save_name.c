@@ -76,6 +76,7 @@ bool subbrute_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 instance->scene_manager, SubBruteSceneSetupAttack);
         }
     }
+
     return consumed;
 }
 

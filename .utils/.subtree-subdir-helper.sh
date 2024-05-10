@@ -49,8 +49,13 @@ else
         prevhead="$(git rev-parse HEAD)"
         exec {capture}>&1
         result="$(git subtree "${action}" -P "${path}" "${split}" -m "${action^} ${path} from ${repo}" 2>&1 | tee /proc/self/fd/$capture)"
+        cleanmerge=false
+        if git diff --quiet && git diff --cached --quiet && git merge HEAD &> /dev/null; then
+            cleanmerge=true
+        fi
         bash .utils/.check-merge.sh "${path}" "${repo}" "${result}"
-        if [ "${prevhead}" = "$(git rev-parse HEAD)" ]; then
+        if [ "${prevhead}" = "$(git rev-parse HEAD)" ] && ! $cleanmerge; then
+            # Not a clean merge, and merge was aborted, don't save cache
             ok=false
         fi
     fi

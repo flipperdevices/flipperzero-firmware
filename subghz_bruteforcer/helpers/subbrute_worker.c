@@ -72,6 +72,7 @@ bool subbrute_worker_set_step(SubBruteWorker* instance, uint64_t step) {
     furi_assert(instance);
     if(!subbrute_worker_can_manual_transmit(instance)) {
         FURI_LOG_W(TAG, "Cannot set step during running mode");
+
         return false;
     }
 
@@ -264,21 +265,14 @@ bool subbrute_worker_transmit_current_key(SubBruteWorker* instance, uint64_t ste
             stream, instance->file, step, instance->bits, instance->te, instance->repeat);
     }
 
-    //    size_t written = stream_write_string(stream, payload);
-    //    if(written <= 0) {
-    //        FURI_LOG_W(TAG, "Error creating packet! EXIT");
-    //        result = false;
-    //    } else {
     subbrute_worker_subghz_transmit(instance, flipper_format);
 
     result = true;
 #if FURI_DEBUG
     FURI_LOG_D(TAG, "Manual transmit done");
 #endif
-    //    }
 
     flipper_format_free(flipper_format);
-    //    furi_string_free(payload);
 
     return result;
 }
@@ -366,11 +360,13 @@ int32_t subbrute_worker_thread(void* context) {
 
     if(!instance->worker_running) {
         FURI_LOG_W(TAG, "Worker is not set to running state!");
+
         return -1;
     }
     if(instance->state != SubBruteWorkerStateReady &&
        instance->state != SubBruteWorkerStateFinished) {
         FURI_LOG_W(TAG, "Invalid state for running worker! State: %d", instance->state);
+
         return -2;
     }
 #ifdef FURI_DEBUG
@@ -411,15 +407,6 @@ int32_t subbrute_worker_thread(void* context) {
         //furi_delay_ms(SUBBRUTE_MANUAL_TRANSMIT_INTERVAL / 4);
 #endif
 
-        //        size_t written = stream_write_stream_write_string(stream, payload);
-        //        if(written <= 0) {
-        //            FURI_LOG_W(TAG, "Error creating packet! BREAK");
-        //            instance->worker_running = false;
-        //            local_state = SubBruteWorkerStateIDLE;
-        //            furi_string_free(payload);
-        //            break;
-        //        }
-
         subbrute_worker_subghz_transmit(instance, flipper_format);
 
         if(instance->step + 1 > instance->max_value) {
@@ -427,12 +414,11 @@ int32_t subbrute_worker_thread(void* context) {
             FURI_LOG_I(TAG, "Worker finished to end");
 #endif
             local_state = SubBruteWorkerStateFinished;
-            //            furi_string_free(payload);
+
             break;
         }
         instance->step++;
 
-        //        furi_string_free(payload);
         furi_delay_ms(instance->tx_timeout_ms);
     }
 
@@ -446,6 +432,7 @@ int32_t subbrute_worker_thread(void* context) {
 #ifdef FURI_DEBUG
     FURI_LOG_I(TAG, "Worker stop");
 #endif
+
     return 0;
 }
 
@@ -472,18 +459,6 @@ uint32_t subbrute_worker_get_te(SubBruteWorker* instance) {
 void subbrute_worker_set_te(SubBruteWorker* instance, uint32_t te) {
     instance->te = te;
 }
-
-// void subbrute_worker_timeout_inc(SubBruteWorker* instance) {
-//     if(instance->tx_timeout_ms < 255) {
-//         instance->tx_timeout_ms++;
-//     }
-// }
-
-// void subbrute_worker_timeout_dec(SubBruteWorker* instance) {
-//     if(instance->tx_timeout_ms > 0) {
-//         instance->tx_timeout_ms--;
-//     }
-// }
 
 bool subbrute_worker_is_tx_allowed(SubBruteWorker* instance, uint32_t value) {
     furi_assert(instance);

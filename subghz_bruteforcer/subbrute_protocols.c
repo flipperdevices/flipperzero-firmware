@@ -147,6 +147,17 @@ const SubBruteProtocol subbrute_protocol_chamberlain_9bit_315 = {
     .file = ChamberlainFileProtocol};
 
 /**
+ * Chamberlain 9bit 318MHz
+ */
+const SubBruteProtocol subbrute_protocol_chamberlain_9bit_318 = {
+    .frequency = 318000000,
+    .bits = 9,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = ChamberlainFileProtocol};
+
+/**
  * Chamberlain 9bit 390MHz
  */
 const SubBruteProtocol subbrute_protocol_chamberlain_9bit_390 = {
@@ -435,6 +446,7 @@ static const char* subbrute_protocol_names[] = {
     [SubBruteAttackHoltek12bitAM915] = "Holtek AM 12bit 915MHz",
     [SubBruteAttackChamberlain9bit300] = "Chamberlain 9bit 300MHz",
     [SubBruteAttackChamberlain9bit315] = "Chamberlain 9bit 315MHz",
+    [SubBruteAttackChamberlain9bit318] = "Chamberlain 9bit 318MHz",
     [SubBruteAttackChamberlain9bit390] = "Chamberlain 9bit 390MHz",
     [SubBruteAttackChamberlain9bit433] = "Chamberlain 9bit 433MHz",
     [SubBruteAttackChamberlain8bit300] = "Chamberlain 8bit 300MHz",
@@ -487,6 +499,7 @@ const SubBruteProtocol* subbrute_protocol_registry[] = {
     [SubBruteAttackHoltek12bitAM915] = &subbrute_protocol_holtek_12bit_am_915,
     [SubBruteAttackChamberlain9bit300] = &subbrute_protocol_chamberlain_9bit_300,
     [SubBruteAttackChamberlain9bit315] = &subbrute_protocol_chamberlain_9bit_315,
+    [SubBruteAttackChamberlain9bit318] = &subbrute_protocol_chamberlain_9bit_318,
     [SubBruteAttackChamberlain9bit390] = &subbrute_protocol_chamberlain_9bit_390,
     [SubBruteAttackChamberlain9bit433] = &subbrute_protocol_chamberlain_9bit_433,
     [SubBruteAttackChamberlain8bit300] = &subbrute_protocol_chamberlain_8bit_300,
@@ -828,8 +841,6 @@ void subbrute_protocol_file_generate_file(
     uint64_t file_key,
     bool two_bytes) {
     FuriString* candidate = furi_string_alloc();
-    // char subbrute_payload_byte[8];
-    //furi_string_set_str(candidate, file_key);
     subbrute_protocol_create_candidate_for_existing_file(
         candidate, step, bit_index, file_key, two_bytes);
 
