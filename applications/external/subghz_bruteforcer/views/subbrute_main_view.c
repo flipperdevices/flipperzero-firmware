@@ -109,9 +109,6 @@ void subbrute_main_view_center_displayed_key(
 }
 
 void subbrute_main_view_draw_is_byte_selected(Canvas* canvas, SubBruteMainViewModel* model) {
-#ifdef FURI_DEBUG
-    //FURI_LOG_D(TAG, "key_from_file: %s", model->key_from_file);
-#endif
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(
         canvas, 64, 17, AlignCenter, AlignTop, "Please select values to calc:");
@@ -152,9 +149,6 @@ void subbrute_main_view_draw_is_ordinary_selected(Canvas* canvas, SubBruteMainVi
     const uint8_t item_height = 16;
     const uint8_t string_height_offset = 9;
 
-#ifdef FURI_DEBUG
-    //FURI_LOG_D(TAG, "window_position: %d, index: %d", model->window_position, model->index);
-#endif
     for(size_t position = 0; position < SubBruteAttackTotalCount; ++position) {
         uint8_t item_position = position - model->window_position;
 
@@ -189,7 +183,7 @@ void subbrute_main_view_draw_is_ordinary_selected(Canvas* canvas, SubBruteMainVi
 #else
                 canvas_set_font(canvas, FontBatteryPercent);
 #endif
-                char buffer[10];
+                char buffer[10] = {0};
                 snprintf(buffer, sizeof(buffer), "x%d", current_repeat_count);
                 uint8_t temp_x_offset_repeats =
                     current_repeat_count <= SUBBRUTE_PROTOCOL_MAX_REPEATS ? 15 : 18;
@@ -230,11 +224,13 @@ bool subbrute_main_view_input_file_protocol(InputEvent* event, SubBruteMainView*
            (instance->two_bytes && instance->index > 1)) {
             instance->index--;
         }
+
         updated = true;
     } else if(event->key == InputKeyRight) {
         if(instance->index < 7) {
             instance->index++;
         }
+
         updated = true;
     } else if(event->key == InputKeyUp) {
         instance->two_bytes = !instance->two_bytes;
@@ -242,14 +238,11 @@ bool subbrute_main_view_input_file_protocol(InputEvent* event, SubBruteMainView*
         if(instance->two_bytes && instance->index < 7) {
             instance->index++;
         }
-        // instance->callback(
-        //     instance->two_bytes ? SubBruteCustomEventTypeChangeStepUp :
-        //                           SubBruteCustomEventTypeChangeStepDown,
-        //     instance->context);
 
         updated = true;
     } else if(event->key == InputKeyOk) {
         instance->callback(SubBruteCustomEventTypeIndexSelected, instance->context);
+
         updated = true;
     }
     return updated;
@@ -273,7 +266,7 @@ bool subbrute_main_view_input_ordinary_protocol(
         } else {
             instance->index = CLAMP(index - 1, correct_total, min_value);
         }
-        //instance->repeat_values = 0;
+
         updated = true;
     } else if(event->key == InputKeyDown && is_short) {
         if(index == correct_total) {
@@ -281,7 +274,7 @@ bool subbrute_main_view_input_ordinary_protocol(
         } else {
             instance->index = CLAMP(index + 1, correct_total, min_value);
         }
-        //instance->repeat_values = 0;
+
         updated = true;
     } else if(event->key == InputKeyLeft && is_short) {
         instance->repeat_values[index] = CLAMP(current_repeats - 1, max_repeats, min_repeats);
@@ -297,6 +290,7 @@ bool subbrute_main_view_input_ordinary_protocol(
         } else {
             instance->callback(SubBruteCustomEventTypeMenuSelected, instance->context);
         }
+
         updated = true;
     }
 
@@ -322,7 +316,7 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
 
-    SubBruteMainView* instance = context;
+    SubBruteMainView* instance = (SubBruteMainView*)context;
 
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
 #ifdef FURI_DEBUG
@@ -417,6 +411,7 @@ void subbrute_main_view_free(SubBruteMainView* instance) {
 
 View* subbrute_main_view_get_view(SubBruteMainView* instance) {
     furi_assert(instance);
+
     return instance->view;
 }
 
@@ -460,6 +455,7 @@ void subbrute_main_view_set_index(
             model->key_from_file = instance->key_from_file;
             model->is_select_byte = instance->is_select_byte;
             model->two_bytes = instance->two_bytes;
+
             for(size_t i = 0; i < SubBruteAttackTotalCount; i++) {
                 model->repeat_values[i] = repeats[i];
             }
@@ -469,15 +465,18 @@ void subbrute_main_view_set_index(
 
 SubBruteAttacks subbrute_main_view_get_index(SubBruteMainView* instance) {
     furi_assert(instance);
+
     return instance->index;
 }
 
 const uint8_t* subbrute_main_view_get_repeats(SubBruteMainView* instance) {
     furi_assert(instance);
+
     return instance->repeat_values;
 }
 
 bool subbrute_main_view_get_two_bytes(SubBruteMainView* instance) {
     furi_assert(instance);
+
     return instance->two_bytes;
 }

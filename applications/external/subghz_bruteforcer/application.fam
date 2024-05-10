@@ -10,6 +10,6 @@ App(
     fap_icon_assets_symbol="subghz_bruteforcer",
     fap_author="derskythe",  # Also contributions from Ganapati & xMasterX
     fap_weburl="https://github.com/DarkFlippers/flipperzero-subbrute",
-    fap_version="3.11.3",
+    fap_version="3.12",
     fap_description="SubGHz Bruteforcer Application for Flipper Zero that lets you can select the protocol and frequency that will be used for bruteforce.",
 )

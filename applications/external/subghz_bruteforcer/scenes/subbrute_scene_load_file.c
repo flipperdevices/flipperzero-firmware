@@ -91,5 +91,6 @@ void subbrute_scene_load_file_on_exit(void* context) {
 bool subbrute_scene_load_file_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
+
     return false;
 }
