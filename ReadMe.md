@@ -35,6 +35,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Added 4 more GITS Profile Pictures for a total of 9 GITS and 47 in all (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures)
 - Updated: [Noptel LRF Sampler v1.8 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Updated: [PicoPass (iClass) v1.14 (By Bettse)](https://gitlab.com/bettse/picopass)
+- Updated: [MagSpoof v0.8 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 
 <a name="release">
 
@@ -435,7 +436,7 @@ $ ./fbt dolphin_ext
 - [Lightmeter v1.2 (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009`
 - [Logic Analyzer (By g3gg0)](https://github.com/g3gg0/flipper-logic_analyzer)
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
-- [MagSpoof v0.7 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
+- [MagSpoof v0.8 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - [MALVEKE GAME BOY ADVANCE Cartridge v2.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gba_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Cartridge (GB/GBC) v2.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Emulator v2.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_emulator) `Req: Malveke`

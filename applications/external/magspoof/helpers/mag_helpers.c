@@ -331,40 +331,47 @@ void mag_spoof(Mag* mag) {
 
     if(!tx_init(state)) return;
 
-    FURI_CRITICAL_ENTER();
-    for(uint16_t i = 0; i < (ZERO_PREFIX * 2); i++) {
-        // is this right?
-        if(!!(i % 2)) bit ^= 1;
-        play_halfbit(bit, state);
-        furi_delay_us(state->us_clock);
-    }
-
-    if((state->track == MagTrackStateOneAndTwo) || (state->track == MagTrackStateOne))
-        play_track((uint8_t*)bits_t1_manchester, bits_t1_count, state, false);
-
-    if((state->track == MagTrackStateOneAndTwo))
-        for(uint16_t i = 0; i < (ZERO_BETWEEN * 2); i++) {
+    uint8_t i = 0;
+    do {
+        FURI_CRITICAL_ENTER();
+        for(uint16_t i = 0; i < (ZERO_PREFIX * 2); i++) {
+            // is this right?
             if(!!(i % 2)) bit ^= 1;
             play_halfbit(bit, state);
             furi_delay_us(state->us_clock);
         }
 
-    if((state->track == MagTrackStateOneAndTwo) || (state->track == MagTrackStateTwo))
-        play_track(
-            (uint8_t*)bits_t2_manchester,
-            bits_t2_count,
-            state,
-            (state->reverse == MagReverseStateOn));
+        if((state->track == MagTrackStateOneAndTwo) || (state->track == MagTrackStateOne))
+            play_track((uint8_t*)bits_t1_manchester, bits_t1_count, state, false);
 
-    if((state->track == MagTrackStateThree))
-        play_track((uint8_t*)bits_t3_manchester, bits_t3_count, state, false);
+        if((state->track == MagTrackStateOneAndTwo))
+            for(uint16_t i = 0; i < (ZERO_BETWEEN * 2); i++) {
+                if(!!(i % 2)) bit ^= 1;
+                play_halfbit(bit, state);
+                furi_delay_us(state->us_clock);
+            }
 
-    for(uint16_t i = 0; i < (ZERO_SUFFIX * 2); i++) {
-        if(!!(i % 2)) bit ^= 1;
-        play_halfbit(bit, state);
-        furi_delay_us(state->us_clock);
-    }
-    FURI_CRITICAL_EXIT();
+        if((state->track == MagTrackStateOneAndTwo) || (state->track == MagTrackStateTwo))
+            play_track(
+                (uint8_t*)bits_t2_manchester,
+                bits_t2_count,
+                state,
+                (state->reverse == MagReverseStateOn));
+
+        if((state->track == MagTrackStateThree))
+            play_track((uint8_t*)bits_t3_manchester, bits_t3_count, state, false);
+
+        for(uint16_t i = 0; i < (ZERO_SUFFIX * 2); i++) {
+            if(!!(i % 2)) bit ^= 1;
+            play_halfbit(bit, state);
+            furi_delay_us(state->us_clock);
+        }
+        FURI_CRITICAL_EXIT();
+
+        i++;
+        FURI_LOG_D(
+            TAG, "TX %u (n_repeats: %u, repeat_mode: %u)", i, state->n_repeats, state->repeat_mode);
+    } while((i < state->n_repeats) && state->repeat_mode);
 
     free(data1);
     free(data2);
