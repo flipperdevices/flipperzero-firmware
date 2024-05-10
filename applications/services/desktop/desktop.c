@@ -139,7 +139,7 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         desktop_auto_lock_arm(desktop);
         return true;
     case DesktopGlobalAutoLock:
-        if(!loader_is_locked(desktop->loader)) {
+        if(!loader_is_locked(desktop->loader) && !desktop->locked) {
             desktop_lock(desktop);
         }
         return true;
@@ -215,6 +215,8 @@ static void desktop_clock_timer_callback(void* context) {
 }
 
 void desktop_lock(Desktop* desktop) {
+    furi_assert(!desktop->locked);
+
     furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
 
     if(desktop->settings.pin_code.length) {
@@ -230,9 +232,13 @@ void desktop_lock(Desktop* desktop) {
 
     DesktopStatus status = {.locked = true};
     furi_pubsub_publish(desktop->status_pubsub, &status);
+
+    desktop->locked = true;
 }
 
 void desktop_unlock(Desktop* desktop) {
+    furi_assert(desktop->locked);
+
     view_port_enabled_set(desktop->lock_icon_viewport, false);
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_set_lockdown(gui, false);
@@ -251,6 +257,8 @@ void desktop_unlock(Desktop* desktop) {
 
     DesktopStatus status = {.locked = false};
     furi_pubsub_publish(desktop->status_pubsub, &status);
+
+    desktop->locked = false;
 }
 
 void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
