@@ -193,9 +193,7 @@ View* subbrute_attack_view_get_view(SubBruteAttackView* instance) {
 
 void subbrute_attack_view_set_current_step(SubBruteAttackView* instance, uint64_t current_step) {
     furi_assert(instance);
-#ifdef FURI_DEBUG
-    //FURI_LOG_D(TAG, "Set step: %d", current_step);
-#endif
+
     instance->current_step = current_step;
     with_view_model(
         instance->view,
@@ -226,7 +224,6 @@ void subbrute_attack_view_init_values(
     instance->max_value = max_value;
     instance->current_step = current_step;
     instance->is_attacking = is_attacking;
-    // instance->extra_repeats = extra_repeats;
 
     with_view_model(
         instance->view,
@@ -262,7 +259,7 @@ void subbrute_attack_view_exit(void* context) {
 void subbrute_attack_view_draw(Canvas* canvas, void* context) {
     furi_assert(context);
     SubBruteAttackViewModel* model = (SubBruteAttackViewModel*)context;
-    char buffer[64];
+    char buffer[64] = {0};
 
     const char* attack_name = NULL;
     attack_name = subbrute_protocol_name(model->attack_type);

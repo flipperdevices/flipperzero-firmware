@@ -90,6 +90,7 @@ typedef enum {
  * - `SubBruteAttackHoltek12bitAM915`: Holtek 12-bit AM 915 MHz sub-brute attack.
  * - `SubBruteAttackChamberlain9bit300`: Chamberlain 9-bit 300 MHz sub-brute attack.
  * - `SubBruteAttackChamberlain9bit315`: Chamberlain 9-bit 315 MHz sub-brute attack.
+ * - `SubBruteAttackChamberlain9bit318`: Chamberlain 9-bit 318 MHz sub-brute attack.
  * - `SubBruteAttackChamberlain9bit390`: Chamberlain 9-bit 390 MHz sub-brute attack.
  * - `SubBruteAttackChamberlain9bit433`: Chamberlain 9-bit 433 MHz sub-brute attack.
  * - `SubBruteAttackChamberlain8bit300`: Chamberlain 8-bit 300 MHz sub-brute attack.
@@ -131,6 +132,7 @@ typedef enum {
     SubBruteAttackHoltek12bitAM915,
     SubBruteAttackChamberlain9bit300,
     SubBruteAttackChamberlain9bit315,
+    SubBruteAttackChamberlain9bit318,
     SubBruteAttackChamberlain9bit390,
     SubBruteAttackChamberlain9bit433,
     SubBruteAttackChamberlain8bit300,
