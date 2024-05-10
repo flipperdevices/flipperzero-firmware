@@ -61,11 +61,11 @@ static void desktop_clock_update(Desktop* desktop) {
     furi_hal_rtc_get_datetime(&curr_dt);
     bool time_format_12 = locale_get_time_format() == LocaleTimeFormat12h;
 
-    if(desktop->time_hour != curr_dt.hour || desktop->time_minute != curr_dt.minute ||
-       desktop->time_format_12 != time_format_12) {
-        desktop->time_format_12 = time_format_12;
-        desktop->time_hour = curr_dt.hour;
-        desktop->time_minute = curr_dt.minute;
+    if(desktop->clock.hour != curr_dt.hour || desktop->clock.minute != curr_dt.minute ||
+       desktop->clock.format_12 != time_format_12) {
+        desktop->clock.format_12 = time_format_12;
+        desktop->clock.hour = curr_dt.hour;
+        desktop->clock.minute = curr_dt.minute;
         view_port_update(desktop->clock_viewport);
     }
 }
@@ -92,8 +92,8 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
 
     canvas_set_font(canvas, FontPrimary);
 
-    uint8_t hour = desktop->time_hour;
-    if(desktop->time_format_12) {
+    uint8_t hour = desktop->clock.hour;
+    if(desktop->clock.format_12) {
         if(hour > 12) {
             hour -= 12;
         }
@@ -103,11 +103,11 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
     }
 
     char buffer[20];
-    snprintf(buffer, sizeof(buffer), "%02u:%02u", hour, desktop->time_minute);
+    snprintf(buffer, sizeof(buffer), "%02u:%02u", hour, desktop->clock.minute);
 
     view_port_set_width(
         desktop->clock_viewport,
-        canvas_string_width(canvas, buffer) - 1 + (desktop->time_minute % 10 == 1));
+        canvas_string_width(canvas, buffer) - 1 + (desktop->clock.minute % 10 == 1));
 
     canvas_draw_str_aligned(canvas, 0, 8, AlignLeft, AlignBottom, buffer);
 }
