@@ -19,6 +19,3 @@ PB_BIND(PB_Desktop_StatusUnsubscribeRequest, PB_Desktop_StatusUnsubscribeRequest
 
 
 PB_BIND(PB_Desktop_Status, PB_Desktop_Status, AUTO)
-
-
-

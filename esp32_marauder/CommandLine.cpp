@@ -196,7 +196,7 @@ void CommandLine::filterAccessPoints(String filter) {
 
 void CommandLine::runCommand(String input) {
   if (input == "") return;
-
+  
   if(wifi_scan_obj.scanning() && wifi_scan_obj.currentScanMode == WIFI_SCAN_GPS_NMEA){
     if(input != STOPSCAN_CMD) return;    
   }
@@ -303,9 +303,13 @@ void CommandLine::runCommand(String input) {
       display_obj.tft.init();
       menu_function_obj.changeMenu(menu_function_obj.current_menu);
     #endif
+    #ifdef HAS_GPS
+      gps_obj.stop();
+    #endif
   }
   else if (cmd_args.get(0) == GPS_DATA_CMD) {
     #ifdef HAS_GPS
+      gps_obj.begin();
       if (gps_obj.getGpsModuleStatus()) {
         Serial.println("Getting GPS Data. Stop with " + (String)STOPSCAN_CMD);
         wifi_scan_obj.currentScanMode = WIFI_SCAN_GPS_DATA;
@@ -318,6 +322,7 @@ void CommandLine::runCommand(String input) {
   }
   else if (cmd_args.get(0) == GPS_CMD) {
     #ifdef HAS_GPS
+      gps_obj.begin();
       if (gps_obj.getGpsModuleStatus()) {
         int get_arg = this->argSearch(&cmd_args, "-g");
         int nmea_arg = this->argSearch(&cmd_args, "-n");
@@ -385,6 +390,7 @@ void CommandLine::runCommand(String input) {
   }
   else if (cmd_args.get(0) == NMEA_CMD) {
     #ifdef HAS_GPS
+      gps_obj.begin();
       if (gps_obj.getGpsModuleStatus()) {
         #ifdef HAS_SCREEN
           menu_function_obj.changeMenu(&menu_function_obj.gpsInfoMenu);
@@ -533,6 +539,7 @@ void CommandLine::runCommand(String input) {
     // Wardrive
     else if (cmd_args.get(0) == WARDRIVE_CMD) {
       #ifdef HAS_GPS
+        gps_obj.begin();
         if (gps_obj.getGpsModuleStatus()) {
           int sta_sw = this->argSearch(&cmd_args, "-s");
 

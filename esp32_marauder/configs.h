@@ -214,11 +214,6 @@
   //// END BOARD FEATURES
 
   //// POWER MANAGEMENT
-  #ifdef HAS_PWR_MGMT
-    #ifdef MARAUDER_M5STICKC
-      #include "AXP192.h"
-    #endif
-  #endif
   //// END POWER MANAGEMENT
 
   //// BUTTON DEFINITIONS

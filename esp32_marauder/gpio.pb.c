@@ -25,9 +25,3 @@ PB_BIND(PB_Gpio_ReadPinResponse, PB_Gpio_ReadPinResponse, AUTO)
 
 
 PB_BIND(PB_Gpio_WritePin, PB_Gpio_WritePin, AUTO)
-
-
-
-
-
-

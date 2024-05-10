@@ -59,6 +59,9 @@ void GpsInterface::begin() {
   nmea.setUnknownSentenceHandler(gps_nmea_notimp);
 
 }
+void GpsInterface::stop() {
+  //  TODO: Implement Serial2.end();
+}
 
 //passthrough for other objects
 void gps_nmea_notimp(MicroNMEA& nmea){

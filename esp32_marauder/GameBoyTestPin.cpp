@@ -1,8 +1,5 @@
 #include "GameBoyTestPin.h"
 
-unsigned char raw_buffer[FRAME_SIZE]; // max( 16*8*14*8, 16*14*16 ) sensor pixels , tile bytes
-static unsigned char GBCAM_BUFFER[14336];
-
 HardwareSerial Serial3(3);
 
 
@@ -40,6 +37,7 @@ void GameBoyTestPin::setup() {
     digitalWrite(GAMEBOY_RD, LOW);
     digitalWrite(GAMEBOY_RST, LOW);
     digitalWrite(GAMEBOY_AUDIO, LOW);
+
 }
 void GameBoyTestPin::begin()
 {

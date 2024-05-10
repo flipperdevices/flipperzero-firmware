@@ -9,10 +9,6 @@
 
 #include "configs.h"
 #include "settings.h"
-#ifdef HAS_SCREEN
-  #include "Display.h"
-  #include <LinkedList.h>
-#endif
 #include "SDInterface.h"
 #include "Buffer.h"
 #include "lang_var.h"

@@ -20,16 +20,10 @@
 #ifdef HAS_BT
   #include "esp_bt.h"
 #endif
-#ifdef HAS_SCREEN
-  #include "Display.h"
-#endif
 #ifdef HAS_SD
   #include "SDInterface.h"
 #endif
 #include "Buffer.h"
-#ifdef HAS_BATTERY
-  #include "BatteryInterface.h"
-#endif
 #ifdef HAS_GPS
   #include "GpsInterface.h"
 #endif

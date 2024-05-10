@@ -10,6 +10,3 @@ PB_BIND(PB_Property_GetRequest, PB_Property_GetRequest, AUTO)
 
 
 PB_BIND(PB_Property_GetResponse, PB_Property_GetResponse, AUTO)
-
-
-

@@ -8,9 +8,6 @@
 #include "settings.h"
 #include "SD.h"
 #include "Buffer.h"
-#ifdef HAS_SCREEN
-  #include "Display.h"
-#endif
 #include <Update.h>
 
 extern Buffer buffer_obj;

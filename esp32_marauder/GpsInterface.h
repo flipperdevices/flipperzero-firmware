@@ -73,6 +73,8 @@ class GpsInterface {
     String generateGXgga();
     String generateGXrmc();
 
+    void stop();
+
   private:
     enum type_t {
       GPSTYPE_NATIVE = 0,

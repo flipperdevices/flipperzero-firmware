@@ -19,7 +19,3 @@ PB_BIND(PB_Region, PB_Region, AUTO)
 
 
 PB_BIND(PB_Region_Band, PB_Region_Band, AUTO)
-
-
-
-

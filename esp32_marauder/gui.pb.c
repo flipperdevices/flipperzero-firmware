@@ -22,9 +22,3 @@ PB_BIND(PB_Gui_StartVirtualDisplayRequest, PB_Gui_StartVirtualDisplayRequest, AU
 
 
 PB_BIND(PB_Gui_StopVirtualDisplayRequest, PB_Gui_StopVirtualDisplayRequest, AUTO)
-
-
-
-
-
-

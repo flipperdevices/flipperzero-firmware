@@ -37,7 +37,3 @@ PB_BIND(PB_App_GetErrorResponse, PB_App_GetErrorResponse, AUTO)
 
 
 PB_BIND(PB_App_DataExchangeRequest, PB_App_DataExchangeRequest, AUTO)
-
-
-
-

@@ -55,8 +55,3 @@ PB_BIND(PB_System_PowerInfoRequest, PB_System_PowerInfoRequest, AUTO)
 
 
 PB_BIND(PB_System_PowerInfoResponse, PB_System_PowerInfoResponse, AUTO)
-
-
-
-
-
