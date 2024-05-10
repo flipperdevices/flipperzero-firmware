@@ -5,6 +5,7 @@
 #define ZERO_PREFIX 25 // n zeros prefix
 #define ZERO_BETWEEN 53 // n zeros between tracks
 #define ZERO_SUFFIX 25 // n zeros suffix
+#define REPEAT_DELAY_MS 50
 
 // bits per char on a given track
 const uint8_t bitlen[] = {7, 5, 5};
@@ -371,6 +372,8 @@ void mag_spoof(Mag* mag) {
         i++;
         FURI_LOG_D(
             TAG, "TX %u (n_repeats: %u, repeat_mode: %u)", i, state->n_repeats, state->repeat_mode);
+        furi_delay_ms(REPEAT_DELAY_MS);
+
     } while((i < state->n_repeats) && state->repeat_mode);
 
     free(data1);
