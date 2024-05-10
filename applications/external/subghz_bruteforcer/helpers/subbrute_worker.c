@@ -206,6 +206,7 @@ void subbrute_worker_stop(SubBruteWorker* instance) {
     furi_assert(instance);
 
     if(!instance->worker_running) {
+
         return;
     }
 
