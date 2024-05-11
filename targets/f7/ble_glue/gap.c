@@ -38,6 +38,7 @@ typedef struct {
     FuriThread* thread;
     FuriMessageQueue* command_queue;
     bool enable_adv;
+    bool is_secure;
     uint8_t negotiation_fail_count;
 } Gap;
 
@@ -73,12 +74,21 @@ static void gap_verify_connection_parameters(Gap* gap) {
 
     // Send connection parameters request update if necessary
     GapConnectionParamsRequest* params = &gap->config->conn_param;
+
+    // Desired max connection interval depends on how many negotiation rounds we had in the past
+    uint16_t connection_interval_max = gap->negotiation_fail_count ? params->conn_int_max :
+                                                                     params->conn_int_min;
+
+    // We care about lower connection interval bound a lot: if it's lower than 30ms 2nd core will not allow us to use flash controller
     bool negoatiation_failed = params->conn_int_min > gap->connection_params.conn_interval;
-    if(gap->negotiation_fail_count) {
-        negoatiation_failed |= params->conn_int_max < gap->connection_params.conn_interval;
-    } else {
-        negoatiation_failed |= params->conn_int_min < gap->connection_params.conn_interval;
+
+    // We don't care about upper bound till connection become secure
+    if(gap->is_secure) {
+        // In the first negotiation round we want connection interval to be minimum
+        // If platform disagree then we request wider range
+        negoatiation_failed |= connection_interval_max < gap->connection_params.conn_interval;
     }
+
     if(negoatiation_failed) {
         FURI_LOG_W(
             TAG,
@@ -87,13 +97,23 @@ static void gap_verify_connection_parameters(Gap* gap) {
         if(aci_l2cap_connection_parameter_update_req(
                gap->service.connection_handle,
                params->conn_int_min,
-               gap->negotiation_fail_count ? params->conn_int_max : params->conn_int_min,
+               connection_interval_max,
                gap->connection_params.slave_latency,
                gap->connection_params.supervisor_timeout)) {
             FURI_LOG_E(TAG, "Failed to request connection parameters update");
+            // Other side is not in the mood
+            // But we are open to try it again
+            gap->negotiation_fail_count = 0;
         } else {
             gap->negotiation_fail_count++;
         }
+    } else {
+        FURI_LOG_I(
+            TAG,
+            "Connection interval suite us. Spent %u rounds to negotiate",
+            gap->negotiation_fail_count);
+        // Looks like other side is open to negotiation
+        gap->negotiation_fail_count = 0;
     }
 }
 
@@ -108,9 +128,9 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
 
     event_pckt = (hci_event_pckt*)((hci_uart_pckt*)pckt)->data;
 
-    if(gap) {
-        furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
-    }
+    furi_check(gap);
+    furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
+
     switch(event_pckt->evt) {
     case HCI_DISCONNECTION_COMPLETE_EVT_CODE: {
         hci_disconnection_complete_event_rp0* disconnection_complete_event =
@@ -118,10 +138,11 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
         if(disconnection_complete_event->Connection_Handle == gap->service.connection_handle) {
             gap->service.connection_handle = 0;
             gap->state = GapStateIdle;
-            gap->negotiation_fail_count = 0;
             FURI_LOG_I(
                 TAG, "Disconnect from client. Reason: %02X", disconnection_complete_event->Reason);
         }
+        gap->is_secure = false;
+        gap->negotiation_fail_count = 0;
         // Enterprise sleep
         furi_delay_us(666 + 666);
         if(gap->enable_adv) {
@@ -223,6 +244,7 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
 
         case ACI_GAP_SLAVE_SECURITY_INITIATED_VSEVT_CODE:
             FURI_LOG_D(TAG, "Slave security initiated");
+            gap->is_secure = true;
             break;
 
         case ACI_GAP_BOND_LOST_VSEVT_CODE:
@@ -265,7 +287,6 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
 
         case ACI_L2CAP_CONNECTION_UPDATE_RESP_VSEVT_CODE:
             FURI_LOG_D(TAG, "Procedure complete event");
-            gap->negotiation_fail_count = 0;
             break;
 
         case ACI_L2CAP_CONNECTION_UPDATE_REQ_VSEVT_CODE: {
@@ -282,9 +303,9 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
     default:
         break;
     }
-    if(gap) {
-        furi_mutex_release(gap->state_mutex);
-    }
+
+    furi_mutex_release(gap->state_mutex);
+
     return BleEventFlowEnable;
 }
 
