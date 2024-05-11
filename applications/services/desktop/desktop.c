@@ -388,8 +388,8 @@ static void desktop_clock_timer_callback(void* context) {
                     desktop->clock.hour = curr_dt.hour;
                 } else {
                     desktop->clock.hour = (curr_dt.hour > 12) ?
-                                        curr_dt.hour - 12 :
-                                        ((curr_dt.hour == 0) ? 12 : curr_dt.hour);
+                                              curr_dt.hour - 12 :
+                                              ((curr_dt.hour == 0) ? 12 : curr_dt.hour);
                 }
                 desktop->clock.minute = curr_dt.minute;
                 view_port_update(desktop->clock_slim_viewport);
@@ -412,8 +412,8 @@ static void desktop_clock_timer_callback(void* context) {
                     desktop->clock.hour = curr_dt.hour;
                 } else {
                     desktop->clock.hour = (curr_dt.hour > 12) ?
-                                        curr_dt.hour - 12 :
-                                        ((curr_dt.hour == 0) ? 12 : curr_dt.hour);
+                                              curr_dt.hour - 12 :
+                                              ((curr_dt.hour == 0) ? 12 : curr_dt.hour);
                 }
                 desktop->clock.minute = curr_dt.minute;
                 view_port_update(desktop->clock_viewport);
