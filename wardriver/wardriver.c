@@ -207,7 +207,7 @@ static void render_callback(Canvas* canvas, void* context) {
     case NO_APS:
         canvas_draw_str(canvas, 80, 30, "No AP's");
         canvas_draw_str(canvas, 80, 40, "Found!");
-        canvas_draw_icon(canvas, 1, 4, &I_DolphinWait_61x59);
+        canvas_draw_icon(canvas, 1, 9, &I_DolphinWait_59x54);
         break;
     case NORMAL:
     default:

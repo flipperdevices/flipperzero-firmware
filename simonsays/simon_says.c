@@ -272,7 +272,7 @@ void simon_draw_callback(Canvas* canvas, void* ctx) {
         // Draw Simon Pose
         if(simon_state->activePlayer == player) {
             // Player's turn
-            canvas_draw_icon(canvas, 0, 4, &I_DolphinWait_61x59);
+            canvas_draw_icon(canvas, 0, 9, &I_DolphinWait_59x54);
         } else {
             // Simon's turn
             canvas_draw_icon(canvas, 0, 4, &I_DolphinTalking_59x63);
