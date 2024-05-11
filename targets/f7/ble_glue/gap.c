@@ -39,7 +39,7 @@ typedef struct {
     FuriMessageQueue* command_queue;
     bool enable_adv;
     bool is_secure;
-    uint8_t negotiation_fail_count;
+    uint8_t negotiation_round;
 } Gap;
 
 typedef enum {
@@ -76,16 +76,16 @@ static void gap_verify_connection_parameters(Gap* gap) {
     GapConnectionParamsRequest* params = &gap->config->conn_param;
 
     // Desired max connection interval depends on how many negotiation rounds we had in the past
-    uint16_t connection_interval_max = gap->negotiation_fail_count ? params->conn_int_max :
-                                                                     params->conn_int_min;
+    // In the first negotiation round we want connection interval to be minimum
+    // If platform disagree then we request wider range
+    uint16_t connection_interval_max = gap->negotiation_round ? params->conn_int_max :
+                                                                params->conn_int_min;
 
-    // We care about lower connection interval bound a lot: if it's lower than 30ms 2nd core will not allow us to use flash controller
+    // We do care about lower connection interval bound a lot: if it's lower than 30ms 2nd core will not allow us to use flash controller
     bool negoatiation_failed = params->conn_int_min > gap->connection_params.conn_interval;
 
     // We don't care about upper bound till connection become secure
     if(gap->is_secure) {
-        // In the first negotiation round we want connection interval to be minimum
-        // If platform disagree then we request wider range
         negoatiation_failed |= connection_interval_max < gap->connection_params.conn_interval;
     }
 
@@ -93,7 +93,7 @@ static void gap_verify_connection_parameters(Gap* gap) {
         FURI_LOG_W(
             TAG,
             "Connection interval doesn't suite us. Trying to negotiate, round %u",
-            gap->negotiation_fail_count + 1);
+            gap->negotiation_round + 1);
         if(aci_l2cap_connection_parameter_update_req(
                gap->service.connection_handle,
                params->conn_int_min,
@@ -101,19 +101,19 @@ static void gap_verify_connection_parameters(Gap* gap) {
                gap->connection_params.slave_latency,
                gap->connection_params.supervisor_timeout)) {
             FURI_LOG_E(TAG, "Failed to request connection parameters update");
-            // Other side is not in the mood
+            // The other side is not in the mood
             // But we are open to try it again
-            gap->negotiation_fail_count = 0;
+            gap->negotiation_round = 0;
         } else {
-            gap->negotiation_fail_count++;
+            gap->negotiation_round++;
         }
     } else {
         FURI_LOG_I(
             TAG,
-            "Connection interval suite us. Spent %u rounds to negotiate",
-            gap->negotiation_fail_count);
-        // Looks like other side is open to negotiation
-        gap->negotiation_fail_count = 0;
+            "Connection interval suites us. Spent %u rounds to negotiate",
+            gap->negotiation_round);
+        // Looks like the other side is open to negotiation
+        gap->negotiation_round = 0;
     }
 }
 
@@ -142,7 +142,7 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
                 TAG, "Disconnect from client. Reason: %02X", disconnection_complete_event->Reason);
         }
         gap->is_secure = false;
-        gap->negotiation_fail_count = 0;
+        gap->negotiation_round = 0;
         // Enterprise sleep
         furi_delay_us(666 + 666);
         if(gap->enable_adv) {
