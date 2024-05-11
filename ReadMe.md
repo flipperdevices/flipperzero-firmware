@@ -36,7 +36,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Noptel LRF Sampler v1.8 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
 - Updated: [MagSpoof v0.8 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - OFW: [Desktop: fix crash on autolock after restart in locked state #3643 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3643)
-- SubGHz: Re-added POCSAG Support [Protocol integrations (Pocsag) (By htotoo)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d6a7bb66c370e44775f9cbb8b7b12c00d6bdbdc6)
 - Updated: [Sub-GHz Bruteforcer v3.12 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Updated: [PicoPass (iClass) v1.15 (By Bettse)](https://gitlab.com/bettse/picopass)
 - RFID: [Instafob Protocol Support (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/commit/e6acfb405f111c8383747ae322d08b5a65a799c7)
