@@ -20,6 +20,7 @@
 #include "protocol_gallagher.h"
 #include "protocol_hitag1.h"
 #include "protocol_nexwatch.h"
+#include "protocol_insta_fob.h"
 
 const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolEM4100] = &protocol_em4100,
@@ -46,4 +47,5 @@ const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolGallagher] = &protocol_gallagher,
     [LFRFIDProtocolHitag1] = &protocol_hitag1,
     [LFRFIDProtocolNexwatch] = &protocol_nexwatch,
+    [LFRFIDProtocolInstafob] = &protocol_insta_fob,
 };
