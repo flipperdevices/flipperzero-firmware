@@ -1,7 +1,7 @@
 #pragma once
 
 #include <furi.h>
-#include <gui/canvas_i.h>
+#include <gui/canvas.h>
 #include <stdbool.h>
 #include <string.h>
 
