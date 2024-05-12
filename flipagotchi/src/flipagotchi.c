@@ -52,9 +52,24 @@ const NotificationSequence sequence_notification = {
     NULL,
 };
 
-static bool flipagotchi_exec_cmd(PwnDumpModel* model) {
-    char charStr[2] = "\0";
+static void text_message_process(FuriString* receiver, uint8_t* arguments, const unsigned int max_text_len) {
+    static char charStr[2] = "\0";
 
+    // Write over parameter with nothing
+    furi_string_set_str(receiver, "");
+
+    for(size_t i = 0; i < max_text_len; i++) {
+        // Break if we hit the end of the text
+        if(arguments[i] == 0x00) {
+            break;
+        }
+
+        charStr[0] = arguments[i];
+        furi_string_cat_str(receiver, charStr);
+    }
+}
+
+static bool flipagotchi_exec_cmd(PwnDumpModel* model) {
     if(message_queue_has_message(model->queue)) {
         PwnCommand cmd;
         message_queue_pop_message(model->queue, &cmd);
@@ -77,66 +92,22 @@ static bool flipagotchi_exec_cmd(PwnDumpModel* model) {
         }
         // Process Name
         case 0x05: {
-            // Write over hostname with nothing
-            furi_string_set_str(model->pwn->hostname_furi, "");
-
-            for(size_t i = 0; i < PWNAGOTCHI_MAX_HOSTNAME_LEN; i++) {
-                // Break if we hit the end of the name
-                if(cmd.arguments[i] == 0x00) {
-                    break;
-                }
-
-                charStr[0] = cmd.arguments[i];
-                furi_string_cat_str(model->pwn->hostname_furi, charStr);
-            }
+            text_message_process(model->pwn->hostname, cmd.arguments, PWNAGOTCHI_MAX_HOSTNAME_LEN);
             break;
         }
         // Process channel
         case 0x06: {
-            // Write over channel with nothing
-            furi_string_set_str(model->pwn->channel_furi, "");
-
-            for(size_t i = 0; i < PWNAGOTCHI_MAX_CHANNEL_LEN; i++) {
-                // Break if we hit the end of the channel
-                if(cmd.arguments[i] == 0x00) {
-                    break;
-                }
-
-                charStr[0] = cmd.arguments[i];
-                furi_string_cat_str(model->pwn->channel_furi, charStr);
-            }
+            text_message_process(model->pwn->channel, cmd.arguments, PWNAGOTCHI_MAX_CHANNEL_LEN);
             break;
         }
         // Process APS (Access Points)
         case 0x07: {
-            // Write over APS with nothing
-            furi_string_set_str(model->pwn->apStat_furi, "");
-
-            for(size_t i = 0; i < PWNAGOTCHI_MAX_APS_LEN; i++) {
-                // Break if we hit the end of the APS
-                if(cmd.arguments[i] == 0x00) {
-                    break;
-                }
-
-                charStr[0] = cmd.arguments[i];
-                furi_string_cat_str(model->pwn->apStat_furi, charStr);
-            }
+            text_message_process(model->pwn->apStat, cmd.arguments, PWNAGOTCHI_MAX_APS_LEN);
             break;
         }
         // Process uptime
         case 0x08: {
-            // Write over uptime with nothing
-            furi_string_set_str(model->pwn->uptime_furi, "");
-
-            for(size_t i = 0; i < PWNAGOTCHI_MAX_UPTIME_LEN; i++) {
-                // Break if we hit the end of the uptime
-                if(cmd.arguments[i] == 0x00) {
-                    break;
-                }
-
-                charStr[0] = cmd.arguments[i];
-                furi_string_cat_str(model->pwn->uptime_furi, charStr);
-            }
+            text_message_process(model->pwn->uptime, cmd.arguments, PWNAGOTCHI_MAX_UPTIME_LEN);
             break;
         }
         // Process friend
@@ -168,34 +139,13 @@ static bool flipagotchi_exec_cmd(PwnDumpModel* model) {
         }
         // Process Handshakes
         case 0x0b: {
-            // Write over handshakes with nothing
-            furi_string_set_str(model->pwn->handshakes_furi, "");
-
-            for(size_t i = 0; i < PWNAGOTCHI_MAX_HANDSHAKES_LEN; i++) {
-                // Break if we hit the end of the handshakes
-                if(cmd.arguments[i] == 0x00) {
-                    break;
-                }
-
-                charStr[0] = cmd.arguments[i];
-                furi_string_cat_str(model->pwn->handshakes_furi, charStr);
-            }
+            text_message_process(
+                model->pwn->handshakes, cmd.arguments, PWNAGOTCHI_MAX_HANDSHAKES_LEN);
             break;
         }
         // Process message
         case 0x0c: {
-            // Write over message with nothing
-            furi_string_set_str(model->pwn->message_furi, "");
-
-            for(size_t i = 0; i < PWNAGOTCHI_MAX_APS_LEN; i++) {
-                // Break if we hit the end of the message
-                if(cmd.arguments[i] == 0x00) {
-                    break;
-                }
-
-                charStr[0] = cmd.arguments[i];
-                furi_string_cat_str(model->pwn->message_furi, charStr);
-            }
+            text_message_process(model->pwn->message, cmd.arguments, PWNAGOTCHI_MAX_MESSAGE_LEN);
             break;
         }
         }
@@ -221,10 +171,7 @@ static uint32_t flipagotchi_exit(void* context) {
     return VIEW_NONE;
 }
 
-static void flipagotchi_on_irq_cb(
-    FuriHalSerialHandle* serial_handle,
-    FuriHalSerialRxEvent ev,
-    void* context) {
+static void flipagotchi_on_irq_cb(FuriHalSerialHandle* serial_handle, FuriHalSerialRxEvent ev, void* context) {
     furi_assert(context);
     FlipagotchiApp* app = context;
     uint8_t data = furi_hal_serial_async_rx(serial_handle);
@@ -258,7 +205,7 @@ static int32_t flipagotchi_worker(void* context) {
                 if(length > 0) {
                     with_view_model(
                         app->view,
-                        PwnDumpModel * model,
+                        PwnDumpModel* model,
                         {
                             for(size_t i = 0; i < length; i++) {
                                 flipagotchi_push_to_list(model, data[i]);
@@ -298,7 +245,7 @@ static FlipagotchiApp* flipagotchi_app_alloc() {
     view_allocate_model(app->view, ViewModelTypeLocking, sizeof(PwnDumpModel));
     with_view_model(
         app->view,
-        PwnDumpModel * model,
+        PwnDumpModel* model,
         {
             model->queue = message_queue_alloc();
             model->pwn = pwnagotchi_alloc();

@@ -45,3 +45,4 @@
 #define HANDSHAKES_DEFAULT_TEXT "0 (0)"
 #define UPTIME_DEFAULT_TEXT "00:00:00"
 #define MESSAGE_DEFAULT_TEXT "Hack the planet!"
+#define FRIEND_STAT_DEFAULT_TEXT ""
