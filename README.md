@@ -30,4 +30,4 @@ Author and Acknowledgments
 The "ID Card v2" application is created by @evillero. This version was built upon the skeleton app provided by @codeallnight and is an improved version of the ID card originally developed by @alanretgue.
 
 Future Enhancements
-The application is planned to be upgraded to include image display functionality.
+The application is planned to be upgraded to include image display functionality and to add support for inputting and displaying email addresses.
