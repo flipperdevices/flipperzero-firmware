@@ -113,29 +113,22 @@ typedef struct {
     /// Current face
     enum PwnagotchiFace face;
     /// CH channel display at top left
-    char channel[PWNAGOTCHI_MAX_CHANNEL_LEN];
     FuriString* channel_furi;
     /// AP text shown at the top
-    char apStat[PWNAGOTCHI_MAX_APS_LEN];
     FuriString* apStat_furi;
     /// Uptime as text
-    char uptime[PWNAGOTCHI_MAX_UPTIME_LEN];
     FuriString* uptime_furi;
     /// Hostname of the unit
-    char hostname[PWNAGOTCHI_MAX_HOSTNAME_LEN];
     FuriString* hostname_furi;
     /// Message that is displayed
-    char message[PWNAGOTCHI_MAX_MESSAGE_LEN];
     FuriString* message_furi;
     /// LAST SSID and other handshake information for the bottom
-    char handshakes[PWNAGOTCHI_MAX_SSID_LEN];
     FuriString* handshakes_furi;
     /// Current mode the pwnagotchi is in
     enum PwnagotchiMode mode;
     /// Friend face
     enum PwnagotchiFace friendFace;
     /// Name and aps of friend
-    char friendStat[PWNAGOTCHI_MAX_FRIEND_STAT_LEN];
     FuriString* friendStat_furi;
 
 } Pwnagotchi;
