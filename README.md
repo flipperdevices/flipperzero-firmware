@@ -1,6 +1,6 @@
 ## ID_card_v2
 This program represents a simple application for managing an ID card for Flipper Zerp.
-![id](https://github.com/evillero/ID_card_v2/blob/main/docs/03.png
+![id](https://github.com/evillero/ID_card_v2/blob/main/docs/03.png)
 # Application Description
 The "ID Card v2" application allows users to easily manage personal data such as name, phone number, address, and notes. These data are stored in a text file (id.txt) on the device.
 
