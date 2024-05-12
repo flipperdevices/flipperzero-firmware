@@ -685,12 +685,12 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         float eta_round = (float)1 - ((float)program_state->eta_round / (float)eta_round_time);
         float eta_total = (float)1 - ((float)program_state->eta_total / (float)eta_total_time);
         float progress = (float)program_state->num_completed / (float)program_state->total;
-        if(eta_round < 0) {
+        if(eta_round < 0 || eta_round > 1) {
             // Round ETA miscalculated
             eta_round = 1;
             program_state->eta_round = 0;
         }
-        if(eta_total < 0) {
+        if(eta_total < 0 || eta_total > 1) {
             // Total ETA miscalculated
             eta_total = 1;
             program_state->eta_total = 0;
@@ -825,7 +825,6 @@ int32_t mfkey_main() {
                     case InputKeyRight:
                         if(program_state->mfkey_state == Ready) {
                             program_state->mfkey_state = Help;
-                            view_port_update(view_port);
                         }
                         break;
                     case InputKeyLeft:
@@ -833,13 +832,11 @@ int32_t mfkey_main() {
                     case InputKeyOk:
                         if(program_state->mfkey_state == Ready) {
                             furi_thread_start(program_state->mfkeythread);
-                            view_port_update(view_port);
                         }
                         break;
                     case InputKeyBack:
                         if(program_state->mfkey_state == Help) {
                             program_state->mfkey_state = Ready;
-                            view_port_update(view_port);
                         } else {
                             program_state->close_thread_please = true;
                             // Wait until thread is finished
@@ -854,8 +851,8 @@ int32_t mfkey_main() {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(program_state->mutex);
+        view_port_update(view_port);
     }
 
     // Thread joined in back event handler
