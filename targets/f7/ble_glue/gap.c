@@ -82,14 +82,14 @@ static void gap_verify_connection_parameters(Gap* gap) {
                                                                 params->conn_int_min;
 
     // We do care about lower connection interval bound a lot: if it's lower than 30ms 2nd core will not allow us to use flash controller
-    bool negoatiation_failed = params->conn_int_min > gap->connection_params.conn_interval;
+    bool negotiation_failed = params->conn_int_min > gap->connection_params.conn_interval;
 
     // We don't care about upper bound till connection become secure
     if(gap->is_secure) {
-        negoatiation_failed |= connection_interval_max < gap->connection_params.conn_interval;
+        negotiation_failed |= connection_interval_max < gap->connection_params.conn_interval;
     }
 
-    if(negoatiation_failed) {
+    if(negotiation_failed) {
         FURI_LOG_W(
             TAG,
             "Connection interval doesn't suite us. Trying to negotiate, round %u",
