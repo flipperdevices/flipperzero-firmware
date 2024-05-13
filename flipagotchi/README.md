@@ -7,6 +7,6 @@ This app requires additional setup on the Pwnagotchi as well as some hardware se
 [MIT](https://choosealicense.com/licenses/mit/)
 
 ## Disclaimer
-<b>This program is meant for educational purposes ONLY. I disclaim any and all responsibility for the usage of this program by external parties (not me).</b>
+This program is meant for educational purposes ONLY. I disclaim any and all responsibility for the usage of this program by external parties (not me).
 
 See GitHub repository for more detailed information and setup instructions.
