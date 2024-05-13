@@ -546,6 +546,10 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     gap->thread = furi_thread_alloc_ex("BleGapDriver", 1024, gap_app, gap);
     furi_thread_start(gap->thread);
 
+    // Set initial state
+    gap->is_secure = false;
+    gap->negotiation_round = 0;
+
     uint8_t adv_service_uid[2];
     gap->service.adv_svc_uuid_len = 1;
     adv_service_uid[0] = gap->config->adv_service_uuid & 0xff;
