@@ -1,8 +1,9 @@
 #pragma once
 
 #include <furi.h>
-#include <gui/canvas_i.h>
+#include <gui/canvas.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "constants.h"
 
@@ -17,7 +18,7 @@
 #define PWNAGOTCHI_APS_I 7
 #define PWNAGOTCHI_APS_J 25
 #define PWNAGOTCHI_UPTIME_I 7
-#define PWNAGOTCHI_UPTIME_J 77
+#define PWNAGOTCHI_UPTIME_J 75
 #define PWNAGOTCHI_LINE1_START_I 8
 #define PWNAGOTCHI_LINE1_START_J 0
 #define PWNAGOTCHI_LINE1_END_I 8
@@ -111,25 +112,24 @@ enum PwnagotchiMode { PwnMode_Auto, PwnMode_Ai, PwnMode_Manual };
 typedef struct {
     /// Current face
     enum PwnagotchiFace face;
-    // char* faceStr;
     /// CH channel display at top left
-    char channel[PWNAGOTCHI_MAX_CHANNEL_LEN];
+    FuriString* channel;
     /// AP text shown at the top
-    char apStat[PWNAGOTCHI_MAX_APS_LEN];
+    FuriString* apStat;
     /// Uptime as text
-    char uptime[PWNAGOTCHI_MAX_UPTIME_LEN];
+    FuriString* uptime;
     /// Hostname of the unit
-    char hostname[PWNAGOTCHI_MAX_HOSTNAME_LEN];
+    FuriString* hostname;
     /// Message that is displayed
-    char message[PWNAGOTCHI_MAX_MESSAGE_LEN];
+    FuriString* message;
     /// LAST SSID and other handshake information for the bottom
-    char handshakes[PWNAGOTCHI_MAX_SSID_LEN];
+    FuriString* handshakes;
     /// Current mode the pwnagotchi is in
     enum PwnagotchiMode mode;
     /// Friend face
     enum PwnagotchiFace friendFace;
     /// Name and aps of friend
-    char friendStat[PWNAGOTCHI_MAX_FRIEND_STAT_LEN];
+    FuriString* friendStat;
 
 } Pwnagotchi;
 

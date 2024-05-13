@@ -15,16 +15,19 @@ https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c45f8e9a921
 Pwnagotchi* pwnagotchi_alloc() {
     Pwnagotchi* pwn = malloc(sizeof(Pwnagotchi));
 
+    // Set numbered values
     pwn->face = Cool;
     pwn->friendFace = NoFace;
-
-    strncpy(pwn->channel, "*", 2);
-    strncpy(pwn->apStat, "0 (0)", 6);
-    strncpy(pwn->hostname, "pwn", 4);
-    strncpy(pwn->handshakes, "0 (0)", 6);
-    strncpy(pwn->uptime, "00:00:00", 9);
-    strncpy(pwn->message, "Hack the planet!", 17);
     pwn->mode = PwnMode_Manual;
+
+    // Set string values to initial
+    pwn->channel = furi_string_alloc_set_str(CHANNEL_DEFAULT_TEXT);
+    pwn->apStat = furi_string_alloc_set_str(AP_STAT_DEFAULT_TEXT);
+    pwn->uptime = furi_string_alloc_set_str(UPTIME_DEFAULT_TEXT);
+    pwn->hostname = furi_string_alloc_set_str(HOSTNAME_DEFAULT_TEXT);
+    pwn->message = furi_string_alloc_set_str(MESSAGE_DEFAULT_TEXT);
+    pwn->handshakes = furi_string_alloc_set_str(HANDSHAKES_DEFAULT_TEXT);
+    pwn->friendStat = furi_string_alloc_set_str(FRIEND_STAT_DEFAULT_TEXT);
 
     return pwn;
 }
@@ -125,40 +128,49 @@ void pwnagotchi_draw_face(Pwnagotchi* pwn, Canvas* canvas) {
     }
 }
 
-void pwnagotchi_draw_name(Pwnagotchi* pwn, Canvas* canvas) {
-    char* formatName = malloc(sizeof(char) * (PWNAGOTCHI_MAX_HOSTNAME_LEN + 2));
-    strncpy(formatName, pwn->hostname, PWNAGOTCHI_MAX_HOSTNAME_LEN);
-    strncat(formatName, ">", 2);
+/**
+ * Function to draw a generic string with a preceder and data
+ * 
+ * @param preceder Preceding characters in the string
+ * @param info Actual string from pwnagotchi to print
+ * @param i_pos Position in the i direction to start printing
+ * @param j_pos Position in the j direction to start printing
+ * @param canvas Pointer to the canvas to draw on
+*/
+static void pwnagotchi_draw_str(
+    char* preceder,
+    FuriString* info,
+    const unsigned int i_pos,
+    const unsigned int j_pos,
+    Canvas* canvas) {
+    FuriString* formatTemp =
+        furi_string_alloc_printf("%s%s", preceder, furi_string_get_cstr(info));
+
     canvas_set_font(canvas, PWNAGOTCHI_FONT);
-    canvas_draw_str(canvas, PWNAGOTCHI_NAME_J, PWNAGOTCHI_NAME_I, formatName);
-    free(formatName);
+    canvas_draw_str(canvas, j_pos, i_pos, furi_string_get_cstr(formatTemp));
+    furi_string_free(formatTemp);
+}
+
+void pwnagotchi_draw_name(Pwnagotchi* pwn, Canvas* canvas) {
+    FuriString* formatName =
+        furi_string_alloc_printf("%s%s", furi_string_get_cstr(pwn->hostname), ">");
+
+    canvas_set_font(canvas, PWNAGOTCHI_FONT);
+    canvas_draw_str(
+        canvas, PWNAGOTCHI_NAME_J, PWNAGOTCHI_NAME_I, furi_string_get_cstr(formatName));
+    furi_string_free(formatName);
 }
 
 void pwnagotchi_draw_channel(Pwnagotchi* pwn, Canvas* canvas) {
-    char* formatChannel = malloc(sizeof(char) * (PWNAGOTCHI_MAX_CHANNEL_LEN + 4));
-    strncpy(formatChannel, "CH", 3);
-    strcat(formatChannel, pwn->channel);
-    canvas_set_font(canvas, PWNAGOTCHI_FONT);
-    canvas_draw_str(canvas, PWNAGOTCHI_CHANNEL_J, PWNAGOTCHI_CHANNEL_I, formatChannel);
-    free(formatChannel);
+    pwnagotchi_draw_str("CH ", pwn->channel, PWNAGOTCHI_CHANNEL_I, PWNAGOTCHI_CHANNEL_J, canvas);
 }
 
 void pwnagotchi_draw_aps(Pwnagotchi* pwn, Canvas* canvas) {
-    char* formatAP = malloc(sizeof(char) * (PWNAGOTCHI_MAX_APS_LEN + 5));
-    strncpy(formatAP, "APS", 4);
-    strcat(formatAP, pwn->apStat);
-    canvas_set_font(canvas, PWNAGOTCHI_FONT);
-    canvas_draw_str(canvas, PWNAGOTCHI_APS_J, PWNAGOTCHI_APS_I, formatAP);
-    free(formatAP);
+    pwnagotchi_draw_str("APS ", pwn->apStat, PWNAGOTCHI_APS_I, PWNAGOTCHI_APS_J, canvas);
 }
 
 void pwnagotchi_draw_uptime(Pwnagotchi* pwn, Canvas* canvas) {
-    char* formatUp = malloc(sizeof(char) * (PWNAGOTCHI_MAX_UPTIME_LEN + 4));
-    strncpy(formatUp, "UP", 3);
-    strcat(formatUp, pwn->uptime);
-    canvas_set_font(canvas, PWNAGOTCHI_FONT);
-    canvas_draw_str(canvas, PWNAGOTCHI_UPTIME_J, PWNAGOTCHI_UPTIME_I, formatUp);
-    free(formatUp);
+    pwnagotchi_draw_str("UP ", pwn->uptime, PWNAGOTCHI_UPTIME_I, PWNAGOTCHI_UPTIME_J, canvas);
 }
 
 void pwnagotchi_draw_lines(Pwnagotchi* pwn, Canvas* canvas) {
@@ -181,12 +193,8 @@ void pwnagotchi_draw_lines(Pwnagotchi* pwn, Canvas* canvas) {
 }
 
 void pwnagotchi_draw_handshakes(Pwnagotchi* pwn, Canvas* canvas) {
-    char* formatShakes = malloc(sizeof(char) * (PWNAGOTCHI_MAX_HANDSHAKES_LEN + 5));
-    strncpy(formatShakes, "PWND ", 6);
-    strcat(formatShakes, pwn->handshakes);
-    canvas_set_font(canvas, PWNAGOTCHI_FONT);
-    canvas_draw_str(canvas, PWNAGOTCHI_HANDSHAKES_J, PWNAGOTCHI_HANDSHAKES_I, formatShakes);
-    free(formatShakes);
+    pwnagotchi_draw_str(
+        "PWND ", pwn->handshakes, PWNAGOTCHI_HANDSHAKES_I, PWNAGOTCHI_HANDSHAKES_J, canvas);
 }
 
 void pwnagotchi_draw_friend(Pwnagotchi* pwn, Canvas* canvas) {
@@ -212,13 +220,14 @@ void pwnagotchi_draw_mode(Pwnagotchi* pwn, Canvas* canvas) {
 void pwnagotchi_draw_message(Pwnagotchi* pwn, Canvas* canvas) {
     canvas_set_font(canvas, FontSecondary);
     int fontHeight = canvas_current_font_height(canvas);
+    const char* message = furi_string_get_cstr(pwn->message);
 
     // Apparently W is the widest character (USING a for a more average approach)
     size_t charLength = canvas_string_width(canvas, "a");
 
     size_t horizSpace = FLIPPER_SCREEN_WIDTH - PWNAGOTCHI_MESSAGE_J;
     size_t charSpaces = floor(((double)horizSpace) / charLength);
-    size_t messagePixLen = canvas_string_width(canvas, pwn->message);
+    size_t messagePixLen = canvas_string_width(canvas, message);
     size_t maxLines =
         floor((PWNAGOTCHI_MESSAGE_I - PWNAGOTCHI_LINE2_END_I) / ((double)fontHeight));
 
@@ -231,7 +240,7 @@ void pwnagotchi_draw_message(Pwnagotchi* pwn, Canvas* canvas) {
         char* line = malloc(sizeof(char) * allocSize);
 
         // Copy the allotted characters into line
-        memcpy(line, (pwn->message + charIndex), allocSize);
+        memcpy(line, (message + charIndex), allocSize);
 
         // Now loop backwards and cut it off at a space if we end with a letter
         size_t backspaceCount = 0;
@@ -272,8 +281,15 @@ void pwnagotchi_draw_all(Pwnagotchi* pwn, Canvas* canvas) {
 }
 
 void pwnagotchi_free(Pwnagotchi* pwn) {
+    furi_string_free(pwn->channel);
+    furi_string_free(pwn->apStat);
+    furi_string_free(pwn->uptime);
+    furi_string_free(pwn->hostname);
+    furi_string_free(pwn->message);
+    furi_string_free(pwn->handshakes);
+    furi_string_free(pwn->friendStat);
+
     free(pwn);
-    pwn = NULL;
 }
 
 void pwnagotchi_screen_clear(Pwnagotchi* pwn) {

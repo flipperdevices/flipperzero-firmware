@@ -1,7 +1,9 @@
 #pragma once
 
+#include <furi_hal.h>
+
 /// Defines the channel that the pwnagotchi uses
-#define PWNAGOTCHI_UART_CHANNEL (FuriHalSerialIdUsart)
+#define PWNAGOTCHI_UART_CHANNEL FuriHalSerialIdUsart
 
 /// Defines the baudrate that the pwnagotchi will use
 #define PWNAGOTCHI_UART_BAUD 115200
@@ -35,3 +37,12 @@
 
 /// Width of flipper screen
 #define FLIPPER_SCREEN_WIDTH 128
+
+/// Default messages for when the program boots
+#define CHANNEL_DEFAULT_TEXT "*"
+#define AP_STAT_DEFAULT_TEXT "0 (0)"
+#define HOSTNAME_DEFAULT_TEXT "pwn"
+#define HANDSHAKES_DEFAULT_TEXT "0 (0)"
+#define UPTIME_DEFAULT_TEXT "00:00:00"
+#define MESSAGE_DEFAULT_TEXT "Hack the planet!"
+#define FRIEND_STAT_DEFAULT_TEXT ""

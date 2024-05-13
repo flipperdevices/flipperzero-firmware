@@ -1,11 +1,14 @@
 App(
     appid="flipagotchi",
-    name="Flipagotchi WIP",
+    name="Flipagotchi",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipagotchi_app",
     stack_size=2 * 1024,
     fap_icon="flipagotchi_10px.png",
-    fap_category="Tools",
     fap_icon_assets="assets",
-    fap_icon_assets_symbol="flipagotchi",
+    fap_category="GPIO",
+    fap_author="Matt-London",
+    fap_weburl="https://github.com/Matt-London/pwnagotchi-flipper",
+    fap_version="2.0",
+    fap_description="This program will interface the pwnagotchi with the flipper. This will be accomplished using custom code on the pwnagotchi's end to give the flipper simple rendering instructions over UART.",
 )
