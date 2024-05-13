@@ -2,6 +2,7 @@
 This program will interface the pwnagotchi with the flipper. This will be accomplished using custom code on the pwnagotchi's end to give the flipper simple rendering instructions over UART.
 
 <img src='doc/attachments/PwnZeroBaseWFace.png' alt='Flipper screen showing base Pwnagotchi display' height="128" width="256"/>
+<img src="doc/attachments/PwnInAction.gif" width="256" height="160"/>
 
 ## Layout
 This project is broken down into two parts: flipagotchi and pwnzero
@@ -12,8 +13,6 @@ pwnagotchi-flipper
 ```
 - flipagotchi is the Flipper-side application
 - pwnzero is the pwnagotchi-side application
-
-<img src="doc/attachments/PwnInAction.gif" width="256" height="160"/>
 
 ## Setup
 ### Flipagotchi Setup (Flipper side)
