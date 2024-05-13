@@ -19,7 +19,7 @@ cp -rf .blank_files/manifest_Minimal.txt build/f7-firmware-C/resources/dolphin/m
 cp -rf .blank_files/manifest_Minimal.txt build/f7-firmware-C/resources/dolphin/manifest_Minimal.txt
 cp -rf .blank_files/manifest_None.txt build/f7-firmware-C/resources/dolphin/manifest_None.txt
 cd build/f7-firmware-C/resources
-tar -cf "../../../RM$DATE_VAR-$TIME_VAR/resources.tar" *
+tar -czf "../../../RM$DATE_VAR-$TIME_VAR/resources.tar.gz" *
 cd ../../../
 zip -rq "RM$DATE_VAR-$TIME_VAR-$VER_VAR-$HASH_VAR.zip" "RM$DATE_VAR-$TIME_VAR"
 tar -czf "RM$DATE_VAR-$TIME_VAR-$VER_VAR-$HASH_VAR.tgz" "RM$DATE_VAR-$TIME_VAR"
