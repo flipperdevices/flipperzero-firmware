@@ -4,12 +4,12 @@
 #include <gui/elements.h>
 #include <gui/view_port.h>
 
-#include <storage/storage.h>
-
 #include <furi_hal_bus.h>
 #include <furi_hal_cortex.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_serial.h>
+#include <furi_hal_serial_control.h>
 
 #include <stm32wbxx_ll_adc.h>
 #include <stm32wbxx_ll_tim.h>
@@ -19,7 +19,6 @@
 #define TAG "LfRfidAdc"
 
 #define DATA_INPUT_PIN (gpio_rfid_data_in)
-#define DATA_OUTPUT_PIN (gpio_ext_pa7)
 
 #define CARRIER_INPUT_PIN (gpio_rfid_carrier)
 #define CARRIER_OUTPUT_PIN (gpio_rfid_carrier_out)
@@ -27,10 +26,9 @@
 #define CARRIER_FREQ_HZ (125000UL)
 #define VREFBUF_STARTUP_DELAY_US (500000UL)
 #define RECEIVE_BUFFER_LEN (32UL * 1024UL)
+#define DECODE_BUFFER_LEN (RECEIVE_BUFFER_LEN / 2)
 
 #define ADC_INPUT_CHANNEL LL_ADC_CHANNEL_14
-
-#define STORAGE_FILE_NAME EXT_PATH("lfrfid_adc.bin")
 
 typedef enum {
     LfRfidAdcAppEventExit,
@@ -40,11 +38,13 @@ typedef enum {
 
 typedef struct {
     Gui* gui;
-    Storage* storage;
     ViewPort* view_port;
     FuriMessageQueue* queue;
-    File* file;
+    FuriHalSerialHandle* serial;
     uint16_t buf[RECEIVE_BUFFER_LEN];
+    uint8_t decode_buf[DECODE_BUFFER_LEN];
+    uint16_t prev_value;
+    int32_t prev_dv;
 } LfRfidAdcApp;
 
 static void lfrfid_adc_app_draw_callback(Canvas* canvas, void* context) {
@@ -57,7 +57,7 @@ static void lfrfid_adc_app_draw_callback(Canvas* canvas, void* context) {
         canvas_height(canvas),
         AlignCenter,
         AlignCenter,
-        "\e#Received data\e# is being\nstored on the \e#SD Card\e#",
+        "\e#Received data\e# is being\nsent to \e#USART\e#",
         false);
 }
 
@@ -92,11 +92,9 @@ static LfRfidAdcApp* lfrfid_adc_app_alloc() {
     LfRfidAdcApp* app = malloc(sizeof(LfRfidAdcApp));
 
     app->gui = furi_record_open(RECORD_GUI);
-    app->storage = furi_record_open(RECORD_STORAGE);
 
     app->view_port = view_port_alloc();
     app->queue = furi_message_queue_alloc(4, sizeof(LfRfidAdcAppEvent));
-    app->file = storage_file_alloc(app->storage);
 
     view_port_draw_callback_set(app->view_port, lfrfid_adc_app_draw_callback, app);
     view_port_input_callback_set(app->view_port, lfrfid_adc_app_input_callback, app);
@@ -107,13 +105,11 @@ static LfRfidAdcApp* lfrfid_adc_app_alloc() {
 };
 
 static void lfrfid_adc_app_free(LfRfidAdcApp* app) {
-    storage_file_free(app->file);
     furi_message_queue_free(app->queue);
 
     gui_remove_view_port(app->gui, app->view_port);
     view_port_free(app->view_port);
 
-    furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_GUI);
 
     free(app);
@@ -191,12 +187,11 @@ static void lfrfid_adc_app_adc_init(LfRfidAdcApp* app) {
     FURI_LOG_D(TAG, "ADC initialized");
 }
 
-static void lfrfid_adc_app_storage_init(LfRfidAdcApp* app) {
-    if(!storage_file_open(app->file, STORAGE_FILE_NAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-        FURI_LOG_E(TAG, "Failed to open file to store the received data");
-    } else {
-        FURI_LOG_D(TAG, "Storage initialized");
-    }
+static void lfrfid_adc_app_serial_init(LfRfidAdcApp* app) {
+    app->serial = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_hal_serial_init(app->serial, 4000000UL);
+
+    FURI_LOG_D(TAG, "Serial initialized");
 }
 
 static void lfrfid_adc_app_dma_init(LfRfidAdcApp* app) {
@@ -222,15 +217,6 @@ static void lfrfid_adc_app_dma_init(LfRfidAdcApp* app) {
     LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_1);
 
     FURI_LOG_D(TAG, "DMA initialized");
-}
-
-static bool lfrfid_adc_app_storage_write(LfRfidAdcApp* app, bool tc) {
-    const size_t size_requested = RECEIVE_BUFFER_LEN * sizeof(uint16_t) / 2UL;
-
-    const void* data = (void*)app->buf + (tc ? size_requested : 0);
-    const size_t size_written = storage_file_write(app->file, data, size_requested);
-
-    return size_requested == size_written;
 }
 
 static void lfrfid_adc_app_comp_init(LfRfidAdcApp* app) {
@@ -287,7 +273,7 @@ static void lfrfid_adc_app_carrier_init(LfRfidAdcApp* app) {
 static void lfrfid_adc_app_init(LfRfidAdcApp* app) {
     FURI_LOG_D(TAG, "Application started");
 
-    lfrfid_adc_app_storage_init(app);
+    lfrfid_adc_app_serial_init(app);
     lfrfid_adc_app_dma_init(app);
     lfrfid_adc_app_adc_init(app);
     lfrfid_adc_app_comp_init(app);
@@ -304,7 +290,43 @@ static void lfrfid_adc_app_deinit(LfRfidAdcApp* app) {
     furi_hal_bus_disable(FuriHalBusTIM1);
     furi_hal_bus_disable(FuriHalBusTIM2);
 
+    furi_hal_serial_control_release(app->serial);
+
     FURI_LOG_D(TAG, "Application exited");
+}
+
+static void lfrfid_adc_app_decode_data(LfRfidAdcApp* app, bool tc) {
+    const size_t data_len = RECEIVE_BUFFER_LEN / 2UL;
+    const size_t data_offset = tc ? data_len : 0;
+
+    const uint16_t* data = app->buf + data_offset;
+
+    for(size_t i = 0; i < data_len; ++i) {
+        const uint16_t value = data[i];
+
+        const int32_t dv = (int32_t)value - app->prev_value;
+        const int32_t sum_dv = dv + app->prev_dv;
+
+        // TODO: Dynamic threshold?
+        const int threshold = 20;
+
+        const bool same_sign = (dv < 0) == (app->prev_dv < 0);
+        const bool above_threshold = abs(sum_dv) > threshold;
+
+        if(same_sign && above_threshold) {
+            app->decode_buf[i] = sum_dv > 0;
+        } else {
+            // Value remains the same
+            const size_t prev_index = (i > 0 ? i : data_len) - 1;
+            app->decode_buf[i] = app->decode_buf[prev_index];
+        }
+
+        app->prev_value = value;
+        app->prev_dv = dv;
+    }
+
+    furi_hal_serial_tx(app->serial, app->decode_buf, DECODE_BUFFER_LEN);
+    furi_hal_serial_tx_wait_complete(app->serial);
 }
 
 static void lfrfid_adc_app_run(LfRfidAdcApp* app) {
@@ -321,10 +343,7 @@ static void lfrfid_adc_app_run(LfRfidAdcApp* app) {
 
         } else if(
             event == LfRfidAdcAppEventHalfTransfer || event == LfRfidAdcAppEventTransferComplete) {
-            if(!lfrfid_adc_app_storage_write(app, event == LfRfidAdcAppEventTransferComplete)) {
-                FURI_LOG_E(TAG, "Failed to write to the storage file");
-                break;
-            }
+            lfrfid_adc_app_decode_data(app, event == LfRfidAdcAppEventTransferComplete);
         }
     }
 
