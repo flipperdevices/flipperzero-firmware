@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0506-1236-0.101.3-f0871a4.tgz&channel=RM0506-1236-0.101.3-f0871a4&version=0.101.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0513-1530-0.101.3-c59e0b0.tgz&channel=RM0513-1530-0.101.3-c59e0b0&version=0.101.3)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,23 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-13 15:08 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-13 15:08 EST`
-- Updated: [VB Migration Assistant v1.3 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
-- [Added 4 more GITS Profile Pictures for a total of 9 GITS and 47 in all (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures)
-- Updated: [Noptel LRF Sampler v1.8 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
-- Updated: [MagSpoof v0.8 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
-- OFW: [Desktop: fix crash on autolock after restart in locked state #3643 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3643)
-- Updated: [Sub-GHz Bruteforcer v3.12 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
-- Updated: [PicoPass (iClass) v1.15 (By Bettse)](https://gitlab.com/bettse/picopass)
-- RFID: [Instafob Protocol Support (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/commit/e6acfb405f111c8383747ae322d08b5a65a799c7)
-- Updated: [Mfkey v2.2 (By noproto)](https://github.com/noproto/FlipperMfkey) [Fix Possible Viewport Mutex Deadlock (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/99f74f5555310b13728dd9978ff4151ea787eca9)
-- Removed: [ID Card v1.0 (By alanretgue)](https://github.com/alanretgue/Flipper_Zero-id_card)
-- Added: [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
-- OFW: [Add the Akira animation #3636 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3636)
-- OFW: [Remove unused DolphinWait_61x59 icon #3645 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3645) (No changes needed for RM)
-- Updated: [Flipagotchi v2.1.1 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper) (Version Only Change from 2.0)
-- OFW: [Add support for R_ARM_REL32 relocations. #3631 (By Sameesunkaria)](https://github.com/flipperdevices/flipperzero-firmware/pull/3631)
-- OFW: [FuriHal: move version init to early stage #3647 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3647)
-- OFW: [Ble: new connection parameters negotiation scheme #3644 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3644)
 
 <a name="release">
 
@@ -597,4 +580,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0506-1236-0.101.3-f0871a4.tgz&channel=RM0506-1236-0.101.3-f0871a4&version=0.101.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0513-1530-0.101.3-c59e0b0.tgz&channel=RM0513-1530-0.101.3-c59e0b0&version=0.101.3)
