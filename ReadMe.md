@@ -43,8 +43,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed: [ID Card v1.0 (By alanretgue)](https://github.com/alanretgue/Flipper_Zero-id_card)
 - Added: [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
 - OFW: [Add the Akira animation #3636 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3636)
-- OFW: [Remove unused DolphinWait_61x59 icon #3645 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3645)
-- Updated: [Flipagotchi v2.1.1 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
+- OFW: [Remove unused DolphinWait_61x59 icon #3645 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3645) (No changes needed for RM)
+- Updated: [Flipagotchi v2.1.1 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper) (Version Only)
 - OFW: [Add support for R_ARM_REL32 relocations. #3631 (By Sameesunkaria)](https://github.com/flipperdevices/flipperzero-firmware/pull/3631)
 
 <a name="release">
