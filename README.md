@@ -16,7 +16,7 @@ pwnagotchi-flipper
 
 ## Setup
 ### Flipagotchi Setup (Flipper side)
-The flipagotchi app should soon be available on the flipper app store. If you would like to do things manually then follow these instructions.
+<b>The flipagotchi app can be downloaded from the flipper app store.</b> If you would like to do things manually then follow these instructions.
 1. Connect your Flipper to your computer
 2. Clone the Flipper Zero firmware onto your machine
 3. Place the ```flipagotchi/``` directory into the ```applications_user/```
