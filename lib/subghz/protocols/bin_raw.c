@@ -101,6 +101,7 @@ const SubGhzProtocolDecoder subghz_protocol_bin_raw_decoder = {
     .serialize = subghz_protocol_decoder_bin_raw_serialize,
     .deserialize = subghz_protocol_decoder_bin_raw_deserialize,
     .get_string = subghz_protocol_decoder_bin_raw_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_bin_raw_encoder = {

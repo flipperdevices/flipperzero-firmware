@@ -55,6 +55,7 @@ const SubGhzProtocolDecoder subghz_protocol_kinggates_stylo_4k_decoder = {
     .serialize = subghz_protocol_decoder_kinggates_stylo_4k_serialize,
     .deserialize = subghz_protocol_decoder_kinggates_stylo_4k_deserialize,
     .get_string = subghz_protocol_decoder_kinggates_stylo_4k_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_kinggates_stylo_4k_encoder = {

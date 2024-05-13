@@ -67,6 +67,7 @@ const SubGhzProtocolDecoder ws_protocol_auriol_ahfl_decoder = {
     .serialize = ws_protocol_decoder_auriol_ahfl_serialize,
     .deserialize = ws_protocol_decoder_auriol_ahfl_deserialize,
     .get_string = ws_protocol_decoder_auriol_ahfl_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_auriol_ahfl_encoder = {

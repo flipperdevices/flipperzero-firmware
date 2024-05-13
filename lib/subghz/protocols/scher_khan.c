@@ -56,6 +56,7 @@ const SubGhzProtocolDecoder subghz_protocol_scher_khan_decoder = {
     .serialize = subghz_protocol_decoder_scher_khan_serialize,
     .deserialize = subghz_protocol_decoder_scher_khan_deserialize,
     .get_string = subghz_protocol_decoder_scher_khan_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_scher_khan_encoder = {

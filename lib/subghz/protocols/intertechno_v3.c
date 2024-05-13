@@ -57,6 +57,7 @@ const SubGhzProtocolDecoder subghz_protocol_intertechno_v3_decoder = {
     .serialize = subghz_protocol_decoder_intertechno_v3_serialize,
     .deserialize = subghz_protocol_decoder_intertechno_v3_deserialize,
     .get_string = subghz_protocol_decoder_intertechno_v3_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_intertechno_v3_encoder = {

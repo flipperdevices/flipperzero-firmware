@@ -62,6 +62,7 @@ const SubGhzProtocolDecoder ws_protocol_lacrosse_tx141thbv2_decoder = {
     .serialize = ws_protocol_decoder_lacrosse_tx141thbv2_serialize,
     .deserialize = ws_protocol_decoder_lacrosse_tx141thbv2_deserialize,
     .get_string = ws_protocol_decoder_lacrosse_tx141thbv2_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_lacrosse_tx141thbv2_encoder = {

@@ -419,6 +419,7 @@ const SubGhzProtocolDecoder ws_protocol_oregon2_decoder = {
     .serialize = ws_protocol_decoder_oregon2_serialize,
     .deserialize = ws_protocol_decoder_oregon2_deserialize,
     .get_string = ws_protocol_decoder_oregon2_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocol ws_protocol_oregon2 = {

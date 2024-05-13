@@ -84,6 +84,7 @@ const SubGhzProtocolDecoder ws_protocol_lacrosse_tx_decoder = {
     .serialize = ws_protocol_decoder_lacrosse_tx_serialize,
     .deserialize = ws_protocol_decoder_lacrosse_tx_deserialize,
     .get_string = ws_protocol_decoder_lacrosse_tx_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_lacrosse_tx_encoder = {

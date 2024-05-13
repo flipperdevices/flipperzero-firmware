@@ -50,6 +50,7 @@ const SubGhzProtocolDecoder subghz_protocol_marantec_decoder = {
     .serialize = subghz_protocol_decoder_marantec_serialize,
     .deserialize = subghz_protocol_decoder_marantec_deserialize,
     .get_string = subghz_protocol_decoder_marantec_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_marantec_encoder = {

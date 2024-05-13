@@ -109,3 +109,10 @@ SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_deserialize(
  * @param output Resulting text
  */
 void subghz_protocol_decoder_hormann_bisecur_get_string(void* context, FuriString* output);
+
+/**
+ * Getting a one-line textual representation of the received data.
+ * @param context Pointer to a SubGhzProtocolDecoderHormannBiSecur instance
+ * @param output Resulting text
+ */
+void subghz_protocol_decoder_hormann_bisecur_get_string_brief(void* context, FuriString* output);

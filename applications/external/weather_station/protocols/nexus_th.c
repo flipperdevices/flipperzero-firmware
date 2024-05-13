@@ -68,6 +68,7 @@ const SubGhzProtocolDecoder ws_protocol_nexus_th_decoder = {
     .serialize = ws_protocol_decoder_nexus_th_serialize,
     .deserialize = ws_protocol_decoder_nexus_th_deserialize,
     .get_string = ws_protocol_decoder_nexus_th_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_nexus_th_encoder = {

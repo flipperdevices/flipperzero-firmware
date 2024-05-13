@@ -49,6 +49,7 @@ const SubGhzProtocolDecoder subghz_protocol_dooya_decoder = {
     .serialize = subghz_protocol_decoder_dooya_serialize,
     .deserialize = subghz_protocol_decoder_dooya_deserialize,
     .get_string = subghz_protocol_decoder_dooya_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_dooya_encoder = {

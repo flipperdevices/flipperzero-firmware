@@ -350,6 +350,7 @@ const SubGhzProtocolDecoder subghz_protocol_honeywell_decoder = {
     .serialize = subghz_protocol_decoder_honeywell_serialize,
     .deserialize = subghz_protocol_decoder_honeywell_deserialize,
     .get_string = subghz_protocol_decoder_honeywell_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_honeywell_encoder = {

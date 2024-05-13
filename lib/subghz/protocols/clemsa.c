@@ -63,6 +63,7 @@ const SubGhzProtocolDecoder subghz_protocol_clemsa_decoder = {
     .serialize = subghz_protocol_decoder_clemsa_serialize,
     .deserialize = subghz_protocol_decoder_clemsa_deserialize,
     .get_string = subghz_protocol_decoder_clemsa_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_clemsa_encoder = {

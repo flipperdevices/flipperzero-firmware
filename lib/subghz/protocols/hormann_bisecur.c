@@ -63,6 +63,7 @@ const SubGhzProtocolDecoder subghz_protocol_hormann_bisecur_decoder = {
     .serialize = subghz_protocol_decoder_hormann_bisecur_serialize,
     .deserialize = subghz_protocol_decoder_hormann_bisecur_deserialize,
     .get_string = subghz_protocol_decoder_hormann_bisecur_get_string,
+    .get_string_brief = subghz_protocol_decoder_hormann_bisecur_get_string_brief,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_hormann_bisecur_encoder = {
@@ -570,6 +571,26 @@ void subghz_protocol_decoder_hormann_bisecur_get_string(void* context, FuriStrin
         instance->generic.serial,
         instance->generic.data,
         instance->generic.data_2);
+}
+
+void subghz_protocol_decoder_hormann_bisecur_get_string_brief(void* context, FuriString* output) {
+    furi_assert(context);
+    SubGhzProtocolDecoderHormannBiSecur* instance = context;
+    subghz_protocol_hormann_bisecur_parse_data(instance);
+    bool valid_crc = subghz_protocol_decoder_hormann_bisecur_check_crc(instance);
+
+    if(!valid_crc) {
+        furi_string_cat_printf(output, "HBS Bad checksum");
+        return;
+    }
+
+    uint8_t data_hash = subghz_protocol_blocks_xor_bytes(
+        (const uint8_t*)&instance->generic.data, sizeof(uint64_t));
+    uint8_t data_2_hash = subghz_protocol_blocks_xor_bytes(
+        (const uint8_t*)&instance->generic.data_2, sizeof(uint64_t));
+
+    furi_string_cat_printf(
+        output, "HBS %08lX:%02X%02X", instance->generic.serial, data_hash, data_2_hash);
 }
 
 static LevelDuration subghz_protocol_encoder_hormann_bisecur_add_duration_to_upload(

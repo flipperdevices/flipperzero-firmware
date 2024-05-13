@@ -76,6 +76,7 @@ const SubGhzProtocolDecoder ws_protocol_tx_8300_decoder = {
     .serialize = ws_protocol_decoder_tx_8300_serialize,
     .deserialize = ws_protocol_decoder_tx_8300_deserialize,
     .get_string = ws_protocol_decoder_tx_8300_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_tx_8300_encoder = {

@@ -65,6 +65,7 @@ const SubGhzProtocolDecoder subghz_protocol_secplus_v2_decoder = {
     .serialize = subghz_protocol_decoder_secplus_v2_serialize,
     .deserialize = subghz_protocol_decoder_secplus_v2_deserialize,
     .get_string = subghz_protocol_decoder_secplus_v2_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_secplus_v2_encoder = {

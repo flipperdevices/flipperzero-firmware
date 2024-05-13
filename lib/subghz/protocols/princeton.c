@@ -58,6 +58,7 @@ const SubGhzProtocolDecoder subghz_protocol_princeton_decoder = {
     .serialize = subghz_protocol_decoder_princeton_serialize,
     .deserialize = subghz_protocol_decoder_princeton_deserialize,
     .get_string = subghz_protocol_decoder_princeton_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_princeton_encoder = {

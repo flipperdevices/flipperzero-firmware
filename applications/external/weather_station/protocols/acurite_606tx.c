@@ -55,6 +55,7 @@ const SubGhzProtocolDecoder ws_protocol_acurite_606tx_decoder = {
     .serialize = ws_protocol_decoder_acurite_606tx_serialize,
     .deserialize = ws_protocol_decoder_acurite_606tx_deserialize,
     .get_string = ws_protocol_decoder_acurite_606tx_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_acurite_606tx_encoder = {

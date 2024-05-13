@@ -65,6 +65,7 @@ const SubGhzProtocolDecoder ws_protocol_thermopro_tx4_decoder = {
     .serialize = ws_protocol_decoder_thermopro_tx4_serialize,
     .deserialize = ws_protocol_decoder_thermopro_tx4_deserialize,
     .get_string = ws_protocol_decoder_thermopro_tx4_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_thermopro_tx4_encoder = {

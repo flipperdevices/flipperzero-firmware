@@ -50,6 +50,7 @@ const SubGhzProtocolDecoder subghz_protocol_magellan_decoder = {
     .serialize = subghz_protocol_decoder_magellan_serialize,
     .deserialize = subghz_protocol_decoder_magellan_deserialize,
     .get_string = subghz_protocol_decoder_magellan_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_magellan_encoder = {

@@ -49,6 +49,7 @@ const SubGhzProtocolDecoder subghz_protocol_nero_sketch_decoder = {
     .serialize = subghz_protocol_decoder_nero_sketch_serialize,
     .deserialize = subghz_protocol_decoder_nero_sketch_deserialize,
     .get_string = subghz_protocol_decoder_nero_sketch_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_nero_sketch_encoder = {

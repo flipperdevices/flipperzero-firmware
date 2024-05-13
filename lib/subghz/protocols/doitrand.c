@@ -55,6 +55,7 @@ const SubGhzProtocolDecoder subghz_protocol_doitrand_decoder = {
     .serialize = subghz_protocol_decoder_doitrand_serialize,
     .deserialize = subghz_protocol_decoder_doitrand_deserialize,
     .get_string = subghz_protocol_decoder_doitrand_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_doitrand_encoder = {

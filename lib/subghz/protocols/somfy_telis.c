@@ -55,6 +55,7 @@ const SubGhzProtocolDecoder subghz_protocol_somfy_telis_decoder = {
     .serialize = subghz_protocol_decoder_somfy_telis_serialize,
     .deserialize = subghz_protocol_decoder_somfy_telis_deserialize,
     .get_string = subghz_protocol_decoder_somfy_telis_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_somfy_telis_encoder = {

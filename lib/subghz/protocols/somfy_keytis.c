@@ -54,6 +54,7 @@ const SubGhzProtocolDecoder subghz_protocol_somfy_keytis_decoder = {
     .serialize = subghz_protocol_decoder_somfy_keytis_serialize,
     .deserialize = subghz_protocol_decoder_somfy_keytis_deserialize,
     .get_string = subghz_protocol_decoder_somfy_keytis_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocol subghz_protocol_somfy_keytis = {

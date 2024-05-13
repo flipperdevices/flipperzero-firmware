@@ -245,7 +245,7 @@ bool subghz_history_add_to_history(
     SubGhzProtocolDecoderBase* decoder_base = context;
     uint32_t hash_data = subghz_protocol_decoder_base_get_hash_data_long(decoder_base);
     if((instance->code_last_hash_data == hash_data) &&
-       ((furi_get_tick() - instance->last_update_timestamp) < 500)) {
+       ((furi_get_tick() - instance->last_update_timestamp) < 600)) {
         instance->last_update_timestamp = furi_get_tick();
         return false;
     }
@@ -265,7 +265,6 @@ bool subghz_history_add_to_history(
     instance->code_last_hash_data = hash_data;
     instance->last_update_timestamp = furi_get_tick();
 
-    FuriString* text = furi_string_alloc();
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_push_raw(instance->history->data);
     item->preset = malloc(sizeof(SubGhzRadioPreset));
     item->type = decoder_base->protocol->type;
@@ -284,6 +283,15 @@ bool subghz_history_add_to_history(
     item->item_str = furi_string_alloc();
     item->flipper_string = flipper_format_string_alloc();
     subghz_protocol_decoder_base_serialize(decoder_base, item->flipper_string, preset);
+
+    if(decoder_base->protocol && decoder_base->protocol->decoder &&
+       decoder_base->protocol->decoder->get_string_brief) {
+        decoder_base->protocol->decoder->get_string_brief(decoder_base, item->item_str);
+        instance->last_index_write++;
+        return true;
+    }
+
+    FuriString* text = furi_string_alloc();
 
     do {
         if(!flipper_format_rewind(item->flipper_string)) {

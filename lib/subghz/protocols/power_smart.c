@@ -57,6 +57,7 @@ const SubGhzProtocolDecoder subghz_protocol_power_smart_decoder = {
     .serialize = subghz_protocol_decoder_power_smart_serialize,
     .deserialize = subghz_protocol_decoder_power_smart_deserialize,
     .get_string = subghz_protocol_decoder_power_smart_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_power_smart_encoder = {

@@ -58,6 +58,7 @@ const SubGhzProtocolDecoder subghz_protocol_holtek_decoder = {
     .serialize = subghz_protocol_decoder_holtek_serialize,
     .deserialize = subghz_protocol_decoder_holtek_deserialize,
     .get_string = subghz_protocol_decoder_holtek_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_holtek_encoder = {

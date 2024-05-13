@@ -87,6 +87,7 @@ const SubGhzProtocolDecoder tpms_protocol_schrader_gg4_decoder = {
     .serialize = tpms_protocol_decoder_schrader_gg4_serialize,
     .deserialize = tpms_protocol_decoder_schrader_gg4_deserialize,
     .get_string = tpms_protocol_decoder_schrader_gg4_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder tpms_protocol_schrader_gg4_encoder = {

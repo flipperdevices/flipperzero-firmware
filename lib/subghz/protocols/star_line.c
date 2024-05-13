@@ -65,6 +65,7 @@ const SubGhzProtocolDecoder subghz_protocol_star_line_decoder = {
     .serialize = subghz_protocol_decoder_star_line_serialize,
     .deserialize = subghz_protocol_decoder_star_line_deserialize,
     .get_string = subghz_protocol_decoder_star_line_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_star_line_encoder = {

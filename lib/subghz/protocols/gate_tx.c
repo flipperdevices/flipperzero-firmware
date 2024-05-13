@@ -48,6 +48,7 @@ const SubGhzProtocolDecoder subghz_protocol_gate_tx_decoder = {
     .serialize = subghz_protocol_decoder_gate_tx_serialize,
     .deserialize = subghz_protocol_decoder_gate_tx_deserialize,
     .get_string = subghz_protocol_decoder_gate_tx_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_gate_tx_encoder = {

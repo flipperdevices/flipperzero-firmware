@@ -70,6 +70,7 @@ const SubGhzProtocolDecoder ws_protocol_wendox_w6726_decoder = {
     .serialize = ws_protocol_decoder_wendox_w6726_serialize,
     .deserialize = ws_protocol_decoder_wendox_w6726_deserialize,
     .get_string = ws_protocol_decoder_wendox_w6726_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_wendox_w6726_encoder = {

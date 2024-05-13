@@ -60,6 +60,7 @@ const SubGhzProtocolDecoder subghz_protocol_came_decoder = {
     .serialize = subghz_protocol_decoder_came_serialize,
     .deserialize = subghz_protocol_decoder_came_deserialize,
     .get_string = subghz_protocol_decoder_came_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_came_encoder = {

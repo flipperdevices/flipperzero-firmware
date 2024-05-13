@@ -50,6 +50,7 @@ const SubGhzProtocolDecoder subghz_protocol_nero_radio_decoder = {
     .serialize = subghz_protocol_decoder_nero_radio_serialize,
     .deserialize = subghz_protocol_decoder_nero_radio_deserialize,
     .get_string = subghz_protocol_decoder_nero_radio_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_nero_radio_encoder = {

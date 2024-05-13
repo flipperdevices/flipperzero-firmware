@@ -47,6 +47,7 @@ const SubGhzProtocolDecoder subghz_protocol_nice_flo_decoder = {
     .serialize = subghz_protocol_decoder_nice_flo_serialize,
     .deserialize = subghz_protocol_decoder_nice_flo_deserialize,
     .get_string = subghz_protocol_decoder_nice_flo_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_nice_flo_encoder = {

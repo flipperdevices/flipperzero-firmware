@@ -76,6 +76,7 @@ const SubGhzProtocolDecoder subghz_protocol_x10_decoder = {
     .serialize = subghz_protocol_decoder_x10_serialize,
     .deserialize = subghz_protocol_decoder_x10_deserialize,
     .get_string = subghz_protocol_decoder_x10_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_x10_encoder = {

@@ -55,6 +55,7 @@ const SubGhzProtocolDecoder subghz_protocol_linear_delta3_decoder = {
     .serialize = subghz_protocol_decoder_linear_delta3_serialize,
     .deserialize = subghz_protocol_decoder_linear_delta3_deserialize,
     .get_string = subghz_protocol_decoder_linear_delta3_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_linear_delta3_encoder = {

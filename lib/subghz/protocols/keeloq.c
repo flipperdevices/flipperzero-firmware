@@ -66,6 +66,7 @@ const SubGhzProtocolDecoder subghz_protocol_keeloq_decoder = {
     .serialize = subghz_protocol_decoder_keeloq_serialize,
     .deserialize = subghz_protocol_decoder_keeloq_deserialize,
     .get_string = subghz_protocol_decoder_keeloq_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_keeloq_encoder = {

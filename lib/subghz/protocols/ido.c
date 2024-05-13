@@ -48,6 +48,7 @@ const SubGhzProtocolDecoder subghz_protocol_ido_decoder = {
     .deserialize = subghz_protocol_decoder_ido_deserialize,
     .serialize = subghz_protocol_decoder_ido_serialize,
     .get_string = subghz_protocol_decoder_ido_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_ido_encoder = {

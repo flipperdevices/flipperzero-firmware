@@ -80,6 +80,7 @@ const SubGhzProtocolDecoder ws_protocol_infactory_decoder = {
     .serialize = ws_protocol_decoder_infactory_serialize,
     .deserialize = ws_protocol_decoder_infactory_deserialize,
     .get_string = ws_protocol_decoder_infactory_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_infactory_encoder = {

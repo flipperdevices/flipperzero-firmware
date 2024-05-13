@@ -430,6 +430,7 @@ const SubGhzProtocolDecoder subghz_protocol_pocsag_decoder = {
     .serialize = subghz_protocol_decoder_pocsag_serialize,
     .deserialize = subghz_protocol_decoder_pocsag_deserialize,
     .get_string = subhz_protocol_decoder_pocsag_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_pocsag_encoder = {

@@ -95,6 +95,7 @@ const SubGhzProtocolDecoder ws_protocol_gt_wt_03_decoder = {
     .serialize = ws_protocol_decoder_gt_wt_03_serialize,
     .deserialize = ws_protocol_decoder_gt_wt_03_deserialize,
     .get_string = ws_protocol_decoder_gt_wt_03_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_gt_wt_03_encoder = {
