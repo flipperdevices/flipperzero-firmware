@@ -40,11 +40,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PicoPass (iClass) v1.15 (By Bettse)](https://gitlab.com/bettse/picopass)
 - RFID: [Instafob Protocol Support (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/commit/e6acfb405f111c8383747ae322d08b5a65a799c7)
 - Updated: [Mfkey v2.2 (By noproto)](https://github.com/noproto/FlipperMfkey) [Fix Possible Viewport Mutex Deadlock (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/99f74f5555310b13728dd9978ff4151ea787eca9)
-- Updated: [Flipagotchi v2.0 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - Removed: [ID Card v1.0 (By alanretgue)](https://github.com/alanretgue/Flipper_Zero-id_card)
 - Added: [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
 - OFW: [Add the Akira animation #3636 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3636)
 - OFW: [Remove unused DolphinWait_61x59 icon #3645 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3645)
+- Updated: [Flipagotchi v2.1.1 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 
 <a name="release">
 
@@ -406,7 +406,7 @@ $ ./fbt dolphin_ext
 - [Financial Calculator v1.0 (By schaene)](https://github.com/schaene/Flipper-Financial-Calculator)
 - [FindMy Flipper v3.5 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - [Flashlight v1.1 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
-- [Flipagotchi v2.0 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
+- [Flipagotchi v2.1.1 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [FlipBoard Blinky v2.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBoard Keyboard v2.4 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBoard Signal v3.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)

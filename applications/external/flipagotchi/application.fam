@@ -9,6 +9,6 @@ App(
     fap_category="GPIO",
     fap_author="Matt-London",
     fap_weburl="https://github.com/Matt-London/pwnagotchi-flipper",
-    fap_version="2.0",
+    fap_version="2.1.1",
     fap_description="This program will interface the pwnagotchi with the flipper. This will be accomplished using custom code on the pwnagotchi's end to give the flipper simple rendering instructions over UART.",
 )
