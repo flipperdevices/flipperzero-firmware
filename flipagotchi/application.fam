@@ -1,6 +1,6 @@
 App(
     appid="flipagotchi",
-    fap_version="2.1.0",
+    fap_version="2.1.1",
     name="Flipagotchi",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipagotchi_app",

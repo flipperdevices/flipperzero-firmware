@@ -1,7 +1,7 @@
 Displays the screen of the Pwnagotchi on the Flipper's screen. Interfaces over UART with a Raspberry Pi Zero W running the Pwnagotchi program.
 
-## Setup instructions
-### PwnZero Setup (Pwnagotchi side)
+# Setup instructions
+## PwnZero Setup (Pwnagotchi side)
 This procedure will explain how to configure the Pwnagotchi to use the PwnZero plugin to communicate with the Flipper. Note: You may need to change the pyserial file name based on whichever version pip downloaded for you.
 1. On your host machine run `pip3 download pyserial`, this should download a `.whl` file.
 2. Take note of the filename of the `.whl` and insert that instead of mine
