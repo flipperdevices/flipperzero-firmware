@@ -40,7 +40,7 @@ This procedure will explain how to configure the Pwnagotchi to use the PwnZero p
     4. Select `Yes` for serial enabled
 6. Place the PwnZero.py file somewhere on the Pi in either its own folder or a folder with other plugins
 7. Edit ```/etc/pwnagotchi/config.toml``` file and set ```main.custom_plugins = "/path/to/plugin/folder"```
-8. Follow hardware setup shown in the doc/HardwareSetup.md to connect the devices
+8. Follow hardware setup shown in `doc/HardwareSetup.md` to connect the devices
 9. Restart the Pwnagotchi and open the Flipagotchi app on the Flipper Zero
 
 ### Setup note
