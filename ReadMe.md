@@ -41,6 +41,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - RFID: [Instafob Protocol Support (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/commit/e6acfb405f111c8383747ae322d08b5a65a799c7)
 - Updated: [Mfkey v2.2 (By noproto)](https://github.com/noproto/FlipperMfkey) [Fix Possible Viewport Mutex Deadlock (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/99f74f5555310b13728dd9978ff4151ea787eca9)
 - Updated: [Flipagotchi v2.0 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
+- Removed: [ID Card v1.0 (By alanretgue)](https://github.com/alanretgue/Flipper_Zero-id_card)
+- Added: [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
 
 <a name="release">
 
@@ -428,7 +430,7 @@ $ ./fbt dolphin_ext
 - [HID File Transfer v1.0 (By Kavakuo)](https://github.com/Kavakuo/HID-File-Transfer)
 - [i2c Tools v1.2 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - [iButton Fuzzer v1.3 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
-- [ID Card v1.0 (By alanretgue)](https://github.com/alanretgue/Flipper_Zero-id_card)
+- [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
 - [IFTTT Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [IR Decoder v1.0 (By prplecake)](https://github.com/prplecake/f0/tree/master/infrared/apps/ir_decoder)

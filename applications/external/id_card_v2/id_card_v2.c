@@ -18,7 +18,7 @@ typedef enum {
     IDScenesIDCardScene,
     IDScenesGreetingInputScene,
     IDScenesGreetingMessageScene,
-    IDScenesAboutScene, 
+    IDScenesAboutScene,
     IDScenesSceneCount,
 } IDScenesScene;
 
@@ -42,7 +42,7 @@ typedef struct App {
 typedef enum {
     IDScenesMainMenuSceneIDCard,
     IDScenesMainMenuSceneSetup,
-    IDScenesMainMenuSceneAbout, 
+    IDScenesMainMenuSceneAbout,
 } IDScenesMainMenuSceneIndex;
 
 typedef enum {
@@ -57,7 +57,7 @@ typedef enum {
 void save_user_input(const char* filename, const char* input) {
     Storage* storage = (Storage*)furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
-    if (storage_file_open(file, filename, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+    if(storage_file_open(file, filename, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
         storage_file_write(file, input, strlen(input));
         storage_file_close(file);
     }
@@ -68,9 +68,9 @@ void save_user_input(const char* filename, const char* input) {
 void load_user_input(const char* filename, char* buffer, size_t buffer_size) {
     Storage* storage = (Storage*)furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
-    if (storage_file_open(file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(storage_file_open(file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint16_t bytes_read = storage_file_read(file, buffer, buffer_size - 1);
-        buffer[bytes_read] = '\0'; 
+        buffer[bytes_read] = '\0';
         storage_file_close(file);
     }
     storage_file_free(file);
@@ -81,16 +81,13 @@ void id_menu_callback(void* context, uint32_t index) {
     App* app = context;
     switch(index) {
     case IDScenesMainMenuSceneIDCard:
-        scene_manager_handle_custom_event(
-            app->scene_manager, IDScenesMainMenuSceneIDCardEvent);
+        scene_manager_handle_custom_event(app->scene_manager, IDScenesMainMenuSceneIDCardEvent);
         break;
     case IDScenesMainMenuSceneSetup:
-        scene_manager_handle_custom_event(
-            app->scene_manager, IDScenesMainMenuSceneSetupEvent);
+        scene_manager_handle_custom_event(app->scene_manager, IDScenesMainMenuSceneSetupEvent);
         break;
-    case IDScenesMainMenuSceneAbout: 
-        scene_manager_next_scene(
-            app->scene_manager, IDScenesAboutScene); 
+    case IDScenesMainMenuSceneAbout:
+        scene_manager_next_scene(app->scene_manager, IDScenesAboutScene);
         break;
     }
 }
@@ -121,24 +118,9 @@ void id_main_menu_scene_on_enter(void* context) {
     App* app = context;
     submenu_reset(app->submenu);
     submenu_set_header(app->submenu, "ID Card v2");
-    submenu_add_item(
-        app->submenu,
-        "ID Card",
-        IDScenesMainMenuSceneIDCard,
-        id_menu_callback,
-        app);
-    submenu_add_item(
-        app->submenu,
-        "Setup",
-        IDScenesMainMenuSceneSetup,
-        id_menu_callback,
-        app);
-    submenu_add_item( 
-        app->submenu,
-        "About",
-        IDScenesMainMenuSceneAbout,
-        id_menu_callback,
-        app);
+    submenu_add_item(app->submenu, "ID Card", IDScenesMainMenuSceneIDCard, id_menu_callback, app);
+    submenu_add_item(app->submenu, "Setup", IDScenesMainMenuSceneSetup, id_menu_callback, app);
+    submenu_add_item(app->submenu, "About", IDScenesMainMenuSceneAbout, id_menu_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesSubmenuView);
 }
 void id_main_menu_scene_on_exit(void* context) {
@@ -149,65 +131,61 @@ void id_main_menu_scene_on_exit(void* context) {
 void id_card_scene_on_enter(void* context) {
     App* app = context;
     widget_reset(app->widget);
-    widget_add_string_element(
-        app->widget, 5, 5, AlignLeft, AlignCenter, FontPrimary, "ID Card");
-    
-    
+    widget_add_string_element(app->widget, 5, 5, AlignLeft, AlignCenter, FontPrimary, "ID Card");
+
     load_user_input(ID_SAVE_PATH, app->user_input, app->user_input_size);
-    
-    
+
     char* input_copy = strdup(app->user_input);
-    if (input_copy != NULL) {
-        int y_position = 30; 
-        
+    if(input_copy != NULL) {
+        int y_position = 30;
+
         char* token = strtok(input_copy, "_");
 
-        
-        if (token != NULL && strcmp(token, "0") != 0) {
+        if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
                 app->widget, 5, y_position, AlignLeft, AlignCenter, FontPrimary, "Name:");
             widget_add_string_element(
                 app->widget, 55, y_position, AlignLeft, AlignCenter, FontPrimary, token);
-            y_position += 10; 
+            y_position += 10;
         }
-        
+
         token = strtok(NULL, "_");
-        if (token != NULL && strcmp(token, "0") != 0) {
+        if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
                 app->widget, 5, y_position, AlignLeft, AlignCenter, FontPrimary, "Tel:");
             widget_add_string_element(
                 app->widget, 55, y_position, AlignLeft, AlignCenter, FontPrimary, token);
-            y_position += 10; 
+            y_position += 10;
         }
-        
+
         token = strtok(NULL, "_");
-        if (token != NULL && strcmp(token, "0") != 0) {
+        if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
                 app->widget, 5, y_position, AlignLeft, AlignCenter, FontPrimary, "Address:");
             widget_add_string_element(
                 app->widget, 55, y_position, AlignLeft, AlignCenter, FontPrimary, token);
-            y_position += 10; 
+            y_position += 10;
         }
-        
+
         token = strtok(NULL, "_");
-        if (token != NULL && strcmp(token, "0") != 0) {
+        if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
                 app->widget, 5, y_position, AlignLeft, AlignCenter, FontPrimary, "Notes:");
             widget_add_string_element(
                 app->widget, 55, y_position, AlignLeft, AlignCenter, FontPrimary, token);
-            y_position += 10; 
+            y_position += 10;
         }
-        
+
         free(input_copy);
     }
-    
+
     view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesWidgetView);
 }
 
 bool id_card_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
-    return false; 
+    return false;
 }
 void id_card_scene_on_exit(void* context) {
     UNUSED(context);
@@ -239,7 +217,7 @@ bool id_greeting_input_scene_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == IDScenesGreetingInputSceneSaveEvent) {
             scene_manager_next_scene(app->scene_manager, IDScenesGreetingMessageScene);
-            app->user_input_available = true; 
+            app->user_input_available = true;
             save_user_input(ID_SAVE_PATH, app->user_input);
             consumed = true;
         }
@@ -260,7 +238,7 @@ void id_greeting_message_scene_on_enter(void* context) {
 bool id_greeting_message_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
-    return false; 
+    return false;
 }
 void id_greeting_message_scene_on_exit(void* context) {
     App* app = context;
@@ -270,7 +248,7 @@ void id_greeting_message_scene_on_exit(void* context) {
 void id_about_scene_on_enter(void* context) {
     App* app = context;
     widget_reset(app->widget);
-    
+
     widget_add_string_element(
         app->widget, 5, 5, AlignLeft, AlignCenter, FontPrimary, "To leave the field empty,");
     widget_add_string_element(
@@ -285,7 +263,7 @@ void id_about_scene_on_enter(void* context) {
 bool id_about_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
-    return false; 
+    return false;
 }
 void id_about_scene_on_exit(void* context) {
     App* app = context;
@@ -297,7 +275,7 @@ void (*const id_scene_on_enter_handlers[])(void*) = {
     id_card_scene_on_enter,
     id_greeting_input_scene_on_enter,
     id_greeting_message_scene_on_enter,
-    id_about_scene_on_enter, 
+    id_about_scene_on_enter,
 };
 
 bool (*const id_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
@@ -305,7 +283,7 @@ bool (*const id_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     id_card_scene_on_event,
     id_greeting_input_scene_on_event,
     id_greeting_message_scene_on_event,
-    id_about_scene_on_event, 
+    id_about_scene_on_event,
 };
 
 void (*const id_scene_on_exit_handlers[])(void*) = {
@@ -313,7 +291,7 @@ void (*const id_scene_on_exit_handlers[])(void*) = {
     id_card_scene_on_exit,
     id_greeting_input_scene_on_exit,
     id_greeting_message_scene_on_exit,
-    id_about_scene_on_exit, 
+    id_about_scene_on_exit,
 };
 
 static const SceneManagerHandlers id_scene_manager_handlers = {
@@ -355,7 +333,7 @@ static App* app_alloc() {
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, IDScenesTextInputView, text_input_get_view(app->text_input));
-    app->user_input_available = false; 
+    app->user_input_available = false;
     load_user_input(ID_SAVE_PATH, app->user_input, app->user_input_size);
     return app;
 }
@@ -386,4 +364,3 @@ int32_t id_app(void* p) {
     app_free(app);
     return 0;
 }
-
