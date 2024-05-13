@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0513-0034-0.101.3-72e1dee](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-13 00:34 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-13 00:34 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-13 11:37 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-13 11:37 EST`
 - Updated: [VB Migration Assistant v1.3 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - [Added 4 more GITS Profile Pictures for a total of 9 GITS and 47 in all (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures)
 - Updated: [Noptel LRF Sampler v1.8 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
@@ -45,6 +45,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Add the Akira animation #3636 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3636)
 - OFW: [Remove unused DolphinWait_61x59 icon #3645 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3645)
 - Updated: [Flipagotchi v2.1.1 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
+- OFW: [Add support for R_ARM_REL32 relocations. #3631 (By Sameesunkaria)](https://github.com/flipperdevices/flipperzero-firmware/pull/3631)
 
 <a name="release">
 
