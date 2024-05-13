@@ -110,7 +110,7 @@ static void gap_verify_connection_parameters(Gap* gap) {
     } else {
         FURI_LOG_I(
             TAG,
-            "Connection interval suites us. Spent %u rounds to negotiate",
+            "Connection interval suits us. Spent %u rounds to negotiate",
             gap->negotiation_round);
         // Looks like the other side is open to negotiation
         gap->negotiation_round = 0;
