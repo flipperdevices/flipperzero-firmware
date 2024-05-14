@@ -52,6 +52,7 @@ enum MagCustomEvent {
     MagEventNext = 100,
     MagEventExit,
     MagEventPopupClosed,
+    MagEventConfirmDialog,
 };
 
 typedef struct {

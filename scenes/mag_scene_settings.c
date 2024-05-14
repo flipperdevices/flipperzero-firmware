@@ -61,6 +61,8 @@ const char* const off_on_text[OFF_ON_COUNT] = {
     "ON",
 };
 
+VariableItem* item_dialog_cb;
+
 void mag_scene_settings_var_item_list_callback(void* context, uint32_t index) {
     Mag* mag = context;
     view_dispatcher_send_custom_event(mag->view_dispatcher, index);
@@ -105,36 +107,20 @@ static void mag_scene_settings_set_repeat_mode(VariableItem* item) {
     mag_scene_settings_set_bool(item, &mag->state.repeat_mode);
 }
 
-/*
 static void mag_scene_settings_set_allow_uart(VariableItem* item) {
     Mag* mag = variable_item_get_context(item);
 
-    bool rising = !(mag->state.allow_uart);
+    // rising change when value index is truth-y, and prior value false
+    bool rising = !mag->state.allow_uart && !!variable_item_get_current_value_index(item);
     // trigger dialog only on rising change
     if(rising) {
-        DialogMessage* msg = dialog_message_alloc();
-        dialog_message_set_header(msg, "UART MSR", 64, 0, AlignCenter, AlignTop);
-        dialog_message_set_buttons(msg, "No", NULL, "Yes");
-        dialog_message_set_text(
-            msg,
-            "This option requires a\nUART-compatible mag reader.\nIs it installed?\n",
-            64,
-            32,
-            AlignCenter,
-            AlignCenter);
-        DialogMessageButton res = dialog_message_show(furi_record_open(RECORD_DIALOGS), msg);
-        if(res != DialogMessageButtonRight) {
-            // if not "Yes", reset index
-            variable_item_set_current_value_index(item, (uint32_t)mag->state.allow_uart);
-        }
-        dialog_message_free(msg);
-        furi_record_close(RECORD_DIALOGS);
+        item_dialog_cb = item;
+        view_dispatcher_send_custom_event(mag->view_dispatcher, MagEventConfirmDialog);
     }
 
     // set value & text based on current varitem index
     mag_scene_settings_set_bool(item, &mag->state.allow_uart);
 }
-*/
 
 static void mag_pin_variable_item_list_add(
     Mag* mag,
@@ -188,13 +174,8 @@ void mag_scene_settings_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, n_repeats_text[value_index]);
 
-#ifndef FW_ORIGIN_Official
-    item = variable_item_list_add(var_item_list, "UART MSR: ", 1, NULL, mag);
-    variable_item_set_current_value_text(item, mag->state.allow_uart ? "ON" : "OFF");
-#endif
-
-    //mag_bool_variable_item_list_add(
-    //    mag, "UART MSR:", mag->state.allow_uart, mag_scene_settings_set_allow_uart);
+    mag_bool_variable_item_list_add(
+        mag, "UART MSR:", mag->state.allow_uart, mag_scene_settings_set_allow_uart);
 
     variable_item_list_set_enter_callback(
         var_item_list, mag_scene_settings_var_item_list_callback, mag);
@@ -228,36 +209,6 @@ void mag_scene_settings_dialog_invalid_pins(Mag* mag) {
     }
 }
 
-#ifndef FW_ORIGIN_Official
-void mag_scene_settings_dialog_allow_uart(Mag* mag) {
-    bool change = mag->state.allow_uart;
-    if(!change) {
-        DialogMessage* msg = dialog_message_alloc();
-        dialog_message_set_header(msg, "UART MSR", 64, 0, AlignCenter, AlignTop);
-        dialog_message_set_buttons(msg, "No", NULL, "Yes");
-        dialog_message_set_text(
-            msg,
-            "This option requires a\nUART-compatible mag reader.\nIs it installed?\n",
-            64,
-            32,
-            AlignCenter,
-            AlignCenter);
-        DialogMessageButton res = dialog_message_show(furi_record_open(RECORD_DIALOGS), msg);
-        if(res == DialogMessageButtonRight) {
-            change = true;
-        }
-        dialog_message_free(msg);
-        furi_record_close(RECORD_DIALOGS);
-    }
-    if(change) {
-        mag->state.allow_uart = !mag->state.allow_uart;
-        variable_item_set_current_value_text(
-            variable_item_list_get(mag->variable_item_list, VarItemListIndexAllowUART),
-            mag->state.allow_uart ? "ON" : "OFF");
-    }
-}
-#endif
-
 bool mag_scene_settings_on_event(void* context, SceneManagerEvent event) {
     Mag* mag = context;
     SceneManager* scene_manager = mag->scene_manager;
@@ -274,16 +225,33 @@ bool mag_scene_settings_on_event(void* context, SceneManagerEvent event) {
         } else {
             scene_manager_previous_scene(scene_manager);
         }
+
         break;
-#ifndef FW_ORIGIN_Official
     case SceneManagerEventTypeCustom:
         scene_manager_set_scene_state(mag->scene_manager, MagSceneSettings, event.event);
         consumed = true;
-        if(event.event == VarItemListIndexAllowUART) {
-            mag_scene_settings_dialog_allow_uart(mag);
+        if(event.event == MagEventConfirmDialog) {
+            DialogMessage* msg = dialog_message_alloc();
+            dialog_message_set_header(msg, "UART MSR", 64, 0, AlignCenter, AlignTop);
+            dialog_message_set_buttons(msg, "No", NULL, "Yes");
+            dialog_message_set_text(
+                msg,
+                "This option requires a\nUART-compatible mag reader.\nIs it installed?\n",
+                64,
+                32,
+                AlignCenter,
+                AlignCenter);
+            DialogMessageButton res = dialog_message_show(furi_record_open(RECORD_DIALOGS), msg);
+            if(res != DialogMessageButtonRight) {
+                // if not "Yes", reset to "OFF" (0 / false-y)
+                variable_item_set_current_value_index(item_dialog_cb, 0);
+                mag_scene_settings_set_bool(item_dialog_cb, &mag->state.allow_uart);
+            }
+            dialog_message_free(msg);
+            furi_record_close(RECORD_DIALOGS);
+            item_dialog_cb = NULL;
         }
         break;
-#endif
     default:
         break;
     }
