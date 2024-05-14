@@ -28,10 +28,10 @@ All changes to personal data are automatically saved when the user finishes inpu
 Note
 If the user does not want to enter specific data such as a phone number or address, they can leave that field blank. In that case, it is necessary to leave "0", so that the application can interpret the format correctly.
 
-Author and Acknowledgments
+# Author and Acknowledgments
 The 'ID Card v2' application is created by @evillero. This version was built upon the skeleton app provided by @codeallnight, with thanks to @WillyJL, and is an improved version of the ID card originally developed by @alanretgue.
 
-#Contact
+# Contact
 For any inquiries or feedback reporting bugs, you can contact the author via email or discord: ldpm1402@gmail.com https://discord.com/invite/NsjCvqwPAd
 
 
