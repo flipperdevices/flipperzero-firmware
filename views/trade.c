@@ -90,6 +90,7 @@
 #include <furi_hal.h>
 
 #include <dolphin/dolphin.h>
+#include <notification/notification_messages.h>
 
 #include <gui/elements.h>
 #include <gui/view.h>
@@ -222,6 +223,7 @@ struct trade_ctx {
     void* gblink_handle;
     struct gblink_pins* gblink_pins;
     PokemonData* pdata;
+    NotificationApp* notifications;
 };
 
 /* These are the needed variables for the draw callback */
@@ -318,6 +320,21 @@ static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
      */
     dolphin_deed(DolphinDeedPluginGameWin);
     plist_create(&(trade->patch_list), trade->pdata);
+}
+
+/* Call this at any point to reset the timer on the backlight turning off.
+ * During trade, this should get called pretty frequently so long as data
+ * is moving in and out.
+ *
+ * I hesitate to force the backlight on, as I don't want to be responsible
+ * for draining someone's battery on accident.
+ */
+static void trade_backlight_bump_callback(void* context, uint32_t arg) {
+    furi_assert(context);
+    UNUSED(arg);
+    struct trade_ctx* trade = context;
+
+    notification_message(trade->notifications, &sequence_display_backlight_on);
 }
 
 static void trade_draw_bottom_bar(Canvas* const canvas) {
@@ -835,6 +852,9 @@ static void transferBit(void* context, uint8_t in_byte) {
         gblink_transfer(trade->gblink_handle, getTradeCentreResponse(trade));
         break;
     }
+
+    /* Each byte that comes in, bump the backlight timer so it stays on during a trade */
+    furi_timer_pending_callback(trade_backlight_bump_callback, trade, 0);
 }
 
 void trade_enter_callback(void* context) {
@@ -915,6 +935,7 @@ void* trade_alloc(
     trade->input_pdata = pokemon_data_alloc(pdata->gen);
     trade->patch_list = NULL;
     trade->gblink_pins = gblink_pins;
+    trade->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     view_set_context(trade->view, trade);
     view_allocate_model(trade->view, ViewModelTypeLockFree, sizeof(struct trade_model));
@@ -937,6 +958,8 @@ void trade_free(ViewDispatcher* view_dispatcher, uint32_t view_id, void* trade_c
     struct trade_ctx* trade = (struct trade_ctx*)trade_ctx;
 
     view_dispatcher_remove_view(view_dispatcher, view_id);
+
+    furi_record_close(RECORD_NOTIFICATION);
 
     view_free(trade->view);
     pokemon_data_free(trade->input_pdata);
