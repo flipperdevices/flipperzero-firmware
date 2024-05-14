@@ -332,14 +332,15 @@ static void lfrfid_adc_app_decode_data(LfRfidAdcApp* app, bool tc) {
         const int32_t sum_dv = dv + app->prev_dv;
 
         // TODO: Dynamic noise threshold?
-        const int noise_threshold = 20;
+        // Trial and error: values between 20...40 give decent results
+        const int noise_threshold = 28;
 
         const bool same_sign = (dv > 0) == (app->prev_dv > 0);
         const bool above_threshold = abs(sum_dv) > noise_threshold;
 
         if(same_sign && above_threshold) {
-            const bool level =
-                !(sum_dv > 0); // Taking into account the previous level, not the new one
+            // Registering the previous level, not the new one
+            const bool level = !(sum_dv > 0);
 
             if(level != app->prev_level) { // Running decoder only on level changes
                 const ProtocolId protocol_id =
