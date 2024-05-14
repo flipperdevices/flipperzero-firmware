@@ -29,7 +29,7 @@
 
 #define VREFBUF_STARTUP_DELAY_US (500000UL)
 
-#define RECEIVE_BUFFER_LEN (32UL * 1024UL)
+#define RECEIVE_BUFFER_LEN (2UL * 1024UL)
 
 #define ADC_INPUT_CHANNEL LL_ADC_CHANNEL_14
 
@@ -302,9 +302,6 @@ static void lfrfid_adc_app_deinit(LfRfidAdcApp* app) {
 }
 
 static void lfrfid_adc_app_print_protocol(LfRfidAdcApp* app, ProtocolId protocol_id) {
-    FURI_LOG_D(
-        TAG, "Protocol detected: %s", protocol_dict_get_name(app->protocol_dict, protocol_id));
-
     const size_t data_size = protocol_dict_get_data_size(app->protocol_dict, protocol_id);
     protocol_dict_get_data(app->protocol_dict, protocol_id, app->protocol_data, data_size);
 
@@ -316,7 +313,8 @@ static void lfrfid_adc_app_print_protocol(LfRfidAdcApp* app, ProtocolId protocol
 
     *sp = '\0';
 
-    FURI_LOG_D(TAG, "Data: %s", app->protocol_string);
+    const char* protocol_name = protocol_dict_get_name(app->protocol_dict, protocol_id);
+    FURI_LOG_I(TAG, "Protocol: %s Data: %s", protocol_name, app->protocol_string);
 }
 
 static void lfrfid_adc_app_decode_data(LfRfidAdcApp* app, bool tc) {
