@@ -1,3 +1,5 @@
+![idcard](https://github.com/evillero/ID_card_v2/blob/main/docs/03.png)
+
 ## ID_card_v2
 This program represents a simple application for managing an ID card for Flipper Zerp.
 
