@@ -119,5 +119,4 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent even
 void desktop_settings_scene_start_on_exit(void* context) {
     DesktopSettingsApp* app = context;
     variable_item_list_reset(app->variable_item_list);
-    DESKTOP_SETTINGS_SAVE(&app->settings);
 }
