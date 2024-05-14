@@ -77,12 +77,14 @@ def gsa_authenticate(username, password, second_factor="sms"):
     if "sp" not in r:
         print("Authentication Failed. Check your Apple ID and password.")
         raise Exception("AuthenticationError")
-    if r["sp"] != "s2k":
-        print(f"This implementation only supports s2k. Server returned {r['sp']}")
+    if r["sp"] != "s2k" and r["sp"] != "s2k_fo":
+        print(
+            f"This implementation only supports s2k and s2k_fo. Server returned {r['sp']}"
+        )
         return
 
     # Change the password out from under the SRP library, as we couldn't calculate it without the salt.
-    usr.p = encrypt_password(password, r["s"], r["i"])
+    usr.p = encrypt_password(password, r["s"], r["i"], r["sp"] == "s2k_fo")
 
     M = usr.process_challenge(r["s"], r["B"])
 
@@ -220,8 +222,9 @@ def generate_meta_headers(serial="0", user_id=uuid.uuid4(), device_id=uuid.uuid4
     }
 
 
-def encrypt_password(password, salt, iterations):
-    p = hashlib.sha256(password.encode("utf-8")).digest()
+def encrypt_password(password, salt, iterations, hex=False):
+    hash = hashlib.sha256(password.encode("utf-8"))
+    p = hash.hexdigest() if hex else hash.digest()
     return pbkdf2.PBKDF2(p, salt, iterations, SHA256).read(32)
 
 

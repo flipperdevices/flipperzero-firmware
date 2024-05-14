@@ -31,8 +31,8 @@ def decrypt(enc_data, algorithm_dkey, mode):
 def decode_tag(data):
     latitude = struct.unpack(">i", data[0:4])[0] / 10000000.0
     longitude = struct.unpack(">i", data[4:8])[0] / 10000000.0
-    confidence = int.from_bytes(data[8:9])
-    status = int.from_bytes(data[9:10])
+    confidence = int.from_bytes(data[8:9], "big")
+    status = int.from_bytes(data[9:10], "big")
     return {"lat": latitude, "lon": longitude, "conf": confidence, "status": status}
 
 
