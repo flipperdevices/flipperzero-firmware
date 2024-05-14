@@ -36,8 +36,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Infrared: Add Toshiba RAS-2518D #3635 (By hakuyoku2011)](https://github.com/flipperdevices/flipperzero-firmware/pull/3635)
 - OFW: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
 - OFW: [Electra lfrfid protocol implementation #3640 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3640)
-- Updated: [MagSpoof v0.8 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - OFW: [Settings menu refactoring #3632 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3632)
+- Updated: [MagSpoof v0.9 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 
 <a name="release">
 
@@ -440,7 +440,7 @@ $ ./fbt dolphin_ext
 - [Lightmeter v1.2 (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009`
 - [Logic Analyzer (By g3gg0)](https://github.com/g3gg0/flipper-logic_analyzer)
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
-- [MagSpoof v0.8 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
+- [MagSpoof v0.9 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - [MALVEKE GAME BOY ADVANCE Cartridge v2.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gba_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Cartridge (GB/GBC) v2.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Emulator v2.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_emulator) `Req: Malveke`

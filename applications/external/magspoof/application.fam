@@ -11,7 +11,7 @@ App(
     fap_icon_assets_symbol="mag",
     fap_author="Zachary Weiss",
     fap_weburl="https://github.com/zacharyweiss/magspoof_flipper",
-    fap_version="0.8",
+    fap_version="0.9",
     fap_description="Enables wireless transmission of magstripe data",
     # Read By hummusec
     # fap_weburl="https://github.com/hummusec/magspoof_flipper", # READ mode
