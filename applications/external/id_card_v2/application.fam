@@ -5,6 +5,7 @@ App(
     entry_point="id_app",
     stack_size=2 * 1024,
     fap_icon="id.png",
+    fap_icon_assets="icons",
     fap_category="Tools",
     fap_author="evillero",
     fap_weburl="https://github.com/evillero/ID_card_v2",
