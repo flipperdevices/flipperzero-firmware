@@ -82,5 +82,5 @@ class AnalyseUploader:
 
 
 if __name__ == "__main__":
-    test = AnalyseUploader()
-    test.upload_analyse_request()
+    analyzer = AnalyseUploader()
+    analyzer.upload_analyse_request()
