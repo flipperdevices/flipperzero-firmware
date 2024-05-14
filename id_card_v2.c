@@ -150,7 +150,7 @@ void id_card_scene_on_enter(void* context) {
     App* app = context;
     widget_reset(app->widget);
     widget_add_string_element(
-        app->widget, 5, 5, AlignLeft, AlignCenter, FontPrimary, "ID Card");
+        app->widget, 90, 5, AlignLeft, AlignCenter, FontPrimary, "ID Card");
     
     
     load_user_input(ID_SAVE_PATH, app->user_input, app->user_input_size);
@@ -158,43 +158,52 @@ void id_card_scene_on_enter(void* context) {
     
     char* input_copy = strdup(app->user_input);
     if (input_copy != NULL) {
-        int y_position = 30; 
+        int y_position = 20; 
         
         char* token = strtok(input_copy, "_");
 
         
         if (token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
-                app->widget, 5, y_position, AlignLeft, AlignCenter, FontPrimary, "Name:");
+                app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Name:");
             widget_add_string_element(
-                app->widget, 55, y_position, AlignLeft, AlignCenter, FontPrimary, token);
+                app->widget, 35, y_position, AlignLeft, AlignCenter, FontSecondary, token);
+            y_position += 10; 
+        }
+         
+         token = strtok(NULL, "_");
+        if (token != NULL && strcmp(token, "0") != 0) {
+            widget_add_string_element(
+                app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Email:");
+            widget_add_string_element(
+                app->widget, 35, y_position, AlignLeft, AlignCenter, FontSecondary, token);
             y_position += 10; 
         }
         
         token = strtok(NULL, "_");
         if (token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
-                app->widget, 5, y_position, AlignLeft, AlignCenter, FontPrimary, "Tel:");
+                app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Tel:");
             widget_add_string_element(
-                app->widget, 55, y_position, AlignLeft, AlignCenter, FontPrimary, token);
+                app->widget, 35, y_position, AlignLeft, AlignCenter, FontSecondary, token);
             y_position += 10; 
         }
         
         token = strtok(NULL, "_");
         if (token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
-                app->widget, 5, y_position, AlignLeft, AlignCenter, FontPrimary, "Address:");
+                app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Addr:");
             widget_add_string_element(
-                app->widget, 55, y_position, AlignLeft, AlignCenter, FontPrimary, token);
+                app->widget, 35, y_position, AlignLeft, AlignCenter, FontSecondary, token);
             y_position += 10; 
         }
         
         token = strtok(NULL, "_");
         if (token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
-                app->widget, 5, y_position, AlignLeft, AlignCenter, FontPrimary, "Notes:");
+                app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Notes:");
             widget_add_string_element(
-                app->widget, 55, y_position, AlignLeft, AlignCenter, FontPrimary, token);
+                app->widget, 35, y_position, AlignLeft, AlignCenter, FontSecondary, token);
             y_position += 10; 
         }
         
@@ -222,7 +231,7 @@ void id_greeting_input_scene_on_enter(void* context) {
     App* app = context;
     bool clear_text = true;
     text_input_reset(app->text_input);
-    text_input_set_header_text(app->text_input, "Enter name_tel_addr_notes");
+    text_input_set_header_text(app->text_input, "name_mail_tel_addr_notes");
     text_input_set_result_callback(
         app->text_input,
         id_text_input_callback,
@@ -272,13 +281,13 @@ void id_about_scene_on_enter(void* context) {
     widget_reset(app->widget);
     
     widget_add_string_element(
-        app->widget, 5, 5, AlignLeft, AlignCenter, FontPrimary, "To leave the field empty,");
+        app->widget, 5, 5, AlignLeft, AlignCenter, FontSecondary, "To leave the field empty,");
     widget_add_string_element(
-        app->widget, 5, 15, AlignLeft, AlignCenter, FontPrimary, "for example,without Tel");
+        app->widget, 5, 15, AlignLeft, AlignCenter, FontSecondary, "type 0, without Tel:");
     widget_add_string_element(
-        app->widget, 5, 25, AlignLeft, AlignCenter, FontPrimary, "name_0_address_notes");
+        app->widget, 5, 25, AlignLeft, AlignCenter, FontSecondary, "name_email_0_addr_notes");
     widget_add_string_element(
-        app->widget, 5, 45, AlignLeft, AlignCenter, FontPrimary, "author:@evillero");
+        app->widget, 5, 55, AlignLeft, AlignCenter, FontPrimary, "author:@evillero");
     view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesWidgetView);
 }
 
@@ -386,4 +395,3 @@ int32_t id_app(void* p) {
     app_free(app);
     return 0;
 }
-
