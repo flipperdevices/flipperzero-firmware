@@ -49,7 +49,8 @@ class FlipperProtobufClient(FlipperBaseProtoClient):
         )
 
     async def start(self) -> None:
-        await self.connector.open_connection()
+        if not self.connector.is_open:
+            await self.connector.open_connection()
 
         await self.connector.read_until(b">: ")
         await self.connector.write(b"start_rpc_session\r")

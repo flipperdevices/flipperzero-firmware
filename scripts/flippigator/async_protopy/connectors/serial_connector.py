@@ -26,12 +26,13 @@ class SerialConnector(BaseConnector):
         reader, writer = await open_serial_connection(url=self.url, baudrate=self.baud_rate, **self.kwargs)
         self._reader = reader
         self._writer = writer
-
+        self.is_open = True
         return self
 
     async def close_connection(self) -> None:
         self._writer.close()
         await self._writer.wait_closed()
+        self.is_open = False
 
     async def __aenter__(self) -> Self:
         await self.open_connection()

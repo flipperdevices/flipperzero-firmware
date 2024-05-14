@@ -91,7 +91,11 @@ class Navigator:
         except TimeoutError:
             return self.screen_image.copy()
         '''
-        screen_response = await self.screen_stream.__anext__()
+        try:
+            screen_response = await asyncio.wait_for(self.screen_stream.__anext__(), timeout=timeout)
+        except TimeoutError:
+            return self.screen_image.copy()
+
         data = screen_response.gui_screen_frame.data
 
         def get_bin(x):

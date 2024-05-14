@@ -11,6 +11,8 @@ class BaseConnector(ABC):
         self.args = args
         self.kwargs = kwargs
 
+        self.is_open = False
+
     @abstractmethod
     async def open_connection(self) -> Self:
         """Opens a connection
