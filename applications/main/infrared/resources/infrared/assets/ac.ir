@@ -829,9 +829,6 @@ data: 3302 1640 404 423 407 420 410 1212 437 390 440 1234 405 395 435 392 438 41
 #
 # Model: Toshiba RAS-2518D
 #
-Filetype: IR signals file
-Version: 1
-# 
 name: Dh
 type: raw
 frequency: 38000
