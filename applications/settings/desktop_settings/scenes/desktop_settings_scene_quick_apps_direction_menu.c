@@ -93,7 +93,7 @@ void desktop_settings_scene_quick_apps_direction_menu_on_enter(void* context) {
         submenu_set_header(app->submenu, "Dummy Mode");
     }
 
-    submenu_set_selected_item(app->submenu, app->menu_idx);
+    submenu_set_selected_item(app->submenu, app->quick_apps_direction_menu_idx);
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewMenu);
 }
 
@@ -179,5 +179,6 @@ bool desktop_settings_scene_quick_apps_direction_menu_on_event(
 
 void desktop_settings_scene_quick_apps_direction_menu_on_exit(void* context) {
     DesktopSettingsApp* app = context;
+    app->quick_apps_direction_menu_idx = submenu_get_selected_item(app->submenu);
     submenu_reset(app->submenu);
 }

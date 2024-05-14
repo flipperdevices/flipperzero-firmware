@@ -250,6 +250,22 @@ void submenu_reset(Submenu* submenu) {
         true);
 }
 
+uint32_t submenu_get_selected_item(Submenu* submenu) {
+    furi_check(submenu);
+
+    uint32_t selected_item = 0;
+
+    with_view_model(
+        submenu->view,
+        SubmenuModel * model,
+        {
+            selected_item = model->position;
+        },
+        false);
+
+    return selected_item;
+}
+
 void submenu_set_selected_item(Submenu* submenu, uint32_t index) {
     furi_check(submenu);
     with_view_model(
