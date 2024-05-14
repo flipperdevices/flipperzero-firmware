@@ -67,18 +67,18 @@ void submenu_change_item_label(Submenu* submenu, uint32_t index, const char* lab
  */
 void submenu_reset(Submenu* submenu);
 
-/** Get submenu selected item
+/** Get submenu selected item index
  *
  * @param      submenu  Submenu instance
  *
- * @return     { description_of_the_return_value }
+ * @return     Index of the selected item
  */
 uint32_t submenu_get_selected_item(Submenu* submenu);
 
-/** Set submenu selected item
+/** Set submenu selected item by index
  *
  * @param      submenu  Submenu instance
- * @param      index    The index
+ * @param      index    The index of the selected item
  */
 void submenu_set_selected_item(Submenu* submenu, uint32_t index);
 

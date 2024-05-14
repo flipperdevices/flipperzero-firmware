@@ -253,17 +253,20 @@ void submenu_reset(Submenu* submenu) {
 uint32_t submenu_get_selected_item(Submenu* submenu) {
     furi_check(submenu);
 
-    uint32_t selected_item = 0;
+    uint32_t selected_item_index = 0;
 
     with_view_model(
         submenu->view,
         SubmenuModel * model,
         {
-            selected_item = model->position;
+            if(model->position < SubmenuItemArray_size(model->items)) {
+                const SubmenuItem* item = SubmenuItemArray_cget(model->items, model->position);
+                selected_item_index = item->index;
+            }
         },
         false);
 
-    return selected_item;
+    return selected_item_index;
 }
 
 void submenu_set_selected_item(Submenu* submenu, uint32_t index) {

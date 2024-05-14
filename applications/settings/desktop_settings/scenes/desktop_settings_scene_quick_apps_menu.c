@@ -66,7 +66,10 @@ bool desktop_settings_scene_quick_apps_menu_on_event(void* context, SceneManager
             consumed = true;
             break;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        submenu_set_selected_item(app->submenu, 0);
     }
+
     return consumed;
 }
 
