@@ -32,4 +32,7 @@ If the user does not want to enter specific data such as a phone number or addre
 Author and Acknowledgments
 The 'ID Card v2' application is created by @evillero. This version was built upon the skeleton app provided by @codeallnight, with thanks to @WillyJL, and is an improved version of the ID card originally developed by @alanretgue.
 
+#Contact
+For any inquiries or feedback reporting bugs, you can contact the author via email or discord: ldpm1402@gmail.com https://discord.com/invite/NsjCvqwPAd
+
 
