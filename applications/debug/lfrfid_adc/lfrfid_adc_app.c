@@ -4,12 +4,13 @@
 #include <gui/elements.h>
 #include <gui/view_port.h>
 
+#include <lib/toolbox/protocols/protocol_dict.h>
+#include <lib/lfrfid/protocols/lfrfid_protocols.h>
+
 #include <furi_hal_bus.h>
 #include <furi_hal_cortex.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
-#include <furi_hal_serial.h>
-#include <furi_hal_serial_control.h>
 
 #include <stm32wbxx_ll_adc.h>
 #include <stm32wbxx_ll_tim.h>
@@ -24,9 +25,11 @@
 #define CARRIER_OUTPUT_PIN (gpio_rfid_carrier_out)
 
 #define CARRIER_FREQ_HZ (125000UL)
+#define CARRIER_PERIOD_US (1000000UL / CARRIER_FREQ_HZ)
+
 #define VREFBUF_STARTUP_DELAY_US (500000UL)
+
 #define RECEIVE_BUFFER_LEN (32UL * 1024UL)
-#define DECODE_BUFFER_LEN (RECEIVE_BUFFER_LEN / 2)
 
 #define ADC_INPUT_CHANNEL LL_ADC_CHANNEL_14
 
@@ -40,11 +43,14 @@ typedef struct {
     Gui* gui;
     ViewPort* view_port;
     FuriMessageQueue* queue;
-    FuriHalSerialHandle* serial;
-    uint16_t buf[RECEIVE_BUFFER_LEN];
-    uint8_t decode_buf[DECODE_BUFFER_LEN];
+    ProtocolDict* protocol_dict;
+    uint8_t* protocol_data;
+    char* protocol_string;
+    uint16_t rx_buf[RECEIVE_BUFFER_LEN];
     uint16_t prev_value;
     int32_t prev_dv;
+    bool prev_level;
+    uint32_t pulse_time;
 } LfRfidAdcApp;
 
 static void lfrfid_adc_app_draw_callback(Canvas* canvas, void* context) {
@@ -57,7 +63,7 @@ static void lfrfid_adc_app_draw_callback(Canvas* canvas, void* context) {
         canvas_height(canvas),
         AlignCenter,
         AlignCenter,
-        "\e#Received data\e# is being\nsent to \e#USART\e#",
+        "\e#Received data\e# is being\ndecoded (check the \e#Logs\e#)",
         false);
 }
 
@@ -95,6 +101,11 @@ static LfRfidAdcApp* lfrfid_adc_app_alloc() {
 
     app->view_port = view_port_alloc();
     app->queue = furi_message_queue_alloc(4, sizeof(LfRfidAdcAppEvent));
+    app->protocol_dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
+
+    const size_t max_protocol_data_size = protocol_dict_get_max_data_size(app->protocol_dict);
+    app->protocol_data = malloc(max_protocol_data_size);
+    app->protocol_string = malloc(max_protocol_data_size * 3 + 1);
 
     view_port_draw_callback_set(app->view_port, lfrfid_adc_app_draw_callback, app);
     view_port_input_callback_set(app->view_port, lfrfid_adc_app_input_callback, app);
@@ -105,6 +116,9 @@ static LfRfidAdcApp* lfrfid_adc_app_alloc() {
 };
 
 static void lfrfid_adc_app_free(LfRfidAdcApp* app) {
+    free(app->protocol_string);
+    free(app->protocol_data);
+    protocol_dict_free(app->protocol_dict);
     furi_message_queue_free(app->queue);
 
     gui_remove_view_port(app->gui, app->view_port);
@@ -187,17 +201,10 @@ static void lfrfid_adc_app_adc_init(LfRfidAdcApp* app) {
     FURI_LOG_D(TAG, "ADC initialized");
 }
 
-static void lfrfid_adc_app_serial_init(LfRfidAdcApp* app) {
-    app->serial = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
-    furi_hal_serial_init(app->serial, 4000000UL);
-
-    FURI_LOG_D(TAG, "Serial initialized");
-}
-
 static void lfrfid_adc_app_dma_init(LfRfidAdcApp* app) {
     LL_DMA_InitTypeDef init_struct = {0};
     init_struct.PeriphOrM2MSrcAddress = (uint32_t) & (ADC1->DR);
-    init_struct.MemoryOrM2MDstAddress = (uint32_t) & (app->buf[0]);
+    init_struct.MemoryOrM2MDstAddress = (uint32_t) & (app->rx_buf[0]);
     init_struct.Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY;
     init_struct.Mode = LL_DMA_MODE_CIRCULAR;
     init_struct.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
@@ -273,7 +280,8 @@ static void lfrfid_adc_app_carrier_init(LfRfidAdcApp* app) {
 static void lfrfid_adc_app_init(LfRfidAdcApp* app) {
     FURI_LOG_D(TAG, "Application started");
 
-    lfrfid_adc_app_serial_init(app);
+    protocol_dict_decoders_start(app->protocol_dict);
+
     lfrfid_adc_app_dma_init(app);
     lfrfid_adc_app_adc_init(app);
     lfrfid_adc_app_comp_init(app);
@@ -290,16 +298,32 @@ static void lfrfid_adc_app_deinit(LfRfidAdcApp* app) {
     furi_hal_bus_disable(FuriHalBusTIM1);
     furi_hal_bus_disable(FuriHalBusTIM2);
 
-    furi_hal_serial_control_release(app->serial);
-
     FURI_LOG_D(TAG, "Application exited");
+}
+
+static void lfrfid_adc_app_print_protocol(LfRfidAdcApp* app, ProtocolId protocol_id) {
+    FURI_LOG_D(
+        TAG, "Protocol detected: %s", protocol_dict_get_name(app->protocol_dict, protocol_id));
+
+    const size_t data_size = protocol_dict_get_data_size(app->protocol_dict, protocol_id);
+    protocol_dict_get_data(app->protocol_dict, protocol_id, app->protocol_data, data_size);
+
+    char* sp = app->protocol_string;
+
+    for(size_t i = 0; i < data_size; ++i) {
+        sp += snprintf(sp, 4, "%02X ", app->protocol_data[i]);
+    }
+
+    *sp = '\0';
+
+    FURI_LOG_D(TAG, "Data: %s", app->protocol_string);
 }
 
 static void lfrfid_adc_app_decode_data(LfRfidAdcApp* app, bool tc) {
     const size_t data_len = RECEIVE_BUFFER_LEN / 2UL;
     const size_t data_offset = tc ? data_len : 0;
 
-    const uint16_t* data = app->buf + data_offset;
+    const uint16_t* data = app->rx_buf + data_offset;
 
     for(size_t i = 0; i < data_len; ++i) {
         const uint16_t value = data[i];
@@ -307,26 +331,33 @@ static void lfrfid_adc_app_decode_data(LfRfidAdcApp* app, bool tc) {
         const int32_t dv = (int32_t)value - app->prev_value;
         const int32_t sum_dv = dv + app->prev_dv;
 
-        // TODO: Dynamic threshold?
-        const int threshold = 20;
+        // TODO: Dynamic noise threshold?
+        const int noise_threshold = 20;
 
-        const bool same_sign = (dv < 0) == (app->prev_dv < 0);
-        const bool above_threshold = abs(sum_dv) > threshold;
+        const bool same_sign = (dv > 0) == (app->prev_dv > 0);
+        const bool above_threshold = abs(sum_dv) > noise_threshold;
 
         if(same_sign && above_threshold) {
-            app->decode_buf[i] = sum_dv > 0;
-        } else {
-            // Value remains the same
-            const size_t prev_index = (i > 0 ? i : data_len) - 1;
-            app->decode_buf[i] = app->decode_buf[prev_index];
+            const bool level =
+                !(sum_dv > 0); // Taking into account the previous level, not the new one
+
+            if(level != app->prev_level) { // Running decoder only on level changes
+                const ProtocolId protocol_id =
+                    protocol_dict_decoders_feed(app->protocol_dict, level, app->pulse_time);
+
+                if(protocol_id != PROTOCOL_NO) {
+                    lfrfid_adc_app_print_protocol(app, protocol_id);
+                }
+
+                app->prev_level = level;
+                app->pulse_time = 0;
+            }
         }
 
+        app->pulse_time += CARRIER_PERIOD_US;
         app->prev_value = value;
         app->prev_dv = dv;
     }
-
-    furi_hal_serial_tx(app->serial, app->decode_buf, DECODE_BUFFER_LEN);
-    furi_hal_serial_tx_wait_complete(app->serial);
 }
 
 static void lfrfid_adc_app_run(LfRfidAdcApp* app) {
