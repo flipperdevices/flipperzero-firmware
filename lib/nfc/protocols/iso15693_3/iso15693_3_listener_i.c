@@ -254,7 +254,7 @@ static Iso15693_3Error iso15693_3_listener_read_multi_blocks_handler(
         const Iso15693_3ReadMultiBlocksRequestLayout* request =
             (const Iso15693_3ReadMultiBlocksRequestLayout*)data;
 
-        FURI_LOG_W(TAG, "Read multiple: %d, %d", request->first_block_num, request->block_count);
+        // FURI_LOG_W(TAG, "Read multiple: %d, %d", request->first_block_num, request->block_count);
         if(data_size != sizeof(Iso15693_3ReadMultiBlocksRequestLayout)) {
             error = Iso15693_3ErrorFormat;
             break;
@@ -290,7 +290,7 @@ static Iso15693_3Error iso15693_3_listener_read_multi_blocks_handler(
         }
     } while(false);
 
-    FURI_LOG_E(TAG, "Error %d", error);
+    // FURI_LOG_E(TAG, "Error %d", error);
     return error;
 }
 

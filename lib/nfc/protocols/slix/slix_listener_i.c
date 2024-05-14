@@ -64,7 +64,7 @@ static SlixError slix_listener_set_password(
         }
     } while(false);
 
-    // FURI_LOG_I(TAG, "Password %lx, error %d", password, error);
+    FURI_LOG_I(TAG, "Password %lx, error %d", password, error);
 
     return error;
 }
