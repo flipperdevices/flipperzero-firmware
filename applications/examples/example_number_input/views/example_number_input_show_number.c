@@ -118,8 +118,6 @@ ExampleNumberInputShowNumber* example_number_input_show_number_alloc() {
 void example_number_input_show_number_free(ExampleNumberInputShowNumber* instance) {
     furi_assert(instance);
 
-    with_view_model(
-        instance->view, ExampleNumberInputShowNumberModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }

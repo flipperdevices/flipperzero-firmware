@@ -21,11 +21,11 @@ static ExampleNumberInput* example_number_input_alloc() {
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
     view_dispatcher_set_custom_event_callback(
         app->view_dispatcher, example_number_input_custom_event_callback);
-    //app->number_input = number_input_alloc();
-    /*view_dispatcher_add_view(
+    app->number_input = number_input_alloc();
+    view_dispatcher_add_view(
         app->view_dispatcher,
         ExampleNumberInputViewIdNumberInput,
-        number_input_get_view(app->number_input));*/
+        number_input_get_view(app->number_input));
     app->show_number = example_number_input_show_number_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -41,10 +41,10 @@ static ExampleNumberInput* example_number_input_alloc() {
 static void example_number_input_free(ExampleNumberInput* app) {
     furi_assert(app);
     view_dispatcher_remove_view(app->view_dispatcher, ExampleNumberInputViewIdShowNumber);
-    //view_dispatcher_remove_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
+    view_dispatcher_remove_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
     view_dispatcher_remove_view(app->view_dispatcher, ExampleNumberInputViewIdStack);
     scene_manager_free(app->scene_manager);
-    //number_input_free(app->number_input);
+    number_input_free(app->number_input);
     view_stack_free(app->view_stack);
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
@@ -65,11 +65,11 @@ int32_t example_number_input(void* p) {
 
     scene_manager_next_scene(app->scene_manager, ExampleNumberInputSceneShowNumber);
 
-    //furi_hal_power_suppress_charge_enter();
+    furi_hal_power_suppress_charge_enter();
 
     view_dispatcher_run(app->view_dispatcher);
 
-    //furi_hal_power_suppress_charge_exit();
+    furi_hal_power_suppress_charge_exit();
 
     example_number_input_free(app);
 

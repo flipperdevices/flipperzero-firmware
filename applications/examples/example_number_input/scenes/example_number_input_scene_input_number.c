@@ -9,13 +9,13 @@ void example_number_input_scene_input_number_callback(void* context) {
 void example_number_input_scene_input_number_on_enter(void* context) {
     furi_assert(context);
     ExampleNumberInput* app = context;
-    //NumberInput* number_input = app->number_input;
+    NumberInput* number_input = app->number_input;
     size_t enter_name_length = 5;
     char* str = "Enter a number (0 - 9999)";
     const char* constStr = str;
     UNUSED(constStr);
     UNUSED(enter_name_length);
-    /*number_input_set_header_text(number_input, constStr);
+    number_input_set_header_text(number_input, constStr);
     number_input_set_result_callback(
         number_input,
         example_number_input_scene_input_number_callback,
@@ -23,10 +23,10 @@ void example_number_input_scene_input_number_on_enter(void* context) {
         app->text_buffer,
         //app->text_store[0],
         enter_name_length,
-        false);*/
+        false);
 
-    //view_dispatcher_switch_to_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
-    view_dispatcher_switch_to_view(app->view_dispatcher, ExampleNumberInputViewIdShowNumber);
+    view_dispatcher_switch_to_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
+    //view_dispatcher_switch_to_view(app->view_dispatcher, ExampleNumberInputViewIdShowNumber);
 }
 
 bool example_number_input_scene_input_number_on_event(void* context, SceneManagerEvent event) {
