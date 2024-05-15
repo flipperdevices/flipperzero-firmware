@@ -73,8 +73,9 @@ static void highscores_save() {
     furi_record_close(RECORD_STORAGE);
 }
 
+
 void game_results(SlotMachineApp* app) {
-    int matches[] = {0, 0, 0, 0, 0};
+    int matches[] = { 0, 0, 0, 0, 0 };
     double total = 0;
 
     for (int i = 0; i < COLUMNS_COUNT; i++) {
@@ -88,9 +89,15 @@ void game_results(SlotMachineApp* app) {
     }
 
     if (total > 0) {
-        app->money += total;
+        app->money += total; // Add winnings to the player's money
         app->winamount = total;
         app->winview = true;
+
+        // Add the bet amount back to the player's money
+        app->money += app->bet;
+
+        // Reset the bet amount, uncomment me if you want to do this
+        //app->bet = 0;
 
         if (total > highscore.highscore) {
             highscore.highscore = total;
@@ -102,6 +109,7 @@ void game_results(SlotMachineApp* app) {
         app->loseview = true;
     }
 }
+
 
 void draw_container(Canvas* canvas) {
     canvas_draw_rframe(canvas, 2, 12, 120, 34, 3);
