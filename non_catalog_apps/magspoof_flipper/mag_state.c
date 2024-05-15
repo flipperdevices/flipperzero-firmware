@@ -50,15 +50,41 @@ bool mag_state_load(MagState* out_state) {
             if(!flipper_format_file_open_existing(file, MAG_STATE_PATH)) break;
             if(!flipper_format_read_header(file, str, &tmp)) break;
             if(furi_string_cmp_str(str, MAG_STATE_HEADER)) break;
-            if(tmp != MAG_STATE_VER) break;
+            // if(tmp != MAG_STATE_VER) break;
 
-            if(!flipper_format_read_uint32(file, "pin_input", &tmp, 1)) break;
-            state.pin_input = tmp;
-            if(!flipper_format_read_uint32(file, "pin_output", &tmp, 1)) break;
-            state.pin_output = tmp;
-            if(!flipper_format_read_uint32(file, "pin_enable", &tmp, 1)) break;
-            state.pin_enable = tmp;
-            if(!flipper_format_read_bool(file, "allow_uart", &state.allow_uart, 1)) break;
+            if(!flipper_format_read_uint32(file, "pin_input", &tmp, 1)) {
+                flipper_format_rewind(file);
+                tmp = MAG_STATE_DEFAULT_PIN_INPUT;
+            }
+            state.pin_input = (MagPin)tmp;
+
+            if(!flipper_format_read_uint32(file, "pin_output", &tmp, 1)) {
+                flipper_format_rewind(file);
+                tmp = MAG_STATE_DEFAULT_PIN_OUTPUT;
+            }
+            state.pin_output = (MagPin)tmp;
+
+            if(!flipper_format_read_uint32(file, "pin_enable", &tmp, 1)) {
+                flipper_format_rewind(file);
+                tmp = MAG_STATE_DEFAULT_PIN_ENABLE;
+            }
+            state.pin_enable = (MagPin)tmp;
+
+            if(!flipper_format_read_bool(file, "allow_uart", &state.allow_uart, 1)) {
+                flipper_format_rewind(file);
+                state.allow_uart = MAG_STATE_DEFAULT_ALLOW_UART;
+            }
+
+            if(!flipper_format_read_uint32(file, "n_repeats", &tmp, 1)) {
+                flipper_format_rewind(file);
+                tmp = MAG_STATE_DEFAULT_N_REPEATS;
+            }
+            state.n_repeats = (uint8_t)tmp;
+
+            if(!flipper_format_read_bool(file, "repeat_mode", &state.repeat_mode, 1)) {
+                flipper_format_rewind(file);
+                state.repeat_mode = MAG_STATE_DEFAULT_REPEAT_MODE;
+            }
 
             loaded_from_file = true;
         } while(0);
@@ -66,16 +92,18 @@ bool mag_state_load(MagState* out_state) {
     }
     furi_record_close(RECORD_STORAGE);
 
-    // If could not be read from file
-    // Or file GPIO config is invalid (pins overlap)
-    // Set defaults
+    // If file's GPIO config is invalid (pins overlap)
+    // Reset to defaults
     // Additionally raise message to user?
-    if(!loaded_from_file || !mag_state_gpio_is_valid(&state)) {
+    if(!mag_state_gpio_is_valid(&state)) {
         mag_state_gpio_reset(&state);
     }
 
     if(!loaded_from_file) {
+        mag_state_gpio_reset(&state);
         state.allow_uart = MAG_STATE_DEFAULT_ALLOW_UART;
+        state.n_repeats = MAG_STATE_DEFAULT_N_REPEATS;
+        state.repeat_mode = MAG_STATE_DEFAULT_REPEAT_MODE;
     }
 
     // set defaults we don't save
@@ -102,13 +130,16 @@ void mag_state_save(MagState* state) {
         if(!flipper_format_file_open_always(file, MAG_STATE_PATH)) break;
         if(!flipper_format_write_header_cstr(file, MAG_STATE_HEADER, MAG_STATE_VER)) break;
 
-        tmp = state->pin_input;
+        tmp = (uint32_t)state->pin_input;
         if(!flipper_format_write_uint32(file, "pin_input", &tmp, 1)) break;
-        tmp = state->pin_output;
+        tmp = (uint32_t)state->pin_output;
         if(!flipper_format_write_uint32(file, "pin_output", &tmp, 1)) break;
-        tmp = state->pin_enable;
+        tmp = (uint32_t)state->pin_enable;
         if(!flipper_format_write_uint32(file, "pin_enable", &tmp, 1)) break;
         if(!flipper_format_write_bool(file, "allow_uart", &state->allow_uart, 1)) break;
+        tmp = (uint32_t)state->n_repeats;
+        if(!flipper_format_write_uint32(file, "n_repeats", &tmp, 1)) break;
+        if(!flipper_format_write_bool(file, "repeat_mode", &state->repeat_mode, 1)) break;
 
     } while(0);
     flipper_format_free(file);

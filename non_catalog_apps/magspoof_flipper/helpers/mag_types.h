@@ -46,6 +46,8 @@ typedef enum {
 #define MAG_STATE_DEFAULT_PIN_OUTPUT MagPinA6
 #define MAG_STATE_DEFAULT_PIN_ENABLE MagPinA4
 #define MAG_STATE_DEFAULT_ALLOW_UART false
+#define MAG_STATE_DEFAULT_N_REPEATS 3
+#define MAG_STATE_DEFAULT_REPEAT_MODE true
 
 typedef enum {
     MagViewSubmenu,
