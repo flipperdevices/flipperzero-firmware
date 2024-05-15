@@ -45,9 +45,6 @@ HexViewer* hex_viewer_app_alloc() {
     view_dispatcher_set_custom_event_callback(
         app->view_dispatcher, hex_viewer_custom_event_callback);
 
-    app->submenu = submenu_alloc();
-    app->text_input = text_input_alloc();
-
     // Set defaults, in case no config loaded
     app->haptic = 1;
     app->speaker = 1;
@@ -61,6 +58,7 @@ HexViewer* hex_viewer_app_alloc() {
     // Load configs
     hex_viewer_read_settings(app);
 
+    app->submenu = submenu_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, HexViewerViewIdMenu, submenu_get_view(app->submenu));
 
@@ -70,6 +68,7 @@ HexViewer* hex_viewer_app_alloc() {
         HexViewerViewIdStartscreen,
         hex_viewer_startscreen_get_view(app->hex_viewer_startscreen));
 
+    app->text_input = text_input_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, HexViewerViewIdScroll, text_input_get_view(app->text_input));
 
@@ -97,12 +96,13 @@ void hex_viewer_app_free(HexViewer* app) {
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdStartscreen);
-    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdScroll);
-    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdSettings);
-
     submenu_free(app->submenu);
+    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdStartscreen);
+    hex_viewer_startscreen_free(app->hex_viewer_startscreen);
+    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdScroll);
     text_input_free(app->text_input);
+    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdSettings);
+    variable_item_list_free(app->variable_item_list);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_STORAGE);
@@ -128,7 +128,13 @@ int32_t hex_viewer_app(void* p) {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    scene_manager_next_scene(app->scene_manager, HexViewerSceneStartscreen);
+    if(p && strlen(p) && hex_viewer_open_file(app, (const char*)p)) {
+        hex_viewer_read_file(app);
+        scene_manager_next_scene(app->scene_manager, HexViewerSceneStartscreen);
+    } else {
+        scene_manager_next_scene(app->scene_manager, HexViewerSceneStartscreen);
+        scene_manager_next_scene(app->scene_manager, HexViewerSceneOpen);
+    }
 
     furi_hal_power_suppress_charge_enter();
 
