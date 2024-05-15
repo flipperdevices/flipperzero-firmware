@@ -39,6 +39,13 @@ bool color_guess_scene_play_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         }
+    } else if(event.type == SceneManagerEventTypeTick) {
+        // Redraw on tick event to update timer
+        with_view_model(
+            color_guess_play_get_view(app->color_guess_play),
+            void* model,
+            { UNUSED(model); },
+            true);
     }
 
     return consumed;
