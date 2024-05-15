@@ -1,3 +1,9 @@
+## 1.5
+- Additional Memory Management fixes by Willy-JL
+- Redraw Issue fixed by Willy-JL
+- Added GNU License
+- Added version number
+
 ## 1.4
 - Prevent value changing on win view
 - Fix issues with FW build 0.99.x

@@ -29,4 +29,7 @@ Then run the command:
 The application will be compiled and copied onto your device. 
 
 ## Licensing
-This code is open-source and may be used for whatever you want to do with it. 
+This code is open-source under the conditions of GNU GENERAL PUBLIC LICENSE. 
+
+## Credits
+Thanks to [Willy-JL](https://github.com/Willy-JL) for assisting in the fine-tuning of the app
