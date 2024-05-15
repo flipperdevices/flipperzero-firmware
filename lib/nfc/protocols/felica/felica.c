@@ -308,6 +308,21 @@ bool felica_check_mac(
     uint8_t* mac_ptr = data + data_size_without_mac;
     return !memcmp(mac, mac_ptr, 8);
 }
+///TODO: Think of simplifying felica_check_mac with the help of this function
+void felica_calculate_mac_read(
+    mbedtls_des3_context* ctx,
+    const uint8_t* session_key,
+    const uint8_t* rc,
+    const uint8_t* blocks,
+    const uint8_t block_count,
+    const uint8_t* data,
+    uint8_t* mac) {
+    ///TODO: add furi_checks
+    uint8_t first_block[8];
+    felica_prepare_first_block(FelicaMACTypeRead, blocks, block_count, first_block);
+    uint8_t data_size_without_mac = FELICA_DATA_BLOCK_SIZE * (block_count - 1);
+    felica_calculate_mac(ctx, session_key, rc, first_block, data, data_size_without_mac, mac);
+}
 
 void felica_calculate_mac_write(
     mbedtls_des3_context* ctx,

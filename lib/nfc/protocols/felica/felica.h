@@ -251,6 +251,15 @@ bool felica_check_mac(
     const uint8_t block_count,
     uint8_t* data);
 
+void felica_calculate_mac_read(
+    mbedtls_des3_context* ctx,
+    const uint8_t* session_key,
+    const uint8_t* rc,
+    const uint8_t* blocks,
+    const uint8_t block_count,
+    const uint8_t* data,
+    uint8_t* mac);
+
 void felica_calculate_mac_write(
     mbedtls_des3_context* ctx,
     const uint8_t* session_key,
