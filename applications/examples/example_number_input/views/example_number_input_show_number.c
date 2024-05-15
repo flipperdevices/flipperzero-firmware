@@ -31,20 +31,20 @@ void example_number_input_show_number_draw(
     canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, model->number);
 
     elements_button_center(canvas, "Change");
+    UNUSED(model);
 }
 
 static void
     example_number_input_show_number_model_init(ExampleNumberInputShowNumberModel* const model) {
-    UNUSED(model);
-    //model->number = "1";
+    model->number = "1";
 }
 
 void example_number_input_show_number_model_set_number(
     ExampleNumberInputShowNumber* instance,
-    const char* number) {
+    FuriString* number) {
     furi_assert(instance);
     ExampleNumberInputShowNumberModel* model = view_get_model(instance->view);
-    model->number = number;
+    model->number = furi_string_get_cstr(number);
     view_commit_model(instance->view, false);
 }
 

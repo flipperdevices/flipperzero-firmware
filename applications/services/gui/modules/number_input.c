@@ -117,7 +117,9 @@ static void number_input_backspace_cb(NumberInputModel* model) {
     uint8_t text_length = model->clear_default_text ? 1 : furi_string_utf8_length(model->text_buffer);
     if(text_length > 0) {
         //model->text_buffer[text_length - 1] = 0;
-        furi_string_model->text_buffer = 0;
+        //const char* oldText = furi_string_get_cstr(model->text_buffer);
+        furi_string_set_strn(model->text_buffer, furi_string_get_cstr(model->text_buffer), text_length - 1);
+        //model->text_buffer = 0;
     }
 }
 
@@ -181,8 +183,9 @@ static void number_input_handle_ok(NumberInputModel* model) {
             text_length = 0;
         }
         if(text_length < (model->text_buffer_size - 1)) {
-            model->text_buffer[text_length] = selected;
-            model->text_buffer[text_length + 1] = 0;
+            furi_string_set_strn(model->text_buffer, furi_string_get_cstr(model->text_buffer), model->text_buffer_size - 1);
+            //model->text_buffer[text_length] = selected;
+            //model->text_buffer[text_length + 1] = 0;
         }
     }
     model->clear_default_text = false;

@@ -6,7 +6,7 @@
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <gui/scene_manager.h>
-#include <gui/modules/number_input.h>
+//#include <gui/modules/number_input.h>
 #include <gui/view.h>
 #include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
@@ -32,8 +32,9 @@ typedef struct {
     NotificationApp* notification;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
-    char text_store[EXAMPLE_TEXT_STORE_NUM][EXAMPLE_TEXT_STORE_SIZE + 1];
-    NumberInput* number_input;
+    FuriString* text_buffer;
+    //char text_store[EXAMPLE_TEXT_STORE_NUM][EXAMPLE_TEXT_STORE_SIZE + 1];
+    //NumberInput* number_input;
     ViewStack* view_stack;
     ExampleNumberInputShowNumber* show_number;
 } ExampleNumberInput;
