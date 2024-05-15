@@ -115,8 +115,6 @@ ColorGuessStartscreen* color_guess_startscreen_alloc() {
 void color_guess_startscreen_free(ColorGuessStartscreen* instance) {
     furi_assert(instance);
 
-    with_view_model(
-        instance->view, ColorGuessStartscreenModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }
