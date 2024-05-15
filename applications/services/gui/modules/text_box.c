@@ -109,7 +109,9 @@ static void text_box_get_prev_line_index(
 
         // Ignore newline symbol at the end of previous line
         if(text[i] == '\n') {
-            i--;
+            if(i > 0) {
+                i--;
+            }
         }
 
         // Search for the start of the previous paragraph
