@@ -60,6 +60,10 @@ typedef enum {
     FelicaErrorTimeout,
 } FelicaError;
 
+typedef struct {
+    uint8_t data[FELICA_DATA_BLOCK_SIZE];
+} FelicaBlockData;
+
 /** @brief Separate type for card key block. Used in authentication process */
 typedef struct {
     uint8_t data[FELICA_DATA_BLOCK_SIZE];
@@ -81,6 +85,22 @@ typedef struct {
         card_key; /**< User must fill this field with known card key in order to pass auth*/
     FelicaAuthenticationStatus auth_status; /**< Authentication status*/
 } FelicaAuthenticationContext;
+
+/**
+ * @brief Stucture for holding Felica session key which is calculated from rc and ck.
+*/
+typedef struct {
+    uint8_t data[FELICA_DATA_BLOCK_SIZE];
+} FelicaSessionKey;
+
+/**
+ * @brief Structure used to hold authentication related fields.
+*/
+typedef struct {
+    mbedtls_des3_context des_context; /**< Context for mbedtls des functions. */
+    FelicaSessionKey session_key; /**< Calculated session key. */
+    FelicaAuthenticationContext context; /**< Public auth context provided to upper levels. */
+} FelicaAuthentication;
 
 /** @brief Felica ID block */
 typedef struct {
@@ -145,6 +165,14 @@ typedef struct {
 #pragma pack(pop)
 
 typedef struct {
+    uint8_t length;
+    uint8_t response_code;
+    FelicaIDm idm;
+    uint8_t SF1;
+    uint8_t SF2;
+} FelicaCommandResponseHeader;
+
+typedef struct {
     uint8_t service_code : 4;
     uint8_t access_mode : 3;
     uint8_t length : 1;
@@ -162,22 +190,17 @@ typedef struct {
 } FelicaPollerReadCommandResponse;
 
 typedef struct {
-    uint8_t length;
+    /*   uint8_t length;
     uint8_t response_code;
     FelicaIDm idm;
     uint8_t SF1;
-    uint8_t SF2;
+    uint8_t SF2; */
+    FelicaCommandResponseHeader header;
     uint8_t block_count;
     uint8_t data[];
 } FelicaListenerReadCommandResponse;
 
-typedef struct {
-    uint8_t length;
-    uint8_t response_code;
-    FelicaIDm idm;
-    uint8_t SF1;
-    uint8_t SF2;
-} FelicaCommandResponseHeader;
+typedef FelicaCommandResponseHeader FelicaListenerWriteCommandResponse;
 
 typedef FelicaCommandResponseHeader FelicaPollerWriteCommandResponse;
 /* typedef struct {
