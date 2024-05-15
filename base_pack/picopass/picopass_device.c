@@ -193,7 +193,8 @@ static bool picopass_device_save_file(
             furi_string_printf(temp_str, "%s/%s%s", folder, dev_name, extension);
         }
 
-        if(dev->format == PicopassDeviceSaveFormatHF ||
+        if(dev->format == PicopassDeviceSaveFormatOriginal ||
+           dev->format == PicopassDeviceSaveFormatLegacy ||
            dev->format == PicopassDeviceSaveFormatPartial) {
             // Open file
             if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
@@ -215,6 +216,12 @@ static bool picopass_device_save_file(
             for(size_t i = 0; i < app_limit; i++) {
                 furi_string_printf(temp_str, "Block %d", i);
                 if(card_data[i].valid) {
+                    if(dev->format == PicopassDeviceSaveFormatLegacy) {
+                        if(i == PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX) {
+                            card_data[i].data[0] = 0x03;
+                        }
+                    }
+
                     if(!flipper_format_write_hex(
                            file,
                            furi_string_get_cstr(temp_str),
@@ -249,7 +256,7 @@ static bool picopass_device_save_file(
 }
 
 bool picopass_device_save(PicopassDevice* dev, const char* dev_name) {
-    if(dev->format == PicopassDeviceSaveFormatHF) {
+    if(dev->format == PicopassDeviceSaveFormatOriginal) {
         return picopass_device_save_file(
             dev, dev_name, STORAGE_APP_DATA_PATH_PREFIX, PICOPASS_APP_EXTENSION, true);
     } else if(dev->format == PicopassDeviceSaveFormatLF) {
@@ -260,6 +267,11 @@ bool picopass_device_save(PicopassDevice* dev, const char* dev_name) {
     } else if(dev->format == PicopassDeviceSaveFormatPartial) {
         return picopass_device_save_file(
             dev, dev_name, STORAGE_APP_DATA_PATH_PREFIX, PICOPASS_APP_EXTENSION, true);
+    } else if(dev->format == PicopassDeviceSaveFormatLegacy) {
+        return picopass_device_save_file(
+            dev, dev_name, STORAGE_APP_DATA_PATH_PREFIX, PICOPASS_APP_EXTENSION, true);
+    } else {
+        FURI_LOG_E(TAG, "Unknown format");
     }
 
     return false;
@@ -382,7 +394,7 @@ void picopass_device_clear(PicopassDevice* dev) {
 
     picopass_device_data_clear(&dev->dev_data);
     memset(&dev->dev_data, 0, sizeof(dev->dev_data));
-    dev->format = PicopassDeviceSaveFormatHF;
+    dev->format = PicopassDeviceSaveFormatOriginal;
     furi_string_reset(dev->load_path);
 }
 
@@ -441,7 +453,7 @@ void picopass_device_data_clear(PicopassDeviceData* dev_data) {
 
 bool picopass_device_delete(PicopassDevice* dev, bool use_load_path) {
     furi_assert(dev);
-    if(dev->format != PicopassDeviceSaveFormatHF) {
+    if(dev->format != PicopassDeviceSaveFormatOriginal) {
         // Never delete other formats (LF, Seader, etc)
         return false;
     }
