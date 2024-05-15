@@ -28,6 +28,7 @@ void color_guess_startscreen_set_callback(
 
 void color_guess_startscreen_draw(Canvas* canvas, ColorGuessStartscreenModel* model) {
     UNUSED(model);
+    char buffer[64];
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
@@ -36,6 +37,8 @@ void color_guess_startscreen_draw(Canvas* canvas, ColorGuessStartscreenModel* mo
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 54, 22, AlignLeft, AlignTop, "Guess the color");
     canvas_draw_str_aligned(canvas, 54, 32, AlignLeft, AlignTop, "on Flipper's LED");
+    snprintf(buffer, sizeof(buffer), "Ver. %s", COLOR_GUESS_VERSION);
+    canvas_draw_str_aligned(canvas, 92, 56, AlignLeft, AlignTop, buffer);
     elements_button_center(canvas, "Start");
 }
 
@@ -115,8 +118,6 @@ ColorGuessStartscreen* color_guess_startscreen_alloc() {
 void color_guess_startscreen_free(ColorGuessStartscreen* instance) {
     furi_assert(instance);
 
-    with_view_model(
-        instance->view, ColorGuessStartscreenModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }
