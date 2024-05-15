@@ -123,8 +123,12 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     elements_button_top_right(canvas, "Hold");
 
     // draw progress bar
-    elements_progress_bar(
-        canvas, 8, 36, 112, (float)metronome_state->current_beat / metronome_state->beats_per_bar);
+    float current_progress = (float)metronome_state->current_beat / metronome_state->beats_per_bar;
+    if(!((current_progress >= 0.0f) && (current_progress <= 1.0f))) {
+        current_progress = 0.1f;
+    }
+
+    elements_progress_bar(canvas, 8, 36, 112, current_progress);
 
     // cleanup
     furi_string_free(tempStr);
@@ -300,7 +304,6 @@ int32_t metronome_app() {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
         furi_mutex_acquire(metronome_state->mutex, FuriWaitForever);
-
         if(event_status == FuriStatusOk) {
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypeShort) {
@@ -379,7 +382,6 @@ int32_t metronome_app() {
                 }
             }
         }
-
         furi_mutex_release(metronome_state->mutex);
         view_port_update(view_port);
     }
