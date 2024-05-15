@@ -18,8 +18,7 @@
 #include "UnitempViews.h"
 #include <gui/modules/variable_item_list.h>
 #include <stdio.h>
-
-extern const Icon I_Cry_dolph_55x52;
+#include "unitemp_icons.h"
 
 //Текущий вид
 static View* view;
