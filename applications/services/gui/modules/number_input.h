@@ -55,7 +55,7 @@ void number_input_set_result_callback(
     NumberInput* number_input,
     NumberInputCallback input_callback,
     void* callback_context,
-    char* text_buffer,
+    FuriString* text_buffer,
     size_t text_buffer_size,
     bool clear_default_text);
 

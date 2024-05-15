@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct {
     const char* header;
-    char* text_buffer;
+    FuriString* text_buffer;
     size_t text_buffer_size;
     bool clear_default_text;
 
@@ -109,14 +109,15 @@ static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
 
     elements_slightly_rounded_frame(canvas, 6, 14, 116, 15);
 
-    const char* text = model->text_buffer;
-    canvas_draw_str(canvas, text_x, text_y, text);
+    FuriString* text = model->text_buffer;
+    canvas_draw_str(canvas, text_x, text_y, furi_string_get_cstr(text));
 }
 
 static void number_input_backspace_cb(NumberInputModel* model) {
-    uint8_t text_length = model->clear_default_text ? 1 : strlen(model->text_buffer);
+    uint8_t text_length = model->clear_default_text ? 1 : furi_string_utf8_length(model->text_buffer);
     if(text_length > 0) {
-        model->text_buffer[text_length - 1] = 0;
+        //model->text_buffer[text_length - 1] = 0;
+        furi_string_model->text_buffer = 0;
     }
 }
 
@@ -170,7 +171,7 @@ static void number_input_handle_right(NumberInputModel* model) {
  */
 static void number_input_handle_ok(NumberInputModel* model) {
     char selected = number_input_get_row(model->selected_row)[model->selected_column].text;
-    size_t text_length = strlen(model->text_buffer);
+    size_t text_length = furi_string_utf8_length(model->text_buffer);
     if(selected == enter_symbol) {
         model->callback(model->callback_context);
     } else if(selected == backspace_symbol) {
@@ -194,7 +195,7 @@ static void number_input_handle_ok(NumberInputModel* model) {
  */
 static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
     NumberInputModel* model = _model;
-    uint8_t text_length = model->text_buffer ? strlen(model->text_buffer) : 0;
+    uint8_t text_length = model->text_buffer ? furi_string_utf8_length(model->text_buffer) : 0;
     UNUSED(text_length);
 
     canvas_clear(canvas);
@@ -331,7 +332,7 @@ void number_input_reset(NumberInput* number_input) {
             model->selected_row = 0;
             model->selected_column = 0;
             model->clear_default_text = false;
-            model->text_buffer = "";
+            model->text_buffer = furi_string_alloc();
             model->text_buffer_size = 0;
             model->callback = NULL;
             model->callback_context = NULL;
@@ -354,6 +355,13 @@ NumberInput* number_input_alloc(void) {
 
 void number_input_free(NumberInput* number_input) {
     furi_assert(number_input);
+    with_view_model(
+        number_input->view,
+        NumberInputModel * model,
+        {
+            furi_string_free(model->text_buffer);
+        },
+        true);
     view_free(number_input->view);
     free(number_input);
 }
@@ -367,7 +375,7 @@ void number_input_set_result_callback(
     NumberInput* number_input,
     NumberInputCallback callback,
     void* callback_context,
-    char* text_buffer,
+    FuriString* text_buffer,
     size_t text_buffer_size,
     bool clear_default_text) {
     with_view_model(
