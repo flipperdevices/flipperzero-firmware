@@ -1,6 +1,6 @@
 ## ID_card_v2
 This program represents a simple application for managing an ID card for Flipper Zero.
-![idcard](https://github.com/evillero/ID_card_v2/blob/main/docs/03.png)
+
 
 # Application Description
 The "ID Card v2" application allows users to easily manage personal data such as name, phone number, address, and notes. These data are stored in a text file (id.txt) on the device.
@@ -14,10 +14,10 @@ Setup: Input, view, and edit personal data.
 About: Information about the application and the author.
 
 # Inputting Personal Data
-When selecting the "Setup" option, users enter their personal data in the format: name_mail_tel_addr_notes. Each data is separated by an underscore "_". If the user does not want to enter a specific piece of data, they can omit it, but it is important to retain the "0".
+When selecting the "Setup" option, users enter their personal data in the format: name/mail/tel/addr/notes. Each data is separated by slash "/". If the user does not want to enter a specific piece of data, they can omit it, but it is important to retain the "0".
 
 Example: Name_mail_tel_addr_notes
-Example without mail: Name_0_tel_addr_notes
+Example without mail: Name/0/tel/addr/notes
 
 Viewing ID Card
 After entering data, users can view their ID card. The application will display all entered data in the form of an ID card.
