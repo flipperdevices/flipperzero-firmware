@@ -41,7 +41,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [SubGHz: Improve Hormann BiSecur readability in SubGHz history (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/608d2b1d963872835541bbd19b8ba792d0b093aa)
 - OFW: [TLSF memory allocator. Less free flash, moar free ram. #3572 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3572) (Already in RM)
 - OFW: [Add new map analyser #3648 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3648)
-- Updated: [Color Guess v1.5 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications) (Fixes By Willy-JL)
+- Updated: [Color Guess v1.5 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications) [Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/29ad4914ad6350cfa3be399d5ddaff9d747e6b5f)
+- Updated: [Slot Machine v1.2 (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots) [Changes (By DefinetlyNotAI)](https://github.com/Daniel-dev-s/flipperzero-slots/pull/2)
 
 <a name="release">
 
