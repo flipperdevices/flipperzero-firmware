@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // VB Lab Migration Assistant for Flipper Zero
-// Copyright (C) 2022  cyanic
+// Copyright (C) 2022-2024  cyanic
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,12 +50,12 @@ void vb_migrate_scene_register_save_on_enter(void* context) {
 
     // Set default name
     FuriString* temp_str;
-    NfcDeviceData* dev_data = &inst->nfc_dev->dev_data;
-    BantBlock* bant = vb_tag_get_bant_block(dev_data);
+    const MfUltralightData* data = nfc_device_get_data(inst->nfc_dev, NfcProtocolMfUltralight);
+    const BantBlock* bant = vb_tag_get_bant_block_const(data);
     const VbTagProduct* prod = vb_tag_find_product(bant);
     temp_str = furi_string_alloc_printf("%s_", prod->short_name);
-    for(size_t i = 0; i < dev_data->nfc_data.uid_len; ++i) {
-        furi_string_cat_printf(temp_str, "%02x", dev_data->nfc_data.uid[i]);
+    for(size_t i = 0; i < data->iso14443_3a_data->uid_len; ++i) {
+        furi_string_cat_printf(temp_str, "%02x", data->iso14443_3a_data->uid[i]);
     }
     vb_migrate_text_store_set(inst, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);
@@ -80,7 +80,9 @@ bool vb_migrate_scene_register_save_on_event(void* context, SceneManagerEvent ev
                 if(vb_migrate_save_nfc(inst, inst->text_store, VB_MIGRATE_TEMPLATE_NAME)) {
                     inst->num_captured = 0;
 
-                    BantBlock* bant = vb_tag_get_bant_block(&inst->nfc_dev->dev_data);
+                    const MfUltralightData* data =
+                        nfc_device_get_data(inst->nfc_dev, NfcProtocolMfUltralight);
+                    const BantBlock* bant = vb_tag_get_bant_block_const(data);
                     const VbTagProduct* product = vb_tag_find_product(bant);
                     inst->orig_product = product;
                     if(product) {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // VB Lab Migration Assistant for Flipper Zero
-// Copyright (C) 2022  cyanic
+// Copyright (C) 2022-2024  cyanic
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <notification/notification_messages.h>
+#include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
+#include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
 
 #include "../vb_tag.h"
 #include "../vb_migrate_i.h"
@@ -54,63 +56,81 @@ static void
     }
 }
 
-static bool
-    vb_migrate_scene_register_worker_read_initial_callback(NfcWorkerEvent event, void* context) {
+static NfcCommand
+    vb_migrate_scene_register_worker_read_initial_callback(NfcGenericEvent event, void* context) {
     VbMigrate* inst = context;
-    bool consumed = false;
+    const MfUltralightPollerEvent* mf_ultralight_event = event.event_data;
+    NfcCommand result = NfcCommandContinue;
 
-    if(event == NfcWorkerEventReadMfUltralight) {
+    if(mf_ultralight_event->type == MfUltralightPollerEventTypeReadSuccess) {
+        nfc_device_set_data(
+            inst->nfc_dev, NfcProtocolMfUltralight, nfc_poller_get_data(inst->poller));
         view_dispatcher_send_custom_event(inst->view_dispatcher, RegisterEventTypeVbReadInitial);
-        consumed = true;
+        result = NfcCommandStop;
     }
 
-    return consumed;
+    return result;
 }
 
-static bool vb_migrate_scene_register_worker_auth_callback(NfcWorkerEvent event, void* context) {
+static NfcCommand
+    vb_migrate_scene_register_worker_auth_callback(NfcGenericEvent event, void* context) {
     VbMigrate* inst = context;
-    bool consumed = false;
+    const MfUltralightListenerEvent* mf_ultralight_event = event.event_data;
+    NfcCommand result = NfcCommandContinue;
 
-    if(event == NfcWorkerEventMfUltralightPwdAuth) {
-        view_dispatcher_send_custom_event(inst->view_dispatcher, RegisterEventTypeVbPwdAuth);
-        consumed = true;
-    }
-
-    return consumed;
-}
-
-static bool
-    vb_migrate_scene_register_worker_full_capture_callback(NfcWorkerEvent event, void* context) {
-    VbMigrate* inst = context;
-    bool consumed = false;
-
-    if(event == NfcWorkerEventMfUltralightPassKey) {
+    if(mf_ultralight_event->type == MfUltralightListenerEventTypeAuth) {
+        // Set up for auth
         memcpy(
-            inst->nfc_dev->dev_data.mf_ul_data.auth_key,
+            inst->captured_pwd,
+            mf_ultralight_event->data->password.data,
+            sizeof(inst->captured_pwd));
+        view_dispatcher_send_custom_event(inst->view_dispatcher, RegisterEventTypeVbPwdAuth);
+        result = NfcCommandStop;
+    }
+
+    return result;
+}
+
+static NfcCommand
+    vb_migrate_scene_register_worker_full_capture_callback(NfcGenericEvent event, void* context) {
+    VbMigrate* inst = context;
+    const MfUltralightPollerEvent* mf_ultralight_event = event.event_data;
+    NfcCommand result = NfcCommandContinue;
+
+    if(mf_ultralight_event->type == MfUltralightPollerEventTypeAuthRequest) {
+        mf_ultralight_event->data->auth_context.skip_auth = false;
+        memcpy(
+            mf_ultralight_event->data->auth_context.password.data,
             inst->captured_pwd,
             sizeof(inst->captured_pwd));
-        consumed = true;
-    } else if(event == NfcWorkerEventSuccess) {
+    } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeReadSuccess) {
+        nfc_device_set_data(
+            inst->nfc_dev, NfcProtocolMfUltralight, nfc_poller_get_data(inst->poller));
         view_dispatcher_send_custom_event(
             inst->view_dispatcher, RegisterEventTypeVbReadFullSuccess);
-        consumed = true;
-    } else if(event == NfcWorkerEventFail) {
+        result = NfcCommandStop;
+    } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeAuthFailed) {
         view_dispatcher_send_custom_event(inst->view_dispatcher, RegisterEventTypeVbReadFullFail);
-        consumed = true;
+        result = NfcCommandStop;
     }
 
-    return consumed;
+    return result;
 }
 
 static void vb_migrate_scene_register_cleanup_state(VbMigrate* inst, RegisterState state) {
     if(state == RegisterStateCaptureInvalidTag || state == RegisterStateCaptureFailed ||
        state == RegisterStateCaptureIncorrectTag) {
         notification_message(inst->notifications, &sequence_reset_red);
-    } else if(
-        state == RegisterStateCaptureInitial || state == RegisterStateCapturePwd ||
-        state == RegisterStateCaptureFull) {
+    } else if(state == RegisterStateCaptureInitial || state == RegisterStateCaptureFull) {
         vb_migrate_blink_stop(inst);
-        nfc_worker_stop(inst->worker);
+        nfc_poller_stop(inst->poller);
+        nfc_poller_free(inst->poller);
+        inst->poller = NULL;
+    } else if(state == RegisterStateCapturePwd) {
+        vb_migrate_blink_stop(inst);
+        nfc_listener_stop(inst->listener);
+        nfc_listener_free(inst->listener);
+        inst->listener = NULL;
     }
 }
 
@@ -199,14 +219,9 @@ static void vb_migrate_scene_register_set_state(VbMigrate* inst, RegisterState s
                 inst);
 
             view_dispatcher_switch_to_view(inst->view_dispatcher, VbMigrateViewWidget);
-            nfc_device_clear(inst->nfc_dev);
-            inst->nfc_dev->dev_data.read_mode = NfcReadModeMfUltralight;
-            nfc_worker_start(
-                inst->worker,
-                NfcWorkerStateRead,
-                &inst->nfc_dev->dev_data,
-                vb_migrate_scene_register_worker_read_initial_callback,
-                inst);
+            inst->poller = nfc_poller_alloc(inst->nfc, NfcProtocolMfUltralight);
+            nfc_poller_start(
+                inst->poller, vb_migrate_scene_register_worker_read_initial_callback, inst);
             vb_migrate_blink_read(inst);
         } else if(state == RegisterStateCaptureInvalidTag) {
             widget_reset(widget);
@@ -238,15 +253,14 @@ static void vb_migrate_scene_register_set_state(VbMigrate* inst, RegisterState s
 
             view_dispatcher_switch_to_view(inst->view_dispatcher, VbMigrateViewWidget);
 
-            BantBlock* bant = vb_tag_get_bant_block(&inst->nfc_dev->dev_data);
+            nfc_device_copy_data(inst->nfc_dev, NfcProtocolMfUltralight, inst->data_work);
+            BantBlock* bant = vb_tag_get_bant_block(inst->data_work);
             vb_tag_set_operation(bant, VbTagOperationReady);
             vb_tag_set_status(bant, VbTagStatusReady);
-            nfc_worker_start(
-                inst->worker,
-                NfcWorkerStateMfUltralightEmulate,
-                &inst->nfc_dev->dev_data,
-                vb_migrate_scene_register_worker_auth_callback,
-                inst);
+            inst->listener =
+                nfc_listener_alloc(inst->nfc, NfcProtocolMfUltralight, inst->data_work);
+            nfc_listener_start(
+                inst->listener, vb_migrate_scene_register_worker_auth_callback, inst);
             vb_migrate_blink_emulate(inst);
         } else if(state == RegisterStateCaptureFull) {
             widget_reset(widget);
@@ -264,13 +278,10 @@ static void vb_migrate_scene_register_set_state(VbMigrate* inst, RegisterState s
 
             view_dispatcher_switch_to_view(inst->view_dispatcher, VbMigrateViewWidget);
 
-            inst->nfc_dev->dev_data.mf_ul_data.auth_method = MfUltralightAuthMethodAuto;
-            nfc_worker_start(
-                inst->worker,
-                NfcWorkerStateReadMfUltralightReadAuth,
-                &inst->nfc_dev->dev_data,
-                vb_migrate_scene_register_worker_full_capture_callback,
-                inst);
+            // TODO: run detect before starting poller (need a worker thread)?
+            inst->poller = nfc_poller_alloc(inst->nfc, NfcProtocolMfUltralight);
+            nfc_poller_start(
+                inst->poller, vb_migrate_scene_register_worker_full_capture_callback, inst);
             vb_migrate_blink_read(inst);
         } else if(state == RegisterStateCaptureFailed) {
             widget_reset(widget);
@@ -364,11 +375,11 @@ bool vb_migrate_scene_register_on_event(void* context, SceneManagerEvent event) 
         } else if(event.event == RegisterEventTypePrevButton) {
             consumed = vb_migrate_scene_register_prev_state(inst, state, false);
         } else if(event.event == RegisterEventTypeVbReadInitial) {
-            if(vb_tag_validate_product(&inst->nfc_dev->dev_data)) {
+            const MfUltralightData* data =
+                nfc_device_get_data(inst->nfc_dev, NfcProtocolMfUltralight);
+            if(vb_tag_validate_product(data)) {
                 memcpy(
-                    inst->captured_uid,
-                    inst->nfc_dev->dev_data.nfc_data.uid,
-                    sizeof(inst->captured_uid));
+                    inst->captured_uid, data->iso14443_3a_data->uid, sizeof(inst->captured_uid));
                 notification_message(inst->notifications, &sequence_success);
                 vb_migrate_scene_register_set_state(inst, RegisterStateCapturePwd);
             } else {
@@ -377,19 +388,15 @@ bool vb_migrate_scene_register_on_event(void* context, SceneManagerEvent event) 
             }
             consumed = true;
         } else if(event.event == RegisterEventTypeVbPwdAuth) {
-            // Set up for auth
-            memcpy(
-                inst->captured_pwd,
-                inst->nfc_dev->dev_data.mf_ul_auth.pwd.raw,
-                sizeof(inst->captured_pwd));
-
             notification_message(inst->notifications, &sequence_success);
             vb_migrate_scene_register_set_state(inst, RegisterStateCaptureFull);
             consumed = true;
         } else if(event.event == RegisterEventTypeVbReadFullSuccess) {
-            NfcDeviceData* dev_data = &inst->nfc_dev->dev_data;
-            if(memcmp(dev_data->nfc_data.uid, inst->captured_uid, sizeof(inst->captured_uid)) ||
-               dev_data->mf_ul_data.data_read != dev_data->mf_ul_data.data_size) {
+            const MfUltralightData* data =
+                nfc_device_get_data(inst->nfc_dev, NfcProtocolMfUltralight);
+            if(memcmp(
+                   data->iso14443_3a_data->uid, inst->captured_uid, sizeof(inst->captured_uid)) ||
+               data->pages_read != data->pages_total) {
                 notification_message(inst->notifications, &sequence_error);
                 vb_migrate_scene_register_set_state(inst, RegisterStateCaptureIncorrectTag);
             } else {
