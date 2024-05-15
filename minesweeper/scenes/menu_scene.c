@@ -31,7 +31,7 @@ void minesweeper_scene_menu_screen_on_enter(void* context) {
     dialog_ex_set_text(
         app->menu_screen, farewellPrompts[prompt_index], 65, 20, AlignLeft, AlignTop);
 
-    dialog_ex_set_icon(app->menu_screen, 11, 0, &I_Cry_dolph_55x52);
+    dialog_ex_set_icon(app->menu_screen, 11, 0, &I_dolph_cry_49x54);
 
     dialog_ex_set_left_button_text(app->menu_screen, "Back");
 

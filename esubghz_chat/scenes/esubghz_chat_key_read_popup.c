@@ -137,7 +137,7 @@
 //         popup_reset(state->nfc_popup);
 //         popup_set_header(state->nfc_popup, "Failure!", 64, 2, AlignCenter, AlignTop);
 //         popup_set_text(state->nfc_popup, "Failed\nto read\nkey.", 78, 16, AlignLeft, AlignTop);
-//         popup_set_icon(state->nfc_popup, 21, 13, &I_Cry_dolph_55x52);
+//         popup_set_icon(state->nfc_popup, 14, 10, &I_dolph_cry_49x54);
 
 //         popup_set_timeout(state->nfc_popup, KEY_READ_POPUP_MS);
 //         popup_set_context(state->nfc_popup, state);
