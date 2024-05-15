@@ -48,7 +48,7 @@ ColorGuess* color_guess_app_alloc() {
         app->view_dispatcher, color_guess_tick_event_callback, 100);
     view_dispatcher_set_custom_event_callback(
         app->view_dispatcher, color_guess_custom_event_callback);
-    
+
     app->color_guess_startscreen = color_guess_startscreen_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -72,8 +72,6 @@ ColorGuess* color_guess_app_alloc() {
         app->view_dispatcher,
         ColorGuessViewIdSettings,
         variable_item_list_get_view(app->variable_item_list));
-    
-    
 
     //End Scene Additions
 
@@ -94,7 +92,7 @@ void color_guess_app_free(ColorGuess* app) {
     view_dispatcher_remove_view(app->view_dispatcher, ColorGuessViewIdPlay);
     color_guess_play_free(app->color_guess_play);
     view_dispatcher_remove_view(app->view_dispatcher, ColorGuessViewIdColorSet);
-    color_guess_color_set_free(app->color_guess_color_set);    
+    color_guess_color_set_free(app->color_guess_color_set);
     view_dispatcher_remove_view(app->view_dispatcher, ColorGuessViewIdSettings);
     view_dispatcher_free(app->view_dispatcher);
 
