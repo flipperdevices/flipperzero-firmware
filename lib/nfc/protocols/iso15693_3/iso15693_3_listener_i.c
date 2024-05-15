@@ -775,8 +775,6 @@ Iso15693_3Error
             (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
         Iso15693_3ListenerSessionState* session_state = &instance->session_state;
-
-        FURI_LOG_D("ISO", "Cmd: %02x, state: %d", request->command, instance->state);
         if((request->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5) == 0) {
             session_state->selected = request->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
             session_state->addressed = request->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;

@@ -116,6 +116,7 @@ void slix_reset(SlixData* data) {
     furi_check(data);
 
     iso15693_3_reset(data->iso15693_3_data);
+    data->capabilities = SlixCapabilitiesDefault;
     slix_password_set_defaults(data->passwords);
 
     memset(&data->system_info, 0, sizeof(SlixSystemInfo));
@@ -129,6 +130,7 @@ void slix_copy(SlixData* data, const SlixData* other) {
     furi_check(other);
 
     iso15693_3_copy(data->iso15693_3_data, other->iso15693_3_data);
+    data->capabilities = other->capabilities;
 
     memcpy(data->passwords, other->passwords, sizeof(SlixPassword) * SlixPasswordTypeCount);
     memcpy(data->signature, other->signature, sizeof(SlixSignature));
@@ -257,7 +259,7 @@ static bool slix_save_capabilities(const SlixData* data, FlipperFormat* ff) {
     FuriString* tmp_str = furi_string_alloc();
     do {
         furi_string_set_str(
-            tmp_str, "Slix capabilities field affects emulation modes. Possible options:");
+            tmp_str, "SLIX capabilities field affects emulation modes. Possible options:");
         for(size_t i = 0; i < COUNT_OF(slix_capabilities_names); i++) {
             furi_string_cat_printf(tmp_str, " %s,", slix_capabilities_names[i]);
         }
