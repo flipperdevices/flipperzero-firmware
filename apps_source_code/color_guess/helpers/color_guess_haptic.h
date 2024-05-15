@@ -1,3 +1,5 @@
+#pragma once
+
 #include <notification/notification_messages.h>
 
 void color_guess_play_happy_bump(void* context);

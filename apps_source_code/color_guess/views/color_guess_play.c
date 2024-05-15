@@ -8,8 +8,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
-
-//extern const Icon* digits[17];
+#include <lib/datetime/datetime.h>
 
 struct ColorGuessPlay {
     View* view;
@@ -215,9 +214,11 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                 instance->view,
                 ColorGuessPlayModel * model,
                 {
-                    model->cursorpos--;
-                    if(model->cursorpos < 0) {
-                        model->cursorpos = 5;
+                    if(model->success != 1) {
+                        model->cursorpos--;
+                        if(model->cursorpos < 0) {
+                            model->cursorpos = 5;
+                        }
                     }
                 },
                 true);
@@ -227,9 +228,11 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                 instance->view,
                 ColorGuessPlayModel * model,
                 {
-                    model->cursorpos++;
-                    if(model->cursorpos > 5) {
-                        model->cursorpos = 0;
+                    if(model->success != 1) {
+                        model->cursorpos++;
+                        if(model->cursorpos > 5) {
+                            model->cursorpos = 0;
+                        }
                     }
                 },
                 true);
@@ -239,12 +242,14 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                 instance->view,
                 ColorGuessPlayModel * model,
                 {
-                    model->digit[model->cursorpos]++;
-                    if(model->digit[model->cursorpos] > 15) {
-                        model->digit[model->cursorpos] = 0;
+                    if(model->success != 1) {
+                        model->digit[model->cursorpos]++;
+                        if(model->digit[model->cursorpos] > 15) {
+                            model->digit[model->cursorpos] = 0;
+                        }
+                        color_guess_play_calculate_closeness(instance, model);
+                        play_haptic(instance->context, model);
                     }
-                    color_guess_play_calculate_closeness(instance, model);
-                    play_haptic(instance->context, model);
                 },
                 true);
             break;
@@ -253,12 +258,14 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                 instance->view,
                 ColorGuessPlayModel * model,
                 {
-                    model->digit[model->cursorpos]--;
-                    if(model->digit[model->cursorpos] < 0) {
-                        model->digit[model->cursorpos] = 15;
+                    if(model->success != 1) {
+                        model->digit[model->cursorpos]--;
+                        if(model->digit[model->cursorpos] < 0) {
+                            model->digit[model->cursorpos] = 15;
+                        }
+                        color_guess_play_calculate_closeness(instance, model);
+                        play_haptic(instance->context, model);
                     }
-                    color_guess_play_calculate_closeness(instance, model);
-                    play_haptic(instance->context, model);
                 },
                 true);
             break;
