@@ -138,7 +138,8 @@ void elements_multiline_text_aligned(
 /** Draw multiline text
  *
  * @param   canvas  Canvas instance
- * @param   x, y    top left corner coordinates
+ * @param   x       top left corner coordinates
+ * @param   y       top left corner coordinates
  * @param   text    string (possible multiline)
  */
 void elements_multiline_text(Canvas* canvas, int32_t x, int32_t y, const char* text);
@@ -146,7 +147,8 @@ void elements_multiline_text(Canvas* canvas, int32_t x, int32_t y, const char* t
 /** Draw framed multiline text
  *
  * @param   canvas  Canvas instance
- * @param   x, y    top left corner coordinates
+ * @param   x       top left corner coordinates
+ * @param   y       top left corner coordinates
  * @param   text    string (possible multiline)
  */
 void elements_multiline_text_framed(Canvas* canvas, int32_t x, int32_t y, const char* text);
@@ -154,8 +156,10 @@ void elements_multiline_text_framed(Canvas* canvas, int32_t x, int32_t y, const 
 /** Draw slightly rounded frame
  *
  * @param   canvas          Canvas instance
- * @param   x, y            top left corner coordinates
- * @param   width, height   size of frame
+ * @param   x               top left corner coordinates
+ * @param   y               top left corner coordinates
+ * @param   width           width of frame
+ * @param   height          height of frame
  */
 void elements_slightly_rounded_frame(
     Canvas* canvas,
@@ -167,8 +171,10 @@ void elements_slightly_rounded_frame(
 /** Draw slightly rounded box
  *
  * @param   canvas          Canvas instance
- * @param   x, y            top left corner coordinates
- * @param   width, height   size of box
+ * @param   x               top left corner coordinates
+ * @param   y               top left corner coordinates
+ * @param   width           height of box
+ * @param   height          height of box
  */
 void elements_slightly_rounded_box(
     Canvas* canvas,
@@ -180,8 +186,10 @@ void elements_slightly_rounded_box(
 /** Draw bold rounded frame
  *
  * @param   canvas          Canvas instance
- * @param   x, y            top left corner coordinates
- * @param   width, height   size of frame
+ * @param   x               top left corner coordinates
+ * @param   y               top left corner coordinates
+ * @param   width           width of frame
+ * @param   height          height of frame
  */
 void elements_bold_rounded_frame(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t height);
 
