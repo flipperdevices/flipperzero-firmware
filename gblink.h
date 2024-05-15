@@ -80,7 +80,7 @@ void *gblink_alloc(struct gblink_def *gblink_def);
 void gblink_free(void *handle);
 
 #ifdef __cplusplus
-{
+}
 #endif
 
 #endif // __GBLINK_H__
