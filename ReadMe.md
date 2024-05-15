@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0514-1746-0.101.3-07b470d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-14 17:46 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-14 17:46 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-14 21:14 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-14 21:14 EST`
 - Updated: [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - OFW: [Infrared: Add Toshiba RAS-2518D #3635 (By hakuyoku2011)](https://github.com/flipperdevices/flipperzero-firmware/pull/3635)
@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Electra lfrfid protocol implementation #3640 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3640)
 - OFW: [Settings menu refactoring #3632 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3632)
 - Updated: [MagSpoof v0.9 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
+- [SubGHz: Improve Hormann BiSecur readability in SubGHz history (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/608d2b1d963872835541bbd19b8ba792d0b093aa)
 
 <a name="release">
 
