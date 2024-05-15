@@ -5,6 +5,8 @@ This program represents a simple application for managing an ID card for Flipper
 # Application Description
 The "ID Card v2" application allows users to easily manage personal data such as name, phone number, address, and notes. These data are stored in a text file (id.txt) on the device.
 
+[ID](https://github.com/evillero/ID_card_v2/blob/main/docs/03.png)
+
 # How to Use the Application
 Main Menu
 In the main menu, users have three options:
