@@ -39,9 +39,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Settings menu refactoring #3632 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3632)
 - Updated: [MagSpoof v0.9 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - [SubGHz: Improve Hormann BiSecur readability in SubGHz history (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/608d2b1d963872835541bbd19b8ba792d0b093aa)
-- Updated: [Color Guess v1.4 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications) (Fixes By Willy-JL)
 - OFW: [TLSF memory allocator. Less free flash, moar free ram. #3572 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3572) (Already in RM)
 - OFW: [Add new map analyser #3648 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3648)
+- Updated: [Color Guess v1.5 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications) (Fixes By Willy-JL)
 
 <a name="release">
 
@@ -262,7 +262,7 @@ $ ./fbt dolphin_ext
 - [Chess v2.0 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
-- [Color Guess v1.4 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
+- [Color Guess v1.5 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Connect Wires v1.2 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 - [Crossy Road v1.0 (By Mikael098)](https://github.com/Mikael098/CrossyRoad-FlipperZero-)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.3 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
