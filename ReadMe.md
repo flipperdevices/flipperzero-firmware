@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0515-1533-0.101.3-a845020](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-15 23:25 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-15 23:25 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-15 23:40 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-15 23:40 EST`
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - OFW: [Infrared: Add Toshiba RAS-2518D #3635 (By hakuyoku2011)](https://github.com/flipperdevices/flipperzero-firmware/pull/3635)
 - OFW: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
@@ -43,7 +43,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Color Guess v1.5 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications) [Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/29ad4914ad6350cfa3be399d5ddaff9d747e6b5f)
 - Updated: [Slot Machine v1.2 (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots) [Changes (By DefinetlyNotAI)](https://github.com/Daniel-dev-s/flipperzero-slots/pull/2)
 - Updated: [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
-- [Hid app improvements (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/3005f6cd9a333cf6d16f2df873ad0f86f174b45f)
+- [Hid app improvements (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5997db3a3ce50b60937bde446a7b21c44051a159)
+- Updated: [Metronome v1.2 (By panki27)](https://github.com/panki27/Metronome) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
+- Added: [Mifare Nested v1.6.5 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
+- Updated: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
 
 <a name="release">
 
@@ -455,7 +458,7 @@ $ ./fbt dolphin_ext
 - [MALVEKE GB Photo v2.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_photo) `Req: Malveke`
 - [MALVEKE PIN Test v2.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
 - [MAX31855 (By skotopes)](https://github.com/skotopes/flipperzero_max31855)
-- [Metronome v1.1 (By panki27)](https://github.com/panki27/Metronome)
+- [Metronome v1.2 (By panki27)](https://github.com/panki27/Metronome)
 - [MFC Editor v1.0 (By TollyH)](https://github.com/TollyH/flipper-apps)
 - [Mfkey v2.2 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [MH-Z19 CO2 Sensor v0.2 (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
@@ -463,6 +466,7 @@ $ ./fbt dolphin_ext
 - [MIDI Ocarina v0.1 (By crackerjacques)](https://github.com/crackerjacques/Flipper_Zero_MIDI_Ocarina)
 - [MIDI RX v0.1 (By crackerjacques)](https://github.com/crackerjacques/flipper_zero_midi_rx)
 - [Mifare Fuzzer v1.3 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
+- [Mifare Nested v1.6.5 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 - [Mitsubishi AC Remote v1.0 (By achistyakov)](https://github.com/achistyakov/flipperzero-mitsubishi-ac-remote)
 - [MODBUS v0.1 (By ElectronicCats)](https://github.com/ElectronicCats/flipper-rs485modbus) `Req: Modbus By ElectronicCats`
 - [Morse Code v1.1 (By wh00hw)](https://github.com/DarkFlippers/unleashed-firmware/pull/144)
