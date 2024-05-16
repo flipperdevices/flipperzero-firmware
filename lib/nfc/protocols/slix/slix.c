@@ -72,7 +72,7 @@ static const SlixTypeFeatures slix_type_features[] = {
 
 static const char* slix_capabilities_names[SlixCapabilitiesCount] = {
     [SlixCapabilitiesDefault] = "Default",
-    [SlixCapabilitiesAcceptAllPasswords] = "Accept all passwords",
+    [SlixCapabilitiesAcceptAllPasswords] = "AcceptAllPasswords",
 };
 
 typedef struct {
