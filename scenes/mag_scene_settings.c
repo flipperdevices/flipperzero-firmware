@@ -10,9 +10,7 @@ enum VarItemListIndex {
     VarItemListIndexPinEnable,
     VarItemListIndexNRepeats,
     VarItemListIndexRepeatModeOn,
-#ifndef FW_ORIGIN_Official
     VarItemListIndexAllowUART,
-#endif
 };
 
 static const char* gpio[] = {
@@ -60,8 +58,6 @@ const char* const off_on_text[OFF_ON_COUNT] = {
     "OFF",
     "ON",
 };
-
-VariableItem* item_dialog_cb;
 
 void mag_scene_settings_var_item_list_callback(void* context, uint32_t index) {
     Mag* mag = context;
@@ -114,7 +110,7 @@ static void mag_scene_settings_set_allow_uart(VariableItem* item) {
     bool rising = !mag->state.allow_uart && !!variable_item_get_current_value_index(item);
     // trigger dialog only on rising change
     if(rising) {
-        item_dialog_cb = item;
+        scene_manager_set_scene_state(mag->scene_manager, MagSceneSettings, (uint32_t)item);
         view_dispatcher_send_custom_event(mag->view_dispatcher, MagEventConfirmDialog);
     }
 
@@ -228,7 +224,7 @@ bool mag_scene_settings_on_event(void* context, SceneManagerEvent event) {
 
         break;
     case SceneManagerEventTypeCustom:
-        scene_manager_set_scene_state(mag->scene_manager, MagSceneSettings, event.event);
+        // scene_manager_set_scene_state(mag->scene_manager, MagSceneSettings, event.event);
         consumed = true;
         if(event.event == MagEventConfirmDialog) {
             DialogMessage* msg = dialog_message_alloc();
@@ -244,12 +240,15 @@ bool mag_scene_settings_on_event(void* context, SceneManagerEvent event) {
             DialogMessageButton res = dialog_message_show(furi_record_open(RECORD_DIALOGS), msg);
             if(res != DialogMessageButtonRight) {
                 // if not "Yes", reset to "OFF" (0 / false-y)
-                variable_item_set_current_value_index(item_dialog_cb, 0);
-                mag_scene_settings_set_bool(item_dialog_cb, &mag->state.allow_uart);
+                VariableItem* item =
+                    (VariableItem*)scene_manager_get_scene_state(scene_manager, MagSceneSettings);
+                variable_item_set_current_value_index(item, 0);
+                mag_scene_settings_set_bool(item, &mag->state.allow_uart);
             }
             dialog_message_free(msg);
             furi_record_close(RECORD_DIALOGS);
-            item_dialog_cb = NULL;
+            // clear item from scene state
+            scene_manager_set_scene_state(scene_manager, MagSceneSettings, 0);
         }
         break;
     default:
