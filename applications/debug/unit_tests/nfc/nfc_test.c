@@ -679,8 +679,7 @@ NfcCommand slix_poller_set_password_callback(NfcGenericEventEx event, void* cont
     return command;
 }
 
-MU_TEST(slix_default_emulation_test) {
-    const char* file_path = EXT_PATH("unit_tests/nfc/Slix_cap_default.nfc");
+static void slix_set_password_test(const char* file_path, SlixPassword pass, bool correct_pass) {
     FURI_LOG_I(TAG, "Testing file: %s", file_path);
 
     Nfc* poller = nfc_alloc();
@@ -689,16 +688,18 @@ MU_TEST(slix_default_emulation_test) {
     NfcDevice* nfc_device = nfc_device_alloc();
     mu_assert(nfc_device_load(nfc_device, file_path), "nfc_device_load() failed\r\n");
 
-    NfcListener* slix_listener = nfc_listener_alloc(
-        listener, NfcProtocolSlix, nfc_device_get_data(nfc_device, NfcProtocolSlix));
+    const SlixData* slix_data = nfc_device_get_data(nfc_device, NfcProtocolSlix);
+    NfcListener* slix_listener = nfc_listener_alloc(listener, NfcProtocolSlix, slix_data);
     nfc_listener_start(slix_listener, NULL, NULL);
+
+    SlixCapabilities slix_capabilities = slix_data->capabilities;
 
     NfcPoller* slix_poller = nfc_poller_alloc(poller, NfcProtocolSlix);
 
     NfcTestSlixPollerSetPasswordContext slix_poller_context = {
         .thread_id = furi_thread_get_current_id(),
         .state = NfcTestSlixPollerSetPasswordStateGetRandomNumber,
-        .password = 0x00000000U,
+        .password = pass,
         .error = SlixErrorNone,
     };
 
@@ -713,15 +714,33 @@ MU_TEST(slix_default_emulation_test) {
     nfc_listener_stop(slix_listener);
     nfc_listener_free(slix_listener);
 
-    mu_assert(slix_poller_context.error == SlixErrorNone, "Failed to set password");
     mu_assert(
         slix_poller_context.state == NfcTestSlixPollerSetPasswordStateSetPassword,
         "Poller failed before setting password");
-    mu_assert(slix_poller_context.error == SlixErrorNone, "Failed to set password");
+
+    if((slix_capabilities == SlixCapabilitiesAcceptAllPasswords) || (correct_pass)) {
+        mu_assert(slix_poller_context.error == SlixErrorNone, "Failed to set password");
+    } else {
+        mu_assert(
+            slix_poller_context.error == SlixErrorTimeout, "Must have received SlixErrorTimeout");
+    }
 
     nfc_device_free(nfc_device);
     nfc_free(listener);
     nfc_free(poller);
+}
+
+MU_TEST(slix_set_password_default_cap_correct_pass) {
+    slix_set_password_test(EXT_PATH("unit_tests/nfc/Slix_cap_default.nfc"), 0x00000000, true);
+}
+
+MU_TEST(slix_set_password_default_cap_incorrect_pass) {
+    slix_set_password_test(EXT_PATH("unit_tests/nfc/Slix_cap_default.nfc"), 0x12341234, false);
+}
+
+MU_TEST(slix_set_password_access_all_passwords_cap) {
+    slix_set_password_test(
+        EXT_PATH("unit_tests/nfc/Slix_cap_accept_all_pass.nfc"), 0x12341234, false);
 }
 
 MU_TEST_SUITE(nfc) {
@@ -765,7 +784,9 @@ MU_TEST_SUITE(nfc) {
     UNUSED(mf_classic_send_frame_test);
     UNUSED(mf_classic_dict_test);
 
-    MU_RUN_TEST(slix_default_emulation_test);
+    MU_RUN_TEST(slix_set_password_default_cap_correct_pass);
+    MU_RUN_TEST(slix_set_password_default_cap_incorrect_pass);
+    MU_RUN_TEST(slix_set_password_access_all_passwords_cap);
 
     nfc_test_free();
 }
