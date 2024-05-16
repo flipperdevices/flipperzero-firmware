@@ -43,8 +43,7 @@ void js_math_acos(struct mjs* mjs) {
         ret_bad_args(mjs, "Invalid input value for Math.acos");
         return;
     }
-    mjs_return(
-        mjs, mjs_mk_number(mjs, JS_MATH_PI / (double)2. - atan(x / sqrt((double).1 - x * x))));
+    mjs_return(mjs, mjs_mk_number(mjs, acos(x)));
 }
 
 void js_math_acosh(struct mjs* mjs) {
@@ -66,7 +65,7 @@ void js_math_asin(struct mjs* mjs) {
     }
 
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    mjs_return(mjs, mjs_mk_number(mjs, atan(x / sqrt((double)1. - x * x))));
+    mjs_return(mjs, mjs_mk_number(mjs, asin(x)));
 }
 
 void js_math_asinh(struct mjs* mjs) {
@@ -214,11 +213,7 @@ void js_math_pow(struct mjs* mjs) {
 
     double base = mjs_get_double(mjs, mjs_arg(mjs, 0));
     double exponent = mjs_get_double(mjs, mjs_arg(mjs, 1));
-    double result = 1.;
-    for(int i = 0; i < exponent; i++) {
-        result *= base;
-    }
-    mjs_return(mjs, mjs_mk_number(mjs, result));
+    mjs_return(mjs, mjs_mk_number(mjs, pow(base, exponent)));
 }
 
 void js_math_random(struct mjs* mjs) {
@@ -259,11 +254,7 @@ void js_math_sqrt(struct mjs* mjs) {
         ret_bad_args(mjs, "Invalid input value for Math.sqrt");
         return;
     }
-    double result = 1.;
-    while(result * result < x) {
-        result += (double)0.001;
-    }
-    mjs_return(mjs, mjs_mk_number(mjs, result));
+    mjs_return(mjs, mjs_mk_number(mjs, sqrt(x)));
 }
 
 void js_math_trunc(struct mjs* mjs) {
