@@ -627,6 +627,9 @@ MU_TEST(mf_classic_dict_test) {
         "Remove test dict failed");
 }
 
+MU_TEST(slix_file_test) {
+}
+
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
@@ -667,6 +670,8 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(mf_classic_value_block);
     MU_RUN_TEST(mf_classic_send_frame_test);
     MU_RUN_TEST(mf_classic_dict_test);
+
+    MU_RUN_TEST(slix_file_test);
 
     nfc_test_free();
 }
