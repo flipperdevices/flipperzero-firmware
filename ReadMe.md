@@ -56,6 +56,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [JS: Add textbox module #3597 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3597) (Updated from nminaylov)
 - OFW: PR: [NFC: add Slix capabilities #3652 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3652)
 - RFID: [Restored options to Set PW, Wipe and Write Block to T5577 (By plgcoder)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/678)
+- Patreon Builds Update: Removed L3_Freedom_2_dolphins_128x64 from Minimal build.
+- Patreon Builds Update: Updated Mods animation on builds: Dolphin, ManifestSwitcher, Minimal & Stock
+- Patreon Builds Update: Added Akira animation on builds: Dolphin, ManifestSwitcher, Minimal & Stock
 
 <a name="release">
 
