@@ -220,7 +220,7 @@ static void handle_time_setting_updown(CountDownTimView* cdv, CountDownViewCmd c
             }
 
             if(count < 0) {
-                count = 0;
+                count = 1;
             }
 
             // update count state
