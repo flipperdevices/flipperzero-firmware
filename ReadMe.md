@@ -52,6 +52,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [TLSF and the Temple of Corrupted Memory
 #3653 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3653) [SubGHz: fix memory corrupt in read raw view (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3653/commits/1460030d035e4b133e08f44f6f8033acc420ba37)
 - OFW: [JS: Add submenu module #3601 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3601)
+- OFW: PR: [JS: Add math module #3598 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598) (Updated from nminaylov)
+- OFW: PR: [JS: Add textbox module #3597 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3597) (Updated from nminaylov)
 
 <a name="release">
 
