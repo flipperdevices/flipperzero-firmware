@@ -682,6 +682,8 @@ NfcCommand slix_poller_set_password_callback(NfcGenericEventEx event, void* cont
         if(slix_ctx->state == NfcTestSlixPollerSetPasswordStateGetRandomNumber) {
             slix_ctx->error = slix_poller_get_random_number(poller, &slix_ctx->random_number);
             if(slix_ctx->error != SlixErrorNone) {
+                furi_thread_flags_set(slix_ctx->thread_id, NFC_TEST_FLAG_WORKER_DONE);
+                command = NfcCommandStop;
             } else {
                 slix_ctx->state = NfcTestSlixPollerSetPasswordStateSetPassword;
             }
@@ -693,6 +695,8 @@ NfcCommand slix_poller_set_password_callback(NfcGenericEventEx event, void* cont
         }
     } else {
         slix_ctx->error = slix_process_iso15693_3_error(iso15_event->data->error);
+        furi_thread_flags_set(slix_ctx->thread_id, NFC_TEST_FLAG_WORKER_DONE);
+        command = NfcCommandStop;
     }
 
     return command;
