@@ -3,6 +3,7 @@
 #include "registry.h"
 
 #include <subghz/subghz_last_settings.h>
+#include <furi_hal_subghz_i.h>
 
 void subghz_devices_init(void) {
     furi_check(!subghz_device_registry_is_valid());
@@ -34,8 +35,9 @@ bool subghz_devices_begin(const SubGhzDevice* device) {
     if(device->interconnect->begin) {
         SubGhzDeviceConf conf = {
             .ver = 1,
-            .extended_range = false, // TODO
-            .power_amp = furi_hal_subghz_get_ext_power_amp(),
+            .extended_range = furi_hal_subghz_get_extended_range(),
+            .bypass_region = furi_hal_subghz_get_bypass_region(),
+            .power_amp = true,
         };
 
         ret = device->interconnect->begin(&conf);
@@ -241,4 +243,13 @@ void subghz_devices_write_packet(const SubGhzDevice* device, const uint8_t* data
     if(device->interconnect->write_packet) {
         device->interconnect->write_packet(data, size);
     }
+}
+
+SubGhzTx subghz_devices_check_tx(const SubGhzDevice* device, uint32_t frequency) {
+    SubGhzTx ret = SubGhzTxUnsupported;
+    furi_check(device);
+    if(device->interconnect->check_tx) {
+        ret = device->interconnect->check_tx(frequency);
+    }
+    return ret;
 }

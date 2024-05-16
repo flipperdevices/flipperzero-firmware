@@ -1675,11 +1675,11 @@ Function,-,furi_hal_spi_config_init,void,
 Function,-,furi_hal_spi_config_init_early,void,
 Function,-,furi_hal_spi_dma_init,void,
 Function,+,furi_hal_spi_release,void,FuriHalSpiBusHandle*
+Function,+,furi_hal_subghz_check_tx,SubGhzTx,uint32_t
 Function,-,furi_hal_subghz_dump_state,void,
 Function,+,furi_hal_subghz_flush_rx,void,
 Function,+,furi_hal_subghz_flush_tx,void,
 Function,+,furi_hal_subghz_get_data_gpio,const GpioPin*,
-Function,+,furi_hal_subghz_get_ext_power_amp,_Bool,
 Function,+,furi_hal_subghz_get_lqi,uint8_t,
 Function,+,furi_hal_subghz_get_rolling_counter_mult,int8_t,
 Function,+,furi_hal_subghz_get_rssi,float,
@@ -1697,7 +1697,6 @@ Function,+,furi_hal_subghz_reset,void,
 Function,+,furi_hal_subghz_rx,void,
 Function,+,furi_hal_subghz_rx_pipe_not_empty,_Bool,
 Function,+,furi_hal_subghz_set_async_mirror_pin,void,const GpioPin*
-Function,+,furi_hal_subghz_set_ext_power_amp,void,_Bool
 Function,+,furi_hal_subghz_set_frequency,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
@@ -3345,6 +3344,7 @@ Function,+,subghz_custom_btn_set,_Bool,uint8_t
 Function,+,subghz_custom_btns_reset,void,
 Function,-,subghz_device_cc1101_ext_ep,const FlipperAppPluginDescriptor*,
 Function,+,subghz_devices_begin,_Bool,const SubGhzDevice*
+Function,+,subghz_devices_check_tx,SubGhzTx,"const SubGhzDevice*, uint32_t"
 Function,+,subghz_devices_deinit,void,
 Function,+,subghz_devices_end,void,const SubGhzDevice*
 Function,+,subghz_devices_flush_rx,void,const SubGhzDevice*

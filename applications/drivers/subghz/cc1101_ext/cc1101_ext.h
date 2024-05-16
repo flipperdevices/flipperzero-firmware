@@ -152,6 +152,14 @@ uint8_t subghz_device_cc1101_ext_get_lqi(void);
  */
 bool subghz_device_cc1101_ext_is_frequency_valid(uint32_t value);
 
+/** Сheck if and why transmission is blocked on this frequency with current config
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     tx allowed or blocked enum
+ */
+SubGhzTx subghz_device_cc1101_ext_check_tx(uint32_t value);
+
 /** Set frequency
  *
  * @param      value  frequency in Hz

@@ -29,7 +29,9 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
             subghz->dialogs, "Error in protocol\nparameters\ndescription");
         break;
     case SubGhzTxRxStartTxStateErrorOnlyRx:
-        subghz_dialog_message_freq_error(subghz, true);
+        uint32_t frequency = subghz_txrx_get_preset(subghz->txrx).frequency;
+        SubGhzTx can_tx = subghz_txrx_radio_device_check_tx(subghz->txrx, frequency);
+        subghz_dialog_message_freq_error(subghz, can_tx);
         break;
 
     default:
@@ -39,19 +41,33 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
     return false;
 }
 
-void subghz_dialog_message_freq_error(SubGhz* subghz, bool only_rx) {
+void subghz_dialog_message_freq_error(SubGhz* subghz, SubGhzTx can_tx) {
     DialogsApp* dialogs = subghz->dialogs;
     DialogMessage* message = dialog_message_alloc();
-    const char* header_text = "Frequency not supported";
-    const char* message_text = "Frequency\nis outside of\nsupported range.";
+    const char* header_text = "Transmission is blocked";
+    const char* message_text;
 
-    if(only_rx) {
-        header_text = "Transmission is Blocked!";
-        message_text = "Frequency\nis outside of\ndefault range.\nCheck docs.";
+    switch(can_tx) {
+    case SubGhzTxAllowed:
+    default:
+        return;
+    case SubGhzTxBlockedRegionNotProvisioned:
+        message_text = "Region is not\nprovisioned.\nUpdate firmware\nor bypass region.";
+        break;
+    case SubGhzTxBlockedRegion:
+        message_text = "Frequency outside\nof region range.\nMNTM > Protocols\n> Bypass Region";
+        break;
+    case SubGhzTxBlockedDefault:
+        message_text = "Frequency outside\nof default range.\nMNTM > Protocols\n> Extend Bands";
+        break;
+    case SubGhzTxUnsupported:
+        header_text = "Frequency not supported";
+        message_text = "Frequency is\noutside of\nsupported range.";
+        break;
     }
 
     dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
-    dialog_message_set_text(message, message_text, 3, 23, AlignLeft, AlignTop);
+    dialog_message_set_text(message, message_text, 3, 20, AlignLeft, AlignTop);
 
     dialog_message_set_icon(message, &I_WarningDolphinFlip_45x42, 83, 22);
 
@@ -73,6 +89,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
     uint32_t temp_data32;
     float temp_lat = NAN; // NAN or 0.0?? because 0.0 is valid value
     float temp_lon = NAN;
+    SubGhzTx can_tx = SubGhzTxUnsupported;
 
     do {
         stream_clean(fff_data_stream);
@@ -102,12 +119,13 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
 
         if(!subghz_txrx_radio_device_is_frequency_valid(subghz->txrx, temp_data32)) {
             FURI_LOG_E(TAG, "Frequency not supported on chosen radio module");
+            can_tx = SubGhzTxUnsupported;
             load_key_state = SubGhzLoadKeyStateUnsuportedFreq;
             break;
         }
 
-        // TODO: use different frequency allowed lists for differnet modules (non cc1101)
-        if(!furi_hal_subghz_is_tx_allowed(temp_data32)) {
+        can_tx = subghz_txrx_radio_device_check_tx(subghz->txrx, temp_data32);
+        if(can_tx != SubGhzTxAllowed) {
             FURI_LOG_E(TAG, "This frequency can only be used for RX");
 
             load_key_state = SubGhzLoadKeyStateOnlyRx;
@@ -212,14 +230,9 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
         return false;
 
     case SubGhzLoadKeyStateUnsuportedFreq:
-        if(show_dialog) {
-            subghz_dialog_message_freq_error(subghz, false);
-        }
-        return false;
-
     case SubGhzLoadKeyStateOnlyRx:
         if(show_dialog) {
-            subghz_dialog_message_freq_error(subghz, true);
+            subghz_dialog_message_freq_error(subghz, can_tx);
         }
         return false;
 

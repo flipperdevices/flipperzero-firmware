@@ -92,6 +92,8 @@ const SubGhzDeviceInterconnect subghz_device_cc1101_ext_interconnect = {
     .is_rx_data_crc_valid = subghz_device_cc1101_ext_is_rx_data_crc_valid,
     .read_packet = subghz_device_cc1101_ext_read_packet,
     .write_packet = subghz_device_cc1101_ext_write_packet,
+
+    .check_tx = subghz_device_cc1101_ext_check_tx,
 };
 
 const SubGhzDevice subghz_device_cc1101_ext = {

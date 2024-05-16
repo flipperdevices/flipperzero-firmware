@@ -35,13 +35,8 @@ void subghz_scene_saved_menu_on_enter(void* context) {
         subghz_scene_saved_menu_submenu_callback,
         subghz);
 
-    FuriString* lat_str = furi_string_alloc();
-    FuriString* lon_str = furi_string_alloc();
-
-    subghz_txrx_get_latitude_and_longitude(subghz->txrx, lat_str, lon_str);
-
-    if(strcmp(furi_string_get_cstr(lat_str), "nan") != 0 &&
-       strcmp(furi_string_get_cstr(lon_str), "nan") != 0) {
+    if(!isnanf(subghz_txrx_get_latitude(subghz->txrx)) ||
+       !isnanf(subghz_txrx_get_longitude(subghz->txrx)) || subghz->gps) {
         submenu_add_item(
             subghz->submenu,
             "Geographic info",
@@ -49,9 +44,6 @@ void subghz_scene_saved_menu_on_enter(void* context) {
             subghz_scene_saved_menu_submenu_callback,
             subghz);
     }
-
-    furi_string_free(lon_str);
-    furi_string_free(lat_str);
 
     submenu_set_selected_item(
         subghz->submenu,
@@ -82,7 +74,8 @@ bool subghz_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexGeo) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneSavedMenu, SubmenuIndexGeo);
-            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSavedShowGps);
+            scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneShowGps, true);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowGps);
             return true;
         }
     }

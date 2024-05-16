@@ -59,6 +59,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Patreon Builds Update: Removed L3_Freedom_2_dolphins_128x64 from Minimal build.
 - Patreon Builds Update: Updated Mods animation on builds: Dolphin, ManifestSwitcher, Minimal & Stock
 - Patreon Builds Update: Added Akira animation on builds: Dolphin, ManifestSwitcher, Minimal & Stock
+- [Many updates for SubGHz GPS, CC1101 Handling, Frequency Bypass & SubGHz Optimizations (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
 
 <a name="release">
 

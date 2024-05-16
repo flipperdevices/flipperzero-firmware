@@ -88,6 +88,8 @@ const SubGhzDeviceInterconnect subghz_device_cc1101_int_interconnect = {
     .is_rx_data_crc_valid = furi_hal_subghz_is_rx_data_crc_valid,
     .read_packet = furi_hal_subghz_read_packet,
     .write_packet = furi_hal_subghz_write_packet,
+
+    .check_tx = furi_hal_subghz_check_tx,
 };
 
 const SubGhzDevice subghz_device_cc1101_int = {

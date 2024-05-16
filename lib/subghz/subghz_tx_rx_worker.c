@@ -243,7 +243,7 @@ bool subghz_tx_rx_worker_start(
 
     instance->worker_running = true;
 
-    if(furi_hal_region_is_frequency_allowed(frequency)) {
+    if(furi_hal_subghz_is_tx_allowed(frequency)) {
         instance->frequency = frequency;
         instance->device = device;
         res = true;
