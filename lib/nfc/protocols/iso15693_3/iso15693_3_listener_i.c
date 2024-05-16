@@ -61,11 +61,13 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
             break;
         }
 
-        // if(afi_flag) {
-        //     const uint8_t afi = *data++;
-        //     // When AFI flag is set, ignore non-matching requests
-        //     if(afi != instance->data->system_info.afi) break;
-        // }
+        if(afi_flag) {
+            const uint8_t afi = *data++;
+            // When AFI flag is set, ignore non-matching requests
+            if(afi != 0) {
+                if(afi != instance->data->system_info.afi) break;
+            }
+        }
 
         const uint8_t mask_len = *data++;
         const size_t data_size_required = data_size_min + mask_len;
