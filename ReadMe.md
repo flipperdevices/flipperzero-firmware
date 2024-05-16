@@ -36,7 +36,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
 - OFW: [Electra lfrfid protocol implementation #3640 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3640)
 - OFW: [Settings menu refactoring #3632 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3632)
-- Updated: [MagSpoof v0.9 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - [SubGHz: Improve Hormann BiSecur readability in SubGHz history (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/608d2b1d963872835541bbd19b8ba792d0b093aa)
 - OFW: [TLSF memory allocator. Less free flash, moar free ram. #3572 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3572) (Already in RM)
 - OFW: [Add new map analyser #3648 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3648)
@@ -49,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
 - [Settings: Show SD decimals and percent free again (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/94ef779bdbef138b9996b09fe55ee44340d89213)
 - Updated: [NFC Magic v1.10 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
+- Updated: [MagSpoof v0.10 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 
 <a name="release">
 
@@ -451,7 +451,7 @@ $ ./fbt dolphin_ext
 - [Lightmeter v1.2 (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009`
 - [Logic Analyzer (By g3gg0)](https://github.com/g3gg0/flipper-logic_analyzer)
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
-- [MagSpoof v0.9 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
+- [MagSpoof v0.10 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - [MALVEKE GAME BOY ADVANCE Cartridge v2.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gba_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Cartridge (GB/GBC) v2.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Emulator v2.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_emulator) `Req: Malveke`
