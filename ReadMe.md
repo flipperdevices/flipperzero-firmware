@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0515-1533-0.101.3-a845020](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-16 13:18 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-16 13:18 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-16 15:13 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-16 15:13 EST`
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - OFW: [Infrared: Add Toshiba RAS-2518D #3635 (By hakuyoku2011)](https://github.com/flipperdevices/flipperzero-firmware/pull/3635)
 - OFW: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
@@ -46,10 +46,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Mifare Nested v1.6.5 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
 - Updated: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
 - [Settings: Show SD decimals and percent free again (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/94ef779bdbef138b9996b09fe55ee44340d89213)
-- Reverted: OFW: [TLSF memory allocator. Less free flash, moar free ram. #3572 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3572) (Temp Revert by OFW)
 - Updated: [NFC Magic v1.10 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - Updated: [MagSpoof v0.10 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - Updated: [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
+- OFW: PR: [TLSF and the Temple of Corrupted Memory
+#3653 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3653) [SubGHz: fix memory corrupt in read raw view (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3653/commits/1460030d035e4b133e08f44f6f8033acc420ba37)
+- OFW: [JS: Add submenu module #3601 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3601)
 
 <a name="release">
 
