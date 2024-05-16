@@ -82,8 +82,6 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
 
             } else if(error == Iso15693_3ErrorUidMismatch) {
                 iso15693_3_listener_process_uid_mismatch(instance, rx_buffer);
-            } else if(error != Iso15693_3ErrorNone) {
-                FURI_LOG_E(TAG, "Error %d", error);
             }
 
         } else if(bit_buffer_get_size(rx_buffer) == 0) {

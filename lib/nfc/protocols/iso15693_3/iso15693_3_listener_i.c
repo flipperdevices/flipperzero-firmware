@@ -254,7 +254,6 @@ static Iso15693_3Error iso15693_3_listener_read_multi_blocks_handler(
         const Iso15693_3ReadMultiBlocksRequestLayout* request =
             (const Iso15693_3ReadMultiBlocksRequestLayout*)data;
 
-        // FURI_LOG_W(TAG, "Read multiple: %d, %d", request->first_block_num, request->block_count);
         if(data_size != sizeof(Iso15693_3ReadMultiBlocksRequestLayout)) {
             error = Iso15693_3ErrorFormat;
             break;
@@ -264,15 +263,6 @@ static Iso15693_3Error iso15693_3_listener_read_multi_blocks_handler(
         const uint32_t block_index_end =
             MIN((block_index_start + request->block_count + 1),
                 ((uint32_t)instance->data->system_info.block_count - 1));
-
-        // const uint32_t block_count = request->block_count + 1;
-        // const uint32_t block_count_max = instance->data->system_info.block_count;
-        // const uint32_t block_count_available = block_count_max - block_index_start;
-
-        // if(block_count > block_count_available) {
-        //     error = Iso15693_3ErrorInternal;
-        //     break;
-        // }
 
         error = iso15693_3_listener_extension_handler(
             instance,
@@ -290,7 +280,6 @@ static Iso15693_3Error iso15693_3_listener_read_multi_blocks_handler(
         }
     } while(false);
 
-    // FURI_LOG_E(TAG, "Error %d", error);
     return error;
 }
 
@@ -775,6 +764,7 @@ Iso15693_3Error
             (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
         Iso15693_3ListenerSessionState* session_state = &instance->session_state;
+
         if((request->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5) == 0) {
             session_state->selected = request->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
             session_state->addressed = request->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;
