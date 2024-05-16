@@ -139,7 +139,7 @@ void id_card_scene_on_enter(void* context) {
     if(input_copy != NULL) {
         int y_position = 20;
 
-        char* token = strtok(input_copy, "_");
+        char* token = strtok(input_copy, "/");
 
         if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
@@ -149,7 +149,7 @@ void id_card_scene_on_enter(void* context) {
             y_position += 10;
         }
 
-        token = strtok(NULL, "_");
+        token = strtok(NULL, "/");
         if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
                 app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Email:");
@@ -158,7 +158,7 @@ void id_card_scene_on_enter(void* context) {
             y_position += 10;
         }
 
-        token = strtok(NULL, "_");
+        token = strtok(NULL, "/");
         if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
                 app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Tel:");
@@ -167,7 +167,7 @@ void id_card_scene_on_enter(void* context) {
             y_position += 10;
         }
 
-        token = strtok(NULL, "_");
+        token = strtok(NULL, "/");
         if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
                 app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Addr:");
@@ -176,15 +176,13 @@ void id_card_scene_on_enter(void* context) {
             y_position += 10;
         }
 
-        token = strtok(NULL, "_");
+        token = strtok(NULL, "/");
         if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
                 app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Notes:");
-            widget_add_string_element(
-                app->widget, 35, y_position, AlignLeft, AlignCenter, FontSecondary, token);
+            widget_add_text_scroll_element(app->widget, 35, y_position - 5, 90, 5, token);
             y_position += 10;
         }
-
         free(input_copy);
     }
 
@@ -209,7 +207,7 @@ void id_greeting_input_scene_on_enter(void* context) {
     App* app = context;
     bool clear_text = true;
     text_input_reset(app->text_input);
-    text_input_set_header_text(app->text_input, "name_mail_tel_addr_notes");
+    text_input_set_header_text(app->text_input, "name/mail/tel/addr/notes");
     text_input_set_result_callback(
         app->text_input,
         id_text_input_callback,
@@ -263,7 +261,7 @@ void id_about_scene_on_enter(void* context) {
     widget_add_string_element(
         app->widget, 5, 15, AlignLeft, AlignCenter, FontSecondary, "type 0, without Tel:");
     widget_add_string_element(
-        app->widget, 5, 25, AlignLeft, AlignCenter, FontSecondary, "name_email_0_addr_notes");
+        app->widget, 5, 25, AlignLeft, AlignCenter, FontSecondary, "name/email/0/addr/notes");
     widget_add_string_element(
         app->widget, 5, 55, AlignLeft, AlignCenter, FontPrimary, "author:@evillero");
     view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesWidgetView);

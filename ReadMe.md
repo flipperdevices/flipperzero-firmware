@@ -31,7 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-15 17:17 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-15 17:17 EST`
-- Updated: [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - OFW: [Infrared: Add Toshiba RAS-2518D #3635 (By hakuyoku2011)](https://github.com/flipperdevices/flipperzero-firmware/pull/3635)
 - OFW: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
@@ -43,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Add new map analyser #3648 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3648)
 - Updated: [Color Guess v1.5 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications) [Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/29ad4914ad6350cfa3be399d5ddaff9d747e6b5f)
 - Updated: [Slot Machine v1.2 (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots) [Changes (By DefinetlyNotAI)](https://github.com/Daniel-dev-s/flipperzero-slots/pull/2)
+- Updated: [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
 
 <a name="release">
 
