@@ -646,6 +646,25 @@ MU_TEST(mf_classic_dict_test) {
         "Remove test dict failed");
 }
 
+MU_TEST(slix_file_with_capabilities_test) {
+    NfcDevice* nfc_device_missed_cap = nfc_device_alloc();
+    mu_assert(
+        nfc_device_load(nfc_device_missed_cap, EXT_PATH("unit_tests/nfc/Slix_cap_missed.nfc")),
+        "nfc_device_load() failed\r\n");
+
+    NfcDevice* nfc_device_default_cap = nfc_device_alloc();
+    mu_assert(
+        nfc_device_load(nfc_device_default_cap, EXT_PATH("unit_tests/nfc/Slix_cap_default.nfc")),
+        "nfc_device_load() failed\r\n");
+
+    mu_assert(
+        nfc_device_is_equal(nfc_device_missed_cap, nfc_device_default_cap),
+        "nfc_device_is_equal() failed\r\n");
+
+    nfc_device_free(nfc_device_default_cap);
+    nfc_device_free(nfc_device_missed_cap);
+}
+
 NfcCommand slix_poller_set_password_callback(NfcGenericEventEx event, void* context) {
     furi_check(event.poller);
     furi_check(event.parent_event_data);
@@ -707,7 +726,7 @@ static void slix_set_password_test(const char* file_path, SlixPassword pass, boo
 
     uint32_t flag =
         furi_thread_flags_wait(NFC_TEST_FLAG_WORKER_DONE, FuriFlagWaitAny, FuriWaitForever);
-    mu_assert(flag == NFC_TEST_FLAG_WORKER_DONE, "Wrong thread flag");
+    mu_assert(flag == NFC_TEST_FLAG_WORKER_DONE, "Wrong thread flag\r\n");
 
     nfc_poller_stop(slix_poller);
     nfc_poller_free(slix_poller);
@@ -716,13 +735,14 @@ static void slix_set_password_test(const char* file_path, SlixPassword pass, boo
 
     mu_assert(
         slix_poller_context.state == NfcTestSlixPollerSetPasswordStateSetPassword,
-        "Poller failed before setting password");
+        "Poller failed before setting password\r\n");
 
     if((slix_capabilities == SlixCapabilitiesAcceptAllPasswords) || (correct_pass)) {
-        mu_assert(slix_poller_context.error == SlixErrorNone, "Failed to set password");
+        mu_assert(slix_poller_context.error == SlixErrorNone, "Failed to set password\r\n");
     } else {
         mu_assert(
-            slix_poller_context.error == SlixErrorTimeout, "Must have received SlixErrorTimeout");
+            slix_poller_context.error == SlixErrorTimeout,
+            "Must have received SlixErrorTimeout\r\n");
     }
 
     nfc_device_free(nfc_device);
@@ -746,44 +766,45 @@ MU_TEST(slix_set_password_access_all_passwords_cap) {
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
-    UNUSED(iso14443_3a_reader);
-    UNUSED(mf_ultralight_11_reader);
-    UNUSED(mf_ultralight_21_reader);
-    UNUSED(ntag_215_reader);
-    UNUSED(ntag_216_reader);
-    UNUSED(ntag_213_locked_reader);
+    MU_RUN_TEST(iso14443_3a_reader);
+    MU_RUN_TEST(mf_ultralight_11_reader);
+    MU_RUN_TEST(mf_ultralight_21_reader);
+    MU_RUN_TEST(ntag_215_reader);
+    MU_RUN_TEST(ntag_216_reader);
+    MU_RUN_TEST(ntag_213_locked_reader);
 
-    UNUSED(mf_ultralight_write);
+    MU_RUN_TEST(mf_ultralight_write);
 
-    UNUSED(iso14443_3a_4b_file_test);
-    UNUSED(iso14443_3a_7b_file_test);
+    MU_RUN_TEST(iso14443_3a_4b_file_test);
+    MU_RUN_TEST(iso14443_3a_7b_file_test);
 
-    UNUSED(mf_ultralight_file_test);
-    UNUSED(mf_ultralight_ev1_11_file_test);
-    UNUSED(mf_ultralight_ev1_h11_file_test);
-    UNUSED(mf_ultralight_ev1_21_file_test);
-    UNUSED(mf_ultralight_ev1_h21_file_test);
-    UNUSED(mf_ultralight_ntag_203_file_test);
-    UNUSED(mf_ultralight_ntag_213_file_test);
-    UNUSED(mf_ultralight_ntag_215_file_test);
-    UNUSED(mf_ultralight_ntag_216_file_test);
-    UNUSED(mf_ultralight_ntag_i2c_1k_file_test);
-    UNUSED(mf_ultralight_ntag_i2c_2k_file_test);
-    UNUSED(mf_ultralight_ntag_i2c_plus_1k_file_test);
-    UNUSED(mf_ultralight_ntag_i2c_plus_2k_file_test);
+    MU_RUN_TEST(mf_ultralight_file_test);
+    MU_RUN_TEST(mf_ultralight_ev1_11_file_test);
+    MU_RUN_TEST(mf_ultralight_ev1_h11_file_test);
+    MU_RUN_TEST(mf_ultralight_ev1_21_file_test);
+    MU_RUN_TEST(mf_ultralight_ev1_h21_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_203_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_213_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_215_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_216_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_i2c_1k_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_i2c_2k_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_i2c_plus_1k_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_i2c_plus_2k_file_test);
 
-    UNUSED(mf_classic_mini_file_test);
-    UNUSED(mf_classic_1k_4b_file_test);
-    UNUSED(mf_classic_1k_7b_file_test);
-    UNUSED(mf_classic_4k_4b_file_test);
-    UNUSED(mf_classic_4k_7b_file_test);
+    MU_RUN_TEST(mf_classic_mini_file_test);
+    MU_RUN_TEST(mf_classic_1k_4b_file_test);
+    MU_RUN_TEST(mf_classic_1k_7b_file_test);
+    MU_RUN_TEST(mf_classic_4k_4b_file_test);
+    MU_RUN_TEST(mf_classic_4k_7b_file_test);
 
-    UNUSED(mf_classic_reader);
-    UNUSED(mf_classic_write);
-    UNUSED(mf_classic_value_block);
-    UNUSED(mf_classic_send_frame_test);
-    UNUSED(mf_classic_dict_test);
+    MU_RUN_TEST(mf_classic_reader);
+    MU_RUN_TEST(mf_classic_write);
+    MU_RUN_TEST(mf_classic_value_block);
+    MU_RUN_TEST(mf_classic_send_frame_test);
+    MU_RUN_TEST(mf_classic_dict_test);
 
+    MU_RUN_TEST(slix_file_with_capabilities_test);
     MU_RUN_TEST(slix_set_password_default_cap_correct_pass);
     MU_RUN_TEST(slix_set_password_default_cap_incorrect_pass);
     MU_RUN_TEST(slix_set_password_access_all_passwords_cap);
