@@ -6,6 +6,7 @@ typedef struct {
     TextBox* text_box;
     ViewHolder* view_holder;
     FuriString* text;
+    bool is_shown;
 } JsTextboxInst;
 
 static JsTextboxInst* get_this_ctx(struct mjs* mjs) {
@@ -112,29 +113,19 @@ static void js_textbox_is_open(struct mjs* mjs) {
     JsTextboxInst* textbox = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 0)) return;
 
-    mjs_return(mjs, mjs_mk_boolean(mjs, !!textbox->view_holder));
-}
-
-static void textbox_deinit(void* context) {
-    JsTextboxInst* textbox = context;
-
-    view_holder_stop(textbox->view_holder);
-    view_holder_free(textbox->view_holder);
-    textbox->view_holder = NULL;
-
-    furi_record_close(RECORD_GUI);
-
-    text_box_reset(textbox->text_box);
-    furi_string_reset(textbox->text);
+    mjs_return(mjs, mjs_mk_boolean(mjs, textbox->is_shown));
 }
 
 static void textbox_callback(void* context, uint32_t arg) {
     UNUSED(arg);
-    textbox_deinit(context);
+    JsTextboxInst* textbox = context;
+    view_holder_stop(textbox->view_holder);
+    textbox->is_shown = false;
 }
 
 static void textbox_exit(void* context) {
     JsTextboxInst* textbox = context;
+    // Usung timer to schedule view_holder stop, may not work with high CPU load
     furi_timer_pending_callback(textbox_callback, textbox, 0);
 }
 
@@ -142,19 +133,14 @@ static void js_textbox_show(struct mjs* mjs) {
     JsTextboxInst* textbox = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 0)) return;
 
-    if(textbox->view_holder) {
+    if(textbox->is_shown) {
         mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Textbox is already shown");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
 
-    Gui* gui = furi_record_open(RECORD_GUI);
-    textbox->view_holder = view_holder_alloc();
-    view_holder_attach_to_gui(textbox->view_holder, gui);
-    view_holder_set_back_callback(textbox->view_holder, textbox_exit, textbox);
-
-    view_holder_set_view(textbox->view_holder, text_box_get_view(textbox->text_box));
     view_holder_start(textbox->view_holder);
+    textbox->is_shown = true;
 
     mjs_return(mjs, MJS_UNDEFINED);
 }
@@ -163,9 +149,8 @@ static void js_textbox_close(struct mjs* mjs) {
     JsTextboxInst* textbox = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 0)) return;
 
-    if(textbox->view_holder) {
-        textbox_deinit(textbox);
-    }
+    view_holder_stop(textbox->view_holder);
+    textbox->is_shown = false;
 
     mjs_return(mjs, MJS_UNDEFINED);
 }
@@ -182,15 +167,29 @@ static void* js_textbox_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, textbox_obj, "close", ~0, MJS_MK_FN(js_textbox_close));
     textbox->text_box = text_box_alloc();
     textbox->text = furi_string_alloc();
+
+    Gui* gui = furi_record_open(RECORD_GUI);
+    textbox->view_holder = view_holder_alloc();
+    view_holder_attach_to_gui(textbox->view_holder, gui);
+    view_holder_set_back_callback(textbox->view_holder, textbox_exit, textbox);
+    view_holder_set_view(textbox->view_holder, text_box_get_view(textbox->text_box));
+
     *object = textbox_obj;
     return textbox;
 }
 
 static void js_textbox_destroy(void* inst) {
     JsTextboxInst* textbox = inst;
-    if(textbox->view_holder) {
-        textbox_deinit(textbox);
-    }
+
+    view_holder_stop(textbox->view_holder);
+    view_holder_free(textbox->view_holder);
+    textbox->view_holder = NULL;
+
+    furi_record_close(RECORD_GUI);
+
+    text_box_reset(textbox->text_box);
+    furi_string_reset(textbox->text);
+
     text_box_free(textbox->text_box);
     furi_string_free(textbox->text);
     free(textbox);
