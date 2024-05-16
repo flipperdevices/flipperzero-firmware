@@ -27,7 +27,7 @@ uint32_t icon_get_frame_count(const Icon* instance) {
 }
 
 const uint8_t* icon_get_frame_data(const Icon* instance, uint32_t frame) {
-    furi_assert(frame < instance->frame_count);
+    furi_check(frame < instance->frame_count);
     return instance->frames[frame];
 }
 

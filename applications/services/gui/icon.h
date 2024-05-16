@@ -30,11 +30,11 @@ uint16_t icon_get_width(const Icon* instance);
  */
 uint16_t icon_get_height(const Icon* instance);
 
-/** Get Icon XBM bitmap data
+/** Get Icon XBM bitmap data for the first frame
  *
  * @param[in]  instance  pointer to Icon data
  *
- * @return     pointer to XBM bitmap data
+ * @return     pointer to compressed XBM bitmap data
  */
 FURI_DEPRECATED const uint8_t* icon_get_data(const Icon* instance);
 
@@ -46,12 +46,12 @@ FURI_DEPRECATED const uint8_t* icon_get_data(const Icon* instance);
  */
 uint32_t icon_get_frame_count(const Icon* instance);
 
-/** Get Icon XBM bitmap data
+/** Get Icon XBM bitmap data for a particular frame
  *
  * @param[in]  instance  pointer to Icon data
  * @param[in]  frame     frame index
  *
- * @return     pointer to XBM bitmap data
+ * @return     pointer to compressed XBM bitmap data
  */
 const uint8_t* icon_get_frame_data(const Icon* instance, uint32_t frame);
 

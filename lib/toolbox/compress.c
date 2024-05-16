@@ -52,7 +52,6 @@ CompressIcon* compress_icon_alloc(void) {
 }
 
 static void compress_icon_release_large_buffer(CompressIcon* instance) {
-    furi_assert(instance);
     if(instance->large_decoded_buff) {
         free(instance->large_decoded_buff);
         instance->large_decoded_buff = NULL;
@@ -61,6 +60,7 @@ static void compress_icon_release_large_buffer(CompressIcon* instance) {
 
 void compress_icon_free(CompressIcon* instance) {
     furi_check(instance);
+    compress_icon_release_large_buffer(instance);
     heatshrink_decoder_free(instance->decoder);
     free(instance);
 }
@@ -70,14 +70,14 @@ void compress_icon_decode(
     const uint8_t* icon_data,
     uint8_t** decoded_buff,
     size_t size_hint) {
-    furi_assert(instance);
-    furi_assert(icon_data);
-    furi_assert(decoded_buff);
+    furi_check(instance);
+    furi_check(icon_data);
+    furi_check(decoded_buff);
 
     uint8_t* decoded_data_output_ptr = NULL;
     size_t decoded_data_output_size = 0;
+    compress_icon_release_large_buffer(instance);
     if(size_hint > COMPRESS_ICON_DECODED_BUFF_SIZE) {
-        compress_icon_release_large_buffer(instance);
         instance->large_decoded_buff = malloc(size_hint);
         decoded_data_output_size = size_hint;
         decoded_data_output_ptr = instance->large_decoded_buff;
@@ -134,9 +134,9 @@ static bool compress_encode_internal(
     uint8_t* data_out,
     size_t data_out_size,
     size_t* data_res_size) {
-    furi_assert(encoder);
-    furi_assert(data_in);
-    furi_assert(data_in_size);
+    furi_check(encoder);
+    furi_check(data_in);
+    furi_check(data_in_size);
 
     size_t sink_size = 0;
     size_t poll_size = 0;
@@ -216,10 +216,10 @@ static bool compress_decode_internal(
     uint8_t* data_out,
     size_t data_out_size,
     size_t* data_res_size) {
-    furi_assert(decoder);
-    furi_assert(data_in);
-    furi_assert(data_out);
-    furi_assert(data_res_size);
+    furi_check(decoder);
+    furi_check(data_in);
+    furi_check(data_out);
+    furi_check(data_res_size);
 
     bool result = false;
     bool decode_failed = false;
