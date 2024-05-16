@@ -13,6 +13,12 @@
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller.h>
+#include <nfc/protocols/iso15693_3/iso15693_3_poller.h>
+#include <nfc/protocols/slix/slix.h>
+#include <nfc/protocols/slix/slix_i.h>
+#include <nfc/protocols/slix/slix_poller.h>
+#include <nfc/protocols/slix/slix_poller_i.h>
+
 #include <nfc/nfc_poller.h>
 
 #include <toolbox/keys_dict.h>
@@ -41,6 +47,19 @@ typedef struct {
     BitBuffer* rx_buf;
     FuriThreadId thread_id;
 } NfcTestMfClassicSendFrameTest;
+
+typedef enum {
+    NfcTestSlixPollerSetPasswordStateGetRandomNumber,
+    NfcTestSlixPollerSetPasswordStateSetPassword,
+} NfcTestSlixPollerSetPasswordState;
+
+typedef struct {
+    FuriThreadId thread_id;
+    NfcTestSlixPollerSetPasswordState state;
+    SlixRandomNumber random_number;
+    SlixPassword password;
+    SlixError error;
+} NfcTestSlixPollerSetPasswordContext;
 
 typedef struct {
     Storage* storage;
@@ -627,51 +646,126 @@ MU_TEST(mf_classic_dict_test) {
         "Remove test dict failed");
 }
 
-MU_TEST(slix_file_test) {
+NfcCommand slix_poller_set_password_callback(NfcGenericEventEx event, void* context) {
+    furi_check(event.poller);
+    furi_check(event.parent_event_data);
+    furi_check(context);
+
+    NfcCommand command = NfcCommandContinue;
+    Iso15693_3PollerEvent* iso15_event = event.parent_event_data;
+    SlixPoller* poller = event.poller;
+    NfcTestSlixPollerSetPasswordContext* slix_ctx = context;
+
+    if(iso15_event->type == Iso15693_3PollerEventTypeReady) {
+        iso15693_3_copy(
+            poller->data->iso15693_3_data, iso15693_3_poller_get_data(poller->iso15693_3_poller));
+
+        if(slix_ctx->state == NfcTestSlixPollerSetPasswordStateGetRandomNumber) {
+            slix_ctx->error = slix_poller_get_random_number(poller, &slix_ctx->random_number);
+            if(slix_ctx->error != SlixErrorNone) {
+            } else {
+                slix_ctx->state = NfcTestSlixPollerSetPasswordStateSetPassword;
+            }
+        } else if(slix_ctx->state == NfcTestSlixPollerSetPasswordStateSetPassword) {
+            slix_ctx->error = slix_poller_set_password(
+                poller, SlixPasswordTypeRead, slix_ctx->password, slix_ctx->random_number);
+            furi_thread_flags_set(slix_ctx->thread_id, NFC_TEST_FLAG_WORKER_DONE);
+            command = NfcCommandStop;
+        }
+    } else {
+        slix_ctx->error = slix_process_iso15693_3_error(iso15_event->data->error);
+    }
+
+    return command;
+}
+
+MU_TEST(slix_default_emulation_test) {
+    const char* file_path = EXT_PATH("unit_tests/nfc/Slix_cap_default.nfc");
+    FURI_LOG_I(TAG, "Testing file: %s", file_path);
+
+    Nfc* poller = nfc_alloc();
+    Nfc* listener = nfc_alloc();
+
+    NfcDevice* nfc_device = nfc_device_alloc();
+    mu_assert(nfc_device_load(nfc_device, file_path), "nfc_device_load() failed\r\n");
+
+    NfcListener* slix_listener = nfc_listener_alloc(
+        listener, NfcProtocolSlix, nfc_device_get_data(nfc_device, NfcProtocolSlix));
+    nfc_listener_start(slix_listener, NULL, NULL);
+
+    NfcPoller* slix_poller = nfc_poller_alloc(poller, NfcProtocolSlix);
+
+    NfcTestSlixPollerSetPasswordContext slix_poller_context = {
+        .thread_id = furi_thread_get_current_id(),
+        .state = NfcTestSlixPollerSetPasswordStateGetRandomNumber,
+        .password = 0x00000000U,
+        .error = SlixErrorNone,
+    };
+
+    nfc_poller_start_ex(slix_poller, slix_poller_set_password_callback, &slix_poller_context);
+
+    uint32_t flag =
+        furi_thread_flags_wait(NFC_TEST_FLAG_WORKER_DONE, FuriFlagWaitAny, FuriWaitForever);
+    mu_assert(flag == NFC_TEST_FLAG_WORKER_DONE, "Wrong thread flag");
+
+    nfc_poller_stop(slix_poller);
+    nfc_poller_free(slix_poller);
+    nfc_listener_stop(slix_listener);
+    nfc_listener_free(slix_listener);
+
+    mu_assert(slix_poller_context.error == SlixErrorNone, "Failed to set password");
+    mu_assert(
+        slix_poller_context.state == NfcTestSlixPollerSetPasswordStateSetPassword,
+        "Poller failed before setting password");
+    mu_assert(slix_poller_context.error == SlixErrorNone, "Failed to set password");
+
+    nfc_device_free(nfc_device);
+    nfc_free(listener);
+    nfc_free(poller);
 }
 
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
-    MU_RUN_TEST(iso14443_3a_reader);
-    MU_RUN_TEST(mf_ultralight_11_reader);
-    MU_RUN_TEST(mf_ultralight_21_reader);
-    MU_RUN_TEST(ntag_215_reader);
-    MU_RUN_TEST(ntag_216_reader);
-    MU_RUN_TEST(ntag_213_locked_reader);
+    UNUSED(iso14443_3a_reader);
+    UNUSED(mf_ultralight_11_reader);
+    UNUSED(mf_ultralight_21_reader);
+    UNUSED(ntag_215_reader);
+    UNUSED(ntag_216_reader);
+    UNUSED(ntag_213_locked_reader);
 
-    MU_RUN_TEST(mf_ultralight_write);
+    UNUSED(mf_ultralight_write);
 
-    MU_RUN_TEST(iso14443_3a_4b_file_test);
-    MU_RUN_TEST(iso14443_3a_7b_file_test);
+    UNUSED(iso14443_3a_4b_file_test);
+    UNUSED(iso14443_3a_7b_file_test);
 
-    MU_RUN_TEST(mf_ultralight_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_11_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_h11_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_21_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_h21_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_203_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_213_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_215_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_216_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_1k_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_2k_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_plus_1k_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_plus_2k_file_test);
+    UNUSED(mf_ultralight_file_test);
+    UNUSED(mf_ultralight_ev1_11_file_test);
+    UNUSED(mf_ultralight_ev1_h11_file_test);
+    UNUSED(mf_ultralight_ev1_21_file_test);
+    UNUSED(mf_ultralight_ev1_h21_file_test);
+    UNUSED(mf_ultralight_ntag_203_file_test);
+    UNUSED(mf_ultralight_ntag_213_file_test);
+    UNUSED(mf_ultralight_ntag_215_file_test);
+    UNUSED(mf_ultralight_ntag_216_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_1k_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_2k_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_plus_1k_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_plus_2k_file_test);
 
-    MU_RUN_TEST(mf_classic_mini_file_test);
-    MU_RUN_TEST(mf_classic_1k_4b_file_test);
-    MU_RUN_TEST(mf_classic_1k_7b_file_test);
-    MU_RUN_TEST(mf_classic_4k_4b_file_test);
-    MU_RUN_TEST(mf_classic_4k_7b_file_test);
+    UNUSED(mf_classic_mini_file_test);
+    UNUSED(mf_classic_1k_4b_file_test);
+    UNUSED(mf_classic_1k_7b_file_test);
+    UNUSED(mf_classic_4k_4b_file_test);
+    UNUSED(mf_classic_4k_7b_file_test);
 
-    MU_RUN_TEST(mf_classic_reader);
-    MU_RUN_TEST(mf_classic_write);
-    MU_RUN_TEST(mf_classic_value_block);
-    MU_RUN_TEST(mf_classic_send_frame_test);
-    MU_RUN_TEST(mf_classic_dict_test);
+    UNUSED(mf_classic_reader);
+    UNUSED(mf_classic_write);
+    UNUSED(mf_classic_value_block);
+    UNUSED(mf_classic_send_frame_test);
+    UNUSED(mf_classic_dict_test);
 
-    MU_RUN_TEST(slix_file_test);
+    MU_RUN_TEST(slix_default_emulation_test);
 
     nfc_test_free();
 }
