@@ -183,7 +183,8 @@ static void number_input_handle_ok(NumberInputModel* model) {
             text_length = 0;
         }
         if(text_length < (model->text_buffer_size - 1)) {
-            furi_string_set_strn(model->text_buffer, furi_string_get_cstr(model->text_buffer), model->text_buffer_size - 1);
+            furi_string_set(model->text_buffer, furi_string_get_cstr(model->text_buffer) + selected);
+            //furi_string_set_strn(model->text_buffer, furi_string_get_cstr(model->text_buffer), model->text_buffer_size - 1);
             //model->text_buffer[text_length] = selected;
             //model->text_buffer[text_length + 1] = 0;
         }
@@ -313,6 +314,9 @@ static bool number_input_view_input_callback(InputEvent* event, void* context) {
         case InputKeyOk:
             number_input_handle_ok(model);
             break;
+        /*case InputKeyBack:
+            model->callback(model->callback_context);
+            break;*/
         default:
             consumed = false;
             break;
