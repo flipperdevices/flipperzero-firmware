@@ -6,7 +6,7 @@
 #define ADD_SCENE(prefix, name, id) ESubGhzChatScene_##id,
 typedef enum {
 #include "esubghz_chat_scene_config.h"
-	ESubGhzChatScene_MAX
+    ESubGhzChatScene_MAX
 } ESubGhzChatScene;
 #undef ADD_SCENE
 
@@ -19,7 +19,7 @@ extern const SceneManagerHandlers esubghz_chat_scene_event_handlers;
 
 // Generate scene on_event handlers declaration
 #define ADD_SCENE(prefix, name, id) \
-	bool scene_on_event_##name(void* context, SceneManagerEvent event);
+    bool scene_on_event_##name(void* context, SceneManagerEvent event);
 #include "esubghz_chat_scene_config.h"
 #undef ADD_SCENE
 
