@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0515-1533-0.101.3-a845020](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-16 15:13 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-16 15:13 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-16 18:27 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-16 18:27 EST`
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - OFW: [Infrared: Add Toshiba RAS-2518D #3635 (By hakuyoku2011)](https://github.com/flipperdevices/flipperzero-firmware/pull/3635)
 - OFW: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
@@ -55,6 +55,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [JS: Add math module #3598 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598) (Updated from nminaylov)
 - OFW: PR: [JS: Add textbox module #3597 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3597) (Updated from nminaylov)
 - OFW: PR: [NFC: add Slix capabilities #3652 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3652)
+- RFID: [Restored options to Set PW, Wipe and Write Block to T5577 (By plgcoder)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/678)
 
 <a name="release">
 

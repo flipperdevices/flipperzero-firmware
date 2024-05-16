@@ -127,6 +127,15 @@ static LfRfid* lfrfid_alloc(void) {
     view_dispatcher_add_view(
         lfrfid->view_dispatcher, LfRfidViewRead, lfrfid_view_read_get_view(lfrfid->read_view));
 
+    lfrfid->extra_options = 0;
+    lfrfid->password2 = (uint8_t*)malloc(4);
+    memset(lfrfid->password2, 0, 4);
+    lfrfid->new_password = (uint8_t*)malloc(4);
+    memset(lfrfid->new_password, 0, 4);
+
+    lfrfid->write_page = 0;
+    lfrfid->write_block = 0;
+
     return lfrfid;
 } //-V773
 
@@ -147,6 +156,9 @@ static void lfrfid_free(LfRfid* lfrfid) {
 
     free(lfrfid->new_key_data);
     free(lfrfid->old_key_data);
+
+    free(lfrfid->password2);
+    free(lfrfid->new_password);
 
     // Submenu
     view_dispatcher_remove_view(lfrfid->view_dispatcher, LfRfidViewSubmenu);
