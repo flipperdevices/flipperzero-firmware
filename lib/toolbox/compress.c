@@ -13,6 +13,7 @@
 
 /** Buffer sizes for input and output data */
 #define COMPRESS_ICON_ENCODED_BUFF_SIZE (1024u)
+/** Output is slightly larger than desired size (1024) to account for heatshrink poller quirks */
 #define COMPRESS_ICON_DECODED_BUFF_SIZE (1028u)
 
 static bool compress_decode_internal(
@@ -173,7 +174,10 @@ static bool compress_encode_internal(
     } else {
         do {
             poll_res = heatshrink_encoder_poll(
-                encoder, &data_out[res_buff_size], data_out_size - 4 - res_buff_size, &poll_size);
+                encoder,
+                &data_out[res_buff_size],
+                data_out_size - sizeof(CompressHeader) - res_buff_size,
+                &poll_size);
             if(poll_res < 0) {
                 encode_failed = true;
                 break;
@@ -187,7 +191,9 @@ static bool compress_encode_internal(
     // Write encoded data to output buffer if compression is efficient. Else - write header and original data
     if(!encode_failed && (res_buff_size < data_in_size + 1)) {
         CompressHeader header = {
-            .is_compressed = 0x01, .reserved = 0x00, .compressed_buff_size = res_buff_size};
+            .is_compressed = 0x01,
+            .reserved = 0x00,
+            .compressed_buff_size = res_buff_size - sizeof(CompressHeader)};
         memcpy(data_out, &header, sizeof(header));
         *data_res_size = res_buff_size;
     } else if(data_out_size > data_in_size) {
@@ -201,17 +207,6 @@ static bool compress_encode_internal(
     heatshrink_encoder_reset(encoder);
 
     return result;
-}
-
-bool compress_encode(
-    Compress* compress,
-    uint8_t* data_in,
-    size_t data_in_size,
-    uint8_t* data_out,
-    size_t data_out_size,
-    size_t* data_res_size) {
-    return compress_encode_internal(
-        compress->encoder, data_in, data_in_size, data_out, data_out_size, data_res_size);
 }
 
 static bool compress_decode_internal(
@@ -282,11 +277,23 @@ static bool compress_decode_internal(
         *data_res_size = data_in_size - 1;
         result = true;
     } else {
+        // Not enough space in output buffer
         result = false;
     }
     heatshrink_decoder_reset(decoder);
 
     return result;
+}
+
+bool compress_encode(
+    Compress* compress,
+    uint8_t* data_in,
+    size_t data_in_size,
+    uint8_t* data_out,
+    size_t data_out_size,
+    size_t* data_res_size) {
+    return compress_encode_internal(
+        compress->encoder, data_in, data_in_size, data_out, data_out_size, data_res_size);
 }
 
 bool compress_decode(
