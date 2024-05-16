@@ -157,13 +157,7 @@ void js_math_exp(struct mjs* mjs) {
     }
 
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    double result = 1.;
-    double term = 1.;
-    for(int i = 1; i < 100; i++) {
-        term *= x / i;
-        result += term;
-    }
-    mjs_return(mjs, mjs_mk_number(mjs, result));
+    mjs_return(mjs, mjs_mk_number(mjs, exp(x)));
 }
 
 void js_math_floor(struct mjs* mjs) {
@@ -252,13 +246,7 @@ void js_math_sin(struct mjs* mjs) {
     }
 
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    double result = x;
-    double term = x;
-    for(int i = 1; i < 10; i++) {
-        term *= -x * x / (double)((2 * i) * (2 * i + 1));
-        result += term;
-    }
-    mjs_return(mjs, mjs_mk_number(mjs, result));
+    mjs_return(mjs, mjs_mk_number(mjs, sin(x)));
 }
 
 void js_math_sqrt(struct mjs* mjs) {
