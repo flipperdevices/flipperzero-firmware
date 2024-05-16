@@ -259,9 +259,12 @@ static bool slix_save_capabilities(const SlixData* data, FlipperFormat* ff) {
     FuriString* tmp_str = furi_string_alloc();
     do {
         furi_string_set_str(
-            tmp_str, "SLIX capabilities field affects emulation modes. Possible options:");
-        for(size_t i = 0; i < COUNT_OF(slix_capabilities_names); i++) {
-            furi_string_cat_printf(tmp_str, " %s,", slix_capabilities_names[i]);
+            tmp_str, "SLIX capabilities field affects emulation modes. Possible options: ");
+        for(size_t i = 0; i < SlixCapabilitiesCount; i++) {
+            furi_string_cat_str(tmp_str, slix_capabilities_names[i]);
+            if(i < SlixCapabilitiesCount - 1) {
+                furi_string_cat(tmp_str, ", ");
+            }
         }
         if(!flipper_format_write_comment_cstr(ff, furi_string_get_cstr(tmp_str))) break;
 
