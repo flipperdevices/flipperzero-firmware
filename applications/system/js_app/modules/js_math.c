@@ -55,6 +55,7 @@ void js_math_acosh(struct mjs* mjs) {
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
     if(x < (double)1.) {
         ret_bad_args(mjs, "Invalid input value for Math.acosh");
+        return;
     }
     mjs_return(mjs, mjs_mk_number(mjs, log(x + sqrt(x * x - (double)1.))));
 }
@@ -104,6 +105,7 @@ void js_math_atanh(struct mjs* mjs) {
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
     if(x <= (double)-1. || x >= (double)1.) {
         ret_bad_args(mjs, "Invalid input value for Math.atanh");
+        return;
     }
     mjs_return(mjs, mjs_mk_number(mjs, (double)0.5 * log(((double)1. + x) / ((double)1. - x))));
 }
@@ -181,6 +183,7 @@ void js_math_log(struct mjs* mjs) {
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
     if(x <= 0) {
         ret_bad_args(mjs, "Invalid input value for Math.log");
+        return;
     }
     double result = 0.;
     while(x >= JS_MATH_E) {
@@ -266,7 +269,7 @@ void js_math_sqrt(struct mjs* mjs) {
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
     if(x < (double)0.) {
         ret_bad_args(mjs, "Invalid input value for Math.sqrt");
-        mjs_return(mjs, MJS_UNDEFINED);
+        return;
     }
     double result = 1.;
     while(result * result < x) {
