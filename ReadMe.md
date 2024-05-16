@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [JS: Add submenu module #3601 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3601)
 - OFW: PR: [JS: Add math module #3598 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598) (Updated from nminaylov)
 - OFW: PR: [JS: Add textbox module #3597 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3597) (Updated from nminaylov)
+- OFW: PR: [NFC: add Slix capabilities #3652 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3652)
 
 <a name="release">
 
