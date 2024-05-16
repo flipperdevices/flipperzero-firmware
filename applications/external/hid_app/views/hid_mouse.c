@@ -20,22 +20,21 @@ typedef struct {
     bool left_mouse_held;
     bool right_mouse_pressed;
     bool connected;
-    uint8_t button_press_repeat_count;
-    HidTransport transport;
+    uint8_t acceleration;
 } HidMouseModel;
 
 static void hid_mouse_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     HidMouseModel* model = context;
 
-    // Header
-    if(model->transport == HidTransportBle) {
-        if(model->connected) {
-            canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
-        } else {
-            canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
-        }
+// Header
+#ifdef HID_TRANSPORT_BLE
+    if(model->connected) {
+        canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
+    } else {
+        canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
     }
+#endif
 
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Mouse");
@@ -118,16 +117,10 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
         hid_mouse->view,
         HidMouseModel * model,
         {
-            /*  Jump Size = 5px
-                ONE JUMP 1st 5 repeats
-                2xJUMP acceleration thereafter (10px)
-                MAX speed 100px                                 */
-            model->button_press_repeat_count =
-                (event->type == InputTypePress)         ? 0 :
-                (event->type == InputTypeRelease)       ? 0 :
-                (model->button_press_repeat_count < 5)  ? model->button_press_repeat_count + 1 :
-                (model->button_press_repeat_count > 17) ? 20 :
-                                                          model->button_press_repeat_count + 2;
+            model->acceleration = (event->type == InputTypePress)   ? 1 :
+                                  (event->type == InputTypeRelease) ? 0 :
+                                  (model->acceleration >= 20)       ? 20 :
+                                                                      model->acceleration + 1;
 
             if(event->key == InputKeyBack) {
                 if(event->type == InputTypeShort) {
@@ -160,10 +153,8 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->right_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, MOUSE_MOVE_SHORT, 0);
                 } else if(event->type == InputTypeRepeat) {
-                    for(uint8_t i = 0; i < model->button_press_repeat_count; i++) {
-                        hid_hal_mouse_move(hid_mouse->hid, MOUSE_MOVE_SHORT, 0);
-                        furi_thread_yield(); //Let events fire, so button up can stop mouse.
-                    }
+                    for(uint8_t i = model->acceleration; i > 1; i -= 2)
+                        hid_hal_mouse_move(hid_mouse->hid, MOUSE_MOVE_LONG, 0);
                 } else if(event->type == InputTypeRelease) {
                     model->right_pressed = false;
                 }
@@ -172,10 +163,8 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->left_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, -MOUSE_MOVE_SHORT, 0);
                 } else if(event->type == InputTypeRepeat) {
-                    for(uint8_t i = 0; i < model->button_press_repeat_count; i++) {
-                        hid_hal_mouse_move(hid_mouse->hid, -MOUSE_MOVE_SHORT, 0);
-                        furi_thread_yield(); //Let events fire, so button up can stop mouse.
-                    }
+                    for(uint8_t i = model->acceleration; i > 1; i -= 2)
+                        hid_hal_mouse_move(hid_mouse->hid, -MOUSE_MOVE_LONG, 0);
                 } else if(event->type == InputTypeRelease) {
                     model->left_pressed = false;
                 }
@@ -184,10 +173,9 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->down_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, 0, MOUSE_MOVE_SHORT);
                 } else if(event->type == InputTypeRepeat) {
-                    for(uint8_t i = 0; i < model->button_press_repeat_count; i++) {
-                        hid_hal_mouse_move(hid_mouse->hid, 0, MOUSE_MOVE_SHORT);
-                        furi_thread_yield(); //Let events fire, so button up can stop mouse.
-                    }
+                    for(uint8_t i = model->acceleration; i > 1; i -= 2)
+                        hid_hal_mouse_move(hid_mouse->hid, 0, MOUSE_MOVE_LONG);
+
                 } else if(event->type == InputTypeRelease) {
                     model->down_pressed = false;
                 }
@@ -196,10 +184,8 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->up_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, 0, -MOUSE_MOVE_SHORT);
                 } else if(event->type == InputTypeRepeat) {
-                    for(uint8_t i = 0; i < model->button_press_repeat_count; i++) {
-                        hid_hal_mouse_move(hid_mouse->hid, 0, -MOUSE_MOVE_SHORT);
-                        furi_thread_yield(); //Let events fire, so button up can stop mouse.
-                    }
+                    for(uint8_t i = model->acceleration; i > 1; i -= 2)
+                        hid_hal_mouse_move(hid_mouse->hid, 0, -MOUSE_MOVE_LONG);
                 } else if(event->type == InputTypeRelease) {
                     model->up_pressed = false;
                 }
@@ -231,9 +217,6 @@ HidMouse* hid_mouse_alloc(Hid* hid) {
     view_allocate_model(hid_mouse->view, ViewModelTypeLocking, sizeof(HidMouseModel));
     view_set_draw_callback(hid_mouse->view, hid_mouse_draw_callback);
     view_set_input_callback(hid_mouse->view, hid_mouse_input_callback);
-
-    with_view_model(
-        hid_mouse->view, HidMouseModel * model, { model->transport = hid->transport; }, true);
 
     return hid_mouse;
 }

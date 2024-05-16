@@ -14,7 +14,6 @@ struct HidCamera {
 typedef struct {
     bool ok_pressed;
     bool connected;
-    HidTransport transport;
 } HidCameraModel;
 
 static void hid_camera_draw_callback(Canvas* canvas, void* context) {
@@ -22,13 +21,13 @@ static void hid_camera_draw_callback(Canvas* canvas, void* context) {
     HidCameraModel* model = context;
 
     // Header
-    if(model->transport == HidTransportBle) {
-        if(model->connected) {
-            canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
-        } else {
-            canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
-        }
+#ifdef HID_TRANSPORT_BLE
+    if(model->connected) {
+        canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
+    } else {
+        canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
     }
+#endif
 
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Camera");
@@ -87,9 +86,6 @@ HidCamera* hid_camera_alloc(Hid* hid) {
     view_allocate_model(hid_camera->view, ViewModelTypeLocking, sizeof(HidCameraModel));
     view_set_draw_callback(hid_camera->view, hid_camera_draw_callback);
     view_set_input_callback(hid_camera->view, hid_camera_input_callback);
-
-    with_view_model(
-        hid_camera->view, HidCameraModel * model, { model->transport = hid->transport; }, true);
 
     return hid_camera;
 }

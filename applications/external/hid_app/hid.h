@@ -28,17 +28,13 @@
 #include "views/hid_mouse_clicker.h"
 #include "views/hid_mouse_jiggler.h"
 #include "views/hid_camera.h"
+#include "views/hid_mouse_jiggler_stealth.h"
 #include "views/hid_ptt.h"
 #include "views/hid_ptt_menu.h"
 #include "views/hid_tiktok.h"
 #include "scenes/hid_scene.h"
 
 #define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
-
-typedef enum {
-    HidTransportUsb,
-    HidTransportBle,
-} HidTransport;
 
 typedef struct Hid Hid;
 
@@ -49,7 +45,7 @@ struct Hid {
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
-    Submenu* device_type_submenu;
+    Submenu* submenu;
     DialogEx* dialog;
     Popup* popup;
     HidKeynote* hid_keynote;
@@ -62,12 +58,10 @@ struct Hid {
     HidMouseClicker* hid_mouse_clicker;
     HidMouseJiggler* hid_mouse_jiggler;
     HidCamera* hid_camera;
+    HidMouseJigglerStealth* hid_mouse_jiggler_stealth;
     HidTikTok* hid_tiktok;
     HidPushToTalk* hid_ptt;
     HidPushToTalkMenu* hid_ptt_menu;
-
-    HidTransport transport;
-    uint32_t view_id;
 };
 void bt_hid_remove_pairing(Hid* app);
 
