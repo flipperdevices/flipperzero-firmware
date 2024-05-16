@@ -7,7 +7,7 @@ App(
     fap_icon="assets/Nfc_10px.png",
     fap_category="NFC",
     fap_icon_assets="assets",
-    fap_version="1.9",
+    fap_version="1.10",
     fap_description="Application for writing to NFC tags with modifiable sector 0",
     #  [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
     #  [rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67)

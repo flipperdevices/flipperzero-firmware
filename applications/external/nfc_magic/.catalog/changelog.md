@@ -1,3 +1,6 @@
+## 1.10
+ - Fixed the user dictionary dictionary attack results being discarded
+
 ## 1.9
  - Get revision, get config moved into main Gen4 menu
  - New function: Set Gen4 card shadow mode

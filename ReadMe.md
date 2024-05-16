@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Mifare Nested v1.6.5 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
 - Updated: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
 - [Settings: Show SD decimals and percent free again (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/94ef779bdbef138b9996b09fe55ee44340d89213)
+- Updated: [NFC Magic v1.10 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 
 <a name="release">
 
@@ -481,7 +482,7 @@ $ ./fbt dolphin_ext
 - [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Mx2125 Step Counter v1.0 (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
-- [NFC Magic v1.9 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
+- [NFC Magic v1.10 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
