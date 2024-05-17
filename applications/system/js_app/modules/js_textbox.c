@@ -86,6 +86,9 @@ static void js_textbox_add_text(struct mjs* mjs) {
         return;
     }
 
+    // Avoid condition race between GUI and JS thread
+    text_box_set_text(textbox->text_box, "");
+
     size_t new_len = furi_string_size(textbox->text) + text_len;
     if(new_len >= 4096) {
         furi_string_right(textbox->text, new_len / 2);
@@ -101,6 +104,9 @@ static void js_textbox_add_text(struct mjs* mjs) {
 static void js_textbox_clear_text(struct mjs* mjs) {
     JsTextboxInst* textbox = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 0)) return;
+
+    // Avoid condition race between GUI and JS thread
+    text_box_set_text(textbox->text_box, "");
 
     furi_string_reset(textbox->text);
 
@@ -125,7 +131,7 @@ static void textbox_callback(void* context, uint32_t arg) {
 
 static void textbox_exit(void* context) {
     JsTextboxInst* textbox = context;
-    // Usung timer to schedule view_holder stop, may not work with high CPU load
+    // Using timer to schedule view_holder stop, will not work under high CPU load
     furi_timer_pending_callback(textbox_callback, textbox, 0);
 }
 
@@ -157,6 +163,7 @@ static void js_textbox_close(struct mjs* mjs) {
 
 static void* js_textbox_create(struct mjs* mjs, mjs_val_t* object) {
     JsTextboxInst* textbox = malloc(sizeof(JsTextboxInst));
+
     mjs_val_t textbox_obj = mjs_mk_object(mjs);
     mjs_set(mjs, textbox_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, textbox));
     mjs_set(mjs, textbox_obj, "setConfig", ~0, MJS_MK_FN(js_textbox_set_config));
@@ -165,8 +172,9 @@ static void* js_textbox_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, textbox_obj, "isOpen", ~0, MJS_MK_FN(js_textbox_is_open));
     mjs_set(mjs, textbox_obj, "show", ~0, MJS_MK_FN(js_textbox_show));
     mjs_set(mjs, textbox_obj, "close", ~0, MJS_MK_FN(js_textbox_close));
-    textbox->text_box = text_box_alloc();
+
     textbox->text = furi_string_alloc();
+    textbox->text_box = text_box_alloc();
 
     Gui* gui = furi_record_open(RECORD_GUI);
     textbox->view_holder = view_holder_alloc();
