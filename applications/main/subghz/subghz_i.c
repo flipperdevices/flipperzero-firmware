@@ -55,10 +55,10 @@ void subghz_dialog_message_freq_error(SubGhz* subghz, SubGhzTx can_tx) {
         message_text = "Region is not\nprovisioned.\nUpdate firmware\nor bypass region.";
         break;
     case SubGhzTxBlockedRegion:
-        message_text = "Frequency outside\nof region range.\nMNTM > Protocols\n> Bypass Region";
+        message_text = "Frequency outside\nof region range.\nCFW > Protocols\n> Bypass Region";
         break;
     case SubGhzTxBlockedDefault:
-        message_text = "Frequency outside\nof default range.\nMNTM > Protocols\n> Extend Bands";
+        message_text = "Frequency outside\nof default range.\nCFW > Protocols\n> Extend Bands";
         break;
     case SubGhzTxUnsupported:
         header_text = "Frequency not supported";
