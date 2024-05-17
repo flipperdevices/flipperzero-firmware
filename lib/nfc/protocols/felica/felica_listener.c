@@ -19,30 +19,7 @@ FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
 
     mbedtls_des3_init(&instance->auth.des_context);
     nfc_set_fdt_listen_fc(instance->nfc, FELICA_FDT_LISTEN_FC);
-    ///TODO: Remove this after MAC calc testing
-    /*     instance->data->data.fs.rc.data[0] = 0xF1;
-    instance->data->data.fs.rc.data[1] = 0x87;
-    instance->data->data.fs.rc.data[2] = 0x5A;
-    instance->data->data.fs.rc.data[3] = 0x01;
-    instance->data->data.fs.rc.data[4] = 0xF9;
-    instance->data->data.fs.rc.data[5] = 0xB2;
-    instance->data->data.fs.rc.data[6] = 0x9E;
-    instance->data->data.fs.rc.data[7] = 0x4C;
-    instance->data->data.fs.rc.data[8] = 0x06;
-    instance->data->data.fs.rc.data[9] = 0xA1;
-    instance->data->data.fs.rc.data[10] = 0xCE;
-    instance->data->data.fs.rc.data[11] = 0xC4;
-    instance->data->data.fs.rc.data[12] = 0x16;
-    instance->data->data.fs.rc.data[13] = 0x55;
-    instance->data->data.fs.rc.data[14] = 0x85;
-    instance->data->data.fs.rc.data[15] = 0xCF;
 
-    instance->rc_written = true;
-    felica_calculate_session_key(
-        &instance->auth.des_context,
-        instance->data->data.fs.ck.data,
-        instance->data->data.fs.rc.data,
-        instance->auth.session_key.data); */
     //------------------------------
     memcpy(instance->mc_shadow.data, instance->data->data.fs.mc.data, FELICA_DATA_BLOCK_SIZE);
     instance->data->data.fs.state.data[0] = 0;
@@ -278,39 +255,6 @@ static void felica_listener_command_handler_write(
     resp->idm = request->header.idm;
     resp->length = sizeof(FelicaListenerWriteCommandResponse);
 
-    /*  if(felica_listener_validate_write_request_and_set_sf(instance, request, data_ptr, resp)) {
-        for(uint8_t i = 0; i < request->header.block_count; i++) {
-            const FelicaBlockListElement* item = &request->list[i];
-
-            if(item->block_number == FELICA_BLOCK_INDEX_REG) {
-                felica_listener_write_reg_block(instance, request, &data_ptr->blocks[i], resp);
-            } else if(item->block_number == FELICA_BLOCK_INDEX_MC) {
-                felica_listener_write_mc_block(instance, request, &data_ptr->blocks[i], resp);
-            } else {
-                uint8_t num = felica_listener_get_block_index(item->block_number);
-                memcpy(
-                    &instance->data->data.dump[num * (FELICA_DATA_BLOCK_SIZE + 2) + 2],
-                    data_ptr->blocks[i].data,
-                    FELICA_DATA_BLOCK_SIZE);
-
-                if(item->block_number == FELICA_BLOCK_INDEX_STATE) {
-                    instance->auth.context.auth_status.external =
-                        instance->data->data.fs.state.data[0] == 0x01;
-
-                    instance->auth.context.auth_status.internal =
-                        instance->auth.context.auth_status.external;
-                } else if(item->block_number == FELICA_BLOCK_INDEX_RC) {
-                    felica_calculate_session_key(
-                        &instance->auth.des_context,
-                        instance->data->data.fs.ck.data,
-                        instance->data->data.fs.rc.data,
-                        instance->auth.session_key.data);
-                    instance->rc_written = true;
-                }
-            }
-        }
-        felica_wcnt_increment(instance->data);
-    } */
     if(felica_listener_validate_write_request_and_set_sf(instance, request, data_ptr, resp)) {
         for(uint8_t i = 0; i < request->header.block_count; i++) {
             const FelicaBlockListElement* item = &request->list[i];
