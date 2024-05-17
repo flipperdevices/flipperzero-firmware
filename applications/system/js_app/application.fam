@@ -34,6 +34,7 @@ App(
     #  [JS App Updates and Fixes for CLI (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b8843d481b36acaeeaa1a82eb3bcc715b626aac6)
     #  [JS: BadUSB Demo, Speaker API and VGM Module (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/js/)
     #  [JS: Fix widget sometimes MemCrash on exit. (By jamisonderek)](https://github.com/Next-Flip/Momentum-Firmware/pull/103)
+    #  [JS: Math (By Spooks4576) (Updated By nminaylov & skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598)
 )
 
 App(
