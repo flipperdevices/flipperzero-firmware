@@ -89,9 +89,15 @@ void game_results(SlotMachineApp* app) {
     }
 
     if(total > 0) {
-        app->money += total;
+        app->money += total; // Add winnings to the player's money
         app->winamount = total;
         app->winview = true;
+
+        // Add the bet amount back to the player's money
+        app->money += app->bet;
+
+        // Reset the bet amount, uncomment me if you want to do this
+        //app->bet = 0;
 
         if(total > highscore.highscore) {
             highscore.highscore = total;

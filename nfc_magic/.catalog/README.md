@@ -11,13 +11,13 @@ A Magic card is a card that allows you to change its UID. Generally, NFC cards h
 Currently, not all Magic cards are supported. The following cards are supported:
 
 * Mifare Classic 1K/4K Gen1A/Gen1B (including OTP versions)
+* Mifare Classic 1K/4K Gen2 (DirectWrite/CUID/FUID/UFUID)
 * Ultimate Magic Card (Gen4 GTU)
 
 For the Gen4 cards, both the Ultralight and the Classic modes are supported, with the ability to select a custom password.
 
 The following cards are currently not supported:
 
-* Mifare Classic 1K/4K Gen2 (DirectWrite/CUID/FUID/UFUID)
 * Mifare Classic 1K/4K Gen3 (APDU)
 * Mifare Classic Magic Gen4 (GDM)
 * Supercard (Gen1 and Gen2)

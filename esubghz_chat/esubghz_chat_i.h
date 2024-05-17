@@ -11,7 +11,6 @@
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
 #include <notification/notification_messages.h>
-// #include <lib/nfc/nfc_worker.h>
 #include <lib/subghz/subghz_tx_rx_worker.h>
 #include <mbedtls/sha256.h>
 

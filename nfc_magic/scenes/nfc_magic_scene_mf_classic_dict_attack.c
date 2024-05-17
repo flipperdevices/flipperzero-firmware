@@ -32,7 +32,15 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
             instance->view_dispatcher, NfcMagicAppCustomEventCardLost);
     } else if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
         const MfClassicData* mfc_data = nfc_poller_get_data(instance->poller);
-        nfc_device_set_data(instance->target_dev, NfcProtocolMfClassic, mfc_data);
+
+        if(nfc_device_get_protocol(instance->target_dev) == NfcProtocolInvalid) {
+            FURI_LOG_D(TAG, "Setting MFC data to target device");
+            nfc_device_set_data(instance->target_dev, NfcProtocolMfClassic, mfc_data);
+        } else {
+            FURI_LOG_D(TAG, "MFC data already set to target device");
+            mfc_data = nfc_device_get_data(instance->target_dev, NfcProtocolMfClassic);
+        }
+
         FURI_LOG_D(TAG, "MFC type: %d", mfc_data->type);
         mfc_event->data->poller_mode.mode = MfClassicPollerModeDictAttack;
         mfc_event->data->poller_mode.data = mfc_data;

@@ -81,7 +81,7 @@
 //     popup_disable_timeout(state->nfc_popup);
 
 //     popup_set_header(state->nfc_popup, "Sharing...", 67, 13, AlignLeft, AlignTop);
-//     popup_set_icon(state->nfc_popup, 0, 3, &I_NFC_dolphin_emulation_47x61);
+//     popup_set_icon(state->nfc_popup, 0, 3, &I_NFC_dolphin_emulation_51x64);
 //     popup_set_text(state->nfc_popup, "Sharing\nKey via\nNFC", 90, 28, AlignCenter, AlignTop);
 
 //     prepare_nfc_dev_data(state);
