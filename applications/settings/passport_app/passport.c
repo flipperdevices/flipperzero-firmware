@@ -224,9 +224,6 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case PIMG_BRIAREOS:
             canvas_draw_icon(canvas, 11, 2, &I_Briareos_Hecatonchires);
             break;
-        case PIMG_COBRA:
-            canvas_draw_icon(canvas, 11, 2, &I_Cobra);
-            break;
         case PIMG_DALI:
             canvas_draw_icon(canvas, 11, 2, &I_Dali_Mask);
             break;
@@ -316,6 +313,24 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             break;
         case PIMG_RABBIT:
             canvas_draw_icon_animation(canvas, 11, 2, animations[AniRabbit]);
+            break;
+        case PIMG_SCARMLA:
+            canvas_draw_icon(canvas, 11, 2, &I_SC_Armaroid_Lady);
+            break;
+        case PIMG_SCCOBRA:
+            canvas_draw_icon(canvas, 11, 2, &I_SC_Cobra);
+            break;
+        case PIMG_SCCRYBO:
+            canvas_draw_icon(canvas, 11, 2, &I_SC_Crystal_Bowie);
+            break;
+        case PIMG_SCDOMRO:
+            canvas_draw_icon(canvas, 11, 2, &I_SC_Dominique_Royal);
+            break;
+        case PIMG_SCSANDRA:
+            canvas_draw_icon(canvas, 11, 2, &I_SC_Sandra);
+            break;
+        case PIMG_SCTARBEIGE:
+            canvas_draw_icon(canvas, 11, 2, &I_SC_Tarbeige);
             break;
         case PIMG_SHINKAI:
             canvas_draw_icon(canvas, 11, 2, &I_Shinkai);
