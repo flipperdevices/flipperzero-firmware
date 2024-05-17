@@ -1,5 +1,5 @@
 App(
-    appid="Antis",
+    appid="antis",
     name="Antidepressants",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bigsad_app",

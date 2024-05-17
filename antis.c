@@ -4,17 +4,19 @@
 #include <input/input.h>
 #include <stdlib.h>
 #include "antis_icons.h"
-#include "dolphin/helpers/dolphin_state.h"
+#include "dolphin_state.h"
 #include "saved_struct.h"
 #include <power/power_service/power.h>
+#include "tinyfont.h"
 
 const char* funnyText[] = 
-{"Stop poking my brain",
- "You're a terrible owner",
- "I'll remember this!",
- "This really isnt ok",
- "Just feed me RFID cards!",
- "Forget to charge me too?"};
+{"\"Stop poking my brain\"",
+ "\"You're a terrible owner\"",
+ "\"I'll remember this!\"",
+ "\"This really isnt ok\"",
+ "\"Just feed me RFID cards!\"",
+ "\"Forget to charge me too?\"",
+ "\"Asshole...\""};
 
 int funnyTextIndex = 0;
 
@@ -23,43 +25,42 @@ char strButthurt[16];
 char strXp[16];
 int btnIndex = 0;
 
+int yOffset = 9;
+
 static void draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     //graphics
     canvas_clear(canvas);
     canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 3, 12, &I_passport_bad1_46x49);
-    if(btnIndex == 0){
-        canvas_draw_icon(canvas, 110, 15, &I_ButtonLeftSmall_3x5);
-    }
-    else if(btnIndex == 1){
-        canvas_draw_icon(canvas, 110, 25, &I_ButtonLeftSmall_3x5);
-    }
+    canvas_draw_icon(canvas, 3, 3 + yOffset, &I_passport_bad1_46x49);
+    if(btnIndex == 0){ canvas_draw_icon(canvas, 120, 19 + yOffset, &I_ButtonLeftSmall_3x5); }
+    else if(btnIndex == 1){ canvas_draw_icon(canvas, 120, 29 + yOffset, &I_ButtonLeftSmall_3x5); }
 
     //strings
-    canvas_set_font(canvas, FontBatteryPercent);
+    canvas_set_custom_u8g2_font(canvas, u8g2_font_5x7_tf);
     canvas_draw_str(canvas, 3, 9, funnyText[funnyTextIndex]);
+
     canvas_set_font(canvas, FontSecondary);
     snprintf(strButthurt, 16, "Butthurt: %lu", stateLocal->data.butthurt);
     snprintf(strXp, 16, "XP: %lu", stateLocal->data.icounter);
-    canvas_draw_str(canvas, 51, 21, strButthurt);
-    canvas_draw_str(canvas, 51, 31, strXp);
+    canvas_draw_str(canvas, 51, 25 + yOffset, strButthurt);
+    canvas_draw_str(canvas, 51, 35 + yOffset, strXp);
 
     //save button
     if(btnIndex == 2){
-        canvas_draw_rbox(canvas, 51, 46, 74, 15, 3);
+        canvas_draw_rbox(canvas, 51, 37 + yOffset, 74, 15, 3);
         canvas_invert_color(canvas);
-        canvas_draw_str_aligned(canvas, 88, 53, AlignCenter, AlignCenter, "Save & Reboot");
+        canvas_draw_str_aligned(canvas, 88, 45 + yOffset, AlignCenter, AlignCenter, "Save & Reboot");
         canvas_invert_color(canvas);
-        canvas_draw_rframe(canvas, 51, 46, 74, 15, 3);
+        canvas_draw_rframe(canvas, 51, 37 + yOffset, 74, 15, 3);
     }
     else{
         canvas_invert_color(canvas);
-        canvas_draw_rbox(canvas, 51, 46, 74, 15, 3);
+        canvas_draw_rbox(canvas, 51, 37 + yOffset, 74, 15, 3);
         canvas_invert_color(canvas);
-        canvas_draw_str_aligned(canvas, 88, 53, AlignCenter, AlignCenter, "Save & Reboot");
-        canvas_draw_rframe(canvas, 51, 46, 74, 15, 3);
+        canvas_draw_str_aligned(canvas, 88, 45 + yOffset, AlignCenter, AlignCenter, "Save & Reboot");
+        canvas_draw_rframe(canvas, 51, 37 + yOffset, 74, 15, 3);
     }
 }
 
@@ -82,18 +83,19 @@ int32_t bigsad_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    funnyTextIndex = rand() % 5;
+    funnyTextIndex = rand() % 7;
 
     stateLocal = malloc(sizeof(DolphinState));
 
     bool running = true;
     bool success = saved_struct_load("/int/.dolphin.state", &stateLocal->data, sizeof(DolphinStoreData), 0xD0, 0x01);
-    if(!success){
-        running = false;
-    }
+    if(!success){ running = false; }
+
+    view_port_update(view_port);
 
     while(running) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
+        view_port_update(view_port);
         if(event.type == InputTypePress){
             if(event.key == InputKeyOk && btnIndex == 2) {
                 bool result = saved_struct_save("/int/.dolphin.state", &stateLocal->data, sizeof(DolphinStoreData), 0xD0, 0x01);
@@ -126,7 +128,7 @@ int32_t bigsad_app(void* p) {
             if(event.key == InputKeyBack) {
                 running = false;
             }
-        } 
+        }
     }
 
     furi_message_queue_free(event_queue);

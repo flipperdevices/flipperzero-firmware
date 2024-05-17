@@ -3,6 +3,11 @@
     "files.associations": {
         "dolphin_state.h": "c",
         "gui.h": "c",
-        "furi.h": "c"
+        "furi.h": "c",
+        "dolphin_deed.h": "c",
+        "saved_struct.h": "c",
+        "stdbool.h": "c",
+        "icon.h": "c",
+        "power.h": "c"
     }
 }

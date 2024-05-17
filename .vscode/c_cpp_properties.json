@@ -4,7 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:\\Users\\puffl\\Documents\\GitHub\\unleashed-firmware/**"
+                "C:\\Users\\puffl\\.ufbt\\current\\sdk_headers\\f7_sdk/**"
             ],
             "defines": [
                 "_DEBUG",
