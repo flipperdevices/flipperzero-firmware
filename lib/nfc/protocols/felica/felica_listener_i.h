@@ -25,6 +25,11 @@ typedef struct {
     FelicaBlockData blocks[2];
 } FelicaListenerWriteBlockData;
 
+typedef void (*FelicaCommandWriteBlockHandler)(
+    FelicaListener* instance,
+    const uint8_t block_number,
+    const FelicaBlockData* data_block);
+
 struct FelicaListener {
     Nfc* nfc;
     FelicaData* data;
