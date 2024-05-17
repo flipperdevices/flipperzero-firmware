@@ -35,6 +35,7 @@ App(
     #  [JS: BadUSB Demo, Speaker API and VGM Module (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/js/)
     #  [JS: Fix widget sometimes MemCrash on exit. (By jamisonderek)](https://github.com/Next-Flip/Momentum-Firmware/pull/103)
     #  [JS: Math (By Spooks4576) (Updated By nminaylov & skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598)
+    #  [JS: TextBox (By Willy-JL) (Updated By nminaylov & skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598)
 )
 
 App(
