@@ -1,5 +1,10 @@
 #include "../esp_flasher_app_i.h"
 
+// Marauder firmware source - https://github.com/justcallmekoko/ESP32Marauder
+// Wardriver firmware source - https://github.com/Sil333033/flipperzero-wardriver
+// AirTag Scanner firmware source - https://github.com/MatthewKuKanich/ESP32-AirTag-Scanner
+// Black Magic firmware source - https://github.com/flipperdevices/blackmagic-esp32-s2
+
 // DO NOT use as an example, you should split into different scene files for each screen
 // To keep in a single file, this is setup in an unusual and confusing way
 // You can find more info in comments throughout

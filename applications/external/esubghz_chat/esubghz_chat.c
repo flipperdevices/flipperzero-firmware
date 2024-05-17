@@ -547,15 +547,6 @@ static void chat_box_free(ESubGhzChatState* state) {
 }
 
 int32_t esubghz_chat(const char* args) {
-    if(furi_hal_nfc_is_hal_ready() != FuriHalNfcErrorNone) {
-        printf("NFC chip failed to start\r\n");
-        return -1;
-    }
-
-    furi_hal_nfc_acquire();
-    furi_hal_nfc_low_power_mode_start();
-    furi_hal_nfc_release();
-    furry_hal_nfc_init();
     /* init the crypto system */
     crypto_init();
 
@@ -619,20 +610,16 @@ int32_t esubghz_chat(const char* args) {
         goto err_alloc_worker;
     }
 
-    NfcDevice* nfcdevic = nfc_device_alloc();
-    state->nfc_dev_data = &nfcdevic->dev_data;
+    // state->nfc_worker = nfc_worker_alloc();
+    // if(state->nfc_worker == NULL) {
+    //     goto err_alloc_nworker;
+    // }
 
-    state->nfc_worker = nfc_worker_alloc();
-    if(state->nfc_worker == NULL) {
-        goto err_alloc_nworker;
-    }
-
-    /*state->nfc_dev_data = malloc(sizeof(NfcDeviceData));
-    if(state->nfc_dev_data == NULL) {
-        goto err_alloc_ndevdata;
-    }*/
-
-    //memset(state->nfc_dev_data, 0, sizeof(NfcDeviceData));
+    // state->nfc_dev_data = malloc(sizeof(NfcDeviceData));
+    // if(state->nfc_dev_data == NULL) {
+    //     goto err_alloc_ndevdata;
+    // }
+    // memset(state->nfc_dev_data, 0, sizeof(NfcDeviceData));
 
     state->crypto_ctx = crypto_ctx_alloc();
     if(state->crypto_ctx == NULL) {
@@ -728,7 +715,7 @@ int32_t esubghz_chat(const char* args) {
     }
 
     /* if it is running, stop the NFC worker */
-    nfc_worker_stop(state->nfc_worker);
+    // nfc_worker_stop(state->nfc_worker);
 
     err = 0;
 
@@ -753,12 +740,10 @@ int32_t esubghz_chat(const char* args) {
     crypto_ctx_clear(state->crypto_ctx);
 
     /* clear nfc data */
-    if(state->nfc_dev_data->parsed_data != NULL) {
-        furi_string_free(state->nfc_dev_data->parsed_data);
-    }
-
-    //nfc_device_data_clear(state->nfc_dev_data);
-    crypto_explicit_bzero(state->nfc_dev_data, sizeof(NfcDeviceData));
+    // if(state->nfc_dev_data->parsed_data != NULL) {
+    //     furi_string_free(state->nfc_dev_data->parsed_data);
+    // }
+    // crypto_explicit_bzero(state->nfc_dev_data, sizeof(NfcDeviceData));
 
     /* deinit devices */
     radio_device_loader_end(state->subghz_device);
@@ -773,14 +758,12 @@ int32_t esubghz_chat(const char* args) {
     crypto_ctx_free(state->crypto_ctx);
 
 err_alloc_crypto:
-    //free(state->nfc_dev_data);
+    //     free(state->nfc_dev_data);
 
-    //err_alloc_ndevdata:
-    nfc_worker_free(state->nfc_worker);
+    // err_alloc_ndevdata:
+    //     nfc_worker_free(state->nfc_worker);
 
-    nfc_device_free(nfcdevic);
-
-err_alloc_nworker:
+    // err_alloc_nworker:
     subghz_tx_rx_worker_free(state->subghz_worker);
 
 err_alloc_worker:
@@ -819,13 +802,6 @@ err_alloc:
     } else {
         FURI_LOG_I(APPLICATION_NAME, "Clean exit.");
     }
-
-    furry_hal_nfc_deinit();
-
-    //
-    furi_hal_nfc_acquire();
-    furi_hal_nfc_low_power_mode_start();
-    furi_hal_nfc_release();
 
     return err;
 }

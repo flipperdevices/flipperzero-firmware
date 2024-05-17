@@ -5,7 +5,7 @@ typedef enum {
     ESubGhzChatKeyMenuItems_Password,
     ESubGhzChatKeyMenuItems_HexKey,
     ESubGhzChatKeyMenuItems_GenKey,
-    ESubGhzChatKeyMenuItems_ReadKeyFromNfc,
+    // ESubGhzChatKeyMenuItems_ReadKeyFromNfc,
 } ESubGhzChatKeyMenuItems;
 
 static void key_menu_cb(void* context, uint32_t index) {
@@ -52,10 +52,10 @@ static void key_menu_cb(void* context, uint32_t index) {
         view_dispatcher_send_custom_event(state->view_dispatcher, ESubGhzChatEvent_KeyMenuGenKey);
         break;
 
-    case ESubGhzChatKeyMenuItems_ReadKeyFromNfc:
-        view_dispatcher_send_custom_event(
-            state->view_dispatcher, ESubGhzChatEvent_KeyMenuReadKeyFromNfc);
-        break;
+        // case ESubGhzChatKeyMenuItems_ReadKeyFromNfc:
+        //     view_dispatcher_send_custom_event(
+        //         state->view_dispatcher, ESubGhzChatEvent_KeyMenuReadKeyFromNfc);
+        //     break;
 
     default:
         break;
@@ -98,13 +98,13 @@ void scene_on_enter_key_menu(void* context) {
         ESubGhzChatKeyMenuItems_GenKey,
         key_menu_cb,
         state);
-    menu_add_item(
-        state->menu,
-        "Read Key from NFC",
-        &I_Nfc_14px,
-        ESubGhzChatKeyMenuItems_ReadKeyFromNfc,
-        key_menu_cb,
-        state);
+    // menu_add_item(
+    //     state->menu,
+    //     "Read Key from NFC",
+    //     &I_Nfc_14px,
+    //     ESubGhzChatKeyMenuItems_ReadKeyFromNfc,
+    //     key_menu_cb,
+    //     state);
 
     view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_Menu);
 }
@@ -140,11 +140,11 @@ bool scene_on_event_key_menu(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
-        /* switch to hex key read scene */
-        case ESubGhzChatEvent_KeyMenuReadKeyFromNfc:
-            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeyReadPopup);
-            consumed = true;
-            break;
+            /* switch to hex key read scene */
+            // case ESubGhzChatEvent_KeyMenuReadKeyFromNfc:
+            //     scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeyReadPopup);
+            //     consumed = true;
+            //     break;
         }
 
         break;
