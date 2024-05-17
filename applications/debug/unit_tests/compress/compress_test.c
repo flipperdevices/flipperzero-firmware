@@ -13,7 +13,6 @@
 #define COMPRESS_UNIT_TESTS_PATH(path) EXT_PATH("unit_tests/compress/" path)
 
 static void compress_test_reference_comp_decomp() {
-    return;
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     File* compressed_file = storage_file_alloc(storage);
@@ -92,7 +91,6 @@ static void compress_test_reference_comp_decomp() {
 }
 
 static void compress_test_random_comp_decomp() {
-    return;
     static const size_t src_buffer_size = 1024;
     static const size_t encoded_buffer_size = 1024;
 
