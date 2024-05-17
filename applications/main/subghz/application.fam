@@ -39,7 +39,7 @@ App(
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
     entry_point="subghz_gps_plugin_ep",
-    requires=["subghz"],
+    requires=["subghz_gps"],
     sources=["helpers/subghz_gps.c", "helpers/minmea.c"],
 )
 
