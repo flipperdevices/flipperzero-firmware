@@ -21,10 +21,10 @@ typedef struct {
     bool clear_default_text;
     int32_t max_value;
     int32_t min_value;
-
+    bool useSign;
+    char sign;
     NumberInputCallback callback;
     void* callback_context;
-
     int8_t selected_row;
     uint8_t selected_column;
 } NumberInputModel;
@@ -34,6 +34,7 @@ static const uint8_t keyboard_origin_y = 31;
 static const uint8_t keyboard_row_count = 2;
 static const uint8_t enter_symbol = '\r';
 static const uint8_t backspace_symbol = '\b';
+static const uint8_t sign_symbol = '-';
 
 static const NumberInputKey keyboard_keys_row_1[] = {
     {'0', 0, 12},
@@ -50,6 +51,7 @@ static const NumberInputKey keyboard_keys_row_2[] = {
     {'7', 22, 26},
     {'8', 33, 26},
     {'9', 44, 26},
+    {sign_symbol, 55, 17},
     {enter_symbol, 95, 17},
 };
 
@@ -105,10 +107,10 @@ static const NumberInputKey* number_input_get_row(uint8_t row_index) {
  * @param      model   The model
  */
 static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
-    const uint8_t text_x = 8;
+    const uint8_t text_x = 18;
     const uint8_t text_y = 25;
 
-    elements_slightly_rounded_frame(canvas, 6, 14, 116, 15);
+    elements_slightly_rounded_frame(canvas, 16, 14, 106, 15);
 
     FuriString* text = model->text_buffer;
     canvas_draw_str(canvas, text_x, text_y, furi_string_get_cstr(text));
@@ -128,6 +130,9 @@ static void number_input_backspace_cb(NumberInputModel* model) {
 static void number_input_handle_up(NumberInputModel* model) {
     if(model->selected_row > 0) {
         model->selected_row--;
+        if (model->selected_column > number_input_get_row_size(model->selected_row) - 1) {
+            model->selected_column = number_input_get_row_size(model->selected_row) - 1;
+        }
     }
 }
 
@@ -137,6 +142,9 @@ static void number_input_handle_up(NumberInputModel* model) {
  */
 static void number_input_handle_down(NumberInputModel* model) {
     if(model->selected_row < keyboard_row_count - 1) {
+        if (model->selected_column >= number_input_get_row_size(model->selected_row) - 1) {
+            model->selected_column = number_input_get_row_size(model->selected_row + 1) -1;
+        }
         model->selected_row += 1;
     }
 }
@@ -236,6 +244,10 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
         const NumberInputKey* keys = number_input_get_row(row);
 
         for(size_t column = 0; column < column_count; column++) {
+            if (keys[column].text == sign_symbol && !model->useSign) {
+                continue;
+            }
+
             if(keys[column].text == enter_symbol) {
                 canvas_set_color(canvas, ColorBlack);
                 if(model->selected_row == row && model->selected_column == column) {
@@ -265,6 +277,21 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
                         &I_KeyBackspace_16x9);
+                }
+            } else if(keys[column].text == sign_symbol) {
+                canvas_set_color(canvas, ColorBlack);
+                if(model->selected_row == row && model->selected_column == column) {
+                    canvas_draw_icon(
+                        canvas,
+                        keyboard_origin_x + keys[column].x,
+                        keyboard_origin_y + keys[column].y,
+                        &I_KeySignSelected_21x11);
+                } else {
+                    canvas_draw_icon(
+                        canvas,
+                        keyboard_origin_x + keys[column].x,
+                        keyboard_origin_y + keys[column].y,
+                        &I_KeySign_21x11);
                 }
             } else {
                 if(model->selected_row == row && model->selected_column == column) {
@@ -365,6 +392,8 @@ void number_input_reset(NumberInput* number_input) {
             model->callback_context = NULL;
             model->max_value = 0;
             model->min_value = 0;
+            model->useSign = 0;
+            model->sign = '+';
         },
         true);
 }
@@ -418,6 +447,8 @@ void number_input_set_result_callback(
             model->clear_default_text = clear_default_text;
             model->min_value = min_value;
             model->max_value = max_value;
+            model->useSign = false;
+            model->sign = '+';
         },
         true);
 }
