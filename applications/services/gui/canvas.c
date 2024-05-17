@@ -15,7 +15,7 @@ const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
 
 Canvas* canvas_init(void) {
     Canvas* canvas = malloc(sizeof(Canvas));
-    canvas->compress_icon = compress_icon_alloc();
+    canvas->compress_icon = compress_icon_alloc(ICON_DECOMPRESSOR_BUFFER_SIZE);
 
     // Initialize mutex
     canvas->mutex = furi_mutex_alloc(FuriMutexTypeNormal);

@@ -844,7 +844,7 @@ Function,+,compress_alloc,Compress*,uint16_t
 Function,+,compress_decode,_Bool,"Compress*, uint8_t*, size_t, uint8_t*, size_t, size_t*"
 Function,+,compress_encode,_Bool,"Compress*, uint8_t*, size_t, uint8_t*, size_t, size_t*"
 Function,+,compress_free,void,Compress*
-Function,+,compress_icon_alloc,CompressIcon*,
+Function,+,compress_icon_alloc,CompressIcon*,size_t
 Function,+,compress_icon_decode,void,"CompressIcon*, const uint8_t*, uint8_t**, size_t"
 Function,+,compress_icon_free,void,CompressIcon*
 Function,-,copysign,double,"double, double"
