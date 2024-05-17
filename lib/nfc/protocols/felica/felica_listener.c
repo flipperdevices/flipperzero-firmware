@@ -102,73 +102,6 @@ FelicaError felica_listener_frame_exchange( ///TODO: move this to listener_i.c f
     return ret;
 }
 
-static uint8_t felica_listener_get_block_index(uint8_t number) {
-    if(number >= FELICA_BLOCK_INDEX_RC && number < FELICA_BLOCK_INDEX_WCNT) {
-        return number - 0x80 + FELICA_BLOCK_INDEX_REG + 1;
-    } else if(number >= FELICA_BLOCK_INDEX_WCNT && number <= FELICA_BLOCK_INDEX_STATE) {
-        return number - 0x90 + 9 + FELICA_BLOCK_INDEX_REG + 1;
-    } else if(number == FELICA_BLOCK_INDEX_CRC_CHECK) {
-        return number - 0x90 + 9 + FELICA_BLOCK_INDEX_REG + 2;
-    }
-
-    return number;
-}
-
-static bool felica_block_exists(uint8_t number) {
-    bool exist = true;
-    if(number > FELICA_BLOCK_INDEX_REG && number < FELICA_BLOCK_INDEX_RC) {
-        exist = false;
-    } else if(number > FELICA_BLOCK_INDEX_MC && number < FELICA_BLOCK_INDEX_WCNT) {
-        exist = false;
-    } else if(number > FELICA_BLOCK_INDEX_STATE && number < FELICA_BLOCK_INDEX_CRC_CHECK) {
-        exist = false;
-    } else if(number > FELICA_BLOCK_INDEX_CRC_CHECK) {
-        exist = false;
-    }
-
-    /*  exist =
-        !((number > FELICA_BLOCK_INDEX_REG && number < FELICA_BLOCK_INDEX_RC) ||
-          (number > FELICA_BLOCK_INDEX_MC && number < FELICA_BLOCK_INDEX_WCNT) ||
-          (number > FELICA_BLOCK_INDEX_STATE && number < FELICA_BLOCK_INDEX_CRC_CHECK) ||
-          (number > FELICA_BLOCK_INDEX_CRC_CHECK)); */
-    return exist;
-}
-
-static bool
-    felica_get_mc_bit(const FelicaListener* instance, uint8_t byte_index, uint8_t bit_number) {
-    uint8_t* mc = instance->data->data.fs.mc.data;
-
-    uint16_t flags = *((uint16_t*)&mc[byte_index]);
-    bool bit = (flags & (1 << bit_number)) != 0;
-    return bit;
-}
-
-static bool felica_block_requires_auth(
-    const FelicaListener* instance,
-    uint8_t command,
-    uint8_t block_number) {
-    uint8_t mc_flag_index = command; //(command == FELICA_CMD_READ_WITHOUT_ENCRYPTION) ? 6 : 8;
-    return felica_get_mc_bit(instance, mc_flag_index, block_number);
-}
-
-static bool felica_block_is_readonly(const FelicaListener* instance, uint8_t block_number) {
-    uint8_t mc_flag_index = 0;
-    ///TODO: Add more checks for other blocks not only first 15
-    if(block_number <= FELICA_BLOCK_INDEX_REG) {
-        return !felica_get_mc_bit(instance, mc_flag_index, block_number);
-    } else if(
-        (block_number >= FELICA_BLOCK_INDEX_ID && block_number <= FELICA_BLOCK_INDEX_SER_C) ||
-        (block_number >= FELICA_BLOCK_INDEX_CKV && block_number <= FELICA_BLOCK_INDEX_CK)) {
-        return instance->data->data.fs.mc.data[2] == 0xFF; ///TODO: replace this with some macro
-    } else
-        return false;
-}
-
-static bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_number) {
-    uint8_t mc_flag_index = 10;
-    return felica_get_mc_bit(instance, mc_flag_index, block_number);
-}
-
 static bool felica_validate_read_block_list(
     const FelicaListener* instance,
     const FelicaListenerReadRequest* const request,
@@ -219,112 +152,6 @@ static bool felica_validate_read_block_list(
         }
     }
     return true;
-}
-
-static bool felica_validate_write_block_list(
-    FelicaListener* instance,
-    const FelicaListenerWriteRequest* const request,
-    const FelicaListenerWriteBlockData* const data,
-    FelicaListenerWriteCommandResponse* response) {
-    instance->write_with_mac = false;
-    if(request->header.block_count == 2 &&
-       request->list[1].block_number == FELICA_BLOCK_INDEX_MAC_A) {
-        instance->write_with_mac = true;
-    } else if(request->header.block_count < 1 || request->header.block_count > 2) {
-        response->SF1 = 0x02;
-        response->SF2 = 0xB2;
-        return false;
-    }
-    ///зачем мне цикл, если может быть всего 2 блока???
-    for(uint8_t i = 0; i < request->header.block_count; i++) {
-        //const FelicaListenerWriteBlockListElement* dat = &request->data[i];
-        //const FelicaBlockListElement* item = &dat->item;
-        const FelicaBlockListElement* item = &request->list[i];
-        if(felica_block_is_readonly(instance, item->block_number) ||
-           (felica_block_requires_mac(instance, item->block_number) &&
-            !instance->write_with_mac)) {
-            response->SF1 = 0x01;
-            response->SF2 = 0xA8;
-            return false;
-        }
-
-        if(item->service_code != 0) {
-            response->SF1 = (1 << i);
-            response->SF2 = 0xA3;
-            return false;
-        } else if(item->access_mode != 0) {
-            response->SF1 = (1 << i);
-            response->SF2 = 0xA7;
-            return false;
-        } else if(!felica_block_exists(item->block_number)) {
-            response->SF1 = (1 << i);
-            response->SF2 = 0xA8;
-            return false;
-        } else if((i == 1) && (item->block_number == FELICA_BLOCK_INDEX_MAC_A)) {
-            uint8_t calculated_mac[8];
-            felica_calculate_mac_write(
-                &instance->auth.des_context,
-                instance->auth.session_key.data,
-                instance->data->data.fs.rc.data,
-                data->blocks[1].data + 8,
-                data->blocks[0].data,
-                calculated_mac);
-
-            if(!instance->rc_written || (memcmp(calculated_mac, data->blocks[1].data, 8) != 0) ||
-               !felica_wcnt_check_error_boundary(instance->data)) {
-                response->SF1 = 0x02;
-                response->SF2 = 0xB2;
-                return false;
-            }
-        } else if(
-            felica_block_requires_auth(instance, request->header.code, item->block_number) &&
-            !instance->auth.context.auth_status.external) {
-            response->SF1 = 0x01;
-            response->SF2 = 0xB1;
-            return false;
-        }
-    }
-    return true;
-}
-
-static bool felica_listener_validate_write_request_and_set_sf(
-    FelicaListener* instance,
-    const FelicaListenerWriteRequest* const request,
-    const FelicaListenerWriteBlockData* const data,
-    FelicaListenerWriteCommandResponse* response) {
-    bool valid = false;
-    do {
-        if(request->header.service_num != 0x01) {
-            response->SF1 = 0xFF;
-            response->SF2 = 0xA1;
-            break;
-        }
-
-        if((request->header.code == FELICA_CMD_WRITE_WITHOUT_ENCRYPTION) &&
-           (request->header.block_count < 0x01 || request->header.block_count > 0x02)) {
-            response->SF1 = 0xFF;
-            response->SF2 = 0xA2;
-            break;
-        }
-
-        if(request->header.service_code != FELICA_SERVICE_RW_ACCESS) {
-            response->SF1 = 0x01;
-            response->SF2 = 0xA6;
-            break;
-        }
-
-        if(!felica_validate_write_block_list(instance, request, data, response)) break;
-
-        if(felica_wcnt_check_warning_boundary(instance->data)) {
-            response->SF1 = 0xFF;
-            response->SF2 = 0x71;
-        } else {
-            response->SF1 = 0x00;
-            response->SF2 = 0x00;
-        }
-        valid = true;
-    } while(false);
-    return valid;
 }
 
 static bool felica_listener_validate_read_request_and_set_sf(
@@ -431,62 +258,6 @@ static void felica_listener_command_handler_read(
     felica_listener_frame_exchange(instance, instance->tx_buffer);
 }
 
-static void felica_listener_write_mc_block(
-    FelicaListener* instance,
-    const FelicaListenerWriteRequest* request,
-    const FelicaBlockData* data,
-    FelicaListenerWriteCommandResponse* response) {
-    UNUSED(request);
-    UNUSED(response);
-
-    bool mc_bits_permission = felica_get_mc_bit(instance, 0, 15);
-    ///TODO: replace this with some function
-    bool mc_system_block_permission = instance->data->data.fs.mc.data[2] == 0xFF;
-    for(uint8_t i = 0; i < FELICA_DATA_BLOCK_SIZE; i++) {
-        if((i <= 1) && mc_bits_permission) {
-            instance->mc_shadow.data[i] &= data->data[i];
-        } else if((i >= 2 && i <= 5) && (mc_system_block_permission)) {
-            instance->mc_shadow.data[i] = data->data[i];
-        } else if((i >= 6 && i <= 12) && mc_bits_permission) {
-            instance->mc_shadow.data[i] |= data->data[i];
-        } else if(i >= 13 && i <= 15) {
-            instance->mc_shadow.data[i] = 0;
-        } /* else {
-            instance->mc_shadow.data[i] = data->data[i];
-        } */
-    }
-}
-
-static void felica_listener_write_reg_block(
-    FelicaListener* instance,
-    const FelicaListenerWriteRequest* request,
-    const FelicaBlockData* data,
-    FelicaListenerWriteCommandResponse* response) {
-    UNUSED(request);
-    UNUSED(response);
-
-    typedef struct {
-        uint32_t A;
-        uint32_t B;
-        uint64_t C;
-    } FELICA_REG_BLOCK;
-
-    FELICA_REG_BLOCK* Reg = (FELICA_REG_BLOCK*)instance->data->data.fs.reg.data;
-    FELICA_REG_BLOCK* RegNew = (FELICA_REG_BLOCK*)data;
-
-    if(Reg->A >= RegNew->A) {
-        Reg->A = RegNew->A;
-    }
-
-    if(Reg->B >= RegNew->B) {
-        Reg->B = RegNew->B;
-    }
-
-    if((Reg->A >= RegNew->A) && (Reg->B >= RegNew->B)) {
-        Reg->C = RegNew->C;
-    }
-}
-
 static void felica_listener_command_handler_write(
     FelicaListener* instance,
     const FelicaListenerGenericRequest* const generic_request) {
@@ -506,16 +277,17 @@ static void felica_listener_command_handler_write(
     resp->response_code = 0x09;
     resp->idm = request->header.idm;
     resp->length = sizeof(FelicaListenerWriteCommandResponse);
-    if(felica_listener_validate_write_request_and_set_sf(instance, request, data_ptr, resp)) {
+
+    /*  if(felica_listener_validate_write_request_and_set_sf(instance, request, data_ptr, resp)) {
         for(uint8_t i = 0; i < request->header.block_count; i++) {
             const FelicaBlockListElement* item = &request->list[i];
-            uint8_t num = felica_listener_get_block_index(item->block_number);
 
             if(item->block_number == FELICA_BLOCK_INDEX_REG) {
                 felica_listener_write_reg_block(instance, request, &data_ptr->blocks[i], resp);
             } else if(item->block_number == FELICA_BLOCK_INDEX_MC) {
                 felica_listener_write_mc_block(instance, request, &data_ptr->blocks[i], resp);
             } else {
+                uint8_t num = felica_listener_get_block_index(item->block_number);
                 memcpy(
                     &instance->data->data.dump[num * (FELICA_DATA_BLOCK_SIZE + 2) + 2],
                     data_ptr->blocks[i].data,
@@ -536,6 +308,16 @@ static void felica_listener_command_handler_write(
                     instance->rc_written = true;
                 }
             }
+        }
+        felica_wcnt_increment(instance->data);
+    } */
+    if(felica_listener_validate_write_request_and_set_sf(instance, request, data_ptr, resp)) {
+        for(uint8_t i = 0; i < request->header.block_count; i++) {
+            const FelicaBlockListElement* item = &request->list[i];
+            FelicaCommandWriteBlockHandler handler =
+                felica_listener_get_write_block_handler(item->block_number);
+
+            handler(instance, item->block_number, &data_ptr->blocks[i]);
         }
         felica_wcnt_increment(instance->data);
     }
