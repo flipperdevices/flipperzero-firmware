@@ -46,7 +46,7 @@ static void compress_icon_update_buffer_size(CompressIcon* instance, size_t new_
 
     if(new_size > instance->buffer_size) {
         FURI_LOG_I(TAG, "New buffer size: %d", new_size);
-        instance->decoded_buff = realloc(instance->decoded_buff, new_size);
+        instance->decoded_buff = realloc(instance->decoded_buff, new_size); //-V701
         instance->buffer_size = new_size;
     }
 }
