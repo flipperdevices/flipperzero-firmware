@@ -58,7 +58,7 @@ void storage_settings_scene_formatting_on_enter(void* context) {
         notification_message(notification, &sequence_success);
         furi_record_close(RECORD_NOTIFICATION);
     }
-    dialog_ex_set_center_button_text(dialog_ex, "OK");
+    dialog_ex_set_left_button_text(dialog_ex, "Finish");
 }
 
 bool storage_settings_scene_formatting_on_event(void* context, SceneManagerEvent event) {
@@ -67,7 +67,7 @@ bool storage_settings_scene_formatting_on_event(void* context, SceneManagerEvent
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case DialogExResultCenter:
+        case DialogExResultLeft:
             consumed = scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, StorageSettingsStart);
             break;

@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0516-1848-0.101.3-8944ca7](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-16 20:00 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-16 20:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-17 10:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-17 10:45 EST`
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - OFW: [Infrared: Add Toshiba RAS-2518D #3635 (By hakuyoku2011)](https://github.com/flipperdevices/flipperzero-firmware/pull/3635)
 - OFW: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
@@ -44,11 +44,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Hid app improvements (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5997db3a3ce50b60937bde446a7b21c44051a159)
 - Updated: [Metronome v1.2 (By panki27)](https://github.com/panki27/Metronome) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
 - Added: [Mifare Nested v1.6.5 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
-- Updated: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
 - [Settings: Show SD decimals and percent free again (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/94ef779bdbef138b9996b09fe55ee44340d89213)
 - Updated: [NFC Magic v1.10 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - Updated: [MagSpoof v0.10 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
-- Updated: [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - OFW: PR: [TLSF and the Temple of Corrupted Memory
 #3653 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3653) [SubGHz: fix memory corrupt in read raw view (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3653/commits/1460030d035e4b133e08f44f6f8033acc420ba37)
 - OFW: [JS: Add submenu module #3601 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3601)
@@ -60,6 +58,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Patreon Builds Update: Updated Mods animation on builds: Dolphin, ManifestSwitcher, Minimal & Stock
 - Patreon Builds Update: Added Akira animation on builds: Dolphin, ManifestSwitcher, Minimal & Stock
 - [Many updates for SubGHz GPS, CC1101 Handling, Frequency Bypass & SubGHz Optimizations (By Willy-JL & Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/cbbfb62064a3e8e7b81643fd437cd5dde69c5eb6) If you have CC1101 issues, delete subghz/assets/last_subghz.settings on your SD card.
+- Updated: [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer) [Changes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c5983ee83de81f6e6b1513e188828ff68887a389)
+- Updated: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc) [Changes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c5983ee83de81f6e6b1513e188828ff68887a389)
+- Updated: [Mifare Nested v1.6.5 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc) [Changes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c5983ee83de81f6e6b1513e188828ff68887a389)
+- OFW: [Settings refactor fixes #3654 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3654)
+- OFW: [NFC: add Slix capabilities #3652 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3652)
 
 <a name="release">
 
