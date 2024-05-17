@@ -17,7 +17,7 @@ typedef struct CompressIcon CompressIcon;
 
 /** Initialize icon compressor
  *
- * @param[in]  icon_buffer_size  The icon buffer size for decoding.
+ * @param[in]  decode_buf_size  The icon buffer size for decoding.
  *  If consequent calls will require larger buffer, it will be grown. 
  *  It is not possible to shrink the buffer.
  * @return     Compress Icon instance
