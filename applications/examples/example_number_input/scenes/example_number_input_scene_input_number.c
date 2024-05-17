@@ -19,8 +19,9 @@ void example_number_input_scene_input_number_on_enter(void* context) {
         example_number_input_scene_input_number_callback,
         context,
         app->text_buffer,
-        128,
+        -128,
         8120,
+        true,
         false);
     UNUSED(enter_name_length);
 

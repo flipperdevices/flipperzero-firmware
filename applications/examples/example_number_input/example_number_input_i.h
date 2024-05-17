@@ -6,8 +6,7 @@
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <gui/scene_manager.h>
-//#include <gui/modules/number_input.h>
-#include "temp/number_input.h"
+#include <gui/modules/number_input.h>
 #include <gui/view.h>
 #include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
