@@ -44,7 +44,7 @@ This procedure will explain how to configure the Pwnagotchi to use the PwnZero p
 9. Restart the Pwnagotchi and open the Flipagotchi app on the Flipper Zero
 
 ### Setup note
-[Chrismettal](https://github.com/Chrismettal) has designed a "backpack" for the Flipper Zero which is a board that allows you to cleanly attach various devices to the Flipper. They have crated one for the Raspberry Pi Zero W which would be a great way to keep your Flipagotchi tidy! Here is a link to their [project](https://github.com/Chrismettal/flipper-zero-backpacks#raspberry-pi-zero-w).
+[Chrismettal](https://github.com/Chrismettal) has designed a "backpack" for the Flipper Zero which is a board that allows you to cleanly attach various devices to the Flipper. They have created one for the Raspberry Pi Zero W which would be a great way to keep your Flipagotchi tidy! Here is a link to their [project](https://github.com/Chrismettal/flipper-zero-backpacks#raspberry-pi-zero-w).
 
 ## Development stages
 ### Stage 1: Simple display rendering
