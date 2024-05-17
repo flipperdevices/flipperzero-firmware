@@ -92,7 +92,7 @@ static void compress_test_reference_comp_decomp() {
 }
 
 static void compress_test_random_comp_decomp() {
-    // return;
+    return;
     static const size_t src_buffer_size = 1024;
     static const size_t encoded_buffer_size = 1024;
 
