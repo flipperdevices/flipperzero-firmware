@@ -117,14 +117,15 @@ static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
 }
 
 static void number_input_backspace_cb(NumberInputModel* model) {
-    uint8_t text_length = model->clear_default_text ? 1 : furi_string_utf8_length(model->text_buffer);
+    uint8_t text_length = model->clear_default_text ? 1 :
+                                                      furi_string_utf8_length(model->text_buffer);
     if(text_length > 0) {
-        furi_string_set_strn(model->text_buffer, furi_string_get_cstr(model->text_buffer), text_length - 1);
+        furi_string_set_strn(
+            model->text_buffer, furi_string_get_cstr(model->text_buffer), text_length - 1);
     }
 }
 
-static char* int32_to_string(int32_t value)
-{
+static char* int32_to_string(int32_t value) {
     char* buffer = (char*)malloc(12);
     snprintf(buffer, 12, "%ld", value);
     return buffer;
@@ -137,7 +138,7 @@ static char* int32_to_string(int32_t value)
 static void number_input_handle_up(NumberInputModel* model) {
     if(model->selected_row > 0) {
         model->selected_row--;
-        if (model->selected_column > number_input_get_row_size(model->selected_row) - 1) {
+        if(model->selected_column > number_input_get_row_size(model->selected_row) - 1) {
             model->selected_column = number_input_get_row_size(model->selected_row) - 1;
         }
     }
@@ -149,13 +150,13 @@ static void number_input_handle_up(NumberInputModel* model) {
  */
 static void number_input_handle_down(NumberInputModel* model) {
     if(model->selected_row < keyboard_row_count - 1) {
-        if (model->selected_column >= number_input_get_row_size(model->selected_row) - 1) {
-            model->selected_column = number_input_get_row_size(model->selected_row + 1) -1;
+        if(model->selected_column >= number_input_get_row_size(model->selected_row) - 1) {
+            model->selected_column = number_input_get_row_size(model->selected_row + 1) - 1;
         }
         model->selected_row += 1;
     }
     const NumberInputKey* keys = number_input_get_row(model->selected_row);
-    if (keys[model->selected_column].text == sign_symbol && !model->useSign) {
+    if(keys[model->selected_column].text == sign_symbol && !model->useSign) {
         model->selected_column--;
     }
 }
@@ -171,7 +172,7 @@ static void number_input_handle_left(NumberInputModel* model) {
         model->selected_column = number_input_get_row_size(model->selected_row) - 1;
     }
     const NumberInputKey* keys = number_input_get_row(model->selected_row);
-    if (keys[model->selected_column].text == sign_symbol && !model->useSign) {
+    if(keys[model->selected_column].text == sign_symbol && !model->useSign) {
         model->selected_column--;
     }
 }
@@ -187,29 +188,28 @@ static void number_input_handle_right(NumberInputModel* model) {
         model->selected_column = 0;
     }
     const NumberInputKey* keys = number_input_get_row(model->selected_row);
-    if (keys[model->selected_column].text == sign_symbol && !model->useSign) {
+    if(keys[model->selected_column].text == sign_symbol && !model->useSign) {
         model->selected_column++;
     }
 }
 
-static void prevent_to_large_number(NumberInputModel* model)
-{
-    if (strtol(furi_string_get_cstr(model->text_buffer), NULL, 10) > model->max_value) {
+static void prevent_to_large_number(NumberInputModel* model) {
+    if(strtol(furi_string_get_cstr(model->text_buffer), NULL, 10) > model->max_value) {
         char* str = int32_to_string(model->max_value);
         furi_string_set_str(model->text_buffer, str);
         free(str);
     }
     // Added in prevent large, as it would block the input of small positive numbers
-    if (model->sign == '-' && strtol(furi_string_get_cstr(model->text_buffer), NULL, 10) < model->min_value) {
+    if(model->sign == '-' &&
+       strtol(furi_string_get_cstr(model->text_buffer), NULL, 10) < model->min_value) {
         char* str = int32_to_string(model->min_value);
         furi_string_set_str(model->text_buffer, str);
         free(str);
     }
 }
 
-static void prevent_to_small_number(NumberInputModel* model)
-{
-    if (strtol(furi_string_get_cstr(model->text_buffer), NULL, 10) < model->min_value) {
+static void prevent_to_small_number(NumberInputModel* model) {
+    if(strtol(furi_string_get_cstr(model->text_buffer), NULL, 10) < model->min_value) {
         char* str = int32_to_string(model->min_value);
         furi_string_set_str(model->text_buffer, str);
         free(str);
@@ -217,7 +217,7 @@ static void prevent_to_small_number(NumberInputModel* model)
 }
 
 static void number_input_sign(NumberInputModel* model) {
-    if (model->sign == '-') {
+    if(model->sign == '-') {
         model->sign = '+';
     } else {
         model->sign = '-';
@@ -279,7 +279,7 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
         const NumberInputKey* keys = number_input_get_row(row);
 
         for(size_t column = 0; column < column_count; column++) {
-            if (keys[column].text == sign_symbol && !model->useSign) {
+            if(keys[column].text == sign_symbol && !model->useSign) {
                 continue;
             }
 
@@ -451,9 +451,7 @@ void number_input_free(NumberInput* number_input) {
     with_view_model(
         number_input->view,
         NumberInputModel * model,
-        {
-            furi_string_free(model->text_buffer);
-        },
+        { furi_string_free(model->text_buffer); },
         true);
     view_free(number_input->view);
     free(number_input);
