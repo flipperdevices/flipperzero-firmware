@@ -65,7 +65,7 @@ const UnitTest unit_tests[] = {
     {.name = "dialogs_file_browser_options",
      .entry = run_minunit_test_dialogs_file_browser_options},
     {.name = "expansion", .entry = run_minunit_test_expansion},
-    // {.name = "compress", .entry = run_minunit_test_compress},
+    {.name = "compress", .entry = run_minunit_test_compress},
 };
 
 void minunit_print_progress(void) {
