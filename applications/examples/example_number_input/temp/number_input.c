@@ -18,8 +18,9 @@ typedef struct {
 typedef struct {
     const char* header;
     FuriString* text_buffer;
-    size_t text_buffer_size;
     bool clear_default_text;
+    int32_t max_value;
+    int32_t min_value;
 
     NumberInputCallback callback;
     void* callback_context;
@@ -164,6 +165,31 @@ static void number_input_handle_right(NumberInputModel* model) {
     }
 }
 
+static char* int32_to_string(int32_t value)
+{
+    char* buffer = (char*)malloc(12);
+    snprintf(buffer, 12, "%ld", value);
+    return buffer;
+}
+
+static void prevent_to_large_number(NumberInputModel* model)
+{
+    if (strtol(furi_string_get_cstr(model->text_buffer), NULL, 10) > model->max_value) {
+        char* str = int32_to_string(model->max_value);
+        furi_string_set_str(model->text_buffer, str);
+        free(str);
+    }
+}
+
+static void prevent_to_small_number(NumberInputModel* model)
+{
+    if (strtol(furi_string_get_cstr(model->text_buffer), NULL, 10) < model->min_value) {
+        char* str = int32_to_string(model->min_value);
+        furi_string_set_str(model->text_buffer, str);
+        free(str);
+    }
+}
+
 /** Handle OK button
  *
  * @param      model  The model
@@ -173,18 +199,15 @@ static void number_input_handle_ok(NumberInputModel* model) {
     char temp_str[2];
     temp_str[0] = selected;
     temp_str[1] = '\0';
-    size_t text_length = furi_string_utf8_length(model->text_buffer);
     if(selected == enter_symbol) {
+        prevent_to_small_number(model);
+        prevent_to_large_number(model);
         model->callback(model->callback_context);
     } else if(selected == backspace_symbol) {
         number_input_backspace_cb(model);
     } else {
-        if(model->clear_default_text) {
-            text_length = 0;
-        }
-        if(text_length < (model->text_buffer_size - 1)) {
-            furi_string_cat_str(model->text_buffer, temp_str);
-        }
+        furi_string_cat_str(model->text_buffer, temp_str);
+        prevent_to_large_number(model);
     }
     model->clear_default_text = false;
 }
@@ -312,6 +335,7 @@ static bool number_input_view_input_callback(InputEvent* event, void* context) {
             number_input_handle_ok(model);
             break;
         case InputKeyBack:
+            prevent_to_small_number(model);
             model->callback(model->callback_context);
             break;
         default:
@@ -337,9 +361,10 @@ void number_input_reset(NumberInput* number_input) {
             model->selected_column = 0;
             model->clear_default_text = false;
             model->text_buffer = furi_string_alloc();
-            model->text_buffer_size = 0;
             model->callback = NULL;
             model->callback_context = NULL;
+            model->max_value = 0;
+            model->min_value = 0;
         },
         true);
 }
@@ -380,7 +405,8 @@ void number_input_set_result_callback(
     NumberInputCallback callback,
     void* callback_context,
     FuriString* text_buffer,
-    size_t text_buffer_size,
+    int32_t min_value,
+    int32_t max_value,
     bool clear_default_text) {
     with_view_model(
         number_input->view,
@@ -389,8 +415,9 @@ void number_input_set_result_callback(
             model->callback = callback;
             model->callback_context = callback_context;
             model->text_buffer = text_buffer;
-            model->text_buffer_size = text_buffer_size;
             model->clear_default_text = clear_default_text;
+            model->min_value = min_value;
+            model->max_value = max_value;
         },
         true);
 }
