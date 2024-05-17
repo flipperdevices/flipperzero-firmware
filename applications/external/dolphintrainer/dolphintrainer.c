@@ -4,18 +4,22 @@
 #include <input/input.h>
 #include <stdlib.h>
 #include "dolphin_trainer_icons.h"
-#include "dolphin/helpers/dolphin_state.h"
+#include <dolphin/helpers/dolphin_state.h>
 #include <toolbox/saved_struct.h>
 #include <power/power_service/power.h>
+#include "tinyfont.h"
 
 const char* funnyText[] = {
-    "Stop poking my brain",
-    "You're a terrible owner",
-    "I'll remember this!",
-    "This really isnt ok",
-    "Just feed me RFID cards!",
-    "Forget to charge me too?"};
+    "\"Stop poking my brain\"",
+    "\"You're a terrible owner\"",
+    "\"I'll remember this!\"",
+    "\"This really isnt ok\"",
+    "\"Just feed me RFID cards!\"",
+    "\"Forget to charge me too?\"",
+    "\"Asshole...\""};
+
 int funnyTextIndex = 0;
+
 DolphinState* stateLocal = 0;
 char strButthurt[16];
 char strXp[16];
@@ -40,46 +44,51 @@ uint8_t dolphin_get_mylevel(int icounter) {
     return DOLPHIN_LEVEL_COUNT + 1;
 }
 
+int yOffset = 9;
+
 static void draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     //graphics
     canvas_clear(canvas);
     canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 3, 12, &I_passport_bad1_46x49);
+    canvas_draw_icon(canvas, 3, 3 + yOffset, &I_passport_bad1_46x49);
     if(btnIndex == 0) {
-        canvas_draw_icon(canvas, 110, 15, &I_ButtonLeftSmall_3x5);
+        canvas_draw_icon(canvas, 120, 9 + yOffset, &I_ButtonLeftSmall_3x5);
     } else if(btnIndex == 1) {
-        canvas_draw_icon(canvas, 110, 25, &I_ButtonLeftSmall_3x5);
+        canvas_draw_icon(canvas, 120, 19 + yOffset, &I_ButtonLeftSmall_3x5);
     } else if(btnIndex == 2) {
-        canvas_draw_icon(canvas, 110, 35, &I_ButtonLeftSmall_3x5);
+        canvas_draw_icon(canvas, 120, 29 + yOffset, &I_ButtonLeftSmall_3x5);
     }
 
     //strings
     curLevel = dolphin_get_mylevel(stateLocal->data.icounter);
-    canvas_set_font(canvas, FontBatteryPercent);
+    canvas_set_custom_u8g2_font(canvas, u8g2_font_5x7_tf);
     canvas_draw_str(canvas, 3, 9, funnyText[funnyTextIndex]);
+
     canvas_set_font(canvas, FontSecondary);
+    snprintf(strLevel, 10, "Level: %lu", curLevel);
     snprintf(strButthurt, 16, "Butthurt: %lu", stateLocal->data.butthurt);
     snprintf(strXp, 16, "XP: %lu", stateLocal->data.icounter);
-    snprintf(strLevel, 10, "Level: %lu", curLevel);
-    canvas_draw_str(canvas, 51, 21, strButthurt);
-    canvas_draw_str(canvas, 51, 31, strXp);
-    canvas_draw_str(canvas, 51, 41, strLevel);
+    canvas_draw_str(canvas, 51, 15 + yOffset, strLevel);
+    canvas_draw_str(canvas, 51, 25 + yOffset, strButthurt);
+    canvas_draw_str(canvas, 51, 35 + yOffset, strXp);
 
-    //save button
     if(btnIndex == 3) {
-        canvas_draw_rbox(canvas, 51, 46, 74, 15, 3);
+        //save button
+        canvas_draw_rbox(canvas, 51, 37 + yOffset, 74, 15, 3);
         canvas_invert_color(canvas);
-        canvas_draw_str_aligned(canvas, 88, 53, AlignCenter, AlignCenter, "Save & Reboot");
+        canvas_draw_str_aligned(
+            canvas, 88, 45 + yOffset, AlignCenter, AlignCenter, "Save & Reboot");
         canvas_invert_color(canvas);
-        canvas_draw_rframe(canvas, 51, 46, 74, 15, 3);
+        canvas_draw_rframe(canvas, 51, 37 + yOffset, 74, 15, 3);
     } else {
         canvas_invert_color(canvas);
-        canvas_draw_rbox(canvas, 51, 46, 74, 15, 3);
+        canvas_draw_rbox(canvas, 51, 37 + yOffset, 74, 15, 3);
         canvas_invert_color(canvas);
-        canvas_draw_str_aligned(canvas, 88, 53, AlignCenter, AlignCenter, "Save & Reboot");
-        canvas_draw_rframe(canvas, 51, 46, 74, 15, 3);
+        canvas_draw_str_aligned(
+            canvas, 88, 45 + yOffset, AlignCenter, AlignCenter, "Save & Reboot");
+        canvas_draw_rframe(canvas, 51, 37 + yOffset, 74, 15, 3);
     }
 }
 
@@ -102,7 +111,7 @@ int32_t dolphin_trainer_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    funnyTextIndex = rand() % 5;
+    funnyTextIndex = rand() % 7;
 
     stateLocal = malloc(sizeof(DolphinState));
 
@@ -113,15 +122,17 @@ int32_t dolphin_trainer_app(void* p) {
         running = false;
     }
 
+    view_port_update(view_port);
+
     while(running) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
+        view_port_update(view_port);
         if(event.type == InputTypePress) {
             if(event.key == InputKeyOk && btnIndex == 3) {
                 bool result = saved_struct_save(
                     DOLPHIN_STATE_PATH, &stateLocal->data, sizeof(DolphinStoreData), 0xD0, 0x01);
                 if(result) {
-                    furi_delay_ms(100);
-                    furi_hal_power_reset();
+                    power_reboot(PowerBootModeNormal);
                     running = false;
                     return 0;
                 }
@@ -141,32 +152,32 @@ int32_t dolphin_trainer_app(void* p) {
                 }
             }
             if(event.key == InputKeyRight) {
-                if(btnIndex == 0 && stateLocal->data.butthurt < 14) {
-                    stateLocal->data.butthurt++;
-                } else if(btnIndex == 1) {
-                    stateLocal->data.icounter += 10;
-                } else if(btnIndex == 2) {
+                if(btnIndex == 0) {
                     curLevel = dolphin_get_mylevel(stateLocal->data.icounter) - 1;
                     if(curLevel <= 28) {
                         stateLocal->data.icounter = DOLPHIN_LEVELS[curLevel] + 1;
                     }
+                } else if(btnIndex == 1 && stateLocal->data.butthurt < 14) {
+                    stateLocal->data.butthurt++;
+                } else if(btnIndex == 2) {
+                    stateLocal->data.icounter += 10;
                 }
             }
             if(event.key == InputKeyLeft) {
-                if(btnIndex == 0 && stateLocal->data.butthurt > 0) {
-                    stateLocal->data.butthurt--;
-                } else if(btnIndex == 1) {
-                    if(stateLocal->data.icounter < 10) {
-                        stateLocal->data.icounter = 0;
-                    } else {
-                        stateLocal->data.icounter -= 10;
-                    }
-                } else if(btnIndex == 2) {
+                if(btnIndex == 0) {
                     curLevel = dolphin_get_mylevel(stateLocal->data.icounter) - 3;
                     if(curLevel >= 1) {
                         stateLocal->data.icounter = DOLPHIN_LEVELS[curLevel] + 1;
                     } else if(curLevel == 0) {
                         stateLocal->data.icounter = 0;
+                    }
+                } else if(btnIndex == 1 && stateLocal->data.butthurt > 0) {
+                    stateLocal->data.butthurt--;
+                } else if(btnIndex == 2) {
+                    if(stateLocal->data.icounter < 10) {
+                        stateLocal->data.icounter = 0;
+                    } else {
+                        stateLocal->data.icounter -= 10;
                     }
                 }
             }

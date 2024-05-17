@@ -95,7 +95,6 @@ static void updater_main_draw_callback(Canvas* canvas, void* _model) {
     } else {
         canvas_draw_str_aligned(canvas, 42, 14, AlignLeft, AlignTop, "RM FW Update");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 82, 6, AlignCenter, AlignTop, "Installing");
         canvas_draw_str_aligned(
             canvas, 64, 51, AlignCenter, AlignTop, furi_string_get_cstr(model->status));
         canvas_draw_icon(canvas, 4, 5, &I_Updating_32x40);

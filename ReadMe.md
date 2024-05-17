@@ -67,6 +67,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - SubGHz: [Fix Radio Device Loader loading GPS plugin (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/49d66158698bc5d06b73a7116cd22335cd89c4b6)
 - OFW: [JS: Add math module #3598 (By Spooks4576)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598) Updates (By skotopes)
 - OFW: [JS: Add textbox module #3597 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3597) Updates (By skotopes)
+- Updated: [Dolphin Trainer v1.2 (By nymda)](https://github.com/nymda/FlipperAntidepressants) With Modifications (By RogueMaster) To Adjust For Level Mod
+- Image assets for BLE Pairing, DFU, SubGHz Receiving & Updating changed to Pikachu or Goku.
 
 <a name="release">
 
@@ -404,7 +406,7 @@ $ ./fbt dolphin_ext
 - [Digimon F-Com v1.2 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 - [Distance Sensor v1.2 (By privet971)](https://github.com/privet971/FlipperZeroApps/tree/main/usping) `Req: Parallax (3 wires) SKU 28015`
 - [Distance Sensor v1.1 (By Sanqui)](https://github.com/Sanqui/flipperzero-firmware/tree/hc_sr04) `Req: HC-SR04` Ported/Modified by xMasterX
-- [Dolphin Trainer (By nymda)](https://github.com/nymda/FlipperAntidepressants) (Change Flipper level, experience and butthurt) [Level Changer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/96b67d9d53b5a70e85f8bdd81dcbc602f90d46cd)
+- [Dolphin Trainer v1.2 (By nymda)](https://github.com/nymda/FlipperAntidepressants)
 - [DSTIKE Deauther v1.1 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `Req: ESP8266`
 - [DTMF Dolphin v1.2 (By litui)](https://github.com/litui/dtmf_dolphin)
 - [EM4100 Key Generator v1.1 (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)

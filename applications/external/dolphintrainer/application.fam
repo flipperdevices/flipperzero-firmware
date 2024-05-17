@@ -8,4 +8,9 @@ App(
     fap_icon="ico.png",
     fap_category="Settings",
     fap_icon_assets="icons",
+    fap_author="nymda",
+    fap_weburl="https://github.com/nymda/FlipperAntidepressants",
+    fap_version="1.2",
+    fap_description="App to change the level, experience and mood/butthurt of your dolphin pet, EXP adjusted for Rogue Master Custom Firmware.",
+    #  [Level Changer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/96b67d9d53b5a70e85f8bdd81dcbc602f90d46cd)
 )
