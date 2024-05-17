@@ -65,6 +65,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: add Slix capabilities #3652 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3652)
 - Passport: [5 new profile pictures (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures)
 - SubGHz: [Fix Radio Device Loader loading GPS plugin (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/49d66158698bc5d06b73a7116cd22335cd89c4b6)
+- OFW: [JS: Add math module #3598 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598) Updates (By skotopes)
 
 <a name="release">
 
