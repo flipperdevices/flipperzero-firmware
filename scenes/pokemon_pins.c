@@ -27,7 +27,7 @@ static const GpioPinRecord* named_pins[NUM_PINS] = {
 /* This must match gblink's enum order */
 static const char* named_groups[] = {
     "Original",
-    "Malveke",
+    "MLVK2.5",
     "Custom",
     "",
 };
