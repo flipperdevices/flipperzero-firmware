@@ -490,7 +490,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     bool tab_empty = true;
     bool is_app_tab = furi_string_start_with_str(browser->path, "/app:");
     if(tab == ArchiveTabFavorites) {
-        if(archive_favorites_count() > 0) {
+        if(archive_favorites_count(browser) > 0) {
             tab_empty = false;
         }
     } else if(is_app_tab) {
@@ -515,8 +515,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
         }
     }
 
-    if(tab_empty && tab != ArchiveTabBrowser && tab != ArchiveTabInternal &&
-       (tab != ArchiveTabDiskImage || !browser->disk_image)) {
+    if(tab_empty && tab != ArchiveTabBrowser && tab != ArchiveTabInternal) {
         archive_switch_tab(browser, key);
     } else {
         with_view_model(
@@ -525,7 +524,6 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
             {
                 model->item_idx = 0;
                 model->array_offset = 0;
-                model->is_app_tab = is_app_tab;
             },
             false);
         archive_get_items(browser, furi_string_get_cstr(browser->path));

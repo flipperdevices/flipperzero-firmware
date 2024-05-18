@@ -15,7 +15,7 @@ CfwSettings cfw_settings = {
     .lock_menu_type = true, // Adv Grid VS FALSE=LIST
     .sort_dirs_first = true, // ON
     .show_hidden_files = false, // OFF
-    .show_internal_tab = true, // ON
+    .show_internal_tab = false, // OFF
     .favorite_timeout = 0, // OFF
     .dark_mode = false, // OFF
     .charge_cap = 100, // 100%

@@ -20,8 +20,7 @@ static void cfw_app_scene_interface_common_sort_dirs_first_changed(VariableItem*
     app->save_settings = true;
 }
 
-static void
-    cfw_app_scene_interface_filebrowser_show_hidden_files_changed(VariableItem* item) {
+static void cfw_app_scene_interface_filebrowser_show_hidden_files_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
@@ -29,8 +28,7 @@ static void
     app->save_settings = true;
 }
 
-static void
-    cfw_app_scene_interface_filebrowser_show_internal_tab_changed(VariableItem* item) {
+static void cfw_app_scene_interface_filebrowser_show_internal_tab_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
