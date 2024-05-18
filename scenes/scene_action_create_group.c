@@ -45,9 +45,14 @@ bool scene_action_create_group_on_event(void* context, SceneManagerEvent event) 
             if(!strcmp(app->temp_cstr, "")) {
                 return false;
             }
-            Item* item = ItemArray_get(app->items_view->items, app->selected_item);
+
             FuriString* current_path = furi_string_alloc();
-            path_extract_dirname(furi_string_get_cstr(item->path), current_path);
+            if(app->selected_item != EMPTY_ACTION_INDEX) {
+                Item* item = ItemArray_get(app->items_view->items, app->selected_item);
+                path_extract_dirname(furi_string_get_cstr(item->path), current_path);
+            } else {
+                furi_string_set(current_path, app->items_view->path);
+            }
 
             FuriString* new_group_path = furi_string_alloc();
             furi_string_printf(
