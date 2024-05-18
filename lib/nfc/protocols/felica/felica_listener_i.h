@@ -30,14 +30,24 @@ typedef void (*FelicaCommandWriteBlockHandler)(
     const uint8_t block_number,
     const FelicaBlockData* data_block);
 
+typedef void (*FelicaCommanReadBlockHandler)(
+    FelicaListener* instance,
+    const uint8_t block_number,
+    const uint8_t resp_data_index,
+    FelicaListenerReadCommandResponse* response);
+
 struct FelicaListener {
     Nfc* nfc;
     FelicaData* data;
     FelicaListenerState state;
     FelicaAuthentication auth;
     FelicaBlockData mc_shadow;
+
+    uint8_t requested_blocks[4];
+    uint8_t mac_calc_start;
+
     bool rc_written;
-    ///TODO: replace bools below woth one single bool operation_needs_mac
+    ///TODO: replace bools below with one single bool operation_needs_mac
     bool write_with_mac;
     bool read_with_mac;
     BitBuffer* tx_buffer;
