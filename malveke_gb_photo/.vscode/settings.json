@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "malveke_gb_photo.h": "c",
+        "boilerplate_custom_event.h": "c",
+        "boilerplate_scene_1.h": "c",
+        "boilerplate_startscreen.h": "c",
+        "boilerplate_scene.h": "c",
+        "boilerplate_storage.h": "c",
+        "u8g2_font_5x7_mf.h": "c"
+    }
+}

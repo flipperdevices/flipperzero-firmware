@@ -14,7 +14,7 @@ fi
 path="${1%/}"
 repo="${2%/}"
 if [ "$3" = "" ]; then
-    read repo branch subdir <<< "$(sed -E "s|(https?://[^/]+)/([^/]+)/([^/]+)/(tree\|blob)/([^/]+)/(.*)|\1/\2/\3 \5 \6|" <<< "${repo}")"
+    read repo branch subdir <<< "$(sed -E "s|(https?://[^/]+)/([^/]+)/([^/]+)/(tree\|blob)/([^/]+)/?(.*)|\1/\2/\3 \5 \6|" <<< "${repo}")"
 else
     branch="${3}"
     subdir="${4%/}"

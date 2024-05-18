@@ -1,0 +1,8 @@
+ADD_SCENE(gb_cartridge, startscreen, Startscreen)
+ADD_SCENE(gb_cartridge, menu, Menu)
+ADD_SCENE(gb_cartridge, scene_1, Scene_1)
+ADD_SCENE(gb_cartridge, scene_2, Scene_2)
+ADD_SCENE(gb_cartridge, scene_3, Scene_3)
+// ADD_SCENE(gb_cartridge, scene_4, Scene_4)
+ADD_SCENE(gb_cartridge, scene_5, Scene_5)
+ADD_SCENE(gb_cartridge, settings, Settings)

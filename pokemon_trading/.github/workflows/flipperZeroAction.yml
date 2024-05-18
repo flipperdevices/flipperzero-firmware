@@ -1,0 +1,35 @@
+name: "FAP: Build and lint"
+on: [push, pull_request]
+jobs:
+  ufbt-build-action:
+    runs-on: ubuntu-latest
+    name: 'ufbt: Build'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive  # Ensure submodules are also checked out
+
+      - name: Setup flipper-gblink submodule
+        run: git submodule update --init --recursive
+
+      # Add any additional steps needed for the build process
+      # Replace this with your existing build steps
+
+      - name: Build with ufbt GAME BOY Pokemon Trading
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.3
+        id: build-app-gb-pokemon-trading
+        with:
+          sdk-channel: release
+          app-dir: ./
+      - name: Upload app artifacts GAME BOY Pokemon Trading
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}-${{ steps.build-app-gb-pokemon-trading.outputs.suffix }}
+          path: ${{ steps.build-app-gb-pokemon-trading.outputs.fap-artifacts }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ${{ steps.build-app-gb-pokemon-trading.outputs.fap-artifacts }}
