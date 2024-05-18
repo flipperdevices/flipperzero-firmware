@@ -473,10 +473,14 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
 
     browser->last_tab_switch_dir = key;
 
-    if(key == InputKeyLeft) {
-        tab = ((tab - 1) + ArchiveTabTotal) % ArchiveTabTotal;
-    } else {
-        tab = (tab + 1) % ArchiveTabTotal;
+    for(int i = 0; i < 2; i++) {
+        if(key == InputKeyLeft) {
+            tab = ((tab - 1) + ArchiveTabTotal) % ArchiveTabTotal;
+        } else {
+            tab = (tab + 1) % ArchiveTabTotal;
+        }
+        if(tab == ArchiveTabInternal && !cfw_settings.show_internal_tab) continue;
+        break;
     }
 
     browser->is_root = true;
@@ -484,11 +488,12 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
 
     furi_string_set(browser->path, archive_get_default_path(tab));
     bool tab_empty = true;
+    bool is_app_tab = furi_string_start_with_str(browser->path, "/app:");
     if(tab == ArchiveTabFavorites) {
-        if(archive_favorites_count(browser) > 0) {
+        if(archive_favorites_count() > 0) {
             tab_empty = false;
         }
-    } else if(furi_string_start_with_str(browser->path, "/app:")) {
+    } else if(is_app_tab) {
         char* app_name = strchr(furi_string_get_cstr(browser->path), ':');
         if(app_name != NULL) {
             if(archive_app_is_available(browser, furi_string_get_cstr(browser->path))) {
@@ -498,18 +503,20 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     } else {
         tab = archive_get_tab(browser);
         if(archive_is_dir_exists(browser->path)) {
-            bool skip_assets = (strcmp(archive_get_tab_ext(tab), "*") == 0) ? false : true;
+            bool is_browser = !strcmp(archive_get_tab_ext(tab), "*");
+            bool skip_assets = !is_browser;
             // Hide dot files everywhere except Browser if in debug mode
-            bool hide_dot_files = (strcmp(archive_get_tab_ext(tab), "*") == 0) ?
-                                      !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) :
-                                      true;
+            bool hide_dot_files = !is_browser               ? true :
+                                  tab == ArchiveTabInternal ? false :
+                                                              !cfw_settings.show_hidden_files;
             archive_file_browser_set_path(
                 browser, browser->path, archive_get_tab_ext(tab), skip_assets, hide_dot_files);
             tab_empty = false; // Empty check will be performed later
         }
     }
 
-    if((tab_empty) && (tab != ArchiveTabBrowser)) {
+    if(tab_empty && tab != ArchiveTabBrowser && tab != ArchiveTabInternal &&
+       (tab != ArchiveTabDiskImage || !browser->disk_image)) {
         archive_switch_tab(browser, key);
     } else {
         with_view_model(
@@ -518,6 +525,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
             {
                 model->item_idx = 0;
                 model->array_offset = 0;
+                model->is_app_tab = is_app_tab;
             },
             false);
         archive_get_items(browser, furi_string_get_cstr(browser->path));

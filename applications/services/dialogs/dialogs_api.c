@@ -3,6 +3,7 @@
 #include <toolbox/api_lock.h>
 #include <assets_icons.h>
 #include <storage/storage.h>
+#include <cfw/cfw.h>
 
 /****************** File browser ******************/
 
@@ -37,7 +38,8 @@ bool dialog_file_browser_show(
             .file_icon = options ? options->icon : NULL,
             .hide_ext = options ? options->hide_ext : true,
             .skip_assets = options ? options->skip_assets : true,
-            .hide_dot_files = options ? options->hide_dot_files : true,
+            .hide_dot_files =
+                (options ? options->hide_dot_files : true && !cfw_settings.show_hidden_files),
             .preselected_filename = path,
             .item_callback = options ? options->item_loader_callback : NULL,
             .item_callback_context = options ? options->item_loader_context : NULL,

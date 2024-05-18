@@ -14,9 +14,11 @@ CfwSettings cfw_settings = {
     .game_start_point = 0, // First Item
     .lock_menu_type = true, // Adv Grid VS FALSE=LIST
     .sort_dirs_first = true, // ON
+    .show_hidden_files = false, // OFF
+    .show_internal_tab = true, // ON
+    .favorite_timeout = 0, // OFF
     .dark_mode = false, // OFF
     .charge_cap = 100, // 100%
-    .favorite_timeout = 0, // OFF
     .spi_cc1101_handle = SpiDefault, // &furi_hal_spi_bus_handle_external
     .spi_nrf24_handle = SpiDefault, // &furi_hal_spi_bus_handle_external
     .uart_esp_channel = FuriHalSerialIdUsart, // pin 13,14
@@ -54,11 +56,15 @@ void cfw_settings_load(void) {
         flipper_format_rewind(file);
         flipper_format_read_bool(file, "sort_dirs_first", &x->sort_dirs_first, 1);
         flipper_format_rewind(file);
+        flipper_format_read_bool(file, "show_hidden_files", &x->show_hidden_files, 1);
+        flipper_format_rewind(file);
+        flipper_format_read_bool(file, "show_internal_tab", &x->show_internal_tab, 1);
+        flipper_format_rewind(file);
+        flipper_format_read_uint32(file, "favorite_timeout", &x->favorite_timeout, 1);
+        flipper_format_rewind(file);
         flipper_format_read_bool(file, "dark_mode", &x->dark_mode, 1);
         flipper_format_rewind(file);
         flipper_format_read_uint32(file, "charge_cap", &x->charge_cap, 1);
-        flipper_format_rewind(file);
-        flipper_format_read_uint32(file, "favorite_timeout", &x->favorite_timeout, 1);
         flipper_format_rewind(file);
         flipper_format_read_uint32(file, "spi_cc1101_handle", (uint32_t*)&x->spi_cc1101_handle, 1);
         flipper_format_rewind(file);
@@ -110,9 +116,11 @@ void cfw_settings_save() {
         flipper_format_write_uint32(file, "game_start_point", &x->game_start_point, 1);
         flipper_format_write_bool(file, "lock_menu_type", &x->lock_menu_type, 1);
         flipper_format_write_bool(file, "sort_dirs_first", &x->sort_dirs_first, 1);
+        flipper_format_write_bool(file, "show_hidden_files", &x->show_hidden_files, 1);
+        flipper_format_write_bool(file, "show_internal_tab", &x->show_internal_tab, 1);
+        flipper_format_write_uint32(file, "favorite_timeout", &x->favorite_timeout, 1);
         flipper_format_write_bool(file, "dark_mode", &x->dark_mode, 1);
         flipper_format_write_uint32(file, "charge_cap", &x->charge_cap, 1);
-        flipper_format_write_uint32(file, "favorite_timeout", &x->favorite_timeout, 1);
         flipper_format_write_uint32(
             file, "spi_cc1101_handle", (uint32_t*)&x->spi_cc1101_handle, 1);
         flipper_format_write_uint32(file, "spi_nrf24_handle", (uint32_t*)&x->spi_nrf24_handle, 1);

@@ -52,9 +52,11 @@ typedef struct {
     uint32_t game_start_point;
     bool lock_menu_type;
     bool sort_dirs_first;
+    bool show_hidden_files;
+    bool show_internal_tab;
+    uint32_t favorite_timeout;
     bool dark_mode;
     uint32_t charge_cap;
-    uint32_t favorite_timeout;
     SpiHandle spi_cc1101_handle;
     SpiHandle spi_nrf24_handle;
     FuriHalSerialId uart_esp_channel;
