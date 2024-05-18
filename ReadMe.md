@@ -68,7 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [JS: Add math module #3598 (By Spooks4576)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598) Updates (By skotopes)
 - OFW: [JS: Add textbox module #3597 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3597) Updates (By skotopes)
 - Updated: [Dolphin Trainer v1.2 (By nymda)](https://github.com/nymda/FlipperAntidepressants) With Modifications (By RogueMaster) To Adjust For Level Mod
-- Image assets for BLE Pairing, DFU, SubGHz Receiving & Updating changed to Pikachu or Goku.
+- Image assets for BLE Pairing, DFU, SubGHz Receiving & Updating changed to Pikachu or Goku. Many other in app image assets also updated.
 
 <a name="release">
 
