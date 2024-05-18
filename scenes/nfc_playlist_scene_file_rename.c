@@ -3,13 +3,13 @@
 void nfc_playlist_file_rename_menu_callback(void* context) {
    NfcPlaylist* nfc_playlist = context;
    Storage* storage = furi_record_open(RECORD_STORAGE);
-   
+   FuriString* tmp_old_file_path = furi_string_alloc();
+   FuriString* tmp_new_file_path = furi_string_alloc();
+
    char const* old_file_path = (char*)furi_string_get_cstr(nfc_playlist->settings.file_path);
    char const* old_file_name = strchr(old_file_path, '/') != NULL ? &strrchr(old_file_path, '/')[1] : old_file_path;
 
-   FuriString* tmp_old_file_path = furi_string_alloc();
-   FuriString* tmp_new_file_path = furi_string_alloc_set_str(old_file_path);
-
+   furi_string_printf(tmp_old_file_path, "%s", old_file_path);
    furi_string_replace(tmp_old_file_path, old_file_name, "");
 
    furi_string_printf(tmp_new_file_path, "%s%s.txt", furi_string_get_cstr(tmp_old_file_path), nfc_playlist->text_input_output);
