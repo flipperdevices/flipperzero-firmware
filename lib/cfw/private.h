@@ -1,3 +1,3 @@
 #pragma once
 
-void CFW_SETTINGS_LOAD();
+void cfw_settings_load();

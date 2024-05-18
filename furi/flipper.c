@@ -52,7 +52,7 @@ void flipper_init(void) {
         flipper_start_service(&FLIPPER_SERVICES[i]);
     }
     if(furi_hal_is_normal_boot()) {
-        CFW_SETTINGS_LOAD();
+        cfw_settings_load();
     } else {
         FURI_LOG_I(TAG, "Special boot, skipping optional components");
     }

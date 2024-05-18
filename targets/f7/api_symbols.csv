@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,62.0,,
+Version,+,62.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
@@ -310,7 +310,6 @@ Header,+,targets/furi_hal_include/furi_hal_usb_hid.h,,
 Header,+,targets/furi_hal_include/furi_hal_usb_hid_u2f.h,,
 Header,+,targets/furi_hal_include/furi_hal_version.h,,
 Header,+,targets/furi_hal_include/furi_hal_vibro.h,,
-Function,+,CFW_SETTINGS_SAVE,void,
 Function,+,DESKTOP_SETTINGS_LOAD,_Bool,DesktopSettings*
 Function,+,DESKTOP_SETTINGS_SAVE,_Bool,DesktopSettings*
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
@@ -854,6 +853,7 @@ Function,-,ceil,double,double
 Function,-,ceilf,float,float
 Function,-,ceill,long double,long double
 Function,-,cfree,void,void*
+Function,+,cfw_settings_save,void,
 Function,-,clearerr,void,FILE*
 Function,-,clearerr_unlocked,void,FILE*
 Function,+,cli_add_command,void,"Cli*, const char*, CliCommandFlag, CliCallback, void*"

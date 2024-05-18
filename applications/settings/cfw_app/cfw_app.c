@@ -135,7 +135,7 @@ bool cfw_app_apply(CfwApp* app) {
     }
 
     if(app->save_settings) {
-        CFW_SETTINGS_SAVE();
+        cfw_settings_save();
     }
 
     if(app->require_reboot) {

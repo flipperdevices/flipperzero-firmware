@@ -5,8 +5,6 @@
 #include <furi_hal_serial_types.h>
 #include <furi_hal_version.h>
 #include <toolbox/colors.h>
-// #include <gui/icon_i.h>
-// #include <power/power_service/power.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,7 +67,7 @@ typedef struct {
     FuriHalVersionColor spoof_color;
 } CfwSettings;
 
-void CFW_SETTINGS_SAVE(void);
+void cfw_settings_save(void);
 extern CfwSettings cfw_settings;
 
 #ifdef __cplusplus

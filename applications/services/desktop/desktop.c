@@ -769,7 +769,7 @@ int32_t desktop_srv(void* p) {
         return 0;
     }
 
-    CFW_SETTINGS_LOAD();
+    cfw_settings_load();
 
     Desktop* desktop = desktop_alloc();
 

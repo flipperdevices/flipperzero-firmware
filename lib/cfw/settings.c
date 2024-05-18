@@ -29,7 +29,7 @@ CfwSettings cfw_settings = {
     .spoof_color = FuriHalVersionColorUnknown, // Real
 };
 
-void CFW_SETTINGS_LOAD(void) {
+void cfw_settings_load(void) {
     if(!furi_hal_is_normal_boot()) return;
 
     CfwSettings* x = &cfw_settings;
@@ -90,7 +90,7 @@ void CFW_SETTINGS_LOAD(void) {
     FURI_LOG_I(TAG, "RM WUZ HERE");
 }
 
-void CFW_SETTINGS_SAVE() {
+void cfw_settings_save() {
     if(!furi_hal_is_normal_boot()) return;
 
     CfwSettings* x = &cfw_settings;
