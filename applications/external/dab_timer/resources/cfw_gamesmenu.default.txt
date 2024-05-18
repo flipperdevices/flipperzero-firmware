@@ -22,13 +22,19 @@ GamesMenuList Version 0
 /ext/apps/Games/etchasketch.fap
 /ext/apps/Games/five_nights_at_flippers.fap
 /ext/apps/Games/flappybird.fap
+/ext/apps/Games/flight_assault.fap
+/ext/apps/Games/flipper_hero.fap
+/ext/apps/Games/flippy_road.fap
 /ext/apps/Games/game15.fap
 /ext/apps/Games/gameoflife.fap
 /ext/apps/Games/guess_the_number.fap
 /ext/apps/Games/hangman.fap
+/ext/apps/Games/hanoi_towers.fap
 /ext/apps/Games/heap_defence.fap
 /ext/apps/Games/jetpack.fap
+/ext/apps/Games/kcline.fap
 /ext/apps/Games/mandelbrotset.fap
+/ext/apps/Games/matagotchi.fap
 /ext/apps/Games/minesweeper.fap
 /ext/apps/Games/minesweeper_redux.fap
 /ext/apps/Games/montyhall.fap
@@ -71,6 +77,7 @@ GamesMenuList Version 0
 /ext/apps/Games/vexed.fap
 /ext/apps/GPIO/VGM/video_game_module_tool.fap
 /ext/apps/Games/videopoker.fap
+/ext/apps/Games/yapinvaders.fap
 /ext/apps/Games/yatzee.fap
 /ext/apps/Games/zero.fap
 /ext/apps/Games/zombiez.fap

@@ -69,6 +69,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [JS: Add textbox module #3597 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3597) Updates (By skotopes)
 - Updated: [Dolphin Trainer v1.2 (By nymda)](https://github.com/nymda/FlipperAntidepressants) With Modifications (By RogueMaster) To Adjust For Level Mod
 - Image assets for BLE Pairing, DFU, SubGHz Receiving & Updating changed to Pikachu or Goku. Many other in app image assets also updated.
+- Updated: [CFW Settings v1.6 - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) (Fixed App Saving and Game Menu Type Selection)
+- Updated: [Game List for Game Only Mode default menu. Now has 82 games! (By RogueMaster)]
 
 <a name="release">
 
@@ -385,7 +387,7 @@ $ ./fbt dolphin_ext
 - [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
 - [Canon Intervalometer v1.0 (By TravisCG)](https://github.com/TravisCG/canonivm)
 - [Caesar Cipher v1.1 (By panki27)](https://github.com/panki27/caesar-cipher)
-- [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca)
+- [CFW Settings v1.6 - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca)
 - [Chronometer (By nmrr)](https://github.com/nmrr/flipperzero-chronometer)
 - [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
 - [Clock v1.1 (By kowalski7cc)](https://github.com/kowalski7cc/flipperzero-firmware/tree/clock-v1)

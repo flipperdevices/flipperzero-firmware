@@ -38,7 +38,6 @@
 #include <desktop/desktop_settings.h>
 #include "helpers/passport_settings.h"
 
-#define MENU_ICON_MAX_SIZE 14
 #define CFW_SUBGHZ_FREQ_BUFFER_SIZE 6
 
 ARRAY_DEF(CharList, char*)

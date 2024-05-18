@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ir_decoder_app",
     stack_size=2 * 1024,
+    fap_icon="ir_scope.png",
     fap_category="Infrared",
     fap_author="prplecake",
     fap_weburl="https://github.com/prplecake/f0/tree/master/infrared/apps/ir_decoder",
