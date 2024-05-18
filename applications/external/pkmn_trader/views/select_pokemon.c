@@ -176,7 +176,6 @@ void select_pokemon_free(ViewDispatcher* view_dispatcher, uint32_t viewid, void*
 
     view_dispatcher_remove_view(view_dispatcher, viewid);
 
-    view_free_model(select->view);
     view_free(select->view);
     free(select);
 }

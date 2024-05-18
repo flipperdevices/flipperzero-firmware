@@ -73,6 +73,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [CFW Settings v1.6 - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) [Fixed App Saving and Game Menu Type Selection (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a48ebae81fb4fdcd9e0ddd5e78e8d248e6f7bf18) & [Added Options For Show Hidden Files & Show Internal Tab (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3051df77137513bc8c6a38b7cd1d95f09c013dff)
 - Updated: [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac)
+- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 
