@@ -27,7 +27,7 @@
 #define RECALC_TYPES 0x40
 #define RECALC_ALL 0xFF
 
-#define FXBM_SPRITE_SIZE 362 // Each 50x50 sprite
+#define FXBM_SPRITE_SIZE 404 // Each 56x56 sprite
 
 /* Text lookups to make debug output cleaner and easier to parse as a human */
 static char* stat_text_get(DataStat stat) {
@@ -351,7 +351,7 @@ void pokemon_default_nickname_set(char* dest, PokemonData* pdata, size_t n) {
     }
 }
 
-/* Each sprite 50x50 is 362 bytes long */
+/* Each sprite 56x56 is 404 bytes long */
 uint8_t* pokemon_icon_get(PokemonData* pdata, int num) {
     furi_assert(pdata);
     File* file;
