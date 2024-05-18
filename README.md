@@ -16,10 +16,7 @@ Setup: Input, view, and edit personal data.
 About: Information about the application and the author.
 
 # Inputting Personal Data
-When selecting the "Setup" option, users enter their personal data in the format: name/mail/tel/addr/notes. Each data is separated by slash "/". If the user does not want to enter a specific piece of data, they can omit it, but it is important to retain the "0".
-
-Example: Name_mail_tel_addr_notes
-Example without mail: Name/0/tel/addr/notes
+When selecting the "Setup" option, users enter their personal data in the format: step by step. If the user does not want to enter a specific piece of data, they can omit it, but it is important to retain the "0".
 
 Viewing ID Card
 After entering data, users can view their ID card. The application will display all entered data in the form of an ID card.
