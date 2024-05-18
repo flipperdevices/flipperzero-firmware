@@ -63,7 +63,8 @@ bool felica_block_requires_auth(
 bool felica_block_is_readonly(const FelicaListener* instance, uint8_t block_number);
 bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_number);
 
-FelicaCommandWriteBlockHandler felica_listener_get_write_block_handler(uint8_t block_number);
+FelicaCommanReadBlockHandler felica_listener_get_read_block_handler(const uint8_t block_number);
+FelicaCommandWriteBlockHandler felica_listener_get_write_block_handler(const uint8_t block_number);
 
 bool felica_listener_validate_write_request_and_set_sf(
     FelicaListener* instance,

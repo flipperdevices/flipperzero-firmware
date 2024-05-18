@@ -118,6 +118,72 @@ bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_num
     return felica_get_mc_bit(instance, mc_flag_index, block_number);
 }
 
+static void felica_handler_read_block(
+    FelicaListener* instance,
+    const uint8_t block_number,
+    const uint8_t resp_data_index,
+    FelicaListenerReadCommandResponse* response) {
+    UNUSED(instance);
+    UNUSED(block_number);
+    UNUSED(response);
+
+    uint8_t num = felica_listener_get_block_index(block_number);
+    memcpy(
+        &response->data[resp_data_index * FELICA_DATA_BLOCK_SIZE],
+        &instance->data->data.dump[num * (FELICA_DATA_BLOCK_SIZE + 2) + 2],
+        FELICA_DATA_BLOCK_SIZE);
+    response->header.length += FELICA_DATA_BLOCK_SIZE;
+}
+
+static void felica_handler_read_all_zeros(
+    FelicaListener* instance,
+    const uint8_t block_number,
+    const uint8_t resp_data_index,
+    FelicaListenerReadCommandResponse* response) {
+    UNUSED(instance);
+    UNUSED(block_number);
+
+    memset(&response->data[resp_data_index * FELICA_DATA_BLOCK_SIZE], 0, FELICA_DATA_BLOCK_SIZE);
+    response->header.length += FELICA_DATA_BLOCK_SIZE;
+}
+
+static void felica_handler_read_mac_a_block(
+    FelicaListener* instance,
+    const uint8_t block_number,
+    const uint8_t resp_data_index,
+    FelicaListenerReadCommandResponse* response) {
+    if(resp_data_index != response->block_count - 1) {
+        felica_handler_read_all_zeros(instance, block_number, resp_data_index, response);
+        //memset(
+        //    &response->data[resp_data_index * FELICA_DATA_BLOCK_SIZE], 0, FELICA_DATA_BLOCK_SIZE);
+        instance->mac_calc_start = resp_data_index + 1;
+        //skip_block = true;
+        //response->header.length += FELICA_DATA_BLOCK_SIZE;
+    } else {
+        felica_calculate_mac_read(
+            &instance->auth.des_context,
+            instance->auth.session_key.data,
+            instance->data->data.fs.rc.data,
+            &instance->requested_blocks[instance->mac_calc_start],
+            response->block_count - instance->mac_calc_start,
+            &response->data[instance->mac_calc_start * FELICA_DATA_BLOCK_SIZE],
+            instance->data->data.fs.mac_a.data);
+        felica_handler_read_block(instance, block_number, resp_data_index, response);
+    }
+}
+
+FelicaCommanReadBlockHandler felica_listener_get_read_block_handler(const uint8_t block_number) {
+    FelicaCommanReadBlockHandler handler = felica_handler_read_block;
+
+    if(block_number == FELICA_BLOCK_INDEX_RC || block_number == FELICA_BLOCK_INDEX_CK) {
+        handler = felica_handler_read_all_zeros;
+    } else if(block_number == FELICA_BLOCK_INDEX_MAC_A) {
+        handler = felica_handler_read_mac_a_block;
+    }
+
+    return handler;
+}
+
 static bool felica_validate_write_block_list(
     FelicaListener* instance,
     const FelicaListenerWriteRequest* const request,
@@ -310,7 +376,8 @@ void felica_handler_write_state_block(
     instance->auth.context.auth_status.internal = state;
 }
 
-FelicaCommandWriteBlockHandler felica_listener_get_write_block_handler(uint8_t block_number) {
+FelicaCommandWriteBlockHandler
+    felica_listener_get_write_block_handler(const uint8_t block_number) {
     FelicaCommandWriteBlockHandler handler = felica_handler_write_block;
     switch(block_number) {
     case FELICA_BLOCK_INDEX_RC:
