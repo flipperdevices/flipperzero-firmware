@@ -25,6 +25,8 @@
 #define CONFIG_FILE "noptel_lrf_sampler.save"
 #define SMM_PREFIX_CONFIG_DEFINITION_FILE "smm_prefix_config.def"
 
+//#define USE_5V_PIN		/* As well as PC1, for power control */
+
 #define NO_AVERAGE -1		/* This distance will be displayed as
 				   "NO AVERAGE" */
 #define NO_DISTANCE_DISPLAY -2	/* This distance will be displayed as a blank */
