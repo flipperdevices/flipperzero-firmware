@@ -47,6 +47,15 @@ On the Flipper Zero, select `125 kHz RFID`, `Saved`, then select the file you cr
 Reading a tag...
 On the Flipper Zero, select `125 kHz RFID`, `Read`.  Place the tag against the back of the Flipper (or use another Flipper that is emulating the tag) and you should see the latitude and longitude displayed on the screen.
 
+## Protocol format
+
+- 125kHz, FSK2a, RF/50, FC/8, FC/10
+- Preamble: 0xF337
+- Data: 8 bytes (first 4 bytes are latitude, last 4 bytes are longitude)
+- Checksum: XOR of the 8 bytes of data
+
+NOTE: The 4-bytes are just float values that are cast to a 4-byte integer.
+
 ## Support
 
 The best way to get support is to join the Flipper Zero Tutorials (Unofficial) Discord community. Here is a [Discord invite](https://discord.com/invite/NsjCvqwPAd) to join my `Flipper Zero Tutorials (Unofficial)` community.
