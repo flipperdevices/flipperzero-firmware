@@ -188,44 +188,15 @@ static void felica_listener_command_handler_read(
         resp->block_count = 0;
     }
 
-    uint8_t mac_calc_start = 0;
-    uint8_t blocks[4] = {};
+    instance->mac_calc_start = 0;
+    memset(instance->requested_blocks, 0, 4);
     for(uint8_t i = 0; i < resp->block_count; i++) {
         const FelicaBlockListElement* item = &request->list[i];
-        blocks[i] = item->block_number;
-        bool skip_block = false;
-        if(item->block_number == FELICA_BLOCK_INDEX_MAC_A) {
-            if(i != resp->block_count - 1) {
-                memset(&resp->data[i * FELICA_DATA_BLOCK_SIZE], 0, FELICA_DATA_BLOCK_SIZE);
-                mac_calc_start = i + 1;
-                skip_block = true;
-                resp->header.length += FELICA_DATA_BLOCK_SIZE;
-            } else {
-                felica_calculate_mac_read(
-                    &instance->auth.des_context,
-                    instance->auth.session_key.data,
-                    instance->data->data.fs.rc.data,
-                    &blocks[mac_calc_start],
-                    resp->block_count - mac_calc_start,
-                    &resp->data[mac_calc_start * FELICA_DATA_BLOCK_SIZE],
-                    instance->data->data.fs.mac_a.data);
-            }
-        } else if(
-            item->block_number == FELICA_BLOCK_INDEX_RC ||
-            item->block_number == FELICA_BLOCK_INDEX_CK) {
-            memset(&resp->data[i * FELICA_DATA_BLOCK_SIZE], 0, FELICA_DATA_BLOCK_SIZE);
-            skip_block = true;
-            resp->header.length += FELICA_DATA_BLOCK_SIZE;
-        }
+        instance->requested_blocks[i] = item->block_number;
+        FelicaCommanReadBlockHandler handler =
+            felica_listener_get_read_block_handler(item->block_number);
 
-        if(!skip_block) {
-            uint8_t num = felica_listener_get_block_index(item->block_number);
-            memcpy(
-                &resp->data[i * FELICA_DATA_BLOCK_SIZE],
-                &instance->data->data.dump[num * (FELICA_DATA_BLOCK_SIZE + 2) + 2],
-                FELICA_DATA_BLOCK_SIZE);
-            resp->header.length += FELICA_DATA_BLOCK_SIZE;
-        }
+        handler(instance, item->block_number, i, resp);
     }
 
     bit_buffer_reset(instance->tx_buffer);
