@@ -27,7 +27,7 @@ static void hid_mouse_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     HidMouseModel* model = context;
 
-// Header
+    // Header
 #ifdef HID_TRANSPORT_BLE
     if(model->connected) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
@@ -217,7 +217,6 @@ HidMouse* hid_mouse_alloc(Hid* hid) {
     view_allocate_model(hid_mouse->view, ViewModelTypeLocking, sizeof(HidMouseModel));
     view_set_draw_callback(hid_mouse->view, hid_mouse_draw_callback);
     view_set_input_callback(hid_mouse->view, hid_mouse_input_callback);
-
     return hid_mouse;
 }
 

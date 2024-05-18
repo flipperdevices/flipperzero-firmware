@@ -127,7 +127,7 @@ static uint32_t hid_ptt_menu_view(void* context) {
     return HidViewPushToTalkMenu;
 }
 
-Hid* hid_alloc(void) {
+Hid* hid_alloc() {
     Hid* app = malloc(sizeof(Hid));
 
     // Gui
