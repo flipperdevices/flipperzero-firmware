@@ -137,6 +137,5 @@ View* select_pokemon_alloc(PokemonFap* pokemon_fap) {
 
 void select_pokemon_free(PokemonFap* pokemon_fap) {
     furi_assert(pokemon_fap);
-    view_free_model(pokemon_fap->select_view);
     view_free(pokemon_fap->select_view);
 }

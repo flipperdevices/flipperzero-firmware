@@ -762,7 +762,6 @@ void trade_free(ViewDispatcher* view_dispatcher, uint32_t view_id, void* trade_c
 
     view_dispatcher_remove_view(view_dispatcher, view_id);
 
-    view_free_model(trade->view);
     view_free(trade->view);
     free(trade->input_block);
     free(trade);
