@@ -1,6 +1,6 @@
 App(
     appid="malveke_gb_cartridge",
-    name="GAME BOY Cartridge (GB/GBC)",
+    name="[GB/GBC] Cartridge",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gb_cartridge_app",
     stack_size=2 * 1024,

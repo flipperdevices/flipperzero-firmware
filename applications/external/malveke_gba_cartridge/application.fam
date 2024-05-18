@@ -1,6 +1,6 @@
 App(
     appid="malveke_gba_cartridge",
-    name="GAME BOY ADVANCE Cartridge",
+    name="[GBA] Cartridge",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gba_cartridge_app",
     stack_size=2 * 1024,

@@ -1,6 +1,6 @@
 App(
     appid="malveke_gb_live_camera",
-    name="GAME BOY Live Camera",
+    name="[GB] Live Camera",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gb_live_camera_app",
     stack_size=8 * 1024,

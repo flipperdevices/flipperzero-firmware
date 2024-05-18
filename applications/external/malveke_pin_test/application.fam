@@ -1,6 +1,6 @@
 App(
     appid="malveke_pin_test",
-    name="PIN Test",
+    name="[GB] PIN Test",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="malveke_pin_test_app",
     stack_size=1 * 1024,

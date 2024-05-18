@@ -66,7 +66,7 @@ bool scene_action_rename_on_event(void* context, SceneManagerEvent event) {
             FuriString* new_path = furi_string_alloc_printf(
                 "%s/%s%s", furi_string_get_cstr(dir_name), app->temp_cstr, item->ext);
 
-            // FURI_LOG_I(TAG, "Rename: %s to %s", old_path, furi_string_get_cstr(new_path));
+            FURI_LOG_I(TAG, "Rename: %s to %s", old_path, furi_string_get_cstr(new_path));
             FS_Error fs_result =
                 storage_common_rename(app->storage, old_path, furi_string_get_cstr(new_path));
             if(fs_result == FSE_OK) {

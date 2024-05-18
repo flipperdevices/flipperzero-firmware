@@ -72,6 +72,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Added 7 games to game list for Game Only Mode default menu. Now has 82 games! (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a48ebae81fb4fdcd9e0ddd5e78e8d248e6f7bf18#diff-d885276c2d6fb6ca082a97c4ef9841bc376f3b5a482bdf5c77ee82af919f0244)
 - Updated: [CFW Settings v1.6 - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) [Fixed App Saving and Game Menu Type Selection (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a48ebae81fb4fdcd9e0ddd5e78e8d248e6f7bf18) & [Added Options For Show Hidden Files & Show Internal Tab (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3051df77137513bc8c6a38b7cd1d95f09c013dff)
 - Updated: [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac)
 
 <a name="release">
 

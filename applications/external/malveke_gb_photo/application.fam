@@ -1,6 +1,6 @@
 App(
     appid="malveke_gb_photo",
-    name="GAME BOY PHOTO MALVEKE",
+    name="[GB] Photo",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="boilerplate_app",
     stack_size=2 * 1024,

@@ -1,6 +1,6 @@
 App(
     appid="malveke_gb_emulator",
-    name="GAME BOY Emulator",
+    name="[GB] Emulator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="malveke_gb_emulator_app",
     stack_size=1 * 1024,
