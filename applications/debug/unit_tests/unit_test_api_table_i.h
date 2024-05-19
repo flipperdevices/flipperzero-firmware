@@ -1,7 +1,6 @@
 #include <update_util/resources/manifest.h>
 #include <nfc/protocols/slix/slix_i.h>
 #include <nfc/protocols/iso15693_3/iso15693_3_poller_i.h>
-// #include <FreeRTOS-Kernel/include/queue.h>
 #include <FreeRTOS.h>
 #include <FreeRTOS-Kernel/include/queue.h>
 
