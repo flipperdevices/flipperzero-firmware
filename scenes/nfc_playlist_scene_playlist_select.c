@@ -21,7 +21,7 @@ void nfc_playlist_playlist_select_scene_on_enter(void* context) {
    FuriString* tmp_str = furi_string_alloc_set_str(PLAYLIST_LOCATION);
    file_browser_start(nfc_playlist->file_browser, tmp_str);
    furi_string_free(tmp_str);
-   
+
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileBrowser);
 }
 
