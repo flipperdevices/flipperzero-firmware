@@ -32,12 +32,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-18 21:22 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-18 21:22 EST`
 - OFW: [Fix calling both view_free_model() and view_free() #3655 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3655)
-- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [NFC Playlist v1.8 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [ID Card v2.1 (By evillero)](https://github.com/evillero/ID_card_v2)
 - CFW Settings: [Changed Defaults to Show Hidden Files & Show Internal Tab (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
 - Passport: [3 new Akira themed profile pictures (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures) Sorry if you have to re-select your profile picture.
 - Updated: [Bluetooth/USB Remote v1.8 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- Updated: [AZERTY Mouse Jacker v1.2 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 
 <a name="release">
 
@@ -333,7 +334,7 @@ $ ./fbt dolphin_ext
 - [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - [Authenticator/TOTP v5.14.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [AVR Flasher v1.3 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
-- [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
+- [AZERTY Mouse Jacker v1.2 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)
 - [Barcode App v1.2 (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) `Uses: COM-port`
@@ -362,7 +363,7 @@ $ ./fbt dolphin_ext
 - [Continuity Tester (By benallen-dev)](https://github.com/benallen-dev/flipper-zero-apps/tree/main/continuity)
 - [Control 7-segment display with Flipper Zero (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Cookie Clicker v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
-- [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
+- [Count Down Timer v1.3 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - [Cross Remote v2.5 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
@@ -398,7 +399,7 @@ $ ./fbt dolphin_ext
 - [FAP Boilerplate v1.1 (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - [Financial Calculator v1.0 (By schaene)](https://github.com/schaene/Flipper-Financial-Calculator)
 - [FindMy Flipper v3.5 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
-- [Flashlight v1.1 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
+- [Flashlight v1.2 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi v2.1.1 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [FlipBoard Blinky v2.3 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBoard Keyboard v2.4 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
