@@ -9,7 +9,7 @@ App(
     fap_category="Tools",
     fap_author="evillero",
     fap_weburl="https://github.com/evillero/ID_card_v2",
-    fap_version="2.0",
+    fap_version="2.1",
     fap_description="This program represents a simple application for managing an ID card.",
     #  [Original Idea v1.0 (By alanretgue)](https://github.com/alanretgue/Flipper_Zero-id_card)
 )

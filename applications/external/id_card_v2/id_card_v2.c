@@ -16,7 +16,11 @@
 typedef enum {
     IDScenesMainMenuScene,
     IDScenesIDCardScene,
-    IDScenesGreetingInputScene,
+    IDScenesInputNameScene,
+    IDScenesInputEmailScene,
+    IDScenesInputTelScene,
+    IDScenesInputAddrScene,
+    IDScenesInputNotesScene,
     IDScenesGreetingMessageScene,
     IDScenesAboutScene,
     IDScenesSceneCount,
@@ -37,6 +41,11 @@ typedef struct App {
     char* user_input;
     uint16_t user_input_size;
     bool user_input_available;
+    char name[64];
+    char email[64];
+    char tel[64];
+    char addr[64];
+    char notes[64];
 } App;
 
 typedef enum {
@@ -51,8 +60,13 @@ typedef enum {
 } IDScenesMainMenuEvent;
 
 typedef enum {
+    IDScenesInputNameEvent,
+    IDScenesInputEmailEvent,
+    IDScenesInputTelEvent,
+    IDScenesInputAddrEvent,
+    IDScenesInputNotesEvent,
     IDScenesGreetingInputSceneSaveEvent,
-} IDScenesGreetingInputEvent;
+} IDScenesInputEvent;
 
 void save_user_input(const char* filename, const char* input) {
     Storage* storage = (Storage*)furi_record_open(RECORD_STORAGE);
@@ -103,7 +117,7 @@ bool id_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case IDScenesMainMenuSceneSetupEvent:
-            scene_manager_next_scene(app->scene_manager, IDScenesGreetingInputScene);
+            scene_manager_next_scene(app->scene_manager, IDScenesInputNameScene);
             consumed = true;
             break;
         }
@@ -123,6 +137,7 @@ void id_main_menu_scene_on_enter(void* context) {
     submenu_add_item(app->submenu, "About", IDScenesMainMenuSceneAbout, id_menu_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesSubmenuView);
 }
+
 void id_main_menu_scene_on_exit(void* context) {
     App* app = context;
     submenu_reset(app->submenu);
@@ -143,44 +158,44 @@ void id_card_scene_on_enter(void* context) {
 
         if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
-                app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Name:");
+                app->widget, 0, y_position, AlignLeft, AlignCenter, FontSecondary, "Name:");
             widget_add_string_element(
-                app->widget, 35, y_position, AlignLeft, AlignCenter, FontSecondary, token);
+                app->widget, 26, y_position, AlignLeft, AlignCenter, FontSecondary, token);
             y_position += 10;
         }
 
         token = strtok(NULL, "/");
         if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
-                app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Email:");
+                app->widget, 0, y_position, AlignLeft, AlignCenter, FontSecondary, "Email:");
             widget_add_string_element(
-                app->widget, 35, y_position, AlignLeft, AlignCenter, FontSecondary, token);
+                app->widget, 26, y_position, AlignLeft, AlignCenter, FontSecondary, token);
             y_position += 10;
         }
 
         token = strtok(NULL, "/");
         if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
-                app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Tel:");
+                app->widget, 0, y_position, AlignLeft, AlignCenter, FontSecondary, "Tel:");
             widget_add_string_element(
-                app->widget, 35, y_position, AlignLeft, AlignCenter, FontSecondary, token);
+                app->widget, 26, y_position, AlignLeft, AlignCenter, FontSecondary, token);
             y_position += 10;
         }
 
         token = strtok(NULL, "/");
         if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
-                app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Addr:");
+                app->widget, 0, y_position, AlignLeft, AlignCenter, FontSecondary, "Addr:");
             widget_add_string_element(
-                app->widget, 35, y_position, AlignLeft, AlignCenter, FontSecondary, token);
+                app->widget, 26, y_position, AlignLeft, AlignCenter, FontSecondary, token);
             y_position += 10;
         }
 
         token = strtok(NULL, "/");
         if(token != NULL && strcmp(token, "0") != 0) {
             widget_add_string_element(
-                app->widget, 5, y_position, AlignLeft, AlignCenter, FontSecondary, "Notes:");
-            widget_add_text_scroll_element(app->widget, 35, y_position - 5, 90, 5, token);
+                app->widget, 0, y_position, AlignLeft, AlignCenter, FontSecondary, "Notes:");
+            widget_add_text_scroll_element(app->widget, 26, y_position - 5, 90, 5, token);
             y_position += 10;
         }
         free(input_copy);
@@ -194,6 +209,7 @@ bool id_card_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(event);
     return false;
 }
+
 void id_card_scene_on_exit(void* context) {
     UNUSED(context);
 }
@@ -203,35 +219,141 @@ void id_text_input_callback(void* context) {
     scene_manager_handle_custom_event(app->scene_manager, IDScenesGreetingInputSceneSaveEvent);
 }
 
-void id_greeting_input_scene_on_enter(void* context) {
+void id_input_name_scene_on_enter(void* context) {
     App* app = context;
-    bool clear_text = true;
     text_input_reset(app->text_input);
-    text_input_set_header_text(app->text_input, "name/mail/tel/addr/notes");
+    text_input_set_header_text(app->text_input, "Enter Name:");
     text_input_set_result_callback(
-        app->text_input,
-        id_text_input_callback,
-        app,
-        app->user_input,
-        app->user_input_size,
-        clear_text);
+        app->text_input, id_text_input_callback, app, app->name, sizeof(app->name), true);
     view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesTextInputView);
 }
 
-bool id_greeting_input_scene_on_event(void* context, SceneManagerEvent event) {
+bool id_input_name_scene_on_event(void* context, SceneManagerEvent event) {
     App* app = context;
-    bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == IDScenesGreetingInputSceneSaveEvent) {
-            scene_manager_next_scene(app->scene_manager, IDScenesGreetingMessageScene);
-            app->user_input_available = true;
-            save_user_input(ID_SAVE_PATH, app->user_input);
-            consumed = true;
+            scene_manager_next_scene(app->scene_manager, IDScenesInputEmailScene);
+            return true;
         }
     }
-    return consumed;
+    return false;
 }
-void id_greeting_input_scene_on_exit(void* context) {
+
+void id_input_name_scene_on_exit(void* context) {
+    UNUSED(context);
+}
+
+void id_input_email_scene_on_enter(void* context) {
+    App* app = context;
+    text_input_reset(app->text_input);
+    text_input_set_header_text(app->text_input, "Enter Email:");
+    text_input_set_result_callback(
+        app->text_input, id_text_input_callback, app, app->email, sizeof(app->email), true);
+    view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesTextInputView);
+}
+
+bool id_input_email_scene_on_event(void* context, SceneManagerEvent event) {
+    App* app = context;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == IDScenesGreetingInputSceneSaveEvent) {
+            scene_manager_next_scene(app->scene_manager, IDScenesInputTelScene);
+            return true;
+        }
+    }
+    return false;
+}
+
+void id_input_email_scene_on_exit(void* context) {
+    UNUSED(context);
+}
+
+void id_input_tel_scene_on_enter(void* context) {
+    App* app = context;
+    text_input_reset(app->text_input);
+    text_input_set_header_text(app->text_input, "Enter Tel:");
+    text_input_set_result_callback(
+        app->text_input, id_text_input_callback, app, app->tel, sizeof(app->tel), true);
+    view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesTextInputView);
+}
+
+bool id_input_tel_scene_on_event(void* context, SceneManagerEvent event) {
+    App* app = context;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == IDScenesGreetingInputSceneSaveEvent) {
+            scene_manager_next_scene(app->scene_manager, IDScenesInputAddrScene);
+            return true;
+        }
+    }
+    return false;
+}
+
+void id_input_tel_scene_on_exit(void* context) {
+    UNUSED(context);
+}
+
+void id_input_addr_scene_on_enter(void* context) {
+    App* app = context;
+    text_input_reset(app->text_input);
+    text_input_set_header_text(app->text_input, "Enter Addr:");
+    text_input_set_result_callback(
+        app->text_input, id_text_input_callback, app, app->addr, sizeof(app->addr), true);
+    view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesTextInputView);
+}
+
+bool id_input_addr_scene_on_event(void* context, SceneManagerEvent event) {
+    App* app = context;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == IDScenesGreetingInputSceneSaveEvent) {
+            scene_manager_next_scene(app->scene_manager, IDScenesInputNotesScene);
+            return true;
+        }
+    }
+    return false;
+}
+
+void id_input_addr_scene_on_exit(void* context) {
+    UNUSED(context);
+}
+
+void id_input_notes_scene_on_enter(void* context) {
+    App* app = context;
+    text_input_reset(app->text_input);
+    text_input_set_header_text(app->text_input, "Enter Notes:");
+    text_input_set_result_callback(
+        app->text_input, id_text_input_callback, app, app->notes, sizeof(app->notes), true);
+    view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesTextInputView);
+}
+
+bool id_input_notes_scene_on_event(void* context, SceneManagerEvent event) {
+    App* app = context;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == IDScenesGreetingInputSceneSaveEvent) {
+            // Calculate the required buffer size
+            size_t buffer_size = strlen(app->name) + 1 + strlen(app->email) + 1 +
+                                 strlen(app->tel) + 1 + strlen(app->addr) + 1 +
+                                 strlen(app->notes) + 1;
+            char* buffer = malloc(buffer_size);
+            if(buffer) {
+                snprintf(
+                    buffer,
+                    buffer_size,
+                    "%s/%s/%s/%s/%s",
+                    app->name,
+                    app->email,
+                    app->tel,
+                    app->addr,
+                    app->notes);
+                save_user_input(ID_SAVE_PATH, buffer);
+                free(buffer);
+            }
+            scene_manager_next_scene(app->scene_manager, IDScenesGreetingMessageScene);
+            return true;
+        }
+    }
+    return false;
+}
+
+void id_input_notes_scene_on_exit(void* context) {
     UNUSED(context);
 }
 
@@ -242,11 +364,13 @@ void id_greeting_message_scene_on_enter(void* context) {
         app->widget, 64, 5, AlignCenter, AlignCenter, FontPrimary, "Changes Saved");
     view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesWidgetView);
 }
+
 bool id_greeting_message_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
     return false;
 }
+
 void id_greeting_message_scene_on_exit(void* context) {
     App* app = context;
     widget_reset(app->widget);
@@ -257,11 +381,10 @@ void id_about_scene_on_enter(void* context) {
     widget_reset(app->widget);
 
     widget_add_string_element(
-        app->widget, 5, 5, AlignLeft, AlignCenter, FontSecondary, "To leave the field empty,");
+        app->widget, 5, 5, AlignLeft, AlignCenter, FontSecondary, "Easy step-by-step input,");
     widget_add_string_element(
-        app->widget, 5, 15, AlignLeft, AlignCenter, FontSecondary, "type 0, without Tel:");
-    widget_add_string_element(
-        app->widget, 5, 25, AlignLeft, AlignCenter, FontSecondary, "name/email/0/addr/notes");
+        app->widget, 5, 15, AlignLeft, AlignCenter, FontSecondary, "To leave the field empty,");
+    widget_add_string_element(app->widget, 5, 25, AlignLeft, AlignCenter, FontSecondary, "type 0");
     widget_add_string_element(
         app->widget, 5, 55, AlignLeft, AlignCenter, FontPrimary, "author:@evillero");
     view_dispatcher_switch_to_view(app->view_dispatcher, IDScenesWidgetView);
@@ -272,6 +395,7 @@ bool id_about_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(event);
     return false;
 }
+
 void id_about_scene_on_exit(void* context) {
     App* app = context;
     widget_reset(app->widget);
@@ -280,7 +404,11 @@ void id_about_scene_on_exit(void* context) {
 void (*const id_scene_on_enter_handlers[])(void*) = {
     id_main_menu_scene_on_enter,
     id_card_scene_on_enter,
-    id_greeting_input_scene_on_enter,
+    id_input_name_scene_on_enter,
+    id_input_email_scene_on_enter,
+    id_input_tel_scene_on_enter,
+    id_input_addr_scene_on_enter,
+    id_input_notes_scene_on_enter,
     id_greeting_message_scene_on_enter,
     id_about_scene_on_enter,
 };
@@ -288,7 +416,11 @@ void (*const id_scene_on_enter_handlers[])(void*) = {
 bool (*const id_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     id_main_menu_scene_on_event,
     id_card_scene_on_event,
-    id_greeting_input_scene_on_event,
+    id_input_name_scene_on_event,
+    id_input_email_scene_on_event,
+    id_input_tel_scene_on_event,
+    id_input_addr_scene_on_event,
+    id_input_notes_scene_on_event,
     id_greeting_message_scene_on_event,
     id_about_scene_on_event,
 };
@@ -296,7 +428,11 @@ bool (*const id_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
 void (*const id_scene_on_exit_handlers[])(void*) = {
     id_main_menu_scene_on_exit,
     id_card_scene_on_exit,
-    id_greeting_input_scene_on_exit,
+    id_input_name_scene_on_exit,
+    id_input_email_scene_on_exit,
+    id_input_tel_scene_on_exit,
+    id_input_addr_scene_on_exit,
+    id_input_notes_scene_on_exit,
     id_greeting_message_scene_on_exit,
     id_about_scene_on_exit,
 };

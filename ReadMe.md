@@ -34,6 +34,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Fix calling both view_free_model() and view_free() #3655 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3655)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [NFC Playlist v1.8 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- Updated: [ID Card v2.1 (By evillero)](https://github.com/evillero/ID_card_v2)
 
 <a name="release">
 
@@ -421,7 +422,7 @@ $ ./fbt dolphin_ext
 - [HID File Transfer v1.0 (By Kavakuo)](https://github.com/Kavakuo/HID-File-Transfer)
 - [i2c Tools v1.2 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - [iButton Fuzzer v1.3 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
-- [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
+- [ID Card v2.1 (By evillero)](https://github.com/evillero/ID_card_v2)
 - [IFTTT Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [IR Decoder v1.0 (By prplecake)](https://github.com/prplecake/f0/tree/master/infrared/apps/ir_decoder)
