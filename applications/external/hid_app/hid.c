@@ -263,6 +263,11 @@ int32_t hid_ble_app(void* p) {
     // Migrate data from old sd-card folder
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
+    storage_common_migrate(
+        storage,
+        EXT_PATH("apps/Bluetooth/" HID_BT_KEYS_STORAGE_NAME),
+        APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+
     bt_keys_storage_set_storage_path(app->bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
 
     furi_record_close(RECORD_STORAGE);

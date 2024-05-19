@@ -14,6 +14,7 @@ enum HidSubmenuIndex {
     HidSubmenuIndexMouseClicker,
     HidSubmenuIndexMouseJiggler,
     HidSubmenuIndexMouseJigglerStealth,
+    HidSubmenuIndexCamera,
     HidSubmenuIndexPushToTalk,
     HidSubmenuIndexRemovePairing,
 };
@@ -74,6 +75,8 @@ void hid_scene_start_on_enter(void* context) {
         HidSubmenuIndexMouseJigglerStealth,
         hid_scene_start_submenu_callback,
         app);
+    submenu_add_item(
+        app->submenu, "Camera", HidSubmenuIndexCamera, hid_scene_start_submenu_callback, app);
     submenu_add_item(
         app->submenu,
         "PushToTalk",
@@ -142,6 +145,9 @@ bool hid_scene_start_on_event(void* context, SceneManagerEvent event) {
                 break;
             case HidSubmenuIndexMouseJigglerStealth:
                 view_id = HidViewMouseJigglerStealth;
+                break;
+            case HidSubmenuIndexCamera:
+                view_id = HidViewCamera;
                 break;
             case HidSubmenuIndexPushToTalk:
                 view_id = HidViewPushToTalkMenu;
