@@ -64,12 +64,13 @@ void test_runner_free(TestRunner* instance) {
     free(instance);
 }
 
-static void test_runner_run_plugin(TestRunner* instance, const char* path) {
+static bool test_runner_run_plugin(TestRunner* instance, const char* path) {
     furi_assert(instance);
 
     FlipperApplication* lib =
         flipper_application_alloc(instance->storage, instance->api_interface);
 
+    bool result = false;
     do {
         FlipperApplicationPreloadStatus preload_res = flipper_application_preload(lib, path);
 
@@ -100,9 +101,13 @@ static void test_runner_run_plugin(TestRunner* instance, const char* path) {
         instance->minunit_assert += test->get_minunit_assert();
         instance->minunit_fail += test->get_minunit_fail();
         instance->minunit_status += test->get_minunit_status();
+
+        result = true;
     } while(false);
 
     flipper_application_free(lib);
+
+    return result;
 }
 
 static void test_runner_run_internal(TestRunner* instance) {
@@ -135,14 +140,21 @@ static void test_runner_run_internal(TestRunner* instance) {
             path_concat(PLUGINS_PATH, file_name_buffer, file_name);
             FURI_LOG_D(TAG, "Loading %s", furi_string_get_cstr(file_name));
 
+            bool result = false;
             if(furi_string_size(instance->args)) {
                 if(furi_string_cmp_str(instance->args, furi_string_get_cstr(file_name)) == 0) {
-                    test_runner_run_plugin(instance, furi_string_get_cstr(file_name));
+                    result = test_runner_run_plugin(instance, furi_string_get_cstr(file_name));
                 } else {
                     printf("Skipping %s\r\n", furi_string_get_cstr(file_name));
                 }
             } else {
-                test_runner_run_plugin(instance, furi_string_get_cstr(file_name));
+                result = test_runner_run_plugin(instance, furi_string_get_cstr(file_name));
+            }
+
+            if(!result) {
+                instance->minunit_fail++;
+                printf("Failed to execute test: %s\r\n", furi_string_get_cstr(file_name));
+                break;
             }
         }
     } while(false);
