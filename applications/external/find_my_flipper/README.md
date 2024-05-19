@@ -22,6 +22,8 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 <details>
   <summary><b>Option A: Cloning Existing Tag (Preferred and allows you to track without additional setup)</b></summary>
 
+1A. Scan and import tag via ESP32 with BLE. Use the Airtag scanner ESP32 firmware and Flipper app. 
+
 1. **Pair a Tag:** First, pair an AirTag, Samsung SmartTag or Tile Tracker with your device.
 2. **Enter 'Lost' Mode:** Keep the tag away from the device it's registered to for approximately 15 minutes.
 3. **Download nrfConnect or use an ESP32** Install nrfConnect from the Google Play Store. (Apple version doesn't reveal the needed Raw data, looking for a workaround)
