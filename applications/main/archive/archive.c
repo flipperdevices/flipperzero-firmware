@@ -64,6 +64,13 @@ void archive_free(ArchiveApp* archive) {
     furi_assert(archive);
     ViewDispatcher* view_dispatcher = archive->view_dispatcher;
 
+    if(archive->browser->disk_image) {
+        storage_virtual_quit(furi_record_open(RECORD_STORAGE));
+        furi_record_close(RECORD_STORAGE);
+        storage_file_free(archive->browser->disk_image);
+        archive->browser->disk_image = NULL;
+    }
+
     // Loading
     loading_free(archive->loading);
 

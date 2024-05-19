@@ -20,6 +20,7 @@ static const char* ArchiveTabNames[] = {
     [ArchiveTabBadUsb] = "Bad USB",
     [ArchiveTabU2f] = "U2F",
     [ArchiveTabApplications] = "Apps",
+    [ArchiveTabDiskImage] = "Disk Image",
     [ArchiveTabInternal] = "Internal",
     [ArchiveTabBrowser] = "Browser",
 };
@@ -224,6 +225,12 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
                         "Show",
                         ArchiveBrowserEventFileMenuShow);
                 }
+                if(selected->type == ArchiveFileTypeDiskImage) {
+                    archive_menu_add_item(
+                        menu_array_push_raw(model->context_menu),
+                        "Mount",
+                        ArchiveBrowserEventFileMenuShow);
+                }
             }
         }
     } /*else {
@@ -319,16 +326,19 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             ArchiveFile_t* file = files_array_get(
                 model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
             file_type = file->type;
+            bool ext = model->tab_idx == ArchiveTabBrowser ||
+                       model->tab_idx == ArchiveTabInternal ||
+                       model->tab_idx == ArchiveTabDiskImage;
             if(file_type == ArchiveFileTypeApplication) {
                 if(file->custom_icon_data) {
                     custom_icon_data = file->custom_icon_data;
                     furi_string_set(str_buf, file->custom_name);
                 } else {
                     file_type = ArchiveFileTypeUnknown;
-                    path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
+                    path_extract_filename(file->path, str_buf, !ext);
                 }
             } else {
-                path_extract_filename(file->path, str_buf, archive_is_known_app(file->type));
+                path_extract_filename(file->path, str_buf, !ext);
             }
         } else {
             furi_string_set(str_buf, "---");

@@ -36,6 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Playlist v1.8 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [ID Card v2.1 (By evillero)](https://github.com/evillero/ID_card_v2)
 - CFW Settings: [Changed Defaults to Show Hidden Files & Show Internal Tab (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
+- [Updated Archive Plugin for Disk Image support (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/321a768fa9bab94980fccdec0fb17fd6e836ee16)
 
 <a name="release">
 

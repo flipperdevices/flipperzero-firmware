@@ -55,6 +55,50 @@ static void archive_loader_callback(const void* message, void* context) {
     }
 }
 
+static void archive_mount_disk_image(ArchiveBrowserView* browser, ArchiveFile_t* selected) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* disk_image = NULL;
+    do {
+        if(browser->disk_image) {
+            // Deinit and recycle File object
+            if(storage_virtual_quit(storage) != FSE_OK) break;
+            storage_file_close(browser->disk_image);
+            disk_image = browser->disk_image;
+            browser->disk_image = NULL;
+        } else {
+            disk_image = storage_file_alloc(storage);
+        }
+
+        if(!storage_file_open(
+               disk_image,
+               furi_string_get_cstr(selected->path),
+               FSAM_READ | FSAM_WRITE,
+               FSOM_OPEN_EXISTING))
+            break;
+
+        FS_Error init = storage_virtual_init(storage, disk_image);
+        if(init == FSE_ALREADY_OPEN) {
+            if(storage_virtual_quit(storage) == FSE_OK) {
+                init = storage_virtual_init(storage, disk_image);
+            }
+        }
+        if(init != FSE_OK) break;
+
+        if(storage_virtual_mount(storage) != FSE_OK) {
+            storage_virtual_quit(storage);
+            break;
+        }
+
+        browser->disk_image = disk_image;
+
+        while(archive_get_tab(browser) != ArchiveTabDiskImage) {
+            archive_switch_tab(browser, TAB_LEFT);
+        }
+    } while(0);
+    if(disk_image && !browser->disk_image) storage_file_free(disk_image);
+    furi_record_close(RECORD_STORAGE);
+}
+
 static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selected) {
     UNUSED(browser);
     Loader* loader = furi_record_open(RECORD_LOADER);
@@ -246,10 +290,15 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuShow:
-            archive_show_file_menu(browser, false);
-            scene_manager_set_scene_state(
-                archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_DEFAULT);
-            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneShow);
+            if(selected->type == ArchiveFileTypeDiskImage &&
+               archive_get_tab(browser) != ArchiveTabDiskImage) {
+                archive_mount_disk_image(browser, selected);
+            } else {
+                archive_show_file_menu(browser, false);
+                scene_manager_set_scene_state(
+                    archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_DEFAULT);
+                scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneShow);
+            }
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuDelete:

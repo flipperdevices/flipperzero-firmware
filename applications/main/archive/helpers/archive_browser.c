@@ -19,7 +19,8 @@ static void
     browser->is_root = is_root;
     ArchiveTabEnum tab = archive_get_tab(browser);
 
-    if((item_cnt == 0) && (archive_is_home(browser)) && (tab != ArchiveTabBrowser)) {
+    if((item_cnt == 0) && (archive_is_home(browser)) && (tab != ArchiveTabBrowser) &&
+       (tab != ArchiveTabDiskImage || !browser->disk_image)) {
         archive_switch_tab(browser, browser->last_tab_switch_dir);
     } else if(!furi_string_start_with_str(browser->path, "/app:")) {
         with_view_model(
@@ -28,7 +29,7 @@ static void
             {
                 files_array_reset(model->files);
                 model->item_cnt = item_cnt;
-                model->item_idx = (file_idx > 0) ? file_idx : 0;
+                model->item_idx = file_idx;
                 load_offset =
                     CLAMP(model->item_idx - FILE_LIST_BUF_LEN / 2, (int32_t)model->item_cnt, 0);
                 model->array_offset = 0;
@@ -452,7 +453,9 @@ void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active) {
 }
 
 static bool archive_is_dir_exists(FuriString* path) {
-    if(furi_string_equal(path, STORAGE_ANY_PATH_PREFIX)) {
+    if(furi_string_equal(path, STORAGE_INT_PATH_PREFIX) ||
+       furi_string_equal(path, STORAGE_EXT_PATH_PREFIX) ||
+       furi_string_equal(path, STORAGE_MNT_PATH_PREFIX)) {
         return true;
     }
     bool state = false;
@@ -515,7 +518,8 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
         }
     }
 
-    if(tab_empty && tab != ArchiveTabBrowser && tab != ArchiveTabInternal) {
+    if(tab_empty && tab != ArchiveTabBrowser && tab != ArchiveTabInternal &&
+       (tab != ArchiveTabDiskImage || !browser->disk_image)) {
         archive_switch_tab(browser, key);
     } else {
         with_view_model(
