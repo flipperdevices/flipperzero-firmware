@@ -10,6 +10,10 @@
 
 #include <loader/firmware_api/firmware_api.h>
 #include <flipper_application/flipper_application.h>
+#include <flipper_application/api_hashtable/api_hashtable.h>
+#include <flipper_application/plugins/composite_resolver.h>
+
+extern const ElfApiInterface* const unit_tests_api_interface;
 
 #define TAG "TestRunner"
 
@@ -25,7 +29,7 @@ struct TestRunner {
     FuriString* args;
 
     // ELF related stuff
-    const ElfApiInterface* api_interface;
+    CompositeApiResolver* composite_resolver;
 
     // Report data
     int minunit_run;
@@ -44,13 +48,17 @@ TestRunner* test_runner_alloc(Cli* cli, FuriString* args) {
     instance->cli = cli;
     instance->args = args;
 
-    instance->api_interface = firmware_api_interface;
+    instance->composite_resolver = composite_api_resolver_alloc();
+    composite_api_resolver_add(instance->composite_resolver, firmware_api_interface);
+    composite_api_resolver_add(instance->composite_resolver, unit_tests_api_interface);
 
     return instance;
 }
 
 void test_runner_free(TestRunner* instance) {
     furi_assert(instance);
+
+    composite_api_resolver_free(instance->composite_resolver);
 
     furi_record_close(RECORD_NOTIFICATION);
     instance->notification = NULL;
@@ -68,7 +76,9 @@ static bool test_runner_run_plugin(TestRunner* instance, const char* path) {
     furi_assert(instance);
 
     FlipperApplication* lib =
-        flipper_application_alloc(instance->storage, instance->api_interface);
+
+        flipper_application_alloc(
+            instance->storage, composite_api_resolver_get(instance->composite_resolver));
 
     bool result = false;
     instance->minunit_fail = -1;
