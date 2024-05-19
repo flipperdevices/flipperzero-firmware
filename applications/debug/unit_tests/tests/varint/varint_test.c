@@ -88,3 +88,5 @@ int run_minunit_test_varint(void) {
     MU_RUN_SUITE(test_varint_suite);
     return MU_EXIT_CODE;
 }
+
+TEST_API_DEFINE(run_minunit_test_varint)

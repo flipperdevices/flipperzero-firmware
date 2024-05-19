@@ -549,3 +549,5 @@ int run_minunit_test_flipper_format(void) {
     MU_RUN_SUITE(flipper_format);
     return MU_EXIT_CODE;
 }
+
+TEST_API_DEFINE(run_minunit_test_flipper_format)

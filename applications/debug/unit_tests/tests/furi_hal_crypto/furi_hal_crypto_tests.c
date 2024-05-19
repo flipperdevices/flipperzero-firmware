@@ -600,3 +600,5 @@ int run_minunit_test_furi_hal_crypto(void) {
     MU_RUN_SUITE(furi_hal_crypto_gcm_test);
     return MU_EXIT_CODE;
 }
+
+TEST_API_DEFINE(run_minunit_test_furi_hal_crypto)

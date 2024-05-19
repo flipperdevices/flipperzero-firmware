@@ -220,3 +220,5 @@ int run_minunit_test_protocol_dict(void) {
     MU_RUN_SUITE(test_protocol_dict_suite);
     return MU_EXIT_CODE;
 }
+
+TEST_API_DEFINE(run_minunit_test_protocol_dict)

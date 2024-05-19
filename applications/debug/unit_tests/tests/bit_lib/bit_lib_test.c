@@ -738,3 +738,5 @@ int run_minunit_test_bit_lib(void) {
     MU_RUN_SUITE(test_bit_lib);
     return MU_EXIT_CODE;
 }
+
+TEST_API_DEFINE(run_minunit_test_bit_lib)

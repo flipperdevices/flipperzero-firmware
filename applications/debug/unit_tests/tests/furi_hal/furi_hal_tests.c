@@ -232,3 +232,5 @@ int run_minunit_test_furi_hal(void) {
     MU_RUN_SUITE(furi_hal_i2c_ext_suite);
     return MU_EXIT_CODE;
 }
+
+TEST_API_DEFINE(run_minunit_test_furi_hal)

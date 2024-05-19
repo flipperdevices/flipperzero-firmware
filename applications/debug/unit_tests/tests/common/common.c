@@ -28,3 +28,19 @@ void minunit_printf_warning(const char* format, ...) {
     printf(_FURI_LOG_CLR_W "%s\r\n" _FURI_LOG_CLR_RESET, furi_string_get_cstr(str));
     furi_string_free(str);
 }
+
+int get_minunit_run(void) {
+    return minunit_run;
+}
+
+int get_minunit_assert(void) {
+    return minunit_assert;
+}
+
+int get_minunit_fail(void) {
+    return minunit_fail;
+}
+
+int get_minunit_status(void) {
+    return minunit_status;
+}

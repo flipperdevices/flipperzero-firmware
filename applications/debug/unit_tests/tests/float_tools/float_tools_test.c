@@ -58,3 +58,5 @@ int run_minunit_test_float_tools(void) {
     MU_RUN_SUITE(float_tools_suite);
     return MU_EXIT_CODE;
 }
+
+TEST_API_DEFINE(run_minunit_test_float_tools)

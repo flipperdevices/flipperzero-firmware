@@ -108,3 +108,5 @@ int run_minunit_test_bt(void) {
     MU_RUN_SUITE(test_bt);
     return MU_EXIT_CODE;
 }
+
+TEST_API_DEFINE(run_minunit_test_bt)

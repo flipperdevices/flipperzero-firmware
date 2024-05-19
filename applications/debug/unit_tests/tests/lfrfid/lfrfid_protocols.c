@@ -551,3 +551,5 @@ int run_minunit_test_lfrfid_protocols(void) {
     MU_RUN_SUITE(test_lfrfid_protocols_suite);
     return MU_EXIT_CODE;
 }
+
+TEST_API_DEFINE(run_minunit_test_lfrfid_protocols)
