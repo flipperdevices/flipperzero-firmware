@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0513-1543-0.101.3-40c8d69.tgz&channel=RM0513-1543-0.101.3-40c8d69&version=0.101.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0518-2113-0.101.3-9a70498.tgz&channel=RM0518-2113-0.101.3-9a70498&version=0.101.3)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,50 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-18 11:19 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-18 11:19 EST`
-- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- OFW: [Infrared: Add Toshiba RAS-2518D #3635 (By hakuyoku2011)](https://github.com/flipperdevices/flipperzero-firmware/pull/3635)
-- OFW: [NFC: Mf Desfire fix reading big files #3616 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3616)
-- OFW: [Electra lfrfid protocol implementation #3640 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3640)
-- OFW: [Settings menu refactoring #3632 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3632)
-- [SubGHz: Improve Hormann BiSecur readability in SubGHz history (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/608d2b1d963872835541bbd19b8ba792d0b093aa)
-- OFW: [Add new map analyser #3648 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3648)
-- Updated: [Color Guess v1.5 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications) [Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/29ad4914ad6350cfa3be399d5ddaff9d747e6b5f)
-- Updated: [Slot Machine v1.2 (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots) [Changes (By DefinetlyNotAI)](https://github.com/Daniel-dev-s/flipperzero-slots/pull/2)
-- Updated: [ID Card v2.0 (By evillero)](https://github.com/evillero/ID_card_v2)
-- [Hid app improvements (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5997db3a3ce50b60937bde446a7b21c44051a159)
-- Updated: [Metronome v1.2 (By panki27)](https://github.com/panki27/Metronome) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
-- Added: [Mifare Nested v1.6.5 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc)
-- [Settings: Show SD decimals and percent free again (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/94ef779bdbef138b9996b09fe55ee44340d89213)
-- Updated: [NFC Magic v1.10 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
-- Updated: [MagSpoof v0.10 (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
-- OFW: PR: [TLSF and the Temple of Corrupted Memory
-#3653 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3653) [SubGHz: fix memory corrupt in read raw view (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3653/commits/1460030d035e4b133e08f44f6f8033acc420ba37)
-- OFW: [JS: Add submenu module #3601 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3601)
-- OFW: PR: [JS: Add math module #3598 (By Spooks4576)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598) (Updated from nminaylov)
-- OFW: PR: [JS: Add textbox module #3597 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3597) (Updated from nminaylov)
-- OFW: PR: [NFC: add Slix capabilities #3652 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3652)
-- RFID: [Restored options to Set PW, Wipe and Write Block to T5577 (By plgcoder)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/678)
-- Patreon Builds Update: Removed L3_Freedom_2_dolphins_128x64 from Minimal build.
-- Patreon Builds Update: Updated Mods animation on builds: Dolphin, ManifestSwitcher, Minimal & Stock
-- Patreon Builds Update: Added Akira animation on builds: Dolphin, ManifestSwitcher, Minimal & Stock
-- [Many updates for SubGHz GPS, CC1101 Handling, Frequency Bypass & SubGHz Optimizations (By Willy-JL & Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/cbbfb62064a3e8e7b81643fd437cd5dde69c5eb6) If you have CC1101 issues, delete subghz/assets/last_subghz.settings on your SD card.
-- Updated: [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer) [Changes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c5983ee83de81f6e6b1513e188828ff68887a389)
-- Updated: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc) [Changes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c5983ee83de81f6e6b1513e188828ff68887a389)
-- Updated: [Mifare Nested v1.6.5 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested) [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f06daf063bca9dbe17526eb3b9a9e5985c5045cc) [Changes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c5983ee83de81f6e6b1513e188828ff68887a389)
-- OFW: [Settings refactor fixes #3654 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3654)
-- OFW: [NFC: add Slix capabilities #3652 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3652)
-- Passport: [5 new profile pictures (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures)
-- SubGHz: [Fix Radio Device Loader loading GPS plugin (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/49d66158698bc5d06b73a7116cd22335cd89c4b6)
-- OFW: [JS: Add math module #3598 (By Spooks4576)](https://github.com/flipperdevices/flipperzero-firmware/pull/3598) Updates (By skotopes)
-- OFW: [JS: Add textbox module #3597 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3597) Updates (By skotopes)
-- Updated: [Dolphin Trainer v1.2 (By nymda)](https://github.com/nymda/FlipperAntidepressants) With Modifications (By RogueMaster) To Adjust For Level Mod
-- Image assets for BLE Pairing, DFU, SubGHz Receiving & Updating changed to Pikachu or Goku. Many other in app image assets also updated.
-- [Added 7 games to game list for Game Only Mode default menu. Now has 82 games! (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a48ebae81fb4fdcd9e0ddd5e78e8d248e6f7bf18#diff-d885276c2d6fb6ca082a97c4ef9841bc376f3b5a482bdf5c77ee82af919f0244)
-- Updated: [CFW Settings v1.6 - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) [Fixed App Saving and Game Menu Type Selection (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a48ebae81fb4fdcd9e0ddd5e78e8d248e6f7bf18) & [Added Options For Show Hidden Files & Show Internal Tab (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3051df77137513bc8c6a38b7cd1d95f09c013dff)
-- Updated: [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac)
-- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- [Fix USB/BT Remote Mouse Clicker merge (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e20549eff3a147cfd7119b42acd5aef7380a19ec)
 
 <a name="release">
 
@@ -625,4 +581,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0513-1543-0.101.3-40c8d69.tgz&channel=RM0513-1543-0.101.3-40c8d69&version=0.101.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0518-2113-0.101.3-9a70498.tgz&channel=RM0518-2113-0.101.3-9a70498&version=0.101.3)
