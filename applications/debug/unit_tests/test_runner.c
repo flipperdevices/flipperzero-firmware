@@ -135,17 +135,15 @@ static void test_runner_run_internal(TestRunner* instance) {
             path_concat(PLUGINS_PATH, file_name_buffer, file_name);
             FURI_LOG_D(TAG, "Loading %s", furi_string_get_cstr(file_name));
 
-            test_runner_run_plugin(instance, furi_string_get_cstr(file_name));
-
-            // if(furi_string_size(instance->args)) {
-            //     if(furi_string_cmp_str(instance->args, unit_tests[i].name) == 0) {
-            //         unit_tests[i].entry();
-            //     } else {
-            //         printf("Skipping %s\r\n", unit_tests[i].name);
-            //     }
-            // } else {
-            //     unit_tests[i].entry();
-            // }
+            if(furi_string_size(instance->args)) {
+                if(furi_string_cmp_str(instance->args, furi_string_get_cstr(file_name)) == 0) {
+                    test_runner_run_plugin(instance, furi_string_get_cstr(file_name));
+                } else {
+                    printf("Skipping %s\r\n", furi_string_get_cstr(file_name));
+                }
+            } else {
+                test_runner_run_plugin(instance, furi_string_get_cstr(file_name));
+            }
         }
     } while(false);
 
