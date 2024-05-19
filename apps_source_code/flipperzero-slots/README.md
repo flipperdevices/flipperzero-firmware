@@ -3,4 +3,6 @@
 ![Screen1](screen1.png "Title")
 ![Screen2](screen2.png "Title")
 
-I am not a C programmer, so any suggestions are welcome!
+Simple slots with highscores for flipper zero.
+
+*version 1.0.1*

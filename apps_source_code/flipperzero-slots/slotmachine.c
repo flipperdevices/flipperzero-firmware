@@ -46,6 +46,7 @@ static SlotsHighscore highscore;
 
 static bool highscores_load() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("apps/Games/slotmachine.save"), HIGHSCORES_FILENAME);
     File* file = storage_file_alloc(storage);
 
     uint16_t bytes_readed = 0;
@@ -88,9 +89,15 @@ void game_results(SlotMachineApp* app) {
     }
 
     if(total > 0) {
-        app->money += total;
+        app->money += total; // Add winnings to the player's money
         app->winamount = total;
         app->winview = true;
+
+        // Add the bet amount back to the player's money
+        app->money += app->bet;
+
+        // Reset the bet amount, uncomment me if you want to do this
+        //app->bet = 0;
 
         if(total > highscore.highscore) {
             highscore.highscore = total;
