@@ -221,11 +221,26 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         switch(passport->settings.image) {
         case PIMG_NONE:
             break;
+        case PIMG_ADPOLICE:
+            canvas_draw_icon(canvas, 11, 2, &I_AD_Police);
+            break;
+        case PIMG_AKKAN:
+            canvas_draw_icon(canvas, 11, 2, &I_Akira_Kaneda);
+            break;
+        case PIMG_AKKEI:
+            canvas_draw_icon(canvas, 11, 2, &I_Akira_Kei);
+            break;
+        case PIMG_AKTET:
+            canvas_draw_icon(canvas, 11, 2, &I_Akira_Tetsuo);
+            break;
         case PIMG_BRIAREOS:
             canvas_draw_icon(canvas, 11, 2, &I_Briareos_Hecatonchires);
             break;
         case PIMG_DALI:
             canvas_draw_icon(canvas, 11, 2, &I_Dali_Mask);
+            break;
+        case PIMG_DEDSEC:
+            canvas_draw_icon(canvas, 11, 2, &I_Dedsec_Mask);
             break;
         case PIMG_DEER:
             canvas_draw_icon(canvas, 11, 2, &I_Deer);
@@ -293,6 +308,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case PIMG_LAIN:
             canvas_draw_icon(canvas, 11, 2, &I_Lain);
             break;
+        case PIMG_LEEROY:
+            canvas_draw_icon(canvas, 11, 2, &I_Leeroy_Jenkins);
+            break;
         case PIMG_MARIO:
             canvas_draw_icon(canvas, 11, 2, &I_Pixel_Mario);
             break;
@@ -335,6 +353,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case PIMG_SHINKAI:
             canvas_draw_icon(canvas, 11, 2, &I_Shinkai);
             break;
+        case PIMG_SKULL:
+            canvas_draw_icon(canvas, 11, 2, &I_Skull);
+            break;
         case PIMG_SLIME:
             canvas_draw_icon_animation(canvas, 11, 2, animations[AniSlime]);
             break;
@@ -359,20 +380,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case PIMG_WAIFU3:
             canvas_draw_icon(canvas, 11, 2, &I_Waifu3);
             break;
-        case PIMG_ADPOLICE:
-            canvas_draw_icon(canvas, 11, 2, &I_AD_Police);
-            break;
-        case PIMG_SKULL:
-            canvas_draw_icon(canvas, 11, 2, &I_Skull);
-            break;
-        case PIMG_DEDSEC:
-            canvas_draw_icon(canvas, 11, 2, &I_Dedsec_Mask);
-            break;
         case PIMG_WRENCH:
             canvas_draw_icon(canvas, 11, 2, portrait_wrench[passport->tmpMood]);
-            break;
-        case PIMG_LEEROY:
-            canvas_draw_icon(canvas, 11, 2, &I_Leeroy_Jenkins);
             break;
         }
 
