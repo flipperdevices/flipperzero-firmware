@@ -1,14 +1,19 @@
 #include "test_runner.h"
 
+#include "tests/test_api.h"
+
 #include <cli/cli.h>
 #include <toolbox/path.h>
 #include <loader/loader.h>
 #include <storage/storage.h>
 #include <notification/notification_messages.h>
 
+#include <loader/firmware_api/firmware_api.h>
+#include <flipper_application/flipper_application.h>
+
 #define TAG "TestRunner"
 
-#define PLUGINS_PATH APP_DATA_PATH("plugins")
+#define PLUGINS_PATH "/ext/apps_data/unit_tests/plugins"
 
 struct TestRunner {
     Storage* storage;
@@ -18,6 +23,9 @@ struct TestRunner {
     // Temporary used things
     Cli* cli;
     FuriString* args;
+
+    // ELF related stuff
+    const ElfApiInterface* api_interface;
 
     // Report data
     int minunit_run;
@@ -35,6 +43,8 @@ TestRunner* test_runner_alloc(Cli* cli, FuriString* args) {
 
     instance->cli = cli;
     instance->args = args;
+
+    instance->api_interface = firmware_api_interface;
 
     return instance;
 }
@@ -54,7 +64,48 @@ void test_runner_free(TestRunner* instance) {
     free(instance);
 }
 
-void test_runner_run_internal(TestRunner* instance) {
+static void test_runner_run_plugin(TestRunner* instance, const char* path) {
+    furi_assert(instance);
+
+    FlipperApplication* lib =
+        flipper_application_alloc(instance->storage, instance->api_interface);
+
+    do {
+        FlipperApplicationPreloadStatus preload_res = flipper_application_preload(lib, path);
+
+        if(preload_res != FlipperApplicationPreloadStatusSuccess) {
+            FURI_LOG_E(TAG, "Failed to preload %s, %d", path, preload_res);
+            break;
+        }
+
+        if(!flipper_application_is_plugin(lib)) {
+            FURI_LOG_E(TAG, "Not a plugin %s", path);
+            break;
+        }
+
+        FlipperApplicationLoadStatus load_status = flipper_application_map_to_memory(lib);
+        if(load_status != FlipperApplicationLoadStatusSuccess) {
+            FURI_LOG_E(TAG, "Failed to load %s", path);
+            break;
+        }
+
+        const FlipperAppPluginDescriptor* app_descriptor =
+            flipper_application_plugin_get_descriptor(lib);
+
+        const TestApi* test = app_descriptor->entry_point;
+
+        test->run();
+
+        instance->minunit_run += test->get_minunit_run();
+        instance->minunit_assert += test->get_minunit_assert();
+        instance->minunit_fail += test->get_minunit_fail();
+        instance->minunit_status += test->get_minunit_status();
+    } while(false);
+
+    flipper_application_free(lib);
+}
+
+static void test_runner_run_internal(TestRunner* instance) {
     furi_assert(instance);
 
     char file_name_buffer[256];
@@ -83,6 +134,8 @@ void test_runner_run_internal(TestRunner* instance) {
 
             path_concat(PLUGINS_PATH, file_name_buffer, file_name);
             FURI_LOG_D(TAG, "Loading %s", furi_string_get_cstr(file_name));
+
+            test_runner_run_plugin(instance, furi_string_get_cstr(file_name));
 
             // if(furi_string_size(instance->args)) {
             //     if(furi_string_cmp_str(instance->args, unit_tests[i].name) == 0) {
