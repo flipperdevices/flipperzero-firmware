@@ -35,6 +35,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [NFC Playlist v1.8 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [ID Card v2.1 (By evillero)](https://github.com/evillero/ID_card_v2)
+- CFW Settings: [Changed Defaults to Show Hidden Files & Show Internal Tab (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
 
 <a name="release">
 
