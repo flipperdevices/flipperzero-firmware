@@ -961,6 +961,7 @@ void trade_free(ViewDispatcher* view_dispatcher, uint32_t view_id, void* trade_c
 
     furi_record_close(RECORD_NOTIFICATION);
 
+    view_free_model(trade->view);
     view_free(trade->view);
     pokemon_data_free(trade->input_pdata);
     free(trade);
