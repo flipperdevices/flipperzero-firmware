@@ -231,7 +231,7 @@ static void text_box_prepare_model(Canvas* canvas, TextBoxModel* model) {
 
     if(model->focus == TextBoxFocusEnd) {
         if(lines_num > model->lines_on_screen) {
-            model->text_offset = window_offset[lines_num % model->lines_on_screen];
+            model->text_offset = window_offset[(lines_num - 1) % model->lines_on_screen];
         }
     } else {
         model->text_offset = 0;
