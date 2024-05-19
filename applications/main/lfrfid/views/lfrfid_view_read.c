@@ -23,7 +23,7 @@ static void lfrfid_view_read_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_font(canvas, FontPrimary);
 
     if(model->read_mode == LfRfidReadAsk) {
-        canvas_draw_str(canvas, 70, 16, "Reading 1/2");
+        canvas_draw_str(canvas, 70, 16, "Reading 1/3");
 
         canvas_draw_str(canvas, 77, 29, "ASK");
         canvas_draw_icon(canvas, 70, 22, &I_ButtonRight_4x7);
@@ -32,7 +32,7 @@ static void lfrfid_view_read_draw_callback(Canvas* canvas, void* _model) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 77, 43, "PSK");
     } else if(model->read_mode == LfRfidReadPsk) {
-        canvas_draw_str(canvas, 70, 16, "Reading 2/2");
+        canvas_draw_str(canvas, 70, 16, "Reading 2/3");
 
         canvas_draw_str(canvas, 77, 43, "PSK");
         canvas_draw_icon(canvas, 70, 36, &I_ButtonRight_4x7);
