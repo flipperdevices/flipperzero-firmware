@@ -9,9 +9,6 @@ All the playlists should be placed in ext/apps_data/nfc_playlist and an example 
 /ext/nfc/link2.nfc
 ```
 An example file can be found in the repository
-## Supported Firmwares
-As i know these firmwares are supported and working if you know any more please let me know
-- <a href="https://github.com/RogueMaster/flipperzero-firmware-wPlugins">RogueMaster</a>
 ## Settings:
 - Emulate time (How long the NFC card will be emulated for)
 - Delay time (How long the gap between the cards will be)

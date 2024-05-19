@@ -5,7 +5,7 @@ App(
     entry_point="finik_eth_app",
     stack_size=20 * 1024,
     fap_icon="images/ethernet_icon_10x10px.png",
-    fap_category="GPIO",
+    fap_category="GPIO/Debug",
     fap_icon_assets="images",
     fap_icon_assets_symbol="finik_eth",
     fap_private_libs=[
@@ -51,6 +51,7 @@ App(
     ],
     fap_author="karasevia",
     fap_weburl="https://github.com/karasevia/finik_eth",
-    fap_version=(1, 0),
-    fap_description="Driver for W5500 ethernet module. Can DHCP or Static IP and Ping some IP-address",
+    fap_version="1.1",
+    fap_description="This is a small helper that lets you connect your Flipper via RJ45 to your network. You can then set the interface-mac and test if you can get an IP via DHCP and the ping addresses.",
+    #  [With docs and Hex UI fix #4 (By arag0re)](https://github.com/karasevia/finik_eth/pull/4)
 )

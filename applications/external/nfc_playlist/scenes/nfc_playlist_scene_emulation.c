@@ -36,7 +36,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
               EmulationState == NfcPlaylistEmulationState_Emulating) {
             char* file_path = (char*)furi_string_get_cstr(line);
 
-            if(strspn(file_path, " \t\n\r") == strlen(file_path)) {
+            if(strlen(file_path) <= 1) {
                 continue;
             }
 

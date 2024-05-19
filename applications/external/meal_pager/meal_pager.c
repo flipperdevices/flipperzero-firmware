@@ -113,10 +113,10 @@ void meal_pager_app_free(Meal_Pager* app) {
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, Meal_PagerViewIdMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, Meal_PagerViewIdStartscreen);
     view_dispatcher_remove_view(app->view_dispatcher, Meal_PagerViewIdTransmit);
     view_dispatcher_remove_view(app->view_dispatcher, Meal_PagerViewIdSettings);
     view_dispatcher_remove_view(app->view_dispatcher, Meal_PagerViewIdIntInput);
+    view_dispatcher_remove_view(app->view_dispatcher, Meal_PagerViewIdStartscreen);
     submenu_free(app->submenu);
     int_input_free(app->int_input);
 
