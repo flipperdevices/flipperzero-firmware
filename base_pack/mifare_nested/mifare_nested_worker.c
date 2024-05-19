@@ -542,7 +542,7 @@ SaveNoncesResult_t* mifare_nested_worker_write_nonces(
 
     free_nonces(nonces, sector_count, free_tries_count);
     file_stream_close(file_stream);
-    free(file_stream);
+    stream_free(file_stream);
 
     if(!result->saved) {
         FURI_LOG_E(TAG, "No nonces collected, removing file...");
@@ -733,15 +733,18 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
     storage_common_mkdir(storage, furi_string_get_cstr(folder_path));
     furi_string_free(folder_path);
 
-    if(!mifare_nested_worker_read_key_cache(&data, mf_data) ||
-       !mifare_nested_worker_check_initial_keys(
-           &nonces, mf_data, 1, sector_count, &key, &key_block, &found_key_type)) {
+    bool ok = mifare_nested_worker_read_key_cache(&data, mf_data);
+    if(ok) {
+        ok = mifare_nested_worker_check_initial_keys(
+            &nonces, mf_data, 1, sector_count, &key, &key_block, &found_key_type);
+        if(!ok) {
+            free_nonces(&nonces, sector_count, 1);
+        }
+    }
+    if(!ok) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
         nfc_deactivate();
-
-        //free(mf_data);
-        free_nonces(&nonces, sector_count, 1);
 
         return;
     }
@@ -846,8 +849,6 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
     SaveNoncesResult_t* result =
         mifare_nested_worker_write_nonces(&data, storage, &nonces, 1, 1, sector_count, 0, 0);
 
-    //free(mf_data);
-
     if(result->saved) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNoncesCollected, mifare_nested_worker->context);
@@ -900,15 +901,18 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
     storage_common_mkdir(storage, furi_string_get_cstr(folder_path));
     furi_string_free(folder_path);
 
-    if(!mifare_nested_worker_read_key_cache(&data, mf_data) ||
-       !mifare_nested_worker_check_initial_keys(
-           &nonces, mf_data, 1, sector_count, &key, &key_block, &found_key_type)) {
+    bool ok = mifare_nested_worker_read_key_cache(&data, mf_data);
+    if(ok) {
+        ok = mifare_nested_worker_check_initial_keys(
+            &nonces, mf_data, 1, sector_count, &key, &key_block, &found_key_type);
+        if(!ok) {
+            free_nonces(&nonces, sector_count, 1);
+        }
+    }
+    if(!ok) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
         nfc_deactivate();
-
-        //free(mf_data);
-        free_nonces(&nonces, sector_count, 1);
 
         return;
     }
@@ -1023,7 +1027,6 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
 
                         furi_string_free(hardnested_file);
                         free(found);
-                        //free(mf_data);
                         nfc_deactivate();
 
                         mifare_nested_worker->callback(
@@ -1095,8 +1098,6 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
     SaveNoncesResult_t* result =
         mifare_nested_worker_write_nonces(&data, storage, &nonces, 1, 1, sector_count, 0, 0);
 
-    //free(mf_data);
-
     if(result->saved) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNoncesCollected, mifare_nested_worker->context);
@@ -1148,15 +1149,18 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
     storage_common_mkdir(storage, furi_string_get_cstr(folder_path));
     furi_string_free(folder_path);
 
-    if(!mifare_nested_worker_read_key_cache(&data, mf_data) ||
-       !mifare_nested_worker_check_initial_keys(
-           &nonces, mf_data, 3, sector_count, &key, &key_block, &found_key_type)) {
+    bool ok = mifare_nested_worker_read_key_cache(&data, mf_data);
+    if(ok) {
+        ok = mifare_nested_worker_check_initial_keys(
+            &nonces, mf_data, 3, sector_count, &key, &key_block, &found_key_type);
+        if(!ok) {
+            free_nonces(&nonces, sector_count, 3);
+        }
+    }
+    if(!ok) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
         nfc_deactivate();
-
-        //free(mf_data);
-        free_nonces(&nonces, sector_count, 3);
 
         return;
     }
@@ -1187,7 +1191,6 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
         if(first_distance == 0 && second_distance == 0) {
             nfc_deactivate();
 
-            //free(mf_data);
             free_nonces(&nonces, sector_count, 3);
 
             mifare_nested_worker_change_state(
@@ -1271,7 +1274,6 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
 
                 nfc_deactivate();
 
-                //free(mf_data);
                 free_nonces(&nonces, sector_count, 3);
 
                 mifare_nested_worker_change_state(
@@ -1298,7 +1300,6 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
                 mifare_nested_worker->callback(
                     MifareNestedWorkerEventAttackFailed, mifare_nested_worker->context);
 
-                //free(mf_data);
                 free_nonces(&nonces, sector_count, 3);
 
                 return;
@@ -1412,8 +1413,6 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
     SaveNoncesResult_t* result = mifare_nested_worker_write_nonces(
         &data, storage, &nonces, tries_count, 3, sector_count, delay, distance);
 
-    //free(mf_data);
-
     if(result->saved) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNoncesCollected, mifare_nested_worker->context);
@@ -1466,7 +1465,7 @@ bool* mifare_nested_worker_check_keys_exists(
     }
 
     file_stream_close(file_stream);
-    free(file_stream);
+    stream_free(file_stream);
 
     return old_keys;
 }
@@ -1546,7 +1545,7 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
 
         file_stream_close(file_stream);
 
-        free(file_stream);
+        stream_free(file_stream);
         furi_string_free(path);
         furi_string_free(next_line);
         furi_record_close(RECORD_STORAGE);
@@ -1653,7 +1652,7 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
 
     furi_string_free(next_line);
     file_stream_close(file_stream);
-    free(file_stream);
+    stream_free(file_stream);
 
     mifare_nested_worker->callback(
         MifareNestedWorkerEventProcessingKeys, mifare_nested_worker->context);
