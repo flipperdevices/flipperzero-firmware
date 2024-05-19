@@ -22,7 +22,7 @@ static const TextBoxViewTestContent text_box_view_test_content_arr[] = {
         .font = TextBoxFontText,
         .focus = TextBoxFocusStart,
         .text =
-            "Verify that symbols don't overlap borders: llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll",
+            "Verify that symbols don't overlap borders: llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllend",
     },
     {
         .font = TextBoxFontText,
