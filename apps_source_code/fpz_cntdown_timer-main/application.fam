@@ -1,5 +1,3 @@
-# qv. https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md
-
 App(
     appid="cntdown_tim",
     name="Count Down Timer",
@@ -15,6 +13,6 @@ App(
     fap_category="Tools",
     fap_author="@0w0mewo",
     fap_weburl="https://github.com/0w0mewo/fpz_cntdown_timer",
-    fap_version="1.2",
+    fap_version="1.3",
     fap_description="Simple count down timer",
 )
