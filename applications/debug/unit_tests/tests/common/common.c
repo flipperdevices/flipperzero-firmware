@@ -37,10 +37,6 @@ int get_minunit_assert(void) {
     return minunit_assert;
 }
 
-int get_minunit_fail(void) {
-    return minunit_fail;
-}
-
 int get_minunit_status(void) {
     return minunit_status;
 }

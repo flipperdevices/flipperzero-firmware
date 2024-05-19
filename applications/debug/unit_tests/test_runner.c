@@ -71,6 +71,7 @@ static bool test_runner_run_plugin(TestRunner* instance, const char* path) {
         flipper_application_alloc(instance->storage, instance->api_interface);
 
     bool result = false;
+    instance->minunit_fail = -1;
     do {
         FlipperApplicationPreloadStatus preload_res = flipper_application_preload(lib, path);
 
@@ -95,14 +96,13 @@ static bool test_runner_run_plugin(TestRunner* instance, const char* path) {
 
         const TestApi* test = app_descriptor->entry_point;
 
-        test->run();
+        instance->minunit_fail = test->run();
 
         instance->minunit_run += test->get_minunit_run();
         instance->minunit_assert += test->get_minunit_assert();
-        instance->minunit_fail += test->get_minunit_fail();
         instance->minunit_status += test->get_minunit_status();
 
-        result = true;
+        result = (instance->minunit_fail == 0);
     } while(false);
 
     flipper_application_free(lib);
@@ -152,7 +152,6 @@ static void test_runner_run_internal(TestRunner* instance) {
             }
 
             if(!result) {
-                instance->minunit_fail++;
                 printf("Failed to execute test: %s\r\n", furi_string_get_cstr(file_name));
                 break;
             }
@@ -180,7 +179,7 @@ void test_runner_run(TestRunner* instance) {
         test_runner_run_internal(instance);
 
         if(instance->minunit_run != 0) {
-            printf("\r\nFailed tests: %u\r\n", instance->minunit_fail);
+            printf("\r\nFailed tests: %d\r\n", instance->minunit_fail);
 
             // Time report
             cycle_counter = (furi_get_tick() - cycle_counter);
