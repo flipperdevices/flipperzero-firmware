@@ -257,6 +257,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Programmer Calculator | ![Tools Badge] | [by armixz](https://github.com/armixz/Flipper-Zero-Programmer-Calculator) |  | ![None Badge] |
 | Tone Generator | ![Tools Badge] | [by GEMISIS](https://github.com/GEMISIS/tone_gen/) |  | ![None Badge] |
 | DCF77 Clock Sync | ![Tools Badge] | [by mdaskalov](https://github.com/mdaskalov/dcf77-clock-sync) |  | ![None Badge] |
+| Quac! Remote | ![Tools Badge] | [by rdefeo](https://github.com/rdefeo/quac) | Various fixes by @Willy-JL | [![Author Badge]](https://lab.flipper.net/apps/quac) |
 | USB HID Autofire | ![USB Badge] | [by pbek](https://github.com/pbek/usb_hid_autofire) |  | ![None Badge] |
 | USB Consumer Control | ![USB Badge] | [by WithSecureLabs](https://github.com/WithSecureLabs/usb-consumer-control/tree/main) |  | ![None Badge] |
 | HID File Transfer | ![USB Badge] | [by Kavakuo](https://github.com/Kavakuo/HID-File-Transfer) | Get client app in [original repo](https://github.com/Kavakuo/HID-File-Transfer) | ![None Badge] |
