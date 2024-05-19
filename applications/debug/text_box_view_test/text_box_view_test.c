@@ -124,6 +124,9 @@ int32_t text_box_view_test_app(void* p) {
     view_dispatcher_remove_view(view_dispatcher, 0);
     view_dispatcher_free(view_dispatcher);
     view_stack_free(view_stack);
+    view_free(text_box_switch_view);
+    text_box_free(instance.text_box);
+
     furi_record_close(RECORD_GUI);
 
     return 0;
