@@ -32,7 +32,9 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
          char* file_path = (char*)furi_string_get_cstr(line);
 
-         if (strlen(file_path) <= 1) {continue;}
+         if (strspn(file_path, " \t\n\r") == strlen(file_path)) {
+            continue;
+         }
 
          if (nfc_playlist->settings.emulate_delay > 0 && file_position != 0 && !skip_delay) {
             popup_set_header(nfc_playlist->popup, "Delaying", 64, 10, AlignCenter, AlignTop);
