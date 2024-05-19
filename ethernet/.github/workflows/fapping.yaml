@@ -1,0 +1,43 @@
+name: Build and Release FAP
+
+on:
+  push:
+    tags:
+      - 'v*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Build Flipper Application Package (.fap)
+        id: build-app
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.4
+        with:
+          sdk-branch: ${{ github.ref == 'refs/heads/dev' && 'dev' || '' }}
+         
+      - name: Upload app artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
+
+      - name: Create GitHub Release and Upload FAP
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ steps.build-app.outputs.fap-artifacts }}
