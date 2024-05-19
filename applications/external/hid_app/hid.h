@@ -27,11 +27,12 @@
 #include "views/hid_mouse.h"
 #include "views/hid_mouse_clicker.h"
 #include "views/hid_mouse_jiggler.h"
-#include "views/hid_camera.h"
 #include "views/hid_mouse_jiggler_stealth.h"
+#include "views/hid_camera.h"
+#include "views/hid_tiktok.h"
 #include "views/hid_ptt.h"
 #include "views/hid_ptt_menu.h"
-#include "views/hid_tiktok.h"
+
 #include "scenes/hid_scene.h"
 
 #define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
@@ -57,12 +58,13 @@ struct Hid {
     HidMouse* hid_mouse;
     HidMouseClicker* hid_mouse_clicker;
     HidMouseJiggler* hid_mouse_jiggler;
-    HidCamera* hid_camera;
     HidMouseJigglerStealth* hid_mouse_jiggler_stealth;
+    HidCamera* hid_camera;
     HidTikTok* hid_tiktok;
     HidPushToTalk* hid_ptt;
     HidPushToTalkMenu* hid_ptt_menu;
 };
+
 void bt_hid_remove_pairing(Hid* app);
 
 void hid_hal_keyboard_press(Hid* instance, uint16_t event);

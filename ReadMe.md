@@ -35,11 +35,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ID Card v2.1 (By evillero)](https://github.com/evillero/ID_card_v2)
 - CFW Settings: [Changed Defaults to Show Hidden Files & Show Internal Tab (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
 - Passport: [3 new Akira themed profile pictures (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures) Sorry if you have to re-select your profile picture.
-- Updated: [Bluetooth/USB Remote v1.8 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [AZERTY Mouse Jacker v1.2 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - Updated: [lfrfid_view_read.c sequence progress #1071 (By JendrBendr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1071)
 - Updated: [NFC Playlist v1.8 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- Updated: [Bluetooth/USB Remote v1.8 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 
 <a name="release">
 
