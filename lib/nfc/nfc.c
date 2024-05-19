@@ -1,5 +1,3 @@
-#ifndef FW_CFG_unit_tests
-
 #include "nfc.h"
 
 #include <furi_hal_nfc.h>
@@ -659,5 +657,3 @@ NfcError nfc_felica_listener_set_sensf_res_data(
     instance->comm_state = NfcCommStateIdle;
     return nfc_process_hal_error(error);
 }
-
-#endif // APP_UNIT_TESTS
