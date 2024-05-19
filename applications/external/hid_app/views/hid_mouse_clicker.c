@@ -144,6 +144,9 @@ static bool hid_mouse_clicker_input_callback(InputEvent* event, void* context) {
                 rate_changed = true;
                 consumed = true;
                 break;
+            case InputKeyBack:
+                model->running = false;
+                break;
             default:
                 consumed = true;
                 break;
