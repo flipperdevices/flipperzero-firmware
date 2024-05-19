@@ -12,7 +12,7 @@ void nfc_playlist_name_new_file_menu_callback(void* context) {
       storage_file_close(file);
       furi_string_swap(nfc_playlist->settings.file_path, file_name);
    }
-   
+
    storage_file_free(file);
    furi_string_free(file_name);
    furi_record_close(RECORD_STORAGE);
@@ -25,7 +25,7 @@ void nfc_playlist_name_new_file_scene_on_enter(void* context) {
    text_input_set_header_text(nfc_playlist->text_input, "Enter file name");
    text_input_set_minimum_length(nfc_playlist->text_input, 1);
    text_input_set_result_callback(nfc_playlist->text_input, nfc_playlist_name_new_file_menu_callback, nfc_playlist, nfc_playlist->text_input_output, 50, true);
-   
+
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_TextInput);
 }
 

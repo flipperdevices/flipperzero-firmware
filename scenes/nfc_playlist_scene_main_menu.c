@@ -61,7 +61,7 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_Settings,
       nfc_playlist_main_menu_menu_callback,
       nfc_playlist);
-      
+
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Submenu);
 }
 
