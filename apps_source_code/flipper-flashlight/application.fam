@@ -9,6 +9,7 @@ App(
     ],
     stack_size=2 * 1024,
     order=20,
+    fap_icon_assets="icons",
     fap_icon="flash10px.png",
     fap_category="GPIO",
     fap_author="@xMasterX",
