@@ -33,6 +33,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-18 21:22 EST`
 - OFW: [Fix calling both view_free_model() and view_free() #3655 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3655)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- Updated: [NFC Playlist v1.8 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
@@ -468,7 +469,7 @@ $ ./fbt dolphin_ext
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
 - [NFC Magic v1.10 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
-- [NFC Playlist v1.7 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- [NFC Playlist v1.8 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
