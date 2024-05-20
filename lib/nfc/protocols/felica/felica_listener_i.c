@@ -2,7 +2,10 @@
 
 #include <nfc/helpers/felica_crc.h>
 
-#define FELICA_CHECK_MC_VALUE
+#define FELICA_WCNT_MC2_FF_MAX_VALUE (0x00FFFFFF)
+#define FELICA_WCNT_MC2_00_MAX_VALUE (0x00FFFE00)
+#define FELICA_WCNT_MC2_00_WARNING_BEGIN_VALUE (0x00001027)
+#define FELICA_WCNT_MC2_00_WARNING_END_VALUE (0x00FFFDFF)
 
 static uint32_t felica_wcnt_get_max_value(const FelicaData* data) {
     const uint8_t mc = data->data.fs.mc.data[2];
@@ -10,7 +13,7 @@ static uint32_t felica_wcnt_get_max_value(const FelicaData* data) {
     if(mc != 0xFF && mc != 0x00) {
         furi_crash("Reserved value is forbidden");
     }
-    return (mc == 0xFF) ? 0x00FFFFFF : 0x00FFFE00;
+    return (mc == 0xFF) ? FELICA_WCNT_MC2_FF_MAX_VALUE : FELICA_WCNT_MC2_00_MAX_VALUE;
 }
 
 static bool felica_wcnt_check_warning_boundary(const FelicaData* data) {
@@ -18,7 +21,8 @@ static bool felica_wcnt_check_warning_boundary(const FelicaData* data) {
     const uint32_t* wcnt_ptr = (uint32_t*)data->data.fs.wcnt.data;
     bool res = false;
     if(mc == 0x00) {
-        if(*wcnt_ptr > 0x00001027 && *wcnt_ptr < 0x00FFFDFF) {
+        if((*wcnt_ptr > FELICA_WCNT_MC2_00_WARNING_BEGIN_VALUE) &&
+           (*wcnt_ptr < FELICA_WCNT_MC2_00_WARNING_END_VALUE)) {
             res = true;
         }
     }
@@ -45,7 +49,7 @@ void felica_wcnt_increment(FelicaData* data) {
 static void felica_wcnt_post_process(FelicaData* data) {
     uint32_t* wcnt_ptr = (uint32_t*)data->data.fs.wcnt.data;
 
-    if((data->data.fs.mc.data[2] == 0x00) && (*wcnt_ptr > 0x00FFFE00)) {
+    if((data->data.fs.mc.data[2] == 0x00) && (*wcnt_ptr > FELICA_WCNT_MC2_00_MAX_VALUE)) {
         *wcnt_ptr = 0;
     }
 }
