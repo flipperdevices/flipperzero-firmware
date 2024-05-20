@@ -9,7 +9,7 @@ App(
     fap_category="GPIO",
     # Optional values
     fap_version="1.2",
-    fap_icon="template.png",  # 10x10 1-bit PNG
+    fap_icon="logo.png",  # 10x10 1-bit PNG
     # fap_description="A simple app",
     # fap_author="J. Doe",
     # fap_weburl="https://github.com/user/template",
