@@ -2,8 +2,6 @@
 
 #include <nfc/helpers/felica_crc.h>
 
-#define TAG "FelicaListener"
-
 #define FELICA_CHECK_MC_VALUE
 
 static uint32_t felica_wcnt_get_max_value(const FelicaData* data) {
@@ -15,15 +13,7 @@ static uint32_t felica_wcnt_get_max_value(const FelicaData* data) {
     return (mc == 0xFF) ? 0x00FFFFFF : 0x00FFFE00;
 }
 
-void felica_wcnt_increment(FelicaData* data) {
-    const uint32_t wcnt_max = felica_wcnt_get_max_value(data);
-    uint32_t* wcnt_ptr = (uint32_t*)data->data.fs.wcnt.data;
-    if(*wcnt_ptr < wcnt_max) {
-        *wcnt_ptr += 1;
-    }
-}
-
-bool felica_wcnt_check_warning_boundary(const FelicaData* data) {
+static bool felica_wcnt_check_warning_boundary(const FelicaData* data) {
     const uint8_t mc = data->data.fs.mc.data[2];
     const uint32_t* wcnt_ptr = (uint32_t*)data->data.fs.wcnt.data;
     bool res = false;
@@ -37,14 +27,22 @@ bool felica_wcnt_check_warning_boundary(const FelicaData* data) {
     //return ((mc == 00) && ((*wcnt_ptr > 0x00001027) && (*wcnt_ptr < 0x00FFFDFF)));
 }
 
-bool felica_wcnt_check_error_boundary(const FelicaData* data) {
+static bool felica_wcnt_check_error_boundary(const FelicaData* data) {
     const uint32_t wcnt_max = felica_wcnt_get_max_value(data);
     const uint32_t* wcnt_ptr = (const uint32_t*)data->data.fs.wcnt.data;
 
     return *wcnt_ptr != wcnt_max;
 }
 
-void felica_wcnt_post_process(FelicaData* data) {
+void felica_wcnt_increment(FelicaData* data) {
+    const uint32_t wcnt_max = felica_wcnt_get_max_value(data);
+    uint32_t* wcnt_ptr = (uint32_t*)data->data.fs.wcnt.data;
+    if(*wcnt_ptr < wcnt_max) {
+        *wcnt_ptr += 1;
+    }
+}
+
+static void felica_wcnt_post_process(FelicaData* data) {
     uint32_t* wcnt_ptr = (uint32_t*)data->data.fs.wcnt.data;
 
     if((data->data.fs.mc.data[2] == 0x00) && (*wcnt_ptr > 0x00FFFE00)) {
@@ -64,7 +62,7 @@ uint8_t felica_listener_get_block_index(uint8_t number) {
     return number;
 }
 
-bool felica_block_exists(uint8_t number) {
+static bool felica_block_exists(uint8_t number) {
     bool exist = true;
     if(number > FELICA_BLOCK_INDEX_REG && number < FELICA_BLOCK_INDEX_RC) {
         exist = false;
@@ -84,7 +82,8 @@ bool felica_block_exists(uint8_t number) {
     return exist;
 }
 
-bool felica_get_mc_bit(const FelicaListener* instance, uint8_t byte_index, uint8_t bit_number) {
+static bool
+    felica_get_mc_bit(const FelicaListener* instance, uint8_t byte_index, uint8_t bit_number) {
     uint8_t* mc = instance->data->data.fs.mc.data;
 
     uint16_t flags = *((uint16_t*)&mc[byte_index]);
@@ -92,7 +91,7 @@ bool felica_get_mc_bit(const FelicaListener* instance, uint8_t byte_index, uint8
     return bit;
 }
 
-bool felica_block_requires_auth(
+static bool felica_block_requires_auth(
     const FelicaListener* instance,
     uint8_t command,
     uint8_t block_number) {
@@ -100,7 +99,7 @@ bool felica_block_requires_auth(
     return felica_get_mc_bit(instance, mc_flag_index, block_number);
 }
 
-bool felica_block_is_readonly(const FelicaListener* instance, uint8_t block_number) {
+static bool felica_block_is_readonly(const FelicaListener* instance, uint8_t block_number) {
     uint8_t mc_flag_index = 0;
     ///TODO: Add more checks for other blocks not only first 15
     if(block_number <= FELICA_BLOCK_INDEX_REG) {
@@ -113,7 +112,7 @@ bool felica_block_is_readonly(const FelicaListener* instance, uint8_t block_numb
         return false;
 }
 
-bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_number) {
+static bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_number) {
     uint8_t mc_flag_index = 10;
     return felica_get_mc_bit(instance, mc_flag_index, block_number);
 }
@@ -154,11 +153,7 @@ static void felica_handler_read_mac_a_block(
     FelicaListenerReadCommandResponse* response) {
     if(resp_data_index != response->block_count - 1) {
         felica_handler_read_all_zeros(instance, block_number, resp_data_index, response);
-        //memset(
-        //    &response->data[resp_data_index * FELICA_DATA_BLOCK_SIZE], 0, FELICA_DATA_BLOCK_SIZE);
         instance->mac_calc_start = resp_data_index + 1;
-        //skip_block = true;
-        //response->header.length += FELICA_DATA_BLOCK_SIZE;
     } else {
         felica_calculate_mac_read(
             &instance->auth.des_context,
@@ -378,7 +373,7 @@ bool felica_listener_validate_write_request_and_set_sf(
     return valid;
 }
 
-void felica_handler_write_block(
+static void felica_handler_write_block(
     FelicaListener* instance,
     const uint8_t block_number,
     const FelicaBlockData* data_block) {
@@ -390,7 +385,7 @@ void felica_handler_write_block(
         FELICA_DATA_BLOCK_SIZE);
 }
 
-void felica_handler_write_rc_block(
+static void felica_handler_write_rc_block(
     FelicaListener* instance,
     const uint8_t block_number,
     const FelicaBlockData* data_block) {
@@ -404,7 +399,7 @@ void felica_handler_write_rc_block(
     instance->rc_written = true;
 }
 
-void felica_handler_write_reg_block(
+static void felica_handler_write_reg_block(
     FelicaListener* instance,
     const uint8_t block_number,
     const FelicaBlockData* data_block) {
@@ -432,7 +427,7 @@ void felica_handler_write_reg_block(
     }
 }
 
-void felica_handler_write_mc_block(
+static void felica_handler_write_mc_block(
     FelicaListener* instance,
     const uint8_t block_number,
     const FelicaBlockData* data_block) {
@@ -453,7 +448,7 @@ void felica_handler_write_mc_block(
     }
 }
 
-void felica_handler_write_state_block(
+static void felica_handler_write_state_block(
     FelicaListener* instance,
     const uint8_t block_number,
     const FelicaBlockData* data_block) {
