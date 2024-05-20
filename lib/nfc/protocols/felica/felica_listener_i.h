@@ -86,3 +86,6 @@ bool felica_listener_validate_read_request_and_set_sf(
 
 FelicaCommanReadBlockHandler felica_listener_get_read_block_handler(const uint8_t block_number);
 FelicaCommandWriteBlockHandler felica_listener_get_write_block_handler(const uint8_t block_number);
+
+FelicaError
+    felica_listener_frame_exchange(const FelicaListener* instance, const BitBuffer* tx_buffer);
