@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Ethernet W5500 v1.1 (By karasevia)](https://github.com/karasevia/finik_eth) `Req: W5500`
 - Updated: [Restaurant Pager Trigger v1.6 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [NFC Playlist v1.9 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- Updated: [Chess v2.0 (By xtruan)](https://github.com/xtruan/flipper-chess)
 
 <a name="release">
 
