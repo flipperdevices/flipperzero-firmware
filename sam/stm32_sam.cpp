@@ -4510,7 +4510,7 @@ void STM32SAM::AdjustLengths() {
                 mem56 = flags[index];
 
             // not a consonant
-            if((flags[index] & 64) == 0) {
+            if((index != 255 && flags[index] & 64) == 0) {
                 // RX or LX?
                 if((index == 18) || (index == 19)) // 'RX' & 'LX'
                 {
