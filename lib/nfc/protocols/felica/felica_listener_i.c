@@ -498,3 +498,25 @@ FelicaCommandWriteBlockHandler
     }
     return handler;
 }
+
+FelicaError
+    felica_listener_frame_exchange(const FelicaListener* instance, const BitBuffer* tx_buffer) {
+    furi_assert(instance);
+
+    const size_t tx_bytes = bit_buffer_get_size_bytes(tx_buffer);
+    furi_assert(tx_bytes <= bit_buffer_get_capacity_bytes(instance->tx_buffer) - FELICA_CRC_SIZE);
+
+    felica_crc_append(instance->tx_buffer);
+
+    FelicaError ret = FelicaErrorNone;
+
+    do {
+        NfcError error = nfc_listener_tx(instance->nfc, instance->tx_buffer);
+        if(error != NfcErrorNone) {
+            ret = felica_listener_process_error(error);
+            break;
+        }
+    } while(false);
+
+    return ret;
+}
