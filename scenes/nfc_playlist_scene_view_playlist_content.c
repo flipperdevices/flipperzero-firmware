@@ -4,27 +4,29 @@ void nfc_playlist_view_playlist_content_scene_on_enter(void* context) {
    NfcPlaylist* nfc_playlist = context;
 
    Storage* storage = furi_record_open(RECORD_STORAGE);
-   File* file = storage_file_alloc(storage);
+   Stream* stream = file_stream_alloc(storage);
 
-   if (storage_file_open(file, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-      uint8_t buffer[PLAYLIST_VIEW_MAX_SIZE];
-      uint16_t read_count = storage_file_read(file, buffer, PLAYLIST_VIEW_MAX_SIZE);
-      FuriString* playlist_content = furi_string_alloc();
+   if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+      FuriString* line = furi_string_alloc();
+      FuriString* tmp_str = furi_string_alloc();
 
-      for(uint16_t i = 0; i < read_count; i++) {
-         furi_string_push_back(playlist_content, buffer[i]);
+      while(stream_read_line(stream, line)) {
+         furi_string_cat_printf(tmp_str, "%s", furi_string_get_cstr(line));
       }
 
-      widget_add_text_scroll_element(nfc_playlist->widget, 4, 4, 124, 60, furi_string_get_cstr(playlist_content));
+      stream_clean(stream);
+      furi_string_free(line);
+      file_stream_close(stream);
+
+      widget_add_text_scroll_element(nfc_playlist->widget, 4, 4, 124, 60, furi_string_get_cstr(tmp_str));
       widget_add_frame_element(nfc_playlist->widget, 0, 0, 128, 64, 0);
 
-      furi_string_free(playlist_content);
-      storage_file_close(file);
+      furi_string_free(tmp_str);
    } else {
       widget_add_text_box_element(nfc_playlist->widget, 0, 0, 128, 64, AlignCenter, AlignCenter, "\eFailed to open playlist\n\nPress back\e", false);
    }
 
-   storage_file_free(file);
+   stream_free(stream);
    furi_record_close(RECORD_STORAGE);
 
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Widget);
