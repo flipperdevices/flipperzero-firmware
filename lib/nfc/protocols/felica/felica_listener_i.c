@@ -507,6 +507,17 @@ const FelicaListenerWriteBlockData* felica_listener_get_write_request_data_point
                                                      generic_request->header.block_count);
 }
 
+static FelicaError felica_listener_process_error(NfcError error) {
+    switch(error) {
+    case NfcErrorNone:
+        return FelicaErrorNone;
+    case NfcErrorTimeout:
+        return FelicaErrorTimeout;
+    default:
+        return FelicaErrorNotPresent;
+    }
+}
+
 FelicaError
     felica_listener_frame_exchange(const FelicaListener* instance, const BitBuffer* tx_buffer) {
     furi_assert(instance);
