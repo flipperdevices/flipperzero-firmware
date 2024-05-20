@@ -1,4 +1,4 @@
-name: "FAP: Build for multiple SDK sources"
+name: "uFBT Build"
 on:
   push:
     branches: 
