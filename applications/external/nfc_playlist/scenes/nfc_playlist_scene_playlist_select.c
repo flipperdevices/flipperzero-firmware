@@ -20,9 +20,8 @@ void nfc_playlist_playlist_select_menu_callback(void* context) {
         }
         furi_string_free(line);
         file_stream_close(stream);
-        stream_free(stream);
     }
-
+    stream_free(stream);
     furi_record_close(RECORD_STORAGE);
 
     scene_manager_previous_scene(nfc_playlist->scene_manager);
