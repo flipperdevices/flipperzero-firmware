@@ -1,3 +1,4 @@
+#include <gui/icon.h>
 #include <gui/icon_i.h>
 
 const uint8_t _I_icon_button_ok_0[] = {

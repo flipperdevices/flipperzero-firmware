@@ -45,6 +45,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBIP Crypto Wallet v1.15 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - OFW: [Text Box rework #3642 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3642)
 - Updated: [NFC Playlist v2.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- OFW: [Icons: compression fixes & larger dimension support #3564 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3564)
+- OFW: [FuriHal: add flash ops stats, workaround bug in SHCI_C2_SetSystemClock #3657 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3657)
+- Updated: [Sokoban v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
 
 <a name="release">
 
@@ -313,7 +316,7 @@ $ ./fbt dolphin_ext
 - [Snake v1.7 (By OlegSchwann)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/829) (With updates from DrZlo13, xMasterX, QtRoS and RogueMaster) [Snake Score Saving (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922) [Turns anywhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/125) [Food Spawns Anywwhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/130)
 - [Snake 2.0 v2.1 (By Willzvul)](https://github.com/Willzvul/Snake_2.0/)
 - [Solitaire v1.1.4 (By teeebor)](https://github.com/teeebor/flipper_games)
-- [Sokoban v1.2 (By Racso)](https://github.com/Racso/fzero-apps)
+- [Sokoban v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
 - [Space Impact WIP v0.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-space-impact)
 - [Sudoku v1.2 (By profelis)](https://github.com/profelis/fz-sudoku)
 - [SUPER-CHIP Emulator (By Milk-Cool)](https://github.com/Milk-Cool/fz-schip)
