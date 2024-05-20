@@ -44,9 +44,7 @@ struct FelicaListener {
 
     uint8_t requested_blocks[4];
     uint8_t mac_calc_start;
-
     bool rc_written;
-    bool write_with_mac;
 
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;

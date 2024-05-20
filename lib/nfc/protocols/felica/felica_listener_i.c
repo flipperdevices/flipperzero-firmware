@@ -291,10 +291,10 @@ static bool felica_validate_write_block_list(
     const FelicaListenerWriteRequest* const request,
     const FelicaListenerWriteBlockData* const data,
     FelicaListenerWriteCommandResponse* response) {
-    instance->write_with_mac = false;
+    bool write_with_mac = false;
     if(request->base.header.block_count == 2 &&
        request->list[1].block_number == FELICA_BLOCK_INDEX_MAC_A) {
-        instance->write_with_mac = true;
+        write_with_mac = true;
     } else if(request->base.header.block_count < 1 || request->base.header.block_count > 2) {
         response->SF1 = 0x02;
         response->SF2 = 0xB2;
@@ -304,8 +304,7 @@ static bool felica_validate_write_block_list(
     for(uint8_t i = 0; i < request->base.header.block_count; i++) {
         const FelicaBlockListElement* item = &request->list[i];
         if(felica_block_is_readonly(instance, item->block_number) ||
-           (felica_block_requires_mac(instance, item->block_number) &&
-            !instance->write_with_mac)) {
+           (felica_block_requires_mac(instance, item->block_number) && !write_with_mac)) {
             response->SF1 = 0x01;
             response->SF2 = 0xA8;
             return false;
