@@ -75,10 +75,8 @@ void test_runner_free(TestRunner* instance) {
 static bool test_runner_run_plugin(TestRunner* instance, const char* path) {
     furi_assert(instance);
 
-    FlipperApplication* lib =
-
-        flipper_application_alloc(
-            instance->storage, composite_api_resolver_get(instance->composite_resolver));
+    FlipperApplication* lib = flipper_application_alloc(
+        instance->storage, composite_api_resolver_get(instance->composite_resolver));
 
     bool result = false;
     instance->minunit_fail = -1;

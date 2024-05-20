@@ -93,6 +93,7 @@ static void compress_test_reference_comp_decomp() {
 static void compress_test_random_comp_decomp() {
     static const size_t src_buffer_size = 1024;
     static const size_t encoded_buffer_size = 1024;
+    static const size_t small_buffer_size = src_buffer_size / 32;
 
     // We only fill half of the buffer with random data, so if anything goes wrong, there's no overflow
     static const size_t src_data_size = src_buffer_size / 2;
@@ -101,6 +102,7 @@ static void compress_test_random_comp_decomp() {
     uint8_t* src_buff = malloc(src_buffer_size);
     uint8_t* encoded_buff = malloc(encoded_buffer_size);
     uint8_t* decoded_buff = malloc(src_buffer_size);
+    uint8_t* small_buff = malloc(small_buffer_size);
 
     furi_hal_random_fill_buf(src_buff, src_data_size);
 
@@ -111,18 +113,33 @@ static void compress_test_random_comp_decomp() {
             comp, src_buff, src_data_size, encoded_buff, encoded_buffer_size, &encoded_size),
         "Compress failed");
 
+    mu_assert(encoded_size > 0, "Encoded size is zero");
+
+    size_t small_enc_dec_size = 0;
+    mu_assert(
+        compress_encode(
+            comp, src_buff, src_data_size, small_buff, small_buffer_size, &small_enc_dec_size) ==
+            false,
+        "Compress to small buffer failed");
+
     size_t decoded_size = 0;
     mu_assert(
         compress_decode(
-            comp, encoded_buff, encoded_size, decoded_buff, src_buffer_size + 4, &decoded_size),
+            comp, encoded_buff, encoded_size, decoded_buff, src_buffer_size, &decoded_size),
         "Decompress failed");
-
     mu_assert(decoded_size == src_data_size, "Decoded size is not equal to source size");
 
     mu_assert(
         memcmp(src_buff, decoded_buff, src_data_size) == 0,
         "Decoded buffer is not equal to source");
 
+    mu_assert(
+        compress_decode(
+            comp, encoded_buff, encoded_size, small_buff, small_buffer_size, &small_enc_dec_size) ==
+            false,
+        "Decompress to small buffer failed");
+
+    free(small_buff);
     free(src_buff);
     free(encoded_buff);
     free(decoded_buff);

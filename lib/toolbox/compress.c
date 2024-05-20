@@ -40,8 +40,6 @@ struct CompressIcon {
 
 CompressIcon* compress_icon_alloc(size_t decode_buf_size) {
     CompressIcon* instance = malloc(sizeof(CompressIcon));
-    instance->buffer = NULL;
-    instance->buffer_size = 0;
     instance->decoder = heatshrink_decoder_alloc(
         COMPRESS_ICON_ENCODED_BUFF_SIZE,
         COMPRESS_EXP_BUFF_SIZE_LOG,
@@ -154,10 +152,7 @@ static bool compress_encode_internal(
     } else {
         do {
             poll_res = heatshrink_encoder_poll(
-                encoder,
-                &data_out[res_buff_size],
-                data_out_size - sizeof(CompressHeader) - res_buff_size,
-                &poll_size);
+                encoder, &data_out[res_buff_size], data_out_size - res_buff_size, &poll_size);
             if(poll_res < 0) {
                 encode_failed = true;
                 break;
