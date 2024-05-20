@@ -16,6 +16,12 @@
 
 #define TAG "FuriHalFlash"
 
+#ifdef FLASH_OP_DEBUG
+#undef FURI_LOG_T
+#define FURI_LOG_T(...)
+#else
+#endif
+
 #define FURI_HAL_CRITICAL_MSG "Critical flash operation fail"
 #define FURI_HAL_FLASH_READ_BLOCK (8U)
 #define FURI_HAL_FLASH_WRITE_BLOCK (8U)
