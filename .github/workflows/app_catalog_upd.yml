@@ -34,7 +34,7 @@ jobs:
         v_minor=$(echo $fap_version_raw | cut -d "," -f 2 | xargs)
         echo "v_major=$v_major" >> "$GITHUB_ENV"
         echo "v_minor=$v_minor" >> "$GITHUB_ENV"
-        echo "branch_name=${BRANCH_PREFIX}${APP_NAME}_v${v_major}.${v_minor}" >> "$GITHUB_ENV"
+        echo "branch_name=${BRANCH_PREFIX}${APP_NAME}_${v_major}.${v_minor}" >> "$GITHUB_ENV"
         
     - name: Checkout App Catalog
       uses: actions/checkout@v4
