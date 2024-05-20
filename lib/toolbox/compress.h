@@ -17,9 +17,10 @@ typedef struct CompressIcon CompressIcon;
 
 /** Initialize icon compressor
  *
- * @param[in]  decode_buf_size  The icon buffer size for decoding.
- *  If consequent calls will require larger buffer, it will be grown. 
- *  It is not possible to shrink the buffer.
+ * @param[in]  decode_buf_size  The icon buffer size for decoding. Ensure that
+ *                              it's big enough for any icons that you are
+ *                              planning to decode with it.
+ *
  * @return     Compress Icon instance
  */
 CompressIcon* compress_icon_alloc(size_t decode_buf_size);
@@ -32,18 +33,16 @@ void compress_icon_free(CompressIcon* instance);
 
 /** Decompress icon
  *
- * @warning    decoded_buff pointer set by this function is valid till next
+ * @warning    output pointer set by this function is valid till next
  *             `compress_icon_decode` or `compress_icon_free` call
  *
- * @param      instance      The Compress Icon instance
- * @param      icon_data     pointer to icon data.
- * @param[in]  decoded_buff  pointer to decoded buffer pointer. Data in buffer is valid till next call.
- *  If icon data was not compressed, pointer within icon_data is returned
+ * @param      instance   The Compress Icon instance
+ * @param      icon_data  pointer to icon data.
+ * @param[in]  output     pointer to decoded buffer pointer. Data in buffer is
+ *                        valid till next call. If icon data was not compressed,
+ *                        pointer within icon_data is returned
  */
-void compress_icon_decode(
-    CompressIcon* instance,
-    const uint8_t* icon_data,
-    uint8_t** decoded_buff);
+void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint8_t** output);
 
 /** Compress control structure */
 typedef struct Compress Compress;

@@ -34,47 +34,37 @@ _Static_assert(sizeof(CompressHeader) == 4, "Incorrect CompressHeader size");
 
 struct CompressIcon {
     heatshrink_decoder* decoder;
-    uint8_t* decoded_buff;
+    uint8_t* buffer;
     size_t buffer_size;
 };
 
-static void compress_icon_update_buffer_size(CompressIcon* instance, size_t new_size) {
-    furi_check(instance);
-    furi_check(new_size);
-
-    new_size += 4; /* To account for heatshrink's poller quirks */
-
-    if(new_size > instance->buffer_size) {
-        FURI_LOG_I(TAG, "New buffer size: %zu", new_size);
-        instance->decoded_buff = realloc(instance->decoded_buff, new_size); //-V701
-        instance->buffer_size = new_size;
-    }
-}
-
 CompressIcon* compress_icon_alloc(size_t decode_buf_size) {
     CompressIcon* instance = malloc(sizeof(CompressIcon));
-    instance->decoded_buff = NULL;
+    instance->buffer = NULL;
     instance->buffer_size = 0;
     instance->decoder = heatshrink_decoder_alloc(
         COMPRESS_ICON_ENCODED_BUFF_SIZE,
         COMPRESS_EXP_BUFF_SIZE_LOG,
         COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
     heatshrink_decoder_reset(instance->decoder);
-    compress_icon_update_buffer_size(instance, decode_buf_size);
+
+    instance->buffer_size = decode_buf_size + 4; /* To account for heatshrink's poller quirks */
+    instance->buffer = malloc(instance->buffer_size);
+
     return instance;
 }
 
 void compress_icon_free(CompressIcon* instance) {
     furi_check(instance);
-    free(instance->decoded_buff);
+    free(instance->buffer);
     heatshrink_decoder_free(instance->decoder);
     free(instance);
 }
 
-void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint8_t** decoded_buff) {
+void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint8_t** output) {
     furi_check(instance);
     furi_check(icon_data);
-    furi_check(decoded_buff);
+    furi_check(output);
 
     CompressHeader* header = (CompressHeader*)icon_data;
     if(header->is_compressed) {
@@ -85,12 +75,12 @@ void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint
             icon_data,
             /* Decoder will check/process headers again - need to pass them */
             sizeof(CompressHeader) + header->compressed_buff_size,
-            instance->decoded_buff,
+            instance->buffer,
             instance->buffer_size,
             &decoded_size));
-        *decoded_buff = instance->decoded_buff;
+        *output = instance->buffer;
     } else {
-        *decoded_buff = (uint8_t*)&icon_data[1];
+        *output = (uint8_t*)&icon_data[1];
     }
 }
 
