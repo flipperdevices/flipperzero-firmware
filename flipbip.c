@@ -102,8 +102,7 @@ static void flipbip_scene_renew_dialog_callback(DialogExResult result, void* con
 static void flipbip_wallet_create(void* context) {
     FlipBip* app = context;
     furi_assert(app);
-    scene_manager_set_scene_state(
-        app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1New);
+    scene_manager_set_scene_state(app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1New);
     scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
 }
 
@@ -171,7 +170,8 @@ FlipBip* flipbip_app_alloc() {
     dialog_ex_set_context(app->renew_dialog, app);
     dialog_ex_set_left_button_text(app->renew_dialog, "No");
     dialog_ex_set_right_button_text(app->renew_dialog, "Yes");
-    dialog_ex_set_header(app->renew_dialog, "Current wallet\nWill be lost.\nProceed?", 16, 12, AlignLeft, AlignTop);
+    dialog_ex_set_header(
+        app->renew_dialog, "Current wallet\nWill be lost.\nProceed?", 16, 12, AlignLeft, AlignTop);
     view_dispatcher_add_view(
         app->view_dispatcher, FlipBipViewRenewConfirm, dialog_ex_get_view(app->renew_dialog));
 
