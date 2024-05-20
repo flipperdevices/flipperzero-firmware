@@ -58,26 +58,31 @@ struct FelicaListener {
     void* context;
 };
 
+void felica_listener_reset(FelicaListener* instance);
 void felica_wcnt_increment(FelicaData* data);
-bool felica_wcnt_check_warning_boundary(const FelicaData* data);
-bool felica_wcnt_check_error_boundary(const FelicaData* data);
-void felica_wcnt_post_process(FelicaData* data);
-
-uint8_t felica_listener_get_block_index(uint8_t number);
-bool felica_block_exists(uint8_t number);
-bool felica_get_mc_bit(const FelicaListener* instance, uint8_t byte_index, uint8_t bit_number);
-bool felica_block_requires_auth(
+//void felica_wcnt_post_process(FelicaData* data);
+bool felica_listener_check_idm(const FelicaListener* instance, const FelicaIDm* request_idm);
+//uint8_t felica_listener_get_block_index(uint8_t number);
+//bool felica_block_exists(uint8_t number);
+//bool felica_get_mc_bit(const FelicaListener* instance, uint8_t byte_index, uint8_t bit_number);
+/* bool felica_block_requires_auth(
     const FelicaListener* instance,
     uint8_t command,
     uint8_t block_number);
-bool felica_block_is_readonly(const FelicaListener* instance, uint8_t block_number);
-bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_number);
-
-FelicaCommanReadBlockHandler felica_listener_get_read_block_handler(const uint8_t block_number);
-FelicaCommandWriteBlockHandler felica_listener_get_write_block_handler(const uint8_t block_number);
+ */
+//bool felica_block_is_readonly(const FelicaListener* instance, uint8_t block_number);
+//bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_number);
 
 bool felica_listener_validate_write_request_and_set_sf(
     FelicaListener* instance,
     const FelicaListenerWriteRequest* const request,
     const FelicaListenerWriteBlockData* const data,
     FelicaListenerWriteCommandResponse* response);
+
+bool felica_listener_validate_read_request_and_set_sf(
+    const FelicaListener* instance,
+    const FelicaListenerReadRequest* const request,
+    FelicaCommandResponseHeader* resp_header);
+
+FelicaCommanReadBlockHandler felica_listener_get_read_block_handler(const uint8_t block_number);
+FelicaCommandWriteBlockHandler felica_listener_get_write_block_handler(const uint8_t block_number);

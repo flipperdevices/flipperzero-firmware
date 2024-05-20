@@ -50,7 +50,27 @@ static void felica_wcnt_post_process(FelicaData* data) {
     }
 }
 
-uint8_t felica_listener_get_block_index(uint8_t number) {
+bool felica_listener_check_idm(const FelicaListener* instance, const FelicaIDm* request_idm) {
+    const FelicaIDm* idm = &instance->data->idm;
+    return memcmp(idm->data, request_idm->data, 8) == 0;
+}
+
+void felica_listener_reset(FelicaListener* instance) {
+    instance->auth.context.auth_status.internal = false;
+    instance->auth.context.auth_status.external = false;
+    instance->data->data.fs.state.data[0] = 0;
+    instance->rc_written = false;
+    memset(instance->auth.session_key.data, 0, FELICA_DATA_BLOCK_SIZE);
+
+    memcpy(
+        instance->data->data.fs.mc.data,
+        instance->mc_shadow.data,
+        FELICA_DATA_BLOCK_SIZE); ///TODO: repace this to mc_post_process
+
+    felica_wcnt_post_process(instance->data);
+}
+
+static uint8_t felica_listener_get_block_index(uint8_t number) {
     if(number >= FELICA_BLOCK_INDEX_RC && number < FELICA_BLOCK_INDEX_WCNT) {
         return number - 0x80 + FELICA_BLOCK_INDEX_REG + 1;
     } else if(number >= FELICA_BLOCK_INDEX_WCNT && number <= FELICA_BLOCK_INDEX_STATE) {

@@ -197,18 +197,7 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
     } else if(nfc_event->type == NfcEventTypeFieldOff) {
         instance->state = Felica_ListenerStateIdle;
         FURI_LOG_D(TAG, "Field Off");
-        ///TODO: Move this to a separate functions aka felica_listener_reset
-        instance->auth.context.auth_status.internal = false;
-        instance->auth.context.auth_status.external = false;
-        instance->data->data.fs.state.data[0] = 0;
-        instance->rc_written = false;
-        memset(instance->auth.session_key.data, 0, FELICA_DATA_BLOCK_SIZE);
-        //-------------------------------------------------------
-        memcpy(
-            instance->data->data.fs.mc.data,
-            instance->mc_shadow.data,
-            FELICA_DATA_BLOCK_SIZE); ///TODO: replace this to mc_post_process
-        felica_wcnt_post_process(instance->data);
+        felica_listener_reset(instance);
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
         FURI_LOG_D(TAG, "Rx Done");
         FelicaListenerGenericRequest* request =
