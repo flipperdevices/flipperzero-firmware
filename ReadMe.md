@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0518-2113-0.101.3-9a70498.tgz&channel=RM0518-2113-0.101.3-9a70498&version=0.101.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0520-1640-0.102.1-13c0834.tgz&channel=RM0520-1640-0.102.1-13c0834&version=0.101.3)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,24 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-20 16:15 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-20 16:15 EST`
-- OFW: [Fix calling both view_free_model() and view_free() #3655 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3655)
-- Updated: [ID Card v2.1 (By evillero)](https://github.com/evillero/ID_card_v2)
-- CFW Settings: [Changed Defaults to Show Hidden Files & Show Internal Tab (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
-- Passport: [3 new Akira themed profile pictures (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures) Sorry if you have to re-select your profile picture.
-- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Updated: [AZERTY Mouse Jacker v1.2 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
-- Updated: [lfrfid_view_read.c sequence progress #1071 (By JendrBendr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1071)
-- Updated: [Bluetooth/USB Remote v1.8 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-- Updated: [Ethernet W5500 v1.1 (By karasevia)](https://github.com/karasevia/finik_eth) `Req: W5500`
-- Updated: [Restaurant Pager Trigger v1.6 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
-- Updated: [Chess v1.10 (By xtruan)](https://github.com/xtruan/flipper-chess)
-- Updated: [FlipBIP Crypto Wallet v1.15 (By xtruan)](https://github.com/xtruan/FlipBIP)
-- OFW: [Text Box rework #3642 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3642)
-- Updated: [NFC Playlist v2.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- OFW: [Icons: compression fixes & larger dimension support #3564 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3564)
-- OFW: [FuriHal: add flash ops stats, workaround bug in SHCI_C2_SetSystemClock #3657 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3657)
-- Updated: [Sokoban v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
-- Version increment from OFW
 
 <a name="release">
 
@@ -599,4 +581,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0518-2113-0.101.3-9a70498.tgz&channel=RM0518-2113-0.101.3-9a70498&version=0.101.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0520-1640-0.102.1-13c0834.tgz&channel=RM0520-1640-0.102.1-13c0834&version=0.101.3)
