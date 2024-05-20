@@ -105,10 +105,7 @@ static FelicaError felica_listener_command_handler_write(
 
     const FelicaListenerWriteRequest* request = (FelicaListenerWriteRequest*)generic_request;
     const FelicaListenerWriteBlockData* data_ptr =
-        (const FelicaListenerWriteBlockData*)((uint8_t*)generic_request +
-                                              sizeof(FelicaListenerGenericRequest) +
-                                              sizeof(FelicaBlockListElement) *
-                                                  request->header.block_count);
+        felica_listener_get_write_request_data_pointer(generic_request);
 
     FelicaListenerWriteCommandResponse* resp =
         (FelicaListenerWriteCommandResponse*)malloc(sizeof(FelicaListenerWriteCommandResponse));

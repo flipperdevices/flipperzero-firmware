@@ -499,6 +499,14 @@ FelicaCommandWriteBlockHandler
     return handler;
 }
 
+const FelicaListenerWriteBlockData* felica_listener_get_write_request_data_pointer(
+    const FelicaListenerGenericRequest* const generic_request) {
+    return (const FelicaListenerWriteBlockData*)((uint8_t*)generic_request +
+                                                 sizeof(FelicaListenerGenericRequest) +
+                                                 sizeof(FelicaBlockListElement) *
+                                                     generic_request->header.block_count);
+}
+
 FelicaError
     felica_listener_frame_exchange(const FelicaListener* instance, const BitBuffer* tx_buffer) {
     furi_assert(instance);

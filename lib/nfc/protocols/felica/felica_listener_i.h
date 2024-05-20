@@ -70,6 +70,8 @@ bool felica_listener_check_idm(const FelicaListener* instance, const FelicaIDm* 
  */
 //bool felica_block_is_readonly(const FelicaListener* instance, uint8_t block_number);
 //bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_number);
+const FelicaListenerWriteBlockData* felica_listener_get_write_request_data_pointer(
+    const FelicaListenerGenericRequest* const generic_request);
 
 bool felica_listener_validate_write_request_and_set_sf(
     FelicaListener* instance,
