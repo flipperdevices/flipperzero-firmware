@@ -55,14 +55,6 @@ uint32_t icon_get_frame_count(const Icon* instance);
  */
 const uint8_t* icon_get_frame_data(const Icon* instance, uint32_t frame);
 
-/** Get estimate for decoded icon size
- *
- * @param[in]  instance  pointer to Icon data
- *
- * @return     size in bytes
- */
-uint32_t icon_get_decode_size(const Icon* instance);
-
 #ifdef __cplusplus
 }
 #endif

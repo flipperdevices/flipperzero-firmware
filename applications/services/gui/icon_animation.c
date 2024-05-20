@@ -67,11 +67,6 @@ uint8_t icon_animation_get_height(const IconAnimation* instance) {
     return instance->icon->height;
 }
 
-uint32_t icon_animation_get_decode_size(const IconAnimation* instance) {
-    furi_assert(instance);
-    return icon_get_decode_size(instance->icon);
-}
-
 void icon_animation_start(IconAnimation* instance) {
     furi_check(instance);
 

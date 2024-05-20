@@ -1926,7 +1926,6 @@ Function,+,ibutton_worker_write_copy_start,void,"iButtonWorker*, iButtonKey*"
 Function,+,ibutton_worker_write_set_callback,void,"iButtonWorker*, iButtonWorkerWriteCallback, void*"
 Function,+,icon_animation_alloc,IconAnimation*,const Icon*
 Function,+,icon_animation_free,void,IconAnimation*
-Function,+,icon_animation_get_decode_size,uint32_t,const IconAnimation*
 Function,+,icon_animation_get_height,uint8_t,const IconAnimation*
 Function,+,icon_animation_get_width,uint8_t,const IconAnimation*
 Function,+,icon_animation_is_last_frame,_Bool,const IconAnimation*
@@ -1934,7 +1933,6 @@ Function,+,icon_animation_set_update_callback,void,"IconAnimation*, IconAnimatio
 Function,+,icon_animation_start,void,IconAnimation*
 Function,+,icon_animation_stop,void,IconAnimation*
 Function,+,icon_get_data,const uint8_t*,const Icon*
-Function,+,icon_get_decode_size,uint32_t,const Icon*
 Function,+,icon_get_frame_count,uint32_t,const Icon*
 Function,+,icon_get_frame_data,const uint8_t*,"const Icon*, uint32_t"
 Function,+,icon_get_height,uint16_t,const Icon*

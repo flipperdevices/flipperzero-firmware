@@ -85,14 +85,6 @@ void icon_animation_stop(IconAnimation* instance);
  */
 bool icon_animation_is_last_frame(const IconAnimation* instance);
 
-/** Get IconAnimation frame buffer size
- *
- * @param      instance  IconAnimation instance
- *
- * @return     frame size, in bytes
- */
-uint32_t icon_animation_get_decode_size(const IconAnimation* instance);
-
 #ifdef __cplusplus
 }
 #endif
