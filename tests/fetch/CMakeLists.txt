@@ -33,9 +33,4 @@ foreach(FAMILY ${TEST_FAMILIES})
     
     add_executable(fetch-test-${FAMILY} ${SOURCES})
     target_link_libraries(fetch-test-${FAMILY} STM32::NoSys HAL::STM32::${FAMILY}${CORE}::CORTEX CMSIS::STM32::${DEVICE}${CORE})
-
-    if(${FAMILY} STREQUAL "MP1") 
-        target_compile_definitions(fetch-test-${FAMILY} PRIVATE USE_HAL_DRIVER)
-    endif()
-
 endforeach()

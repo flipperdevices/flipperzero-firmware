@@ -36,10 +36,6 @@ foreach(FAMILY ${TEST_FAMILIES})
     add_executable(hal-test-${FAMILY} ${SOURCES})
     target_compile_definitions(hal-test-${FAMILY} PRIVATE USE_FULL_LL_DRIVER)
     
-    if(${FAMILY} STREQUAL "MP1") 
-        target_compile_definitions(hal-test-${FAMILY} PRIVATE USE_HAL_DRIVER)
-    endif()
-
     foreach(DRIVER ${HAL_DRIVERS_${FAMILY}})
         string(TOUPPER ${DRIVER} DRIVER)
         target_link_libraries(hal-test-${FAMILY} HAL::STM32::${FAMILY}${CORE}::${DRIVER})
