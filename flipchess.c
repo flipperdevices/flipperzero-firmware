@@ -74,7 +74,6 @@ FlipChess* flipchess_app_alloc() {
         app->view_dispatcher, flipchess_tick_event_callback, 100);
     view_dispatcher_set_custom_event_callback(
         app->view_dispatcher, flipchess_custom_event_callback);
-    app->submenu = submenu_alloc();
 
     // Settings
     app->haptic = FlipChessHapticOn;
@@ -89,6 +88,7 @@ FlipChess* flipchess_app_alloc() {
     // Text input
     app->input_state = FlipChessTextInputDefault;
 
+    app->submenu = submenu_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, FlipChessViewIdMenu, submenu_get_view(app->submenu));
     app->flipchess_startscreen = flipchess_startscreen_alloc();
@@ -131,14 +131,17 @@ void flipchess_app_free(FlipChess* app) {
     // Scene manager
     scene_manager_free(app->scene_manager);
 
-    text_input_free(app->text_input);
-
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, FlipChessViewIdMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, FlipChessViewIdScene1);
-    view_dispatcher_remove_view(app->view_dispatcher, FlipChessViewIdSettings);
-    view_dispatcher_remove_view(app->view_dispatcher, FlipChessViewIdTextInput);
     submenu_free(app->submenu);
+    view_dispatcher_remove_view(app->view_dispatcher, FlipChessViewIdStartscreen);
+    flipchess_startscreen_free(app->flipchess_startscreen);
+    view_dispatcher_remove_view(app->view_dispatcher, FlipChessViewIdScene1);
+    flipchess_scene_1_free(app->flipchess_scene_1);
+    view_dispatcher_remove_view(app->view_dispatcher, FlipChessViewIdSettings);
+    variable_item_list_free(app->variable_item_list);
+    view_dispatcher_remove_view(app->view_dispatcher, FlipChessViewIdTextInput);
+    text_input_free(app->text_input);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
