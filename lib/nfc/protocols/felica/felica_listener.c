@@ -5,7 +5,10 @@
 #include <furi_hal_nfc.h>
 
 #define FELICA_LISTENER_MAX_BUFFER_SIZE (128)
-#define TAG "Felica"
+#define FELICA_LISTENER_RESPONSE_CODE_READ (0x07)
+#define FELICA_LISTENER_RESPONSE_CODE_WRITE (0x09)
+
+#define TAG "FelicaListener"
 
 FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
     furi_assert(nfc);
@@ -177,7 +180,7 @@ static void felica_listener_command_handler_read(
         request->header.block_count * FELICA_DATA_BLOCK_SIZE);
     furi_check(resp);
 
-    resp->header.response_code = 0x07;
+    resp->header.response_code = FELICA_LISTENER_RESPONSE_CODE_READ;
     resp->header.idm = request->header.idm;
     resp->header.length = sizeof(FelicaCommandResponseHeader);
 
@@ -222,7 +225,7 @@ static void felica_listener_command_handler_write(
         (FelicaListenerWriteCommandResponse*)malloc(sizeof(FelicaListenerWriteCommandResponse));
     furi_check(resp);
 
-    resp->response_code = 0x09;
+    resp->response_code = FELICA_LISTENER_RESPONSE_CODE_WRITE;
     resp->idm = request->header.idm;
     resp->length = sizeof(FelicaListenerWriteCommandResponse);
 
