@@ -123,6 +123,7 @@ static void test_runner_run_internal(TestRunner* instance) {
 
     char file_name_buffer[256];
     FuriString* file_name = furi_string_alloc();
+    FuriString* file_basename = furi_string_alloc();
     File* directory = storage_file_alloc(instance->storage);
 
     do {
@@ -148,19 +149,22 @@ static void test_runner_run_internal(TestRunner* instance) {
             path_concat(PLUGINS_PATH, file_name_buffer, file_name);
             FURI_LOG_D(TAG, "Loading %s", furi_string_get_cstr(file_name));
 
-            bool result = false;
+            path_extract_filename(file_name, file_basename, true);
+            const char* file_basename_cstr = furi_string_get_cstr(file_basename);
+
+            bool result = true;
             if(furi_string_size(instance->args)) {
-                if(furi_string_cmp_str(instance->args, furi_string_get_cstr(file_name)) == 0) {
+                if(furi_string_cmp_str(instance->args, file_basename_cstr) == 0) {
                     result = test_runner_run_plugin(instance, furi_string_get_cstr(file_name));
                 } else {
-                    printf("Skipping %s\r\n", furi_string_get_cstr(file_name));
+                    printf("Skipping %s\r\n", file_basename_cstr);
                 }
             } else {
                 result = test_runner_run_plugin(instance, furi_string_get_cstr(file_name));
             }
 
             if(!result) {
-                printf("Failed to execute test: %s\r\n", furi_string_get_cstr(file_name));
+                printf("Failed to execute test: %s\r\n", file_basename_cstr);
                 break;
             }
         }
@@ -169,6 +173,7 @@ static void test_runner_run_internal(TestRunner* instance) {
     storage_dir_close(directory);
     storage_file_free(directory);
     furi_string_free(file_name);
+    furi_string_free(file_basename);
 }
 
 void test_runner_run(TestRunner* instance) {
