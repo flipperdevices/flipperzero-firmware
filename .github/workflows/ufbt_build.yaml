@@ -18,12 +18,17 @@ jobs:
             sdk-channel: dev
           - name: release channel
             sdk-channel: release
+          - name: Unofficial firmware
+            # example URL, replace with a valid one
+            # you can also use other modes for specifying SDK sources
+            sdk-index-url: https://flipper.example.com/directory.json
+            sdk-channel: dev
     name: 'ufbt: Build for ${{ matrix.name }}'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Build with ufbt
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.3
         id: build-app
         with:
           sdk-channel: ${{ matrix.sdk-channel }}
