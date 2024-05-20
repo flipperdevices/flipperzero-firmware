@@ -14,6 +14,8 @@ void nfc_playlist_name_new_file_menu_callback(void* context) {
         furi_string_swap(nfc_playlist->settings.file_path, file_name);
     }
 
+    nfc_playlist->settings.playlist_length = 0;
+
     storage_file_free(file);
     furi_string_free(file_name);
     furi_record_close(RECORD_STORAGE);

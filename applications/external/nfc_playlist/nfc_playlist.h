@@ -39,6 +39,7 @@ typedef enum {
 
 typedef struct {
     FuriString* file_path;
+    uint8_t playlist_length;
     bool playlist_selected;
     uint8_t emulate_timeout;
     uint8_t emulate_delay;

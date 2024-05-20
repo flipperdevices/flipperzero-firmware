@@ -41,7 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Bluetooth/USB Remote v1.8 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - Updated: [Ethernet W5500 v1.1 (By karasevia)](https://github.com/karasevia/finik_eth) `Req: W5500`
 - Updated: [Restaurant Pager Trigger v1.6 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
-- Updated: [NFC Playlist v1.8 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- Updated: [NFC Playlist v1.9 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
@@ -477,7 +477,7 @@ $ ./fbt dolphin_ext
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
 - [NFC Magic v1.10 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
-- [NFC Playlist v1.8 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- [NFC Playlist v1.9 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
