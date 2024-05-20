@@ -19,7 +19,7 @@ The goal of this project is to see how much crypto functionality can be brought 
 - If you do not have one, download a Flipper Zero firmware to get the `fbt` build tool
 - Plug your Flipper Zero in via USB
 - Copy the contents of this folder into the `applications_user` folder of your firmware
-- Modify the `site_scons/cc.scons` file in the Flipper Zero firmware to add the `"-Os"` flag
+- ~Modify the `site_scons/cc.scons` file in the Flipper Zero firmware to add the `"-Os"` flag~
 
 Then run the command: 
  ```
