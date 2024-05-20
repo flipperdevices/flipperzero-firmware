@@ -76,13 +76,11 @@ bool nfc_playlist_nfc_remove_scene_on_event(void* context, SceneManagerEvent eve
                   if (current_line != selected_line) {
                      furi_string_replace_all(line, "\n", "");
                      if (furi_string_empty(tmp_str)) {
-                        furi_string_printf(tmp_str, "%s", furi_string_get_cstr(line));
+                        furi_string_cat_printf(tmp_str, "%s", furi_string_get_cstr(line));
                      } else {
-                        furi_string_cat(tmp_str, "\n");
-                        furi_string_cat(tmp_str, furi_string_get_cstr(line));
+                        furi_string_cat_printf(tmp_str, "\n%s", furi_string_get_cstr(line));
                      }
                   }
-                  furi_string_reset(line);
                }
 
                stream_clean(stream);
@@ -90,10 +88,10 @@ bool nfc_playlist_nfc_remove_scene_on_event(void* context, SceneManagerEvent eve
                stream_write_string(stream, tmp_str);
                furi_string_free(tmp_str);
                file_stream_close(stream);
-               stream_free(stream);
                nfc_playlist->settings.playlist_length--;
                selected_line = nfc_playlist->settings.playlist_length;
             }
+            stream_free(stream);
             furi_record_close(RECORD_STORAGE);
 
             if (selected_line == 0) {
