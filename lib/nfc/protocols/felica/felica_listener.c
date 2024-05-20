@@ -94,11 +94,11 @@ static FelicaError felica_listener_command_handler_read(
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)resp, resp->header.length);
     free(resp);
-    ///TODO: Process return value of this function
-    felica_listener_frame_exchange(instance, instance->tx_buffer);
+
+    return felica_listener_frame_exchange(instance, instance->tx_buffer);
 }
 
-static void felica_listener_command_handler_write(
+static FelicaError felica_listener_command_handler_write(
     FelicaListener* instance,
     const FelicaListenerGenericRequest* const generic_request) {
     FURI_LOG_D(TAG, "Write cmd");
@@ -133,27 +133,22 @@ static void felica_listener_command_handler_write(
     bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)resp, resp->length);
     free(resp);
 
-    ///TODO: Process return value of this function
-    felica_listener_frame_exchange(instance, instance->tx_buffer);
+    return felica_listener_frame_exchange(instance, instance->tx_buffer);
 }
 
-typedef void (*FelicaListenerCommandHandler)(
+static FelicaError felica_listener_process_request(
     FelicaListener* instance,
-    const FelicaListenerGenericRequest* const generic_request);
-
-static FelicaListenerCommandHandler felica_listener_get_cmd_handler(uint8_t command_code) {
-    FelicaListenerCommandHandler handler = NULL;
-    switch(command_code) {
+    const FelicaListenerGenericRequest* generic_request) {
+    const uint8_t cmd_code = generic_request->header.code;
+    switch(cmd_code) {
     case FELICA_CMD_READ_WITHOUT_ENCRYPTION:
-        handler = felica_listener_command_handler_read;
-        break;
+        return felica_listener_command_handler_read(instance, generic_request);
     case FELICA_CMD_WRITE_WITHOUT_ENCRYPTION:
-        handler = felica_listener_command_handler_write;
-        break;
+        return felica_listener_command_handler_write(instance, generic_request);
     default:
+        furi_crash("FeliCa incorrect command");
         break;
     }
-    return handler;
 }
 
 NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
@@ -181,10 +176,9 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
         uint8_t size = bit_buffer_get_size_bytes(nfc_event->data.buffer) - 2;
 
         if(felica_listener_check_idm(instance, &request->header.idm) && request->length == size) {
-            FelicaListenerCommandHandler handler =
-                felica_listener_get_cmd_handler(request->header.code);
-            if(handler != NULL) {
-                handler(instance, request);
+            FelicaError error = felica_listener_process_request(instance, request);
+            if(error != FelicaErrorNone) {
+                FURI_LOG_E(TAG, "Processing error: %2X", error);
             }
         }
         bit_buffer_reset(nfc_event->data.buffer);
