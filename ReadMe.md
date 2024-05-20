@@ -43,8 +43,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Restaurant Pager Trigger v1.6 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [Chess v1.10 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Updated: [FlipBIP Crypto Wallet v1.15 (By xtruan)](https://github.com/xtruan/FlipBIP)
-- Updated: [NFC Playlist v1.9 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - OFW: [Text Box rework #3642 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3642)
+- Updated: [NFC Playlist v2.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
@@ -480,7 +480,7 @@ $ ./fbt dolphin_ext
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
 - [NFC Magic v1.10 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
-- [NFC Playlist v1.9 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- [NFC Playlist v2.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Relay v0.2 (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
