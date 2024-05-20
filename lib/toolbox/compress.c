@@ -71,20 +71,15 @@ void compress_icon_free(CompressIcon* instance) {
     free(instance);
 }
 
-void compress_icon_decode(
-    CompressIcon* instance,
-    const uint8_t* icon_data,
-    uint8_t** decoded_buff,
-    size_t size_hint) {
+void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint8_t** decoded_buff) {
     furi_check(instance);
     furi_check(icon_data);
     furi_check(decoded_buff);
 
-    compress_icon_update_buffer_size(instance, size_hint);
-
     CompressHeader* header = (CompressHeader*)icon_data;
     if(header->is_compressed) {
         size_t decoded_size = 0;
+        /* If decompression fails - check that decode_buf_size is large enough */
         furi_check(compress_decode_internal(
             instance->decoder,
             icon_data,
@@ -93,8 +88,6 @@ void compress_icon_decode(
             instance->decoded_buff,
             instance->buffer_size,
             &decoded_size));
-        /* If size_hint was set, check if decoded size matches */
-        furi_check(!size_hint || (decoded_size == size_hint));
         *decoded_buff = instance->decoded_buff;
     } else {
         *decoded_buff = (uint8_t*)&icon_data[1];
@@ -244,8 +237,8 @@ static bool compress_decode_internal(
             sunk += sink_size;
             do {
                 poll_res = heatshrink_decoder_poll(
-                    decoder, &data_out[res_buff_size], data_out_size, &poll_size);
-                if(poll_res < 0) {
+                    decoder, &data_out[res_buff_size], data_out_size - res_buff_size, &poll_size);
+                if((poll_res < 0) || ((data_out_size - res_buff_size) == 0)) {
                     decode_failed = true;
                     break;
                 }
@@ -260,7 +253,10 @@ static bool compress_decode_internal(
             } else {
                 do {
                     poll_res = heatshrink_decoder_poll(
-                        decoder, &data_out[res_buff_size], data_out_size, &poll_size);
+                        decoder,
+                        &data_out[res_buff_size],
+                        data_out_size - res_buff_size,
+                        &poll_size);
                     res_buff_size += poll_size;
                     finish_res = heatshrink_decoder_finish(decoder);
                 } while(finish_res != HSDR_FINISH_DONE);
