@@ -2,7 +2,7 @@ sourcecode:
   type: git
   location:
     origin: https://github.com/xtruan/flipper-chess.git
-    commit_sha: 7dda90e7803d0291f35dbd6d0a8ae4febd2723d3
+    commit_sha: 4678ec9a6db516e09a9c18929dca2a5f1acca32a
 description: "How about a nice game of chess?"
 changelog: "v1.10 - Update to support new FW"
 author: "@xtruan"
