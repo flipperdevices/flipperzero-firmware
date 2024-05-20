@@ -90,22 +90,22 @@ static void felica_listener_command_handler_read(
 
     FelicaListenerReadCommandResponse* resp = malloc(
         sizeof(FelicaCommandResponseHeader) + 1 +
-        request->header.block_count * FELICA_DATA_BLOCK_SIZE);
+        request->base.header.block_count * FELICA_DATA_BLOCK_SIZE);
     furi_check(resp);
 
     resp->header.response_code = FELICA_LISTENER_RESPONSE_CODE_READ;
-    resp->header.idm = request->header.idm;
+    resp->header.idm = request->base.header.idm;
     resp->header.length = sizeof(FelicaCommandResponseHeader);
 
     if(felica_listener_validate_read_request_and_set_sf(instance, request, &resp->header)) {
-        resp->block_count = request->header.block_count;
+        resp->block_count = request->base.header.block_count;
         resp->header.length++;
     } else {
         resp->block_count = 0;
     }
 
     instance->mac_calc_start = 0;
-    memset(instance->requested_blocks, 0, 4);
+    memset(instance->requested_blocks, 0, sizeof(instance->requested_blocks));
     for(uint8_t i = 0; i < resp->block_count; i++) {
         const FelicaBlockListElement* item = &request->list[i];
         instance->requested_blocks[i] = item->block_number;
@@ -139,11 +139,11 @@ static void felica_listener_command_handler_write(
     furi_check(resp);
 
     resp->response_code = FELICA_LISTENER_RESPONSE_CODE_WRITE;
-    resp->idm = request->header.idm;
+    resp->idm = request->base.header.idm;
     resp->length = sizeof(FelicaListenerWriteCommandResponse);
 
     if(felica_listener_validate_write_request_and_set_sf(instance, request, data_ptr, resp)) {
-        for(uint8_t i = 0; i < request->header.block_count; i++) {
+        for(uint8_t i = 0; i < request->base.header.block_count; i++) {
             const FelicaBlockListElement* item = &request->list[i];
             FelicaCommandWriteBlockHandler handler =
                 felica_listener_get_write_block_handler(item->block_number);

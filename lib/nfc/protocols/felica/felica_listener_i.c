@@ -205,7 +205,7 @@ static bool felica_validate_read_block_list(
     FelicaCommandResponseHeader* response) {
     uint8_t mac_a_pos = 0;
     bool mac_a_present = false, mac_present = false;
-    for(uint8_t i = 0; i < request->header.block_count; i++) {
+    for(uint8_t i = 0; i < request->base.header.block_count; i++) {
         FelicaBlockListElement item = request->list[i];
         if(item.service_code != 0) {
             response->SF1 = (1 << i);
@@ -218,7 +218,7 @@ static bool felica_validate_read_block_list(
         } else if(
             !felica_block_exists(item.block_number) ||
             (felica_block_is_readonly(instance, item.block_number) &&
-             request->header.service_code != FELICA_SERVICE_RO_ACCESS)) {
+             request->base.header.service_code != FELICA_SERVICE_RO_ACCESS)) {
             response->SF1 = (1 << i);
             response->SF2 = 0xA8;
             return false;
@@ -235,7 +235,7 @@ static bool felica_validate_read_block_list(
                 mac_a_pos = i;
             }
         } else if(
-            felica_block_requires_auth(instance, request->header.code, item.block_number) &&
+            felica_block_requires_auth(instance, request->base.header.code, item.block_number) &&
             !instance->auth.context.auth_status.external) {
             response->SF1 = (1 << i);
             response->SF2 = 0xB1;
@@ -257,20 +257,20 @@ bool felica_listener_validate_read_request_and_set_sf(
     FelicaCommandResponseHeader* resp_header) {
     bool valid = false;
     do {
-        if(request->header.service_num != 0x01) {
+        if(request->base.header.service_num != 0x01) {
             resp_header->SF1 = 0xFF;
             resp_header->SF2 = 0xA1;
             break;
         }
-        if((request->header.code == FELICA_CMD_READ_WITHOUT_ENCRYPTION) &&
-           (request->header.block_count < 0x01 || request->header.block_count > 0x04)) {
+        if((request->base.header.code == FELICA_CMD_READ_WITHOUT_ENCRYPTION) &&
+           (request->base.header.block_count < 0x01 || request->base.header.block_count > 0x04)) {
             resp_header->SF1 = 0xFF;
             resp_header->SF2 = 0xA2;
             break;
         }
 
-        if(request->header.service_code != FELICA_SERVICE_RO_ACCESS &&
-           request->header.service_code != FELICA_SERVICE_RW_ACCESS) {
+        if(request->base.header.service_code != FELICA_SERVICE_RO_ACCESS &&
+           request->base.header.service_code != FELICA_SERVICE_RW_ACCESS) {
             resp_header->SF1 = 0x01;
             resp_header->SF2 = 0xA6;
             break;
@@ -292,18 +292,16 @@ static bool felica_validate_write_block_list(
     const FelicaListenerWriteBlockData* const data,
     FelicaListenerWriteCommandResponse* response) {
     instance->write_with_mac = false;
-    if(request->header.block_count == 2 &&
+    if(request->base.header.block_count == 2 &&
        request->list[1].block_number == FELICA_BLOCK_INDEX_MAC_A) {
         instance->write_with_mac = true;
-    } else if(request->header.block_count < 1 || request->header.block_count > 2) {
+    } else if(request->base.header.block_count < 1 || request->base.header.block_count > 2) {
         response->SF1 = 0x02;
         response->SF2 = 0xB2;
         return false;
     }
-    ///зачем мне цикл, если может быть всего 2 блока???
-    for(uint8_t i = 0; i < request->header.block_count; i++) {
-        //const FelicaListenerWriteBlockListElement* dat = &request->data[i];
-        //const FelicaBlockListElement* item = &dat->item;
+
+    for(uint8_t i = 0; i < request->base.header.block_count; i++) {
         const FelicaBlockListElement* item = &request->list[i];
         if(felica_block_is_readonly(instance, item->block_number) ||
            (felica_block_requires_mac(instance, item->block_number) &&
@@ -342,7 +340,7 @@ static bool felica_validate_write_block_list(
                 return false;
             }
         } else if(
-            felica_block_requires_auth(instance, request->header.code, item->block_number) &&
+            felica_block_requires_auth(instance, request->base.header.code, item->block_number) &&
             !instance->auth.context.auth_status.external) {
             response->SF1 = 0x01;
             response->SF2 = 0xB1;
@@ -360,20 +358,20 @@ bool felica_listener_validate_write_request_and_set_sf(
     UNUSED(data);
     bool valid = false;
     do {
-        if(request->header.service_num != 0x01) {
+        if(request->base.header.service_num != 0x01) {
             response->SF1 = 0xFF;
             response->SF2 = 0xA1;
             break;
         }
 
-        if((request->header.code == FELICA_CMD_WRITE_WITHOUT_ENCRYPTION) &&
-           (request->header.block_count < 0x01 || request->header.block_count > 0x02)) {
+        if((request->base.header.code == FELICA_CMD_WRITE_WITHOUT_ENCRYPTION) &&
+           (request->base.header.block_count < 0x01 || request->base.header.block_count > 0x02)) {
             response->SF1 = 0xFF;
             response->SF2 = 0xA2;
             break;
         }
 
-        if(request->header.service_code != FELICA_SERVICE_RW_ACCESS) {
+        if(request->base.header.service_code != FELICA_SERVICE_RW_ACCESS) {
             response->SF1 = 0x01;
             response->SF2 = 0xA6;
             break;

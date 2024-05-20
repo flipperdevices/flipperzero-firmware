@@ -13,8 +13,7 @@ typedef struct {
 } FelicaListenerGenericRequest;
 
 typedef struct {
-    uint8_t length;
-    FelicaCommandHeader header;
+    FelicaListenerGenericRequest base;
     FelicaBlockListElement list[];
 } FelicaListenerRequest;
 
@@ -47,9 +46,8 @@ struct FelicaListener {
     uint8_t mac_calc_start;
 
     bool rc_written;
-    ///TODO: replace bools below with one single bool operation_needs_mac
     bool write_with_mac;
-    bool read_with_mac;
+
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
 
