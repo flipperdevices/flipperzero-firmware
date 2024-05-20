@@ -75,6 +75,7 @@ void test_runner_free(TestRunner* instance) {
 static bool test_runner_run_plugin(TestRunner* instance, const char* path) {
     furi_assert(instance);
 
+    FURI_LOG_D(TAG, "Loading %s", path);
     FlipperApplication* lib = flipper_application_alloc(
         instance->storage, composite_api_resolver_get(instance->composite_resolver));
 
@@ -147,7 +148,6 @@ static void test_runner_run_internal(TestRunner* instance) {
             }
 
             path_concat(PLUGINS_PATH, file_name_buffer, file_name);
-            FURI_LOG_D(TAG, "Loading %s", furi_string_get_cstr(file_name));
 
             path_extract_filename(file_name, file_basename, true);
             const char* file_basename_cstr = furi_string_get_cstr(file_basename);
