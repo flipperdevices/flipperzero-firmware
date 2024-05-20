@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Icons: compression fixes & larger dimension support #3564 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3564)
 - OFW: [FuriHal: add flash ops stats, workaround bug in SHCI_C2_SetSystemClock #3657 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3657)
 - Updated: [Sokoban v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
+- Version increment from OFW
 
 <a name="release">
 
