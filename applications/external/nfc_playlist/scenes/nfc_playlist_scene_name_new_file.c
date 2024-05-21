@@ -24,7 +24,7 @@ void nfc_playlist_name_new_file_menu_callback(void* context) {
 
 void nfc_playlist_name_new_file_scene_on_enter(void* context) {
     NfcPlaylist* nfc_playlist = context;
-    nfc_playlist->text_input_output = (char*)malloc(50);
+    nfc_playlist->text_input_output = (char*)malloc(50 * sizeof(char));
     text_input_set_header_text(nfc_playlist->text_input, "Enter file name");
     text_input_set_minimum_length(nfc_playlist->text_input, 1);
     text_input_set_result_callback(
@@ -32,7 +32,7 @@ void nfc_playlist_name_new_file_scene_on_enter(void* context) {
         nfc_playlist_name_new_file_menu_callback,
         nfc_playlist,
         nfc_playlist->text_input_output,
-        50,
+        50 * sizeof(char),
         true);
 
     view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_TextInput);

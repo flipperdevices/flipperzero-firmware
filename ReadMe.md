@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0520-1615-0.102.1-fac792f](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-20 16:15 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-20 16:15 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-21 12:28 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-21 12:28 EST`
 - Updated: [Chess v1.10 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Updated: [Digimon F-Com v1.3 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 - Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac) Fix (By Willy-JL)
@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Patreon Builds Update: [P0KEMON and ManifestSwitcher builds have been updated to have 12 new Psyduck animations (By naisatoh)](https://github.com/naisatoh/Psyduck-Asset-Pack)
 - Patreon Builds Update: [P0KEMON and ManifestSwitcher builds have been updated to have 8 new starter P0kemon animations (By AbeNaws)](https://github.com/AbeNaws/FlipperZeroAssetPacks/tree/main/Pokemon/Compiled/Pokemon/Anims)
 - Passport added profile images of Haunter (By int0xmonkey), Psyduck (By naisatoh) & Pokemon Trainer (By AbeNaws)
+- Updated: [NFC Playlist v2.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
