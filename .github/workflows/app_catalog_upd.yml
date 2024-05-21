@@ -1,6 +1,7 @@
 name: Update Flipper Application Catalog
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -11,68 +12,10 @@ jobs:
   update-catalog:
     runs-on: ubuntu-latest
 
-    env:
-      BRANCH_PREFIX: zacharyweiss/
-      APP_NAME: magspoof
-      APP_FOLDER: GPIO
-      CATALOG_REPO: zacharyweiss/flipper-application-catalog
-      CATALOG_UPSTREAM: flipperdevices/flipper-application-catalog
-      CATALOG_FOLDER: flipper-application-catalog
-    
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        path: ${{ env.APP_NAME }}
-        
-    - name: Get fap_version
-      id: fap_version
-      run: |
-        cd $APP_NAME
-        fap_version_raw=$(grep -oP '(?<=fap_version=\()\d+, \d+(?=\))' application.fam)
-        v_major=$(echo $fap_version_raw | cut -d "," -f 1 | xargs)
-        v_minor=$(echo $fap_version_raw | cut -d "," -f 2 | xargs)
-        echo "v_major=$v_major" >> "$GITHUB_ENV"
-        echo "v_minor=$v_minor" >> "$GITHUB_ENV"
-        echo "branch_name=${BRANCH_PREFIX}${APP_NAME}_${v_major}.${v_minor}" >> "$GITHUB_ENV"
-        
-    - name: Checkout App Catalog
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ env.CATALOG_REPO }}
-        path: ${{ env.CATALOG_FOLDER }}
-        token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
-        
-    - name: Create Branch & Fetch Upstream
-      run: |
-        cd $CATALOG_FOLDER
-        git checkout -b "$branch_name"
-        git remote add upstream "https://x-access-token:${{ secrets.CATALOG_UPDATE_TOKEN }}@github.com/$CATALOG_UPSTREAM.git"        
-        git fetch upstream main
-        git remote -v
-        git rebase --autosquash --autostash "upstream/main"
-#        git remote set-url origin "https://x-access-token:${{ secrets.CATALOG_UPDATE_TOKEN }}@github.com/$CATALOG_REPO.git"
-
-    - name: Update manifest.yml
-      run: |
-        manifest_path=applications/$APP_FOLDER/$APP_NAME/manifest.yml
-        echo "manifest_path=$manifest_path" > "$GITHUB_ENV"
-        sed -i 's/commit_sha: .*/commit_sha: ${{ github.sha }}/' $CATALOG_FOLDER/$manifest_path
-
-    - name: Commit
-      run: |
-        cd $CATALOG_FOLDER
-        git config user.name "$GITHUB_ACTOR"
-        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-        git add .
-        git commit -m "Update ${APP_NAME} manifest for v${v_major}.${v_minor} @ ${{ github.sha }}"
-#        git push --force -u origin HEAD
-
-    - name: Push
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
-        directory: ${{ env.CATALOG_FOLDER }}
-        branch: ${{ env.branch_name }}
-        repository: ${{ env.CATALOG_REPO }}
-        force: true
+      - uses: zacharyweiss/flipper-app-catalog-action@v1.0
+        id: update_manifest
+        with:
+          CATALOG_UPDATE_TOKEN: ${{ secrets.CATALOG_UPDATE_TOKEN }}
+    
+      # TODO: Auto-PR?
