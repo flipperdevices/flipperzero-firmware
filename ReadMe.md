@@ -35,6 +35,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Digimon F-Com v1.3 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 - Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac) Fix (By Willy-JL)
 - Updated: [FlipBIP Crypto Wallet v1.16 (By xtruan)](https://github.com/xtruan/FlipBIP)
+- Patreon Builds Update: [420, 420+18, Anime420 and ManifestSwitcher builds have been updated to have the NiggiePuff animation (By ATOMNFT)](https://github.com/ATOMNFT/Flipper-Vault/tree/main/Animations/Weed%20Themed/NuggiePuff)
 
 <a name="release">
 
