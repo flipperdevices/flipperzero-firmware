@@ -98,6 +98,13 @@ void initStratagems(){
     initStratagem(0, "Reinforce", "UDRLU");
     initStratagem(0, "SOS Beacon", "UDLR");
     initStratagem(0, "Resupply", "DDUR");
+    initStratagem(0, "NUX-223 Hellbomb", "DULDURDU");
+    initStratagem(0, "SSSD Delivery", "DDDUU");
+    initStratagem(0, "Seismic Probe", "UULRDD");
+    initStratagem(0, "Upload Data", "LRUUU");
+    initStratagem(0, "Illumination Flare", "RRLL");
+    initStratagem(0, "SEAF Artillery", "RUUD");
+    initStratagem(0, "Super Earth Flag", "DUDU");
 
     initGroup(1, "Offensive: Eagle");
     initStratagem(1, "Eagle Rearm", "UULUR");
