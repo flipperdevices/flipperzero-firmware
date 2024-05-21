@@ -63,6 +63,9 @@ WidgetElement* widget_element_text_box_create(
     const char* text,
     bool strip_to_dots);
 
+/** Update text box element */
+void widget_element_text_box_set_text(WidgetElement* gui_string, const char* text);
+
 /** Create button element */
 WidgetElement* widget_element_button_create(
     GuiButtonType button_type,

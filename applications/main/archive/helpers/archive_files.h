@@ -13,16 +13,20 @@ typedef enum {
     ArchiveFileTypeIButton,
     ArchiveFileTypeNFC,
     ArchiveFileTypeSubGhz,
-    ArchiveFileTypeSubGhzRemote,
     ArchiveFileTypeLFRFID,
     ArchiveFileTypeInfrared,
-    ArchiveFileTypeBadUsb,
+    ArchiveFileTypeSubghzPlaylist,
+    ArchiveFileTypeSubghzRemote,
+    ArchiveFileTypeInfraredRemote,
+    ArchiveFileTypeBadKb,
+    ArchiveFileTypeWAV,
     ArchiveFileTypeMag,
     ArchiveFileTypeU2f,
     ArchiveFileTypeApplication,
+    ArchiveFileTypeJS,
+    ArchiveFileTypeSearch,
     ArchiveFileTypeUpdateManifest,
     ArchiveFileTypeDiskImage,
-    ArchiveFileTypeJS,
     ArchiveFileTypeFolder,
     ArchiveFileTypeUnknown,
     ArchiveFileTypeAppOrJs,
@@ -36,7 +40,6 @@ typedef struct {
     FuriString* custom_name;
     bool fav;
     bool is_app;
-    bool is_text_file;
 } ArchiveFile_t;
 
 static void ArchiveFile_t_init(ArchiveFile_t* obj) {
@@ -46,7 +49,6 @@ static void ArchiveFile_t_init(ArchiveFile_t* obj) {
     obj->custom_name = furi_string_alloc();
     obj->fav = false;
     obj->is_app = false;
-    obj->is_text_file = false;
 }
 
 static void ArchiveFile_t_init_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
@@ -61,7 +63,6 @@ static void ArchiveFile_t_init_set(ArchiveFile_t* obj, const ArchiveFile_t* src)
     obj->custom_name = furi_string_alloc_set(src->custom_name);
     obj->fav = src->fav;
     obj->is_app = src->is_app;
-    obj->is_text_file = src->is_text_file;
 }
 
 static void ArchiveFile_t_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
@@ -76,7 +77,6 @@ static void ArchiveFile_t_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
     furi_string_set(obj->custom_name, src->custom_name);
     obj->fav = src->fav;
     obj->is_app = src->is_app;
-    obj->is_text_file = src->is_text_file;
 }
 
 static void ArchiveFile_t_clear(ArchiveFile_t* obj) {
@@ -122,8 +122,9 @@ void archive_file_append(const char* path, const char* format, ...)
     _ATTRIBUTE((__format__(__printf__, 2, 3)));
 void archive_delete_file(void* context, const char* format, ...)
     _ATTRIBUTE((__format__(__printf__, 2, 3)));
-FS_Error archive_rename_copy_file_or_dir(
+FS_Error archive_copy_rename_file_or_dir(
     void* context,
     const char* src_path,
-    const char* dst_path,
-    bool copy);
+    FuriString* dst_path,
+    bool copy,
+    bool find_name);

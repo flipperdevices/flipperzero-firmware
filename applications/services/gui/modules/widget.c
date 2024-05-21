@@ -119,7 +119,7 @@ static void widget_add_element(Widget* widget, WidgetElement* element) {
         true);
 }
 
-void widget_add_string_multiline_element(
+WidgetElement* widget_add_string_multiline_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -131,9 +131,10 @@ void widget_add_string_multiline_element(
     WidgetElement* string_multiline_element =
         widget_element_string_multiline_create(x, y, horizontal, vertical, font, text);
     widget_add_element(widget, string_multiline_element);
+    return string_multiline_element;
 }
 
-void widget_add_string_element(
+WidgetElement* widget_add_string_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -145,9 +146,10 @@ void widget_add_string_element(
     WidgetElement* string_element =
         widget_element_string_create(x, y, horizontal, vertical, font, text);
     widget_add_element(widget, string_element);
+    return string_element;
 }
 
-void widget_add_text_box_element(
+WidgetElement* widget_add_text_box_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -161,9 +163,10 @@ void widget_add_text_box_element(
     WidgetElement* text_box_element = widget_element_text_box_create(
         x, y, width, height, horizontal, vertical, text, strip_to_dots);
     widget_add_element(widget, text_box_element);
+    return text_box_element;
 }
 
-void widget_add_text_scroll_element(
+WidgetElement* widget_add_text_scroll_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -174,9 +177,10 @@ void widget_add_text_scroll_element(
     WidgetElement* text_scroll_element =
         widget_element_text_scroll_create(x, y, width, height, text);
     widget_add_element(widget, text_scroll_element);
+    return text_scroll_element;
 }
 
-void widget_add_button_element(
+WidgetElement* widget_add_button_element(
     Widget* widget,
     GuiButtonType button_type,
     const char* text,
@@ -186,16 +190,18 @@ void widget_add_button_element(
     WidgetElement* button_element =
         widget_element_button_create(button_type, text, callback, context);
     widget_add_element(widget, button_element);
+    return button_element;
 }
 
-void widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* icon) {
+WidgetElement* widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* icon) {
     furi_check(widget);
     furi_check(icon);
     WidgetElement* icon_element = widget_element_icon_create(x, y, icon);
     widget_add_element(widget, icon_element);
+    return icon_element;
 }
 
-void widget_add_frame_element(
+WidgetElement* widget_add_frame_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -205,4 +211,5 @@ void widget_add_frame_element(
     furi_check(widget);
     WidgetElement* frame_element = widget_element_frame_create(x, y, width, height, radius);
     widget_add_element(widget, frame_element);
+    return frame_element;
 }

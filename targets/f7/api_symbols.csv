@@ -5,8 +5,8 @@ Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
 Header,+,applications/services/applications.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
-Header,+,applications/services/bt/bt_settings.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
+Header,+,applications/services/bt/bt_settings.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
 Header,+,applications/services/desktop/desktop_settings.h,,
@@ -789,8 +789,8 @@ Function,+,bt_keys_storage_set_default_path,void,Bt*
 Function,+,bt_keys_storage_set_file_path,void,"BtKeysStorage*, const char*"
 Function,+,bt_keys_storage_set_ram_params,void,"BtKeysStorage*, uint8_t*, uint16_t"
 Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
-Function,+,bt_open_rpc_connection,void,Bt*
 Function,+,bt_keys_storage_update,_Bool,"BtKeysStorage*, uint8_t*, uint32_t"
+Function,+,bt_open_rpc_connection,void,Bt*
 Function,+,bt_profile_restore_default,_Bool,Bt*
 Function,+,bt_profile_start,FuriHalBleProfileBase*,"Bt*, const FuriHalBleProfileTemplate*, FuriHalBleProfileParams"
 Function,+,bt_remote_rssi,_Bool,"Bt*, uint8_t*"
@@ -817,7 +817,6 @@ Function,+,button_panel_free,void,ButtonPanel*
 Function,+,button_panel_get_view,View*,ButtonPanel*
 Function,+,button_panel_reserve,void,"ButtonPanel*, size_t, size_t"
 Function,+,button_panel_reset,void,ButtonPanel*
-Function,+,button_panel_reset_selection,void,ButtonPanel*
 Function,+,byte_input_alloc,ByteInput*,
 Function,+,byte_input_free,void,ByteInput*
 Function,+,byte_input_get_view,View*,ByteInput*
@@ -1122,11 +1121,14 @@ Function,+,file_browser_worker_alloc,BrowserWorker*,"FuriString*, const char*, c
 Function,+,file_browser_worker_folder_enter,void,"BrowserWorker*, FuriString*, int32_t"
 Function,+,file_browser_worker_folder_exit,void,BrowserWorker*
 Function,+,file_browser_worker_folder_refresh,void,"BrowserWorker*, int32_t"
+Function,+,file_browser_worker_folder_refresh_sel,void,"BrowserWorker*, const char*"
 Function,+,file_browser_worker_free,void,BrowserWorker*
+Function,+,file_browser_worker_get_filter_ext,const char*,BrowserWorker*
 Function,+,file_browser_worker_is_in_start_folder,_Bool,BrowserWorker*
 Function,+,file_browser_worker_load,void,"BrowserWorker*, uint32_t, uint32_t"
 Function,+,file_browser_worker_set_callback_context,void,"BrowserWorker*, void*"
 Function,+,file_browser_worker_set_config,void,"BrowserWorker*, FuriString*, const char*, _Bool, _Bool"
+Function,+,file_browser_worker_set_filter_ext,void,"BrowserWorker*, FuriString*, const char*"
 Function,+,file_browser_worker_set_folder_callback,void,"BrowserWorker*, BrowserWorkerFolderOpenCallback"
 Function,+,file_browser_worker_set_item_callback,void,"BrowserWorker*, BrowserWorkerListItemCallback"
 Function,+,file_browser_worker_set_list_callback,void,"BrowserWorker*, BrowserWorkerListLoadCallback"
@@ -3066,6 +3068,7 @@ Function,+,rpc_system_app_set_callback,void,"RpcAppSystem*, RpcAppSystemCallback
 Function,+,rpc_system_app_set_error_code,void,"RpcAppSystem*, uint32_t"
 Function,+,rpc_system_app_set_error_text,void,"RpcAppSystem*, const char*"
 Function,-,rpmatch,int,const char*
+Function,+,run_with_default_app,void,const char*
 Function,+,saved_struct_get_metadata,_Bool,"const char*, uint8_t*, uint8_t*, size_t*"
 Function,+,saved_struct_load,_Bool,"const char*, void*, size_t, uint8_t, uint8_t"
 Function,+,saved_struct_save,_Bool,"const char*, const void*, size_t, uint8_t, uint8_t"
@@ -3746,13 +3749,13 @@ Function,-,vsprintf,int,"char*, const char*, __gnuc_va_list"
 Function,-,vsscanf,int,"const char*, const char*, __gnuc_va_list"
 Function,-,wcstombs,size_t,"char*, const wchar_t*, size_t"
 Function,-,wctomb,int,"char*, wchar_t"
-Function,+,widget_add_button_element,void,"Widget*, GuiButtonType, const char*, ButtonCallback, void*"
-Function,+,widget_add_frame_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t"
-Function,+,widget_add_icon_element,void,"Widget*, uint8_t, uint8_t, const Icon*"
-Function,+,widget_add_string_element,void,"Widget*, uint8_t, uint8_t, Align, Align, Font, const char*"
-Function,+,widget_add_string_multiline_element,void,"Widget*, uint8_t, uint8_t, Align, Align, Font, const char*"
-Function,+,widget_add_text_box_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, Align, Align, const char*, _Bool"
-Function,+,widget_add_text_scroll_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, const char*"
+Function,+,widget_add_button_element,WidgetElement*,"Widget*, GuiButtonType, const char*, ButtonCallback, void*"
+Function,+,widget_add_frame_element,WidgetElement*,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t"
+Function,+,widget_add_icon_element,WidgetElement*,"Widget*, uint8_t, uint8_t, const Icon*"
+Function,+,widget_add_string_element,WidgetElement*,"Widget*, uint8_t, uint8_t, Align, Align, Font, const char*"
+Function,+,widget_add_string_multiline_element,WidgetElement*,"Widget*, uint8_t, uint8_t, Align, Align, Font, const char*"
+Function,+,widget_add_text_box_element,WidgetElement*,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, Align, Align, const char*, _Bool"
+Function,+,widget_add_text_scroll_element,WidgetElement*,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, const char*"
 Function,+,widget_alloc,Widget*,
 Function,+,widget_free,void,Widget*
 Function,+,widget_get_view,View*,Widget*

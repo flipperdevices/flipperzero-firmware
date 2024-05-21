@@ -72,6 +72,7 @@ void submenu_add_lockable_item(
     void* callback_context,
     bool locked,
     const char* locked_message);
+
 /** Change label of an existing item
  * 
  * @param      submenu  Submenu instance

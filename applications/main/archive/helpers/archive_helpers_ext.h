@@ -19,6 +19,8 @@ void favorite_timeout_callback(void* _ctx);
 
 void favorite_timeout_run(ViewDispatcher* view_dispatcher, SceneManager* scene_manager);
 
+void run_with_default_app(const char* path);
+
 #ifdef __cplusplus
 }
 #endif

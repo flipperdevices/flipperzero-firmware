@@ -11,8 +11,7 @@
 #define SCENE_NEW_DIR_CUSTOM_EVENT (0UL)
 
 void archive_scene_new_dir_text_input_callback(void* context) {
-    furi_assert(context);
-    ArchiveApp* archive = context;
+    ArchiveApp* archive = (ArchiveApp*)context;
     view_dispatcher_send_custom_event(archive->view_dispatcher, SCENE_NEW_DIR_CUSTOM_EVENT);
 }
 

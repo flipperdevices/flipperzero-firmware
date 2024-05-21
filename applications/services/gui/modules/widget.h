@@ -51,7 +51,7 @@ View* widget_get_view(Widget* widget);
  * @param      font        Font instance
  * @param[in]  text        The text
  */
-void widget_add_string_multiline_element(
+WidgetElement* widget_add_string_multiline_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -70,7 +70,7 @@ void widget_add_string_multiline_element(
  * @param      font        Font instance
  * @param[in]  text        The text
  */
-void widget_add_string_element(
+WidgetElement* widget_add_string_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -94,7 +94,7 @@ void widget_add_string_element(
  *                               "\e!Inverted text\e!" - white text on black background
  * @param      strip_to_dots    Strip text to ... if does not fit to width
  */
-void widget_add_text_box_element(
+WidgetElement* widget_add_text_box_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -119,7 +119,7 @@ void widget_add_text_box_element(
  *                               "\ecCenter-aligned text" - sets center horizontal align until the next '\n' symbol
  *                               "\erRight-aligned text" - sets right horizontal align until the next '\n' symbol
  */
-void widget_add_text_scroll_element(
+WidgetElement* widget_add_text_scroll_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -135,7 +135,7 @@ void widget_add_text_scroll_element(
  * @param      callback     ButtonCallback instance
  * @param      context      pointer to context
  */
-void widget_add_button_element(
+WidgetElement* widget_add_button_element(
     Widget* widget,
     GuiButtonType button_type,
     const char* text,
@@ -149,7 +149,7 @@ void widget_add_button_element(
  * @param      y       top left y coordinate
  * @param      icon    Icon instance
  */
-void widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* icon);
+WidgetElement* widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* icon);
 
 /** Add Frame Element
  *
@@ -160,7 +160,7 @@ void widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* i
  * @param      height  frame height
  * @param      radius  frame radius
  */
-void widget_add_frame_element(
+WidgetElement* widget_add_frame_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,

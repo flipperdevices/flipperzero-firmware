@@ -3,7 +3,6 @@
 #include "../helpers/archive_browser.h"
 
 #define SCENE_DELETE_CUSTOM_EVENT (0UL)
-#define MAX_TEXT_INPUT_LEN 22
 
 void archive_scene_delete_widget_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
@@ -64,7 +63,6 @@ bool archive_scene_delete_on_event(void* context, SceneManagerEvent event) {
                 archive_delete_file(browser, "%s", name);
             }
             archive_show_loading_popup(app, false);
-            archive_show_file_menu(browser, false);
             return scene_manager_previous_scene(app->scene_manager);
         } else if(event.event == GuiButtonTypeLeft) {
             return scene_manager_previous_scene(app->scene_manager);

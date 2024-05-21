@@ -72,3 +72,8 @@ WidgetElement* widget_element_text_box_create(
 
     return gui_string;
 } //-V773
+
+void widget_element_text_box_set_text(WidgetElement* gui_string, const char* text) {
+    GuiTextBoxModel* model = gui_string->model;
+    furi_string_set(model->text, text);
+}
