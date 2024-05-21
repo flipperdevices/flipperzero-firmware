@@ -6,6 +6,7 @@
 A Flipper Zero app that allows the flipper to communicate with Digimon V-Pets.
 
 Currently tested devices:
+
 Classic:
 - 1997 Digital Monster
 - 1998 Digimon Pendulum
@@ -28,6 +29,7 @@ Modern:
 
 Color:
 - 2023 Digital Monster COLOR
+- Pendulum Color
 
 Currently tested apps:
 - W0rld (via Chrome web browser serial)
@@ -37,8 +39,8 @@ Currently tested apps:
 
 Unsupported Apps:
 
+
 Untested:
-- PenC
 - All other pets
 - Listen Mode
 
@@ -49,10 +51,6 @@ Based on:
 - The updated DMComm Arduino library by BladeSabre: https://github.com/dmcomm/dmcomm-arduino-lib
 - The Flipper Zero Boilerplate App: https://github.com/leedave/flipper-zero-fap-boilerplate
 - The Flipper Zero Firmware: https://github.com/flipperdevices/flipperzero-firmware
-
-### Known Issues
-
-Occasionally when using the USB A-Com mode, the flipper zero USB driver will crash the flipper due to the way I'm overwriting the USB VID/PID. I'm not sure why yet and am still debugging this. Subsequent attempts seem to work and this is uncommon (although not rare).
 
 ### Youtube Example
 
