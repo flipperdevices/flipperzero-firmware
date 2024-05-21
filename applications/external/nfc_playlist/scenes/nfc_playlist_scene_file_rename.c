@@ -19,7 +19,7 @@ void nfc_playlist_file_rename_menu_callback(void* context) {
         nfc_playlist->text_input_output);
 
     if(!storage_file_exists(storage, furi_string_get_cstr(tmp_new_file_path))) {
-        storage_common_rename_safe(
+        storage_common_rename(
             storage,
             furi_string_get_cstr(nfc_playlist->settings.file_path),
             furi_string_get_cstr(tmp_new_file_path));
