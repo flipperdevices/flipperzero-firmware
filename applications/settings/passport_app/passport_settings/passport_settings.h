@@ -43,7 +43,7 @@ extern "C" {
 #define BG_SCROLL 13
 #define BG_SLUT 14
 
-#define PROFILE_IMG_COUNT 55
+#define PROFILE_IMG_COUNT 58
 
 #define PIMG_NONE 0
 #define PIMG_ADPOLICE 1
@@ -74,32 +74,35 @@ extern "C" {
 #define PIMG_GOKUSSJ 26
 #define PIMG_GOKUSSJ3 27
 #define PIMG_GUYFAWKES 28
-#define PIMG_LAIN 29
-#define PIMG_LEEROY 30
-#define PIMG_MARIO 31
-#define PIMG_MARVIN 32
-#define PIMG_MORELEELLOO 33
-#define PIMG_NEUROMANCER 34
-#define PIMG_PIKASLEEPY 35
-#define PIMG_PIRATE 36 // Pirate Profile Pic (By cyberartemio)
-#define PIMG_RABBIT 37
-#define PIMG_SCARMLA 38
-#define PIMG_SCCOBRA 39
-#define PIMG_SCCRYBO 40
-#define PIMG_SCDOMRO 41
-#define PIMG_SCSANDRA 42
-#define PIMG_SCTARBEIGE 43
-#define PIMG_SHINKAI 44
-#define PIMG_SKULL 45
-#define PIMG_SLIME 46
-#define PIMG_SONIC 47
-#define PIMG_SPIDER 48
-#define PIMG_TANKGIRL 49
-#define PIMG_TOTORO 50
-#define PIMG_WAIFU1 51
-#define PIMG_WAIFU2 52
-#define PIMG_WAIFU3 53
-#define PIMG_WRENCH 54
+#define PIMG_HAUNTER 29
+#define PIMG_LAIN 30
+#define PIMG_LEEROY 31
+#define PIMG_MARIO 32
+#define PIMG_MARVIN 33
+#define PIMG_MORELEELLOO 34
+#define PIMG_NEUROMANCER 35
+#define PIMG_PIKASLEEPY 36
+#define PIMG_PIRATE 37 // Pirate Profile Pic (By cyberartemio)
+#define PIMG_PKMNTR 38
+#define PIMG_PSYDUCK 39
+#define PIMG_RABBIT 40
+#define PIMG_SCARMLA 41
+#define PIMG_SCCOBRA 42
+#define PIMG_SCCRYBO 43
+#define PIMG_SCDOMRO 44
+#define PIMG_SCSANDRA 45
+#define PIMG_SCTARBEIGE 46
+#define PIMG_SHINKAI 47
+#define PIMG_SKULL 48
+#define PIMG_SLIME 49
+#define PIMG_SONIC 50
+#define PIMG_SPIDER 51
+#define PIMG_TANKGIRL 52
+#define PIMG_TOTORO 53
+#define PIMG_WAIFU1 54
+#define PIMG_WAIFU2 55
+#define PIMG_WAIFU3 56
+#define PIMG_WRENCH 57
 
 typedef struct {
     uint8_t background;

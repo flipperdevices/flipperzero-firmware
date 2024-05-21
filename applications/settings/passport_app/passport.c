@@ -305,6 +305,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case PIMG_GUYFAWKES:
             canvas_draw_icon(canvas, 11, 2, &I_Guy_Fawkes_Mask);
             break;
+        case PIMG_HAUNTER:
+            canvas_draw_icon(canvas, 11, 2, &I_Haunter);
+            break;
         case PIMG_LAIN:
             canvas_draw_icon(canvas, 11, 2, &I_Lain);
             break;
@@ -328,6 +331,12 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             break;
         case PIMG_PIRATE:
             canvas_draw_icon(canvas, 11, 2, &I_pirate);
+            break;
+        case PIMG_PKMNTR:
+            canvas_draw_icon(canvas, 11, 2, &I_PkmnTrainer);
+            break;
+        case PIMG_PSYDUCK:
+            canvas_draw_icon(canvas, 11, 2, &I_Psyduck);
             break;
         case PIMG_RABBIT:
             canvas_draw_icon_animation(canvas, 11, 2, animations[AniRabbit]);

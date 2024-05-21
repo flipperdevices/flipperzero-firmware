@@ -36,6 +36,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac) Fix (By Willy-JL)
 - Updated: [FlipBIP Crypto Wallet v1.16 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - Patreon Builds Update: [420, 420+18, Anime420 and ManifestSwitcher builds have been updated to have the NiggiePuff animation (By ATOMNFT)](https://github.com/ATOMNFT/Flipper-Vault/tree/main/Animations/Weed%20Themed/NuggiePuff)
+- Patreon Builds Update: [P0KEMON and ManifestSwitcher builds have been updated to have 8 new Haunter animations (By int0xmonkey)](https://github.com/int0xmonkey/Haunter-Asset-Pack/tree/main/Haunter/Anims)
+- Patreon Builds Update: [P0KEMON and ManifestSwitcher builds have been updated to have 12 new Psyduck animations (By naisatoh)](https://github.com/naisatoh/Psyduck-Asset-Pack)
+- Patreon Builds Update: [P0KEMON and ManifestSwitcher builds have been updated to have 8 new starter P0kemon animations (By AbeNaws)](https://github.com/AbeNaws/FlipperZeroAssetPacks/tree/main/Pokemon/Compiled/Pokemon/Anims)
+- Passport added profile images of Haunter (By int0xmonkey), Psyduck (By naisatoh) & Pokemon Trainer (By AbeNaws)
 
 <a name="release">
 
@@ -145,7 +149,7 @@ $ ./fbt dolphin_ext
 - Desktop: Hold Right goes to About with Battery Info [(Thanks to Willy-JL)]
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10 (Happy Lvl 1 Dolphin), 11-15 (Happy Lvl 2 Dolphin), 16-18 (Happy Lvl 3 Dolphin), 19-21 (Kid G0ku), 22-24 (Adult G0ku), 25-27 (SSJ G0ku) and 28-30 (SSJ3 G0ku)
-- Dolphin: CFW Settings: Passport: Now has 15 selectable backgrounds options and 55 profile image options. (Changes By RogueMaster with thanks to ESurge) (Section By ESurge)
+- Dolphin: CFW Settings: Passport: Now has 15 selectable backgrounds options and 58 profile image options. (Changes By RogueMaster with thanks to ESurge) (Section By ESurge)
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
 - Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware), changed to Mood Stays Less Than 6 / Mood Stays High (but not in game mode) (By RogueMaster)
