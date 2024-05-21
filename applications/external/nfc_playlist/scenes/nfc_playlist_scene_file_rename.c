@@ -26,6 +26,7 @@ void nfc_playlist_file_rename_menu_callback(void* context) {
         nfc_playlist->settings.file_path =
             furi_string_alloc_set_str(furi_string_get_cstr(tmp_new_file_path));
     }
+
     furi_record_close(RECORD_STORAGE);
     furi_string_free(tmp_new_file_path);
     furi_string_free(tmp_old_file_path);
@@ -56,16 +57,6 @@ void nfc_playlist_file_rename_scene_on_enter(void* context) {
         nfc_playlist,
         nfc_playlist->text_input_output,
         (50 * sizeof(char)),
-        false);
-
-    text_input_set_header_text(nfc_playlist->text_input, "Enter new file name");
-    text_input_set_minimum_length(nfc_playlist->text_input, 1);
-    text_input_set_result_callback(
-        nfc_playlist->text_input,
-        nfc_playlist_file_rename_menu_callback,
-        nfc_playlist,
-        nfc_playlist->text_input_output,
-        50,
         false);
 
     view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_TextInput);
