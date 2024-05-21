@@ -1,11 +1,11 @@
 name: "uFBT Build"
 on:
   workflow_dispatch:
-  # push:
-  #   branches: 
-  #     - main
-  #     - develop
-  # pull_request:
+  push:
+    branches: 
+      - main
+      - develop
+  pull_request:
   # schedule: 
     # do a build every day
     # - cron: "1 1 * * *"

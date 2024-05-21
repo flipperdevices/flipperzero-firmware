@@ -6,7 +6,7 @@
 #include "flipchess_icons.h"
 #include "helpers/flipchess_fonts.h"
 
-#include <assets_icons.h>
+// #include <assets_icons.h>
 
 struct FlipChessStartscreen {
     View* view;
