@@ -32,11 +32,10 @@ Color:
 Currently tested apps:
 - W0rld (via Chrome web browser serial)
 - Alpha Terminal and Alpha Serial (Android)
-- Alpha Terminal (Windows)
+- Alpha Terminal and Alpha Serial (Windows)
 - ACom Wiki (Android)
 
 Unsupported Apps:
-- Alpha Serial (Windows) still doesn't seem to detect it
 
 Untested:
 - PenC
@@ -122,4 +121,7 @@ The flipper will change the USB port from CLI mode into Serial mode and behave a
 
 Dmcomm supports a voltage test. However, the flipper zero firmware does not yet have ADC support implemented. This is still possible as demonstrated by the flipper zero oscilloscope project. At some point I may implement this. A-Com's themselves use analog input in order to support a wider range of devices logic levels. This may limit the flipper app's compatibility for now.
 
-Debug mode support could be added at some point.
+- Implement ADC for voltage test mode
+- Add support for dmcomm debug modes
+- In listen mode, use interrupt mode to trigger read
+- Add menu entry to do digirom conversion like the website does and save file back out to same file.
