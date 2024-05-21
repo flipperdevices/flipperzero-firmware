@@ -230,7 +230,7 @@ static void hid_keyboard_draw_callback(Canvas* canvas, void* context) {
 
     // Header
 #ifdef HID_TRANSPORT_BLE
-    if((!model->connected)) {
+    if(!model->connected) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
         canvas_set_font(canvas, FontPrimary);
         elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Keyboard");

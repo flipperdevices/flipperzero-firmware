@@ -171,7 +171,12 @@ FlipBip* flipbip_app_alloc() {
     dialog_ex_set_left_button_text(app->renew_dialog, "No");
     dialog_ex_set_right_button_text(app->renew_dialog, "Yes");
     dialog_ex_set_header(
-        app->renew_dialog, "Current wallet\nWill be lost.\nProceed?", 16, 12, AlignLeft, AlignTop);
+        app->renew_dialog,
+        "Current wallet\nwill be deleted!\nProceed?",
+        16,
+        12,
+        AlignLeft,
+        AlignTop);
     view_dispatcher_add_view(
         app->view_dispatcher, FlipBipViewRenewConfirm, dialog_ex_get_view(app->renew_dialog));
 

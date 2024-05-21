@@ -243,7 +243,7 @@ bool getGradientPixel(uint8_t x, uint8_t y, uint8_t i) {
         + y * GRADIENT_WIDTH % (GRADIENT_WIDTH * GRADIENT_HEIGHT) // y byte offset
         + x / GRADIENT_HEIGHT % GRADIENT_WIDTH; // x byte offset
     //uint8_t *gradient_data = NULL;
-    //furi_hal_compress_icon_decode(icon_get_data(&I_gradient_inv), &gradient_data);
+    //furi_hal_compress_icon_decode(icon_get_frame_data(&I_gradient_inv, 0), &gradient_data);
     // return the bit based on x
     return read_bit(pgm_read_byte(gradient + index), x % 8);
 }

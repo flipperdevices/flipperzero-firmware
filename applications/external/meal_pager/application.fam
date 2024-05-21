@@ -1,6 +1,6 @@
 App(
     appid="meal_pager",
-    name="Restaurant Pager Trigger",
+    name="Restaurant Pager",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="meal_pager_app",
     stack_size=2 * 1024,

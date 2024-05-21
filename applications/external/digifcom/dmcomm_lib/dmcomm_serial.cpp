@@ -29,6 +29,11 @@ void SerialFollower::setProngTester(ProngTester& prong_tester) {
 void SerialFollower::loop() {
     uint8_t i = serialRead();
     if(i > 0) {
+        if(strncmp(command_buffer_, "ready", 5) ==
+           0) { // Hack to make Alpha Serial (windows) detect this as an A-Com
+            serial_.println(F("ready"));
+            return;
+        }
         DigiROMType rom_type = digiROMType(command_buffer_);
         if(rom_type.signal_type != kSignalTypeInfo &&
            rom_type.signal_type != kSignalTypeProngTest) {

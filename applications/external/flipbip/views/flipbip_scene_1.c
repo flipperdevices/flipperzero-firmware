@@ -317,8 +317,9 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         canvas_draw_str(canvas, 2, 10, TEXT_LOADING);
         canvas_draw_str(canvas, 7, 30, s_derivation_text);
         // canvas_draw_icon(canvas, 86, 22, &I_Keychain_39x36);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 125, 2, AlignRight, AlignTop, FLIPBIP_VERSION);
         if(s_warn_insecure) {
-            canvas_set_font(canvas, FontSecondary);
             canvas_draw_str(canvas, 2, 50, WARN_INSECURE_TEXT_1);
             canvas_draw_str(canvas, 2, 60, WARN_INSECURE_TEXT_2);
         }

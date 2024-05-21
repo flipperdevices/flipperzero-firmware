@@ -196,10 +196,6 @@ static bool process_ducky_file(
 }
 
 static bool load_addrs_file(Stream* file_stream) {
-    size_t file_size = 0;
-    size_t bytes_read = 0;
-    uint8_t* file_buf;
-    char* line_ptr;
     uint8_t rate;
     uint8_t addrlen = 0;
     uint32_t counter = 0;
@@ -210,38 +206,35 @@ static bool load_addrs_file(Stream* file_stream) {
     FURI_LOG_D(TAG, "opening addrs file");
     addrs_count = 0;
     if(open_addrs_file(file_stream)) {
-        file_size = stream_size(file_stream);
-        if(file_size == (size_t)0) {
-            FURI_LOG_D(TAG, "load failed. file_size: %d", file_size);
-            return loaded;
-        }
-        file_buf = malloc(file_size);
-        memset(file_buf, 0, file_size);
-        bytes_read = stream_read(file_stream, file_buf, file_size);
-        if(bytes_read == file_size) {
-            FURI_LOG_D(TAG, "loading addrs file");
-            char* line = strtok((char*)file_buf, "\n");
+        FURI_LOG_D(TAG, "loading addrs file");
+        FuriString* line = furi_string_alloc();
+        while(stream_read_line(file_stream, line)) {
+            furi_string_trim(line);
 
-            while(line != NULL) {
-                line_ptr = strstr((char*)line, ",");
-                *line_ptr = 0;
-                rate = atoi(line_ptr + 1);
-                addrlen = (uint8_t)(strlen(line) / 2);
-                i_addr_lo = strtoul(line + 2, NULL, 16);
-                line[2] = (char)0;
-                i_addr_hi = strtoul(line, NULL, 16);
-                int32_to_bytes(i_addr_lo, &addr[1], true);
-                addr[0] = (uint8_t)(i_addr_hi & 0xFF);
-                memset(loaded_addrs[counter], rate, 1);
-                memcpy(&loaded_addrs[counter++][1], addr, addrlen);
-                addrs_count++;
-                line = strtok(NULL, "\n");
-                loaded = true;
-            }
-        } else {
-            FURI_LOG_D(TAG, "load failed. file size: %d", file_size);
+            // Example: 7890ABCDEF,2
+            size_t comma = furi_string_search_char(line, ',');
+            if(comma == FURI_STRING_FAILURE) continue;
+            size_t line_len = furi_string_size(line);
+            if(line_len != comma + 2 || line_len < 6) continue;
+
+            char rate_str[] = {furi_string_get_char(line, comma + 1), '\0'};
+            rate = atoi(rate_str);
+
+            furi_string_left(line, comma);
+            addrlen = (uint8_t)(furi_string_size(line) / 2);
+            i_addr_lo = strtoul(furi_string_get_cstr(line) + 2, NULL, 16);
+
+            furi_string_left(line, 2);
+            i_addr_hi = strtoul(furi_string_get_cstr(line), NULL, 16);
+
+            int32_to_bytes(i_addr_lo, &addr[1], true);
+            addr[0] = (uint8_t)(i_addr_hi & 0xFF);
+            memset(loaded_addrs[counter], rate, 1);
+            memcpy(&loaded_addrs[counter++][1], addr, addrlen);
+            addrs_count++;
+            loaded = true;
         }
-        free(file_buf);
+        furi_string_free(line);
     }
     return loaded;
 }
