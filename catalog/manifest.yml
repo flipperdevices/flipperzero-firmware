@@ -4,14 +4,14 @@ sourcecode:
     origin: https://github.com/xtruan/FlipBIP.git
     commit_sha: a9b4eadaa2ad775ead09cec8eb0987704640acc2
 description: "Cryptocurrency wallet with support for BTC, ETH, DOGE, and ZEC (t-addr)"
-changelog: "v1.15 - Update to support new FW"
+changelog: "v1.16 - Minor UI cleanup"
 author: "@xtruan"
 screenshots:
-  - "./catalog/startscreen.png"
   - "./catalog/menu1.png"
   - "./catalog/menu2.png"
   - "./catalog/input_mnemonic.png"
   - "./catalog/btc_loading.png"
   - "./catalog/wallet_info.png"
+  - "./catalog/wallet_mnemonic.png"
   - "./catalog/btc_receive.png"
   - "./catalog/settings.png"
