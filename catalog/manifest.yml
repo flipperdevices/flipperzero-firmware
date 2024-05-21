@@ -2,7 +2,7 @@ sourcecode:
   type: git
   location:
     origin: https://github.com/xtruan/FlipBIP.git
-    commit_sha: a9b4eadaa2ad775ead09cec8eb0987704640acc2
+    commit_sha: 5afc1d3d7bc5b45a06a7d188e98de61fd8a0183c
 description: "Cryptocurrency wallet with support for BTC, ETH, DOGE, and ZEC (t-addr)"
 changelog: "v1.16 - Minor UI cleanup"
 author: "@xtruan"
