@@ -12,11 +12,16 @@ void nfc_playlist_file_rename_menu_callback(void* context) {
    furi_string_cat_str(new_file_path, ".txt");
    char const* new_file_path_cstr = furi_string_get_cstr(new_file_path);
 
-   if(!storage_file_exists(storage, new_file_path_cstr)) {
-      storage_common_rename(storage, furi_string_get_cstr(nfc_playlist->settings.file_path), new_file_path_cstr);
+   if (storage_common_rename_safe(storage, furi_string_get_cstr(nfc_playlist->settings.file_path), new_file_path_cstr) == 0) {
       furi_string_free(nfc_playlist->settings.file_path);
       nfc_playlist->settings.file_path = furi_string_alloc_set_str(new_file_path_cstr);
    }
+
+   // if (!storage_file_exists(storage, new_file_path_cstr)) {
+   //    storage_common_rename(storage, furi_string_get_cstr(nfc_playlist->settings.file_path), new_file_path_cstr);
+   //    furi_string_free(nfc_playlist->settings.file_path);
+   //    nfc_playlist->settings.file_path = furi_string_alloc_set_str(new_file_path_cstr);
+   // }
 
    furi_record_close(RECORD_STORAGE);
    furi_string_free(new_file_path);
