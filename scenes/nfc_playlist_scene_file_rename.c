@@ -17,6 +17,7 @@ void nfc_playlist_file_rename_menu_callback(void* context) {
       storage_common_rename_safe(storage, furi_string_get_cstr(nfc_playlist->settings.file_path), furi_string_get_cstr(tmp_new_file_path));
       nfc_playlist->settings.file_path = furi_string_alloc_set_str(furi_string_get_cstr(tmp_new_file_path));
    }
+   
    furi_record_close(RECORD_STORAGE);
    furi_string_free(tmp_new_file_path);
    furi_string_free(tmp_old_file_path);
