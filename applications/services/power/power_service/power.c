@@ -350,8 +350,7 @@ Power* power_alloc(void) {
         power->view_dispatcher,
         PowerViewUnplugUsb,
         power_unplug_usb_get_view(power->power_unplug_usb));
-    view_dispatcher_attach_to_gui(
-        power->view_dispatcher, power->gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_attach_to_gui(power->view_dispatcher, power->gui, ViewDispatcherTypeDesktop);
 
     // Battery view port
     power->battery_view_port = power_battery_view_port_alloc(power);

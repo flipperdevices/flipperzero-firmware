@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Passport added profile images of Haunter (By int0xmonkey), Psyduck (By naisatoh) & Pokemon Trainer (By AbeNaws)
 - Updated: [NFC Playlist v2.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Archive: [Disk Image Mount support, Search, support for: SubGHz Remote, SubGHz Playlist, IR Remote, Text Viewer & Hex Viewer, and WAV file integration (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1070)
+- Power: [Show -unplug usb cable- even when locked (By Willy-JL)]
 
 <a name="release">
 
