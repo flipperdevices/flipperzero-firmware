@@ -13,9 +13,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: zacharyweiss/flipper-app-catalog-action@v1.0
+      - uses: zacharyweiss/flipper-app-catalog-action@v1.1
         id: update_manifest
         with:
           CATALOG_UPDATE_TOKEN: ${{ secrets.CATALOG_UPDATE_TOKEN }}
     
-      # TODO: Auto-PR?
+      - name: Auto-PR
+        run: |
+          cd flipper-application-catalog
+          SHORT_SHA_OLD=$(echo ${{ steps.update_manifest.outputs.OLD_SHA }} | cut -c1-8)
+          SHORT_SHA_NEW=$(echo ${{ github.sha }} | cut -c1-8)
+
+          echo "# Application Submission
+
+          - Bumps ${{ steps.update_manifest.outputs.NAME }} to v${{ steps.update_manifest.outputs.V_MAJOR }}.${{ steps.update_manifest.outputs.V_MINOR }} (${SHORT_SHA_OLD} > ${SHORT_SHA_NEW})
+          - Commits since last release:
+          
+          \`\`\`
+          ${{ steps.update_manifest.outputs.CHANGES }}
+          \`\`\`
+          
+          # Extra Requirements 
+          Cf. original PR adding the app: #375
+          
+          
+          # Author Checklist (Fill this out)
+          
+          - [X] I've read the [contribution guidelines](../blob/HEAD/documentation/Contributing.md) and my PR follows them
+          - [X] I own the code I'm submitting or have code owner's permission to submit it
+          - [X] I [have validated](../blob/HEAD/documentation/Contributing.md#validating-manifest) the manifest file(s) with \`python3 tools/bundle.py --nolint ${{ steps.update_manifest.outputs.MANIFEST_PATH }} bundle.zip\`
+          
+          
+          # Reviewer Checklist (Don't fill this out)
+          
+          - [ ] Bundle is valid
+          - [ ] There are no obvious issues with the source code
+          - [ ] I've ran this application and verified its functionality
+          
+          " | gh pr create \
+            --title "Update ${{ steps.update_manifest.outputs.NAME }} to v${{ steps.update_manifest.outputs.V_MAJOR }}.${{ steps.update_manifest.outputs.V_MINOR }}" \
+            --body-file - \
+            --base main \
+            --head ${{ steps.update_manifest.outputs.BRANCH_NAME }} \
+            --repo flipperdevices/flipper-application-catalog
+        env:
+          GH_TOKEN: ${{ secrets.CATALOG_UPDATE_TOKEN }}
