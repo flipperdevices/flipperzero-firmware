@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Power: [Show -unplug usb cable- even when locked (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/14940302ca49316cc2ac681cc94898d98573755c)
 - Added: [Strategem Zero v0.1 (By nymda)](https://github.com/nymda/StratagemZero)
 - Updated: [NFC Playlist v2.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- Updated: [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader) Fix for TLSF allocator crashes (By Willy-JL)
 
 <a name="release">
 
