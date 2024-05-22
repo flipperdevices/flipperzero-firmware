@@ -3,6 +3,8 @@
 #include <lib/nfc/nfc.h>
 #include <lib/nfc/helpers/iso14443_crc.h>
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a.h>
+#include <lib/nfc/protocols/felica/felica.h>
+#include <lib/nfc/helpers/felica_crc.h>
 
 #include <furi/furi.h>
 
@@ -50,11 +52,31 @@ typedef struct {
     Iso14443_3aSelResp sel_resp[2];
 } Iso14443_3aColResData;
 
+typedef struct {
+    uint8_t length;
+    uint8_t polling_cmd;
+    uint16_t system_code;
+    uint8_t request_code;
+    uint8_t time_slot;
+} Felica_PollingRequest;
+
+typedef struct {
+    uint8_t code;
+    FelicaIDm idm;
+    FelicaPMm pmm;
+} Felica_SensfResData;
+
+typedef struct {
+    uint16_t system_code;
+    Felica_SensfResData sens_res;
+} Felica_PT_Memory;
+
 struct Nfc {
     NfcState state;
 
     Iso14443_3aColResStatus col_res_status;
     Iso14443_3aColResData col_res_data;
+    Felica_PT_Memory pt_memory;
 
     NfcEventCallback callback;
     void* context;
@@ -241,6 +263,21 @@ static void nfc_worker_listener_pass_col_res(Nfc* instance, uint8_t* rx_data, ui
             NfcEvent event = {.type = NfcEventTypeListenerActivated};
             instance->callback(event, instance->context);
 
+            processed = true;
+        }
+    } else if(rx_bits == 8 * 8) {
+        Felica_PollingRequest* request = (Felica_PollingRequest*)rx_data;
+        if(request->system_code == instance->pt_memory.system_code) {
+            uint8_t response_size = sizeof(Felica_SensfResData) + 1;
+            bit_buffer_reset(tx_buffer);
+            bit_buffer_append_byte(tx_buffer, response_size);
+            bit_buffer_append_bytes(
+                tx_buffer, (uint8_t*)&instance->pt_memory.sens_res, sizeof(Felica_SensfResData));
+            felica_crc_append(tx_buffer);
+            nfc_listener_tx(instance, tx_buffer);
+            instance->col_res_status = Iso14443_3aColResStatusDone;
+            NfcEvent event = {.type = NfcEventTypeListenerActivated};
+            instance->callback(event, instance->context);
             processed = true;
         }
     }
@@ -466,6 +503,11 @@ NfcError nfc_felica_listener_set_sensf_res_data(
     furi_assert(pmm);
     furi_assert(idm_len == 8);
     furi_assert(pmm_len == 8);
+
+    instance->pt_memory.system_code = 0xFFFF;
+    instance->pt_memory.sens_res.code = 0x01;
+    memcpy(instance->pt_memory.sens_res.idm.data, idm, idm_len);
+    memcpy(instance->pt_memory.sens_res.pmm.data, pmm, pmm_len);
 
     return NfcErrorNone;
 }
