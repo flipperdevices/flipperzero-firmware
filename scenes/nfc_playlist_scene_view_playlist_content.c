@@ -6,7 +6,7 @@ void nfc_playlist_view_playlist_content_scene_on_enter(void* context) {
    Storage* storage = furi_record_open(RECORD_STORAGE);
    Stream* stream = file_stream_alloc(storage);
 
-   if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+   if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.playlist_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
       FuriString* line = furi_string_alloc();
       FuriString* tmp_str = furi_string_alloc();
 

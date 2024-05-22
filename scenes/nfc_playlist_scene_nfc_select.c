@@ -6,7 +6,7 @@ void nfc_playlist_nfc_select_menu_callback(void* context) {
    Storage* storage = furi_record_open(RECORD_STORAGE);
    Stream* stream = file_stream_alloc(storage);
 
-   if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+   if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.playlist_path), FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
       FuriString* line = furi_string_alloc();
       FuriString* tmp_str = furi_string_alloc();
       while(stream_read_line(stream, line)) {

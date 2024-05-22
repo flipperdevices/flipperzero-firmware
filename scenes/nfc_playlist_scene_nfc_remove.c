@@ -67,7 +67,7 @@ bool nfc_playlist_nfc_remove_scene_on_event(void* context, SceneManagerEvent eve
             Storage* storage = furi_record_open(RECORD_STORAGE);
             Stream* stream = file_stream_alloc(storage);
 
-            if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+            if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.playlist_path), FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
                FuriString* line = furi_string_alloc();
                FuriString* tmp_str = furi_string_alloc();
                uint8_t current_line = 0;
