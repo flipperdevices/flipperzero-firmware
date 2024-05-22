@@ -62,6 +62,7 @@ GamesMenuList Version 0
 /ext/apps/Games/sokoban.fap
 /ext/apps/Games/solitaire.fap
 /ext/apps/Games/space_impact.fap
+/ext/apps/Games/stratagem.fap
 /ext/apps/Games/sudoku.fap
 /ext/apps/Games/super_chip.fap
 /ext/apps/Games/tama_p1.fap
