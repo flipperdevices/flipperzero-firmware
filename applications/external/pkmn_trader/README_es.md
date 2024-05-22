@@ -54,7 +54,7 @@ Estas instrucciones asumen que estás comenzando desde el escritorio de Flipper 
 
   <p align='center'>
       <br />
-      <img src="./docs/images/flipper-zero-flat-1.png" width="400" />
+      <img src="./docs/images/flipper-zero-pokemon-select-1.png" width="400" />
       <br />
   </p>
 - Presiona los botones `IZQUIERDA`/`DERECHA` para paginar la selección de Pokémon de a 1.
@@ -63,7 +63,7 @@ Estas instrucciones asumen que estás comenzando desde el escritorio de Flipper 
 
   <p align='center'>
        <br />
-      <img src="./docs/images/flipper-zero-flat-2.png" width="400" /><br />
+      <img src="./docs/images/flipper-zero-pokemon-select-2.png" width="400" /><br />
   </p>
 - El nombre del Pokémon intercambiado se puede establecer. Cuando se selecciona un Pokémon, el nombre por defecto es el nombre de la especie en mayúsculas. Esto imita a un Pokémon sin un nombre personalizado. Para restablecer este nombre a su valor predeterminado, borra el campo de entrada de texto, presiona `OK` en el botón `Save`. Esto llenará el cuadro de texto con el nombre predeterminado. Presiona `Save` nuevamente para establecer este nombre.
 
@@ -73,26 +73,26 @@ Estas instrucciones asumen que estás comenzando desde el escritorio de Flipper 
 
     <p align='center'>
         <br />
-        <img src="./docs/images/flipper-zero-flat-1-1.png" width="400" />
+        <img src="./docs/images/flipper-zero-nickname.png" width="400" />
         <br />
     </p>
 - También se puede ajustar el nivel del Pokémon presionando `OK` en la opción de nivel. El nivel mínimo es `2` y el máximo es `100`. El nivel se ingresa a través de un cuadro de texto. (Los niveles por debajo de 2 causan una falla de desbordamiento en los juegos de Gen I que haría que el nivel saltara a 100, así que si deseas esto, simplemente establece el nivel del Pokémon en 100).
 
   <p align='center'>
       <br />
-      <img src="./docs/images/flipper-zero-flat-3.png" width="400" />
+      <img src="./docs/images/flipper-zero-flat-pokemon-level.png" width="400" />
       <br />
   </p>
 - El menú `Select Moves` se utiliza para elegir los movimientos del Pokémon intercambiado. Están predefinidos con el conjunto de movimientos que el Pokémon conocería al nivel 1. Seleccionar una ranura de movimiento mostrará un índice alfabético de movimientos. Además, se pueden seleccionar rápidamente `No Move` y `Default`. Ten en cuenta que cualquier movimiento después del primer `No Move` se ignora.
 
   <p align='center'>
       <br />
-      <img src="./docs/images/flipper-zero-flat-7.png" width="400" />
+      <img src="./docs/images/flipper-zero-move-1.png" width="400" />
       <br />
   </p>
   <p align='center'>
       <br />
-      <img src="./docs/images/flipper-zero-flat-8.png" width="400" />
+      <img src="./docs/images/flipper-zero-move-2.png" width="400" />
       <br />
   </p>
 - El menú `Select Types` puede cambiar los tipos del Pokémon intercambiado. Los tipos están predefinidos según lo que normalmente es el Pokémon seleccionado.
@@ -105,7 +105,7 @@ Estas instrucciones asumen que estás comenzando desde el escritorio de Flipper 
 
     <p align='center'>
         <br />
-        <img src="./docs/images/flipper-zero-flat-8-1.png" width="400" />
+        <img src="./docs/images/flipper-zero-type.png" width="400" />
         <br />
     </p>
 - Las estadísticas del Pokémon también se pueden influir. Las configuraciones actuales son:
@@ -119,7 +119,7 @@ Estas instrucciones asumen que estás comenzando desde el escritorio de Flipper 
 
     <p align='center'>
         <br />
-        <img src="./docs/images/flipper-zero-flat-5.png" width="400" />
+        <img src="./docs/images/flipper-zero-stats.png" width="400" />
         <br />
     </p>
 
@@ -127,11 +127,11 @@ Estas instrucciones asumen que estás comenzando desde el escritorio de Flipper 
 
   <p align='center'>
       <br />
-      <img src="./docs/images/flipper-zero-flat-6.png" width="400" /><br />
+      <img src="./docs/images/flipper-zero-ot-id.png" width="400" /><br />
   </p>
   <p align='center'>
       <br />
-      <img src="./docs/images/flipper-zero-flat-6-1.png" width="400" /><br />
+      <img src="./docs/images/flipper-zero-ot-name.png" width="400" /><br />
   </p>
 - Finalmente, selecciona Intercambiar PKMN para iniciar el proceso de intercambio.
 
