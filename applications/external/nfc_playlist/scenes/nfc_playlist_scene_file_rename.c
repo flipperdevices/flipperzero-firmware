@@ -11,21 +11,15 @@ void nfc_playlist_file_rename_menu_callback(void* context) {
     FuriString* new_file_path = furi_string_alloc_set_str(old_file_path);
     furi_string_replace(new_file_path, old_file_name, nfc_playlist->text_input_output);
     furi_string_cat_str(new_file_path, ".txt");
-    char const* new_file_path_cstr = furi_string_get_cstr(new_file_path);
 
-    if(storage_common_rename(
-           storage, furi_string_get_cstr(nfc_playlist->settings.file_path), new_file_path_cstr) ==
-       0) {
-        furi_string_free(nfc_playlist->settings.file_path);
-        nfc_playlist->settings.file_path = furi_string_alloc_set_str(new_file_path_cstr);
+    if(!storage_file_exists(storage, furi_string_get_cstr(new_file_path))) {
+        storage_common_rename(
+            storage,
+            furi_string_get_cstr(nfc_playlist->settings.file_path),
+            furi_string_get_cstr(new_file_path));
+        nfc_playlist->settings.file_path =
+            furi_string_alloc_set_str(furi_string_get_cstr(new_file_path));
     }
-
-    // if (!storage_file_exists(storage, new_file_path_cstr)) {
-    //    storage_common_rename(storage, furi_string_get_cstr(nfc_playlist->settings.file_path), new_file_path_cstr);
-    //    furi_string_free(nfc_playlist->settings.file_path);
-    //    nfc_playlist->settings.file_path = furi_string_alloc_set_str(new_file_path_cstr);
-    // }
-
     furi_record_close(RECORD_STORAGE);
     furi_string_free(new_file_path);
 
@@ -44,7 +38,6 @@ void nfc_playlist_file_rename_scene_on_enter(void* context) {
 
     nfc_playlist->text_input_output = strdup(furi_string_get_cstr(tmp_file_name_furi));
     furi_string_free(tmp_file_name_furi);
-
     text_input_set_header_text(nfc_playlist->text_input, "Enter new file name");
     text_input_set_minimum_length(nfc_playlist->text_input, 1);
     text_input_set_result_callback(
@@ -52,7 +45,7 @@ void nfc_playlist_file_rename_scene_on_enter(void* context) {
         nfc_playlist_file_rename_menu_callback,
         nfc_playlist,
         nfc_playlist->text_input_output,
-        (50 * sizeof(char)),
+        25,
         false);
 
     view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_TextInput);
