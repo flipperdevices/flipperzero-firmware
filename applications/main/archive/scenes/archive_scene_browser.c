@@ -211,7 +211,6 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             if(!archive_is_home(browser)) {
                 archive_leave_dir(browser);
             } else {
-                FURI_LOG_I(TAG, "ArchiveBrowserEventExit");
                 if(archive->loader_stop_subscription) {
                     furi_pubsub_unsubscribe(
                         loader_get_pubsub(archive->loader), archive->loader_stop_subscription);
@@ -232,9 +231,9 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
 
 void archive_scene_browser_on_exit(void* context) {
     ArchiveApp* archive = (ArchiveApp*)context;
-    FURI_LOG_I(TAG, "archive_scene_browser_on_exit");
     if(archive->loader_stop_subscription) {
-        furi_pubsub_unsubscribe(loader_get_pubsub(archive->loader), archive->loader_stop_subscription);
+        furi_pubsub_unsubscribe(
+            loader_get_pubsub(archive->loader), archive->loader_stop_subscription);
         archive->loader_stop_subscription = NULL;
     }
 }
