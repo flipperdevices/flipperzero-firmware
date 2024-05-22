@@ -231,7 +231,7 @@ void seader_send_response(
 
     seader_send_payload(seader_uart, payload, to, from, replyTo);
 
-    ASN_STRUCT_FREE(asn_DEF_Payload, payload);
+    free(payload);
 }
 
 void seader_send_request_pacs(Seader* seader) {
@@ -262,9 +262,9 @@ void seader_send_request_pacs(Seader* seader) {
 
     seader_send_payload(seader_uart, payload, 0x44, 0x0a, 0x44);
 
-    ASN_STRUCT_FREE(asn_DEF_RequestPacs, requestPacs);
-    ASN_STRUCT_FREE(asn_DEF_SamCommand, samCommand);
-    ASN_STRUCT_FREE(asn_DEF_Payload, payload);
+    free(requestPacs);
+    free(samCommand);
+    free(payload);
 }
 
 void seader_worker_send_serial_number(Seader* seader) {
@@ -287,8 +287,8 @@ void seader_worker_send_serial_number(Seader* seader) {
 
     seader_send_payload(seader_uart, payload, 0x44, 0x0a, 0x44);
 
-    ASN_STRUCT_FREE(asn_DEF_SamCommand, samCommand);
-    ASN_STRUCT_FREE(asn_DEF_Payload, payload);
+    free(samCommand);
+    free(payload);
 }
 
 void seader_worker_send_version(Seader* seader) {
@@ -311,8 +311,8 @@ void seader_worker_send_version(Seader* seader) {
 
     seader_send_payload(seader_uart, payload, 0x44, 0x0a, 0x44);
 
-    ASN_STRUCT_FREE(asn_DEF_SamCommand, samCommand);
-    ASN_STRUCT_FREE(asn_DEF_Payload, payload);
+    free(samCommand);
+    free(payload);
 }
 
 void seader_send_card_detected(Seader* seader, CardDetails_t* cardDetails) {
@@ -341,9 +341,9 @@ void seader_send_card_detected(Seader* seader, CardDetails_t* cardDetails) {
 
     seader_send_payload(seader_uart, payload, 0x44, 0x0a, 0x44);
 
-    ASN_STRUCT_FREE(asn_DEF_Payload, payload);
-    ASN_STRUCT_FREE(asn_DEF_SamCommand, samCommand);
-    ASN_STRUCT_FREE(asn_DEF_CardDetected, cardDetected);
+    free(payload);
+    free(samCommand);
+    free(cardDetected);
 }
 
 bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
@@ -394,7 +394,7 @@ bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
         }
     }
 
-    ASN_STRUCT_FREE(asn_DEF_PAC, pac);
+    free(pac);
     return rtn;
 }
 
@@ -434,7 +434,7 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
         rtn = true;
     }
 
-    ASN_STRUCT_FREE(asn_DEF_SamVersion, version);
+    free(version);
     return rtn;
 }
 
@@ -597,9 +597,9 @@ void seader_send_nfc_rx(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t l
 
     seader_send_response(seader_uart, response, 0x14, 0x0a, 0x0);
 
-    ASN_STRUCT_FREE(asn_DEF_NFCRx, nfcRx);
-    ASN_STRUCT_FREE(asn_DEF_NFCResponse, nfcResponse);
-    ASN_STRUCT_FREE(asn_DEF_Response, response);
+    free(nfcRx);
+    free(nfcResponse);
+    free(response);
 }
 
 void seader_capture_sio(BitBuffer* tx_buffer, BitBuffer* rx_buffer, SeaderCredential* credential) {
@@ -953,8 +953,8 @@ void seader_parse_nfc_off(SeaderUartBridge* seader_uart) {
 
     seader_send_response(seader_uart, response, 0x44, 0x0a, 0);
 
-    ASN_STRUCT_FREE(asn_DEF_Response, response);
-    ASN_STRUCT_FREE(asn_DEF_NFCResponse, nfcResponse);
+    free(response);
+    free(nfcResponse);
 }
 
 void seader_parse_nfc_command(Seader* seader, NFCCommand_t* nfcCommand, SeaderPollerContainer* spc) {
@@ -1047,7 +1047,7 @@ bool seader_process_success_response_i(
         FURI_LOG_D(TAG, "Failed to decode APDU payload: [%s]", display);
     }
 
-    ASN_STRUCT_FREE(asn_DEF_Payload, payload);
+    free(payload);
     return processed;
 }
 
@@ -1104,6 +1104,6 @@ NfcCommand seader_worker_card_detect(
 
     seader_send_card_detected(seader, cardDetails);
 
-    ASN_STRUCT_FREE(asn_DEF_CardDetails, cardDetails);
+    free(cardDetails);
     return NfcCommandContinue;
 }
