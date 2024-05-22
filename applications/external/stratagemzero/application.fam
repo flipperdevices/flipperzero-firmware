@@ -1,16 +1,14 @@
-# For details & more options, see documentation/AppManifests.md in firmware repo
-
 App(
-    appid="stratagem",  # Must be unique
-    name="Stratagem Zero",  # Displayed in menus
+    appid="stratagem",
+    name="Stratagem Zero",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="stratagem_app",
     stack_size=2 * 1024,
+    fap_icon_assets="images",
+    fap_icon="stratagem.png",
     fap_category="Games",
-    fap_version="0.1",
-    fap_icon="stratagem.png",  # 10x10 1-bit PNG
-    fap_description="Stratagem hero clone",
     fap_author="Nymda",
     fap_weburl="https://github.com/nymda/StratagemZero",
-    fap_icon_assets="images",  # Image assets to compile for this application
+    fap_version="0.1",
+    fap_description="Stratagem hero clone",
 )

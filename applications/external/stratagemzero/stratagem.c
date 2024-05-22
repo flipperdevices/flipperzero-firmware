@@ -14,19 +14,19 @@
 #define TIME_REWARD_MULTIPLIER 0.10
 #define TIME_DECREASE_MULTIPLER 0.125
 
-typedef struct{
+typedef struct {
     char name[24];
     char arrows[12];
 } stratagem;
 
-typedef struct{
+typedef struct {
     char name[24];
     int groupID;
     stratagem stratagems[16];
     int stratagemCount;
 } group;
 
-typedef enum{
+typedef enum {
     begin,
     active,
     end,
@@ -50,13 +50,15 @@ state gameState = begin;
 char levelText[16];
 char scoreText[16];
 
-void nextStrata(){
+void nextStrata() {
     int nextIndex = furi_hal_random_get() % groups[groupIndex].stratagemCount;
-    while(strataIndex == nextIndex){ nextIndex = furi_hal_random_get() % groups[groupIndex].stratagemCount; }
+    while(strataIndex == nextIndex) {
+        nextIndex = furi_hal_random_get() % groups[groupIndex].stratagemCount;
+    }
     strataIndex = nextIndex;
 }
 
-void nextLevel(){
+void nextLevel() {
     level++;
     levelLen = (furi_hal_random_get() % 4) + 4;
     levelCompleted = 0;
@@ -64,13 +66,15 @@ void nextLevel(){
     remainingtime = totaltime;
 
     int nextIndex = furi_hal_random_get() % 6;
-    while(groupIndex == nextIndex){ nextIndex = furi_hal_random_get() % 6; }
+    while(groupIndex == nextIndex) {
+        nextIndex = furi_hal_random_get() % 6;
+    }
     groupIndex = nextIndex;
 
     nextStrata();
 }
 
-void newGame(){
+void newGame() {
     totaltime = 2000;
     remainingtime = 2000;
     groupIndex = 0;
@@ -80,20 +84,20 @@ void newGame(){
     levelLen = 0;
     levelCompleted = 0;
     nextLevel();
-} 
+}
 
-void initGroup(int groupID, const char* name){
+void initGroup(int groupID, const char* name) {
     memcpy(groups[groupID].name, name, strlen(name) + 1);
 }
 
-void initStratagem(int groupID, const char* name, const char* pattern){
+void initStratagem(int groupID, const char* name, const char* pattern) {
     group* gr = &groups[groupID];
     memcpy(gr->stratagems[gr->stratagemCount].name, name, strlen(name) + 1);
     memcpy(gr->stratagems[gr->stratagemCount].arrows, pattern, strlen(pattern) + 1);
     gr->stratagemCount++;
 }
 
-void initStratagems(){
+void initStratagems() {
     initGroup(0, "Mission");
     initStratagem(0, "Reinforce", "UDRLU");
     initStratagem(0, "SOS Beacon", "UDLR");
@@ -169,42 +173,61 @@ void initStratagems(){
     initStratagem(5, "E/MG-101 HMG", "DRLRRL");
 }
 
-void draw_stratagem(Canvas* canvas, uint8_t y){
+void draw_stratagem(Canvas* canvas, uint8_t y) {
     int arrowSize = 14; //its square
-    int x = 64 - (((int)strlen(groups[groupIndex].stratagems[strataIndex].arrows) * arrowSize) / 2);
+    int x =
+        64 - (((int)strlen(groups[groupIndex].stratagems[strataIndex].arrows) * arrowSize) / 2);
     y -= arrowSize / 2;
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, y - (arrowSize * 0.5) - 12, AlignCenter, AlignCenter, groups[groupIndex].name);
+    canvas_draw_str_aligned(
+        canvas, 64, y - (arrowSize * 0.5) - 12, AlignCenter, AlignCenter, groups[groupIndex].name);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, y - (arrowSize * 0.5), AlignCenter, AlignCenter, groups[groupIndex].stratagems[strataIndex].name);
+    canvas_draw_str_aligned(
+        canvas,
+        64,
+        y - (arrowSize * 0.5),
+        AlignCenter,
+        AlignCenter,
+        groups[groupIndex].stratagems[strataIndex].name);
 
-    for(int i = 0; i < (int)strlen(groups[groupIndex].stratagems[strataIndex].arrows); i++){
-        switch (groups[groupIndex].stratagems[strataIndex].arrows[i])
-        {
-            case 'U':
-                if(arrowIndex > i){ canvas_draw_icon(canvas, x, y, &I_UpArrow_Filled_14x14); }
-                else{ canvas_draw_icon(canvas, x, y, &I_UpArrow_Empty_14x14); }
-                break;
+    for(int i = 0; i < (int)strlen(groups[groupIndex].stratagems[strataIndex].arrows); i++) {
+        switch(groups[groupIndex].stratagems[strataIndex].arrows[i]) {
+        case 'U':
+            if(arrowIndex > i) {
+                canvas_draw_icon(canvas, x, y, &I_UpArrow_Filled_14x14);
+            } else {
+                canvas_draw_icon(canvas, x, y, &I_UpArrow_Empty_14x14);
+            }
+            break;
 
-            case 'D':
-                if(arrowIndex > i){ canvas_draw_icon(canvas, x, y, &I_DownArrow_Filled_14x14); }
-                else{ canvas_draw_icon(canvas, x, y, &I_DownArrow_Empty_14x14); }
-                break;
+        case 'D':
+            if(arrowIndex > i) {
+                canvas_draw_icon(canvas, x, y, &I_DownArrow_Filled_14x14);
+            } else {
+                canvas_draw_icon(canvas, x, y, &I_DownArrow_Empty_14x14);
+            }
+            break;
 
-            case 'L':
-                if(arrowIndex > i){ canvas_draw_icon(canvas, x, y, &I_LeftArrow_Filled_14x14); }
-                else{ canvas_draw_icon(canvas, x, y, &I_LeftArrow_Empty_14x14); }
-                break;
+        case 'L':
+            if(arrowIndex > i) {
+                canvas_draw_icon(canvas, x, y, &I_LeftArrow_Filled_14x14);
+            } else {
+                canvas_draw_icon(canvas, x, y, &I_LeftArrow_Empty_14x14);
+            }
+            break;
 
-            case 'R':
-                if(arrowIndex > i){ canvas_draw_icon(canvas, x, y, &I_RightArrow_Filled_14x14); }
-                else{ canvas_draw_icon(canvas, x, y, &I_RightArrow_Empty_14x14); }
-                break;
-            
-            case 0x00:
-                return;
+        case 'R':
+            if(arrowIndex > i) {
+                canvas_draw_icon(canvas, x, y, &I_RightArrow_Filled_14x14);
+            } else {
+                canvas_draw_icon(canvas, x, y, &I_RightArrow_Empty_14x14);
+            }
+            break;
+
+        case 0x00:
+            return;
         }
         x += arrowSize;
     }
@@ -247,12 +270,12 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
 
-    if(gameState == active || gameState == begin){
+    if(gameState == active || gameState == begin) {
         draw_stratagem(canvas, 40);
         float remPerc = (float)((float)remainingtime / (float)totaltime);
         draw_timer_bar(canvas, 2, 53, 124, remPerc);
     }
-    if(gameState == end){
+    if(gameState == end) {
         snprintf(levelText, 16, "Level: %i", level);
         snprintf(scoreText, 16, "Score: %i", score);
 
@@ -275,71 +298,78 @@ static void timer_callback(void* ctx) {
     furi_assert(ctx);
     UNUSED(ctx);
 
-    if(gameState == begin || gameState == end){ return; }
+    if(gameState == begin || gameState == end) {
+        return;
+    }
 
-    if(remainingtime <= 0){ 
+    if(remainingtime <= 0) {
         remainingtime = 0;
         gameState = end;
         notification_message(notif, &sequence_error);
-        return; 
+        return;
     }
     remainingtime--;
 }
 
-static void handleKeyPress(InputKey key){
+static void handleKeyPress(InputKey key) {
     bool fail = false;
 
-    if(gameState == end){ 
-        gameState = begin; 
+    if(gameState == end) {
+        gameState = begin;
         newGame();
         return;
-    }
-    else if(gameState == begin){
+    } else if(gameState == begin) {
         gameState = active;
     }
 
-    if(key == InputKeyUp){
-        if(groups[groupIndex].stratagems[strataIndex].arrows[arrowIndex] == 'U'){
+    if(key == InputKeyUp) {
+        if(groups[groupIndex].stratagems[strataIndex].arrows[arrowIndex] == 'U') {
             arrowIndex++;
+        } else {
+            fail = true;
         }
-        else{ fail = true; }
     }
-    if(key == InputKeyDown){
-        if(groups[groupIndex].stratagems[strataIndex].arrows[arrowIndex] == 'D'){
+    if(key == InputKeyDown) {
+        if(groups[groupIndex].stratagems[strataIndex].arrows[arrowIndex] == 'D') {
             arrowIndex++;
+        } else {
+            fail = true;
         }
-        else{ fail = true; }
     }
-    if(key == InputKeyLeft){
-        if(groups[groupIndex].stratagems[strataIndex].arrows[arrowIndex] == 'L'){
+    if(key == InputKeyLeft) {
+        if(groups[groupIndex].stratagems[strataIndex].arrows[arrowIndex] == 'L') {
             arrowIndex++;
+        } else {
+            fail = true;
         }
-        else{ fail = true; }
     }
-    if(key == InputKeyRight){
-        if(groups[groupIndex].stratagems[strataIndex].arrows[arrowIndex] == 'R'){
+    if(key == InputKeyRight) {
+        if(groups[groupIndex].stratagems[strataIndex].arrows[arrowIndex] == 'R') {
             arrowIndex++;
+        } else {
+            fail = true;
         }
-        else{ fail = true; }
     }
 
-    if(fail){
-        remainingtime -= ((float)totaltime * TIME_PENALTY_MULTIPLIER);;
+    if(fail) {
+        remainingtime -= ((float)totaltime * TIME_PENALTY_MULTIPLIER);
+        ;
         arrowIndex = 0;
         notification_message(notif, &sequence_single_vibro);
     }
 
-    if(arrowIndex == ((int)strlen(groups[groupIndex].stratagems[strataIndex].arrows))){
+    if(arrowIndex == ((int)strlen(groups[groupIndex].stratagems[strataIndex].arrows))) {
         arrowIndex = 0;
         remainingtime += ((float)totaltime * TIME_REWARD_MULTIPLIER);
-        if(remainingtime > totaltime){ remainingtime = totaltime; }
+        if(remainingtime > totaltime) {
+            remainingtime = totaltime;
+        }
         levelCompleted++;
 
-        if(levelCompleted == levelLen){
+        if(levelCompleted == levelLen) {
             nextLevel();
             notification_message(notif, &sequence_double_vibro);
-        }
-        else{
+        } else {
             nextStrata();
             score++;
         }
@@ -377,12 +407,17 @@ int32_t stratagem_app(void* p) {
     while(running) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         view_port_update(view_port);
-        if(!(event_status == FuriStatusOk)){ continue; }
+        if(!(event_status == FuriStatusOk)) {
+            continue;
+        }
         if(event.type == InputTypePress) {
-            if(event.key == InputKeyUp || event.key == InputKeyDown || event.key == InputKeyLeft || event.key == InputKeyRight || event.key == InputKeyOk){
+            if(event.key == InputKeyUp || event.key == InputKeyDown || event.key == InputKeyLeft ||
+               event.key == InputKeyRight || event.key == InputKeyOk) {
                 handleKeyPress(event.key);
             }
-            if(event.key == InputKeyBack) { running = false; }
+            if(event.key == InputKeyBack) {
+                running = false;
+            }
         }
     }
 
