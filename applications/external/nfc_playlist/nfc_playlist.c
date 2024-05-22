@@ -22,7 +22,7 @@ static NfcPlaylist* nfc_playlist_alloc() {
     nfc_playlist->submenu = submenu_alloc();
     nfc_playlist->widget = widget_alloc();
 
-    nfc_playlist->settings.file_path = furi_string_alloc();
+    nfc_playlist->settings.playlist_path = furi_string_alloc();
     nfc_playlist->file_browser_output = furi_string_alloc();
     nfc_playlist->settings.playlist_selected = false;
     nfc_playlist->settings.emulate_timeout = default_emulate_timeout;
@@ -95,9 +95,8 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
     text_input_free(nfc_playlist->text_input);
     popup_free(nfc_playlist->popup);
 
-    furi_string_free(nfc_playlist->settings.file_path);
+    furi_string_free(nfc_playlist->settings.playlist_path);
     furi_string_free(nfc_playlist->file_browser_output);
-    furi_string_free(nfc_playlist->temp_furi_string);
     free(nfc_playlist);
 }
 

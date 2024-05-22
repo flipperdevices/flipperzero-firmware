@@ -38,7 +38,7 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
         NfcPlaylistMenuSelection_Start,
         nfc_playlist_main_menu_menu_callback,
         nfc_playlist,
-        furi_string_empty(nfc_playlist->settings.file_path),
+        furi_string_empty(nfc_playlist->settings.playlist_path),
         "No\nplaylist\nselected");
 
     submenu_add_item(
@@ -79,7 +79,7 @@ bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent even
             consumed = true;
             break;
         case NfcPlaylistEvent_ShowFileEdit:
-            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileEdit);
+            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_PlaylistEdit);
             consumed = true;
             break;
         case NfcPlaylistEvent_ShowSettings:

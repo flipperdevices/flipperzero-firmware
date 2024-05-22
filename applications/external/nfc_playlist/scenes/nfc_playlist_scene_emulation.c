@@ -22,7 +22,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
     if(file_stream_open(
            stream,
-           furi_string_get_cstr(nfc_playlist->settings.file_path),
+           furi_string_get_cstr(nfc_playlist->settings.playlist_path),
            FSAM_READ,
            FSOM_OPEN_EXISTING)) {
         EmulationState = NfcPlaylistEmulationState_Emulating;
@@ -36,7 +36,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
               EmulationState == NfcPlaylistEmulationState_Emulating) {
             char* file_path = (char*)furi_string_get_cstr(line);
 
-            if(strlen(file_path) <= 1) {
+            if(strspn(file_path, " \t\n\r") == strlen(file_path)) {
                 continue;
             }
 

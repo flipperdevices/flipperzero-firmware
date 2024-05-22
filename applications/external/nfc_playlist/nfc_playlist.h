@@ -38,7 +38,7 @@ typedef enum {
 } NfcPlaylistViews;
 
 typedef struct {
-    FuriString* file_path;
+    FuriString* playlist_path;
     uint8_t playlist_length;
     bool playlist_selected;
     uint8_t emulate_timeout;
@@ -60,7 +60,6 @@ typedef struct {
     char* text_input_output;
     NotificationApp* notification;
     FuriThread* thread;
-    FuriString* temp_furi_string;
     NfcPlaylistWorker* nfc_playlist_worker;
     NfcPlaylistSettings settings;
 } NfcPlaylist;
