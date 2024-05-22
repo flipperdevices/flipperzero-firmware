@@ -40,9 +40,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Patreon Builds Update: [P0KEMON and ManifestSwitcher builds have been updated to have 12 new Psyduck animations (By naisatoh)](https://github.com/naisatoh/Psyduck-Asset-Pack)
 - Patreon Builds Update: [P0KEMON and ManifestSwitcher builds have been updated to have 8 new starter P0kemon animations (By AbeNaws)](https://github.com/AbeNaws/FlipperZeroAssetPacks/tree/main/Pokemon/Compiled/Pokemon/Anims)
 - Passport added profile images of Haunter (By int0xmonkey), Psyduck (By naisatoh) & Pokemon Trainer (By AbeNaws)
-- Updated: [NFC Playlist v2.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Archive: [Disk Image Mount support, Search, support for: SubGHz Remote, SubGHz Playlist, IR Remote, Text Viewer & Hex Viewer, and WAV file integration (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1070)
 - Power: [Show -unplug usb cable- even when locked (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/14940302ca49316cc2ac681cc94898d98573755c)
+- Updated: [NFC Playlist v2.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
