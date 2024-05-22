@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0521-1404-0.102.1-49d966d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-21 14:04 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-21 14:04 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-21 20:14 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-21 20:14 EST`
 - Updated: [Chess v1.10 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Updated: [Digimon F-Com v1.3 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 - Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac) Fix (By Willy-JL)
@@ -42,7 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Passport added profile images of Haunter (By int0xmonkey), Psyduck (By naisatoh) & Pokemon Trainer (By AbeNaws)
 - Updated: [NFC Playlist v2.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Archive: [Disk Image Mount support, Search, support for: SubGHz Remote, SubGHz Playlist, IR Remote, Text Viewer & Hex Viewer, and WAV file integration (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1070)
-- Power: [Show -unplug usb cable- even when locked (By Willy-JL)]
+- Power: [Show -unplug usb cable- even when locked (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/14940302ca49316cc2ac681cc94898d98573755c)
 
 <a name="release">
 
