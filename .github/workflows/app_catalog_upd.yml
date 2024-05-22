@@ -54,7 +54,7 @@ jobs:
             --title "Update ${{ steps.update_manifest.outputs.NAME }} to v${{ steps.update_manifest.outputs.V_MAJOR }}.${{ steps.update_manifest.outputs.V_MINOR }}" \
             --body-file - \
             --base main \
-            --head ${{ steps.update_manifest.outputs.BRANCH_NAME }} \
+            --head ${{ github.repository_owner }}:${{ steps.update_manifest.outputs.BRANCH_NAME }} \
             --repo flipperdevices/flipper-application-catalog
         env:
           GH_TOKEN: ${{ secrets.CATALOG_UPDATE_TOKEN }}
