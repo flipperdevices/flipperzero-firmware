@@ -73,6 +73,7 @@ static const bool default_skip_error = false;
 
 #define PLAYLIST_LOCATION "/ext/apps_data/nfc_playlist/"
 #define PLAYLIST_DIR "/ext/apps_data/nfc_playlist"
+#define PLAYLIST_NAME_LEN 100
 
 typedef enum NfcPlaylistLedState {
     NfcPlaylistLedState_Normal,

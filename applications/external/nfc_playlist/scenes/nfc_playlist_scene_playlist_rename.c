@@ -12,11 +12,12 @@ void nfc_playlist_playlist_rename_menu_callback(void* context) {
     furi_string_replace(new_file_path, old_file_name, nfc_playlist->text_input_output);
     furi_string_cat_str(new_file_path, ".txt");
 
-    if(storage_common_rename(storage, old_file_path, furi_string_get_cstr(new_file_path)) == 0) {
-        furi_string_move(nfc_playlist->settings.playlist_path, new_file_path);
+    if(storage_common_rename(storage, old_file_path, furi_string_get_cstr(new_file_path)) ==
+       0) {
+        furi_string_swap(nfc_playlist->settings.playlist_path, new_file_path);
     }
-    furi_string_free(new_file_path);
 
+    furi_string_free(new_file_path);
     furi_record_close(RECORD_STORAGE);
 
     scene_manager_search_and_switch_to_previous_scene(
@@ -43,7 +44,7 @@ void nfc_playlist_playlist_rename_scene_on_enter(void* context) {
         nfc_playlist_playlist_rename_menu_callback,
         nfc_playlist,
         nfc_playlist->text_input_output,
-        (50 + sizeof(nfc_playlist->text_input_output)),
+        PLAYLIST_NAME_LEN,
         false);
 
     view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_TextInput);
