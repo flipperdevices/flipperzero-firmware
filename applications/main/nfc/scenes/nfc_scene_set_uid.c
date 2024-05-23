@@ -7,10 +7,7 @@ void nfc_scene_set_uid_on_enter(void* context) {
 
     size_t uid_len;
     const uint8_t* uid = nfc_device_get_uid(instance->nfc_device, &uid_len);
-
     memcpy(instance->byte_input_store, uid, uid_len);
-    // Save UID length for use in callback
-    scene_manager_set_scene_state(instance->scene_manager, NfcSceneSetUid, uid_len);
 
     // Setup view
     ByteInput* byte_input = instance->byte_input;
