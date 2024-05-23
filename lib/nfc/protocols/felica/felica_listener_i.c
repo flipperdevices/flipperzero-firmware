@@ -7,8 +7,24 @@
 #define FELICA_WCNT_MC2_00_WARNING_BEGIN_VALUE (0x00001027)
 #define FELICA_WCNT_MC2_00_WARNING_END_VALUE (0x00FFFDFF)
 
+#define FELICA_MC_SP_REG_ALL_RW_BYTES_0_1 (0)
+#define FELICA_MC_ALL_BYTE (2)
+#define FELICA_MC_SYS_OP (3)
+#define FELICA_MC_RF_PRM (4)
+#define FELICA_MC_CKCKV_W_MAC_A (5)
+#define FELICA_MC_SP_REG_R_RESTR_BYTES_6_7 (6)
+#define FELICA_MC_SP_REG_W_RESTR_BYTES_8_9 (8)
+#define FELICA_MC_SP_REG_W_MAC_A_BYTES_10_11 (10)
+#define FELICA_MC_STATE_W_MAC_A (12)
+#define FELICA_MC_RESERVED_13 (13)
+#define FELICA_MC_RESERVED_14 (14)
+#define FELICA_MC_RESERVED_15 (15)
+
+#define FELICA_LISTENER_READ_BLOCK_COUNT_MAX (4)
+#define FELICA_LISTENER_READ_BLOCK_COUNT_MIN (1)
+
 static uint32_t felica_wcnt_get_max_value(const FelicaData* data) {
-    const uint8_t mc = data->data.fs.mc.data[2];
+    const uint8_t mc = data->data.fs.mc.data[FELICA_MC_ALL_BYTE];
 
     if(mc != 0xFF && mc != 0x00) {
         furi_crash("Reserved value is forbidden");
@@ -17,7 +33,7 @@ static uint32_t felica_wcnt_get_max_value(const FelicaData* data) {
 }
 
 static bool felica_wcnt_check_warning_boundary(const FelicaData* data) {
-    const uint8_t mc = data->data.fs.mc.data[2];
+    const uint8_t mc = data->data.fs.mc.data[FELICA_MC_ALL_BYTE];
     const uint32_t* wcnt_ptr = (uint32_t*)data->data.fs.wcnt.data;
     bool res = false;
     if(mc == 0x00) {
@@ -49,7 +65,8 @@ void felica_wcnt_increment(FelicaData* data) {
 static void felica_wcnt_post_process(FelicaData* data) {
     uint32_t* wcnt_ptr = (uint32_t*)data->data.fs.wcnt.data;
 
-    if((data->data.fs.mc.data[2] == 0x00) && (*wcnt_ptr > FELICA_WCNT_MC2_00_MAX_VALUE)) {
+    if((data->data.fs.mc.data[FELICA_MC_ALL_BYTE] == 0x00) &&
+       (*wcnt_ptr > FELICA_WCNT_MC2_00_MAX_VALUE)) {
         *wcnt_ptr = 0;
     }
 }
@@ -124,21 +141,20 @@ static bool felica_block_requires_auth(
 }
 
 static bool felica_block_is_readonly(const FelicaListener* instance, uint8_t block_number) {
-    uint8_t mc_flag_index = 0;
     ///TODO: Add more checks for other blocks not only first 15
     if(block_number <= FELICA_BLOCK_INDEX_REG) {
-        return !felica_get_mc_bit(instance, mc_flag_index, block_number);
+        return !felica_get_mc_bit(instance, FELICA_MC_SP_REG_ALL_RW_BYTES_0_1, block_number);
     } else if(
         (block_number >= FELICA_BLOCK_INDEX_ID && block_number <= FELICA_BLOCK_INDEX_SER_C) ||
         (block_number >= FELICA_BLOCK_INDEX_CKV && block_number <= FELICA_BLOCK_INDEX_CK)) {
-        return instance->data->data.fs.mc.data[2] == 0xFF; ///TODO: replace this with some macro
+        ///TODO: replace this with some macro
+        return instance->data->data.fs.mc.data[FELICA_MC_ALL_BYTE] == 0xFF;
     } else
         return false;
 }
 
 static bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_number) {
-    uint8_t mc_flag_index = 10;
-    return felica_get_mc_bit(instance, mc_flag_index, block_number);
+    return felica_get_mc_bit(instance, FELICA_MC_SP_REG_W_MAC_A_BYTES_10_11, block_number);
 }
 
 static void felica_handler_read_block(
@@ -267,7 +283,8 @@ bool felica_listener_validate_read_request_and_set_sf(
             break;
         }
         if((request->base.header.code == FELICA_CMD_READ_WITHOUT_ENCRYPTION) &&
-           (request->base.header.block_count < 0x01 || request->base.header.block_count > 0x04)) {
+           (request->base.header.block_count < FELICA_LISTENER_READ_BLOCK_COUNT_MIN ||
+            request->base.header.block_count > FELICA_LISTENER_READ_BLOCK_COUNT_MAX)) {
             resp_header->SF1 = 0xFF;
             resp_header->SF2 = 0xA2;
             break;
@@ -454,16 +471,20 @@ static void felica_handler_write_mc_block(
     const FelicaBlockData* data_block) {
     UNUSED(block_number);
 
-    bool mc_bits_permission = felica_get_mc_bit(instance, 0, 15);
-    bool mc_system_block_permission = instance->data->data.fs.mc.data[2] == 0xFF;
+    bool mc_bits_permission = felica_get_mc_bit(instance, FELICA_MC_SP_REG_ALL_RW_BYTES_0_1, 15);
+    bool mc_system_block_permission = instance->data->data.fs.mc.data[FELICA_MC_ALL_BYTE] == 0xFF;
     for(uint8_t i = 0; i < FELICA_DATA_BLOCK_SIZE; i++) {
         if((i <= 1) && mc_bits_permission) {
             instance->mc_shadow.data[i] &= data_block->data[i];
-        } else if((i >= 2 && i <= 5) && (mc_system_block_permission)) {
+        } else if(
+            (i >= FELICA_MC_ALL_BYTE && i <= FELICA_MC_CKCKV_W_MAC_A) &&
+            (mc_system_block_permission)) {
             instance->mc_shadow.data[i] = data_block->data[i];
-        } else if((i >= 6 && i <= 12) && mc_bits_permission) {
+        } else if(
+            (i >= FELICA_MC_SP_REG_R_RESTR_BYTES_6_7 && i <= FELICA_MC_STATE_W_MAC_A) &&
+            (mc_bits_permission)) {
             instance->mc_shadow.data[i] |= data_block->data[i];
-        } else if(i >= 13 && i <= 15) {
+        } else if(i >= FELICA_MC_RESERVED_13 && i <= FELICA_MC_RESERVED_15) {
             instance->mc_shadow.data[i] = 0;
         }
     }
