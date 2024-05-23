@@ -14,7 +14,6 @@ void nfc_playlist_view_playlist_content_scene_on_enter(void* context) {
          furi_string_cat_printf(tmp_str, "%s", furi_string_get_cstr(line));
       }
 
-      stream_clean(stream);
       furi_string_free(line);
       file_stream_close(stream);
 

@@ -12,11 +12,10 @@ void nfc_playlist_playlist_rename_menu_callback(void* context) {
    furi_string_cat_str(new_file_path, ".txt");
    
    if (storage_common_rename_safe(storage, old_file_path, furi_string_get_cstr(new_file_path)) == 0) {
-      furi_string_move(nfc_playlist->settings.playlist_path, new_file_path);
-   } else {
-      furi_string_free(new_file_path);
+      furi_string_swap(nfc_playlist->settings.playlist_path, new_file_path);
    }
 
+   furi_string_free(new_file_path);
    furi_record_close(RECORD_STORAGE);
 
    scene_manager_search_and_switch_to_previous_scene(nfc_playlist->scene_manager, NfcPlaylistScene_MainMenu);
@@ -36,7 +35,7 @@ void nfc_playlist_playlist_rename_scene_on_enter(void* context) {
 
    text_input_set_header_text(nfc_playlist->text_input, "Enter new file name");
    text_input_set_minimum_length(nfc_playlist->text_input, 1);
-   text_input_set_result_callback(nfc_playlist->text_input, nfc_playlist_playlist_rename_menu_callback, nfc_playlist, nfc_playlist->text_input_output, (50 + sizeof(nfc_playlist->text_input_output)), false);
+   text_input_set_result_callback(nfc_playlist->text_input, nfc_playlist_playlist_rename_menu_callback, nfc_playlist, nfc_playlist->text_input_output, PLAYLIST_NAME_LEN, false);
 
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_TextInput);
 }
