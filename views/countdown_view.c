@@ -94,6 +94,7 @@ static void countdown_timer_view_on_draw(Canvas* canvas, void* ctx) {
 
     int32_t count = model->count;
     int32_t expected_count = model->saved_count_setting;
+    furi_check(expected_count > 0, "expected_count < 0");
 
     CountDownViewSelect select = model->select;
 
