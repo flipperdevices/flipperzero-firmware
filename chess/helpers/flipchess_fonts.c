@@ -2,12 +2,11 @@
 
 /*
   Fontname: -FreeType-LucasArts SCUMM   Subtitle   Roman Outline-Medium-R-Normal--32-320-72-72-P-107-ISO10646-1
-  Copyright: Copyright Goatmeal 2013  LucasArts SCUMM - Subtitle - Roman
+  Copyright: Copyright Goatmeal 2013 - LucasArts SCUMM - Subtitle - Roman
   Glyphs: 74/95
   BBX Build Mode: 0
 */
-const uint8_t _u8g2_font_lucasarts_scumm_subtitle_o_tr[1941] U8G2_FONT_SECTION(
-    "_u8g2_font_lucasarts_scumm_subtitle_o_tr") =
+const uint8_t _u8g2_font_lucasarts_scumm_subtitle_o_tr[1941] =
     "J\0\3\2\5\4\1\4\6\22\21\0\373\14\374\14\374\1\265\4\345\7x \5\0b\11!\21\246\237"
     "\231!\221F\307I\211\232\206\250\323\220\0\42\11\250>\212'\237\206\3'\11\244>\211A\62\15\2,"
     "\16\346\222\231A\311\222,\221N\312\20\1-\11in\212\207\34x\10.\11\204\36\211A\222\6\1/"

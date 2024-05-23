@@ -3,7 +3,7 @@
 [![Build](https://github.com/xtruan/FlipBIP/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xtruan/FlipBIP/actions/workflows/build.yml)
 
 ## Crypto toolkit for Flipper Zero
-- Last built against `0.88.0` Flipper Zero firmware release
+- Last built against `0.101.2` Flipper Zero firmware release
 - Using Trezor crypto libs from `core/v2.5.3` release
 - NOTE: This app uses very close to the maximum Flipper Zero RAM. If you get `furi_check failed` on launch, try running again!
 
@@ -19,7 +19,7 @@ The goal of this project is to see how much crypto functionality can be brought 
 - If you do not have one, download a Flipper Zero firmware to get the `fbt` build tool
 - Plug your Flipper Zero in via USB
 - Copy the contents of this folder into the `applications_user` folder of your firmware
-- Modify the `site_scons/cc.scons` file in the Flipper Zero firmware to add the `"-Os"` flag
+- ~Modify the `site_scons/cc.scons` file in the Flipper Zero firmware to add the `"-Os"` flag~
 
 Then run the command: 
  ```

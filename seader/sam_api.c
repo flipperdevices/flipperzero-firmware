@@ -394,7 +394,7 @@ bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
         }
     }
 
-    free(pac);
+    ASN_STRUCT_FREE(asn_DEF_PAC, pac);
     return rtn;
 }
 
@@ -434,7 +434,7 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
         rtn = true;
     }
 
-    free(version);
+    ASN_STRUCT_FREE(asn_DEF_SamVersion, version);
     return rtn;
 }
 
@@ -1047,7 +1047,7 @@ bool seader_process_success_response_i(
         FURI_LOG_D(TAG, "Failed to decode APDU payload: [%s]", display);
     }
 
-    free(payload);
+    ASN_STRUCT_FREE(asn_DEF_Payload, payload);
     return processed;
 }
 

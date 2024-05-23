@@ -17,7 +17,7 @@ App(
     fap_category="GPIO",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="mag",
-    fap_version=(0, 10),  # major, minor
+    fap_version=(0, 10),
     fap_description="Enables wireless transmission of magstripe data",
     fap_author="Zachary Weiss",
     fap_weburl="https://github.com/zacharyweiss/magspoof_flipper",

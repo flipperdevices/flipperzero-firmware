@@ -7,7 +7,7 @@
 ![FLIPR](https://github.com/xtruan/flipper-chess/blob/main/icons/FLIPR_128x64.png)
 
 ## Chess game for Flipper Zero
-- Built against `0.86.1` Flipper Zero firmware release
+- Built against `0.101.2` Flipper Zero firmware release
 - Uses [smallchesslib](https://codeberg.org/drummyfish/smallchesslib)
 
 ### Installation

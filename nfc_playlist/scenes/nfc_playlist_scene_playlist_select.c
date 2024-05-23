@@ -2,8 +2,29 @@
 
 void nfc_playlist_playlist_select_menu_callback(void* context) {
     NfcPlaylist* nfc_playlist = context;
-    furi_string_swap(nfc_playlist->settings.file_path, nfc_playlist->file_browser_output);
+    furi_string_swap(nfc_playlist->settings.playlist_path, nfc_playlist->file_browser_output);
     furi_string_reset(nfc_playlist->file_browser_output);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Stream* stream = file_stream_alloc(storage);
+
+    if(file_stream_open(
+           stream,
+           furi_string_get_cstr(nfc_playlist->settings.playlist_path),
+           FSAM_READ,
+           FSOM_OPEN_EXISTING)) {
+        nfc_playlist->settings.playlist_length = 0;
+        FuriString* line = furi_string_alloc();
+        while(stream_read_line(stream, line)) {
+            nfc_playlist->settings.playlist_length++;
+        }
+        furi_string_free(line);
+        file_stream_close(stream);
+    }
+
+    stream_free(stream);
+    furi_record_close(RECORD_STORAGE);
+
     scene_manager_previous_scene(nfc_playlist->scene_manager);
 }
 

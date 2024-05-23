@@ -259,7 +259,8 @@ void fadeScreen(uint8_t intensity, bool color, Canvas* const canvas) {
 // Adds a delay to limit play to specified fps
 // Calculates also delta to keep movement consistent in lower framerates
 void fps() {
-    while(furi_get_tick() - lastFrameTime < FRAME_TIME);
+    while(furi_get_tick() - lastFrameTime < FRAME_TIME)
+        ;
     delta = (double)(furi_get_tick() - lastFrameTime) / (double)FRAME_TIME;
     lastFrameTime = furi_get_tick();
 }

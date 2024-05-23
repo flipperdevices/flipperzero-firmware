@@ -1,7 +1,7 @@
 #include "../flipbip.h"
 #include "../helpers/flipbip_file.h"
 
-#define FLIPBIP_SUBMENU_TEXT "** FlipBIP wallet " FLIPBIP_VERSION " **"
+// #define FLIPBIP_SUBMENU_TEXT "** FlipBIP wallet " FLIPBIP_VERSION " **"
 
 void flipbip_scene_menu_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -12,13 +12,13 @@ void flipbip_scene_menu_submenu_callback(void* context, uint32_t index) {
 void flipbip_scene_menu_on_enter(void* context) {
     FlipBip* app = context;
 
-    // FlipBIP header with version
-    submenu_add_item(
-        app->submenu,
-        FLIPBIP_SUBMENU_TEXT,
-        SubmenuIndexNOP,
-        flipbip_scene_menu_submenu_callback,
-        app);
+    // // FlipBIP header with version
+    // submenu_add_item(
+    //     app->submenu,
+    //     FLIPBIP_SUBMENU_TEXT,
+    //     SubmenuIndexNOP,
+    //     flipbip_scene_menu_submenu_callback,
+    //     app);
 
     if(flipbip_has_file(FlipBipFileKey, NULL, false) &&
        flipbip_has_file(FlipBipFileDat, NULL, false)) {

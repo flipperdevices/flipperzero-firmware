@@ -4,39 +4,36 @@ void nfc_playlist_nfc_select_menu_callback(void* context) {
     NfcPlaylist* nfc_playlist = context;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    File* file = storage_file_alloc(storage);
+    Stream* stream = file_stream_alloc(storage);
 
-    if(storage_file_open(
-           file,
-           furi_string_get_cstr(nfc_playlist->settings.file_path),
+    if(file_stream_open(
+           stream,
+           furi_string_get_cstr(nfc_playlist->settings.playlist_path),
            FSAM_READ_WRITE,
            FSOM_OPEN_EXISTING)) {
-        uint8_t buffer[PLAYLIST_VIEW_MAX_SIZE];
-        uint16_t read_count = storage_file_read(file, buffer, PLAYLIST_VIEW_MAX_SIZE);
-        FuriString* playlist_content = furi_string_alloc();
-
-        for(uint16_t i = 0; i < read_count; i++) {
-            furi_string_push_back(playlist_content, buffer[i]);
+        FuriString* line = furi_string_alloc();
+        FuriString* tmp_str = furi_string_alloc();
+        while(stream_read_line(stream, line)) {
+            furi_string_cat_printf(tmp_str, "%s", furi_string_get_cstr(line));
         }
 
-        if(read_count > 0) {
-            furi_string_printf(
-                playlist_content, "\n%s", furi_string_get_cstr(nfc_playlist->file_browser_output));
+        if(!furi_string_empty(tmp_str)) {
+            furi_string_cat_printf(
+                tmp_str, "\n%s", furi_string_get_cstr(nfc_playlist->file_browser_output));
         } else {
             furi_string_printf(
-                playlist_content, "%s", furi_string_get_cstr(nfc_playlist->file_browser_output));
+                tmp_str, "%s", furi_string_get_cstr(nfc_playlist->file_browser_output));
         }
 
-        storage_file_write(
-            file,
-            furi_string_get_cstr(playlist_content),
-            sizeof(char) * furi_string_utf8_length(playlist_content));
-
-        furi_string_free(playlist_content);
-        storage_file_close(file);
+        stream_clean(stream);
+        furi_string_free(line);
+        stream_write_string(stream, tmp_str);
+        file_stream_close(stream);
+        furi_string_free(tmp_str);
+        nfc_playlist->settings.playlist_length++;
     }
 
-    storage_file_free(file);
+    stream_free(stream);
     furi_record_close(RECORD_STORAGE);
     furi_string_reset(nfc_playlist->file_browser_output);
 
