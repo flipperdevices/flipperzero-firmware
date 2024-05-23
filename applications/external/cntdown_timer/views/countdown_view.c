@@ -93,7 +93,7 @@ static void countdown_timer_view_on_draw(Canvas* canvas, void* ctx) {
     char buffer[64];
 
     int32_t count = model->count;
-    int32_t expected_count = model->saved_count_setting;
+    int32_t expected_count = MAX(model->saved_count_setting, 1);
 
     CountDownViewSelect select = model->select;
 
@@ -307,13 +307,11 @@ static void handle_time_setting_select(InputKey key, CountDownTimView* cdv) {
         break;
 
     case InputKeyRight:
-        selection--;
-        selection = selection % 3;
+        selection = (3 + selection - 1) % 3;
         break;
 
     case InputKeyLeft:
-        selection++;
-        selection = selection % 3;
+        selection = (3 + selection + 1) % 3;
         break;
 
     default:
