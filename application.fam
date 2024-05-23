@@ -11,5 +11,5 @@ App(
     order=20,
     fap_icon="cntdown_timer.png",
     fap_category="Tools",
-    version=""
+    fap_version="1.4"
 )
