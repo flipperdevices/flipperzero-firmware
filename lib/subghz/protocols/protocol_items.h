@@ -4,6 +4,7 @@
 
 #include "princeton.h"
 #include "keeloq.h"
+#include "genie.h"
 #include "star_line.h"
 #include "nice_flo.h"
 #include "came.h"
