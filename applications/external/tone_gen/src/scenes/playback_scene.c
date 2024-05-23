@@ -1,4 +1,5 @@
 #include <furi_hal.h>
+#include <notification/notification_messages.h>
 
 #include "playback_scene.h"
 #include "../app_context.h"
@@ -64,7 +65,8 @@ void scene_on_enter_playback_scene(void* context) {
     // Set the currently active view
     FURI_LOG_I(TAG, "setting active view");
     view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_PlaybackView);
-
+    NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(notifications, &sequence_set_only_blue_255);
     if(initializeSpeaker()) {
         FURI_LOG_I(TAG, "Starting sound");
         startSound(toneDataModel);
@@ -85,4 +87,6 @@ void scene_on_exit_playback_scene(void* context) {
     UNUSED(context);
     stopSound();
     deinitializeSpeaker();
+    NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(notifications, &sequence_reset_rgb);
 }
