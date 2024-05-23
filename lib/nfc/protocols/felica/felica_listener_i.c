@@ -104,23 +104,11 @@ static uint8_t felica_listener_get_block_index(uint8_t number) {
 }
 
 static bool felica_block_exists(uint8_t number) {
-    bool exist = true;
-    if(number > FELICA_BLOCK_INDEX_REG && number < FELICA_BLOCK_INDEX_RC) {
-        exist = false;
-    } else if(number > FELICA_BLOCK_INDEX_MC && number < FELICA_BLOCK_INDEX_WCNT) {
-        exist = false;
-    } else if(number > FELICA_BLOCK_INDEX_STATE && number < FELICA_BLOCK_INDEX_CRC_CHECK) {
-        exist = false;
-    } else if(number > FELICA_BLOCK_INDEX_CRC_CHECK) {
-        exist = false;
-    }
-
-    /*  exist =
-        !((number > FELICA_BLOCK_INDEX_REG && number < FELICA_BLOCK_INDEX_RC) ||
-          (number > FELICA_BLOCK_INDEX_MC && number < FELICA_BLOCK_INDEX_WCNT) ||
-          (number > FELICA_BLOCK_INDEX_STATE && number < FELICA_BLOCK_INDEX_CRC_CHECK) ||
-          (number > FELICA_BLOCK_INDEX_CRC_CHECK)); */
-    return exist;
+    return !(
+        (number > FELICA_BLOCK_INDEX_REG && number < FELICA_BLOCK_INDEX_RC) ||
+        (number > FELICA_BLOCK_INDEX_MC && number < FELICA_BLOCK_INDEX_WCNT) ||
+        (number > FELICA_BLOCK_INDEX_STATE && number < FELICA_BLOCK_INDEX_CRC_CHECK) ||
+        (number > FELICA_BLOCK_INDEX_CRC_CHECK));
 }
 
 static bool
