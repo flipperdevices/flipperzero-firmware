@@ -21,6 +21,8 @@ static void archive_tick_event_callback(void* context) {
 static ArchiveApp* archive_alloc(void) {
     ArchiveApp* archive = malloc(sizeof(ArchiveApp));
 
+    archive->loader = furi_record_open(RECORD_LOADER);
+
     archive->fav_move_str = furi_string_alloc();
     archive->file_extension = furi_string_alloc();
 
@@ -108,6 +110,8 @@ void archive_free(ArchiveApp* archive) {
     furi_record_close(RECORD_DIALOGS);
     archive->dialogs = NULL;
 
+    furi_record_close(RECORD_LOADER);
+    archive->loader = NULL;
     furi_record_close(RECORD_GUI);
     archive->gui = NULL;
 
