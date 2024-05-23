@@ -175,7 +175,7 @@ static void felica_handler_read_mac_a_block(
     const uint8_t block_number,
     const uint8_t resp_data_index,
     FelicaListenerReadCommandResponse* response) {
-    if(resp_data_index != response->block_count - 1) {
+    if((resp_data_index != response->block_count - 1) || (resp_data_index == 0)) {
         felica_handler_read_all_zeros(instance, block_number, resp_data_index, response);
         instance->mac_calc_start = resp_data_index + 1;
     } else {
