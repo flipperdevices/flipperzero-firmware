@@ -93,7 +93,7 @@ static void countdown_timer_view_on_draw(Canvas* canvas, void* ctx) {
     char buffer[64];
 
     int32_t count = model->count;
-    int32_t expected_count = MAX(model->saved_count_setting, 1);
+    int32_t expected_count = model->saved_count_setting;
 
     CountDownViewSelect select = model->select;
 
@@ -219,9 +219,7 @@ static void handle_time_setting_updown(CountDownTimView* cdv, CountDownViewCmd c
                 break;
             }
 
-            if(count <= 0) {
-                count = 1;
-            }
+            count = MAX(count, 1);
 
             // update count state
             model->count = count;

@@ -56,7 +56,7 @@ void notification_off() {
 }
 
 void notification_timeup() {
-    notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_audiovisual_alert);
+    notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_timeup);
 }
 
 void parse_sec_to_time_str(char* buffer, size_t len, int32_t sec) {
