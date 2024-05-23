@@ -44,10 +44,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Power: [Show -unplug usb cable- even when locked (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/14940302ca49316cc2ac681cc94898d98573755c)
 - Added: [Strategem Zero v0.1 (By nymda)](https://github.com/nymda/StratagemZero)
 - Updated: [NFC Playlist v2.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- Updated: [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader) Fix for TLSF allocator crashes (By Willy-JL)
 - OFW: [Text Box: fix displaying text with end text focus #3658 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3658)
 - OFW: [Replaced obsolete-format delay #3660 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3660)
 - SubGHZ: [Added Genie Protocol (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder/protocols)
+- Updated: [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader) Fix for TLSF allocator crashes (By Willy-JL) and modifications (By bettse)
 
 <a name="release">
 
