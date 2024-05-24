@@ -22,6 +22,8 @@
 
 #define FELICA_LISTENER_READ_BLOCK_COUNT_MAX (4)
 #define FELICA_LISTENER_READ_BLOCK_COUNT_MIN (1)
+#define FELICA_LISTENER_WRITE_BLOCK_COUNT_MAX (2)
+#define FELICA_LISTENER_WRITE_BLOCK_COUNT_MIN (1)
 
 static uint32_t felica_wcnt_get_max_value(const FelicaData* data) {
     const uint8_t mc = data->data.fs.mc.data[FELICA_MC_ALL_BYTE];
@@ -301,10 +303,12 @@ static bool felica_validate_write_block_list(
     const FelicaListenerWriteBlockData* const data,
     FelicaListenerWriteCommandResponse* response) {
     bool write_with_mac = false;
-    if(request->base.header.block_count == 2 &&
+    if(request->base.header.block_count == FELICA_LISTENER_WRITE_BLOCK_COUNT_MAX &&
        request->list[1].block_number == FELICA_BLOCK_INDEX_MAC_A) {
         write_with_mac = true;
-    } else if(request->base.header.block_count < 1 || request->base.header.block_count > 2) {
+    } else if(
+        request->base.header.block_count < FELICA_LISTENER_WRITE_BLOCK_COUNT_MIN ||
+        request->base.header.block_count > FELICA_LISTENER_WRITE_BLOCK_COUNT_MAX) {
         response->SF1 = 0x02;
         response->SF2 = 0xB2;
         return false;
