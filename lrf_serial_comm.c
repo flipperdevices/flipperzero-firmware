@@ -7,7 +7,6 @@
 
 /*** Includes ***/
 #include <furi_hal.h>
-#include <furi_hal_usb_cdc.h>
 #include <expansion/expansion.h>
 
 #include "lrf_serial_comm.h"
