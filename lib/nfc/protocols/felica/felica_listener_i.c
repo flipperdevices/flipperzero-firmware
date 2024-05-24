@@ -132,15 +132,21 @@ static bool felica_block_requires_auth(
 
 static bool felica_block_is_readonly(const FelicaListener* instance, uint8_t block_number) {
     ///TODO: Add more checks for other blocks not only first 15
+    bool readonly = false;
     if(block_number <= FELICA_BLOCK_INDEX_REG) {
-        return !felica_get_mc_bit(instance, FELICA_MC_SP_REG_ALL_RW_BYTES_0_1, block_number);
+        readonly = !felica_get_mc_bit(instance, FELICA_MC_SP_REG_ALL_RW_BYTES_0_1, block_number);
     } else if(
-        (block_number >= FELICA_BLOCK_INDEX_ID && block_number <= FELICA_BLOCK_INDEX_SER_C) ||
+        ((block_number == FELICA_BLOCK_INDEX_ID) || (block_number == FELICA_BLOCK_INDEX_SER_C)) ||
         (block_number >= FELICA_BLOCK_INDEX_CKV && block_number <= FELICA_BLOCK_INDEX_CK)) {
         ///TODO: replace this with some macro
-        return instance->data->data.fs.mc.data[FELICA_MC_ALL_BYTE] == 0xFF;
-    } else
-        return false;
+        readonly = instance->data->data.fs.mc.data[FELICA_MC_ALL_BYTE] == 0x00;
+    } else if(
+        (block_number == FELICA_BLOCK_INDEX_MAC) || (block_number == FELICA_BLOCK_INDEX_WCNT) ||
+        (block_number == FELICA_BLOCK_INDEX_D_ID) ||
+        (block_number == FELICA_BLOCK_INDEX_CRC_CHECK)) {
+        readonly = true;
+    }
+    return readonly;
 }
 
 static bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_number) {
