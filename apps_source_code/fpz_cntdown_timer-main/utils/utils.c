@@ -10,6 +10,42 @@ static const NotificationSequence sequence_beep = {
     NULL,
 };
 
+static const NotificationSequence sequence_timeup = {
+    &message_force_display_brightness_setting_1f,
+    &message_display_backlight_on,
+    &message_vibro_on,
+
+    &message_note_c8,
+    &message_delay_50,
+    &message_sound_off,
+    &message_delay_50,
+    &message_delay_25,
+
+    &message_note_c8,
+    &message_delay_50,
+    &message_sound_off,
+    &message_delay_50,
+    &message_delay_25,
+
+    &message_note_c8,
+    &message_delay_50,
+    &message_sound_off,
+    &message_delay_50,
+    &message_delay_25,
+
+    &message_note_c8,
+    &message_delay_50,
+    &message_sound_off,
+    &message_delay_50,
+    &message_delay_25,
+
+    &message_vibro_off,
+    &message_display_backlight_off,
+    &message_delay_500,
+
+    NULL,
+};
+
 void notification_beep_once() {
     notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_beep);
     notification_off();
@@ -20,7 +56,7 @@ void notification_off() {
 }
 
 void notification_timeup() {
-    notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_audiovisual_alert);
+    notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_timeup);
 }
 
 void parse_sec_to_time_str(char* buffer, size_t len, int32_t sec) {
