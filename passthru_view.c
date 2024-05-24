@@ -217,13 +217,13 @@ static void vcp_on_state_change(void *ctx, uint8_t state) {
 
 
 /** Virtual COM port callback for when the port's configuration changes */
-static void vcp_on_line_config(void *ctx, struct usb_cdc_line_coding *vpc_cfg) {
+static void vcp_on_line_config(void *ctx, struct usb_cdc_line_coding *vcp_cfg) {
 
   App *app = (App *)ctx;
   PassthruModel *passthru_model = view_get_model(app->passthru_view);
 
   /* Get the new virtual COM port configuration */
-  passthru_model->vcp_config = vpc_cfg;
+  passthru_model->vcp_config = vcp_cfg;
 
   /* Mirror the virtual COM port on the UART */
   mirror_vcp_on_uart(app, passthru_model);
