@@ -168,16 +168,31 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
         felica_listener_reset(instance);
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
         FURI_LOG_D(TAG, "Rx Done");
-        FelicaListenerGenericRequest* request =
-            (FelicaListenerGenericRequest*)bit_buffer_get_data(nfc_event->data.buffer);
-        uint8_t size = bit_buffer_get_size_bytes(nfc_event->data.buffer) - 2;
+        do {
+            if(!felica_crc_check(nfc_event->data.buffer)) {
+                FURI_LOG_E(TAG, "Wrong CRC");
+                break;
+            }
 
-        if(felica_listener_check_idm(instance, &request->header.idm) && request->length == size) {
+            FelicaListenerGenericRequest* request =
+                (FelicaListenerGenericRequest*)bit_buffer_get_data(nfc_event->data.buffer);
+
+            if(!felica_listener_check_idm(instance, &request->header.idm)) {
+                FURI_LOG_E(TAG, "Wrong IDm");
+                break;
+            }
+
+            uint8_t size = bit_buffer_get_size_bytes(nfc_event->data.buffer) - 2;
+            if(request->length != size) {
+                FURI_LOG_E(TAG, "Wrong request length");
+                break;
+            }
+
             FelicaError error = felica_listener_process_request(instance, request);
             if(error != FelicaErrorNone) {
                 FURI_LOG_E(TAG, "Processing error: %2X", error);
             }
-        }
+        } while(false);
         bit_buffer_reset(nfc_event->data.buffer);
     }
     return command;
