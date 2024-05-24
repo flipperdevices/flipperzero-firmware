@@ -15,7 +15,7 @@
 #include "scenes/flipbip_scene.h"
 #include "views/flipbip_scene_1.h"
 
-#define FLIPBIP_VERSION "v1.14"
+#define FLIPBIP_VERSION "v1.16"
 
 #define COIN_BTC 0
 #define COIN_DOGE 3
@@ -23,8 +23,6 @@
 #define COIN_ZEC 133
 
 #define TEXT_BUFFER_SIZE 256
-
-
 
 typedef struct {
     Gui* gui;
@@ -50,7 +48,7 @@ typedef struct {
     char import_mnemonic_text[TEXT_BUFFER_SIZE];
     char input_text[TEXT_BUFFER_SIZE];
 
-    void (* wallet_create)(void* context);
+    void (*wallet_create)(void* context);
 } FlipBip;
 
 typedef enum {
