@@ -71,3 +71,75 @@ function(stm32l1_get_memory_info DEVICE TYPE FLASH_SIZE RAM_SIZE)
         set(${RAM_SIZE} ${RAM} PARENT_SCOPE)
     endif()
 endfunction()
+
+list(APPEND STM32_ALL_DEVICES
+    L100C6
+    L100R8
+    L100RB
+    L100RC
+    L151C6
+    L151C8
+    L151CB
+    L151CC
+    L151QC
+    L151QD
+    L151QE
+    L151R6
+    L151R8
+    L151RB
+    L151RC
+    L151RD
+    L151RE
+    L151UC
+    L151V8
+    L151VB
+    L151VC
+    L151VD
+    L151VE
+    L151ZC
+    L151ZD
+    L151ZE
+    L152C6
+    L152C8
+    L152CB
+    L152CC
+    L152QC
+    L152QD
+    L152QE
+    L152R6
+    L152R8
+    L152RB
+    L152RC
+    L152RD
+    L152RE
+    L152UC
+    L152V8
+    L152VB
+    L152VC
+    L152VD
+    L152VE
+    L152ZC
+    L152ZD
+    L152ZE
+    L162QC
+    L162QD
+    L162RC
+    L162RD
+    L162RE
+    L162VC
+    L162VD
+    L162VE
+    L162ZC
+    L162ZD
+    L162ZE
+)
+
+list(APPEND STM32_SUPPORTED_FAMILIES_LONG_NAME
+    STM32L1
+)
+
+list(APPEND STM32_FETCH_FAMILIES L1)
+
+set(CUBE_L1_VERSION  v1.10.3)
+set(CMSIS_L1_VERSION v2.3.2)
+set(HAL_L1_VERSION   v1.4.4)

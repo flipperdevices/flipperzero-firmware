@@ -29,3 +29,28 @@ function(stm32mp1_get_memory_info DEVICE TYPE FLASH_SIZE)
         set(${FLASH_SIZE} "0KB" PARENT_SCOPE)
     endif()
 endfunction()
+
+list(APPEND STM32_ALL_DEVICES
+    MP151A
+    MP151C
+    MP151D
+    MP151F
+    MP153A
+    MP153C
+    MP153D
+    MP153F
+    MP157A
+    MP157C
+    MP157D
+    MP157F
+)
+
+list(APPEND STM32_SUPPORTED_FAMILIES_LONG_NAME
+    STM32MP1_M4
+)
+
+list(APPEND STM32_FETCH_FAMILIES MP1)
+
+set(CUBE_MP1_VERSION  1.5.0)
+set(CMSIS_MP1_VERSION cube)
+set(HAL_MP1_VERSION   cube)

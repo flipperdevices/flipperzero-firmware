@@ -1,13 +1,4 @@
-set(STM32_SUPPORTED_FAMILIES_LONG_NAME
-    STM32C0
-    STM32F0 STM32F1 STM32F2 STM32F3 STM32F4 STM32F7
-    STM32G0 STM32G4
-    STM32H5
-    STM32H7_M4 STM32H7_M7
-    STM32L0 STM32L1 STM32L4 STM32L5
-    STM32U0 STM32U5
-    STM32WB_M4 STM32WL_M4 STM32WL_M0PLUS
-    STM32MP1_M4 )
+include(stm32/devices)
 
 foreach(FAMILY ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
     # append short names (F0, F1, H7_M4, ...) to STM32_SUPPORTED_FAMILIES_SHORT_NAME
@@ -380,25 +371,3 @@ if(NOT (TARGET STM32::Nano::FloatScan))
         $<$<C_COMPILER_ID:GNU>:-Wl,--undefined,_scanf_float>
     )
 endif()
-
-include(stm32/utilities)
-include(stm32/c0)
-include(stm32/f0)
-include(stm32/f1)
-include(stm32/f2)
-include(stm32/f3)
-include(stm32/f4)
-include(stm32/f7)
-include(stm32/g0)
-include(stm32/g4)
-include(stm32/h5)
-include(stm32/h7)
-include(stm32/l0)
-include(stm32/l1)
-include(stm32/l4)
-include(stm32/l5)
-include(stm32/u0)
-include(stm32/u5)
-include(stm32/wb)
-include(stm32/wl)
-include(stm32/mp1)

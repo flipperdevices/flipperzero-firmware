@@ -66,8 +66,6 @@ function(stm32wl_get_memory_info DEVICE TYPE CORE RAM FLASH_ORIGIN RAM_ORIGIN TW
     endif()
 endfunction()
 
-
-
 function(stm32wl_get_device_cores DEVICE TYPE CORES)
     if(${TYPE} IN_LIST STM32_WL_DUAL_CORE)
         set(${CORES} M4 M0PLUS PARENT_SCOPE)
@@ -75,3 +73,33 @@ function(stm32wl_get_device_cores DEVICE TYPE CORES)
         set(${CORES} M4 PARENT_SCOPE)
     endif()
 endfunction()
+
+list(APPEND STM32_ALL_DEVICES
+    WL55CC
+    WL54CC
+    WL55JC
+    WL54JC
+    WLE5J8
+    WLE5JB
+    WLE5JC
+    WLE5C8
+    WLE5CB
+    WLE5CC
+    WLE4J8
+    WLE4JB
+    WLE4JC
+    WLE4C8
+    WLE4CB
+    WLE4CC
+)
+
+list(APPEND STM32_SUPPORTED_FAMILIES_LONG_NAME
+    STM32WL_M0PLUS
+    STM32WL_M4
+)
+
+list(APPEND STM32_FETCH_FAMILIES WL)
+
+set(CUBE_WL_VERSION  v1.1.0)
+set(CMSIS_WL_VERSION v1.1.0)
+set(HAL_WL_VERSION   v1.1.0)
