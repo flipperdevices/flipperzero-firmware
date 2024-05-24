@@ -345,7 +345,6 @@ static bool felica_validate_write_block_list(
             response->SF2 = 0xA7;
             return false;
         } else if((i == 1) && (item->block_number == FELICA_BLOCK_INDEX_MAC_A)) {
-            ///TODO: Check what if MAC_A block will be first
             uint8_t calculated_mac[8];
             felica_calculate_mac_write(
                 &instance->auth.des_context,

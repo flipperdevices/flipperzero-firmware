@@ -23,7 +23,6 @@ FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
     mbedtls_des3_init(&instance->auth.des_context);
     nfc_set_fdt_listen_fc(instance->nfc, FELICA_FDT_LISTEN_FC);
 
-    //------------------------------
     memcpy(instance->mc_shadow.data, instance->data->data.fs.mc.data, FELICA_DATA_BLOCK_SIZE);
     instance->data->data.fs.state.data[0] = 0;
     nfc_config(instance->nfc, NfcModeListener, NfcTechFelica);
