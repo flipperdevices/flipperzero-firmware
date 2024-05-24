@@ -502,6 +502,14 @@ static void felica_handler_write_state_block(
     instance->auth.context.auth_status.internal = state;
 }
 
+static void felica_handler_write_id_block(
+    FelicaListener* instance,
+    const uint8_t block_number,
+    const FelicaBlockData* data_block) {
+    UNUSED(block_number);
+    memcpy(&instance->data->data.fs.id.data[8], &data_block->data[8], 8);
+}
+
 FelicaCommandWriteBlockHandler
     felica_listener_get_write_block_handler(const uint8_t block_number) {
     FelicaCommandWriteBlockHandler handler = felica_handler_write_block;
@@ -517,6 +525,9 @@ FelicaCommandWriteBlockHandler
         break;
     case FELICA_BLOCK_INDEX_STATE:
         handler = felica_handler_write_state_block;
+        break;
+    case FELICA_BLOCK_INDEX_ID:
+        handler = felica_handler_write_id_block;
         break;
     default:
         handler = felica_handler_write_block;
