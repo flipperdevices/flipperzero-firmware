@@ -322,8 +322,15 @@ static bool felica_validate_write_block_list(
 
     for(uint8_t i = 0; i < request->base.header.block_count; i++) {
         const FelicaBlockListElement* item = &request->list[i];
+        if(!felica_block_exists(item->block_number)) {
+            response->SF1 = (1 << i);
+            response->SF2 = 0xA8;
+            return false;
+        }
+
         if(felica_block_is_readonly(instance, item->block_number) ||
-           (felica_block_requires_mac(instance, item->block_number) && !write_with_mac)) {
+           (felica_block_requires_mac(instance, item->block_number) && !write_with_mac) ||
+           ((i == 0) && (item->block_number == FELICA_BLOCK_INDEX_MAC_A))) {
             response->SF1 = 0x01;
             response->SF2 = 0xA8;
             return false;
@@ -337,11 +344,8 @@ static bool felica_validate_write_block_list(
             response->SF1 = (1 << i);
             response->SF2 = 0xA7;
             return false;
-        } else if(!felica_block_exists(item->block_number)) {
-            response->SF1 = (1 << i);
-            response->SF2 = 0xA8;
-            return false;
         } else if((i == 1) && (item->block_number == FELICA_BLOCK_INDEX_MAC_A)) {
+            ///TODO: Check what if MAC_A block will be first
             uint8_t calculated_mac[8];
             felica_calculate_mac_write(
                 &instance->auth.des_context,
