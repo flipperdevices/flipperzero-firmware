@@ -6,9 +6,3 @@ updates:
       interval: "weekly"
     assignees:
       - "zacharyweiss"
-  - package-ecosystem: "gitsubmodule"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    assignees:
-      - "zacharyweiss"
