@@ -9,7 +9,7 @@ App(
     stack_size=4 * 1024,
     requires=["gui"],
     order=10,
-    fap_version=(2, 4),
+    fap_version=(2, 5),
     fap_icon="flipkeyboard.png",
     fap_category="GPIO/FlipBoard",
     fap_icon_assets="assets",

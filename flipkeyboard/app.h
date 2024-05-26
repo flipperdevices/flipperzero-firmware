@@ -8,7 +8,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/widget.h>
 #include <gui/modules/variable_item_list.h>
-#include "flipboard_keyboard_icons.h"
+#include "app_icons.h"
 
 #include "./common/action_config.h"
 #include "./common/app_menu.h"

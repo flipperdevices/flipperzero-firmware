@@ -254,7 +254,7 @@ static bool custom_event_handler(void* context, uint32_t event) {
 }
 
 /**
- * @brief This method is invoked when the FlipboardKeyboard app is launched.
+ * @brief This method is invoked when the FlipboardSignal app is launched.
  * @param p Unused.
  * @return 0.
  */

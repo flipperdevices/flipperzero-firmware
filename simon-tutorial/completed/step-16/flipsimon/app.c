@@ -1,13 +1,13 @@
 #include <furi.h>
 #include <gui/view.h>
 #include "app_config.h"
+#include "app_icons.h"
 #include "./common/config_colors.h"
 #include "./common/custom_event.h"
 #include "./common/flipboard.h"
 #include "./common/flipboard_model.h"
 #include "./common/flipboard_model_ref.h"
 #include "./common/leds.h"
-#include "flipboard_simon_icons.h"
 
 #define MAX_SONG_LENGTH 12
 #define SIMON_TEACH_DELAY_MS 1000

@@ -20,6 +20,8 @@
 
 typedef struct AppMenu AppMenu;
 
+typedef bool (*AppMenuCallback)(void* context);
+
 /**
  * @brief      Allocate and initialize AppMenu structure.
  * @details    This function allocate and initialize AppMenu structure.  It also allocate
@@ -62,3 +64,13 @@ void app_menu_add_item(AppMenu* menu, char* name, View* view, uint32_t view_id);
  * @param      menu  Pointer to AppMenu structure.
 */
 void app_menu_show(AppMenu* menu);
+
+/**
+ * @brief      Set callback for AppMenu structure.
+ * @details    This function set callback for AppMenu structure.  It is used to set callback
+ *         for AppMenu that will get invoked while splash screen is showing.
+ * @param      menu      Pointer to AppMenu structure.
+ * @param      callback  Callback function.
+ * @param      context   Context for callback function.
+ */
+void app_menu_set_callback(AppMenu* menu, AppMenuCallback callback, void* context);
