@@ -16,7 +16,7 @@ App(
     fap_author="EstebanFuentealba & kbembedded",  # Plus research / work from kbembedded and R4g3D
     # fap_author="Esteban Fuentealba, Kris Bahnsen, Darryn Cull",
     fap_weburl="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading",
-    fap_version=(1, 8),
+    fap_version=(2, 0),
     fap_description="Pokemon exchange from Flipper Zero to Game Boy for Generation I (Pokemon Red, Blue, Yellow). Flipper Zero emulates a Slave Game Boy connected to a Game Link Cable to be able to exchange any Pokemon from the First Generation (Red, Blue, Yellow) to a real Game Boy.",
     #  [Extended Functionality #17 (By R4g3D)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/17)
     #  [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
