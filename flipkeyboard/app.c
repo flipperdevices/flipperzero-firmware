@@ -84,6 +84,7 @@ void flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_b
  */
 void flipboard_enter_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
+    flipboard_keyboard_attach(flipboard_model_get_keyboard(fm));
     flipboard_model_set_button_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
     flipboard_model_set_colors(fm, NULL, 0x0);
     flipboard_model_set_gui_refresh_speed_ms(fm, 0);
@@ -95,6 +96,7 @@ void flipboard_enter_callback(void* context) {
  */
 void flipboard_exit_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
+    flipboard_keyboard_detatch(flipboard_model_get_keyboard(fm));
     flipboard_model_set_colors(fm, NULL, 0x0);
     flipboard_model_set_button_monitor(fm, NULL, NULL);
     flipboard_model_set_gui_refresh_speed_ms(fm, 0);
@@ -215,8 +217,6 @@ int32_t flipboard_keyboard_app(void* p) {
 
     ActionModelFields fields = ActionModelFieldAll;
     bool single_mode_button = false;
-    bool attach_keyboard = true;
-    // attach_keyboard = false;
 
     Flipboard* app = flipboard_alloc(
         FLIPBOARD_APP_NAME,
@@ -225,7 +225,6 @@ int32_t flipboard_keyboard_app(void* p) {
         fields,
         flipboard_defaults,
         single_mode_button,
-        attach_keyboard,
         keys,
         shift_keys,
         COUNT_OF(keys) / 12,

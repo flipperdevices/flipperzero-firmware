@@ -428,7 +428,6 @@ int32_t flipboard_blinky_app(void* _p) {
 
     ActionModelFields fields = ActionModelFieldNone;
     bool single_mode_button = true;
-    bool attach_keyboard = false;
 
     Flipboard* app = flipboard_alloc(
         FLIPBOARD_APP_NAME,
@@ -437,7 +436,6 @@ int32_t flipboard_blinky_app(void* _p) {
         fields,
         NULL, // no default button settings needed.
         single_mode_button,
-        attach_keyboard,
         NULL,
         NULL,
         0,

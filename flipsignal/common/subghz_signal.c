@@ -16,11 +16,11 @@ struct SubGhzSignal {
 #ifdef FIRMWARE_SUPPORTS_SUBGHZ
 #include <devices/devices.h>
 #ifdef APP_USES_SUBGHZ_PROTOCOL_ITEMS
-#include <subghz_protocol_registry.h>
+#include <lib/subghz/protocols/protocol_items.h>
 #endif
-
 //#include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
 //#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
+
 #define SUBGHZ_DEVICE_CC1101_EXT_NAME "cc1101_ext"
 #define SUBGHZ_DEVICE_CC1101_INT_NAME "cc1101_int"
 
