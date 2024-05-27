@@ -404,6 +404,7 @@ int32_t flipboard_blinky_app(void* _p) {
         &I_qr_github,
         ABOUT_TEXT,
         fields,
+        NULL, // no default button settings needed.
         single_mode_button,
         attach_keyboard,
         NULL,

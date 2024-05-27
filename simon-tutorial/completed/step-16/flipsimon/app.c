@@ -450,6 +450,30 @@ static bool custom_event_handler(void* context, uint32_t event) {
     return true;
 }
 
+static void flipboard_defaults(FlipboardModel* model) {
+    ActionModel* action_model;
+    action_model = action_model_alloc(1);
+    action_model_set_color_down(action_model, 0xFF00);
+    action_model_set_frequency(action_model, 164.814);
+    flipboard_model_set_action_model(
+        model, action_model_get_action_id(action_model), action_model);
+    action_model = action_model_alloc(2);
+    action_model_set_color_down(action_model, 0xFF0000);
+    action_model_set_frequency(action_model, 220);
+    flipboard_model_set_action_model(
+        model, action_model_get_action_id(action_model), action_model);
+    action_model = action_model_alloc(4);
+    action_model_set_color_down(action_model, 0xFF7F00);
+    action_model_set_frequency(action_model, 277.183);
+    flipboard_model_set_action_model(
+        model, action_model_get_action_id(action_model), action_model);
+    action_model = action_model_alloc(8);
+    action_model_set_color_down(action_model, 0xFF);
+    action_model_set_frequency(action_model, 329.628);
+    flipboard_model_set_action_model(
+        model, action_model_get_action_id(action_model), action_model);
+}
+
 /**
  * @brief This is the entry point of the application.
  * @details The application.fam file sets the entry_point property to this function.
@@ -467,6 +491,7 @@ int32_t flipboard_simon_app(void* p) {
         &I_qr_github,
         ABOUT_TEXT,
         fields,
+        flipboard_defaults,
         single_mode_button,
         false,
         NULL,

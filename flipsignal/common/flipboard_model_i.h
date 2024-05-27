@@ -53,4 +53,6 @@ struct FlipboardModel {
 
     // Custom data that can be used when extending the application.
     void* custom_data;
+
+    FlipboardModelSetDefaults set_defaults;
 };

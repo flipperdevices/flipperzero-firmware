@@ -9,7 +9,7 @@ App(
     stack_size=4 * 1024,
     requires=["gui"],
     order=10,
-    fap_version=(1, 5),
+    fap_version=(1, 6),
     fap_icon="flipsimon.png",
     fap_category="GPIO/FlipBoard",
     fap_description="Simon memory game for the FlipBoard.",

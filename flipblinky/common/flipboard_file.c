@@ -102,6 +102,8 @@ bool flipboard_model_load(FlipboardModel* model) {
         flipboard_model_set_action_model(model, i, NULL);
     }
 
+    flipboard_model_set_defaults(model);
+
     do {
         uint32_t version = 0;
 
@@ -125,7 +127,14 @@ bool flipboard_model_load(FlipboardModel* model) {
             break;
         }
         for(size_t i = 0; i < 16; i++) {
-            flipboard_model_set_action_model(model, i, action_model_alloc_from_ff(i, format));
+            ActionModel* action_model = action_model_alloc_from_ff(i, format);
+            if(action_model) {
+                ActionModel* old_model = flipboard_model_get_action_model(model, i);
+                if(old_model) {
+                    action_model_free(old_model);
+                }
+                flipboard_model_set_action_model(model, i, action_model);
+            }
         }
 
         success = true;
