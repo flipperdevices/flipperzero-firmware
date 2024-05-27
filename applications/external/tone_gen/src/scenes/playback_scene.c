@@ -67,6 +67,7 @@ void scene_on_enter_playback_scene(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_PlaybackView);
     NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
     notification_message(notifications, &sequence_set_only_blue_255);
+    furi_record_close(RECORD_NOTIFICATION);
     if(initializeSpeaker()) {
         FURI_LOG_I(TAG, "Starting sound");
         startSound(toneDataModel);
@@ -89,4 +90,5 @@ void scene_on_exit_playback_scene(void* context) {
     deinitializeSpeaker();
     NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
     notification_message(notifications, &sequence_reset_rgb);
+    furi_record_close(RECORD_NOTIFICATION);
 }

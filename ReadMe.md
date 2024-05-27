@@ -47,13 +47,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Replaced obsolete-format delay #3660 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3660)
 - SubGHz: [Added Genie Protocol (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder/protocols)
 - Updated: [NFC Seader v2.8 (By bettse)](https://github.com/bettse/seader) Fix for TLSF allocator crashes (By Willy-JL) and modifications (By bettse)
-- Updated: [Tone Generator v1.0 (By GEMISIS)](https://github.com/GEMISIS/tone_gen)
 - Updated: [NFC Playlist v2.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - OFW: [Archive: fix condition race on exit #3659 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3659)
 - OFW: [NFC App: fix changing UID #3663 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3663)
 - Updated: [Count Down Timer v1.4 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer) [Some small fixes and improvements #106 (By puppable)](https://github.com/xMasterX/all-the-plugins/pull/106)
 - RFID: [electra non-initialized encoded epilogue on render fix (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c58c8ce1f6e05ec3462e2b93ab4e2846ee75853c)
 - Updated: [Reversi v1.3 (By dimat)](https://github.com/dimat/flipperzero-reversi)
+- Updated: [Tone Generator v1.0 (By GEMISIS)](https://github.com/GEMISIS/tone_gen)
 
 <a name="release">
 
