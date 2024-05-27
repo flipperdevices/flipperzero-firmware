@@ -205,10 +205,6 @@ static void felica_handler_read_block(
     const uint8_t block_number,
     const uint8_t resp_data_index,
     FelicaListenerReadCommandResponse* response) {
-    UNUSED(instance);
-    UNUSED(block_number);
-    UNUSED(response);
-
     uint8_t num = felica_listener_get_block_index(block_number);
     memcpy(
         &response->data[resp_data_index * FELICA_DATA_BLOCK_SIZE],
