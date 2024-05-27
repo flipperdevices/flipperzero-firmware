@@ -4,7 +4,7 @@
 
 #include <string.h>
 
-#include <assets_icons.h>
+#include "nfc_playlist_icons.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
