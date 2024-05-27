@@ -24,7 +24,8 @@ FlipboardModel*
     backlight_on(model->backlight);
     model->custom_data = NULL;
 
-    flipboard_model_load(model);
+    // NOTE: We will call flipboard_model_load(model); when
+    // the app_menu is displaying the splash screen.
 
     return model;
 }
@@ -445,4 +446,16 @@ uint8_t flipboard_model_reduce(FlipboardModel* model, uint8_t new_key, bool left
     }
 
     return reduced_new_key;
+}
+
+void flipboard_model_set_defaults_callback(
+    FlipboardModel* model,
+    FlipboardModelSetDefaults callback) {
+    model->set_defaults = callback;
+}
+
+void flipboard_model_set_defaults(FlipboardModel* model) {
+    if(model->set_defaults) {
+        model->set_defaults(model);
+    }
 }

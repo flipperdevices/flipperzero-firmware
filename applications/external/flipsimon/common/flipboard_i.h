@@ -6,6 +6,7 @@
 #include "action_config.h"
 #include "app_menu.h"
 #include "flipboard.h"
+#include "flipboard_file.h"
 #include "flipboard_model.h"
 #include "keyboard.h"
 #include "leds.h"

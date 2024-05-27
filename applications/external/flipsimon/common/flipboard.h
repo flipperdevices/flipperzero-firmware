@@ -17,6 +17,7 @@
 
 #include "action_model.h"
 #include "keystroke_selector.h"
+#include "flipboard_model.h"
 
 typedef struct Flipboard Flipboard;
 typedef struct FlipboardModel FlipboardModel;
@@ -32,6 +33,7 @@ typedef View* (*GetPrimaryView)(void* context);
  * @param qr_icon The icon to display in the qr view.
  * @param about_text The text to display in the about view.
  * @param fields The fields to display in the button model.
+ * @param set_defaults Callback to set the defaults of the application.
  * @param single_mode_button Whether to display the button model in single mode.
  * @param attach_keyboard Whether to attach the keyboard to the application.
  * @param keys The keys to display in the keystroke selector.
@@ -45,6 +47,7 @@ Flipboard* flipboard_alloc(
     const Icon* qr_icon,
     char* about_text,
     ActionModelFields fields,
+    FlipboardModelSetDefaults set_defaults,
     bool single_mode_button,
     bool attach_keyboard,
     KeystrokeSelectorKey* keys,

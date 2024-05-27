@@ -140,11 +140,36 @@ void app_menu_add_item(AppMenu* menu, char* name, View* view, uint32_t view_id) 
     ViewIdsArray_push_back(menu->view_ids, view_id);
 }
 
+void app_menu_set_callback(AppMenu* menu, AppMenuCallback callback, void* context) {
+    menu->callback = callback;
+    menu->callback_context = context;
+}
+
+static void app_menu_popup_done(void* context) {
+    AppMenu* menu = (AppMenu*)context;
+    view_dispatcher_switch_to_view(menu->view_dispatcher, FLIPBOARD_APP_MENU_VIEW_ID);
+    view_dispatcher_remove_view(menu->view_dispatcher, 42042);
+    popup_free(menu->popup);
+}
+
 /**
  * @brief      Show AppMenu structure.
  * @details    This function show AppMenu structure.  It is used to show AppMenu view.
  * @param      menu  Pointer to AppMenu structure.
 */
 void app_menu_show(AppMenu* menu) {
-    view_dispatcher_switch_to_view(menu->view_dispatcher, FLIPBOARD_APP_MENU_VIEW_ID);
+    menu->popup = popup_alloc();
+    popup_set_header(menu->popup, "FlipBoard", 70, 2, AlignLeft, AlignTop);
+    popup_set_text(
+        menu->popup, "Be sure\ndevice is\nconnected\nto Flipper.", 70, 20, AlignLeft, AlignTop);
+    popup_set_icon(menu->popup, 0, 0, &I_flippy);
+    popup_set_timeout(menu->popup, 3000);
+    popup_enable_timeout(menu->popup);
+    popup_set_context(menu->popup, menu);
+    popup_set_callback(menu->popup, app_menu_popup_done);
+    view_dispatcher_add_view(menu->view_dispatcher, 42042, popup_get_view(menu->popup));
+    view_dispatcher_switch_to_view(menu->view_dispatcher, 42042);
+    if(menu->callback) {
+        menu->callback(menu->callback_context);
+    }
 }

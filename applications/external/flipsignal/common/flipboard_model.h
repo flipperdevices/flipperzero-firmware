@@ -20,6 +20,8 @@ typedef struct FlipboardKeyboard FlipboardKeyboard;
 typedef struct FlipboardLeds FlipboardLeds;
 typedef struct ButtonModel ButtonModel;
 
+typedef void (*FlipboardModelSetDefaults)(FlipboardModel* model);
+
 /**
  * @brief flipboard_model_alloc allocates a FlipboardModel.
  * @param app_name The name of the application.  The name is used to 
@@ -244,3 +246,9 @@ void flipboard_model_send_text(
  * @return The reduced button.
 */
 uint8_t flipboard_model_reduce(FlipboardModel* model, uint8_t new_button, bool left_wins);
+
+void flipboard_model_set_defaults_callback(
+    FlipboardModel* model,
+    FlipboardModelSetDefaults callback);
+
+void flipboard_model_set_defaults(FlipboardModel* model);
