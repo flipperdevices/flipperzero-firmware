@@ -2,16 +2,17 @@
 
 ## Introduction
 
-Now supports MALVEKE board!
+Tool for trading Pokemon from the Flipper Zero to Generation I and II Game Boy games (Red, Blue, Yellow, Gold, Silver, and Crystal). In addition to creating and trading Pokemon to a Game Boy game, the Flipper can be used to modify an existing Pokemon traded to the Flipper and trading it back to the Game Boy!
 
-This is a Pokemon exchange application from Flipper Zero to Game Boy (Generación I). Flipper Zero emulates a "Slave" Game Boy connected to a Game Link Cable to be able to exchange any Pokemon from the First Generation (Red, Blue, Yellow) to a real Game Boy.
+No longer causes the OK button to break when using the pinout for older MALVEKE (MLVK2.5) PCBs! Users of MALVEKE PCBs Rev. <= 2.5 no longer need to reset the Flipper after a trade and are able to modify the traded Pokemon!
 
-If a MALVEKE board is plugged in to GPIO before starting the app, the app will default to using the MALVEKE EXT1 interface.
-
+See the project's [README on GitHub](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/blob/main/README.md) for more detailed instructions on the application and all of the customization options for Pokemon.
 
 ## Connection: Flipper Zero GPIO - Game Boy
 
-The original pinout is as follows:
+See the project's [README on GitHub](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/blob/main/README.md) for Link Cable interface adapters available on Tindie.
+
+The Original pinout is as follows:
 
 | Cable Game Link (Socket) | Flipper Zero GPIO |
 | ------------------------ | ----------------- |
@@ -20,22 +21,21 @@ The original pinout is as follows:
 | 3 (SI)                   | 7 (C3)            |
 | 2 (SO)                   | 5 (B3)            |
 
-Using the "Select Pinout" option, the Original, MALVEKE, or any custom pin configuration can be selected.
+Using the "Select Pinout" option, the Original, MALVEKE (MLVK2.5), or any custom pin configuration can be selected as well.
 
 
-## How does it work?
+## How Does it Work?
 
-The method used to communicate 2 Game Boys is based on the SPI protocol, which is a very simple serial communication protocol in which a master device communicates with one or more slave devices. The protocol is bidirectional and synchronous, and uses three basic signals:
+Game Boy and Game Boy color games communicate using a synchronous serial protocol; similar to SPI without a chip select line. The Pokemon games themselves arbitrate which unit is driving the clock; this application lets the Game Boy drive the clock every time. Like SPI, data is full-duplex bidirectional, and uses 3 signals:
 
 - A clock signal (CLK).
 - An output signal (Serial Out or SO).
 - An input signal (Serial In or SI).
 
-In the Game Boy, games store data in an internal shift register that is used to send and receive information. The SPI protocol used by the Game Boy uses the clock signal to indicate when data is being transferred.
+The Game Boy itself uses a shift register to clock data in and out.
 
-The Game Boy link protocol is synchronous and requires the slave device to respond at the same rate as the master device. The master device supplies an 8KHz clock (data transfer rate of 1KB/s). The time window for responding is only **~120μs**. However, the slave device has no restrictions and can respond when it receives data. The clock can vary and there is no lower limit.
-
-
-##  Tested In
+## Tested to Support Game Boy models
 - Game Boy Color (GBC)
 - Game Boy Advance (GBA)
+- Game Boy Advance SP (GBA SP)
+- Analogue Pocket

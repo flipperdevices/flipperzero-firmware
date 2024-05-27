@@ -46,10 +46,10 @@ uint8_t plist_index_get(struct patch_list* plist, int offset) {
     return plist->index;
 }
 
-void plist_create(struct patch_list** pplist, TradeBlock* trade_block) {
-    furi_assert(trade_block);
-    uint8_t* trade_party_flat = (uint8_t*)trade_block->party;
-    int i;
+void plist_create(struct patch_list** pplist, PokemonData* pdata) {
+    furi_assert(pdata);
+    uint8_t* trade_party_flat = pdata->party;
+    size_t i;
 
     /* If plist is non-NULL that means its already been created. Tear it down
      * first.
@@ -60,15 +60,13 @@ void plist_create(struct patch_list** pplist, TradeBlock* trade_block) {
     }
 
     *pplist = plist_alloc();
-    /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
     /* The first half of the patch list covers offsets 0x00 - 0xfb, which
      * is expressed as 0x01 - 0xfc. An 0xFF byte is added to signify the
      * end of the first part. The second half of the patch list covers
-     * offsets 0xfc - 0x107. Which is expressed as 0x01 - 0xc. A 0xFF byte
-     * is added to signify the end of the second part/
+     * offsets 0xfc - 0x107 (more in gen ii). Which is expressed as
+     * 0x01 - 0xc. A 0xFF byte is added to signify the end of the second part.
      */
-    for(i = 0; i < 264; i++) {
-        FURI_LOG_D(TAG, "%02X", trade_party_flat[i]);
+    for(i = 0; i < pdata->party_sz; i++) {
         if(i == 0xFC) {
             FURI_LOG_D(TAG, "[plist] part 1 end");
             plist_append(*pplist, 0xFF);

@@ -5,17 +5,17 @@ App(
     entry_point="pokemon_app",
     requires=["gui"],
     stack_size=2 * 1024,
-    fap_version=[1,6],
+    fap_version=[2,0],
     fap_category="GPIO",
     fap_icon="pokemon_10px.png",
     fap_icon_assets="assets",
-    fap_author="Esteban Fuentealba, Kris Bahnsen, Darryn Cull",
+    fap_file_assets="files",
+    fap_author="Esteban Fuentealba, Kris Bahnsen, Darryn Cull, ProteanReverie",
     fap_weburl="https://github.com/EstebanFuentealba",
-    fap_description="Pokemon exchange from Flipper Zero to Game Boy for Generation I (Pokemon Red, Blue, Yellow)",
+    fap_description="Pokemon exchange from Flipper Zero to Game Boy, supports Generation I & II non-Japanese games",
     fap_private_libs=[
         Lib(
             name="flipper-gblink",
-            sources=["gblink.c"],
         ),
     ],
 )

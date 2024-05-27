@@ -1,5 +1,22 @@
 # Changelog - Patch Notes
 
+## Version 2.0
+**Bug Fixes**  
+- Older MALVEKE style pinout no longer breaks OK button, MALVEKE users now able to modify traded Pokemon
+
+**New Features**  
+- Generation II support (Gold, Silver, Crystal)  
+  - Ability to configure name, level, held item, moveset, EV/IV, shininess, gender, pokerus, Unown form, OT ID/name
+- Custom Sprite Art for all Pokemon, all sprites are the full 56x56 px size  
+- Better state synchronization during trades, able to request canceling a trade
+- Exit confirmation to prevent accidentally losing configuration  
+- Add main menu to select generation and pinout  
+- Adjust Trade and Select views to show full sprite, with proper transparency
+
+**Refactor**
+- Sprites moved to file on SD card  
+- Create accessors for generically modifying Pokemon struct data  
+
 ## Version 1.6
 - **Change Name:** All the application names for GAME BOY/MALVEKE were standardized for better readability on the screen.
 
