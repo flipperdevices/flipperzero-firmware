@@ -788,9 +788,9 @@ Function,+,bt_keys_storage_load,_Bool,BtKeysStorage*
 Function,+,bt_keys_storage_set_default_path,void,Bt*
 Function,+,bt_keys_storage_set_file_path,void,"BtKeysStorage*, const char*"
 Function,+,bt_keys_storage_set_ram_params,void,"BtKeysStorage*, uint8_t*, uint16_t"
-Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*
-Function,-,bt_open_rpc_connection,void,Bt*
+Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
 Function,+,bt_keys_storage_update,_Bool,"BtKeysStorage*, uint8_t*, uint32_t"
+Function,+,bt_open_rpc_connection,void,Bt*
 Function,+,bt_profile_restore_default,_Bool,Bt*
 Function,+,bt_profile_start,FuriHalBleProfileBase*,"Bt*, const FuriHalBleProfileTemplate*, FuriHalBleProfileParams"
 Function,+,bt_remote_rssi,_Bool,"Bt*, uint8_t*"

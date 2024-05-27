@@ -18,13 +18,13 @@ static void archive_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(archive->scene_manager);
 }
 
-ArchiveApp* archive_alloc(void) {
+static ArchiveApp* archive_alloc(void) {
     ArchiveApp* archive = malloc(sizeof(ArchiveApp));
 
     archive->gui = furi_record_open(RECORD_GUI);
     archive->loader = furi_record_open(RECORD_LOADER);
     archive->fav_move_str = furi_string_alloc();
-    archive->dst_path = furi_string_alloc();
+    archive->file_extension = furi_string_alloc();
 
     archive->scene_manager = scene_manager_alloc(&archive_scene_handlers, archive);
     archive->view_dispatcher = view_dispatcher_alloc();
@@ -51,6 +51,11 @@ ArchiveApp* archive_alloc(void) {
         view_dispatcher, ArchiveViewStack, view_stack_get_view(archive->view_stack));
 
     archive->browser = browser_alloc();
+    with_view_model(
+        archive->browser->view,
+        ArchiveBrowserViewModel * model,
+        { model->archive = archive; },
+        true);
     view_dispatcher_add_view(
         archive->view_dispatcher, ArchiveViewBrowser, archive_browser_get_view(archive->browser));
 
@@ -63,6 +68,21 @@ ArchiveApp* archive_alloc(void) {
 void archive_free(ArchiveApp* archive) {
     furi_assert(archive);
     ViewDispatcher* view_dispatcher = archive->view_dispatcher;
+
+    scene_manager_set_scene_state(archive->scene_manager, ArchiveAppSceneInfo, false);
+    scene_manager_set_scene_state(archive->scene_manager, ArchiveAppSceneSearch, false);
+    if(archive->thread) {
+        furi_thread_join(archive->thread);
+        furi_thread_free(archive->thread);
+        archive->thread = NULL;
+    }
+
+    if(archive->browser->disk_image) {
+        storage_virtual_quit(furi_record_open(RECORD_STORAGE));
+        furi_record_close(RECORD_STORAGE);
+        storage_file_free(archive->browser->disk_image);
+        archive->browser->disk_image = NULL;
+    }
 
     // Loading
     loading_free(archive->loading);
@@ -83,7 +103,7 @@ void archive_free(ArchiveApp* archive) {
 
     browser_free(archive->browser);
     furi_string_free(archive->fav_move_str);
-    furi_string_free(archive->dst_path);
+    furi_string_free(archive->file_extension);
 
     furi_record_close(RECORD_DIALOGS);
     archive->dialogs = NULL;

@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0523-1403-0.102.1-3268e52](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-23 14:03 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-23 14:03 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-27 21:12 CST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-27 21:12 CST`
 - Updated: [Chess v1.10 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Updated: [Digimon F-Com v1.3 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 - Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac) Fix (By Willy-JL)
@@ -52,6 +52,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Archive: fix condition race on exit #3659 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3659)
 - OFW: [NFC App: fix changing UID #3663 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3663)
 - Updated: [Count Down Timer v1.4 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer) [Some small fixes and improvements #106 (By puppable)](https://github.com/xMasterX/all-the-plugins/pull/106)
+- RFID: [electra non-initialized encoded epilogue on render fix (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c58c8ce1f6e05ec3462e2b93ab4e2846ee75853c)
+- Updated: [Reversi v1.3 (By dimat)](https://github.com/dimat/flipperzero-reversi)
 
 <a name="release">
 
@@ -310,7 +312,7 @@ $ ./fbt dolphin_ext
 - [Race v1.1 (By zyuhel)](https://github.com/zyuhel/flipperzero-racegame)
 - [Reaction Test (By Milk-Cool)](https://github.com/Milk-Cool/fz-reaction-game)
 - [Reaction Time (By ihatecsv)](https://github.com/ihatecsv/flipper_reaction_time)
-- [Reversi v1.2 (By dimat)](https://github.com/dimat/flipperzero-reversi)
+- [Reversi v1.3 (By dimat)](https://github.com/dimat/flipperzero-reversi)
 - [Rock Paper Scissors v1.5 (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/plugins/rock_paper_scissors)
 - [Rock Paper Scissors 2 v1.0 (By benwoo1110)](https://github.com/benwoo1110/rps-FlipperZero)
 - [Root of Life v1.1 (By Xorboo)](https://github.com/Xorboo/root-of-life)
