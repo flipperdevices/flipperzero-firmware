@@ -33,7 +33,7 @@ bool flipboard_view_flip_keyboard_input(InputEvent* _event, void* _context) {
 void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     FlipboardModelRef* my_model = (FlipboardModelRef*)model;
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(my_model->model);
-    if(fbm->render_model.source == FlipboardBlinkySourcePNG) {
+    if(fbm->render_model.source == FlipboardBlinkySourceAssets) {
         uint16_t h = icon_get_height(&I_nametag);
         if(h > 64) {
             h = 64;
@@ -458,8 +458,8 @@ int32_t flipboard_blinky_app(void* _p) {
 
     view_dispatcher_run(flipboard_get_view_dispatcher(app));
 
-    flipboard_blinky_model_free(fbm);
     app_settings_free(settings);
+    flipboard_blinky_model_free(fbm);
     flipboard_free(app);
 
     return 0;

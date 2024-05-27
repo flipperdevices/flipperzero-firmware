@@ -2,11 +2,14 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
+#include <storage/storage.h>
+#include <toolbox/saved_struct.h>
 
 #include "common/flipboard.h"
 
 #include "app.h"
 #include "app_settings.h"
+#include "app_config.h"
 #include "flipboard_blinky_model.h"
 
 struct AppSettings {
@@ -18,7 +21,7 @@ struct AppSettings {
 };
 
 static char* display_source_values[] = {
-    [FlipboardBlinkySourcePNG] = "PNG",
+    [FlipboardBlinkySourceAssets] = "Assets",
     [FlipboardBlinkySourceFXBM] = "FXBM",
     [FlipboardBlinkySourceText] = "TEXT"};
 
@@ -28,6 +31,7 @@ static char* justification_values[] = {
     [FlipboardBlinkyJustificationRight] = "Right"};
 
 static void app_settings_populate(AppSettings* settings);
+static void app_settings_save(AppSettings* settings);
 
 static void app_settings_display_source_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
@@ -112,12 +116,34 @@ static void app_settings_populate(AppSettings* settings) {
     }
 }
 
+static void app_settings_load(AppSettings* settings) {
+    furi_assert(settings->fbm);
+    saved_struct_load(
+        EXT_PATH("apps_data") "/flipboard/blinky.cfg",
+        &settings->fbm->render_model,
+        sizeof(FlipboardBlinkyRenderModel),
+        FLIPBOARD_BLINKY_CONFIG_MAGIC,
+        FLIPBOARD_BLINKY_CONFIG_VERSION);
+}
+
+static void app_settings_save(AppSettings* settings) {
+    furi_assert(settings->fbm);
+    bool saved = saved_struct_save(
+        EXT_PATH("apps_data") "/flipboard/blinky.cfg",
+        &settings->fbm->render_model,
+        sizeof(FlipboardBlinkyRenderModel),
+        FLIPBOARD_BLINKY_CONFIG_MAGIC,
+        FLIPBOARD_BLINKY_CONFIG_VERSION);
+    FURI_LOG_D(TAG, "Saved: %d", saved);
+}
+
 AppSettings* app_settings_alloc(Flipboard* app) {
     FlipboardModel* fm = flipboard_get_model(app);
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
     AppSettings* settings = (AppSettings*)malloc(sizeof(AppSettings));
     settings->app = app;
     settings->fbm = fbm;
+    app_settings_load(settings);
     settings->list = variable_item_list_alloc();
     settings->text_input = text_input_alloc();
     variable_item_list_set_enter_callback(settings->list, app_settings_item_clicked, settings);
@@ -129,6 +155,7 @@ AppSettings* app_settings_alloc(Flipboard* app) {
 }
 
 void app_settings_free(AppSettings* settings) {
+    app_settings_save(settings);
     variable_item_list_free(settings->list);
     ViewDispatcher* vd = flipboard_get_view_dispatcher(settings->app);
     view_dispatcher_remove_view(vd, 5555);

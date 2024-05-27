@@ -2,7 +2,7 @@
 #include "app.h"
 
 FlipboardBlinkySource flipboard_blinky_source_order[] = {
-    FlipboardBlinkySourcePNG,
+    FlipboardBlinkySourceAssets,
     FlipboardBlinkySourceFXBM,
     FlipboardBlinkySourceText};
 
@@ -23,7 +23,7 @@ FlipboardBlinkyModel* flipboard_blinky_model_alloc(FlipboardModel* context) {
     fbm->effect_id = 1;
     fbm->max_effect_id = 6;
     fbm->show_details_until = 0;
-    fbm->render_model.source = FlipboardBlinkySourcePNG;
+    fbm->render_model.source = FlipboardBlinkySourceAssets;
     fbm->render_model.justification = FlipboardBlinkyJustificationCenter;
     fbm->render_model.line[0][0] = '\0';
     fbm->render_model.line[1][0] = '\0';

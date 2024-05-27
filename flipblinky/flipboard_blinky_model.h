@@ -5,7 +5,7 @@
 #include "fxbm.h"
 
 typedef enum FlipboardBlinkySource {
-    FlipboardBlinkySourcePNG = 'P',
+    FlipboardBlinkySourceAssets = 'A',
     FlipboardBlinkySourceFXBM = 'X',
     FlipboardBlinkySourceText = 'T',
 } FlipboardBlinkySource;

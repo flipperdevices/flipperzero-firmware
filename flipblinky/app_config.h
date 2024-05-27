@@ -7,9 +7,13 @@
 
 #define FIRMWARE_SUPPORTS_SUBGHZ 1
 
+// Configuration file header
+#define FLIPBOARD_BLINKY_CONFIG_MAGIC 0x46
+#define FLIPBOARD_BLINKY_CONFIG_VERSION 0x1
+
 #define ABOUT_TEXT                             \
     "Welcome to the Flipboard\n"               \
-    "blinky v3.1!\n\n"                         \
+    "blinky v3.2!\n\n"                         \
     "Optimized for FlipBoard \n"               \
     "hardware --\n"                            \
     "see link below to order!\n"               \
