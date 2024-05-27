@@ -81,13 +81,16 @@ static FelicaError felica_listener_command_handler_read(
 
     instance->mac_calc_start = 0;
     memset(instance->requested_blocks, 0, sizeof(instance->requested_blocks));
+    const FelicaBlockListElement* item =
+        felica_listener_block_list_item_get_first(instance, request);
     for(uint8_t i = 0; i < resp->block_count; i++) {
-        const FelicaBlockListElement* item = &request->list[i];
         instance->requested_blocks[i] = item->block_number;
         FelicaCommanReadBlockHandler handler =
             felica_listener_get_read_block_handler(item->block_number);
 
         handler(instance, item->block_number, i, resp);
+
+        item = felica_listener_block_list_item_get_next(instance, item);
     }
 
     bit_buffer_reset(instance->tx_buffer);
@@ -115,12 +118,15 @@ static FelicaError felica_listener_command_handler_write(
     resp->length = sizeof(FelicaListenerWriteCommandResponse);
 
     if(felica_listener_validate_write_request_and_set_sf(instance, request, data_ptr, resp)) {
+        const FelicaBlockListElement* item =
+            felica_listener_block_list_item_get_first(instance, request);
         for(uint8_t i = 0; i < request->base.header.block_count; i++) {
-            const FelicaBlockListElement* item = &request->list[i];
             FelicaCommandWriteBlockHandler handler =
                 felica_listener_get_write_block_handler(item->block_number);
 
             handler(instance, item->block_number, &data_ptr->blocks[i]);
+
+            item = felica_listener_block_list_item_get_next(instance, item);
         }
         felica_wcnt_increment(instance->data);
     }
@@ -176,14 +182,15 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
             FelicaListenerGenericRequest* request =
                 (FelicaListenerGenericRequest*)bit_buffer_get_data(nfc_event->data.buffer);
 
-            if(!felica_listener_check_idm(instance, &request->header.idm)) {
-                FURI_LOG_E(TAG, "Wrong IDm");
+            uint8_t size = bit_buffer_get_size_bytes(nfc_event->data.buffer) - 2;
+            if((request->length != size) ||
+               (!felica_listener_check_block_list(instance, request))) {
+                FURI_LOG_E(TAG, "Wrong request length");
                 break;
             }
 
-            uint8_t size = bit_buffer_get_size_bytes(nfc_event->data.buffer) - 2;
-            if(request->length != size) {
-                FURI_LOG_E(TAG, "Wrong request length");
+            if(!felica_listener_check_idm(instance, &request->header.idm)) {
+                FURI_LOG_E(TAG, "Wrong IDm");
                 break;
             }
 

@@ -42,6 +42,7 @@ struct FelicaListener {
     FelicaAuthentication auth;
     FelicaBlockData mc_shadow;
 
+    uint8_t block_list_size;
     uint8_t requested_blocks[4];
     uint8_t mac_calc_start;
     bool rc_written;
@@ -58,6 +59,16 @@ void felica_listener_reset(FelicaListener* instance);
 void felica_wcnt_increment(FelicaData* data);
 //void felica_wcnt_post_process(FelicaData* data);
 bool felica_listener_check_idm(const FelicaListener* instance, const FelicaIDm* request_idm);
+bool felica_listener_check_block_list(
+    FelicaListener* instance,
+    FelicaListenerGenericRequest* request);
+const FelicaBlockListElement* felica_listener_block_list_item_get_first(
+    FelicaListener* instance,
+    const FelicaListenerRequest* request);
+const FelicaBlockListElement* felica_listener_block_list_item_get_next(
+    FelicaListener* instance,
+    const FelicaBlockListElement* item);
+
 //uint8_t felica_listener_get_block_index(uint8_t number);
 //bool felica_block_exists(uint8_t number);
 //bool felica_get_mc_bit(const FelicaListener* instance, uint8_t byte_index, uint8_t bit_number);
@@ -78,7 +89,7 @@ bool felica_listener_validate_write_request_and_set_sf(
     FelicaListenerWriteCommandResponse* response);
 
 bool felica_listener_validate_read_request_and_set_sf(
-    const FelicaListener* instance,
+    FelicaListener* instance,
     const FelicaListenerReadRequest* const request,
     FelicaCommandResponseHeader* resp_header);
 

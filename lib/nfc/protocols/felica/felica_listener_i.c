@@ -25,6 +25,11 @@
 #define FELICA_LISTENER_WRITE_BLOCK_COUNT_MAX (2)
 #define FELICA_LISTENER_WRITE_BLOCK_COUNT_MIN (1)
 
+#define FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE_MIN (sizeof(FelicaBlockListElement))
+#define FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE(item)                    \
+    ((item->length == 1) ? FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE_MIN : \
+                           (FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE_MIN + 1))
+
 static uint32_t felica_wcnt_get_max_value(const FelicaData* data) {
     const uint8_t mc = data->data.fs.mc.data[FELICA_MC_ALL_BYTE];
 
@@ -71,6 +76,48 @@ static void felica_wcnt_post_process(FelicaData* data) {
        (*wcnt_ptr > FELICA_WCNT_MC2_00_MAX_VALUE)) {
         *wcnt_ptr = 0;
     }
+}
+
+const FelicaBlockListElement* felica_listener_block_list_item_get_first(
+    FelicaListener* instance,
+    const FelicaListenerRequest* request) {
+    instance->block_list_size = request->base.length - sizeof(FelicaListenerGenericRequest);
+    if(request->base.header.code == FELICA_CMD_WRITE_WITHOUT_ENCRYPTION) {
+        instance->block_list_size -= request->base.header.block_count * FELICA_DATA_BLOCK_SIZE;
+    }
+    return (instance->block_list_size == 0) ? NULL : request->list;
+}
+
+const FelicaBlockListElement* felica_listener_block_list_item_get_next(
+    FelicaListener* instance,
+    const FelicaBlockListElement* item) {
+    FelicaBlockListElement* next_item = NULL;
+    uint8_t item_size = FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE(item);
+    instance->block_list_size -= item_size;
+
+    if(instance->block_list_size >= FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE_MIN) {
+        next_item = (FelicaBlockListElement*)((uint8_t*)item + item_size);
+
+        uint8_t next_item_size = FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE(next_item);
+
+        next_item = (instance->block_list_size < next_item_size) ? NULL : next_item;
+    }
+
+    return next_item;
+}
+
+bool felica_listener_check_block_list(FelicaListener* instance, FelicaListenerGenericRequest* req) {
+    FelicaListenerRequest* request = (FelicaListenerRequest*)req;
+    bool valid = false;
+    const FelicaBlockListElement* item =
+        felica_listener_block_list_item_get_first(instance, request);
+    uint8_t item_cnt = 0;
+    while(item != NULL) {
+        item_cnt++;
+        item = felica_listener_block_list_item_get_next(instance, item);
+    }
+    valid = ((item_cnt == request->base.header.block_count));
+    return valid;
 }
 
 bool felica_listener_check_idm(const FelicaListener* instance, const FelicaIDm* request_idm) {
@@ -215,32 +262,45 @@ FelicaCommanReadBlockHandler felica_listener_get_read_block_handler(const uint8_
     return handler;
 }
 
+static bool
+    felica_listener_block_list_item_validate_block_number(const FelicaBlockListElement* item) {
+    bool valid = true;
+    if(item->length == 0) {
+        uint8_t D2_block_number = *(&item->block_number + 1);
+        valid = D2_block_number == 0;
+    }
+    return valid;
+}
+
 static bool felica_validate_read_block_list(
-    const FelicaListener* instance,
+    FelicaListener* instance,
     const FelicaListenerReadRequest* const request,
     FelicaCommandResponseHeader* response) {
     uint8_t mac_a_pos = 0;
     bool mac_a_present = false, mac_present = false;
+
+    const FelicaBlockListElement* item =
+        felica_listener_block_list_item_get_first(instance, request);
     for(uint8_t i = 0; i < request->base.header.block_count; i++) {
-        FelicaBlockListElement item = request->list[i];
-        if(item.service_code != 0) {
+        if(item->service_code != 0) {
             response->SF1 = (1 << i);
             response->SF2 = 0xA3;
             return false;
-        } else if(item.access_mode != 0) {
+        } else if(item->access_mode != 0) {
             response->SF1 = (1 << i);
             response->SF2 = 0xA7;
             return false;
         } else if(
-            !felica_block_exists(item.block_number) ||
-            (felica_block_is_readonly(instance, item.block_number) &&
+            !felica_listener_block_list_item_validate_block_number(item) ||
+            !felica_block_exists(item->block_number) ||
+            (felica_block_is_readonly(instance, item->block_number) &&
              request->base.header.service_code != FELICA_SERVICE_RO_ACCESS)) {
             response->SF1 = (1 << i);
             response->SF2 = 0xA8;
             return false;
-        } else if(item.block_number == FELICA_BLOCK_INDEX_MAC) {
+        } else if(item->block_number == FELICA_BLOCK_INDEX_MAC) {
             mac_present = true;
-        } else if(item.block_number == FELICA_BLOCK_INDEX_MAC_A) {
+        } else if(item->block_number == FELICA_BLOCK_INDEX_MAC_A) {
             if(!instance->rc_written) {
                 response->SF1 = (1 << i);
                 response->SF2 = 0xB2;
@@ -251,7 +311,7 @@ static bool felica_validate_read_block_list(
                 mac_a_pos = i;
             }
         } else if(
-            felica_block_requires_auth(instance, request->base.header.code, item.block_number) &&
+            felica_block_requires_auth(instance, request->base.header.code, item->block_number) &&
             !instance->auth.context.auth_status.external) {
             response->SF1 = (1 << i);
             response->SF2 = 0xB1;
@@ -263,12 +323,14 @@ static bool felica_validate_read_block_list(
             response->SF2 = 0xB0;
             return false;
         }
+
+        item = felica_listener_block_list_item_get_next(instance, item);
     }
     return true;
 }
 
 bool felica_listener_validate_read_request_and_set_sf(
-    const FelicaListener* instance,
+    FelicaListener* instance,
     const FelicaListenerReadRequest* const request,
     FelicaCommandResponseHeader* resp_header) {
     bool valid = false;
@@ -320,9 +382,11 @@ static bool felica_validate_write_block_list(
         return false;
     }
 
+    const FelicaBlockListElement* item =
+        felica_listener_block_list_item_get_first(instance, request);
     for(uint8_t i = 0; i < request->base.header.block_count; i++) {
-        const FelicaBlockListElement* item = &request->list[i];
-        if(!felica_block_exists(item->block_number)) {
+        if(!felica_listener_block_list_item_validate_block_number(item) ||
+           !felica_block_exists(item->block_number)) {
             response->SF1 = (1 << i);
             response->SF2 = 0xA8;
             return false;
@@ -367,6 +431,8 @@ static bool felica_validate_write_block_list(
             response->SF2 = 0xB1;
             return false;
         }
+
+        item = felica_listener_block_list_item_get_next(instance, item);
     }
     return true;
 }
