@@ -493,7 +493,6 @@ int32_t flipboard_simon_app(void* p) {
         fields,
         flipboard_defaults,
         single_mode_button,
-        false,
         NULL,
         NULL,
         0,

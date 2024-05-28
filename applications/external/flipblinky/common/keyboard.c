@@ -8,8 +8,9 @@
  */
 FlipboardKeyboard* flipboard_keyboard_alloc() {
     FlipboardKeyboard* keyboard = malloc(sizeof(FlipboardKeyboard));
-    keyboard->usb_previous = NULL;
-    keyboard->attached = false;
+    keyboard->use_ble = false;
+    keyboard->hid = bad_usb_hid_get_interface(
+        keyboard->use_ble ? BadUsbHidInterfaceBle : BadUsbHidInterfaceUsb);
     return keyboard;
 }
 
@@ -32,8 +33,23 @@ void flipboard_keyboard_free(FlipboardKeyboard* keyboard) {
  * @param keyboard The keyboard to attach.
  */
 void flipboard_keyboard_attach(FlipboardKeyboard* keyboard) {
-    keyboard->usb_previous = furi_hal_usb_get_config();
-    keyboard->attached = furi_hal_usb_set_config(&usb_hid, NULL);
+    keyboard->use_ble = false;
+    keyboard->hid = bad_usb_hid_get_interface(BadUsbHidInterfaceUsb);
+    keyboard->instance = keyboard->hid->init(NULL);
+    uint8_t retries = 10;
+    do {
+        furi_delay_ms(100);
+    } while(!keyboard->hid->is_connected(keyboard->instance) && retries-- > 0);
+
+    if(keyboard->hid->is_connected(keyboard->instance)) {
+        FURI_LOG_I("Keyboard", "Keyboard attached");
+    } else {
+        keyboard->hid->deinit(keyboard->instance);
+        FURI_LOG_W("Keyboard", "Keyboard not attached, using BLE instead.");
+        keyboard->use_ble = true;
+        keyboard->hid = bad_usb_hid_get_interface(BadUsbHidInterfaceBle);
+        keyboard->instance = keyboard->hid->init(NULL);
+    }
 }
 
 /**
@@ -43,10 +59,9 @@ void flipboard_keyboard_attach(FlipboardKeyboard* keyboard) {
  * @param keyboard The keyboard to detach.
  */
 void flipboard_keyboard_detatch(FlipboardKeyboard* keyboard) {
-    if(keyboard->attached) {
-        furi_hal_usb_set_config(keyboard->usb_previous, NULL);
-        keyboard->usb_previous = NULL;
-        keyboard->attached = false;
+    if(keyboard && keyboard->instance) {
+        keyboard->hid->deinit(keyboard->instance);
+        keyboard->instance = NULL;
     }
 }
 
@@ -58,11 +73,11 @@ void flipboard_keyboard_detatch(FlipboardKeyboard* keyboard) {
  * @param ch The character to send.
  */
 void flipboard_keyboard_send_char(FlipboardKeyboard* keyboard, char ch) {
-    if(keyboard->attached) {
+    if(keyboard->hid->is_connected(keyboard->instance)) {
         uint16_t keycode = HID_ASCII_TO_KEY(ch);
-        furi_hal_hid_kb_press(keycode);
+        keyboard->hid->kb_press(keyboard->instance, keycode);
         furi_delay_ms(PRESS_DELAY_MS);
-        furi_hal_hid_kb_release(keycode);
+        keyboard->hid->kb_release(keyboard->instance, keycode);
         furi_delay_ms(RELEASE_DELAY_MS);
     }
 }
@@ -98,9 +113,9 @@ void flipboard_keyboard_send_text(FlipboardKeyboard* keyboard, const char* messa
  */
 void flipboard_keyboard_send_keycode(FlipboardKeyboard* keyboard, uint16_t code) {
     FURI_LOG_D("Keyboard", "Sending keycode: %d", code);
-    if(keyboard->attached) {
+    if(keyboard->hid->is_connected(keyboard->instance)) {
         furi_delay_ms(PRESS_DELAY_MS);
-        furi_hal_hid_kb_press(code);
+        keyboard->hid->kb_press(keyboard->instance, code);
     }
 }
 
@@ -113,9 +128,9 @@ void flipboard_keyboard_send_keycode(FlipboardKeyboard* keyboard, uint16_t code)
  */
 void flipboard_keyboard_release_keycode(FlipboardKeyboard* keyboard, uint16_t code) {
     FURI_LOG_D("Keyboard", "Release keycode: %d", code);
-    if(keyboard->attached) {
+    if(keyboard->hid->is_connected(keyboard->instance)) {
         furi_delay_ms(PRESS_DELAY_MS);
-        furi_hal_hid_kb_release(code);
+        keyboard->hid->kb_release(keyboard->instance, code);
     }
 }
 
@@ -127,9 +142,9 @@ void flipboard_keyboard_release_keycode(FlipboardKeyboard* keyboard, uint16_t co
  */
 void flipboard_keyboard_release_all(FlipboardKeyboard* keyboard) {
     FURI_LOG_D("Keyboard", "Release all keys");
-    if(keyboard->attached) {
+    if(keyboard->hid->is_connected(keyboard->instance)) {
         furi_delay_ms(RELEASE_DELAY_MS);
-        furi_hal_hid_kb_release_all();
+        keyboard->hid->release_all(keyboard->instance);
     }
 }
 

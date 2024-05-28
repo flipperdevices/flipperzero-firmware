@@ -9,7 +9,7 @@
 
 #define ABOUT_TEXT                             \
     "Welcome to the Flipboard\n"               \
-    "keyboard 2.6\n"                           \
+    "keyboard 3.1 BLE+USB\n"                   \
     "Optimized for FlipBoard\n"                \
     "hardware, see link below\n"               \
     "to order!\n"                              \

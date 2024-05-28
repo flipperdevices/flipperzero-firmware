@@ -7,11 +7,12 @@ App(
     ],
     entry_point="flipboard_signal_app",
     stack_size=4 * 1024,
+    fap_libs=["ble_profile"],
     fap_icon="flipsignal.png",
     fap_category="GPIO/FlipBoard",
     fap_icon_assets="assets",
     fap_author="jamisonderek",
     fap_weburl="https://github.com/jamisonderek/flipboard",
-    fap_version=(3, 5),
+    fap_version=(3, 7),
     fap_description="FlipBoard Signal turns your FlipBoard into a signal sender.",
 )

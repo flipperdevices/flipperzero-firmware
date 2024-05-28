@@ -31,7 +31,8 @@ void flipboard_keyboard_free(FlipboardKeyboard* keyboard);
  * @brief Attaches the keyboard to the USB port.
  * @details Attaches the keyboard to the USB port. This will
  * replace the current USB configuration. You should call
- * flipboard_keyboard_detatch to detach the keyboard.
+ * flipboard_keyboard_detatch to detach the keyboard.  If a USB
+ * keyboard is not attached, it will attempt to attach using BLE.
  * @param keyboard The keyboard to attach.
  */
 void flipboard_keyboard_attach(FlipboardKeyboard* keyboard);

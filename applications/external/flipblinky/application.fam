@@ -7,11 +7,12 @@ App(
     ],
     entry_point="flipboard_blinky_app",
     stack_size=4 * 1024,
+    fap_libs=["ble_profile"],
     fap_icon="flipblinky.png",
     fap_category="GPIO/FlipBoard",
     fap_icon_assets="assets",
     fap_author="jamisonderek",
     fap_weburl="https://github.com/jamisonderek/flipboard",
-    fap_version=(2, 5),
+    fap_version=(3, 3),
     fap_description="FlipBoard Blinky turns your FlipBoard into a blinky badge.",
 )

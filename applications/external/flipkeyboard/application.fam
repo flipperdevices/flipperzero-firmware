@@ -7,11 +7,12 @@ App(
     ],
     entry_point="flipboard_keyboard_app",
     stack_size=4 * 1024,
+    fap_libs=["ble_profile"],
     fap_icon="flipkeyboard.png",
     fap_category="GPIO/FlipBoard",
     fap_icon_assets="assets",
     fap_author="jamisonderek",
     fap_weburl="https://github.com/jamisonderek/flipboard",
-    fap_version=(2, 6),
+    fap_version=(3, 1),
     fap_description="FlipBoard Keyboard turns your FlipBoard into a keyboard.",
 )
