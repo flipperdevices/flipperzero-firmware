@@ -10,6 +10,6 @@ void uhf_reader_view_delete_success_enter_callback(void* context);
 
 void uhf_reader_view_delete_success_exit_callback(void* context);
 
-void view_delete_success_alloc(UHFReaderApp* app);
+void view_delete_success_alloc(UHFReaderApp* App);
 
-void view_delete_success_free(UHFReaderApp* app);
+void view_delete_success_free(UHFReaderApp* App);

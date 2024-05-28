@@ -22,7 +22,7 @@ typedef void (*ProcessLine)(FuriString* line, void* context);
 typedef struct {
     // UART bus & channel to use
     FuriHalBus uart_bus;
-    FuriHalUartId uart_channel;
+    FuriHalSerialHandle* serial_handle;
     bool uart_init_by_app;
 
     // Stream buffer to hold incoming data (worker will dequeue and process)
@@ -50,18 +50,22 @@ typedef enum {
 } WorkerEventFlags;
 
 /** 
- * Invoked by ISR when a byte of data is received on the UART bus.  This function
+ * Invoked when a byte of data is received on the UART bus.  This function
  * adds the byte to the stream buffer and sets the WorkerEventDataWaiting flag.
  * 
- * @param ev       Event type 
- * @param data     Byte of data received
+ * @param handle   Serial handle 
+ * @param event    FuriHalSerialRxEvent
  * @param context  UartHelper instance
 */
-static void uart_helper_received_byte_callback(UartIrqEvent ev, uint8_t data, void* context) {
+static void uart_helper_received_byte_callback(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
     UartHelper* helper = context;
 
-    if(ev == UartIrqEventRXNE) {
-        furi_stream_buffer_send(helper->rx_stream, &data, 1, 0);
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
+        furi_stream_buffer_send(helper->rx_stream, (void*)&data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(helper->worker_thread), WorkerEventDataWaiting);
     }
 }
@@ -168,21 +172,21 @@ UartHelper* uart_helper_alloc() {
     // The uart_helper uses USART1.
     UartHelper* helper = malloc(sizeof(UartHelper));
     helper->uart_bus = FuriHalBusUSART1;
-    helper->uart_channel = FuriHalUartIdUSART1;
+    helper->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
     // Typically the UART is already enabled and will assert if you try to enable again.
     helper->uart_init_by_app = !furi_hal_bus_is_enabled(helper->uart_bus);
     if(helper->uart_init_by_app) {
-        furi_hal_uart_init(helper->uart_channel, uart_baud);
+        furi_hal_serial_init(helper->serial_handle, uart_baud);
     } else {
         // If UART is already initialized, disable the console so it doesn't write to the UART.
-        furi_hal_console_disable();
+        // furi_hal_console_disable();
     }
 
     // process_line callback gets invoked when a line is read.  By default the callback is not set.
     helper->process_line = NULL;
 
     // Set the baud rate for the UART
-    furi_hal_uart_set_br(helper->uart_channel, uart_baud);
+    furi_hal_serial_set_br(helper->serial_handle, uart_baud);
 
     // When a byte of data is received, it will be appended to the rx_stream.  A worker thread
     // will dequeue the data from the rx_stream.
@@ -199,7 +203,8 @@ UartHelper* uart_helper_alloc() {
     furi_thread_start(helper->worker_thread);
 
     // Set the callback to invoke when data is received.
-    furi_hal_uart_set_irq_cb(helper->uart_channel, uart_helper_received_byte_callback, helper);
+    furi_hal_serial_async_rx_start(
+        helper->serial_handle, uart_helper_received_byte_callback, helper, false);
 
     return helper;
 }
@@ -218,13 +223,13 @@ void uart_helper_set_callback(UartHelper* helper, ProcessLine process_line, void
 
 void uart_helper_set_baud_rate(UartHelper* helper, uint32_t baud_rate) {
     // Update the baud rate for the UART.
-    furi_hal_uart_set_br(helper->uart_channel, baud_rate);
+    furi_hal_serial_set_br(helper->serial_handle, baud_rate);
     ring_buffer_clear(helper->ring_buffer);
 }
 
 void uart_helper_send(UartHelper* helper, const char* data, size_t length) {
     // Transmit data via UART TX.
-    furi_hal_uart_tx(helper->uart_channel, (uint8_t*)data, length);
+    furi_hal_serial_tx(helper->serial_handle, (uint8_t*)data, length);
 }
 
 void uart_helper_send_string(UartHelper* helper, FuriString* string) {
@@ -251,11 +256,12 @@ void uart_helper_free(UartHelper* helper) {
     // Free the worker_thread.
     furi_thread_free(helper->worker_thread);
 
+    furi_hal_serial_control_release(helper->serial_handle);
     // If the UART was initialized by the application, deinitialize it, otherwise re-enable the console.
     if(helper->uart_init_by_app) {
-        furi_hal_uart_deinit(helper->uart_channel);
+        furi_hal_serial_deinit(helper->serial_handle);
     } else {
-        furi_hal_console_enable();
+        // furi_hal_console_enable();
     }
 
     // Free the rx_stream and ring_buffer.

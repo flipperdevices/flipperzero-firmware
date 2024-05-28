@@ -2,12 +2,12 @@
 #include <stdlib.h>
 
 //Function Declarations
-char* extractEPC(const char* input);
+char* extract_epc(const char* Input);
 
-char* extractRES(const char* input);
+char* extract_res(const char* Input);
 
-char* extractTID(const char* input);
+char* extract_tid(const char* Input);
 
-char* extractMEM(const char* input);
+char* extract_mem(const char* Input);
 
-char* extractName(const char* input);
+char* extract_name(const char* Input);

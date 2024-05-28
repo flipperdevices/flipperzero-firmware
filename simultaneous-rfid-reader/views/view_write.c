@@ -3,11 +3,11 @@
 /**
  * @brief      Callback for returning to write submenu screen.
  * @details    This function is called when user press back button.
- * @param      _context  The context - unused
+ * @param      context  The context - unused
  * @return     next view id
 */
-uint32_t uhf_reader_navigation_write_callback(void* _context) {
-    UNUSED(_context);
+uint32_t uhf_reader_navigation_write_callback(void* context) {
+    UNUSED(context);
     return UHFReaderViewWrite;
 }
 
@@ -17,17 +17,17 @@ uint32_t uhf_reader_navigation_write_callback(void* _context) {
  * @param      context  The UHFReaderApp - Used to change app variables.
 */
 void uhf_reader_epc_value_text_updated(void* context) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
+    UHFReaderApp* App = (UHFReaderApp*)context;
     bool redraw = true;
     with_view_model(
-        app->view_write,
-        
+        App->ViewWrite,
+
         //Keep track of the new epc value
-        UHFReaderWriteModel * model,
-        { furi_string_set(model->new_epc_value, app->temp_save_buffer); },
+        UHFReaderWriteModel * Model,
+        { furi_string_set(Model->NewEpcValue, App->TempSaveBuffer); },
         redraw);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, UHFReaderViewWrite);
+    view_dispatcher_switch_to_view(App->ViewDispatcher, UHFReaderViewWrite);
 }
 
 /**
@@ -36,10 +36,9 @@ void uhf_reader_epc_value_text_updated(void* context) {
  * @param      context  The context - The UHFReaderApp
 */
 void uhf_reader_view_write_timer_callback(void* context) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, UHFReaderEventIdRedrawScreen);
+    UHFReaderApp* App = (UHFReaderApp*)context;
+    view_dispatcher_send_custom_event(App->ViewDispatcher, UHFReaderEventIdRedrawScreen);
 }
-
 
 /**
  * @brief      Write enter callback function.
@@ -47,58 +46,55 @@ void uhf_reader_view_write_timer_callback(void* context) {
  * @param      context  The context - UHFReaderApp object.
 */
 void uhf_reader_view_write_enter_callback(void* context) {
-    
-    //Grab the period for the timer 
-    uint32_t period = furi_ms_to_ticks(200);
-    UHFReaderApp* app = (UHFReaderApp*)context;
-    
-    //Allocate space for the FuriStrings used 
-    FuriString* temp_str = furi_string_alloc();
-    FuriString* temp_tag = furi_string_alloc();
-    
+    //Grab the period for the timer
+    uint32_t Period = furi_ms_to_ticks(200);
+    UHFReaderApp* App = (UHFReaderApp*)context;
+
+    //Allocate space for the FuriStrings used
+    FuriString* TempStr = furi_string_alloc();
+    FuriString* TempTag = furi_string_alloc();
+
     //Open the saved epcs file to extract the uhf tag info
-    if(!flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
+    if(!flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
         FURI_LOG_E(TAG, "Failed to open Saved file");
-        flipper_format_file_close(app->epc_file);
+        flipper_format_file_close(App->EpcFile);
     } else {
-        furi_string_printf(temp_str, "Tag%ld", app->selected_tag_index);
-        if(!flipper_format_read_string(app->epc_file, furi_string_get_cstr(temp_str), temp_tag)) {
-            FURI_LOG_D(TAG, "Could not read tag %ld data", app->selected_tag_index);
+        furi_string_printf(TempStr, "Tag%ld", App->SelectedTagIndex);
+        if(!flipper_format_read_string(App->EpcFile, furi_string_get_cstr(TempStr), TempTag)) {
+            FURI_LOG_D(TAG, "Could not read tag %ld data", App->SelectedTagIndex);
         } else {
-            
             //Grab the saved uhf tag info from the saved epcs file
-            const char* inputString = furi_string_get_cstr(temp_tag);
-            furi_string_set(app->epc_to_write, extractEPC(inputString));
-            furi_string_set(app->epc_name, extractName(inputString));
-            
-            //Set the write model uhf tag values accordingly 
+            const char* InputString = furi_string_get_cstr(TempTag);
+            furi_string_set(App->EpcToWrite, extract_epc(InputString));
+            furi_string_set(App->EpcName, extract_name(InputString));
+
+            //Set the write model uhf tag values accordingly
             bool redraw = true;
             with_view_model(
-                app->view_write,
-                UHFReaderWriteModel * model,
+                App->ViewWrite,
+                UHFReaderWriteModel * Model,
                 {
-                    furi_string_set(model->epc_value, extractEPC(inputString));
-                    furi_string_set(model->tid_value, extractTID(inputString));
-                    furi_string_set(model->res_value, extractRES(inputString));
-                    furi_string_set(model->mem_value, extractMEM(inputString));
+                    furi_string_set(Model->EpcValue, extract_epc(InputString));
+                    furi_string_set(Model->TidValue, extract_tid(InputString));
+                    furi_string_set(Model->ResValue, extract_res(InputString));
+                    furi_string_set(Model->MemValue, extract_mem(InputString));
                 },
                 redraw);
             //Close the file
-            flipper_format_file_close(app->epc_file);
+            flipper_format_file_close(App->EpcFile);
         }
     }
 
-    //Start the timer 
-    furi_assert(app->timer == NULL);
-    app->timer =
+    //Start the timer
+    furi_assert(App->Timer == NULL);
+    App->Timer =
         furi_timer_alloc(uhf_reader_view_write_timer_callback, FuriTimerTypePeriodic, context);
-    furi_timer_start(app->timer, period);
-    
+    furi_timer_start(App->Timer, Period);
+
     //Setting default reading states and freeing FuriStrings used
-    app->is_writing = false;
-    furi_string_free(temp_tag);
-    furi_string_free(temp_str);
-    
+    App->IsWriting = false;
+    furi_string_free(TempTag);
+    furi_string_free(TempStr);
 }
 
 /**
@@ -107,10 +103,10 @@ void uhf_reader_view_write_enter_callback(void* context) {
  * @param      context  The context - UHFReaderApp object.
 */
 void uhf_reader_view_write_exit_callback(void* context) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
-    furi_timer_stop(app->timer);
-    furi_timer_free(app->timer);
-    app->timer = NULL;
+    UHFReaderApp* App = (UHFReaderApp*)context;
+    furi_timer_stop(App->Timer);
+    furi_timer_free(App->Timer);
+    App->Timer = NULL;
 }
 
 /**
@@ -121,53 +117,47 @@ void uhf_reader_view_write_exit_callback(void* context) {
  * @return     true if the event was handled, false otherwise. 
 */
 bool uhf_reader_view_write_custom_event_callback(uint32_t event, void* context) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
+    UHFReaderApp* App = (UHFReaderApp*)context;
     switch(event) {
-    
     // Redraw screen by passing true to last parameter of with_view_model.
-    case UHFReaderEventIdRedrawScreen:
-        {
-            bool redraw = true;
-            with_view_model(
-                app->view_write, UHFReaderWriteModel * _model, { UNUSED(_model); }, redraw);
-            return true;
-        }
-    
-    //The ok button was pressed to trigger a write
-    case UHFReaderEventIdOkPressed:
-        {
-            bool redraw = false;
-            with_view_model(
-                app->view_write,
-                UHFReaderWriteModel * model,
-                {
-                    //TODO: Modify this to work for the YMR1001
-                    //Send the write command 
-                    //I'm sure there is a better way to do this but works for now...
-                    if(furi_string_equal(model->write_function, WRITE_EPC)) {
-                        uart_helper_send(app->uart_helper, "WRITE\n", 6);
-                        uart_helper_send_string(app->uart_helper, model->epc_value);
-                        uart_helper_send_string(app->uart_helper, model->new_epc_value);
-                    } else if(furi_string_equal(model->write_function, WRITE_EPC_MEM)) {
-                        uart_helper_send(app->uart_helper, "WRITERES\n", 9);
-                        uart_helper_send_string(app->uart_helper, model->epc_value);
-                        uart_helper_send_string(app->uart_helper, model->new_epc_value);
-                    } else if(furi_string_equal(model->write_function, WRITE_USR_MEM)) {
-                        uart_helper_send(app->uart_helper, "WRITEUSR\n", 9);
-                        uart_helper_send_string(app->uart_helper, model->epc_value);
-                        uart_helper_send_string(app->uart_helper, model->new_epc_value);
-                    }
-                    else if(furi_string_equal(model->write_function, WRITE_TID_MEM)) {
-                        uart_helper_send(app->uart_helper, "WRITETID\n", 9);
-                        uart_helper_send_string(app->uart_helper, model->epc_value);
-                        uart_helper_send_string(app->uart_helper, model->new_epc_value);
-                    }
-                    
-                },
-                redraw);
+    case UHFReaderEventIdRedrawScreen: {
+        bool redraw = true;
+        with_view_model(App->ViewWrite, UHFReaderWriteModel * _Model, { UNUSED(_Model); }, redraw);
+        return true;
+    }
 
-            return true;
-        }
+    //The ok button was pressed to trigger a write
+    case UHFReaderEventIdOkPressed: {
+        bool redraw = false;
+        with_view_model(
+            App->ViewWrite,
+            UHFReaderWriteModel * Model,
+            {
+                //TODO: Modify this to work for the YMR1001
+                //Send the write command
+                //I'm sure there is a better way to do this but works for now...
+                if(furi_string_equal(Model->WriteFunction, WRITE_EPC)) {
+                    uart_helper_send(App->UartHelper, "WRITE\n", 6);
+                    uart_helper_send_string(App->UartHelper, Model->EpcValue);
+                    uart_helper_send_string(App->UartHelper, Model->NewEpcValue);
+                } else if(furi_string_equal(Model->WriteFunction, WRITE_EPC_MEM)) {
+                    uart_helper_send(App->UartHelper, "WRITERES\n", 9);
+                    uart_helper_send_string(App->UartHelper, Model->EpcValue);
+                    uart_helper_send_string(App->UartHelper, Model->NewEpcValue);
+                } else if(furi_string_equal(Model->WriteFunction, WRITE_USR_MEM)) {
+                    uart_helper_send(App->UartHelper, "WRITEUSR\n", 9);
+                    uart_helper_send_string(App->UartHelper, Model->EpcValue);
+                    uart_helper_send_string(App->UartHelper, Model->NewEpcValue);
+                } else if(furi_string_equal(Model->WriteFunction, WRITE_TID_MEM)) {
+                    uart_helper_send(App->UartHelper, "WRITETID\n", 9);
+                    uart_helper_send_string(App->UartHelper, Model->EpcValue);
+                    uart_helper_send_string(App->UartHelper, Model->NewEpcValue);
+                }
+            },
+            redraw);
+
+        return true;
+    }
     default:
         return false;
     }
@@ -180,9 +170,9 @@ bool uhf_reader_view_write_custom_event_callback(uint32_t event, void* context) 
  * @param      model  The view model - model for the view with variables required for drawing.
 */
 void uhf_reader_view_write_draw_callback(Canvas* canvas, void* model) {
-    UHFReaderWriteModel* my_model = (UHFReaderWriteModel*)model;
+    UHFReaderWriteModel* MyModel = (UHFReaderWriteModel*)model;
     FuriString* xstr = furi_string_alloc();
-    
+
     //Clearing the canvas, setting the color, font and content displayed.
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -192,22 +182,22 @@ void uhf_reader_view_write_draw_callback(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 0, 33, "Write Mode:");
 
     //Displaying the current write mode selected
-    canvas_draw_str(canvas, 51, 33, furi_string_get_cstr(my_model->write_function));
+    canvas_draw_str(canvas, 51, 33, furi_string_get_cstr(MyModel->WriteFunction));
 
     //Display the current power level
     canvas_draw_str(canvas, 4, 22, "Pow: ");
-    canvas_draw_str(canvas, 28, 22, furi_string_get_cstr(my_model->setting_2_power));
+    canvas_draw_str(canvas, 28, 22, furi_string_get_cstr(MyModel->Setting2Power));
 
     //Display the antenna selected
     canvas_draw_str(canvas, 70, 22, "Ant:");
-    canvas_draw_str(canvas, 90, 22, furi_string_get_cstr(my_model->setting_3_value));
+    canvas_draw_str(canvas, 90, 22, furi_string_get_cstr(MyModel->Setting3Value));
 
     //Display the current write status
     canvas_draw_str(canvas, 0, 44, "Write Status: ");
-    canvas_draw_str(canvas, 65, 44, furi_string_get_cstr(my_model->write_status));
+    canvas_draw_str(canvas, 65, 44, furi_string_get_cstr(MyModel->WriteStatus));
 
-    //Display the write button 
-    if(!my_model->is_writing) {
+    //Display the write button
+    if(!MyModel->IsWriting) {
         elements_button_center(canvas, "Write");
 
     } else {
@@ -224,147 +214,145 @@ void uhf_reader_view_write_draw_callback(Canvas* canvas, void* model) {
  * @return     true if the event was handled, false otherwise.
 */
 bool uhf_reader_view_write_input_callback(InputEvent* event, void* context) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
-    
+    UHFReaderApp* App = (UHFReaderApp*)context;
+
     //Handle the short input types
     if(event->type == InputTypeShort) {
-        
         //If the left button is pressed, then pull up the EPC value and keyboard
-        if(event->key == InputKeyLeft && !app->is_writing) {
-            text_input_set_header_text(app->epc_write, "EPC Value");
+        if(event->key == InputKeyLeft && !App->IsWriting) {
+            text_input_set_header_text(App->EpcWrite, "EPC Value");
             bool redraw = false;
             with_view_model(
-                app->view_write,
-                
+                App->ViewWrite,
+
                 //Store the new epc value and mark the write function as the epc selection
-                UHFReaderWriteModel * model,
+                UHFReaderWriteModel * Model,
                 {
                     strncpy(
-                        app->temp_save_buffer,
-                        furi_string_get_cstr(model->epc_value),
-                        app->temp_buffer_save_size);
-                    furi_string_set_str(model->write_function, WRITE_EPC);
+                        App->TempSaveBuffer,
+                        furi_string_get_cstr(Model->EpcValue),
+                        App->TempBufferSaveSize);
+                    furi_string_set_str(Model->WriteFunction, WRITE_EPC);
                 },
                 redraw);
 
             // Configure the text input
             bool clear_previous_text = true;
             text_input_set_result_callback(
-                app->epc_write,
+                App->EpcWrite,
                 uhf_reader_epc_value_text_updated,
-                app,
-                app->temp_save_buffer,
-                app->temp_buffer_save_size,
+                App,
+                App->TempSaveBuffer,
+                App->TempBufferSaveSize,
                 clear_previous_text);
             view_set_previous_callback(
-                text_input_get_view(app->epc_write), uhf_reader_navigation_write_callback);
-            view_dispatcher_switch_to_view(app->view_dispatcher, UHFReaderViewEPCWriteInput);
+                text_input_get_view(App->EpcWrite), uhf_reader_navigation_write_callback);
+            view_dispatcher_switch_to_view(App->ViewDispatcher, UHFReaderViewEpcWriteInput);
             return true;
-        } 
-        
+        }
+
         //If the right button is pressed, then display the reserved memory bank and display the keyboard
-        else if(event->key == InputKeyRight && !app->is_writing) {
-            text_input_set_header_text(app->epc_write, "Reserved Memory Bank");
+        else if(event->key == InputKeyRight && !App->IsWriting) {
+            text_input_set_header_text(App->EpcWrite, "Reserved Memory Bank");
             bool redraw = false;
             with_view_model(
-                app->view_write,
-                
+                App->ViewWrite,
+
                 //Store the modified value for the reserved memory bank
-                UHFReaderWriteModel * model,
+                UHFReaderWriteModel * Model,
                 {
                     strncpy(
-                        app->temp_save_buffer,
-                        furi_string_get_cstr(model->res_value),
-                        app->temp_buffer_save_size);
-                    furi_string_set_str(model->write_function, WRITE_EPC_MEM);
+                        App->TempSaveBuffer,
+                        furi_string_get_cstr(Model->ResValue),
+                        App->TempBufferSaveSize);
+                    furi_string_set_str(Model->WriteFunction, WRITE_EPC_MEM);
                 },
                 redraw);
 
             // Configure the text input
             bool clear_previous_text = true;
             text_input_set_result_callback(
-                app->epc_write,
+                App->EpcWrite,
                 uhf_reader_epc_value_text_updated,
-                app,
-                app->temp_save_buffer,
-                app->temp_buffer_save_size,
+                App,
+                App->TempSaveBuffer,
+                App->TempBufferSaveSize,
                 clear_previous_text);
             view_set_previous_callback(
-                text_input_get_view(app->epc_write), uhf_reader_navigation_write_callback);
-            view_dispatcher_switch_to_view(app->view_dispatcher, UHFReaderViewEPCWriteInput);
+                text_input_get_view(App->EpcWrite), uhf_reader_navigation_write_callback);
+            view_dispatcher_switch_to_view(App->ViewDispatcher, UHFReaderViewEpcWriteInput);
             return true;
-        } 
-        
+        }
+
         //If the up button is pressed, then display the user memory bank and keyboard
-        else if(event->key == InputKeyUp && !app->is_writing) {
-            text_input_set_header_text(app->epc_write, "User Memory Bank");
+        else if(event->key == InputKeyUp && !App->IsWriting) {
+            text_input_set_header_text(App->EpcWrite, "User Memory Bank");
             bool redraw = false;
             with_view_model(
-                app->view_write,
-                
+                App->ViewWrite,
+
                 //Store the modified user memory value
-                UHFReaderWriteModel * model,
+                UHFReaderWriteModel * Model,
                 {
                     strncpy(
-                        app->temp_save_buffer,
-                        furi_string_get_cstr(model->mem_value),
-                        app->temp_buffer_save_size);
-                    furi_string_set(model->write_function, WRITE_USR_MEM);
+                        App->TempSaveBuffer,
+                        furi_string_get_cstr(Model->MemValue),
+                        App->TempBufferSaveSize);
+                    furi_string_set(Model->WriteFunction, WRITE_USR_MEM);
                 },
                 redraw);
 
             // Configure the text input
             bool clear_previous_text = true;
             text_input_set_result_callback(
-                app->epc_write,
+                App->EpcWrite,
                 uhf_reader_epc_value_text_updated,
-                app,
-                app->temp_save_buffer,
-                app->temp_buffer_save_size,
+                App,
+                App->TempSaveBuffer,
+                App->TempBufferSaveSize,
                 clear_previous_text);
             view_set_previous_callback(
-                text_input_get_view(app->epc_write), uhf_reader_navigation_write_callback);
-            view_dispatcher_switch_to_view(app->view_dispatcher, UHFReaderViewEPCWriteInput);
+                text_input_get_view(App->EpcWrite), uhf_reader_navigation_write_callback);
+            view_dispatcher_switch_to_view(App->ViewDispatcher, UHFReaderViewEpcWriteInput);
             return true;
-        } 
-        
+        }
+
         //If the down button is pressed, then display the TID memory bank and the keyboard
-        else if(event->key == InputKeyDown && !app->is_writing) {
-            text_input_set_header_text(app->epc_write, "TID Memory Bank");
+        else if(event->key == InputKeyDown && !App->IsWriting) {
+            text_input_set_header_text(App->EpcWrite, "TID Memory Bank");
             bool redraw = false;
             with_view_model(
-                app->view_write,
-                
+                App->ViewWrite,
+
                 //Store the modified TID value
-                UHFReaderWriteModel * model,
+                UHFReaderWriteModel * Model,
                 {
                     strncpy(
-                        app->temp_save_buffer,
-                        furi_string_get_cstr(model->tid_value),
-                        app->temp_buffer_save_size);
-                    furi_string_set_str(model->write_function, WRITE_TID_MEM);
+                        App->TempSaveBuffer,
+                        furi_string_get_cstr(Model->TidValue),
+                        App->TempBufferSaveSize);
+                    furi_string_set_str(Model->WriteFunction, WRITE_TID_MEM);
                 },
                 redraw);
 
             // Configure the text input
             bool clear_previous_text = true;
             text_input_set_result_callback(
-                app->epc_write,
+                App->EpcWrite,
                 uhf_reader_epc_value_text_updated,
-                app,
-                app->temp_save_buffer,
-                app->temp_buffer_save_size,
+                App,
+                App->TempSaveBuffer,
+                App->TempBufferSaveSize,
                 clear_previous_text);
             view_set_previous_callback(
-                text_input_get_view(app->epc_write), uhf_reader_navigation_write_callback);
-            view_dispatcher_switch_to_view(app->view_dispatcher, UHFReaderViewEPCWriteInput);
+                text_input_get_view(App->EpcWrite), uhf_reader_navigation_write_callback);
+            view_dispatcher_switch_to_view(App->ViewDispatcher, UHFReaderViewEpcWriteInput);
             return true;
         }
     } else if(event->type == InputTypePress) {
         if(event->key == InputKeyOk) {
-
             //Handle the OK button event
-            view_dispatcher_send_custom_event(app->view_dispatcher, UHFReaderEventIdOkPressed);
+            view_dispatcher_send_custom_event(App->ViewDispatcher, UHFReaderEventIdOkPressed);
             return true;
         }
     }
@@ -374,82 +362,80 @@ bool uhf_reader_view_write_input_callback(InputEvent* event, void* context) {
 /**
  * @brief      Callback when the user exits the write screen.
  * @details    This function is called when the user exits the write screen.
- * @param      _context  The context - not used
+ * @param      context  The context - not used
  * @return     the view id of the next view.
 */
-uint32_t uhf_reader_navigation_write_exit_callback(void* _context) {
-    UNUSED(_context);
+uint32_t uhf_reader_navigation_write_exit_callback(void* context) {
+    UNUSED(context);
     return UHFReaderViewTagAction;
 }
-
 
 /**
  * @brief      Allocates the write view.
  * @details    This function allocates all variables for the write view.
  * @param      context  The context - UHFReaderApp object.
 */
-void view_write_alloc(UHFReaderApp* app){
-
+void view_write_alloc(UHFReaderApp* App) {
     //Allocating the view and setting all callback functions
-    app->view_write = view_alloc();
-    view_set_draw_callback(app->view_write, uhf_reader_view_write_draw_callback);
-    view_set_input_callback(app->view_write, uhf_reader_view_write_input_callback);
-    view_set_previous_callback(app->view_write, uhf_reader_navigation_write_exit_callback);
-    view_set_enter_callback(app->view_write, uhf_reader_view_write_enter_callback);
-    view_set_exit_callback(app->view_write, uhf_reader_view_write_exit_callback);
-    view_set_context(app->view_write, app);
-    view_set_custom_callback(app->view_write, uhf_reader_view_write_custom_event_callback);
-    
-    //Allocating the view model
-    view_allocate_model(app->view_write, ViewModelTypeLockFree, sizeof(UHFReaderWriteModel));
-    UHFReaderWriteModel* model_write = view_get_model(app->view_write);
-    FuriString* epc_name_write_default = furi_string_alloc();
-    
-    //Setting default values for the view model
-    model_write->setting_1_index = app->setting_1_index;
-    model_write->setting_2_power = app->setting_2_power_str;
-    model_write->setting_3_index = app->setting_3_index;
-    model_write->epc_name = epc_name_write_default;
-    model_write->setting_1_value = furi_string_alloc_set(app->setting_1_names[app->setting_1_index]);
-    model_write->setting_3_value = furi_string_alloc_set(app->setting_3_names[app->setting_3_index]);
-    FuriString* epc_write_default = furi_string_alloc();
-    furi_string_set_str(epc_write_default, "Press Write");
-    FuriString* epc_value_write_default = furi_string_alloc();
-    furi_string_set_str(epc_value_write_default, "Press Write");
-    model_write->epc_value = epc_value_write_default;
-    FuriString* epc_value_write_status = furi_string_alloc();
-    furi_string_set_str(epc_value_write_status, "Press Write");
-    model_write->write_status = epc_value_write_status;
-    FuriString* write_default_epc = furi_string_alloc();
-    model_write->new_epc_value = write_default_epc;
-    FuriString* default_write_function = furi_string_alloc();
-    furi_string_set_str(default_write_function, "Press Arrow Keys");
-    model_write->write_function = default_write_function;
-    FuriString* default_write_tid = furi_string_alloc();
-    furi_string_set_str(default_write_tid, "TID HERE");
-    model_write->tid_value = default_write_tid;
-    FuriString* default_write_tid_new = furi_string_alloc();
-    furi_string_set_str(default_write_tid_new, "NEW TID HERE");
-    model_write->new_tid_value = default_write_tid_new;
-    FuriString* default_write_res = furi_string_alloc();
-    furi_string_set_str(default_write_res, "RES HERE");
-    model_write->res_value = default_write_res;
-    FuriString* default_write_res_new = furi_string_alloc();
-    furi_string_set_str(default_write_res_new, "NEW RES HERE");
-    model_write->new_res_value = default_write_res_new;
-    FuriString* default_write_mem = furi_string_alloc();
-    furi_string_set_str(default_write_mem, "MEM HERE");
-    model_write->mem_value = default_write_mem;
-    FuriString* default_write_mem_new = furi_string_alloc();
-    furi_string_set_str(default_write_mem_new, "NEW MEM HERE");
-    model_write->new_mem_value = default_write_mem_new;
-    app->epc_name = furi_string_alloc_set("Enter Name");
-    app->epc_to_write = furi_string_alloc_set("Enter Name");
-    app->epc_write = text_input_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, UHFReaderViewEPCWriteInput, text_input_get_view(app->epc_write));
+    App->ViewWrite = view_alloc();
+    view_set_draw_callback(App->ViewWrite, uhf_reader_view_write_draw_callback);
+    view_set_input_callback(App->ViewWrite, uhf_reader_view_write_input_callback);
+    view_set_previous_callback(App->ViewWrite, uhf_reader_navigation_write_exit_callback);
+    view_set_enter_callback(App->ViewWrite, uhf_reader_view_write_enter_callback);
+    view_set_exit_callback(App->ViewWrite, uhf_reader_view_write_exit_callback);
+    view_set_context(App->ViewWrite, App);
+    view_set_custom_callback(App->ViewWrite, uhf_reader_view_write_custom_event_callback);
 
-    view_dispatcher_add_view(app->view_dispatcher, UHFReaderViewWrite, app->view_write);
+    //Allocating the view model
+    view_allocate_model(App->ViewWrite, ViewModelTypeLockFree, sizeof(UHFReaderWriteModel));
+    UHFReaderWriteModel* ModelWrite = view_get_model(App->ViewWrite);
+    FuriString* EpcNameWriteDefault = furi_string_alloc();
+
+    //Setting default values for the view model
+    ModelWrite->Setting1Index = App->Setting1Index;
+    ModelWrite->Setting2Power = App->Setting2PowerStr;
+    ModelWrite->Setting3Index = App->Setting3Index;
+    ModelWrite->EpcName = EpcNameWriteDefault;
+    ModelWrite->Setting1Value = furi_string_alloc_set(App->Setting1Names[App->Setting1Index]);
+    ModelWrite->Setting3Value = furi_string_alloc_set(App->Setting3Names[App->Setting3Index]);
+    FuriString* EpcWriteDefault = furi_string_alloc();
+    furi_string_set_str(EpcWriteDefault, "Press Write");
+    FuriString* EpcValueWriteDefault = furi_string_alloc();
+    furi_string_set_str(EpcValueWriteDefault, "Press Write");
+    ModelWrite->EpcValue = EpcValueWriteDefault;
+    FuriString* EpcValueWriteStatus = furi_string_alloc();
+    furi_string_set_str(EpcValueWriteStatus, "Press Write");
+    ModelWrite->WriteStatus = EpcValueWriteStatus;
+    FuriString* WriteDefaultEpc = furi_string_alloc();
+    ModelWrite->NewEpcValue = WriteDefaultEpc;
+    FuriString* DefaultWriteFunction = furi_string_alloc();
+    furi_string_set_str(DefaultWriteFunction, "Press Arrow Keys");
+    ModelWrite->WriteFunction = DefaultWriteFunction;
+    FuriString* DefaultWriteTid = furi_string_alloc();
+    furi_string_set_str(DefaultWriteTid, "TID HERE");
+    ModelWrite->TidValue = DefaultWriteTid;
+    FuriString* DefaultWriteTidNew = furi_string_alloc();
+    furi_string_set_str(DefaultWriteTidNew, "NEW TID HERE");
+    ModelWrite->NewTidValue = DefaultWriteTidNew;
+    FuriString* DefaultWriteRes = furi_string_alloc();
+    furi_string_set_str(DefaultWriteRes, "RES HERE");
+    ModelWrite->ResValue = DefaultWriteRes;
+    FuriString* DefaultWriteResNew = furi_string_alloc();
+    furi_string_set_str(DefaultWriteResNew, "NEW RES HERE");
+    ModelWrite->NewResValue = DefaultWriteResNew;
+    FuriString* DefaultWriteMem = furi_string_alloc();
+    furi_string_set_str(DefaultWriteMem, "MEM HERE");
+    ModelWrite->MemValue = DefaultWriteMem;
+    FuriString* DefaultWriteMemNew = furi_string_alloc();
+    furi_string_set_str(DefaultWriteMemNew, "NEW MEM HERE");
+    ModelWrite->NewMemValue = DefaultWriteMemNew;
+    App->EpcName = furi_string_alloc_set("Enter Name");
+    App->EpcToWrite = furi_string_alloc_set("Enter Name");
+    App->EpcWrite = text_input_alloc();
+    view_dispatcher_add_view(
+        App->ViewDispatcher, UHFReaderViewEpcWriteInput, text_input_get_view(App->EpcWrite));
+
+    view_dispatcher_add_view(App->ViewDispatcher, UHFReaderViewWrite, App->ViewWrite);
 }
 
 /**
@@ -457,9 +443,9 @@ void view_write_alloc(UHFReaderApp* app){
  * @details    This function frees all variables for the write view.
  * @param      context  The context - UHFReaderApp object.
 */
-void view_write_free(UHFReaderApp* app){
-    view_dispatcher_remove_view(app->view_dispatcher, UHFReaderViewEPCWriteInput);
-    text_input_free(app->epc_write);
-    view_dispatcher_remove_view(app->view_dispatcher, UHFReaderViewWrite);
-    view_free(app->view_write);
+void view_write_free(UHFReaderApp* App) {
+    view_dispatcher_remove_view(App->ViewDispatcher, UHFReaderViewEpcWriteInput);
+    text_input_free(App->EpcWrite);
+    view_dispatcher_remove_view(App->ViewDispatcher, UHFReaderViewWrite);
+    view_free(App->ViewWrite);
 }

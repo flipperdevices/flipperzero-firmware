@@ -2,6 +2,6 @@
 #include "../app.h"
 
 //Function Declarations
-void deleteAndUpdateEntry(void* context, uint32_t keyToDelete);
+void delete_and_update_entry(void* context, uint32_t KeyToDelete);
 
-void updateDictionaryKeys(void* context);
+void update_dictionary_keys(void* context);

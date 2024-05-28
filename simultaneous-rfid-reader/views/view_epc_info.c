@@ -7,8 +7,8 @@
  * @param      model  The view model - model for the view with variables required for drawing.
 */
 void uhf_reader_view_epc_info_draw_callback(Canvas* canvas, void* model) {
-    UHFRFIDTagModel* my_model = (UHFRFIDTagModel*)model;
-    FuriString* xstr = furi_string_alloc();
+    UHFRFIDTagModel* MyModel = (UHFRFIDTagModel*)model;
+    FuriString* XStr = furi_string_alloc();
 
     //Clearing the canvas, setting the color, font and content displayed.
     canvas_clear(canvas);
@@ -22,82 +22,82 @@ void uhf_reader_view_epc_info_draw_callback(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 4, 55, "User Mem: ");
 
     //Displaying the EPC, TID, Reserved, and User memory in a scrolling fashion
-    my_model->scrolling_text_epc = (char*)furi_string_get_cstr(my_model->EPC);
-    my_model->scrolling_text_tid = (char*)furi_string_get_cstr(my_model->TID);
-    my_model->scrolling_text_res = (char*)furi_string_get_cstr(my_model->Reserved);
-    my_model->scrolling_text_mem = (char*)furi_string_get_cstr(my_model->User);
+    MyModel->ScrollingTextEpc = (char*)furi_string_get_cstr(MyModel->Epc);
+    MyModel->ScrollingTextTid = (char*)furi_string_get_cstr(MyModel->Tid);
+    MyModel->ScrollingTextRes = (char*)furi_string_get_cstr(MyModel->Reserved);
+    MyModel->ScrollingTextMem = (char*)furi_string_get_cstr(MyModel->User);
 
     //Setting the width of the screen for the sliding window
-    uint32_t screen_width_chars = 24;
+    uint32_t ScreenWidthChars = 24;
 
     // Calculate the start and end indices of the substring to draw
-    uint32_t start_pos = my_model->scroll_offset_epc;
+    uint32_t StartPos = MyModel->ScrollOffsetEpc;
 
     //Calculate the length of the scrolling text
-    uint32_t len = strlen(my_model->scrolling_text_epc);
+    uint32_t Len = strlen(MyModel->ScrollingTextEpc);
 
     //I am sure there is a better way to do this that involves slightly safer memory management...
-    char visible_part[screen_width_chars + 2];
-    memset(visible_part, ' ', screen_width_chars);
-    visible_part[screen_width_chars] = '\0';
+    char VisiblePart[ScreenWidthChars + 2];
+    memset(VisiblePart, ' ', ScreenWidthChars);
+    VisiblePart[ScreenWidthChars] = '\0';
 
     //Fill the array up with the epc values
-    for(uint32_t i = 0; i < screen_width_chars; i++) {
-        uint32_t char_index = start_pos + i;
-        if(char_index <= len) {
-            visible_part[i] = my_model->scrolling_text_epc[char_index];
+    for(uint32_t i = 0; i < ScreenWidthChars; i++) {
+        uint32_t CharIndex = StartPos + i;
+        if(CharIndex <= Len) {
+            VisiblePart[i] = MyModel->ScrollingTextEpc[CharIndex];
         }
     }
 
     //This is just the same code for the TID, Reserved, and User memory
     //TODO: Make this into some sort of function to reduce code duplication
-    canvas_draw_str(canvas, 28, 22, visible_part);
-    uint32_t start_pos_tid = my_model->scroll_offset_tid;
-    uint32_t len_tid = strlen(my_model->scrolling_text_tid);
-    
-    char visible_part_tid[screen_width_chars + 2];
-    memset(visible_part_tid, ' ', screen_width_chars);
-    visible_part_tid[screen_width_chars] = '\0';
+    canvas_draw_str(canvas, 28, 22, VisiblePart);
+    uint32_t StartPosTid = MyModel->ScrollOffsetTid;
+    uint32_t LenTid = strlen(MyModel->ScrollingTextTid);
 
-    for(uint32_t i = 0; i < screen_width_chars; i++) {
-        uint32_t char_index_tid = start_pos_tid + i;
-        if(char_index_tid <= len_tid) {
-            visible_part_tid[i] = my_model->scrolling_text_tid[char_index_tid];
+    char VisiblePartTid[ScreenWidthChars + 2];
+    memset(VisiblePartTid, ' ', ScreenWidthChars);
+    VisiblePartTid[ScreenWidthChars] = '\0';
+
+    for(uint32_t i = 0; i < ScreenWidthChars; i++) {
+        uint32_t CharIndexTid = StartPosTid + i;
+        if(CharIndexTid <= LenTid) {
+            VisiblePartTid[i] = MyModel->ScrollingTextTid[CharIndexTid];
         }
     }
 
-    canvas_draw_str(canvas, 28, 33, visible_part_tid);
-    uint32_t start_pos_res = my_model->scroll_offset_res;
-    uint32_t len_res = strlen(my_model->scrolling_text_res);
+    canvas_draw_str(canvas, 28, 33, VisiblePartTid);
+    uint32_t StartPosRes = MyModel->ScrollOffsetRes;
+    uint32_t LenRes = strlen(MyModel->ScrollingTextRes);
 
-    char visible_part_res[screen_width_chars + 2];
-    memset(visible_part_res, ' ', screen_width_chars);
-    visible_part_res[screen_width_chars] = '\0';
+    char VisiblePartRes[ScreenWidthChars + 2];
+    memset(VisiblePartRes, ' ', ScreenWidthChars);
+    VisiblePartRes[ScreenWidthChars] = '\0';
 
-    for(uint32_t i = 0; i < screen_width_chars; i++) {
-        uint32_t char_index_res = start_pos_res + i;
-        if(char_index_res <= len_res) {
-            visible_part_res[i] = my_model->scrolling_text_res[char_index_res];
+    for(uint32_t i = 0; i < ScreenWidthChars; i++) {
+        uint32_t CharIndexRes = StartPosRes + i;
+        if(CharIndexRes <= LenRes) {
+            VisiblePartRes[i] = MyModel->ScrollingTextRes[CharIndexRes];
         }
     }
 
-    canvas_draw_str(canvas, 46, 44, visible_part_res);
-    uint32_t start_pos_mem = my_model->scroll_offset_mem;
-    uint32_t len_mem = strlen(my_model->scrolling_text_mem);
+    canvas_draw_str(canvas, 46, 44, VisiblePartRes);
+    uint32_t StartPosMem = MyModel->ScrollOffsetMem;
+    uint32_t LenMem = strlen(MyModel->ScrollingTextMem);
 
-    char visible_part_mem[screen_width_chars + 2];
-    memset(visible_part_mem, ' ', screen_width_chars);
-    visible_part_mem[screen_width_chars] = '\0';
+    char VisiblePartMem[ScreenWidthChars + 2];
+    memset(VisiblePartMem, ' ', ScreenWidthChars);
+    VisiblePartMem[ScreenWidthChars] = '\0';
 
-    for(uint32_t i = 0; i < screen_width_chars; i++) {
-        uint32_t char_index_mem = start_pos_mem + i;
-        if(char_index_mem <= len_mem) {
-            visible_part_mem[i] = my_model->scrolling_text_mem[char_index_mem];
+    for(uint32_t i = 0; i < ScreenWidthChars; i++) {
+        uint32_t CharIndexMem = StartPosMem + i;
+        if(CharIndexMem <= LenMem) {
+            VisiblePartMem[i] = MyModel->ScrollingTextMem[CharIndexMem];
         }
     }
 
-    canvas_draw_str(canvas, 48, 55, visible_part_mem);
-    furi_string_free(xstr);
+    canvas_draw_str(canvas, 48, 55, VisiblePartMem);
+    furi_string_free(XStr);
 }
 
 /**
@@ -106,8 +106,8 @@ void uhf_reader_view_epc_info_draw_callback(Canvas* canvas, void* model) {
  * @param      context  The context - not used
  * @return     the view id of the next view.
 */
-uint32_t uhf_reader_navigation_exit_epc_info_callback(void* _context) {
-    UNUSED(_context);
+uint32_t uhf_reader_navigation_exit_epc_info_callback(void* context) {
+    UNUSED(context);
     return UHFReaderViewTagAction;
 }
 
@@ -117,40 +117,40 @@ uint32_t uhf_reader_navigation_exit_epc_info_callback(void* _context) {
  * @param      context  The UHFReaderApp - Used to change app variables.
 */
 void uhf_reader_view_epc_info_timer_callback(void* context) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
+    UHFReaderApp* App = (UHFReaderApp*)context;
 
     //Update the offset for each value used in the draw callback
     with_view_model(
-        app->view_epc_info,
+        App->ViewEpcInfo,
         UHFRFIDTagModel * model,
         {
-            uint32_t len = strlen(model->scrolling_text_epc);
-            uint32_t len_tid = strlen(model->scrolling_text_tid);
-            uint32_t len_res = strlen(model->scrolling_text_res);
-            uint32_t len_mem = strlen(model->scrolling_text_mem);
-            
+            uint32_t Len = strlen(model->ScrollingTextEpc);
+            uint32_t LenTid = strlen(model->ScrollingTextTid);
+            uint32_t LenRes = strlen(model->ScrollingTextRes);
+            uint32_t LenMem = strlen(model->ScrollingTextMem);
+
             //Incrementing each offset
-            model->scroll_offset_epc++;
-            model->scroll_offset_tid++;
-            model->scroll_offset_res++;
-            model->scroll_offset_mem++;
-            
-            //Check the bounds of the offset and reset if necessary 
-            if(model->scroll_offset_epc >= len) {
-                model->scroll_offset_epc = 0;
+            model->ScrollOffsetEpc++;
+            model->ScrollOffsetTid++;
+            model->ScrollOffsetRes++;
+            model->ScrollOffsetMem++;
+
+            //Check the bounds of the offset and reset if necessary
+            if(model->ScrollOffsetEpc >= Len) {
+                model->ScrollOffsetEpc = 0;
             }
-            if(model->scroll_offset_tid >= len_tid) {
-                model->scroll_offset_tid = 0;
+            if(model->ScrollOffsetTid >= LenTid) {
+                model->ScrollOffsetTid = 0;
             }
-            if(model->scroll_offset_res >= len_res) {
-                model->scroll_offset_res = 0;
+            if(model->ScrollOffsetRes >= LenRes) {
+                model->ScrollOffsetRes = 0;
             }
-            if(model->scroll_offset_mem >= len_mem) {
-                model->scroll_offset_mem = 0;
+            if(model->ScrollOffsetMem >= LenMem) {
+                model->ScrollOffsetMem = 0;
             }
         },
         true);
-    view_dispatcher_send_custom_event(app->view_dispatcher, UHFReaderEventIdRedrawScreen);
+    view_dispatcher_send_custom_event(App->ViewDispatcher, UHFReaderEventIdRedrawScreen);
 }
 
 /**
@@ -159,52 +159,52 @@ void uhf_reader_view_epc_info_timer_callback(void* context) {
  * @param      context  The context - UHFReaderApp object.
 */
 void uhf_reader_view_epc_info_enter_callback(void* context) {
-    //Grab the period for the timer 
-    uint32_t period = furi_ms_to_ticks(200);
-    UHFReaderApp* app = (UHFReaderApp*)context;
+    //Grab the period for the timer
+    uint32_t Period = furi_ms_to_ticks(200);
+    UHFReaderApp* App = (UHFReaderApp*)context;
 
-    //Create FuriStrings for storing saved UHF tag values 
-    FuriString* temp_str = furi_string_alloc();
-    FuriString* temp_tag = furi_string_alloc();
+    //Create FuriStrings for storing saved UHF tag values
+    FuriString* TempStr = furi_string_alloc();
+    FuriString* TempTag = furi_string_alloc();
 
-    //Open the saved epcs text file 
-    if(!flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
+    //Open the saved epcs text file
+    if(!flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
         FURI_LOG_E(TAG, "Failed to open Saved file");
-        flipper_format_file_close(app->epc_file);
+        flipper_format_file_close(App->EpcFile);
 
     } else {
         //Read from the file selecting the current tag the user picked
-        furi_string_printf(temp_str, "Tag%ld", app->selected_tag_index);
-        if(!flipper_format_read_string(app->epc_file, furi_string_get_cstr(temp_str), temp_tag)) {
-            FURI_LOG_D(TAG, "Could not read tag %ld data", app->selected_tag_index);
+        furi_string_printf(TempStr, "Tag%ld", App->SelectedTagIndex);
+        if(!flipper_format_read_string(App->EpcFile, furi_string_get_cstr(TempStr), TempTag)) {
+            FURI_LOG_D(TAG, "Could not read tag %ld data", App->SelectedTagIndex);
         } else {
             //Grabbing the extracted tid, reserved memory, user memory, and epc from the file to display to the user
-            const char* inputString = furi_string_get_cstr(temp_tag);
-            bool redraw = true;
+            const char* InputString = furi_string_get_cstr(TempTag);
+            bool Redraw = true;
             with_view_model(
-                app->view_epc_info,
+                App->ViewEpcInfo,
                 UHFRFIDTagModel * model,
                 {
-                    furi_string_set(model->EPC, extractEPC(inputString));
-                    furi_string_set(model->TID, extractTID(inputString));
-                    furi_string_set(model->Reserved, extractRES(inputString));
-                    furi_string_set(model->User, extractMEM(inputString));
+                    furi_string_set(model->Epc, extract_epc(InputString));
+                    furi_string_set(model->Tid, extract_tid(InputString));
+                    furi_string_set(model->Reserved, extract_res(InputString));
+                    furi_string_set(model->User, extract_mem(InputString));
                 },
-                redraw);
+                Redraw);
             //Close the file
-            flipper_format_file_close(app->epc_file);
+            flipper_format_file_close(App->EpcFile);
         }
     }
 
     //Freeing all FuriStrings used
-    furi_string_free(temp_tag);
-    furi_string_free(temp_str);
+    furi_string_free(TempTag);
+    furi_string_free(TempStr);
 
-    //Start the timer 
-    furi_assert(app->timer == NULL);
-    app->timer =
+    //Start the timer
+    furi_assert(App->Timer == NULL);
+    App->Timer =
         furi_timer_alloc(uhf_reader_view_epc_info_timer_callback, FuriTimerTypePeriodic, context);
-    furi_timer_start(app->timer, period);
+    furi_timer_start(App->Timer, Period);
 }
 
 /**
@@ -213,10 +213,10 @@ void uhf_reader_view_epc_info_enter_callback(void* context) {
  * @param      context  The context - UHFReaderApp object.
 */
 void uhf_reader_view_epc_info_exit_callback(void* context) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
-    furi_timer_stop(app->timer);
-    furi_timer_free(app->timer);
-    app->timer = NULL;
+    UHFReaderApp* App = (UHFReaderApp*)context;
+    furi_timer_stop(App->Timer);
+    furi_timer_free(App->Timer);
+    App->Timer = NULL;
 }
 
 /**
@@ -224,42 +224,41 @@ void uhf_reader_view_epc_info_exit_callback(void* context) {
  * @details    This function allocates all variables for the tag info view.
  * @param      context  The context - UHFReaderApp object.
 */
-void view_epc_info_alloc(UHFReaderApp* app){
-
+void view_epc_info_alloc(UHFReaderApp* App) {
     //Allocating the view and setting all callback functions
-    app->view_epc_info = view_alloc();
-    view_set_draw_callback(app->view_epc_info, uhf_reader_view_epc_info_draw_callback);
-    view_set_previous_callback(app->view_epc_info, uhf_reader_navigation_exit_epc_info_callback);
-    view_set_enter_callback(app->view_epc_info, uhf_reader_view_epc_info_enter_callback);
-    view_set_exit_callback(app->view_epc_info, uhf_reader_view_epc_info_exit_callback);
-    view_set_context(app->view_epc_info, app);
-    
+    App->ViewEpcInfo = view_alloc();
+    view_set_draw_callback(App->ViewEpcInfo, uhf_reader_view_epc_info_draw_callback);
+    view_set_previous_callback(App->ViewEpcInfo, uhf_reader_navigation_exit_epc_info_callback);
+    view_set_enter_callback(App->ViewEpcInfo, uhf_reader_view_epc_info_enter_callback);
+    view_set_exit_callback(App->ViewEpcInfo, uhf_reader_view_epc_info_exit_callback);
+    view_set_context(App->ViewEpcInfo, App);
+
     //Allocating the view model
-    view_allocate_model(app->view_epc_info, ViewModelTypeLockFree, sizeof(UHFRFIDTagModel));
-    UHFRFIDTagModel* model_epc_info = view_get_model(app->view_epc_info);
-    FuriString* user_mem_epc_info = furi_string_alloc();
-    furi_string_set_str(user_mem_epc_info, "000000...");
-    FuriString* tid_mem_epc_info = furi_string_alloc();
-    furi_string_set_str(tid_mem_epc_info, "E2801105200....");
-    FuriString* epc_info = furi_string_alloc();
-    furi_string_set_str(epc_info, "ABCDEF12");
-    FuriString* reserved_mem_epc_info = furi_string_alloc();
-    furi_string_set_str(reserved_mem_epc_info, "131313...");
-    
+    view_allocate_model(App->ViewEpcInfo, ViewModelTypeLockFree, sizeof(UHFRFIDTagModel));
+    UHFRFIDTagModel* ModelEpcInfo = view_get_model(App->ViewEpcInfo);
+    FuriString* UserMemEpcInfo = furi_string_alloc();
+    furi_string_set_str(UserMemEpcInfo, "000000...");
+    FuriString* TidMemEpcInfo = furi_string_alloc();
+    furi_string_set_str(TidMemEpcInfo, "E2801105200....");
+    FuriString* EpcInfo = furi_string_alloc();
+    furi_string_set_str(EpcInfo, "ABCDEF12");
+    FuriString* ReservedMemEpcInfo = furi_string_alloc();
+    furi_string_set_str(ReservedMemEpcInfo, "131313...");
+
     //Setting default values for the view model
-    model_epc_info->User = user_mem_epc_info;
-    model_epc_info->EPC = epc_info;
-    model_epc_info->TID = tid_mem_epc_info;
-    model_epc_info->Reserved = reserved_mem_epc_info;
-    model_epc_info->scroll_offset_epc = 0;
-    model_epc_info->scrolling_text_epc = "EPC VALUE HERE";
-    model_epc_info->scroll_offset_tid = 0;
-    model_epc_info->scrolling_text_tid = "TID VALUE HERE";
-    model_epc_info->scroll_offset_res = 0;
-    model_epc_info->scrolling_text_res = "RES VALUE HERE";
-    model_epc_info->scroll_offset_mem = 0;
-    model_epc_info->scrolling_text_mem = "MEM VALUE HERE";
-    view_dispatcher_add_view(app->view_dispatcher, UHFReaderViewEPCInfo, app->view_epc_info);
+    ModelEpcInfo->User = UserMemEpcInfo;
+    ModelEpcInfo->Epc = EpcInfo;
+    ModelEpcInfo->Tid = TidMemEpcInfo;
+    ModelEpcInfo->Reserved = ReservedMemEpcInfo;
+    ModelEpcInfo->ScrollOffsetEpc = 0;
+    ModelEpcInfo->ScrollingTextEpc = "EPC VALUE HERE";
+    ModelEpcInfo->ScrollOffsetTid = 0;
+    ModelEpcInfo->ScrollingTextTid = "TID VALUE HERE";
+    ModelEpcInfo->ScrollOffsetRes = 0;
+    ModelEpcInfo->ScrollingTextRes = "RES VALUE HERE";
+    ModelEpcInfo->ScrollOffsetMem = 0;
+    ModelEpcInfo->ScrollingTextMem = "MEM VALUE HERE";
+    view_dispatcher_add_view(App->ViewDispatcher, UHFReaderViewEpcInfo, App->ViewEpcInfo);
 }
 
 /**
@@ -267,7 +266,7 @@ void view_epc_info_alloc(UHFReaderApp* app){
  * @details    This function frees all variables for the tag info view.
  * @param      context  The context - UHFReaderApp object.
 */
-void view_epc_info_free(UHFReaderApp* app){
-    view_dispatcher_remove_view(app->view_dispatcher, UHFReaderViewEPCInfo);
-    view_free(app->view_epc_info);
+void view_epc_info_free(UHFReaderApp* App) {
+    view_dispatcher_remove_view(App->ViewDispatcher, UHFReaderViewEpcInfo);
+    view_free(App->ViewEpcInfo);
 }

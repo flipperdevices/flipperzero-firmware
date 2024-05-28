@@ -1,441 +1,425 @@
 #include "../app.h"
-
 /**
  * @brief      Callback for handling UART input
  * @details    This function is called there is content to read in the buffer
  * @param      line     The current line in the buffer to read
  * @param      context  The UHFReaderApp
 */
-void uart_demo_process_line(FuriString* line, void* context) {
-    UHFReaderApp* app = context;
-    bool redraw = true;
+void uart_demo_process_line(FuriString* Line, void* Context) {
+    UHFReaderApp* App = (UHFReaderApp*)Context;
+    bool Redraw = true;
 
-    switch(app->state) {
-    
-    //Handle the Idle State
-    case UHFReaderState_Idle:
+    switch(App->State) {
+    // Handle the Idle State
+    case UHFReaderStateIdle:
 
-        //Handles the EPC values
-        if(strcmp(furi_string_get_cstr(line), "TR") == 0) {
-            app->state = UHFReaderState_WaitForNumber;
-        } 
-        
-        //Handles the TID values
-        else if(strcmp(furi_string_get_cstr(line), "TID") == 0) {
+        // Handles the EPC values
+        if(strcmp(furi_string_get_cstr(Line), "TR") == 0) {
+            App->State = UHFReaderStateWaitForNumber;
+        }
 
-            //The TID values are sent first, so I initialize the index for each type of field
-            app->cur_epc_index = 26;
-            app->cur_tid_index = 1;
-            app->cur_res_index = 1;
-            app->cur_mem_index = 1;
-            
-            bool redraw = true;
+        // Handles the TID values
+        else if(strcmp(furi_string_get_cstr(Line), "TID") == 0) {
+            // The TID values are sent first, so initialize the index for each type of field
+            App->CurEpcIndex = 26;
+            App->CurTidIndex = 1;
+            App->CurResIndex = 1;
+            App->CurMemIndex = 1;
+
+            bool Redraw = true;
             with_view_model(
-                app->view_read,
-                UHFReaderConfigModel * model,
-                { model->cur_epc_index = 1; },
-                redraw);
-            app->state = UHFReaderState_WaitForTID;
-        } 
-        
-        //Handles the Reserved Memory Values
-        else if(strcmp(furi_string_get_cstr(line), "RES") == 0) {
-            app->state = UHFReaderState_WaitForRES;
+                App->ViewRead, UHFReaderConfigModel * Model, { Model->CurEpcIndex = 1; }, Redraw);
+            App->State = UHFReaderStateWaitForTID;
+        }
 
-        } 
+        // Handles the Reserved Memory Values
+        else if(strcmp(furi_string_get_cstr(Line), "RES") == 0) {
+            App->State = UHFReaderStateWaitForRES;
 
-        //Handles the User Memory Values
-        else if(strcmp(furi_string_get_cstr(line), "MEM") == 0) {
-            app->state = UHFReaderState_WaitForMEM;
+        }
 
-        } 
-        
-        //Handles modified epc value
-        else if(strcmp(furi_string_get_cstr(line), "EVOK") == 0) { //For handling modified epc value
+        // Handles the User Memory Values
+        else if(strcmp(furi_string_get_cstr(Line), "MEM") == 0) {
+            App->State = UHFReaderStateWaitForMEM;
 
-            if(!flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
+        }
+
+        // Handles modified EPC value
+        else if(strcmp(furi_string_get_cstr(Line), "EVOK") == 0) {
+            if(!flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
                 FURI_LOG_E(TAG, "Failed to open file");
             }
 
-            FuriString* num_epcs = furi_string_alloc();
-            FuriString* epc_and_name = furi_string_alloc();
-            FuriString* temp_tid = furi_string_alloc();
-            FuriString* temp_res = furi_string_alloc();
-            FuriString* temp_mem = furi_string_alloc();
+            FuriString* NumEpcs = furi_string_alloc();
+            FuriString* EpcAndName = furi_string_alloc();
+            FuriString* TempTid = furi_string_alloc();
+            FuriString* TempRes = furi_string_alloc();
+            FuriString* TempMem = furi_string_alloc();
 
             with_view_model(
-                app->view_write,
-                UHFReaderWriteModel * model,
+                App->ViewWrite,
+                UHFReaderWriteModel * Model,
                 {
-                    furi_string_set(temp_tid, model->tid_value);
-                    furi_string_set(temp_res, model->res_value);
-                    furi_string_set(temp_mem, model->mem_value);
-                    furi_string_set(model->write_function, WRITE_EPC_OK);
+                    furi_string_set(TempTid, Model->TidValue);
+                    furi_string_set(TempRes, Model->ResValue);
+                    furi_string_set(TempMem, Model->MemValue);
+                    furi_string_set(Model->WriteFunction, WRITE_EPC_OK);
                 },
-                redraw);
+                Redraw);
 
-            furi_string_printf(num_epcs, "Tag%ld", app->selected_tag_index);
+            furi_string_printf(NumEpcs, "Tag%ld", App->SelectedTagIndex);
 
             furi_string_printf(
-                epc_and_name,
+                EpcAndName,
                 "%s:%s:%s:%s:%s",
-                furi_string_get_cstr(app->epc_name),
-                app->temp_save_buffer,
-                furi_string_get_cstr(temp_tid),
-                furi_string_get_cstr(temp_res),
-                furi_string_get_cstr(temp_mem));
+                furi_string_get_cstr(App->EpcName),
+                App->TempSaveBuffer,
+                furi_string_get_cstr(TempTid),
+                furi_string_get_cstr(TempRes),
+                furi_string_get_cstr(TempMem));
 
             if(!flipper_format_update_string_cstr(
-                   app->epc_file,
-                   furi_string_get_cstr(num_epcs),
-                   furi_string_get_cstr(epc_and_name))) {
+                   App->EpcFile, furi_string_get_cstr(NumEpcs), furi_string_get_cstr(EpcAndName))) {
                 FURI_LOG_E(TAG, "Failed to write to file");
             }
 
-            flipper_format_file_close(app->epc_file);
-            furi_string_free(num_epcs);
-            furi_string_free(epc_and_name);
-            furi_string_free(temp_tid);
-            furi_string_free(temp_res);
-            furi_string_free(temp_mem);
+            flipper_format_file_close(App->EpcFile);
+            furi_string_free(NumEpcs);
+            furi_string_free(EpcAndName);
+            furi_string_free(TempTid);
+            furi_string_free(TempRes);
+            furi_string_free(TempMem);
 
-        } else if(strcmp(furi_string_get_cstr(line), "EVBAD") == 0) {
+        } else if(strcmp(furi_string_get_cstr(Line), "EVBAD") == 0) {
             with_view_model(
-                app->view_write,
-                UHFReaderWriteModel * model,
-                { furi_string_set(model->write_function, WRITE_EPC_FAIL); },
-                redraw);
-        } else if(strcmp(furi_string_get_cstr(line), "RVOK") == 0) {
-            if(!flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
+                App->ViewWrite,
+                UHFReaderWriteModel * Model,
+                { furi_string_set(Model->WriteFunction, WRITE_EPC_FAIL); },
+                Redraw);
+        } else if(strcmp(furi_string_get_cstr(Line), "RVOK") == 0) {
+            if(!flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
                 FURI_LOG_E(TAG, "Failed to open file");
             }
 
-            FuriString* num_epcs = furi_string_alloc();
-            FuriString* epc_and_name = furi_string_alloc();
-            FuriString* temp_tid = furi_string_alloc();
-            FuriString* temp_epc = furi_string_alloc();
-            FuriString* temp_mem = furi_string_alloc();
+            FuriString* NumEpcs = furi_string_alloc();
+            FuriString* EpcAndName = furi_string_alloc();
+            FuriString* TempTid = furi_string_alloc();
+            FuriString* TempEpc = furi_string_alloc();
+            FuriString* TempMem = furi_string_alloc();
 
             with_view_model(
-                app->view_write,
-                UHFReaderWriteModel * model,
+                App->ViewWrite,
+                UHFReaderWriteModel * Model,
                 {
-                    furi_string_set(temp_tid, model->tid_value);
-                    furi_string_set(temp_epc, app->epc_to_write);
-                    furi_string_set(temp_mem, model->mem_value);
-                    furi_string_set(model->write_function, WRITE_EPC_OK);
+                    furi_string_set(TempTid, Model->TidValue);
+                    furi_string_set(TempEpc, App->EpcToWrite);
+                    furi_string_set(TempMem, Model->MemValue);
+                    furi_string_set(Model->WriteFunction, WRITE_EPC_OK);
                 },
-                redraw);
+                Redraw);
 
-            furi_string_printf(num_epcs, "Tag%ld", app->selected_tag_index);
+            furi_string_printf(NumEpcs, "Tag%ld", App->SelectedTagIndex);
 
             furi_string_printf(
-                epc_and_name,
+                EpcAndName,
                 "%s:%s:%s:%s:%s",
-                furi_string_get_cstr(app->epc_name),
-                furi_string_get_cstr(temp_epc),
-                furi_string_get_cstr(temp_tid),
-                app->temp_save_buffer,
-                furi_string_get_cstr(temp_mem));
+                furi_string_get_cstr(App->EpcName),
+                furi_string_get_cstr(TempEpc),
+                furi_string_get_cstr(TempTid),
+                App->TempSaveBuffer,
+                furi_string_get_cstr(TempMem));
 
             if(!flipper_format_update_string_cstr(
-                   app->epc_file,
-                   furi_string_get_cstr(num_epcs),
-                   furi_string_get_cstr(epc_and_name))) {
+                   App->EpcFile, furi_string_get_cstr(NumEpcs), furi_string_get_cstr(EpcAndName))) {
                 FURI_LOG_E(TAG, "Failed to write to file");
             }
 
-            flipper_format_file_close(app->epc_file);
-            furi_string_free(num_epcs);
-            furi_string_free(epc_and_name);
-            furi_string_free(temp_tid);
-            furi_string_free(temp_epc);
-            furi_string_free(temp_mem);
+            flipper_format_file_close(App->EpcFile);
+            furi_string_free(NumEpcs);
+            furi_string_free(EpcAndName);
+            furi_string_free(TempTid);
+            furi_string_free(TempEpc);
+            furi_string_free(TempMem);
 
-        } 
-        //Handles error if write failed for reservd memory
-        else if(strcmp(furi_string_get_cstr(line), "RVBAD") == 0) {
+        }
+        // Handles error if write failed for reserved memory
+        else if(strcmp(furi_string_get_cstr(Line), "RVBAD") == 0) {
             with_view_model(
-                app->view_write,
-                UHFReaderWriteModel * model,
-                { furi_string_set(model->write_function, WRITE_EPC_FAIL); },
-                redraw);
+                App->ViewWrite,
+                UHFReaderWriteModel * Model,
+                { furi_string_set(Model->WriteFunction, WRITE_EPC_FAIL); },
+                Redraw);
 
-        } 
+        }
 
-        //Handles TID modified values
-        else if(strcmp(furi_string_get_cstr(line), "TVOK") == 0) {
-            if(!flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
+        // Handles TID modified values
+        else if(strcmp(furi_string_get_cstr(Line), "TVOK") == 0) {
+            if(!flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
                 FURI_LOG_E(TAG, "Failed to open file");
             }
 
-            FuriString* num_epcs = furi_string_alloc();
-            FuriString* epc_and_name = furi_string_alloc();
-            FuriString* temp_res = furi_string_alloc();
-            FuriString* temp_epc = furi_string_alloc();
-            FuriString* temp_mem = furi_string_alloc();
+            FuriString* NumEpcs = furi_string_alloc();
+            FuriString* EpcAndName = furi_string_alloc();
+            FuriString* TempRes = furi_string_alloc();
+            FuriString* TempEpc = furi_string_alloc();
+            FuriString* TempMem = furi_string_alloc();
 
             with_view_model(
-                app->view_write,
-                UHFReaderWriteModel * model,
+                App->ViewWrite,
+                UHFReaderWriteModel * Model,
                 {
-                    furi_string_set(temp_res, model->res_value);
-                    furi_string_set(temp_epc, app->epc_to_write);
-                    furi_string_set(temp_mem, model->mem_value);
-                    furi_string_set(model->write_function, WRITE_EPC_OK);
+                    furi_string_set(TempRes, Model->ResValue);
+                    furi_string_set(TempEpc, App->EpcToWrite);
+                    furi_string_set(TempMem, Model->MemValue);
+                    furi_string_set(Model->WriteFunction, WRITE_EPC_OK);
                 },
-                redraw);
+                Redraw);
 
-            furi_string_printf(num_epcs, "Tag%ld", app->selected_tag_index);
+            furi_string_printf(NumEpcs, "Tag%ld", App->SelectedTagIndex);
 
             furi_string_printf(
-                epc_and_name,
+                EpcAndName,
                 "%s:%s:%s:%s:%s",
-                furi_string_get_cstr(app->epc_name),
-                furi_string_get_cstr(temp_epc),
-                app->temp_save_buffer,
-                furi_string_get_cstr(temp_res),
-                furi_string_get_cstr(temp_mem));
+                furi_string_get_cstr(App->EpcName),
+                furi_string_get_cstr(TempEpc),
+                App->TempSaveBuffer,
+                furi_string_get_cstr(TempRes),
+                furi_string_get_cstr(TempMem));
 
             if(!flipper_format_update_string_cstr(
-                   app->epc_file,
-                   furi_string_get_cstr(num_epcs),
-                   furi_string_get_cstr(epc_and_name))) {
+                   App->EpcFile, furi_string_get_cstr(NumEpcs), furi_string_get_cstr(EpcAndName))) {
                 FURI_LOG_E(TAG, "Failed to write to file");
             }
 
-            flipper_format_file_close(app->epc_file);
-            furi_string_free(num_epcs);
-            furi_string_free(epc_and_name);
-            furi_string_free(temp_res);
-            furi_string_free(temp_epc);
-            furi_string_free(temp_mem);
+            flipper_format_file_close(App->EpcFile);
+            furi_string_free(NumEpcs);
+            furi_string_free(EpcAndName);
+            furi_string_free(TempRes);
+            furi_string_free(TempEpc);
+            furi_string_free(TempMem);
 
-        } 
-        
-        //Handles error if write failed for TID
-        else if(strcmp(furi_string_get_cstr(line), "TVBAD") == 0) {
+        }
+
+        // Handles error if write failed for TID
+        else if(strcmp(furi_string_get_cstr(Line), "TVBAD") == 0) {
             with_view_model(
-                app->view_write,
-                UHFReaderWriteModel * model,
-                { furi_string_set(model->write_function, WRITE_EPC_FAIL); },
-                redraw);
+                App->ViewWrite,
+                UHFReaderWriteModel * Model,
+                { furi_string_set(Model->WriteFunction, WRITE_EPC_FAIL); },
+                Redraw);
 
-        } 
-        
-        //Handles modified user memory values
-        else if(strcmp(furi_string_get_cstr(line), "UVOK") == 0) {
-            if(!flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
+        }
+
+        // Handles modified user memory values
+        else if(strcmp(furi_string_get_cstr(Line), "UVOK") == 0) {
+            if(!flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
                 FURI_LOG_E(TAG, "Failed to open file");
             }
 
-            FuriString* num_epcs = furi_string_alloc();
-            FuriString* epc_and_name = furi_string_alloc();
-            FuriString* temp_tid = furi_string_alloc();
-            FuriString* temp_epc = furi_string_alloc();
-            FuriString* temp_res = furi_string_alloc();
+            FuriString* NumEpcs = furi_string_alloc();
+            FuriString* EpcAndName = furi_string_alloc();
+            FuriString* TempTid = furi_string_alloc();
+            FuriString* TempEpc = furi_string_alloc();
+            FuriString* TempRes = furi_string_alloc();
 
             with_view_model(
-                app->view_write,
-                UHFReaderWriteModel * model,
+                App->ViewWrite,
+                UHFReaderWriteModel * Model,
                 {
-                    furi_string_set(temp_tid, model->tid_value);
-                    furi_string_set(temp_epc, app->epc_to_write);
-                    furi_string_set(temp_res, model->res_value);
-                    furi_string_set(model->write_function, WRITE_EPC_OK);
+                    furi_string_set(TempTid, Model->TidValue);
+                    furi_string_set(TempEpc, App->EpcToWrite);
+                    furi_string_set(TempRes, Model->ResValue);
+                    furi_string_set(Model->WriteFunction, WRITE_EPC_OK);
                 },
-                redraw);
+                Redraw);
 
-            furi_string_printf(num_epcs, "Tag%ld", app->selected_tag_index);
+            furi_string_printf(NumEpcs, "Tag%ld", App->SelectedTagIndex);
 
             furi_string_printf(
-                epc_and_name,
+                EpcAndName,
                 "%s:%s:%s:%s:%s",
-                furi_string_get_cstr(app->epc_name),
-                furi_string_get_cstr(temp_epc),
-                furi_string_get_cstr(temp_tid),
-                furi_string_get_cstr(temp_res),
-                app->temp_save_buffer);
+                furi_string_get_cstr(App->EpcName),
+                furi_string_get_cstr(TempEpc),
+                furi_string_get_cstr(TempTid),
+                furi_string_get_cstr(TempRes),
+                App->TempSaveBuffer);
 
             if(!flipper_format_update_string_cstr(
-                   app->epc_file,
-                   furi_string_get_cstr(num_epcs),
-                   furi_string_get_cstr(epc_and_name))) {
+                   App->EpcFile, furi_string_get_cstr(NumEpcs), furi_string_get_cstr(EpcAndName))) {
                 FURI_LOG_E(TAG, "Failed to write to file");
             }
 
-            flipper_format_file_close(app->epc_file);
-            furi_string_free(num_epcs);
-            furi_string_free(epc_and_name);
-            furi_string_free(temp_tid);
-            furi_string_free(temp_epc);
-            furi_string_free(temp_res);
+            flipper_format_file_close(App->EpcFile);
+            furi_string_free(NumEpcs);
+            furi_string_free(EpcAndName);
+            furi_string_free(TempTid);
+            furi_string_free(TempEpc);
+            furi_string_free(TempRes);
 
-        } 
-        
-        //Handles failed User Memory writes
-        else if(strcmp(furi_string_get_cstr(line), "UVBAD") == 0) {
+        }
+
+        // Handles failed User Memory writes
+        else if(strcmp(furi_string_get_cstr(Line), "UVBAD") == 0) {
             with_view_model(
-                app->view_write,
-                UHFReaderWriteModel * model,
-                { furi_string_set(model->write_function, WRITE_EPC_FAIL); },
-                redraw);
+                App->ViewWrite,
+                UHFReaderWriteModel * Model,
+                { furi_string_set(Model->WriteFunction, WRITE_EPC_FAIL); },
+                Redraw);
         }
         break;
-    
-    //Wait for the number of tags read
-    case UHFReaderState_WaitForNumber:
-        app->number_of_epcs_to_read = atoi(furi_string_get_cstr(line));
-        memset(app->epc_values, 0, 127 * 26);
-        app->state = UHFReaderState_CollectEPCs;
+
+    // Wait for the number of tags read
+    case UHFReaderStateWaitForNumber:
+        App->NumberOfEpcsToRead = atoi(furi_string_get_cstr(Line));
+        memset(App->EpcValues, 0, 127 * 26);
+        App->State = UHFReaderStateCollectEPCs;
         break;
 
-    //Collect each epc value
-    case UHFReaderState_CollectEPCs:
-        if(strcmp(furi_string_get_cstr(line), "end") == 0) {
-            uart_helper_send(app->uart_helper, "done\n", 5);
-            app->state = UHFReaderState_DoneCollecting;
+    // Collect each EPC value
+    case UHFReaderStateCollectEPCs:
+        if(strcmp(furi_string_get_cstr(Line), "end") == 0) {
+            uart_helper_send(App->UartHelper, "done\n", 5);
+            App->State = UHFReaderStateDoneCollecting;
 
         } else {
-            app->epc_values[app->cur_epc_index] = strdup(furi_string_get_cstr(line));
-            app->cur_epc_index += 26;
+            App->EpcValues[App->CurEpcIndex] = strdup(furi_string_get_cstr(Line));
+            App->CurEpcIndex += 26;
         }
         break;
-    
-    //Wait for the number of TIDs read
-    case UHFReaderState_WaitForTID:
-        app->number_of_tids_to_read = atoi(furi_string_get_cstr(line));
-        memset(app->tid_values, 0, 127 * 41);
-        app->state = UHFReaderState_CollectTIDs;
+
+    // Wait for the number of TIDs read
+    case UHFReaderStateWaitForTID:
+        App->NumberOfTidsToRead = atoi(furi_string_get_cstr(Line));
+        memset(App->TidValues, 0, 127 * 41);
+        App->State = UHFReaderStateCollectTIDs;
         break;
-    
-    //Wait for number of reserved reads 
-    case UHFReaderState_WaitForRES:
-        app->number_of_res_to_read = atoi(furi_string_get_cstr(line));
-        memset(app->res_values, 0, 127 * 17);
-        app->state = UHFReaderState_CollectRESs;
+
+    // Wait for number of reserved reads
+    case UHFReaderStateWaitForRES:
+        App->NumberOfResToRead = atoi(furi_string_get_cstr(Line));
+        memset(App->ResValues, 0, 127 * 17);
+        App->State = UHFReaderStateCollectRESs;
         break;
-    
-    //Wait for number of user reads 
-    case UHFReaderState_WaitForMEM:
-        app->number_of_mem_to_read = atoi(furi_string_get_cstr(line));
-        memset(app->mem_values, 0, 127 * 33);
-        app->state = UHFReaderState_CollectMEMs;
+
+    // Wait for number of user reads
+    case UHFReaderStateWaitForMEM:
+        App->NumberOfMemToRead = atoi(furi_string_get_cstr(Line));
+        memset(App->MemValues, 0, 127 * 33);
+        App->State = UHFReaderStateCollectMEMs;
         break;
-    
-    //Collect the TIDs read
-    case UHFReaderState_CollectTIDs:
-        if(strcmp(furi_string_get_cstr(line), "end") == 0) {
-            uart_helper_send(app->uart_helper, "done\n", 5);
-            app->state = UHFReaderState_DoneCollectingTIDs;
+
+    // Collect the TIDs read
+    case UHFReaderStateCollectTIDs:
+        if(strcmp(furi_string_get_cstr(Line), "end") == 0) {
+            uart_helper_send(App->UartHelper, "done\n", 5);
+            App->State = UHFReaderStateDoneCollectingTIDs;
         } else {
-            app->tid_values[app->cur_tid_index * 41] = strdup(furi_string_get_cstr(line));
-            app->cur_tid_index += 1;
+            App->TidValues[App->CurTidIndex * 41] = strdup(furi_string_get_cstr(Line));
+            App->CurTidIndex += 1;
         }
         break;
-    
-    //Collect the reserved memory blocks read
-    case UHFReaderState_CollectRESs:
-        if(strcmp(furi_string_get_cstr(line), "end") == 0) {
-            uart_helper_send(app->uart_helper, "done\n", 5);
-            app->state = UHFReaderState_DoneCollectingRESs;
+
+    // Collect the reserved memory blocks read
+    case UHFReaderStateCollectRESs:
+        if(strcmp(furi_string_get_cstr(Line), "end") == 0) {
+            uart_helper_send(App->UartHelper, "done\n", 5);
+            App->State = UHFReaderStateDoneCollectingRESs;
 
         } else {
-            app->res_values[app->cur_res_index * 17] = strdup(furi_string_get_cstr(line));
-            app->cur_res_index += 1;
+            App->ResValues[App->CurResIndex * 17] = strdup(furi_string_get_cstr(Line));
+            App->CurResIndex += 1;
         }
         break;
-    
-    //Collect the User memory blocks read
-    case UHFReaderState_CollectMEMs:
-        if(strcmp(furi_string_get_cstr(line), "end") == 0) {
-            uart_helper_send(app->uart_helper, "done\n", 5);
-            app->state = UHFReaderState_DoneCollectingMEMs;
+
+    // Collect the User memory blocks read
+    case UHFReaderStateCollectMEMs:
+        if(strcmp(furi_string_get_cstr(Line), "end") == 0) {
+            uart_helper_send(App->UartHelper, "done\n", 5);
+            App->State = UHFReaderStateDoneCollectingMEMs;
         } else {
-            app->mem_values[app->cur_mem_index * 33] = strdup(furi_string_get_cstr(line));
-            app->cur_mem_index += 1;
+            App->MemValues[App->CurMemIndex * 33] = strdup(furi_string_get_cstr(Line));
+            App->CurMemIndex += 1;
         }
         break;
 
-    //State after done collecting TIDs
-    case UHFReaderState_DoneCollectingTIDs:
-        app->cur_tid_index = 1;
+    // State after done collecting TIDs
+    case UHFReaderStateDoneCollectingTIDs:
+        App->CurTidIndex = 1;
         with_view_model(
-            app->view_epc,
-            UHFRFIDTagModel * model,
+            App->ViewEpc,
+            UHFRFIDTagModel * Model,
             {
-                if(app->number_of_tids_to_read > 0) {
-                    furi_string_set_str(model->TID, app->tid_values[app->cur_tid_index * 41]);
+                if(App->NumberOfTidsToRead > 0) {
+                    furi_string_set_str(Model->Tid, App->TidValues[App->CurTidIndex * 41]);
                 }
             },
-            redraw);
+            Redraw);
 
-        //Send the next command to read the EPCS from the RPi
-        uart_helper_send(app->uart_helper, "EPCS\n", 5);
-        app->state = UHFReaderState_Idle;
+        // Send the next command to read the EPCs from the RPi
+        uart_helper_send(App->UartHelper, "EPCS\n", 5);
+        App->State = UHFReaderStateIdle;
         break;
-    
-    //State after done collecting Reserved Mem Blocks
-    case UHFReaderState_DoneCollectingRESs:
-        app->cur_res_index = 1;
-        with_view_model(
-            app->view_epc,
-            UHFRFIDTagModel * model,
-            {
-                if(app->number_of_res_to_read > 0) {
-                    furi_string_set_str(model->Reserved, app->res_values[app->cur_res_index * 17]);
-                }
-            },
-            redraw);
-        uart_helper_send(app->uart_helper, "MEM\n", 4);
-        app->state = UHFReaderState_Idle;
-        break;
-    
-    //State after done collecting User Mem Blocks
-    case UHFReaderState_DoneCollectingMEMs:
-        app->cur_mem_index = 1;
-        with_view_model(
-            app->view_epc,
-            UHFRFIDTagModel * model,
-            {
-                if(app->number_of_mem_to_read > 0) {
-                    furi_string_set_str(model->User, app->mem_values[app->cur_mem_index * 33]);
-                }
-            },
-            redraw);
-        app->is_reading = false;
-        with_view_model(
-            app->view_read, UHFReaderConfigModel * model, { model->is_reading = false; }, redraw);
-        app->state = UHFReaderState_Idle;
-        break;
-    //State after done collecting EPCS
-    case UHFReaderState_DoneCollecting:
-        app->cur_epc_index = 26;
-        bool redraw = true;
-        with_view_model(
-            app->view_read,
-            UHFReaderConfigModel * model,
-            {
-                if(app->number_of_epcs_to_read > 0) {
-                    furi_string_set_str(
-                        model->epc_value, app->epc_values[model->cur_epc_index * 26]);
 
-                    model->num_epcs_read = app->number_of_epcs_to_read;
-                }
-            },
-            redraw);
+    // State after done collecting Reserved Mem Blocks
+    case UHFReaderStateDoneCollectingRESs:
+        App->CurResIndex = 1;
         with_view_model(
-            app->view_epc,
-            UHFRFIDTagModel * model,
+            App->ViewEpc,
+            UHFRFIDTagModel * Model,
             {
-                if(app->number_of_epcs_to_read > 0) {
-                    furi_string_set_str(model->EPC, app->epc_values[app->cur_tid_index * 26]);
+                if(App->NumberOfResToRead > 0) {
+                    furi_string_set_str(Model->Reserved, App->ResValues[App->CurResIndex * 17]);
                 }
             },
-            redraw);
+            Redraw);
+        uart_helper_send(App->UartHelper, "MEM\n", 4);
+        App->State = UHFReaderStateIdle;
+        break;
 
-        uart_helper_send(app->uart_helper, "RES\n", 4);
-        app->state = UHFReaderState_Idle;
+    // State after done collecting User Mem Blocks
+    case UHFReaderStateDoneCollectingMEMs:
+        App->CurMemIndex = 1;
+        with_view_model(
+            App->ViewEpc,
+            UHFRFIDTagModel * Model,
+            {
+                if(App->NumberOfMemToRead > 0) {
+                    furi_string_set_str(Model->User, App->MemValues[App->CurMemIndex * 33]);
+                }
+            },
+            Redraw);
+        App->IsReading = false;
+        with_view_model(
+            App->ViewRead, UHFReaderConfigModel * Model, { Model->IsReading = false; }, Redraw);
+        App->State = UHFReaderStateIdle;
+        break;
+    // State after done collecting EPCs
+    case UHFReaderStateDoneCollecting:
+        App->CurEpcIndex = 26;
+        bool Redraw = true;
+        with_view_model(
+            App->ViewRead,
+            UHFReaderConfigModel * Model,
+            {
+                if(App->NumberOfEpcsToRead > 0) {
+                    furi_string_set_str(Model->EpcValue, App->EpcValues[Model->CurEpcIndex * 26]);
+
+                    Model->NumEpcsRead = App->NumberOfEpcsToRead;
+                }
+            },
+            Redraw);
+        with_view_model(
+            App->ViewEpc,
+            UHFRFIDTagModel * Model,
+            {
+                if(App->NumberOfEpcsToRead > 0) {
+                    furi_string_set_str(Model->Epc, App->EpcValues[App->CurTidIndex * 26]);
+                }
+            },
+            Redraw);
+
+        uart_helper_send(App->UartHelper, "RES\n", 4);
+        App->State = UHFReaderStateIdle;
         break;
     }
 }

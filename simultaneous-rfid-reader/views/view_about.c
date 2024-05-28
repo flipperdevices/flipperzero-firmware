@@ -3,11 +3,11 @@
 /**
  * @brief      Callback for returning to submenu.
  * @details    This function is called when user press back button.
- * @param      _context  The context - unused
+ * @param      context  The context - unused
  * @return     next view id
 */
-uint32_t uhf_reader_navigation_about_submenu_callback(void* _context) {
-    UNUSED(_context);
+uint32_t uhf_reader_navigation_about_submenu_callback(void* context) {
+    UNUSED(context);
     return UHFReaderViewSubmenu;
 }
 
@@ -16,35 +16,35 @@ uint32_t uhf_reader_navigation_about_submenu_callback(void* _context) {
  * @details    Allocates the contents of the about screen.
  * @param      app  The UHFReaderApp used to allocate variables 
 */
-void view_about_alloc(UHFReaderApp* app) {
+void view_about_alloc(UHFReaderApp* App) {
     
     //Creating the about widget 
-    app->widget_about = widget_alloc();
-    FuriString* tmp_string = furi_string_alloc();
+    App->WidgetAbout = widget_alloc();
+    FuriString* TmpString = furi_string_alloc();
     widget_add_text_box_element(
-        app->widget_about, 0, 0, 128, 14, AlignCenter, AlignBottom, UHF_RFID_BLANK_INV, false);
+        App->WidgetAbout, 0, 0, 128, 14, AlignCenter, AlignBottom, UHF_RFID_BLANK_INV, false);
     widget_add_text_box_element(
-        app->widget_about, 0, 0, 128, 14, AlignCenter, AlignBottom, UHF_RFID_NAME, false);
+        App->WidgetAbout, 0, 0, 128, 14, AlignCenter, AlignBottom, UHF_RFID_NAME, false);
     
     //Adding version and developer information
-    furi_string_printf(tmp_string, "\e#%s\n", "Information:");
-    furi_string_cat_printf(tmp_string, "Version: %s\n", UHF_RFID_VERSION_APP);
-    furi_string_cat_printf(tmp_string, "Developed by: %s\n", UHF_RFID_MEM_DEVELOPER);
-    furi_string_cat_printf(tmp_string, "Github: %s\n\n", UHF_RFID_GITHUB);
-    furi_string_cat_printf(tmp_string, "\e#%s\n", "Description:");
+    furi_string_printf(TmpString, "\e#%s\n", "Information:");
+    furi_string_cat_printf(TmpString, "Version: %s\n", UHF_RFID_VERSION_APP);
+    furi_string_cat_printf(TmpString, "Developed by: %s\n", UHF_RFID_MEM_DEVELOPER);
+    furi_string_cat_printf(TmpString, "Github: %s\n\n", UHF_RFID_GITHUB);
+    furi_string_cat_printf(TmpString, "\e#%s\n", "Description:");
     
     //Section with high level overview of app functions 
     furi_string_cat_printf(
-        tmp_string,
+        TmpString,
         "UHF RFID Reader\n"
         "Made for use with a M6E Nano compatible reader.\n"
         "Can read up to 150 tags simultaneously using M6E reader!\n"
         "Can read/write, save, and dump data from read tags.\n\n");
    
     //Hardware requirements
-    furi_string_cat_printf(tmp_string, "\e#%s\n", "Hardware Requirements:");
+    furi_string_cat_printf(TmpString, "\e#%s\n", "Hardware Requirements:");
     furi_string_cat_printf(
-        tmp_string,
+        TmpString,
         "Any of these options work, however, changes to the wiring and configuration may be necessary.\n"
         "- ThingMagic Nano Embedded RFID Reader Module\n"
         "- SparkFun Simultaneous RFID Reader\n"
@@ -53,9 +53,9 @@ void view_about_alloc(UHFReaderApp* app) {
         "- Custom UHF RFID Flipper Zero Board (Coming Soon)\n\n");
 
     //The configuration screen
-    furi_string_cat_printf(tmp_string, "\e#%s\n", "Configuration:");
+    furi_string_cat_printf(TmpString, "\e#%s\n", "Configuration:");
     furi_string_cat_printf(
-        tmp_string,
+        TmpString,
         " The configuration menu has the following options:\n"
         "- Toggle reader connection\n"
         "- Set the power of the reader within the range 0-2700\n"
@@ -67,9 +67,9 @@ void view_about_alloc(UHFReaderApp* app) {
         "\n");
     
     //Read screen information
-    furi_string_cat_printf(tmp_string, "\e#%s\n", "Read:");
+    furi_string_cat_printf(TmpString, "\e#%s\n", "Read:");
     furi_string_cat_printf(
-        tmp_string,
+        TmpString,
         " The read menu has the following options:\n"
         "- Press Ok to start/stop reading\n"
         "- Press Up to save the selected EPC\n"
@@ -77,9 +77,9 @@ void view_about_alloc(UHFReaderApp* app) {
         "- Press Left/Right to cycle through tags read\n\n");
     
     //Write screen information
-    furi_string_cat_printf(tmp_string, "\e#%s\n", "Write:");
+    furi_string_cat_printf(TmpString, "\e#%s\n", "Write:");
     furi_string_cat_printf(
-        tmp_string,
+        TmpString,
         " The write menu has the following options:\n"
         "- Press Ok to start/stop writing\n"
         "- Press Left to modify the EPC value\n"
@@ -89,12 +89,12 @@ void view_about_alloc(UHFReaderApp* app) {
     
     //Adding the widget to the view dispatcher 
     widget_add_text_scroll_element(
-        app->widget_about, 0, 16, 128, 50, furi_string_get_cstr(tmp_string));
-    furi_string_free(tmp_string);
+        App->WidgetAbout, 0, 16, 128, 50, furi_string_get_cstr(TmpString));
+    furi_string_free(TmpString);
     view_set_previous_callback(
-        widget_get_view(app->widget_about), uhf_reader_navigation_about_submenu_callback);
+        widget_get_view(App->WidgetAbout), uhf_reader_navigation_about_submenu_callback);
     view_dispatcher_add_view(
-        app->view_dispatcher, UHFReaderViewAbout, widget_get_view(app->widget_about));
+        App->ViewDispatcher, UHFReaderViewAbout, widget_get_view(App->WidgetAbout));
 }
 
 /**
@@ -102,7 +102,7 @@ void view_about_alloc(UHFReaderApp* app) {
  * @details    Frees all variables associated with the about widget.
  * @param      app  The UHFReaderApp - used to free the widget.
 */
-void view_about_free(UHFReaderApp* app){
-    view_dispatcher_remove_view(app->view_dispatcher, UHFReaderViewAbout);
-    widget_free(app->widget_about);
+void view_about_free(UHFReaderApp* App) {
+    view_dispatcher_remove_view(App->ViewDispatcher, UHFReaderViewAbout);
+    widget_free(App->WidgetAbout);
 }

@@ -41,9 +41,8 @@
 #include "helpers/saved_epc_functions.h"
 
 //Function declarations
-void main_menu_alloc(UHFReaderApp* app);
+void main_menu_alloc(UHFReaderApp* App);
 
-uint32_t uhf_reader_navigation_exit_callback(void* _context);
+uint32_t uhf_reader_navigation_exit_callback(void* context);
 
 void uhf_reader_submenu_callback(void* context, uint32_t index);
-

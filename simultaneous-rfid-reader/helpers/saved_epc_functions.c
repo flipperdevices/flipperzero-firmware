@@ -5,126 +5,126 @@
  * @details    This function updates the dictionary that is being used to store all the saved epcs.
  * @param      context  - The UHFReaderApp
 */
-void updateDictionaryKeys(void* context) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
+void update_dictionary_keys(void* context) {
+    UHFReaderApp* App = (UHFReaderApp*)context;
 
-    //Updating the saved epcs menu
-    view_dispatcher_remove_view(app->view_dispatcher, UHFReaderViewSaved);
-    submenu_free(app->submenu_saved);
-    app->submenu_saved = submenu_alloc();
-    submenu_set_header(app->submenu_saved, "Saved EPCs");
-    uint32_t totalTags = app->number_of_saved_tags;
+    // Updating the saved epcs menu
+    view_dispatcher_remove_view(App->ViewDispatcher, UHFReaderViewSaved);
+    submenu_free(App->SubmenuSaved);
+    App->SubmenuSaved = submenu_alloc();
+    submenu_set_header(App->SubmenuSaved, "Saved EPCs");
+    uint32_t TotalTags = App->NumberOfSavedTags;
 
-    //Open the saved epcs file and extract the tag name and create the submenu items
-    if(flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
-        for(uint32_t i = 0; i < totalTags; i++) {
+    // Open the saved epcs file and extract the tag name and create the submenu items
+    if(flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
+        for(uint32_t i = 0; i < TotalTags; i++) {
             
-            FuriString* temp_str = furi_string_alloc();
-            FuriString* temp_tag = furi_string_alloc();
-            furi_string_printf(temp_str, "Tag%ld", i + 1);
+            FuriString* TempStr = furi_string_alloc();
+            FuriString* TempTag = furi_string_alloc();
+            furi_string_printf(TempStr, "Tag%ld", i + 1);
             
             if(!flipper_format_read_string(
-                   app->epc_file, furi_string_get_cstr(temp_str), temp_tag)) {
+                   App->EpcFile, furi_string_get_cstr(TempStr), TempTag)) {
                 FURI_LOG_D(TAG, "Could not read tag %ld data", i + 1);
             } else {
                 
-                //Extract the name of the saved UHF Tag
-                const char* inputString = furi_string_get_cstr(temp_tag);
-                char* extractedName = extractName(inputString);
+                // Extract the name of the saved UHF Tag
+                const char* InputString = furi_string_get_cstr(TempTag);
+                char* ExtractedName = extract_name(InputString);
 
-                if(extractedName != NULL) {
+                if(ExtractedName != NULL) {
                     submenu_add_item(
-                        app->submenu_saved,
-                        extractedName,
+                        App->SubmenuSaved,
+                        ExtractedName,
                         (i + 1),
                         uhf_reader_submenu_saved_callback,
-                        app); 
-                    free(extractedName);
+                        App); 
+                    free(ExtractedName);
                 } 
             }
-            furi_string_free(temp_str);
-            furi_string_free(temp_tag);
+            furi_string_free(TempStr);
+            furi_string_free(TempTag);
         }
     }
     view_set_previous_callback(
-        submenu_get_view(app->submenu_saved), uhf_reader_navigation_saved_exit_callback);
+        submenu_get_view(App->SubmenuSaved), uhf_reader_navigation_saved_exit_callback);
     view_dispatcher_add_view(
-        app->view_dispatcher, UHFReaderViewSaved, submenu_get_view(app->submenu_saved));
-    flipper_format_file_close(app->epc_file);
+        App->ViewDispatcher, UHFReaderViewSaved, submenu_get_view(App->SubmenuSaved));
+    flipper_format_file_close(App->EpcFile);
 }
 
 /**
  * @brief      Function to delete and update a saved tag in the saved epcs file
  * @details    This function deletes the specified tag and updates the saved epcs file 
  * @param      context  - The UHFReaderApp
- * @param      keyToDelete  - The index of the saved UHF tag to delete
+ * @param      key_to_delete  - The index of the saved UHF tag to delete
 */
-void deleteAndUpdateEntry(void* context, uint32_t keyToDelete) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
-    uint32_t totalTags = app->number_of_saved_tags;
-    FuriString* epc_to_delete = furi_string_alloc();
+void delete_and_update_entry(void* context, uint32_t KeyToDelete) {
+    UHFReaderApp* App = (UHFReaderApp*)context;
+    uint32_t TotalTags = App->NumberOfSavedTags;
+    FuriString* EpcToDelete = furi_string_alloc();
 
-    //Open the saved epcs file
-    if(flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
+    // Open the saved epcs file
+    if(flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
         
-        //Update subsequent keys
-        for(uint32_t i = 1; i <= totalTags; i++) {
-            FuriString* temp_str_old = furi_string_alloc();
-            FuriString* temp_str_new = furi_string_alloc();
-            furi_string_printf(temp_str_old, "Tag%ld", i);
+        // Update subsequent keys
+        for(uint32_t i = 1; i <= TotalTags; i++) {
+            FuriString* TempStrOld = furi_string_alloc();
+            FuriString* TempStrNew = furi_string_alloc();
+            furi_string_printf(TempStrOld, "Tag%ld", i);
 
-            //Calculate the new key based on the deletion
-            uint32_t newKey = (i > keyToDelete) ? i - 1 : i;
+            // Calculate the new key based on the deletion
+            uint32_t NewKey = (i > KeyToDelete) ? i - 1 : i;
 
-            //Skip the deleted key
-            if(i != keyToDelete) { 
-                furi_string_printf(temp_str_new, "Tag%ld", newKey);
-                FuriString* temp_tag = furi_string_alloc();
+            // Skip the deleted key
+            if(i != KeyToDelete) { 
+                furi_string_printf(TempStrNew, "Tag%ld", NewKey);
+                FuriString* TempTag = furi_string_alloc();
                 if(!flipper_format_read_string(
-                       app->epc_file, furi_string_get_cstr(temp_str_old), temp_tag)) {
+                       App->EpcFile, furi_string_get_cstr(TempStrOld), TempTag)) {
                     FURI_LOG_D(TAG, "Could not read tag %ld data", i);
                 } else {
                     if(!flipper_format_update_string_cstr(
-                           app->epc_file,
-                           furi_string_get_cstr(temp_str_new),
-                           furi_string_get_cstr(temp_tag))) {
+                           App->EpcFile,
+                           furi_string_get_cstr(TempStrNew),
+                           furi_string_get_cstr(TempTag))) {
                         FURI_LOG_D(TAG, "Could not update tag %ld data", i);
                         flipper_format_write_string_cstr(
-                            app->epc_file,
-                            furi_string_get_cstr(temp_str_new),
-                            furi_string_get_cstr(temp_tag));
+                            App->EpcFile,
+                            furi_string_get_cstr(TempStrNew),
+                            furi_string_get_cstr(TempTag));
                     }
                 }
 
-                furi_string_free(temp_tag);
+                furi_string_free(TempTag);
             }
-            furi_string_free(temp_str_old);
-            furi_string_free(temp_str_new);
+            furi_string_free(TempStrOld);
+            furi_string_free(TempStrNew);
         }
 
-        furi_string_printf(epc_to_delete, "Tag%ld", app->number_of_saved_tags);
-        if(!flipper_format_delete_key(app->epc_file, furi_string_get_cstr(epc_to_delete))) {
+        furi_string_printf(EpcToDelete, "Tag%ld", App->NumberOfSavedTags);
+        if(!flipper_format_delete_key(App->EpcFile, furi_string_get_cstr(EpcToDelete))) {
             FURI_LOG_D(
-                TAG, "Could not delete saved tag with index %ld", app->number_of_saved_tags);
+                TAG, "Could not delete saved tag with index %ld", App->NumberOfSavedTags);
         }
         
-        //Update the total number of saved tags
-        app->number_of_saved_tags--;
-        flipper_format_file_close(app->epc_file);
+        // Update the total number of saved tags
+        App->NumberOfSavedTags--;
+        flipper_format_file_close(App->EpcFile);
     }
 
-    //Update the index file
-    FuriString* new_num_epcs = furi_string_alloc();
-    furi_string_printf(new_num_epcs, "%ld", app->number_of_saved_tags);
-    if(flipper_format_file_open_existing(app->epc_index_file, APP_DATA_PATH("Index_File.txt"))) {
+    // Update the index file
+    FuriString* NewNumEpcs = furi_string_alloc();
+    furi_string_printf(NewNumEpcs, "%ld", App->NumberOfSavedTags);
+    if(flipper_format_file_open_existing(App->EpcIndexFile, APP_DATA_PATH("Index_File.txt"))) {
         if(!flipper_format_write_string_cstr(
-               app->epc_index_file, "Number of Tags", furi_string_get_cstr(new_num_epcs))) {
+               App->EpcIndexFile, "Number of Tags", furi_string_get_cstr(NewNumEpcs))) {
             FURI_LOG_E(TAG, "Failed to write to file");
         } else {
             FURI_LOG_E(TAG, "Updated index file!");
         }
     }
-    furi_string_free(epc_to_delete);
-    flipper_format_file_close(app->epc_index_file);
-    furi_string_free(new_num_epcs);
+    furi_string_free(EpcToDelete);
+    flipper_format_file_close(App->EpcIndexFile);
+    furi_string_free(NewNumEpcs);
 }

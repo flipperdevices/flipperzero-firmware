@@ -19,7 +19,6 @@
 #include <string.h>
 #include "helpers/uart_helper.h"
 
-
 //Submenu enums for different screens
 typedef enum {
     UHFReaderSubmenuIndexRead,
@@ -40,194 +39,191 @@ typedef enum {
 
 //Defining views for the application
 typedef enum {
-    UHFReaderViewSubmenu, 
+    UHFReaderViewSubmenu,
     UHFReaderViewDeleteSuccess,
-    UHFReaderViewConfigure, 
-    UHFReaderViewEPCDump, 
-    UHFReaderViewEPCInfo,
+    UHFReaderViewConfigure,
+    UHFReaderViewEpcDump,
+    UHFReaderViewEpcInfo,
     UHFReaderViewDelete,
-    UHFReaderViewAbout, 
-    UHFReaderViewRead, 
-    UHFReaderViewSaveInput, 
+    UHFReaderViewAbout,
+    UHFReaderViewRead,
+    UHFReaderViewSaveInput,
     UHFReaderViewRenameInput,
-    UHFReaderViewEPCWriteInput,
-    UHFReaderViewWrite, 
+    UHFReaderViewEpcWriteInput,
+    UHFReaderViewWrite,
     UHFReaderViewSaved,
     UHFReaderViewTagAction,
-    UHFReaderViewSelectSavedTag, 
-    UHFReaderViewSetPower, 
+    UHFReaderViewSelectSavedTag,
+    UHFReaderViewSetPower,
 } UHFReaderView;
 
 //Event IDs for the app
 typedef enum {
-    UHFReaderEventIdRedrawScreen = 0, 
-    UHFReaderEventIdOkPressed = 42, 
+    UHFReaderEventIdRedrawScreen = 0,
+    UHFReaderEventIdOkPressed = 42,
 } UHFReaderEventId;
 
 //State of the reader app when communicating with raspberry pi zero over uart
 typedef enum {
-    UHFReaderState_Idle,
-    UHFReaderState_WaitForNumber,
-    UHFReaderState_CollectEPCs,
-    UHFReaderState_DoneCollecting,
-    UHFReaderState_WaitForTID,
-    UHFReaderState_CollectTIDs,
-    UHFReaderState_DoneCollectingTIDs,
-    UHFReaderState_WaitForRES,
-    UHFReaderState_CollectRESs,
-    UHFReaderState_DoneCollectingRESs,
-    UHFReaderState_WaitForMEM,
-    UHFReaderState_CollectMEMs,
-    UHFReaderState_DoneCollectingMEMs
+    UHFReaderStateIdle,
+    UHFReaderStateWaitForNumber,
+    UHFReaderStateCollectEPCs,
+    UHFReaderStateDoneCollecting,
+    UHFReaderStateWaitForTID,
+    UHFReaderStateCollectTIDs,
+    UHFReaderStateDoneCollectingTIDs,
+    UHFReaderStateWaitForRES,
+    UHFReaderStateCollectRESs,
+    UHFReaderStateDoneCollectingRESs,
+    UHFReaderStateWaitForMEM,
+    UHFReaderStateCollectMEMs,
+    UHFReaderStateDoneCollectingMEMs
 } UHFReaderState;
-
 
 //The main UHFReaderApp Struct
 typedef struct {
-    ViewDispatcher* view_dispatcher; 
-    NotificationApp* notifications; 
-    
-    Submenu* submenu; 
-    Submenu* submenu_saved; 
-    Submenu* submenu_tag_actions; 
+    ViewDispatcher* ViewDispatcher;
+    NotificationApp* Notifications;
 
-    TextInput* text_input; 
-    TextInput* save_input; 
-    TextInput* rename_input; 
-    TextInput* epc_write; 
+    Submenu* Submenu;
+    Submenu* SubmenuSaved;
+    Submenu* SubmenuTagActions;
 
-    VariableItemList* variable_item_list_config; 
-    VariableItem* setting_2_item;
-    Widget* widget_about;
-    
-    View* view_read;
-    View* view_write; 
-    View* view_delete; 
-    View* view_delete_success;
-    View* view_epc;
-    View* view_epc_info; 
-    
-    char* temp_buffer; 
-    char* temp_save_buffer; 
-    char* file_name;
-    char* epc_to_save;
-    char* setting_1_config_label;
-    char* setting_1_names[2];
-    char* setting_2_config_label;
-    char* setting_2_entry_text;
-    char* setting_2_default_value;
-    char* setting_3_config_label;
-    char* setting_3_names[2];
+    TextInput* TextInput;
+    TextInput* SaveInput;
+    TextInput* RenameInput;
+    TextInput* EpcWrite;
 
-    uint32_t temp_buffer_size; 
-    uint32_t temp_buffer_save_size; 
-    uint32_t name_size;
-    uint32_t selected_tag_index;
-    uint32_t number_of_saved_tags;
-    uint32_t number_of_tids_to_read;
-    uint32_t number_of_res_to_read;
-    uint32_t number_of_mem_to_read;
-    uint32_t cur_epc_index;
-    uint32_t cur_tid_index;
-    uint32_t cur_res_index;
-    uint32_t cur_mem_index;
+    VariableItemList* VariableItemListConfig;
+    VariableItem* Setting2Item;
+    Widget* WidgetAbout;
 
-    UartHelper* uart_helper;
+    View* ViewRead;
+    View* ViewWrite;
+    View* ViewDelete;
+    View* ViewDeleteSuccess;
+    View* ViewEpc;
+    View* ViewEpcInfo;
 
-    FuriString* epc_name_delete; 
-    FuriString* epc_delete; 
-    FuriString* epc_name;
-    FuriString* setting_2_power_str;
-    FuriString* epc_to_write;
+    char* TempBuffer;
+    char* TempSaveBuffer;
+    char* FileName;
+    char* EpcToSave;
+    char* Setting1ConfigLabel;
+    char* Setting1Names[2];
+    char* Setting2ConfigLabel;
+    char* Setting2EntryText;
+    char* Setting2DefaultValue;
+    char* Setting3ConfigLabel;
+    char* Setting3Names[2];
 
-    bool is_reading;
-    bool is_writing;
-    bool reader_connected;
+    uint32_t TempBufferSize;
+    uint32_t TempBufferSaveSize;
+    uint32_t NameSize;
+    uint32_t SelectedTagIndex;
+    uint32_t NumberOfSavedTags;
+    uint32_t NumberOfTidsToRead;
+    uint32_t NumberOfResToRead;
+    uint32_t NumberOfMemToRead;
+    uint32_t CurEpcIndex;
+    uint32_t CurTidIndex;
+    uint32_t CurResIndex;
+    uint32_t CurMemIndex;
 
-    FuriTimer* timer; 
+    UartHelper* UartHelper;
 
-    Storage* tag_storage;
-    FlipperFormat* epc_file;
-    FlipperFormat* epc_index_file;
-    
-    
-    UHFReaderState state;
-    
-    size_t number_of_epcs_to_read;
-    size_t name_size_parse;
-    
-    uint8_t setting_3_index;
-    uint8_t setting_1_index;
-    uint8_t setting_1_values[2];
-    uint8_t setting_3_values[2];
+    FuriString* EpcNameDelete;
+    FuriString* EpcDelete;
+    FuriString* EpcName;
+    FuriString* Setting2PowerStr;
+    FuriString* EpcToWrite;
 
-    char** epc_values; 
-    char** tid_values;
-    char** res_values;
-    char** mem_values;
+    bool IsReading;
+    bool IsWriting;
+    bool ReaderConnected;
+
+    FuriTimer* Timer;
+
+    Storage* TagStorage;
+    FlipperFormat* EpcFile;
+    FlipperFormat* EpcIndexFile;
+
+    UHFReaderState State;
+
+    size_t NumberOfEpcsToRead;
+    size_t NameSizeParse;
+
+    uint8_t Setting3Index;
+    uint8_t Setting1Index;
+    uint8_t Setting1Values[2];
+    uint8_t Setting3Values[2];
+
+    char** EpcValues;
+    char** TidValues;
+    char** ResValues;
+    char** MemValues;
 
 } UHFReaderApp;
 
 //The model for the configure/read screen
 typedef struct {
-    uint32_t setting_1_index; 
-    FuriString* setting_2_power; 
-    uint32_t setting_3_index; 
-    bool is_reading;
-    FuriString* epc_name;
-    uint32_t cur_epc_index;
-    FuriString* epc_value;
-    uint32_t num_epcs_read;
-    FuriString* setting_1_value;
-    FuriString* setting_3_value;
-    uint32_t scroll_offset;
-    char* scrolling_text;
+    uint32_t Setting1Index;
+    FuriString* Setting2Power;
+    uint32_t Setting3Index;
+    bool IsReading;
+    FuriString* EpcName;
+    uint32_t CurEpcIndex;
+    FuriString* EpcValue;
+    uint32_t NumEpcsRead;
+    FuriString* Setting1Value;
+    FuriString* Setting3Value;
+    uint32_t ScrollOffset;
+    char* ScrollingText;
 } UHFReaderConfigModel;
 
 //Model for the write screen
 typedef struct {
-    uint32_t setting_1_index; 
-    FuriString* setting_2_power; 
-    uint32_t setting_3_index; 
-    bool is_writing;
-    FuriString* epc_name;
-    FuriString* write_function;
-    FuriString* epc_value;
-    FuriString* write_status;
-    FuriString* new_epc_value;
-    FuriString* tid_value;
-    FuriString* new_tid_value;
-    FuriString* res_value;
-    FuriString* new_res_value;
-    FuriString* mem_value;
-    FuriString* new_mem_value;
-    FuriString* setting_1_value;
-    FuriString* setting_3_value;
+    uint32_t Setting1Index;
+    FuriString* Setting2Power;
+    uint32_t Setting3Index;
+    bool IsWriting;
+    FuriString* EpcName;
+    FuriString* WriteFunction;
+    FuriString* EpcValue;
+    FuriString* WriteStatus;
+    FuriString* NewEpcValue;
+    FuriString* TidValue;
+    FuriString* NewTidValue;
+    FuriString* ResValue;
+    FuriString* NewResValue;
+    FuriString* MemValue;
+    FuriString* NewMemValue;
+    FuriString* Setting1Value;
+    FuriString* Setting3Value;
 } UHFReaderWriteModel;
-
 
 //Model for the delete screen
 typedef struct {
-    uint32_t selected_tag_index; 
-    FuriString* selected_tag_name; 
-    FuriString* selected_tag_epc; 
-    uint32_t scroll_offset;
-    char* scrolling_text;
+    uint32_t SelectedTagIndex;
+    FuriString* SelectedTagName;
+    FuriString* SelectedTagEpc;
+    uint32_t ScrollOffset;
+    char* ScrollingText;
 } UHFReaderDeleteModel;
 
 //Model use for handling UHF RFID tag data
 typedef struct {
     FuriString* Reserved;
-    FuriString* EPC; 
-    FuriString* TID; 
-    FuriString* User; 
-    uint32_t cur_epc_index;
-    uint32_t scroll_offset_epc;
-    char* scrolling_text_epc;
-    uint32_t scroll_offset_tid;
-    char* scrolling_text_tid;
-    uint32_t scroll_offset_res;
-    char* scrolling_text_res;
-    uint32_t scroll_offset_mem;
-    char* scrolling_text_mem;
+    FuriString* Epc;
+    FuriString* Tid;
+    FuriString* User;
+    uint32_t CurEpcIndex;
+    uint32_t ScrollOffsetEpc;
+    char* ScrollingTextEpc;
+    uint32_t ScrollOffsetTid;
+    char* ScrollingTextTid;
+    uint32_t ScrollOffsetRes;
+    char* ScrollingTextRes;
+    uint32_t ScrollOffsetMem;
+    char* ScrollingTextMem;
 } UHFRFIDTagModel;

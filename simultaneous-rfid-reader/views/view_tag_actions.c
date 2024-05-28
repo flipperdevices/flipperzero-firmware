@@ -6,11 +6,10 @@
  * @param      context  The context - not used
  * @return     the view id of the next view.
 */
-uint32_t uhf_reader_navigation_epc_info_callback(void* _context) {
-    UNUSED(_context);
+uint32_t uhf_reader_navigation_epc_info_callback(void* context) {
+    UNUSED(context);
     return UHFReaderViewTagAction;
 }
-
 
 /**
  * @brief      Callback for the rename text input screen.
@@ -18,150 +17,146 @@ uint32_t uhf_reader_navigation_epc_info_callback(void* _context) {
  * @param      context  The UHFReaderApp - Used to change app variables.
 */
 void uhf_reader_rename_text_updated(void* context) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
+    UHFReaderApp* App = (UHFReaderApp*)context;
 
     //Allocating FuriStrings to store each of the values associated with each UHF Tag
-    FuriString* temp_tid = furi_string_alloc();
-    FuriString* temp_res = furi_string_alloc();
-    FuriString* temp_mem = furi_string_alloc();
-    FuriString* temp_str = furi_string_alloc();
-    FuriString* temp_tag = furi_string_alloc();
-    FuriString* temp_epc_str = furi_string_alloc();
-    
+    FuriString* TempTid = furi_string_alloc();
+    FuriString* TempRes = furi_string_alloc();
+    FuriString* TempMem = furi_string_alloc();
+    FuriString* TempStr = furi_string_alloc();
+    FuriString* TempTag = furi_string_alloc();
+    FuriString* TempEpcStr = furi_string_alloc();
+
     //Open the saved EPCs file
-    if(!flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
+    if(!flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
         FURI_LOG_E(TAG, "Failed to open Saved file");
-        flipper_format_file_close(app->epc_file);
+        flipper_format_file_close(App->EpcFile);
 
     } else {
-        furi_string_printf(temp_str, "Tag%ld", app->selected_tag_index);
-        
+        furi_string_printf(TempStr, "Tag%ld", App->SelectedTagIndex);
+
         //Get the current tag data for the tag being renamed
-        if(!flipper_format_read_string(app->epc_file, furi_string_get_cstr(temp_str), temp_tag)) {
-            FURI_LOG_D(TAG, "Could not read tag %ld data", app->selected_tag_index);
+        if(!flipper_format_read_string(App->EpcFile, furi_string_get_cstr(TempStr), TempTag)) {
+            FURI_LOG_D(TAG, "Could not read tag %ld data", App->SelectedTagIndex);
         } else {
-            
             //Get all the fields for the current tag being renamed
-            const char* inputString = furi_string_get_cstr(temp_tag);
-            char* extractedEPC = extractEPC(inputString);
-            char* extractedTID = extractTID(inputString);
-            char* extractedRES = extractRES(inputString);
-            char* extractedMEM = extractMEM(inputString);
-            furi_string_set_str(temp_epc_str, extractedEPC);
-            furi_string_set_str(temp_tid, extractedTID);
-            furi_string_set_str(temp_res, extractedRES);
-            furi_string_set_str(temp_mem, extractedMEM);
-            flipper_format_file_close(app->epc_file);
+            const char* InputString = furi_string_get_cstr(TempTag);
+            char* ExtractedEpc = extract_epc(InputString);
+            char* ExtractedTid = extract_tid(InputString);
+            char* ExtractedRes = extract_res(InputString);
+            char* ExtractedMem = extract_mem(InputString);
+            furi_string_set_str(TempEpcStr, ExtractedEpc);
+            furi_string_set_str(TempTid, ExtractedTid);
+            furi_string_set_str(TempRes, ExtractedRes);
+            furi_string_set_str(TempMem, ExtractedMem);
+            flipper_format_file_close(App->EpcFile);
         }
     }
 
     //Open the file again
-    if(!flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
+    if(!flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
         FURI_LOG_E(TAG, "Failed to open file");
     }
 
     //Allocate new FuriStrings for storing the newly named UHF tag
-    FuriString* num_epcs = furi_string_alloc();
-    FuriString* epc_and_name = furi_string_alloc();
-    furi_string_printf(num_epcs, "Tag%ld", app->selected_tag_index);
+    FuriString* NumEpcs = furi_string_alloc();
+    FuriString* EpcAndName = furi_string_alloc();
+    furi_string_printf(NumEpcs, "Tag%ld", App->SelectedTagIndex);
     furi_string_printf(
-        epc_and_name,
+        EpcAndName,
         "%s:%s:%s:%s:%s",
-        app->temp_save_buffer,
-        furi_string_get_cstr(temp_epc_str),
-        furi_string_get_cstr(temp_tid),
-        furi_string_get_cstr(temp_res),
-        furi_string_get_cstr(temp_mem));
-    
+        App->TempSaveBuffer,
+        furi_string_get_cstr(TempEpcStr),
+        furi_string_get_cstr(TempTid),
+        furi_string_get_cstr(TempRes),
+        furi_string_get_cstr(TempMem));
+
     //Write to the file and update the current string in its index
     if(!flipper_format_update_string_cstr(
-           app->epc_file, furi_string_get_cstr(num_epcs), furi_string_get_cstr(epc_and_name))) {
+           App->EpcFile, furi_string_get_cstr(NumEpcs), furi_string_get_cstr(EpcAndName))) {
         FURI_LOG_E(TAG, "Failed to write to file");
     }
 
     //Close the file
-    flipper_format_file_close(app->epc_file);
+    flipper_format_file_close(App->EpcFile);
 
     //Free all FuriStrings used
-    furi_string_free(epc_and_name);
-    furi_string_free(num_epcs);
-    furi_string_free(temp_epc_str);
-    furi_string_free(temp_tid);
-    furi_string_free(temp_res);
-    furi_string_free(temp_mem);
-    furi_string_free(temp_str);
-    furi_string_free(temp_tag);
-    
-    //Remove the current saved submenu to reallocate and update it 
-    view_dispatcher_remove_view(app->view_dispatcher, UHFReaderViewSaved);
-    submenu_free(app->submenu_saved);
-    app->submenu_saved = submenu_alloc();
-    submenu_set_header(app->submenu_saved, "Saved EPCs");
+    furi_string_free(EpcAndName);
+    furi_string_free(NumEpcs);
+    furi_string_free(TempEpcStr);
+    furi_string_free(TempTid);
+    furi_string_free(TempRes);
+    furi_string_free(TempMem);
+    furi_string_free(TempStr);
+    furi_string_free(TempTag);
+
+    //Remove the current saved submenu to reallocate and update it
+    view_dispatcher_remove_view(App->ViewDispatcher, UHFReaderViewSaved);
+    submenu_free(App->SubmenuSaved);
+    App->SubmenuSaved = submenu_alloc();
+    submenu_set_header(App->SubmenuSaved, "Saved EPCs");
 
     //Update the index file or create a new one doesn't exist
-    FuriString* extracted_num_tags_str = furi_string_alloc();
-    if(!flipper_format_file_open_existing(app->epc_index_file, APP_DATA_PATH("Index_File.txt"))) {
+    FuriString* ExtractedNumTagsStr = furi_string_alloc();
+    if(!flipper_format_file_open_existing(App->EpcIndexFile, APP_DATA_PATH("Index_File.txt"))) {
         FURI_LOG_E(TAG, "Creating new index file");
-        flipper_format_file_close(app->epc_index_file);
-        if(!flipper_format_file_open_new(app->epc_index_file, APP_DATA_PATH("Index_File.txt"))) {
+        flipper_format_file_close(App->EpcIndexFile);
+        if(!flipper_format_file_open_new(App->EpcIndexFile, APP_DATA_PATH("Index_File.txt"))) {
             FURI_LOG_E(TAG, "Failed to open file");
         } else {
-            if(!flipper_format_write_string_cstr(app->epc_index_file, "Number of Tags", "0")) {
+            if(!flipper_format_write_string_cstr(App->EpcIndexFile, "Number of Tags", "0")) {
                 FURI_LOG_E(TAG, "Failed to write to file");
             } else {
-                app->number_of_saved_tags = 0;
+                App->NumberOfSavedTags = 0;
             }
         }
     } else {
-        if(!flipper_format_read_string(
-               app->epc_index_file, "Number of Tags", extracted_num_tags_str)) {
+        if(!flipper_format_read_string(App->EpcIndexFile, "Number of Tags", ExtractedNumTagsStr)) {
         } else {
-            app->number_of_saved_tags =
-                (uint32_t)atoi(furi_string_get_cstr(extracted_num_tags_str));
+            App->NumberOfSavedTags = (uint32_t)atoi(furi_string_get_cstr(ExtractedNumTagsStr));
         }
     }
-    furi_string_free(extracted_num_tags_str);
-    flipper_format_file_close(app->epc_index_file);
-    
-    //Open the saved epcs file to iterate through and create new submenu items 
-    if(!flipper_format_file_open_existing(app->epc_file, APP_DATA_PATH("Saved_EPCs.txt"))) {
+    furi_string_free(ExtractedNumTagsStr);
+    flipper_format_file_close(App->EpcIndexFile);
+
+    //Open the saved epcs file to iterate through and create new submenu items
+    if(!flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
         FURI_LOG_E(TAG, "Failed to open Saved file");
-        flipper_format_file_close(app->epc_file);
+        flipper_format_file_close(App->EpcFile);
 
     } else {
-        for(uint32_t i = 0; i < (uint32_t)app->number_of_saved_tags; i++) {
-            FuriString* temp_str = furi_string_alloc();
-            FuriString* temp_tag = furi_string_alloc();
-            furi_string_printf(temp_str, "Tag%ld", i + 1);
-            if(!flipper_format_read_string(
-                   app->epc_file, furi_string_get_cstr(temp_str), temp_tag)) {
+        for(uint32_t i = 0; i < (uint32_t)App->NumberOfSavedTags; i++) {
+            FuriString* TempStr = furi_string_alloc();
+            FuriString* TempTag = furi_string_alloc();
+            furi_string_printf(TempStr, "Tag%ld", i + 1);
+            if(!flipper_format_read_string(App->EpcFile, furi_string_get_cstr(TempStr), TempTag)) {
                 FURI_LOG_D(TAG, "Could not read tag %ld data", i + 1);
             } else {
-                const char* inputString = furi_string_get_cstr(temp_tag);
-                char* extractedName = extractName(inputString);
-                
+                const char* InputString = furi_string_get_cstr(TempTag);
+                char* ExtractedName = extract_name(InputString);
+
                 //Update the saved submenu
-                if(extractedName != NULL) {
+                if(ExtractedName != NULL) {
                     submenu_add_item(
-                        app->submenu_saved,
-                        extractedName,
+                        App->SubmenuSaved,
+                        ExtractedName,
                         (i + 1),
                         uhf_reader_submenu_saved_callback,
-                        app); 
-                    free(extractedName);
-                } 
+                        App);
+                    free(ExtractedName);
+                }
             }
-            furi_string_free(temp_str);
-            furi_string_free(temp_tag);
+            furi_string_free(TempStr);
+            furi_string_free(TempTag);
         }
-        flipper_format_file_close(app->epc_file);
+        flipper_format_file_close(App->EpcFile);
     }
 
     view_set_previous_callback(
-        submenu_get_view(app->submenu_saved), uhf_reader_navigation_saved_exit_callback);
+        submenu_get_view(App->SubmenuSaved), uhf_reader_navigation_saved_exit_callback);
     view_dispatcher_add_view(
-        app->view_dispatcher, UHFReaderViewSaved, submenu_get_view(app->submenu_saved));
-    view_dispatcher_switch_to_view(app->view_dispatcher, UHFReaderViewSaved);
+        App->ViewDispatcher, UHFReaderViewSaved, submenu_get_view(App->SubmenuSaved));
+    view_dispatcher_switch_to_view(App->ViewDispatcher, UHFReaderViewSaved);
 }
 
 /**
@@ -171,56 +166,55 @@ void uhf_reader_rename_text_updated(void* context) {
  * @param      index  The selected submenu index
 */
 void uhf_reader_submenu_tag_info_callback(void* context, uint32_t index) {
-    UHFReaderApp* app = (UHFReaderApp*)context;
+    UHFReaderApp* App = (UHFReaderApp*)context;
 
     switch(index) {
-    
     //Handles the Tag Info menu
     case UHFReaderSubmenuIndexTagInfo:
-        view_dispatcher_switch_to_view(app->view_dispatcher, UHFReaderViewEPCInfo);
+        view_dispatcher_switch_to_view(App->ViewDispatcher, UHFReaderViewEpcInfo);
         break;
 
     //Handles the rename screen
     case UHFReaderSubmenuIndexTagRename:
-        text_input_set_header_text(app->rename_input, "Rename EPC");
+        text_input_set_header_text(App->RenameInput, "Rename EPC");
 
         //Grab the text from the rename text input
-        bool redraw = false;
+        bool Redraw = false;
         with_view_model(
-            app->view_write,
-            UHFReaderWriteModel * model,
+            App->ViewWrite,
+            UHFReaderWriteModel * Model,
             {
                 strncpy(
-                    app->temp_save_buffer,
-                    furi_string_get_cstr(model->epc_name),
-                    app->temp_buffer_save_size);
+                    App->TempSaveBuffer,
+                    furi_string_get_cstr(Model->EpcName),
+                    App->TempBufferSaveSize);
             },
-            redraw);
+            Redraw);
 
         // Configure the text input.  When user enters text and clicks OK then the rename text updated callback will run
-        bool clear_previous_text = true;
+        bool ClearPreviousText = true;
         text_input_set_result_callback(
-            app->rename_input,
+            App->RenameInput,
             uhf_reader_rename_text_updated,
-            app,
-            app->temp_save_buffer,
-            app->temp_buffer_save_size,
-            clear_previous_text);
+            App,
+            App->TempSaveBuffer,
+            App->TempBufferSaveSize,
+            ClearPreviousText);
 
         // Pressing the BACK button will reload the configure screen.
         view_set_previous_callback(
-            text_input_get_view(app->rename_input), uhf_reader_navigation_epc_info_callback);
-        view_dispatcher_switch_to_view(app->view_dispatcher, UHFReaderViewRenameInput);
+            text_input_get_view(App->RenameInput), uhf_reader_navigation_epc_info_callback);
+        view_dispatcher_switch_to_view(App->ViewDispatcher, UHFReaderViewRenameInput);
         break;
 
     //Handles the write screen
     case UHFReaderSubmenuIndexTagWrite:
-        view_dispatcher_switch_to_view(app->view_dispatcher, UHFReaderViewWrite);
+        view_dispatcher_switch_to_view(App->ViewDispatcher, UHFReaderViewWrite);
         break;
-    
+
     //Handles the delete screen
     case UHFReaderSubmenuIndexTagDelete:
-        view_dispatcher_switch_to_view(app->view_dispatcher, UHFReaderViewDelete);
+        view_dispatcher_switch_to_view(App->ViewDispatcher, UHFReaderViewDelete);
         break;
     default:
         break;
@@ -233,8 +227,8 @@ void uhf_reader_submenu_tag_info_callback(void* context, uint32_t index) {
  * @param      context  The context - not used
  * @return     the view id of the next view.
 */
-uint32_t uhf_reader_navigation_tag_action_exit_callback(void* _context) {
-    UNUSED(_context);
+uint32_t uhf_reader_navigation_tag_action_exit_callback(void* context) {
+    UNUSED(context);
     return UHFReaderViewSaved;
 }
 
@@ -243,46 +237,43 @@ uint32_t uhf_reader_navigation_tag_action_exit_callback(void* _context) {
  * @details    This function allocates all variables for the tag actions view.
  * @param      app  The UHFReaderApp object.
 */
-void view_tag_actions_alloc(UHFReaderApp* app){
-
+void view_tag_actions_alloc(UHFReaderApp* App) {
     //Allocate the tag actions submenu
-    app->submenu_tag_actions = submenu_alloc();
-    submenu_set_header(app->submenu_tag_actions, "EPC Actions");
+    App->SubmenuTagActions = submenu_alloc();
+    submenu_set_header(App->SubmenuTagActions, "EPC Actions");
     submenu_add_item(
-        app->submenu_tag_actions,
+        App->SubmenuTagActions,
         "Tag Data",
         UHFReaderSubmenuIndexTagInfo,
         uhf_reader_submenu_tag_info_callback,
-        app);
+        App);
     submenu_add_item(
-        app->submenu_tag_actions,
+        App->SubmenuTagActions,
         "Rename",
         UHFReaderSubmenuIndexTagRename,
         uhf_reader_submenu_tag_info_callback,
-        app);
+        App);
     submenu_add_item(
-        app->submenu_tag_actions,
+        App->SubmenuTagActions,
         "Write",
         UHFReaderSubmenuIndexTagWrite,
         uhf_reader_submenu_tag_info_callback,
-        app);
+        App);
     submenu_add_item(
-        app->submenu_tag_actions,
+        App->SubmenuTagActions,
         "Delete",
         UHFReaderSubmenuIndexTagDelete,
         uhf_reader_submenu_tag_info_callback,
-        app);
+        App);
     view_set_previous_callback(
-        submenu_get_view(app->submenu_tag_actions),
-        uhf_reader_navigation_tag_action_exit_callback);
+        submenu_get_view(App->SubmenuTagActions), uhf_reader_navigation_tag_action_exit_callback);
     view_dispatcher_add_view(
-        app->view_dispatcher, UHFReaderViewTagAction, submenu_get_view(app->submenu_tag_actions));
+        App->ViewDispatcher, UHFReaderViewTagAction, submenu_get_view(App->SubmenuTagActions));
 
     //Allocate the rename text input
-    app->rename_input = text_input_alloc();
+    App->RenameInput = text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, UHFReaderViewRenameInput, text_input_get_view(app->rename_input));
-    
+        App->ViewDispatcher, UHFReaderViewRenameInput, text_input_get_view(App->RenameInput));
 }
 
 /**
@@ -290,9 +281,9 @@ void view_tag_actions_alloc(UHFReaderApp* app){
  * @details    This function frees all variables for the tag actions view.
  * @param      context  The context - UHFReaderApp object.
 */
-void view_tag_actions_free(UHFReaderApp* app){
-    view_dispatcher_remove_view(app->view_dispatcher, UHFReaderViewRenameInput);
-    text_input_free(app->rename_input);
-    view_dispatcher_remove_view(app->view_dispatcher, UHFReaderViewTagAction);
-    submenu_free(app->submenu_tag_actions);
+void view_tag_actions_free(UHFReaderApp* App) {
+    view_dispatcher_remove_view(App->ViewDispatcher, UHFReaderViewRenameInput);
+    text_input_free(App->RenameInput);
+    view_dispatcher_remove_view(App->ViewDispatcher, UHFReaderViewTagAction);
+    submenu_free(App->SubmenuTagActions);
 }
