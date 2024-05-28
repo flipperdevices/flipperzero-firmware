@@ -8,6 +8,8 @@ App(
     order=10,
     fap_icon="app.png",
     fap_category="GPIO",
-    fap_icon_assets="assets",
+    fap_author="@RileyHaffner",
+    fap_weburl="https://github.com/haffnerriley/Simultaneous-UHF-RFID-FlipperZero",
+    fap_version="1.0",
     fap_description="Simultaneous UHF RFID Reader that supports the M6E Nano Reader. Read up to 150 UHF tags per second!",
 )
