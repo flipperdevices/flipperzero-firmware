@@ -13,6 +13,7 @@
  */
 
 #define TAG "SubGhzProtocolPrinceton"
+#define PRINCETON_GUARD_TIME_DEFALUT 30 //GUARD_TIME = PRINCETON_GUARD_TIME_DEFALUT * 30
 
 static const SubGhzBlockConst subghz_protocol_princeton_const = {
     .te_short = 390,
@@ -170,7 +171,7 @@ SubGhzProtocolStatus
         //optional parameter parameter
         if(!flipper_format_read_uint32(
                flipper_format, "Guard_time", (uint32_t*)&instance->guard_time, 1)) {
-            instance->guard_time = 30;
+            instance->guard_time = PRINCETON_GUARD_TIME_DEFALUT;
         }
 
         flipper_format_read_uint32(
@@ -243,7 +244,7 @@ void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t 
             instance->decoder.decode_data = 0;
             instance->decoder.decode_count_bit = 0;
             instance->te = 0;
-            instance->guard_time = 30;
+            instance->guard_time = PRINCETON_GUARD_TIME_DEFALUT;
         }
         break;
     case PrincetonDecoderStepSaveDuration:
@@ -367,7 +368,7 @@ SubGhzProtocolStatus
         }
         if(!flipper_format_read_uint32(
                flipper_format, "Guard_time", (uint32_t*)&instance->guard_time, 1)) {
-            instance->guard_time = 30;
+            instance->guard_time = PRINCETON_GUARD_TIME_DEFALUT;
         }
     } while(false);
 
