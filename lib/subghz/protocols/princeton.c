@@ -13,7 +13,7 @@
  */
 
 #define TAG "SubGhzProtocolPrinceton"
-#define PRINCETON_GUARD_TIME_DEFALUT 30 //GUARD_TIME = PRINCETON_GUARD_TIME_DEFALUT * 30
+#define PRINCETON_GUARD_TIME_DEFALUT 30 //GUARD_TIME = PRINCETON_GUARD_TIME_DEFALUT * TE
 
 static const SubGhzBlockConst subghz_protocol_princeton_const = {
     .te_short = 390,
