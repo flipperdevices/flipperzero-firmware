@@ -142,22 +142,18 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
 
     switch(favorite_id) {
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppLeftShort:
+    case SCENE_STATE_SET_DUMMY_APP | DummyAppLeft:
         submenu_set_header(submenu, "Left - Press");
         break;
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppLeftLong:
         submenu_set_header(submenu, "Left - Hold");
         break;
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppRightShort:
+    case SCENE_STATE_SET_DUMMY_APP | DummyAppRight:
         submenu_set_header(submenu, "Right - Press");
         break;
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppRightLong:
         submenu_set_header(submenu, "Right - Hold");
-        break;
-    case SCENE_STATE_SET_DUMMY_APP | DummyAppLeft:
-        submenu_set_header(submenu, "Left - Press");
-        break;
-    case SCENE_STATE_SET_DUMMY_APP | DummyAppRight:
-        submenu_set_header(submenu, "Right - Press");
         break;
     case SCENE_STATE_SET_DUMMY_APP | DummyAppDown:
         submenu_set_header(submenu, "Down - Press");
