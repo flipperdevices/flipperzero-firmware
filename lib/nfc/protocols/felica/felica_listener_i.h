@@ -59,7 +59,7 @@ void felica_listener_reset(FelicaListener* instance);
 void felica_wcnt_increment(FelicaData* data);
 //void felica_wcnt_post_process(FelicaData* data);
 bool felica_listener_check_idm(const FelicaListener* instance, const FelicaIDm* request_idm);
-bool felica_listener_check_block_list(
+bool felica_listener_check_block_list_size(
     FelicaListener* instance,
     FelicaListenerGenericRequest* request);
 const FelicaBlockListElement* felica_listener_block_list_item_get_first(

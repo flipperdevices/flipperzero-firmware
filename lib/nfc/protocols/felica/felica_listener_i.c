@@ -106,7 +106,9 @@ const FelicaBlockListElement* felica_listener_block_list_item_get_next(
     return next_item;
 }
 
-bool felica_listener_check_block_list(FelicaListener* instance, FelicaListenerGenericRequest* req) {
+bool felica_listener_check_block_list_size(
+    FelicaListener* instance,
+    FelicaListenerGenericRequest* req) {
     FelicaListenerRequest* request = (FelicaListenerRequest*)req;
     bool valid = false;
     const FelicaBlockListElement* item =
@@ -446,7 +448,6 @@ bool felica_listener_validate_write_request_and_set_sf(
     const FelicaListenerWriteRequest* const request,
     const FelicaListenerWriteBlockData* const data,
     FelicaListenerWriteCommandResponse* response) {
-    UNUSED(data);
     bool valid = false;
     do {
         if(request->base.header.service_num != 0x01) {

@@ -184,7 +184,7 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
 
             uint8_t size = bit_buffer_get_size_bytes(nfc_event->data.buffer) - 2;
             if((request->length != size) ||
-               (!felica_listener_check_block_list(instance, request))) {
+               (!felica_listener_check_block_list_size(instance, request))) {
                 FURI_LOG_E(TAG, "Wrong request length");
                 break;
             }
