@@ -80,6 +80,12 @@ SubGhzProtocolStatus subghz_txrx_gen_data_protocol_and_te(
             FURI_LOG_E(TAG, "Unable to update Te");
         }
     }
+    if(ret == SubGhzProtocolStatusOk) {
+        if(!flipper_format_update_uint32(instance->fff_data, "Guard_time", 30, 1)) {
+            ret = SubGhzProtocolStatusErrorParserOthers;
+            FURI_LOG_E(TAG, "Unable to update Guard_time");
+        }
+    }
     return ret;
 }
 
