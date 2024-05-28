@@ -197,7 +197,15 @@ static bool felica_block_is_readonly(const FelicaListener* instance, uint8_t blo
 }
 
 static bool felica_block_requires_mac(const FelicaListener* instance, uint8_t block_number) {
-    return felica_get_mc_bit(instance, FELICA_MC_SP_REG_W_MAC_A_BYTES_10_11, block_number);
+    bool need_mac = false;
+    if(block_number <= FELICA_BLOCK_INDEX_REG) {
+        need_mac = felica_get_mc_bit(instance, FELICA_MC_SP_REG_W_MAC_A_BYTES_10_11, block_number);
+    } else if(block_number == FELICA_BLOCK_INDEX_CK || block_number == FELICA_BLOCK_INDEX_CKV) {
+        need_mac = felica_get_mc_bit(instance, FELICA_MC_CKCKV_W_MAC_A, 0);
+    } else if(block_number == FELICA_BLOCK_INDEX_STATE) {
+        need_mac = felica_get_mc_bit(instance, FELICA_MC_STATE_W_MAC_A, 0);
+    }
+    return need_mac;
 }
 
 static void felica_handler_read_block(
