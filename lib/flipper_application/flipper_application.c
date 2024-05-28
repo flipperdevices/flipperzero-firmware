@@ -273,38 +273,38 @@ FuriThread* flipper_application_alloc_thread(FlipperApplication* app, const char
     return app->thread;
 }
 
-static const char* preload_status_strings[] = {
-    [FlipperApplicationPreloadStatusSuccess] = "Success",
-    [FlipperApplicationPreloadStatusUnspecifiedError] = "Unknown error",
-    [FlipperApplicationPreloadStatusInvalidFile] = "Invalid file",
-    [FlipperApplicationPreloadStatusNotEnoughMemory] = "Not enough memory",
-    [FlipperApplicationPreloadStatusInvalidManifest] = "Invalid file manifest",
-    [FlipperApplicationPreloadStatusApiTooOld] =
-        "Update Application to use with this Firmware (ApiTooOld)",
-    [FlipperApplicationPreloadStatusApiTooNew] =
-        "Update Firmware to use with this Application (ApiTooNew)",
-    [FlipperApplicationPreloadStatusTargetMismatch] = "Hardware target mismatch",
-};
-
-static const char* load_status_strings[] = {
-    [FlipperApplicationLoadStatusSuccess] = "Success",
-    [FlipperApplicationLoadStatusUnspecifiedError] = "Unknown error",
-    [FlipperApplicationLoadStatusMissingImports] =
-        "Update Firmware to use with this Application (MissingImports)",
-};
-
 const char* flipper_application_preload_status_to_string(FlipperApplicationPreloadStatus status) {
-    if(status >= COUNT_OF(preload_status_strings) || preload_status_strings[status] == NULL) {
-        return "Unknown error";
+    switch(status) {
+    case FlipperApplicationPreloadStatusSuccess:
+        return "Success";
+    case FlipperApplicationPreloadStatusInvalidFile:
+        return "Invalid file";
+    case FlipperApplicationPreloadStatusNotEnoughMemory:
+        return "Not enough memory";
+    case FlipperApplicationPreloadStatusInvalidManifest:
+        return "Invalid file manifest";
+    case FlipperApplicationPreloadStatusApiTooOld:
+        return "Update Application to use with this Firmware (ApiTooOld)";
+    case FlipperApplicationPreloadStatusApiTooNew:
+        return "Update Firmware to use with this Application (ApiTooNew)";
+    case FlipperApplicationPreloadStatusTargetMismatch:
+        return "Hardware target mismatch";
     }
-    return preload_status_strings[status];
+
+    return "Unknown error";
 }
 
 const char* flipper_application_load_status_to_string(FlipperApplicationLoadStatus status) {
-    if(status >= COUNT_OF(load_status_strings) || load_status_strings[status] == NULL) {
+    switch(status) {
+    case FlipperApplicationLoadStatusSuccess:
+        return "Success";
+    case FlipperApplicationLoadStatusUnspecifiedError:
         return "Unknown error";
+    case FlipperApplicationLoadStatusMissingImports:
+        return "Update Firmware to use with this Application (MissingImports)";
     }
-    return load_status_strings[status];
+
+    return "Unknown error";
 }
 
 const FlipperAppPluginDescriptor*
