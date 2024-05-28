@@ -1,0 +1,13 @@
+App(
+    appid="simultaneous-rfid-reader",
+    name="[RFID] UHF RFID Reader",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="main_uhf_reader_app",
+    stack_size=22 * 1024,
+    requires=["gui"],
+    order=10,
+    fap_icon="app.png",
+    fap_category="GPIO",
+    fap_icon_assets="assets",
+    fap_description="Simultaneous UHF RFID Reader that supports the M6E Nano Reader. Read up to 150 UHF tags per second!",
+)
