@@ -2,6 +2,10 @@
 
 #include <stdbool.h>
 
+#include <furi_hal.h>
+
+#include "imu_lsm6dso.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

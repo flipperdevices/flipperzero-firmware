@@ -1,0 +1,3 @@
+[submodule "lib/stm32-lsm6dso"]
+	path = lib/stm32-lsm6dso
+	url = https://github.com/STMicroelectronics/stm32-lsm6dso.git

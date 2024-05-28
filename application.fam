@@ -9,4 +9,10 @@ App(
     fap_version="1.1",
     fap_libs=["ble_profile"],
     sources=["*.c", "*.cc"],
+    fap_private_libs=[
+        Lib(
+            name="stm32-lsm6dso",
+            cflags=["-Wno-error"],
+        ),
+    ],
 )
