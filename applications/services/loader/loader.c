@@ -105,7 +105,7 @@ static void loader_show_gui_error(
             dialog_message_set_header(
                 message, "Error: Out of Memory", 64, 0, AlignCenter, AlignTop);
             dialog_message_set_text(
-                message, "My brains so full\nPlease, reboot me!", 0, 64, AlignLeft, AlignBottom);
+                message, "My brain is so full\nPlease, reboot me!", 0, 64, AlignLeft, AlignBottom);
             dialog_message_set_buttons(message, NULL, NULL, "Reboot");
             if(dialog_message_show(dialogs, message) == DialogMessageButtonRight) {
                 furi_hal_power_reset();
