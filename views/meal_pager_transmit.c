@@ -180,7 +180,7 @@ void meal_pager_transmit_free(Meal_PagerTransmit* instance) {
             model->pager = 0;
             model->sending = 0;
         },
-        true);    
+        true);
     view_free(instance->view);
     free(instance);
 }
