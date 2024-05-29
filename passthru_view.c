@@ -653,7 +653,7 @@ void passthru_view_exit_callback(void *ctx) {
 void passthru_view_draw_callback(Canvas *canvas, void *model) {
 
   PassthruModel *passthru_model = (PassthruModel *)model;
-  uint8_t x, y;
+  int16_t x, y;
   uint8_t i, j;
   bool is_byte_sent;
   bool was_byte_sent;
