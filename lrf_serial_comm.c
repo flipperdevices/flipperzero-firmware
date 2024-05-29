@@ -954,9 +954,6 @@ static int32_t uart_rx_thread(void *ctx) {
     }
   }
 
-  /* Free the UART receive stream buffer */
-  furi_stream_buffer_free(app->rx_stream);
-
   return 0;
 }
 
@@ -1103,6 +1100,9 @@ void lrf_serial_comm_app_free(LRFSerialCommApp *app) {
   furi_thread_flags_set(furi_thread_get_id(app->rx_thread), stop);
   furi_thread_join(app->rx_thread);
   furi_thread_free(app->rx_thread);
+
+  /* Free the UART receive stream buffer */
+  furi_stream_buffer_free(app->rx_stream);
 
   /* Re-enable support for expansion modules */
   expansion_enable(furi_record_open(RECORD_EXPANSION));
