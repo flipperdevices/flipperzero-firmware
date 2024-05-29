@@ -35,9 +35,9 @@ Make sure your FlipBoard is connected to your Flipper Zero.  Choose the `Start a
 
 <img src="./gallery/buttons.png" width="200px">
 
-Press the leftmost button to decrease the delay between frames.  Press the adjacent button to increase the delay between frames.  The speed in milliseconds is displayed in the bottom right corner when you press a button.
+Press the leftmost button to decrease the delay between frames.  Press the adjacent button to increase the delay between frames. 
 
-Press the rightmost button to change the animation.  Press the adjacent button to decrease the animation id.  Press both buttons to run the off animation.  The animation id is displayed in the bottom right corner when you press a button.  
+Press the rightmost button to change the animation.  Press the adjacent button to decrease the animation id.  Press both buttons to run the off animation.
 
 ## Configuration
 
