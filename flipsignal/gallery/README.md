@@ -18,7 +18,7 @@ Go to "Configure application" in the app menu to setup how each action works. Yo
 
   - The "Press color" option changes the button color when it’s pressed. If you pick a combo button, all the buttons in that combo will change color.
 
-  - The "Release color" option changes the button color when it’s not pressed. This option doesn’t work for combo buttons.
+  - The "Release color" option changes the button color when it’s not pressed. This option doesn’t apply for combo buttons.
 
   - The "Music note" option changes the sound to play when the button is pressed. You can pick "Off" if you don’t want any sound.
 
