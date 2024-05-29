@@ -1,11 +1,10 @@
 App(
     appid="simultaneous_rfid_reader",
-    name="[GPIO] Simultaneous UHF RFID Reader",
+    name="Simultaneous UHF RFID Reader",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="main_uhf_reader_app",
     stack_size=22 * 1024,
     requires=["gui"],
-    order=10,
     fap_icon="app.png",
     fap_category="GPIO",
     fap_author="@RileyHaffner",
