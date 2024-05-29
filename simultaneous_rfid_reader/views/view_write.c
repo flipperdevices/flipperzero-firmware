@@ -237,7 +237,7 @@ bool uhf_reader_view_write_input_callback(InputEvent* event, void* context) {
                 redraw);
 
             // Configure the text input
-            bool clear_previous_text = true;
+            bool clear_previous_text = false;
             text_input_set_result_callback(
                 App->EpcWrite,
                 uhf_reader_epc_value_text_updated,
@@ -270,7 +270,7 @@ bool uhf_reader_view_write_input_callback(InputEvent* event, void* context) {
                 redraw);
 
             // Configure the text input
-            bool clear_previous_text = true;
+            bool clear_previous_text = false;
             text_input_set_result_callback(
                 App->EpcWrite,
                 uhf_reader_epc_value_text_updated,
@@ -303,7 +303,7 @@ bool uhf_reader_view_write_input_callback(InputEvent* event, void* context) {
                 redraw);
 
             // Configure the text input
-            bool clear_previous_text = true;
+            bool clear_previous_text = false;
             text_input_set_result_callback(
                 App->EpcWrite,
                 uhf_reader_epc_value_text_updated,
@@ -336,7 +336,7 @@ bool uhf_reader_view_write_input_callback(InputEvent* event, void* context) {
                 redraw);
 
             // Configure the text input
-            bool clear_previous_text = true;
+            bool clear_previous_text = false;
             text_input_set_result_callback(
                 App->EpcWrite,
                 uhf_reader_epc_value_text_updated,
