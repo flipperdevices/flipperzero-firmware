@@ -4,15 +4,9 @@
 ## Starting out
 - [Overview](#overview)
 - [Applications](#applications)
-  - [FlipKeyboard](./flipkeyboard/README.md)
-  - [FlipBlinky](./flipblinky/README.md)
-  - [FlipSignal](./flipsignal/README.md)
-  - [Simon Tutorial](./simon-tutorial/README.md)
 - [Installing Apps](#installing-apps)
-  - [Using flipc.org (Chrome, Edge, Opera)](#using-flipcorg-chrome-edge-opera)
-  - [Using flipc.org (Other browsers)](#using-flipcorg-other-browsers)
-  - [Copying FAP using qFlipper](#copying-fap-using-qflipper)
-  - [Copying FAP using SD Card](#copying-fap-using-sd-card)
+  - [Official Store](#official-store)
+  - [Pre-installed on some firmware](#pre-installed-on-some-firmware)
   - [Building with VSCode (Visual Studio Code)](#building-with-vscode-visual-studio-code)
   - [Building with FBT](#building-with-fbt)
   - [Building with UFBT](#building-with-ufbt)
@@ -21,102 +15,38 @@
 
 ## Overview
 
-The FlipBoard v1.1 is a versatile device for the Flipper Zero that can enable all kinds of features. It has 4 buttons that connect via separate GPIO pins, so you can react to any combinations of button up/down events. Each button has a 24-bit color LED that is programmable using the WS2812b protocol. There is also a small single-color LED on the board you can use, for example, to signal a status change.
+The FlipBoard is a versatile device for the Flipper Zero that can enable all kinds of features. It has 4 buttons that connect to the Flipper Zero via separate GPIO pins, so you can react to any combinations of button up/down events. Each button has a 24-bit color LED that is programmable using the WS2812b protocol. There is also a small single-color LED on the board you can use, for example, to signal a status change.
 
-Currently there are three applications written for the FlipBoard that demonstrate many of the key features.  FlipKeyboard is a macropad application that can automate repetative tasks, typing many keys in a single button click.  FlipBlinky is visual effects, useful if you are wearing your Flipper Zero with FlipBoard as a badge at a conference.  FlipSignal sends Sub-GHz and IR signals.  We will be adding more applications as time progresses, along with tutorials on how to write your own applications! Please let us know your feedback.
+The FlipBoard applications are written in C and compiled into FAP (Flipper Application Packages).  The GPIO and LED drivers can also be used in JavaScript applications that run on the Flipper Zero!
 
-You can order your FlipBoard from [https://tindie.com/stores/MakeItHackin](https://tindie.com/stores/MakeItHackin).
+You can order your FlipBoard from [@MakeItHackin](https://www.youtube.com/makeithackin) using [tindie](https://www.tindie.com/products/32844/) or [Etsy](https://www.etsy.com/listing/1601295558/).  Be sure to also join our [Discord server](https://discord.gg/KTThkQHj5B).
 
 ## Applications
+Currently there are four applications written for the FlipBoard that demonstrate many of the key features:
 
-- [FlipKeyboard](./flipkeyboard/README.md)
-- [FlipBlinky](./flipblinky/README.md)
-- [FlipSignal](./flipsignal/README.md)
-- [Simon Tutorial](./simon-tutorial/README.md)
+- [FlipKeyboard](./flipkeyboard/README.md) - A MacroPad that types using USB or BLE.  Also a music keyboard.
+- [FlipBlinky](./flipblinky/README.md) - Turn the FlipBoard into blinky badge.
+- [FlipSignal](./flipsignal/README.md) - Send IR and Sub-GHz signals.
+- Simon memory game
+  - [Tutorial](./simon-tutorial/README.md) step-by-step instructions to make your own game!
+  - [Completed game](./simon-tutorial/completed/step-16/flipsimon/README.md) version of the game that is ready to play.
 
 ## Installing Apps
 
-There are multiple ways to install applications on your Flipper Zero.  If you just want to run the apps without making any customizations, you can install a FAP (Flipper Application Package) file that is built for you.  If you want to customize the app & follow along with the various tutorials, it is recommended you install the source code and build it yourself!
-
-If you just want to run applications without customizing, here are some options:
-- GOOD OPTION: [Install using flipc.org (requires Chrome, Edge or Opera web browser)](#using-flipcorg-chrome-edge-opera)
-- [Download FAP from flipc.org (Other browsers)](#using-flipcorg-other-browsers)
-  - [Install FAP on Flipper using qFlipper](#copying-fap-using-qflipper)
-  - [Install FAP on Flipper using SD Card](#copying-fap-using-sd-card)
-
-If you want to modify the code, here are some options:
-- BEST OPTION: [Build FAP with VSCode (Visual Studio Code)](#building-with-vscode-visual-studio-code)
+Here are some options for installation:
+- [Official Store](#official-store) (coming soon?)
+- [Pre-installed on some firmware](#pre-installed-on-some-firmware) (like RogueMaster)
+- [Visual Studio Code](#building-with-vscode-visual-studio-code)
 - [Build FAP with FBT tool](#building-with-fbt)
-- [Build FAP with UFBT tool](#building-with-ufbt)
+- [Build FAP with uFBT tool](#building-with-ufbt)
 
-### Using flipc.org (Chrome, Edge, Opera)
+### Official Store
 
-For best experience, use the latest version of Chrome, Microsoft Edge or Opera.  Other browsers will only give you a file you need to manually install (since they don't support the [Web Serial API](https://caniuse.com/web-serial)).
+We hope to have the FlipBoard applications available in the official Flipper Zero store soon.  This will make it easy to install the applications on your Flipper Zero without needing to build the applications yourself.
 
-Flipc.org is a website that allows you to install FAP files directly from the web.  This is an unofficial website and is not affiliated with the Flipper Zero team, run by a single person.  It is provided as a convenience for users who want to install apps without having to build them from source.
+### Pre-installed on some firmware
 
-![Flipc.org install](images/flipc-install.gif)
-
-- Step 1: **Load the web page** for the app you want to install.  Other people may have "forked" the app and made their own version, so make sure you are using the correct link.  In some cases, their changes may improve the product, but in other cases, they may have introduced bugs or malicious code.  **Use at your own risk.**
-  - https://flipc.org/jamisonderek/flipboard?branch=main&root=flipblinky
-  - https://flipc.org/jamisonderek/flipboard?branch=main&root=flipsignal
-  - https://flipc.org/jamisonderek/flipboard?branch=main&root=flipkeyboard
-
-- Step 2: Click on the underlined text under FIRMWARE and **choose the firmware** that matches what you are running on your Flipper Zero. (Official, Unleashed, RogueMaster, Xtreme)
-- Step 3: Click on the underlined text under CHANNEL and **choose the current channel** you are running on your Flipper Zero.  (Release, Release Candidate, Development)
-- Step 4: **Connect your Flipper Zero** to your computer. Make sure nothing is running on your computer that is using the serial port.  In particular, close qFlipper, close https://lab.flipper.net, and close any CLI tools that communicate with the Flipper Zero.
-- Step 5: Click on the orange **Install button**.
-  - The application should get installed.
-  - The Install button should change to an orange Run of Flipper button.
-  - You can try "Run on Flipper" to run the application, but this will not work for all firmware versions.
-
-### Using flipc.org (Other browsers)
-
-For best experience, use the latest version of Chrome, Microsoft Edge or Opera.  Other browsers will only give you a file you need to manually install (since they don't support the [Web Serial API](https://caniuse.com/web-serial)).
-
-Flipc.org is a website that allows you to install FAP files directly from the web.  This is an unofficial website and is not affiliated with the Flipper Zero team, run by a single person.  It is provided as a convenience for users who want to install apps without having to build them from source.
-
-![Flipc.org download](images/flipc-download.gif)
-
-- Step 1: **Load the web page** for the app you want to install.  Other people may have "forked" the app and made their own version, so make sure you are using the correct link.  In some cases, their changes may improve the product, but in other cases, they may have introduced bugs or malicious code.  **Use at your own risk.**
-  - https://flipc.org/jamisonderek/flipboard?branch=main&root=flipblinky
-  - https://flipc.org/jamisonderek/flipboard?branch=main&root=flipsignal
-  - https://flipc.org/jamisonderek/flipboard?branch=main&root=flipkeyboard
-- Step 2: Click on the underlined text under FIRMWARE and **choose the firmware** that matches what you are running on your Flipper Zero. (Official, Unleashed, RogueMaster, Xtreme)
-- Step 3: Click on the underlined text under CHANNEL and **choose the current channel** you are running on your Flipper Zero.  (Release, Release Candidate, Development)
-- Step 4: **Connect your Flipper Zero** to your computer. Make sure nothing is running on your computer that is using the serial port.  In particular, close qFlipper, close https://lab.flipper.net, and close any CLI tools that communicate with the Flipper Zero.
-- Step 5: Click on the orange **Download button**. The browser should automatically download the file and put it in your web download folder.
-- Step 6: **Install the FAP** onto your Flipper Zero using one of the methods below.
-  - [Using qFlipper](#copying-fap-using-qflipper)
-  - [Using SD Card](#copying-fap-using-sd-card)
-
-### Copying FAP using qFlipper
-
-If you are using a browser that does not support the Web Serial API, you will need to manually copy the FAP file to your Flipper Zero.
-
-![copy FAP using qFlipper](images/qflipper-copy.gif)
-
-- Step 1: Download the FAP file to your computer.
-- Step 2: Connect your Flipper Zero to your computer.
-- Step 3: Launch [qFlipper](https://docs.flipper.net/qflipper) application.
-- Step 4: Click the `Files` tab in qFlipper.
-- Step 5: Navigate to `SD Card/apps/GPIO` folder (or whatever category your FAP is).
-- Step 6: Drag the FAP file from your computer to the qFlipper window.
-
-### Copying FAP using SD Card
-
-If you are using a browser that does not support the Web Serial API, you will need to manually copy the FAP file to your Flipper Zero.
-
-![eject SD card](images/eject-sd.gif)
-
-- Step 1: Download the FAP file to your computer.
-- Step 2: Navigate to `Settings`/`Storage`/`Unmount SD Card`/`Unmount`.
-- Step 3: Eject the SD Card from your Flipper Zero & insert it into your computer.
-
-![copy FAP using SD card](images/copy-sd.gif)
-
-- Step 4: Drag the file into `/apps/GPIO` folder (or whatever category your FAP is).
-- Step 5: Eject the SD Card from your computer & insert it back into your Flipper Zero.
+Currently the RogueMaster firmware has the FlipBoard applications pre-installed.  This is a great option if you want to try out the applications without building them yourself.
 
 ### Building with VSCode (Visual Studio Code) 
 
@@ -143,6 +73,7 @@ Configure VSCode:
   - Step 5a: `View`/`Command Palette`/`Git: Clone (Recursive)`
   - Step 5b: Enter the URL of the firmware you would like to run on your Flipper and choose your `/repos` folder as the target.
     - Official: `https://github.com/flipperdevices/flipperzero-firmware.git`
+    - Momentum: `https://github.com/Next-Flip/Momentum-Firmware.git`
     - Unleashed: `https://github.com/DarkFlippers/unleashed-firmware.git`
     - RogueMaster: `https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git`
     - Xtreme: `https://github.com/Flipper-XFW/Xtreme-Firmware.git`
@@ -178,18 +109,19 @@ Configure VSCode:
   - Step 8a: Copy the folder `flipblinky` from `/repos/flipboard/flipblinky` to `./applications_user/flipblinky`.
   - Step 8b: Copy the folder `flipsignal` from `/repos/flipboard/flipsignal` to `./applications_user/flipsignal`.
   - Step 8c: Copy the folder `flipkeyboard` from `/repos/flipboard/flipkeyboard` to `./applications_user/flipkeyboard`.
+  - Step 8d: Copy the folder `flipsimon` from `/repos/flipboard/simon-tutorial/completed/step-16/flipsimon` to `./applications_user/flipsimon`.
 
 Build and deploy the application:
   - Step 1: Connect your Flipper to the computer.
   - Step 2: In VSCode, make sure the Explorer window is open (`View`/`Explorer`).
   - Step 2: Open the file `./applications_user/flipblinky/app.c` (or whichever application you want to build)
-  - Step 3: Press `Ctrl+Shift+B` to bring up the build options.
+  - Step 3: Press `Ctrl+Shift+B` to bring up the build options (or `Terminal`/`Run Task...`).
   - Step 4: Choose `[Debug] Launch App on Flipper`.
   - Step 5: The application should get built, the FAP installed on the Flipper Zero, and then the application should get launched.
 
 ### Building with FBT
 
-If you prefer a different editor, then using FBT may be a good option.  FBT is a command line tool that can build the firmware and applications.  This is the same tool used by VSCode.
+If you prefer a different editor than VSCode, using FBT may be a good option.  FBT is a command line tool that can build the firmware and applications.  This is the same tool used by VSCode.
 
 Prerequisites:
 - [Install Python](https://www.python.org/downloads/)
@@ -207,13 +139,14 @@ Configure FBT:
   - Step 4b: Change directory to your `/repos` folder.
   - Step 4c: Clone the firmware repository you would like to run on your Flipper.
     - Official: `git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git`
+    - Momentum: `git clone --recursive https://github.com/Next-Flip/Momentum-Firmware.git`
     - Unleashed: `git clone --recursive https://github.com/DarkFlippers/unleashed-firmware.git`
     - RogueMaster: `git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git roguemaster-firmware`
     - Xtreme: `git clone --recursive https://github.com/Flipper-XFW/Xtreme-Firmware.git`
 - Step 5: Deploy the firmware
   - Step 5a: Connect your Flipper to the computer.
   - Step 5b: Open a command prompt.
-  - Step 5c: Change directory to the firmware repository you cloned.
+  - Step 5c: Change directory to the firmware repository you cloned (e.g. `cd Momentum-Firmware`).
   - Step 5d: Run the command `./fbt FORCE=1 flash_usb_full`
 - Step 6: Copy the applications from the flipboard repository to the firmware repository's `application_user` folder.
   - Step 6a: Copy the folder `flipblinky` from `/repos/flipboard/flipblinky` to `./applications_user/flipblinky`.
@@ -226,7 +159,8 @@ Build and deploy the application:
   - Step 3: Change directory to the firmware repository you cloned.
   - Step 4: Run the command `./fbt launch APPSRC=./applications_user/flipblinky/app.c` (or whichever application you want to build)
 
-### Building with UFBT
+### Building with uFBT
+uFBT is a lightweight tool that can quickly build the application.  This method does not work with Unleashed or Xtreme firmware.  You must use FBT or VSCode for those firmwares.
 
 Prerequisites:
 - [Install Python](https://www.python.org/downloads/)
@@ -242,21 +176,22 @@ Prepare environment:
 - Step 4: Install ubft tool.
   - Linux & macOS: `python3 -m pip install --upgrade ufbt`
   - Windows: `py -m pip install --upgrade ufbt`
-- Step 5: Build and deploy the application.
+- Step 5: Set environment to match your firmware.
   - Step 5a: Connect your Flipper to the computer.
   - Step 5b: Open a command prompt.
   - Step 5c: Change directory to the flipboard application. (`cd /repos/flipboard/flipblinky`)
-  - Step 5d: Run the command `ufbt launch`.
-
-## Running the application
-
-![running app](images/running-app.gif)
-
-- Step 1: Make sure you have followed the step to [install the application](#installing-apps).
-- Step 2: On the Flipper Zero, navigate to the `Apps` menu.
-- Step 3: Select the type of application (like GPIO) you want to run.
-- Step 4: Select the application you want to run.
+  - Step 5d: Run the command based on your firmware:
+    - Official: `ufbt update --index-url=https://update.flipperzero.one/firmware/directory.json`
+    - Unleashed: `ufbt update --index-url=https://up.unleashedflip.com/directory.json`
+    - Momentum: `ufbt update --index-url=https://up.momentum-fw.dev/firmware/directory.json`
+- Step 6: Build and deploy the application.
+  - Step 6a: Connect your Flipper to the computer.
+  - Step 6b: Open a command prompt.
+  - Step 6c: Change directory to the flipboard application. (`cd /repos/flipboard/flipblinky`)
+  - Step 6d: Run the command `ufbt launch`.
 
 ## Support
 
-If you have any questions, please contact us on Discord at https://discord.com/invite/NsjCvqwPAd
+If you have need help, we are here for you.  Also, we would love your feedback on cool ideas for future FlipBoard applications!
+
+Please visit my Flipper Zero Discord server [Flipper Zero Tutorials (Unofficial)](https://discord.gg/KTThkQHj5B) and ask your questions in the `#flipboard` or `#general` channel.
