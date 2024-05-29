@@ -69,12 +69,22 @@ void flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_b
 
     ActionModel* action_model = flipboard_model_get_action_model(model, reduced_new_button);
     flipboard_model_set_colors(model, action_model, new_button);
+#ifdef FLIPBOARD_KEYBOARD_SEND_MESSAGES_AFTER_KEYSTROKES
     if(!flipboard_model_send_keystrokes(model, action_model)) {
         //  If keystrokes did not send any messages, then we will send them in order.
         for(int i = 0; i < 4; i++) {
             flipboard_model_send_text(model, action_model, i);
         }
     }
+#else
+    if (action_model_get_keystrokes_count(action_model) > 0) {
+        flipboard_model_send_keystrokes(model, action_model);
+    } else {
+        for(int i = 0; i < 4; i++) {
+            flipboard_model_send_text(model, action_model, i);
+        }
+    }
+#endif    
     flipboard_model_play_tone(model, action_model);
 }
 
