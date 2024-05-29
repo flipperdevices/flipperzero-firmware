@@ -1,3 +1,9 @@
-[submodule "lib/stm32-lsm6dso"]
-	path = lib/stm32-lsm6dso
+[submodule "lib/bmi160-api"]
+	path = lib/bmi160-api
+	url = https://github.com/boschsensortec/BMI160_SensorAPI.git
+[submodule "lib/lsm6dso-api"]
+	path = lib/lsm6dso-api
 	url = https://github.com/STMicroelectronics/stm32-lsm6dso.git
+[submodule "lib/lsm6ds3tr-api"]
+	path = lib/lsm6ds3tr-api
+	url = https://github.com/STMicroelectronics/lsm6ds3tr-c-pid.git

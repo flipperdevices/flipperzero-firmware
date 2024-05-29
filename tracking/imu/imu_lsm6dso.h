@@ -1,7 +1,7 @@
 #ifndef LSM6DSO_H_   /* Include guard */
 #define LSM6DSO_H_
 
-#include "../../lib/stm32-lsm6dso/lsm6dso_reg.h"
+#include "../../lib/lsm6dso-api/lsm6dso_reg.h"
 
 #include <furi_hal.h>
 

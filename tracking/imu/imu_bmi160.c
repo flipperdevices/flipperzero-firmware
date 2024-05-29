@@ -1,4 +1,4 @@
-#include "bmi160.h"
+#include "../../lib/bmi160-api/bmi160.h"
 
 #include <furi_hal.h>
 

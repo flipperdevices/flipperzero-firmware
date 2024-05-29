@@ -1,4 +1,4 @@
-#include "lsm6ds3tr_c_reg.h"
+#include "../../lib/lsm6ds3tr-api/lsm6ds3tr-c_reg.h"
 
 #include <furi_hal.h>
 

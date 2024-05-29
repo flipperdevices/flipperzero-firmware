@@ -27,6 +27,11 @@ Using it is really simple:
 
 See early prototype [in action](https://www.youtube.com/watch?v=DdxAmmsYfMA).
 
+## How?
+
+ * Clone this repository with `git clone --recurse-submodules` to include the driver implementations.
+ * Build the project using `ufbt`
+
 ## Hardware
 
 The custom module is using Bosch BMI160 accelerometer/gyroscope chip connected via I2C.

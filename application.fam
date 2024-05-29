@@ -11,7 +11,20 @@ App(
     sources=["*.c", "*.cc"],
     fap_private_libs=[
         Lib(
-            name="stm32-lsm6dso",
+            name="bmi160-api",
+            cflags=["-Wno-error"],
+            sources=[
+                "bmi160.c",
+                "bmi160.h",
+                "bmi160_defs.h",
+            ],
+        ),
+        Lib(
+            name="lsm6ds3tr-api",
+            cflags=["-Wno-error"],
+        ),
+        Lib(
+            name="lsm6dso-api",
             cflags=["-Wno-error"],
         ),
     ],
