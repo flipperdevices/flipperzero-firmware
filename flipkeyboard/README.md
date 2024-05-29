@@ -52,6 +52,7 @@ The "Message 1-4" option changes the text to send (NOTE: you should also use "Ad
 
 ## Using the app
 <img src="./gallery/06-key-keyboard.png" width="200px">
+<img src="./gallery/06-key-keyboard-ble.png" width="200px">
 
 Make sure your FlipBoard is connected to your Flipper Zero.  Make sure the qFlipper application is NOT running. Choose the `Start application` option to launch the app.  Press the buttons to see the LEDs change color & hear the tones get played. If your computer is connected to your Flipper Zero via USB, you should see keystrokes and Messages get entered on the computer.  If you computer is NOT connected to your Flipper Zero via USB, then BLE will be used to send the keystrokes and Messages to the computer.
 
