@@ -222,10 +222,7 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
             }
         } else { // if not RAW protocol
             FURI_LOG_I(TAG, "Protocol != RAW");
-            bool repeat_exists = flipper_format_key_exist(fff_data_file, "Repeat");
-            if(!repeat_exists) {
-                flipper_format_write_uint32(fff_data_file, "Repeat", &repeat, 1);
-            }
+            flipper_format_insert_or_update_uint32(fff_data_file, "Repeat", &repeat, 1);
             transmitter =
                 subghz_transmitter_alloc_init(environment, furi_string_get_cstr(temp_str));
             if(transmitter == NULL) {
@@ -240,9 +237,6 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
                     is_init_protocol = false;
                 }
             }
-            if(!repeat_exists) {
-                flipper_format_delete_key(fff_data_file, "Repeat");
-            }
         }
 
         if(is_init_protocol) {
@@ -250,7 +244,9 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
         } else {
             subghz_devices_sleep(device);
             subghz_devices_end(device);
-            subghz_transmitter_free(transmitter);
+            if(transmitter != NULL) {
+                subghz_transmitter_free(transmitter);
+            }
         }
     } while(false);
 
