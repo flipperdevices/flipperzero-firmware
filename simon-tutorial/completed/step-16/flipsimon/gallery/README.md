@@ -28,8 +28,6 @@ Make sure your FlipBoard is connected to your Flipper Zero. Choose the "Start ap
 
 ## Support
 
-<img src="./gallery/08-simon-qrcode.png" width="200px">
-
 If you have need help, we are here for you.  Also, we would love your feedback on cool ideas for future FlipBoard applications!
 
 Please visit my Flipper Zero Discord server [Flipper Zero Tutorials (Unofficial)](https://discord.gg/KTThkQHj5B) and ask your questions in the #flipboard or #general channel.
