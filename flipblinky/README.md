@@ -46,7 +46,7 @@ Choose `Configure application` to change the configuration of the app.  The `Dis
 ### Display Source = Assets
 <img src="./gallery/05-blinky-config-assets.png" width="200px">
 
-The Display Source of `Assets` will use the file that is in [assets/nametag.png](./assets/nametag.png).  You can replace this file with your own 128x64 black and white image; but this file is hard-coded into the application, so you will need to recompile the app to use your own Assets image.
+The Display Source of `Assets` will use the file that is in [assets/nametag.png](./assets/nametag.png).  You can replace this file with your own 128x64 black and white image; but this file is hard-coded into the application, so you will need to recompile the app to use your own Assets image.  (See the [Display Source = FXBM](#display-source--fxbm) section for a way to use your own image without recompiling the app).
 
 ### Display Source = FXBM
 <img src="./gallery/04-blinky-config-fxbm.png" width="200px">
@@ -62,7 +62,7 @@ Instructions for generating and copying the `blinky.fxbm` file to the SD card ar
 ### Display Source = Text
 <img src="./gallery/02-blinky-config-text.png" width="200px">
 
-The Display Source of `TEXT` will use the text that is in the `Line 1`-`Line 4` fields.  You can change the text to whatever you want.  Choose the line to edit and click OK to be prompted for the new text.
+The Display Source of `TEXT` will use the text that was set in the `Line 1`-`Line 4` fields.  You can change the text to whatever you want.  Choose the line to edit and click OK to be prompted for the new text.
 
 <img src="./gallery/03-blinky-config-text-line.png" width="200px">
 
