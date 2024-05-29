@@ -97,6 +97,7 @@ If you choose to have a different effect than just scrolling, find `flipboard_do
 
 ## Updates
 
+- Version 3.4 : Common code update
 - Version 3.3 : Common code update
 - Version 3.2 : Save/Load settings
 - Version 3.1 : Added display source and justification configuration

@@ -4,6 +4,7 @@
 #include <extra_profiles/hid_profile.h>
 #include <bt/bt_service/bt.h>
 #include <storage/storage.h>
+#include <dialogs/dialogs.h>
 
 #define TAG "BadUSB HID"
 
@@ -11,7 +12,29 @@
 
 void* hid_usb_init(FuriHalUsbHidConfig* hid_cfg) {
     void* prev = furi_hal_usb_get_config();
-    furi_check(furi_hal_usb_set_config(&usb_hid, hid_cfg));
+    while(!furi_hal_usb_set_config(&usb_hid, hid_cfg)) {
+        furi_hal_vibro_on(true);
+        furi_delay_ms(100);
+        furi_hal_vibro_on(false);
+        furi_delay_ms(100);
+        furi_hal_vibro_on(true);
+        furi_delay_ms(100);
+        furi_hal_vibro_on(false);
+        DialogsApp* dialog_app = furi_record_open(RECORD_DIALOGS);
+        DialogMessage* dialog_message = dialog_message_alloc();
+        dialog_message_set_buttons(dialog_message, NULL, "Retry", NULL);
+        dialog_message_set_header(
+            dialog_message,
+            "USB Init Failure...\n\nBe sure qFlipper is NOT\nrunning!",
+            0,
+            0,
+            AlignLeft,
+            AlignTop);
+        dialog_message_show(dialog_app, dialog_message);
+        dialog_message_free(dialog_message);
+        furi_record_close(RECORD_DIALOGS);
+        furi_delay_ms(500);
+    }
     return prev;
 }
 
