@@ -19,6 +19,6 @@
 ## 3.1
  - Fix bug with second button not working.
 ## 3.0
- - Renamed files AGAIN.  :(   `Flip1.sub`, `Flip2.sub`, `Flip4.sub`, `Flip8.sub` and the IR entries to `Flip1`, `Flip2`, `Flip4`, `Flip8`.
+ - Renamed files AGAIN.  "Flip1.sub", "Flip2.sub", "Flip4.sub", "Flip8.sub" and the IR entries to "Flip1", "Flip2", "Flip4", "Flip8".
 ## 2.0
- - Flipper keyboard doesn't have a dash, so renamed the files to `Flip1.sub`, `Flip2.sub`, `Flip3.sub`, `Flip4.sub` and the IR entries to `Flip1`, `Flip2`, `Flip3`, `Flip4`.
+ - Flipper keyboard doesn't have a dash, so renamed the files to "Flip1.sub", "Flip2.sub", "Flip3.sub", "Flip4.sub" and the IR entries to "Flip1", "Flip2", "Flip3", "Flip4".
