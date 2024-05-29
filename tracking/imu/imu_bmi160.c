@@ -78,3 +78,6 @@ int bmi160_read(double* vec) {
 
     return ACC_DATA_READY | GYR_DATA_READY;
 }
+
+void bmi160_end() {
+}
