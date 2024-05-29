@@ -22,6 +22,8 @@ bool flipboard_view_flip_keyboard_input(InputEvent* event, void* context) {
 void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     FuriString* action_text = furi_string_alloc();
     FlipboardModelRef* my_model = (FlipboardModelRef*)model;
+    FlipboardKeyboard* keyboard = flipboard_model_get_keyboard(my_model->model);
+    FlipboardKeyboardInterface interface = flipboard_keyboard_get_inteface(keyboard);
     ButtonMonitor* bm = flipboard_model_get_button_monitor(my_model->model);
     uint8_t action = 0;
     if(bm != NULL) {
@@ -37,7 +39,13 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     canvas_set_bitmap_mode(canvas, 1);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 6, 12, "FlipKeyboard (USB/BLE)");
+    if(interface == FlipboardKeyboardInterfaceUsb) {
+        canvas_draw_str(canvas, 6, 12, "FlipKeyboard (USB)");
+    } else if(interface == FlipboardKeyboardInterfaceBle) {
+        canvas_draw_str(canvas, 6, 12, "FlipKeyboard (BLE)");
+    } else {
+        canvas_draw_str(canvas, 6, 12, "FlipKeyboard (USB/BLE)");
+    }
 
     canvas_draw_icon(canvas, 5, 19, icon1);
     canvas_draw_icon(canvas, 36, 19, icon2);

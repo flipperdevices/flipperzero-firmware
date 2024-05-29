@@ -66,6 +66,8 @@ Make sure your FlipBoard is connected to your Flipper Zero. Choose the `Start ap
 
 
 ## Updates
+
+- Version 3.10 : Common code update.
 - Version 3.9 : Show "FlipSignal (IR/SUBGHZ)".
 - Version 3.8 : Common code update.
 - Version 3.7 : Common code update.

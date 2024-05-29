@@ -34,13 +34,13 @@ The `Press color` option changes the button color when it’s pressed. If you pi
 
 The `Release color` option changes the button color when it’s not pressed. This option doesn’t work for combo buttons.
 
-The `Music note` option changes the sound to play when the button is pressed. You can pick "Off" if you don’t want any sound.
+The `Music note` option changes the sound to play when the button is pressed. You can pick `Off` if you don’t want any sound.
 
 <img src="./gallery/04-key-config-2.png" width="200px"> <img src="./gallery/04-key-config-3.png" width="200px">
 
-The `Keystroke` option adds a key to press when the button is pressed. You can pick `None` if you don’t want any key to be pressed.  There is also options "Msg1", "Msg2", "Msg3", "Msg4" which will type the message you have set in the "Message 1-4" option.  The option "Delay" will pause for 100ms. The keys "Ctrl", "Shift", "Alt" and "Gui" are modifiers that will stay pressed until the next key.  If you press `Ok` on the Keystroke, you will get a custom keyboard to pick the key. You can press `Back` if you decide to not change the key.
+The `Keystroke` option adds a key to press when the button is pressed. You can pick `None` if you don’t want any key to be pressed.  There is also options `Msg1`, `Msg2`, `Msg3`, `Msg4` which will type the message you have set in the "Message 1-4" option.  The option `Delay` will pause for 100ms. The keys `Ctrl`, `Shift`, `Alt` and `Gui` are modifiers that will stay pressed until the next key.  If you press `Ok` on the Keystroke, you will get a custom keyboard to pick the key. You can press `Back` if you decide to not change the key.
 
-NOTE: For this application, not all keys are on the on-screen keyboard; you may need to use "left" and "right" buttons on the "Keystroke" option to access some keys options.
+NOTE: For this application, not all keys are on the on-screen keyboard; you may need to use the Flipper Zero's `Left` and `Right` buttons on the "Keystroke" option to access some keys options.
 
 NOTE: You can remove a Keystroke by selecting `None` as the key.  Currently this change only takes effect after you quit the application and restart it.  In a future version, this will take effect when you go to the application main menu.
 
@@ -48,7 +48,7 @@ The `Count` is how many times to press the key (or repeat the delay).
 
 <img src="./gallery/05-key-config-4.png" width="200px">
 
-The "Message 1-4" option changes the text to send (NOTE: you should also use "Add Keystroke" and choose "Msg1"-"Msg4" to send the message). If you want to erase a message, replace the message with a Space then press save.
+The "Message 1-4" option changes the text to send (NOTE: you should also use "Add Keystroke" and choose `Msg1`-`Msg4` to send the message). If you want to erase a message, replace the message with a Space then press save.
 
 ## Using the app
 <img src="./gallery/06-key-keyboard.png" width="200px">
@@ -79,6 +79,7 @@ To pair a BLE device, run the `FlipKeyboard` application on the Flipper Zero.  M
 
 ## Updates
 
+- Version 3.6 : Show "BLE" or "USB".
 - Version 3.5 : Show FlipKeyboard title when app is running.
 - Version 3.4 : Don't send MSG1-4 if Keystroke is set to any key.
 - Version 3.3 : Add support for BLE.

@@ -8,6 +8,7 @@
  */
 FlipboardKeyboard* flipboard_keyboard_alloc() {
     FlipboardKeyboard* keyboard = malloc(sizeof(FlipboardKeyboard));
+    keyboard->interface = FlipboardKeyboardInterfaceUnknown;
     keyboard->use_ble = false;
     keyboard->hid = bad_usb_hid_get_interface(
         keyboard->use_ble ? BadUsbHidInterfaceBle : BadUsbHidInterfaceUsb);
@@ -33,6 +34,7 @@ void flipboard_keyboard_free(FlipboardKeyboard* keyboard) {
  * @param keyboard The keyboard to attach.
  */
 void flipboard_keyboard_attach(FlipboardKeyboard* keyboard) {
+    keyboard->interface = FlipboardKeyboardInterfaceUnknown;
     keyboard->use_ble = false;
     keyboard->hid = bad_usb_hid_get_interface(BadUsbHidInterfaceUsb);
     keyboard->instance = keyboard->hid->init(NULL);
@@ -43,12 +45,14 @@ void flipboard_keyboard_attach(FlipboardKeyboard* keyboard) {
 
     if(keyboard->hid->is_connected(keyboard->instance)) {
         FURI_LOG_I("Keyboard", "Keyboard attached");
+        keyboard->interface = FlipboardKeyboardInterfaceUsb;
     } else {
         keyboard->hid->deinit(keyboard->instance);
         FURI_LOG_W("Keyboard", "Keyboard not attached, using BLE instead.");
         keyboard->use_ble = true;
         keyboard->hid = bad_usb_hid_get_interface(BadUsbHidInterfaceBle);
         keyboard->instance = keyboard->hid->init(NULL);
+        keyboard->interface = FlipboardKeyboardInterfaceBle;
     }
 }
 
@@ -166,4 +170,13 @@ void flipboard_keyboard_send_keycodes(
     }
 
     flipboard_keyboard_release_all(keyboard);
+}
+
+/**
+ * @brief Gets the interface the keyboard is using.
+ * @param keyboard The keyboard to send the key codes with.
+ * @return The interface the keyboard is using.
+ */
+FlipboardKeyboardInterface flipboard_keyboard_get_inteface(FlipboardKeyboard* keyboard) {
+    return keyboard->interface;
 }
