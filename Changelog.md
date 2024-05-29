@@ -1,3 +1,10 @@
+## Version 1.9 - 29/05/2024
+
+- Correctly display the bytes at the left-hand side of the serial traffic screen in the passthrough view
+- Free the UART receive stream buffer in the main thread rather than in the receive thread
+- Added code to turn on the +5V pin as well as the PC1 pin when the app is running - currently compiled out
+- Minor corrections
+
 ## Version 1.8 - 08/05/2024
 
 - Added serial traffic monitor in the USB serial passthrough view
