@@ -1,7 +1,5 @@
-# Changelog
+Changelog:
 
-## [1.0.0] - 2024-05-29
-
-### Added
+v1.0 - 2024-05-29:
 - Initial release of Simultaneous UHF RFID Flipper Zero App.
 
