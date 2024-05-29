@@ -22,7 +22,7 @@ You can order your FlipBoard from [@MakeItHackin](https://www.youtube.com/makeit
 <img src="./gallery/07-key-splash.png" width="200px">
 <img src="./gallery/01-key-main-menu.png" width="200px">
 
-Make sure your FlipBoard is connected to your Flipper Zero.  On your Flipper Zero, press the `Ok` button.  Scroll down to `Apps` and click the `Ok` button.  Select the `GPIO` folder.  Select the `Flipboard` folder. Select the `FlipBoard Keyboard` application. You should see startup splash screen for a few seconds reminding you to connect the FlipBoard and then the FlipBoard LEDs will do their start-up sequence.
+Make sure your FlipBoard is connected to your Flipper Zero.  On your Flipper Zero, press the `Ok` button.  Scroll down to `Apps` and click the `Ok` button.  Select the `GPIO` folder.  Select the `FlipBoard Keyboard` application. You should see startup splash screen for a few seconds reminding you to connect the FlipBoard and then the FlipBoard LEDs will do their start-up sequence.
 
 ## Configuration
 
