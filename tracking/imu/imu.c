@@ -1,12 +1,5 @@
 #include "imu.h"
 
-bool bmi160_begin();
-int bmi160_read(double* vec);
-
-bool lsm6ds3trc_begin();
-void lsm6ds3trc_end();
-int lsm6ds3trc_read(double* vec);
-
 bool imu_begin() {
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
     bool ret = lsm6dso_begin(); // lsm6ds3trc_begin();
@@ -25,4 +18,14 @@ int imu_read(double* vec) {
     int ret = lsm6dso_read(vec); // lsm6ds3trc_read(vec);
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
     return ret;
+}
+
+void imu_scan_i2c() {
+    unsigned int address;
+    unsigned int *found;
+    for(address = 1; address < 0xff; address++) {
+        if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, address, 50)) {
+            FURI_LOG_E(IMU_TAG, "<<<<<<<found Device>>>>>>> ID 0x%X", address);
+        }
+    }
 }

@@ -1,12 +1,4 @@
-#include "../../lib/bmi160-api/bmi160.h"
-
-#include <furi_hal.h>
-
-#include "imu.h"
-
-#define TAG "BMI160"
-
-#define BMI160_DEV_ADDR (0x69 << 1)
+#include "imu_bmi160.h"
 
 static const double DEG_TO_RAD = 0.017453292519943295769236907684886;
 static const double G = 9.81;
@@ -28,14 +20,14 @@ int8_t bmi160_read_i2c(uint8_t dev_addr, uint8_t reg_addr, uint8_t* read_data, u
 }
 
 bool bmi160_begin() {
-    FURI_LOG_I(TAG, "Init BMI160");
+    FURI_LOG_I(BMI160_TAG, "Init BMI160");
 
     if(!furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, BMI160_DEV_ADDR, 50)) {
-        FURI_LOG_E(TAG, "Device not ready!");
+        FURI_LOG_E(BMI160_TAG, "Device not ready!");
         return false;
     }
 
-    FURI_LOG_I(TAG, "Device ready!");
+    FURI_LOG_I(BMI160_TAG, "Device ready!");
 
     bmi160dev.id = BMI160_DEV_ADDR;
     bmi160dev.intf = BMI160_I2C_INTF;
@@ -44,8 +36,8 @@ bool bmi160_begin() {
     bmi160dev.delay_ms = furi_delay_ms;
 
     if(bmi160_init(&bmi160dev) != BMI160_OK) {
-        FURI_LOG_E(TAG, "Initialization failure!");
-        FURI_LOG_E(TAG, "Chip ID 0x%X", bmi160dev.chip_id);
+        FURI_LOG_E(BMI160_TAG, "Initialization failure!");
+        FURI_LOG_E(BMI160_TAG, "Chip ID 0x%X", bmi160dev.chip_id);
         return false;
     }
 
@@ -59,13 +51,13 @@ bool bmi160_begin() {
     bmi160dev.gyro_cfg.power = BMI160_GYRO_NORMAL_MODE;
 
     if(bmi160_set_sens_conf(&bmi160dev) != BMI160_OK) {
-        FURI_LOG_E(TAG, "Initialization failure!");
-        FURI_LOG_E(TAG, "Chip ID 0x%X", bmi160dev.chip_id);
+        FURI_LOG_E(BMI160_TAG, "Initialization failure!");
+        FURI_LOG_E(BMI160_TAG, "Chip ID 0x%X", bmi160dev.chip_id);
         return false;
     }
 
-    FURI_LOG_I(TAG, "Initialization success!");
-    FURI_LOG_I(TAG, "Chip ID 0x%X", bmi160dev.chip_id);
+    FURI_LOG_I(BMI160_TAG, "Initialization success!");
+    FURI_LOG_I(BMI160_TAG, "Chip ID 0x%X", bmi160dev.chip_id);
 
     return true;
 }

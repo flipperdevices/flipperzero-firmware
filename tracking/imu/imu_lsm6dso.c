@@ -14,17 +14,6 @@ int32_t lsm6dso_read_i2c(void* handle, uint8_t reg_addr, uint8_t* read_data, uin
     return -2;
 }
 
-void lsm6dso_scan_i2c() {
-    unsigned int address;
-    for(address = 1; address < 0xff; address++) {
-        if(!furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, address, 50)) {
-                FURI_LOG_E(LSM6DSO_TAG, "No answer on ID 0x%X", address);
-        } else {
-            FURI_LOG_E(LSM6DSO_TAG, "<<<<<<<found Device>>>>>>> ID 0x%X", address);
-        }
-    }
-}
-
 bool lsm6dso_begin() {
     FURI_LOG_I(LSM6DSO_TAG, "Init LSM6DSOTR-C");
 

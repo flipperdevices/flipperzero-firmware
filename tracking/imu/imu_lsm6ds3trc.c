@@ -1,14 +1,6 @@
-#include "../../lib/lsm6ds3tr-api/lsm6ds3tr-c_reg.h"
+#include "imu_lsm6ds3trc.h"
 
-#include <furi_hal.h>
-
-#include "imu.h"
-
-#define TAG "LSM6DS3TR-C"
-
-#define LSM6DS3_ADDRESS (0x6A << 1)
-
-static const double DEG_TO_RAD = 0.017453292519943295769236907684886;
+static const double LSM6DS3_DEG_TO_RAD = 0.017453292519943295769236907684886;
 
 stmdev_ctx_t lsm6ds3trc_ctx;
 
@@ -24,10 +16,10 @@ int32_t lsm6ds3trc_read_i2c(void* handle, uint8_t reg_addr, uint8_t* read_data, 
 }
 
 bool lsm6ds3trc_begin() {
-    FURI_LOG_I(TAG, "Init LSM6DS3TR-C");
+    FURI_LOG_I(LSM6DS3_TAG, "Init LSM6DS3TR-C");
 
     if(!furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, LSM6DS3_ADDRESS, 50)) {
-        FURI_LOG_E(TAG, "Not ready");
+        FURI_LOG_E(LSM6DS3_TAG, "Not ready");
         return false;
     }
 
@@ -39,7 +31,7 @@ bool lsm6ds3trc_begin() {
     uint8_t whoami;
     lsm6ds3tr_c_device_id_get(&lsm6ds3trc_ctx, &whoami);
     if(whoami != LSM6DS3TR_C_ID) {
-        FURI_LOG_I(TAG, "Unknown model: %x", (int)whoami);
+        FURI_LOG_I(LSM6DS3_TAG, "Unknown model: %x", (int)whoami);
         return false;
     }
 
@@ -59,7 +51,7 @@ bool lsm6ds3trc_begin() {
     lsm6ds3tr_c_gy_power_mode_set(&lsm6ds3trc_ctx, LSM6DS3TR_C_GY_HIGH_PERFORMANCE);
     lsm6ds3tr_c_gy_band_pass_set(&lsm6ds3trc_ctx, LSM6DS3TR_C_LP2_ONLY);
 
-    FURI_LOG_I(TAG, "Init OK");
+    FURI_LOG_I(LSM6DS3_TAG, "Init OK");
     return true;
 }
 
@@ -84,9 +76,9 @@ int lsm6ds3trc_read(double* vec) {
 
     if(reg.status_reg.gda) {
         lsm6ds3tr_c_angular_rate_raw_get(&lsm6ds3trc_ctx, data);
-        vec[5] = (double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[0]) * DEG_TO_RAD / 1000;
-        vec[3] = (double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[1]) * DEG_TO_RAD / 1000;
-        vec[4] = (double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[2]) * DEG_TO_RAD / 1000;
+        vec[5] = (double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[0]) * LSM6DS3_DEG_TO_RAD / 1000;
+        vec[3] = (double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[1]) * LSM6DS3_DEG_TO_RAD / 1000;
+        vec[4] = (double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[2]) * LSM6DS3_DEG_TO_RAD / 1000;
         ret |= GYR_DATA_READY;
     }
 

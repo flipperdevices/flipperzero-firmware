@@ -1,5 +1,5 @@
-#ifndef LSM6DSO_H_   /* Include guard */
-#define LSM6DSO_H_
+#ifndef IMU_LSM6DSO_H   /* Include guard */
+#define IMU_LSM6DSO_H
 
 #include "../../lib/lsm6dso-api/lsm6dso_reg.h"
 
@@ -17,7 +17,6 @@ int32_t lsm6dso_write_i2c(void* handle, uint8_t reg_addr, uint8_t* data, uint16_
 int32_t lsm6dso_read_i2c(void* handle, uint8_t reg_addr, uint8_t* read_data, uint16_t len);
 
 bool lsm6dso_begin();
-void lsm6dso_scan_i2c();
 void lsm6dso_end();
 int lsm6dso_read(double* vec);
 
