@@ -78,6 +78,7 @@ To pair a BLE device, run the `FlipKeyboard` application on the Flipper Zero.  M
 
 ## Updates
 
+- Version 3.5 : Show FlipKeyboard title when app is running.
 - Version 3.4 : Don't send MSG1-4 if Keystroke is set to any key.
 - Version 3.3 : Add support for BLE.
 - Version 2.6 : Default configuration on first load.

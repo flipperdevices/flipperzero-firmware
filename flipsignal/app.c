@@ -37,7 +37,7 @@ static void flipboard_view_flip_signal_draw(Canvas* canvas, void* model) {
 
     canvas_set_bitmap_mode(canvas, 1);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 21, 12, "PRESS BUTTONS");
+    canvas_draw_str(canvas, 6, 12, "FlipSignal (IR/SUBGHZ)");
     canvas_draw_icon(canvas, 5, 19, icon1);
     canvas_draw_icon(canvas, 36, 19, icon2);
     canvas_draw_icon(canvas, 67, 19, icon3);

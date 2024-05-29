@@ -10,7 +10,7 @@ App(
     requires=["gui"],
     fap_libs=["ble_profile"],
     order=10,
-    fap_version=(3, 4),
+    fap_version=(3, 5),
     fap_icon="flipkeyboard.png",
     fap_category="GPIO/FlipBoard",
     fap_icon_assets="assets",

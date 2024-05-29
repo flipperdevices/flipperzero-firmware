@@ -37,7 +37,7 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     canvas_set_bitmap_mode(canvas, 1);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 21, 12, "PRESS BUTTONS");
+    canvas_draw_str(canvas, 6, 12, "FlipKeyboard (USB/BLE)");
 
     canvas_draw_icon(canvas, 5, 19, icon1);
     canvas_draw_icon(canvas, 36, 19, icon2);
@@ -77,14 +77,14 @@ void flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_b
         }
     }
 #else
-    if (action_model_get_keystrokes_count(action_model) > 0) {
+    if(action_model_get_keystrokes_count(action_model) > 0) {
         flipboard_model_send_keystrokes(model, action_model);
     } else {
         for(int i = 0; i < 4; i++) {
             flipboard_model_send_text(model, action_model, i);
         }
     }
-#endif    
+#endif
     flipboard_model_play_tone(model, action_model);
 }
 
