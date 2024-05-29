@@ -24,12 +24,12 @@ The FlipBlinky application turns your Flipper Zero + FlipBoard into a blinky bad
 ## Running the app
 
 <img src="./gallery/00-blinky-splash.png" width="200px">
+<img src="./gallery/01-blinky-main-menu.png" width="200px">
 
 Make sure your FlipBoard is connected to your Flipper Zero.  On your Flipper Zero, press the `Ok` button.  Scroll down to `Apps` and click the `Ok` button.  Select the `GPIO` folder.  Select the `Flipboard` folder. Select the `FlipBoard Blinky` application. You should see startup splash screen for a few seconds reminding you to connect the FlipBoard and then the FlipBoard LEDs will do their start-up sequence.
 
 ## Using the app
-
-<img src="./gallery/01-blinky-main-menu.png" width="200px">
+<img src="./gallery/07-blinky-nametag.png" width="200px">
 
 Make sure your FlipBoard is connected to your Flipper Zero.  Choose the `Start application` option to launch the app.  You should see the FlipBoard LEDs light up and start animating.
 

@@ -17,7 +17,7 @@ The FlipKeyboard application turns your Flipper Zero and FlipBoard into a MacroP
 - [Support](#support)
 
 ## Running the app
-
+<img src="./gallery/07-key-splash.png" width="200px">
 <img src="./gallery/01-key-main-menu.png" width="200px">
 
 Make sure your FlipBoard is connected to your Flipper Zero.  On your Flipper Zero, press the `Ok` button.  Scroll down to `Apps` and click the `Ok` button.  Select the `GPIO` folder.  Select the `Flipboard` folder. Select the `FlipBoard Keyboard` application. You should see startup splash screen for a few seconds reminding you to connect the FlipBoard and then the FlipBoard LEDs will do their start-up sequence.
@@ -26,7 +26,7 @@ Make sure your FlipBoard is connected to your Flipper Zero.  On your Flipper Zer
 
 <img src="./gallery/02-key-config-action.png" width="200px">
 
-Go to `Configurate application` in the app menu to setup how each action works. You’ll see all of the different button combos listed (for example "Action 3" is pressing button 1 and button 2 at the same time). Press `Ok` to select the Action to configure.
+Go to `Configure application` in the app menu to setup how each action works. You’ll see all of the different button combos listed (for example "Action 3" is pressing button 1 and button 2 at the same time). Press `Ok` to select the Action to configure.
 
 <img src="./gallery/03-key-config-1.png" width="200px">
 
@@ -51,6 +51,7 @@ The `Count` is how many times to press the key (or repeat the delay).
 The "Message 1-4" option changes the text to send (NOTE: you should also use "Add Keystroke" and choose "Msg1"-"Msg4" to send the message). If you want to erase a message, replace the message with a Space then press save.
 
 ## Using the app
+<img src="./gallery/06-key-keyboard.png" width="200px">
 
 Make sure your FlipBoard is connected to your Flipper Zero.  Make sure the qFlipper application is NOT running. Choose the `Start application` option to launch the app.  Press the buttons to see the LEDs change color & hear the tones get played. If your computer is connected to your Flipper Zero via USB, you should see keystrokes and Messages get entered on the computer.  If you computer is NOT connected to your Flipper Zero via USB, then BLE will be used to send the keystrokes and Messages to the computer.
 
