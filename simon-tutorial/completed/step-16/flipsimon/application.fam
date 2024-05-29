@@ -12,7 +12,7 @@ App(
     order=10,
     fap_version=(1, 9),
     fap_icon="flipsimon.png",
-    fap_category="GPIO/FlipBoard",
+    fap_category="GPIO",
     fap_description="Simon memory game for the FlipBoard.",
     fap_icon_assets="assets",
     fap_author="codeallnight",
