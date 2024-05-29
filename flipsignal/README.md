@@ -7,6 +7,9 @@ The FlipSignal application turns your Flipper Zero and FlipBoard into an Infrare
 
 The application sends a Sub-GHz signal (RAW or Protocol) and then it sends any IR signals.  Configuration of signals is done by saving files using a specific file name.
 
+
+You can order your FlipBoard from [@MakeItHackin](https://www.youtube.com/makeithackin) using [tindie](https://www.tindie.com/products/32844/) or [Etsy](https://www.etsy.com/listing/1601295558/).  Be sure to also join our [Discord server](https://discord.gg/KTThkQHj5B).
+
 - [Running the app](#running-the-app)
 - [Configuration](#configuration)
   - [Action configuration](#action-configuration)

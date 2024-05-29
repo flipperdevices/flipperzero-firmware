@@ -6,6 +6,8 @@
 
 The FlipKeyboard application turns your Flipper Zero and FlipBoard into a MacroPad Keyboard.  It also becomes a musical light-up keyboard that you can use to play songs. It supports both USB *and* BLE connections. Automate repetitive typing tasks with the press a button on the FlipBoard! The application is written in C and uses the FlipBoard common code for the majority of the functionality.
 
+You can order your FlipBoard from [@MakeItHackin](https://www.youtube.com/makeithackin) using [tindie](https://www.tindie.com/products/32844/) or [Etsy](https://www.etsy.com/listing/1601295558/).  Be sure to also join our [Discord server](https://discord.gg/KTThkQHj5B).
+
 - [Running the app](#running-the-app)
 - [Configuration](#configuration)
 - [Using the app](#using-the-app)

@@ -6,6 +6,8 @@
 
 The FlipBlinky application turns your Flipper Zero + FlipBoard into a blinky badge for wearing at conferences.  The application is written in C and uses the FlipBoard common code for the majority of the functionality.
 
+You can order your FlipBoard from [@MakeItHackin](https://www.youtube.com/makeithackin) using [tindie](https://www.tindie.com/products/32844/) or [Etsy](https://www.etsy.com/listing/1601295558/).  Be sure to also join our [Discord server](https://discord.gg/KTThkQHj5B).
+
 - [Running the app](#running-the-app)
 - [Using the app](#using-the-app)
 - [Configuration](#configuration)

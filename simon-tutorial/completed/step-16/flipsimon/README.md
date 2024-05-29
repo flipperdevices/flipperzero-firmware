@@ -5,6 +5,8 @@
 
 The FlipSimon application turns your Flipper Zero and FlipBoard into a memory game.  FlipSimon was originally written as a [step-by-step tutorial](../../README.md) to teach C, Flipper Zero Code, and FlipBoard common code - so you can create your own applications.  Based on community feedback, this version of the application was improved to make the application similar to the other released FlipBoard applications.
 
+You can order your FlipBoard from [@MakeItHackin](https://www.youtube.com/makeithackin) using [tindie](https://www.tindie.com/products/32844/) or [Etsy](https://www.etsy.com/listing/1601295558/).  Be sure to also join our [Discord server](https://discord.gg/KTThkQHj5B).
+
 - [Running the app](#running-the-app)
 - [Configuration](#configuration)
   - [Action configuration](#action-configuration)
