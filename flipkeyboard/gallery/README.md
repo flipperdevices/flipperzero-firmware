@@ -42,7 +42,7 @@ You must first enable BLE on your Flipper Zero, make sure no applications are ru
 
 The FlipKeyboard application supports BLE (Bluetooth Low Energy) connections.  This option will be selected when you choose 'Start application' and don't have a USB cable connected.
 
-To pair a BLE device, run the 'FlipKeyboard' application on the Flipper Zero.  Make sure the USB cable is NOT plugged in, then choose 'Start application'.  On your device (phone, computer, etc.) choose Bluetooth pairing.  The device should show up as 'BadUSB <flipper name>'.  On your Flipper confirm the pairing code is correct and click 'Ok', then click confirm on your device.  The device should now be paired.
+To pair a BLE device, run the 'FlipKeyboard' application on the Flipper Zero.  Make sure the USB cable is NOT plugged in, then choose 'Start application'.  On your device (phone, computer, etc.) choose Bluetooth pairing.  The device should show up as 'BadUSB {flipper name}'.  On your Flipper confirm the pairing code is correct and click 'Ok', then click confirm on your device.  The device should now be paired.
 
 ## Support
 
