@@ -1,6 +1,6 @@
 App(
-    appid="simultaneous-rfid-reader",
-    name="[UHF] Simultaneous RFID Reader",
+    appid="simultaneous_rfid_reader",
+    name="[GPIO] Simultaneous UHF RFID Reader",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="main_uhf_reader_app",
     stack_size=22 * 1024,
