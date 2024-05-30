@@ -537,8 +537,8 @@ MU_TEST(felica_read) {
     FelicaData* felica_data = felica_alloc();
     FelicaError error = felica_do_request_response(felica_data, NULL);
     mu_assert(error == FelicaErrorNone, "felica_poller() failed");
-    mu_assert(felica_data->data.fs.spad[1].SF1 == 0x01, "block[1].SF1 != 0x01");
-    mu_assert(felica_data->data.fs.spad[1].SF2 == 0xB1, "block[1].SF2 != 0xB1");
+    mu_assert(felica_data->data.fs.spad[4].SF1 == 0x01, "block[4].SF1 != 0x01");
+    mu_assert(felica_data->data.fs.spad[4].SF2 == 0xB1, "block[4].SF2 != 0xB1");
 
     felica_free(felica_data);
 }
@@ -550,8 +550,8 @@ MU_TEST(felica_read_auth) {
 
     FelicaError error = felica_do_request_response(felica_data, &card_key);
     mu_assert(error == FelicaErrorNone, "felica_poller() failed");
-    mu_assert(felica_data->data.fs.spad[1].SF1 == 0x00, "block[1].SF1 != 0x00");
-    mu_assert(felica_data->data.fs.spad[1].SF2 == 0x00, "block[1].SF2 != 0x00");
+    mu_assert(felica_data->data.fs.spad[4].SF1 == 0x00, "block[4].SF1 != 0x00");
+    mu_assert(felica_data->data.fs.spad[4].SF2 == 0x00, "block[4].SF2 != 0x00");
 
     felica_free(felica_data);
 }
