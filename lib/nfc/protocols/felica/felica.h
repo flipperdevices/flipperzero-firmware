@@ -190,11 +190,6 @@ typedef struct {
 } FelicaPollerReadCommandResponse;
 
 typedef struct {
-    /*   uint8_t length;
-    uint8_t response_code;
-    FelicaIDm idm;
-    uint8_t SF1;
-    uint8_t SF2; */
     FelicaCommandResponseHeader header;
     uint8_t block_count;
     uint8_t data[];
@@ -203,13 +198,6 @@ typedef struct {
 typedef FelicaCommandResponseHeader FelicaListenerWriteCommandResponse;
 
 typedef FelicaCommandResponseHeader FelicaPollerWriteCommandResponse;
-/* typedef struct {
-    uint8_t length;
-    uint8_t response_code;
-    FelicaIDm idm;
-    uint8_t SF1;
-    uint8_t SF2;
-} FelicaPollerWriteCommandResponse; */
 
 extern const NfcDeviceBase nfc_device_felica;
 
