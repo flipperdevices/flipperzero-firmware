@@ -1,17 +1,4 @@
-#include "kernel.h"
-#include "message_queue.h"
-#include "check.h"
-
-#include <FreeRTOS.h>
-#include <queue.h>
-
-struct FuriMessageQueue {
-    // !!! Semi-Opaque type inheritance, Very Fragile, DO NOT MOVE !!!
-    StaticQueue_t container;
-
-    // !!! Data buffer, must be last in the structure, DO NOT MOVE !!!
-    uint8_t buffer[];
-};
+#include "message_queue_i.h"
 
 FuriMessageQueue* furi_message_queue_alloc(uint32_t msg_count, uint32_t msg_size) {
     furi_check((furi_kernel_is_irq_or_masked() == 0U) && (msg_count > 0U) && (msg_size > 0U));
@@ -34,6 +21,10 @@ FuriMessageQueue* furi_message_queue_alloc(uint32_t msg_count, uint32_t msg_size
 void furi_message_queue_free(FuriMessageQueue* instance) {
     furi_check(furi_kernel_is_irq_or_masked() == 0U);
     furi_check(instance);
+
+    // Epoll must be disconnected
+    furi_check(!instance->epoll_item_in);
+    furi_check(!instance->epoll_item_out);
 
     vQueueDelete((QueueHandle_t)instance);
     free(instance);
@@ -75,6 +66,15 @@ FuriStatus
         }
     }
 
+    if(stat == FuriStatusOk) {
+        FURI_CRITICAL_ENTER();
+        if(instance->epoll_item_in) {
+            furi_epoll_item_notify(
+                instance->epoll_item_in, FuriEpollItemTypeMessageQueue, FuriEpollEventIn);
+        }
+        FURI_CRITICAL_EXIT();
+    }
+
     /* Return execution status */
     return (stat);
 }
@@ -112,6 +112,15 @@ FuriStatus furi_message_queue_get(FuriMessageQueue* instance, void* msg_ptr, uin
                 }
             }
         }
+    }
+
+    if(stat == FuriStatusOk) {
+        FURI_CRITICAL_ENTER();
+        if(instance->epoll_item_out) {
+            furi_epoll_item_notify(
+                instance->epoll_item_out, FuriEpollItemTypeMessageQueue, FuriEpollEventOut);
+        }
+        FURI_CRITICAL_EXIT();
     }
 
     return (stat);
@@ -191,6 +200,38 @@ FuriStatus furi_message_queue_reset(FuriMessageQueue* instance) {
         (void)xQueueReset(hQueue);
     }
 
+    if(stat == FuriStatusOk) {
+        FURI_CRITICAL_ENTER();
+        if(instance->epoll_item_out) {
+            furi_epoll_item_notify(
+                instance->epoll_item_out, FuriEpollItemTypeMessageQueue, FuriEpollEventOut);
+        }
+        FURI_CRITICAL_EXIT();
+    }
+
     /* Return execution status */
     return (stat);
+}
+
+void furi_message_queue_epoll_in_set(
+    FuriMessageQueue* instance,
+    FuriEpollItem* epoll_item,
+    FuriEpollEvent event) {
+    furi_check(instance);
+    furi_check(!furi_kernel_is_irq_or_masked());
+
+    FURI_CRITICAL_ENTER();
+
+    if(event == FuriEpollEventIn) {
+        furi_check(epoll_item ? instance->epoll_item_in == NULL : instance->epoll_item_in != NULL);
+        instance->epoll_item_in = epoll_item;
+    } else if(event == FuriEpollEventOut) {
+        furi_check(
+            epoll_item ? instance->epoll_item_out == NULL : instance->epoll_item_out != NULL);
+        instance->epoll_item_out = epoll_item;
+    } else {
+        furi_crash();
+    }
+
+    FURI_CRITICAL_EXIT();
 }

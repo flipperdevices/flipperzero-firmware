@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,62.3,,
+Version,+,62.4,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1092,6 +1092,13 @@ Function,+,furi_delay_ms,void,uint32_t
 Function,+,furi_delay_tick,void,uint32_t
 Function,+,furi_delay_until_tick,FuriStatus,uint32_t
 Function,+,furi_delay_us,void,uint32_t
+Function,+,furi_epoll_alloc,FuriEpoll*,
+Function,+,furi_epoll_free,void,FuriEpoll*
+Function,+,furi_epoll_message_queue_add,void,"FuriEpoll*, FuriMessageQueue*, FuriEpollEvent, FuriEpollMessageQueueCallback, void*"
+Function,+,furi_epoll_message_queue_remove,void,"FuriEpoll*, FuriMessageQueue*"
+Function,+,furi_epoll_poll,void,FuriEpoll*
+Function,+,furi_epoll_stop,void,FuriEpoll*
+Function,+,furi_epoll_tick_set,void,"FuriEpoll*, uint32_t, FuriEpollTickCallback, void*"
 Function,+,furi_event_flag_alloc,FuriEventFlag*,
 Function,+,furi_event_flag_clear,uint32_t,"FuriEventFlag*, uint32_t"
 Function,+,furi_event_flag_free,void,FuriEventFlag*

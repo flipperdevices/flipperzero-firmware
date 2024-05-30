@@ -29,8 +29,16 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
     // Free ViewPort
     view_port_free(view_dispatcher->view_port);
     // Free internal queue
-    if(view_dispatcher->queue) {
-        furi_message_queue_free(view_dispatcher->queue);
+    if(view_dispatcher->input_queue) {
+        furi_epoll_message_queue_remove(view_dispatcher->epoll, view_dispatcher->input_queue);
+        furi_message_queue_free(view_dispatcher->input_queue);
+    }
+    if(view_dispatcher->event_queue) {
+        furi_epoll_message_queue_remove(view_dispatcher->epoll, view_dispatcher->event_queue);
+        furi_message_queue_free(view_dispatcher->event_queue);
+    }
+    if(view_dispatcher->epoll) {
+        furi_epoll_free(view_dispatcher->epoll);
     }
     // Free dispatcher
     free(view_dispatcher);
@@ -38,8 +46,25 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
 
 void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->queue == NULL);
-    view_dispatcher->queue = furi_message_queue_alloc(16, sizeof(ViewDispatcherMessage));
+    furi_check(view_dispatcher->epoll == NULL);
+
+    view_dispatcher->epoll = furi_epoll_alloc();
+
+    view_dispatcher->input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
+    furi_epoll_message_queue_add(
+        view_dispatcher->epoll,
+        view_dispatcher->input_queue,
+        FuriEpollEventIn,
+        view_dispatcher_run_input_callback,
+        view_dispatcher);
+
+    view_dispatcher->event_queue = furi_message_queue_alloc(8, sizeof(ViewDispatcherMessage));
+    furi_epoll_message_queue_add(
+        view_dispatcher->epoll,
+        view_dispatcher->event_queue,
+        FuriEpollEventIn,
+        view_dispatcher_run_event_callback,
+        view_dispatcher);
 }
 
 void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context) {
@@ -72,46 +97,37 @@ void view_dispatcher_set_tick_event_callback(
 
 void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->queue);
+    furi_check(view_dispatcher->epoll);
 
     uint32_t tick_period = view_dispatcher->tick_period == 0 ? FuriWaitForever :
                                                                view_dispatcher->tick_period;
-    ViewDispatcherMessage message;
-    while(1) {
-        if(furi_message_queue_get(view_dispatcher->queue, &message, tick_period) != FuriStatusOk) {
-            view_dispatcher_handle_tick_event(view_dispatcher);
-            continue;
-        }
-        if(message.type == ViewDispatcherMessageTypeStop) {
-            break;
-        } else if(message.type == ViewDispatcherMessageTypeInput) {
-            view_dispatcher_handle_input(view_dispatcher, &message.input);
-        } else if(message.type == ViewDispatcherMessageTypeCustomEvent) {
-            view_dispatcher_handle_custom_event(view_dispatcher, message.custom_event);
-        }
-    }
+
+    furi_epoll_tick_set(
+        view_dispatcher->epoll, tick_period, view_dispatcher_handle_tick_event, view_dispatcher);
+
+    furi_epoll_poll(view_dispatcher->epoll);
 
     // Wait till all input events delivered
+    InputEvent input;
     while(view_dispatcher->ongoing_input) {
-        furi_message_queue_get(view_dispatcher->queue, &message, FuriWaitForever);
-        if(message.type == ViewDispatcherMessageTypeInput) {
-            uint8_t key_bit = (1 << message.input.key);
-            if(message.input.type == InputTypePress) {
-                view_dispatcher->ongoing_input |= key_bit;
-            } else if(message.input.type == InputTypeRelease) {
-                view_dispatcher->ongoing_input &= ~key_bit;
-            }
+        furi_message_queue_get(view_dispatcher->input_queue, &input, FuriWaitForever);
+        uint8_t key_bit = (1 << input.key);
+        if(input.type == InputTypePress) {
+            view_dispatcher->ongoing_input |= key_bit;
+        } else if(input.type == InputTypeRelease) {
+            view_dispatcher->ongoing_input &= ~key_bit;
         }
     }
 }
 
 void view_dispatcher_stop(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->queue);
+    furi_check(view_dispatcher->epoll);
     ViewDispatcherMessage message;
     message.type = ViewDispatcherMessageTypeStop;
     furi_check(
-        furi_message_queue_put(view_dispatcher->queue, &message, FuriWaitForever) == FuriStatusOk);
+        furi_message_queue_put(view_dispatcher->event_queue, &message, FuriWaitForever) ==
+        FuriStatusOk);
 }
 
 void view_dispatcher_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id, View* view) {
@@ -218,12 +234,9 @@ void view_dispatcher_draw_callback(Canvas* canvas, void* context) {
 
 void view_dispatcher_input_callback(InputEvent* event, void* context) {
     ViewDispatcher* view_dispatcher = context;
-    if(view_dispatcher->queue) {
-        ViewDispatcherMessage message;
-        message.type = ViewDispatcherMessageTypeInput;
-        message.input = *event;
+    if(view_dispatcher->input_queue) {
         furi_check(
-            furi_message_queue_put(view_dispatcher->queue, &message, FuriWaitForever) ==
+            furi_message_queue_put(view_dispatcher->input_queue, event, FuriWaitForever) ==
             FuriStatusOk);
     } else {
         view_dispatcher_handle_input(view_dispatcher, event);
@@ -287,7 +300,8 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
     }
 }
 
-void view_dispatcher_handle_tick_event(ViewDispatcher* view_dispatcher) {
+void view_dispatcher_handle_tick_event(void* context) {
+    ViewDispatcher* view_dispatcher = context;
     if(view_dispatcher->tick_event_callback) {
         view_dispatcher->tick_event_callback(view_dispatcher->event_context);
     }
@@ -306,14 +320,15 @@ void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32
 
 void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t event) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->queue);
+    furi_check(view_dispatcher->epoll);
 
     ViewDispatcherMessage message;
     message.type = ViewDispatcherMessageTypeCustomEvent;
     message.custom_event = event;
 
     furi_check(
-        furi_message_queue_put(view_dispatcher->queue, &message, FuriWaitForever) == FuriStatusOk);
+        furi_message_queue_put(view_dispatcher->event_queue, &message, FuriWaitForever) ==
+        FuriStatusOk);
 }
 
 static const ViewPortOrientation view_dispatcher_view_port_orientation_table[] = {
@@ -345,7 +360,7 @@ void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* vie
         view_port_update(view_dispatcher->view_port);
     } else {
         view_port_enabled_set(view_dispatcher->view_port, false);
-        if(view_dispatcher->queue) {
+        if(view_dispatcher->epoll) {
             view_dispatcher_stop(view_dispatcher);
         }
     }
@@ -360,4 +375,28 @@ void view_dispatcher_update(View* view, void* context) {
     if(view_dispatcher->current_view == view) {
         view_port_update(view_dispatcher->view_port);
     }
+}
+
+void view_dispatcher_run_event_callback(FuriMessageQueue* queue, void* context) {
+    furi_assert(context);
+    ViewDispatcher* instance = context;
+    furi_assert(instance->event_queue == queue);
+
+    ViewDispatcherMessage message;
+    furi_check(furi_message_queue_get(instance->event_queue, &message, 0) == FuriStatusOk);
+    if(message.type == ViewDispatcherMessageTypeStop) {
+        furi_epoll_stop(instance->epoll);
+    } else if(message.type == ViewDispatcherMessageTypeCustomEvent) {
+        view_dispatcher_handle_custom_event(instance, message.custom_event);
+    }
+}
+
+void view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context) {
+    furi_assert(context);
+    ViewDispatcher* instance = context;
+    furi_assert(instance->input_queue == queue);
+
+    InputEvent input;
+    furi_check(furi_message_queue_get(instance->input_queue, &input, 0) == FuriStatusOk);
+    view_dispatcher_handle_input(instance, &input);
 }
