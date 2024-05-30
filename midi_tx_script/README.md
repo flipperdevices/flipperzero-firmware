@@ -1,6 +1,6 @@
 Send MIDI message via Serial Port.
 
-In Raspberry Pi and other SBCs
+In Raspberry Pi, TTL232 USB Dongle and other SBCs
 
 connect SBC's Serial TX to Flipper zero RX / GND to GND.
 
