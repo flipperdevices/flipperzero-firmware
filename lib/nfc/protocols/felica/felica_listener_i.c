@@ -61,6 +61,8 @@ static bool felica_wcnt_check_error_boundary(const FelicaData* data) {
 }
 
 void felica_wcnt_increment(FelicaData* data) {
+    furi_assert(data);
+
     const uint32_t wcnt_max = felica_wcnt_get_max_value(data);
     uint32_t* wcnt_ptr = (uint32_t*)data->data.fs.wcnt.data;
     if(*wcnt_ptr < wcnt_max) {
@@ -111,6 +113,9 @@ static const FelicaBlockListElement* felica_listener_block_list_iterate(
 const FelicaBlockListElement* felica_listener_block_list_item_get_first(
     FelicaListener* instance,
     const FelicaListenerRequest* request) {
+    furi_assert(instance);
+    furi_assert(request);
+
     instance->request_size_buf = request->base.length - sizeof(FelicaListenerGenericRequest);
     return felica_listener_block_list_iterate(instance, request->list, 0);
 }
@@ -118,6 +123,9 @@ const FelicaBlockListElement* felica_listener_block_list_item_get_first(
 const FelicaBlockListElement* felica_listener_block_list_item_get_next(
     FelicaListener* instance,
     const FelicaBlockListElement* item) {
+    furi_assert(instance);
+    furi_assert(item);
+
     return felica_listener_block_list_iterate(
         instance, item, FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE(item));
 }
@@ -125,6 +133,9 @@ const FelicaBlockListElement* felica_listener_block_list_item_get_next(
 const FelicaListenerWriteBlockData* felica_listener_get_write_request_data_pointer(
     const FelicaListener* const instance,
     const FelicaListenerGenericRequest* const generic_request) {
+    furi_assert(instance);
+    furi_assert(generic_request);
+
     return (const FelicaListenerWriteBlockData*)((uint8_t*)generic_request +
                                                  sizeof(FelicaListenerGenericRequest) +
                                                  instance->block_list_size);
@@ -190,6 +201,9 @@ static uint8_t felica_listener_get_block_list_item_count_size(
 bool felica_listener_check_block_list_size(
     FelicaListener* instance,
     FelicaListenerGenericRequest* req) {
+    furi_assert(instance);
+    furi_assert(req);
+
     FelicaListenerRequest* request = (FelicaListenerRequest*)req;
     bool valid = true;
 
@@ -209,11 +223,16 @@ bool felica_listener_check_block_list_size(
 }
 
 bool felica_listener_check_idm(const FelicaListener* instance, const FelicaIDm* request_idm) {
+    furi_assert(instance);
+    furi_assert(request_idm);
+
     const FelicaIDm* idm = &instance->data->idm;
     return memcmp(idm->data, request_idm->data, 8) == 0;
 }
 
 void felica_listener_reset(FelicaListener* instance) {
+    furi_assert(instance);
+
     instance->auth.context.auth_status.internal = false;
     instance->auth.context.auth_status.external = false;
     instance->data->data.fs.state.data[0] = 0;
@@ -418,6 +437,10 @@ bool felica_listener_validate_read_request_and_set_sf(
     FelicaListener* instance,
     const FelicaListenerReadRequest* const request,
     FelicaCommandResponseHeader* resp_header) {
+    furi_assert(instance);
+    furi_assert(request);
+    furi_assert(resp_header);
+
     bool valid = false;
     do {
         if(request->base.header.service_num != 0x01) {
@@ -456,13 +479,11 @@ static bool felica_validate_write_block_list(
     const FelicaListenerWriteBlockData* const data,
     FelicaListenerWriteCommandResponse* response) {
     const FelicaBlockListElement* items[FELICA_LISTENER_WRITE_BLOCK_COUNT_MAX] = {};
-
     items[0] = felica_listener_block_list_item_get_first(instance, request);
     items[1] = felica_listener_block_list_item_get_next(instance, items[0]);
 
     bool write_with_mac = false;
     if(request->base.header.block_count == FELICA_LISTENER_WRITE_BLOCK_COUNT_MAX &&
-       /* request->list[1].block_number */
        items[1]->block_number == FELICA_BLOCK_INDEX_MAC_A) {
         write_with_mac = true;
     } else if(
@@ -531,6 +552,11 @@ bool felica_listener_validate_write_request_and_set_sf(
     const FelicaListenerWriteRequest* const request,
     const FelicaListenerWriteBlockData* const data,
     FelicaListenerWriteCommandResponse* response) {
+    furi_assert(instance);
+    furi_assert(request);
+    furi_assert(data);
+    furi_assert(response);
+
     bool valid = false;
     do {
         if(request->base.header.service_num != 0x01) {
@@ -703,6 +729,7 @@ static FelicaError felica_listener_process_error(NfcError error) {
 FelicaError
     felica_listener_frame_exchange(const FelicaListener* instance, const BitBuffer* tx_buffer) {
     furi_assert(instance);
+    furi_assert(tx_buffer);
 
     const size_t tx_bytes = bit_buffer_get_size_bytes(tx_buffer);
     furi_assert(tx_bytes <= bit_buffer_get_capacity_bytes(instance->tx_buffer) - FELICA_CRC_SIZE);
