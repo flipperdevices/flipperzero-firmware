@@ -10,11 +10,13 @@
 extern "C" {
 #endif
 
+/** Epoll events */
 typedef enum {
     FuriEpollEventOut, /**< On departure: item was retrieved from container, flag reset, etc... */
     FuriEpollEventIn, /**< On arrival: item was inserted into container, flag set, etc... */
 } FuriEpollEvent;
 
+/** Anonymous message queue type */
 typedef struct FuriEpoll FuriEpoll;
 
 /** Allocate Epoll instance
@@ -52,6 +54,10 @@ void furi_epoll_stop(FuriEpoll* instance);
  * Tick related API
  */
 
+/** Tick callback type
+ * 
+ * @param      context   The context for callback
+ */
 typedef void (*FuriEpollTickCallback)(void* context);
 
 /** Set Epoll tick callback
@@ -73,10 +79,25 @@ void furi_epoll_tick_set(
 /*
  * Message queue related APIs
  */
+
+/** Anonymous message queue type */
 typedef struct FuriMessageQueue FuriMessageQueue;
 
+/** Callback type for message queue
+ *
+ * @param      queue          The queue that triggered event
+ * @param      context        The context that was provided on furi_epoll_message_queue_add call
+ */
 typedef void (*FuriEpollMessageQueueCallback)(FuriMessageQueue* queue, void* context);
 
+/** Add message queue to epoll
+ *
+ * @param      instance       The Epoll instance
+ * @param      message_queue  The message queue to add
+ * @param[in]  event          The Epoll event to trigger on
+ * @param[in]  callback       The callback to call on event
+ * @param      context        The context for callback
+ */
 void furi_epoll_message_queue_add(
     FuriEpoll* instance,
     FuriMessageQueue* message_queue,
@@ -84,6 +105,11 @@ void furi_epoll_message_queue_add(
     FuriEpollMessageQueueCallback callback,
     void* context);
 
+/** Remove message queue from the epoll instance
+ *
+ * @param      instance       The instance
+ * @param      message_queue  The message queue
+ */
 void furi_epoll_message_queue_remove(FuriEpoll* instance, FuriMessageQueue* message_queue);
 
 #ifdef __cplusplus

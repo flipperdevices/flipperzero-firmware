@@ -48,9 +48,14 @@ void furi_epoll_poll(FuriEpoll* instance) {
             if(flags & FuriEpollFlagStop) {
                 break;
             } else if(flags & FuriEpollFlagEvent) {
+                FuriEpollItem* item = NULL;
+                FURI_CRITICAL_ENTER();
                 if(!WaitingList_empty_p(instance->waiting_list)) {
-                    FuriEpollItem* item = WaitingList_pop_front(instance->waiting_list);
+                    item = WaitingList_pop_front(instance->waiting_list);
                     WaitingList_init_field(item);
+                }
+                FURI_CRITICAL_EXIT();
+                if(item) {
                     while(furi_epoll_poll_process_event(instance, item))
                         ;
                 }
@@ -179,9 +184,11 @@ void furi_epoll_item_notify(FuriEpollItem* instance, FuriEpollItemType type, Fur
     furi_check(instance->type == type);
     furi_check(instance->event == event);
 
+    FURI_CRITICAL_ENTER();
     if(!instance->WaitingList.prev && !instance->WaitingList.next) {
         WaitingList_push_back(instance->owner->waiting_list, instance);
     }
+    FURI_CRITICAL_EXIT();
 
     xTaskNotifyIndexed(
         instance->owner->thread_id, FURI_EPOLL_NOTIFY_INDEX, FuriEpollFlagEvent, eSetBits);
