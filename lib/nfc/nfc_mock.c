@@ -5,6 +5,7 @@
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <lib/nfc/protocols/felica/felica.h>
 #include <lib/nfc/helpers/felica_crc.h>
+#include <lib/nfc/protocols/felica/felica_poller_sync.h>
 
 #include <furi/furi.h>
 
@@ -509,6 +510,7 @@ NfcError nfc_felica_listener_set_sensf_res_data(
 
     instance->pt_memory.system_code = 0xFFFF;
     instance->pt_memory.sens_res.code = 0x01;
+    instance->software_col_res_required = true;
     memcpy(instance->pt_memory.sens_res.idm.data, idm, idm_len);
     memcpy(instance->pt_memory.sens_res.pmm.data, pmm, pmm_len);
 
