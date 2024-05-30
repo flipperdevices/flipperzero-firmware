@@ -87,33 +87,13 @@ static bool
     return valid;
 }
 
-const FelicaBlockListElement* felica_listener_block_list_item_get_first(
+static const FelicaBlockListElement* felica_listener_block_list_iterate(
     FelicaListener* instance,
-    const FelicaListenerRequest* request) {
-    instance->request_size_buf = request->base.length - sizeof(FelicaListenerGenericRequest);
-
-    const FelicaBlockListElement* item = NULL;
-    if(instance->request_size_buf >= FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE_MIN) {
-        item = request->list;
-        uint8_t item_size = FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE(item);
-        if(instance->request_size_buf < item_size) {
-            item = NULL;
-            instance->request_size_buf = 0;
-        } else {
-            instance->request_size_buf -= item_size;
-        }
-    }
-    return item;
-}
-
-const FelicaBlockListElement* felica_listener_block_list_item_get_next(
-    FelicaListener* instance,
-    const FelicaBlockListElement* item) {
+    const FelicaBlockListElement* prev_item,
+    const uint8_t item_size) {
     FelicaBlockListElement* next_item = NULL;
-    uint8_t item_size = FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE(item);
-
     if(instance->request_size_buf >= FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE_MIN) {
-        next_item = (FelicaBlockListElement*)((uint8_t*)item + item_size);
+        next_item = (FelicaBlockListElement*)((uint8_t*)prev_item + item_size);
 
         uint8_t next_item_size = FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE(next_item);
 
@@ -126,6 +106,20 @@ const FelicaBlockListElement* felica_listener_block_list_item_get_next(
     }
 
     return next_item;
+}
+
+const FelicaBlockListElement* felica_listener_block_list_item_get_first(
+    FelicaListener* instance,
+    const FelicaListenerRequest* request) {
+    instance->request_size_buf = request->base.length - sizeof(FelicaListenerGenericRequest);
+    return felica_listener_block_list_iterate(instance, request->list, 0);
+}
+
+const FelicaBlockListElement* felica_listener_block_list_item_get_next(
+    FelicaListener* instance,
+    const FelicaBlockListElement* item) {
+    return felica_listener_block_list_iterate(
+        instance, item, FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE(item));
 }
 
 const FelicaListenerWriteBlockData* felica_listener_get_write_request_data_pointer(
