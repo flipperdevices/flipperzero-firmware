@@ -1,5 +1,11 @@
 Send MIDI message via Serial Port.
 
+In Raspberry Pi and other SBCs
+
+connect Serial TX to Flipper zero RX / GND to GND.
+
+Then
+
 ```
 pip install mido pyserial
 ```
