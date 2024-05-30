@@ -12,11 +12,8 @@
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
-<<<<<<< HEAD:applications/debug/unit_tests/nfc/nfc_test.c
 #include <nfc/protocols/felica/felica.h>
 #include <nfc/protocols/felica/felica_poller_sync.h>
-    == == ==
-    =
 #include <nfc/protocols/mf_classic/mf_classic_poller.h>
 #include <nfc/protocols/iso15693_3/iso15693_3_poller.h>
 #include <nfc/protocols/slix/slix.h>
@@ -25,8 +22,6 @@
 #include <nfc/protocols/slix/slix_poller_i.h>
 
 #include <nfc/nfc_poller.h>
-        >>>>>>> dev : applications / debug / unit_tests / tests / nfc /
-                      nfc_test.c
 
 #include <toolbox/keys_dict.h>
 #include <nfc/nfc.h>
@@ -40,13 +35,13 @@
 
 #define NFC_TEST_FLAG_WORKER_DONE (1)
 
-                      typedef enum {
-                          NfcTestMfClassicSendFrameTestStateAuth,
-                          NfcTestMfClassicSendFrameTestStateReadBlock,
+typedef enum {
+    NfcTestMfClassicSendFrameTestStateAuth,
+    NfcTestMfClassicSendFrameTestStateReadBlock,
 
-                          NfcTestMfClassicSendFrameTestStateFail,
-                          NfcTestMfClassicSendFrameTestStateSuccess,
-                      } NfcTestMfClassicSendFrameTestState;
+    NfcTestMfClassicSendFrameTestStateFail,
+    NfcTestMfClassicSendFrameTestStateSuccess,
+} NfcTestMfClassicSendFrameTestState;
 
 typedef struct {
     NfcTestMfClassicSendFrameTestState state;
