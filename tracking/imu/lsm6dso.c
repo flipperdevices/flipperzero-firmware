@@ -1,4 +1,7 @@
-#include "imu_lsm6dso.h"
+#include "lsm6dso.h"
+
+#define LSM6DSO_TAG "LSM6DO"
+#define LSM6DSO_DEV_ADDRESS (0x6B << 1)
 
 stmdev_ctx_t lsm6dso_ctx;
 
@@ -76,11 +79,19 @@ int lsm6dso_read(double* vec) {
 
     if(reg.status_reg.gda) {
         lsm6dso_angular_rate_raw_get(&lsm6dso_ctx, data);
-        vec[5] = (double)lsm6dso_from_fs2000_to_mdps(data[0]) * LSM6DSO_DEG_TO_RAD / 1000;
-        vec[3] = (double)lsm6dso_from_fs2000_to_mdps(data[1]) * LSM6DSO_DEG_TO_RAD / 1000;
-        vec[4] = (double)lsm6dso_from_fs2000_to_mdps(data[2]) * LSM6DSO_DEG_TO_RAD / 1000;
+        vec[5] = (double)lsm6dso_from_fs2000_to_mdps(data[0]) * DEG_TO_RAD / 1000;
+        vec[3] = (double)lsm6dso_from_fs2000_to_mdps(data[1]) * DEG_TO_RAD / 1000;
+        vec[4] = (double)lsm6dso_from_fs2000_to_mdps(data[2]) * DEG_TO_RAD / 1000;
         ret |= GYR_DATA_READY;
     }
 
     return ret;
 }
+
+struct imu_t imu_lsm6dso = {
+    LSM6DSO_DEV_ADDRESS,
+    lsm6dso_begin,
+    lsm6dso_end,
+    lsm6dso_read,
+    LSM6DSO_TAG
+};

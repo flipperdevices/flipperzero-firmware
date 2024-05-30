@@ -1,7 +1,7 @@
-#include "imu_bmi160.h"
+#include "bmi160.h"
 
-static const double DEG_TO_RAD = 0.017453292519943295769236907684886;
-static const double G = 9.81;
+#define BMI160_TAG "BMI160"
+#define BMI160_DEV_ADDR (0x69 << 1)
 
 struct bmi160_dev bmi160dev;
 struct bmi160_sensor_data bmi160_accel;
@@ -69,9 +69,9 @@ int bmi160_read(double* vec) {
         return 0;
     }
 
-    vec[0] = ((double)bmi160_accel.x * 4 / 32768) * G;
-    vec[1] = ((double)bmi160_accel.y * 4 / 32768) * G;
-    vec[2] = ((double)bmi160_accel.z * 4 / 32768) * G;
+    vec[0] = ((double)bmi160_accel.x * 4 / 32768) * GRAVITY;
+    vec[1] = ((double)bmi160_accel.y * 4 / 32768) * GRAVITY;
+    vec[2] = ((double)bmi160_accel.z * 4 / 32768) * GRAVITY;
     vec[3] = ((double)bmi160_gyro.x * 2000 / 32768) * DEG_TO_RAD;
     vec[4] = ((double)bmi160_gyro.y * 2000 / 32768) * DEG_TO_RAD;
     vec[5] = ((double)bmi160_gyro.z * 2000 / 32768) * DEG_TO_RAD;
@@ -81,3 +81,13 @@ int bmi160_read(double* vec) {
 
 void bmi160_end() {
 }
+
+struct imu_t imu_bmi160 = {
+   BMI160_DEV_ADDR,
+   bmi160_begin,
+   bmi160_end,
+   bmi160_read,
+   BMI160_TAG
+};
+
+

@@ -7,10 +7,6 @@
 
 #include "imu.h"
 
-#define LSM6DS3_TAG "LSM6DS3TR-C"
-
-#define LSM6DS3_ADDRESS (0x6A << 1)
-
 // External variable declaration
 extern stmdev_ctx_t lsm6ds3trc_ctx;
 
@@ -21,5 +17,6 @@ bool lsm6ds3trc_begin(void);
 void lsm6ds3trc_end(void);
 int lsm6ds3trc_read(double* vec);
 
+extern struct imu_t imu_lsm6ds3trc;
 
 #endif // LSM6DS3TRC_H
