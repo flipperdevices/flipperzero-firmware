@@ -34,7 +34,7 @@ Currently there are four applications written for the FlipBoard that demonstrate
 ## Installing Apps
 
 Here are some options for installation:
-- [Official Store](#official-store) (coming soon?)
+- [Official Store](#official-store)
 - [Pre-installed on some firmware](#pre-installed-on-some-firmware) (like RogueMaster)
 - [Visual Studio Code](#building-with-vscode-visual-studio-code)
 - [Build FAP with FBT tool](#building-with-fbt)
@@ -42,7 +42,7 @@ Here are some options for installation:
 
 ### Official Store
 
-We hope to have the FlipBoard applications available in the official Flipper Zero store soon.  This will make it easy to install the applications on your Flipper Zero without needing to build the applications yourself.
+The FlipBoard applications are now available in the [Official Flipper Zero store](https://lab.flipper.net/apps/category/gpio).  Connect your Flipper Zero to the computer, and browse the store web site using a Chrome or Edge browser.  You should see an `Install` button to install the FlipBoard apps.  You can also use the [Official Mobile App](https://docs.flipper.net/mobile-app) to install the applications (choose `Hub`, then `Apps`, then `GPIO` category).
 
 ### Pre-installed on some firmware
 
