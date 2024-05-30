@@ -28,7 +28,7 @@ typedef struct {
     Point hours[12];
 } ClockFace;
 
-#define CONFIG_VERSION 1
+#define CONFIG_VERSION 2
 typedef struct {
     uint8_t version;
     bool split;
