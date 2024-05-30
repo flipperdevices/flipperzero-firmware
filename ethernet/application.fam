@@ -1,5 +1,5 @@
 App(
-    appid="ethernet",
+    appid="finik_eth",
     name="[W5500] Ethernet",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="finik_eth_app",
@@ -14,7 +14,6 @@ App(
     fap_version="1.0",
     fap_category="GPIO/Debug",
     fap_icon_assets="images",
-    fap_icon_assets_symbol="finik_eth",
     fap_private_libs=[
         Lib(
             cflags=[

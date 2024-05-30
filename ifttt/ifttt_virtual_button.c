@@ -36,9 +36,7 @@ void save_settings_file(FlipperFormat* file, Settings* settings) {
     flipper_format_write_string_cstr(file, CONF_EVENT, settings->save_event);
 }
 
-Settings* load_settings() {
-    Settings* settings = malloc(sizeof(Settings));
-
+Settings* load_settings(Settings* settings) {
     settings->save_ssid = "";
     settings->save_password = "";
     settings->save_key = "";
@@ -63,25 +61,27 @@ Settings* load_settings() {
             uint32_t value;
             if(flipper_format_read_header(file, string_value, &value)) {
                 if(flipper_format_read_string(file, CONF_SSID, text_ssid_value)) {
-                    settings->save_ssid = malloc(furi_string_size(text_ssid_value) + 1);
-                    strcpy(settings->save_ssid, furi_string_get_cstr(text_ssid_value));
+                    settings->save_ssid = (char*)furi_string_get_cstr(text_ssid_value);
                 }
                 if(flipper_format_read_string(file, CONF_PASSWORD, text_password_value)) {
-                    settings->save_password = malloc(furi_string_size(text_password_value) + 1);
-                    strcpy(settings->save_password, furi_string_get_cstr(text_password_value));
+                    settings->save_password = (char*)furi_string_get_cstr(text_password_value);
                 }
                 if(flipper_format_read_string(file, CONF_KEY, text_key_value)) {
-                    settings->save_key = malloc(furi_string_size(text_key_value) + 1);
-                    strcpy(settings->save_key, furi_string_get_cstr(text_key_value));
+                    settings->save_key = (char*)furi_string_get_cstr(text_key_value);
                 }
                 if(flipper_format_read_string(file, CONF_EVENT, text_event_value)) {
-                    settings->save_event = malloc(furi_string_size(text_event_value) + 1);
-                    strcpy(settings->save_event, furi_string_get_cstr(text_event_value));
+                    settings->save_event = (char*)furi_string_get_cstr(text_event_value);
                 }
             }
             flipper_format_file_close(file);
         }
     }
+
+    // We assigned some constant / internal buffer of furi string, so duplicate it and free at exit
+    settings->save_ssid = strdup(settings->save_ssid);
+    settings->save_password = strdup(settings->save_password);
+    settings->save_key = strdup(settings->save_key);
+    settings->save_event = strdup(settings->save_event);
 
     furi_string_free(text_ssid_value);
     furi_string_free(text_password_value);
@@ -203,6 +203,7 @@ void ifttt_virtual_button_app_free(VirtualButtonApp* app) {
     free(app->settings.save_ssid);
     free(app->settings.save_password);
     free(app->settings.save_key);
+    free(app->settings.save_event);
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, VirtualButtonAppViewSendView);
@@ -242,7 +243,7 @@ int32_t ifttt_virtual_button_app(void* p) {
 
     uint32_t first_scene = VirtualButtonAppSceneStart;
     VirtualButtonApp* app = ifttt_virtual_button_app_alloc(first_scene);
-    memcpy(&app->settings, load_settings(), sizeof(Settings));
+    load_settings(&app->settings);
     send_serial_command_config(app->serial_handle, ESerialCommand_Config, &(app->settings));
 
     view_dispatcher_run(app->view_dispatcher);

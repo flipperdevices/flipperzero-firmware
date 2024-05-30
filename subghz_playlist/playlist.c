@@ -40,14 +40,15 @@ typedef struct {
     int current_playlist_repetition; // current playlist repetition
 
     // last 3 files
-    FuriString* prev_0_path; // current file
-    FuriString* prev_1_path; // previous file
-    FuriString* prev_2_path; // previous previous file
-    FuriString* prev_3_path; // you get the idea
+    FuriString* prev_0_text; // current file
+    FuriString* prev_1_text; // previous file
+    FuriString* prev_2_text; // previous previous file
+    FuriString* prev_3_text; // you get the idea
 
     int state; // current state
 
     ViewPort* view_port;
+    FuriMutex* mutex;
 } DisplayMeta;
 
 typedef struct {
@@ -182,6 +183,11 @@ static int playlist_worker_process(
             TAG,
             "  (TX) The SubGhz device used does not support the frequency for transmitеing, %lu",
             frequency);
+
+        subghz_devices_idle(worker->radio_device);
+
+        subghz_transmitter_free(transmitter);
+        subghz_environment_free(environment);
         return -5;
     }
     FURI_LOG_D(TAG, "  (TX) Start sending ...");
@@ -241,17 +247,14 @@ static bool playlist_worker_wait_pause(PlaylistWorker* worker) {
 }
 
 void updatePlayListView(PlaylistWorker* worker, const char* str) {
-    furi_string_reset(worker->meta->prev_3_path);
-    furi_string_set(worker->meta->prev_3_path, furi_string_get_cstr(worker->meta->prev_2_path));
+    furi_check(furi_mutex_acquire(worker->meta->mutex, FuriWaitForever) == FuriStatusOk);
 
-    furi_string_reset(worker->meta->prev_2_path);
-    furi_string_set(worker->meta->prev_2_path, furi_string_get_cstr(worker->meta->prev_1_path));
+    furi_string_set(worker->meta->prev_3_text, furi_string_get_cstr(worker->meta->prev_2_text));
+    furi_string_set(worker->meta->prev_2_text, furi_string_get_cstr(worker->meta->prev_1_text));
+    furi_string_set(worker->meta->prev_1_text, furi_string_get_cstr(worker->meta->prev_0_text));
+    furi_string_set(worker->meta->prev_0_text, str);
 
-    furi_string_reset(worker->meta->prev_1_path);
-    furi_string_set(worker->meta->prev_1_path, furi_string_get_cstr(worker->meta->prev_0_path));
-
-    furi_string_reset(worker->meta->prev_0_path);
-    furi_string_set(worker->meta->prev_0_path, str);
+    furi_mutex_release(worker->meta->mutex);
 
     view_port_update(worker->meta->view_port);
 }
@@ -282,7 +285,10 @@ static bool playlist_worker_play_playlist_once(
         const char* str = furi_string_get_cstr(data);
 
         // it's not fancy, but it works for now :)
-        updatePlayListView(worker, str);
+        FuriString* filename = furi_string_alloc();
+        path_extract_filename(data, filename, true);
+        updatePlayListView(worker, furi_string_get_cstr(filename));
+        furi_string_free(filename);
 
         for(int i = 0; i < 1; i++) {
             if(!playlist_worker_wait_pause(worker)) {
@@ -299,9 +305,18 @@ static bool playlist_worker_play_playlist_once(
                 playlist_worker_process(worker, fff_file, fff_data, str, preset, protocol);
 
             // if there was an error, fff_file is not already freed
+            // why do you do this with numbers without meaning x_x
             if(status < 0) {
-                flipper_format_file_close(fff_file);
-                flipper_format_free(fff_file);
+                if(status > -5) {
+                    flipper_format_file_close(fff_file);
+                    flipper_format_free(fff_file);
+                }
+
+                furi_check(
+                    furi_mutex_acquire(worker->meta->mutex, FuriWaitForever) == FuriStatusOk);
+                furi_string_cat(worker->meta->prev_0_text, " FAIL");
+                furi_mutex_release(worker->meta->mutex);
+                view_port_update(worker->meta->view_port);
             }
 
             // re-send file is paused mid-send
@@ -409,18 +424,18 @@ void playlist_meta_reset(DisplayMeta* instance) {
     instance->current_count = 0;
     instance->current_playlist_repetition = 0;
 
-    furi_string_reset(instance->prev_0_path);
-    furi_string_reset(instance->prev_1_path);
-    furi_string_reset(instance->prev_2_path);
-    furi_string_reset(instance->prev_3_path);
+    furi_string_reset(instance->prev_0_text);
+    furi_string_reset(instance->prev_1_text);
+    furi_string_reset(instance->prev_2_text);
+    furi_string_reset(instance->prev_3_text);
 }
 
 DisplayMeta* playlist_meta_alloc() {
     DisplayMeta* instance = malloc(sizeof(DisplayMeta));
-    instance->prev_0_path = furi_string_alloc();
-    instance->prev_1_path = furi_string_alloc();
-    instance->prev_2_path = furi_string_alloc();
-    instance->prev_3_path = furi_string_alloc();
+    instance->prev_0_text = furi_string_alloc();
+    instance->prev_1_text = furi_string_alloc();
+    instance->prev_2_text = furi_string_alloc();
+    instance->prev_3_text = furi_string_alloc();
     playlist_meta_reset(instance);
     instance->state = STATE_NONE;
     instance->playlist_repetitions = 1;
@@ -428,10 +443,10 @@ DisplayMeta* playlist_meta_alloc() {
 }
 
 void playlist_meta_free(DisplayMeta* instance) {
-    furi_string_free(instance->prev_0_path);
-    furi_string_free(instance->prev_1_path);
-    furi_string_free(instance->prev_2_path);
-    furi_string_free(instance->prev_3_path);
+    furi_string_free(instance->prev_0_text);
+    furi_string_free(instance->prev_1_text);
+    furi_string_free(instance->prev_2_text);
+    furi_string_free(instance->prev_3_text);
     free(instance);
 }
 
@@ -624,35 +639,51 @@ static void render_callback(Canvas* canvas, void* ctx) {
             canvas_set_font(canvas, FontSecondary);
 
             // current
-            if(!furi_string_empty(app->meta->prev_0_path)) {
-                path_extract_filename(app->meta->prev_0_path, temp_str, true);
-                int w = canvas_string_width(canvas, furi_string_get_cstr(temp_str));
+            if(!furi_string_empty(app->meta->prev_0_text)) {
+                int w = canvas_string_width(canvas, furi_string_get_cstr(app->meta->prev_0_text));
                 canvas_set_color(canvas, ColorBlack);
                 canvas_draw_rbox(canvas, 1, 1, w + 4, 12, 2);
                 canvas_set_color(canvas, ColorWhite);
                 canvas_draw_str_aligned(
-                    canvas, 3, 3, AlignLeft, AlignTop, furi_string_get_cstr(temp_str));
+                    canvas,
+                    3,
+                    3,
+                    AlignLeft,
+                    AlignTop,
+                    furi_string_get_cstr(app->meta->prev_0_text));
             }
 
             // last 3
             canvas_set_color(canvas, ColorBlack);
 
-            if(!furi_string_empty(app->meta->prev_1_path)) {
-                path_extract_filename(app->meta->prev_1_path, temp_str, true);
+            if(!furi_string_empty(app->meta->prev_1_text)) {
                 canvas_draw_str_aligned(
-                    canvas, 3, 15, AlignLeft, AlignTop, furi_string_get_cstr(temp_str));
+                    canvas,
+                    3,
+                    15,
+                    AlignLeft,
+                    AlignTop,
+                    furi_string_get_cstr(app->meta->prev_1_text));
             }
 
-            if(!furi_string_empty(app->meta->prev_2_path)) {
-                path_extract_filename(app->meta->prev_2_path, temp_str, true);
+            if(!furi_string_empty(app->meta->prev_2_text)) {
                 canvas_draw_str_aligned(
-                    canvas, 3, 26, AlignLeft, AlignTop, furi_string_get_cstr(temp_str));
+                    canvas,
+                    3,
+                    26,
+                    AlignLeft,
+                    AlignTop,
+                    furi_string_get_cstr(app->meta->prev_2_text));
             }
 
-            if(!furi_string_empty(app->meta->prev_3_path)) {
-                path_extract_filename(app->meta->prev_3_path, temp_str, true);
+            if(!furi_string_empty(app->meta->prev_3_text)) {
                 canvas_draw_str_aligned(
-                    canvas, 3, 37, AlignLeft, AlignTop, furi_string_get_cstr(temp_str));
+                    canvas,
+                    3,
+                    37,
+                    AlignLeft,
+                    AlignTop,
+                    furi_string_get_cstr(app->meta->prev_3_text));
             }
         }
         break;
@@ -736,6 +767,7 @@ int32_t playlist_app(char* p) {
     DisplayMeta* meta = playlist_meta_alloc();
     Playlist* app = playlist_alloc(meta);
     meta->view_port = app->view_port;
+    meta->mutex = app->mutex;
 
     furi_hal_power_suppress_charge_enter();
 
@@ -768,6 +800,7 @@ int32_t playlist_app(char* p) {
     while(1) { // close application if no file was selected
         furi_check(
             furi_message_queue_get(app->input_queue, &input, FuriWaitForever) == FuriStatusOk);
+        furi_check(furi_mutex_acquire(app->mutex, FuriWaitForever) == FuriStatusOk);
 
         switch(input.key) {
         case InputKeyLeft:

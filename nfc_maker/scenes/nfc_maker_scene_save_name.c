@@ -17,7 +17,13 @@ void nfc_maker_scene_save_name_on_enter(void* context) {
     text_input_set_header_text(text_input, "Save the NFC tag:");
 
     FuriString* prefix = furi_string_alloc();
-    nfc_device_get_abbreviated_name(app->nfc_device, prefix);
+    furi_string_set(prefix, nfc_device_get_name(app->nfc_device, NfcDeviceNameTypeFull));
+    furi_string_replace(prefix, "Mifare", "MF");
+    furi_string_replace(prefix, " Classic", "C"); // MFC
+    furi_string_replace(prefix, "Desfire", "Des"); // MF Des
+    furi_string_replace(prefix, "Ultralight", "UL"); // MF UL
+    furi_string_replace(prefix, " Plus", "+"); // NTAG I2C+
+    furi_string_replace(prefix, " (Unknown)", "");
     furi_string_replace_all(prefix, " ", "_");
     name_generator_make_auto(app->save_buf, BIG_INPUT_LEN, furi_string_get_cstr(prefix));
     furi_string_free(prefix);
