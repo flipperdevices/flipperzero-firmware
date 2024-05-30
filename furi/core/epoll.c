@@ -15,7 +15,6 @@ void furi_epoll_free(FuriEpoll* instance) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
-    // WaitingList_clear(instance->waiting_list);
     FuriEpollTree_clear(instance->tree);
     free(instance);
 }

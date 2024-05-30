@@ -12,16 +12,6 @@
 #include "view_i.h"
 #include "gui_i.h"
 
-typedef enum {
-    ViewDispatcherMessageTypeCustomEvent,
-    ViewDispatcherMessageTypeStop,
-} ViewDispatcherMessageType;
-
-typedef struct {
-    ViewDispatcherMessageType type;
-    uint32_t custom_event;
-} ViewDispatcherMessage;
-
 DICT_DEF2(ViewDict, uint32_t, M_DEFAULT_OPLIST, View*, M_PTR_OPLIST)
 
 struct ViewDispatcher {

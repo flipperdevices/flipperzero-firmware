@@ -58,7 +58,7 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
         view_dispatcher_run_input_callback,
         view_dispatcher);
 
-    view_dispatcher->event_queue = furi_message_queue_alloc(8, sizeof(ViewDispatcherMessage));
+    view_dispatcher->event_queue = furi_message_queue_alloc(8, sizeof(uint32_t));
     furi_epoll_message_queue_add(
         view_dispatcher->epoll,
         view_dispatcher->event_queue,
@@ -123,11 +123,7 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
 void view_dispatcher_stop(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
     furi_check(view_dispatcher->epoll);
-    ViewDispatcherMessage message;
-    message.type = ViewDispatcherMessageTypeStop;
-    furi_check(
-        furi_message_queue_put(view_dispatcher->event_queue, &message, FuriWaitForever) ==
-        FuriStatusOk);
+    furi_epoll_stop(view_dispatcher->epoll);
 }
 
 void view_dispatcher_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id, View* view) {
@@ -322,12 +318,8 @@ void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t
     furi_check(view_dispatcher);
     furi_check(view_dispatcher->epoll);
 
-    ViewDispatcherMessage message;
-    message.type = ViewDispatcherMessageTypeCustomEvent;
-    message.custom_event = event;
-
     furi_check(
-        furi_message_queue_put(view_dispatcher->event_queue, &message, FuriWaitForever) ==
+        furi_message_queue_put(view_dispatcher->event_queue, &event, FuriWaitForever) ==
         FuriStatusOk);
 }
 
@@ -382,13 +374,9 @@ void view_dispatcher_run_event_callback(FuriMessageQueue* queue, void* context) 
     ViewDispatcher* instance = context;
     furi_assert(instance->event_queue == queue);
 
-    ViewDispatcherMessage message;
-    furi_check(furi_message_queue_get(instance->event_queue, &message, 0) == FuriStatusOk);
-    if(message.type == ViewDispatcherMessageTypeStop) {
-        furi_epoll_stop(instance->epoll);
-    } else if(message.type == ViewDispatcherMessageTypeCustomEvent) {
-        view_dispatcher_handle_custom_event(instance, message.custom_event);
-    }
+    uint32_t event;
+    furi_check(furi_message_queue_get(instance->event_queue, &event, 0) == FuriStatusOk);
+    view_dispatcher_handle_custom_event(instance, event);
 }
 
 void view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context) {
