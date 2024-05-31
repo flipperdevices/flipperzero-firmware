@@ -13,7 +13,7 @@ typedef enum {
     FuriTimerTypePeriodic = 1 ///< Repeating timer.
 } FuriTimerType;
 
-typedef void FuriTimer;
+typedef struct FuriTimer FuriTimer;
 
 /** Allocate timer
  *

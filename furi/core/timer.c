@@ -6,56 +6,36 @@
 #include <FreeRTOS.h>
 #include <timers.h>
 
-typedef struct {
-    FuriTimerCallback func;
-    void* context;
-} TimerCallback_t;
+struct FuriTimer {
+    StaticTimer_t container;
+    FuriTimerCallback cb_func;
+    void* cb_context;
+};
+
+// IMPORTANT: container MUST be the FIRST struct member
+static_assert(offsetof(FuriTimer, container) == 0);
 
 static void TimerCallback(TimerHandle_t hTimer) {
-    TimerCallback_t* callb;
-
-    /* Retrieve pointer to callback function and context */
-    callb = (TimerCallback_t*)pvTimerGetTimerID(hTimer);
-
-    /* Remove dynamic allocation flag */
-    callb = (TimerCallback_t*)((uint32_t)callb & ~1U);
-
-    if(callb != NULL) {
-        callb->func(callb->context);
-    }
+    FuriTimer* instance = pvTimerGetTimerID(hTimer);
+    furi_check(instance);
+    instance->cb_func(instance->cb_context);
 }
 
 FuriTimer* furi_timer_alloc(FuriTimerCallback func, FuriTimerType type, void* context) {
     furi_check((furi_kernel_is_irq_or_masked() == 0U) && (func != NULL));
 
-    TimerHandle_t hTimer;
-    TimerCallback_t* callb;
-    UBaseType_t reload;
+    FuriTimer* instance = malloc(sizeof(FuriTimer));
 
-    hTimer = NULL;
+    instance->cb_func = func;
+    instance->cb_context = context;
 
-    /* Dynamic memory allocation is available: if memory for callback and */
-    /* its context is not provided, allocate it from dynamic memory pool */
-    callb = (TimerCallback_t*)malloc(sizeof(TimerCallback_t));
+    const UBaseType_t reload = (type == FuriTimerTypeOnce ? pdFALSE : pdTRUE);
+    const TimerHandle_t hTimer = xTimerCreateStatic(
+        NULL, portMAX_DELAY, reload, instance, TimerCallback, &instance->container);
 
-    callb->func = func;
-    callb->context = context;
+    furi_check(hTimer == (TimerHandle_t)instance);
 
-    if(type == FuriTimerTypeOnce) {
-        reload = pdFALSE;
-    } else {
-        reload = pdTRUE;
-    }
-
-    /* Store callback memory dynamic allocation flag */
-    callb = (TimerCallback_t*)((uint32_t)callb | 1U);
-    // TimerCallback function is always provided as a callback and is used to call application
-    // specified function with its context both stored in structure callb.
-    hTimer = xTimerCreate(NULL, portMAX_DELAY, reload, callb, TimerCallback);
-    furi_check(hTimer);
-
-    /* Return timer ID */
-    return ((FuriTimer*)hTimer);
+    return instance;
 }
 
 void furi_timer_free(FuriTimer* instance) {
@@ -63,26 +43,13 @@ void furi_timer_free(FuriTimer* instance) {
     furi_check(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
-    TimerCallback_t* callb;
+    furi_check(xTimerDelete(hTimer, portMAX_DELAY) == pdPASS);
 
-    callb = (TimerCallback_t*)pvTimerGetTimerID(hTimer);
-
-    if((uint32_t)callb & 1U) {
-        /* If callback memory was allocated, it is only safe to free it with
-         * the timer inactive. Send a stop command and wait for the timer to
-         * be in an inactive state.
-         */
-        furi_check(xTimerStop(hTimer, portMAX_DELAY) == pdPASS);
-        while(furi_timer_is_running(instance)) furi_delay_tick(2);
-
-        /* Callback memory was allocated from dynamic pool, clear flag */
-        callb = (TimerCallback_t*)((uint32_t)callb & ~1U);
-
-        /* Return allocated memory to dynamic pool */
-        free(callb);
+    while(xTimerIsTimerActive(hTimer) != pdFALSE) {
+        furi_delay_tick(2);
     }
 
-    furi_check(xTimerDelete(hTimer, portMAX_DELAY) == pdPASS);
+    free(instance);
 }
 
 FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks) {
