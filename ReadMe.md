@@ -33,7 +33,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-28 10:24 CST`
 - Updated: [Chess v1.10 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Updated: [Digimon F-Com v1.3 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
-- Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac) Fix (By Willy-JL)
 - Updated: [FlipBIP Crypto Wallet v1.16 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - Patreon Builds Update: [420, 420+18, Anime420 and ManifestSwitcher builds have been updated to have the NuggiePuff animation (By ATOMNFT)](https://github.com/ATOMNFT/Flipper-Vault/tree/main/Animations/Weed%20Themed/NuggiePuff)
 - Patreon Builds Update: [P0KEMON and ManifestSwitcher builds have been updated to have 8 new Haunter animations (By int0xmonkey)](https://github.com/int0xmonkey/Haunter-Asset-Pack/tree/main/Haunter/Anims)
@@ -60,6 +59,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Keyboard v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v3.7 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Simon v1.7 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [IFTTT Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) Changes (By Willy-JL)
+- Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac) Fix (By Willy-JL)
+- Updated: [Sub-GHz Playlist v1.0 (By darmiel)](https://github.com/darmiel/flipper-playlist) Changes (By Willy-JL)
+- Updated: [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) Changes (By Willy-JL)s
 
 <a name="release">
 
