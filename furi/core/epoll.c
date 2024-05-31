@@ -1,3 +1,6 @@
+#include "core/epoll.h"
+#include "core/check.h"
+#include "core/message_queue.h"
 #include "epoll_i.h"
 #include "message_queue_i.h"
 
@@ -19,19 +22,27 @@ void furi_epoll_free(FuriEpoll* instance) {
     free(instance);
 }
 
-static bool furi_epoll_poll_process_event(FuriEpoll* instance, FuriEpollItem* item) {
+static FuriEpollProcessStatus
+    furi_epoll_poll_process_event(FuriEpoll* instance, FuriEpollItem* item) {
     UNUSED(instance);
 
     if(item->type == FuriEpollItemTypeMessageQueue) {
-        if(!furi_message_queue_get_count(item->item)) {
-            return false;
+        if(item->event == FuriEpollEventIn && !furi_message_queue_get_count(item->item)) {
+            return FuriEpollProcessStatusComplete;
         }
-        item->callback(item->item, item->callback_context);
-    } else {
-        furi_crash();
+
+        if(item->event == FuriEpollEventOut && !furi_message_queue_get_space(item->item)) {
+            return FuriEpollProcessStatusComplete;
+        }
+
+        if(item->callback(item->item, item->callback_context)) {
+            return FuriEpollProcessStatusIncomplete;
+        } else {
+            return FuriEpollProcessStatusAgain;
+        }
     }
 
-    return true;
+    furi_crash();
 }
 
 void furi_epoll_poll(FuriEpoll* instance) {
@@ -56,8 +67,20 @@ void furi_epoll_poll(FuriEpoll* instance) {
                 }
                 FURI_CRITICAL_EXIT();
                 if(item) {
-                    while(furi_epoll_poll_process_event(instance, item))
-                        ;
+                    while(true) {
+                        FuriEpollProcessStatus ret = furi_epoll_poll_process_event(instance, item);
+                        if(ret == FuriEpollProcessStatusComplete) {
+                            // Event processing complete, break from loop
+                            break;
+                        } else if(ret == FuriEpollProcessStatusIncomplete) {
+                            // Event processing incomplete more processing needed
+                        } else if(ret == FuriEpollProcessStatusAgain) {
+                            furi_epoll_item_notify(item, item->type, item->event);
+                            break;
+                        } else {
+                            furi_crash();
+                        }
+                    }
                 }
             }
         } else {
@@ -111,6 +134,10 @@ void furi_epoll_message_queue_add(
     FuriEpollTree_set_at(instance->tree, message_queue, item);
 
     furi_message_queue_epoll_in_set(message_queue, item, item->event);
+
+    if(item->event == FuriEpollEventIn && furi_message_queue_get_count(message_queue)) {
+        furi_epoll_item_notify(item, item->type, item->event);
+    }
 
     FURI_CRITICAL_EXIT();
 }

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <furi.h>
 #include <m-dict.h>
 
 #include "view_dispatcher.h"
@@ -57,7 +56,7 @@ void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* vie
 void view_dispatcher_update(View* view, void* context);
 
 /** ViewDispatcher run event loop event callback */
-void view_dispatcher_run_event_callback(FuriMessageQueue* queue, void* context);
+bool view_dispatcher_run_event_callback(FuriMessageQueue* queue, void* context);
 
 /** ViewDispatcher run event loop input callback */
-void view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context);
+bool view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context);

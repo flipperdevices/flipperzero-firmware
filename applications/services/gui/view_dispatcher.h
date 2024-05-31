@@ -47,8 +47,8 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher);
 
 /** Enable queue support
  *
- * If queue enabled all input and custom events will be dispatched throw
- * internal queue
+ * Allocates epoll, input and event message queues.
+ * Must be used with `view_dispatcher_run`
  *
  * @param      view_dispatcher  ViewDispatcher instance
  */
@@ -100,6 +100,20 @@ void view_dispatcher_set_tick_event_callback(
  * @param      context          pointer to context
  */
 void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context);
+
+/** Get epoll instance
+ *
+ * epoll instance is allocated on `view_dispatcher_enable_queue` and used in
+ * view_dispatcher_run.
+ *
+ * You can add your objects into epoll instance, but don't run the loop on your
+ * side it will cause issues with input processing on dispatcher stop.
+ *
+ * @param      view_dispatcher  ViewDispatcher instance
+ *
+ * @return     The epoll instance.
+ */
+FuriEpoll* view_dispatcher_get_epoll(ViewDispatcher* view_dispatcher);
 
 /** Run ViewDispatcher
  *

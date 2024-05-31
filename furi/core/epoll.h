@@ -1,6 +1,12 @@
 /**
  * @file epoll.h
- * Event poller
+ * @brief Furi Epoll
+ * 
+ * This module is kinda inspired by linux epoll / freebsd kqueue.
+ * At least on the concept level, however API is different.
+ * 
+ * Main focus was to implement event loop integrated with OS.
+ * 
  */
 #pragma once
 
@@ -87,8 +93,10 @@ typedef struct FuriMessageQueue FuriMessageQueue;
  *
  * @param      queue          The queue that triggered event
  * @param      context        The context that was provided on furi_epoll_message_queue_add call
+ * 
+ * @return     true if event was processed, false if we need to delay processing
  */
-typedef void (*FuriEpollMessageQueueCallback)(FuriMessageQueue* queue, void* context);
+typedef bool (*FuriEpollMessageQueueCallback)(FuriMessageQueue* queue, void* context);
 
 /** Add message queue to epoll
  *

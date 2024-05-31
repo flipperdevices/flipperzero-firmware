@@ -7,8 +7,8 @@
 void test_furi_create_open(void);
 void test_furi_concurrent_access(void);
 void test_furi_pubsub(void);
-
 void test_furi_memmgr(void);
+void test_furi_epoll(void);
 
 static int foo = 0;
 
@@ -39,15 +39,19 @@ MU_TEST(mu_test_furi_memmgr) {
     test_furi_memmgr();
 }
 
+MU_TEST(mu_test_furi_epoll) {
+    test_furi_epoll();
+}
+
 MU_TEST_SUITE(test_suite) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
-
     MU_RUN_TEST(test_check);
 
     // v2 tests
     MU_RUN_TEST(mu_test_furi_create_open);
     MU_RUN_TEST(mu_test_furi_pubsub);
     MU_RUN_TEST(mu_test_furi_memmgr);
+    MU_RUN_TEST(mu_test_furi_epoll);
 }
 
 int run_minunit_test_furi(void) {

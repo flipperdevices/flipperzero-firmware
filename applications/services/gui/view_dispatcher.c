@@ -95,6 +95,13 @@ void view_dispatcher_set_tick_event_callback(
     view_dispatcher->tick_period = tick_period;
 }
 
+FuriEpoll* view_dispatcher_get_epoll(ViewDispatcher* view_dispatcher) {
+    furi_check(view_dispatcher);
+    furi_check(view_dispatcher->epoll);
+
+    return view_dispatcher->epoll;
+}
+
 void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
     furi_check(view_dispatcher->epoll);
@@ -369,7 +376,7 @@ void view_dispatcher_update(View* view, void* context) {
     }
 }
 
-void view_dispatcher_run_event_callback(FuriMessageQueue* queue, void* context) {
+bool view_dispatcher_run_event_callback(FuriMessageQueue* queue, void* context) {
     furi_assert(context);
     ViewDispatcher* instance = context;
     furi_assert(instance->event_queue == queue);
@@ -377,9 +384,11 @@ void view_dispatcher_run_event_callback(FuriMessageQueue* queue, void* context) 
     uint32_t event;
     furi_check(furi_message_queue_get(instance->event_queue, &event, 0) == FuriStatusOk);
     view_dispatcher_handle_custom_event(instance, event);
+
+    return true;
 }
 
-void view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context) {
+bool view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context) {
     furi_assert(context);
     ViewDispatcher* instance = context;
     furi_assert(instance->input_queue == queue);
@@ -387,4 +396,6 @@ void view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context) 
     InputEvent input;
     furi_check(furi_message_queue_get(instance->input_queue, &input, 0) == FuriStatusOk);
     view_dispatcher_handle_input(instance, &input);
+
+    return true;
 }

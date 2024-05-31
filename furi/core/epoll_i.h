@@ -22,6 +22,12 @@ typedef enum {
 #define FuriEpollFlagAll (FuriEpollFlagEvent | FuriEpollFlagStop)
 
 typedef enum {
+    FuriEpollProcessStatusComplete,
+    FuriEpollProcessStatusIncomplete,
+    FuriEpollProcessStatusAgain,
+} FuriEpollProcessStatus;
+
+typedef enum {
     FuriEpollItemTypeMessageQueue,
 } FuriEpollItemType;
 
