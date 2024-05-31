@@ -135,7 +135,11 @@ void furi_epoll_message_queue_add(
 
     furi_message_queue_epoll_in_set(message_queue, item, item->event);
 
-    if(item->event == FuriEpollEventIn && furi_message_queue_get_count(message_queue)) {
+    if(item->event == FuriEpollEventIn && furi_message_queue_get_count(item->item)) {
+        furi_epoll_item_notify(item, item->type, item->event);
+    }
+
+    if(item->event == FuriEpollEventOut && furi_message_queue_get_space(item->item)) {
         furi_epoll_item_notify(item, item->type, item->event);
     }
 

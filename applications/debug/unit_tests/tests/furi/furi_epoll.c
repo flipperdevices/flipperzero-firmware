@@ -61,11 +61,6 @@ int32_t test_furi_epoll_producer(void* p) {
         test_furi_epoll_producer_mq_callback,
         data);
 
-    data->producer_counter++;
-    furi_check(
-        furi_message_queue_put(data->mq, &data->producer_counter, 0) == FuriStatusOk,
-        "furi_message_queue_put failed");
-
     furi_epoll_poll(data->producer_epoll);
 
     furi_epoll_message_queue_remove(data->producer_epoll, data->mq);
