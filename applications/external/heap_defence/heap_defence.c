@@ -483,7 +483,8 @@ static void heap_defense_render_callback(Canvas* const canvas, void* mutex) {
     furi_mutex_release(game->mutex);
 }
 
-static void heap_defense_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void heap_defense_input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     if(input_event->type != InputTypePress && input_event->type != InputTypeLong) return;
 
     furi_assert(event_queue);
@@ -491,7 +492,8 @@ static void heap_defense_input_callback(InputEvent* input_event, FuriMessageQueu
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void heap_defense_timer_callback(FuriMessageQueue* event_queue) {
+static void heap_defense_timer_callback(void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     GameEvent event;

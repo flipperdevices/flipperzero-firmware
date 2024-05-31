@@ -113,7 +113,8 @@ static void tick_callback(void* ctx_q) {
     furi_message_queue_put(queue, &event, 0);
 }
 
-static void input_callback(InputEvent* input_event, FuriMessageQueue* queue) {
+static void input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* queue = ctx;
     furi_assert(queue);
     Event event = {.type = EventTypeKey, .input = *input_event};
     furi_message_queue_put(queue, &event, FuriWaitForever);

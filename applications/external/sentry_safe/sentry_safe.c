@@ -45,7 +45,8 @@ static void sentry_safe_render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_release(sentry_state->mutex);
 }
 
-static void sentry_safe_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void sentry_safe_input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     Event event = {.type = EventTypeKey, .input = *input_event};

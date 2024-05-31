@@ -26,7 +26,8 @@ bool totp_cli_ensure_authenticated(const PluginState* plugin_state, Cli* cli) {
     return true;
 }
 
-void totp_cli_force_close_app(FuriMessageQueue* event_queue) {
+void totp_cli_force_close_app(void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     PluginEvent event = {.type = EventForceCloseApp};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }

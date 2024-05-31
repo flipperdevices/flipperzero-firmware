@@ -21,8 +21,8 @@ static void multi_converter_render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_release(multi_converter_state->mutex);
 }
 
-static void
-    multi_converter_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void multi_converter_input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     MultiConverterEvent event = {.type = EventTypeKey, .input = *input_event};

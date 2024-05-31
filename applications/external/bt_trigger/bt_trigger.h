@@ -45,7 +45,7 @@ typedef struct {
 
 static void draw_callback(Canvas* canvas, void* ctx);
 static void input_callback(InputEvent* input_event, void* ctx);
-static void timer_callback(FuriMessageQueue* event_queue);
+static void timer_callback(void* ctx);
 static void bt_hid_connection_status_changed_callback(BtStatus status, void* context);
 AppStruct* appStructAlloc();
 void cleanUpBeforeYouLeave(AppStruct* app);

@@ -199,7 +199,8 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 }
 
 //Timer callback
-static void timer_callback(FuriMessageQueue* event_queue) {
+static void timer_callback(void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     //check eventqueue is not null
     furi_assert(event_queue);
     //creating event and adding it to the event list

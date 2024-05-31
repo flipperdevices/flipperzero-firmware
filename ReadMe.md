@@ -62,7 +62,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [IFTTT Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) Changes (By Willy-JL)
 - Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac) Fix (By Willy-JL)
 - Updated: [Sub-GHz Playlist v1.0 (By darmiel)](https://github.com/darmiel/flipper-playlist) Changes (By Willy-JL)
-- Updated: [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) Changes (By Willy-JL)s
+- Updated: [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) Changes (By Willy-JL)
+- Various app changes for message queue updates (By Willy-JL)
 
 <a name="release">
 

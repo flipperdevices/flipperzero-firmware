@@ -20,7 +20,7 @@ bool totp_cli_ensure_authenticated(const PluginState* plugin_state, Cli* cli);
  * @brief Forces application to be instantly closed
  * @param event_queue main app queue
  */
-void totp_cli_force_close_app(FuriMessageQueue* event_queue);
+void totp_cli_force_close_app(void* ctx);
 
 /**
  * @brief Reads line of characters from console
