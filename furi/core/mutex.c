@@ -41,8 +41,10 @@ void furi_mutex_free(FuriMutex* instance) {
     furi_check(!FURI_IS_IRQ_MODE());
     furi_check(instance);
 
-    vSemaphoreDelete((SemaphoreHandle_t)((uint32_t)instance & ~1UL));
-    free(instance);
+    FuriMutex* _instance = (FuriMutex*)((uint32_t)instance & ~1UL);
+
+    vSemaphoreDelete((SemaphoreHandle_t)_instance);
+    free(_instance);
 }
 
 FuriStatus furi_mutex_acquire(FuriMutex* instance, uint32_t timeout) {
