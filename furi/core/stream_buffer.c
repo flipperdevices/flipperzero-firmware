@@ -19,7 +19,7 @@ static_assert(offsetof(FuriStreamBuffer, buffer) == sizeof(FuriStreamBuffer));
 FuriStreamBuffer* furi_stream_buffer_alloc(size_t size, size_t trigger_level) {
     furi_check(size != 0);
 
-    FuriStreamBuffer* stream_buffer = malloc(sizeof(FuriStreamBuffer) + size);
+    FuriStreamBuffer* stream_buffer = malloc(sizeof(FuriStreamBuffer) + size + 1);
     StreamBufferHandle_t hStreamBuffer = xStreamBufferCreateStatic(
         size, trigger_level, stream_buffer->buffer, &stream_buffer->container);
 
