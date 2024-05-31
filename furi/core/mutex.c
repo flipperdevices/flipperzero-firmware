@@ -6,9 +6,11 @@
 #include <semphr.h>
 
 struct FuriMutex {
-    // IMPORTANT: MUST be the first struct member
     StaticSemaphore_t container;
 };
+
+// IMPORTANT: container MUST be the FIRST struct member
+static_assert(offsetof(FuriMutex, container) == 0);
 
 FuriMutex* furi_mutex_alloc(FuriMutexType type) {
     furi_check(!FURI_IS_IRQ_MODE());
