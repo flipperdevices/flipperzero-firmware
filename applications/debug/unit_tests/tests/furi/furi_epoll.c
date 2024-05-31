@@ -1,13 +1,6 @@
 #include "../test.h"
-#include "core/epoll.h"
-#include "core/kernel.h"
-#include "core/log.h"
-#include "core/message_queue.h"
-#include "core/thread.h"
-#include "furi_hal_random.h"
 #include <furi.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include <furi_hal.h>
 
 #define TAG "TestFuriEpoll"
 
