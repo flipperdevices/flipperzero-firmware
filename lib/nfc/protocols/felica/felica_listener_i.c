@@ -112,12 +112,12 @@ const FelicaBlockListElement* felica_listener_block_list_item_get_first(
 
 const FelicaBlockListElement* felica_listener_block_list_item_get_next(
     FelicaListener* instance,
-    const FelicaBlockListElement* item) {
+    const FelicaBlockListElement* prev_item) {
     furi_assert(instance);
-    furi_assert(item);
+    furi_assert(prev_item);
 
     return felica_listener_block_list_iterate(
-        instance, item, FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE(item));
+        instance, prev_item, FELICA_LISTENER_BLOCK_LIST_ITEM_SIZE(prev_item));
 }
 
 const FelicaListenerWriteBlockData* felica_listener_get_write_request_data_pointer(
