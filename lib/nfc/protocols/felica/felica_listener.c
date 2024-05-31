@@ -65,7 +65,7 @@ static FelicaError felica_listener_command_handler_read(
 
     FelicaListenerReadCommandResponse* resp = malloc(
         sizeof(FelicaCommandResponseHeader) + 1 +
-        request->base.header.block_count * FELICA_DATA_BLOCK_SIZE);
+        FELICA_LISTENER_READ_BLOCK_COUNT_MAX * FELICA_DATA_BLOCK_SIZE);
     furi_check(resp);
 
     resp->header.response_code = FELICA_LISTENER_RESPONSE_CODE_READ;
