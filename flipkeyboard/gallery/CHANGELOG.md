@@ -1,3 +1,5 @@
+## 3.7
+ - Fix issue were invalid memory was getting freed.
 ## 3.6
  - Show "BLE" or "USB".
 ## 3.5
