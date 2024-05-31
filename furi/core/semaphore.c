@@ -23,7 +23,8 @@ FuriSemaphore* furi_semaphore_alloc(uint32_t max_count, uint32_t initial_count) 
     if(max_count == 1U) {
         hSemaphore = xSemaphoreCreateBinaryStatic(&instance->container);
     } else {
-        hSemaphore = xSemaphoreCreateCountingStatic(max_count, initial_count, &instance->container);
+        hSemaphore =
+            xSemaphoreCreateCountingStatic(max_count, initial_count, &instance->container);
     }
 
     furi_check(hSemaphore == (SemaphoreHandle_t)instance);
