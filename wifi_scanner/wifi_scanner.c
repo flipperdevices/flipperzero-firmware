@@ -636,7 +636,8 @@ static void wifi_module_render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_release(app->mutex);
 }
 
-static void wifi_module_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void wifi_module_input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     SPluginEvent event = {.m_type = EventTypeKey, .m_input = *input_event};
