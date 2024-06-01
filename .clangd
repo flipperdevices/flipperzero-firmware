@@ -5,5 +5,9 @@ CompileFlags:
     Remove: 
         - -mword-relocations
 
+---
+
+If:
+    PathMatch: .*\.h
 Diagnostics:
     UnusedIncludes: None
