@@ -46,7 +46,8 @@ static bool animation_storage_load_single_manifest_info(
         /* skip other animation names */
         flipper_format_set_strict_mode(file, false);
         while(flipper_format_read_string(file, "Name", read_string) &&
-              furi_string_cmp_str(read_string, name));
+              furi_string_cmp_str(read_string, name))
+            ;
         if(furi_string_cmp_str(read_string, name)) break;
         flipper_format_set_strict_mode(file, true);
 
