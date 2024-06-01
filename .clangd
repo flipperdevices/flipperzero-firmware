@@ -1,7 +1,8 @@
 CompileFlags:
-  Add: -Wno-unknown-warning-option
-  ## Experimental
-  # Remove: [-m*, -f*]
+    Add: 
+        - -Wno-unknown-warning-option
+    Remove: 
+        - -mword-relocations
 
 Diagnostics:
-  UnusedIncludes: None
+    UnusedIncludes: None
