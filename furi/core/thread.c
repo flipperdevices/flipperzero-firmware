@@ -263,7 +263,7 @@ void furi_thread_start(FuriThread* thread) {
     furi_check(thread);
     furi_check(thread->callback);
     furi_check(thread->state == FuriThreadStateStopped);
-    furi_check(thread->stack_size > 0 && thread->stack_size < (UINT16_MAX * sizeof(StackType_t)));
+    furi_check(thread->stack_size > 0 && thread->stack_size < (UINT16_MAX));
 
     furi_thread_set_state(thread, FuriThreadStateStarting);
 

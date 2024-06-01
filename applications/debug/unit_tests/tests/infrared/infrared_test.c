@@ -2,7 +2,7 @@
 #include <flipper_format.h>
 #include <infrared.h>
 #include <common/infrared_common_i.h>
-#include "../test.h"
+#include "../test.h" // IWYU pragma: keep
 
 #define IR_TEST_FILES_DIR EXT_PATH("unit_tests/infrared/")
 #define IR_TEST_FILE_PREFIX "test_"
@@ -76,8 +76,7 @@ static bool infrared_test_load_raw_signal(
     do {
         bool is_name_found = false;
         for(; !is_name_found && flipper_format_read_string(ff, "name", buf);
-            is_name_found = !furi_string_cmp(buf, signal_name))
-            ;
+            is_name_found = !furi_string_cmp(buf, signal_name));
 
         if(!is_name_found) break;
         if(!flipper_format_read_string(ff, "type", buf) || furi_string_cmp_str(buf, "raw")) break;
@@ -129,8 +128,7 @@ static bool infrared_test_load_messages(
     do {
         bool is_name_found = false;
         for(; !is_name_found && flipper_format_read_string(ff, "name", buf);
-            is_name_found = !furi_string_cmp(buf, signal_name))
-            ;
+            is_name_found = !furi_string_cmp(buf, signal_name));
 
         if(!is_name_found) break;
         if(!flipper_format_read_string(ff, "type", buf) ||
