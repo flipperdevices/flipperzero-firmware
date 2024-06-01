@@ -1,6 +1,7 @@
 CompileFlags:
     Add: 
         - -Wno-unknown-warning-option
+        - -Wno-format
     Remove: 
         - -mword-relocations
 
