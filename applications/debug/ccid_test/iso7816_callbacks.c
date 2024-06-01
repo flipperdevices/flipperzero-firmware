@@ -17,16 +17,12 @@ void iso7816_set_callbacks(Iso7816Callbacks* cb) {
 }
 
 void iso7816_icc_power_on_callback(uint8_t* atrBuffer, uint32_t* atrlen) {
-
     Iso7816Atr atr;
     callbacks->iso7816_answer_to_reset(&atr);
 
     furi_assert(atr.T0 == 0x00);
 
-    uint8_t AtrBuffer[2] = {
-        atr.TS, 
-        atr.T0
-    };
+    uint8_t AtrBuffer[2] = {atr.TS, atr.T0};
 
     *atrlen = 2;
 
@@ -40,14 +36,13 @@ void iso7816_xfr_datablock_callback(
     uint32_t pcToReaderDataBlockLen,
     uint8_t* readerToPcDataBlock,
     uint32_t* readerToPcDataBlockLen) {
-
     struct ISO7816_Response_APDU responseAPDU;
     uint8_t responseApduDataBuffer[ISO7816_RESPONSE_BUFFER_SIZE];
     uint8_t responseApduDataBufferLen = 0;
 
     if(callbacks != NULL) {
         struct ISO7816_Command_APDU commandAPDU;
-        
+
         const uint8_t* commandApduDataBuffer = NULL;
         uint8_t commandApduDataBufferLen = 0;
 
@@ -58,7 +53,13 @@ void iso7816_xfr_datablock_callback(
             commandApduDataBuffer = &pcToReaderDataBlock[5];
         }
 
-        callbacks->iso7816_process_command(&commandAPDU, &responseAPDU, commandApduDataBuffer, commandApduDataBufferLen, responseApduDataBuffer, &responseApduDataBufferLen);
+        callbacks->iso7816_process_command(
+            &commandAPDU,
+            &responseAPDU,
+            commandApduDataBuffer,
+            commandApduDataBufferLen,
+            responseApduDataBuffer,
+            &responseApduDataBufferLen);
 
     } else {
         //class not supported
@@ -66,6 +67,10 @@ void iso7816_xfr_datablock_callback(
         responseAPDU.SW2 = 0x00;
     }
 
-    iso7816_write_response_apdu(&responseAPDU, readerToPcDataBlock, readerToPcDataBlockLen, responseApduDataBuffer, responseApduDataBufferLen);    
-
+    iso7816_write_response_apdu(
+        &responseAPDU,
+        readerToPcDataBlock,
+        readerToPcDataBlockLen,
+        responseApduDataBuffer,
+        responseApduDataBufferLen);
 }

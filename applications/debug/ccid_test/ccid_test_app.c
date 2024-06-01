@@ -34,7 +34,6 @@ typedef enum {
     CcidTestSubmenuIndexInsertSmartcardReader
 } SubmenuIndex;
 
-
 static void ccid_test_app_render_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
     canvas_clear(canvas);
@@ -111,8 +110,8 @@ void ccid_xfr_datablock_callback(
     void* context) {
     UNUSED(context);
 
-    iso7816_xfr_datablock_callback(pcToReaderDataBlock, pcToReaderDataBlockLen, readerToPcDataBlock, readerToPcDataBlockLen);
-
+    iso7816_xfr_datablock_callback(
+        pcToReaderDataBlock, pcToReaderDataBlockLen, readerToPcDataBlock, readerToPcDataBlockLen);
 }
 
 static const CcidCallbacks ccid_cb = {
@@ -133,51 +132,49 @@ void iso7816_process_command(
     uint8_t commandApduDataBufferLen,
     uint8_t* responseApduDataBuffer,
     uint8_t* responseApduDataBufferLen) {
+    //example 1: sends a command with no body, receives a response with no body
+    //sends APDU 0x01:0x02:0x00:0x00
+    //receives SW1=0x90, SW2=0x00
+    if(commandAPDU->CLA == 0x01 && commandAPDU->INS == 0x01) {
+        responseAPDU->SW1 = 0x90;
+        responseAPDU->SW2 = 0x00;
+    }
+    //example 2: sends a command with no body, receives a response with a body with two bytes
+    //sends APDU 0x01:0x02:0x00:0x00
+    //receives 'bc' (0x62, 0x63) SW1=0x80, SW2=0x10
+    else if(commandAPDU->CLA == 0x01 && commandAPDU->INS == 0x02) {
+        responseApduDataBuffer[0] = 0x62;
+        responseApduDataBuffer[1] = 0x63;
 
-        //example 1: sends a command with no body, receives a response with no body
-        //sends APDU 0x01:0x02:0x00:0x00
-        //receives SW1=0x90, SW2=0x00
-        if(commandAPDU->CLA == 0x01 && commandAPDU->INS == 0x01) {
-            responseAPDU->SW1=0x90;
-            responseAPDU->SW2=0x00;
-        }
-        //example 2: sends a command with no body, receives a response with a body with two bytes
-        //sends APDU 0x01:0x02:0x00:0x00
-        //receives 'bc' (0x62, 0x63) SW1=0x80, SW2=0x10
-        else if (commandAPDU->CLA == 0x01 && commandAPDU->INS == 0x02) {
+        *responseApduDataBufferLen = 2;
 
-            responseApduDataBuffer[0] = 0x62;
-            responseApduDataBuffer[1] = 0x63;
+        responseAPDU->SW1 = 0x90;
+        responseAPDU->SW2 = 0x00;
+    }
+    //example 3: ends a command with a body with two bytes, receives a response with  a body with two bytes
+    //sends APDU 0x01:0x03:0x00:0x00:0x02:CA:FE
+    //receives (0xCA, 0xFE) SW1=0x90, SW2=0x02
+    else if(
+        commandAPDU->CLA == 0x01 && commandAPDU->INS == 0x03 && commandApduDataBufferLen == 2 &&
+        commandAPDU->Lc == 2) {
+        //echo command body to response body
+        responseApduDataBuffer[0] = commandApduDataBuffer[0];
+        responseApduDataBuffer[1] = commandApduDataBuffer[1];
 
-            *responseApduDataBufferLen = 2;
+        *responseApduDataBufferLen = 2;
 
-            responseAPDU->SW1=0x90;
-            responseAPDU->SW2=0x00;
-        }
-        //example 3: ends a command with a body with two bytes, receives a response with  a body with two bytes
-        //sends APDU 0x01:0x03:0x00:0x00:0x02:CA:FE
-        //receives (0xCA, 0xFE) SW1=0x90, SW2=0x02
-        else if (commandAPDU->CLA == 0x01 && commandAPDU->INS == 0x03 && commandApduDataBufferLen == 2 && commandAPDU->Lc == 2) {
-
-            //echo command body to response body
-            responseApduDataBuffer[0] = commandApduDataBuffer[0];
-            responseApduDataBuffer[1] = commandApduDataBuffer[1];
-
-            *responseApduDataBufferLen = 2;
-
-            responseAPDU->SW1=0x90;
-            responseAPDU->SW2=0x00;
-        } else {
-            responseAPDU->SW1=0x6A;
-            responseAPDU->SW2=0x00;
-        }    
+        responseAPDU->SW1 = 0x90;
+        responseAPDU->SW2 = 0x00;
+    } else {
+        responseAPDU->SW1 = 0x6A;
+        responseAPDU->SW2 = 0x00;
+    }
 }
 
 static const Iso7816Callbacks iso87816_cb = {
     iso7816_answer_to_reset,
     iso7816_process_command,
 };
-
 
 int32_t ccid_test_app(void* p) {
     UNUSED(p);

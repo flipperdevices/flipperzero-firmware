@@ -331,7 +331,9 @@ void CALLBACK_CCID_IccPowerOn(
         if(smartcard_inserted) {
             if(callbacks[CCID_SLOT_INDEX] != NULL) {
                 callbacks[CCID_SLOT_INDEX]->icc_power_on_callback(
-                    responseDataBlock->abData, &responseDataBlock->dwLength, cb_ctx[CCID_SLOT_INDEX]);
+                    responseDataBlock->abData,
+                    &responseDataBlock->dwLength,
+                    cb_ctx[CCID_SLOT_INDEX]);
                 responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
                                              CCID_ICCSTATUS_PRESENTANDACTIVE;
             } else {

@@ -10,7 +10,6 @@ void iso7816_read_command_apdu(
     struct ISO7816_Command_APDU* command,
     const uint8_t* dataBuffer,
     uint32_t dataLen) {
-
     UNUSED(dataLen);
 
     command->CLA = dataBuffer[0];
@@ -18,7 +17,6 @@ void iso7816_read_command_apdu(
     command->P1 = dataBuffer[2];
     command->P2 = dataBuffer[3];
     command->Lc = dataBuffer[4];
-
 }
 
 //data buffer countains the whole APU response (response + trailer (SW1+SW2))
@@ -28,13 +26,13 @@ void iso7816_write_response_apdu(
     uint32_t* readerToPcDataBlockLen,
     uint8_t* responseDataBuffer,
     uint32_t responseDataLen) {
-
-    uint32_t responseDataBufferIndex=0;
+    uint32_t responseDataBufferIndex = 0;
 
     //response body
     if(responseDataLen > 0) {
-        while(responseDataBufferIndex < responseDataLen){
-            readerToPcDataBlock[responseDataBufferIndex] = responseDataBuffer[responseDataBufferIndex];
+        while(responseDataBufferIndex < responseDataLen) {
+            readerToPcDataBlock[responseDataBufferIndex] =
+                responseDataBuffer[responseDataBufferIndex];
             responseDataBufferIndex++;
         }
     }

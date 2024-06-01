@@ -22,7 +22,7 @@ struct ISO7816_Response_APDU {
     uint8_t SW2;
 } FURI_PACKED;
 
-void iso7816_answer_to_reset(Iso7816Atr * atr);
+void iso7816_answer_to_reset(Iso7816Atr* atr);
 void iso7816_read_command_apdu(
     struct ISO7816_Command_APDU* command,
     const uint8_t* dataBuffer,
