@@ -545,7 +545,7 @@ static bool
         uint16_t bit_count = 0;
         do {
             gap_ind--;
-            data_temp = (int)(round((double)(instance->data_raw[gap_ind]) / instance->te));
+            data_temp = (int)(roundf((float)(instance->data_raw[gap_ind]) / instance->te));
             bin_raw_debug("%d ", data_temp);
             if(data_temp == 0) bit_count++; //there is noise in the package
             for(size_t i = 0; i < (size_t)abs(data_temp); i++) {
@@ -808,7 +808,7 @@ static bool
         bin_raw_debug_tag(TAG, "Sequence analysis without gap\r\n");
         ind = 0;
         for(size_t i = 0; i < instance->data_raw_ind; i++) {
-            int data_temp = (int)(round((double)(instance->data_raw[i]) / instance->te));
+            int data_temp = (int)(roundf((float)(instance->data_raw[i]) / instance->te));
             if(data_temp == 0) break; //found an interval 2 times shorter than TE, this is noise
             bin_raw_debug("%d  ", data_temp);
 
