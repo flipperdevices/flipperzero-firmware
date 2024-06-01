@@ -34,8 +34,8 @@ static void lfrfid_debug_view_tune_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_color(canvas, ColorBlack);
 
     char buffer[TEMP_STR_LEN + 1];
-    double freq = ((double)SystemCoreClock / ((double)model->ARR + 1));
-    double duty = ((double)model->CCR + 1) / ((double)model->ARR + 1) * 100.0;
+    double freq = ((double)SystemCoreClock / (model->ARR + 1));
+    double duty = (double)((model->CCR + 1) * 100) / (model->ARR + 1);
     snprintf(
         buffer,
         TEMP_STR_LEN,
