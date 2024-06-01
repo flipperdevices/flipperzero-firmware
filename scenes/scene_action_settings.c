@@ -93,18 +93,10 @@ static bool scene_action_settings_import_file_browser_callback(
 
 // Ask user for file to import from elsewhere on the SD card
 FuriString* scene_action_get_file_to_import_alloc(App* app) {
-    FuriString* current_path = furi_string_alloc();
-    if(app->selected_item != EMPTY_ACTION_INDEX) {
-        Item* item = ItemArray_get(app->items_view->items, app->selected_item);
-        path_extract_dirname(furi_string_get_cstr(item->path), current_path);
-    } else {
-        furi_string_set(current_path, app->items_view->path);
-    }
-
     // Setup our file browser options
     DialogsFileBrowserOptions fb_options;
     dialog_file_browser_set_basic_options(&fb_options, "", NULL);
-    fb_options.base_path = furi_string_get_cstr(current_path);
+    fb_options.base_path = STORAGE_EXT_PATH_PREFIX;
     fb_options.skip_assets = true;
     furi_string_set_str(app->temp_str, fb_options.base_path);
     fb_options.item_loader_callback = scene_action_settings_import_file_browser_callback;
@@ -112,18 +104,8 @@ FuriString* scene_action_get_file_to_import_alloc(App* app) {
 
     FuriString* full_path = NULL;
     if(dialog_file_browser_show(app->dialog, app->temp_str, app->temp_str, &fb_options)) {
-        // FURI_LOG_I(TAG, "Selected file is %s", furi_string_get_cstr(app->temp_str));
-        FuriString* file_name = furi_string_alloc();
-        path_extract_filename(app->temp_str, file_name, false);
-        // FURI_LOG_I(TAG, "Importing file %s", furi_string_get_cstr(file_name));
-        full_path = furi_string_alloc_printf(
-            "%s/%s", furi_string_get_cstr(current_path), furi_string_get_cstr(file_name));
-        // FURI_LOG_I(TAG, "New path is %s", furi_string_get_cstr(full_path));
-        furi_string_free(file_name);
-    } else {
-        // FURI_LOG_I(TAG, "User cancelled");
+        full_path = furi_string_alloc_set(app->temp_str);
     }
-    furi_string_free(current_path);
     return full_path;
 }
 
@@ -241,8 +223,8 @@ bool scene_action_settings_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             // get the filename to import
             FuriString* import_file = scene_action_get_file_to_import_alloc(app);
-            FURI_LOG_I(TAG, "Importing %s", furi_string_get_cstr(import_file));
             if(import_file) {
+                FURI_LOG_I(TAG, "Importing %s", furi_string_get_cstr(import_file));
                 // if it's a .ir file, switch to a scene that lets user pick the command from the file
                 // only if there's more than one command in the file. then copy that relevant chunk
                 // to the local directory
@@ -274,12 +256,23 @@ bool scene_action_settings_on_event(void* context, SceneManagerEvent event) {
                         furi_string_get_cstr(file_name));
                     // FURI_LOG_I(TAG, "New path is %s", furi_string_get_cstr(full_path));
 
+                    FURI_LOG_I(
+                        TAG,
+                        "Copy: %s to %s",
+                        furi_string_get_cstr(import_file),
+                        furi_string_get_cstr(full_path));
                     FS_Error fs_result = storage_common_copy(
                         app->storage,
                         furi_string_get_cstr(import_file),
                         furi_string_get_cstr(full_path));
-                    if(fs_result == FSE_OK) {
-                    } else {
+                    if(fs_result != FSE_OK) {
+                        FURI_LOG_E(
+                            TAG, "Copy file failed! %s", filesystem_api_error_get_desc(fs_result));
+                        FuriString* error_msg = furi_string_alloc_printf(
+                            "Copy failed!\nError: %s", filesystem_api_error_get_desc(fs_result));
+                        dialog_message_show_storage_error(
+                            app->dialog, furi_string_get_cstr(error_msg));
+                        furi_string_free(error_msg);
                     }
                     furi_string_free(file_name);
                     furi_string_free(full_path);
