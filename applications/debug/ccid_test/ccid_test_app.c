@@ -184,8 +184,8 @@ int32_t ccid_test_app(void* p) {
 
     //setup CCID USB
     // On linux: set VID PID using: /usr/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Info.plist
-    app->ccid_cfg.vid = 0x1234;
-    app->ccid_cfg.pid = 0x5678;
+    app->ccid_cfg.vid = 0x076B;
+    app->ccid_cfg.pid = 0x3A21;
 
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_unlock();
