@@ -13,10 +13,10 @@ MU_TEST(test_power_charge_voltage_limit_exact) {
     //
     // This test may need adapted if other charge controllers are used in the future.
     for(uint16_t charge_mv = 3840; charge_mv <= 4208; charge_mv += 16) {
-        double charge_volt = (double)charge_mv / 1000;
+        float charge_volt = (float)charge_mv / 1000;
         furi_hal_power_set_battery_charge_voltage_limit(charge_volt);
         mu_assert_double_eq(
-            charge_volt, (double)furi_hal_power_get_battery_charge_voltage_limit());
+            (double)charge_volt, (double)furi_hal_power_get_battery_charge_voltage_limit());
     }
 }
 
