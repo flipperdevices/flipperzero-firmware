@@ -1,0 +1,7 @@
+CompileFlags:
+  Add: -Wno-unknown-warning-option
+  ## Experimental
+  # Remove: [-m*, -f*]
+
+Diagnostics:
+  UnusedIncludes: None
