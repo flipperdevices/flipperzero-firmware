@@ -76,15 +76,15 @@ static bool scene_action_settings_import_file_browser_callback(
     char ext[MAX_EXT_LEN];
     path_extract_extension(path, ext, MAX_EXT_LEN);
     if(!strcmp(ext, ".sub")) {
-        memcpy(*icon, icon_get_data(&I_SubGHz_10px), 32); // TODO: find the right size!
+        memcpy(*icon, icon_get_frame_data(&I_SubGHz_10px, 0), 32); // TODO: find the right size!
     } else if(!strcmp(ext, ".rfid")) {
-        memcpy(*icon, icon_get_data(&I_RFID_10px), 32);
+        memcpy(*icon, icon_get_frame_data(&I_RFID_10px, 0), 32);
     } else if(!strcmp(ext, ".ir")) {
-        memcpy(*icon, icon_get_data(&I_IR_10px), 32);
+        memcpy(*icon, icon_get_frame_data(&I_IR_10px, 0), 32);
     } else if(!strcmp(ext, ".nfc")) {
-        memcpy(*icon, icon_get_data(&I_NFC_10px), 32);
+        memcpy(*icon, icon_get_frame_data(&I_NFC_10px, 0), 32);
     } else if(!strcmp(ext, ".qpl")) {
-        memcpy(*icon, icon_get_data(&I_Playlist_10px), 32);
+        memcpy(*icon, icon_get_frame_data(&I_Playlist_10px, 0), 32);
     } else {
         return false;
     }
