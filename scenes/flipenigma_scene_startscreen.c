@@ -1,5 +1,4 @@
 #include "../flipenigma.h"
-#include "../helpers/flipenigma_voice.h"
 #include "../helpers/flipenigma_file.h"
 #include "../helpers/flipenigma_custom_event.h"
 #include "../views/flipenigma_startscreen.h"
