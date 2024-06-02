@@ -243,7 +243,8 @@ Enigma *init_enigma(const char *rotor_names[ROTORS_N],
 
   if (plugboard_size > PLUGBOARD_SIZE) {
     printf("[ERROR]: init_enigma() - supplied plugboard size (%d) greater than maxium (%d)\n", plugboard_size, PLUGBOARD_SIZE);
-    exit(0);
+    // exit(0);
+    return NULL;
   }
 
   Enigma *e = calloc(1, sizeof(Enigma));
