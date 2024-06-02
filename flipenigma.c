@@ -67,20 +67,24 @@ static void text_build_output(char *input, char *output)
     {
         if (input[in] >= 'A' && input[in] <= 'Z')
         {
+            // encrypt A-Z characters only
+
+            // copy the current input char to new object
             char plaintext[2];
             plaintext[0] = input[in];
             plaintext[1] = '\0';
             char ciphertext[2];
             ciphertext[0] = input[in];
             ciphertext[1] = '\0';
-
+            // encrypt this single character
             enigma_encrypt(e, plaintext, 1, ciphertext);
-
+            // set output at position
             output[out] = ciphertext[0];
         }
         else
         {
-            output[out] = input[in]; // do not
+            // passthrough non A-Z char at position
+            output[out] = input[in];
         }
         out++;
     }
@@ -100,28 +104,23 @@ static void text_input_callback(void *context)
     // check that there is text in the input
     if (strlen(app->input_text) > 0)
     {
-
-        FURI_LOG_D("enigma", "Input text: %s", app->input_text);
-        // this is where we build the output.
+        // convert the text to uppercase
         text_string_to_uppercase(app->input_text);
-        FURI_LOG_D("enigma", "Upper text: %s", app->input_text);
-        // this does the actual work of encrypting the text
+        // do the actual work of encrypting the text
         text_build_output(app->input_text, app->cipher_text);
-        
+        // pupulate text box with cipher text
         text_box_set_text(app->text_box, app->cipher_text);
-        
-        // reset input state
-        app->input_state = FlipEnigmaTextInputDefault;
+        // set handled boolean
         handled = true;
-
-        // TODO
-        view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdTextBox);
     }
 
-    if (!handled)
+    // reset input state
+    app->input_state = FlipEnigmaTextInputDefault;
+    if (handled) {
+        view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdTextBox);
+    }
+    else
     {
-        // reset input state
-        app->input_state = FlipEnigmaTextInputDefault;
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdMenu);
     }
 }

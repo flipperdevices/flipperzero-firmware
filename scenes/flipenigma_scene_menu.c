@@ -28,7 +28,7 @@ bool flipenigma_scene_menu_on_event(void* context, SceneManagerEvent event) {
     FlipEnigma* app = context;
     //UNUSED(app);
     if(event.type == SceneManagerEventTypeBack) {
-        //exit app
+        // exit app
         scene_manager_stop(app->scene_manager);
         view_dispatcher_stop(app->view_dispatcher);
         return true;
@@ -36,7 +36,9 @@ bool flipenigma_scene_menu_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexTextInput) {
             scene_manager_set_scene_state(
                 app->scene_manager, FlipEnigmaSceneMenu, SubmenuIndexTextInput);
-            view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdTextInput);
+            // set input state to "Active" to get correct scene behavior
+            app->input_state = FlipEnigmaTextInputActive;
+            scene_manager_next_scene(app->scene_manager, FlipEnigmaSceneStartscreen);
             return true;
         }
         else if(event.event == SubmenuIndexSettings) {

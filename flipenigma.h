@@ -18,6 +18,7 @@
 
 #define FLIPENIGMA_VERSION "v1.0"
 
+// "To make cryptanalysis harder, messages were limited to 250 characters."
 #define TEXT_BUFFER_SIZE 251
 #define TEXT_SIZE (TEXT_BUFFER_SIZE - 1)
 
@@ -65,7 +66,7 @@ typedef enum {
     FlipEnigmaPlayerAI3 = 3,
 } FlipEnigmaPlayerMode;
 
-typedef enum { FlipEnigmaTextInputDefault, FlipEnigmaTextInputGame } FlipEnigmaTextInputState;
+typedef enum { FlipEnigmaTextInputDefault, FlipEnigmaTextInputActive } FlipEnigmaTextInputState;
 
 typedef enum {
     FlipEnigmaStatusNone = 0,

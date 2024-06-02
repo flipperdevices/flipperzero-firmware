@@ -19,9 +19,16 @@ void flipenigma_scene_startscreen_on_enter(void* context) {
     //     }
     // }
 
-    flipenigma_startscreen_set_callback(
-        app->flipenigma_startscreen, flipenigma_scene_startscreen_callback, app);
-    view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdStartscreen);
+    if(app->input_state == FlipEnigmaTextInputActive) {
+        // handle text input; this only uses this scene to have 
+        // a correct stack of scenes
+        view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdTextInput);
+    } else {
+        // handle default mode; actually use this scene's logic
+        flipenigma_startscreen_set_callback(
+            app->flipenigma_startscreen, flipenigma_scene_startscreen_callback, app);
+        view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdStartscreen);
+    }
 }
 
 bool flipenigma_scene_startscreen_on_event(void* context, SceneManagerEvent event) {
