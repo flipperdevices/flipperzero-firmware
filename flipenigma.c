@@ -187,6 +187,9 @@ FlipEnigma *flipenigma_app_alloc()
     text_input_set_header_text(app->text_input, "Input");
     view_dispatcher_add_view(
         app->view_dispatcher, FlipEnigmaViewIdTextInput, text_input_get_view(app->text_input));
+
+    app->text_box = text_box_alloc();
+    text_box_set_font(app->text_box, TextBoxFontText);
     view_dispatcher_add_view(
         app->view_dispatcher, FlipEnigmaViewIdTextBox, text_box_get_view(app->text_box));
 
