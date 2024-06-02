@@ -67,8 +67,16 @@ static void text_build_output(char *input, char *output)
     {
         if (input[in] >= 'A' && input[in] <= 'Z')
         {
-            enigma_encrypt(e, input[in], 1, output[out]);
-            //output[out] = input[in]; // do
+            char plaintext[2];
+            plaintext[0] = input[in];
+            plaintext[1] = '\0';
+            char ciphertext[2];
+            ciphertext[0] = input[in];
+            ciphertext[1] = '\0';
+
+            enigma_encrypt(e, plaintext, 1, ciphertext);
+
+            output[out] = ciphertext[0];
         }
         else
         {
@@ -204,7 +212,7 @@ void flipenigma_app_free(FlipEnigma *app)
     view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdTextInput);
     text_input_free(app->text_input);
     view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdTextBox);
-    text_input_free(app->text_box);
+    text_box_free(app->text_box);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
