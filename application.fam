@@ -1,0 +1,19 @@
+App(
+    appid="Enigma",
+    name="Enigma",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipenigma_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=4 * 1024,
+    order=10,
+    fap_icon="flipenigma_10px.png",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="flipenigma",
+    fap_category="Games",
+    fap_author="Struan Clark (xtruan)",
+    fap_weburl="https://github.com/xtruan/flipper-enigma",
+    fap_version=(1, 0),
+    fap_description="Enigma for Flipper",
+)
