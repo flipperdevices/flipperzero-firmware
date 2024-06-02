@@ -2,13 +2,13 @@
 
 [![Build](https://github.com/xtruan/flipper-enigma/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xtruan/flipper-enigma/actions/workflows/build.yml)
 
-`HOW ABOUT A NICE GAME OF ENIGMA?`
+`(ENIGMA)`
 
 ![FLIPR](https://github.com/xtruan/flipper-enigma/blob/main/icons/FLIPR_128x64.png)
 
-## Enigma game for Flipper Zero
+## Enigma machine simulator for Flipper Zero
 - Built against `0.101.2` Flipper Zero firmware release
-- Uses [smallenigmalib](https://codeberg.org/drummyfish/smallenigmalib)
+- Uses [enigma-machine](https://github.com/LeonardoE95/enigma-machine)
 
 ### Installation
 
