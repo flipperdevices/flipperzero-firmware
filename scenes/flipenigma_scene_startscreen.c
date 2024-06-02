@@ -13,11 +13,11 @@ void flipenigma_scene_startscreen_on_enter(void* context) {
     furi_assert(context);
     FlipEnigma* app = context;
 
-    if(flipenigma_has_file(FlipEnigmaFileBoard, NULL, false)) {
-        if(flipenigma_load_file(app->import_game_text, FlipEnigmaFileBoard, NULL)) {
-            app->import_game = 1;
-        }
-    }
+    // if(flipenigma_has_file(FlipEnigmaFileBoard, NULL, false)) {
+    //     if(flipenigma_load_file(app->cipher_text, FlipEnigmaFileBoard, NULL)) {
+    //         app->import_game = 1;
+    //     }
+    // }
 
     flipenigma_startscreen_set_callback(
         app->flipenigma_startscreen, flipenigma_scene_startscreen_callback, app);

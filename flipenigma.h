@@ -12,13 +12,13 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/text_box.h>
 #include "scenes/flipenigma_scene.h"
 #include "views/flipenigma_startscreen.h"
-#include "views/flipenigma_scene_1.h"
 
-#define FLIPENIGMA_VERSION "v1.10"
+#define FLIPENIGMA_VERSION "v1.0"
 
-#define TEXT_BUFFER_SIZE 96
+#define TEXT_BUFFER_SIZE 251
 #define TEXT_SIZE (TEXT_BUFFER_SIZE - 1)
 
 typedef struct {
@@ -29,8 +29,8 @@ typedef struct {
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     TextInput* text_input;
+    TextBox* text_box;
     FlipEnigmaStartscreen* flipenigma_startscreen;
-    FlipEnigmaScene1* flipenigma_scene_1;
     // Settings options
     int haptic;
     int white_mode;
@@ -41,16 +41,16 @@ typedef struct {
     uint8_t import_game;
     // Text input
     uint8_t input_state;
-    char import_game_text[TEXT_BUFFER_SIZE];
+    char cipher_text[TEXT_BUFFER_SIZE];
     char input_text[TEXT_BUFFER_SIZE];
 } FlipEnigma;
 
 typedef enum {
     FlipEnigmaViewIdStartscreen,
     FlipEnigmaViewIdMenu,
-    FlipEnigmaViewIdScene1,
     FlipEnigmaViewIdSettings,
     FlipEnigmaViewIdTextInput,
+    FlipEnigmaViewIdTextBox,
 } FlipEnigmaViewId;
 
 typedef enum {

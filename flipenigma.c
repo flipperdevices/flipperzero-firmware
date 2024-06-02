@@ -1,68 +1,133 @@
 #include "flipenigma.h"
 #include "helpers/flipenigma_haptic.h"
 
-bool flipenigma_custom_event_callback(void* context, uint32_t event) {
+#define ENIGMA_IMPLEMENTATION
+#include "enigma/enigma.h"
+
+bool flipenigma_custom_event_callback(void *context, uint32_t event)
+{
     furi_assert(context);
-    FlipEnigma* app = context;
+    FlipEnigma *app = context;
     return scene_manager_handle_custom_event(app->scene_manager, event);
 }
 
-void flipenigma_tick_event_callback(void* context) {
+void flipenigma_tick_event_callback(void *context)
+{
     furi_assert(context);
-    FlipEnigma* app = context;
+    FlipEnigma *app = context;
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-//leave app if back button pressed
-bool flipenigma_navigation_event_callback(void* context) {
+// leave app if back button pressed
+bool flipenigma_navigation_event_callback(void *context)
+{
     furi_assert(context);
-    FlipEnigma* app = context;
+    FlipEnigma *app = context;
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-static void text_input_callback(void* context) {
+static void text_string_to_uppercase(char *input)
+{
+    int i;
+    for (i = 0; input[i] != '\0'; i++)
+    {
+        if (input[i] >= 'a' && input[i] <= 'z')
+        {
+            input[i] = input[i] - 32;
+        }
+        else
+        {
+            input[i] = input[i];
+        }
+    }
+}
+
+static void text_build_output(char *input, char *output)
+{
+    Enigma *e = init_enigma (
+			   // rotors model
+			   (const char *[]){"M3-II", "M3-I", "M3-III"},
+			   // rotor_positions
+			   (const uint8_t [ROTORS_N]) {0, 0, 0},
+			   // rotor_ring_settings
+			   (const uint8_t [ROTORS_N]) {0, 0, 0},
+			   // reflector model
+			   "M3-B",
+			   // plugboard switches
+			   (uint8_t [][2]){                      
+			     {'A', 'M'}, {'F', 'I'}, {'N', 'V'},
+			     {'P', 'S'}, {'T', 'U'}, {'W', 'Z'}},
+			   // plugboard size
+			   6                                      
+			   );
+
+    int out = 0;
+    int in;
+    for (in = 0; input[in] != '\0'; in++)
+    {
+        if (input[in] >= 'A' && input[in] <= 'Z')
+        {
+            enigma_encrypt(e, input[in], 1, output[out]);
+            //output[out] = input[in]; // do
+        }
+        else
+        {
+            output[out] = input[in]; // do not
+        }
+        out++;
+    }
+    //output[out] = '\n';
+    //out++;
+    output[out] = '\0';
+
+    destroy_enigma(e);
+}
+
+static void text_input_callback(void *context)
+{
     furi_assert(context);
-    FlipEnigma* app = context;
+    FlipEnigma *app = context;
     bool handled = false;
 
     // check that there is text in the input
-    if(strlen(app->input_text) > 0) {
-        if(app->input_state == FlipEnigmaTextInputGame) {
-            if(app->import_game == 1) {
-                strncpy(app->import_game_text, app->input_text, TEXT_SIZE);
+    if (strlen(app->input_text) > 0)
+    {
 
-                uint8_t status = FlipEnigmaStatusNone;
-                if(status == FlipEnigmaStatusNone) {
-                    //notification_message(app->notification, &sequence_blink_cyan_100);
-                    flipenigma_play_happy_bump(app);
-                } else {
-                    //notification_message(app->notification, &sequence_blink_red_100);
-                    flipenigma_play_long_bump(app);
-                }
-            }
-            // reset input state
-            app->input_state = FlipEnigmaTextInputDefault;
-            handled = true;
-            view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdMenu);
-        }
+        FURI_LOG_D("enigma", "Input text: %s", app->input_text);
+        // this is where we build the output.
+        text_string_to_uppercase(app->input_text);
+        FURI_LOG_D("enigma", "Upper text: %s", app->input_text);
+        // this does the actual work of encrypting the text
+        text_build_output(app->input_text, app->cipher_text);
+        
+        text_box_set_text(app->text_box, app->cipher_text);
+        
+        // reset input state
+        app->input_state = FlipEnigmaTextInputDefault;
+        handled = true;
+
+        // TODO
+        view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdTextBox);
     }
 
-    if(!handled) {
+    if (!handled)
+    {
         // reset input state
         app->input_state = FlipEnigmaTextInputDefault;
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdMenu);
     }
 }
 
-FlipEnigma* flipenigma_app_alloc() {
-    FlipEnigma* app = malloc(sizeof(FlipEnigma));
+FlipEnigma *flipenigma_app_alloc()
+{
+    FlipEnigma *app = malloc(sizeof(FlipEnigma));
     app->gui = furi_record_open(RECORD_GUI);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
 
-    //Turn backlight on, believe me this makes testing your app easier
+    // Turn backlight on, believe me this makes testing your app easier
     notification_message(app->notification, &sequence_display_backlight_on);
 
-    //Scene additions
+    // Scene additions
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
 
@@ -96,11 +161,6 @@ FlipEnigma* flipenigma_app_alloc() {
         app->view_dispatcher,
         FlipEnigmaViewIdStartscreen,
         flipenigma_startscreen_get_view(app->flipenigma_startscreen));
-    app->flipenigma_scene_1 = flipenigma_scene_1_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        FlipEnigmaViewIdScene1,
-        flipenigma_scene_1_get_view(app->flipenigma_scene_1));
     app->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -111,21 +171,24 @@ FlipEnigma* flipenigma_app_alloc() {
     text_input_set_result_callback(
         app->text_input,
         text_input_callback,
-        (void*)app,
+        (void *)app,
         app->input_text,
         TEXT_BUFFER_SIZE,
-        //clear default text
+        // clear default text
         true);
     text_input_set_header_text(app->text_input, "Input");
     view_dispatcher_add_view(
         app->view_dispatcher, FlipEnigmaViewIdTextInput, text_input_get_view(app->text_input));
+    view_dispatcher_add_view(
+        app->view_dispatcher, FlipEnigmaViewIdTextBox, text_box_get_view(app->text_box));
 
-    //End Scene Additions
+    // End Scene Additions
 
     return app;
 }
 
-void flipenigma_app_free(FlipEnigma* app) {
+void flipenigma_app_free(FlipEnigma *app)
+{
     furi_assert(app);
 
     // Scene manager
@@ -136,12 +199,12 @@ void flipenigma_app_free(FlipEnigma* app) {
     submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdStartscreen);
     flipenigma_startscreen_free(app->flipenigma_startscreen);
-    view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdScene1);
-    flipenigma_scene_1_free(app->flipenigma_scene_1);
     view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdSettings);
     variable_item_list_free(app->variable_item_list);
     view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdTextInput);
     text_input_free(app->text_input);
+    view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdTextBox);
+    text_input_free(app->text_box);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
@@ -149,14 +212,15 @@ void flipenigma_app_free(FlipEnigma* app) {
     app->gui = NULL;
     app->notification = NULL;
 
-    //Remove whatever is left
-    //memzero(app, sizeof(FlipEnigma));
+    // Remove whatever is left
+    // memzero(app, sizeof(FlipEnigma));
     free(app);
 }
 
-int32_t flipenigma_app(void* p) {
+int32_t flipenigma_app(void *p)
+{
     UNUSED(p);
-    FlipEnigma* app = flipenigma_app_alloc();
+    FlipEnigma *app = flipenigma_app_alloc();
 
     // Disabled because causes exit on custom firmwares such as RM
     /*if(!furi_hal_region_is_provisioned()) {
@@ -167,8 +231,8 @@ int32_t flipenigma_app(void* p) {
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     scene_manager_next_scene(
-        app->scene_manager, FlipEnigmaSceneStartscreen); //Start with start screen
-    //scene_manager_next_scene(app->scene_manager, FlipEnigmaSceneMenu); //if you want to directly start with Menu
+        app->scene_manager, FlipEnigmaSceneStartscreen); // Start with start screen
+    // scene_manager_next_scene(app->scene_manager, FlipEnigmaSceneMenu); //if you want to directly start with Menu
 
     furi_hal_random_init();
     // furi_hal_power_suppress_charge_enter();
