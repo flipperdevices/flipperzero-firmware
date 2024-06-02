@@ -7,7 +7,6 @@
 //#include <dolphin/dolphin.h>
 #include <string.h>
 //#include "flipenigma_icons.h"
-#include "../helpers/flipenigma_voice.h"
 #include "../helpers/flipenigma_haptic.h"
 
 #define SCL_960_CASTLING 0 // setting to 1 compiles a 960 version of smolenigma
