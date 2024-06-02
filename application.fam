@@ -1,5 +1,5 @@
 App(
-    appid="Enigma",
+    appid="enigma",
     name="Enigma",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipenigma_app",
