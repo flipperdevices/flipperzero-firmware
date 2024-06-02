@@ -183,7 +183,7 @@ FlipEnigma *flipenigma_app_alloc()
         TEXT_BUFFER_SIZE,
         // clear default text
         true);
-    text_input_set_header_text(app->text_input, "Input");
+    text_input_set_header_text(app->text_input, "Input Message");
     view_dispatcher_add_view(
         app->view_dispatcher, FlipEnigmaViewIdTextInput, text_input_get_view(app->text_input));
 

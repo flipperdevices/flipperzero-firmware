@@ -14,7 +14,7 @@ void flipenigma_scene_menu_on_enter(void* context) {
     FlipEnigma* app = context;
 
     submenu_add_item(
-        app->submenu, "(ENIGMA)", SubmenuIndexTextInput, flipenigma_scene_menu_submenu_callback, app);
+        app->submenu, "Message Entry", SubmenuIndexTextInput, flipenigma_scene_menu_submenu_callback, app);
     submenu_add_item(
         app->submenu, "Settings", SubmenuIndexSettings, flipenigma_scene_menu_submenu_callback, app);
 
