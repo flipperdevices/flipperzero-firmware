@@ -1092,19 +1092,19 @@ Function,+,furi_delay_ms,void,uint32_t
 Function,+,furi_delay_tick,void,uint32_t
 Function,+,furi_delay_until_tick,FuriStatus,uint32_t
 Function,+,furi_delay_us,void,uint32_t
-Function,+,furi_event_loop_alloc,FuriEventLoop*,
-Function,+,furi_event_loop_free,void,FuriEventLoop*
-Function,+,furi_event_loop_message_queue_add,void,"FuriEventLoop*, FuriMessageQueue*, FuriEventLoopEvent, FuriEventLoopMessageQueueCallback, void*"
-Function,+,furi_event_loop_message_queue_remove,void,"FuriEventLoop*, FuriMessageQueue*"
-Function,+,furi_event_loop_poll,void,FuriEventLoop*
-Function,+,furi_event_loop_stop,void,FuriEventLoop*
-Function,+,furi_event_loop_tick_set,void,"FuriEventLoop*, uint32_t, FuriEventLoopTickCallback, void*"
 Function,+,furi_event_flag_alloc,FuriEventFlag*,
 Function,+,furi_event_flag_clear,uint32_t,"FuriEventFlag*, uint32_t"
 Function,+,furi_event_flag_free,void,FuriEventFlag*
 Function,+,furi_event_flag_get,uint32_t,FuriEventFlag*
 Function,+,furi_event_flag_set,uint32_t,"FuriEventFlag*, uint32_t"
 Function,+,furi_event_flag_wait,uint32_t,"FuriEventFlag*, uint32_t, uint32_t, uint32_t"
+Function,+,furi_event_loop_alloc,FuriEventLoop*,
+Function,+,furi_event_loop_free,void,FuriEventLoop*
+Function,+,furi_event_loop_message_queue_subscribe,void,"FuriEventLoop*, FuriMessageQueue*, FuriEventLoopEvent, FuriEventLoopMessageQueueCallback, void*"
+Function,+,furi_event_loop_message_queue_unsubscribe,void,"FuriEventLoop*, FuriMessageQueue*"
+Function,+,furi_event_loop_run,void,FuriEventLoop*
+Function,+,furi_event_loop_stop,void,FuriEventLoop*
+Function,+,furi_event_loop_tick_set,void,"FuriEventLoop*, uint32_t, FuriEventLoopTickCallback, void*"
 Function,+,furi_get_tick,uint32_t,
 Function,+,furi_hal_adc_acquire,FuriHalAdcHandle*,
 Function,+,furi_hal_adc_configure,void,FuriHalAdcHandle*
