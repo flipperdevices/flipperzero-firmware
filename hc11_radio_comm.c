@@ -491,7 +491,7 @@ static int32_t hc11_rx_tx_thread(void *ctx) {
         while(num_rxbytes--)
           cc1101_read_reg(spi, CC1101_FIFO, regval);
         if(loglevel == FuriLogLevelTrace)
-          FURI_LOG_I(TAG, "Error: too many bytes in RX FIFO for packet size!");
+          FURI_LOG_T(TAG, "Error: too many bytes in RX FIFO for packet size!");
       }
 
       /* Get the LQI and CRC_OK flag in the last byte of the packet */
