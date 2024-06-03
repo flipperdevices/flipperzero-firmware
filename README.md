@@ -8,7 +8,9 @@
 
 Flipper Zero app send data to / from a [HC-11](https://www.hc01.com/goods/640e91920be12d0114404c98) wireless RF UART communication module.
 
-*See [here](https://www.elecrow.com/434mhz-serial-rf-module-hc11-140m-p-873.html), [here](https://hobbycomponents.com/wired-wireless/513-hc-11-433mhz-wireless-serial-module), [here](https://elektronik-lavpris.dk/p134115/modu0054-hc-11-433mhz-wireless-serial-module/), [here](https://invize.se/produkt/radiomodul-hc11/) or [here](https://littlebirdelectronics.com.au/products/434mhz-serial-rf-module-hc-11-1-40m) for a few distributors of this little module around the world.*
+![Usage demo](screenshots/demo.gif)
+
+*See [here](https://www.elecrow.com/434mhz-serial-rf-module-hc11-140m-p-873.html), [here](https://hobbycomponents.com/wired-wireless/513-hc-11-433mhz-wireless-serial-module), [here](https://elektronik-lavpris.dk/p134115/modu0054-hc-11-433mhz-wireless-serial-module/), [here](https://invize.se/produkt/radiomodul-hc11/) or [here](https://littlebirdelectronics.com.au/products/434mhz-serial-rf-module-hc-11-1-40m) for a few distributors of the HC-11 module around the world.*
 
 
 
