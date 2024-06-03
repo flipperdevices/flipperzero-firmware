@@ -800,6 +800,9 @@ static int32_t main_rx_thread(void *ctx) {
 /** Send function **/
 void radio_tx(HC11RadioCommApp *app, uint8_t *data, uint16_t len) {
 
+  /* Start a red LED flash */
+  start_led_flash(&app->led_control, RED);
+
   /* save the address of the data and size to send */
   app->tx_buf = data;
   app->tx_buf_size = len;
