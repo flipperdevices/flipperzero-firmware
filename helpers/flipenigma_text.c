@@ -4,6 +4,8 @@
 #define ENIGMA_IMPLEMENTATION
 #include "../enigma/enigma.h"
 
+#define PLUGBOARD_ERROR_TEXT "Error parsing plugboard\n-> Must be evenly paired\n-> Must be unique"
+
 void text_string_to_uppercase(char* input) {
     int i;
     for(i = 0; input[i] != '\0'; i++) {
@@ -153,9 +155,7 @@ void text_input_callback(void* context) {
             if(app->plugboard_size == 0) {
                 flipenigma_play_bad_bump(app);
                 // Populate text box with error text
-                text_box_set_text(
-                    app->text_box,
-                    "Error parsing plugboard\n-> Must be evenly paired\n-> Must be unique");
+                text_box_set_text(app->text_box, PLUGBOARD_ERROR_TEXT);
                 // Set show_text_box boolean
                 show_text_box = true;
             } else {
