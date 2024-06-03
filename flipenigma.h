@@ -19,8 +19,8 @@
 #define FLIPENIGMA_VERSION "v1.0"
 
 // "To make cryptanalysis harder, messages were limited to 250 characters."
-#define TEXT_BUFFER_SIZE 251
-#define TEXT_SIZE (TEXT_BUFFER_SIZE - 1)
+#define TEXT_SIZE 250
+#define TEXT_BUFFER_SIZE (TEXT_SIZE + (TEXT_SIZE / 5) + 1)
 
 typedef struct {
     Gui* gui;
@@ -29,13 +29,16 @@ typedef struct {
     Submenu* submenu;
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
-    TextInput* text_input;
+    TextInput* message_input;
+    TextInput* plugboard_input;
     TextBox* text_box;
     FlipEnigmaStartscreen* flipenigma_startscreen;
     // Text input
     uint8_t input_state;
+    char input_message_text[TEXT_BUFFER_SIZE];
+    char input_plugboard_text[TEXT_BUFFER_SIZE];
+    char plain_text[TEXT_BUFFER_SIZE];
     char cipher_text[TEXT_BUFFER_SIZE];
-    char input_text[TEXT_BUFFER_SIZE];
     // Settings options
     int haptic;
     const char* rotors_model[3];
@@ -50,7 +53,8 @@ typedef enum {
     FlipEnigmaViewIdStartscreen,
     FlipEnigmaViewIdMenu,
     FlipEnigmaViewIdSettings,
-    FlipEnigmaViewIdTextInput,
+    FlipEnigmaViewIdMessageInput,
+    FlipEnigmaViewIdPlugboardInput,
     FlipEnigmaViewIdTextBox,
 } FlipEnigmaViewId;
 
@@ -102,7 +106,11 @@ typedef enum {
     FlipEnigma26Z,
 } FlipEnigmaPosition;
 
-typedef enum { FlipEnigmaTextInputDefault, FlipEnigmaTextInputActive } FlipEnigmaTextInputState;
+typedef enum {
+    FlipEnigmaTextInputDefault,
+    FlipEnigmaTextInputMessage,
+    FlipEnigmaTextInputPlugboard
+} FlipEnigmaTextInputState;
 
 typedef enum {
     FlipEnigmaStatusNone = 0,

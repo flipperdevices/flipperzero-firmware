@@ -19,10 +19,14 @@ void flipenigma_scene_startscreen_on_enter(void* context) {
     //     }
     // }
 
-    if(app->input_state == FlipEnigmaTextInputActive) {
-        // handle text input; this only uses this scene to have
+    if(app->input_state == FlipEnigmaTextInputMessage) {
+        // handle message input; this only uses this scene to have
         // a correct stack of scenes
-        view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdTextInput);
+        view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdMessageInput);
+    } else if(app->input_state == FlipEnigmaTextInputPlugboard) {
+        // handle plugboard input; this only uses this scene to have
+        // a correct stack of scenes
+        view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdPlugboardInput);
     } else {
         // handle default mode; actually use this scene's logic
         flipenigma_startscreen_set_callback(

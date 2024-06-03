@@ -1,8 +1,6 @@
 #include "flipenigma.h"
 #include "helpers/flipenigma_haptic.h"
-
-#define ENIGMA_IMPLEMENTATION
-#include "enigma/enigma.h"
+#include "helpers/flipenigma_text.h"
 
 bool flipenigma_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -21,82 +19,6 @@ bool flipenigma_navigation_event_callback(void* context) {
     furi_assert(context);
     FlipEnigma* app = context;
     return scene_manager_handle_back_event(app->scene_manager);
-}
-
-static void text_string_to_uppercase(char* input) {
-    int i;
-    for(i = 0; input[i] != '\0'; i++) {
-        if(input[i] >= 'a' && input[i] <= 'z') {
-            input[i] = input[i] - 32;
-        } else {
-            input[i] = input[i];
-        }
-    }
-}
-
-static void text_build_output(FlipEnigma* app, char* input, char* output) {
-    Enigma* e = init_enigma(
-        app->rotors_model,
-        app->rotor_positions,
-        app->rotor_ring_settings,
-        app->reflector_model,
-        app->plugboard_switches,
-        app->plugboard_size);
-
-    int out = 0;
-    int in;
-    for(in = 0; input[in] != '\0'; in++) {
-        if(input[in] >= 'A' && input[in] <= 'Z') {
-            // encrypt A-Z characters only
-
-            // copy the current input char to new object
-            char plaintext[2];
-            plaintext[0] = input[in];
-            plaintext[1] = '\0';
-            char ciphertext[2];
-            ciphertext[0] = input[in];
-            ciphertext[1] = '\0';
-            // encrypt this single character
-            enigma_encrypt(e, plaintext, 1, ciphertext);
-            // set output at position
-            output[out] = ciphertext[0];
-        } else {
-            // passthrough non A-Z char at position
-            output[out] = input[in];
-        }
-        out++;
-    }
-    //output[out] = '\n';
-    //out++;
-    output[out] = '\0';
-
-    destroy_enigma(e);
-}
-
-static void text_input_callback(void* context) {
-    furi_assert(context);
-    FlipEnigma* app = context;
-    bool handled = false;
-
-    // check that there is text in the input
-    if(strlen(app->input_text) > 0) {
-        // convert the text to uppercase
-        text_string_to_uppercase(app->input_text);
-        // do the actual work of encrypting the text
-        text_build_output(app, app->input_text, app->cipher_text);
-        // pupulate text box with cipher text
-        text_box_set_text(app->text_box, app->cipher_text);
-        // set handled boolean
-        handled = true;
-    }
-
-    // reset input state
-    app->input_state = FlipEnigmaTextInputDefault;
-    if(handled) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdTextBox);
-    } else {
-        view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdMenu);
-    }
 }
 
 FlipEnigma* flipenigma_app_alloc() {
@@ -122,10 +44,10 @@ FlipEnigma* flipenigma_app_alloc() {
 
     // Settings
     app->haptic = FlipEnigmaHapticOn;
-
-    app->rotors_model[0] = "M3-II";
-    app->rotors_model[1] = "M3-I";
-    app->rotors_model[2] = "M3-III";
+    // Settings - Enigma
+    app->rotors_model[0] = "M3-III";
+    app->rotors_model[1] = "M3-II";
+    app->rotors_model[2] = "M3-I";
     app->rotor_positions[0] = FlipEnigma01A;
     app->rotor_positions[1] = FlipEnigma01A;
     app->rotor_positions[2] = FlipEnigma01A;
@@ -133,19 +55,22 @@ FlipEnigma* flipenigma_app_alloc() {
     app->rotor_ring_settings[1] = FlipEnigma01A;
     app->rotor_ring_settings[2] = FlipEnigma01A;
     app->reflector_model = "M3-B";
-    app->plugboard_switches[0][0] = 'A';
-    app->plugboard_switches[0][1] = 'M';
-    app->plugboard_switches[1][0] = 'F';
-    app->plugboard_switches[1][1] = 'I';
-    app->plugboard_switches[2][0] = 'N';
-    app->plugboard_switches[2][1] = 'V';
-    app->plugboard_switches[3][0] = 'P';
-    app->plugboard_switches[3][1] = 'S';
-    app->plugboard_switches[4][0] = 'T';
-    app->plugboard_switches[4][1] = 'U';
-    app->plugboard_switches[5][0] = 'W';
-    app->plugboard_switches[5][1] = 'Z';
-    app->plugboard_size = 6;
+    app->plugboard_size = 0;
+
+    // DEBUG
+    // app->plugboard_switches[0][0] = 'A';
+    // app->plugboard_switches[0][1] = 'M';
+    // app->plugboard_switches[1][0] = 'F';
+    // app->plugboard_switches[1][1] = 'I';
+    // app->plugboard_switches[2][0] = 'N';
+    // app->plugboard_switches[2][1] = 'V';
+    // app->plugboard_switches[3][0] = 'P';
+    // app->plugboard_switches[3][1] = 'S';
+    // app->plugboard_switches[4][0] = 'T';
+    // app->plugboard_switches[4][1] = 'U';
+    // app->plugboard_switches[5][0] = 'W';
+    // app->plugboard_switches[5][1] = 'Z';
+    // app->plugboard_size = 6;
 
     // Text input
     app->input_state = FlipEnigmaTextInputDefault;
@@ -164,18 +89,35 @@ FlipEnigma* flipenigma_app_alloc() {
         FlipEnigmaViewIdSettings,
         variable_item_list_get_view(app->variable_item_list));
 
-    app->text_input = text_input_alloc();
+    app->message_input = text_input_alloc();
     text_input_set_result_callback(
-        app->text_input,
+        app->message_input,
         text_input_callback,
         (void*)app,
-        app->input_text,
+        app->input_message_text,
         TEXT_BUFFER_SIZE,
         // clear default text
         true);
-    text_input_set_header_text(app->text_input, "Input Message");
+    text_input_set_header_text(app->message_input, "Input Message");
     view_dispatcher_add_view(
-        app->view_dispatcher, FlipEnigmaViewIdTextInput, text_input_get_view(app->text_input));
+        app->view_dispatcher,
+        FlipEnigmaViewIdMessageInput,
+        text_input_get_view(app->message_input));
+
+    app->plugboard_input = text_input_alloc();
+    text_input_set_result_callback(
+        app->plugboard_input,
+        text_input_callback,
+        (void*)app,
+        app->input_plugboard_text,
+        TEXT_BUFFER_SIZE,
+        // clear default text
+        true);
+    text_input_set_header_text(app->plugboard_input, "Input Plugboard");
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        FlipEnigmaViewIdPlugboardInput,
+        text_input_get_view(app->plugboard_input));
 
     app->text_box = text_box_alloc();
     text_box_set_font(app->text_box, TextBoxFontText);
@@ -200,8 +142,10 @@ void flipenigma_app_free(FlipEnigma* app) {
     flipenigma_startscreen_free(app->flipenigma_startscreen);
     view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdSettings);
     variable_item_list_free(app->variable_item_list);
-    view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdTextInput);
-    text_input_free(app->text_input);
+    view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdMessageInput);
+    text_input_free(app->message_input);
+    view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdPlugboardInput);
+    text_input_free(app->plugboard_input);
     view_dispatcher_remove_view(app->view_dispatcher, FlipEnigmaViewIdTextBox);
     text_box_free(app->text_box);
 

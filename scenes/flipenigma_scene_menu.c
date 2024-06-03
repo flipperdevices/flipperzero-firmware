@@ -1,7 +1,8 @@
 #include "../flipenigma.h"
 
 enum SubmenuIndex {
-    SubmenuIndexTextInput = 10,
+    SubmenuIndexMessageInput = 10,
+    SubmenuIndexPlugboardInput,
     SubmenuIndexSettings,
 };
 
@@ -16,13 +17,19 @@ void flipenigma_scene_menu_on_enter(void* context) {
     submenu_add_item(
         app->submenu,
         "Message Entry",
-        SubmenuIndexTextInput,
+        SubmenuIndexMessageInput,
         flipenigma_scene_menu_submenu_callback,
         app);
     submenu_add_item(
         app->submenu,
         "Rotor Settings",
         SubmenuIndexSettings,
+        flipenigma_scene_menu_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Plugboard Settings",
+        SubmenuIndexPlugboardInput,
         flipenigma_scene_menu_submenu_callback,
         app);
 
@@ -41,11 +48,18 @@ bool flipenigma_scene_menu_on_event(void* context, SceneManagerEvent event) {
         view_dispatcher_stop(app->view_dispatcher);
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexTextInput) {
+        if(event.event == SubmenuIndexMessageInput) {
             scene_manager_set_scene_state(
-                app->scene_manager, FlipEnigmaSceneMenu, SubmenuIndexTextInput);
-            // set input state to "Active" to get correct scene behavior
-            app->input_state = FlipEnigmaTextInputActive;
+                app->scene_manager, FlipEnigmaSceneMenu, SubmenuIndexMessageInput);
+            // set input state to "Message" to get correct scene behavior
+            app->input_state = FlipEnigmaTextInputMessage;
+            scene_manager_next_scene(app->scene_manager, FlipEnigmaSceneStartscreen);
+            return true;
+        } else if(event.event == SubmenuIndexPlugboardInput) {
+            scene_manager_set_scene_state(
+                app->scene_manager, FlipEnigmaSceneMenu, SubmenuIndexPlugboardInput);
+            // set input state to "Plugboard" to get correct scene behavior
+            app->input_state = FlipEnigmaTextInputPlugboard;
             scene_manager_next_scene(app->scene_manager, FlipEnigmaSceneStartscreen);
             return true;
         } else if(event.event == SubmenuIndexSettings) {
