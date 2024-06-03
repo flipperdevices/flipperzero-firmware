@@ -2,13 +2,13 @@ sourcecode:
   type: git
   location:
     origin: https://github.com/xtruan/flipper-enigma.git
-    commit_sha: b27d64a926c8131af0f97af100b4c5838b78fe53
+    commit_sha: 08191d3bec7ada2a7bf41f86276e0ffa5f6e2954
 description: "Enigma machine emulator"
 changelog: "v1.0 - Initial release"
 author: "@xtruan"
 screenshots:
   - "./catalog/startscreen.png"
-  - "./catalog/menu1.png"
+  - "./catalog/menu.png"
   - "./catalog/rotor11.png"
   - "./catalog/plaintext1.png"
   - "./catalog/ciphertext1.png"
