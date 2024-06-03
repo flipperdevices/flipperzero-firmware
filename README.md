@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/xtruan/flipper-enigma/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xtruan/flipper-enigma/actions/workflows/build.yml)
 
-![ENIGMA](https://github.com/xtruan/flipper-enigma/blob/main/catalog/startscreen.png)
+![ENIGMA](https://github.com/xtruan/flipper-enigma/blob/main/icons/ENIGMA_128x56.png)
 
 ## Enigma machine emulator for Flipper Zero
 - Built against `0.101.2` Flipper Zero firmware release
