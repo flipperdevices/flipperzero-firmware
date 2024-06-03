@@ -178,7 +178,7 @@ void text_input_callback(void* context) {
                     text_box_set_text(app->text_box, TEXT_PLUGBOARD_ERROR);
                     // Set show_text_box boolean
                     show_text_box = true;
-                    
+
                     flipenigma_play_bad_bump(app);
                 } else {
                     text_normalize_spacing(app->input_plugboard_text, app->plain_text, 2);
@@ -186,7 +186,7 @@ void text_input_callback(void* context) {
                     text_box_set_text(app->text_box, app->plain_text);
                     // Set show_text_box boolean
                     show_text_box = true;
-                    
+
                     flipenigma_play_happy_bump(app);
                 }
                 // text_input_set_header_text(app->plugboard_input, app->input_plugboard_text);
