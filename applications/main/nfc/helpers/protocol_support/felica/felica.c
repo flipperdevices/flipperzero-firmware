@@ -177,7 +177,7 @@ static bool nfc_scene_read_menu_on_event_felica(NfcApp* instance, SceneManagerEv
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_felica = {
-    .features = NfcProtocolFeatureEmulateUid,
+    .features = NfcProtocolFeatureEmulateFull,
 
     .scene_info =
         {
