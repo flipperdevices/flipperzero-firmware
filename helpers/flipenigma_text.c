@@ -30,7 +30,8 @@ void text_string_to_uppercase(char* input) {
 bool text_are_all_characters_unique(const char* input) {
     bool char_set[256] = {false}; // Assuming ASCII character set
 
-    for(size_t i = 0; input[i] != '\0'; ++i) {
+    size_t len = strlen(input);
+    for(size_t i = 0; i < len; ++i) {
         unsigned char val = (unsigned char)input[i];
         if(char_set[val]) {
             return false; // Character already found
@@ -110,14 +111,11 @@ void text_build_output_ciphertext(FlipEnigma* app, char* input, char* output) {
     size_t len = strlen(input);
     for(size_t in = 0; in < len; ++in) {
         // Encrypt A-Z characters only
+        char plaintext[2] = "X";
+        char ciphertext[2] = "X";
         if(input[in] >= 'A' && input[in] <= 'Z') {
             // Copy the current input char to new object
-            char plaintext[2];
             plaintext[0] = input[in];
-            plaintext[1] = '\0';
-            char ciphertext[2];
-            ciphertext[0] = input[in];
-            ciphertext[1] = '\0';
             // Encrypt this single character
             enigma_encrypt(e, plaintext, 1, ciphertext);
             // Set output at position
