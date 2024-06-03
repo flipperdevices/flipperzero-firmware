@@ -138,8 +138,8 @@ void text_input_callback(void* context) {
     FlipEnigma* app = context;
     bool show_text_box = false;
 
-    // Check that there is text in the input
     if(app->input_state == FlipEnigmaTextInputMessage) {
+        // Check that there is text in the input
         if(strlen(app->input_message_text) > 0) {
             // Convert the text to uppercase
             text_string_to_uppercase(app->input_message_text);
@@ -154,6 +154,7 @@ void text_input_callback(void* context) {
             flipenigma_play_happy_bump(app);
         }
     } else if(app->input_state == FlipEnigmaTextInputPlugboard) {
+        // Check that there is text in the input
         if(strlen(app->input_plugboard_text) > 0) {
             // Convert the text to uppercase
             text_string_to_uppercase(app->input_plugboard_text);
@@ -161,29 +162,32 @@ void text_input_callback(void* context) {
             // Check for disable case
             if(strcmp(app->input_plugboard_text, "X") == 0) {
                 app->plugboard_size = 0;
-                flipenigma_play_happy_bump(app);
                 // Populate text box with info text
                 text_box_set_text(app->text_box, TEXT_PLUGBOARD_DISABLED);
                 // Set show_text_box boolean
                 show_text_box = true;
+
+                flipenigma_play_happy_bump(app);
             }
             // Do the actual work of parsing the plugboard
             else {
                 app->plugboard_size = text_validate_and_convert_plugboard(
                     app->input_plugboard_text, app->plugboard_switches);
                 if(app->plugboard_size == 0) {
-                    flipenigma_play_bad_bump(app);
                     // Populate text box with error text
                     text_box_set_text(app->text_box, TEXT_PLUGBOARD_ERROR);
                     // Set show_text_box boolean
                     show_text_box = true;
+                    
+                    flipenigma_play_bad_bump(app);
                 } else {
-                    flipenigma_play_happy_bump(app);
                     text_normalize_spacing(app->input_plugboard_text, app->plain_text, 2);
                     // Populate text box with plugboard text
                     text_box_set_text(app->text_box, app->plain_text);
                     // Set show_text_box boolean
                     show_text_box = true;
+                    
+                    flipenigma_play_happy_bump(app);
                 }
                 // text_input_set_header_text(app->plugboard_input, app->input_plugboard_text);
             }
