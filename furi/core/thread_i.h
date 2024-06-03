@@ -36,5 +36,5 @@ struct FuriThread {
     bool is_service;
     bool heap_trace_enabled;
 
-    configSTACK_DEPTH_TYPE stack_size;
+    size_t stack_size;
 };

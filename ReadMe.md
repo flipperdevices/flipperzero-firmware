@@ -65,6 +65,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Keyboard v3.7 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v3.10 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Simon v1.9 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- OFW: [Favorite apps navigation fix and text fixes #3670 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/3670)
+- OFW: [Furi: wrap message queue in container, prepare it for epoll. Accessor: disable expansion service on start. #3672 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3672)
+- OFW: [Updater: fix inability to update with bigger updater.bin #3676 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3676)
+- OFW: [SubGhz: Princeton protocol add custom guard time #3671 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3671)
+- OFW: [fbt, vscode: tweaks for cdb generation for clangd #3680 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3680)
+- OFW: [Add initial ISO7816 support #3681 (By kidbomb)](https://github.com/flipperdevices/flipperzero-firmware/pull/3681)
+- OFW: [cleanup of various warnings from clangd #3682 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3682)
 
 <a name="release">
 

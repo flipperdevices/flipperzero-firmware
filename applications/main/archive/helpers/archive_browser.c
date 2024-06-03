@@ -7,7 +7,6 @@
 #include <core/log.h>
 #include <gui/modules/file_browser_worker.h>
 #include <flipper_application/flipper_application.h>
-#include <math.h>
 #include <furi_hal.h>
 
 static void

@@ -1,7 +1,6 @@
 #include "timer.h"
 #include "thread.h"
 #include "check.h"
-#include "memmgr.h"
 #include "kernel.h"
 
 #include <FreeRTOS.h>

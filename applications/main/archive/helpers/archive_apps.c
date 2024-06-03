@@ -1,4 +1,3 @@
-#include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
 #include <applications/main/u2f/u2f_data.h>

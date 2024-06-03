@@ -88,6 +88,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         if(favorite_id == DummyAppUpLong) {
             lock_if_none = true;
         }
+        favorite_id |= SCENE_STATE_SET_DUMMY_APP;
     }
 
     // Special case: Application browser

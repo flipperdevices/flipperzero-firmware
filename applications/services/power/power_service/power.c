@@ -119,7 +119,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
         }
 
         // TODO: Verify if it displays correctly with custom battery skins !!!
-        if(power->info.voltage_battery_charge_limit < 4.2) {
+        if(power->info.voltage_battery_charge_limit < 4.2f) {
             // Battery charging voltage is modified, indicate with cross pattern
             canvas_invert_color(canvas);
             uint8_t battery_bar_width = (power->info.charge + 4) / 5;

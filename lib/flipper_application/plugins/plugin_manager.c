@@ -13,7 +13,7 @@
 
 #define MAX_NAME_LEN 254
 
-ARRAY_DEF(FlipperApplicationList, FlipperApplication*, M_PTR_OPLIST)
+ARRAY_DEF(FlipperApplicationList, FlipperApplication*, M_PTR_OPLIST) // NOLINT
 #define M_OPL_FlipperApplicationList_t() ARRAY_OPLIST(FlipperApplicationList, M_PTR_OPLIST)
 
 struct PluginManager {

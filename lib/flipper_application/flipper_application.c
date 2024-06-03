@@ -19,7 +19,7 @@ struct FlipperApplication {
 
 /********************** Debugger access to loader state **********************/
 
-LIST_DEF(FlipperApplicationList, const FlipperApplication*, M_POD_OPLIST);
+LIST_DEF(FlipperApplicationList, const FlipperApplication*, M_POD_OPLIST); // NOLINT
 
 FlipperApplicationList_t flipper_application_loaded_app_list = {0};
 static bool flipper_application_loaded_app_list_initialized = false;

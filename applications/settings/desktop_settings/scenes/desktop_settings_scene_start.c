@@ -3,7 +3,6 @@
 
 #include "../desktop_settings_app.h"
 #include "desktop_settings_scene.h"
-#include "desktop_settings_scene_i.h"
 #include <power/power_service/power.h>
 
 typedef enum {
@@ -125,22 +124,22 @@ void desktop_settings_scene_start_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, desktop_on_off_text[value_index]);
 
-    variable_item_list_add(variable_item_list, "Favorite - Down Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite - Left Short", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite - Left Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite - Right Short", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite - Right Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite - Up Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Down Hold", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Left Press", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Left Hold", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Right Press", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Right Hold", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Up Hold", 1, NULL, NULL);
 
-    variable_item_list_add(variable_item_list, "DummyMode - Left", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "DummyMode - Left Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "DummyMode - Right", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "DummyMode - Right Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "DummyMode - Up Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "DummyMode - Down", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "DummyMode - Down Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "DummyMode - Ok", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "DummyMode - Ok Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode - Left Press", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode - Left Hold", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode - Right Press", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode - Right Hold", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode - Up Hold", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode - Down Press", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode - Down Hold", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode - Ok Press", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode - Ok Hold", 1, NULL, NULL);
 
     variable_item_list_set_enter_callback(
         variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);
