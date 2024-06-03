@@ -22,9 +22,9 @@ void furi_message_queue_free(FuriMessageQueue* instance) {
     furi_check(furi_kernel_is_irq_or_masked() == 0U);
     furi_check(instance);
 
-    // Epoll must be disconnected
-    furi_check(!instance->epoll_item_in);
-    furi_check(!instance->epoll_item_out);
+    // Event Loop must be disconnected
+    furi_check(!instance->event_loop_item_in);
+    furi_check(!instance->event_loop_item_out);
 
     vQueueDelete((QueueHandle_t)instance);
     free(instance);
@@ -68,9 +68,11 @@ FuriStatus
 
     if(stat == FuriStatusOk) {
         FURI_CRITICAL_ENTER();
-        if(instance->epoll_item_in) {
-            furi_epoll_item_notify(
-                instance->epoll_item_in, FuriEpollItemTypeMessageQueue, FuriEpollEventIn);
+        if(instance->event_loop_item_in) {
+            furi_event_loop_item_notify(
+                instance->event_loop_item_in,
+                FuriEventLoopItemTypeMessageQueue,
+                FuriEventLoopEventIn);
         }
         FURI_CRITICAL_EXIT();
     }
@@ -116,9 +118,11 @@ FuriStatus furi_message_queue_get(FuriMessageQueue* instance, void* msg_ptr, uin
 
     if(stat == FuriStatusOk) {
         FURI_CRITICAL_ENTER();
-        if(instance->epoll_item_out) {
-            furi_epoll_item_notify(
-                instance->epoll_item_out, FuriEpollItemTypeMessageQueue, FuriEpollEventOut);
+        if(instance->event_loop_item_out) {
+            furi_event_loop_item_notify(
+                instance->event_loop_item_out,
+                FuriEventLoopItemTypeMessageQueue,
+                FuriEventLoopEventOut);
         }
         FURI_CRITICAL_EXIT();
     }
@@ -202,9 +206,11 @@ FuriStatus furi_message_queue_reset(FuriMessageQueue* instance) {
 
     if(stat == FuriStatusOk) {
         FURI_CRITICAL_ENTER();
-        if(instance->epoll_item_out) {
-            furi_epoll_item_notify(
-                instance->epoll_item_out, FuriEpollItemTypeMessageQueue, FuriEpollEventOut);
+        if(instance->event_loop_item_out) {
+            furi_event_loop_item_notify(
+                instance->event_loop_item_out,
+                FuriEventLoopItemTypeMessageQueue,
+                FuriEventLoopEventOut);
         }
         FURI_CRITICAL_EXIT();
     }
@@ -213,22 +219,25 @@ FuriStatus furi_message_queue_reset(FuriMessageQueue* instance) {
     return (stat);
 }
 
-void furi_message_queue_epoll_in_set(
+void furi_message_queue_event_loop_in_set(
     FuriMessageQueue* instance,
-    FuriEpollItem* epoll_item,
-    FuriEpollEvent event) {
+    FuriEventLoopItem* event_loop_item,
+    FuriEventLoopEvent event) {
     furi_check(instance);
     furi_check(!furi_kernel_is_irq_or_masked());
 
     FURI_CRITICAL_ENTER();
 
-    if(event == FuriEpollEventIn) {
-        furi_check(epoll_item ? instance->epoll_item_in == NULL : instance->epoll_item_in != NULL);
-        instance->epoll_item_in = epoll_item;
-    } else if(event == FuriEpollEventOut) {
+    if(event == FuriEventLoopEventIn) {
         furi_check(
-            epoll_item ? instance->epoll_item_out == NULL : instance->epoll_item_out != NULL);
-        instance->epoll_item_out = epoll_item;
+            event_loop_item ? instance->event_loop_item_in == NULL :
+                              instance->event_loop_item_in != NULL);
+        instance->event_loop_item_in = event_loop_item;
+    } else if(event == FuriEventLoopEventOut) {
+        furi_check(
+            event_loop_item ? instance->event_loop_item_out == NULL :
+                              instance->event_loop_item_out != NULL);
+        instance->event_loop_item_out = event_loop_item;
     } else {
         furi_crash();
     }

@@ -1191,13 +1191,13 @@ Function,+,furi_delay_ms,void,uint32_t
 Function,+,furi_delay_tick,void,uint32_t
 Function,+,furi_delay_until_tick,FuriStatus,uint32_t
 Function,+,furi_delay_us,void,uint32_t
-Function,+,furi_epoll_alloc,FuriEpoll*,
-Function,+,furi_epoll_free,void,FuriEpoll*
-Function,+,furi_epoll_message_queue_add,void,"FuriEpoll*, FuriMessageQueue*, FuriEpollEvent, FuriEpollMessageQueueCallback, void*"
-Function,+,furi_epoll_message_queue_remove,void,"FuriEpoll*, FuriMessageQueue*"
-Function,+,furi_epoll_poll,void,FuriEpoll*
-Function,+,furi_epoll_stop,void,FuriEpoll*
-Function,+,furi_epoll_tick_set,void,"FuriEpoll*, uint32_t, FuriEpollTickCallback, void*"
+Function,+,furi_event_loop_alloc,FuriEventLoop*,
+Function,+,furi_event_loop_free,void,FuriEventLoop*
+Function,+,furi_event_loop_message_queue_add,void,"FuriEventLoop*, FuriMessageQueue*, FuriEventLoopEvent, FuriEventLoopMessageQueueCallback, void*"
+Function,+,furi_event_loop_message_queue_remove,void,"FuriEventLoop*, FuriMessageQueue*"
+Function,+,furi_event_loop_poll,void,FuriEventLoop*
+Function,+,furi_event_loop_stop,void,FuriEventLoop*
+Function,+,furi_event_loop_tick_set,void,"FuriEventLoop*, uint32_t, FuriEventLoopTickCallback, void*"
 Function,+,furi_event_flag_alloc,FuriEventFlag*,
 Function,+,furi_event_flag_clear,uint32_t,"FuriEventFlag*, uint32_t"
 Function,+,furi_event_flag_free,void,FuriEventFlag*
@@ -3517,7 +3517,7 @@ Function,+,view_dispatcher_alloc,ViewDispatcher*,
 Function,+,view_dispatcher_attach_to_gui,void,"ViewDispatcher*, Gui*, ViewDispatcherType"
 Function,+,view_dispatcher_enable_queue,void,ViewDispatcher*
 Function,+,view_dispatcher_free,void,ViewDispatcher*
-Function,+,view_dispatcher_get_epoll,FuriEpoll*,ViewDispatcher*
+Function,+,view_dispatcher_get_event_loop,FuriEventLoop*,ViewDispatcher*
 Function,+,view_dispatcher_remove_view,void,"ViewDispatcher*, uint32_t"
 Function,+,view_dispatcher_run,void,ViewDispatcher*
 Function,+,view_dispatcher_send_custom_event,void,"ViewDispatcher*, uint32_t"

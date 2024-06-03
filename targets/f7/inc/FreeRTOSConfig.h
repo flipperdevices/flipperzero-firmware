@@ -89,7 +89,7 @@ to exclude the API function. */
 /* Workaround for various notification issues:
  * - First one used by system primitives
  * - Second one by thread event notification
- * - Third one by epoll
+ * - Third one by FuriEventLoop
  */
 #define configTASK_NOTIFICATION_ARRAY_ENTRIES 3
 

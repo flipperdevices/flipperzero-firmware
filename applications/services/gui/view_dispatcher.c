@@ -30,15 +30,17 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
     view_port_free(view_dispatcher->view_port);
     // Free internal queue
     if(view_dispatcher->input_queue) {
-        furi_epoll_message_queue_remove(view_dispatcher->epoll, view_dispatcher->input_queue);
+        furi_event_loop_message_queue_unsubscribe(
+            view_dispatcher->event_loop, view_dispatcher->input_queue);
         furi_message_queue_free(view_dispatcher->input_queue);
     }
     if(view_dispatcher->event_queue) {
-        furi_epoll_message_queue_remove(view_dispatcher->epoll, view_dispatcher->event_queue);
+        furi_event_loop_message_queue_unsubscribe(
+            view_dispatcher->event_loop, view_dispatcher->event_queue);
         furi_message_queue_free(view_dispatcher->event_queue);
     }
-    if(view_dispatcher->epoll) {
-        furi_epoll_free(view_dispatcher->epoll);
+    if(view_dispatcher->event_loop) {
+        furi_event_loop_free(view_dispatcher->event_loop);
     }
     // Free dispatcher
     free(view_dispatcher);
@@ -46,23 +48,23 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
 
 void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->epoll == NULL);
+    furi_check(view_dispatcher->event_loop == NULL);
 
-    view_dispatcher->epoll = furi_epoll_alloc();
+    view_dispatcher->event_loop = furi_event_loop_alloc();
 
     view_dispatcher->input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
-    furi_epoll_message_queue_add(
-        view_dispatcher->epoll,
+    furi_event_loop_message_queue_subscribe(
+        view_dispatcher->event_loop,
         view_dispatcher->input_queue,
-        FuriEpollEventIn,
+        FuriEventLoopEventIn,
         view_dispatcher_run_input_callback,
         view_dispatcher);
 
     view_dispatcher->event_queue = furi_message_queue_alloc(8, sizeof(uint32_t));
-    furi_epoll_message_queue_add(
-        view_dispatcher->epoll,
+    furi_event_loop_message_queue_subscribe(
+        view_dispatcher->event_loop,
         view_dispatcher->event_queue,
-        FuriEpollEventIn,
+        FuriEventLoopEventIn,
         view_dispatcher_run_event_callback,
         view_dispatcher);
 }
@@ -95,24 +97,27 @@ void view_dispatcher_set_tick_event_callback(
     view_dispatcher->tick_period = tick_period;
 }
 
-FuriEpoll* view_dispatcher_get_epoll(ViewDispatcher* view_dispatcher) {
+FuriEventLoop* view_dispatcher_get_event_loop(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->epoll);
+    furi_check(view_dispatcher->event_loop);
 
-    return view_dispatcher->epoll;
+    return view_dispatcher->event_loop;
 }
 
 void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->epoll);
+    furi_check(view_dispatcher->event_loop);
 
     uint32_t tick_period = view_dispatcher->tick_period == 0 ? FuriWaitForever :
                                                                view_dispatcher->tick_period;
 
-    furi_epoll_tick_set(
-        view_dispatcher->epoll, tick_period, view_dispatcher_handle_tick_event, view_dispatcher);
+    furi_event_loop_tick_set(
+        view_dispatcher->event_loop,
+        tick_period,
+        view_dispatcher_handle_tick_event,
+        view_dispatcher);
 
-    furi_epoll_poll(view_dispatcher->epoll);
+    furi_event_loop_run(view_dispatcher->event_loop);
 
     // Wait till all input events delivered
     InputEvent input;
@@ -129,8 +134,8 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
 
 void view_dispatcher_stop(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->epoll);
-    furi_epoll_stop(view_dispatcher->epoll);
+    furi_check(view_dispatcher->event_loop);
+    furi_event_loop_stop(view_dispatcher->event_loop);
 }
 
 void view_dispatcher_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id, View* view) {
@@ -323,7 +328,7 @@ void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32
 
 void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t event) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->epoll);
+    furi_check(view_dispatcher->event_loop);
 
     furi_check(
         furi_message_queue_put(view_dispatcher->event_queue, &event, FuriWaitForever) ==
@@ -359,7 +364,7 @@ void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* vie
         view_port_update(view_dispatcher->view_port);
     } else {
         view_port_enabled_set(view_dispatcher->view_port, false);
-        if(view_dispatcher->epoll) {
+        if(view_dispatcher->event_loop) {
             view_dispatcher_stop(view_dispatcher);
         }
     }

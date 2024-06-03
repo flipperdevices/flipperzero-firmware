@@ -2,21 +2,21 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#define TAG "TestFuriEpoll"
+#define TAG "TestFuriEventLoop"
 
-#define EPOLL_EVENT_COUNT (256u)
+#define EVENT_LOOP_EVENT_COUNT (256u)
 
 typedef struct {
     FuriMessageQueue* mq;
 
-    FuriEpoll* producer_epoll;
+    FuriEventLoop* producer_event_loop;
     uint32_t producer_counter;
 
-    FuriEpoll* consumer_epoll;
+    FuriEventLoop* consumer_event_loop;
     uint32_t consumer_counter;
 } TestFuriData;
 
-bool test_furi_epoll_producer_mq_callback(FuriMessageQueue* queue, void* context) {
+bool test_furi_event_loop_producer_mq_callback(FuriMessageQueue* queue, void* context) {
     furi_check(context);
 
     TestFuriData* data = context;
@@ -26,18 +26,18 @@ bool test_furi_epoll_producer_mq_callback(FuriMessageQueue* queue, void* context
         TAG, "producer_mq_callback: %lu %lu", data->producer_counter, data->consumer_counter);
 
     // Remove and add should not cause crash
-    // if(data->producer_counter == EPOLL_EVENT_COUNT/2) {
-    //     furi_epoll_message_queue_remove(data->producer_epoll, data->mq);
-    //     furi_epoll_message_queue_add(
-    //     data->producer_epoll,
+    // if(data->producer_counter == EVENT_LOOP_EVENT_COUNT/2) {
+    //     furi_event_loop_message_queue_remove(data->producer_event_loop, data->mq);
+    //     furi_event_loop_message_queue_add(
+    //     data->producer_event_loop,
     //     data->mq,
-    //     FuriEpollEventOut,
-    //     test_furi_epoll_producer_mq_callback,
+    //     FuriEventLoopEventOut,
+    //     test_furi_event_loop_producer_mq_callback,
     //     data);
     // }
 
-    if(data->producer_counter == EPOLL_EVENT_COUNT) {
-        furi_epoll_stop(data->producer_epoll);
+    if(data->producer_counter == EVENT_LOOP_EVENT_COUNT) {
+        furi_event_loop_stop(data->producer_event_loop);
         return false;
     }
 
@@ -50,32 +50,32 @@ bool test_furi_epoll_producer_mq_callback(FuriMessageQueue* queue, void* context
     return true;
 }
 
-int32_t test_furi_epoll_producer(void* p) {
+int32_t test_furi_event_loop_producer(void* p) {
     furi_check(p);
 
     FURI_LOG_I(TAG, "producer start");
 
     TestFuriData* data = p;
 
-    data->producer_epoll = furi_epoll_alloc();
-    furi_epoll_message_queue_add(
-        data->producer_epoll,
+    data->producer_event_loop = furi_event_loop_alloc();
+    furi_event_loop_message_queue_subscribe(
+        data->producer_event_loop,
         data->mq,
-        FuriEpollEventOut,
-        test_furi_epoll_producer_mq_callback,
+        FuriEventLoopEventOut,
+        test_furi_event_loop_producer_mq_callback,
         data);
 
-    furi_epoll_poll(data->producer_epoll);
+    furi_event_loop_run(data->producer_event_loop);
 
-    furi_epoll_message_queue_remove(data->producer_epoll, data->mq);
-    furi_epoll_free(data->producer_epoll);
+    furi_event_loop_message_queue_unsubscribe(data->producer_event_loop, data->mq);
+    furi_event_loop_free(data->producer_event_loop);
 
     FURI_LOG_I(TAG, "producer end");
 
     return 0;
 }
 
-bool test_furi_epoll_consumer_mq_callback(FuriMessageQueue* queue, void* context) {
+bool test_furi_event_loop_consumer_mq_callback(FuriMessageQueue* queue, void* context) {
     furi_check(context);
 
     TestFuriData* data = context;
@@ -88,50 +88,50 @@ bool test_furi_epoll_consumer_mq_callback(FuriMessageQueue* queue, void* context
         TAG, "consumer_mq_callback: %lu %lu", data->producer_counter, data->consumer_counter);
 
     // Remove and add should not cause crash
-    // if(data->producer_counter == EPOLL_EVENT_COUNT/2) {
-    //     furi_epoll_message_queue_remove(data->consumer_epoll, data->mq);
-    //     furi_epoll_message_queue_add(
-    //     data->consumer_epoll,
+    // if(data->producer_counter == EVENT_LOOP_EVENT_COUNT/2) {
+    //     furi_event_loop_message_queue_remove(data->consumer_event_loop, data->mq);
+    //     furi_event_loop_message_queue_add(
+    //     data->consumer_event_loop,
     //     data->mq,
-    //     FuriEpollEventIn,
-    //     test_furi_epoll_producer_mq_callback,
+    //     FuriEventLoopEventIn,
+    //     test_furi_event_loop_producer_mq_callback,
     //     data);
     // }
 
-    if(data->consumer_counter == EPOLL_EVENT_COUNT) {
-        furi_epoll_stop(data->consumer_epoll);
+    if(data->consumer_counter == EVENT_LOOP_EVENT_COUNT) {
+        furi_event_loop_stop(data->consumer_event_loop);
         return false;
     }
 
     return true;
 }
 
-int32_t test_furi_epoll_consumer(void* p) {
+int32_t test_furi_event_loop_consumer(void* p) {
     furi_check(p);
 
     FURI_LOG_I(TAG, "consumer start");
 
     TestFuriData* data = p;
 
-    data->consumer_epoll = furi_epoll_alloc();
-    furi_epoll_message_queue_add(
-        data->consumer_epoll,
+    data->consumer_event_loop = furi_event_loop_alloc();
+    furi_event_loop_message_queue_subscribe(
+        data->consumer_event_loop,
         data->mq,
-        FuriEpollEventIn,
-        test_furi_epoll_consumer_mq_callback,
+        FuriEventLoopEventIn,
+        test_furi_event_loop_consumer_mq_callback,
         data);
 
-    furi_epoll_poll(data->consumer_epoll);
+    furi_event_loop_run(data->consumer_event_loop);
 
-    furi_epoll_message_queue_remove(data->consumer_epoll, data->mq);
-    furi_epoll_free(data->consumer_epoll);
+    furi_event_loop_message_queue_unsubscribe(data->consumer_event_loop, data->mq);
+    furi_event_loop_free(data->consumer_event_loop);
 
     FURI_LOG_I(TAG, "consumer end");
 
     return 0;
 }
 
-void test_furi_epoll(void) {
+void test_furi_event_loop(void) {
     TestFuriData data = {};
 
     data.mq = furi_message_queue_alloc(16, sizeof(uint32_t));
@@ -139,14 +139,14 @@ void test_furi_epoll(void) {
     FuriThread* producer_thread = furi_thread_alloc();
     furi_thread_set_name(producer_thread, "producer_thread");
     furi_thread_set_stack_size(producer_thread, 1 * 1024);
-    furi_thread_set_callback(producer_thread, test_furi_epoll_producer);
+    furi_thread_set_callback(producer_thread, test_furi_event_loop_producer);
     furi_thread_set_context(producer_thread, &data);
     furi_thread_start(producer_thread);
 
     FuriThread* consumer_thread = furi_thread_alloc();
     furi_thread_set_name(consumer_thread, "consumer_thread");
     furi_thread_set_stack_size(consumer_thread, 1 * 1024);
-    furi_thread_set_callback(consumer_thread, test_furi_epoll_consumer);
+    furi_thread_set_callback(consumer_thread, test_furi_event_loop_consumer);
     furi_thread_set_context(consumer_thread, &data);
     furi_thread_start(consumer_thread);
 

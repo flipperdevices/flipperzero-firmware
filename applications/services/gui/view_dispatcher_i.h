@@ -14,7 +14,7 @@
 DICT_DEF2(ViewDict, uint32_t, M_DEFAULT_OPLIST, View*, M_PTR_OPLIST)
 
 struct ViewDispatcher {
-    FuriEpoll* epoll;
+    FuriEventLoop* event_loop;
     FuriMessageQueue* input_queue;
     FuriMessageQueue* event_queue;
 
