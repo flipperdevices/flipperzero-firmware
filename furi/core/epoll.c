@@ -55,8 +55,11 @@ void furi_epoll_poll(FuriEpoll* instance) {
         uint32_t flags = 0;
         BaseType_t ret =
             xTaskNotifyWaitIndexed(FURI_EPOLL_NOTIFY_INDEX, 0, FuriEpollFlagAll, &flags, timeout);
+
+        instance->state = FuriEpollStateProcessing;
         if(ret == pdTRUE) {
             if(flags & FuriEpollFlagStop) {
+                instance->state = FuriEpollStateIdle;
                 break;
             } else if(flags & FuriEpollFlagEvent) {
                 FuriEpollItem* item = NULL;
@@ -88,6 +91,7 @@ void furi_epoll_poll(FuriEpoll* instance) {
                 instance->tick_callback(instance->tick_callback_context);
             }
         }
+        instance->state = FuriEpollStateIdle;
     }
 }
 
@@ -120,6 +124,7 @@ void furi_epoll_message_queue_add(
     void* context) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
+    furi_check(instance->state == FuriEpollStateIdle);
     furi_check(message_queue);
 
     FURI_CRITICAL_ENTER();
@@ -148,6 +153,7 @@ void furi_epoll_message_queue_add(
 
 void furi_epoll_message_queue_remove(FuriEpoll* instance, FuriMessageQueue* message_queue) {
     furi_check(instance);
+    furi_check(instance->state == FuriEpollStateIdle);
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
     FURI_CRITICAL_ENTER();

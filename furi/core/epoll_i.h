@@ -65,23 +65,27 @@ BPTREE_DEF2(
 
 #define M_OPL_FuriEpollTree_t() BPTREE_OPLIST(FuriEpollTree, M_POD_OPLIST)
 
+typedef enum {
+    FuriEpollStateIdle,
+    FuriEpollStateProcessing,
+} FuriEpollState;
+
 struct FuriEpoll {
     // Only works if all operations are done from the same thread
     FuriThreadId thread_id;
 
-    // Tree mutex
-    FuriMutex* tree_mutex;
+    // Poller state
+    volatile FuriEpollState state;
 
     // Tree
     FuriEpollTree_t tree;
+    // Tree waiting list
+    WaitingList_t waiting_list;
 
     // Tick event
     uint32_t tick_interval;
     FuriEpollTickCallback tick_callback;
     void* tick_callback_context;
-
-    // Waiting items
-    WaitingList_t waiting_list;
 };
 
 FuriEpollItem* furi_epoll_item_alloc(FuriEpoll* owner);

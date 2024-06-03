@@ -25,6 +25,17 @@ bool test_furi_epoll_producer_mq_callback(FuriMessageQueue* queue, void* context
     FURI_LOG_I(
         TAG, "producer_mq_callback: %lu %lu", data->producer_counter, data->consumer_counter);
 
+    // Remove and add should not cause crash
+    // if(data->producer_counter == EPOLL_EVENT_COUNT/2) {
+    //     furi_epoll_message_queue_remove(data->producer_epoll, data->mq);
+    //     furi_epoll_message_queue_add(
+    //     data->producer_epoll,
+    //     data->mq,
+    //     FuriEpollEventOut,
+    //     test_furi_epoll_producer_mq_callback,
+    //     data);
+    // }
+
     if(data->producer_counter == EPOLL_EVENT_COUNT) {
         furi_epoll_stop(data->producer_epoll);
         return false;
@@ -75,6 +86,17 @@ bool test_furi_epoll_consumer_mq_callback(FuriMessageQueue* queue, void* context
 
     FURI_LOG_I(
         TAG, "consumer_mq_callback: %lu %lu", data->producer_counter, data->consumer_counter);
+
+    // Remove and add should not cause crash
+    // if(data->producer_counter == EPOLL_EVENT_COUNT/2) {
+    //     furi_epoll_message_queue_remove(data->consumer_epoll, data->mq);
+    //     furi_epoll_message_queue_add(
+    //     data->consumer_epoll,
+    //     data->mq,
+    //     FuriEpollEventIn,
+    //     test_furi_epoll_producer_mq_callback,
+    //     data);
+    // }
 
     if(data->consumer_counter == EPOLL_EVENT_COUNT) {
         furi_epoll_stop(data->consumer_epoll);
