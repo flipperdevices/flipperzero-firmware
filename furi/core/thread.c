@@ -39,7 +39,10 @@ struct FuriThread {
 
     FuriThreadPriority priority;
 
+    StaticTask_t* task_buffer;
+    StackType_t* stack_buffer;
     TaskHandle_t task_handle;
+
     size_t heap_size;
 
     FuriThreadStdout output;
@@ -90,6 +93,8 @@ static void furi_thread_body(void* context) {
 
     thread->ret = thread->callback(thread->context);
 
+    furi_check(!thread->is_service, "Service threads MUST NOT return");
+
     if(thread->heap_trace_enabled == true) {
         furi_delay_ms(33);
         thread->heap_size = memmgr_heap_get_thread_memory((FuriThreadId)task_handle);
@@ -104,13 +109,6 @@ static void furi_thread_body(void* context) {
 
     furi_check(thread->state == FuriThreadStateRunning);
 
-    if(thread->is_service) {
-        FURI_LOG_W(
-            TAG,
-            "%s service thread TCB memory will not be reclaimed",
-            thread->name ? thread->name : "<unknown service>");
-    }
-
     // flush stdout
     __furi_thread_stdout_flush(thread);
 
@@ -122,8 +120,9 @@ static void furi_thread_body(void* context) {
 
 FuriThread* furi_thread_alloc(void) {
     FuriThread* thread = malloc(sizeof(FuriThread));
+
+    thread->task_buffer = malloc(sizeof(StaticTask_t));
     thread->output.buffer = furi_string_alloc();
-    thread->is_service = false;
 
     FuriThread* parent = NULL;
     if(xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
@@ -167,15 +166,18 @@ FuriThread* furi_thread_alloc_ex(
 
 void furi_thread_free(FuriThread* thread) {
     furi_check(thread);
-
     // Ensure that use join before free
     furi_check(thread->state == FuriThreadStateStopped);
     furi_check(thread->task_handle == NULL);
+    // Cannot free a service thread
+    furi_check(thread->is_service == false);
 
     if(thread->name) free(thread->name);
     if(thread->appid) free(thread->appid);
-    furi_string_free(thread->output.buffer);
+    if(thread->stack_buffer) free(thread->stack_buffer);
 
+    furi_string_free(thread->output.buffer);
+    free(thread->task_buffer);
     free(thread);
 }
 
@@ -196,13 +198,31 @@ void furi_thread_set_appid(FuriThread* thread, const char* appid) {
 }
 
 void furi_thread_mark_as_service(FuriThread* thread) {
+    furi_check(thread);
+    furi_check(thread->state == FuriThreadStateStopped);
+    // Cannot mark a thread as a service more than once
+    furi_check(thread->is_service == false);
+    // Stack size MUST be configured before marking a thread as a service
+    furi_check(thread->stack_size);
+
+    free(thread->task_buffer);
+    free(thread->stack_buffer);
+
+    thread->task_buffer = memmgr_alloc_from_pool(sizeof(StaticTask_t));
+    thread->stack_buffer = memmgr_alloc_from_pool(thread->stack_size);
+
     thread->is_service = true;
 }
 
 void furi_thread_set_stack_size(FuriThread* thread, size_t stack_size) {
     furi_check(thread);
     furi_check(thread->state == FuriThreadStateStopped);
+    furi_check(stack_size);
     furi_check(stack_size % 4 == 0);
+    // Stack size cannot be configured for a thread that was marked as a service
+    furi_check(thread->is_service == false);
+
+    thread->stack_buffer = realloc(thread->stack_buffer, stack_size);
     thread->stack_size = stack_size;
 }
 
@@ -263,28 +283,23 @@ void furi_thread_start(FuriThread* thread) {
     furi_check(thread);
     furi_check(thread->callback);
     furi_check(thread->state == FuriThreadStateStopped);
-    furi_check(thread->stack_size > 0 && thread->stack_size < (UINT16_MAX * sizeof(StackType_t)));
+    furi_check(thread->stack_size);
 
     furi_thread_set_state(thread, FuriThreadStateStarting);
 
-    uint32_t stack = thread->stack_size / sizeof(StackType_t);
+    uint32_t stack_depth = thread->stack_size / sizeof(StackType_t);
     UBaseType_t priority = thread->priority ? thread->priority : FuriThreadPriorityNormal;
-    if(thread->is_service) {
-        thread->task_handle = xTaskCreateStatic(
-            furi_thread_body,
-            thread->name,
-            stack,
-            thread,
-            priority,
-            memmgr_alloc_from_pool(sizeof(StackType_t) * stack),
-            memmgr_alloc_from_pool(sizeof(StaticTask_t)));
-    } else {
-        BaseType_t ret = xTaskCreate(
-            furi_thread_body, thread->name, stack, thread, priority, &thread->task_handle);
-        furi_check(ret == pdPASS);
-    }
 
-    furi_check(thread->task_handle);
+    thread->task_handle = xTaskCreateStatic(
+        furi_thread_body,
+        thread->name,
+        stack_depth,
+        thread,
+        priority,
+        thread->stack_buffer,
+        thread->task_buffer);
+
+    furi_check(thread->task_handle == (TaskHandle_t)thread->task_buffer);
 }
 
 void furi_thread_cleanup_tcb_event(TaskHandle_t task) {
@@ -299,7 +314,9 @@ void furi_thread_cleanup_tcb_event(TaskHandle_t task) {
 
 bool furi_thread_join(FuriThread* thread) {
     furi_check(thread);
-
+    // Cannot join a service thread
+    furi_check(!thread->is_service);
+    // Cannot join a thread to itself
     furi_check(furi_thread_get_current() != thread);
 
     // !!! IMPORTANT NOTICE !!!
