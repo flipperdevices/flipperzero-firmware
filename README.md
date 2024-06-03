@@ -4,7 +4,7 @@
 
 `(ENIGMA)`
 
-![FLIPR](https://github.com/xtruan/flipper-enigma/blob/main/icons/FLIPR_128x64.png)
+![ENIGMA](https://github.com/xtruan/flipper-enigma/blob/main/icons/ENIGMA_128x56.png)
 
 ## Enigma machine simulator for Flipper Zero
 - Built against `0.101.2` Flipper Zero firmware release
