@@ -3,14 +3,14 @@ sourcecode:
   location:
     origin: https://github.com/xtruan/flipper-enigma.git
     commit_sha: 936a32f359f121459a6aa4b124a274062b43b26c
-description: "How about a nice game of enigma?"
-changelog: "v1.10 - Update to support new FW"
+description: "Enigma machine emulator"
+changelog: "v1.0 - Initial release"
 author: "@xtruan"
 screenshots:
   - "./catalog/startscreen.png"
   - "./catalog/menu.png"
-  - "./catalog/game2.png"
-  - "./catalog/game3.png"
-  - "./catalog/game4.png"
-  - "./catalog/game5.png"
-  - "./catalog/settings.png"
+  - "./catalog/rotor.png"
+  - "./catalog/message.png"
+  - "./catalog/ciphertext.png"
+  - "./catalog/plugboard1.png"
+  - "./catalog/plugboard2.png"
