@@ -33,7 +33,7 @@ jobs:
         with:
           strip_v: false
       - name: Publish flipper-enigma
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
           files: |
             build/f7-firmware-C/.extapps/enigma.fap
