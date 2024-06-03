@@ -65,9 +65,6 @@ bool flipenigma_scene_startscreen_on_event(void* context, SceneManagerEvent even
 }
 
 void flipenigma_scene_startscreen_on_exit(void* context) {
-    FlipEnigma* app = context;
-
-    if(app->sound == 1) {
-        // flipenigma_voice_shall_we_play();
-    }
+    UNUSED(context);
+    // FlipEnigma* app = context;
 }

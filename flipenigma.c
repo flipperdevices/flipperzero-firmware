@@ -42,24 +42,16 @@ static void text_string_to_uppercase(char *input)
     }
 }
 
-static void text_build_output(char *input, char *output)
+static void text_build_output(FlipEnigma *app, char *input, char *output)
 {
     Enigma *e = init_enigma (
-			   // rotors model
-			   (const char *[]){"M3-II", "M3-I", "M3-III"},
-			   // rotor_positions
-			   (const uint8_t [ROTORS_N]) {0, 0, 0},
-			   // rotor_ring_settings
-			   (const uint8_t [ROTORS_N]) {0, 0, 0},
-			   // reflector model
-			   "M3-B",
-			   // plugboard switches
-			   (uint8_t [][2]){                      
-			     {'A', 'M'}, {'F', 'I'}, {'N', 'V'},
-			     {'P', 'S'}, {'T', 'U'}, {'W', 'Z'}},
-			   // plugboard size
-			   6                                      
-			   );
+        app->rotors_model,
+        app->rotor_positions,
+        app->rotor_ring_settings,
+        app->reflector_model,
+        app->plugboard_switches,
+        app->plugboard_size
+    );
 
     int out = 0;
     int in;
@@ -107,7 +99,7 @@ static void text_input_callback(void *context)
         // convert the text to uppercase
         text_string_to_uppercase(app->input_text);
         // do the actual work of encrypting the text
-        text_build_output(app->input_text, app->cipher_text);
+        text_build_output(app, app->input_text, app->cipher_text);
         // pupulate text box with cipher text
         text_box_set_text(app->text_box, app->cipher_text);
         // set handled boolean
@@ -149,13 +141,30 @@ FlipEnigma *flipenigma_app_alloc()
 
     // Settings
     app->haptic = FlipEnigmaHapticOn;
-    app->white_mode = FlipEnigmaPlayerHuman;
-    app->black_mode = FlipEnigmaPlayerAI1;
 
-    // Startscreen
-    app->sound = 0;
-    // Main menu
-    app->import_game = 0;
+    app->rotors_model[0] = "M3-II";
+    app->rotors_model[1] = "M3-I";
+    app->rotors_model[2] = "M3-III";
+    app->rotor_positions[0] = 0;
+    app->rotor_positions[1] = 0;
+    app->rotor_positions[2] = 0;
+    app->rotor_ring_settings[0] = 0;
+    app->rotor_ring_settings[1] = 0;
+    app->rotor_ring_settings[2] = 0;
+    app->reflector_model = "M3-B";
+    app->plugboard_switches[0][0] = 'A';
+    app->plugboard_switches[0][1] = 'M';
+    app->plugboard_switches[1][0] = 'F';
+    app->plugboard_switches[1][1] = 'I';
+    app->plugboard_switches[2][0] = 'N';
+    app->plugboard_switches[2][1] = 'V';
+    app->plugboard_switches[3][0] = 'P';
+    app->plugboard_switches[3][1] = 'S';
+    app->plugboard_switches[4][0] = 'T';
+    app->plugboard_switches[4][1] = 'U';
+    app->plugboard_switches[5][0] = 'W';
+    app->plugboard_switches[5][1] = 'Z';
+    app->plugboard_size = 6;            
 
     // Text input
     app->input_state = FlipEnigmaTextInputDefault;

@@ -32,18 +32,18 @@ typedef struct {
     TextInput* text_input;
     TextBox* text_box;
     FlipEnigmaStartscreen* flipenigma_startscreen;
-    // Settings options
-    int haptic;
-    int white_mode;
-    int black_mode;
-    // Startscreen options
-    uint8_t sound;
-    // Main menu options
-    uint8_t import_game;
     // Text input
     uint8_t input_state;
     char cipher_text[TEXT_BUFFER_SIZE];
     char input_text[TEXT_BUFFER_SIZE];
+    // Settings options
+    int haptic;
+    const char* rotors_model[3];
+    uint8_t rotor_positions[3];
+    uint8_t rotor_ring_settings[3];
+    const char* reflector_model;
+    uint8_t plugboard_switches[10][2];
+    size_t plugboard_size;
 } FlipEnigma;
 
 typedef enum {
@@ -60,11 +60,18 @@ typedef enum {
 } FlipEnigmaHapticState;
 
 typedef enum {
-    FlipEnigmaPlayerHuman = 0,
-    FlipEnigmaPlayerAI1 = 1,
-    FlipEnigmaPlayerAI2 = 2,
-    FlipEnigmaPlayerAI3 = 3,
-} FlipEnigmaPlayerMode;
+    FlipEnigmaRotorM3I,
+    FlipEnigmaRotorM3II,
+    FlipEnigmaRotorM3III,
+    FlipEnigmaRotorM3IV,
+    FlipEnigmaRotorM3V,
+} FlipEnigmaRotor;
+
+typedef enum {
+    FlipEnigmaReflectorM3A,
+    FlipEnigmaReflectorM3B,
+    FlipEnigmaReflectorM3C,
+} FlipEnigmaReflector;
 
 typedef enum { FlipEnigmaTextInputDefault, FlipEnigmaTextInputActive } FlipEnigmaTextInputState;
 

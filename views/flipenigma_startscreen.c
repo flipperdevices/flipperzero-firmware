@@ -63,8 +63,7 @@ bool flipenigma_startscreen_input(InputEvent* event, void* context) {
             break;
         case InputKeyRight:
         case InputKeyOk:
-            // sound off, haptic on
-            app->sound = 0;
+            // haptic on
             app->haptic = FlipEnigmaHapticOn;
             with_view_model(
                 instance->view,
