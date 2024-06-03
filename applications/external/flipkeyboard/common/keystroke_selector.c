@@ -112,7 +112,6 @@ void keystroke_selector_free(KeystrokeSelector* keystroke_selector) {
         {
             for(size_t i = 0; i < model->rows * KEYSTROKE_SELECTOR_COLS; i++) {
                 if(model->keys[i].shift) {
-                    free(model->keys[i].shift);
                     model->keys[i].shift = NULL;
                 }
             }

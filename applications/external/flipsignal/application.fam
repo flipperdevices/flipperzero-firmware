@@ -13,6 +13,6 @@ App(
     fap_icon_assets="assets",
     fap_author="jamisonderek",
     fap_weburl="https://github.com/jamisonderek/flipboard",
-    fap_version=(3, 7),
+    fap_version=(3, 10),
     fap_description="FlipBoard Signal turns your FlipBoard into a signal sender.",
 )

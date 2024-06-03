@@ -16,4 +16,5 @@ struct FlipboardKeyboard {
     const BadUsbHidApi* hid;
     void* instance;
     bool use_ble;
+    FlipboardKeyboardInterface interface;
 };

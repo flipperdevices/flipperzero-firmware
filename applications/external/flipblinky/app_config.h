@@ -13,7 +13,7 @@
 
 #define ABOUT_TEXT                             \
     "Welcome to the Flipboard\n"               \
-    "blinky v3.3!\n\n"                         \
+    "blinky v3.5!\n\n"                         \
     "Optimized for FlipBoard \n"               \
     "hardware --\n"                            \
     "see link below to order!\n"               \

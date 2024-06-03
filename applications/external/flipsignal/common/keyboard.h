@@ -11,6 +11,12 @@
 
 typedef struct FlipboardKeyboard FlipboardKeyboard;
 
+typedef enum FlipboardKeyboardInterface {
+    FlipboardKeyboardInterfaceUnknown,
+    FlipboardKeyboardInterfaceUsb,
+    FlipboardKeyboardInterfaceBle,
+} FlipboardKeyboardInterface;
+
 /**
  * @brief Allocates a new flipboard keyboard.
  * @details Allocates a new flipboard keyboard. The keyboard is
@@ -102,3 +108,10 @@ void flipboard_keyboard_send_keycodes(
     FlipboardKeyboard* keyboard,
     uint16_t* codes,
     size_t nb_codes);
+
+/**
+ * @brief Gets the interface the keyboard is using.
+ * @param keyboard The keyboard to send the key codes with.
+ * @return The interface the keyboard is using.
+ */
+FlipboardKeyboardInterface flipboard_keyboard_get_inteface(FlipboardKeyboard* keyboard);

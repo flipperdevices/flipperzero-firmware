@@ -13,6 +13,6 @@ App(
     fap_icon_assets="assets",
     fap_author="jamisonderek",
     fap_weburl="https://github.com/jamisonderek/flipboard",
-    fap_version=(3, 3),
+    fap_version=(3, 5),
     fap_description="FlipBoard Blinky turns your FlipBoard into a blinky badge.",
 )
