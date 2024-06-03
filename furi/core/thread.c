@@ -218,11 +218,15 @@ void furi_thread_set_stack_size(FuriThread* thread, size_t stack_size) {
     furi_check(thread);
     furi_check(thread->state == FuriThreadStateStopped);
     furi_check(stack_size);
-    furi_check(stack_size % 4 == 0);
-    // Stack size cannot be configured for a thread that was marked as a service
+    furi_check(stack_size % sizeof(StackType_t) == 0);
+    // Stack size cannot be configured for a thread that has been marked as a service
     furi_check(thread->is_service == false);
 
-    thread->stack_buffer = realloc(thread->stack_buffer, stack_size);
+    if(thread->stack_buffer) {
+        free(thread->stack_buffer);
+    }
+
+    thread->stack_buffer = malloc(stack_size);
     thread->stack_size = stack_size;
 }
 
