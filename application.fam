@@ -1,0 +1,35 @@
+App(
+    appid = "hc11_modem",
+    name = "HC-11 modem",
+    apptype = FlipperAppType.EXTERNAL,
+    entry_point = "hc11_modem_app_entry",
+    stack_size = 4 * 1024,
+    requires = ["gui"],
+
+    order = 10,
+    fap_category = "Sub-GHz",
+
+    # Optional values
+    fap_version = "1.0",
+    fap_icon = "assets/hc11_modem.png",  # 10x10 1-bit PNG
+    fap_description = "HC11 modem",
+    fap_author = "Giraut",
+    fap_weburl = "https://github.com/Giraut/flipper_zero_hc11_wireless_modem",
+
+    sources = [
+        "about_view.c",
+        "backlight_control.c",
+        "config_save_restore.c",
+        "config_view.c",
+        "led_control.c",
+        "hc11_radio_comm.c",
+        "main.c",
+        "parameters.c",
+        "passthru_view.c",
+        "submenu.c",
+    ],
+
+    fap_libs = ["hwdrivers"],
+
+    fap_icon_assets="assets"
+)
