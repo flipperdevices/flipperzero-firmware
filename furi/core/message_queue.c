@@ -5,6 +5,11 @@
 #include <FreeRTOS.h>
 #include <queue.h>
 
+// Internal FreeRTOS member names
+#define uxMessagesWaiting uxDummy4[0]
+#define uxLength uxDummy4[1]
+#define uxItemSize uxDummy4[2]
+
 struct FuriMessageQueue {
     StaticQueue_t container;
     uint8_t buffer[];
@@ -77,8 +82,7 @@ FuriStatus
         }
     }
 
-    /* Return execution status */
-    return (stat);
+    return stat;
 }
 
 FuriStatus furi_message_queue_get(FuriMessageQueue* instance, void* msg_ptr, uint32_t timeout) {
@@ -116,31 +120,19 @@ FuriStatus furi_message_queue_get(FuriMessageQueue* instance, void* msg_ptr, uin
         }
     }
 
-    return (stat);
+    return stat;
 }
 
 uint32_t furi_message_queue_get_capacity(FuriMessageQueue* instance) {
     furi_check(instance);
 
-    uint32_t capacity;
-
-    /* capacity = pxQueue->uxLength */
-    capacity = instance->container.uxDummy4[1];
-
-    /* Return maximum number of messages */
-    return (capacity);
+    return instance->container.uxLength;
 }
 
 uint32_t furi_message_queue_get_message_size(FuriMessageQueue* instance) {
     furi_check(instance);
 
-    uint32_t size;
-
-    /* size = pxQueue->uxItemSize */
-    size = instance->container.uxDummy4[2];
-
-    /* Return maximum message size */
-    return (size);
+    return instance->container.uxItemSize;
 }
 
 uint32_t furi_message_queue_get_count(FuriMessageQueue* instance) {
@@ -155,8 +147,7 @@ uint32_t furi_message_queue_get_count(FuriMessageQueue* instance) {
         count = uxQueueMessagesWaiting(hQueue);
     }
 
-    /* Return number of queued messages */
-    return ((uint32_t)count);
+    return (uint32_t)count;
 }
 
 uint32_t furi_message_queue_get_space(FuriMessageQueue* instance) {
@@ -168,16 +159,14 @@ uint32_t furi_message_queue_get_space(FuriMessageQueue* instance) {
     if(furi_kernel_is_irq_or_masked() != 0U) {
         isrm = taskENTER_CRITICAL_FROM_ISR();
 
-        /* space = pxQueue->uxLength - pxQueue->uxMessagesWaiting; */
-        space = instance->container.uxDummy4[1] - instance->container.uxDummy4[0];
+        space = instance->container.uxLength - instance->container.uxMessagesWaiting;
 
         taskEXIT_CRITICAL_FROM_ISR(isrm);
     } else {
         space = (uint32_t)uxQueueSpacesAvailable((QueueHandle_t)instance);
     }
 
-    /* Return number of available slots */
-    return (space);
+    return space;
 }
 
 FuriStatus furi_message_queue_reset(FuriMessageQueue* instance) {
@@ -193,6 +182,5 @@ FuriStatus furi_message_queue_reset(FuriMessageQueue* instance) {
         (void)xQueueReset(hQueue);
     }
 
-    /* Return execution status */
-    return (stat);
+    return stat;
 }
