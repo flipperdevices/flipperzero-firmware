@@ -20,7 +20,7 @@ void flipenigma_scene_startscreen_on_enter(void* context) {
     // }
 
     if(app->input_state == FlipEnigmaTextInputActive) {
-        // handle text input; this only uses this scene to have 
+        // handle text input; this only uses this scene to have
         // a correct stack of scenes
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdTextInput);
     } else {

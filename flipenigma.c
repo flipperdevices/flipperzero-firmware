@@ -4,61 +4,49 @@
 #define ENIGMA_IMPLEMENTATION
 #include "enigma/enigma.h"
 
-bool flipenigma_custom_event_callback(void *context, uint32_t event)
-{
+bool flipenigma_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
-    FlipEnigma *app = context;
+    FlipEnigma* app = context;
     return scene_manager_handle_custom_event(app->scene_manager, event);
 }
 
-void flipenigma_tick_event_callback(void *context)
-{
+void flipenigma_tick_event_callback(void* context) {
     furi_assert(context);
-    FlipEnigma *app = context;
+    FlipEnigma* app = context;
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
 // leave app if back button pressed
-bool flipenigma_navigation_event_callback(void *context)
-{
+bool flipenigma_navigation_event_callback(void* context) {
     furi_assert(context);
-    FlipEnigma *app = context;
+    FlipEnigma* app = context;
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-static void text_string_to_uppercase(char *input)
-{
+static void text_string_to_uppercase(char* input) {
     int i;
-    for (i = 0; input[i] != '\0'; i++)
-    {
-        if (input[i] >= 'a' && input[i] <= 'z')
-        {
+    for(i = 0; input[i] != '\0'; i++) {
+        if(input[i] >= 'a' && input[i] <= 'z') {
             input[i] = input[i] - 32;
-        }
-        else
-        {
+        } else {
             input[i] = input[i];
         }
     }
 }
 
-static void text_build_output(FlipEnigma *app, char *input, char *output)
-{
-    Enigma *e = init_enigma (
+static void text_build_output(FlipEnigma* app, char* input, char* output) {
+    Enigma* e = init_enigma(
         app->rotors_model,
         app->rotor_positions,
         app->rotor_ring_settings,
         app->reflector_model,
         app->plugboard_switches,
-        app->plugboard_size
-    );
+        app->plugboard_size);
 
     int out = 0;
     int in;
-    for (in = 0; input[in] != '\0'; in++)
-    {
-        if (input[in] >= 'A' && input[in] <= 'Z')
-        {
+    for(in = 0; input[in] != '\0'; in++) {
+        if(input[in] >= 'A' && input[in] <= 'Z') {
             // encrypt A-Z characters only
 
             // copy the current input char to new object
@@ -72,9 +60,7 @@ static void text_build_output(FlipEnigma *app, char *input, char *output)
             enigma_encrypt(e, plaintext, 1, ciphertext);
             // set output at position
             output[out] = ciphertext[0];
-        }
-        else
-        {
+        } else {
             // passthrough non A-Z char at position
             output[out] = input[in];
         }
@@ -87,15 +73,13 @@ static void text_build_output(FlipEnigma *app, char *input, char *output)
     destroy_enigma(e);
 }
 
-static void text_input_callback(void *context)
-{
+static void text_input_callback(void* context) {
     furi_assert(context);
-    FlipEnigma *app = context;
+    FlipEnigma* app = context;
     bool handled = false;
 
     // check that there is text in the input
-    if (strlen(app->input_text) > 0)
-    {
+    if(strlen(app->input_text) > 0) {
         // convert the text to uppercase
         text_string_to_uppercase(app->input_text);
         // do the actual work of encrypting the text
@@ -108,18 +92,15 @@ static void text_input_callback(void *context)
 
     // reset input state
     app->input_state = FlipEnigmaTextInputDefault;
-    if (handled) {
+    if(handled) {
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdTextBox);
-    }
-    else
-    {
+    } else {
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdMenu);
     }
 }
 
-FlipEnigma *flipenigma_app_alloc()
-{
-    FlipEnigma *app = malloc(sizeof(FlipEnigma));
+FlipEnigma* flipenigma_app_alloc() {
+    FlipEnigma* app = malloc(sizeof(FlipEnigma));
     app->gui = furi_record_open(RECORD_GUI);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
 
@@ -164,7 +145,7 @@ FlipEnigma *flipenigma_app_alloc()
     app->plugboard_switches[4][1] = 'U';
     app->plugboard_switches[5][0] = 'W';
     app->plugboard_switches[5][1] = 'Z';
-    app->plugboard_size = 6;            
+    app->plugboard_size = 6;
 
     // Text input
     app->input_state = FlipEnigmaTextInputDefault;
@@ -187,7 +168,7 @@ FlipEnigma *flipenigma_app_alloc()
     text_input_set_result_callback(
         app->text_input,
         text_input_callback,
-        (void *)app,
+        (void*)app,
         app->input_text,
         TEXT_BUFFER_SIZE,
         // clear default text
@@ -206,8 +187,7 @@ FlipEnigma *flipenigma_app_alloc()
     return app;
 }
 
-void flipenigma_app_free(FlipEnigma *app)
-{
+void flipenigma_app_free(FlipEnigma* app) {
     furi_assert(app);
 
     // Scene manager
@@ -236,10 +216,9 @@ void flipenigma_app_free(FlipEnigma *app)
     free(app);
 }
 
-int32_t flipenigma_app(void *p)
-{
+int32_t flipenigma_app(void* p) {
     UNUSED(p);
-    FlipEnigma *app = flipenigma_app_alloc();
+    FlipEnigma* app = flipenigma_app_alloc();
 
     // Disabled because causes exit on custom firmwares such as RM
     /*if(!furi_hal_region_is_provisioned()) {

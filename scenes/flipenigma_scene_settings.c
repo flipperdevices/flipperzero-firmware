@@ -40,93 +40,24 @@ const uint32_t reflector_model_value[3] = {
 };
 
 const char* rotor_positions_text[26] = {
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
-    "Y",
-    "Z",
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
 };
 const char* rotor_ring_settings_text[26] = {
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-    "13",
-    "14",
-    "15",
-    "16",
-    "17",
-    "18",
-    "19",
-    "20",
-    "21",
-    "22",
-    "23",
-    "24",
-    "25",
-    "26",
+    "1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",  "9",  "10", "11", "12", "13",
+    "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26",
 };
 const uint32_t rotor_positions_value[26] = {
-    FlipEnigma01A,
-    FlipEnigma02B,
-    FlipEnigma03C,
-    FlipEnigma04D,
-    FlipEnigma05E,
-    FlipEnigma06F,
-    FlipEnigma07G,
-    FlipEnigma08H,
-    FlipEnigma09I,
-    FlipEnigma10J,
-    FlipEnigma11K,
-    FlipEnigma12L,
-    FlipEnigma13M,
-    FlipEnigma14N,
-    FlipEnigma15O,
-    FlipEnigma16P,
-    FlipEnigma17Q,
-    FlipEnigma18R,
-    FlipEnigma19S,
-    FlipEnigma20T,
-    FlipEnigma21U,
-    FlipEnigma22V,
-    FlipEnigma23W,
-    FlipEnigma24X,
-    FlipEnigma25Y,
-    FlipEnigma26Z,
+    FlipEnigma01A, FlipEnigma02B, FlipEnigma03C, FlipEnigma04D, FlipEnigma05E, FlipEnigma06F,
+    FlipEnigma07G, FlipEnigma08H, FlipEnigma09I, FlipEnigma10J, FlipEnigma11K, FlipEnigma12L,
+    FlipEnigma13M, FlipEnigma14N, FlipEnigma15O, FlipEnigma16P, FlipEnigma17Q, FlipEnigma18R,
+    FlipEnigma19S, FlipEnigma20T, FlipEnigma21U, FlipEnigma22V, FlipEnigma23W, FlipEnigma24X,
+    FlipEnigma25Y, FlipEnigma26Z,
 };
 
 uint32_t find_index(const char* value, const char* values[], size_t values_len) {
-    for (size_t i = 0; i < values_len; ++i) {
-        if (strcmp(values[i], value) == 0) {
+    for(size_t i = 0; i < values_len; ++i) {
+        if(strcmp(values[i], value) == 0) {
             return i;
         }
     }
@@ -223,25 +154,35 @@ void flipenigma_scene_settings_on_enter(void* context) {
     // Reflector model
     item = variable_item_list_add(
         app->variable_item_list, "Reflector:", 3, flipenigma_scene_settings_set_reflector, app);
-    value_index = value_index_uint32(find_index(app->reflector_model, reflector_model_text, 3), reflector_model_value, 3);
+    value_index = value_index_uint32(
+        find_index(app->reflector_model, reflector_model_text, 3), reflector_model_value, 3);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, reflector_model_text[value_index]);
 
     // Rotor 1 model
     item = variable_item_list_add(
         app->variable_item_list, "Rotor 1:", 5, flipenigma_scene_settings_set_rotor_1, app);
-    value_index = value_index_uint32(find_index(app->rotors_model[0], rotors_model_text, 5), rotors_model_value, 5);
+    value_index = value_index_uint32(
+        find_index(app->rotors_model[0], rotors_model_text, 5), rotors_model_value, 5);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotors_model_text[value_index]);
 
     item = variable_item_list_add(
-        app->variable_item_list, "-> Position:", 26, flipenigma_scene_settings_set_rotor_1_position, app);
+        app->variable_item_list,
+        "-> Position:",
+        26,
+        flipenigma_scene_settings_set_rotor_1_position,
+        app);
     value_index = value_index_uint32(app->rotor_positions[0], rotor_positions_value, 26);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotor_positions_text[value_index]);
 
     item = variable_item_list_add(
-        app->variable_item_list, "-> Ring Setting:", 26, flipenigma_scene_settings_set_rotor_1_ring_setting, app);
+        app->variable_item_list,
+        "-> Ring Setting:",
+        26,
+        flipenigma_scene_settings_set_rotor_1_ring_setting,
+        app);
     value_index = value_index_uint32(app->rotor_ring_settings[0], rotor_positions_value, 26);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotor_ring_settings_text[value_index]);
@@ -249,18 +190,27 @@ void flipenigma_scene_settings_on_enter(void* context) {
     // Rotor 2 model
     item = variable_item_list_add(
         app->variable_item_list, "Rotor 2:", 5, flipenigma_scene_settings_set_rotor_2, app);
-    value_index = value_index_uint32(find_index(app->rotors_model[1], rotors_model_text, 5), rotors_model_value, 5);
+    value_index = value_index_uint32(
+        find_index(app->rotors_model[1], rotors_model_text, 5), rotors_model_value, 5);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotors_model_text[value_index]);
 
     item = variable_item_list_add(
-        app->variable_item_list, "-> Position:", 26, flipenigma_scene_settings_set_rotor_2_position, app);
+        app->variable_item_list,
+        "-> Position:",
+        26,
+        flipenigma_scene_settings_set_rotor_2_position,
+        app);
     value_index = value_index_uint32(app->rotor_positions[1], rotor_positions_value, 26);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotor_positions_text[value_index]);
 
     item = variable_item_list_add(
-        app->variable_item_list, "-> Ring Setting:", 26, flipenigma_scene_settings_set_rotor_2_ring_setting, app);
+        app->variable_item_list,
+        "-> Ring Setting:",
+        26,
+        flipenigma_scene_settings_set_rotor_2_ring_setting,
+        app);
     value_index = value_index_uint32(app->rotor_ring_settings[1], rotor_positions_value, 26);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotor_ring_settings_text[value_index]);
@@ -268,18 +218,27 @@ void flipenigma_scene_settings_on_enter(void* context) {
     // Rotor 3 model
     item = variable_item_list_add(
         app->variable_item_list, "Rotor 3:", 5, flipenigma_scene_settings_set_rotor_3, app);
-    value_index = value_index_uint32(find_index(app->rotors_model[2], rotors_model_text, 5), rotors_model_value, 5);
+    value_index = value_index_uint32(
+        find_index(app->rotors_model[2], rotors_model_text, 5), rotors_model_value, 5);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotors_model_text[value_index]);
 
     item = variable_item_list_add(
-        app->variable_item_list, "-> Position:", 26, flipenigma_scene_settings_set_rotor_3_position, app);
+        app->variable_item_list,
+        "-> Position:",
+        26,
+        flipenigma_scene_settings_set_rotor_3_position,
+        app);
     value_index = value_index_uint32(app->rotor_positions[2], rotor_positions_value, 26);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotor_positions_text[value_index]);
 
     item = variable_item_list_add(
-        app->variable_item_list, "-> Ring Setting:", 26, flipenigma_scene_settings_set_rotor_3_ring_setting, app);
+        app->variable_item_list,
+        "-> Ring Setting:",
+        26,
+        flipenigma_scene_settings_set_rotor_3_ring_setting,
+        app);
     value_index = value_index_uint32(app->rotor_ring_settings[2], rotor_positions_value, 26);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotor_ring_settings_text[value_index]);
