@@ -26,7 +26,7 @@
 #include <toolbox/keys_dict.h>
 #include <nfc/nfc.h>
 
-#include "../test.h"
+#include "../test.h" // IWYU pragma: keep
 
 #define TAG "NfcTest"
 
