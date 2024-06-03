@@ -6,17 +6,71 @@
 
 //reads dataBuffer with dataLen size, translate it into a ISO7816_Command_APDU type
 //extra data will be pointed to commandDataBuffer
-void iso7816_read_command_apdu(
+uint8_t iso7816_read_command_apdu(
     struct ISO7816_Command_APDU* command,
     const uint8_t* dataBuffer,
-    uint32_t dataLen) {
-    UNUSED(dataLen);
+    uint32_t dataLen,
+    const uint8_t** commandApduDataBuffer) {
+    (void)commandApduDataBuffer;
 
     command->CLA = dataBuffer[0];
     command->INS = dataBuffer[1];
     command->P1 = dataBuffer[2];
     command->P2 = dataBuffer[3];
-    command->Lc = dataBuffer[4];
+
+    *commandApduDataBuffer = NULL;
+
+    if(dataLen == 4) {
+        command->Lc = 0;
+        command->Le = 0;
+        command->LePresent = false;
+
+        return ISO7816_READ_COMMAND_APDU_OK;
+    } else if(dataLen == 5) {
+        //short le
+
+        command->Lc = 0;
+        command->Le = dataBuffer[4];
+        command->LePresent = true;
+        if(command->Le == 0x00) {
+            //not supported in this implementation
+            return ISO7816_READ_COMMAND_APDU_ERROR_WRONG_LE;
+        } else {
+            return ISO7816_READ_COMMAND_APDU_OK;
+        }
+
+        return ISO7816_READ_COMMAND_APDU_OK;
+    } else if(dataLen > 5 && dataBuffer[4] != 0x00) {
+        //short lc
+
+        command->Lc = dataBuffer[4];
+        if(command->Lc > 0) {
+            *commandApduDataBuffer = &dataBuffer[5];
+
+            //does it have a short le too?
+            if(dataLen == (uint32_t)(command->Lc + 5)) {
+                command->Le = 0;
+                command->LePresent = false;
+                return ISO7816_READ_COMMAND_APDU_OK;
+            } else if(dataLen == (uint32_t)(command->Lc + 6)) {
+                command->Le = dataBuffer[dataLen - 1];
+                command->LePresent = true;
+                if(command->Le == 0x00) {
+                    //not supported in this implementation
+                    return ISO7816_READ_COMMAND_APDU_ERROR_WRONG_LE;
+                } else {
+                    return ISO7816_READ_COMMAND_APDU_OK;
+                }
+                return ISO7816_READ_COMMAND_APDU_OK;
+            } else {
+                return ISO7816_READ_COMMAND_APDU_ERROR_WRONG_LENGTH;
+            }
+        } else {
+            return ISO7816_READ_COMMAND_APDU_ERROR_WRONG_LENGTH;
+        }
+    } else {
+        return ISO7816_READ_COMMAND_APDU_ERROR_WRONG_LENGTH;
+    }
 }
 
 //data buffer countains the whole APU response (response + trailer (SW1+SW2))
