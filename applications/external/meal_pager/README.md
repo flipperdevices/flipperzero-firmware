@@ -52,7 +52,7 @@ Appart from that, most pagers support 8191 Stations. Triggering ~30 Pagers per s
 Also your Flipper Zero will crash in that time, as the generated signals use RAM which is limited in the device. There may be ways to work around this, but I think its better to have such a limitation.
 
 ## Does this even work
-I don't know. It's based on intel collected from other people. The Flipper sends data, I checked that with a second flipper. But if the data actually triggers something is not sure. 
+I don't know. It's based on intel collected from other people. The Flipper sends data, I checked that with a second flipper. I've also heard rumors that it works in Australia. I'm sure it doesn't work in the US, as they use different frequencies. 
 
 Then run the command: 
  ```
@@ -64,3 +64,4 @@ The application will be compiled and copied onto your device.
 - [Moeker](https://github.com/moeker) and his awesome [pagger tool](https://github.com/meoker/pagger), couldn't have done this without
 - [xb8](https://github.com/xb8/t119bruteforcer) for the useful data collected
 - [Xenobyte, ShotokanZH](https://twitter.com/xenobyte_/status/1558123251276070912) for their super interesting research
+- [WillyJL](https://github.com/Willy-JL) and [xMasterX](https://github.com/xMasterX) for code contributions/corrections

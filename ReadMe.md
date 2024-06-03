@@ -59,7 +59,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac) Fix (By Willy-JL)
 - Updated: [Sub-GHz Playlist v1.0 (By darmiel)](https://github.com/darmiel/flipper-playlist) Changes (By Willy-JL)
 - Updated: [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) Changes (By Willy-JL)
-- Various app changes for message queue updates (By Willy-JL)
 - Updated: [Authenticator/TOTP v5.14.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [FlipBoard Blinky v3.5 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Keyboard v3.7 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
@@ -72,6 +71,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [fbt, vscode: tweaks for cdb generation for clangd #3680 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3680)
 - OFW: [Add initial ISO7816 support #3681 (By kidbomb)](https://github.com/flipperdevices/flipperzero-firmware/pull/3681)
 - OFW: [cleanup of various warnings from clangd #3682 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3682)
+- Updated: [Restaurant Pager Trigger v1.7 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- Updated: [PicoPass (iClass) v1.14 (By Bettse)](https://gitlab.com/bettse/picopass)
+- Various app changes for message queue updates (By Willy-JL)
+- Various app changes for message queue updates (By RogueMaster)
 
 <a name="release">
 
@@ -545,7 +548,7 @@ $ ./fbt dolphin_ext
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
 - [Resistance Calculator v1.2 (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
-- [Restaurant Pager Trigger v1.6 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- [Restaurant Pager Trigger v1.7 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
 - [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - [RFID Fuzzer v1.3 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245)
