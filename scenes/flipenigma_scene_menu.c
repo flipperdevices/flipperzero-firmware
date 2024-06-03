@@ -16,7 +16,7 @@ void flipenigma_scene_menu_on_enter(void* context) {
     submenu_add_item(
         app->submenu, "Message Entry", SubmenuIndexTextInput, flipenigma_scene_menu_submenu_callback, app);
     submenu_add_item(
-        app->submenu, "Settings", SubmenuIndexSettings, flipenigma_scene_menu_submenu_callback, app);
+        app->submenu, "Rotor Settings", SubmenuIndexSettings, flipenigma_scene_menu_submenu_callback, app);
 
     submenu_set_selected_item(
         app->submenu, scene_manager_get_scene_state(app->scene_manager, FlipEnigmaSceneMenu));

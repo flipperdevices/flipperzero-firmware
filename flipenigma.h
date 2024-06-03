@@ -73,13 +73,39 @@ typedef enum {
     FlipEnigmaReflectorM3C,
 } FlipEnigmaReflector;
 
+typedef enum {
+    FlipEnigma01A,
+    FlipEnigma02B,
+    FlipEnigma03C,
+    FlipEnigma04D,
+    FlipEnigma05E,
+    FlipEnigma06F,
+    FlipEnigma07G,
+    FlipEnigma08H,
+    FlipEnigma09I,
+    FlipEnigma10J,
+    FlipEnigma11K,
+    FlipEnigma12L,
+    FlipEnigma13M,
+    FlipEnigma14N,
+    FlipEnigma15O,
+    FlipEnigma16P,
+    FlipEnigma17Q,
+    FlipEnigma18R,
+    FlipEnigma19S,
+    FlipEnigma20T,
+    FlipEnigma21U,
+    FlipEnigma22V,
+    FlipEnigma23W,
+    FlipEnigma24X,
+    FlipEnigma25Y,
+    FlipEnigma26Z,
+} FlipEnigmaPosition;
+
 typedef enum { FlipEnigmaTextInputDefault, FlipEnigmaTextInputActive } FlipEnigmaTextInputState;
 
 typedef enum {
     FlipEnigmaStatusNone = 0,
-    FlipEnigmaStatusMovePlayer = 1,
-    FlipEnigmaStatusMoveAI = 2,
-    FlipEnigmaStatusMoveUndo = 3,
     FlipEnigmaStatusReturn = 10,
     FlipEnigmaStatusLoadError = 11,
     FlipEnigmaStatusSaveError = 12,
