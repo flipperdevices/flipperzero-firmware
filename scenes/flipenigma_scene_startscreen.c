@@ -1,5 +1,4 @@
 #include "../flipenigma.h"
-#include "../helpers/flipenigma_file.h"
 #include "../helpers/flipenigma_custom_event.h"
 #include "../views/flipenigma_startscreen.h"
 
@@ -13,12 +12,6 @@ void flipenigma_scene_startscreen_on_enter(void* context) {
     furi_assert(context);
     FlipEnigma* app = context;
 
-    // if(flipenigma_has_file(FlipEnigmaFileBoard, NULL, false)) {
-    //     if(flipenigma_load_file(app->cipher_text, FlipEnigmaFileBoard, NULL)) {
-    //         app->import_game = 1;
-    //     }
-    // }
-
     if(app->input_state == FlipEnigmaTextInputMessage) {
         // handle message input; this only uses this scene to have
         // a correct stack of scenes
@@ -29,6 +22,13 @@ void flipenigma_scene_startscreen_on_enter(void* context) {
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdPlugboardInput);
     } else {
         // handle default mode; actually use this scene's logic
+
+        // if(flipenigma_has_file(FlipEnigmaFileSettings, NULL, false)) {
+        //     if(flipenigma_load_file(app->settings_text, FlipEnigmaFileSettings, NULL)) {
+        //         // TODO: logic
+        //     }
+        // }
+
         flipenigma_startscreen_set_callback(
             app->flipenigma_startscreen, flipenigma_scene_startscreen_callback, app);
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipEnigmaViewIdStartscreen);
