@@ -27,8 +27,6 @@
      fap_libs = ["hwdrivers"],
 ***/
 CC1101Status cc1101_strobe(FuriHalSpiBusHandle *, uint8_t);
-bool cc1101_wait_status_state(FuriHalSpiBusHandle *, CC1101State state,
-				uint32_t);
 CC1101Status cc1101_read_reg(FuriHalSpiBusHandle *, uint8_t, uint8_t *);
 CC1101Status cc1101_write_reg(FuriHalSpiBusHandle *, uint8_t, uint8_t);
 
