@@ -1,0 +1,2 @@
+const char* acknowledgements_text =
+    "The developers of Picopass would like to humbly acknowledge the work of those who came before and made this possible.\nWe stand on the shoulders of giants.\nFlavio D. Garcia, Gerhard de Koning Gans, Roel Verdult and Milosch Meriac for their research on iClass.  Martin HS (holiman) for their work on the loclass library.  Iceman and the Proxmark3 community.";

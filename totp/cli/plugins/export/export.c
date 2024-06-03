@@ -41,7 +41,7 @@ static void print_uri_component(const char* data, size_t length) {
            c == '-' || c == '_') {
             putchar(c);
         } else {
-            printf("%%%x", c);
+            printf("%%%02x", c);
         }
         c_ptr++;
     }

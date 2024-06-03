@@ -25,7 +25,7 @@
 
 #define SUBGHZ_APP_EXTENSION ".sub"
 #define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
-#define MEAL_PAGER_VERSION "1.6"
+#define MEAL_PAGER_VERSION "1.7"
 
 typedef struct Meal_PagerTransmit Meal_PagerTransmit;
 typedef struct SubGhz SubGhz;

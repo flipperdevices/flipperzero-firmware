@@ -1,3 +1,7 @@
+## v1.7
+- Added code refactors from xMasterX and WillyJL
+- Minor update of Readme
+
 ## v1.6
 - Fix crashes on exit on fw 0.100.3
 
