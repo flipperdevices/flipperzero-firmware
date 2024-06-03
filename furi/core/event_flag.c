@@ -52,7 +52,7 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
     }
 
     /* Return event flags after setting */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
@@ -78,7 +78,7 @@ uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
     }
 
     /* Return event flags before clearing */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_event_flag_get(FuriEventFlag* instance) {
@@ -94,7 +94,7 @@ uint32_t furi_event_flag_get(FuriEventFlag* instance) {
     }
 
     /* Return current event flags */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_event_flag_wait(
@@ -145,5 +145,5 @@ uint32_t furi_event_flag_wait(
     }
 
     /* Return event flags before clearing */
-    return (rflags);
+    return rflags;
 }

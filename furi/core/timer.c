@@ -65,8 +65,7 @@ FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks) {
         stat = FuriStatusErrorResource;
     }
 
-    /* Return execution status */
-    return (stat);
+    return stat;
 }
 
 FuriStatus furi_timer_restart(FuriTimer* instance, uint32_t ticks) {
@@ -84,8 +83,7 @@ FuriStatus furi_timer_restart(FuriTimer* instance, uint32_t ticks) {
         stat = FuriStatusErrorResource;
     }
 
-    /* Return execution status */
-    return (stat);
+    return stat;
 }
 
 FuriStatus furi_timer_stop(FuriTimer* instance) {

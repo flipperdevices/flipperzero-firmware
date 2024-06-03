@@ -53,28 +53,27 @@ FuriStatus furi_mutex_acquire(FuriMutex* instance, uint32_t timeout) {
 
     if(FURI_IS_IRQ_MODE()) {
         stat = FuriStatusErrorISR;
-    } else if(hMutex == NULL) {
-        stat = FuriStatusErrorParameter;
-    } else {
-        if(mutex_type == queueQUEUE_TYPE_RECURSIVE_MUTEX) {
-            if(xSemaphoreTakeRecursive(hMutex, timeout) != pdPASS) {
-                if(timeout != 0U) {
-                    stat = FuriStatusErrorTimeout;
-                } else {
-                    stat = FuriStatusErrorResource;
-                }
+
+    } else if(mutex_type == queueQUEUE_TYPE_RECURSIVE_MUTEX) {
+        if(xSemaphoreTakeRecursive(hMutex, timeout) != pdPASS) {
+            if(timeout != 0U) {
+                stat = FuriStatusErrorTimeout;
+            } else {
+                stat = FuriStatusErrorResource;
             }
-        } else if(mutex_type == queueQUEUE_TYPE_MUTEX) {
-            if(xSemaphoreTake(hMutex, timeout) != pdPASS) {
-                if(timeout != 0U) {
-                    stat = FuriStatusErrorTimeout;
-                } else {
-                    stat = FuriStatusErrorResource;
-                }
-            }
-        } else {
-            furi_crash();
         }
+
+    } else if(mutex_type == queueQUEUE_TYPE_MUTEX) {
+        if(xSemaphoreTake(hMutex, timeout) != pdPASS) {
+            if(timeout != 0U) {
+                stat = FuriStatusErrorTimeout;
+            } else {
+                stat = FuriStatusErrorResource;
+            }
+        }
+
+    } else {
+        furi_crash();
     }
 
     return stat;
@@ -90,20 +89,19 @@ FuriStatus furi_mutex_release(FuriMutex* instance) {
 
     if(FURI_IS_IRQ_MODE()) {
         stat = FuriStatusErrorISR;
-    } else if(hMutex == NULL) {
-        stat = FuriStatusErrorParameter;
-    } else {
-        if(mutex_type == queueQUEUE_TYPE_RECURSIVE_MUTEX) {
-            if(xSemaphoreGiveRecursive(hMutex) != pdPASS) {
-                stat = FuriStatusErrorResource;
-            }
-        } else if(mutex_type == queueQUEUE_TYPE_MUTEX) {
-            if(xSemaphoreGive(hMutex) != pdPASS) {
-                stat = FuriStatusErrorResource;
-            }
-        } else {
-            furi_crash();
+
+    } else if(mutex_type == queueQUEUE_TYPE_RECURSIVE_MUTEX) {
+        if(xSemaphoreGiveRecursive(hMutex) != pdPASS) {
+            stat = FuriStatusErrorResource;
         }
+
+    } else if(mutex_type == queueQUEUE_TYPE_MUTEX) {
+        if(xSemaphoreGive(hMutex) != pdPASS) {
+            stat = FuriStatusErrorResource;
+        }
+
+    } else {
+        furi_crash();
     }
 
     return stat;
@@ -112,13 +110,11 @@ FuriStatus furi_mutex_release(FuriMutex* instance) {
 FuriThreadId furi_mutex_get_owner(FuriMutex* instance) {
     furi_check(instance);
 
-    FuriThreadId owner;
-
     SemaphoreHandle_t hMutex = (SemaphoreHandle_t)instance;
 
-    if(hMutex == NULL) {
-        owner = 0;
-    } else if(FURI_IS_IRQ_MODE()) {
+    FuriThreadId owner;
+
+    if(FURI_IS_IRQ_MODE()) {
         owner = (FuriThreadId)xSemaphoreGetMutexHolderFromISR(hMutex);
     } else {
         owner = (FuriThreadId)xSemaphoreGetMutexHolder(hMutex);

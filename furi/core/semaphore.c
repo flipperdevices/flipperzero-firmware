@@ -65,6 +65,7 @@ FuriStatus furi_semaphore_acquire(FuriSemaphore* instance, uint32_t timeout) {
                 portYIELD_FROM_ISR(yield);
             }
         }
+
     } else {
         if(xSemaphoreTake(hSemaphore, (TickType_t)timeout) != pdPASS) {
             if(timeout != 0U) {
@@ -95,6 +96,7 @@ FuriStatus furi_semaphore_release(FuriSemaphore* instance) {
         } else {
             portYIELD_FROM_ISR(yield);
         }
+
     } else {
         if(xSemaphoreGive(hSemaphore) != pdPASS) {
             stat = FuriStatusErrorResource;
