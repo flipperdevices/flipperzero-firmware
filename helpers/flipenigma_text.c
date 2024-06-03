@@ -4,7 +4,17 @@
 #define ENIGMA_IMPLEMENTATION
 #include "../enigma/enigma.h"
 
-#define PLUGBOARD_ERROR_TEXT "Error parsing plugboard\n-> Must be evenly paired\n-> Must be unique"
+#define TEXT_PLUGBOARD_DISABLED "Plugboard disabled"
+#define TEXT_PLUGBOARD_ERROR          \
+    "Error parsing plugboard!\n"      \
+    "The plugboard text must be\n"    \
+    "an even number of unique \n"     \
+    "letters. These are interpret-\n" \
+    "ed as connected pairs.\n"        \
+    "There is a maximum of 10\n"      \
+    "connections (20 letters).\n"     \
+    "To disable the plugboard,\n"     \
+    "input the letter 'X'."
 
 void text_string_to_uppercase(char* input) {
     int i;
@@ -149,24 +159,36 @@ void text_input_callback(void* context) {
         if(strlen(app->input_plugboard_text) > 0) {
             // Convert the text to uppercase
             text_string_to_uppercase(app->input_plugboard_text);
-            // Do the actual work of parsing the plugboard
-            app->plugboard_size = text_validate_and_convert_plugboard(
-                app->input_plugboard_text, app->plugboard_switches);
-            if(app->plugboard_size == 0) {
-                flipenigma_play_bad_bump(app);
-                // Populate text box with error text
-                text_box_set_text(app->text_box, PLUGBOARD_ERROR_TEXT);
-                // Set show_text_box boolean
-                show_text_box = true;
-            } else {
+
+            // Check for disable case
+            if(strcmp(app->input_plugboard_text, "X") == 0) {
+                app->plugboard_size = 0;
                 flipenigma_play_happy_bump(app);
-                text_normalize_spacing(app->input_plugboard_text, app->plain_text, 2);
-                // Populate text box with plugboard text
-                text_box_set_text(app->text_box, app->plain_text);
+                // Populate text box with info text
+                text_box_set_text(app->text_box, TEXT_PLUGBOARD_DISABLED);
                 // Set show_text_box boolean
                 show_text_box = true;
             }
-            // text_input_set_header_text(app->plugboard_input, app->input_plugboard_text);
+            // Do the actual work of parsing the plugboard
+            else {
+                app->plugboard_size = text_validate_and_convert_plugboard(
+                    app->input_plugboard_text, app->plugboard_switches);
+                if(app->plugboard_size == 0) {
+                    flipenigma_play_bad_bump(app);
+                    // Populate text box with error text
+                    text_box_set_text(app->text_box, TEXT_PLUGBOARD_ERROR);
+                    // Set show_text_box boolean
+                    show_text_box = true;
+                } else {
+                    flipenigma_play_happy_bump(app);
+                    text_normalize_spacing(app->input_plugboard_text, app->plain_text, 2);
+                    // Populate text box with plugboard text
+                    text_box_set_text(app->text_box, app->plain_text);
+                    // Set show_text_box boolean
+                    show_text_box = true;
+                }
+                // text_input_set_header_text(app->plugboard_input, app->input_plugboard_text);
+            }
         }
     }
 

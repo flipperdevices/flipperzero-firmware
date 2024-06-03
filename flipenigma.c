@@ -98,7 +98,7 @@ FlipEnigma* flipenigma_app_alloc() {
         TEXT_BUFFER_SIZE,
         // clear default text
         true);
-    text_input_set_header_text(app->message_input, "Input Message");
+    text_input_set_header_text(app->message_input, "Input message");
     view_dispatcher_add_view(
         app->view_dispatcher,
         FlipEnigmaViewIdMessageInput,
@@ -113,7 +113,7 @@ FlipEnigma* flipenigma_app_alloc() {
         TEXT_BUFFER_SIZE,
         // clear default text
         true);
-    text_input_set_header_text(app->plugboard_input, "Input Plugboard");
+    text_input_set_header_text(app->plugboard_input, "Input plugboard or X to disable");
     view_dispatcher_add_view(
         app->view_dispatcher,
         FlipEnigmaViewIdPlugboardInput,
