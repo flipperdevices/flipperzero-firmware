@@ -75,8 +75,7 @@ FuriStatus furi_semaphore_acquire(FuriSemaphore* instance, uint32_t timeout) {
         }
     }
 
-    /* Return execution status */
-    return (stat);
+    return stat;
 }
 
 FuriStatus furi_semaphore_release(FuriSemaphore* instance) {
@@ -102,8 +101,7 @@ FuriStatus furi_semaphore_release(FuriSemaphore* instance) {
         }
     }
 
-    /* Return execution status */
-    return (stat);
+    return stat;
 }
 
 uint32_t furi_semaphore_get_count(FuriSemaphore* instance) {
@@ -118,6 +116,5 @@ uint32_t furi_semaphore_get_count(FuriSemaphore* instance) {
         count = (uint32_t)uxSemaphoreGetCount(hSemaphore);
     }
 
-    /* Return number of tokens */
-    return (count);
+    return count;
 }
