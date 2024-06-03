@@ -8,6 +8,7 @@
 #include <lib/toolbox/md5_calc.h>
 #include <lib/toolbox/path.h>
 #include <update_util/lfs_backup.h>
+#include <toolbox/tar/tar_archive.h>
 
 #include <pb_decode.h>
 #include <storage.pb.h>
@@ -711,6 +712,51 @@ static void rpc_system_storage_backup_restore_process(const PB_Main* request, vo
         session, request->command_id, backup_ok ? PB_CommandStatus_OK : PB_CommandStatus_ERROR);
 }
 
+static void rpc_system_storage_tar_extract_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_storage_tar_extract_request_tag);
+    furi_assert(context);
+
+    FURI_LOG_D(TAG, "TarExtract");
+
+    RpcStorageSystem* rpc_storage = context;
+    RpcSession* session = rpc_storage->session;
+    furi_assert(session);
+
+    PB_CommandStatus status;
+    rpc_system_storage_reset_state(rpc_storage, session, true);
+
+    Storage* fs_api = furi_record_open(RECORD_STORAGE);
+    TarArchive* archive = tar_archive_alloc(fs_api);
+
+    do {
+        if(!path_contains_only_ascii(request->content.storage_tar_extract_request.out_path)) {
+            status = PB_CommandStatus_ERROR_STORAGE_INVALID_NAME;
+            break;
+        }
+
+        if(!tar_archive_open(
+               archive,
+               request->content.storage_tar_extract_request.tar_path,
+               TAR_OPEN_MODE_READ)) {
+            status = PB_CommandStatus_ERROR_STORAGE_INVALID_PARAMETER;
+            break;
+        }
+
+        if(!tar_archive_unpack_to(
+               archive, request->content.storage_tar_extract_request.out_path, NULL)) {
+            status = PB_CommandStatus_ERROR_STORAGE_INTERNAL;
+            break;
+        }
+
+        status = PB_CommandStatus_OK;
+    } while(0);
+
+    tar_archive_free(archive);
+    furi_record_close(RECORD_STORAGE);
+    rpc_send_and_release_empty(session, request->command_id, status);
+}
+
 void* rpc_system_storage_alloc(RpcSession* session) {
     furi_assert(session);
 
@@ -760,6 +806,9 @@ void* rpc_system_storage_alloc(RpcSession* session) {
 
     rpc_handler.message_handler = rpc_system_storage_backup_restore_process;
     rpc_add_handler(session, PB_Main_storage_backup_restore_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_storage_tar_extract_process;
+    rpc_add_handler(session, PB_Main_storage_tar_extract_request_tag, &rpc_handler);
 
     return rpc_storage;
 }
