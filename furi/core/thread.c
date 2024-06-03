@@ -15,7 +15,9 @@
 
 #define TAG "FuriThread"
 
-#define THREAD_NOTIFY_INDEX 1 // Index 0 is used for stream buffers
+#define THREAD_NOTIFY_INDEX (1) // Index 0 is used for stream buffers
+
+#define THREAD_MAX_STACK_SIZE (UINT16_MAX * sizeof(StackType_t))
 
 typedef struct FuriThreadStdout FuriThreadStdout;
 
@@ -52,7 +54,7 @@ struct FuriThread {
     bool is_service;
     bool heap_trace_enabled;
 
-    configSTACK_DEPTH_TYPE stack_size;
+    size_t stack_size;
 };
 
 static size_t __furi_thread_stdout_write(FuriThread* thread, const char* data, size_t size);
@@ -218,6 +220,7 @@ void furi_thread_set_stack_size(FuriThread* thread, size_t stack_size) {
     furi_check(thread);
     furi_check(thread->state == FuriThreadStateStopped);
     furi_check(stack_size);
+    furi_check(stack_size <= THREAD_MAX_STACK_SIZE);
     furi_check(stack_size % sizeof(StackType_t) == 0);
     // Stack size cannot be configured for a thread that has been marked as a service
     furi_check(thread->is_service == false);
@@ -287,7 +290,7 @@ void furi_thread_start(FuriThread* thread) {
     furi_check(thread);
     furi_check(thread->callback);
     furi_check(thread->state == FuriThreadStateStopped);
-    furi_check(thread->stack_size);
+    furi_check(thread->stack_size > 0);
 
     furi_thread_set_state(thread, FuriThreadStateStarting);
 
