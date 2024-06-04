@@ -66,7 +66,6 @@ static FelicaError felica_listener_command_handler_read(
     FelicaListenerReadCommandResponse* resp = malloc(
         sizeof(FelicaCommandResponseHeader) + 1 +
         FELICA_LISTENER_READ_BLOCK_COUNT_MAX * FELICA_DATA_BLOCK_SIZE);
-    furi_check(resp);
 
     resp->header.response_code = FELICA_LISTENER_RESPONSE_CODE_READ;
     resp->header.idm = request->base.header.idm;
@@ -109,9 +108,7 @@ static FelicaError felica_listener_command_handler_write(
     const FelicaListenerWriteBlockData* data_ptr =
         felica_listener_get_write_request_data_pointer(instance, generic_request);
 
-    FelicaListenerWriteCommandResponse* resp =
-        (FelicaListenerWriteCommandResponse*)malloc(sizeof(FelicaListenerWriteCommandResponse));
-    furi_check(resp);
+    FelicaListenerWriteCommandResponse* resp = malloc(sizeof(FelicaListenerWriteCommandResponse));
 
     resp->response_code = FELICA_LISTENER_RESPONSE_CODE_WRITE;
     resp->idm = request->base.header.idm;
