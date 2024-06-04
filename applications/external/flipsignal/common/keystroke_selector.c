@@ -353,7 +353,7 @@ static void keystroke_selector_draw_callback(Canvas* canvas, void* context) {
                 canvas_set_color(canvas, ColorBlack);
             }
 
-            uint8_t gy = y * KEYSTROKE_SELECTOR_DISPLAYED_HEIGHT;
+            int8_t gy = y * KEYSTROKE_SELECTOR_DISPLAYED_HEIGHT;
             if(is_hanging_char(result.ch)) {
                 gy--;
             }

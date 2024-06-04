@@ -1,3 +1,5 @@
+## 3.8
+ - Some keys not rendering in Keystroke selector.
 ## 3.7
  - Fix issue were invalid memory was getting freed.
 ## 3.6

@@ -61,7 +61,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) Changes (By Willy-JL)
 - Updated: [Authenticator/TOTP v5.14.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [FlipBoard Blinky v3.5 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Keyboard v3.7 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v3.10 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Simon v1.9 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - OFW: [Favorite apps navigation fix and text fixes #3670 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/3670)
@@ -75,6 +74,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PicoPass (iClass) v1.14 (By Bettse)](https://gitlab.com/bettse/picopass)
 - Various app changes for message queue updates (By Willy-JL)
 - Various app changes for message queue updates (By RogueMaster)
+- Updated: [FlipBoard Keyboard v3.8 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 
 <a name="release">
 
@@ -441,7 +441,7 @@ $ ./fbt dolphin_ext
 - [Flashlight v1.2 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi v2.1.1 (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [FlipBoard Blinky v3.5 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- [FlipBoard Keyboard v3.7 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Keyboard v3.8 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBoard Signal v3.10 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBoard Simon v1.9 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBIP Crypto Wallet v1.16 (By xtruan)](https://github.com/xtruan/FlipBIP)
