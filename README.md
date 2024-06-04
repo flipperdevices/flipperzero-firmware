@@ -31,12 +31,12 @@ Start the application in **Apps ▶ Sub-GHz**.
 
 The main menu opens:
 
-![Main menu](screenshots/1-main_menu.png)
+![Main menu](screenshots/6-main_menu.png)
 
 
 ### Configuration
 
-![Configuration menu](screenshots/2-configuration_menu.png)
+![Configuration menu](screenshots/5-configuration_menu.png)
 
 Set radio channel your HC-11 communicates on (see [HC-11 user manual](https://www.hc01.com/downloads/HC-11%20english%20datasheet.pdf) p.6 - **AT+Cxxx** configuration command):
 
@@ -74,11 +74,11 @@ Selecting the **USB serial passthrough** enables the modem function. The Flipper
 
 The first screen shows the overall amount of serial traffic going to and from the HC-11 module:
 
-![Serial passthrough - Traffic volume](screenshots/3-usb_serial_passthrough1.png)
+![Serial passthrough - Traffic volume](screenshots/2-usb_serial_passthrough1.png)
 
 The second screen, accessible with the right arrow, shows the actual traffic: bytes sent to the HC-11 are showed in black while bytes received from the HC-11 are showed normally.
 
-![Serial passthrough - Transferred bytes](screenshots/4-usb_serial_passthrough2.png)
+![Serial passthrough - Transferred bytes](screenshots/3-usb_serial_passthrough2.png)
 
 
 
@@ -86,9 +86,9 @@ The second screen, accessible with the right arrow, shows the actual traffic: by
 
 Gives information about the app. Use the **OK** button or the arrows to switch pages.
 
-![App version](screenshots/5-splash_version.png)
+![App version](screenshots/1-splash_version.png)
 
-![App description](screenshots/6-app_description.png)
+![App description](screenshots/4-app_description.png)
 
 ![GPIO pin connections](screenshots/7-warning.png)
 
