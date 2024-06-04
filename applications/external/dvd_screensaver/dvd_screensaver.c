@@ -38,10 +38,11 @@ int32_t dvd_screensaver_app(void* p) {
 
     DrawContext* draw_context = malloc(sizeof(DrawContext));
 
-    draw_context->x = 47;
-    draw_context->y = 15;
+    draw_context->x = rand() % (126 - LOGO_W);
+    draw_context->y = rand() % (62 - LOGO_H);
 
-    int8_t flip_x = -1, flip_y = 1;
+    int8_t flip_x = (rand() % 2) ? 1 : -1;
+    int8_t flip_y = (rand() % 2) ? 1 : -1;
 
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, draw_callback, draw_context);

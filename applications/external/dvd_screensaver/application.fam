@@ -9,6 +9,6 @@ App(
     fap_category="Media",
     fap_author="shantih19",
     fap_weburl="https://github.com/shantih19/flipper_dvd_screensaver",
-    fap_version="1.0",
+    fap_version="1.1",
     fap_description="DVD Screensaver clone",
 )
