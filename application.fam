@@ -12,7 +12,7 @@ App(
     # Optional values
     fap_version = "1.0",
     fap_icon = "assets/hc11_modem.png",  # 10x10 1-bit PNG
-    fap_description = "HC11 modem",
+    fap_description = "HC11 wireless modem",
     fap_author = "Giraut",
     fap_weburl = "https://github.com/Giraut/flipper_zero_hc11_wireless_modem",
 
