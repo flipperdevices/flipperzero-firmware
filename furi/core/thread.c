@@ -199,9 +199,12 @@ void furi_thread_free(FuriThread* thread) {
     furi_check(thread->state == FuriThreadStateStopped);
     furi_check(thread->task_handle == NULL);
 
-    if(thread->name) free(thread->name);
-    if(thread->appid) free(thread->appid);
-    if(thread->stack_buffer) free(thread->stack_buffer);
+    furi_thread_set_name(thread, NULL);
+    furi_thread_set_appid(thread, NULL);
+
+    if(thread->stack_buffer) {
+        free(thread->stack_buffer);
+    }
 
     furi_string_free(thread->output.buffer);
     free(thread);
@@ -211,7 +214,9 @@ void furi_thread_set_name(FuriThread* thread, const char* name) {
     furi_check(thread);
     furi_check(thread->state == FuriThreadStateStopped);
 
-    if(thread->name) free(thread->name);
+    if(thread->name) {
+        free(thread->name);
+    }
 
     thread->name = name ? strdup(name) : NULL;
 }
@@ -219,7 +224,11 @@ void furi_thread_set_name(FuriThread* thread, const char* name) {
 void furi_thread_set_appid(FuriThread* thread, const char* appid) {
     furi_check(thread);
     furi_check(thread->state == FuriThreadStateStopped);
-    if(thread->appid) free(thread->appid);
+
+    if(thread->appid) {
+        free(thread->appid);
+    }
+
     thread->appid = appid ? strdup(appid) : NULL;
 }
 
