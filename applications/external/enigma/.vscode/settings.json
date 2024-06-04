@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "stdlib.h": "c",
-        "flipenigma_startscreen.h": "c",
-        "enigma.h": "c"
-    }
-}

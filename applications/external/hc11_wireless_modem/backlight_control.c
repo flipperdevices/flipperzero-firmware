@@ -10,50 +10,37 @@
 
 #include "backlight_control.h"
 
-
-
 /*** Routines ***/
 
 /** Setup the backlight control **/
-void set_backlight_control(BacklightControl *blc) {
-
-  /* Enable notifications */
-  blc->notifications = furi_record_open(RECORD_NOTIFICATION);
+void set_backlight_control(BacklightControl* blc) {
+    /* Enable notifications */
+    blc->notifications = furi_record_open(RECORD_NOTIFICATION);
 }
-
-
 
 /** Release the backlight control **/
 void release_backlight_control(void) {
-
-  /* Disable notifications */
-  furi_record_close(RECORD_NOTIFICATION);
+    /* Disable notifications */
+    furi_record_close(RECORD_NOTIFICATION);
 }
 
-
-
 /** Set the backlight on, off or automatic */
-void set_backlight(BacklightControl *blc, uint8_t state) {
-
-  /* Set the backlight in the specified state */
-  switch(state) {
-
+void set_backlight(BacklightControl* blc, uint8_t state) {
+    /* Set the backlight in the specified state */
+    switch(state) {
     case BL_OFF:
-      notification_message(blc->notifications,
-				&sequence_display_backlight_off);
-      break;
+        notification_message(blc->notifications, &sequence_display_backlight_off);
+        break;
 
     case BL_ON:
-      notification_message(blc->notifications,
-				&sequence_display_backlight_enforce_on);
-      break;
+        notification_message(blc->notifications, &sequence_display_backlight_enforce_on);
+        break;
 
     case BL_AUTO:
-      notification_message(blc->notifications,
-				&sequence_display_backlight_enforce_auto);
-      break;
+        notification_message(blc->notifications, &sequence_display_backlight_enforce_auto);
+        break;
 
     default:
-      return;
-  }
+        return;
+    }
 }
