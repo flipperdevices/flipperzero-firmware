@@ -64,6 +64,27 @@ typedef void (*FuriThreadStateCallback)(FuriThreadState state, void* context);
  */
 FuriThread* furi_thread_alloc(void);
 
+/** Allocate FuriThread service
+ *
+ * Service threads are more memory efficient, but have
+ * the following limitations:
+ *
+ * - Cannot return from the callback
+ * - Cannot be joined or freed
+ * - Stack size cannot be altered
+ *
+ * @param name
+ * @param stack_size
+ * @param callback
+ * @param context
+ * @return FuriThread instance
+ */
+FuriThread* furi_thread_alloc_service(
+    const char* name,
+    uint32_t stack_size,
+    FuriThreadCallback callback,
+    void* context);
+
 /** Allocate FuriThread, shortcut version
  * 
  * @param name 
@@ -102,13 +123,6 @@ void furi_thread_set_name(FuriThread* thread, const char* name);
  * @param appid 
  */
 void furi_thread_set_appid(FuriThread* thread, const char* appid);
-
-/** Mark thread as service
- * The service cannot be stopped or removed, and cannot exit from the thread body
- * 
- * @param thread 
- */
-void furi_thread_mark_as_service(FuriThread* thread);
 
 /** Set FuriThread stack size
  *

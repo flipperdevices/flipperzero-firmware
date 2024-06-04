@@ -27,6 +27,10 @@ struct FuriThreadStdout {
 };
 
 struct FuriThread {
+    StaticTask_t container;
+    TaskHandle_t task_handle;
+    StackType_t* stack_buffer;
+
     FuriThreadState state;
     int32_t ret;
 
@@ -41,10 +45,7 @@ struct FuriThread {
 
     FuriThreadPriority priority;
 
-    StaticTask_t* task_buffer;
-    StackType_t* stack_buffer;
-    TaskHandle_t task_handle;
-
+    size_t stack_size;
     size_t heap_size;
 
     FuriThreadStdout output;
@@ -53,9 +54,10 @@ struct FuriThread {
     // this ensures that the size of this structure is minimal
     bool is_service;
     bool heap_trace_enabled;
-
-    size_t stack_size;
 };
+
+// IMPORTANT: container MUST be the FIRST struct member
+static_assert(offsetof(FuriThread, container) == 0);
 
 static size_t __furi_thread_stdout_write(FuriThread* thread, const char* data, size_t size);
 static int32_t __furi_thread_stdout_flush(FuriThread* thread);
@@ -120,10 +122,7 @@ static void furi_thread_body(void* context) {
     furi_thread_catch();
 }
 
-FuriThread* furi_thread_alloc(void) {
-    FuriThread* thread = malloc(sizeof(FuriThread));
-
-    thread->task_buffer = malloc(sizeof(StaticTask_t));
+static void furi_thread_init_common(FuriThread* thread) {
     thread->output.buffer = furi_string_alloc();
 
     FuriThread* parent = NULL;
@@ -149,6 +148,32 @@ FuriThread* furi_thread_alloc(void) {
     } else {
         thread->heap_trace_enabled = false;
     }
+}
+
+FuriThread* furi_thread_alloc(void) {
+    FuriThread* thread = malloc(sizeof(FuriThread));
+
+    furi_thread_init_common(thread);
+
+    return thread;
+}
+
+FuriThread* furi_thread_alloc_service(
+    const char* name,
+    uint32_t stack_size,
+    FuriThreadCallback callback,
+    void* context) {
+    FuriThread* thread = memmgr_alloc_from_pool(sizeof(FuriThread));
+
+    furi_thread_init_common(thread);
+
+    thread->stack_buffer = memmgr_alloc_from_pool(stack_size);
+    thread->stack_size = stack_size;
+    thread->is_service = true;
+
+    furi_thread_set_name(thread, name);
+    furi_thread_set_callback(thread, callback);
+    furi_thread_set_context(thread, context);
 
     return thread;
 }
@@ -168,18 +193,17 @@ FuriThread* furi_thread_alloc_ex(
 
 void furi_thread_free(FuriThread* thread) {
     furi_check(thread);
-    // Ensure that use join before free
-    furi_check(thread->state == FuriThreadStateStopped);
-    furi_check(thread->task_handle == NULL);
     // Cannot free a service thread
     furi_check(thread->is_service == false);
+    // Cannot free a non-joined thread
+    furi_check(thread->state == FuriThreadStateStopped);
+    furi_check(thread->task_handle == NULL);
 
     if(thread->name) free(thread->name);
     if(thread->appid) free(thread->appid);
     if(thread->stack_buffer) free(thread->stack_buffer);
 
     furi_string_free(thread->output.buffer);
-    free(thread->task_buffer);
     free(thread);
 }
 
@@ -197,23 +221,6 @@ void furi_thread_set_appid(FuriThread* thread, const char* appid) {
     furi_check(thread->state == FuriThreadStateStopped);
     if(thread->appid) free(thread->appid);
     thread->appid = appid ? strdup(appid) : NULL;
-}
-
-void furi_thread_mark_as_service(FuriThread* thread) {
-    furi_check(thread);
-    furi_check(thread->state == FuriThreadStateStopped);
-    // Cannot mark a thread as a service more than once
-    furi_check(thread->is_service == false);
-    // Stack size MUST be configured before marking a thread as a service
-    furi_check(thread->stack_size);
-
-    free(thread->task_buffer);
-    free(thread->stack_buffer);
-
-    thread->task_buffer = memmgr_alloc_from_pool(sizeof(StaticTask_t));
-    thread->stack_buffer = memmgr_alloc_from_pool(thread->stack_size);
-
-    thread->is_service = true;
 }
 
 void furi_thread_set_stack_size(FuriThread* thread, size_t stack_size) {
@@ -304,9 +311,9 @@ void furi_thread_start(FuriThread* thread) {
         thread,
         priority,
         thread->stack_buffer,
-        thread->task_buffer);
+        &thread->container);
 
-    furi_check(thread->task_handle == (TaskHandle_t)thread->task_buffer);
+    furi_check(thread->task_handle == (TaskHandle_t)&thread->container);
 }
 
 void furi_thread_cleanup_tcb_event(TaskHandle_t task) {
@@ -411,7 +418,7 @@ uint32_t furi_thread_flags_set(FuriThreadId thread_id, uint32_t flags) {
         }
     }
     /* Return flags after setting */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_thread_flags_clear(uint32_t flags) {
@@ -440,7 +447,7 @@ uint32_t furi_thread_flags_clear(uint32_t flags) {
     }
 
     /* Return flags before clearing */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_thread_flags_get(void) {
@@ -458,7 +465,7 @@ uint32_t furi_thread_flags_get(void) {
         }
     }
 
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeout) {
@@ -528,7 +535,7 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
     }
 
     /* Return flags before clearing */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_item_count) {
@@ -557,7 +564,7 @@ uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_item_c
         vPortFree(task);
     }
 
-    return (count);
+    return count;
 }
 
 const char* furi_thread_get_name(FuriThreadId thread_id) {
@@ -570,7 +577,7 @@ const char* furi_thread_get_name(FuriThreadId thread_id) {
         name = pcTaskGetName(hTask);
     }
 
-    return (name);
+    return name;
 }
 
 const char* furi_thread_get_appid(FuriThreadId thread_id) {
@@ -584,7 +591,7 @@ const char* furi_thread_get_appid(FuriThreadId thread_id) {
         }
     }
 
-    return (appid);
+    return appid;
 }
 
 uint32_t furi_thread_get_stack_space(FuriThreadId thread_id) {
@@ -597,7 +604,7 @@ uint32_t furi_thread_get_stack_space(FuriThreadId thread_id) {
         sz = (uint32_t)(uxTaskGetStackHighWaterMark(hTask) * sizeof(StackType_t));
     }
 
-    return (sz);
+    return sz;
 }
 
 static size_t __furi_thread_stdout_write(FuriThread* thread, const char* data, size_t size) {
