@@ -59,25 +59,25 @@ typedef struct {
     uint16_t system_code;
     uint8_t request_code;
     uint8_t time_slot;
-} Felica_PollingRequest;
+} FelicaPollingRequest;
 
 typedef struct {
     uint8_t code;
     FelicaIDm idm;
     FelicaPMm pmm;
-} Felica_SensfResData;
+} FelicaSensfResData;
 
 typedef struct {
     uint16_t system_code;
-    Felica_SensfResData sens_res;
-} Felica_PT_Memory;
+    FelicaSensfResData sens_res;
+} FelicaPTMemory;
 
 struct Nfc {
     NfcState state;
 
     Iso14443_3aColResStatus col_res_status;
     Iso14443_3aColResData col_res_data;
-    Felica_PT_Memory pt_memory;
+    FelicaPTMemory pt_memory;
     bool software_col_res_required;
 
     NfcEventCallback callback;
@@ -269,13 +269,13 @@ static void nfc_worker_listener_pass_col_res(Nfc* instance, uint8_t* rx_data, ui
             processed = true;
         }
     } else if(rx_bits == 8 * 8) {
-        Felica_PollingRequest* request = (Felica_PollingRequest*)rx_data;
+        FelicaPollingRequest* request = (FelicaPollingRequest*)rx_data;
         if(request->system_code == instance->pt_memory.system_code) {
-            uint8_t response_size = sizeof(Felica_SensfResData) + 1;
+            uint8_t response_size = sizeof(FelicaSensfResData) + 1;
             bit_buffer_reset(tx_buffer);
             bit_buffer_append_byte(tx_buffer, response_size);
             bit_buffer_append_bytes(
-                tx_buffer, (uint8_t*)&instance->pt_memory.sens_res, sizeof(Felica_SensfResData));
+                tx_buffer, (uint8_t*)&instance->pt_memory.sens_res, sizeof(FelicaSensfResData));
             felica_crc_append(tx_buffer);
             nfc_listener_tx(instance, tx_buffer);
             instance->col_res_status = Iso14443_3aColResStatusDone;
