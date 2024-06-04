@@ -10,4 +10,5 @@ App(
     stack_size=4 * 1024,
     order=30,
     fap_icon_assets="assets",
+    fap_category="NFC",
 )
