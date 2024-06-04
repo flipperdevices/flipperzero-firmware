@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0527-2224-0.102.3-c8dbaef](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-05-28 10:24 CST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-05-28 10:24 CST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-06-03 11:35 WITA`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-06-03 11:35 WITA`
 - Updated: [Chess v1.10 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Updated: [Digimon F-Com v1.3 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 - Updated: [FlipBIP Crypto Wallet v1.16 (By xtruan)](https://github.com/xtruan/FlipBIP)
@@ -53,7 +53,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - RFID: [electra non-initialized encoded epilogue on render fix (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c58c8ce1f6e05ec3462e2b93ab4e2846ee75853c)
 - Updated: [Reversi v1.3 (By dimat)](https://github.com/dimat/flipperzero-reversi)
 - Updated: [Tone Generator v1.0 (By GEMISIS)](https://github.com/GEMISIS/tone_gen)
-- Version incremented with OFW
 - Updated: [Pokemon Trading v2.0 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) (Version Only)
 - Updated: [IFTTT Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) Changes (By Willy-JL)
 - Updated: [Quac! v0.6 (By rdefeo)](https://github.com/rdefeo/quac) Fix (By Willy-JL)
@@ -73,10 +72,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Restaurant Pager Trigger v1.7 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [PicoPass (iClass) v1.14 (By Bettse)](https://gitlab.com/bettse/picopass)
 - Various app changes for message queue updates (By Willy-JL)
-- Various app changes for message queue updates (By RogueMaster)
 - Updated: [FlipBoard Keyboard v3.8 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [DVD Screensaver v1.1 (By shantih19)](https://github.com/shantih19/flipper_dvd_screensaver)
 - Updated: [Noptel LRF Sampler v1.9 (By Giraut)](https://github.com/Giraut/flipper_zero_noptel_lrf_sampler)
+- Archive: Fix favorite's parent folders thinking they are favorited too (By Willy-JL)
+- Version incremented with OFW
+- NFC: Fix Mifare DESFire reading & abbreviated prefix (By Willy-JL)
+- Various app changes for message queue updates (By RogueMaster)
 
 <a name="release">
 

@@ -482,8 +482,18 @@ static void nfc_protocol_support_scene_save_name_on_enter(NfcApp* instance) {
     bool name_is_empty = furi_string_empty(instance->file_name);
     if(name_is_empty) {
         furi_string_set(instance->file_path, NFC_APP_FOLDER);
+        FuriString* prefix = furi_string_alloc();
+        furi_string_set(prefix, nfc_device_get_name(instance->nfc_device, NfcDeviceNameTypeFull));
+        furi_string_replace(prefix, "Mifare", "MF");
+        furi_string_replace(prefix, " Classic", "C"); // MFC
+        furi_string_replace(prefix, "Desfire", "Des"); // MF Des
+        furi_string_replace(prefix, "Ultralight", "UL"); // MF UL
+        furi_string_replace(prefix, " Plus", "+"); // NTAG I2C+
+        furi_string_replace(prefix, " (Unknown)", "");
+        furi_string_replace_all(prefix, " ", "_");
         name_generator_make_auto_basic(
-            instance->text_store, NFC_TEXT_STORE_SIZE, NFC_APP_FILENAME_PREFIX);
+            instance->text_store, NFC_TEXT_STORE_SIZE, furi_string_get_cstr(prefix));
+        furi_string_free(prefix);
         furi_string_set(folder_path, NFC_APP_FOLDER);
     } else {
         nfc_text_store_set(instance, "%s", furi_string_get_cstr(instance->file_name));

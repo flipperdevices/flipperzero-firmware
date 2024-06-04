@@ -193,7 +193,7 @@ bool archive_favorites_delete(const char* format, ...) {
                 continue;
             }
 
-            if(furi_string_search(buffer, filename)) {
+            if(!furi_string_equal(buffer, filename)) {
                 archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", furi_string_get_cstr(buffer));
             }
         }
@@ -233,7 +233,7 @@ bool archive_is_favorite(const char* format, ...) {
             if(!furi_string_size(buffer)) {
                 continue;
             }
-            if(!furi_string_search(buffer, filename)) {
+            if(furi_string_equal(buffer, filename)) {
                 found = true;
                 break;
             }
@@ -274,7 +274,7 @@ bool archive_favorites_rename(const char* src, const char* dst) {
             archive_file_append(
                 ARCHIVE_FAV_TEMP_PATH,
                 "%s\n",
-                furi_string_search(buffer, path) ? furi_string_get_cstr(buffer) : dst);
+                !furi_string_equal(buffer, path) ? furi_string_get_cstr(buffer) : dst);
         }
     }
 
