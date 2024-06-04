@@ -159,7 +159,7 @@ void furi_thread_set_name(FuriThread* thread, const char* name);
  * All threads spawned by the same app will have the same appid.
  * 
  * @param[in,out] thread pointer to the FuriThread instance to be modified
- * @param[in] name thread application ID (can be NULL)
+ * @param[in] appid thread application ID (can be NULL)
  */
 void furi_thread_set_appid(FuriThread* thread, const char* appid);
 
