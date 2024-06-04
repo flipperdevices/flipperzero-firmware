@@ -28,6 +28,6 @@ App(
     fap_category="GPIO",
     fap_author="Giraut",
     fap_weburl="https://github.com/Giraut/flipper_zero_noptel_lrf_sampler",
-    fap_version="1.8",
+    fap_version="1.9",
     fap_description="Noptel LRF rangefinder sampler",
 )

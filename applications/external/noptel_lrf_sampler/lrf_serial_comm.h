@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.8
+ * Version: 1.9
  *
  * LRF Serial communication app
 ***/
@@ -8,7 +8,6 @@
 #pragma once
 
 /*** Defines ***/
-#define BAUDRATE 115200
 #define UART_RX_BUF_SIZE 256
 #define DIAG_PROGRESS_UPDATE_EVERY 250 /*ms*/
 

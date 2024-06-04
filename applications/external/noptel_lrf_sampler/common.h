@@ -1,6 +1,6 @@
 /***
  * Noptel LRF rangefinder sampler for the Flipper Zero
- * Version: 1.8
+ * Version: 1.9
  *
  * Main app
 ***/
@@ -17,11 +17,13 @@
 #include "lrf_serial_comm.h"
 
 /*** Defines ***/
-#define VERSION "1.8"
+#define VERSION FAP_VERSION
 #define TAG "noptel_lrf_sampler"
 
 #define CONFIG_FILE "noptel_lrf_sampler.save"
 #define SMM_PREFIX_CONFIG_DEFINITION_FILE "smm_prefix_config.def"
+
+//#define USE_5V_PIN		/* As well as PC1, for power control */
 
 #define NO_AVERAGE \
     -1 /* This distance will be displayed as
