@@ -72,7 +72,8 @@ void dab_timer_render_binary_face(
     }
 }
 
-static void dab_timer_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void dab_timer_input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);

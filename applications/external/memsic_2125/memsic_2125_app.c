@@ -64,7 +64,8 @@ typedef struct {
 // We queue a message and then return to the caller.
 // @input_event the button that triggered the callback.
 // @queue our message queue.
-static void input_callback(InputEvent* input_event, FuriMessageQueue* queue) {
+static void input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* queue = ctx;
     furi_assert(queue);
     DemoEvent event = {.type = DemoEventTypeKey, .input = *input_event};
     furi_message_queue_put(queue, &event, FuriWaitForever);

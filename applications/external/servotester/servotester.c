@@ -67,7 +67,8 @@ static void servotester_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void servotester_timer_callback(FuriMessageQueue* event_queue) {
+static void servotester_timer_callback(void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     ServoTesterEvent event = {.type = EventTypeTick};

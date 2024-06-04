@@ -531,7 +531,8 @@ static void tetris_game_render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_release(tetris_state->mutex);
 }
 
-static void tetris_game_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void tetris_game_input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     TetrisEvent event = {.type = EventTypeKey, .input = *input_event};
@@ -1121,7 +1122,8 @@ static void
     tetris_game_render_curr_piece(tetris_state);
 }
 
-static void tetris_game_update_timer_callback(FuriMessageQueue* event_queue) {
+static void tetris_game_update_timer_callback(void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     TetrisEvent event = {.type = EventTypeTick};

@@ -65,7 +65,9 @@ void step_callback(void* ctx) {
     }
 }
 
-static void input_callback(InputEvent* input_event, FuriMessageQueue* queue) {
+static void input_callback(InputEvent* input_event, void* ctx) {
+    furi_assert(ctx);
+    FuriMessageQueue* queue = ctx;
     StepCounterEvent event = {
         .type = StepCounterEventTypeKey,
         .input_event.key = input_event->key,

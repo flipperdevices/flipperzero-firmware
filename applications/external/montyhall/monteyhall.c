@@ -301,7 +301,8 @@ static void montyhall_render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_release(monty_state->mutex);
 }
 
-static void montyhall_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void montyhall_input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);

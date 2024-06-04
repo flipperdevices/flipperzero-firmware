@@ -222,21 +222,25 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_release(app_fsm->mutex);
 }
 
-static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     AppEvent event = {.type = EventKeyPress, .input = *input_event};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void timer_tick_callback(FuriMessageQueue* event_queue) {
+static void timer_tick_callback(void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     AppEvent event = {.type = EventTimerTick};
     furi_message_queue_put(event_queue, &event, 0);
 }
 
-static void app_init(AppFSM* const app_fsm, FuriMessageQueue* event_queue) {
+static void app_init(AppFSM* const app_fsm, void* ctx) {
+    furi_assert(ctx);
+    FuriMessageQueue* event_queue = ctx;
     app_fsm->counter = 0;
     app_fsm->dcf77_message = &dcf77_message_buffer[0];
     app_fsm->next_message = &dcf77_next_buffer[0];

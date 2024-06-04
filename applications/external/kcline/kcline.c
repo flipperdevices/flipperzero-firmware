@@ -728,7 +728,8 @@ static void input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-static void kcline_update_timer_callback(FuriMessageQueue* event_queue) {
+static void kcline_update_timer_callback(void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
     FuriMessageQueue* event = event_queue;
     furi_message_queue_put(event_queue, &event, 0);

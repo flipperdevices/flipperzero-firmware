@@ -24,8 +24,9 @@
 
 bool run = true;
 
-static void cbInput(InputEvent* event, FuriMessageQueue* queue) {
+static void cbInput(InputEvent* event, void* ctx) {
     ENTER;
+    FuriMessageQueue* queue = ctx;
     furi_assert(queue);
     furi_assert(event);
 

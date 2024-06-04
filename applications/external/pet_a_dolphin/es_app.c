@@ -27,7 +27,8 @@ void es_app_data_free(esAppData* data) {
     free(data);
 }
 
-static void input_callback(InputEvent* input, FuriMessageQueue* event_queue) {
+static void input_callback(InputEvent* input, void* ctx) {
+    FuriMessageQueue* event_queue = ctx;
     furi_assert(event_queue);
 
     AppEvent event = {.type = EventTypeKey, .input = *input};

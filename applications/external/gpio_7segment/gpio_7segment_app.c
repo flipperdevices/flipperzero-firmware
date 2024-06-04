@@ -101,7 +101,8 @@ typedef struct {
 // Invoked when input (button press) is detected.  Queues message and returns to caller.
 // @param input_event the input event that caused the callback to be invoked.
 // @param queue the message queue for queueing key event.
-static void gpio_7segment_input_callback(InputEvent* input_event, FuriMessageQueue* queue) {
+static void gpio_7segment_input_callback(InputEvent* input_event, void* ctx) {
+    FuriMessageQueue* queue = ctx;
     furi_assert(queue);
     GpioEvent event = {.type = GpioEventTypeKey, .input = *input_event};
     furi_message_queue_put(queue, &event, FuriWaitForever);
