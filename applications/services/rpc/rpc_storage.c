@@ -220,6 +220,8 @@ static void rpc_system_storage_list_root(const PB_Main* request, void* context) 
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
 
+    rpc_system_storage_reset_state(rpc_storage, session, true);
+
     const char* hard_coded_dirs[] = {"any", "int", "ext"};
 
     PB_Main response = {
@@ -679,6 +681,8 @@ static void rpc_system_storage_backup_create_process(const PB_Main* request, voi
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
 
+    rpc_system_storage_reset_state(rpc_storage, session, true);
+
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
 
     bool backup_ok =
@@ -700,6 +704,8 @@ static void rpc_system_storage_backup_restore_process(const PB_Main* request, vo
     RpcStorageSystem* rpc_storage = context;
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
+
+    rpc_system_storage_reset_state(rpc_storage, session, true);
 
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
 
