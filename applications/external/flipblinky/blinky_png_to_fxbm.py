@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# This script was modified from 
+# This script was modified from
 # https://github.com/flipperdevices/flipperzero-game-engine/blob/dev/scripts/sprite_builder.py
 
 # input file "blinky.png"
@@ -21,6 +21,7 @@ from PIL import Image, ImageOps
 #   uint32 height in px
 #   uint8[] pixel data, every row is padded to 8 bits (like XBM)
 
+
 def image2xbm(input_file_path):
     with Image.open(input_file_path) as im:
         with io.BytesIO() as output:
@@ -28,6 +29,7 @@ def image2xbm(input_file_path):
             bw = ImageOps.invert(bw)
             bw.save(output, format="XBM")
             return output.getvalue()
+
 
 def xbm2fxbm(data):
     # hell as it is, but it works
@@ -43,15 +45,19 @@ def xbm2fxbm(data):
     output += image_bin
     return output
 
+
 def main():
-    print ("Converts a B&W 128x64 (or smaller) blinky.png file to blinky.fxbm");
+    print("Converts a B&W 128x64 (or smaller) blinky.png file to blinky.fxbm")
     xbm = image2xbm("blinky.png")
     img_data = xbm2fxbm(xbm)
     with open("blinky.fxbm", "wb") as f:
-       f.write(img_data)
+        f.write(img_data)
 
-    print ("Done!  Please copy blinky.fxbm to your Flipper Zero - SD Card/apps_data/flipboard/blinky.fxbm")
+    print(
+        "Done!  Please copy blinky.fxbm to your Flipper Zero - SD Card/apps_data/flipboard/blinky.fxbm"
+    )
     return 0
+
 
 if __name__ == "__main__":
     main()
