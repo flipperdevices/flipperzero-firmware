@@ -1,3 +1,7 @@
+/**
+ * @file timer.h
+ * @brief Furi software Timer API.
+ */
 #pragma once
 
 #include "core/base.h"
