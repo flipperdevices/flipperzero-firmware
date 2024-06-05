@@ -100,7 +100,7 @@ void felica_wcnt_increment(FelicaData* data);
 bool felica_listener_check_idm(const FelicaListener* instance, const FelicaIDm* request_idm);
 
 /**
- *  @brief This is the first request validation function. Its main aim is to check whether
+ * @brief This is the first request validation function. Its main aim is to check whether
  * the input request is valid in general by counting the amount of data in request.
  * Function iterates through block list elements and data, counts real amount of elements and
  * real amount of coresponding elements data (in case of write operation).
@@ -110,7 +110,6 @@ bool felica_listener_check_idm(const FelicaListener* instance, const FelicaIDm* 
  * @param request pointer to received request.
  * @return True if block element list contains valid amount of data, otherwise false.
 */
-
 bool felica_listener_check_block_list_size(
     FelicaListener* instance,
     FelicaListenerGenericRequest* request);
@@ -130,13 +129,12 @@ const FelicaBlockListElement* felica_listener_block_list_item_get_first(
 
 /**
 * @brief Used to take next element from block element list.It uses pointer to the previous element,
-*     takes its length and calculates pointer to the next element if there is enough bytes left.*
-*            @param instance pointer to the listener instance to be used.*
-*            @param prev_item pointer to the previous item taken.*
-*            @ return Pointer to the next element of the list or
-        NULL if there is not enough bytes in the request.const FelicaBlockListElement 
+* takes its length and calculates pointer to the next element if there is enough bytes left.
+* @param instance pointer to the listener instance to be used.
+* @param prev_item pointer to the previous item taken.
+* @return Pointer to the next element of the list or NULL if there is not enough bytes in the request.
 */
-felica_listener_block_list_item_get_next(
+const FelicaBlockListElement* felica_listener_block_list_item_get_next(
     FelicaListener* instance,
     const FelicaBlockListElement* prev_item);
 
@@ -203,8 +201,9 @@ FelicaCommandWriteBlockHandler felica_listener_get_write_block_handler(const uin
 
 /**
  * @brief Sends response data from buffer to reader.
- *    @param instance pointer to the listener instance to be used.
- *    @param tx_buffer buffer with response data.*@ return error code
- * or FelicaErrorNone.FelicaError
+ * @param instance pointer to the listener instance to be used.
+ * @param tx_buffer buffer with response data.
+ * @return error code or FelicaErrorNone.
 */
-felica_listener_frame_exchange(const FelicaListener* instance, const BitBuffer* tx_buffer);
+FelicaError
+    felica_listener_frame_exchange(const FelicaListener* instance, const BitBuffer* tx_buffer);
