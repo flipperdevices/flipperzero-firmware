@@ -192,12 +192,13 @@ void office_draw(Canvas* canvas, void* ctx) {
     snprintf(power, 7, "%u%%", fnaf->electricity->power_left / 10);
 
     if(fnaf->office->camera_moving_direction == none) {
-        signed char position[3] = {24, 0, -24};
+        int8_t position[3] = {24, 0, -24};
         fnaf->office->camera_x = position[fnaf->office->location + 1];
     }
     if(fnaf->office->camera_moving_direction != none) moving_animation(fnaf);
     canvas_set_color(canvas, 1);
     canvas_draw_icon(canvas, fnaf->office->camera_x, 0, &I_office_128x64);
+    FURI_LOG_D(TAG, "Camera x position: %u", fnaf->office->camera_x);
     // fan animation:
     if(fnaf->counter_secondary < 3) {
         canvas_set_color(canvas, 0);
