@@ -70,7 +70,7 @@ void uhf_reader_view_delete_draw_callback(Canvas* canvas, void* model) {
 */
 bool uhf_reader_view_delete_input_callback(InputEvent* event, void* context) {
     UHFReaderApp* App = (UHFReaderApp*)context;
-    
+
     //Switch to the tag action menu if the left button pressed or the delete success screen if the right button pressed
     if(event->type == InputTypeShort) {
         if(event->key == InputKeyLeft) {
@@ -114,17 +114,17 @@ void uhf_reader_view_delete_exit_callback(void* context) {
  * @param      context  The context - UHFReaderApp object.
 */
 void uhf_reader_view_delete_enter_callback(void* context) {
-    //Grab the period for the timer 
+    //Grab the period for the timer
     int32_t Period = furi_ms_to_ticks(200);
     UHFReaderApp* App = (UHFReaderApp*)context;
-    
-    //Create FuriStrings for storing saved UHF tag values 
+
+    //Create FuriStrings for storing saved UHF tag values
     FuriString* TempStr = furi_string_alloc();
     FuriString* TempTag = furi_string_alloc();
     FuriString* TempEpcName = furi_string_alloc();
     FuriString* TempEpcStr = furi_string_alloc();
 
-    //Open the saved epcs text file 
+    //Open the saved epcs text file
     if(!flipper_format_file_open_existing(App->EpcFile, APP_DATA_PATH("Saved_EPCs.txt"))) {
         FURI_LOG_E(TAG, "Failed to open Saved file");
         flipper_format_file_close(App->EpcFile);
@@ -143,7 +143,7 @@ void uhf_reader_view_delete_enter_callback(void* context) {
             furi_string_set_str(TempEpcStr, ExtractedEpc);
             App->EpcDelete = TempEpcStr;
             App->EpcNameDelete = TempEpcName;
-            
+
             //Set the view models for both this view and the delete success view
             bool Redraw = true;
             with_view_model(
@@ -174,8 +174,8 @@ void uhf_reader_view_delete_enter_callback(void* context) {
     furi_string_free(TempStr);
     furi_string_free(TempEpcName);
     furi_string_free(TempEpcStr);
-    
-    //Start the timer 
+
+    //Start the timer
     furi_assert(App->Timer == NULL);
     App->Timer =
         furi_timer_alloc(uhf_reader_view_epc_timer_callback, FuriTimerTypePeriodic, context);
@@ -202,7 +202,7 @@ void view_delete_alloc(UHFReaderApp* App) {
     FuriString* DefaultEpcName = furi_string_alloc();
     furi_string_set_str(DefaultEpcName, "Default Name");
     UHFReaderDeleteModel* ModelDelete = view_get_model(App->ViewDelete);
-    
+
     //Setting default values for the view model
     ModelDelete->SelectedTagEpc = furi_string_alloc_set("ABCDEF12");
     ModelDelete->SelectedTagIndex = 1;

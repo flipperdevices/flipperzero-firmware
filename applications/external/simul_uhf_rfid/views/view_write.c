@@ -122,7 +122,8 @@ bool uhf_reader_view_write_custom_event_callback(uint32_t event, void* context) 
     // Redraw screen by passing true to last parameter of with_view_model.
     case UHFReaderEventIdRedrawScreen: {
         bool redraw = true;
-        with_view_model(App->ViewWrite, UHFReaderWriteModel * _Model, { UNUSED(_Model); }, redraw);
+        with_view_model(
+            App->ViewWrite, UHFReaderWriteModel * _Model, { UNUSED(_Model); }, redraw);
         return true;
     }
 

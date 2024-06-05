@@ -85,7 +85,7 @@ static UHFReaderApp* uhf_reader_app_alloc() {
     App->EpcToSave = (char*)malloc(25);
     App->NumberOfEpcsToRead = 0;
 
-    //Initializing the indices for each array and the file name 
+    //Initializing the indices for each array and the file name
     App->NameSize = 36;
     App->NameSizeParse = 27;
     App->CurEpcIndex = 26;
@@ -139,10 +139,10 @@ static void uhf_reader_app_free(UHFReaderApp* App) {
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_GUI);
-    
+
     //Freeing the UART helper
     uart_helper_free(App->UartHelper);
-    
+
     //Freeing all views, widgets, and menus
     view_delete_free(App);
     view_delete_success_free(App);
@@ -154,7 +154,7 @@ static void uhf_reader_app_free(UHFReaderApp* App) {
     view_config_free(App);
     view_saved_free(App);
     view_tag_actions_free(App);
-    
+
     //Freeing the main menu view
     view_dispatcher_remove_view(App->ViewDispatcher, UHFReaderViewSubmenu);
     submenu_free(App->Submenu);

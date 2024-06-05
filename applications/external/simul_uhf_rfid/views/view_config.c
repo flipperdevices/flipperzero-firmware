@@ -19,11 +19,11 @@ uint32_t uhf_reader_navigation_config_submenu_callback(void* context) {
 void view_config_alloc(UHFReaderApp* App) {
     //Allocate the power input menu
     power_menu_alloc(App);
-    
+
     //Creating the variable item list
     App->VariableItemListConfig = variable_item_list_alloc();
     variable_item_list_reset(App->VariableItemListConfig);
-    
+
     //Initializing configuration setting variables
     App->Setting1Values[0] = 1;
     App->Setting1Values[1] = 2;
@@ -39,32 +39,28 @@ void view_config_alloc(UHFReaderApp* App) {
     App->Setting3Names[0] = "Internal";
     App->Setting3Names[1] = "External";
     App->Setting3ConfigLabel = "Antenna";
-    
+
     // Add setting 1 to variable item list
     VariableItem* Item = variable_item_list_add(
         App->VariableItemListConfig,
         App->Setting1ConfigLabel,
         COUNT_OF(App->Setting1Values),
         uhf_reader_setting_1_change,
-        App
-    );
+        App);
 
     //Creating the default index for setting one which is the connection status
     App->Setting1Index = 0;
     variable_item_set_current_value_index(Item, App->Setting1Index);
     variable_item_set_current_value_text(Item, App->Setting1Names[App->Setting1Index]);
-    
-    //Creating the default power value 
+
+    //Creating the default power value
     App->Setting2PowerStr = furi_string_alloc_set(App->Setting2DefaultValue);
     App->Setting2Item = variable_item_list_add(
-        App->VariableItemListConfig, App->Setting2ConfigLabel, 1, NULL, NULL
-    );
+        App->VariableItemListConfig, App->Setting2ConfigLabel, 1, NULL, NULL);
     variable_item_set_current_value_text(
-        App->Setting2Item, furi_string_get_cstr(App->Setting2PowerStr)
-    );
+        App->Setting2Item, furi_string_get_cstr(App->Setting2PowerStr));
     variable_item_list_set_enter_callback(
-        App->VariableItemListConfig, uhf_reader_setting_item_clicked, App
-    );
+        App->VariableItemListConfig, uhf_reader_setting_item_clicked, App);
 
     // Add setting 3 to variable item list
     VariableItem* AntennaSelection = variable_item_list_add(
@@ -72,8 +68,7 @@ void view_config_alloc(UHFReaderApp* App) {
         App->Setting3ConfigLabel,
         COUNT_OF(App->Setting3Values),
         uhf_reader_setting_3_change,
-        App
-    );
+        App);
 
     //Default index for the antenna selection option
     App->Setting3Index = 0;
@@ -111,7 +106,7 @@ void uhf_reader_setting_1_change(VariableItem* Item) {
 
     //Getting the index
     uint8_t Index = variable_item_get_current_value_index(Item);
-    
+
     //Will eventually do some sort of check to confirm successful connection
     if(App->ReaderConnected == false) {
         uart_helper_send(App->UartHelper, "C\n", 2);
@@ -140,7 +135,7 @@ void uhf_reader_setting_1_change(VariableItem* Item) {
 void uhf_reader_setting_2_text_updated(void* context) {
     UHFReaderApp* App = (UHFReaderApp*)context;
     bool Redraw = true;
-    
+
     //Changing the read screen's power value to the one set in the configuration menu
     with_view_model(
         App->ViewRead,
@@ -160,7 +155,7 @@ void uhf_reader_setting_2_text_updated(void* context) {
                 App->Setting2Item, furi_string_get_cstr(Model->Setting2Power));
         },
         Redraw);
-    
+
     //Changes the power value for the write screen
     with_view_model(
         App->ViewWrite,
@@ -184,7 +179,6 @@ void uhf_reader_setting_2_text_updated(void* context) {
 void uhf_reader_setting_3_change(VariableItem* Item) {
     UHFReaderApp* App = variable_item_get_context(Item);
     uint8_t Index = variable_item_get_current_value_index(Item);
-    
 
     if(Index == 1) {
         uart_helper_send(App->UartHelper, "External\n", 9);
@@ -195,12 +189,12 @@ void uhf_reader_setting_3_change(VariableItem* Item) {
 
     //TODO: WAIT FOR ACK AND THEN SET TEXT VALUE
     variable_item_set_current_value_text(Item, App->Setting3Names[Index]);
-    
+
     //Updating the antenna value for the read screen
     UHFReaderConfigModel* ModelRead = view_get_model(App->ViewRead);
     ModelRead->Setting3Index = Index;
     furi_string_set(ModelRead->Setting3Value, App->Setting3Names[Index]);
-    
+
     //Updating the value of the antenna mode for the write screen
     UHFReaderWriteModel* ModelWrite = view_get_model(App->ViewWrite);
     ModelWrite->Setting3Index = Index;
@@ -217,7 +211,7 @@ void power_menu_alloc(UHFReaderApp* App) {
     App->TextInput = text_input_alloc();
     view_dispatcher_add_view(
         App->ViewDispatcher, UHFReaderViewSetPower, text_input_get_view(App->TextInput));
-    App->TempBufferSize = 5; 
+    App->TempBufferSize = 5;
     App->TempBuffer = (char*)malloc(App->TempBufferSize);
 }
 
@@ -228,8 +222,8 @@ void power_menu_alloc(UHFReaderApp* App) {
 */
 void uhf_reader_setting_item_clicked(void* context, uint32_t index) {
     UHFReaderApp* App = (UHFReaderApp*)context;
-    index++; 
-    
+    index++;
+
     //Check if the power menu is being selected
     if(index == 2) {
         // Header to display on the power value input screen.
@@ -257,8 +251,8 @@ void uhf_reader_setting_item_clicked(void* context, uint32_t index) {
                     App->TempBufferSize);
             },
             Redraw);
-        
-        //Setting the power text input callback function 
+
+        //Setting the power text input callback function
         bool ClearPreviousText = false;
         text_input_set_result_callback(
             App->TextInput,

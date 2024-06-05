@@ -81,6 +81,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Various app changes for message queue updates (By RogueMaster)
 - Added: [Enigma v1.1 (By xtruan)](https://github.com/xtruan/flipper-enigma)
 - Added: [HC-11 Modem v1.0 (By Giraut)](https://github.com/Giraut/flipper_zero_hc11_wireless_modem)
+- aDDED: [Simultanious UHF RFID Reader v1.0 (By RileyHaffner)](https://github.com/haffnerriley/Simultaneous-UHF-RFID-FlipperZero)
 
 <a name="release">
 
@@ -571,6 +572,7 @@ $ ./fbt dolphin_ext
 - [ShapShup v1.2 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - [SI4713 Tuner v0.1 (By rullinoiz)](https://github.com/rullinoiz/flipper-si4713) `Req: SI4713`
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
+- [Simultanious UHF RFID Reader v1.0 (By RileyHaffner)](https://github.com/haffnerriley/Simultaneous-UHF-RFID-FlipperZero)
 - [Skeleton App v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app)
 - [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
 - [Spectrum Analyzer v1.2 (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)

@@ -429,7 +429,8 @@ bool uhf_reader_view_read_custom_event_callback(uint32_t event, void* context) {
     //Redraw the screen
     case UHFReaderEventIdRedrawScreen: {
         bool Redraw = true;
-        with_view_model(App->ViewRead, UHFReaderConfigModel * _model, { UNUSED(_model); }, Redraw);
+        with_view_model(
+            App->ViewRead, UHFReaderConfigModel * _model, { UNUSED(_model); }, Redraw);
         return true;
     }
 

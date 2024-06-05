@@ -7,7 +7,6 @@ uint32_t uhf_reader_navigation_configure_callback(void* context);
 
 void uhf_reader_setting_1_change(VariableItem* Item);
 
-
 void uhf_reader_setting_2_text_updated(void* context);
 
 uint32_t uhf_reader_navigation_config_submenu_callback(void* context);

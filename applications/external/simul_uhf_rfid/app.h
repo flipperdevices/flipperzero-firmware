@@ -1,12 +1,12 @@
 #pragma once
 #include "structures.h"
 
-//Defining the UART parameters for communicating with the Raspberry Pi Zero 
+//Defining the UART parameters for communicating with the Raspberry Pi Zero
 #define DEVICE_BAUDRATE 9600
 #define LINE_DELIMITER '\n'
 #define INCLUDE_LINE_DELIMITER false
 
-//Setting the backlight on 
+//Setting the backlight on
 #define BACKLIGHT_ON 1
 
 //Creating different messages used for display
