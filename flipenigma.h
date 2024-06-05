@@ -69,6 +69,9 @@ typedef enum {
     FlipEnigmaRotorM3III,
     FlipEnigmaRotorM3IV,
     FlipEnigmaRotorM3V,
+    FlipEnigmaRotorM4VI,
+    FlipEnigmaRotorM4VII,
+    FlipEnigmaRotorM4VIII,
 } FlipEnigmaRotor;
 
 typedef enum {

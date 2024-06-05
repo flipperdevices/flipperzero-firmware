@@ -13,19 +13,25 @@ const uint32_t haptic_value[2] = {
     FlipEnigmaHapticOn,
 };
 
-const char* rotors_model_text[5] = {
+const char* rotors_model_text[8] = {
     "M3-I",
     "M3-II",
     "M3-III",
     "M3-IV",
     "M3-V",
+    "M4-VI",
+    "M4-VII",
+    "M4-VIII",
 };
-const uint32_t rotors_model_value[5] = {
+const uint32_t rotors_model_value[8] = {
     FlipEnigmaRotorM3I,
     FlipEnigmaRotorM3II,
     FlipEnigmaRotorM3III,
     FlipEnigmaRotorM3IV,
     FlipEnigmaRotorM3V,
+    FlipEnigmaRotorM4VI,
+    FlipEnigmaRotorM4VII,
+    FlipEnigmaRotorM4VIII,
 };
 
 const char* reflector_model_text[3] = {
@@ -161,9 +167,9 @@ void flipenigma_scene_settings_on_enter(void* context) {
 
     // Rotor 1 model
     item = variable_item_list_add(
-        app->variable_item_list, "Rotor 1:", 5, flipenigma_scene_settings_set_rotor_1, app);
+        app->variable_item_list, "Rotor 1:", 8, flipenigma_scene_settings_set_rotor_1, app);
     value_index = value_index_uint32(
-        find_index(app->rotors_model[0], rotors_model_text, 5), rotors_model_value, 5);
+        find_index(app->rotors_model[0], rotors_model_text, 8), rotors_model_value, 8);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotors_model_text[value_index]);
 
@@ -189,9 +195,9 @@ void flipenigma_scene_settings_on_enter(void* context) {
 
     // Rotor 2 model
     item = variable_item_list_add(
-        app->variable_item_list, "Rotor 2:", 5, flipenigma_scene_settings_set_rotor_2, app);
+        app->variable_item_list, "Rotor 2:", 8, flipenigma_scene_settings_set_rotor_2, app);
     value_index = value_index_uint32(
-        find_index(app->rotors_model[1], rotors_model_text, 5), rotors_model_value, 5);
+        find_index(app->rotors_model[1], rotors_model_text, 8), rotors_model_value, 8);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotors_model_text[value_index]);
 
@@ -217,9 +223,9 @@ void flipenigma_scene_settings_on_enter(void* context) {
 
     // Rotor 3 model
     item = variable_item_list_add(
-        app->variable_item_list, "Rotor 3:", 5, flipenigma_scene_settings_set_rotor_3, app);
+        app->variable_item_list, "Rotor 3:", 8, flipenigma_scene_settings_set_rotor_3, app);
     value_index = value_index_uint32(
-        find_index(app->rotors_model[2], rotors_model_text, 5), rotors_model_value, 5);
+        find_index(app->rotors_model[2], rotors_model_text, 8), rotors_model_value, 8);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rotors_model_text[value_index]);
 
