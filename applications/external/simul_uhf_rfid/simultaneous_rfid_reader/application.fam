@@ -1,0 +1,14 @@
+App(
+    appid="simultaneous_rfid_reader",
+    name="Simultaneous UHF RFID Reader",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="main_uhf_reader_app",
+    stack_size=22 * 1024,
+    requires=["gui"],
+    fap_icon="app.png",
+    fap_category="GPIO",
+    fap_author="@RileyHaffner",
+    fap_weburl="https://github.com/haffnerriley/Simultaneous-UHF-RFID-FlipperZero",
+    fap_version="1.0",
+    fap_description="Simultaneous UHF RFID Reader that supports the M6E Nano Reader. Read up to 150 UHF tags per second!",
+)
