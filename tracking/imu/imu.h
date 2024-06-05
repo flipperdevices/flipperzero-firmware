@@ -26,9 +26,6 @@ static const double GRAVITY = 9.81;
 bool imu_begin();
 void imu_end();
 int imu_read(double* vec);
-struct imu_t* get_imu(uint8_t address);
-unsigned int imu_scan_i2c();
-struct imu_t* find_imu();
 
 #ifdef __cplusplus
 }

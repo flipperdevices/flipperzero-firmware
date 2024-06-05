@@ -1,4 +1,3 @@
-#include <furi_hal.h>
 #include "imu.h"
 #include "../../lib/lsm6ds3tr-api/lsm6ds3tr-c_reg.h"
 
@@ -14,7 +13,8 @@ int32_t lsm6ds3trc_write_i2c(void* handle, uint8_t reg_addr, const uint8_t* data
 }
 
 int32_t lsm6ds3trc_read_i2c(void* handle, uint8_t reg_addr, uint8_t* read_data, uint16_t len) {
-    if(furi_hal_i2c_read_mem(handle, LSM6DS3_DEV_ADDRESS, reg_addr, read_data, len, 50)) return 0;
+    if(furi_hal_i2c_read_mem(handle, LSM6DS3_DEV_ADDRESS, reg_addr, read_data, len, 50))
+        return 0;
     return -1;
 }
 

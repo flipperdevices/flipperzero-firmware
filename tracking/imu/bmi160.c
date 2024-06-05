@@ -1,4 +1,3 @@
-#include <furi_hal.h>
 #include "imu.h"
 #include "../../lib/bmi160-api/bmi160.h"
 

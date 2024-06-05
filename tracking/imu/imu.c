@@ -14,37 +14,7 @@ struct imu_t* imu_types[] = {
 
 static const int imu_count = sizeof(imu_types) / sizeof(struct imu_t*);
 
-struct imu_t* imu_found;
-
-bool imu_begin() {
-    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    if (imu_found == NULL) {
-        imu_found = find_imu();
-    }
-
-    bool ret = false;
-    if (imu_found != NULL) {
-        FURI_LOG_E(IMU_TAG, "Found Device %s", imu_found->name);
-        ret = imu_found->begin();
-    }
-    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-    return ret;
-}
-
-void imu_end() {
-    if (imu_found == NULL) return;
-    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    imu_found->end();
-    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-}
-
-int imu_read(double* vec) {
-    if (imu_found == NULL) return 0;
-    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    int ret = imu_found->read(vec);
-    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-    return ret;
-}
+static struct imu_t* imu_found;
 
 struct imu_t* find_imu() {
     unsigned int i;
@@ -55,4 +25,38 @@ struct imu_t* find_imu() {
         }
     }
     return NULL;
+}
+
+bool imu_begin() {
+    if (imu_found != NULL)
+        return true;
+
+    bool ret = false;
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
+    imu_found = find_imu();
+
+    if (imu_found != NULL) {
+        FURI_LOG_E(IMU_TAG, "Found Device %s", imu_found->name);
+        ret = imu_found->begin();
+    }
+
+    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+    return ret;
+}
+
+void imu_end() {
+    if (imu_found == NULL)
+        return;
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
+    imu_found->end();
+    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+}
+
+int imu_read(double* vec) {
+    if (imu_found == NULL)
+        return 0;
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
+    int ret = imu_found->read(vec);
+    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+    return ret;
 }

@@ -1,4 +1,3 @@
-#include <furi_hal.h>
 #include "imu.h"
 #include "../../lib/lsm6dso-api/lsm6dso_reg.h"
 
@@ -49,7 +48,6 @@ bool lsm6dso_begin() {
     lsm6dso_xl_data_rate_set(&lsm6dso_ctx, LSM6DSO_XL_ODR_104Hz);
     lsm6dso_xl_full_scale_set(&lsm6dso_ctx, LSM6DSO_4g);
     //lsm6dso_xl_lp1_bandwidth_set(&lsm6dso_ctx, LSM6DSO_XL_LP1_ODR_DIV_4);
-    //lsm6dso_aux_gy_lp1_bandwidth_set() ???
 
     lsm6dso_gy_data_rate_set(&lsm6dso_ctx, LSM6DSO_GY_ODR_104Hz);
     lsm6dso_gy_full_scale_set(&lsm6dso_ctx, LSM6DSO_2000dps);
