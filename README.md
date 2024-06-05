@@ -51,6 +51,7 @@ This code is open-source and may be used for whatever you want to do with it.
 - [Minesweeper](https://github.com/squee72564/F0_Minesweeper_Fap) by [Alexander Rodriguez](https://github.com/squee72564)
 - [Guess the Number](https://github.com/kWAYTV/guess-the-number-fz) by [kWAY](https://github.com/kWAYTV)
 - [Flipper Tag](https://github.com/thejudge156/flippertag) by [The Judge](https://github.com/thejudge156)
+- [Flipper Enigma Machine Emulator](https://github.com/xtruan/flipper-enigma)
 - [Color Guess](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/main/Games/color_guess) by me
 - [Cross Remote](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/main/Tools/xremote) by me
 - [Restaurant Pager Trigger](https://github.com/leedave/flipper-zero-meal-pager) by me
