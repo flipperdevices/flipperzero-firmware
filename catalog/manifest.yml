@@ -2,7 +2,7 @@ sourcecode:
   type: git
   location:
     origin: https://github.com/xtruan/flipper-enigma.git
-    commit_sha: 565c0244375347d7a21309b299fbdd4033d9ebfb
+    commit_sha: d29abc555a889c643edd0ee3ad2fda3ad9f57cf6
 description: "Enigma cipher machine simulator"
 changelog: "v1.1 - Added more rotors (VI, VII, VIII)"
 author: "@xtruan"
