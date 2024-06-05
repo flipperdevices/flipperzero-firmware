@@ -312,13 +312,14 @@ void move_rotors(Enigma* e) {
     //  https://www.youtube.com/watch?v=5StZlF-clPc
     //  https://www.youtube.com/watch?v=hcVhQeZ5gI4
     //
-    for(usize n = 0; n < 2; ++n) {
-        if(e->rotors[1].position == e->rotors[1].notch[n]) {
-            e->rotors[2].position = (e->rotors[2].position + 1) % ALPHABET_SIZE;
-            e->rotors[1].position = (e->rotors[1].position + 1) % ALPHABET_SIZE;
-        } else if(e->rotors[0].position == e->rotors[0].notch[n]) {
-            e->rotors[1].position = (e->rotors[1].position + 1) % ALPHABET_SIZE;
-        }
+    if(e->rotors[1].position == e->rotors[1].notch[0] ||
+       e->rotors[1].position == e->rotors[1].notch[1]) {
+        e->rotors[2].position = (e->rotors[2].position + 1) % ALPHABET_SIZE;
+        e->rotors[1].position = (e->rotors[1].position + 1) % ALPHABET_SIZE;
+    } else if(
+        e->rotors[0].position == e->rotors[0].notch[0] ||
+        e->rotors[0].position == e->rotors[0].notch[1]) {
+        e->rotors[1].position = (e->rotors[1].position + 1) % ALPHABET_SIZE;
     }
     e->rotors[0].position = (e->rotors[0].position + 1) % ALPHABET_SIZE;
 }
