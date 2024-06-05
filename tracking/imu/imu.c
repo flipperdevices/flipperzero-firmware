@@ -1,10 +1,18 @@
 #include "imu.h"
 
+#define IMU_TAG "IMU_H"
+
+extern struct imu_t imu_bmi160;
+extern struct imu_t imu_lsm6ds3trc;
+extern struct imu_t imu_lsm6dso;
+
 struct imu_t* imu_types[] = {
     &imu_bmi160,
     &imu_lsm6ds3trc,
     &imu_lsm6dso
 };
+
+static const int imu_count = sizeof(imu_types) / sizeof(struct imu_t*);
 
 struct imu_t* imu_found;
 
@@ -12,14 +20,11 @@ bool imu_begin() {
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
     if (imu_found == NULL) {
         imu_found = find_imu();
-        if (imu_found == NULL) {
-            furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-            return false;
-        }
-        FURI_LOG_E(IMU_TAG, "Found Device %s", imu_found->name);
     }
-    bool ret = 0;
+
+    bool ret = false;
     if (imu_found != NULL) {
+        FURI_LOG_E(IMU_TAG, "Found Device %s", imu_found->name);
         ret = imu_found->begin();
     }
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
@@ -43,7 +48,7 @@ int imu_read(double* vec) {
 
 struct imu_t* find_imu() {
     unsigned int i;
-    for(i = 0; i < sizeof(imu_types) / sizeof(struct imu_t*); i++) {
+    for(i = 0; i < imu_count; i++) {
         if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, imu_types[i]->address, 50)) {
             FURI_LOG_E(IMU_TAG, "found i2c device address 0x%X", imu_types[i]->address);
             return imu_types[i];

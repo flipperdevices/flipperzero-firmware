@@ -1,4 +1,6 @@
-#include "bmi160.h"
+#include <furi_hal.h>
+#include "imu.h"
+#include "../../lib/bmi160-api/bmi160.h"
 
 #define BMI160_TAG "BMI160"
 #define BMI160_DEV_ADDR (0x69 << 1)
@@ -89,5 +91,3 @@ struct imu_t imu_bmi160 = {
    bmi160_read,
    BMI160_TAG
 };
-
-

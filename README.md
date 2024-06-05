@@ -36,6 +36,15 @@ See early prototype [in action](https://www.youtube.com/watch?v=DdxAmmsYfMA).
 
 The custom module is using Bosch BMI160 accelerometer/gyroscope chip connected via I2C.
 
+Note: in fact, some other IMU chips are also supported.
+It's detected via the first found I2C Address.
+
+|   Chip   | Expected I2C Address |
+|:--------:|:--------------------:|
+|  BMI160  |         0x69         |
+| LSM6DS3  |         0x6A         |
+| LSM6DSO  |         0x6B         |
+
 Take a look into the [schematic](https://github.com/ginkage/FlippAirMouse/tree/main/schematic) folder for Gerber, BOM and CPL files, so you can order directly from JLCPCB.
 
 Original idea:

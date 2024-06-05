@@ -1,4 +1,6 @@
-#include "lsm6dso.h"
+#include <furi_hal.h>
+#include "imu.h"
+#include "../../lib/lsm6dso-api/lsm6dso_reg.h"
 
 #define LSM6DSO_TAG "LSM6DO"
 #define LSM6DSO_DEV_ADDRESS (0x6B << 1)

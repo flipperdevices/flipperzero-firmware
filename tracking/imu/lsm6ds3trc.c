@@ -1,4 +1,6 @@
-#include "lsm6ds3trc.h"
+#include <furi_hal.h>
+#include "imu.h"
+#include "../../lib/lsm6ds3tr-api/lsm6ds3tr-c_reg.h"
 
 #define LSM6DS3_TAG "LSM6DS3"
 #define LSM6DS3_DEV_ADDRESS (0x6A << 1)
