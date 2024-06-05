@@ -71,17 +71,17 @@ int lsm6ds3trc_read(double* vec) {
 
     if(reg.status_reg.xlda) {
         lsm6ds3tr_c_acceleration_raw_get(&lsm6ds3trc_ctx, data);
-        vec[2] = (double)lsm6ds3tr_c_from_fs2g_to_mg(data[0]) / 1000;
+        vec[1] = (double)lsm6ds3tr_c_from_fs2g_to_mg(data[0]) / 1000;
         vec[0] = (double)lsm6ds3tr_c_from_fs2g_to_mg(data[1]) / 1000;
-        vec[1] = (double)lsm6ds3tr_c_from_fs2g_to_mg(data[2]) / 1000;
+        vec[2] = -(double)lsm6ds3tr_c_from_fs2g_to_mg(data[2]) / 1000;
         ret |= ACC_DATA_READY;
     }
 
     if(reg.status_reg.gda) {
         lsm6ds3tr_c_angular_rate_raw_get(&lsm6ds3trc_ctx, data);
-        vec[5] = (double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[0]) * DEG_TO_RAD / 1000;
+        vec[4] = (double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[0]) * DEG_TO_RAD / 1000;
         vec[3] = (double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[1]) * DEG_TO_RAD / 1000;
-        vec[4] = (double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[2]) * DEG_TO_RAD / 1000;
+        vec[5] = -(double)lsm6ds3tr_c_from_fs2000dps_to_mdps(data[2]) * DEG_TO_RAD / 1000;
         ret |= GYR_DATA_READY;
     }
 
