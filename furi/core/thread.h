@@ -56,8 +56,6 @@ typedef void* FuriThreadId;
  *
  * The function to be used as a thread callback MUST follow this signature.
  *
- * @warning DO NOT use osThreadExit() in a FuriThread callback, use the return keyword instead.
- *
  * @param[in,out] context pointer to a user-specified object
  * @return value to be used as the thread return code
  */
@@ -115,7 +113,7 @@ FuriThread* furi_thread_alloc_service(
     void* context);
 
 /**
- * @brief Create a FuriThread instance w/ extra parameters
+ * @brief Create a FuriThread instance w/ extra parameters.
  * 
  * @param[in] name human-readable thread name (can be NULL)
  * @param[in] stack_size stack size in bytes (can be changed later)

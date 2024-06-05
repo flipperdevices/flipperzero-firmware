@@ -19,9 +19,12 @@ static_assert(offsetof(FuriStreamBuffer, buffer) == sizeof(FuriStreamBuffer));
 FuriStreamBuffer* furi_stream_buffer_alloc(size_t size, size_t trigger_level) {
     furi_check(size != 0);
 
-    FuriStreamBuffer* stream_buffer = malloc(sizeof(FuriStreamBuffer) + size + 1);
+    // Actual FreeRTOS usable buffer size seems to be one less
+    const size_t buffer_size = size + 1;
+
+    FuriStreamBuffer* stream_buffer = malloc(sizeof(FuriStreamBuffer) + buffer_size);
     StreamBufferHandle_t hStreamBuffer = xStreamBufferCreateStatic(
-        size, trigger_level, stream_buffer->buffer, &stream_buffer->container);
+        buffer_size, trigger_level, stream_buffer->buffer, &stream_buffer->container);
 
     furi_check(hStreamBuffer == (StreamBufferHandle_t)stream_buffer);
 
