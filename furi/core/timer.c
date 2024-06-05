@@ -9,6 +9,7 @@ struct FuriTimer {
     StaticTimer_t container;
     FuriTimerCallback cb_func;
     void* cb_context;
+    volatile bool can_be_removed;
 };
 
 // IMPORTANT: container MUST be the FIRST struct member
@@ -37,14 +38,24 @@ FuriTimer* furi_timer_alloc(FuriTimerCallback func, FuriTimerType type, void* co
     return instance;
 }
 
+static void furi_timer_epilogue(void* context, uint32_t arg) {
+    furi_assert(context);
+    UNUSED(arg);
+
+    FuriTimer* instance = context;
+
+    instance->can_be_removed = true;
+}
+
 void furi_timer_free(FuriTimer* instance) {
     furi_check(!furi_kernel_is_irq_or_masked());
     furi_check(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
     furi_check(xTimerDelete(hTimer, portMAX_DELAY) == pdPASS);
+    furi_check(xTimerPendFunctionCall(furi_timer_epilogue, instance, 0, portMAX_DELAY) == pdPASS);
 
-    while(xTimerIsTimerActive(hTimer) != pdFALSE) {
+    while(!instance->can_be_removed) {
         furi_delay_tick(2);
     }
 
