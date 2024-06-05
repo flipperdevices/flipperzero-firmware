@@ -28,17 +28,17 @@ struct imu_t* find_imu() {
 }
 
 bool imu_begin() {
-    if (imu_found != NULL)
-        return true;
-
     bool ret = false;
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    imu_found = find_imu();
 
-    if (imu_found != NULL) {
-        FURI_LOG_E(IMU_TAG, "Found Device %s", imu_found->name);
-        ret = imu_found->begin();
+    if (imu_found == NULL) {
+        imu_found = find_imu();
+        if (imu_found != NULL)
+            FURI_LOG_E(IMU_TAG, "Found Device %s", imu_found->name);
     }
+
+    if (imu_found != NULL)
+        ret = imu_found->begin();
 
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
     return ret;
