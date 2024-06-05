@@ -129,12 +129,16 @@ RotorModel KNOWN_ROTORS[] = {
     {"M4-VI", "JPGVOUMFYQBENHZRDKASXLICTW", {CHAR2CODE('Z'), CHAR2CODE('M')}},
     {"M4-VII", "NZJHGRCXMYSWBOUFAIVLPEKQDT", {CHAR2CODE('Z'), CHAR2CODE('M')}},
     {"M4-VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", {CHAR2CODE('Z'), CHAR2CODE('M')}},
+    {"M4-Beta", "LEYJVCNIXWPBQMDRTAKZGFUHOS", {CHAR2CODE('_'), CHAR2CODE('_')}}, // TODO: M4
+    {"M4-Gamma", "FSOKANUERHMBTIYCWLQPZXVGJD", {CHAR2CODE('_'), CHAR2CODE('_')}}, // TODO: M4
 };
 
 ReflectorModel KNOWN_REFLECTORS[] = {
     {"M3-A", "EJMZALYXVBWFCRQUONTSPIKHGD"},
     {"M3-B", "YRUHQSLDPXNGOKMIEBFZCWVJAT"},
     {"M3-C", "FVPJIAOYEDRZXWGCTKUQSBNMHL"},
+    {"M4-B Thin", "ENKQAUYWJICOPBLMDXZVFTHRGS"}, // TODO: M4
+    {"M4-C Thin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ"}, // TODO: M4
 };
 
 usize KNOWN_ROTORS_LENGTH = (sizeof(KNOWN_ROTORS) / sizeof(RotorModel));
@@ -308,7 +312,7 @@ void move_rotors(Enigma* e) {
     //  https://www.youtube.com/watch?v=5StZlF-clPc
     //  https://www.youtube.com/watch?v=hcVhQeZ5gI4
     //
-    for(u8 n = 0; n < 2; ++n) {
+    for(usize n = 0; n < 2; ++n) {
         if(e->rotors[1].position == e->rotors[1].notch[n]) {
             e->rotors[2].position = (e->rotors[2].position + 1) % ALPHABET_SIZE;
             e->rotors[1].position = (e->rotors[1].position + 1) % ALPHABET_SIZE;
