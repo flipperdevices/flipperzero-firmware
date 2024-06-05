@@ -104,6 +104,12 @@ It's worth noting that there is no functional distinction between a HC-11 module
 
 ## Installation
 
+### Pre-built app
+
+Install this app from https://lab.flipper.net/apps/hc11_modem
+
+### Manually
+
 - Clone this repository
 - Install [uFBT](https://github.com/flipperdevices/flipperzero-ufbt)
 - Connect the Flipper Zero to the computer with a USB cable
