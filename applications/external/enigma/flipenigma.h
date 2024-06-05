@@ -16,7 +16,7 @@
 #include "scenes/flipenigma_scene.h"
 #include "views/flipenigma_startscreen.h"
 
-#define FLIPENIGMA_VERSION "v1.0"
+#define FLIPENIGMA_VERSION FAP_VERSION
 
 // "To make cryptanalysis harder, messages were limited to 250 characters."
 #define TEXT_SIZE 250
@@ -69,6 +69,9 @@ typedef enum {
     FlipEnigmaRotorM3III,
     FlipEnigmaRotorM3IV,
     FlipEnigmaRotorM3V,
+    FlipEnigmaRotorM4VI,
+    FlipEnigmaRotorM4VII,
+    FlipEnigmaRotorM4VIII,
 } FlipEnigmaRotor;
 
 typedef enum {

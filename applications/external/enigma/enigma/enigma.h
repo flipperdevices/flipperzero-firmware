@@ -33,7 +33,7 @@ typedef struct {
     Wiring forward_wiring;
     Wiring backward_wiring;
     u8 position;
-    u8 notch;
+    u8 notch[2];
     u8 ring;
     char name[LABEL_LENGTH];
 } Rotor;
@@ -41,7 +41,7 @@ typedef struct {
 typedef struct {
     char name[LABEL_LENGTH];
     char wiring[ALPHABET_SIZE];
-    u8 notch;
+    u8 notch[2];
 } RotorModel;
 
 typedef struct {
@@ -121,17 +121,24 @@ void enigma_decrypt(Enigma* e, const char* ciphertext, usize ciphertext_len, cha
 // ENIGMA MODELS
 
 RotorModel KNOWN_ROTORS[] = {
-    {"M3-I", "EKMFLGDQVZNTOWYHXUSPAIBRCJ", CHAR2CODE('Q')},
-    {"M3-II", "AJDKSIRUXBLHWTMCQGZNPYFVOE", CHAR2CODE('E')},
-    {"M3-III", "BDFHJLCPRTXVZNYEIWGAKMUSQO", CHAR2CODE('V')},
-    {"M3-IV", "ESOVPZJAYQUIRHXLNFTGKDCMWB", CHAR2CODE('J')},
-    {"M3-V", "VZBRGITYUPSDNHLXAWMJQOFECK", CHAR2CODE('Z')},
+    {"M3-I", "EKMFLGDQVZNTOWYHXUSPAIBRCJ", {CHAR2CODE('Q'), CHAR2CODE('_')}},
+    {"M3-II", "AJDKSIRUXBLHWTMCQGZNPYFVOE", {CHAR2CODE('E'), CHAR2CODE('_')}},
+    {"M3-III", "BDFHJLCPRTXVZNYEIWGAKMUSQO", {CHAR2CODE('V'), CHAR2CODE('_')}},
+    {"M3-IV", "ESOVPZJAYQUIRHXLNFTGKDCMWB", {CHAR2CODE('J'), CHAR2CODE('_')}},
+    {"M3-V", "VZBRGITYUPSDNHLXAWMJQOFECK", {CHAR2CODE('Z'), CHAR2CODE('_')}},
+    {"M4-VI", "JPGVOUMFYQBENHZRDKASXLICTW", {CHAR2CODE('Z'), CHAR2CODE('M')}},
+    {"M4-VII", "NZJHGRCXMYSWBOUFAIVLPEKQDT", {CHAR2CODE('Z'), CHAR2CODE('M')}},
+    {"M4-VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", {CHAR2CODE('Z'), CHAR2CODE('M')}},
+    {"M4-Beta", "LEYJVCNIXWPBQMDRTAKZGFUHOS", {CHAR2CODE('_'), CHAR2CODE('_')}}, // TODO: M4
+    {"M4-Gamma", "FSOKANUERHMBTIYCWLQPZXVGJD", {CHAR2CODE('_'), CHAR2CODE('_')}}, // TODO: M4
 };
 
 ReflectorModel KNOWN_REFLECTORS[] = {
     {"M3-A", "EJMZALYXVBWFCRQUONTSPIKHGD"},
     {"M3-B", "YRUHQSLDPXNGOKMIEBFZCWVJAT"},
     {"M3-C", "FVPJIAOYEDRZXWGCTKUQSBNMHL"},
+    {"M4-B Thin", "ENKQAUYWJICOPBLMDXZVFTHRGS"}, // TODO: M4
+    {"M4-C Thin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ"}, // TODO: M4
 };
 
 usize KNOWN_ROTORS_LENGTH = (sizeof(KNOWN_ROTORS) / sizeof(RotorModel));
@@ -170,12 +177,12 @@ void init_rotor(Rotor* r, const char* rotor_name, const u8 position, const u8 ri
 
             char* known_name = KNOWN_ROTORS[i].name;
             char* known_wiring = KNOWN_ROTORS[i].wiring;
-            u8 known_notch = KNOWN_ROTORS[i].notch;
+            u8* known_notch = KNOWN_ROTORS[i].notch;
 
             init_wiring(r->forward_wiring, known_wiring, ALPHABET_SIZE);
             reverse_wiring(r->backward_wiring, r->forward_wiring, ALPHABET_SIZE);
 
-            r->notch = known_notch;
+            memcpy(r->notch, known_notch, 2);
             r->position = position;
             r->ring = ring;
 
@@ -305,10 +312,13 @@ void move_rotors(Enigma* e) {
     //  https://www.youtube.com/watch?v=5StZlF-clPc
     //  https://www.youtube.com/watch?v=hcVhQeZ5gI4
     //
-    if(e->rotors[1].position == e->rotors[1].notch) {
+    if(e->rotors[1].position == e->rotors[1].notch[0] ||
+       e->rotors[1].position == e->rotors[1].notch[1]) {
         e->rotors[2].position = (e->rotors[2].position + 1) % ALPHABET_SIZE;
         e->rotors[1].position = (e->rotors[1].position + 1) % ALPHABET_SIZE;
-    } else if(e->rotors[0].position == e->rotors[0].notch) {
+    } else if(
+        e->rotors[0].position == e->rotors[0].notch[0] ||
+        e->rotors[0].position == e->rotors[0].notch[1]) {
         e->rotors[1].position = (e->rotors[1].position + 1) % ALPHABET_SIZE;
     }
     e->rotors[0].position = (e->rotors[0].position + 1) % ALPHABET_SIZE;
