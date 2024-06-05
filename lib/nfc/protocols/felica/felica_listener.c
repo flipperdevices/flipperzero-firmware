@@ -145,8 +145,8 @@ static FelicaError felica_listener_process_request(
     case FELICA_CMD_WRITE_WITHOUT_ENCRYPTION:
         return felica_listener_command_handler_write(instance, generic_request);
     default:
-        furi_crash("FeliCa incorrect command");
-        break;
+        FURI_LOG_E(TAG, "FeliCa incorrect command");
+        return FelicaErrorNotPresent;
     }
 }
 
