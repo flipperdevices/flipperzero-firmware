@@ -3,8 +3,8 @@ sourcecode:
   location:
     origin: https://github.com/xtruan/flipper-enigma.git
     commit_sha: 565c0244375347d7a21309b299fbdd4033d9ebfb
-description: "Enigma machine emulator"
-changelog: "v1.0 - Initial release"
+description: "Enigma cipher machine simulator"
+changelog: "v1.1 - Added more rotors (VI, VII, VIII)"
 author: "@xtruan"
 screenshots:
   - "./catalog/startscreen.png"

@@ -16,7 +16,7 @@
 #include "scenes/flipenigma_scene.h"
 #include "views/flipenigma_startscreen.h"
 
-#define FLIPENIGMA_VERSION "v1.0"
+#define FLIPENIGMA_VERSION "v1.1"
 
 // "To make cryptanalysis harder, messages were limited to 250 characters."
 #define TEXT_SIZE 250
