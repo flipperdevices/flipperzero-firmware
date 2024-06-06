@@ -96,7 +96,7 @@ void ccid_test_app_free(CcidTestApp* app) {
     free(app);
 }
 
-void ccid_icc_power_on_callback(uint8_t* atrBuffer, uint32_t* atrlen, void* context) {
+void ccid_icc_power_on_callback(uint8_t* atrBuffer, uint8_t* atrlen, void* context) {
     UNUSED(context);
 
     iso7816_icc_power_on_callback(atrBuffer, atrlen);
@@ -104,9 +104,9 @@ void ccid_icc_power_on_callback(uint8_t* atrBuffer, uint32_t* atrlen, void* cont
 
 void ccid_xfr_datablock_callback(
     const uint8_t* pcToReaderDataBlock,
-    uint32_t pcToReaderDataBlockLen,
+    uint8_t pcToReaderDataBlockLen,
     uint8_t* readerToPcDataBlock,
-    uint32_t* readerToPcDataBlockLen,
+    uint8_t* readerToPcDataBlockLen,
     void* context) {
     UNUSED(context);
 

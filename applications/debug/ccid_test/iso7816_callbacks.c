@@ -16,7 +16,7 @@ void iso7816_set_callbacks(Iso7816Callbacks* cb) {
     callbacks = cb;
 }
 
-void iso7816_icc_power_on_callback(uint8_t* atrBuffer, uint32_t* atrlen) {
+void iso7816_icc_power_on_callback(uint8_t* atrBuffer, uint8_t* atrlen) {
     Iso7816Atr atr;
     callbacks->iso7816_answer_to_reset(&atr);
 
@@ -33,9 +33,9 @@ void iso7816_icc_power_on_callback(uint8_t* atrBuffer, uint32_t* atrlen) {
 //dataBlockLen tells reader how nany bytes should be read
 void iso7816_xfr_datablock_callback(
     const uint8_t* pcToReaderDataBlock,
-    uint32_t pcToReaderDataBlockLen,
+    uint8_t pcToReaderDataBlockLen,
     uint8_t* readerToPcDataBlock,
-    uint32_t* readerToPcDataBlockLen) {
+    uint8_t* readerToPcDataBlockLen) {
     struct ISO7816_Response_APDU responseAPDU;
     uint8_t responseApduDataBuffer[ISO7816_RESPONSE_BUFFER_SIZE];
     uint8_t responseApduDataBufferLen = 0;

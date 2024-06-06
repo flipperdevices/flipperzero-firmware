@@ -18,11 +18,11 @@ typedef struct {
 
 void iso7816_set_callbacks(Iso7816Callbacks* cb);
 
-void iso7816_icc_power_on_callback(uint8_t* atrBuffer, uint32_t* atrlen);
+void iso7816_icc_power_on_callback(uint8_t* atrBuffer, uint8_t* atrlen);
 void iso7816_xfr_datablock_callback(
     const uint8_t* dataBlock,
-    uint32_t dataBlockLen,
+    uint8_t dataBlockLen,
     uint8_t* responseDataBlock,
-    uint32_t* responseDataBlockLen);
+    uint8_t* responseDataBlockLen);
 
 #endif //_ISO7816_CALLBACKS_H_

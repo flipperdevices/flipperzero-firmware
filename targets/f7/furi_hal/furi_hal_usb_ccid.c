@@ -332,7 +332,7 @@ void CALLBACK_CCID_IccPowerOn(
             if(callbacks[CCID_SLOT_INDEX] != NULL) {
                 callbacks[CCID_SLOT_INDEX]->icc_power_on_callback(
                     responseDataBlock->abData,
-                    &responseDataBlock->dwLength,
+                    (uint8_t*)&responseDataBlock->dwLength,
                     cb_ctx[CCID_SLOT_INDEX]);
                 responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
                                              CCID_ICCSTATUS_PRESENTANDACTIVE;
@@ -364,10 +364,11 @@ void CALLBACK_CCID_XfrBlock(
             if(callbacks[CCID_SLOT_INDEX] != NULL) {
                 callbacks[CCID_SLOT_INDEX]->xfr_datablock_callback(
                     (const uint8_t*)receivedXfrBlock->abData,
-                    receivedXfrBlock->dwLength,
+                    (uint8_t)receivedXfrBlock->dwLength,
                     responseDataBlock->abData,
-                    &responseDataBlock->dwLength,
+                    (uint8_t*)&responseDataBlock->dwLength,
                     cb_ctx[CCID_SLOT_INDEX]);
+
                 responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
                                              CCID_ICCSTATUS_PRESENTANDACTIVE;
             } else {

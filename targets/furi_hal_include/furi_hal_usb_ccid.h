@@ -17,12 +17,12 @@ typedef struct {
 } FuriHalUsbCcidConfig;
 
 typedef struct {
-    void (*icc_power_on_callback)(uint8_t* dataBlock, uint32_t* dataBlockLen, void* context);
+    void (*icc_power_on_callback)(uint8_t* dataBlock, uint8_t* dataBlockLen, void* context);
     void (*xfr_datablock_callback)(
         const uint8_t* pcToReaderDataBlock,
-        uint32_t pcToReaderDataBlockLen,
+        uint8_t pcToReaderDataBlockLen,
         uint8_t* readerToPcDataBlock,
-        uint32_t* readerToPcDataBlockLen,
+        uint8_t* readerToPcDataBlockLen,
         void* context);
 } CcidCallbacks;
 

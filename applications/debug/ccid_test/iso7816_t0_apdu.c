@@ -9,7 +9,7 @@
 void iso7816_read_command_apdu(
     struct ISO7816_Command_APDU* command,
     const uint8_t* dataBuffer,
-    uint32_t dataLen) {
+    uint8_t dataLen) {
     UNUSED(dataLen);
 
     command->CLA = dataBuffer[0];
@@ -23,10 +23,10 @@ void iso7816_read_command_apdu(
 void iso7816_write_response_apdu(
     const struct ISO7816_Response_APDU* response,
     uint8_t* readerToPcDataBlock,
-    uint32_t* readerToPcDataBlockLen,
+    uint8_t* readerToPcDataBlockLen,
     uint8_t* responseDataBuffer,
-    uint32_t responseDataLen) {
-    uint32_t responseDataBufferIndex = 0;
+    uint8_t responseDataLen) {
+    uint8_t responseDataBufferIndex = 0;
 
     //response body
     if(responseDataLen > 0) {
