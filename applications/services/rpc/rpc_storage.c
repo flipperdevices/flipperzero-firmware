@@ -220,8 +220,6 @@ static void rpc_system_storage_list_root(const PB_Main* request, void* context) 
     RpcSession* session = rpc_storage->session;
     furi_assert(session);
 
-    rpc_system_storage_reset_state(rpc_storage, session, true);
-
     const char* hard_coded_dirs[] = {"any", "int", "ext"};
 
     PB_Main response = {
