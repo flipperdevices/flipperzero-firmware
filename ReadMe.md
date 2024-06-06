@@ -84,6 +84,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Simultanious UHF RFID Reader v1.0 (By RileyHaffner)](https://github.com/haffnerriley/Simultaneous-UHF-RFID-FlipperZero) `Req: M6e Nano UHF RFID Reader & Raspberry Pi Zero`
 - Updated: [Five Nights at Flipper's v1.3 (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - Temp disable FURI_TRACE crash msg, need more DFU (By Willy-JL)
+- Fix depricated function in canvas (By xMasterX)
 
 <a name="release">
 
