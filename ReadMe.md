@@ -86,6 +86,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Temp disable FURI_TRACE crash msg, need more DFU (By Willy-JL)
 - Fix depricated function in canvas (By xMasterX)
 - Updated: [BMI Air Mouse v1.2 (By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
+- Updated: [HC-11 Modem v1.0 (By Giraut)](https://github.com/Giraut/flipper_zero_hc11_wireless_modem) `Req: HC-11`
 
 <a name="release">
 

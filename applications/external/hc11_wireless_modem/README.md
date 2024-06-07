@@ -94,7 +94,21 @@ Gives information about the app. Use the **OK** button or the arrows to switch p
 
 
 
+### Flipper-to-Flipper wireless communication
+
+It's worth noting that there is no functional distinction between a HC-11 module and a Flipper Zero running this app. Therefore, it's perfectly possible to exchange data between two or more Flipper Zeros wirelessly without the need for a HC-11 module.
+
+![Flipper-to-Flipper radio communication](screenshots/flipper_to_flipper_radio_comm.gif)
+
+
+
 ## Installation
+
+### Pre-built app
+
+Install this app from https://lab.flipper.net/apps/hc11_modem
+
+### Manually
 
 - Clone this repository
 - Install [uFBT](https://github.com/flipperdevices/flipperzero-ufbt)

@@ -341,7 +341,6 @@ static int32_t hc11_rx_tx_thread(void* ctx) {
 
     while(1) {
         /* Get events */
-        furi_delay_tick(1);
         evts = furi_thread_flags_wait(
             stop | set_cc1101 | unset_cc1101 | gdo0_rise | gdo0_fall | send_data,
             FuriFlagWaitAny,
