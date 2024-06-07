@@ -62,6 +62,7 @@ the hardware setup.
 * [u-Blox NEO-7M]
 * [Uputronics u-blox MAX-M8C Pico]
 * [Quectel L80]
+* [M10Q-5883]
 
 If you have verified this application working with a module not listed here,
 please submit a PR adding it to the list.
@@ -80,3 +81,4 @@ of the repository.
 [uFBT]: https://github.com/flipperdevices/flipperzero-ufbt
 [Uputronics u-blox MAX-M8C Pico]: https://store.uputronics.com/index.php?route=product/product&product_id=72
 [Quectel L80]: https://www.quectel.com/ProductDownload/L80.html
+[M10Q-5883]: https://www.mateksys.com/?portfolio=m10q-5883
