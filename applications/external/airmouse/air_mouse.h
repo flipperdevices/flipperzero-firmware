@@ -15,6 +15,7 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
     DialogEx* dialog;
+    DialogEx* error_dialog;
     BtMouse* bt_mouse;
     UsbMouse* usb_mouse;
     Calibration* calibration;
@@ -27,4 +28,5 @@ typedef enum {
     AirMouseViewUsbMouse,
     AirMouseViewCalibration,
     AirMouseViewExitConfirm,
+    AirMouseViewError,
 } AirMouseView;

@@ -9,8 +9,27 @@ App(
     fap_libs=["ble_profile"],
     sources=["*.c", "*.cc"],
     fap_icon_assets_symbol="air_mouse",
+    fap_private_libs=[
+        Lib(
+            name="bmi160-api",
+            cflags=["-Wno-error"],
+            sources=[
+                "bmi160.c",
+                "bmi160.h",
+                "bmi160_defs.h",
+            ],
+        ),
+        Lib(
+            name="lsm6ds3tr-api",
+            cflags=["-Wno-error"],
+        ),
+        Lib(
+            name="lsm6dso-api",
+            cflags=["-Wno-error"],
+        ),
+    ],
     fap_author="ginkage",
     fap_weburl="https://github.com/ginkage/FlippAirMouse",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_description="Allows you to turn your Flipper into a USB or Bluetooth air mouse (you do need an extra module)",
 )

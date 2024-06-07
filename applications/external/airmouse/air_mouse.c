@@ -91,7 +91,7 @@ AirMouse* air_mouse_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, AirMouseViewSubmenu, submenu_get_view(app->submenu));
 
-    // Dialog view
+    // Dialog views
     app->dialog = dialog_ex_alloc();
     dialog_ex_set_result_callback(app->dialog, air_mouse_dialog_callback);
     dialog_ex_set_context(app->dialog, app);
@@ -101,6 +101,14 @@ AirMouse* air_mouse_app_alloc() {
     dialog_ex_set_header(app->dialog, "Close Current App?", 16, 12, AlignLeft, AlignTop);
     view_dispatcher_add_view(
         app->view_dispatcher, AirMouseViewExitConfirm, dialog_ex_get_view(app->dialog));
+
+    app->error_dialog = dialog_ex_alloc();
+    dialog_ex_set_header(app->error_dialog, "Failed to init IMU", 63, 0, AlignCenter, AlignTop);
+    dialog_ex_set_text(
+        app->error_dialog, "Please connect sensor module", 63, 30, AlignCenter, AlignTop);
+    view_set_previous_callback(dialog_ex_get_view(app->error_dialog), air_mouse_exit);
+    view_dispatcher_add_view(
+        app->view_dispatcher, AirMouseViewError, dialog_ex_get_view(app->error_dialog));
 
     // Bluetooth view
     app->bt_mouse = bt_mouse_alloc(app->view_dispatcher);
@@ -135,6 +143,8 @@ void air_mouse_app_free(AirMouse* app) {
     submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, AirMouseViewExitConfirm);
     dialog_ex_free(app->dialog);
+    view_dispatcher_remove_view(app->view_dispatcher, AirMouseViewError);
+    dialog_ex_free(app->error_dialog);
     view_dispatcher_remove_view(app->view_dispatcher, AirMouseViewBtMouse);
     bt_mouse_free(app->bt_mouse);
     view_dispatcher_remove_view(app->view_dispatcher, AirMouseViewUsbMouse);
@@ -156,8 +166,7 @@ int32_t air_mouse_app(void* p) {
 
     AirMouse* app = air_mouse_app_alloc();
     if(!imu_begin()) {
-        air_mouse_app_free(app);
-        return -1;
+        view_dispatcher_switch_to_view(app->view_dispatcher, AirMouseViewError);
     }
 
     view_dispatcher_run(app->view_dispatcher);
