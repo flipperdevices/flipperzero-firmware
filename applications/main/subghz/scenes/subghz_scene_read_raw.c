@@ -182,7 +182,6 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                     if(subghz_rx_key_state_get(subghz) != SubGhzRxKeyStateRAWLoad) {
                         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRAWMore);
                     }
-                    //subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRAWLoad);
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneMoreRAW);
                     consumed = true;
                 } else {
