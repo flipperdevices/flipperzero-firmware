@@ -29,8 +29,8 @@ typedef enum {
     LFRFIDProtocolKeri,
     LFRFIDProtocolGallagher,
     LFRFIDProtocolNexwatch,
+    LFRFIDProtocolSecurakey,
     LFRFIDProtocolMax,
-    LFRFIDProtocalSecurakey,
 } LFRFIDProtocol;
 
 extern const ProtocolBase* lfrfid_protocols[];
