@@ -2,6 +2,10 @@
 
 #include "event_loop.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct FuriEventLoopItem FuriEventLoopItem;
 
 /* Link between Event Loop  */
@@ -23,3 +27,7 @@ typedef struct {
     const FuriEventLoopContractGetLink get_link;
     const FuriEventLoopContractGetLevel get_level;
 } FuriEventLoopContract;
+
+#ifdef __cplusplus
+}
+#endif

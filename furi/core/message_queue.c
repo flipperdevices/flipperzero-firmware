@@ -5,6 +5,15 @@
 #define uxLength uxDummy4[1]
 #define uxItemSize uxDummy4[2]
 
+struct FuriMessageQueue {
+    StaticQueue_t container;
+
+    // Event Loop Link
+    FuriEventLoopLink event_loop_link;
+
+    uint8_t buffer[];
+};
+
 // IMPORTANT: container MUST be the FIRST struct member
 static_assert(offsetof(FuriMessageQueue, container) == 0);
 // IMPORTANT: buffer MUST be the LAST struct member
