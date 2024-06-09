@@ -1,7 +1,7 @@
 // The timing parameters and data structure used in this file
 // are based on the knowledge found in Proxmark3's firmware:
 // https://github.com/RfidResearchGroup/proxmark3/blob/1c52152d30f7744c0336633317ea6640dbcdc796/client/src/cmdlfsecurakey.c
-// PM3's repo has mentioned the existence of non-26-or-32-bit formats. 
+// PM3's repo has mentioned the existence of non-26-or-32-bit formats.
 // Those are not supported here for preventing false positives.
 #include <furi.h>
 #include <toolbox/protocols/protocol.h>
@@ -13,16 +13,21 @@
 #define TAG "SECURAKEY"
 #define SECURAKEY_ENCODED_SIZE_BITS (83)
 #define SECURAKEY_PREAMBLE_SIZE_BITS (13)
-#define SECURAKEY_ENCODED_FULL_SIZE_BITS (SECURAKEY_ENCODED_SIZE_BITS + SECURAKEY_PREAMBLE_SIZE_BITS)
+#define SECURAKEY_ENCODED_FULL_SIZE_BITS \
+    (SECURAKEY_ENCODED_SIZE_BITS + SECURAKEY_PREAMBLE_SIZE_BITS)
 #define SECURAKEY_ENCODED_FULL_SIZE_BYTE (SECURAKEY_ENCODED_FULL_SIZE_BITS / 8)
-#define SECURAKEY_DECODED_DATA_SIZE_BITS (56) // 8-bit for bit length, 16-bit for facility code/number, 16-bit for card number, 16-bit for two checksum  
+#define SECURAKEY_DECODED_DATA_SIZE_BITS \
+    (56) // 8-bit for bit length, 16-bit for facility code/number, 16-bit for card number, 16-bit for two checksum
 #define SECURAKEY_DECODED_DATA_SIZE_BYTES (SECURAKEY_DECODED_DATA_SIZE_BITS / 8)
 #define LFRFID_FREQUENCY (125000)
 #define SECURAKEY_CLOCK_PER_BIT (40) // RF/40
-#define SECURAKEY_READ_LONG_TIME (1000000 / (LFRFID_FREQUENCY / SECURAKEY_CLOCK_PER_BIT)) // 1000000 micro sec / sec
-#define SECURAKEY_READ_SHORT_TIME (SECURAKEY_READ_LONG_TIME / 2) 
+#define SECURAKEY_READ_LONG_TIME \
+    (1000000 / (LFRFID_FREQUENCY / SECURAKEY_CLOCK_PER_BIT)) // 1000000 micro sec / sec
+#define SECURAKEY_READ_SHORT_TIME (SECURAKEY_READ_LONG_TIME / 2)
 #define SECURAKEY_READ_JITTER_TIME (SECURAKEY_READ_SHORT_TIME * 40 / 100) // 40% jitter tolerance
-#define SECURAKEY_READ_SHORT_TIME_LOW (SECURAKEY_READ_SHORT_TIME - SECURAKEY_READ_JITTER_TIME) // these are used for manchester decoding
+#define SECURAKEY_READ_SHORT_TIME_LOW \
+    (SECURAKEY_READ_SHORT_TIME -      \
+     SECURAKEY_READ_JITTER_TIME) // these are used for manchester decoding
 #define SECURAKEY_READ_SHORT_TIME_HIGH (SECURAKEY_READ_SHORT_TIME + SECURAKEY_READ_JITTER_TIME)
 #define SECURAKEY_READ_LONG_TIME_LOW (SECURAKEY_READ_LONG_TIME - SECURAKEY_READ_JITTER_TIME)
 #define SECURAKEY_READ_LONG_TIME_HIGH (SECURAKEY_READ_LONG_TIME + SECURAKEY_READ_JITTER_TIME)
@@ -32,19 +37,16 @@ typedef struct {
     uint8_t encoded_data[SECURAKEY_ENCODED_FULL_SIZE_BYTE];
     uint8_t encoded_data_index;
     bool encoded_polarity;
-    FuriString* debug_string;
     ManchesterState decoder_manchester_state;
     uint8_t bit_format;
 } ProtocolSecurakey;
 
 ProtocolSecurakey* protocol_securakey_alloc(void) {
     ProtocolSecurakey* protocol = malloc(sizeof(ProtocolSecurakey));
-    protocol->debug_string = furi_string_alloc();
     return (void*)protocol;
 };
 
 void protocol_securakey_free(ProtocolSecurakey* protocol) {
-    free(protocol->debug_string);
     free(protocol);
 };
 
@@ -52,37 +54,15 @@ uint8_t* protocol_securakey_get_data(ProtocolSecurakey* protocol) {
     return protocol->data;
 };
 
-//static const char* protocol_securakey_get_encoded_data_debug(ProtocolSecurakey* protocol) {
-//    //FURI_LOG_D(TAG, "get_encoded_data entered");
-//    furi_string_reset(protocol->debug_string);
-//    for(size_t i = 0; i < SECURAKEY_ENCODED_FULL_SIZE_BITS; i++) {
-//        furi_string_cat(
-//            protocol->debug_string, bit_lib_get_bit(protocol->encoded_data, i) ? "1" : "0");
-//    }
-//    return furi_string_get_cstr(protocol->debug_string);
-//};
-
-//static const char* protocol_securakey_get_data_debug(ProtocolSecurakey* protocol) {
-//    furi_string_reset(protocol->debug_string);
-//    for(size_t i = 0; i < SECURAKEY_DECODED_DATA_SIZE_BITS; i++) {
-//        furi_string_cat(
-//            protocol->debug_string, bit_lib_get_bit(protocol->data, i) ? "1" : "0");
-//    }
-//    return furi_string_get_cstr(protocol->debug_string);
-//};
-
 static bool protocol_securakey_can_be_decoded(ProtocolSecurakey* protocol) {
     // check 11 bits preamble
-    if(bit_lib_get_bits_16(protocol->encoded_data, 0, SECURAKEY_PREAMBLE_SIZE_BITS) == 0b0111111111001) {
-        //FURI_LOG_D(TAG, "encoded_data: %s", protocol_securakey_get_encoded_data_debug(protocol));
-        if(bit_lib_get_bits(protocol->encoded_data, 13, 6) == 26 || bit_lib_get_bits(protocol->encoded_data, 13, 6) == 32) {
-            //FURI_LOG_D(TAG, "Encoded read: %s", protocol_securakey_get_encoded_data_debug(protocol));
+    if(bit_lib_get_bits_16(protocol->encoded_data, 0, SECURAKEY_PREAMBLE_SIZE_BITS) ==
+       0b0111111111001) {
+        if(bit_lib_get_bits(protocol->encoded_data, 13, 6) == 26 ||
+           bit_lib_get_bits(protocol->encoded_data, 13, 6) == 32) {
             return true;
-        } else {
-            return false;
         }
     } else {
-        //FURI_LOG_D(TAG, "Preamble not found, encoded: %s", protocol_securakey_get_encoded_data_debug(protocol));
         return false;
     }
 };
@@ -100,36 +80,35 @@ static void protocol_securakey_decode(ProtocolSecurakey* protocol) {
 
     // get bit length (26-bit or 32-bit)
     // left two 0 paddings in the beginning for easier parsing (00011010 = 011010)
-    bit_lib_copy_bits(protocol->data, 2, 6, protocol->encoded_data, 13); 
-    
+    bit_lib_copy_bits(protocol->data, 2, 6, protocol->encoded_data, 13);
+
     // get facility number (f)
     if(bit_lib_get_bits(protocol->data, 0, 8) == 26) {
-        FURI_LOG_D(TAG,"26-bit Securakey detected");
+        FURI_LOG_D(TAG, "26-bit Securakey detected");
         protocol->bit_format = 26;
         bit_lib_copy_bits(protocol->data, 16, 1, protocol->encoded_data, 36);
-            // have to skip one spacer
+        // have to skip one spacer
         bit_lib_copy_bits(protocol->data, 17, 7, protocol->encoded_data, 38);
     } else if(bit_lib_get_bits(protocol->data, 0, 8) == 32) {
-        FURI_LOG_D(TAG,"32-bit Securakey detected");
+        FURI_LOG_D(TAG, "32-bit Securakey detected");
         protocol->bit_format = 32;
         // same two 0 paddings here, otherwise should be bit_lib_copy_bits(protocol->data, 8, 7, protocol->encoded_data, 30);
         bit_lib_copy_bits(protocol->data, 10, 7, protocol->encoded_data, 30);
-            // have to skip one spacer
+        // have to skip one spacer
         bit_lib_copy_bits(protocol->data, 17, 7, protocol->encoded_data, 38);
     }
- 
+
     // get card number (c)
-    bit_lib_copy_bits(protocol->data, 24, 1, protocol->encoded_data, 45); 
-        // same skips here
+    bit_lib_copy_bits(protocol->data, 24, 1, protocol->encoded_data, 45);
+    // same skips here
     bit_lib_copy_bits(protocol->data, 25, 8, protocol->encoded_data, 47);
     bit_lib_copy_bits(protocol->data, 33, 7, protocol->encoded_data, 56);
 
     // unsure about CS yet, might as well just save it
-        // CS1
+    // CS1
     bit_lib_copy_bits(protocol->data, 40, 8, protocol->encoded_data, 65);
-        // CS2
+    // CS2
     bit_lib_copy_bits(protocol->data, 48, 8, protocol->encoded_data, 74);
-    //FURI_LOG_D(TAG, "decoded data = %s", protocol_securakey_get_data_debug(protocol));
 
     // (decoded) data looks like this (pp are zero paddings):
     // 26-bit format (1-bit EP,  8-bit facility number, 16-bit card number, 1-bit OP)
@@ -198,8 +177,8 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
     memset(protocol->encoded_data, 0, SECURAKEY_ENCODED_FULL_SIZE_BYTE);
 
     // write the preamble to the beginning of the encoded_data
-    bit_lib_set_bits(protocol->encoded_data, 0, 0b01111111 , 8);
-    bit_lib_set_bits(protocol->encoded_data, 8, 0b11001 , 5);
+    bit_lib_set_bits(protocol->encoded_data, 0, 0b01111111, 8);
+    bit_lib_set_bits(protocol->encoded_data, 8, 0b11001, 5);
 
     // write bit length
     bit_lib_copy_bits(protocol->encoded_data, 13, 6, protocol->data, 2);
@@ -210,40 +189,39 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
         bit_lib_set_bit(protocol->encoded_data, 35, 1);
         // write facility number (f)
         bit_lib_copy_bits(protocol->encoded_data, 36, 1, protocol->data, 16);
-            // have to skip one spacer
+        // have to skip one spacer
         bit_lib_copy_bits(protocol->encoded_data, 38, 7, protocol->data, 17);
-        
+
     } else if(bit_lib_get_bits(protocol->data, 0, 8) == 32) {
         protocol->bit_format = 32;
-       // set EP (OP doesn't need to be set because it's 0 already)
+        // set EP (OP doesn't need to be set because it's 0 already)
         bit_lib_set_bit(protocol->encoded_data, 29, 1);
         // write facility number (f)
         bit_lib_copy_bits(protocol->encoded_data, 30, 7, protocol->data, 10);
-            // have to skip one spacer
+        // have to skip one spacer
         bit_lib_copy_bits(protocol->encoded_data, 38, 7, protocol->data, 17);
     }
 
     //write card number (c)
-    bit_lib_copy_bits(protocol->encoded_data, 45, 1, protocol->data, 24); 
-        // same skips here
+    bit_lib_copy_bits(protocol->encoded_data, 45, 1, protocol->data, 24);
+    // same skips here
     bit_lib_copy_bits(protocol->encoded_data, 47, 8, protocol->data, 25);
     bit_lib_copy_bits(protocol->encoded_data, 56, 7, protocol->data, 33);
 
     // unsure about CS yet might as well just copy it from saved
-        // CS1
+    // CS1
     bit_lib_copy_bits(protocol->encoded_data, 65, 8, protocol->data, 40);
-        // CS2
+    // CS2
     bit_lib_copy_bits(protocol->encoded_data, 74, 8, protocol->data, 48);
- 
+
     // for sending we start at bit 0.
     protocol->encoded_data_index = 0;
     protocol->encoded_polarity = true;
-    //FURI_LOG_D(TAG, "Encoded write: %s", protocol_securakey_get_encoded_data_debug(protocol));
     return true;
 };
 
 LevelDuration protocol_securakey_encoder_yield(ProtocolSecurakey* protocol) {
-bool level = bit_lib_get_bit(protocol->encoded_data, protocol->encoded_data_index);
+    bool level = bit_lib_get_bit(protocol->encoded_data, protocol->encoded_data_index);
     uint32_t duration = SECURAKEY_CLOCK_PER_BIT / 2;
     if(protocol->encoded_polarity) {
         protocol->encoded_polarity = false;
@@ -266,7 +244,8 @@ bool protocol_securakey_write_data(ProtocolSecurakey* protocol, void* data) {
     if(request->write_type == LFRFIDWriteTypeT5577) {
         request->t5577.block[0] =
             (LFRFID_T5577_MODULATION_MANCHESTER | LFRFID_T5577_BITRATE_RF_40 |
-             (3 << LFRFID_T5577_MAXBLOCK_SHIFT)); // we only need 3 32-bit blocks for our 96-bit encoded data
+             (3
+              << LFRFID_T5577_MAXBLOCK_SHIFT)); // we only need 3 32-bit blocks for our 96-bit encoded data
         request->t5577.block[1] = bit_lib_get_bits_32(protocol->encoded_data, 0, 32);
         request->t5577.block[2] = bit_lib_get_bits_32(protocol->encoded_data, 32, 32);
         request->t5577.block[3] = bit_lib_get_bits_32(protocol->encoded_data, 64, 32);
