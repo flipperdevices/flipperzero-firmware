@@ -76,7 +76,7 @@ static bool protocol_securakey_can_be_decoded(ProtocolSecurakey* protocol) {
             FURI_LOG_D(
                 TAG, "Encoded read : %s", protocol_securakey_get_encoded_data_debug(protocol));
             return true;
-            
+
         } else {
             return false;
         }
@@ -203,7 +203,7 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
 
     if(bit_lib_get_bits(protocol->data, 0, 8) == 26) {
         protocol->bit_format = 26;
-        // set even parity & odd parity 
+        // set even parity & odd parity
         if(!bit_lib_test_parity(protocol->data, 16, 12, BitLibParityOdd, 12)) {
             bit_lib_set_bit(protocol->encoded_data, 35, 1);
         }
