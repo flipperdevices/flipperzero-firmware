@@ -161,7 +161,7 @@ void furi_event_loop_run(FuriEventLoop* instance) {
                             break;
                         } else if(ret == FuriEventLoopProcessStatusIncomplete) {
                             // Event processing incomplete more processing needed
-                        } else if(ret == FuriEventLoopProcessStatusAgain) {//-V547
+                        } else if(ret == FuriEventLoopProcessStatusAgain) { //-V547
                             furi_event_loop_item_notify(item);
                             break;
                         } else {
