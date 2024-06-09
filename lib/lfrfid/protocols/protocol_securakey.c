@@ -11,8 +11,8 @@
 #include <toolbox/manchester_decoder.h>
 
 #define TAG "SECURAKEY"
-#define SECURAKEY_ENCODED_SIZE_BITS (83)
-#define SECURAKEY_PREAMBLE_SIZE_BITS (13)
+#define SECURAKEY_ENCODED_SIZE_BITS (84)
+#define SECURAKEY_PREAMBLE_SIZE_BITS (12)
 #define SECURAKEY_ENCODED_FULL_SIZE_BITS \
     (SECURAKEY_ENCODED_SIZE_BITS + SECURAKEY_PREAMBLE_SIZE_BITS)
 #define SECURAKEY_ENCODED_FULL_SIZE_BYTE (SECURAKEY_ENCODED_FULL_SIZE_BITS / 8)
@@ -37,16 +37,19 @@ typedef struct {
     uint8_t encoded_data[SECURAKEY_ENCODED_FULL_SIZE_BYTE];
     uint8_t encoded_data_index;
     bool encoded_polarity;
+    FuriString* debug_string;
     ManchesterState decoder_manchester_state;
     uint8_t bit_format;
 } ProtocolSecurakey;
 
 ProtocolSecurakey* protocol_securakey_alloc(void) {
     ProtocolSecurakey* protocol = malloc(sizeof(ProtocolSecurakey));
+    protocol->debug_string = furi_string_alloc();
     return (void*)protocol;
 };
 
 void protocol_securakey_free(ProtocolSecurakey* protocol) {
+    free(protocol->debug_string);
     free(protocol);
 };
 
@@ -54,13 +57,28 @@ uint8_t* protocol_securakey_get_data(ProtocolSecurakey* protocol) {
     return protocol->data;
 };
 
+static const char* protocol_securakey_get_encoded_data_debug(ProtocolSecurakey* protocol) {
+    //FURI_LOG_D(TAG, "get_encoded_data entered");
+    furi_string_reset(protocol->debug_string);
+    for(size_t i = 0; i < SECURAKEY_ENCODED_FULL_SIZE_BITS; i++) {
+        furi_string_cat(
+            protocol->debug_string, bit_lib_get_bit(protocol->encoded_data, i) ? "1" : "0");
+    }
+    return furi_string_get_cstr(protocol->debug_string);
+};
+
 static bool protocol_securakey_can_be_decoded(ProtocolSecurakey* protocol) {
     // check 11 bits preamble
     if(bit_lib_get_bits_16(protocol->encoded_data, 0, SECURAKEY_PREAMBLE_SIZE_BITS) ==
-       0b0111111111001) {
+       0b011111111100) {
         if(bit_lib_get_bits(protocol->encoded_data, 13, 6) == 26 ||
            bit_lib_get_bits(protocol->encoded_data, 13, 6) == 32) {
+            FURI_LOG_D(
+                TAG, "Encoded read : %s", protocol_securakey_get_encoded_data_debug(protocol));
             return true;
+            
+        } else {
+            return false;
         }
     } else {
         return false;
@@ -70,11 +88,11 @@ static bool protocol_securakey_can_be_decoded(ProtocolSecurakey* protocol) {
 static void protocol_securakey_decode(ProtocolSecurakey* protocol) {
     memset(protocol->data, 0, SECURAKEY_DECODED_DATA_SIZE_BYTES);
     // encoded_data looks like this (citation: pm3 repo):
-    // 26-bit format (1-bit EP,  8-bit facility number, 16-bit card number, 1-bit OP)
+    // 26-bit format (1-bit even parity bit,  8-bit facility number, 16-bit card number, 1-bit odd parity bit)
     // preamble     ??bitlen   reserved        EPf   fffffffc   cccccccc   cccccccOP  CS?        CS2?
     // 0111111111 0 01011010 0 00000000 0 00000010 0 00110110 0 00111110 0 01100010 0 00001111 0 01100000 0 00000000 0 0000
 
-    // 32-bit format (1-bit EP, 14-bit facility number, 16-bit card number, 1-bit OP)
+    // 32-bit format (1-bit even parity bit, 14-bit facility number, 16-bit card number, 1-bit odd parity bit)
     // preamble     ??bitlen   reserved  EPfffffff   fffffffc   cccccccc   cccccccOP  CS?        CS2?
     // 0111111111 0 01100000 0 00000000 0 10000100 0 11001010 0 01011011 0 01010110 0 00010110 0 11100000 0 00000000 0 0000
 
@@ -185,8 +203,13 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
 
     if(bit_lib_get_bits(protocol->data, 0, 8) == 26) {
         protocol->bit_format = 26;
-        // set EP (OP doesn't need to be set because it's 0 already)
-        bit_lib_set_bit(protocol->encoded_data, 35, 1);
+        // set even parity & odd parity 
+        if(!bit_lib_test_parity(protocol->data, 16, 12, BitLibParityOdd, 12)) {
+            bit_lib_set_bit(protocol->encoded_data, 35, 1);
+        }
+        if(bit_lib_test_parity(protocol->data, 28, 12, BitLibParityOdd, 12)) {
+            bit_lib_set_bit(protocol->encoded_data, 63, 1);
+        }
         // write facility number (f)
         bit_lib_copy_bits(protocol->encoded_data, 36, 1, protocol->data, 16);
         // have to skip one spacer
@@ -194,15 +217,20 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
 
     } else if(bit_lib_get_bits(protocol->data, 0, 8) == 32) {
         protocol->bit_format = 32;
-        // set EP (OP doesn't need to be set because it's 0 already)
-        bit_lib_set_bit(protocol->encoded_data, 29, 1);
+        // set EP & OP
+        if(!bit_lib_test_parity(protocol->data, 16, 12, BitLibParityOdd, 12)) {
+            bit_lib_set_bit(protocol->encoded_data, 29, 1);
+        }
+        if(bit_lib_test_parity(protocol->data, 28, 12, BitLibParityOdd, 12)) {
+            bit_lib_set_bit(protocol->encoded_data, 63, 1);
+        }
         // write facility number (f)
         bit_lib_copy_bits(protocol->encoded_data, 30, 7, protocol->data, 10);
         // have to skip one spacer
         bit_lib_copy_bits(protocol->encoded_data, 38, 7, protocol->data, 17);
     }
 
-    //write card number (c)
+    // write card number (c)
     bit_lib_copy_bits(protocol->encoded_data, 45, 1, protocol->data, 24);
     // same skips here
     bit_lib_copy_bits(protocol->encoded_data, 47, 8, protocol->data, 25);
@@ -217,6 +245,7 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
     // for sending we start at bit 0.
     protocol->encoded_data_index = 0;
     protocol->encoded_polarity = true;
+    FURI_LOG_D(TAG, "Encoded write: %s", protocol_securakey_get_encoded_data_debug(protocol));
     return true;
 };
 
@@ -228,7 +257,7 @@ LevelDuration protocol_securakey_encoder_yield(ProtocolSecurakey* protocol) {
     } else {
         level = !level;
         protocol->encoded_polarity = true;
-        bit_lib_increment_index(protocol->encoded_data_index, SECURAKEY_ENCODED_SIZE_BITS);
+        bit_lib_increment_index(protocol->encoded_data_index, SECURAKEY_ENCODED_FULL_SIZE_BITS);
     }
     return level_duration_make(level, duration);
 };
