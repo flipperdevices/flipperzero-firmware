@@ -1,8 +1,99 @@
-#include "core/event_loop.h"
-#include "core/check.h"
-#include "core/message_queue.h"
 #include "event_loop_i.h"
 #include "message_queue_i.h"
+
+#include "check.h"
+#include "thread.h"
+
+#include <m-bptree.h>
+#include <m-i-list.h>
+
+#include <FreeRTOS.h>
+#include <task.h>
+
+struct FuriEventLoopItem {
+    // Source
+    FuriEventLoop* owner;
+
+    // Tracking item
+    const FuriEventLoopContract* contract;
+    void* object;
+    FuriEventLoopEvent event;
+
+    // Callback and context
+    FuriEventLoopMessageQueueCallback callback;
+    void* callback_context;
+
+    // Waiting list
+    ILIST_INTERFACE(WaitingList, struct FuriEventLoopItem);
+};
+
+ILIST_DEF(WaitingList, FuriEventLoopItem, M_POD_OPLIST)
+
+static FuriEventLoopItem* furi_event_loop_item_alloc(
+    FuriEventLoop* owner,
+    const FuriEventLoopContract* contract,
+    void* object,
+    FuriEventLoopEvent event);
+
+static void furi_event_loop_item_free(FuriEventLoopItem* instance);
+
+static void furi_event_loop_item_set_callback(
+    FuriEventLoopItem* instance,
+    FuriEventLoopMessageQueueCallback callback,
+    void* callback_context);
+
+static void furi_event_loop_item_notify(FuriEventLoopItem* instance);
+
+/* Event Loop RB tree */
+#define FURI_EVENT_LOOP_TREE_RANK (4)
+
+BPTREE_DEF2( // NOLINT
+    FuriEventLoopTree,
+    FURI_EVENT_LOOP_TREE_RANK,
+    void*, /* pointer to object we track */
+    M_PTR_OPLIST,
+    FuriEventLoopItem*, /* pointer to the FuriEventLoopItem */
+    M_PTR_OPLIST)
+
+#define M_OPL_FuriEventLoopTree_t() BPTREE_OPLIST(FuriEventLoopTree, M_POD_OPLIST)
+
+#define FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX (2)
+
+typedef enum {
+    FuriEventLoopFlagEvent = (1 << 0),
+    FuriEventLoopFlagStop = (1 << 1),
+} FuriEventLoopFlag;
+
+#define FuriEventLoopFlagAll (FuriEventLoopFlagEvent | FuriEventLoopFlagStop)
+
+typedef enum {
+    FuriEventLoopProcessStatusComplete,
+    FuriEventLoopProcessStatusIncomplete,
+    FuriEventLoopProcessStatusAgain,
+} FuriEventLoopProcessStatus;
+
+typedef enum {
+    FuriEventLoopStateIdle,
+    FuriEventLoopStateProcessing,
+} FuriEventLoopState;
+
+struct FuriEventLoop {
+    // Only works if all operations are done from the same thread
+    FuriThreadId thread_id;
+
+    // Poller state
+    volatile FuriEventLoopState state;
+
+    // Tree
+    FuriEventLoopTree_t tree;
+    // Tree waiting list
+    WaitingList_t waiting_list;
+
+    // Tick event
+    uint32_t tick_interval;
+    FuriEventLoopTickCallback tick_callback;
+    void* tick_callback_context;
+};
 
 FuriEventLoop* furi_event_loop_alloc(void) {
     FuriEventLoop* instance = malloc(sizeof(FuriEventLoop));
@@ -26,23 +117,15 @@ static FuriEventLoopProcessStatus
     furi_event_loop_poll_process_event(FuriEventLoop* instance, FuriEventLoopItem* item) {
     UNUSED(instance);
 
-    if(item->type == FuriEventLoopItemTypeMessageQueue) {
-        if(item->event == FuriEventLoopEventIn && !furi_message_queue_get_count(item->item)) {
-            return FuriEventLoopProcessStatusComplete;
-        }
-
-        if(item->event == FuriEventLoopEventOut && !furi_message_queue_get_space(item->item)) {
-            return FuriEventLoopProcessStatusComplete;
-        }
-
-        if(item->callback(item->item, item->callback_context)) {
-            return FuriEventLoopProcessStatusIncomplete;
-        } else {
-            return FuriEventLoopProcessStatusAgain;
-        }
+    if(!item->contract->get_level(item->object, item->event)) {
+        return FuriEventLoopProcessStatusComplete;
     }
 
-    furi_crash();
+    if(item->callback(item->object, item->callback_context)) {
+        return FuriEventLoopProcessStatusIncomplete;
+    } else {
+        return FuriEventLoopProcessStatusAgain;
+    }
 }
 
 void furi_event_loop_run(FuriEventLoop* instance) {
@@ -54,7 +137,7 @@ void furi_event_loop_run(FuriEventLoop* instance) {
     while(true) {
         uint32_t flags = 0;
         BaseType_t ret = xTaskNotifyWaitIndexed(
-            FURI_EVENT_LOOP_NOTIFY_INDEX, 0, FuriEventLoopFlagAll, &flags, timeout);
+            FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, 0, FuriEventLoopFlagAll, &flags, timeout);
 
         instance->state = FuriEventLoopStateProcessing;
         if(ret == pdTRUE) {
@@ -78,8 +161,8 @@ void furi_event_loop_run(FuriEventLoop* instance) {
                             break;
                         } else if(ret == FuriEventLoopProcessStatusIncomplete) {
                             // Event processing incomplete more processing needed
-                        } else if(ret == FuriEventLoopProcessStatusAgain) {
-                            furi_event_loop_item_notify(item, item->type, item->event);
+                        } else if(ret == FuriEventLoopProcessStatusAgain) {//-V547
+                            furi_event_loop_item_notify(item);
                             break;
                         } else {
                             furi_crash();
@@ -101,7 +184,7 @@ void furi_event_loop_stop(FuriEventLoop* instance) {
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
     xTaskNotifyIndexed(
-        instance->thread_id, FURI_EVENT_LOOP_NOTIFY_INDEX, FuriEventLoopFlagStop, eSetBits);
+        instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagStop, eSetBits);
 }
 
 void furi_event_loop_tick_set(
@@ -134,20 +217,26 @@ void furi_event_loop_message_queue_subscribe(
     furi_check(FuriEventLoopTree_get(instance->tree, message_queue) == NULL);
 
     // Allocate and setup item
-    FuriEventLoopItem* item = furi_event_loop_item_alloc(instance);
-    furi_event_loop_item_set_item(item, FuriEventLoopItemTypeMessageQueue, message_queue, event);
+    FuriEventLoopItem* item = furi_event_loop_item_alloc(
+        instance, &furi_message_queue_event_loop_contract, message_queue, event);
     furi_event_loop_item_set_callback(item, callback, context);
 
     FuriEventLoopTree_set_at(instance->tree, message_queue, item);
 
-    furi_message_queue_event_loop_in_set(message_queue, item, item->event);
+    FuriEventLoopLink* link = furi_message_queue_event_loop_get_link(message_queue);
 
-    if(item->event == FuriEventLoopEventIn && furi_message_queue_get_count(item->item)) {
-        furi_event_loop_item_notify(item, item->type, item->event);
+    if(item->event == FuriEventLoopEventIn) {
+        furi_check(link->item_in == NULL);
+        link->item_in = item;
+    } else if(item->event == FuriEventLoopEventOut) {
+        furi_check(link->item_out == NULL);
+        link->item_out = item;
+    } else {
+        furi_crash();
     }
 
-    if(item->event == FuriEventLoopEventOut && furi_message_queue_get_space(item->item)) {
-        furi_event_loop_item_notify(item, item->type, item->event);
+    if(furi_message_queue_event_loop_get_level(item->object, item->event)) {
+        furi_event_loop_item_notify(item);
     }
 
     FURI_CRITICAL_EXIT();
@@ -169,7 +258,17 @@ void furi_event_loop_message_queue_unsubscribe(
     furi_check(item);
     furi_check(item->owner == instance);
 
-    furi_message_queue_event_loop_in_set(message_queue, NULL, item->event);
+    FuriEventLoopLink* link = furi_message_queue_event_loop_get_link(message_queue);
+
+    if(item->event == FuriEventLoopEventIn) {
+        furi_check(link->item_in == item);
+        link->item_in = NULL;
+    } else if(item->event == FuriEventLoopEventOut) {
+        furi_check(link->item_out == item);
+        link->item_out = NULL;
+    } else {
+        furi_crash();
+    }
 
     furi_event_loop_item_free(item);
 
@@ -182,58 +281,72 @@ void furi_event_loop_message_queue_unsubscribe(
  * Event Loop Item API, used internally
  */
 
-FuriEventLoopItem* furi_event_loop_item_alloc(FuriEventLoop* owner) {
+static FuriEventLoopItem* furi_event_loop_item_alloc(
+    FuriEventLoop* owner,
+    const FuriEventLoopContract* contract,
+    void* object,
+    FuriEventLoopEvent event) {
+    furi_assert(owner);
+    furi_assert(object);
+
     FuriEventLoopItem* instance = malloc(sizeof(FuriEventLoopItem));
 
     instance->owner = owner;
-    WaitingList_init_field(instance); // not really necessary
+    instance->contract = contract;
+    instance->object = object;
+    instance->event = event;
+
+    WaitingList_init_field(instance);
 
     return instance;
 }
 
-void furi_event_loop_item_free(FuriEventLoopItem* instance) {
-    furi_check(instance);
+static void furi_event_loop_item_free(FuriEventLoopItem* instance) {
+    furi_assert(instance);
     free(instance);
 }
 
-void furi_event_loop_item_set_item(
-    FuriEventLoopItem* instance,
-    FuriEventLoopItemType type,
-    void* item,
-    FuriEventLoopEvent event) {
-    furi_check(instance);
-    furi_check(!instance->item);
-
-    instance->type = type;
-    instance->item = item;
-    instance->event = event;
-}
-
-void furi_event_loop_item_set_callback(
+static void furi_event_loop_item_set_callback(
     FuriEventLoopItem* instance,
     FuriEventLoopMessageQueueCallback callback,
     void* callback_context) {
-    furi_check(instance);
-    furi_check(!instance->callback);
+    furi_assert(instance);
+    furi_assert(!instance->callback);
 
     instance->callback = callback;
     instance->callback_context = callback_context;
 }
 
-void furi_event_loop_item_notify(
-    FuriEventLoopItem* instance,
-    FuriEventLoopItemType type,
-    FuriEventLoopEvent event) {
-    furi_check(instance);
-    furi_check(instance->type == type);
-    furi_check(instance->event == event);
+static void furi_event_loop_item_notify(FuriEventLoopItem* instance) {
+    furi_assert(instance);
 
     FURI_CRITICAL_ENTER();
+
     if(!instance->WaitingList.prev && !instance->WaitingList.next) {
         WaitingList_push_back(instance->owner->waiting_list, instance);
     }
+
     FURI_CRITICAL_EXIT();
 
     xTaskNotifyIndexed(
-        instance->owner->thread_id, FURI_EVENT_LOOP_NOTIFY_INDEX, FuriEventLoopFlagEvent, eSetBits);
+        instance->owner->thread_id,
+        FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX,
+        FuriEventLoopFlagEvent,
+        eSetBits);
+}
+
+void furi_event_loop_link_notify(FuriEventLoopLink* instance, FuriEventLoopEvent event) {
+    furi_assert(instance);
+
+    FURI_CRITICAL_ENTER();
+
+    if(event == FuriEventLoopEventIn) {
+        if(instance->item_in) furi_event_loop_item_notify(instance->item_in);
+    } else if(event == FuriEventLoopEventOut) {
+        if(instance->item_out) furi_event_loop_item_notify(instance->item_out);
+    } else {
+        furi_crash();
+    }
+
+    FURI_CRITICAL_EXIT();
 }

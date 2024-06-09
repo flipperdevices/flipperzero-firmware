@@ -33,8 +33,8 @@ void furi_message_queue_free(FuriMessageQueue* instance) {
     furi_check(instance);
 
     // Event Loop must be disconnected
-    furi_check(!instance->event_loop_item_in);
-    furi_check(!instance->event_loop_item_out);
+    furi_check(!instance->event_loop_link.item_in);
+    furi_check(!instance->event_loop_link.item_out);
 
     vQueueDelete((QueueHandle_t)instance);
     free(instance);
@@ -77,14 +77,7 @@ FuriStatus
     }
 
     if(stat == FuriStatusOk) {
-        FURI_CRITICAL_ENTER();
-        if(instance->event_loop_item_in) {
-            furi_event_loop_item_notify(
-                instance->event_loop_item_in,
-                FuriEventLoopItemTypeMessageQueue,
-                FuriEventLoopEventIn);
-        }
-        FURI_CRITICAL_EXIT();
+        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventIn);
     }
 
     /* Return execution status */
@@ -127,14 +120,7 @@ FuriStatus furi_message_queue_get(FuriMessageQueue* instance, void* msg_ptr, uin
     }
 
     if(stat == FuriStatusOk) {
-        FURI_CRITICAL_ENTER();
-        if(instance->event_loop_item_out) {
-            furi_event_loop_item_notify(
-                instance->event_loop_item_out,
-                FuriEventLoopItemTypeMessageQueue,
-                FuriEventLoopEventOut);
-        }
-        FURI_CRITICAL_EXIT();
+        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
     }
 
     return stat;
@@ -200,42 +186,33 @@ FuriStatus furi_message_queue_reset(FuriMessageQueue* instance) {
     }
 
     if(stat == FuriStatusOk) {
-        FURI_CRITICAL_ENTER();
-        if(instance->event_loop_item_out) {
-            furi_event_loop_item_notify(
-                instance->event_loop_item_out,
-                FuriEventLoopItemTypeMessageQueue,
-                FuriEventLoopEventOut);
-        }
-        FURI_CRITICAL_EXIT();
+        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
     }
 
     /* Return execution status */
     return stat;
 }
 
-void furi_message_queue_event_loop_in_set(
-    FuriMessageQueue* instance,
-    FuriEventLoopItem* event_loop_item,
-    FuriEventLoopEvent event) {
-    furi_check(instance);
-    furi_check(!furi_kernel_is_irq_or_masked());
+FuriEventLoopLink* furi_message_queue_event_loop_get_link(void* object) {
+    FuriMessageQueue* instance = object;
+    furi_assert(instance);
+    return &instance->event_loop_link;
+}
 
-    FURI_CRITICAL_ENTER();
+uint32_t furi_message_queue_event_loop_get_level(void* object, FuriEventLoopEvent event) {
+    FuriMessageQueue* instance = object;
+    furi_assert(instance);
 
     if(event == FuriEventLoopEventIn) {
-        furi_check(
-            event_loop_item ? instance->event_loop_item_in == NULL :
-                              instance->event_loop_item_in != NULL);
-        instance->event_loop_item_in = event_loop_item;
+        return furi_message_queue_get_count(instance);
     } else if(event == FuriEventLoopEventOut) {
-        furi_check(
-            event_loop_item ? instance->event_loop_item_out == NULL :
-                              instance->event_loop_item_out != NULL);
-        instance->event_loop_item_out = event_loop_item;
+        return furi_message_queue_get_space(instance);
     } else {
         furi_crash();
     }
-
-    FURI_CRITICAL_EXIT();
 }
+
+const FuriEventLoopContract furi_message_queue_event_loop_contract = {
+    .get_link = furi_message_queue_event_loop_get_link,
+    .get_level = furi_message_queue_event_loop_get_level,
+};

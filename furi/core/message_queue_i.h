@@ -14,16 +14,14 @@ struct FuriMessageQueue {
     StaticQueue_t container;
 
     // Event Loop
-    FuriEventLoopItem*
-        event_loop_item_out; /**< Notify event_loop item on message being taken from the queue */
-    FuriEventLoopItem*
-        event_loop_item_in; /**< Notify event_loop item on message being put into the queue */
+    FuriEventLoopLink event_loop_link;
 
     // !!! Data buffer, must be last in the structure, DO NOT MOVE !!!
     uint8_t buffer[];
 };
 
-void furi_message_queue_event_loop_in_set(
-    FuriMessageQueue* instance,
-    FuriEventLoopItem* event_loop_item,
-    FuriEventLoopEvent event);
+FuriEventLoopLink* furi_message_queue_event_loop_get_link(void* instance);
+
+uint32_t furi_message_queue_event_loop_get_level(void* instance, FuriEventLoopEvent event);
+
+extern const FuriEventLoopContract furi_message_queue_event_loop_contract;
