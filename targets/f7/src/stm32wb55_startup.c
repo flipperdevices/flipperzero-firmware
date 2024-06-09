@@ -1,13 +1,20 @@
 #include <stm32wb55_startup.h>
+#include <stm32wb55_linker.h>
 #include <stm32wbxx.h>
 
-uint32_t SystemCoreClock = 4000000UL; /*CPU1: M4 on MSI clock after startup (4MHz)*/
+/** System Core Clock speed
+ * 
+ * CPU1: M4 on MSI clock after startup (4MHz).
+ * Modified by RCC LL HAL.
+ */
+uint32_t SystemCoreClock = 4000000UL;
 
+/** AHB Prescaler Table. Used by RCC LL HAL */
 const uint32_t AHBPrescTable[16UL] =
     {1UL, 3UL, 5UL, 1UL, 1UL, 6UL, 10UL, 32UL, 2UL, 4UL, 8UL, 16UL, 64UL, 128UL, 256UL, 512UL};
-
+/** APB Prescaler Table. Used by RCC LL HAL */
 const uint32_t APBPrescTable[8UL] = {0UL, 0UL, 0UL, 0UL, 1UL, 2UL, 3UL, 4UL};
-
+/** MSI Range Table. Used by RCC LL HAL */
 const uint32_t MSIRangeTable[16UL] = {
     100000UL,
     200000UL,
@@ -26,8 +33,9 @@ const uint32_t MSIRangeTable[16UL] = {
     0UL,
     0UL}; /* 0UL values are incorrect cases */
 
+/** MCU Initialization Routine. Part of ST HAL convention, so we keep it.*/
 void SystemInit(void) {
-    // Define ISR Vector
+    // Set ISR Vector location
 #if defined(VECT_TAB_SRAM)
     // Point ISR Vector to SRAM
     SCB->VTOR = SRAM1_BASE;
@@ -37,30 +45,31 @@ void SystemInit(void) {
 #endif
 
 #if(__FPU_PRESENT == 1) && (__FPU_USED == 1)
+    // Enable access to FPU
     SCB->CPACR |=
         ((3UL << (10UL * 2UL)) | (3UL << (11UL * 2UL))); /* set CP10 and CP11 Full Access */
 #endif
 
-    /* Reset the RCC clock configuration to the default reset state ------------*/
-    /* Set MSION bit */
+    // Reset the RCC clock configuration to the default reset state
+    // Set MSION bit
     RCC->CR |= RCC_CR_MSION;
-    /* Reset CFGR register */
+    // Reset CFGR register
     RCC->CFGR = 0x00070000U;
-    /* Reset PLLSAI1ON, PLLON, HSECSSON, HSEON, HSION, and MSIPLLON bits */
+    // Reset PLLSAI1ON, PLLON, HSECSSON, HSEON, HSION, and MSIPLLON bits
     RCC->CR &= (uint32_t)0xFAF6FEFBU;
-    /*!< Reset LSI1 and LSI2 bits */
+    // Reset LSI1 and LSI2 bits
     RCC->CSR &= (uint32_t)0xFFFFFFFAU;
-    /*!< Reset HSI48ON  bit */
+    // Reset HSI48ON bit
     RCC->CRRCR &= (uint32_t)0xFFFFFFFEU;
-    /* Reset PLLCFGR register */
+    // Reset PLLCFGR register
     RCC->PLLCFGR = 0x22041000U;
 #if defined(STM32WB55xx) || defined(STM32WB5Mxx)
-    /* Reset PLLSAI1CFGR register */
+    // Reset PLLSAI1CFGR register
     RCC->PLLSAI1CFGR = 0x22041000U;
 #endif
-    /* Reset HSEBYP bit */
+    // Reset HSEBYP bit
     RCC->CR &= 0xFFFBFFFFU;
-    /* Disable all interrupts */
+    // Disable all RCC related interrupts
     RCC->CIER = 0x00000000;
 }
 
@@ -68,10 +77,15 @@ void Default_Handler(void) {
     furi_crash("NotImplemented");
 }
 
+/** Start your journey here */
 FURI_NAKED void Reset_Handler() {
-    asm volatile("ldr r0, =_estack");
+    // Funny thing: SP and MSP are set to _stack_end if we came here after MCU reset
+    // Now, what if we came from boot loader? Lets set SP to _stack_end again.
+    // By the way Furi stage loader doing it too, but we don't know who called us.
+    asm volatile("ldr r0, =_stack_end");
     asm volatile("mov sp, r0");
 
+    // ST chip initialization routine
     SystemInit();
 
     uint32_t *source, *destination;
@@ -92,26 +106,32 @@ FURI_NAKED void Reset_Handler() {
         destination++;
     }
 
-    // Wipe RAM2A
+    // Core2 related quirks: wipe MB_MEM2 section
     destination = (uint32_t*)&_sMB_MEM2;
     while(destination < (uint32_t*)&_eMB_MEM2) {
         *destination = 0;
         destination++;
     }
 
+    // libc init array
     __libc_init_array();
 
+    // Our main
     main();
 
+    // You should never exit from main, but we'll catch you if you do
     furi_crash("WhyExit?");
 }
 
+/** ISR type */
 typedef void (*element_t)(void);
 
+/** System initialization vector. Contains: main stack end address, 15 pointers
+ * to unmask-able ISR and 63 to mask-able ISR. */
 PLACE_IN_SECTION(".isr_vector")
 const element_t reset_vector[] = {
     /* Main stack top */
-    (element_t)0x20030000,
+    (element_t)&_stack_end,
     /* 15 Unmaskable ISR */
     Reset_Handler,
     NMI_Handler,

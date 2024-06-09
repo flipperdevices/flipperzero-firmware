@@ -61,12 +61,23 @@ void furi_hal_init(void) {
 #endif
 }
 
+/** Jump to the void*
+ *
+ * Allow your code to transfer control to another firmware.
+ *
+ * @warning    This code doesn't reset system before jump. Call it only from
+ *             main thread, no kernel should be running. Ensure that no
+ *             peripheral blocks active and no interrupts are pending.
+ *
+ * @param      address  The System Vector address.
+ */
 void furi_hal_switch(void* address) {
     __set_BASEPRI(0);
-    asm volatile("ldr    r3, [%0]    \n"
-                 "msr    msp, r3     \n"
-                 "ldr    r3, [%1]    \n"
-                 "mov    pc, r3      \n"
+    // This code emulates system reset: sets MSP and calls Reset ISR
+    asm volatile("ldr    r3, [%0]    \n" // Load SP from new vector to r3
+                 "msr    msp, r3     \n" // Set MSP from r3
+                 "ldr    r3, [%1]    \n" // Load Reset Handler address to r3
+                 "mov    pc, r3      \n" // Set PC from r3 (jump to Reset ISR)
                  :
                  : "r"(address), "r"(address + 0x4)
                  : "r3");

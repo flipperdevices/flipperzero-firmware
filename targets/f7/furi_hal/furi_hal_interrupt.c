@@ -274,11 +274,11 @@ void MemManage_Handler(void) {
             // from 0x00 to 1MB, see FuriHalMpuRegionNULL
             furi_crash("NULL pointer dereference");
         } else {
-            // write or read of MPU region 1 (FuriHalMpuRegionStack)
+            // write or read of MPU region 1 (FuriHalMpuRegionThreadStack)
             furi_crash("MPU fault, possibly stack overflow");
         }
     } else if(FURI_BIT(SCB->CFSR, SCB_CFSR_MSTKERR_Pos)) {
-        // push to stack on MPU region 1 (FuriHalMpuRegionStack)
+        // push to stack on MPU region 1 (FuriHalMpuRegionThreadStack)
         furi_crash("MemManage fault, possibly stack overflow");
     }
 

@@ -1,19 +1,10 @@
+#pragma once
+
 #include <furi.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-extern const void _estack;
-extern const void _sidata;
-extern const void _sdata;
-extern const void _edata;
-
-extern const void _sbss;
-extern const void _ebss;
-
-extern const void _sMB_MEM2;
-extern const void _eMB_MEM2;
 
 extern int main(void);
 extern void __libc_init_array(void);
@@ -22,7 +13,7 @@ void Default_Handler(void);
 
 #define DEFAULT FURI_DEFAULT("Default_Handler")
 
-/* 15 Unmaskable ISR */
+/* 15 Unmask-able ISR */
 DEFAULT void NMI_Handler(void);
 DEFAULT void HardFault_Handler(void);
 DEFAULT void MemManage_Handler(void);
@@ -33,7 +24,7 @@ DEFAULT void DebugMon_Handler(void);
 DEFAULT void PendSV_Handler(void);
 DEFAULT void SysTick_Handler(void);
 
-/* 63 Interrupt Service Routine */
+/* 63 Mask-able ISR */
 DEFAULT void WWDG_IRQHandler(void);
 DEFAULT void PVD_PVM_IRQHandler(void);
 DEFAULT void TAMP_STAMP_LSECSS_IRQHandler(void);

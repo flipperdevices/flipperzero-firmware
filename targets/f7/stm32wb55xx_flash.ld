@@ -1,9 +1,9 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
-_estack = 0x20030000;    /* end of RAM */
+_stack_end = 0x20030000;    /* end of RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
-_Min_Stack_Size = 0x1000; /* required amount of stack */
+_stack_size = 0x1000; /* required amount of stack */
 
 MEMORY {
     FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 1024K
@@ -105,9 +105,9 @@ SECTIONS {
     ._user_heap_stack(DSECT) : {
         . = ALIGN(8);
         __heap_start__ = .;
-        . = ORIGIN(RAM1) + LENGTH(RAM1) - _Min_Stack_Size;
+        . = ORIGIN(RAM1) + LENGTH(RAM1) - _stack_size;
         __heap_end__ = .;
-        . = . + _Min_Stack_Size;
+        . = . + _stack_size;
         . = ALIGN(8);
     } >RAM1
 
