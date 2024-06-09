@@ -61,16 +61,6 @@ void furi_hal_init(void) {
 #endif
 }
 
-/** Jump to the void*
- *
- * Allow your code to transfer control to another firmware.
- *
- * @warning    This code doesn't reset system before jump. Call it only from
- *             main thread, no kernel should be running. Ensure that no
- *             peripheral blocks active and no interrupts are pending.
- *
- * @param      address  The System Vector address.
- */
 void furi_hal_switch(void* address) {
     __set_BASEPRI(0);
     // This code emulates system reset: sets MSP and calls Reset ISR
