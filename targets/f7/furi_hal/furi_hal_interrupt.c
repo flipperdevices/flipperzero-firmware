@@ -313,9 +313,6 @@ void USB_LP_IRQHandler(void) {
 #endif
 }
 
-void USB_HP_IRQHandler(void) {
-}
-
 void IPCC_C1_TX_IRQHandler(void) {
     HW_IPCC_Tx_Handler();
 }
@@ -342,104 +339,4 @@ void USART1_IRQHandler(void) {
 
 void LPUART1_IRQHandler(void) {
     furi_hal_interrupt_call(FuriHalInterruptIdLpUart1);
-}
-
-void WWDG_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void PVD_PVM_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void RTC_WKUP_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void FLASH_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void ADC1_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void C2SEV_PWR_C2H_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void TIM1_BRK_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void PKA_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void I2C1_EV_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void I2C1_ER_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void I2C3_EV_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void I2C3_ER_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void SPI1_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void SPI2_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void SAI1_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void TSC_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void RTC_Alarm_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void CRS_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void PWR_SOTF_BLEACT_802ACT_RFPHASE_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void LCD_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void QUADSPI_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void AES1_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void AES2_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void RNG_IRQHandler(void) {
-    furi_crash("NotImplemented");
-}
-
-void DMAMUX1_OVR_IRQHandler(void) {
-    furi_crash("NotImplemented");
 }
