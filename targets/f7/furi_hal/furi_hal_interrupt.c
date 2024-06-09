@@ -67,13 +67,12 @@ const IRQn_Type furi_hal_interrupt_irqn[FuriHalInterruptIdMax] = {
     [FuriHalInterruptIdLpUart1] = LPUART1_IRQn,
 };
 
-__attribute__((always_inline)) static inline void
-    furi_hal_interrupt_call(FuriHalInterruptId index) {
+FURI_ALWAYS_STATIC_INLINE void furi_hal_interrupt_call(FuriHalInterruptId index) {
     furi_check(furi_hal_interrupt_isr[index].isr);
     furi_hal_interrupt_isr[index].isr(furi_hal_interrupt_isr[index].context);
 }
 
-__attribute__((always_inline)) static inline void
+FURI_ALWAYS_STATIC_INLINE void
     furi_hal_interrupt_enable(FuriHalInterruptId index, uint16_t priority) {
     NVIC_SetPriority(
         furi_hal_interrupt_irqn[index],
@@ -81,23 +80,19 @@ __attribute__((always_inline)) static inline void
     NVIC_EnableIRQ(furi_hal_interrupt_irqn[index]);
 }
 
-__attribute__((always_inline)) static inline void
-    furi_hal_interrupt_clear_pending(FuriHalInterruptId index) {
+FURI_ALWAYS_STATIC_INLINE void furi_hal_interrupt_clear_pending(FuriHalInterruptId index) {
     NVIC_ClearPendingIRQ(furi_hal_interrupt_irqn[index]);
 }
 
-__attribute__((always_inline)) static inline void
-    furi_hal_interrupt_get_pending(FuriHalInterruptId index) {
+FURI_ALWAYS_STATIC_INLINE void furi_hal_interrupt_get_pending(FuriHalInterruptId index) {
     NVIC_GetPendingIRQ(furi_hal_interrupt_irqn[index]);
 }
 
-__attribute__((always_inline)) static inline void
-    furi_hal_interrupt_set_pending(FuriHalInterruptId index) {
+FURI_ALWAYS_STATIC_INLINE void furi_hal_interrupt_set_pending(FuriHalInterruptId index) {
     NVIC_SetPendingIRQ(furi_hal_interrupt_irqn[index]);
 }
 
-__attribute__((always_inline)) static inline void
-    furi_hal_interrupt_disable(FuriHalInterruptId index) {
+FURI_ALWAYS_STATIC_INLINE void furi_hal_interrupt_disable(FuriHalInterruptId index) {
     NVIC_DisableIRQ(furi_hal_interrupt_irqn[index]);
 }
 
@@ -347,4 +342,104 @@ void USART1_IRQHandler(void) {
 
 void LPUART1_IRQHandler(void) {
     furi_hal_interrupt_call(FuriHalInterruptIdLpUart1);
+}
+
+void WWDG_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void PVD_PVM_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void RTC_WKUP_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void FLASH_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void ADC1_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void C2SEV_PWR_C2H_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void TIM1_BRK_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void PKA_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void I2C1_EV_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void I2C1_ER_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void I2C3_EV_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void I2C3_ER_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void SPI1_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void SPI2_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void SAI1_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void TSC_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void RTC_Alarm_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void CRS_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void PWR_SOTF_BLEACT_802ACT_RFPHASE_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void LCD_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void QUADSPI_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void AES1_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void AES2_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void RNG_IRQHandler(void) {
+    furi_crash("NotImplemented");
+}
+
+void DMAMUX1_OVR_IRQHandler(void) {
+    furi_crash("NotImplemented");
 }

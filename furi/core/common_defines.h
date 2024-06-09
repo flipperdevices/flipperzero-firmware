@@ -67,6 +67,10 @@ void __furi_critical_exit(__FuriCriticalInfo info);
 #define FURI_CHECK_RETURN __attribute__((__warn_unused_result__))
 #endif
 
+#ifndef FURI_NAKED
+#define FURI_NAKED __attribute__((naked))
+#endif
+
 #ifdef __cplusplus
 }
 #endif
