@@ -223,7 +223,7 @@ void furi_event_loop_message_queue_subscribe(
 
     FuriEventLoopTree_set_at(instance->tree, message_queue, item);
 
-    FuriEventLoopLink* link = furi_message_queue_event_loop_get_link(message_queue);
+    FuriEventLoopLink* link = item->contract->get_link(message_queue);
 
     if(item->event == FuriEventLoopEventIn) {
         furi_check(link->item_in == NULL);
@@ -235,7 +235,7 @@ void furi_event_loop_message_queue_subscribe(
         furi_crash();
     }
 
-    if(furi_message_queue_event_loop_get_level(item->object, item->event)) {
+    if(item->contract->get_level(item->object, item->event)) {
         furi_event_loop_item_notify(item);
     }
 
@@ -258,7 +258,7 @@ void furi_event_loop_message_queue_unsubscribe(
     furi_check(item);
     furi_check(item->owner == instance);
 
-    FuriEventLoopLink* link = furi_message_queue_event_loop_get_link(message_queue);
+    FuriEventLoopLink* link = item->contract->get_link(message_queue);
 
     if(item->event == FuriEventLoopEventIn) {
         furi_check(link->item_in == item);

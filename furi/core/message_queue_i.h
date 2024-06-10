@@ -9,8 +9,4 @@
 #include <FreeRTOS.h>
 #include <queue.h>
 
-FuriEventLoopLink* furi_message_queue_event_loop_get_link(void* instance);
-
-uint32_t furi_message_queue_event_loop_get_level(void* instance, FuriEventLoopEvent event);
-
 extern const FuriEventLoopContract furi_message_queue_event_loop_contract;

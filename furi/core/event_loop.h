@@ -97,7 +97,7 @@ typedef struct FuriMessageQueue FuriMessageQueue;
  *
  * @param      queue    The queue that triggered event
  * @param      context  The context that was provided on
- *                      furi_event_loop_message_queue_add call
+ *                      furi_event_loop_message_queue_subscribe call
  *
  * @return     true if event was processed, false if we need to delay processing
  */
