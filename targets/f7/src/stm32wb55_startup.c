@@ -89,13 +89,13 @@ FURI_NAKED void Reset_Handler() {
     SystemInit();
 
     // Copy data section from flash
-    memcpy((void*)&_sdata, &_sidata, (uint32_t*)&_edata - (uint32_t*)&_sdata);
+    memcpy((void*)&_sdata, &_sidata, (uint32_t)&_edata - (uint32_t)&_sdata);
 
     // Wipe BSS
-    memset((void*)&_sbss, 0x0, &_ebss - &_sbss);
+    memset((void*)&_sbss, 0x00, (uint32_t)&_ebss - (uint32_t)&_sbss);
 
     // Core2 related quirks: wipe MB_MEM2 section
-    memset((void*)&_sMB_MEM2, 0x0, &_eMB_MEM2 - &_sMB_MEM2);
+    memset((void*)&_sMB_MEM2, 0x00, (uint32_t)&_eMB_MEM2 - (uint32_t)&_sMB_MEM2);
 
     // libc init array
     __libc_init_array();
