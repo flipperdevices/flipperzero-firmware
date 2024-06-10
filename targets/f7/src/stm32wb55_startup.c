@@ -78,7 +78,7 @@ void Default_Handler(void) {
 }
 
 /** Start your journey here */
-FURI_NAKED void Reset_Handler() {
+FURI_NAKED void Reset_Handler(void) {
     // Funny thing: SP and MSP are set to _stack_end if we came here after MCU reset
     // Now, what if we came from boot loader? Lets set SP to _stack_end again.
     // By the way Furi stage loader doing it too, but we don't know who called us.
