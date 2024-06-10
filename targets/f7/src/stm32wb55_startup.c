@@ -88,30 +88,14 @@ FURI_NAKED void Reset_Handler() {
     // ST chip initialization routine
     SystemInit();
 
-    uint32_t *source, *destination;
-
     // Copy data section from flash
-    source = (uint32_t*)&_sidata;
-    destination = (uint32_t*)&_sdata;
-    while(destination < (uint32_t*)&_edata) {
-        *destination = *source;
-        source++;
-        destination++;
-    }
+    memcpy((void*)&_sdata, &_sidata, (uint32_t*)&_edata - (uint32_t*)&_sdata);
 
     // Wipe BSS
-    destination = (uint32_t*)&_sbss;
-    while(destination < (uint32_t*)&_ebss) {
-        *destination = 0;
-        destination++;
-    }
+    memset((void*)&_sbss, 0x0, &_ebss - &_sbss);
 
     // Core2 related quirks: wipe MB_MEM2 section
-    destination = (uint32_t*)&_sMB_MEM2;
-    while(destination < (uint32_t*)&_eMB_MEM2) {
-        *destination = 0;
-        destination++;
-    }
+    memset((void*)&_sMB_MEM2, 0x0, &_eMB_MEM2 - &_sMB_MEM2);
 
     // libc init array
     __libc_init_array();
