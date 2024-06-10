@@ -151,7 +151,6 @@ bool protocol_securakey_decoder_feed(ProtocolSecurakey* protocol, bool level, ui
     bool result = false;
     // this is where we do manchester demodulation on already ASK-demoded data
     ManchesterEvent event = ManchesterEventReset;
-    furi_assert(level);
     if(duration > SECURAKEY_READ_SHORT_TIME_LOW && duration < SECURAKEY_READ_SHORT_TIME_HIGH) {
         if(!level) {
             event = ManchesterEventShortHigh;
