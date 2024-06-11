@@ -17,9 +17,6 @@ typedef struct NumberInput NumberInput;
 /** callback that is executed on save button press */
 typedef void (*NumberInputCallback)(void* context);
 
-/** callback that is executed when byte buffer is changed */
-typedef void (*NumberChangedCallback)(void* context);
-
 /** Allocate and initialize Number input. This Number input is used to enter Numbers (Integers).
  *
  * @return     NumberInput instance pointer
