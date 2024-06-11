@@ -117,7 +117,7 @@ static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
 }
 
 static void number_input_backspace_cb(NumberInputModel* model) {
-    uint8_t text_length = model->clear_default_text ? 1 :
+    size_t text_length = model->clear_default_text ? 1 :
                                                       furi_string_utf8_length(model->text_buffer);
     if(text_length > 0) {
         furi_string_set_strn(
