@@ -163,11 +163,11 @@ FuriThread* furi_thread_alloc_service(
     uint32_t stack_size,
     FuriThreadCallback callback,
     void* context) {
-    FuriThread* thread = memmgr_alloc_from_pool(sizeof(FuriThread));
+    FuriThread* thread = memmgr_aux_pool_alloc(sizeof(FuriThread));
 
     furi_thread_init_common(thread);
 
-    thread->stack_buffer = memmgr_alloc_from_pool(stack_size);
+    thread->stack_buffer = memmgr_aux_pool_alloc(stack_size);
     thread->stack_size = stack_size;
     thread->is_service = true;
 
