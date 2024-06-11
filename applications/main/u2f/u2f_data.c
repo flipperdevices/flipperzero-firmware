@@ -37,7 +37,7 @@ typedef struct {
     uint32_t counter;
     uint8_t random_salt[24];
     uint32_t control;
-} __attribute__((packed)) U2fCounterData;
+} FURI_PACKED U2fCounterData;
 
 bool u2f_data_check(bool cert_only) {
     bool state = false;
@@ -67,7 +67,7 @@ bool u2f_data_check(bool cert_only) {
     return state;
 }
 
-bool u2f_data_cert_check() {
+bool u2f_data_cert_check(void) {
     bool state = false;
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(fs_api);

@@ -8,6 +8,24 @@
 
 #define TAG "InfraredSignal"
 
+// Common keys
+#define INFRARED_SIGNAL_NAME_KEY "name"
+#define INFRARED_SIGNAL_TYPE_KEY "type"
+
+// Type key values
+#define INFRARED_SIGNAL_TYPE_RAW "raw"
+#define INFRARED_SIGNAL_TYPE_PARSED "parsed"
+
+// Raw signal keys
+#define INFRARED_SIGNAL_DATA_KEY "data"
+#define INFRARED_SIGNAL_FREQUENCY_KEY "frequency"
+#define INFRARED_SIGNAL_DUTY_CYCLE_KEY "duty_cycle"
+
+// Parsed signal keys
+#define INFRARED_SIGNAL_PROTOCOL_KEY "protocol"
+#define INFRARED_SIGNAL_ADDRESS_KEY "address"
+#define INFRARED_SIGNAL_COMMAND_KEY "command"
+
 struct InfraredSignal {
     bool is_raw;
     union {
@@ -24,7 +42,7 @@ static void infrared_signal_clear_timings(InfraredSignal* signal) {
     }
 }
 
-static bool infrared_signal_is_message_valid(InfraredMessage* message) {
+static bool infrared_signal_is_message_valid(const InfraredMessage* message) {
     if(!infrared_is_protocol_valid(message->protocol)) {
         FURI_LOG_E(TAG, "Unknown protocol");
         return false;
@@ -57,7 +75,7 @@ static bool infrared_signal_is_message_valid(InfraredMessage* message) {
     return true;
 }
 
-static bool infrared_signal_is_raw_valid(InfraredRawSignal* raw) {
+static bool infrared_signal_is_raw_valid(const InfraredRawSignal* raw) {
     if((raw->frequency > INFRARED_MAX_FREQUENCY) || (raw->frequency < INFRARED_MIN_FREQUENCY)) {
         FURI_LOG_E(
             TAG,
@@ -83,20 +101,26 @@ static bool infrared_signal_is_raw_valid(InfraredRawSignal* raw) {
     return true;
 }
 
-static inline bool infrared_signal_save_message(InfraredMessage* message, FlipperFormat* ff) {
+static inline bool
+    infrared_signal_save_message(const InfraredMessage* message, FlipperFormat* ff) {
     const char* protocol_name = infrared_get_protocol_name(message->protocol);
-    return flipper_format_write_string_cstr(ff, "type", "parsed") &&
-           flipper_format_write_string_cstr(ff, "protocol", protocol_name) &&
-           flipper_format_write_hex(ff, "address", (uint8_t*)&message->address, 4) &&
-           flipper_format_write_hex(ff, "command", (uint8_t*)&message->command, 4);
+    return flipper_format_write_string_cstr(
+               ff, INFRARED_SIGNAL_TYPE_KEY, INFRARED_SIGNAL_TYPE_PARSED) &&
+           flipper_format_write_string_cstr(ff, INFRARED_SIGNAL_PROTOCOL_KEY, protocol_name) &&
+           flipper_format_write_hex(
+               ff, INFRARED_SIGNAL_ADDRESS_KEY, (uint8_t*)&message->address, 4) &&
+           flipper_format_write_hex(
+               ff, INFRARED_SIGNAL_COMMAND_KEY, (uint8_t*)&message->command, 4);
 }
 
-static inline bool infrared_signal_save_raw(InfraredRawSignal* raw, FlipperFormat* ff) {
+static inline bool infrared_signal_save_raw(const InfraredRawSignal* raw, FlipperFormat* ff) {
     furi_assert(raw->timings_size <= MAX_TIMINGS_AMOUNT);
-    return flipper_format_write_string_cstr(ff, "type", "raw") &&
-           flipper_format_write_uint32(ff, "frequency", &raw->frequency, 1) &&
-           flipper_format_write_float(ff, "duty_cycle", &raw->duty_cycle, 1) &&
-           flipper_format_write_uint32(ff, "data", raw->timings, raw->timings_size);
+    return flipper_format_write_string_cstr(
+               ff, INFRARED_SIGNAL_TYPE_KEY, INFRARED_SIGNAL_TYPE_RAW) &&
+           flipper_format_write_uint32(ff, INFRARED_SIGNAL_FREQUENCY_KEY, &raw->frequency, 1) &&
+           flipper_format_write_float(ff, INFRARED_SIGNAL_DUTY_CYCLE_KEY, &raw->duty_cycle, 1) &&
+           flipper_format_write_uint32(
+               ff, INFRARED_SIGNAL_DATA_KEY, raw->timings, raw->timings_size);
 }
 
 static inline bool infrared_signal_read_message(InfraredSignal* signal, FlipperFormat* ff) {
@@ -105,68 +129,79 @@ static inline bool infrared_signal_read_message(InfraredSignal* signal, FlipperF
     bool success = false;
 
     do {
-        if(!flipper_format_read_string(ff, "protocol", buf)) break;
+        if(!flipper_format_read_string(ff, INFRARED_SIGNAL_PROTOCOL_KEY, buf)) break;
 
         InfraredMessage message;
         message.protocol = infrared_get_protocol_by_name(furi_string_get_cstr(buf));
 
-        success = flipper_format_read_hex(ff, "address", (uint8_t*)&message.address, 4) &&
-                  flipper_format_read_hex(ff, "command", (uint8_t*)&message.command, 4) &&
-                  infrared_signal_is_message_valid(&message);
-
-        if(!success) break;
+        if(!flipper_format_read_hex(ff, INFRARED_SIGNAL_ADDRESS_KEY, (uint8_t*)&message.address, 4))
+            break;
+        if(!flipper_format_read_hex(ff, INFRARED_SIGNAL_COMMAND_KEY, (uint8_t*)&message.command, 4))
+            break;
+        if(!infrared_signal_is_message_valid(&message)) break;
 
         infrared_signal_set_message(signal, &message);
-    } while(0);
+        success = true;
+    } while(false);
 
     furi_string_free(buf);
     return success;
 }
 
 static inline bool infrared_signal_read_raw(InfraredSignal* signal, FlipperFormat* ff) {
-    uint32_t timings_size, frequency;
-    float duty_cycle;
+    bool success = false;
 
-    bool success = flipper_format_read_uint32(ff, "frequency", &frequency, 1) &&
-                   flipper_format_read_float(ff, "duty_cycle", &duty_cycle, 1) &&
-                   flipper_format_get_value_count(ff, "data", &timings_size);
+    do {
+        uint32_t frequency;
+        if(!flipper_format_read_uint32(ff, INFRARED_SIGNAL_FREQUENCY_KEY, &frequency, 1)) break;
 
-    if(!success || timings_size > MAX_TIMINGS_AMOUNT) {
-        return false;
-    }
+        float duty_cycle;
+        if(!flipper_format_read_float(ff, INFRARED_SIGNAL_DUTY_CYCLE_KEY, &duty_cycle, 1)) break;
 
-    uint32_t* timings = malloc(sizeof(uint32_t) * timings_size);
-    success = flipper_format_read_uint32(ff, "data", timings, timings_size);
+        uint32_t timings_size;
+        if(!flipper_format_get_value_count(ff, INFRARED_SIGNAL_DATA_KEY, &timings_size)) break;
 
-    if(success) {
+        if(timings_size > MAX_TIMINGS_AMOUNT) break;
+
+        uint32_t* timings = malloc(sizeof(uint32_t) * timings_size);
+        if(!flipper_format_read_uint32(ff, INFRARED_SIGNAL_DATA_KEY, timings, timings_size)) {
+            free(timings);
+            break;
+        }
         infrared_signal_set_raw_signal(signal, timings, timings_size, frequency, duty_cycle);
-    }
+        free(timings);
 
-    free(timings);
+        success = true;
+    } while(false);
+
     return success;
 }
 
-static bool infrared_signal_read_body(InfraredSignal* signal, FlipperFormat* ff) {
+bool infrared_signal_read_body(InfraredSignal* signal, FlipperFormat* ff) {
     FuriString* tmp = furi_string_alloc();
 
     bool success = false;
 
     do {
-        if(!flipper_format_read_string(ff, "type", tmp)) break;
-        if(furi_string_equal(tmp, "raw")) {
-            success = infrared_signal_read_raw(signal, ff);
-        } else if(furi_string_equal(tmp, "parsed")) {
-            success = infrared_signal_read_message(signal, ff);
+        if(!flipper_format_read_string(ff, INFRARED_SIGNAL_TYPE_KEY, tmp)) break;
+
+        if(furi_string_equal(tmp, INFRARED_SIGNAL_TYPE_RAW)) {
+            if(!infrared_signal_read_raw(signal, ff)) break;
+        } else if(furi_string_equal(tmp, INFRARED_SIGNAL_TYPE_PARSED)) {
+            if(!infrared_signal_read_message(signal, ff)) break;
         } else {
-            FURI_LOG_E(TAG, "Unknown signal type");
+            FURI_LOG_E(TAG, "Unknown signal type: %s", furi_string_get_cstr(tmp));
+            break;
         }
+
+        success = true;
     } while(false);
 
     furi_string_free(tmp);
     return success;
 }
 
-InfraredSignal* infrared_signal_alloc() {
+InfraredSignal* infrared_signal_alloc(void) {
     InfraredSignal* signal = malloc(sizeof(InfraredSignal));
 
     signal->is_raw = false;
@@ -180,11 +215,11 @@ void infrared_signal_free(InfraredSignal* signal) {
     free(signal);
 }
 
-bool infrared_signal_is_raw(InfraredSignal* signal) {
+bool infrared_signal_is_raw(const InfraredSignal* signal) {
     return signal->is_raw;
 }
 
-bool infrared_signal_is_valid(InfraredSignal* signal) {
+bool infrared_signal_is_valid(const InfraredSignal* signal) {
     return signal->is_raw ? infrared_signal_is_raw_valid(&signal->payload.raw) :
                             infrared_signal_is_message_valid(&signal->payload.message);
 }
@@ -218,7 +253,7 @@ void infrared_signal_set_raw_signal(
     memcpy(signal->payload.raw.timings, timings, timings_size * sizeof(uint32_t));
 }
 
-InfraredRawSignal* infrared_signal_get_raw_signal(InfraredSignal* signal) {
+const InfraredRawSignal* infrared_signal_get_raw_signal(const InfraredSignal* signal) {
     furi_assert(signal->is_raw);
     return &signal->payload.raw;
 }
@@ -230,14 +265,14 @@ void infrared_signal_set_message(InfraredSignal* signal, const InfraredMessage* 
     signal->payload.message = *message;
 }
 
-InfraredMessage* infrared_signal_get_message(InfraredSignal* signal) {
+const InfraredMessage* infrared_signal_get_message(const InfraredSignal* signal) {
     furi_assert(!signal->is_raw);
     return &signal->payload.message;
 }
 
-bool infrared_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char* name) {
+bool infrared_signal_save(const InfraredSignal* signal, FlipperFormat* ff, const char* name) {
     if(!flipper_format_write_comment_cstr(ff, "") ||
-       !flipper_format_write_string_cstr(ff, "name", name)) {
+       !flipper_format_write_string_cstr(ff, INFRARED_SIGNAL_NAME_KEY, name)) {
         return false;
     } else if(signal->is_raw) {
         return infrared_signal_save_raw(&signal->payload.raw, ff);
@@ -247,46 +282,61 @@ bool infrared_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char*
 }
 
 bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString* name) {
-    FuriString* tmp = furi_string_alloc();
-
     bool success = false;
 
     do {
-        if(!flipper_format_read_string(ff, "name", tmp)) break;
-        furi_string_set(name, tmp);
+        if(!infrared_signal_read_name(ff, name)) break;
         if(!infrared_signal_read_body(signal, ff)) break;
-        success = true;
-    } while(0);
 
-    furi_string_free(tmp);
-    return success;
-}
-
-bool infrared_signal_search_and_read(
-    InfraredSignal* signal,
-    FlipperFormat* ff,
-    const FuriString* name) {
-    bool success = false;
-    FuriString* tmp = furi_string_alloc();
-
-    do {
-        bool is_name_found = false;
-        while(flipper_format_read_string(ff, "name", tmp)) {
-            is_name_found = furi_string_equal(name, tmp);
-            if(is_name_found) break;
-        }
-        if(!is_name_found) break; //-V547
-        if(!infrared_signal_read_body(signal, ff)) break; //-V779
-        success = true;
+        success = true; //-V779
     } while(false);
 
+    return success;
+}
+
+bool infrared_signal_read_name(FlipperFormat* ff, FuriString* name) {
+    return flipper_format_read_string(ff, INFRARED_SIGNAL_NAME_KEY, name);
+}
+
+bool infrared_signal_search_by_name_and_read(
+    InfraredSignal* signal,
+    FlipperFormat* ff,
+    const char* name) {
+    bool success = false;
+    FuriString* tmp = furi_string_alloc();
+
+    while(infrared_signal_read_name(ff, tmp)) {
+        if(furi_string_equal(tmp, name)) {
+            success = infrared_signal_read_body(signal, ff);
+            break;
+        }
+    }
+
     furi_string_free(tmp);
     return success;
 }
 
-void infrared_signal_transmit(InfraredSignal* signal) {
+bool infrared_signal_search_by_index_and_read(
+    InfraredSignal* signal,
+    FlipperFormat* ff,
+    size_t index) {
+    bool success = false;
+    FuriString* tmp = furi_string_alloc();
+
+    for(uint32_t i = 0; infrared_signal_read_name(ff, tmp); ++i) {
+        if(i == index) {
+            success = infrared_signal_read_body(signal, ff);
+            break;
+        }
+    }
+
+    furi_string_free(tmp);
+    return success;
+}
+
+void infrared_signal_transmit(const InfraredSignal* signal) {
     if(signal->is_raw) {
-        InfraredRawSignal* raw_signal = &signal->payload.raw;
+        const InfraredRawSignal* raw_signal = &signal->payload.raw;
         infrared_send_raw_ext(
             raw_signal->timings,
             raw_signal->timings_size,
@@ -294,7 +344,7 @@ void infrared_signal_transmit(InfraredSignal* signal) {
             raw_signal->frequency,
             raw_signal->duty_cycle);
     } else {
-        InfraredMessage* message = &signal->payload.message;
+        const InfraredMessage* message = &signal->payload.message;
         infrared_send(message, 1);
     }
 }

@@ -35,6 +35,8 @@ const StreamVTable file_stream_vtable = {
 };
 
 Stream* file_stream_alloc(Storage* storage) {
+    furi_check(storage);
+
     FileStream* stream = malloc(sizeof(FileStream));
     stream->file = storage_file_alloc(storage);
     stream->storage = storage;
@@ -48,21 +50,21 @@ bool file_stream_open(
     const char* path,
     FS_AccessMode access_mode,
     FS_OpenMode open_mode) {
-    furi_assert(_stream);
+    furi_check(_stream);
     FileStream* stream = (FileStream*)_stream;
     furi_check(stream->stream_base.vtable == &file_stream_vtable);
     return storage_file_open(stream->file, path, access_mode, open_mode);
 }
 
 bool file_stream_close(Stream* _stream) {
-    furi_assert(_stream);
+    furi_check(_stream);
     FileStream* stream = (FileStream*)_stream;
     furi_check(stream->stream_base.vtable == &file_stream_vtable);
     return storage_file_close(stream->file);
 }
 
 FS_Error file_stream_get_error(Stream* _stream) {
-    furi_assert(_stream);
+    furi_check(_stream);
     FileStream* stream = (FileStream*)_stream;
     furi_check(stream->stream_base.vtable == &file_stream_vtable);
     return storage_file_get_error(stream->file);
@@ -134,31 +136,11 @@ static size_t file_stream_size(FileStream* stream) {
 }
 
 static size_t file_stream_write(FileStream* stream, const uint8_t* data, size_t size) {
-    // TODO FL-3545: cache
-    size_t need_to_write = size;
-    while(need_to_write > 0) {
-        uint16_t was_written =
-            storage_file_write(stream->file, data + (size - need_to_write), need_to_write);
-        need_to_write -= was_written;
-
-        if(was_written == 0) break;
-    }
-
-    return size - need_to_write;
+    return storage_file_write(stream->file, data, size);
 }
 
 static size_t file_stream_read(FileStream* stream, uint8_t* data, size_t size) {
-    // TODO FL-3545: cache
-    size_t need_to_read = size;
-    while(need_to_read > 0) {
-        uint16_t was_read =
-            storage_file_read(stream->file, data + (size - need_to_read), need_to_read);
-        need_to_read -= was_read;
-
-        if(was_read == 0) break;
-    }
-
-    return size - need_to_read;
+    return storage_file_read(stream->file, data, size);
 }
 
 static bool file_stream_delete_and_insert(

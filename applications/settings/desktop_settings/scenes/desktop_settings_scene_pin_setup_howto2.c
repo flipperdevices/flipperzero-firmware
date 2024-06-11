@@ -1,6 +1,5 @@
 #include <furi.h>
 #include <gui/scene_manager.h>
-#include <stdint.h>
 
 #include "desktop_settings_scene.h"
 #include "../desktop_settings_app.h"
@@ -52,7 +51,7 @@ bool desktop_settings_scene_pin_setup_howto2_on_event(void* context, SceneManage
             break;
         }
         default:
-            furi_crash(NULL);
+            furi_crash();
         }
     }
     return consumed;

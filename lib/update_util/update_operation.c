@@ -85,7 +85,7 @@ bool update_operation_get_current_package_manifest_path(Storage* storage, FuriSt
                    upd_file, UPDATE_FILE_POINTER_FN, FSAM_READ, FSOM_OPEN_EXISTING)) {
                 break;
             }
-            uint16_t bytes_read =
+            size_t bytes_read =
                 storage_file_read(upd_file, manifest_name_buffer, UPDATE_MANIFEST_MAX_PATH_LEN);
             if((bytes_read == 0) || (bytes_read == UPDATE_MANIFEST_MAX_PATH_LEN)) {
                 break;
@@ -218,7 +218,7 @@ UpdatePrepareResult update_operation_prepare(const char* manifest_file_path) {
     return result;
 }
 
-bool update_operation_is_armed() {
+bool update_operation_is_armed(void) {
     FuriHalRtcBootMode boot_mode = furi_hal_rtc_get_boot_mode();
     const uint32_t rtc_upd_index =
         furi_hal_rtc_get_register(FuriHalRtcRegisterUpdateFolderFSIndex);
@@ -231,7 +231,7 @@ bool update_operation_is_armed() {
            ((rtc_upd_index != INT_MAX) || upd_fn_ptr_exists);
 }
 
-void update_operation_disarm() {
+void update_operation_disarm(void) {
     furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
     furi_hal_rtc_set_register(FuriHalRtcRegisterUpdateFolderFSIndex, INT_MAX);
     Storage* storage = furi_record_open(RECORD_STORAGE);

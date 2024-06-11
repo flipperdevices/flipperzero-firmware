@@ -39,11 +39,44 @@ typedef enum {
 #define _FURI_LOG_CLR_D _FURI_LOG_CLR(_FURI_LOG_CLR_BLUE)
 #define _FURI_LOG_CLR_T _FURI_LOG_CLR(_FURI_LOG_CLR_PURPLE)
 
-typedef void (*FuriLogPuts)(const char* data);
-typedef uint32_t (*FuriLogTimestamp)(void);
+typedef void (*FuriLogHandlerCallback)(const uint8_t* data, size_t size, void* context);
+
+typedef struct {
+    FuriLogHandlerCallback callback;
+    void* context;
+} FuriLogHandler;
 
 /** Initialize logging */
-void furi_log_init();
+void furi_log_init(void);
+
+/** Add log TX callback
+ *
+ * @param[in]  handler  The callback and its context
+ *
+ * @return     true on success, false otherwise
+ */
+bool furi_log_add_handler(FuriLogHandler handler);
+
+/** Remove log TX callback
+ *
+ * @param[in]  handler  The callback and its context
+ *
+ * @return     true on success, false otherwise
+ */
+bool furi_log_remove_handler(FuriLogHandler handler);
+
+/** Transmit data through log IO callbacks
+ *
+ * @param[in]  data  The data
+ * @param[in]  size  The size
+ */
+void furi_log_tx(const uint8_t* data, size_t size);
+
+/** Transmit data through log IO callbacks
+ *
+ * @param[in]  data  The data, null-terminated C-string
+ */
+void furi_log_puts(const char* data);
 
 /** Print log record
  * 
@@ -74,32 +107,21 @@ void furi_log_set_level(FuriLogLevel level);
  *
  * @return     The furi log level.
  */
-FuriLogLevel furi_log_get_level();
-
-/** Set log output callback
- *
- * @param[in]  puts  The puts callback
- */
-void furi_log_set_puts(FuriLogPuts puts);
-
-/** Set timestamp callback
- *
- * @param[in]  timestamp  The timestamp callback
- */
-void furi_log_set_timestamp(FuriLogTimestamp timestamp);
+FuriLogLevel furi_log_get_level(void);
 
 /** Log level to string
  *
  * @param[in]  level  The level
+ * @param[out] str    String representation of the level
  *
- * @return     The string
+ * @return     True if success, False otherwise
  */
 bool furi_log_level_to_string(FuriLogLevel level, const char** str);
 
 /** Log level from string
  *
  * @param[in]  str    The string
- * @param      level  The level
+ * @param[out] level  The level
  * 
  * @return     True if success, False otherwise
  */

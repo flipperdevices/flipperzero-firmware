@@ -6,7 +6,9 @@
 
 #define TAG "CliSrv"
 
-Cli* cli_alloc() {
+#define CLI_INPUT_LEN_LIMIT 256
+
+Cli* cli_alloc(void) {
     Cli* cli = malloc(sizeof(Cli));
 
     CliCommandTree_init(cli->commands);
@@ -17,7 +19,6 @@ Cli* cli_alloc() {
     cli->session = NULL;
 
     cli->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    furi_check(cli->mutex);
 
     cli->idle_sem = furi_semaphore_alloc(1, 0);
 
@@ -25,14 +26,14 @@ Cli* cli_alloc() {
 }
 
 void cli_putc(Cli* cli, char c) {
-    furi_assert(cli);
+    furi_check(cli);
     if(cli->session != NULL) {
         cli->session->tx((uint8_t*)&c, 1);
     }
 }
 
 char cli_getc(Cli* cli) {
-    furi_assert(cli);
+    furi_check(cli);
     char c = 0;
     if(cli->session != NULL) {
         if(cli->session->rx((uint8_t*)&c, 1, FuriWaitForever) == 0) {
@@ -47,14 +48,14 @@ char cli_getc(Cli* cli) {
 }
 
 void cli_write(Cli* cli, const uint8_t* buffer, size_t size) {
-    furi_assert(cli);
+    furi_check(cli);
     if(cli->session != NULL) {
         cli->session->tx(buffer, size);
     }
 }
 
 size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
-    furi_assert(cli);
+    furi_check(cli);
     if(cli->session != NULL) {
         return cli->session->rx(buffer, size, FuriWaitForever);
     } else {
@@ -63,7 +64,7 @@ size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
 }
 
 size_t cli_read_timeout(Cli* cli, uint8_t* buffer, size_t size, uint32_t timeout) {
-    furi_assert(cli);
+    furi_check(cli);
     if(cli->session != NULL) {
         return cli->session->rx(buffer, size, timeout);
     } else {
@@ -72,7 +73,7 @@ size_t cli_read_timeout(Cli* cli, uint8_t* buffer, size_t size, uint32_t timeout
 }
 
 bool cli_is_connected(Cli* cli) {
-    furi_assert(cli);
+    furi_check(cli);
     if(cli->session != NULL) {
         return (cli->session->is_connected());
     }
@@ -80,7 +81,7 @@ bool cli_is_connected(Cli* cli) {
 }
 
 bool cli_cmd_interrupt_received(Cli* cli) {
-    furi_assert(cli);
+    furi_check(cli);
     char c = '\0';
     if(cli_is_connected(cli)) {
         if(cli->session->rx((uint8_t*)&c, 1, 0) == 1) {
@@ -93,14 +94,14 @@ bool cli_cmd_interrupt_received(Cli* cli) {
 }
 
 void cli_print_usage(const char* cmd, const char* usage, const char* arg) {
-    furi_assert(cmd);
-    furi_assert(arg);
-    furi_assert(usage);
+    furi_check(cmd);
+    furi_check(arg);
+    furi_check(usage);
 
     printf("%s: illegal option -- %s\r\nusage: %s %s", cmd, arg, cmd, usage);
 }
 
-void cli_motd() {
+void cli_motd(void) {
     printf("\r\n"
            "              _.-------.._                    -,\r\n"
            "          .-\"```\"--..,,_/ /`-,               -,  \\ \r\n"
@@ -118,7 +119,8 @@ void cli_motd() {
            "|_|  |____||___||_|  |_|  |___||_|_\\   \\___||____||___|\r\n"
            "\r\n"
            "Welcome to Flipper Zero Command Line Interface!\r\n"
-           "Read Manual https://docs.flipperzero.one\r\n"
+           "Read the manual: https://docs.flipper.net/development/cli\r\n"
+           "Run `help` or `?` to list available commands\r\n"
            "\r\n");
 
     const Version* firmware_version = furi_hal_version_get_firmware_version();
@@ -355,7 +357,9 @@ void cli_process_input(Cli* cli) {
         cli_handle_backspace(cli);
     } else if(in_chr == CliSymbolAsciiCR) {
         cli_handle_enter(cli);
-    } else if(in_chr >= 0x20 && in_chr < 0x7F) { //-V560
+    } else if(
+        (in_chr >= 0x20 && in_chr < 0x7F) && //-V560
+        (furi_string_size(cli->line) < CLI_INPUT_LEN_LIMIT)) {
         if(cli->cursor_position == furi_string_size(cli->line)) {
             furi_string_push_back(cli->line, in_chr);
             cli_putc(cli, in_chr);
@@ -380,6 +384,7 @@ void cli_add_command(
     CliCommandFlag flags,
     CliCallback callback,
     void* context) {
+    furi_check(cli);
     FuriString* name_str;
     name_str = furi_string_alloc_set(name);
     furi_string_trim(name_str);
@@ -402,6 +407,7 @@ void cli_add_command(
 }
 
 void cli_delete_command(Cli* cli, const char* name) {
+    furi_check(cli);
     FuriString* name_str;
     name_str = furi_string_alloc_set(name);
     furi_string_trim(name_str);
@@ -419,7 +425,7 @@ void cli_delete_command(Cli* cli, const char* name) {
 }
 
 void cli_session_open(Cli* cli, void* session) {
-    furi_assert(cli);
+    furi_check(cli);
 
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     cli->session = session;
@@ -434,7 +440,7 @@ void cli_session_open(Cli* cli, void* session) {
 }
 
 void cli_session_close(Cli* cli) {
-    furi_assert(cli);
+    furi_check(cli);
 
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     if(cli->session != NULL) {

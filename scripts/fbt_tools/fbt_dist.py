@@ -96,7 +96,21 @@ def DistCommand(env, name, source, **kw):
     command = env.Command(
         target,
         source,
-        '@${PYTHON3} "${DIST_SCRIPT}" copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}" ${DIST_EXTRA}',
+        action=Action(
+            [
+                [
+                    "${PYTHON3}",
+                    "${DIST_SCRIPT}",
+                    "copy",
+                    "-p",
+                    "${DIST_PROJECTS}",
+                    "-s",
+                    "${DIST_SUFFIX}",
+                    "${DIST_EXTRA}",
+                ]
+            ],
+            "${DISTCOMSTR}",
+        ),
         **kw,
     )
     env.Pseudo(target)
@@ -106,7 +120,10 @@ def DistCommand(env, name, source, **kw):
 
 def generate(env):
     if not env["VERBOSE"]:
-        env.SetDefault(COPROCOMSTR="\tCOPRO\t${TARGET}")
+        env.SetDefault(
+            COPROCOMSTR="\tCOPRO\t${TARGET}",
+            DISTCOMSTR="\tDIST\t${TARGET}",
+        )
     env.AddMethod(AddFwProject)
     env.AddMethod(DistCommand)
     env.AddMethod(AddFwFlashTarget)
@@ -133,6 +150,7 @@ def generate(env):
                         "--interface=${SWD_TRANSPORT}",
                         "--serial=${SWD_TRANSPORT_SERIAL}",
                         "${SOURCE}",
+                        "${ARGS}",
                     ],
                     Touch("${TARGET}"),
                 ]
@@ -145,6 +163,7 @@ def generate(env):
                         "-p",
                         "${FLIP_PORT}",
                         "${UPDATE_BUNDLE_DIR}/update.fuf",
+                        "${ARGS}",
                     ],
                     Touch("${TARGET}"),
                 ]
@@ -163,6 +182,7 @@ def generate(env):
                             "--stack_type=${COPRO_STACK_TYPE}",
                             "--stack_file=${COPRO_STACK_BIN}",
                             "--stack_addr=${COPRO_STACK_ADDR}",
+                            "${ARGS}",
                         ]
                     ],
                     "${COPROCOMSTR}",

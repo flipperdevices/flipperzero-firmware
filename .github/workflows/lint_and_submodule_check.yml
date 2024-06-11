@@ -16,14 +16,14 @@ jobs:
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
           ref: ${{ github.sha }}
 
       - name: 'Check protobuf branch'
         run: |
-          git submodule update --init
+          git submodule update --init;
           SUB_PATH="assets/protobuf";
           SUB_BRANCH="dev";
           SUB_COMMITS_MIN=40;
@@ -54,6 +54,8 @@ jobs:
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY;
             echo "$MISSING_TICKETS" >> $GITHUB_STEP_SUMMARY;
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY;
+            echo "Error: Missing issue number in comment(s):";
+            echo "$MISSING_TICKETS";
             exit 1;
           else
             echo "No new TODOs without tickets found" >> $GITHUB_STEP_SUMMARY;

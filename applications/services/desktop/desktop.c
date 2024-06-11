@@ -32,12 +32,16 @@ static void desktop_loader_callback(const void* message, void* context) {
     Desktop* desktop = context;
     const LoaderEvent* event = message;
 
-    if(event->type == LoaderEventTypeApplicationStarted) {
+    if(event->type == LoaderEventTypeApplicationBeforeLoad) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalBeforeAppStarted);
-    } else if(event->type == LoaderEventTypeApplicationStopped) {
+        furi_check(furi_semaphore_acquire(desktop->animation_semaphore, 3000) == FuriStatusOk);
+    } else if(
+        event->type == LoaderEventTypeApplicationLoadFailed ||
+        event->type == LoaderEventTypeApplicationStopped) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalAfterAppFinished);
     }
 }
+
 static void desktop_lock_icon_draw_callback(Canvas* canvas, void* context) {
     UNUSED(context);
     furi_assert(canvas);
@@ -53,15 +57,15 @@ static void desktop_dummy_mode_icon_draw_callback(Canvas* canvas, void* context)
 static void desktop_clock_update(Desktop* desktop) {
     furi_assert(desktop);
 
-    FuriHalRtcDateTime curr_dt;
+    DateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
     bool time_format_12 = locale_get_time_format() == LocaleTimeFormat12h;
 
-    if(desktop->time_hour != curr_dt.hour || desktop->time_minute != curr_dt.minute ||
-       desktop->time_format_12 != time_format_12) {
-        desktop->time_format_12 = time_format_12;
-        desktop->time_hour = curr_dt.hour;
-        desktop->time_minute = curr_dt.minute;
+    if(desktop->clock.hour != curr_dt.hour || desktop->clock.minute != curr_dt.minute ||
+       desktop->clock.format_12 != time_format_12) {
+        desktop->clock.format_12 = time_format_12;
+        desktop->clock.hour = curr_dt.hour;
+        desktop->clock.minute = curr_dt.minute;
         view_port_update(desktop->clock_viewport);
     }
 }
@@ -88,8 +92,8 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
 
     canvas_set_font(canvas, FontPrimary);
 
-    uint8_t hour = desktop->time_hour;
-    if(desktop->time_format_12) {
+    uint8_t hour = desktop->clock.hour;
+    if(desktop->clock.format_12) {
         if(hour > 12) {
             hour -= 12;
         }
@@ -99,11 +103,11 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
     }
 
     char buffer[20];
-    snprintf(buffer, sizeof(buffer), "%02u:%02u", hour, desktop->time_minute);
+    snprintf(buffer, sizeof(buffer), "%02u:%02u", hour, desktop->clock.minute);
 
     view_port_set_width(
         desktop->clock_viewport,
-        canvas_string_width(canvas, buffer) - 1 + (desktop->time_minute % 10 == 1));
+        canvas_string_width(canvas, buffer) - 1 + (desktop->clock.minute % 10 == 1));
 
     canvas_draw_str_aligned(canvas, 0, 8, AlignLeft, AlignBottom, buffer);
 }
@@ -120,8 +124,11 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
 
     switch(event) {
     case DesktopGlobalBeforeAppStarted:
-        animation_manager_unload_and_stall_animation(desktop->animation_manager);
+        if(animation_manager_is_animation_loaded(desktop->animation_manager)) {
+            animation_manager_unload_and_stall_animation(desktop->animation_manager);
+        }
         desktop_auto_lock_inhibit(desktop);
+        furi_semaphore_release(desktop->animation_semaphore);
         return true;
     case DesktopGlobalAfterAppFinished:
         animation_manager_load_and_continue_animation(desktop->animation_manager);
@@ -132,7 +139,7 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         desktop_auto_lock_arm(desktop);
         return true;
     case DesktopGlobalAutoLock:
-        if(!loader_is_locked(desktop->loader)) {
+        if(!loader_is_locked(desktop->loader) && !desktop->locked) {
             desktop_lock(desktop);
         }
         return true;
@@ -208,6 +215,8 @@ static void desktop_clock_timer_callback(void* context) {
 }
 
 void desktop_lock(Desktop* desktop) {
+    furi_assert(!desktop->locked);
+
     furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
 
     if(desktop->settings.pin_code.length) {
@@ -223,9 +232,13 @@ void desktop_lock(Desktop* desktop) {
 
     DesktopStatus status = {.locked = true};
     furi_pubsub_publish(desktop->status_pubsub, &status);
+
+    desktop->locked = true;
 }
 
 void desktop_unlock(Desktop* desktop) {
+    furi_assert(desktop->locked);
+
     view_port_enabled_set(desktop->lock_icon_viewport, false);
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_set_lockdown(gui, false);
@@ -244,6 +257,8 @@ void desktop_unlock(Desktop* desktop) {
 
     DesktopStatus status = {.locked = false};
     furi_pubsub_publish(desktop->status_pubsub, &status);
+
+    desktop->locked = false;
 }
 
 void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
@@ -267,9 +282,10 @@ void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
     desktop->in_transition = false;
 }
 
-Desktop* desktop_alloc() {
+Desktop* desktop_alloc(void) {
     Desktop* desktop = malloc(sizeof(Desktop));
 
+    desktop->animation_semaphore = furi_semaphore_alloc(1, 0);
     desktop->animation_manager = animation_manager_alloc();
     desktop->gui = furi_record_open(RECORD_GUI);
     desktop->scene_thread = furi_thread_alloc();
@@ -290,7 +306,7 @@ Desktop* desktop_alloc() {
 
     desktop->lock_menu = desktop_lock_menu_alloc();
     desktop->debug_view = desktop_debug_alloc();
-    desktop->hw_mismatch_popup = popup_alloc();
+    desktop->popup = popup_alloc();
     desktop->locked_view = desktop_view_locked_alloc();
     desktop->pin_input_view = desktop_view_pin_input_alloc();
     desktop->pin_timeout_view = desktop_view_pin_timeout_alloc();
@@ -326,9 +342,7 @@ Desktop* desktop_alloc() {
     view_dispatcher_add_view(
         desktop->view_dispatcher, DesktopViewIdDebug, desktop_debug_get_view(desktop->debug_view));
     view_dispatcher_add_view(
-        desktop->view_dispatcher,
-        DesktopViewIdHwMismatch,
-        popup_get_view(desktop->hw_mismatch_popup));
+        desktop->view_dispatcher, DesktopViewIdPopup, popup_get_view(desktop->popup));
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewIdPinTimeout,
@@ -414,7 +428,7 @@ bool desktop_api_is_locked(Desktop* instance) {
 
 void desktop_api_unlock(Desktop* instance) {
     furi_assert(instance);
-    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopLockedEventUnlocked);
+    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopGlobalApiUnlock);
 }
 
 FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {
@@ -427,6 +441,8 @@ int32_t desktop_srv(void* p) {
 
     if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
         FURI_LOG_W(TAG, "Skipping start in special boot mode");
+
+        furi_thread_suspend(furi_thread_get_current_id());
         return 0;
     }
 
@@ -466,6 +482,17 @@ int32_t desktop_srv(void* p) {
 
     if(furi_hal_rtc_get_fault_data()) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneFault);
+    }
+
+    uint8_t keys_total, keys_valid;
+    if(!furi_hal_crypto_enclave_verify(&keys_total, &keys_valid)) {
+        FURI_LOG_E(
+            TAG,
+            "Secure Enclave verification failed: total %hhu, valid %hhu",
+            keys_total,
+            keys_valid);
+
+        scene_manager_next_scene(desktop->scene_manager, DesktopSceneSecureEnclave);
     }
 
     // Special case: autostart application is already running

@@ -2,7 +2,7 @@
 #include "toolbox/level_duration.h"
 #include "protocol_jablotron.h"
 #include <toolbox/manchester_decoder.h>
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 
 #define JABLOTRON_ENCODED_BIT_SIZE (64)
@@ -162,7 +162,7 @@ LevelDuration protocol_jablotron_encoder_yield(ProtocolJablotron* protocol) {
 
 void protocol_jablotron_render_data(ProtocolJablotron* protocol, FuriString* result) {
     uint64_t id = protocol_jablotron_card_id(protocol->data);
-    furi_string_printf(result, "ID: %llX\r\n", id);
+    furi_string_printf(result, "Card: %llX", id);
 };
 
 bool protocol_jablotron_write_data(ProtocolJablotron* protocol, void* data) {

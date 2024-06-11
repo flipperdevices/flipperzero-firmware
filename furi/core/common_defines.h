@@ -2,11 +2,13 @@
 
 #include "core_defines.h"
 #include <stdbool.h>
-#include <FreeRTOS.h>
-#include <task.h>
 
 #ifdef __cplusplus
 extern "C" {
+#define FURI_NORETURN [[noreturn]]
+#else
+#include <stdnoreturn.h>
+#define FURI_NORETURN noreturn
 #endif
 
 #include <cmsis_compiler.h>
@@ -15,8 +17,20 @@ extern "C" {
 #define FURI_WARN_UNUSED __attribute__((warn_unused_result))
 #endif
 
+#ifndef FURI_DEPRECATED
+#define FURI_DEPRECATED __attribute__((deprecated))
+#endif
+
 #ifndef FURI_WEAK
 #define FURI_WEAK __attribute__((weak))
+#endif
+
+#ifndef FURI_PACKED
+#define FURI_PACKED __attribute__((packed))
+#endif
+
+#ifndef FURI_ALWAYS_STATIC_INLINE
+#define FURI_ALWAYS_STATIC_INLINE __attribute__((always_inline)) static inline
 #endif
 
 #ifndef FURI_IS_IRQ_MASKED
@@ -47,6 +61,18 @@ void __furi_critical_exit(__FuriCriticalInfo info);
 
 #ifndef FURI_CRITICAL_EXIT
 #define FURI_CRITICAL_EXIT() __furi_critical_exit(__furi_critical_info);
+#endif
+
+#ifndef FURI_CHECK_RETURN
+#define FURI_CHECK_RETURN __attribute__((__warn_unused_result__))
+#endif
+
+#ifndef FURI_NAKED
+#define FURI_NAKED __attribute__((naked))
+#endif
+
+#ifndef FURI_DEFAULT
+#define FURI_DEFAULT(x) __attribute__((weak, alias(x)))
 #endif
 
 #ifdef __cplusplus

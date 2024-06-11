@@ -24,9 +24,9 @@ static const uint8_t reset_display_mask = 1 << 5;
 static const uint8_t reset_blink_mask = 1 << 6;
 
 static void notification_vibro_on(bool force);
-static void notification_vibro_off();
+static void notification_vibro_off(void);
 static void notification_sound_on(float freq, float volume, bool force);
-static void notification_sound_off();
+static void notification_sound_off(void);
 
 static uint8_t notification_settings_get_display_brightness(NotificationApp* app, uint8_t value);
 static uint8_t notification_settings_get_rgb_led_brightness(NotificationApp* app, uint8_t value);
@@ -163,7 +163,7 @@ static void notification_vibro_on(bool force) {
     }
 }
 
-static void notification_vibro_off() {
+static void notification_vibro_off(void) {
     furi_hal_vibro_on(false);
 }
 
@@ -175,7 +175,7 @@ static void notification_sound_on(float freq, float volume, bool force) {
     }
 }
 
-static void notification_sound_off() {
+static void notification_sound_off(void) {
     if(furi_hal_speaker_is_mine()) {
         furi_hal_speaker_stop();
         furi_hal_speaker_release();
@@ -444,7 +444,7 @@ static bool notification_load_settings(NotificationApp* app) {
         storage_file_open(file, NOTIFICATION_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(fs_result) {
-        uint16_t bytes_count = storage_file_read(file, &settings, settings_size);
+        size_t bytes_count = storage_file_read(file, &settings, settings_size);
 
         if(bytes_count != settings_size) {
             fs_result = false;
@@ -488,7 +488,7 @@ static bool notification_save_settings(NotificationApp* app) {
         storage_file_open(file, NOTIFICATION_SETTINGS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS);
 
     if(fs_result) {
-        uint16_t bytes_count = storage_file_write(file, &settings, settings_size);
+        size_t bytes_count = storage_file_write(file, &settings, settings_size);
 
         if(bytes_count != settings_size) {
             fs_result = false;
@@ -516,7 +516,7 @@ static void input_event_callback(const void* value, void* context) {
 }
 
 // App alloc
-static NotificationApp* notification_app_alloc() {
+static NotificationApp* notification_app_alloc(void) {
     NotificationApp* app = malloc(sizeof(NotificationApp));
     app->queue = furi_message_queue_alloc(8, sizeof(NotificationAppMessage));
     app->display_timer = furi_timer_alloc(notification_display_timer, FuriTimerTypeOnce, app);

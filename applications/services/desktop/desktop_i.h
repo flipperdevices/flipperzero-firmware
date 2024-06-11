@@ -28,12 +28,18 @@ typedef enum {
     DesktopViewIdLockMenu,
     DesktopViewIdLocked,
     DesktopViewIdDebug,
-    DesktopViewIdHwMismatch,
+    DesktopViewIdPopup,
     DesktopViewIdPinInput,
     DesktopViewIdPinTimeout,
     DesktopViewIdSlideshow,
     DesktopViewIdTotal,
 } DesktopViewId;
+
+typedef struct {
+    uint8_t hour;
+    uint8_t minute;
+    bool format_12; // 1 - 12 hour, 0 - 24H
+} DesktopClock;
 
 struct Desktop {
     // Scene
@@ -43,7 +49,7 @@ struct Desktop {
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
-    Popup* hw_mismatch_popup;
+    Popup* popup;
     DesktopLockMenuView* lock_menu;
     DesktopDebugView* debug_view;
     DesktopViewLocked* locked_view;
@@ -75,14 +81,15 @@ struct Desktop {
 
     FuriPubSub* status_pubsub;
 
-    uint8_t time_hour;
-    uint8_t time_minute;
-    bool time_format_12 : 1; // 1 - 12 hour, 0 - 24H
+    DesktopClock clock;
 
     bool in_transition : 1;
+    bool locked : 1;
+
+    FuriSemaphore* animation_semaphore;
 };
 
-Desktop* desktop_alloc();
+Desktop* desktop_alloc(void);
 
 void desktop_free(Desktop* desktop);
 void desktop_lock(Desktop* desktop);

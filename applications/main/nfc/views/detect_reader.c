@@ -50,6 +50,7 @@ static void detect_reader_draw_callback(Canvas* canvas, void* model) {
         if(m->state == DetectReaderStateDone) {
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str_aligned(canvas, 51, 22, AlignLeft, AlignTop, "Completed!");
+            canvas_draw_icon(canvas, 24, 23, &I_check_big_20x17);
         } else {
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str_aligned(canvas, 51, 22, AlignLeft, AlignTop, "Collecting...");
@@ -85,7 +86,7 @@ static bool detect_reader_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-DetectReader* detect_reader_alloc() {
+DetectReader* detect_reader_alloc(void) {
     DetectReader* detect_reader = malloc(sizeof(DetectReader));
     detect_reader->view = view_alloc();
     view_allocate_model(detect_reader->view, ViewModelTypeLocking, sizeof(DetectReaderViewModel));
@@ -163,7 +164,10 @@ void detect_reader_set_nonces_collected(DetectReader* detect_reader, uint16_t no
     with_view_model(
         detect_reader->view,
         DetectReaderViewModel * model,
-        { model->nonces = nonces_collected; },
+        {
+            model->nonces = nonces_collected;
+            model->state = DetectReaderStateReaderDetected;
+        },
         false);
 }
 

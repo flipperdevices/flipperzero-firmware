@@ -1,7 +1,6 @@
 #include <furi.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <stdint.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 
@@ -27,6 +26,7 @@ void desktop_settings_scene_pin_setup_done_on_enter(void* context) {
     DESKTOP_SETTINGS_SAVE(&app->settings);
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(notification, &sequence_single_vibro);
+    notification_message(notification, &sequence_blink_green_10);
     furi_record_close(RECORD_NOTIFICATION);
 
     desktop_view_pin_input_set_context(app->pin_input_view, app);
@@ -34,7 +34,7 @@ void desktop_settings_scene_pin_setup_done_on_enter(void* context) {
     desktop_view_pin_input_set_done_callback(app->pin_input_view, pin_setup_done_callback);
     desktop_view_pin_input_set_pin(app->pin_input_view, &app->settings.pin_code);
     desktop_view_pin_input_set_label_button(app->pin_input_view, "Done");
-    desktop_view_pin_input_set_label_primary(app->pin_input_view, 29, 8, "PIN activated!");
+    desktop_view_pin_input_set_label_primary(app->pin_input_view, 29, 8, "PIN Activated!");
     desktop_view_pin_input_set_label_secondary(
         app->pin_input_view, 7, 45, "Remember or write it down");
     desktop_view_pin_input_lock_input(app->pin_input_view);

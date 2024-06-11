@@ -3,7 +3,7 @@
 #include <lfrfid/tools/fsk_demod.h>
 #include <lfrfid/tools/fsk_osc.h>
 #include "lfrfid_protocols.h"
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 
 #define JITTER_TIME (20)
 #define MIN_TIME (64 - JITTER_TIME)
@@ -243,7 +243,7 @@ void protocol_pyramid_render_data(ProtocolPyramid* protocol, FuriString* result)
     uint8_t* decoded_data = protocol->data;
     uint8_t format_length = decoded_data[0];
 
-    furi_string_cat_printf(result, "Format: %d\r\n", format_length);
+    furi_string_printf(result, "Format: %hhu\n", format_length);
     if(format_length == 26) {
         uint8_t facility;
         bit_lib_copy_bits(&facility, 0, 8, decoded_data, 8);
@@ -251,9 +251,9 @@ void protocol_pyramid_render_data(ProtocolPyramid* protocol, FuriString* result)
         uint16_t card_id;
         bit_lib_copy_bits((uint8_t*)&card_id, 8, 8, decoded_data, 16);
         bit_lib_copy_bits((uint8_t*)&card_id, 0, 8, decoded_data, 24);
-        furi_string_cat_printf(result, "FC: %03u, Card: %05u", facility, card_id);
+        furi_string_cat_printf(result, "FC: %03hhu; Card: %05hu", facility, card_id);
     } else {
-        furi_string_cat_printf(result, "Data: unknown");
+        furi_string_cat_printf(result, "Data: Unknown");
     }
 };
 
