@@ -11,7 +11,9 @@ libenv = env.Clone(FW_LIB_NAME="tlsf")
 libenv.ApplyLibFlags()
 
 libenv.Append(
-    CPPDEFINES=[],
+    CPPDEFINES=[
+        "CONFIG_MALLOC_ALIGNMENT=4",
+    ],
 )
 
 sources = [File("tlsf/tlsf.c")]

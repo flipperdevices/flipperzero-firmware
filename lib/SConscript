@@ -13,9 +13,9 @@ env.Append(
 
 libs = env.BuildModules(
     [
-        "tlsf",
         "mlib",
         "stm32wb",
+        "tlsf",
         "freertos",
         "print",
         "microtar",

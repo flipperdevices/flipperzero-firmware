@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <tlsf.h>
-#include <tlsf_block_functions.h>
+// #include <tlsf_block_functions.h>
 #include <FreeRTOS.h>
 #include <task.h>
 #include <m-dict.h>
@@ -45,7 +45,7 @@ static void memmgr_heap_init(void) {
 
 __attribute__((constructor)) static void memmgr_init(void) {
     size_t pool_size = (size_t)&__heap_end__ - (size_t)&__heap_start__;
-    tlsf = tlsf_create_with_pool((void*)&__heap_start__, pool_size, pool_size);
+    tlsf = tlsf_create_with_pool((void*)&__heap_start__, pool_size);
     memmgr_heap_init();
 }
 
@@ -116,8 +116,7 @@ size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
                 MemmgrHeapAllocDict_next(alloc_dict_it)) {
                 MemmgrHeapAllocDict_itref_t* data = MemmgrHeapAllocDict_ref(alloc_dict_it);
                 if(data->key != 0) {
-                    block_header_t* block = block_from_ptr((uint8_t*)data->key);
-                    if(!block_is_free(block)) {
+                    if(!tlsf_pointer_is_free((uint8_t*)data->key)) {
                         leftovers += data->value;
                     }
                 }
@@ -129,7 +128,7 @@ size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
     return leftovers;
 }
 
-static bool tlsf_walker_max_free(void* ptr, size_t size, int used, void* user) {
+static void tlsf_walker_max_free(void* ptr, size_t size, int used, void* user) {
     UNUSED(ptr);
 
     bool free = !used;
@@ -137,8 +136,6 @@ static bool tlsf_walker_max_free(void* ptr, size_t size, int used, void* user) {
     if(free && size > *max_free_block_size) {
         *max_free_block_size = size;
     }
-
-    return true;
 }
 
 size_t memmgr_heap_get_max_free_block(void) {
@@ -159,9 +156,9 @@ typedef struct {
     void* context;
 } BlockWalkerWrapper;
 
-static bool tlsf_walker_wrapper(void* ptr, size_t size, int used, void* user) {
+static void tlsf_walker_wrapper(void* ptr, size_t size, int used, void* user) {
     BlockWalkerWrapper* wrapper = (BlockWalkerWrapper*)user;
-    return wrapper->walker(ptr, size, used, wrapper->context);
+    wrapper->walker(ptr, size, used, wrapper->context);
 }
 
 void memmgr_heap_walk_blocks(BlockWalker walker, void* context) {
@@ -336,7 +333,8 @@ extern void* pvPortRealloc(void* pv, size_t xSize) {
 }
 
 size_t xPortGetFreeHeapSize(void) {
-    return memmgr_get_heap_size() - heap_used - tlsf_size(tlsf);
+    return memmgr_get_heap_size() - heap_used - tlsf_struct_size();
+    return 0;
 }
 
 size_t xPortGetTotalHeapSize(void) {
@@ -344,5 +342,6 @@ size_t xPortGetTotalHeapSize(void) {
 }
 
 size_t xPortGetMinimumEverFreeHeapSize(void) {
-    return memmgr_get_heap_size() - heap_max_used - tlsf_size(tlsf);
+    return memmgr_get_heap_size() - heap_max_used - tlsf_struct_size();
+    return 0;
 }

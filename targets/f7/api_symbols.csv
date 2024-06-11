@@ -597,7 +597,7 @@ Function,-,acosh,double,double
 Function,-,acoshf,float,float
 Function,-,acoshl,long double,long double
 Function,-,acosl,long double,long double
-Function,-,aligned_alloc,void*,"size_t, size_t"
+Function,+,aligned_alloc,void*,"size_t, size_t"
 Function,-,arc4random,__uint32_t,
 Function,-,arc4random_buf,void,"void*, size_t"
 Function,-,arc4random_uniform,__uint32_t,__uint32_t
