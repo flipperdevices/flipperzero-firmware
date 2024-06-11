@@ -58,7 +58,6 @@ uint8_t* protocol_securakey_get_data(ProtocolSecurakey* protocol) {
 };
 
 static const char* protocol_securakey_get_encoded_data_debug(ProtocolSecurakey* protocol) {
-    //FURI_LOG_D(TAG, "get_encoded_data entered");
     furi_string_reset(protocol->debug_string);
     for(size_t i = 0; i < SECURAKEY_ENCODED_FULL_SIZE_BITS; i++) {
         furi_string_cat(
@@ -76,7 +75,6 @@ static bool protocol_securakey_can_be_decoded(ProtocolSecurakey* protocol) {
             FURI_LOG_D(
                 TAG, "Encoded read : %s", protocol_securakey_get_encoded_data_debug(protocol));
             return true;
-
         } else {
             return false;
         }
@@ -284,8 +282,8 @@ bool protocol_securakey_write_data(ProtocolSecurakey* protocol, void* data) {
 };
 
 const ProtocolBase protocol_securakey = {
-    .name = "Securakey",
-    .manufacturer = "Radio Key",
+    .name = "Radio Key",
+    .manufacturer = "Securakey",
     .data_size = SECURAKEY_DECODED_DATA_SIZE_BYTES,
     .features = LFRFIDFeatureASK,
     .validate_count = 3,
