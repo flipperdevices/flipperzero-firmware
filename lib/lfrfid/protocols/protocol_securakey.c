@@ -17,7 +17,7 @@
     (SECURAKEY_ENCODED_SIZE_BITS + SECURAKEY_PREAMBLE_SIZE_BITS)
 #define SECURAKEY_ENCODED_FULL_SIZE_BYTE (SECURAKEY_ENCODED_FULL_SIZE_BITS / 8)
 #define SECURAKEY_DECODED_DATA_SIZE_BITS \
-    (56) // 8-bit for bit length, 16-bit for facility code/number, 16-bit for card number, 16-bit for two checksum
+    (48) // 16-bit for facility code/number, 16-bit for card number, 16-bit for two checksum
 #define SECURAKEY_DECODED_DATA_SIZE_BYTES (SECURAKEY_DECODED_DATA_SIZE_BITS / 8)
 #define LFRFID_FREQUENCY (125000)
 #define SECURAKEY_CLOCK_PER_BIT (40) // RF/40
@@ -37,33 +37,21 @@ typedef struct {
     uint8_t encoded_data[SECURAKEY_ENCODED_FULL_SIZE_BYTE];
     uint8_t encoded_data_index;
     bool encoded_polarity;
-    FuriString* debug_string;
     ManchesterState decoder_manchester_state;
     uint8_t bit_format;
 } ProtocolSecurakey;
 
 ProtocolSecurakey* protocol_securakey_alloc(void) {
     ProtocolSecurakey* protocol = malloc(sizeof(ProtocolSecurakey));
-    protocol->debug_string = furi_string_alloc();
     return (void*)protocol;
 };
 
 void protocol_securakey_free(ProtocolSecurakey* protocol) {
-    free(protocol->debug_string);
     free(protocol);
 };
 
 uint8_t* protocol_securakey_get_data(ProtocolSecurakey* protocol) {
     return protocol->data;
-};
-
-static const char* protocol_securakey_get_encoded_data_debug(ProtocolSecurakey* protocol) {
-    furi_string_reset(protocol->debug_string);
-    for(size_t i = 0; i < SECURAKEY_ENCODED_FULL_SIZE_BITS; i++) {
-        furi_string_cat(
-            protocol->debug_string, bit_lib_get_bit(protocol->encoded_data, i) ? "1" : "0");
-    }
-    return furi_string_get_cstr(protocol->debug_string);
 };
 
 static bool protocol_securakey_can_be_decoded(ProtocolSecurakey* protocol) {
@@ -72,8 +60,6 @@ static bool protocol_securakey_can_be_decoded(ProtocolSecurakey* protocol) {
        0b011111111100) {
         if(bit_lib_get_bits(protocol->encoded_data, 13, 6) == 26 ||
            bit_lib_get_bits(protocol->encoded_data, 13, 6) == 32) {
-            FURI_LOG_D(
-                TAG, "Encoded read : %s", protocol_securakey_get_encoded_data_debug(protocol));
             return true;
         } else {
             return false;
@@ -94,46 +80,43 @@ static void protocol_securakey_decode(ProtocolSecurakey* protocol) {
     // preamble     ??bitlen   reserved  EPfffffff   fffffffc   cccccccc   cccccccOP  CS?        CS2?
     // 0111111111 0 01100000 0 00000000 0 10000100 0 11001010 0 01011011 0 01010110 0 00010110 0 11100000 0 00000000 0 0000
 
-    // get bit length (26-bit or 32-bit)
     // left two 0 paddings in the beginning for easier parsing (00011010 = 011010)
-    bit_lib_copy_bits(protocol->data, 2, 6, protocol->encoded_data, 13);
-
     // get facility number (f)
-    if(bit_lib_get_bits(protocol->data, 0, 8) == 26) {
+    if(bit_lib_get_bits(protocol->encoded_data, 13, 6) == 26) {
         FURI_LOG_D(TAG, "26-bit Securakey detected");
         protocol->bit_format = 26;
-        bit_lib_copy_bits(protocol->data, 16, 1, protocol->encoded_data, 36);
+        bit_lib_copy_bits(protocol->data, 8, 1, protocol->encoded_data, 36);
         // have to skip one spacer
-        bit_lib_copy_bits(protocol->data, 17, 7, protocol->encoded_data, 38);
-    } else if(bit_lib_get_bits(protocol->data, 0, 8) == 32) {
+        bit_lib_copy_bits(protocol->data, 9, 7, protocol->encoded_data, 38);
+    } else if(bit_lib_get_bits(protocol->encoded_data, 13, 6) == 32) {
         FURI_LOG_D(TAG, "32-bit Securakey detected");
         protocol->bit_format = 32;
         // same two 0 paddings here, otherwise should be bit_lib_copy_bits(protocol->data, 8, 7, protocol->encoded_data, 30);
-        bit_lib_copy_bits(protocol->data, 10, 7, protocol->encoded_data, 30);
+        bit_lib_copy_bits(protocol->data, 2, 7, protocol->encoded_data, 30);
         // have to skip one spacer
-        bit_lib_copy_bits(protocol->data, 17, 7, protocol->encoded_data, 38);
+        bit_lib_copy_bits(protocol->data, 9, 7, protocol->encoded_data, 38);
     }
 
     // get card number (c)
-    bit_lib_copy_bits(protocol->data, 24, 1, protocol->encoded_data, 45);
+    bit_lib_copy_bits(protocol->data, 16, 1, protocol->encoded_data, 45);
     // same skips here
-    bit_lib_copy_bits(protocol->data, 25, 8, protocol->encoded_data, 47);
-    bit_lib_copy_bits(protocol->data, 33, 7, protocol->encoded_data, 56);
+    bit_lib_copy_bits(protocol->data, 17, 8, protocol->encoded_data, 47);
+    bit_lib_copy_bits(protocol->data, 25, 7, protocol->encoded_data, 56);
 
     // unsure about CS yet, might as well just save it
     // CS1
-    bit_lib_copy_bits(protocol->data, 40, 8, protocol->encoded_data, 65);
+    bit_lib_copy_bits(protocol->data, 32, 8, protocol->encoded_data, 65);
     // CS2
-    bit_lib_copy_bits(protocol->data, 48, 8, protocol->encoded_data, 74);
+    bit_lib_copy_bits(protocol->data, 40, 8, protocol->encoded_data, 74);
 
     // (decoded) data looks like this (pp are zero paddings):
     // 26-bit format (1-bit EP,  8-bit facility number, 16-bit card number, 1-bit OP)
-    // ppbitlen pppppppp ffffffff cccccccc cccccccc CS1      CS2
-    // 00011010 00000000 00011011 00011111 00110001 00001111 01100000
+    // pppppppp ffffffff cccccccc cccccccc CS1      CS2
+    // 00000000 00011011 00011111 00110001 00001111 01100000
 
     // 32-bit format (1-bit EP, 14-bit facility number, 16-bit card number, 1-bit OP)
-    // ppbitlen ppffffff ffffffff cccccccc cccccccc CS1      CS2?
-    // 00100000 00000010 01100101 00101101 10101011 00010110 11100000
+    // ppffffff ffffffff cccccccc cccccccc CS1      CS2
+    // 00000010 01100101 00101101 10101011 00010110 11100000
 };
 
 void protocol_securakey_decoder_start(ProtocolSecurakey* protocol) {
@@ -183,8 +166,8 @@ void protocol_securakey_render_data(ProtocolSecurakey* protocol, FuriString* res
         result,
         "%u-bit format\nFacility code: %u\nCard number: %u",
         protocol->bit_format,
-        bit_lib_get_bits_16(protocol->data, 8, 16),
-        bit_lib_get_bits_16(protocol->data, 24, 16));
+        bit_lib_get_bits_16(protocol->data, 0, 16),
+        bit_lib_get_bits_16(protocol->data, 16, 16));
 };
 
 bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
@@ -195,54 +178,54 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
     bit_lib_set_bits(protocol->encoded_data, 0, 0b01111111, 8);
     bit_lib_set_bits(protocol->encoded_data, 8, 0b11001, 5);
 
-    // write bit length
-    bit_lib_copy_bits(protocol->encoded_data, 13, 6, protocol->data, 2);
-
-    if(bit_lib_get_bits(protocol->data, 0, 8) == 26) {
+    if(bit_lib_get_bits(protocol->data, 0, 8) == 0) {
         protocol->bit_format = 26;
+        // set bit length
+        bit_lib_set_bits(protocol->encoded_data, 13, protocol->bit_format, 6);
         // set even parity & odd parity
-        if(!bit_lib_test_parity(protocol->data, 16, 12, BitLibParityOdd, 12)) {
+        if(!bit_lib_test_parity(protocol->data, 8, 12, BitLibParityOdd, 12)) {
             bit_lib_set_bit(protocol->encoded_data, 35, 1);
         }
-        if(bit_lib_test_parity(protocol->data, 28, 12, BitLibParityOdd, 12)) {
+        if(bit_lib_test_parity(protocol->data, 20, 12, BitLibParityOdd, 12)) {
             bit_lib_set_bit(protocol->encoded_data, 63, 1);
         }
         // write facility number (f)
-        bit_lib_copy_bits(protocol->encoded_data, 36, 1, protocol->data, 16);
+        bit_lib_copy_bits(protocol->encoded_data, 36, 1, protocol->data, 8);
         // have to skip one spacer
-        bit_lib_copy_bits(protocol->encoded_data, 38, 7, protocol->data, 17);
+        bit_lib_copy_bits(protocol->encoded_data, 38, 7, protocol->data, 9);
 
-    } else if(bit_lib_get_bits(protocol->data, 0, 8) == 32) {
+    } else {
         protocol->bit_format = 32;
+        // set bit length
+        bit_lib_set_bits(protocol->encoded_data, 13, protocol->bit_format, 6);
         // set EP & OP
-        if(!bit_lib_test_parity(protocol->data, 16, 12, BitLibParityOdd, 12)) {
+        if(!bit_lib_test_parity(protocol->data, 2, 15, BitLibParityOdd, 15)) {
             bit_lib_set_bit(protocol->encoded_data, 29, 1);
         }
-        if(bit_lib_test_parity(protocol->data, 28, 12, BitLibParityOdd, 12)) {
+        if(bit_lib_test_parity(protocol->data, 17, 15, BitLibParityOdd, 15)) {
             bit_lib_set_bit(protocol->encoded_data, 63, 1);
         }
         // write facility number (f)
-        bit_lib_copy_bits(protocol->encoded_data, 30, 7, protocol->data, 10);
+        bit_lib_copy_bits(protocol->encoded_data, 30, 7, protocol->data, 2);
         // have to skip one spacer
-        bit_lib_copy_bits(protocol->encoded_data, 38, 7, protocol->data, 17);
+        bit_lib_copy_bits(protocol->encoded_data, 38, 7, protocol->data, 3);
     }
 
     // write card number (c)
-    bit_lib_copy_bits(protocol->encoded_data, 45, 1, protocol->data, 24);
+    bit_lib_copy_bits(protocol->encoded_data, 45, 1, protocol->data, 16);
     // same skips here
-    bit_lib_copy_bits(protocol->encoded_data, 47, 8, protocol->data, 25);
-    bit_lib_copy_bits(protocol->encoded_data, 56, 7, protocol->data, 33);
+    bit_lib_copy_bits(protocol->encoded_data, 47, 8, protocol->data, 17);
+    bit_lib_copy_bits(protocol->encoded_data, 56, 7, protocol->data, 25);
 
     // unsure about CS yet might as well just copy it from saved
     // CS1
-    bit_lib_copy_bits(protocol->encoded_data, 65, 8, protocol->data, 40);
+    bit_lib_copy_bits(protocol->encoded_data, 65, 8, protocol->data, 32);
     // CS2
-    bit_lib_copy_bits(protocol->encoded_data, 74, 8, protocol->data, 48);
+    bit_lib_copy_bits(protocol->encoded_data, 74, 8, protocol->data, 40);
 
     // for sending we start at bit 0.
     protocol->encoded_data_index = 0;
     protocol->encoded_polarity = true;
-    FURI_LOG_D(TAG, "Encoded write: %s", protocol_securakey_get_encoded_data_debug(protocol));
     return true;
 };
 
