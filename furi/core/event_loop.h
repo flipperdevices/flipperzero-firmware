@@ -15,6 +15,7 @@
 #pragma once
 
 #include "base.h"
+#include "event_loop_contract.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,8 +27,21 @@ typedef enum {
     FuriEventLoopEventIn, /**< On arrival: item was inserted into container, flag set, etc... */
 } FuriEventLoopEvent;
 
-/** Anonymous message queue type */
+/** Opaque event loop type */
 typedef struct FuriEventLoop FuriEventLoop;
+
+/** Opaque type of an object participating in event loop */
+typedef void FuriEventLoopObject;
+
+/** Callback type
+ *
+ * @param      object   The object that triggered the event
+ * @param      context  The context that was provided on
+ *                      furi_event_loop_subscribe call
+ *
+ * @return     true if event was processed, false if we need to delay processing
+ */
+typedef bool (*FuriEventLoopCallback)(FuriEventLoopObject* object, void* context);
 
 /** Allocate Event Loop instance
  *
@@ -86,48 +100,31 @@ void furi_event_loop_tick_set(
     FuriEventLoopTickCallback callback,
     void* context);
 
-/*
- * Message queue related APIs
- */
-
-/** Anonymous message queue type */
-typedef struct FuriMessageQueue FuriMessageQueue;
-
-/** Callback type for message queue
- *
- * @param      queue    The queue that triggered event
- * @param      context  The context that was provided on
- *                      furi_event_loop_message_queue_subscribe call
- *
- * @return     true if event was processed, false if we need to delay processing
- */
-typedef bool (*FuriEventLoopMessageQueueCallback)(FuriMessageQueue* queue, void* context);
-
-/** Subscribe to message queue events
+/** Subscribe to events produced by the object
  * 
  * @warning you can only have one subscription for one event type.
  *
  * @param      instance       The Event Loop instance
- * @param      message_queue  The message queue to add
+ * @param      object         The message object to add
+ * @param[in]  contract       The Event Loop interface for the object
  * @param[in]  event          The Event Loop event to trigger on
  * @param[in]  callback       The callback to call on event
  * @param      context        The context for callback
  */
-void furi_event_loop_message_queue_subscribe(
+void furi_event_loop_subscribe(
     FuriEventLoop* instance,
-    FuriMessageQueue* message_queue,
+    FuriEventLoopObject* object,
+    const FuriEventLoopContract* contract,
     FuriEventLoopEvent event,
-    FuriEventLoopMessageQueueCallback callback,
+    FuriEventLoopCallback callback,
     void* context);
 
-/** Unsubscribe from message queue
+/** Unsubscribe from events produced by the object
  *
  * @param      instance       The Event Loop instance
- * @param      message_queue  The message queue
+ * @param      object         The object to unsubscribe from
  */
-void furi_event_loop_message_queue_unsubscribe(
-    FuriEventLoop* instance,
-    FuriMessageQueue* message_queue);
+void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object);
 
 #ifdef __cplusplus
 }

@@ -23,10 +23,10 @@ typedef FuriEventLoopLink* (*FuriEventLoopContractGetLink)(void* object);
 
 typedef uint32_t (*FuriEventLoopContractGetLevel)(void* object, FuriEventLoopEvent event);
 
-typedef struct {
+struct FuriEventLoopContract {
     const FuriEventLoopContractGetLink get_link;
     const FuriEventLoopContractGetLevel get_level;
-} FuriEventLoopContract;
+};
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,11 @@
-#include "message_queue_i.h"
+#include "message_queue.h"
+
+#include "kernel.h"
+#include "event_loop_i.h"
+#include "check.h"
+
+#include <FreeRTOS.h>
+#include <queue.h>
 
 // Internal FreeRTOS member names
 #define uxMessagesWaiting uxDummy4[0]
@@ -18,6 +25,8 @@ struct FuriMessageQueue {
 static_assert(offsetof(FuriMessageQueue, container) == 0);
 // IMPORTANT: buffer MUST be the LAST struct member
 static_assert(offsetof(FuriMessageQueue, buffer) == sizeof(FuriMessageQueue));
+
+const FuriEventLoopContract furi_message_queue_event_loop_contract;
 
 FuriMessageQueue* furi_message_queue_alloc(uint32_t msg_count, uint32_t msg_size) {
     furi_check((furi_kernel_is_irq_or_masked() == 0U) && (msg_count > 0U) && (msg_size > 0U));
@@ -202,13 +211,18 @@ FuriStatus furi_message_queue_reset(FuriMessageQueue* instance) {
     return stat;
 }
 
-static FuriEventLoopLink* furi_message_queue_event_loop_get_link(void* object) {
+const FuriEventLoopContract* furi_message_queue_get_contract(void) {
+    return &furi_message_queue_event_loop_contract;
+}
+
+static FuriEventLoopLink* furi_message_queue_event_loop_get_link(FuriEventLoopObject* object) {
     FuriMessageQueue* instance = object;
     furi_assert(instance);
     return &instance->event_loop_link;
 }
 
-static uint32_t furi_message_queue_event_loop_get_level(void* object, FuriEventLoopEvent event) {
+static uint32_t
+    furi_message_queue_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
     FuriMessageQueue* instance = object;
     furi_assert(instance);
 
