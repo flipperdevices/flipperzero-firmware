@@ -5,6 +5,8 @@ App(
     provides=[
         "updater_app",
         "storage_move_to_sd",
+        "js_app",
+        "js_app_start",
         # "archive",
     ],
 )

@@ -1,17 +1,17 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 void nfc_scene_delete_success_popup_callback(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
 void nfc_scene_delete_success_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Setup view
     Popup* popup = nfc->popup;
-    popup_set_icon(popup, 0, 2, &I_DolphinMafia_115x62);
-    popup_set_header(popup, "Deleted", 83, 19, AlignLeft, AlignBottom);
+    popup_set_icon(popup, 0, 2, &I_DolphinMafia_119x62);
+    popup_set_header(popup, "Deleted", 80, 19, AlignLeft, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, nfc);
     popup_set_callback(popup, nfc_scene_delete_success_popup_callback);
@@ -20,7 +20,7 @@ void nfc_scene_delete_success_on_enter(void* context) {
 }
 
 bool nfc_scene_delete_success_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -31,6 +31,11 @@ bool nfc_scene_delete_success_on_event(void* context, SceneManagerEvent event) {
             } else {
                 consumed = scene_manager_search_and_switch_to_previous_scene(
                     nfc->scene_manager, NfcSceneFileSelect);
+
+                if(!consumed) {
+                    scene_manager_stop(nfc->scene_manager);
+                    view_dispatcher_stop(nfc->view_dispatcher);
+                }
             }
         }
     }
@@ -38,7 +43,7 @@ bool nfc_scene_delete_success_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_delete_success_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clear view
     popup_reset(nfc->popup);

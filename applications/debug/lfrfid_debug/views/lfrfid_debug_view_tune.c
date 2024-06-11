@@ -34,8 +34,8 @@ static void lfrfid_debug_view_tune_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_color(canvas, ColorBlack);
 
     char buffer[TEMP_STR_LEN + 1];
-    double freq = ((float)SystemCoreClock / ((float)model->ARR + 1));
-    double duty = ((float)model->CCR + 1) / ((float)model->ARR + 1) * 100.0f;
+    double freq = ((double)SystemCoreClock / (model->ARR + 1));
+    double duty = (double)((model->CCR + 1) * 100) / (model->ARR + 1);
     snprintf(
         buffer,
         TEMP_STR_LEN,
@@ -170,7 +170,7 @@ static bool lfrfid_debug_view_tune_input_callback(InputEvent* event, void* conte
     return consumed;
 }
 
-LfRfidTuneView* lfrfid_debug_view_tune_alloc() {
+LfRfidTuneView* lfrfid_debug_view_tune_alloc(void) {
     LfRfidTuneView* tune_view = malloc(sizeof(LfRfidTuneView));
     tune_view->view = view_alloc();
     view_set_context(tune_view->view, tune_view);

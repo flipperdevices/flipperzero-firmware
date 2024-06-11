@@ -97,7 +97,7 @@ static int32_t music_worker_thread_callback(void* context) {
     return 0;
 }
 
-MusicWorker* music_worker_alloc() {
+MusicWorker* music_worker_alloc(void) {
     MusicWorker* instance = malloc(sizeof(MusicWorker));
 
     NoteBlockArray_init(instance->notes);
@@ -396,7 +396,7 @@ bool music_worker_load_rtttl_from_file(MusicWorker* instance, const char* file_p
             break;
         };
 
-        uint16_t ret = 0;
+        size_t ret = 0;
         do {
             uint8_t buffer[65] = {0};
             ret = storage_file_read(file, buffer, sizeof(buffer) - 1);

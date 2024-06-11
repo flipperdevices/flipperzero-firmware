@@ -269,6 +269,16 @@ vars.AddVariables(
             "clangd",
         ],
     ),
+    BoolVariable(
+        "STRICT_FAP_IMPORT_CHECK",
+        help="Enable strict import check for .faps",
+        default=True,
+    ),
+    (
+        "ARGS",
+        "Extra arguments to pass to certain scripts supporting it",
+        "",
+    ),
 )
 
 Return("vars")

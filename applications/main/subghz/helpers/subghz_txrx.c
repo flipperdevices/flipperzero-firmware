@@ -1,4 +1,4 @@
-#include "subghz_txrx_i.h"
+#include "subghz_txrx_i.h" // IWYU pragma: keep
 
 #include <lib/subghz/protocols/protocol_items.h>
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
@@ -27,7 +27,7 @@ static void subghz_txrx_radio_device_power_off(SubGhzTxRx* instance) {
     if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
 }
 
-SubGhzTxRx* subghz_txrx_alloc() {
+SubGhzTxRx* subghz_txrx_alloc(void) {
     SubGhzTxRx* instance = malloc(sizeof(SubGhzTxRx));
     instance->setting = subghz_setting_alloc();
     subghz_setting_load(instance->setting, EXT_PATH("subghz/assets/setting_user"));
@@ -185,10 +185,11 @@ static uint32_t subghz_txrx_rx(SubGhzTxRx* instance, uint32_t frequency) {
 
 static void subghz_txrx_idle(SubGhzTxRx* instance) {
     furi_assert(instance);
-    furi_assert(instance->txrx_state != SubGhzTxRxStateSleep);
-    subghz_devices_idle(instance->radio_device);
-    subghz_txrx_speaker_off(instance);
-    instance->txrx_state = SubGhzTxRxStateIDLE;
+    if(instance->txrx_state != SubGhzTxRxStateSleep) {
+        subghz_devices_idle(instance->radio_device);
+        subghz_txrx_speaker_off(instance);
+        instance->txrx_state = SubGhzTxRxStateIDLE;
+    }
 }
 
 static void subghz_txrx_rx_end(SubGhzTxRx* instance) {

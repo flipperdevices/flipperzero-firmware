@@ -9,6 +9,8 @@
 #include <lib/toolbox/stream/stream.h>
 #include <lib/flipper_format/flipper_format_i.h>
 
+#include <math.h>
+
 #define TAG "SubGhzProtocolBinRaw"
 
 //change very carefully, RAM ends at the most inopportune moment
@@ -527,7 +529,8 @@ static bool
             bin_raw_type = BinRAWTypeGap;
             //looking for the last occurrence of gap
             ind = instance->data_raw_ind - 1;
-            while((ind > 0) && (DURATION_DIFF(abs(instance->data_raw[ind]), gap) > gap_delta)) {
+            while((ind > 0) &&
+                  (DURATION_DIFF(abs(instance->data_raw[ind]), (int32_t)gap) > gap_delta)) {
                 ind--;
             }
             gap_ind = ind;
@@ -542,10 +545,10 @@ static bool
         uint16_t bit_count = 0;
         do {
             gap_ind--;
-            data_temp = (int)(round((float)(instance->data_raw[gap_ind]) / instance->te));
+            data_temp = (int)(roundf((float)(instance->data_raw[gap_ind]) / instance->te));
             bin_raw_debug("%d ", data_temp);
             if(data_temp == 0) bit_count++; //there is noise in the package
-            for(size_t i = 0; i < abs(data_temp); i++) {
+            for(size_t i = 0; i < (size_t)abs(data_temp); i++) {
                 bit_count++;
                 if(ind) {
                     ind--;
@@ -561,7 +564,7 @@ static bool
                 }
             }
             //split into full bytes if gap is caught
-            if(DURATION_DIFF(abs(instance->data_raw[gap_ind]), gap) < gap_delta) {
+            if(DURATION_DIFF(abs(instance->data_raw[gap_ind]), (int32_t)gap) < gap_delta) {
                 instance->data_markup[data_markup_ind].byte_bias = ind >> 3;
                 instance->data_markup[data_markup_ind++].bit_count = bit_count;
                 bit_count = 0;
@@ -805,11 +808,11 @@ static bool
         bin_raw_debug_tag(TAG, "Sequence analysis without gap\r\n");
         ind = 0;
         for(size_t i = 0; i < instance->data_raw_ind; i++) {
-            int data_temp = (int)(round((float)(instance->data_raw[i]) / instance->te));
+            int data_temp = (int)(roundf((float)(instance->data_raw[i]) / instance->te));
             if(data_temp == 0) break; //found an interval 2 times shorter than TE, this is noise
             bin_raw_debug("%d  ", data_temp);
 
-            for(size_t k = 0; k < abs(data_temp); k++) {
+            for(size_t k = 0; k < (size_t)abs(data_temp); k++) {
                 if(data_temp > 0) {
                     subghz_protocol_blocks_set_bit_array(
                         true, instance->data, ind++, BIN_RAW_BUF_DATA_SIZE);
@@ -880,7 +883,7 @@ static bool
 void subghz_protocol_decoder_bin_raw_data_input_rssi(
     SubGhzProtocolDecoderBinRAW* instance,
     float rssi) {
-    furi_assert(instance);
+    furi_check(instance);
     switch(instance->decoder.parser_step) {
     case BinRAWDecoderStepReset:
 

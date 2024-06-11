@@ -1,7 +1,6 @@
 #include "receiver.h"
-#include "../subghz_i.h"
-#include <math.h>
 
+#include "types.h"
 #include <input/input.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
@@ -91,7 +90,7 @@ void subghz_view_receiver_set_lock(SubGhzViewReceiver* subghz_receiver, bool loc
             SubGhzViewReceiverModel * model,
             { model->bar_show = SubGhzViewReceiverBarShowLock; },
             true);
-        furi_timer_start(subghz_receiver->timer, pdMS_TO_TICKS(1000));
+        furi_timer_start(subghz_receiver->timer, 1000);
     } else {
         with_view_model(
             subghz_receiver->view,
@@ -251,9 +250,9 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     }
 
     if(model->device_type == SubGhzRadioDeviceTypeInternal) {
-        canvas_draw_icon(canvas, 108, 0, &I_Internal_antenna_20x12);
+        canvas_draw_icon(canvas, 109, 0, &I_Internal_ant_1_9x11);
     } else {
-        canvas_draw_icon(canvas, 108, 0, &I_External_antenna_20x12);
+        canvas_draw_icon(canvas, 109, 0, &I_External_ant_1_9x11);
     }
 
     subghz_view_rssi_draw(canvas, model);
@@ -316,7 +315,7 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
             { model->bar_show = SubGhzViewReceiverBarShowToUnlockPress; },
             true);
         if(subghz_receiver->lock_count == 0) {
-            furi_timer_start(subghz_receiver->timer, pdMS_TO_TICKS(1000));
+            furi_timer_start(subghz_receiver->timer, 1000);
         }
         if(event->key == InputKeyBack && event->type == InputTypeShort) {
             subghz_receiver->lock_count++;
@@ -330,7 +329,7 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
                 { model->bar_show = SubGhzViewReceiverBarShowUnlock; },
                 true);
             //subghz_receiver->lock = false;
-            furi_timer_start(subghz_receiver->timer, pdMS_TO_TICKS(650));
+            furi_timer_start(subghz_receiver->timer, 650);
         }
 
         return true;
@@ -407,7 +406,7 @@ void subghz_view_receiver_exit(void* context) {
     furi_timer_stop(subghz_receiver->timer);
 }
 
-SubGhzViewReceiver* subghz_view_receiver_alloc() {
+SubGhzViewReceiver* subghz_view_receiver_alloc(void) {
     SubGhzViewReceiver* subghz_receiver = malloc(sizeof(SubGhzViewReceiver));
 
     // View allocation and configuration

@@ -1,6 +1,10 @@
-# Apps Assets folder Example
+# Apps Assets folder Example {#example_app_assets}
 
 This example shows how to use the Apps Assets folder to store data that is not part of the application itself, but is required for its operation, and that data is provided with the application.
+
+## Source code
+
+Source code for this example can be found [here](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/examples/example_apps_assets).
 
 ## What is the Apps Assets Folder?
 
@@ -19,7 +23,7 @@ We recommend to use the `APP_ASSETS_PATH` macro to get the path to the Apps Asse
 
 ## What is the difference between the Apps Assets folder and the Apps Data folder?
 
-The Apps Assets folder is used to store the data <u>provided</u> with the application. For example, if you want to create a game, you can store game levels (contant data) in the Apps Assets folder.
+The Apps Assets folder is used to store the data <u>provided</u> with the application. For example, if you want to create a game, you can store game levels (content data) in the Apps Assets folder.
 
 The Apps Data folder is used to store data <u>generated</u> by the application. For example, if you want to create a game, you can save the progress of the game (user-generated data) in the Apps Data folder.
 

@@ -3,7 +3,7 @@
 #include <lfrfid/tools/fsk_demod.h>
 #include <lfrfid/tools/fsk_osc.h>
 #include "lfrfid_protocols.h"
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 
 #define JITTER_TIME (20)
 #define MIN_TIME (64 - JITTER_TIME)
@@ -193,9 +193,13 @@ bool protocol_hid_ex_generic_write_data(ProtocolHIDEx* protocol, void* data) {
 };
 
 void protocol_hid_ex_generic_render_data(ProtocolHIDEx* protocol, FuriString* result) {
-    // TODO FL-3518: parser and render functions
     UNUSED(protocol);
-    furi_string_printf(result, "Generic HID Extended\r\nData: Unknown");
+
+    // TODO FL-3518: parser and render functions
+    furi_string_set(
+        result,
+        "Type: Generic HID Extended\n"
+        "Data: Unknown");
 };
 
 const ProtocolBase protocol_hid_ex_generic = {

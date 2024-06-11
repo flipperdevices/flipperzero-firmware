@@ -1,8 +1,8 @@
-## What a Firmware Target is
+## What a Firmware Target is {#hardware_targets}
 
 Flipper's firmware is modular and supports different hardware configurations in a common code base. It encapsulates hardware-specific differences in `furi_hal`, board initialization code, linker files, SDK data and other information in a _target definition_.
 
-Target-specific files are placed in a single sub-folder in `firmware/targets`. It must contain a target definition file, `target.json`, and may contain other files if they are referenced by current target's definition. By default, `fbt` gathers all source files in target folder, unless they are explicitly excluded.
+Target-specific files are placed in a single sub-folder in `targets`. It must contain a target definition file, `target.json`, and may contain other files if they are referenced by current target's definition. By default, `fbt` gathers all source files in target folder, unless they are explicitly excluded.
 
 Targets can inherit most code parts from other targets, to reduce common code duplication.
 
@@ -29,7 +29,7 @@ A target definition file, `target.json`, is a JSON file that can contain the fol
 
 Not all applications are available on different hardware targets. 
 
-* For applications built into the firmware, you have to specify a compatible application set using `FIRMWARE_APP_SET=...` fbt option. See [fbt docs](./fbt.md#firmware-application-set) for details on build configurations.
+* For applications built into the firmware, you have to specify a compatible application set using `FIRMWARE_APP_SET=...` fbt option. See [fbt docs](./fbt.md) for details on build configurations.
 
 * For applications built as external .faps, you have to explicitly specify compatible targets in application's manifest, `application.fam`. For example, to limit application to a single target, add `targets=["f7"],` to the manifest. It won't be built for other targets.
 

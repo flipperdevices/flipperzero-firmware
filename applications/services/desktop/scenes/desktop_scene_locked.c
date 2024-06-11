@@ -3,14 +3,12 @@
 #include <gui/scene_manager.h>
 #include <gui/view_stack.h>
 #include <stdint.h>
-#include <portmacro.h>
 
 #include "../desktop.h"
 #include "../desktop_i.h"
 #include "../helpers/pin.h"
 #include "../animations/animation_manager.h"
 #include "../views/desktop_events.h"
-#include "../views/desktop_view_pin_input.h"
 #include "../views/desktop_view_locked.h"
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
@@ -84,6 +82,7 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case DesktopLockedEventUnlocked:
+        case DesktopGlobalApiUnlock:
             desktop_unlock(desktop);
             consumed = true;
             break;

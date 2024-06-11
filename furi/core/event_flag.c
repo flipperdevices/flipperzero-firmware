@@ -2,28 +2,38 @@
 #include "common_defines.h"
 #include "check.h"
 
+#include <FreeRTOS.h>
 #include <event_groups.h>
 
 #define FURI_EVENT_FLAG_MAX_BITS_EVENT_GROUPS 24U
 #define FURI_EVENT_FLAG_INVALID_BITS (~((1UL << FURI_EVENT_FLAG_MAX_BITS_EVENT_GROUPS) - 1U))
 
-FuriEventFlag* furi_event_flag_alloc() {
-    furi_assert(!FURI_IS_IRQ_MODE());
+struct FuriEventFlag {
+    StaticEventGroup_t container;
+};
 
-    EventGroupHandle_t handle = xEventGroupCreate();
-    furi_check(handle);
+// IMPORTANT: container MUST be the FIRST struct member
+static_assert(offsetof(FuriEventFlag, container) == 0);
 
-    return ((FuriEventFlag*)handle);
+FuriEventFlag* furi_event_flag_alloc(void) {
+    furi_check(!FURI_IS_IRQ_MODE());
+
+    FuriEventFlag* instance = malloc(sizeof(FuriEventFlag));
+
+    furi_check(xEventGroupCreateStatic(&instance->container) == (EventGroupHandle_t)instance);
+
+    return instance;
 }
 
 void furi_event_flag_free(FuriEventFlag* instance) {
-    furi_assert(!FURI_IS_IRQ_MODE());
+    furi_check(!FURI_IS_IRQ_MODE());
     vEventGroupDelete((EventGroupHandle_t)instance);
+    free(instance);
 }
 
 uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
-    furi_assert(instance);
-    furi_assert((flags & FURI_EVENT_FLAG_INVALID_BITS) == 0U);
+    furi_check(instance);
+    furi_check((flags & FURI_EVENT_FLAG_INVALID_BITS) == 0U);
 
     EventGroupHandle_t hEventGroup = (EventGroupHandle_t)instance;
     uint32_t rflags;
@@ -42,12 +52,12 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
     }
 
     /* Return event flags after setting */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
-    furi_assert(instance);
-    furi_assert((flags & FURI_EVENT_FLAG_INVALID_BITS) == 0U);
+    furi_check(instance);
+    furi_check((flags & FURI_EVENT_FLAG_INVALID_BITS) == 0U);
 
     EventGroupHandle_t hEventGroup = (EventGroupHandle_t)instance;
     uint32_t rflags;
@@ -68,11 +78,11 @@ uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
     }
 
     /* Return event flags before clearing */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_event_flag_get(FuriEventFlag* instance) {
-    furi_assert(instance);
+    furi_check(instance);
 
     EventGroupHandle_t hEventGroup = (EventGroupHandle_t)instance;
     uint32_t rflags;
@@ -84,7 +94,7 @@ uint32_t furi_event_flag_get(FuriEventFlag* instance) {
     }
 
     /* Return current event flags */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_event_flag_wait(
@@ -92,9 +102,9 @@ uint32_t furi_event_flag_wait(
     uint32_t flags,
     uint32_t options,
     uint32_t timeout) {
-    furi_assert(!FURI_IS_IRQ_MODE());
-    furi_assert(instance);
-    furi_assert((flags & FURI_EVENT_FLAG_INVALID_BITS) == 0U);
+    furi_check(!FURI_IS_IRQ_MODE());
+    furi_check(instance);
+    furi_check((flags & FURI_EVENT_FLAG_INVALID_BITS) == 0U);
 
     EventGroupHandle_t hEventGroup = (EventGroupHandle_t)instance;
     BaseType_t wait_all;
@@ -135,5 +145,5 @@ uint32_t furi_event_flag_wait(
     }
 
     /* Return event flags before clearing */
-    return (rflags);
+    return rflags;
 }

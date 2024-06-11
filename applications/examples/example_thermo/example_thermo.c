@@ -1,4 +1,7 @@
-/*
+/**
+ * @file example_thermo.c
+ * @brief 1-Wire thermometer example.
+ *
  * This file contains an example application that reads and displays
  * the temperature from a DS18B20 1-wire thermometer.
  *
@@ -90,7 +93,7 @@ static void example_thermo_request_temperature(ExampleThermoContext* context) {
     bool success = false;
     do {
         /* Each communication with a 1-wire device starts by a reset.
-           The functon will return true if a device responded with a presence pulse. */
+           The function will return true if a device responded with a presence pulse. */
         if(!onewire_host_reset(onewire)) break;
         /* After the reset, a ROM operation must follow.
            If there is only one device connected, the "Skip ROM" command is most appropriate
@@ -130,7 +133,7 @@ static void example_thermo_read_temperature(ExampleThermoContext* context) {
         size_t attempts_left = 10;
         do {
             /* Each communication with a 1-wire device starts by a reset.
-            The functon will return true if a device responded with a presence pulse. */
+            The function will return true if a device responded with a presence pulse. */
             if(!onewire_host_reset(onewire)) continue;
 
             /* After the reset, a ROM operation must follow.
@@ -221,8 +224,7 @@ static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 0, 16, 128, 16);
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(
-        canvas, middle_x, 30, AlignCenter, AlignBottom, "Connnect thermometer");
+    canvas_draw_str_aligned(canvas, middle_x, 30, AlignCenter, AlignBottom, "Connect thermometer");
 
     snprintf(
         text_store,
@@ -237,7 +239,7 @@ static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
         float temp;
         char temp_units;
 
-        /* The applicaton is locale-aware.
+        /* The application is locale-aware.
            Change Settings->System->Units to check it out. */
         switch(locale_get_measurement_unit()) {
         case LocaleMeasurementUnitsMetric:
@@ -313,7 +315,7 @@ static void example_thermo_run(ExampleThermoContext* context) {
 /******************** Initialisation & startup *****************************/
 
 /* Allocate the memory and initialise the variables */
-static ExampleThermoContext* example_thermo_context_alloc() {
+static ExampleThermoContext* example_thermo_context_alloc(void) {
     ExampleThermoContext* context = malloc(sizeof(ExampleThermoContext));
 
     context->view_port = view_port_alloc();
@@ -355,7 +357,7 @@ int32_t example_thermo_main(void* p) {
     /* Allocate all of the necessary structures */
     ExampleThermoContext* context = example_thermo_context_alloc();
 
-    /* Start the applicaton's main loop. It won't return until the application was requested to exit. */
+    /* Start the application's main loop. It won't return until the application was requested to exit. */
     example_thermo_run(context);
 
     /* Release all unneeded resources */

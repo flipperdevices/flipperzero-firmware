@@ -19,7 +19,7 @@ typedef enum {
 const char*
     subghz_frequency_analyzer_log_get_order_name(SubGhzFrequencyAnalyzerLogOrderBy order_by);
 
-TUPLE_DEF2(
+TUPLE_DEF2( //-V1048
     SubGhzFrequencyAnalyzerLogItem,
     (seq, uint8_t),
     (frequency, uint32_t),
@@ -40,6 +40,8 @@ ARRAY_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItem_t)
     ARRAY_OPLIST(SubGhzFrequencyAnalyzerLogItemArray, M_OPL_SubGhzFrequencyAnalyzerLogItem_t())
 ALGO_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItemArray_t)
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
 FUNC_OBJ_INS_DEF(
     SubGhzFrequencyAnalyzerLogItemArray_compare_by /* name of the instance */,
     SubGhzFrequencyAnalyzerLogItemArray_cmp_obj /* name of the interface */,
@@ -76,3 +78,4 @@ FUNC_OBJ_INS_DEF(
     (order_by, SubGhzFrequencyAnalyzerLogOrderBy))
 #define M_OPL_SubGhzFrequencyAnalyzerLogItemArray_compare_by_t() \
     FUNC_OBJ_INS_OPLIST(SubGhzFrequencyAnalyzerLogItemArray_compare_by, M_DEFAULT_OPLIST)
+#pragma GCC diagnostic pop

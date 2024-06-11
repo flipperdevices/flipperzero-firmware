@@ -137,7 +137,7 @@ static const struct {
         .stage = UpdateTaskStageRadioBusy,
         .percent_min = 11,
         .percent_max = 20,
-        .descr = "C2 FUS swich failed",
+        .descr = "C2 FUS switch failed",
     },
     {
         .stage = UpdateTaskStageRadioBusy,
@@ -387,7 +387,7 @@ static void update_task_worker_thread_cb(FuriThreadState state, void* context) {
     }
 }
 
-UpdateTask* update_task_alloc() {
+UpdateTask* update_task_alloc(void) {
     UpdateTask* update_task = malloc(sizeof(UpdateTask));
 
     update_task->state.stage = UpdateTaskStageProgress;

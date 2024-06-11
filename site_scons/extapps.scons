@@ -14,7 +14,6 @@ appenv = ENV["APPENV"] = ENV.Clone(
         "fbt_assets",
         "fbt_sdk",
     ],
-    RESOURCES_ROOT=ENV.Dir("#/assets/resources"),
 )
 
 appenv.Replace(
@@ -42,7 +41,6 @@ appenv.AppendUnique(
         "-Xlinker",
         "-Map=${TARGET}.map",
         "-specs=nano.specs",
-        "-specs=nosys.specs",
     ],
     LIBS=[
         "m",
@@ -50,13 +48,15 @@ appenv.AppendUnique(
         "stdc++",
         "supc++",
     ],
+    CFLAGS=[
+        "-Wno-strict-prototypes",
+    ],
 )
 
 
 @dataclass
 class FlipperExtAppBuildArtifacts:
     application_map: dict = field(default_factory=dict)
-    resources_dist: NodeList = field(default_factory=NodeList)
     sdk_tree: NodeList = field(default_factory=NodeList)
 
 
@@ -77,8 +77,6 @@ Alias(
     "faps",
     list(app_artifact.validator for app_artifact in extapps.application_map.values()),
 )
-
-extapps.resources_dist = appenv.FapDist(appenv["RESOURCES_ROOT"], [])
 
 
 if appsrc := appenv.subst("$APPSRC"):

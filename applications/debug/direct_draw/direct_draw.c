@@ -26,7 +26,7 @@ static void gui_input_events_callback(const void* value, void* ctx) {
     }
 }
 
-static DirectDraw* direct_draw_alloc() {
+static DirectDraw* direct_draw_alloc(void) {
     DirectDraw* instance = malloc(sizeof(DirectDraw));
 
     instance->input = furi_record_open(RECORD_INPUT_EVENTS);
@@ -71,7 +71,7 @@ static void direct_draw_run(DirectDraw* instance) {
     size_t counter = 0;
     float fps = 0;
 
-    vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
+    furi_thread_set_current_priority(FuriThreadPriorityIdle);
 
     do {
         size_t elapsed = DWT->CYCCNT - start;

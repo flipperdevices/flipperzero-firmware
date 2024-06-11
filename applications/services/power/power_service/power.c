@@ -15,7 +15,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
 
     if(power->info.gauge_is_ok) {
         canvas_draw_box(canvas, 2, 2, (power->info.charge + 4) / 5, 4);
-        if(power->info.voltage_battery_charge_limit < 4.2) {
+        if(power->info.voltage_battery_charge_limit < 4.2f) {
             // Battery charge voltage limit is modified, indicate with cross pattern
             canvas_invert_color(canvas);
             uint8_t battery_bar_width = (power->info.charge + 4) / 5;
@@ -100,10 +100,16 @@ static void power_loader_callback(const void* message, void* context) {
     Power* power = context;
     const LoaderEvent* event = message;
 
-    if(event->type == LoaderEventTypeApplicationStarted) {
+    switch (event->type) {
+    case LoaderEventTypeApplicationBeforeLoad:
         power_auto_shutdown_inhibit(power);
-    } else if(event->type == LoaderEventTypeApplicationStopped) {
+        break;
+    case LoaderEventTypeApplicationLoadFailed:
+    case LoaderEventTypeApplicationStopped:
         power_auto_shutdown_arm(power);
+        break;
+    default:
+        furi_crash();
     }
 }
 
@@ -130,7 +136,7 @@ static void power_shutdown_time_changed_callback(const void* event, void* contex
     }
 }
 
-Power* power_alloc() {
+Power* power_alloc(void) {
     Power* power = malloc(sizeof(Power));
 
     //Auto shutdown timer
@@ -290,6 +296,8 @@ int32_t power_srv(void* p) {
 
     if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
         FURI_LOG_W(TAG, "Skipping start in special boot mode");
+
+        furi_thread_suspend(furi_thread_get_current_id());
         return 0;
     }
 

@@ -29,21 +29,25 @@ which is the name that most clang tools search for by default.
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-import json
-import itertools
 import fnmatch
+import itertools
+import json
+from shlex import join, split
+
 import SCons
-
-from SCons.Tool.cxx import CXXSuffixes
+from SCons.Tool.asm import ASPPSuffixes, ASSuffixes
 from SCons.Tool.cc import CSuffixes
-from SCons.Tool.asm import ASSuffixes, ASPPSuffixes
+from SCons.Tool.cxx import CXXSuffixes
 
-# TODO FL-3542: Is there a better way to do this than this global? Right now this exists so that the
+# TODO: (-nofl) Is there a better way to do this than this global? Right now this exists so that the
 # emitter we add can record all of the things it emits, so that the scanner for the top level
 # compilation database can access the complete list, and also so that the writer has easy
 # access to write all of the files. But it seems clunky. How can the emitter and the scanner
 # communicate more gracefully?
 __COMPILATION_DB_ENTRIES = []
+
+# We cache the tool path lookups to avoid doing them over and over again.
+_TOOL_PATH_CACHE = {}
 
 
 # We make no effort to avoid rebuilding the entries. Someday, perhaps we could and even
@@ -91,7 +95,7 @@ def make_emit_compilation_DB_entry(comstr):
             __COMPILATIONDB_ENV=env,
         )
 
-        # TODO FL-3541: Technically, these next two lines should not be required: it should be fine to
+        # TODO: (-nofl) Technically, these next two lines should not be required: it should be fine to
         # cache the entries. However, they don't seem to update properly. Since they are quick
         # to re-generate disable caching and sidestep this problem.
         env.AlwaysBuild(entry)
@@ -102,6 +106,10 @@ def make_emit_compilation_DB_entry(comstr):
         return target, source
 
     return emit_compilation_db_entry
+
+
+def __is_value_true(value):
+    return value in [True, 1, "True", "true"]
 
 
 def compilation_db_entry_action(target, source, env, **kw):
@@ -122,6 +130,20 @@ def compilation_db_entry_action(target, source, env, **kw):
         env=env["__COMPILATIONDB_ENV"],
     )
 
+    cmdline = split(command)
+    binaries_to_omit = env["COMPILATIONDB_OMIT_BINARIES"]
+    while (executable := cmdline[0]) in binaries_to_omit:
+        cmdline.pop(0)
+
+    if __is_value_true(env["COMPILATIONDB_USE_BINARY_ABSPATH"]):
+        if not (tool_path := _TOOL_PATH_CACHE.get(executable, None)):
+            tool_path = env.WhereIs(executable) or executable
+            _TOOL_PATH_CACHE[executable] = tool_path
+        # Replacing the executable with the full path
+        executable = tool_path
+
+    command = join((executable, *cmdline[1:]))
+
     entry = {
         "directory": env.Dir("#").abspath,
         "command": command,
@@ -135,7 +157,7 @@ def compilation_db_entry_action(target, source, env, **kw):
 def write_compilation_db(target, source, env):
     entries = []
 
-    use_abspath = env["COMPILATIONDB_USE_ABSPATH"] in [True, 1, "True", "true"]
+    use_abspath = __is_value_true(env["COMPILATIONDB_USE_ABSPATH"])
     use_path_filter = env.subst("$COMPILATIONDB_PATH_FILTER")
     use_srcpath_filter = env.subst("$COMPILATIONDB_SRCPATH_FILTER")
 
@@ -210,6 +232,8 @@ def generate(env, **kwargs):
         COMPILATIONDB_USE_ABSPATH=False,
         COMPILATIONDB_PATH_FILTER="",
         COMPILATIONDB_SRCPATH_FILTER="",
+        COMPILATIONDB_OMIT_BINARIES=[],
+        COMPILATIONDB_USE_BINARY_ABSPATH=False,
     )
 
     components_by_suffix = itertools.chain(
@@ -242,10 +266,7 @@ def generate(env, **kwargs):
     for entry in components_by_suffix:
         suffix = entry[0]
         builder, base_emitter, command = entry[1]
-
-        # Assumes a dictionary emitter
-        emitter = builder.emitter.get(suffix, False)
-        if emitter:
+        if emitter := builder.emitter.get(suffix, False):
             # We may not have tools installed which initialize all or any of
             # cxx, cc, or assembly. If not skip resetting the respective emitter.
             builder.emitter[suffix] = SCons.Builder.ListEmitter(

@@ -24,9 +24,9 @@ static void desktop_settings_view_pin_setup_howto2_draw(Canvas* canvas, void* mo
     elements_multiline_text_aligned(
         canvas,
         64,
-        24,
+        0,
         AlignCenter,
-        AlignCenter,
+        AlignTop,
         "Forgotten PIN can only be\n"
         "reset with entire device.\n"
         "Read docs How to reset PIN.");
@@ -76,7 +76,7 @@ void desktop_settings_view_pin_setup_howto2_set_ok_callback(
     instance->ok_callback = callback;
 }
 
-DesktopSettingsViewPinSetupHowto2* desktop_settings_view_pin_setup_howto2_alloc() {
+DesktopSettingsViewPinSetupHowto2* desktop_settings_view_pin_setup_howto2_alloc(void) {
     DesktopSettingsViewPinSetupHowto2* view = malloc(sizeof(DesktopSettingsViewPinSetupHowto2));
     view->view = view_alloc();
     view_set_context(view->view, view);
