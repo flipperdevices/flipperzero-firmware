@@ -6,11 +6,12 @@
 
 #include <rpc/rpc_i.h>
 #include <flipper.pb.h>
+#include <core/event_loop.h>
 
 static constexpr auto unit_tests_api_table = sort(create_array_t<sym_entry>(
     API_METHOD(resource_manifest_reader_alloc, ResourceManifestReader*, (Storage*)),
     API_METHOD(resource_manifest_reader_free, void, (ResourceManifestReader*)),
-    API_METHOD(resource_manifest_reader_open, bool, (ResourceManifestReader*, const char* filename)),
+    API_METHOD(resource_manifest_reader_open, bool, (ResourceManifestReader*, const char*)),
     API_METHOD(resource_manifest_reader_next, ResourceManifestEntry*, (ResourceManifestReader*)),
     API_METHOD(resource_manifest_reader_previous, ResourceManifestEntry*, (ResourceManifestReader*)),
     API_METHOD(slix_process_iso15693_3_error, SlixError, (Iso15693_3Error)),
@@ -19,11 +20,24 @@ static constexpr auto unit_tests_api_table = sort(create_array_t<sym_entry>(
     API_METHOD(xQueueSemaphoreTake, BaseType_t, (QueueHandle_t, TickType_t)),
     API_METHOD(vQueueDelete, void, (QueueHandle_t)),
     API_METHOD(
-        xQueueGenericCreate,
+        xQueueGenericCreateStatic,
         QueueHandle_t,
-        (const UBaseType_t, const UBaseType_t, const uint8_t)),
+        (const UBaseType_t, const UBaseType_t, uint8_t*, StaticQueue_t*, const uint8_t)),
     API_METHOD(
         xQueueGenericSend,
         BaseType_t,
         (QueueHandle_t, const void* const, TickType_t, const BaseType_t)),
+    API_METHOD(furi_event_loop_alloc, FuriEventLoop*, (void)),
+    API_METHOD(furi_event_loop_free, void, (FuriEventLoop*)),
+    API_METHOD(
+        furi_event_loop_message_queue_subscribe,
+        void,
+        (FuriEventLoop*,
+         FuriMessageQueue*,
+         FuriEventLoopEvent,
+         FuriEventLoopMessageQueueCallback,
+         void*)),
+    API_METHOD(furi_event_loop_message_queue_unsubscribe, void, (FuriEventLoop*, FuriMessageQueue*)),
+    API_METHOD(furi_event_loop_run, void, (FuriEventLoop*)),
+    API_METHOD(furi_event_loop_stop, void, (FuriEventLoop*)),
     API_VARIABLE(PB_Main_msg, PB_Main_msg_t)));

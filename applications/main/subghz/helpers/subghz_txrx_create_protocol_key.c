@@ -1,4 +1,4 @@
-#include "subghz_txrx_i.h"
+#include "subghz_txrx_i.h" // IWYU pragma: keep
 #include "subghz_txrx_create_protocol_key.h"
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/protocols/protocol_items.h>
@@ -78,6 +78,14 @@ SubGhzProtocolStatus subghz_txrx_gen_data_protocol_and_te(
         if(!flipper_format_update_uint32(instance->fff_data, "TE", (uint32_t*)&te, 1)) {
             ret = SubGhzProtocolStatusErrorParserOthers;
             FURI_LOG_E(TAG, "Unable to update Te");
+        }
+    }
+    if(ret == SubGhzProtocolStatusOk) {
+        uint32_t guard_time = 30;
+        if(!flipper_format_update_uint32(
+               instance->fff_data, "Guard_time", (uint32_t*)&guard_time, 1)) {
+            ret = SubGhzProtocolStatusErrorParserOthers;
+            FURI_LOG_E(TAG, "Unable to update Guard_time");
         }
     }
     return ret;
