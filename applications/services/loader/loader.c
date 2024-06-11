@@ -47,14 +47,18 @@ static LoaderMessageLoaderStatusResult loader_start_internal(
     return result;
 }
 
-static void
-    loader_dialog_prepare_and_show(DialogsApp* dialogs, const char* error, const char* url) {
+static void loader_dialog_prepare_and_show(
+    DialogsApp* dialogs,
+    const char* error,
+    const char* url,
+    const Icon* icon) {
     FuriString* header = furi_string_alloc_printf("Error: %s", error);
     FuriString* text = furi_string_alloc_printf("Learn more:\nr.flipper.net/%s", url);
     DialogMessage* message = dialog_message_alloc();
 
     dialog_message_set_header(message, furi_string_get_cstr(header), 64, 0, AlignCenter, AlignTop);
     dialog_message_set_text(message, furi_string_get_cstr(text), 0, 63, AlignLeft, AlignBottom);
+    dialog_message_set_icon(message, icon, 128 - 25, 64 - 25);
     dialog_message_show(dialogs, message);
 
     dialog_message_free(message);
@@ -78,34 +82,39 @@ static void loader_show_gui_error(
             message, "Update firmware\nto run this app", 3, 26, AlignLeft, AlignTop);
         dialog_message_show(dialogs, message);
     } else if(status.value == LoaderStatusErrorUnknownApp) {
-        loader_dialog_prepare_and_show(dialogs, "App Not Found", "err_01");
+        loader_dialog_prepare_and_show(dialogs, "App Not Found", "err_01", &I_err_01);
     } else if(status.value == LoaderStatusErrorInternal) {
         // TODO FL-3522: we have many places where we can emit a double start, ex: desktop, menu
         // so i prefer to not show LoaderStatusErrorAppStarted error message for now
         switch(status.error) {
         case LoaderStatusErrorInvalidFile:
-            loader_dialog_prepare_and_show(dialogs, "Invalid File", "err_02");
+            loader_dialog_prepare_and_show(dialogs, "Invalid File", "err_02", &I_err_02);
             break;
         case LoaderStatusErrorInvalidManifest:
-            loader_dialog_prepare_and_show(dialogs, "Manifest Invalid", "err_03");
+            loader_dialog_prepare_and_show(dialogs, "Invalid Manifest", "err_03", &I_err_03);
             break;
         case LoaderStatusErrorMissingImports:
-            loader_dialog_prepare_and_show(dialogs, "Missing Imports", "err_04");
+            loader_dialog_prepare_and_show(dialogs, "Missing Imports", "err_04", &I_err_04);
             break;
         case LoaderStatusErrorHWMismatch:
-            loader_dialog_prepare_and_show(dialogs, "HW Target Mismatch", "err_05");
+            loader_dialog_prepare_and_show(dialogs, "HW Target\nMismatch", "err_05", &I_err_05);
             break;
         case LoaderStatusErrorOutdatedApp:
-            loader_dialog_prepare_and_show(dialogs, "Outdated App", "err_06");
+            loader_dialog_prepare_and_show(dialogs, "Outdated App", "err_06", &I_err_06);
             break;
         case LoaderStatusErrorOutdatedFirmware:
-            loader_dialog_prepare_and_show(dialogs, "Outdated Firmware", "err_07");
+            loader_dialog_prepare_and_show(dialogs, "Outdated Firmware", "err_07", &I_err_07);
             break;
         case LoaderStatusErrorOutOfMemory:
             dialog_message_set_header(
                 message, "Error: Out of Memory", 64, 0, AlignCenter, AlignTop);
             dialog_message_set_text(
-                message, "My brain is so full\nPlease, reboot me!", 0, 63, AlignLeft, AlignBottom);
+                message,
+                "Not enough RAM to run the\napp. Please reboot the device",
+                64,
+                13,
+                AlignCenter,
+                AlignTop);
             dialog_message_set_buttons(message, NULL, NULL, "Reboot");
             if(dialog_message_show(dialogs, message) == DialogMessageButtonRight) {
                 furi_hal_power_reset();
@@ -384,9 +393,9 @@ static LoaderStatusError
     case FlipperApplicationPreloadStatusInvalidManifest:
         return LoaderStatusErrorInvalidManifest;
     case FlipperApplicationPreloadStatusApiTooOld:
-        return LoaderStatusErrorOutdatedFirmware;
-    case FlipperApplicationPreloadStatusApiTooNew:
         return LoaderStatusErrorOutdatedApp;
+    case FlipperApplicationPreloadStatusApiTooNew:
+        return LoaderStatusErrorOutdatedFirmware;
     case FlipperApplicationPreloadStatusTargetMismatch:
         return LoaderStatusErrorHWMismatch;
     default:
