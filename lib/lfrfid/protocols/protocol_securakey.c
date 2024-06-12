@@ -162,6 +162,11 @@ bool protocol_securakey_decoder_feed(ProtocolSecurakey* protocol, bool level, ui
 };
 
 void protocol_securakey_render_data(ProtocolSecurakey* protocol, FuriString* result) {
+    if(bit_lib_get_bits(protocol->data, 0, 8) == 0) {
+        protocol->bit_format = 26;
+    } else {
+        protocol->bit_format = 32;
+    }
     furi_string_printf(
         result,
         "%u-bit format\nFacility code: %u\nCard number: %u",
