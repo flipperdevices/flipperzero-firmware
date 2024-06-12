@@ -76,7 +76,7 @@ FuriThreadListItem* furi_thread_list_get_or_insert(FuriThreadList* instance, Fur
     return item;
 }
 
-void furi_thread_list_cleanup(FuriThreadList* instance, uint32_t runtime, uint32_t tick) {
+void furi_thread_list_process(FuriThreadList* instance, uint32_t runtime, uint32_t tick) {
     furi_check(instance);
 
     instance->runtime_previous = instance->runtime_current;
@@ -89,12 +89,13 @@ void furi_thread_list_cleanup(FuriThreadList* instance, uint32_t runtime, uint32
         FuriThreadListItem* item = *FuriThreadListItemArray_cref(it);
         if(item->tick != tick) {
             FuriThreadListItemArray_remove(instance->items, it);
-            FuriThreadListItemDict_erase(instance->search, (uint32_t)item->thread);
+            (void)FuriThreadListItemDict_erase(instance->search, (uint32_t)item->thread);
             free(item);
         } else {
             uint32_t item_counter = item->counter_current - item->counter_previous;
             if(item_counter && item->counter_previous && item->counter_current) {
                 item->cpu = (float)item_counter / (float)runtime_counter * 100.0f;
+                if(item->cpu > 200.0f) item->cpu = .0f;
             } else {
                 item->cpu = 0.0f;
             }

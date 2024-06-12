@@ -389,14 +389,28 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
 
     FuriThreadList* thread_list = furi_thread_list_alloc();
     while(!cli_cmd_interrupt_received(cli)) {
-        uint32_t tick = furi_thread_enumerate(thread_list);
+        uint32_t tick = furi_get_tick();
+        furi_thread_enumerate(thread_list);
 
-        printf("\e[2J"
-               "\e[0;0f");
+        printf("\e[2J\e[0;0f"); // Clear display and return to 0
+
         uint32_t uptime = tick / furi_kernel_get_tick_frequency();
-        printf("Uptime: %luh%lum%lus\r\n", uptime / 60 / 60, uptime / 60 % 60, uptime % 60);
         printf(
-            "%-17s %-20s %-10s %-5s %-13s %-8s %-10s %-10s %-4s\r\n\r\n",
+            "Threads: %zu, Uptime: %luh%lum%lus\r\n",
+            furi_thread_list_size(thread_list),
+            uptime / 60 / 60,
+            uptime / 60 % 60,
+            uptime % 60);
+
+        printf(
+            "Heap: total %zu, free %zu, minimum %zu, max block %zu\r\n\r\n",
+            memmgr_get_total_heap(),
+            memmgr_get_free_heap(),
+            memmgr_get_minimum_free_heap(),
+            memmgr_heap_get_max_free_block());
+
+        printf(
+            "%-17s %-20s %-10s %5s %12s %6s %10s %7s %5s\r\n",
             "AppID",
             "Name",
             "State",
@@ -406,10 +420,11 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
             "Stack Min",
             "Heap",
             "CPU");
+
         for(size_t i = 0; i < furi_thread_list_size(thread_list); i++) {
             const FuriThreadListItem* item = furi_thread_list_get_at(thread_list, i);
             printf(
-                "%-17s %-20s %-10s %-5d 0x%-11lx %-8lu %-10lu %-10zu %2.2f\r\n",
+                "%-17s %-20s %-10s %5d   0x%08lx %6lu %10lu %7zu %5.1f\r\n",
                 item->app_id,
                 item->name,
                 item->state,
@@ -420,7 +435,7 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
                 item->heap,
                 (double)item->cpu);
         }
-        printf("\r\nThreads: %zu\r\n", furi_thread_list_size(thread_list));
+
         furi_delay_ms(1000);
     }
     furi_thread_list_free(thread_list);

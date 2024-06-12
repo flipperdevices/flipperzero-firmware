@@ -1808,7 +1808,7 @@ Function,+,furi_thread_alloc_ex,FuriThread*,"const char*, uint32_t, FuriThreadCa
 Function,-,furi_thread_alloc_service,FuriThread*,"const char*, uint32_t, FuriThreadCallback, void*"
 Function,-,furi_thread_disable_heap_trace,void,FuriThread*
 Function,+,furi_thread_enable_heap_trace,void,FuriThread*
-Function,+,furi_thread_enumerate,uint32_t,FuriThreadList*
+Function,+,furi_thread_enumerate,_Bool,FuriThreadList*
 Function,+,furi_thread_flags_clear,uint32_t,uint32_t
 Function,+,furi_thread_flags_get,uint32_t,
 Function,+,furi_thread_flags_set,uint32_t,"FuriThreadId, uint32_t"
@@ -1829,10 +1829,10 @@ Function,+,furi_thread_get_stdout_callback,FuriThreadStdoutWriteCallback,
 Function,+,furi_thread_is_suspended,_Bool,FuriThreadId
 Function,+,furi_thread_join,_Bool,FuriThread*
 Function,+,furi_thread_list_alloc,FuriThreadList*,
-Function,+,furi_thread_list_cleanup,void,"FuriThreadList*, uint32_t, uint32_t"
 Function,+,furi_thread_list_free,void,FuriThreadList*
 Function,+,furi_thread_list_get_at,FuriThreadListItem*,"FuriThreadList*, size_t"
 Function,+,furi_thread_list_get_or_insert,FuriThreadListItem*,"FuriThreadList*, FuriThread*"
+Function,+,furi_thread_list_process,void,"FuriThreadList*, uint32_t, uint32_t"
 Function,+,furi_thread_list_size,size_t,FuriThreadList*
 Function,+,furi_thread_resume,void,FuriThreadId
 Function,+,furi_thread_set_appid,void,"FuriThread*, const char*"
