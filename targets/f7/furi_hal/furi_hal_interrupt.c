@@ -348,7 +348,7 @@ void LPUART1_IRQHandler(void) {
 }
 
 const char* furi_hal_interrupt_get_name(uint8_t exception_number) {
-    int32_t id = exception_number - 16;
+    int32_t id = (int32_t)exception_number - 16;
 
     switch(id) {
     case -14:
