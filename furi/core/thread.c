@@ -53,7 +53,7 @@ struct FuriThread {
     // this ensures that the size of this structure is minimal
     bool is_service;
     bool heap_trace_enabled;
-    volatile bool ready_to_die;
+    volatile bool is_active;
 };
 
 // IMPORTANT: container MUST be the FIRST struct member
@@ -196,7 +196,7 @@ void furi_thread_free(FuriThread* thread) {
     furi_check(thread->is_service == false);
     // Cannot free a non-joined thread
     furi_check(thread->state == FuriThreadStateStopped);
-    furi_check(thread->ready_to_die);
+    furi_check(!thread->is_active);
 
     furi_thread_set_name(thread, NULL);
     furi_thread_set_appid(thread, NULL);
@@ -312,7 +312,7 @@ void furi_thread_start(FuriThread* thread) {
     uint32_t stack_depth = thread->stack_size / sizeof(StackType_t);
     UBaseType_t priority = thread->priority ? thread->priority : FuriThreadPriorityNormal;
 
-    thread->ready_to_die = false;
+    thread->is_active = true;
 
     furi_check(
         xTaskCreateStatic(
@@ -331,7 +331,7 @@ void furi_thread_cleanup_tcb_event(TaskHandle_t task) {
         // clear thread local storage
         vTaskSetThreadLocalStoragePointer(task, 0, NULL);
         furi_check(thread == (FuriThread*)task);
-        thread->ready_to_die = true;
+        thread->is_active = false;
     }
 }
 
@@ -346,7 +346,7 @@ bool furi_thread_join(FuriThread* thread) {
     //
     // If your thread exited, but your app stuck here: some other thread uses
     // all cpu time, which delays kernel from releasing task handle
-    while(!thread->ready_to_die) {
+    while(thread->is_active) {
         furi_delay_ms(10);
     }
 
