@@ -313,6 +313,12 @@ void USB_LP_IRQHandler(void) {
 #endif
 }
 
+void USB_HP_IRQHandler(void) {
+#ifndef FURI_RAM_EXEC
+    usbd_poll(&udev);
+#endif
+}
+
 void IPCC_C1_TX_IRQHandler(void) {
     HW_IPCC_Tx_Handler();
 }
