@@ -37,10 +37,13 @@ FuriThreadList* furi_thread_list_alloc(void) {
 void furi_thread_list_free(FuriThreadList* instance) {
     furi_check(instance);
 
-    for
-        M_EACH(item, instance->items, FuriThreadListItemArray_t) {
-            free(item);
-        }
+    FuriThreadListItemArray_it_t it;
+    FuriThreadListItemArray_it(it, instance->items);
+    while(!FuriThreadListItemArray_end_p(it)) {
+        FuriThreadListItem* item = *FuriThreadListItemArray_cref(it);
+        free(item);
+        FuriThreadListItemArray_next(it);
+    }
 
     FuriThreadListItemDict_clear(instance->search);
     FuriThreadListItemArray_clear(instance->items);
@@ -85,7 +88,8 @@ void furi_thread_list_process(FuriThreadList* instance, uint32_t runtime, uint32
     uint32_t runtime_counter = instance->runtime_current - instance->runtime_previous;
 
     FuriThreadListItemArray_it_t it;
-    for(FuriThreadListItemArray_it(it, instance->items); !FuriThreadListItemArray_end_p(it);) {
+    FuriThreadListItemArray_it(it, instance->items);
+    while(!FuriThreadListItemArray_end_p(it)) {
         FuriThreadListItem* item = *FuriThreadListItemArray_cref(it);
         if(item->tick != tick) {
             FuriThreadListItemArray_remove(instance->items, it);
