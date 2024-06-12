@@ -6,27 +6,21 @@
 extern "C" {
 #endif
 
-typedef struct FuriEventLoopItem FuriEventLoopItem;
-
-/* Link between Event Loop  */
+typedef uint32_t (*FuriEventLoopBaseGetLevel)(FuriEventLoopBase* object, FuriEventLoopEvent event);
 
 typedef struct {
+    const FuriEventLoopBaseGetLevel get_level;
+} FuriEventLoopInterface;
+
+typedef struct FuriEventLoopItem FuriEventLoopItem;
+
+struct FuriEventLoopBase {
+    const FuriEventLoopInterface* vtable;
     FuriEventLoopItem* item_in;
     FuriEventLoopItem* item_out;
-} FuriEventLoopLink;
-
-void furi_event_loop_link_notify(FuriEventLoopLink* instance, FuriEventLoopEvent event);
-
-/* Contract between event loop and an object */
-
-typedef FuriEventLoopLink* (*FuriEventLoopContractGetLink)(void* object);
-
-typedef uint32_t (*FuriEventLoopContractGetLevel)(void* object, FuriEventLoopEvent event);
-
-struct FuriEventLoopContract {
-    const FuriEventLoopContractGetLink get_link;
-    const FuriEventLoopContractGetLevel get_level;
 };
+
+void furi_event_loop_base_notify(FuriEventLoopBase* base, FuriEventLoopEvent event);
 
 #ifdef __cplusplus
 }

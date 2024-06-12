@@ -13,35 +13,27 @@
 #define uxItemSize uxDummy4[2]
 
 struct FuriMessageQueue {
-    StaticQueue_t container;
-
-    // Event Loop Link
-    FuriEventLoopLink event_loop_link;
-
+    FuriEventLoopBase event_loop_base;
+    StaticQueue_t static_queue;
     uint8_t buffer[];
 };
 
-// IMPORTANT: container MUST be the FIRST struct member
-static_assert(offsetof(FuriMessageQueue, container) == 0);
+// IMPORTANT: event_loop_base MUST be the FIRST struct member
+static_assert(offsetof(FuriMessageQueue, event_loop_base) == 0);
 // IMPORTANT: buffer MUST be the LAST struct member
 static_assert(offsetof(FuriMessageQueue, buffer) == sizeof(FuriMessageQueue));
 
-const FuriEventLoopContract furi_message_queue_event_loop_contract;
+const FuriEventLoopInterface furi_message_queue_event_loop_iface;
 
 FuriMessageQueue* furi_message_queue_alloc(uint32_t msg_count, uint32_t msg_size) {
     furi_check((furi_kernel_is_irq_or_masked() == 0U) && (msg_count > 0U) && (msg_size > 0U));
 
     FuriMessageQueue* instance = malloc(sizeof(FuriMessageQueue) + msg_count * msg_size);
+    instance->event_loop_base.vtable = &furi_message_queue_event_loop_iface;
 
-    // 3 things happens here:
-    // - create queue
-    // - check results
-    // - ensure that queue container is first in the FuriMessageQueue structure
-    //
-    // As a bonus it guarantees that FuriMessageQueue* can be casted into StaticQueue_t* or QueueHandle_t.
-    furi_check(
-        xQueueCreateStatic(msg_count, msg_size, instance->buffer, &instance->container) ==
-        (void*)instance);
+    QueueHandle_t hQueue =
+        xQueueCreateStatic(msg_count, msg_size, instance->buffer, &instance->static_queue);
+    furi_check(hQueue == (QueueHandle_t)&instance->static_queue);
 
     return instance;
 }
@@ -50,11 +42,11 @@ void furi_message_queue_free(FuriMessageQueue* instance) {
     furi_check(furi_kernel_is_irq_or_masked() == 0U);
     furi_check(instance);
 
-    // Event Loop must be disconnected
-    furi_check(!instance->event_loop_link.item_in);
-    furi_check(!instance->event_loop_link.item_out);
+    // Event Loop MUST be disconnected
+    furi_check(!instance->event_loop_base.item_in);
+    furi_check(!instance->event_loop_base.item_out);
 
-    vQueueDelete((QueueHandle_t)instance);
+    vQueueDelete((QueueHandle_t)&instance->static_queue);
     free(instance);
 }
 
@@ -62,7 +54,7 @@ FuriStatus
     furi_message_queue_put(FuriMessageQueue* instance, const void* msg_ptr, uint32_t timeout) {
     furi_check(instance);
 
-    QueueHandle_t hQueue = (QueueHandle_t)instance;
+    QueueHandle_t hQueue = (QueueHandle_t)&instance->static_queue;
     FuriStatus stat;
     BaseType_t yield;
 
@@ -95,17 +87,16 @@ FuriStatus
     }
 
     if(stat == FuriStatusOk) {
-        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventIn);
+        furi_event_loop_base_notify(&instance->event_loop_base, FuriEventLoopEventIn);
     }
 
-    /* Return execution status */
     return stat;
 }
 
 FuriStatus furi_message_queue_get(FuriMessageQueue* instance, void* msg_ptr, uint32_t timeout) {
     furi_check(instance);
 
-    QueueHandle_t hQueue = (QueueHandle_t)instance;
+    QueueHandle_t hQueue = (QueueHandle_t)&instance->static_queue;
     FuriStatus stat;
     BaseType_t yield;
 
@@ -138,7 +129,7 @@ FuriStatus furi_message_queue_get(FuriMessageQueue* instance, void* msg_ptr, uin
     }
 
     if(stat == FuriStatusOk) {
-        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
+        furi_event_loop_base_notify(&instance->event_loop_base, FuriEventLoopEventOut);
     }
 
     return stat;
@@ -147,19 +138,19 @@ FuriStatus furi_message_queue_get(FuriMessageQueue* instance, void* msg_ptr, uin
 uint32_t furi_message_queue_get_capacity(FuriMessageQueue* instance) {
     furi_check(instance);
 
-    return instance->container.uxLength;
+    return instance->static_queue.uxLength;
 }
 
 uint32_t furi_message_queue_get_message_size(FuriMessageQueue* instance) {
     furi_check(instance);
 
-    return instance->container.uxItemSize;
+    return instance->static_queue.uxItemSize;
 }
 
 uint32_t furi_message_queue_get_count(FuriMessageQueue* instance) {
     furi_check(instance);
 
-    QueueHandle_t hQueue = (QueueHandle_t)instance;
+    QueueHandle_t hQueue = (QueueHandle_t)&instance->static_queue;
     UBaseType_t count;
 
     if(furi_kernel_is_irq_or_masked() != 0U) {
@@ -174,17 +165,18 @@ uint32_t furi_message_queue_get_count(FuriMessageQueue* instance) {
 uint32_t furi_message_queue_get_space(FuriMessageQueue* instance) {
     furi_check(instance);
 
+    QueueHandle_t hQueue = (QueueHandle_t)&instance->static_queue;
     uint32_t space;
     uint32_t isrm;
 
     if(furi_kernel_is_irq_or_masked() != 0U) {
         isrm = taskENTER_CRITICAL_FROM_ISR();
 
-        space = instance->container.uxLength - instance->container.uxMessagesWaiting;
+        space = instance->static_queue.uxLength - instance->static_queue.uxMessagesWaiting;
 
         taskEXIT_CRITICAL_FROM_ISR(isrm);
     } else {
-        space = (uint32_t)uxQueueSpacesAvailable((QueueHandle_t)instance);
+        space = (uint32_t)uxQueueSpacesAvailable(hQueue);
     }
 
     return space;
@@ -193,7 +185,7 @@ uint32_t furi_message_queue_get_space(FuriMessageQueue* instance) {
 FuriStatus furi_message_queue_reset(FuriMessageQueue* instance) {
     furi_check(instance);
 
-    QueueHandle_t hQueue = (QueueHandle_t)instance;
+    QueueHandle_t hQueue = (QueueHandle_t)&instance->static_queue;
     FuriStatus stat;
 
     if(furi_kernel_is_irq_or_masked() != 0U) {
@@ -204,26 +196,15 @@ FuriStatus furi_message_queue_reset(FuriMessageQueue* instance) {
     }
 
     if(stat == FuriStatusOk) {
-        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
+        furi_event_loop_base_notify(&instance->event_loop_base, FuriEventLoopEventOut);
     }
 
-    /* Return execution status */
     return stat;
 }
 
-const FuriEventLoopContract* furi_message_queue_get_contract(void) {
-    return &furi_message_queue_event_loop_contract;
-}
-
-static FuriEventLoopLink* furi_message_queue_event_loop_get_link(FuriEventLoopObject* object) {
-    FuriMessageQueue* instance = object;
-    furi_assert(instance);
-    return &instance->event_loop_link;
-}
-
 static uint32_t
-    furi_message_queue_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
-    FuriMessageQueue* instance = object;
+    furi_message_queue_event_loop_get_level(FuriEventLoopBase* object, FuriEventLoopEvent event) {
+    FuriMessageQueue* instance = (FuriMessageQueue*)object;
     furi_assert(instance);
 
     if(event == FuriEventLoopEventIn) {
@@ -235,7 +216,6 @@ static uint32_t
     }
 }
 
-const FuriEventLoopContract furi_message_queue_event_loop_contract = {
-    .get_link = furi_message_queue_event_loop_get_link,
+const FuriEventLoopInterface furi_message_queue_event_loop_iface = {
     .get_level = furi_message_queue_event_loop_get_level,
 };

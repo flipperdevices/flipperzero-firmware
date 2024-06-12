@@ -14,8 +14,7 @@ struct FuriEventLoopItem {
     FuriEventLoop* owner;
 
     // Tracking item
-    const FuriEventLoopContract* contract;
-    FuriEventLoopObject* object;
+    FuriEventLoopBase* object;
     FuriEventLoopEvent event;
 
     // Callback and context
@@ -30,8 +29,7 @@ ILIST_DEF(WaitingList, FuriEventLoopItem, M_POD_OPLIST)
 
 static FuriEventLoopItem* furi_event_loop_item_alloc(
     FuriEventLoop* owner,
-    const FuriEventLoopContract* contract,
-    void* object,
+    FuriEventLoopBase* object,
     FuriEventLoopEvent event);
 
 static void furi_event_loop_item_free(FuriEventLoopItem* instance);
@@ -49,7 +47,7 @@ static void furi_event_loop_item_notify(FuriEventLoopItem* instance);
 BPTREE_DEF2( // NOLINT
     FuriEventLoopTree,
     FURI_EVENT_LOOP_TREE_RANK,
-    FuriEventLoopObject*, /* pointer to object we track */
+    FuriEventLoopBase*, /* pointer to object we track */
     M_PTR_OPLIST,
     FuriEventLoopItem*, /* pointer to the FuriEventLoopItem */
     M_PTR_OPLIST)
@@ -116,7 +114,7 @@ static FuriEventLoopProcessStatus
     furi_event_loop_poll_process_event(FuriEventLoop* instance, FuriEventLoopItem* item) {
     UNUSED(instance);
 
-    if(!item->contract->get_level(item->object, item->event)) {
+    if(!item->object->vtable->get_level(item->object, item->event)) {
         return FuriEventLoopProcessStatusComplete;
     }
 
@@ -202,8 +200,7 @@ void furi_event_loop_tick_set(
 
 void furi_event_loop_subscribe(
     FuriEventLoop* instance,
-    FuriEventLoopObject* object,
-    const FuriEventLoopContract* contract,
+    FuriEventLoopBase* object,
     FuriEventLoopEvent event,
     FuriEventLoopCallback callback,
     void* context) {
@@ -211,38 +208,35 @@ void furi_event_loop_subscribe(
     furi_check(instance->thread_id == furi_thread_get_current_id());
     furi_check(instance->state == FuriEventLoopStateIdle);
     furi_check(object);
-    furi_check(contract);
 
     FURI_CRITICAL_ENTER();
 
     furi_check(FuriEventLoopTree_get(instance->tree, object) == NULL);
 
     // Allocate and setup item
-    FuriEventLoopItem* item = furi_event_loop_item_alloc(instance, contract, object, event);
+    FuriEventLoopItem* item = furi_event_loop_item_alloc(instance, object, event);
     furi_event_loop_item_set_callback(item, callback, context);
 
     FuriEventLoopTree_set_at(instance->tree, object, item);
 
-    FuriEventLoopLink* link = item->contract->get_link(object);
-
     if(item->event == FuriEventLoopEventIn) {
-        furi_check(link->item_in == NULL);
-        link->item_in = item;
+        furi_check(object->item_in == NULL);
+        object->item_in = item;
     } else if(item->event == FuriEventLoopEventOut) {
-        furi_check(link->item_out == NULL);
-        link->item_out = item;
+        furi_check(object->item_out == NULL);
+        object->item_out = item;
     } else {
         furi_crash();
     }
 
-    if(item->contract->get_level(item->object, item->event)) {
+    if(object->vtable->get_level(object, event)) {
         furi_event_loop_item_notify(item);
     }
 
     FURI_CRITICAL_EXIT();
 }
 
-void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
+void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopBase* object) {
     furi_check(instance);
     furi_check(instance->state == FuriEventLoopStateIdle);
     furi_check(instance->thread_id == furi_thread_get_current_id());
@@ -255,15 +249,14 @@ void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* o
     FuriEventLoopItem* item = *item_ptr;
     furi_check(item);
     furi_check(item->owner == instance);
-
-    FuriEventLoopLink* link = item->contract->get_link(object);
+    furi_check(item->object == object);
 
     if(item->event == FuriEventLoopEventIn) {
-        furi_check(link->item_in == item);
-        link->item_in = NULL;
+        furi_check(object->item_in == item);
+        object->item_in = NULL;
     } else if(item->event == FuriEventLoopEventOut) {
-        furi_check(link->item_out == item);
-        link->item_out = NULL;
+        furi_check(object->item_out == item);
+        object->item_out = NULL;
     } else {
         furi_crash();
     }
@@ -281,8 +274,7 @@ void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* o
 
 static FuriEventLoopItem* furi_event_loop_item_alloc(
     FuriEventLoop* owner,
-    const FuriEventLoopContract* contract,
-    void* object,
+    FuriEventLoopBase* object,
     FuriEventLoopEvent event) {
     furi_assert(owner);
     furi_assert(object);
@@ -290,7 +282,6 @@ static FuriEventLoopItem* furi_event_loop_item_alloc(
     FuriEventLoopItem* instance = malloc(sizeof(FuriEventLoopItem));
 
     instance->owner = owner;
-    instance->contract = contract;
     instance->object = object;
     instance->event = event;
 
@@ -333,7 +324,7 @@ static void furi_event_loop_item_notify(FuriEventLoopItem* instance) {
         eSetBits);
 }
 
-void furi_event_loop_link_notify(FuriEventLoopLink* instance, FuriEventLoopEvent event) {
+void furi_event_loop_base_notify(FuriEventLoopBase* instance, FuriEventLoopEvent event) {
     furi_assert(instance);
 
     FURI_CRITICAL_ENTER();
