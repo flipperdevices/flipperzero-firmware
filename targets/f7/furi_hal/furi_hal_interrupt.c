@@ -313,7 +313,7 @@ void USB_LP_IRQHandler(void) {
 #endif
 }
 
-void USB_HP_IRQHandler(void) {
+void USB_HP_IRQHandler(void) { //-V524
 #ifndef FURI_RAM_EXEC
     usbd_poll(&udev);
 #endif
