@@ -29,7 +29,6 @@
 // #define configTOTAL_HEAP_SIZE                    ((size_t)0)
 #define configMAX_TASK_NAME_LEN (32)
 
-/* Run-time stats - broken ATM, to be fixed */
 #define configGENERATE_RUN_TIME_STATS 1
 #define portGET_RUN_TIME_COUNTER_VALUE() (DWT->CYCCNT)
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
