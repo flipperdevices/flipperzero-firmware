@@ -4,15 +4,11 @@
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener_i.h>
 
 #include <furi.h>
+#include <furi_hal.h>
 
 #define TAG "MfUltralightListener"
 
 #define MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE (256)
-
-typedef enum {
-    MfUltralightListenerAccessTypeRead,
-    MfUltralightListenerAccessTypeWrite,
-} MfUltralightListenerAccessType;
 
 typedef struct {
     uint8_t cmd;
@@ -24,31 +20,15 @@ static bool mf_ultralight_listener_check_access(
     MfUltralightListener* instance,
     uint16_t start_page,
     MfUltralightListenerAccessType access_type) {
-    bool access_success = false;
-    bool is_write_op = (access_type == MfUltralightListenerAccessTypeWrite);
+    bool access_success = true;
 
-    do {
-        if(!mf_ultralight_support_feature(
-               instance->features, MfUltralightFeatureSupportPasswordAuth)) {
-            access_success = true;
-            break;
-        }
-        if(instance->auth_state != MfUltralightListenerAuthStateSuccess) {
-            if((instance->config->auth0 <= start_page) &&
-               (instance->config->access.prot || is_write_op)) {
-                break;
-            }
-        }
-        if(instance->config->access.cfglck && is_write_op) {
-            uint16_t config_page_start = instance->data->pages_total - 4;
-            if((start_page == config_page_start) || (start_page == config_page_start + 1)) {
-                break;
-            }
-        }
-
-        access_success = true;
-    } while(false);
-
+    if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportAuthenticate)) {
+        access_success = mf_ultralight_c_check_access(
+            instance->data, start_page, access_type, instance->auth_state);
+    } else if(mf_ultralight_support_feature(
+                  instance->features, MfUltralightFeatureSupportPasswordAuth)) {
+        access_success = mf_ultralight_common_check_access(instance, start_page, access_type);
+    }
     return access_success;
 }
 
