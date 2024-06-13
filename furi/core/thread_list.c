@@ -99,7 +99,7 @@ void furi_thread_list_process(FuriThreadList* instance, uint32_t runtime, uint32
             uint32_t item_counter = item->counter_current - item->counter_previous;
             if(item_counter && item->counter_previous && item->counter_current) {
                 item->cpu = (float)item_counter / (float)runtime_counter * 100.0f;
-                if(item->cpu > 200.0f) item->cpu = .0f;
+                if(item->cpu > 200.0f) item->cpu = 0.0f;
             } else {
                 item->cpu = 0.0f;
             }
