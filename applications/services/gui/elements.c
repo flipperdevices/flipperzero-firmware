@@ -92,6 +92,32 @@ void elements_scrollbar_pos(
     }
 }
 
+void elements_scrollbar_horizontal(
+    Canvas* canvas,
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t pos,
+    size_t total) {
+    furi_check(canvas);
+
+    // prevent overflows
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, x, y - 3, width, 3);
+
+    // dot line
+    canvas_set_color(canvas, ColorBlack);
+    for(size_t i = x; i < width + x; i += 2) {
+        canvas_draw_dot(canvas, i, y - 2);
+    }
+
+    // Position block
+    if(total) {
+        float block_w = ((float)width) / total;
+        canvas_draw_box(canvas, x + (block_w * pos), y - 3, MAX(block_w, 1), 3);
+    }
+}
+
 void elements_scrollbar(Canvas* canvas, size_t pos, size_t total) {
     furi_check(canvas);
 
@@ -590,6 +616,18 @@ void elements_scrollable_text_line(
     FuriString* string,
     size_t scroll,
     bool ellipsis) {
+    elements_scrollable_text_line_centered(canvas, x, y, width, string, scroll, ellipsis, false);
+}
+
+void elements_scrollable_text_line_centered(
+    Canvas* canvas,
+    int32_t x,
+    int32_t y,
+    size_t width,
+    FuriString* string,
+    size_t scroll,
+    bool ellipsis,
+    bool centered) {
     furi_check(canvas);
     furi_check(string);
 
@@ -597,6 +635,11 @@ void elements_scrollable_text_line(
 
     size_t len_px = canvas_string_width(canvas, furi_string_get_cstr(line));
     if(len_px > width) {
+        if(centered) {
+            centered = false;
+            x -= width / 2;
+        }
+
         if(ellipsis) {
             width -= canvas_string_width(canvas, "...");
         }
@@ -604,7 +647,7 @@ void elements_scrollable_text_line(
         // Calculate scroll size
         size_t scroll_size = furi_string_size(line);
         size_t right_width = 0;
-        for(size_t i = scroll_size; i > 0; i--) {
+        for(size_t i = scroll_size - 1; i > 0; i--) {
             right_width += canvas_glyph_width(canvas, furi_string_get_char(line, i));
             if(right_width > width) break;
             scroll_size--;
@@ -628,7 +671,12 @@ void elements_scrollable_text_line(
         }
     }
 
-    canvas_draw_str(canvas, x, y, furi_string_get_cstr(line));
+    if(centered) {
+        canvas_draw_str_aligned(
+            canvas, x, y, AlignCenter, AlignBottom, furi_string_get_cstr(line));
+    } else {
+        canvas_draw_str(canvas, x, y, furi_string_get_cstr(line));
+    }
     furi_string_free(line);
 }
 

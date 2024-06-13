@@ -878,7 +878,9 @@ Function,+,elements_multiline_text_framed,void,"Canvas*, int32_t, int32_t, const
 Function,+,elements_progress_bar,void,"Canvas*, int32_t, int32_t, size_t, float"
 Function,+,elements_progress_bar_with_text,void,"Canvas*, int32_t, int32_t, size_t, float, const char*"
 Function,+,elements_scrollable_text_line,void,"Canvas*, int32_t, int32_t, size_t, FuriString*, size_t, _Bool"
+Function,+,elements_scrollable_text_line_centered,void,"Canvas*, int32_t, int32_t, size_t, FuriString*, size_t, _Bool, _Bool"
 Function,+,elements_scrollbar,void,"Canvas*, size_t, size_t"
+Function,+,elements_scrollbar_horizontal,void,"Canvas*, int32_t, int32_t, size_t, size_t, size_t"
 Function,+,elements_scrollbar_pos,void,"Canvas*, int32_t, int32_t, size_t, size_t, size_t"
 Function,+,elements_slightly_rounded_box,void,"Canvas*, int32_t, int32_t, size_t, size_t"
 Function,+,elements_slightly_rounded_frame,void,"Canvas*, int32_t, int32_t, size_t, size_t"
@@ -2582,6 +2584,7 @@ Function,-,strverscmp,int,"const char*, const char*"
 Function,-,strxfrm,size_t,"char*, const char*, size_t"
 Function,-,strxfrm_l,size_t,"char*, const char*, size_t, locale_t"
 Function,+,submenu_add_item,void,"Submenu*, const char*, uint32_t, SubmenuItemCallback, void*"
+Function,+,submenu_add_lockable_item,void,"Submenu*, const char*, uint32_t, SubmenuItemCallback, void*, _Bool, const char*"
 Function,+,submenu_alloc,Submenu*,
 Function,+,submenu_change_item_label,void,"Submenu*, uint32_t, const char*"
 Function,+,submenu_free,void,Submenu*
@@ -2589,6 +2592,7 @@ Function,+,submenu_get_selected_item,uint32_t,Submenu*
 Function,+,submenu_get_view,View*,Submenu*
 Function,+,submenu_reset,void,Submenu*
 Function,+,submenu_set_header,void,"Submenu*, const char*"
+Function,+,submenu_set_orientation,void,"Submenu*, ViewOrientation"
 Function,+,submenu_set_selected_item,void,"Submenu*, uint32_t"
 Function,-,system,int,const char*
 Function,-,tan,double,double
@@ -2662,13 +2666,17 @@ Function,+,variable_item_get_current_value_index,uint8_t,VariableItem*
 Function,+,variable_item_list_add,VariableItem*,"VariableItemList*, const char*, uint8_t, VariableItemChangeCallback, void*"
 Function,+,variable_item_list_alloc,VariableItemList*,
 Function,+,variable_item_list_free,void,VariableItemList*
+Function,+,variable_item_list_get,VariableItem*,"VariableItemList*, uint8_t"
 Function,+,variable_item_list_get_selected_item_index,uint8_t,VariableItemList*
 Function,+,variable_item_list_get_view,View*,VariableItemList*
 Function,+,variable_item_list_reset,void,VariableItemList*
 Function,+,variable_item_list_set_enter_callback,void,"VariableItemList*, VariableItemListEnterCallback, void*"
+Function,+,variable_item_list_set_header,void,"VariableItemList*, const char*"
 Function,+,variable_item_list_set_selected_item,void,"VariableItemList*, uint8_t"
 Function,+,variable_item_set_current_value_index,void,"VariableItem*, uint8_t"
 Function,+,variable_item_set_current_value_text,void,"VariableItem*, const char*"
+Function,+,variable_item_set_item_label,void,"VariableItem*, const char*"
+Function,+,variable_item_set_locked,void,"VariableItem*, _Bool, const char*"
 Function,+,variable_item_set_values_count,void,"VariableItem*, uint8_t"
 Function,+,varint_int32_length,size_t,int32_t
 Function,+,varint_int32_pack,size_t,"int32_t, uint8_t*"

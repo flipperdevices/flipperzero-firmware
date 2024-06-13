@@ -53,6 +53,26 @@ void submenu_add_item(
     SubmenuItemCallback callback,
     void* callback_context);
 
+/** Add lockable item to submenu
+ *
+ * @param      submenu           Submenu instance
+ * @param      label             menu item label
+ * @param      index             menu item index, used for callback, may be
+ *                               the same with other items
+ * @param      callback          menu item callback
+ * @param      callback_context  menu item callback context
+ * @param      locked            menu item locked status
+ * @param      locked_message    menu item locked message
+ */
+void submenu_add_lockable_item(
+    Submenu* submenu,
+    const char* label,
+    uint32_t index,
+    SubmenuItemCallback callback,
+    void* callback_context,
+    bool locked,
+    const char* locked_message);
+
 /** Change label of an existing item
  * 
  * @param      submenu  Submenu instance
@@ -83,11 +103,19 @@ uint32_t submenu_get_selected_item(Submenu* submenu);
 void submenu_set_selected_item(Submenu* submenu, uint32_t index);
 
 /** Set optional header for submenu
+ * Must be called before adding items OR after adding items and before set_selected_item()
  *
  * @param      submenu  Submenu instance
  * @param      header   header to set
  */
 void submenu_set_header(Submenu* submenu, const char* header);
+
+/** Set submenu orientation
+ *
+ * @param      submenu  Submenu instance
+ * @param      orientation  either vertical or horizontal
+ */
+void submenu_set_orientation(Submenu* submenu, ViewOrientation orientation);
 
 #ifdef __cplusplus
 }
