@@ -384,15 +384,17 @@ void cli_command_led(Cli* cli, FuriString* args, void* context) {
 
 static void cli_command_top(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
-    UNUSED(args);
     UNUSED(context);
+
+    int interval = 1000;
+    args_read_int_and_trim(args, &interval);
 
     FuriThreadList* thread_list = furi_thread_list_alloc();
     while(!cli_cmd_interrupt_received(cli)) {
         uint32_t tick = furi_get_tick();
         furi_thread_enumerate(thread_list);
 
-        printf("\e[2J\e[0;0f"); // Clear display and return to 0
+        if(interval) printf("\e[2J\e[0;0f"); // Clear display and return to 0
 
         uint32_t uptime = tick / furi_kernel_get_tick_frequency();
         printf(
@@ -436,7 +438,11 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
                 (double)item->cpu);
         }
 
-        furi_delay_ms(1000);
+        if(interval > 0) {
+            furi_delay_ms(interval);
+        } else {
+            break;
+        }
     }
     furi_thread_list_free(thread_list);
 }
