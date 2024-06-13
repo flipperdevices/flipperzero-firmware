@@ -545,6 +545,78 @@ static MfUltralightCommand
     return command;
 }
 
+static MfUltralightCommand
+    mf_ultralight_c_authenticate_handler_p2(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedNAK;
+    FURI_LOG_T(TAG, "CMD_ULC_AUTH_2");
+    UNUSED(instance);
+    do {
+        if(bit_buffer_get_byte(buffer, 0) != 0xAF || bit_buffer_get_size_bytes(buffer) != 16 + 1)
+            break;
+
+        const uint8_t* data = bit_buffer_get_data(buffer) + 1;
+        const uint8_t* iv = data + 8;
+
+        uint8_t out[16] = {0};
+
+        const uint8_t* ck = mf_ultralight_3des_get_key(instance->data);
+        mf_ultralight_3des_decrypt(
+            &instance->des_context, ck, instance->encB, data, sizeof(out), out);
+
+        uint8_t* rndA = out;
+        const uint8_t* decoded_shifted_rndB = out + 8;
+
+        mf_ultralight_3des_shift_data(rndA);
+        mf_ultralight_3des_shift_data(instance->rndB);
+        if(memcmp(decoded_shifted_rndB, instance->rndB, 8) == 0) {
+            instance->auth_state = MfUltralightListenerAuthStateSuccess;
+        }
+
+        mf_ultralight_3des_encrypt(&instance->des_context, ck, iv, rndA, rndA);
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, 0x00);
+        bit_buffer_append_bytes(instance->tx_buffer, rndA, 8);
+
+        iso14443_3a_listener_send_standard_frame(
+            instance->iso14443_3a_listener, instance->tx_buffer);
+
+        command = MfUltralightCommandProcessed;
+    } while(false);
+    return command;
+}
+
+static MfUltralightCommand
+    mf_ultralight_c_authenticate_handler_p1(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedNAK;
+    FURI_LOG_T(TAG, "CMD_ULC_AUTH_1");
+    do {
+        if(!mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportAuthenticate) &&
+           bit_buffer_get_byte(buffer, 1) == 0x00)
+            break;
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, 0xAF);
+
+        furi_hal_random_fill_buf(instance->rndB, sizeof(instance->rndB));
+
+        const uint8_t iv[8] = {0};
+        const uint8_t* ck = mf_ultralight_3des_get_key(instance->data);
+
+        mf_ultralight_3des_encrypt(&instance->des_context, ck, iv, instance->rndB, instance->encB);
+
+        bit_buffer_append_bytes(instance->tx_buffer, instance->encB, sizeof(instance->encB));
+
+        iso14443_3a_listener_send_standard_frame(
+            instance->iso14443_3a_listener, instance->tx_buffer);
+        command = MfUltralightCommandProcessed;
+        mf_ultralight_composite_command_set_next(
+            instance, mf_ultralight_c_authenticate_handler_p2);
+    } while(false);
+    return command;
+}
+
 static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
     {
         .cmd = MF_ULTRALIGHT_CMD_READ_PAGE,
@@ -611,7 +683,11 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .cmd_len_bits = 21 * 8,
         .callback = mf_ultralight_listener_vcsl_handler,
     },
-};
+    {
+        .cmd = MF_ULTRALIGHT_CMD_AUTH,
+        .cmd_len_bits = 2 * 8,
+        .callback = mf_ultralight_c_authenticate_handler_p1,
+    }};
 
 static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* instance) {
     MfUltralightData* data = instance->data;
@@ -675,6 +751,7 @@ MfUltralightListener* mf_ultralight_listener_alloc(
     instance->generic_event.protocol = NfcProtocolMfUltralight;
     instance->generic_event.instance = instance;
     instance->generic_event.event_data = &instance->mfu_event;
+    mbedtls_des3_init(&instance->des_context);
 
     return instance;
 }

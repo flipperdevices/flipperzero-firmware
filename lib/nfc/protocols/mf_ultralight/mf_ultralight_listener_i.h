@@ -68,6 +68,9 @@ struct MfUltralightListener {
     bool single_counter_increased;
     MfUltralightMirrorMode mirror;
     MfUltralightListenerCompositeCommandContext composite_cmd;
+    mbedtls_des3_context des_context;
+    uint8_t rndB[8];
+    uint8_t encB[8];
     void* context;
 };
 
