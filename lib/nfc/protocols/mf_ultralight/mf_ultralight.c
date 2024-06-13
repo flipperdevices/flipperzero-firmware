@@ -667,3 +667,53 @@ bool mf_ultralight_is_counter_configured(const MfUltralightData* data) {
 
     return configured;
 }
+
+void mf_ultralight_3des_shift_data(uint8_t* const data) {
+    furi_check(data);
+
+    uint8_t buf = data[0];
+    for(uint8_t i = 1; i < 8; i++) {
+        data[i - 1] = data[i];
+    }
+    data[7] = buf;
+}
+
+const uint8_t* mf_ultralight_3des_get_key(const MfUltralightData* data) {
+    furi_check(data);
+    furi_check(data->type == MfUltralightTypeMfulC);
+
+    return data->page[44].data;
+}
+
+void mf_ultralight_3des_encrypt(
+    mbedtls_des3_context* ctx,
+    const uint8_t* ck,
+    const uint8_t* iv,
+    const uint8_t* input,
+    uint8_t* out) {
+    furi_check(ctx);
+    furi_check(ck);
+    furi_check(iv);
+    furi_check(input);
+    furi_check(out);
+
+    mbedtls_des3_set2key_enc(ctx, ck);
+    mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_ENCRYPT, 8, (uint8_t*)iv, input, out);
+}
+
+void mf_ultralight_3des_decrypt(
+    mbedtls_des3_context* ctx,
+    const uint8_t* ck,
+    const uint8_t* iv,
+    const uint8_t* input,
+    const uint8_t length,
+    uint8_t* out) {
+    furi_check(ctx);
+    furi_check(ck);
+    furi_check(iv);
+    furi_check(input);
+    furi_check(out);
+
+    mbedtls_des3_set2key_dec(ctx, ck);
+    mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_DECRYPT, length, (uint8_t*)iv, input, out);
+}

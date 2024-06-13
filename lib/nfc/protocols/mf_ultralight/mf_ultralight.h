@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a.h>
+#include <mbedtls/include/mbedtls/des.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -225,6 +226,25 @@ bool mf_ultralight_is_all_data_read(const MfUltralightData* data);
 bool mf_ultralight_detect_protocol(const Iso14443_3aData* iso14443_3a_data);
 
 bool mf_ultralight_is_counter_configured(const MfUltralightData* data);
+
+void mf_ultralight_3des_shift_data(uint8_t* const arr);
+
+const uint8_t* mf_ultralight_3des_get_key(const MfUltralightData* data);
+
+void mf_ultralight_3des_encrypt(
+    mbedtls_des3_context* ctx,
+    const uint8_t* ck,
+    const uint8_t* iv,
+    const uint8_t* input,
+    uint8_t* out);
+
+void mf_ultralight_3des_decrypt(
+    mbedtls_des3_context* ctx,
+    const uint8_t* ck,
+    const uint8_t* iv,
+    const uint8_t* input,
+    const uint8_t length,
+    uint8_t* out);
 
 #ifdef __cplusplus
 }
