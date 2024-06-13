@@ -6,6 +6,8 @@
 #define POWER_OFF_TIMEOUT 90
 #define TAG "Power"
 
+static void power_loader_callback(const void*, void*);
+
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Power* power = context;
@@ -49,15 +51,111 @@ static ViewPort* power_battery_view_port_alloc(Power* power) {
     return battery_view_port;
 }
 
+static void power_start_auto_shutdown_timer(Power* power) {
+    furi_timer_start(power->auto_shutdown_timer, furi_ms_to_ticks(power->shutdown_idle_delay_ms));
+}
+
+static void power_stop_auto_shutdown_timer(Power* power) {
+    furi_timer_stop(power->auto_shutdown_timer);
+}
+
+static uint32_t power_is_running_auto_shutdown_timer(Power* power) {
+    return furi_timer_is_running(power->auto_shutdown_timer);
+}
+
+static void power_input_event_callback(const void* value, void* context) {
+    furi_assert(value);
+    furi_assert(context);
+    const InputEvent* event = value;
+    Power* power = context;
+    if(event->type == InputTypePress) {
+        power_start_auto_shutdown_timer(power);
+    }
+}
+
+static void power_auto_shutdown_arm(Power* power) {
+    if(power->shutdown_idle_delay_ms) {
+        if(power->input_events_subscription == NULL) {
+            power->input_events_subscription = furi_pubsub_subscribe(
+                power->input_events_pubsub, power_input_event_callback, power);
+        }
+        if(power->app_start_stop_subscription == NULL) {
+            power->app_start_stop_subscription = furi_pubsub_subscribe(
+                loader_get_pubsub(power->loader), power_loader_callback, power);
+        }
+        power_start_auto_shutdown_timer(power);
+    }
+}
+
+static void power_auto_shutdown_inhibit(Power* power) {
+    power_stop_auto_shutdown_timer(power);
+    if(power->input_events_subscription) {
+        furi_pubsub_unsubscribe(power->input_events_pubsub, power->input_events_subscription);
+        power->input_events_subscription = NULL;
+    }
+}
+
+static void power_loader_callback(const void* message, void* context) {
+    furi_assert(context);
+    Power* power = context;
+    const LoaderEvent* event = message;
+
+    switch (event->type) {
+    case LoaderEventTypeApplicationBeforeLoad:
+        power_auto_shutdown_inhibit(power);
+        break;
+    case LoaderEventTypeApplicationLoadFailed:
+    case LoaderEventTypeApplicationStopped:
+        power_auto_shutdown_arm(power);
+        break;
+    default:
+        furi_crash();
+    }
+}
+
+static void power_auto_shutdown_timer_callback(void* context) {
+    furi_assert(context);
+    Power* power = context;
+    power_auto_shutdown_inhibit(power);
+    furi_hal_power_off();
+}
+
+static void power_shutdown_time_changed_callback(const void* event, void* context) {
+    furi_assert(event);
+    furi_assert(context);
+    Power* power = context;
+    power->shutdown_idle_delay_ms = *(uint32_t*)event;
+    if(power->shutdown_idle_delay_ms) {
+        power_auto_shutdown_arm(power);
+    } else if(power_is_running_auto_shutdown_timer(power)) {
+        if(power->app_start_stop_subscription) {
+            furi_pubsub_unsubscribe(
+                loader_get_pubsub(power->loader), power->app_start_stop_subscription);
+        }
+        power_auto_shutdown_inhibit(power);
+    }
+}
+
 Power* power_alloc(void) {
     Power* power = malloc(sizeof(Power));
+
+    //Auto shutdown timer
+    power->auto_shutdown_timer =
+        furi_timer_alloc(power_auto_shutdown_timer_callback, FuriTimerTypeOnce, power);
 
     // Records
     power->notification = furi_record_open(RECORD_NOTIFICATION);
     power->gui = furi_record_open(RECORD_GUI);
+    power->loader = furi_record_open(RECORD_LOADER);
+    power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
 
     // Pubsub
     power->event_pubsub = furi_pubsub_alloc();
+    power->settings_events = furi_pubsub_alloc();
+    power->input_events_subscription = NULL;
+    power->app_start_stop_subscription = NULL;
+    power->settings_events_subscription =
+        furi_pubsub_subscribe(power->settings_events, power_shutdown_time_changed_callback, power);
 
     // State initialization
     power->state = PowerStateNotCharging;
@@ -204,6 +302,11 @@ int32_t power_srv(void* p) {
     }
 
     Power* power = power_alloc();
+    if(!LOAD_POWER_SETTINGS(&power->shutdown_idle_delay_ms)) {
+        power->shutdown_idle_delay_ms = 0;
+        SAVE_POWER_SETTINGS(&power->shutdown_idle_delay_ms);
+    }
+    power_auto_shutdown_arm(power);
     power_update_info(power);
     furi_record_create(RECORD_POWER, power);
 
