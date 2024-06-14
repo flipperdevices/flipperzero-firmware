@@ -345,6 +345,11 @@ void furi_event_loop_timer_stop(FuriEventLoop* instance, FuriEventLoopTimer* tim
     furi_check(instance->thread_id == furi_thread_get_current_id());
     furi_check(timer);
 
+    if(!timer->owner) {
+        // Stopping an already stopped timer does nothing
+        return;
+    }
+
     TimerList_it_t it;
     TimerList_find(it, instance->timer_list, timer);
 

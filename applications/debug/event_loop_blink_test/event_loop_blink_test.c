@@ -1,13 +1,22 @@
 #include <furi.h>
 #include <furi_hal_resources.h>
+
+#include <gui/gui.h>
+#include <gui/elements.h>
+#include <gui/view_port.h>
+
 #include <input/input.h>
+
+#define TAG "EventLoopBlinkTest"
 
 #define TIMER_COUNT (6U)
 
 typedef struct {
+    ViewPort* view_port;
     FuriEventLoop* event_loop;
     FuriMessageQueue* input_queue;
     FuriEventLoopTimer* timers[TIMER_COUNT];
+    bool timer_state[TIMER_COUNT];
 } EventLoopBlinkTestApp;
 
 static const GpioPin* blink_gpio_pins[] = {
@@ -48,9 +57,27 @@ static void blink_gpio_deinit(void) {
     furi_hal_gpio_init_simple(&gpio_ext_pc0, GpioModeAnalog);
 }
 
-static void input_callback(const void* value, void* context) {
+static void view_port_draw_callback(Canvas* canvas, void* context) {
+    UNUSED(context);
+    canvas_clear(canvas);
+    elements_text_box(
+        canvas,
+        0,
+        0,
+        canvas_width(canvas),
+        canvas_height(canvas),
+        AlignCenter,
+        AlignCenter,
+        "\e#Event Loop Timers Test\e#\n"
+        "Press buttons\n"
+        "to enable or disable timers\n"
+        "\e#Exit\e# = long press \e#Back\e#",
+        false);
+}
+
+static void view_port_input_callback(InputEvent* input_event, void* context) {
     EventLoopBlinkTestApp* app = context;
-    furi_message_queue_put(app->input_queue, value, 0);
+    furi_message_queue_put(app->input_queue, input_event, 0);
 }
 
 static bool input_queue_callback(FuriMessageQueue* queue, void* context) {
@@ -60,8 +87,23 @@ static bool input_queue_callback(FuriMessageQueue* queue, void* context) {
     FuriStatus status = furi_message_queue_get(queue, &event, FuriWaitForever);
     furi_assert(status == FuriStatusOk);
 
-    if(event.type == InputTypeShort && event.key == InputKeyBack) {
-        furi_event_loop_stop(app->event_loop);
+    if(event.type == InputTypeShort) {
+        const size_t timer_idx = event.key;
+        furi_assert(timer_idx < TIMER_COUNT);
+
+        if(app->timer_state[timer_idx]) {
+            furi_event_loop_timer_start(
+                app->event_loop, app->timers[timer_idx], timer_timeouts[timer_idx]);
+        } else {
+            furi_event_loop_timer_stop(app->event_loop, app->timers[timer_idx]);
+        }
+
+        app->timer_state[timer_idx] = !app->timer_state[timer_idx];
+
+    } else if(event.type == InputTypeLong) {
+        if(event.key == InputKeyBack) {
+            furi_event_loop_stop(app->event_loop);
+        }
     }
 
     return true;
@@ -83,7 +125,11 @@ int32_t event_loop_blink_test_app(void* arg) {
 
     blink_gpio_init();
 
-    EventLoopBlinkTestApp app;
+    EventLoopBlinkTestApp app = {};
+
+    app.view_port = view_port_alloc();
+    view_port_draw_callback_set(app.view_port, view_port_draw_callback, &app);
+    view_port_input_callback_set(app.view_port, view_port_input_callback, &app);
 
     app.event_loop = furi_event_loop_alloc();
     app.input_queue = furi_message_queue_alloc(3, sizeof(InputEvent));
@@ -94,9 +140,8 @@ int32_t event_loop_blink_test_app(void* arg) {
         furi_event_loop_timer_start(app.event_loop, app.timers[i], timer_timeouts[i]);
     }
 
-    FuriPubSub* input = furi_record_open(RECORD_INPUT_EVENTS);
-    FuriPubSubSubscription* input_subscription =
-        furi_pubsub_subscribe(input, input_callback, &app);
+    Gui* gui = furi_record_open(RECORD_GUI);
+    gui_add_view_port(gui, app.view_port, GuiLayerFullscreen);
 
     furi_event_loop_tick_set(app.event_loop, 500, event_loop_tick_callback, &app);
     furi_event_loop_message_queue_subscribe(
@@ -106,8 +151,10 @@ int32_t event_loop_blink_test_app(void* arg) {
 
     furi_event_loop_message_queue_unsubscribe(app.event_loop, app.input_queue);
 
-    furi_pubsub_unsubscribe(input, input_subscription);
-    furi_record_close(RECORD_INPUT_EVENTS);
+    gui_remove_view_port(gui, app.view_port);
+    view_port_free(app.view_port);
+
+    furi_record_close(RECORD_GUI);
 
     for(size_t i = 0; i < TIMER_COUNT; ++i) {
         furi_event_loop_timer_stop(app.event_loop, app.timers[i]);
