@@ -18,7 +18,7 @@ struct FuriEventLoopTimer {
     FuriEventLoopTimerCallback callback;
     void* context;
 
-    uint32_t timeout;
+    uint32_t interval;
     uint32_t elapsed;
     bool periodic;
 };
@@ -161,8 +161,13 @@ static FuriEventLoopProcessStatus
     }
 }
 
+static inline uint32_t
+    furi_event_loop_timer_get_remaining_time_internal(const FuriEventLoopTimer* timer) {
+    return (timer->elapsed < timer->interval) ? timer->interval - timer->elapsed : 0;
+}
+
 static uint32_t furi_event_loop_advance_timers(FuriEventLoop* instance) {
-    uint32_t timeout = FuriWaitForever;
+    uint32_t wait_time = FuriWaitForever;
 
     const uint32_t tick_count = xTaskGetTickCount();
     const uint32_t tick_count_diff = tick_count - instance->tick_count_prev;
@@ -173,20 +178,19 @@ static uint32_t furi_event_loop_advance_timers(FuriEventLoop* instance) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
         timer->elapsed += tick_count_diff;
 
-        const uint32_t remaining =
-            (timer->elapsed < timer->timeout) ? timer->timeout - timer->elapsed : 0;
+        const uint32_t remaining = furi_event_loop_timer_get_remaining_time_internal(timer);
 
-        if(remaining < timeout) {
-            timeout = remaining;
+        if(remaining < wait_time) {
+            wait_time = remaining;
         }
     }
 
     instance->tick_count_prev = tick_count;
-    return timeout;
+    return wait_time;
 }
 
-static bool furi_event_loop_timer_is_ready(FuriEventLoopTimer* const timer) {
-    return timer->elapsed >= timer->timeout;
+static inline bool furi_event_loop_timer_is_ready(const FuriEventLoopTimer* timer) {
+    return timer->elapsed >= timer->interval;
 }
 
 static void furi_event_loop_process_timers(FuriEventLoop* instance) {
@@ -206,7 +210,7 @@ static void furi_event_loop_process_timers(FuriEventLoop* instance) {
         timer->callback(timer->elapsed, timer->context);
     }
 
-    // Reset the periodic timers and delete unused single-shot timers
+    // Reset the periodic timers and delete inactive single-shot timers
     for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it);) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
 
@@ -322,7 +326,7 @@ void furi_event_loop_timer_free(FuriEventLoopTimer* timer) {
 void furi_event_loop_timer_start(
     FuriEventLoop* instance,
     FuriEventLoopTimer* timer,
-    uint32_t timeout) {
+    uint32_t interval) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
     furi_check(timer);
@@ -333,7 +337,7 @@ void furi_event_loop_timer_start(
     }
 
     timer->owner = instance;
-    timer->timeout = timeout;
+    timer->interval = interval;
     timer->elapsed = 0;
 
     xTaskNotifyIndexed(
@@ -357,6 +361,21 @@ void furi_event_loop_timer_stop(FuriEventLoop* instance, FuriEventLoopTimer* tim
     TimerList_remove(instance->timer_list, it);
 
     timer->owner = NULL;
+}
+
+uint32_t furi_event_loop_timer_get_remaining_time(const FuriEventLoopTimer* timer) {
+    furi_check(timer);
+    return furi_event_loop_timer_get_remaining_time_internal(timer);
+}
+
+uint32_t furi_event_loop_timer_get_interval(const FuriEventLoopTimer* timer) {
+    furi_check(timer);
+    return timer->interval;
+}
+
+bool furi_event_loop_timer_is_running(const FuriEventLoopTimer* timer) {
+    furi_check(timer);
+    return timer->owner && !furi_event_loop_timer_is_ready(timer);
 }
 
 /*

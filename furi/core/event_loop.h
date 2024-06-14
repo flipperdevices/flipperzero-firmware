@@ -86,9 +86,15 @@ void furi_event_loop_timer_free(FuriEventLoopTimer* timer);
 void furi_event_loop_timer_start(
     FuriEventLoop* instance,
     FuriEventLoopTimer* timer,
-    uint32_t timeout);
+    uint32_t interval);
 
 void furi_event_loop_timer_stop(FuriEventLoop* instance, FuriEventLoopTimer* timer);
+
+uint32_t furi_event_loop_timer_get_remaining_time(const FuriEventLoopTimer* timer);
+
+uint32_t furi_event_loop_timer_get_interval(const FuriEventLoopTimer* timer);
+
+bool furi_event_loop_timer_is_running(const FuriEventLoopTimer* timer);
 
 /*
  * Tick related API
