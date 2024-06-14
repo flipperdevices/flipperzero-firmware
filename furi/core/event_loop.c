@@ -1,6 +1,7 @@
 #include "event_loop_i.h"
 #include "message_queue_i.h"
 
+#include "log.h"
 #include "check.h"
 #include "thread.h"
 
@@ -11,6 +12,8 @@
 
 #include <FreeRTOS.h>
 #include <task.h>
+
+#define TAG "FuriEventLoop"
 
 struct FuriEventLoopTimer {
     FuriEventLoop* owner;
@@ -130,6 +133,11 @@ FuriEventLoop* furi_event_loop_alloc(void) {
     TimerList_init(instance->timer_list);
     TimerList_init(instance->ready_timer_list);
 
+    // Clear notification state and value
+    xTaskNotifyStateClearIndexed(instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX);
+    ulTaskNotifyValueClearIndexed(
+        instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, 0xFFFFFFFF);
+
     return instance;
 }
 
@@ -142,6 +150,13 @@ void furi_event_loop_free(FuriEventLoop* instance) {
     WaitingList_clear(instance->waiting_list);
     TimerList_clear(instance->timer_list);
     TimerList_clear(instance->ready_timer_list);
+
+    uint32_t flags = 0;
+    BaseType_t ret = xTaskNotifyWaitIndexed(
+        FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, 0, FuriEventLoopFlagAll, &flags, 0);
+    if(ret == pdTRUE) {
+        FURI_LOG_D(TAG, "Some events was not processed: 0x%lx", flags);
+    }
 
     free(instance);
 }
