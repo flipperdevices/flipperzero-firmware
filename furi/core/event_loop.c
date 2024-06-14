@@ -110,6 +110,9 @@ void furi_event_loop_free(FuriEventLoop* instance) {
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
     FuriEventLoopTree_clear(instance->tree);
+    xTaskNotifyStateClearIndexed(instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX);
+    ulTaskNotifyValueClearIndexed(
+        instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, 0xffffffff);
     free(instance);
 }
 
