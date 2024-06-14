@@ -61,6 +61,36 @@ void furi_event_loop_run(FuriEventLoop* instance);
 void furi_event_loop_stop(FuriEventLoop* instance);
 
 /*
+ * Timer related API
+ */
+
+/** */
+typedef enum {
+    FuriEventLoopTimerTypeOnce = 0, ///< One-shot timer.
+    FuriEventLoopTimerTypePeriodic = 1 ///< Repeating timer.
+} FuriEventLoopTimerType;
+
+/** */
+typedef void (*FuriEventLoopTimerCallback)(uint32_t elapsed, void* context);
+
+/** Opaque event loop timer type */
+typedef struct FuriEventLoopTimer FuriEventLoopTimer;
+
+FuriEventLoopTimer* furi_event_loop_timer_alloc(
+    FuriEventLoopTimerCallback callback,
+    FuriEventLoopTimerType type,
+    void* context);
+
+void furi_event_loop_timer_free(FuriEventLoopTimer* timer);
+
+void furi_event_loop_timer_start(
+    FuriEventLoop* instance,
+    FuriEventLoopTimer* timer,
+    uint32_t timeout);
+
+void furi_event_loop_timer_stop(FuriEventLoop* instance, FuriEventLoopTimer* timer);
+
+/*
  * Tick related API
  */
 
