@@ -64,36 +64,105 @@ void furi_event_loop_stop(FuriEventLoop* instance);
  * Timer related API
  */
 
-/** */
+/**
+ * @brief Enumeration of possible timer types.
+ */
 typedef enum {
-    FuriEventLoopTimerTypeOnce = 0, ///< One-shot timer.
-    FuriEventLoopTimerTypePeriodic = 1 ///< Repeating timer.
+    FuriEventLoopTimerTypeOnce = 0, /**< One-shot timer. */
+    FuriEventLoopTimerTypePeriodic = 1, /**< Repeating timer. */
 } FuriEventLoopTimerType;
 
-/** */
-typedef void (*FuriEventLoopTimerCallback)(uint32_t elapsed, void* context);
+/**
+ * @brief Timer callback type for functions to be called when a timer expires.
+ *
+ * In the timer callback, it is ALLOWED:
+ * - To start, stop, or restart an existing timer,
+ * - To create new timers using furi_event_loop_timer_alloc(),
+ * - To delete stopped timers using furi_event_loop_timer_free().
+ *
+ * @param[in] time_elapsed time counted by the timer since its start, in ticks
+ * @param[in,out] context pointer to a user-specific object that was provided during timer creation
+ */
+typedef void (*FuriEventLoopTimerCallback)(uint32_t time_elapsed, void* context);
 
-/** Opaque event loop timer type */
+/**
+ * @brief Opaque event loop timer type.
+ */
 typedef struct FuriEventLoopTimer FuriEventLoopTimer;
 
+/**
+ * @brief Create a new event loop timer instance.
+ *
+ * Event loop timers can ONLY be used in conjunction with a FuriEventLoop instance.
+ * Each timer MUST be used in exactly ONE event loop.
+ *
+ * @param[in] callback pointer to the callback function to be executed upon timer timeout
+ * @param[in] type timer type value to determine its behavior (signle-shot or periodic)
+ * @param[in,out] context pointer to a user-specific object (will be passed to the callback)
+ * @returns pointer to the created timer instance
+ */
 FuriEventLoopTimer* furi_event_loop_timer_alloc(
     FuriEventLoopTimerCallback callback,
     FuriEventLoopTimerType type,
     void* context);
 
+/**
+ * @brief Delete a stopped event loop timer instance.
+ *
+ * A timer instance can ONLY be deleted if EITHER of the following is true:
+ * - The timer has expired and the caller is NOT in its callback,
+ * - The timer has been stopped using furi_event_loop_timer_stop().
+ *
+ * @param[in,out] timer pointer to the timer instance to be deleted
+ */
 void furi_event_loop_timer_free(FuriEventLoopTimer* timer);
 
+/**
+ * @brief Start a timer or restart it with a new interval.
+ *
+ * @param[in,out] instance pointer to the current FuriEventLoop instance
+ * @param[in,out] timer pointer to the timer instance to be (re)started
+ * @param[in] interval timer interval in ticks
+ */
 void furi_event_loop_timer_start(
     FuriEventLoop* instance,
     FuriEventLoopTimer* timer,
     uint32_t interval);
 
-void furi_event_loop_timer_stop(FuriEventLoop* instance, FuriEventLoopTimer* timer);
+/**
+ * @brief Stop a timer without firing its callback.
+ *
+ * It is safe to call this function on an already stopped timer (it will do nothing).
+ *
+ * @param[in,out] timer pointer to the timer instance to be stopped
+ */
+void furi_event_loop_timer_stop(FuriEventLoopTimer* timer);
 
+/**
+ * @brief Get the time remaining before the timer becomes expires.
+ *
+ * For stopped or expired timers, this function returns 0.
+ *
+ * @param[in] timer pointer to the timer to be queried
+ * @returns remaining time in ticks
+ */
 uint32_t furi_event_loop_timer_get_remaining_time(const FuriEventLoopTimer* timer);
 
+/**
+ * @brief Get the timer interval.
+ *
+ * @param[in] timer pointer to the timer to be queried
+ * @returns timer interval in ticks
+ */
 uint32_t furi_event_loop_timer_get_interval(const FuriEventLoopTimer* timer);
 
+/**
+ * @brief Check if the timer is currently running.
+ *
+ * A timer is considered running if it has not expired yet.
+ * @param[in] timer pointer to the timer to be queried
+ * @returns true if the timer is running, false otherwise
+ */
 bool furi_event_loop_timer_is_running(const FuriEventLoopTimer* timer);
 
 /*

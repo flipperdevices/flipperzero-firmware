@@ -227,6 +227,7 @@ static void furi_event_loop_process_timers(FuriEventLoop* instance) {
     for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it);) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
 
+        // TODO: a new timer can become expired here and not get its callback fired.
         if(furi_event_loop_timer_is_ready(timer)) {
             if(timer->periodic) {
                 timer->start_time = xTaskGetTickCount();
@@ -328,9 +329,8 @@ FuriEventLoopTimer* furi_event_loop_timer_alloc(
 }
 
 void furi_event_loop_timer_free(FuriEventLoopTimer* timer) {
-    furi_check(timer);
-    furi_check(timer->owner == NULL);
-
+    // No furi_check, it is done by furi_event_loop_timer_stop()
+    furi_event_loop_timer_stop(timer);
     free(timer);
 }
 
@@ -355,15 +355,16 @@ void furi_event_loop_timer_start(
         instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagTimer, eSetBits);
 }
 
-void furi_event_loop_timer_stop(FuriEventLoop* instance, FuriEventLoopTimer* timer) {
-    furi_check(instance);
-    furi_check(instance->thread_id == furi_thread_get_current_id());
+void furi_event_loop_timer_stop(FuriEventLoopTimer* timer) {
     furi_check(timer);
 
-    if(!timer->owner) {
+    if(timer->owner == NULL) {
         // Stopping an already stopped timer does nothing
         return;
     }
+
+    FuriEventLoop* instance = timer->owner;
+    furi_check(instance->thread_id == furi_thread_get_current_id());
 
     TimerList_it_t it;
     TimerList_find(it, instance->timer_list, timer);

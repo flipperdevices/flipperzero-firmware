@@ -1216,7 +1216,7 @@ Function,+,furi_event_loop_timer_get_interval,uint32_t,const FuriEventLoopTimer*
 Function,+,furi_event_loop_timer_get_remaining_time,uint32_t,const FuriEventLoopTimer*
 Function,+,furi_event_loop_timer_is_running,_Bool,const FuriEventLoopTimer*
 Function,+,furi_event_loop_timer_start,void,"FuriEventLoop*, FuriEventLoopTimer*, uint32_t"
-Function,+,furi_event_loop_timer_stop,void,"FuriEventLoop*, FuriEventLoopTimer*"
+Function,+,furi_event_loop_timer_stop,void,FuriEventLoopTimer*
 Function,+,furi_get_tick,uint32_t,
 Function,+,furi_hal_adc_acquire,FuriHalAdcHandle*,
 Function,+,furi_hal_adc_configure,void,FuriHalAdcHandle*

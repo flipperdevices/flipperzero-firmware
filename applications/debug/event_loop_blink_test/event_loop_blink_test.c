@@ -155,7 +155,6 @@ int32_t event_loop_blink_test_app(void* arg) {
     furi_record_close(RECORD_GUI);
 
     for(size_t i = 0; i < TIMER_COUNT; ++i) {
-        furi_event_loop_timer_stop(app.event_loop, app.timers[i]);
         furi_event_loop_timer_free(app.timers[i]);
     }
 
