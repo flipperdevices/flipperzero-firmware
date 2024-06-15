@@ -209,7 +209,7 @@ static inline bool furi_event_loop_timer_is_expired(const FuriEventLoopTimer* ti
 static void furi_event_loop_process_timers(FuriEventLoop* instance) {
     TimerList_it_t it;
 
-    // Build a list of ready timers
+    // Build a list of expired timers
     for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it); TimerList_next(it)) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
         if(furi_event_loop_timer_is_expired(timer)) {
@@ -227,14 +227,17 @@ static void furi_event_loop_process_timers(FuriEventLoop* instance) {
     for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it);) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
 
-        // TODO: a new timer can become expired here and not get its callback fired.
-        if(furi_event_loop_timer_is_expired(timer)) {
+        // Only work on timers that were on the original expired list
+        // and were not restarted in the callback
+        if(TimerList_contain_p(instance->expired_timer_list, timer) &&
+           furi_event_loop_timer_is_expired(timer)) {
             if(timer->periodic) {
                 timer->start_time = xTaskGetTickCount();
 
             } else {
                 TimerList_remove(instance->timer_list, it);
                 timer->owner = NULL;
+                // name_remove() advances the iterator to the next item
                 continue;
             }
         }
