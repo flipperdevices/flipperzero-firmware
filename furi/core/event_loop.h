@@ -78,7 +78,7 @@ typedef enum {
  * In the timer callback, it is ALLOWED:
  * - To start, stop, or restart an existing timer,
  * - To create new timers using furi_event_loop_timer_alloc(),
- * - To delete stopped timers using furi_event_loop_timer_free().
+ * - To delete timers using furi_event_loop_timer_free().
  *
  * @param[in] time_elapsed time counted by the timer since its start, in ticks
  * @param[in,out] context pointer to a user-specific object that was provided during timer creation
@@ -107,11 +107,7 @@ FuriEventLoopTimer* furi_event_loop_timer_alloc(
     void* context);
 
 /**
- * @brief Delete a stopped event loop timer instance.
- *
- * A timer instance can ONLY be deleted if EITHER of the following is true:
- * - The timer has expired and the caller is NOT in its callback,
- * - The timer has been stopped using furi_event_loop_timer_stop().
+ * @brief Delete an event loop timer instance.
  *
  * @param[in,out] timer pointer to the timer instance to be deleted
  */
