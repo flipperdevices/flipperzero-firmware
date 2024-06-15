@@ -114,7 +114,7 @@ struct FuriEventLoop {
     WaitingList_t waiting_list;
     // Timer list
     TimerList_t timer_list;
-    TimerList_t ready_timer_list;
+    TimerList_t expired_timer_list;
 
     // Tick event
     uint32_t tick_interval;
@@ -130,7 +130,7 @@ FuriEventLoop* furi_event_loop_alloc(void) {
     FuriEventLoopTree_init(instance->tree);
     WaitingList_init(instance->waiting_list);
     TimerList_init(instance->timer_list);
-    TimerList_init(instance->ready_timer_list);
+    TimerList_init(instance->expired_timer_list);
 
     // Clear notification state and value
     xTaskNotifyStateClearIndexed(instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX);
@@ -148,7 +148,7 @@ void furi_event_loop_free(FuriEventLoop* instance) {
     FuriEventLoopTree_clear(instance->tree);
     WaitingList_clear(instance->waiting_list);
     TimerList_clear(instance->timer_list);
-    TimerList_clear(instance->ready_timer_list);
+    TimerList_clear(instance->expired_timer_list);
 
     uint32_t flags = 0;
     BaseType_t ret = xTaskNotifyWaitIndexed(
@@ -185,13 +185,13 @@ static inline uint32_t
     return elapsed_time < timer->interval ? timer->interval - elapsed_time : 0;
 }
 
-static uint32_t furi_event_loop_advance_timers(FuriEventLoop* instance) {
+static uint32_t furi_event_loop_get_wait_time(const FuriEventLoop* instance) {
     uint32_t wait_time = FuriWaitForever;
 
-    TimerList_it_t it;
+    TimerList_it_ct it;
 
     for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it); TimerList_next(it)) {
-        FuriEventLoopTimer* timer = *TimerList_ref(it);
+        const FuriEventLoopTimer* timer = *TimerList_cref(it);
         const uint32_t remaining_time = furi_event_loop_timer_get_remaining_time_private(timer);
 
         if(remaining_time < wait_time) {
@@ -202,8 +202,8 @@ static uint32_t furi_event_loop_advance_timers(FuriEventLoop* instance) {
     return wait_time;
 }
 
-static inline bool furi_event_loop_timer_is_ready(const FuriEventLoopTimer* timer) {
-    return furi_event_loop_timer_get_remaining_time(timer) == 0;
+static inline bool furi_event_loop_timer_is_expired(const FuriEventLoopTimer* timer) {
+    return furi_event_loop_timer_get_elapsed_time(timer) >= timer->interval;
 }
 
 static void furi_event_loop_process_timers(FuriEventLoop* instance) {
@@ -212,13 +212,13 @@ static void furi_event_loop_process_timers(FuriEventLoop* instance) {
     // Build a list of ready timers
     for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it); TimerList_next(it)) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
-        if(furi_event_loop_timer_is_ready(timer)) {
-            TimerList_push_back(instance->ready_timer_list, timer);
+        if(furi_event_loop_timer_is_expired(timer)) {
+            TimerList_push_back(instance->expired_timer_list, timer);
         }
     }
 
     // Call respective callbacks for the ready timers
-    for(TimerList_it(it, instance->ready_timer_list); !TimerList_end_p(it); TimerList_next(it)) {
+    for(TimerList_it(it, instance->expired_timer_list); !TimerList_end_p(it); TimerList_next(it)) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
         timer->callback(furi_event_loop_timer_get_elapsed_time(timer), timer->context);
     }
@@ -228,7 +228,7 @@ static void furi_event_loop_process_timers(FuriEventLoop* instance) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
 
         // TODO: a new timer can become expired here and not get its callback fired.
-        if(furi_event_loop_timer_is_ready(timer)) {
+        if(furi_event_loop_timer_is_expired(timer)) {
             if(timer->periodic) {
                 timer->start_time = xTaskGetTickCount();
 
@@ -242,7 +242,7 @@ static void furi_event_loop_process_timers(FuriEventLoop* instance) {
         TimerList_next(it);
     }
 
-    TimerList_reset(instance->ready_timer_list);
+    TimerList_reset(instance->expired_timer_list);
 }
 
 void furi_event_loop_run(FuriEventLoop* instance) {
@@ -250,7 +250,7 @@ void furi_event_loop_run(FuriEventLoop* instance) {
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
     while(true) {
-        const TickType_t xTicksToWait = furi_event_loop_advance_timers(instance);
+        const TickType_t xTicksToWait = furi_event_loop_get_wait_time(instance);
 
         uint32_t flags = 0;
         BaseType_t ret = xTaskNotifyWaitIndexed(
@@ -387,7 +387,7 @@ uint32_t furi_event_loop_timer_get_interval(const FuriEventLoopTimer* timer) {
 
 bool furi_event_loop_timer_is_running(const FuriEventLoopTimer* timer) {
     furi_check(timer);
-    return timer->owner && !furi_event_loop_timer_is_ready(timer);
+    return timer->owner && !furi_event_loop_timer_is_expired(timer);
 }
 
 /*
