@@ -401,8 +401,7 @@ void furi_event_loop_tick_set(
     void* context) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
-    furi_check(callback);
-    furi_check(interval > 0);
+    furi_check(callback ? interval > 0 : true);
 
     instance->tick_interval = interval;
     instance->tick_callback = callback;
