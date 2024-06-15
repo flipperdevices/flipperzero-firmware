@@ -92,7 +92,7 @@ static bool input_queue_callback(FuriMessageQueue* queue, void* context) {
         FuriEventLoopTimer* timer = app->timers[timer_idx];
 
         if(furi_event_loop_timer_is_running(timer)) {
-            furi_event_loop_timer_stop(app->event_loop, timer);
+            furi_event_loop_timer_stop(timer);
         } else {
             furi_event_loop_timer_start(
                 app->event_loop, timer, furi_event_loop_timer_get_interval(timer));
