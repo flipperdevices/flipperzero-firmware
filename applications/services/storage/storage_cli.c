@@ -496,6 +496,75 @@ static void storage_cli_md5(Cli* cli, FuriString* path) {
     furi_record_close(RECORD_STORAGE);
 }
 
+#include <toolbox/compress.h>
+
+typedef struct {
+    File* input_file;
+    File* output_file;
+} UnpackContext;
+
+static size_t hs_unpacker_file_read(uint8_t* buffer, size_t size, void* context) {
+    UnpackContext* unpack_context = (UnpackContext*)context;
+    return storage_file_read(unpack_context->input_file, buffer, size);
+}
+
+static size_t hs_unpacker_file_write(uint8_t* buffer, size_t size, void* context) {
+    UnpackContext* unpack_context = (UnpackContext*)context;
+    return storage_file_write(unpack_context->output_file, buffer, size);
+}
+
+static void storage_cli_unpack(Cli* cli, FuriString* old_path, FuriString* args) {
+    UNUSED(cli);
+    FuriString* new_path = furi_string_alloc();
+
+    if(!args_read_probably_quoted_string_and_trim(args, new_path)) {
+        storage_cli_print_usage();
+        furi_string_free(new_path);
+        return;
+    }
+
+    Storage* api = furi_record_open(RECORD_STORAGE);
+    File* comp_file = storage_file_alloc(api);
+    File* dest_file = storage_file_alloc(api);
+
+    CompressConfigHeatshrink config = {
+        .window_sz2 = 14,
+        .lookahead_sz2 = 5,
+        .input_buffer_sz = 512,
+    };
+    Compress* compress = compress_alloc(COMPRESS_TYPE_HEATSHRINK, &config);
+
+    do {
+        if(!storage_file_open(
+               comp_file, furi_string_get_cstr(old_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+            storage_cli_print_error(storage_file_get_error(comp_file));
+            break;
+        }
+
+        if(!storage_file_open(
+               dest_file, furi_string_get_cstr(new_path), FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
+            storage_cli_print_error(storage_file_get_error(dest_file));
+            break;
+        }
+
+        UnpackContext unpack_context = {
+            .input_file = comp_file,
+            .output_file = dest_file,
+        };
+
+        bool success = compress_decode_stream(
+            compress, hs_unpacker_file_read, hs_unpacker_file_write, &unpack_context);
+
+        printf("Decompression %s\r\n", success ? "success" : "failed");
+    } while(false);
+
+    compress_free(compress);
+    furi_string_free(new_path);
+    storage_file_free(comp_file);
+    storage_file_free(dest_file);
+    furi_record_close(RECORD_STORAGE);
+}
+
 void storage_cli(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     FuriString* cmd;
@@ -586,6 +655,11 @@ void storage_cli(Cli* cli, FuriString* args, void* context) {
 
         if(furi_string_cmp_str(cmd, "timestamp") == 0) {
             storage_cli_timestamp(cli, path);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "unpack") == 0) {
+            storage_cli_unpack(cli, path, args);
             break;
         }
 

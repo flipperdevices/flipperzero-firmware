@@ -56,7 +56,7 @@ static void compress_test_reference_comp_decomp() {
     furi_record_close(RECORD_STORAGE);
 
     uint8_t* temp_buffer = malloc(1024);
-    Compress* comp = compress_alloc(1024);
+    Compress* comp = compress_alloc(COMPRESS_TYPE_HEATSHRINK, CompressConfigHeatshrinkDefault);
 
     size_t encoded_size = 0;
     mu_assert(
@@ -98,7 +98,7 @@ static void compress_test_random_comp_decomp() {
     // We only fill half of the buffer with random data, so if anything goes wrong, there's no overflow
     static const size_t src_data_size = src_buffer_size / 2;
 
-    Compress* comp = compress_alloc(src_buffer_size);
+    Compress* comp = compress_alloc(COMPRESS_TYPE_HEATSHRINK, CompressConfigHeatshrinkDefault);
     uint8_t* src_buff = malloc(src_buffer_size);
     uint8_t* encoded_buff = malloc(encoded_buffer_size);
     uint8_t* decoded_buff = malloc(src_buffer_size);

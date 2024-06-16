@@ -47,6 +47,18 @@ void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint
 /** Compress control structure */
 typedef struct Compress Compress;
 
+typedef enum {
+    COMPRESS_TYPE_HEATSHRINK = 0,
+} CompressType;
+
+typedef struct {
+    uint16_t window_sz2;
+    uint16_t lookahead_sz2;
+    uint16_t input_buffer_sz;
+} CompressConfigHeatshrink;
+
+extern const CompressConfigHeatshrink* CompressConfigHeatshrinkDefault;
+
 /** Allocate encoder and decoder
  *
  * @param      compress_buff_size  size of decoder and encoder buffer to
@@ -54,7 +66,7 @@ typedef struct Compress Compress;
  *
  * @return     Compress instance
  */
-Compress* compress_alloc(uint16_t compress_buff_size);
+Compress* compress_alloc(CompressType type, const void* config);
 
 /** Free encoder and decoder
  *
@@ -99,6 +111,14 @@ bool compress_decode(
     uint8_t* data_out,
     size_t data_out_size,
     size_t* data_res_size);
+
+typedef size_t (*compress_io_cb_t)(uint8_t* buffer, size_t size, void* context);
+
+bool compress_decode_stream(
+    Compress* compress,
+    compress_io_cb_t read_cb,
+    compress_io_cb_t write_cb,
+    void* context);
 
 #ifdef __cplusplus
 }
