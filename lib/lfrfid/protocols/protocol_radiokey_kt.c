@@ -1,6 +1,6 @@
 // The timing parameters and data structure used in this file
 // are based on the knowledge found in Proxmark3's firmware:
-// https://github.com/RfidResearchGroup/proxmark3/blob/1c52152d30f7744c0336633317ea6640dbcdc796/client/src/cmdlfrkkt.c
+// https://github.com/RfidResearchGroup/proxmark3/blob/1c52152d30f7744c0336633317ea6640dbcdc796/client/src/cmdlfsecurakey.c
 // PM3's repo has mentioned the existence of non-26-or-32-bit formats.
 // Those are not supported here for preventing false positives.
 #include <furi.h>
