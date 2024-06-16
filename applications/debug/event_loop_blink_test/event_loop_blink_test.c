@@ -107,8 +107,7 @@ static bool input_queue_callback(FuriMessageQueue* queue, void* context) {
     return true;
 }
 
-static void blink_timer_callback(uint32_t elapsed, void* context) {
-    UNUSED(elapsed);
+static void blink_timer_callback(void* context) {
     const GpioPin* gpio = blink_gpio_pins[(size_t)context];
     furi_hal_gpio_write(gpio, !furi_hal_gpio_read(gpio));
 }

@@ -236,12 +236,23 @@ static bool furi_event_loop_process_timers(FuriEventLoop* instance) {
 
     FURI_CRITICAL_ENTER();
 
-    // Build a list of expired timers
-    for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it); TimerList_next(it)) {
+    // Build a list of expired timers and remove one-shot timers
+    for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it);) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
+
         if(furi_event_loop_timer_is_expired(timer)) {
             TimerList_push_back(instance->expired_timer_list, timer);
+
+            if(timer->periodic) {
+                timer->start_time = xTaskGetTickCount();
+            } else {
+                TimerList_remove(instance->timer_list, it);
+                timer->owner = NULL;
+                continue;
+            }
         }
+
+        TimerList_next(it);
     }
 
     FURI_CRITICAL_EXIT();
@@ -253,29 +264,7 @@ static bool furi_event_loop_process_timers(FuriEventLoop* instance) {
     // Call respective callbacks for the expired timers
     for(TimerList_it(it, instance->expired_timer_list); !TimerList_end_p(it); TimerList_next(it)) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
-        timer->callback(furi_event_loop_timer_get_elapsed_time(timer), timer->context);
-    }
-
-    // Reset the periodic timers and delete inactive single-shot timers
-    for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it);) {
-        FuriEventLoopTimer* timer = *TimerList_ref(it);
-
-        // Only work on timers that were on the original expired list
-        // and were not restarted in the callback
-        if(TimerList_contain_p(instance->expired_timer_list, timer) &&
-           furi_event_loop_timer_is_expired(timer)) {
-            if(timer->periodic) {
-                timer->start_time = xTaskGetTickCount();
-
-            } else {
-                TimerList_remove(instance->timer_list, it);
-                timer->owner = NULL;
-                // name_remove() advances the iterator to the next item
-                continue;
-            }
-        }
-
-        TimerList_next(it);
+        timer->callback(timer->context);
     }
 
     TimerList_reset(instance->expired_timer_list);

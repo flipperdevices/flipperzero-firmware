@@ -80,10 +80,9 @@ typedef enum {
  * - To create new timers using furi_event_loop_timer_alloc(),
  * - To delete timers using furi_event_loop_timer_free().
  *
- * @param[in] time_elapsed time counted by the timer since its start, in ticks
  * @param[in,out] context pointer to a user-specific object that was provided during timer creation
  */
-typedef void (*FuriEventLoopTimerCallback)(uint32_t time_elapsed, void* context);
+typedef void (*FuriEventLoopTimerCallback)(void* context);
 
 /**
  * @brief Opaque event loop timer type.
