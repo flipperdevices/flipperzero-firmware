@@ -198,8 +198,9 @@ static inline uint32_t furi_event_loop_tick_get_remaining_time(const FuriEventLo
 static uint32_t furi_event_loop_get_wait_time(const FuriEventLoop* instance) {
     uint32_t wait_time = FuriWaitForever;
 
-    TimerList_it_ct it;
+    FURI_CRITICAL_ENTER();
 
+    TimerList_it_ct it;
     for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it); TimerList_next(it)) {
         const FuriEventLoopTimer* timer = *TimerList_cref(it);
         const uint32_t remaining_time = furi_event_loop_timer_get_remaining_time_private(timer);
@@ -217,6 +218,8 @@ static uint32_t furi_event_loop_get_wait_time(const FuriEventLoop* instance) {
         }
     }
 
+    FURI_CRITICAL_EXIT();
+
     return wait_time;
 }
 
@@ -231,6 +234,8 @@ static inline bool furi_event_loop_tick_is_expired(const FuriEventLoop* instance
 static bool furi_event_loop_process_timers(FuriEventLoop* instance) {
     TimerList_it_t it;
 
+    FURI_CRITICAL_ENTER();
+
     // Build a list of expired timers
     for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it); TimerList_next(it)) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
@@ -239,11 +244,13 @@ static bool furi_event_loop_process_timers(FuriEventLoop* instance) {
         }
     }
 
+    FURI_CRITICAL_EXIT();
+
     if(TimerList_empty_p(instance->expired_timer_list)) {
         return false;
     }
 
-    // Call respective callbacks for the ready timers
+    // Call respective callbacks for the expired timers
     for(TimerList_it(it, instance->expired_timer_list); !TimerList_end_p(it); TimerList_next(it)) {
         FuriEventLoopTimer* timer = *TimerList_ref(it);
         timer->callback(furi_event_loop_timer_get_elapsed_time(timer), timer->context);
