@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,67.0,,
+Version,+,68.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
@@ -859,7 +859,7 @@ Function,+,composite_api_resolver_free,void,CompositeApiResolver*
 Function,+,composite_api_resolver_get,const ElfApiInterface*,CompositeApiResolver*
 Function,+,compress_alloc,Compress*,"CompressType, const void*"
 Function,+,compress_decode,_Bool,"Compress*, uint8_t*, size_t, uint8_t*, size_t, size_t*"
-Function,+,compress_decode_stream,_Bool,"Compress*, compress_io_cb_t, compress_io_cb_t, void*"
+Function,+,compress_decode_stream,_Bool,"Compress*, compress_io_cb_t, void*, compress_io_cb_t, void*"
 Function,+,compress_encode,_Bool,"Compress*, uint8_t*, size_t, uint8_t*, size_t, size_t*"
 Function,+,compress_free,void,Compress*
 Function,+,compress_icon_alloc,CompressIcon*,size_t

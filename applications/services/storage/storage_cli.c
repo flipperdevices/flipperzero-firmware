@@ -498,19 +498,14 @@ static void storage_cli_md5(Cli* cli, FuriString* path) {
 
 #include <toolbox/compress.h>
 
-typedef struct {
-    File* input_file;
-    File* output_file;
-} UnpackContext;
-
 static size_t hs_unpacker_file_read(uint8_t* buffer, size_t size, void* context) {
-    UnpackContext* unpack_context = (UnpackContext*)context;
-    return storage_file_read(unpack_context->input_file, buffer, size);
+    File* file = (File*)context;
+    return storage_file_read(file, buffer, size);
 }
 
 static size_t hs_unpacker_file_write(uint8_t* buffer, size_t size, void* context) {
-    UnpackContext* unpack_context = (UnpackContext*)context;
-    return storage_file_write(unpack_context->output_file, buffer, size);
+    File* file = (File*)context;
+    return storage_file_write(file, buffer, size);
 }
 
 static void storage_cli_unpack(Cli* cli, FuriString* old_path, FuriString* args) {
@@ -547,15 +542,15 @@ static void storage_cli_unpack(Cli* cli, FuriString* old_path, FuriString* args)
             break;
         }
 
-        UnpackContext unpack_context = {
-            .input_file = comp_file,
-            .output_file = dest_file,
-        };
-
+        uint32_t start_tick = furi_get_tick();
         bool success = compress_decode_stream(
-            compress, hs_unpacker_file_read, hs_unpacker_file_write, &unpack_context);
+            compress, hs_unpacker_file_read, comp_file, hs_unpacker_file_write, dest_file);
 
-        printf("Decompression %s\r\n", success ? "success" : "failed");
+        uint32_t end_tick = furi_get_tick();
+        printf(
+            "Decompression %s in %lu ticks \r\n",
+            success ? "success" : "failed",
+            end_tick - start_tick);
     } while(false);
 
     compress_free(compress);

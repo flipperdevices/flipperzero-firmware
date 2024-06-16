@@ -117,8 +117,9 @@ typedef size_t (*compress_io_cb_t)(uint8_t* buffer, size_t size, void* context);
 bool compress_decode_stream(
     Compress* compress,
     compress_io_cb_t read_cb,
+    void* read_context,
     compress_io_cb_t write_cb,
-    void* context);
+    void* write_context);
 
 #ifdef __cplusplus
 }

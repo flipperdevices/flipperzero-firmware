@@ -208,7 +208,7 @@ static inline bool compress_decoder_poll(
     uint8_t* decompressed_chunk,
     size_t decomp_buffer_size,
     compress_io_cb_t write_cb,
-    void* context) {
+    void* write_context) {
     HSD_poll_res poll_res;
     size_t poll_size;
 
@@ -219,7 +219,7 @@ static inline bool compress_decoder_poll(
             return false;
         }
 
-        size_t write_size = write_cb(decompressed_chunk, poll_size, context);
+        size_t write_size = write_cb(decompressed_chunk, poll_size, write_context);
         if(write_size != poll_size) {
             return false;
         }
@@ -231,8 +231,9 @@ static inline bool compress_decoder_poll(
 static bool compress_decode_stream_internal(
     heatshrink_decoder* decoder,
     compress_io_cb_t read_cb,
+    void* read_context,
     compress_io_cb_t write_cb,
-    void* context) {
+    void* write_context) {
     bool decode_failed = false;
     HSD_sink_res sink_res;
     HSD_finish_res finish_res;
@@ -247,7 +248,7 @@ static bool compress_decode_stream_internal(
     heatshrink_decoder_reset(decoder);
     /* Sink data to decoding buffer */
     do {
-        read_size = read_cb(compressed_chunk, WORK_BUFFER_SIZE, context);
+        read_size = read_cb(compressed_chunk, WORK_BUFFER_SIZE, read_context);
 
         size_t sunk = 0;
         while(sunk < read_size && !decode_failed) {
@@ -260,7 +261,7 @@ static bool compress_decode_stream_internal(
             sunk += sink_size;
 
             if(!compress_decoder_poll(
-                   decoder, decompressed_chunk, WORK_BUFFER_SIZE, write_cb, context)) {
+                   decoder, decompressed_chunk, WORK_BUFFER_SIZE, write_cb, write_context)) {
                 decode_failed = true;
                 break;
             }
@@ -276,7 +277,7 @@ static bool compress_decode_stream_internal(
             }
 
             if(!compress_decoder_poll(
-                   decoder, decompressed_chunk, WORK_BUFFER_SIZE, write_cb, context)) {
+                   decoder, decompressed_chunk, WORK_BUFFER_SIZE, write_cb, write_context)) {
                 decode_failed = true;
                 break;
             }
@@ -348,34 +349,25 @@ static size_t compress_decode_hs_old(
 }
 
 typedef struct {
-    uint8_t* compressed_data;
-    size_t compressed_data_size;
-    uint8_t* data_out;
-    size_t data_out_size;
+    uint8_t* data_ptr;
+    size_t data_size;
+    bool is_source;
 } stream_state;
 
-static size_t comp_stream_read(uint8_t* dest, size_t read_size, void* context) {
+static size_t memory_stream_io_callback(uint8_t* ptr, size_t size, void* context) {
     stream_state* state = (stream_state*)context;
 
-    if(read_size > state->compressed_data_size) {
-        read_size = state->compressed_data_size;
+    if(size > state->data_size) {
+        size = state->data_size;
     }
-    memcpy(dest, state->compressed_data, read_size);
-    state->compressed_data += read_size;
-    state->compressed_data_size -= read_size;
-    return read_size;
-}
-
-static size_t comp_stream_write(uint8_t* src, size_t write_size, void* context) {
-    stream_state* state = (stream_state*)context;
-
-    if(write_size > state->data_out_size) {
-        write_size = state->data_out_size;
+    if(state->is_source) {
+        memcpy(ptr, state->data_ptr, size);
+    } else {
+        memcpy(state->data_ptr, ptr, size);
     }
-    memcpy(state->data_out, src, write_size);
-    state->data_out += write_size;
-    state->data_out_size -= write_size;
-    return write_size;
+    state->data_ptr += size;
+    state->data_size -= size;
+    return size;
 }
 
 bool compress_decode_hs_(
@@ -387,14 +379,23 @@ bool compress_decode_hs_(
     size_t* data_res_size) {
     UNUSED(compress_decode_hs_old);
     // Use stream decoding API
-    stream_state state = {
-        .compressed_data = (uint8_t*)compressed_data,
-        .compressed_data_size = compressed_size,
-        .data_out = data_out,
-        .data_out_size = data_out_size,
+    stream_state compressed_context = {
+        .data_ptr = (uint8_t*)compressed_data,
+        .data_size = compressed_size,
+        .is_source = true,
     };
-    if(compress_decode_stream_internal(decoder, comp_stream_read, comp_stream_write, &state)) {
-        *data_res_size = data_out_size - state.data_out_size;
+    stream_state decompressed_context = {
+        .data_ptr = data_out,
+        .data_size = data_out_size,
+        .is_source = false,
+    };
+    if(compress_decode_stream_internal(
+           decoder,
+           memory_stream_io_callback,
+           &compressed_context,
+           memory_stream_io_callback,
+           &decompressed_context)) {
+        *data_res_size = data_out_size - decompressed_context.data_size;
         return true;
     }
     return false;
@@ -469,13 +470,15 @@ bool compress_decode(
 bool compress_decode_stream(
     Compress* compress,
     compress_io_cb_t read_cb,
+    void* read_context,
     compress_io_cb_t write_cb,
-    void* context) {
+    void* write_context) {
     if(!compress->decoder) {
         CompressConfigHeatshrink* hs_config = (CompressConfigHeatshrink*)compress->config;
         compress->decoder = heatshrink_decoder_alloc(
             hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
     }
 
-    return compress_decode_stream_internal(compress->decoder, read_cb, write_cb, context);
+    return compress_decode_stream_internal(
+        compress->decoder, read_cb, read_context, write_cb, write_context);
 }
