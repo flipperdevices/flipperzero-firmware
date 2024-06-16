@@ -118,6 +118,7 @@ struct FuriEventLoop {
 
     // Tick event
     uint32_t tick_interval;
+    uint32_t tick_prev_time;
     FuriEventLoopTickCallback tick_callback;
     void* tick_callback_context;
 };
@@ -179,10 +180,19 @@ static inline uint32_t furi_event_loop_timer_get_elapsed_time(const FuriEventLoo
     return xTaskGetTickCount() - timer->start_time;
 }
 
+static inline uint32_t furi_event_loop_tick_get_elapsed_time(const FuriEventLoop* instance) {
+    return xTaskGetTickCount() - instance->tick_prev_time;
+}
+
 static inline uint32_t
     furi_event_loop_timer_get_remaining_time_private(const FuriEventLoopTimer* timer) {
     const uint32_t elapsed_time = furi_event_loop_timer_get_elapsed_time(timer);
     return elapsed_time < timer->interval ? timer->interval - elapsed_time : 0;
+}
+
+static inline uint32_t furi_event_loop_tick_get_remaining_time(const FuriEventLoop* instance) {
+    const uint32_t elapsed_time = furi_event_loop_tick_get_elapsed_time(instance);
+    return elapsed_time < instance->tick_interval ? instance->tick_interval - elapsed_time : 0;
 }
 
 static uint32_t furi_event_loop_get_wait_time(const FuriEventLoop* instance) {
@@ -199,6 +209,14 @@ static uint32_t furi_event_loop_get_wait_time(const FuriEventLoop* instance) {
         }
     }
 
+    if(instance->tick_callback) {
+        const uint32_t remaining_time = furi_event_loop_tick_get_remaining_time(instance);
+
+        if(remaining_time < wait_time) {
+            wait_time = remaining_time;
+        }
+    }
+
     return wait_time;
 }
 
@@ -206,7 +224,11 @@ static inline bool furi_event_loop_timer_is_expired(const FuriEventLoopTimer* ti
     return furi_event_loop_timer_get_elapsed_time(timer) >= timer->interval;
 }
 
-static void furi_event_loop_process_timers(FuriEventLoop* instance) {
+static inline bool furi_event_loop_tick_is_expired(const FuriEventLoop* instance) {
+    return furi_event_loop_tick_get_elapsed_time(instance) >= instance->tick_interval;
+}
+
+static bool furi_event_loop_process_timers(FuriEventLoop* instance) {
     TimerList_it_t it;
 
     // Build a list of expired timers
@@ -215,6 +237,10 @@ static void furi_event_loop_process_timers(FuriEventLoop* instance) {
         if(furi_event_loop_timer_is_expired(timer)) {
             TimerList_push_back(instance->expired_timer_list, timer);
         }
+    }
+
+    if(TimerList_empty_p(instance->expired_timer_list)) {
+        return false;
     }
 
     // Call respective callbacks for the ready timers
@@ -246,6 +272,14 @@ static void furi_event_loop_process_timers(FuriEventLoop* instance) {
     }
 
     TimerList_reset(instance->expired_timer_list);
+    return true;
+}
+
+static void furi_event_loop_process_tick(FuriEventLoop* instance) {
+    if(instance->tick_callback && furi_event_loop_tick_is_expired(instance)) {
+        instance->tick_prev_time = xTaskGetTickCount();
+        instance->tick_callback(instance->tick_callback_context);
+    }
 }
 
 void furi_event_loop_run(FuriEventLoop* instance) {
@@ -296,7 +330,9 @@ void furi_event_loop_run(FuriEventLoop* instance) {
             }
 
         } else {
-            furi_event_loop_process_timers(instance);
+            if(!furi_event_loop_process_timers(instance)) {
+                furi_event_loop_process_tick(instance);
+            }
         }
 
         instance->state = FuriEventLoopStateIdle;

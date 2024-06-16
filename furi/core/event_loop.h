@@ -173,8 +173,10 @@ typedef void (*FuriEventLoopTickCallback)(void* context);
 
 /** Set Event Loop tick callback
  *
- * Tick callback called after specified inactivity time. It's not periodic. If
- * Event Loop is busy then ticks will be skipped.
+ * Tick callback is called periodically after specified inactivity time.
+ * It acts like a low-priority timer: it will only fire if there is time
+ * left after processing the synchronisation primitives and the regular timers.
+ * Therefore, it is not monotonic: ticks will be skipped if the event loop is busy.
  *
  * @param      instance  The Event Loop instance
  * @param[in]  interval  The tick interval
