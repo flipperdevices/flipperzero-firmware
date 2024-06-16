@@ -78,7 +78,6 @@ void view_allocate_model(View* view, ViewModelType type, size_t size) {
     } else if(view->model_type == ViewModelTypeLocking) {
         ViewModelLocking* model = malloc(sizeof(ViewModelLocking));
         model->mutex = furi_mutex_alloc(FuriMutexTypeRecursive);
-        furi_check(model->mutex);
         model->data = malloc(size);
         view->model = model;
     } else {
@@ -97,10 +96,11 @@ void view_free_model(View* view) {
         furi_mutex_free(model->mutex);
         free(model->data);
         free(model);
-        view->model = NULL;
     } else {
         furi_crash();
     }
+    view->model = NULL;
+    view->model_type = ViewModelTypeNone;
 }
 
 void* view_get_model(View* view) {

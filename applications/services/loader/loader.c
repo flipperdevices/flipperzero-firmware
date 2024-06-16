@@ -353,6 +353,12 @@ static LoaderStatus loader_start_external_app(
 
         FURI_LOG_I(TAG, "Loaded in %zums", (size_t)(furi_get_tick() - start));
 
+        if(flipper_application_is_plugin(loader->app.fap)) {
+            status = loader_make_status_error(
+                LoaderStatusErrorInternal, error_message, "Plugin %s is not runnable", path);
+            break;
+        }
+
         loader->app.thread = flipper_application_alloc_thread(loader->app.fap, args);
         FuriString* app_name = furi_string_alloc();
         path_extract_filename_no_ext(path, app_name);
@@ -422,13 +428,19 @@ static LoaderStatus loader_do_start_by_name(
     do {
         // check lock
         if(loader_do_is_locked(loader)) {
-            const char* current_thread_name =
-                furi_thread_get_name(furi_thread_get_id(loader->app.thread));
-            status = loader_make_status_error(
-                LoaderStatusErrorAppStarted,
-                error_message,
-                "Loader is locked, please close the \"%s\" first",
-                current_thread_name);
+            if(loader->app.thread == (FuriThread*)LOADER_MAGIC_THREAD_VALUE) {
+                status = loader_make_status_error(
+                    LoaderStatusErrorAppStarted, error_message, "Loader is locked");
+            } else {
+                const char* current_thread_name =
+                    furi_thread_get_name(furi_thread_get_id(loader->app.thread));
+
+                status = loader_make_status_error(
+                    LoaderStatusErrorAppStarted,
+                    error_message,
+                    "Loader is locked, please close the \"%s\" first",
+                    current_thread_name);
+            }
             break;
         }
 

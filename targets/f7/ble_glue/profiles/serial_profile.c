@@ -42,10 +42,12 @@ static void ble_profile_serial_stop(FuriHalBleProfileBase* profile) {
 
 #ifdef STORAGE_INT_ON_LFS
 // AN5289: 4.7, we need at least 25ms + advertisement, which is 30 ms
-#define CONNECTION_INTERVAL (0x18)
+#define CONNECTION_INTERVAL_MIN (0x18)
 #else
-#define CONNECTION_INTERVAL (0x0006)
+#define CONNECTION_INTERVAL_MIN (0x0006)
 #endif
+// Up to 45 ms
+#define CONNECTION_INTERVAL_MAX (0x24)
 
 static GapConfig serial_template_config = {
     .adv_service_uuid = 0x3080,
@@ -53,8 +55,8 @@ static GapConfig serial_template_config = {
     .bonding_mode = true,
     .pairing_method = GapPairingPinCodeShow,
     .conn_param = {
-        .conn_int_min = CONNECTION_INTERVAL,
-        .conn_int_max = CONNECTION_INTERVAL,
+        .conn_int_min = CONNECTION_INTERVAL_MIN,
+        .conn_int_max = CONNECTION_INTERVAL_MAX,
         .slave_latency = 0,
         .supervisor_timeout = 0,
     }};
