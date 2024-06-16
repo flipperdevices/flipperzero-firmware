@@ -21,7 +21,7 @@ static const CompressConfigHeatshrink COMPRESS_CONFIG_HEATSHRINK = {
     .input_buffer_sz = COMPRESS_ICON_ENCODED_BUFF_SIZE,
 };
 
-const CompressConfigHeatshrink* CompressConfigHeatshrinkDefault = &COMPRESS_CONFIG_HEATSHRINK;
+const CompressConfigHeatshrink* compress_config_heatshrink_default = &COMPRESS_CONFIG_HEATSHRINK;
 
 /** Buffer size for input data */
 static bool compress_decode_internal(
@@ -104,11 +104,6 @@ Compress* compress_alloc(CompressType type, const void* config) {
     compress->config = config;
     compress->encoder = NULL;
     compress->decoder = NULL;
-
-    // CompressConfigHeatshrink* hs_config = (CompressConfigHeatshrink*)config;
-    // compress->encoder = heatshrink_encoder_alloc(hs_config->window_sz2, hs_config->lookahead_sz2);
-    // compress->decoder = heatshrink_decoder_alloc(
-    //     hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
 
     return compress;
 }
@@ -290,72 +285,14 @@ static bool compress_decode_stream_internal(
     return !decode_failed;
 }
 
-static size_t compress_decode_hs_old(
-    heatshrink_decoder* decoder,
-    const uint8_t* compressed_data,
-    size_t compressed_size,
-    uint8_t* data_out,
-    size_t data_out_size,
-    size_t* data_res_size) {
-    bool decode_failed = false;
-    HSD_sink_res sink_res;
-    HSD_poll_res poll_res;
-    HSD_finish_res finish_res;
-    size_t sink_size = 0;
-    size_t res_buff_size = 0;
-    size_t poll_size = 0;
-
-    heatshrink_decoder_reset(decoder);
-    /* Sink data to decoding buffer */
-    size_t sunk = 0;
-    while(sunk < compressed_size && !decode_failed) {
-        sink_res = heatshrink_decoder_sink(
-            decoder, (uint8_t*)&compressed_data[sunk], compressed_size - sunk, &sink_size);
-        if(sink_res < 0) {
-            decode_failed = true;
-            break;
-        }
-        sunk += sink_size;
-        do {
-            poll_res = heatshrink_decoder_poll(
-                decoder, &data_out[res_buff_size], data_out_size - res_buff_size, &poll_size);
-            if((poll_res < 0) || ((data_out_size - res_buff_size) == 0)) {
-                decode_failed = true;
-                break;
-            }
-            res_buff_size += poll_size;
-        } while(poll_res == HSDR_POLL_MORE);
-    }
-    /* Notify sinking complete and poll decoded data */
-    if(!decode_failed) {
-        finish_res = heatshrink_decoder_finish(decoder);
-        if(finish_res < 0) {
-            decode_failed = true;
-        } else {
-            do {
-                poll_res = heatshrink_decoder_poll(
-                    decoder, &data_out[res_buff_size], data_out_size - res_buff_size, &poll_size);
-                if(poll_res < 0) {
-                    decode_failed = true;
-                    break;
-                }
-                res_buff_size += poll_size;
-                finish_res = heatshrink_decoder_finish(decoder);
-            } while(finish_res != HSDR_FINISH_DONE);
-        }
-    }
-    *data_res_size = res_buff_size;
-    return !decode_failed;
-}
-
 typedef struct {
     uint8_t* data_ptr;
     size_t data_size;
     bool is_source;
-} stream_state;
+} MemoryStreamState;
 
 static size_t memory_stream_io_callback(uint8_t* ptr, size_t size, void* context) {
-    stream_state* state = (stream_state*)context;
+    MemoryStreamState* state = (MemoryStreamState*)context;
 
     if(size > state->data_size) {
         size = state->data_size;
@@ -368,37 +305,6 @@ static size_t memory_stream_io_callback(uint8_t* ptr, size_t size, void* context
     state->data_ptr += size;
     state->data_size -= size;
     return size;
-}
-
-bool compress_decode_hs_(
-    heatshrink_decoder* decoder,
-    const uint8_t* compressed_data,
-    size_t compressed_size,
-    uint8_t* data_out,
-    size_t data_out_size,
-    size_t* data_res_size) {
-    UNUSED(compress_decode_hs_old);
-    // Use stream decoding API
-    stream_state compressed_context = {
-        .data_ptr = (uint8_t*)compressed_data,
-        .data_size = compressed_size,
-        .is_source = true,
-    };
-    stream_state decompressed_context = {
-        .data_ptr = data_out,
-        .data_size = data_out_size,
-        .is_source = false,
-    };
-    if(compress_decode_stream_internal(
-           decoder,
-           memory_stream_io_callback,
-           &compressed_context,
-           memory_stream_io_callback,
-           &decompressed_context)) {
-        *data_res_size = data_out_size - decompressed_context.data_size;
-        return true;
-    }
-    return false;
 }
 
 static bool compress_decode_internal(
@@ -417,13 +323,26 @@ static bool compress_decode_internal(
 
     CompressHeader* header = (CompressHeader*)data_in;
     if(header->is_compressed) {
-        return compress_decode_hs_(
-            decoder,
-            &data_in[sizeof(CompressHeader)],
-            header->compressed_buff_size,
-            data_out,
-            data_out_size,
-            data_res_size);
+        MemoryStreamState compressed_context = {
+            .data_ptr = (uint8_t*)&data_in[sizeof(CompressHeader)],
+            .data_size = header->compressed_buff_size,
+            .is_source = true,
+        };
+        MemoryStreamState decompressed_context = {
+            .data_ptr = data_out,
+            .data_size = data_out_size,
+            .is_source = false,
+        };
+        if(compress_decode_stream_internal(
+               decoder,
+               memory_stream_io_callback,
+               &compressed_context,
+               memory_stream_io_callback,
+               &decompressed_context)) {
+            *data_res_size = data_out_size - decompressed_context.data_size;
+            result = true;
+        }
+        result = false;
     } else if(data_out_size >= data_in_size - 1) {
         memcpy(data_out, &data_in[1], data_in_size);
         *data_res_size = data_in_size - 1;

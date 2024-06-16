@@ -57,7 +57,7 @@ typedef struct {
     uint16_t input_buffer_sz;
 } CompressConfigHeatshrink;
 
-extern const CompressConfigHeatshrink* CompressConfigHeatshrinkDefault;
+extern const CompressConfigHeatshrink* compress_config_heatshrink_default;
 
 /** Allocate encoder and decoder
  *
