@@ -42,6 +42,7 @@ typedef enum {
  */
 typedef struct {
     MfUltralightAuthPassword password; /**< Password to be used for authentication. */
+    MfUltralightC3DesAuthKey _3des_key;
     MfUltralightAuthPack pack; /**< Pack received on successfull authentication. */
     bool auth_success; /**< Set to true if authentication succeeded, false otherwise. */
     bool skip_auth; /**< Set to true if authentication should be skipped, false otherwise. */
@@ -80,7 +81,7 @@ MfUltralightError mf_ultralight_poller_auth_pwd(
     MfUltralightPoller* instance,
     MfUltralightPollerAuthContext* data);
 
-/**
+/** TODO:Adjust this comment
  * @brief Start authentication procedure.
  *
  * Must ONLY be used inside the callback function.
@@ -90,7 +91,16 @@ MfUltralightError mf_ultralight_poller_auth_pwd(
  * @param[in, out] instance pointer to the instance to be used in the transaction.
  * @return MfUltralightErrorNone if card supports authentication command, an error code on otherwise.
  */
-MfUltralightError mf_ultralight_poller_authenticate(MfUltralightPoller* instance);
+MfUltralightError mf_ultralight_poller_authenticate_start(
+    MfUltralightPoller* instance,
+    const uint8_t* RndA,
+    uint8_t* output);
+
+MfUltralightError mf_ultralight_poller_authenticate_end(
+    MfUltralightPoller* instance,
+    const uint8_t* RndB,
+    const uint8_t* request,
+    uint8_t* response);
 
 /**
  * @brief Read page from card.
