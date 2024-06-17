@@ -121,6 +121,10 @@ typedef struct {
 } MfUltralightAuthPassword;
 
 typedef struct {
+    uint8_t data[16];
+} MfUltralightC3DesAuthKey;
+
+typedef struct {
     uint8_t data[MF_ULTRALIGHT_AUTH_PACK_SIZE];
 } MfUltralightAuthPack;
 
