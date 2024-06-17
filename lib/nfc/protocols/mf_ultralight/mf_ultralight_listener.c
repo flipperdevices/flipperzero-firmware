@@ -764,6 +764,7 @@ void mf_ultralight_listener_free(MfUltralightListener* instance) {
 
     bit_buffer_free(instance->tx_buffer);
     furi_string_free(instance->mirror.ascii_mirror_data);
+    mbedtls_des3_free(&instance->des_context);
     free(instance);
 }
 
