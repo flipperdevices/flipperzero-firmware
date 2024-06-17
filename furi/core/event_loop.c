@@ -377,12 +377,13 @@ void furi_event_loop_timer_start(
     furi_check(instance->thread_id == furi_thread_get_current_id());
     furi_check(timer);
 
-    if(!TimerList_contain_p(instance->timer_list, timer)) {
-        furi_check(timer->owner == NULL);
+    if(timer->owner) {
+        furi_check(timer->owner == instance);
+    } else {
+        timer->owner = instance;
         TimerList_push_back(instance->timer_list, timer);
     }
 
-    timer->owner = instance;
     timer->interval = interval;
     timer->start_time = xTaskGetTickCount();
 
@@ -393,8 +394,8 @@ void furi_event_loop_timer_start(
 void furi_event_loop_timer_stop(FuriEventLoopTimer* timer) {
     furi_check(timer);
 
+    // Stopping an already stopped timer does nothing
     if(timer->owner == NULL) {
-        // Stopping an already stopped timer does nothing
         return;
     }
 
