@@ -26,7 +26,7 @@ typedef struct {
 static const uint32_t mf_ultralight_data_format_version = 2;
 
 static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = {
-    [MfUltralightTypeUnknown] =
+    [MfUltralightTypeOrigin] =
         {
             .device_name = "Mifare Ultralight",
             .total_pages = 16,
@@ -215,7 +215,7 @@ static const char*
     mf_ultralight_get_device_name_by_type(MfUltralightType type, NfcDeviceNameType name_type) {
     if(name_type == NfcDeviceNameTypeShort &&
        (type == MfUltralightTypeUL11 || type == MfUltralightTypeUL21)) {
-        type = MfUltralightTypeUnknown;
+        type = MfUltralightTypeOrigin;
     }
 
     return mf_ultralight_features[type].device_name;
@@ -512,7 +512,7 @@ Iso14443_3aData* mf_ultralight_get_base_data(const MfUltralightData* data) {
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version) {
     furi_check(version);
 
-    MfUltralightType type = MfUltralightTypeUnknown;
+    MfUltralightType type = MfUltralightTypeOrigin;
 
     if(version->storage_size == 0x0B || version->storage_size == 0x00) {
         type = MfUltralightTypeUL11;

@@ -281,7 +281,7 @@ static NfcCommand mf_ultralight_poller_handler_check_ntag_203(MfUltralightPoller
     } else {
         FURI_LOG_D(TAG, "Original Ultralight detected");
         iso14443_3a_poller_halt(instance->iso14443_3a_poller);
-        instance->data->type = MfUltralightTypeUnknown;
+        instance->data->type = MfUltralightTypeOrigin;
         if(instance->mode == MfUltralightPollerModeWrite) {
             instance->mfu_event.type = MfUltralightPollerEventTypeCardMismatch;
             instance->callback(instance->general_event, instance->context);
