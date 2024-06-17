@@ -225,6 +225,7 @@ static inline bool compress_decoder_poll(
 
 static bool compress_decode_stream_internal(
     heatshrink_decoder* decoder,
+    const size_t work_buffer_size,
     compress_io_cb_t read_cb,
     void* read_context,
     compress_io_cb_t write_cb,
@@ -235,15 +236,13 @@ static bool compress_decode_stream_internal(
     size_t read_size = 0;
     size_t sink_size = 0;
 
-    const size_t WORK_BUFFER_SIZE = COMPRESS_ICON_ENCODED_BUFF_SIZE;
-
-    uint8_t* compressed_chunk = malloc(WORK_BUFFER_SIZE);
-    uint8_t* decompressed_chunk = malloc(WORK_BUFFER_SIZE);
+    uint8_t* compressed_chunk = malloc(work_buffer_size);
+    uint8_t* decompressed_chunk = malloc(work_buffer_size);
 
     heatshrink_decoder_reset(decoder);
     /* Sink data to decoding buffer */
     do {
-        read_size = read_cb(compressed_chunk, WORK_BUFFER_SIZE, read_context);
+        read_size = read_cb(compressed_chunk, work_buffer_size, read_context);
 
         size_t sunk = 0;
         while(sunk < read_size && !decode_failed) {
@@ -256,7 +255,7 @@ static bool compress_decode_stream_internal(
             sunk += sink_size;
 
             if(!compress_decoder_poll(
-                   decoder, decompressed_chunk, WORK_BUFFER_SIZE, write_cb, write_context)) {
+                   decoder, decompressed_chunk, work_buffer_size, write_cb, write_context)) {
                 decode_failed = true;
                 break;
             }
@@ -272,7 +271,7 @@ static bool compress_decode_stream_internal(
             }
 
             if(!compress_decoder_poll(
-                   decoder, decompressed_chunk, WORK_BUFFER_SIZE, write_cb, write_context)) {
+                   decoder, decompressed_chunk, work_buffer_size, write_cb, write_context)) {
                 decode_failed = true;
                 break;
             }
@@ -333,16 +332,15 @@ static bool compress_decode_internal(
             .data_size = data_out_size,
             .is_source = false,
         };
-        if(compress_decode_stream_internal(
-               decoder,
-               memory_stream_io_callback,
-               &compressed_context,
-               memory_stream_io_callback,
-               &decompressed_context)) {
+        if((result = compress_decode_stream_internal(
+                decoder,
+                COMPRESS_ICON_ENCODED_BUFF_SIZE,
+                memory_stream_io_callback,
+                &compressed_context,
+                memory_stream_io_callback,
+                &decompressed_context))) {
             *data_res_size = data_out_size - decompressed_context.data_size;
-            result = true;
         }
-        result = false;
     } else if(data_out_size >= data_in_size - 1) {
         memcpy(data_out, &data_in[1], data_in_size);
         *data_res_size = data_in_size - 1;
@@ -392,12 +390,17 @@ bool compress_decode_stream(
     void* read_context,
     compress_io_cb_t write_cb,
     void* write_context) {
+    CompressConfigHeatshrink* hs_config = (CompressConfigHeatshrink*)compress->config;
     if(!compress->decoder) {
-        CompressConfigHeatshrink* hs_config = (CompressConfigHeatshrink*)compress->config;
         compress->decoder = heatshrink_decoder_alloc(
             hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
     }
 
     return compress_decode_stream_internal(
-        compress->decoder, read_cb, read_context, write_cb, write_context);
+        compress->decoder,
+        hs_config->input_buffer_sz,
+        read_cb,
+        read_context,
+        write_cb,
+        write_context);
 }
