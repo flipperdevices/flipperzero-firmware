@@ -244,7 +244,13 @@ static bool nfc_scene_read_and_saved_menu_on_event_mf_ultralight(
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexUnlock) {
-            scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightUnlockMenu);
+            const MfUltralightData* data =
+                nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
+
+            uint32_t next_scene = (data->type == MfUltralightTypeMfulC) ?
+                                      NfcSceneDesAuthKeyInput :
+                                      NfcSceneMfUltralightUnlockMenu;
+            scene_manager_next_scene(instance->scene_manager, next_scene);
             consumed = true;
         } else if(event.event == SubmenuIndexWrite) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightWrite);
