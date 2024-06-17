@@ -236,6 +236,7 @@ void mf_ultralight_3des_encrypt(
     const uint8_t* ck,
     const uint8_t* iv,
     const uint8_t* input,
+    const uint8_t length,
     uint8_t* out);
 
 void mf_ultralight_3des_decrypt(

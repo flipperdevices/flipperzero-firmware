@@ -690,6 +690,7 @@ void mf_ultralight_3des_encrypt(
     const uint8_t* ck,
     const uint8_t* iv,
     const uint8_t* input,
+    const uint8_t length,
     uint8_t* out) {
     furi_check(ctx);
     furi_check(ck);
@@ -698,7 +699,7 @@ void mf_ultralight_3des_encrypt(
     furi_check(out);
 
     mbedtls_des3_set2key_enc(ctx, ck);
-    mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_ENCRYPT, 8, (uint8_t*)iv, input, out);
+    mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_ENCRYPT, length, (uint8_t*)iv, input, out);
 }
 
 void mf_ultralight_3des_decrypt(

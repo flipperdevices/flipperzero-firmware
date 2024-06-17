@@ -572,7 +572,7 @@ static MfUltralightCommand
             instance->auth_state = MfUltralightListenerAuthStateSuccess;
         }
 
-        mf_ultralight_3des_encrypt(&instance->des_context, ck, iv, rndA, rndA);
+        mf_ultralight_3des_encrypt(&instance->des_context, ck, iv, rndA, 8, rndA);
 
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_append_byte(instance->tx_buffer, 0x00);
@@ -604,7 +604,8 @@ static MfUltralightCommand
         const uint8_t iv[8] = {0};
         const uint8_t* ck = mf_ultralight_3des_get_key(instance->data);
 
-        mf_ultralight_3des_encrypt(&instance->des_context, ck, iv, instance->rndB, instance->encB);
+        mf_ultralight_3des_encrypt(
+            &instance->des_context, ck, iv, instance->rndB, 8, instance->encB);
 
         bit_buffer_append_bytes(instance->tx_buffer, instance->encB, sizeof(instance->encB));
 
