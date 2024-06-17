@@ -575,12 +575,14 @@ uint8_t mf_ultralight_get_write_end_page(MfUltralightType type) {
     furi_assert(
         type == MfUltralightTypeUL11 || type == MfUltralightTypeUL21 ||
         type == MfUltralightTypeNTAG213 || type == MfUltralightTypeNTAG215 ||
-        type == MfUltralightTypeNTAG216);
+        type == MfUltralightTypeNTAG216 || type == MfUltralightTypeOrigin);
 
     uint8_t end_page = mf_ultralight_get_config_page_num(type);
     if(type == MfUltralightTypeNTAG213 || type == MfUltralightTypeNTAG215 ||
        type == MfUltralightTypeNTAG216) {
         end_page -= 1;
+    } else if(type == MfUltralightTypeOrigin) {
+        end_page = mf_ultralight_features[type].total_pages;
     }
 
     return end_page;
