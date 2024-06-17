@@ -180,7 +180,7 @@ MfUltralightPoller* mf_ultralight_poller_alloc(Iso14443_3aPoller* iso14443_3a_po
     instance->general_event.protocol = NfcProtocolMfUltralight;
     instance->general_event.event_data = &instance->mfu_event;
     instance->general_event.instance = instance;
-
+    mbedtls_des3_init(&instance->des_context);
     return instance;
 }
 
@@ -193,6 +193,7 @@ void mf_ultralight_poller_free(MfUltralightPoller* instance) {
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
     mf_ultralight_free(instance->data);
+    mbedtls_des3_free(&instance->des_context);
     free(instance);
 }
 
