@@ -94,8 +94,7 @@ static bool input_queue_callback(FuriMessageQueue* queue, void* context) {
         if(furi_event_loop_timer_is_running(timer)) {
             furi_event_loop_timer_stop(timer);
         } else {
-            furi_event_loop_timer_start(
-                app->event_loop, timer, furi_event_loop_timer_get_interval(timer));
+            furi_event_loop_timer_restart(timer);
         }
 
     } else if(event.type == InputTypeLong) {
@@ -129,8 +128,8 @@ int32_t event_loop_blink_test_app(void* arg) {
 
     for(size_t i = 0; i < TIMER_COUNT; ++i) {
         app.timers[i] = furi_event_loop_timer_alloc(
-            blink_timer_callback, FuriEventLoopTimerTypePeriodic, (void*)i);
-        furi_event_loop_timer_start(app.event_loop, app.timers[i], timer_intervals[i]);
+            app.event_loop, blink_timer_callback, FuriEventLoopTimerTypePeriodic, (void*)i);
+        furi_event_loop_timer_start(app.timers[i], timer_intervals[i]);
     }
 
     ViewPort* view_port = view_port_alloc();

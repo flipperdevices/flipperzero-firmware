@@ -92,15 +92,14 @@ typedef struct FuriEventLoopTimer FuriEventLoopTimer;
 /**
  * @brief Create a new event loop timer instance.
  *
- * Event loop timers can ONLY be used in conjunction with a FuriEventLoop instance.
- * Each timer MUST be used in exactly ONE event loop.
- *
+ * @param[in,out] instance pointer to the current FuriEventLoop instance
  * @param[in] callback pointer to the callback function to be executed upon timer timeout
  * @param[in] type timer type value to determine its behavior (signle-shot or periodic)
  * @param[in,out] context pointer to a user-specific object (will be passed to the callback)
  * @returns pointer to the created timer instance
  */
 FuriEventLoopTimer* furi_event_loop_timer_alloc(
+    FuriEventLoop* instance,
     FuriEventLoopTimerCallback callback,
     FuriEventLoopTimerType type,
     void* context);
@@ -115,14 +114,18 @@ void furi_event_loop_timer_free(FuriEventLoopTimer* timer);
 /**
  * @brief Start a timer or restart it with a new interval.
  *
- * @param[in,out] instance pointer to the current FuriEventLoop instance
  * @param[in,out] timer pointer to the timer instance to be (re)started
  * @param[in] interval timer interval in ticks
  */
-void furi_event_loop_timer_start(
-    FuriEventLoop* instance,
-    FuriEventLoopTimer* timer,
-    uint32_t interval);
+void furi_event_loop_timer_start(FuriEventLoopTimer* timer, uint32_t interval);
+
+/**
+ * @brief Restart a timer with the previously set interval.
+ *
+ * @param[in,out] timer pointer to the timer instance to be restarted
+ * @param[in] interval timer interval in ticks
+ */
+void furi_event_loop_timer_restart(FuriEventLoopTimer* timer);
 
 /**
  * @brief Stop a timer without firing its callback.

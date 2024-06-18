@@ -290,9 +290,6 @@ static bool furi_event_loop_process_expired_timer(FuriEventLoop* instance) {
     if(timer->periodic) {
         timer->start_time = xTaskGetTickCount();
         furi_event_loop_schedule_timer(instance, timer);
-
-    } else {
-        timer->owner = NULL;
     }
 
     timer->callback(timer->context);
@@ -311,13 +308,12 @@ static void furi_event_loop_process_timer_queue(FuriEventLoop* instance) {
         }
 
         if(item->request == FuriEventLoopTimerRequestStart) {
-            timer->owner = instance;
             timer->interval = item->interval;
             timer->start_time = item->start_time;
             furi_event_loop_schedule_timer(instance, timer);
 
         } else if(item->request == FuriEventLoopTimerRequestStop) {
-            timer->owner = NULL;
+            // Do nothing
 
         } else if(item->request == FuriEventLoopTimerRequestFree) {
             free(timer);
@@ -429,14 +425,18 @@ void furi_event_loop_stop(FuriEventLoop* instance) {
  */
 
 FuriEventLoopTimer* furi_event_loop_timer_alloc(
+    FuriEventLoop* instance,
     FuriEventLoopTimerCallback callback,
     FuriEventLoopTimerType type,
     void* context) {
+    furi_check(instance);
+    furi_check(instance->thread_id == furi_thread_get_current_id());
     furi_check(callback);
     furi_check(type <= FuriEventLoopTimerTypePeriodic);
 
     FuriEventLoopTimer* timer = malloc(sizeof(FuriEventLoopTimer));
 
+    timer->owner = instance;
     timer->callback = callback;
     timer->context = context;
     timer->periodic = (type == FuriEventLoopTimerTypePeriodic);
@@ -448,31 +448,21 @@ FuriEventLoopTimer* furi_event_loop_timer_alloc(
 
 void furi_event_loop_timer_free(FuriEventLoopTimer* timer) {
     furi_check(timer);
-
-    if(timer->owner == NULL) {
-        free(timer);
-        return;
-    }
-
-    FuriEventLoop* instance = timer->owner;
-    furi_check(instance->thread_id == furi_thread_get_current_id());
+    furi_check(timer->owner);
+    furi_check(timer->owner->thread_id == furi_thread_get_current_id());
 
     const FuriEventLoopTimerQueueItem item = {
         .request = FuriEventLoopTimerRequestFree,
         .timer = timer,
     };
 
-    furi_event_loop_queue_timer_request(instance, &item);
+    furi_event_loop_queue_timer_request(timer->owner, &item);
 }
 
-void furi_event_loop_timer_start(
-    FuriEventLoop* instance,
-    FuriEventLoopTimer* timer,
-    uint32_t interval) {
-    furi_check(instance);
-    furi_check(instance->thread_id == furi_thread_get_current_id());
+void furi_event_loop_timer_start(FuriEventLoopTimer* timer, uint32_t interval) {
     furi_check(timer);
-    furi_check(timer->owner ? timer->owner == instance : true);
+    furi_check(timer->owner);
+    furi_check(timer->owner->thread_id == furi_thread_get_current_id());
 
     const FuriEventLoopTimerQueueItem item = {
         .request = FuriEventLoopTimerRequestStart,
@@ -481,25 +471,35 @@ void furi_event_loop_timer_start(
         .start_time = xTaskGetTickCount(),
     };
 
-    furi_event_loop_queue_timer_request(instance, &item);
+    furi_event_loop_queue_timer_request(timer->owner, &item);
+}
+
+void furi_event_loop_timer_restart(FuriEventLoopTimer* timer) {
+    furi_check(timer);
+    furi_check(timer->owner);
+    furi_check(timer->owner->thread_id == furi_thread_get_current_id());
+
+    const FuriEventLoopTimerQueueItem item = {
+        .request = FuriEventLoopTimerRequestStart,
+        .timer = timer,
+        .interval = timer->interval,
+        .start_time = xTaskGetTickCount(),
+    };
+
+    furi_event_loop_queue_timer_request(timer->owner, &item);
 }
 
 void furi_event_loop_timer_stop(FuriEventLoopTimer* timer) {
     furi_check(timer);
-
-    if(timer->owner == NULL) {
-        return;
-    }
-
-    FuriEventLoop* instance = timer->owner;
-    furi_check(instance->thread_id == furi_thread_get_current_id());
+    furi_check(timer->owner);
+    furi_check(timer->owner->thread_id == furi_thread_get_current_id());
 
     const FuriEventLoopTimerQueueItem item = {
         .request = FuriEventLoopTimerRequestStop,
         .timer = timer,
     };
 
-    furi_event_loop_queue_timer_request(instance, &item);
+    furi_event_loop_queue_timer_request(timer->owner, &item);
 }
 
 uint32_t furi_event_loop_timer_get_remaining_time(const FuriEventLoopTimer* timer) {
@@ -514,7 +514,7 @@ uint32_t furi_event_loop_timer_get_interval(const FuriEventLoopTimer* timer) {
 
 bool furi_event_loop_timer_is_running(const FuriEventLoopTimer* timer) {
     furi_check(timer);
-    return timer->owner && !furi_event_loop_timer_is_expired(timer);
+    return !furi_event_loop_timer_is_expired(timer);
 }
 
 /*
