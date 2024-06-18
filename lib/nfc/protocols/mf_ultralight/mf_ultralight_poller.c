@@ -497,8 +497,9 @@ static NfcCommand mf_ultralight_poller_handler_read_pages(MfUltralightPoller* in
         instance->error = mf_ultralight_poller_read_page(instance, start_page, &data);
     }
 
+    const uint8_t read_cnt = instance->data->type == MfUltralightTypeMfulC ? 1 : 4;
     if(instance->error == MfUltralightErrorNone) {
-        for(size_t i = 0; i < 4; i++) {
+        for(size_t i = 0; i < read_cnt; i++) {
             if(start_page + i < instance->pages_total) {
                 FURI_LOG_D(TAG, "Read page %d success", start_page + i);
                 instance->data->page[start_page + i] = data.page[i];
