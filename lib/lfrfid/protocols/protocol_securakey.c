@@ -36,6 +36,7 @@ typedef struct {
     uint8_t data[SECURAKEY_DECODED_DATA_SIZE_BYTES];
     uint8_t encoded_data[SECURAKEY_ENCODED_FULL_SIZE_BYTE];
     uint8_t encoded_data_index;
+    FuriString* debug_string;
     bool encoded_polarity;
     ManchesterState decoder_manchester_state;
     uint8_t bit_format;
@@ -43,10 +44,12 @@ typedef struct {
 
 ProtocolSecurakey* protocol_securakey_alloc(void) {
     ProtocolSecurakey* protocol = malloc(sizeof(ProtocolSecurakey));
+    protocol->debug_string = furi_string_alloc();
     return (void*)protocol;
 };
 
 void protocol_securakey_free(ProtocolSecurakey* protocol) {
+    free(protocol->debug_string);
     free(protocol);
 };
 
@@ -55,9 +58,15 @@ uint8_t* protocol_securakey_get_data(ProtocolSecurakey* protocol) {
 };
 
 static bool protocol_securakey_can_be_decoded(ProtocolSecurakey* protocol) {
-    // check 11 bits preamble
-    if(bit_lib_get_bits_16(protocol->encoded_data, 0, SECURAKEY_PREAMBLE_SIZE_BITS) ==
-       0b011111111100) {
+    // check 19 bits preamble + format flag
+    if(bit_lib_get_bits_32(protocol->encoded_data, 0, 19) == 0b0111111111000000000) {
+        protocol->bit_format = 0;
+        return true;
+    } else if(bit_lib_get_bits_32(protocol->encoded_data, 0, 19) == 0b0111111111001011010) {
+        protocol->bit_format = 26;
+        return true;
+    } else if(bit_lib_get_bits_32(protocol->encoded_data, 0, 19) == 0b0111111111001100000) {
+        protocol->bit_format = 32;
         return true;
     } else {
         return false;
@@ -107,7 +116,7 @@ static void protocol_securakey_decode(ProtocolSecurakey* protocol) {
             bit_lib_copy_bits(protocol->data, 2, 7, protocol->encoded_data, 30);
             // have to skip one spacer
             bit_lib_copy_bits(protocol->data, 9, 7, protocol->encoded_data, 38);
-        } 
+        }
         // get card number (c)
         bit_lib_copy_bits(protocol->data, 16, 1, protocol->encoded_data, 45);
         // same skips here
@@ -120,7 +129,7 @@ static void protocol_securakey_decode(ProtocolSecurakey* protocol) {
         // CS2
         bit_lib_copy_bits(protocol->data, 40, 8, protocol->encoded_data, 74);
     }
-    
+
     // (decoded) data looks like this (pp are zero paddings):
     // 26-bit format (1-bit EP,  8-bit facility number, 16-bit card number, 1-bit OP)
     // pppppppp ffffffff cccccccc cccccccc CS1      CS2
@@ -181,9 +190,9 @@ void protocol_securakey_render_data(ProtocolSecurakey* protocol, FuriString* res
     if(bit_lib_get_bits_16(protocol->data, 0, 16) == 0) {
         protocol->bit_format = 0;
         furi_string_printf(
-        result,
-        "RKKTH Plaintext format\nCard number: %llu",
-        bit_lib_get_bits_64(protocol->data, 0, 48));
+            result,
+            "RKKTH Plaintext format\nCard number: %llu",
+            bit_lib_get_bits_64(protocol->data, 0, 48));
     } else {
         if(bit_lib_get_bits(protocol->data, 0, 8) == 0) {
             protocol->bit_format = 26;
@@ -215,7 +224,7 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
         bit_lib_copy_bits(protocol->encoded_data, 56, 8, protocol->data, 40);
     } else {
         bit_lib_set_bits(protocol->encoded_data, 8, 0b11001, 5); //preamble cont.
-        if(bit_lib_get_bits(protocol->data, 0, 8) == 0) { 
+        if(bit_lib_get_bits(protocol->data, 0, 8) == 0) {
             protocol->bit_format = 26;
             // set bit length
             bit_lib_set_bits(protocol->encoded_data, 13, protocol->bit_format, 6);
