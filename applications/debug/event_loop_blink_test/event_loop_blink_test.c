@@ -145,20 +145,21 @@ int32_t event_loop_blink_test_app(void* arg) {
 
     furi_event_loop_run(app.event_loop);
 
-    furi_event_loop_message_queue_unsubscribe(app.event_loop, app.input_queue);
-
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
 
     furi_record_close(RECORD_GUI);
 
+    furi_event_loop_message_queue_unsubscribe(app.event_loop, app.input_queue);
+    furi_message_queue_free(app.input_queue);
+
     for(size_t i = 0; i < TIMER_COUNT; ++i) {
         furi_event_loop_timer_free(app.timers[i]);
     }
 
-    furi_message_queue_free(app.input_queue);
     furi_event_loop_free(app.event_loop);
 
     blink_gpio_deinit();
+
     return 0;
 }

@@ -107,6 +107,10 @@ FuriEventLoopTimer* furi_event_loop_timer_alloc(
 /**
  * @brief Delete an event loop timer instance.
  *
+ * @warning The user code MUST call furi_event_loop_timer_free() on ALL instances
+ *          associated with the current event loop BEFORE calling furi_event_loop_free().
+ *          The event loop may EITHER be running OR stopped when the timers are being deleted.
+ *
  * @param[in,out] timer pointer to the timer instance to be deleted
  */
 void furi_event_loop_timer_free(FuriEventLoopTimer* timer);
