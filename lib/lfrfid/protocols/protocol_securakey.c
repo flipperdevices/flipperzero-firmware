@@ -178,7 +178,7 @@ bool protocol_securakey_decoder_feed(ProtocolSecurakey* protocol, bool level, ui
 };
 
 void protocol_securakey_render_data(ProtocolSecurakey* protocol, FuriString* result) {
-    if(bit_lib_get_bits(protocol->data, 0, 16) == 0) {
+    if(bit_lib_get_bits_16(protocol->data, 0, 16) == 0) {
         protocol->bit_format = 0;
         furi_string_printf(
         result,
@@ -205,7 +205,7 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
 
     // write the preamble to the beginning of the encoded_data
     bit_lib_set_bits(protocol->encoded_data, 0, 0b01111111, 8);
-    if(bit_lib_get_bits(protocol->data, 0, 16) == 0) {
+    if(bit_lib_get_bits_16(protocol->data, 0, 16) == 0) {
         bit_lib_set_bits(protocol->encoded_data, 8, 0b110, 3); //preamble cont.
         // write card number (c)
         bit_lib_copy_bits(protocol->encoded_data, 29, 8, protocol->data, 16);
