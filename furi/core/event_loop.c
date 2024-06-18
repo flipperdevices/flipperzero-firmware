@@ -42,7 +42,7 @@ typedef struct {
     uint32_t interval;
 } FuriEventLoopTimerQueueItem;
 
-DEQUE_DEF(TimerQueue, FuriEventLoopTimerQueueItem, M_POD_OPLIST)
+DEQUE_DEF(TimerQueue, FuriEventLoopTimerQueueItem, M_POD_OPLIST) // NOLINT
 
 struct FuriEventLoopItem {
     // Source
@@ -166,15 +166,13 @@ void furi_event_loop_free(FuriEventLoop* instance) {
     furi_check(TimerList_empty_p(instance->timer_list));
 
     FuriEventLoopTree_clear(instance->tree);
-    WaitingList_clear(instance->waiting_list);
-    TimerList_clear(instance->timer_list);
     TimerQueue_clear(instance->timer_queue);
 
     uint32_t flags = 0;
     BaseType_t ret = xTaskNotifyWaitIndexed(
         FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, 0, FuriEventLoopFlagAll, &flags, 0);
     if(ret == pdTRUE) {
-        FURI_LOG_D(TAG, "Some events was not processed: 0x%lx", flags);
+        FURI_LOG_D(TAG, "Some events were not processed: 0x%lx", flags);
     }
 
     free(instance);
