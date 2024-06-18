@@ -5,8 +5,7 @@
 #include "check.h"
 #include "thread.h"
 
-#include <m-algo.h>
-#include <m-list.h>
+#include <m-deque.h>
 #include <m-bptree.h>
 #include <m-i-list.h>
 
@@ -14,6 +13,12 @@
 #include <task.h>
 
 #define TAG "FuriEventLoop"
+
+typedef enum {
+    FuriEventLoopTimerRequestStart,
+    FuriEventLoopTimerRequestStop,
+    FuriEventLoopTimerRequestFree,
+} FuriEventLoopTimerRequest;
 
 struct FuriEventLoopTimer {
     FuriEventLoop* owner;
@@ -23,14 +28,22 @@ struct FuriEventLoopTimer {
 
     uint32_t interval;
     uint32_t start_time;
+
     bool periodic;
+
+    ILIST_INTERFACE(TimerList, FuriEventLoopTimer);
 };
 
-LIST_DEF(TimerList, FuriEventLoopTimer*, M_PTR_OPLIST) // NOLINT
+ILIST_DEF(TimerList, FuriEventLoopTimer, M_POD_OPLIST)
 
-#define M_OPL_TimerList_t() LIST_OPLIST(TimerList, M_PTR_OPLIST)
+typedef struct {
+    FuriEventLoopTimerRequest request;
+    FuriEventLoopTimer* timer;
+    uint32_t interval;
+    uint32_t start_time;
+} FuriEventLoopTimerQueueItem;
 
-ALGO_DEF(TimerList, TimerList_t) // NOLINT
+DEQUE_DEF(TimerQueue, FuriEventLoopTimerQueueItem, M_POD_OPLIST)
 
 struct FuriEventLoopItem {
     // Source
@@ -97,6 +110,7 @@ typedef enum {
 } FuriEventLoopProcessStatus;
 
 typedef enum {
+    FuriEventLoopStateStopped,
     FuriEventLoopStateIdle,
     FuriEventLoopStateProcessing,
 } FuriEventLoopState;
@@ -114,7 +128,8 @@ struct FuriEventLoop {
     WaitingList_t waiting_list;
     // Timer list
     TimerList_t timer_list;
-    TimerList_t expired_timer_list;
+    // Timer command queue
+    TimerQueue_t timer_queue;
 
     // Tick event
     uint32_t tick_interval;
@@ -131,7 +146,7 @@ FuriEventLoop* furi_event_loop_alloc(void) {
     FuriEventLoopTree_init(instance->tree);
     WaitingList_init(instance->waiting_list);
     TimerList_init(instance->timer_list);
-    TimerList_init(instance->expired_timer_list);
+    TimerQueue_init(instance->timer_queue);
 
     // Clear notification state and value
     xTaskNotifyStateClearIndexed(instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX);
@@ -149,7 +164,7 @@ void furi_event_loop_free(FuriEventLoop* instance) {
     FuriEventLoopTree_clear(instance->tree);
     WaitingList_clear(instance->waiting_list);
     TimerList_clear(instance->timer_list);
-    TimerList_clear(instance->expired_timer_list);
+    TimerQueue_clear(instance->timer_queue);
 
     uint32_t flags = 0;
     BaseType_t ret = xTaskNotifyWaitIndexed(
@@ -198,27 +213,14 @@ static inline uint32_t furi_event_loop_tick_get_remaining_time(const FuriEventLo
 static uint32_t furi_event_loop_get_wait_time(const FuriEventLoop* instance) {
     uint32_t wait_time = FuriWaitForever;
 
-    FURI_CRITICAL_ENTER();
-
-    TimerList_it_ct it;
-    for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it); TimerList_next(it)) {
-        const FuriEventLoopTimer* timer = *TimerList_cref(it);
-        const uint32_t remaining_time = furi_event_loop_timer_get_remaining_time_private(timer);
-
-        if(remaining_time < wait_time) {
-            wait_time = remaining_time;
-        }
+    if(!TimerList_empty_p(instance->timer_list)) {
+        FuriEventLoopTimer* timer = TimerList_front(instance->timer_list);
+        wait_time = furi_event_loop_timer_get_remaining_time_private(timer);
     }
 
     if(instance->tick_callback) {
-        const uint32_t remaining_time = furi_event_loop_tick_get_remaining_time(instance);
-
-        if(remaining_time < wait_time) {
-            wait_time = remaining_time;
-        }
+        wait_time = MIN(wait_time, furi_event_loop_tick_get_remaining_time(instance));
     }
-
-    FURI_CRITICAL_EXIT();
 
     return wait_time;
 }
@@ -231,44 +233,101 @@ static inline bool furi_event_loop_tick_is_expired(const FuriEventLoop* instance
     return furi_event_loop_tick_get_elapsed_time(instance) >= instance->tick_interval;
 }
 
-static bool furi_event_loop_process_timers(FuriEventLoop* instance) {
-    TimerList_it_t it;
+static bool furi_event_loop_timer_is_in_list(
+    const FuriEventLoop* instance,
+    const FuriEventLoopTimer* timer) {
+    TimerList_it_ct it;
+
+    for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it); TimerList_next(it)) {
+        if(TimerList_cref(it) == timer) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Schedule the timer so that front() points to the earliest-expiring timer
+static void furi_event_loop_schedule_timer(FuriEventLoop* instance, FuriEventLoopTimer* timer) {
+    FuriEventLoopTimer* timer_pos = NULL;
 
     FURI_CRITICAL_ENTER();
 
-    // Build a list of expired timers and remove one-shot timers
-    for(TimerList_it(it, instance->timer_list); !TimerList_end_p(it);) {
-        FuriEventLoopTimer* timer = *TimerList_ref(it);
+    const uint32_t remaining_time = furi_event_loop_timer_get_remaining_time_private(timer);
 
-        if(furi_event_loop_timer_is_expired(timer)) {
-            TimerList_push_back(instance->expired_timer_list, timer);
-
-            if(timer->periodic) {
-                timer->start_time = xTaskGetTickCount();
-            } else {
-                TimerList_remove(instance->timer_list, it);
-                timer->owner = NULL;
-                continue;
-            }
+    TimerList_it_t it;
+    for(TimerList_it_last(it, instance->timer_list); !TimerList_end_p(it);
+        TimerList_previous(it)) {
+        FuriEventLoopTimer* tmp = TimerList_ref(it);
+        if(remaining_time >= furi_event_loop_timer_get_remaining_time_private(tmp)) {
+            timer_pos = tmp;
+            break;
         }
-
-        TimerList_next(it);
     }
 
     FURI_CRITICAL_EXIT();
 
-    if(TimerList_empty_p(instance->expired_timer_list)) {
+    if(timer_pos) {
+        TimerList_push_after(timer_pos, timer);
+    } else {
+        TimerList_push_front(instance->timer_list, timer);
+    }
+}
+
+static bool furi_event_loop_process_expired_timer(FuriEventLoop* instance) {
+    if(TimerList_empty_p(instance->timer_list)) {
+        return false;
+    }
+    // The front() element contains the earliest-expiring timer
+    FuriEventLoopTimer* timer = TimerList_front(instance->timer_list);
+
+    if(!furi_event_loop_timer_is_expired(timer)) {
         return false;
     }
 
-    // Call respective callbacks for the expired timers
-    for(TimerList_it(it, instance->expired_timer_list); !TimerList_end_p(it); TimerList_next(it)) {
-        FuriEventLoopTimer* timer = *TimerList_ref(it);
-        timer->callback(timer->context);
+    TimerList_unlink(timer);
+
+    if(timer->periodic) {
+        timer->start_time = xTaskGetTickCount();
+        furi_event_loop_schedule_timer(instance, timer);
+
+    } else {
+        timer->owner = NULL;
     }
 
-    TimerList_reset(instance->expired_timer_list);
+    timer->callback(timer->context);
     return true;
+}
+
+static void furi_event_loop_process_timer_queue(FuriEventLoop* instance) {
+    TimerQueue_it_ct it;
+
+    for(TimerQueue_it(it, instance->timer_queue); !TimerQueue_end_p(it); TimerQueue_next(it)) {
+        const FuriEventLoopTimerQueueItem* item = TimerQueue_cref(it);
+        FuriEventLoopTimer* timer = item->timer;
+
+        if(furi_event_loop_timer_is_in_list(instance, timer)) {
+            TimerList_unlink(timer);
+        }
+
+        if(item->request == FuriEventLoopTimerRequestStart) {
+            timer->owner = instance;
+            timer->interval = item->interval;
+            timer->start_time = item->start_time;
+            furi_event_loop_schedule_timer(instance, timer);
+
+        } else if(item->request == FuriEventLoopTimerRequestStop) {
+            timer->owner = NULL;
+
+        } else if(item->request == FuriEventLoopTimerRequestFree) {
+            free(timer);
+
+        } else {
+            furi_crash();
+        }
+    }
+
+    TimerQueue_reset(instance->timer_queue);
 }
 
 static void furi_event_loop_process_tick(FuriEventLoop* instance) {
@@ -278,11 +337,29 @@ static void furi_event_loop_process_tick(FuriEventLoop* instance) {
     }
 }
 
+static void furi_event_loop_queue_timer_request(
+    FuriEventLoop* instance,
+    const FuriEventLoopTimerQueueItem* item) {
+    TimerQueue_push_back(instance->timer_queue, *item);
+
+    if(instance->state == FuriEventLoopStateStopped) {
+        furi_event_loop_process_timer_queue(instance);
+    } else {
+        xTaskNotifyIndexed(
+            instance->thread_id,
+            FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX,
+            FuriEventLoopFlagTimer,
+            eSetBits);
+    }
+}
+
 void furi_event_loop_run(FuriEventLoop* instance) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
     while(true) {
+        instance->state = FuriEventLoopStateIdle;
+
         const TickType_t xTicksToWait = furi_event_loop_get_wait_time(instance);
 
         uint32_t flags = 0;
@@ -290,9 +367,11 @@ void furi_event_loop_run(FuriEventLoop* instance) {
             FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, 0, FuriEventLoopFlagAll, &flags, xTicksToWait);
 
         instance->state = FuriEventLoopStateProcessing;
+
         if(ret == pdTRUE) {
             if(flags & FuriEventLoopFlagStop) {
-                instance->state = FuriEventLoopStateIdle;
+                furi_event_loop_process_timer_queue(instance);
+                instance->state = FuriEventLoopStateStopped;
                 break;
 
             } else if(flags & FuriEventLoopFlagEvent) {
@@ -323,15 +402,17 @@ void furi_event_loop_run(FuriEventLoop* instance) {
                         }
                     }
                 }
+
+            } else if(flags & FuriEventLoopFlagTimer) {
+                furi_event_loop_process_timer_queue(instance);
+
+            } else {
+                furi_crash();
             }
 
-        } else {
-            if(!furi_event_loop_process_timers(instance)) {
-                furi_event_loop_process_tick(instance);
-            }
+        } else if(!furi_event_loop_process_expired_timer(instance)) {
+            furi_event_loop_process_tick(instance);
         }
-
-        instance->state = FuriEventLoopStateIdle;
     }
 }
 
@@ -360,13 +441,28 @@ FuriEventLoopTimer* furi_event_loop_timer_alloc(
     timer->context = context;
     timer->periodic = (type == FuriEventLoopTimerTypePeriodic);
 
+    TimerList_init_field(timer);
+
     return timer;
 }
 
 void furi_event_loop_timer_free(FuriEventLoopTimer* timer) {
-    // No furi_check, it is done by furi_event_loop_timer_stop()
-    furi_event_loop_timer_stop(timer);
-    free(timer);
+    furi_check(timer);
+
+    if(timer->owner == NULL) {
+        free(timer);
+        return;
+    }
+
+    FuriEventLoop* instance = timer->owner;
+    furi_check(instance->thread_id == furi_thread_get_current_id());
+
+    const FuriEventLoopTimerQueueItem item = {
+        .request = FuriEventLoopTimerRequestFree,
+        .timer = timer,
+    };
+
+    furi_event_loop_queue_timer_request(instance, &item);
 }
 
 void furi_event_loop_timer_start(
@@ -376,25 +472,21 @@ void furi_event_loop_timer_start(
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
     furi_check(timer);
+    furi_check(timer->owner ? timer->owner == instance : true);
 
-    if(timer->owner) {
-        furi_check(timer->owner == instance);
-    } else {
-        timer->owner = instance;
-        TimerList_push_back(instance->timer_list, timer);
-    }
+    const FuriEventLoopTimerQueueItem item = {
+        .request = FuriEventLoopTimerRequestStart,
+        .timer = timer,
+        .interval = interval,
+        .start_time = xTaskGetTickCount(),
+    };
 
-    timer->interval = interval;
-    timer->start_time = xTaskGetTickCount();
-
-    xTaskNotifyIndexed(
-        instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagTimer, eSetBits);
+    furi_event_loop_queue_timer_request(instance, &item);
 }
 
 void furi_event_loop_timer_stop(FuriEventLoopTimer* timer) {
     furi_check(timer);
 
-    // Stopping an already stopped timer does nothing
     if(timer->owner == NULL) {
         return;
     }
@@ -402,13 +494,12 @@ void furi_event_loop_timer_stop(FuriEventLoopTimer* timer) {
     FuriEventLoop* instance = timer->owner;
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
-    TimerList_it_t it;
-    TimerList_find(it, instance->timer_list, timer);
+    const FuriEventLoopTimerQueueItem item = {
+        .request = FuriEventLoopTimerRequestStop,
+        .timer = timer,
+    };
 
-    furi_check(!TimerList_end_p(it));
-    TimerList_remove(instance->timer_list, it);
-
-    timer->owner = NULL;
+    furi_event_loop_queue_timer_request(instance, &item);
 }
 
 uint32_t furi_event_loop_timer_get_remaining_time(const FuriEventLoopTimer* timer) {
@@ -456,7 +547,7 @@ void furi_event_loop_message_queue_subscribe(
     void* context) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
-    furi_check(instance->state == FuriEventLoopStateIdle);
+    furi_check(instance->state == FuriEventLoopStateStopped);
     furi_check(message_queue);
 
     FURI_CRITICAL_ENTER();
@@ -493,7 +584,7 @@ void furi_event_loop_message_queue_unsubscribe(
     FuriEventLoop* instance,
     FuriMessageQueue* message_queue) {
     furi_check(instance);
-    furi_check(instance->state == FuriEventLoopStateIdle);
+    furi_check(instance->state == FuriEventLoopStateStopped);
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
     FURI_CRITICAL_ENTER();
