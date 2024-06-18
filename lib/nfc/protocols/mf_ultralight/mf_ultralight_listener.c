@@ -551,32 +551,34 @@ static MfUltralightCommand
     FURI_LOG_T(TAG, "CMD_ULC_AUTH_2");
     UNUSED(instance);
     do {
-        if(bit_buffer_get_byte(buffer, 0) != 0xAF || bit_buffer_get_size_bytes(buffer) != 16 + 1)
+        if(bit_buffer_get_byte(buffer, 0) != 0xAF ||
+           bit_buffer_get_size_bytes(buffer) != MF_ULTRALIGHT_C_ENCRYPTED_PACK_SIZE)
             break;
 
         const uint8_t* data = bit_buffer_get_data(buffer) + 1;
-        const uint8_t* iv = data + 8;
+        const uint8_t* iv = data + MF_ULTRALIGHT_C_AUTH_RND_B_BLOCK_OFFSET;
 
-        uint8_t out[16] = {0};
+        uint8_t out[MF_ULTRALIGHT_C_AUTH_DATA_SIZE] = {0};
 
         const uint8_t* ck = mf_ultralight_3des_get_key(instance->data);
         mf_ultralight_3des_decrypt(
             &instance->des_context, ck, instance->encB, data, sizeof(out), out);
 
         uint8_t* rndA = out;
-        const uint8_t* decoded_shifted_rndB = out + 8;
+        const uint8_t* decoded_shifted_rndB = out + MF_ULTRALIGHT_C_AUTH_RND_B_BLOCK_OFFSET;
 
         mf_ultralight_3des_shift_data(rndA);
         mf_ultralight_3des_shift_data(instance->rndB);
-        if(memcmp(decoded_shifted_rndB, instance->rndB, 8) == 0) {
+        if(memcmp(decoded_shifted_rndB, instance->rndB, sizeof(instance->rndB)) == 0) {
             instance->auth_state = MfUltralightListenerAuthStateSuccess;
         }
 
-        mf_ultralight_3des_encrypt(&instance->des_context, ck, iv, rndA, 8, rndA);
+        mf_ultralight_3des_encrypt(
+            &instance->des_context, ck, iv, rndA, MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE, rndA);
 
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_append_byte(instance->tx_buffer, 0x00);
-        bit_buffer_append_bytes(instance->tx_buffer, rndA, 8);
+        bit_buffer_append_bytes(instance->tx_buffer, rndA, MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE);
 
         iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
@@ -601,11 +603,11 @@ static MfUltralightCommand
 
         furi_hal_random_fill_buf(instance->rndB, sizeof(instance->rndB));
 
-        const uint8_t iv[8] = {0};
+        const uint8_t iv[MF_ULTRALIGHT_C_AUTH_IV_BLOCK_SIZE] = {0};
         const uint8_t* ck = mf_ultralight_3des_get_key(instance->data);
 
         mf_ultralight_3des_encrypt(
-            &instance->des_context, ck, iv, instance->rndB, 8, instance->encB);
+            &instance->des_context, ck, iv, instance->rndB, sizeof(instance->rndB), instance->encB);
 
         bit_buffer_append_bytes(instance->tx_buffer, instance->encB, sizeof(instance->encB));
 

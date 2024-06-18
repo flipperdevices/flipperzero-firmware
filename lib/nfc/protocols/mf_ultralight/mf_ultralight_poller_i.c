@@ -89,7 +89,8 @@ static MfUltralightError mf_ultralight_poller_send_authenticate_cmd(
 
         const uint8_t expected_response_code = initial_cmd ? 0xAF : 0x00;
         if((bit_buffer_get_byte(instance->rx_buffer, 0) != expected_response_code) ||
-           (bit_buffer_get_size_bytes(instance->rx_buffer) != MF_ULTRALIGHT_AUTH_RESPONSE_SIZE)) {
+           (bit_buffer_get_size_bytes(instance->rx_buffer) !=
+            MF_ULTRALIGHT_C_AUTH_RESPONSE_SIZE)) {
             ret = MfUltralightErrorAuth;
             break;
         }
@@ -97,7 +98,7 @@ static MfUltralightError mf_ultralight_poller_send_authenticate_cmd(
         memcpy(
             response,
             bit_buffer_get_data(instance->rx_buffer) + 1,
-            MF_ULTRALIGHT_AUTH_RESPONSE_SIZE - 1);
+            MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE);
     } while(false);
 
     return ret;
@@ -107,7 +108,7 @@ MfUltralightError mf_ultralight_poller_authentication_test(MfUltralightPoller* i
     furi_check(instance);
 
     uint8_t auth_cmd[2] = {MF_ULTRALIGHT_CMD_AUTH, 0x00};
-    uint8_t dummy[8];
+    uint8_t dummy[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE];
     return mf_ultralight_poller_send_authenticate_cmd(
         instance, auth_cmd, sizeof(auth_cmd), true, dummy);
 }
@@ -122,33 +123,32 @@ MfUltralightError mf_ultralight_poller_authenticate_start(
 
     MfUltralightError ret = MfUltralightErrorNone;
     do {
-        uint8_t encRndB[8] = {0};
+        uint8_t encRndB[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE] = {0};
         uint8_t auth_cmd[2] = {MF_ULTRALIGHT_CMD_AUTH, 0x00};
         ret = mf_ultralight_poller_send_authenticate_cmd(
             instance, auth_cmd, sizeof(auth_cmd), true, encRndB /* instance->encRndB */);
 
         if(ret != MfUltralightErrorNone) break;
 
-        uint8_t iv[8] = {0};
-        uint8_t* RndB = output + 8;
+        uint8_t iv[MF_ULTRALIGHT_C_AUTH_IV_BLOCK_SIZE] = {0};
+        uint8_t* RndB = output + MF_ULTRALIGHT_C_AUTH_RND_B_BLOCK_OFFSET;
         mf_ultralight_3des_decrypt(
             &instance->des_context,
             instance->mfu_event.data->auth_context._3des_key.data,
             iv,
             encRndB,
-            //instance->encRndB,
             sizeof(encRndB),
             RndB);
         mf_ultralight_3des_shift_data(RndB);
 
-        memcpy(output, /* instance->RndA */ RndA, 8);
+        memcpy(output, RndA, MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE);
 
         mf_ultralight_3des_encrypt(
             &instance->des_context,
             instance->mfu_event.data->auth_context._3des_key.data,
             encRndB,
             output,
-            16,
+            MF_ULTRALIGHT_C_AUTH_DATA_SIZE,
             output);
 
     } while(false);
@@ -166,8 +166,8 @@ MfUltralightError mf_ultralight_poller_authenticate_end(
     furi_check(request);
     furi_check(response);
 
-    uint8_t auth_cmd[17] = {0xAF};
-    memcpy(&auth_cmd[1], request, 16);
+    uint8_t auth_cmd[MF_ULTRALIGHT_C_ENCRYPTED_PACK_SIZE] = {0xAF};
+    memcpy(&auth_cmd[1], request, MF_ULTRALIGHT_C_AUTH_DATA_SIZE);
     bit_buffer_copy_bytes(instance->tx_buffer, auth_cmd, sizeof(auth_cmd));
 
     MfUltralightError ret = MfUltralightErrorNone;
@@ -177,20 +177,13 @@ MfUltralightError mf_ultralight_poller_authenticate_end(
 
         if(ret != MfUltralightErrorNone) break;
 
-        // uint8_t decoded_shifted_RndA[8] = {0};
         mf_ultralight_3des_decrypt(
             &instance->des_context,
             instance->mfu_event.data->auth_context._3des_key.data,
             RndB,
             bit_buffer_get_data(instance->rx_buffer) + 1,
-            8,
+            MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE,
             response);
-
-        /*  memcpy(
-            response,
-            bit_buffer_get_data(instance->rx_buffer) + 1,
-            MF_ULTRALIGHT_AUTH_RESPONSE_SIZE - 1); */
-
     } while(false);
 
     return ret;

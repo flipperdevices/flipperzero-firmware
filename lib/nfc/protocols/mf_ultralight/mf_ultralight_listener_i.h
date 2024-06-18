@@ -69,8 +69,8 @@ struct MfUltralightListener {
     MfUltralightMirrorMode mirror;
     MfUltralightListenerCompositeCommandContext composite_cmd;
     mbedtls_des3_context des_context;
-    uint8_t rndB[8];
-    uint8_t encB[8];
+    uint8_t rndB[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE];
+    uint8_t encB[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE];
     void* context;
 };
 
