@@ -127,7 +127,6 @@ void furi_event_loop_timer_start(FuriEventLoopTimer* timer, uint32_t interval);
  * @brief Restart a timer with the previously set interval.
  *
  * @param[in,out] timer pointer to the timer instance to be restarted
- * @param[in] interval timer interval in ticks
  */
 void furi_event_loop_timer_restart(FuriEventLoopTimer* timer);
 
