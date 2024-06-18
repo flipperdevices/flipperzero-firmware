@@ -7,6 +7,7 @@
 //-V:DICT_DEF2:779,524,776,760,1044,1001,729,590,568,747,685,1103
 //-V:ALGO_DEF:1048,747,1044
 //-V:TUPLE_DEF2:524,590,1001,760
+//-V:DEQUE_DEF:658,747,760
 
 # Non-severe malloc/null pointer deref warnings
 //-V::522:2,3

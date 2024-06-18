@@ -42,7 +42,7 @@ typedef struct {
     uint32_t interval;
 } FuriEventLoopTimerQueueItem;
 
-DEQUE_DEF(TimerQueue, FuriEventLoopTimerQueueItem, M_POD_OPLIST) // NOLINT
+DEQUE_DEF(TimerQueue, FuriEventLoopTimerQueueItem, M_POD_OPLIST)
 
 struct FuriEventLoopItem {
     // Source
