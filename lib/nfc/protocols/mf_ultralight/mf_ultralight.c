@@ -672,10 +672,10 @@ void mf_ultralight_3des_shift_data(uint8_t* const data) {
     furi_check(data);
 
     uint8_t buf = data[0];
-    for(uint8_t i = 1; i < 8; i++) {
+    for(uint8_t i = 1; i < MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE; i++) {
         data[i - 1] = data[i];
     }
-    data[7] = buf;
+    data[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE - 1] = buf;
 }
 
 const uint8_t* mf_ultralight_3des_get_key(const MfUltralightData* data) {

@@ -81,14 +81,16 @@ MfUltralightError mf_ultralight_poller_auth_pwd(
     MfUltralightPoller* instance,
     MfUltralightPollerAuthContext* data);
 
-/** TODO:Adjust this comment
+/**
  * @brief Start authentication procedure.
  *
  * Must ONLY be used inside the callback function.
  *
- * This function now is used only to identify Mf Ultralight C cards.
+ * This function is used to start authentication process for Ultralight C cards.
  *
  * @param[in, out] instance pointer to the instance to be used in the transaction.
+ * @param[in] RndA Randomly generated block which is required for authentication process.
+ * @param[out] output Authentication encryption result.
  * @return MfUltralightErrorNone if card supports authentication command, an error code on otherwise.
  */
 MfUltralightError mf_ultralight_poller_authenticate_start(
@@ -96,6 +98,16 @@ MfUltralightError mf_ultralight_poller_authenticate_start(
     const uint8_t* RndA,
     uint8_t* output);
 
+/**
+ * @brief End authentication procedure
+ * 
+ * This function is used to end authentication process for Ultralight C cards.
+ * 
+ * @param[in, out] instance pointer to the instance to be used in the transaction.
+ * @param[in] RndB Block received from the card (card generates it randomly) which is required for authentication process.
+ * @param[in] request Contains data of RndA + RndB', where RndB' is decoded and shifted RndB received from the card on previous step.
+ * @param[out] response Must return RndA' which an encrypted shifted RndA value received from the card and decrypted by this function.
+*/
 MfUltralightError mf_ultralight_poller_authenticate_end(
     MfUltralightPoller* instance,
     const uint8_t* RndB,
