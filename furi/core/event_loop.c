@@ -5,7 +5,7 @@
 #include "check.h"
 #include "thread.h"
 
-#include <m-deque.h>
+#include <m-list.h>
 #include <m-bptree.h>
 #include <m-i-list.h>
 
@@ -42,7 +42,7 @@ typedef struct {
     uint32_t interval;
 } FuriEventLoopTimerQueueItem;
 
-DEQUE_DEF(TimerQueue, FuriEventLoopTimerQueueItem, M_POD_OPLIST)
+LIST_DUAL_PUSH_DEF(TimerQueue, FuriEventLoopTimerQueueItem, M_POD_OPLIST)
 
 struct FuriEventLoopItem {
     // Source
@@ -298,34 +298,32 @@ static bool
 }
 
 static void furi_event_loop_process_timer_queue(FuriEventLoop* instance) {
-    TimerQueue_it_ct it;
+    while(!TimerQueue_empty_p(instance->timer_queue)) {
+        FuriEventLoopTimerQueueItem item;
+        TimerQueue_pop_back(&item, instance->timer_queue);
 
-    for(TimerQueue_it(it, instance->timer_queue); !TimerQueue_end_p(it); TimerQueue_next(it)) {
-        const FuriEventLoopTimerQueueItem* item = TimerQueue_cref(it);
-        FuriEventLoopTimer* timer = item->timer;
+        FuriEventLoopTimer* timer = item.timer;
 
         if(furi_event_loop_timer_in_list(instance, timer)) {
             TimerList_unlink(timer);
         }
 
-        if(item->request == FuriEventLoopTimerRequestStart) {
-            timer->interval = item->interval;
+        if(item.request == FuriEventLoopTimerRequestStart) {
+            timer->interval = item.interval;
             timer->start_time = xTaskGetTickCount();
 
             furi_event_loop_schedule_timer(instance, timer);
 
-        } else if(item->request == FuriEventLoopTimerRequestStop) {
+        } else if(item.request == FuriEventLoopTimerRequestStop) {
             // Do nothing
 
-        } else if(item->request == FuriEventLoopTimerRequestFree) {
+        } else if(item.request == FuriEventLoopTimerRequestFree) {
             free(timer);
 
         } else {
             furi_crash();
         }
     }
-
-    TimerQueue_reset(instance->timer_queue);
 }
 
 static void furi_event_loop_process_tick(FuriEventLoop* instance) {
@@ -338,7 +336,7 @@ static void furi_event_loop_process_tick(FuriEventLoop* instance) {
 static void furi_event_loop_queue_timer_request(
     FuriEventLoop* instance,
     const FuriEventLoopTimerQueueItem* item) {
-    TimerQueue_push_back(instance->timer_queue, *item);
+    TimerQueue_push_front(instance->timer_queue, *item);
 
     xTaskNotifyIndexed(
         instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagTimer, eSetBits);
