@@ -400,6 +400,13 @@ static void furi_event_loop_queue_timer_request(
         instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagTimer, eSetBits);
 }
 
+static void furi_event_loop_restore_flags(FuriEventLoop* instance, uint32_t flags) {
+    if(flags) {
+        xTaskNotifyIndexed(
+            instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, flags, eSetBits);
+    }
+}
+
 void furi_event_loop_run(FuriEventLoop* instance) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
@@ -448,6 +455,8 @@ void furi_event_loop_run(FuriEventLoop* instance) {
                         }
                     }
                 }
+
+                furi_event_loop_restore_flags(instance, flags & ~FuriEventLoopFlagEvent);
 
             } else if(flags & FuriEventLoopFlagTimer) {
                 furi_event_loop_process_timer_queue(instance);
