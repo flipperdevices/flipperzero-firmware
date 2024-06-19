@@ -66,9 +66,9 @@ typedef struct {
         FuriEventLoopTickRequest tick;
         FuriEventLoopPendingRequest pending;
     };
-} FuriEventLoopTimerQueueItem;
+} FuriEventLoopRequestQueueItem;
 
-LIST_DUAL_PUSH_DEF(TimerQueue, FuriEventLoopTimerQueueItem, M_POD_OPLIST)
+LIST_DUAL_PUSH_DEF(RequestQueue, FuriEventLoopRequestQueueItem, M_POD_OPLIST)
 
 struct FuriEventLoopItem {
     // Source
@@ -122,11 +122,11 @@ BPTREE_DEF2( // NOLINT
 typedef enum {
     FuriEventLoopFlagEvent = (1 << 0),
     FuriEventLoopFlagStop = (1 << 1),
-    FuriEventLoopFlagTimer = (1 << 2),
+    FuriEventLoopFlagRequest = (1 << 2),
 } FuriEventLoopFlag;
 
 #define FuriEventLoopFlagAll \
-    (FuriEventLoopFlagEvent | FuriEventLoopFlagStop | FuriEventLoopFlagTimer)
+    (FuriEventLoopFlagEvent | FuriEventLoopFlagStop | FuriEventLoopFlagRequest)
 
 typedef enum {
     FuriEventLoopProcessStatusComplete,
@@ -147,14 +147,13 @@ struct FuriEventLoop {
     // Poller state
     volatile FuriEventLoopState state;
 
-    // Tree
+    // Event handling
     FuriEventLoopTree_t tree;
-    // Tree waiting list
     WaitingList_t waiting_list;
-    // Timer list
+
+    // Pending request handling
     TimerList_t timer_list;
-    // Timer command queue
-    TimerQueue_t timer_queue;
+    RequestQueue_t request_queue;
 
     // Tick event
     uint32_t tick_interval;
@@ -171,7 +170,7 @@ FuriEventLoop* furi_event_loop_alloc(void) {
     FuriEventLoopTree_init(instance->tree);
     WaitingList_init(instance->waiting_list);
     TimerList_init(instance->timer_list);
-    TimerQueue_init(instance->timer_queue);
+    RequestQueue_init(instance->request_queue);
 
     // Clear notification state and value
     xTaskNotifyStateClearIndexed(instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX);
@@ -181,18 +180,18 @@ FuriEventLoop* furi_event_loop_alloc(void) {
     return instance;
 }
 
-static void furi_event_loop_process_timer_queue(FuriEventLoop* instance);
+static void furi_event_loop_process_request_queue(FuriEventLoop* instance);
 
 void furi_event_loop_free(FuriEventLoop* instance) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
     furi_check(instance->state == FuriEventLoopStateStopped);
 
-    furi_event_loop_process_timer_queue(instance);
+    furi_event_loop_process_request_queue(instance);
     furi_check(TimerList_empty_p(instance->timer_list));
 
     FuriEventLoopTree_clear(instance->tree);
-    TimerQueue_clear(instance->timer_queue);
+    RequestQueue_clear(instance->request_queue);
 
     uint32_t flags = 0;
     BaseType_t ret = xTaskNotifyWaitIndexed(
@@ -361,10 +360,10 @@ static void furi_event_loop_process_tick_request(
     }
 }
 
-static void furi_event_loop_process_timer_queue(FuriEventLoop* instance) {
-    for(; !TimerQueue_empty_p(instance->timer_queue);
-        TimerQueue_pop_back(NULL, instance->timer_queue)) {
-        const FuriEventLoopTimerQueueItem* item = TimerQueue_back(instance->timer_queue);
+static void furi_event_loop_process_request_queue(FuriEventLoop* instance) {
+    for(; !RequestQueue_empty_p(instance->request_queue);
+        RequestQueue_pop_back(NULL, instance->request_queue)) {
+        const FuriEventLoopRequestQueueItem* item = RequestQueue_back(instance->request_queue);
 
         if(item->type == FuriEventLoopRequestTypeTimer) {
             const FuriEventLoopTimerRequest* request = &item->timer;
@@ -391,13 +390,13 @@ static void furi_event_loop_process_tick(FuriEventLoop* instance) {
     }
 }
 
-static void furi_event_loop_queue_timer_request(
+static void furi_event_loop_enqueue_request(
     FuriEventLoop* instance,
-    const FuriEventLoopTimerQueueItem* item) {
-    TimerQueue_push_front(instance->timer_queue, *item);
+    const FuriEventLoopRequestQueueItem* item) {
+    RequestQueue_push_front(instance->request_queue, *item);
 
     xTaskNotifyIndexed(
-        instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagTimer, eSetBits);
+        instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagRequest, eSetBits);
 }
 
 static void furi_event_loop_restore_flags(FuriEventLoop* instance, uint32_t flags) {
@@ -458,8 +457,8 @@ void furi_event_loop_run(FuriEventLoop* instance) {
 
                 furi_event_loop_restore_flags(instance, flags & ~FuriEventLoopFlagEvent);
 
-            } else if(flags & FuriEventLoopFlagTimer) {
-                furi_event_loop_process_timer_queue(instance);
+            } else if(flags & FuriEventLoopFlagRequest) {
+                furi_event_loop_process_request_queue(instance);
 
             } else {
                 furi_crash();
@@ -509,7 +508,7 @@ void furi_event_loop_timer_free(FuriEventLoopTimer* timer) {
     furi_check(timer);
     furi_check(timer->owner->thread_id == furi_thread_get_current_id());
 
-    const FuriEventLoopTimerQueueItem item = {
+    const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypeTimer,
         .timer =
             {
@@ -518,14 +517,14 @@ void furi_event_loop_timer_free(FuriEventLoopTimer* timer) {
             },
     };
 
-    furi_event_loop_queue_timer_request(timer->owner, &item);
+    furi_event_loop_enqueue_request(timer->owner, &item);
 }
 
 void furi_event_loop_timer_start(FuriEventLoopTimer* timer, uint32_t interval) {
     furi_check(timer);
     furi_check(timer->owner->thread_id == furi_thread_get_current_id());
 
-    const FuriEventLoopTimerQueueItem item = {
+    const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypeTimer,
         .timer =
             {
@@ -535,14 +534,14 @@ void furi_event_loop_timer_start(FuriEventLoopTimer* timer, uint32_t interval) {
             },
     };
 
-    furi_event_loop_queue_timer_request(timer->owner, &item);
+    furi_event_loop_enqueue_request(timer->owner, &item);
 }
 
 void furi_event_loop_timer_restart(FuriEventLoopTimer* timer) {
     furi_check(timer);
     furi_check(timer->owner->thread_id == furi_thread_get_current_id());
 
-    const FuriEventLoopTimerQueueItem item = {
+    const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypeTimer,
         .timer =
             {
@@ -552,14 +551,14 @@ void furi_event_loop_timer_restart(FuriEventLoopTimer* timer) {
             },
     };
 
-    furi_event_loop_queue_timer_request(timer->owner, &item);
+    furi_event_loop_enqueue_request(timer->owner, &item);
 }
 
 void furi_event_loop_timer_stop(FuriEventLoopTimer* timer) {
     furi_check(timer);
     furi_check(timer->owner->thread_id == furi_thread_get_current_id());
 
-    const FuriEventLoopTimerQueueItem item = {
+    const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypeTimer,
         .timer =
             {
@@ -568,7 +567,7 @@ void furi_event_loop_timer_stop(FuriEventLoopTimer* timer) {
             },
     };
 
-    furi_event_loop_queue_timer_request(timer->owner, &item);
+    furi_event_loop_enqueue_request(timer->owner, &item);
 }
 
 uint32_t furi_event_loop_timer_get_remaining_time(const FuriEventLoopTimer* timer) {
@@ -598,7 +597,7 @@ void furi_event_loop_pend_callback(
     furi_check(instance->thread_id == furi_thread_get_current_id());
     furi_check(callback);
 
-    const FuriEventLoopTimerQueueItem item = {
+    const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypePending,
         .pending =
             {
@@ -607,7 +606,7 @@ void furi_event_loop_pend_callback(
             },
     };
 
-    furi_event_loop_queue_timer_request(instance, &item);
+    furi_event_loop_enqueue_request(instance, &item);
 }
 
 /*
@@ -623,7 +622,7 @@ void furi_event_loop_tick_set(
     furi_check(instance->thread_id == furi_thread_get_current_id());
     furi_check(callback ? interval > 0 : true);
 
-    const FuriEventLoopTimerQueueItem item = {
+    const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypeTick,
         .tick =
             {
@@ -633,7 +632,7 @@ void furi_event_loop_tick_set(
             },
     };
 
-    furi_event_loop_queue_timer_request(instance, &item);
+    furi_event_loop_enqueue_request(instance, &item);
 }
 
 /*
