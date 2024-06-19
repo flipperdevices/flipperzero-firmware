@@ -167,6 +167,32 @@ uint32_t furi_event_loop_timer_get_interval(const FuriEventLoopTimer* timer);
 bool furi_event_loop_timer_is_running(const FuriEventLoopTimer* timer);
 
 /*
+ * Deferred function call API
+ */
+
+/**
+ * @brief Timer callback type for functions to be called in a deferred manner.
+ *
+ * @param[in,out] context pointer to a user-specific object that was provided during
+ *                        furi_event_loop_pend_callback() call
+ */
+typedef void (*FuriEventLoopPendingCallback)(void* context);
+
+/**
+ * @brief Call a function when all preceding timer commands are processed
+ *
+ * This function may be useful to call another function when the even loop has been started.
+ *
+ * @param[in,out] instance pointer to the current FuriEventLoop instance
+ * @param[in] callback pointer to the callback to be executed when previous commands have been processed
+ * @param[in,out] context pointer to a user-specific object (will be passed to the callback)
+ */
+void furi_event_loop_pend_callback(
+    FuriEventLoop* instance,
+    FuriEventLoopPendingCallback callback,
+    void* context);
+
+/*
  * Tick related API
  */
 
