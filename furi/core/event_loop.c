@@ -38,7 +38,7 @@ typedef enum {
 
 typedef struct {
     FuriEventLoopTimerRequestType type;
-    FuriEventLoopTimer* instance;
+    FuriEventLoopTimer* timer;
     uint32_t interval;
 } FuriEventLoopTimerRequest;
 
@@ -62,9 +62,9 @@ typedef enum {
 typedef struct {
     FuriEventLoopRequestType type;
     union {
-        FuriEventLoopTimerRequest timer;
-        FuriEventLoopTickRequest tick;
-        FuriEventLoopPendingRequest pending;
+        FuriEventLoopTimerRequest timer_request;
+        FuriEventLoopTickRequest tick_request;
+        FuriEventLoopPendingRequest pending_request;
     };
 } FuriEventLoopRequestQueueItem;
 
@@ -325,7 +325,7 @@ static bool
 static void furi_event_loop_process_timer_request(
     FuriEventLoop* instance,
     const FuriEventLoopTimerRequest* request) {
-    FuriEventLoopTimer* timer = request->instance;
+    FuriEventLoopTimer* timer = request->timer;
 
     if(furi_event_loop_timer_in_list(instance, timer)) {
         TimerList_unlink(timer);
@@ -366,15 +366,15 @@ static void furi_event_loop_process_request_queue(FuriEventLoop* instance) {
         const FuriEventLoopRequestQueueItem* item = RequestQueue_back(instance->request_queue);
 
         if(item->type == FuriEventLoopRequestTypeTimer) {
-            const FuriEventLoopTimerRequest* request = &item->timer;
+            const FuriEventLoopTimerRequest* request = &item->timer_request;
             furi_event_loop_process_timer_request(instance, request);
 
         } else if(item->type == FuriEventLoopRequestTypeTick) {
-            const FuriEventLoopTickRequest* request = &item->tick;
+            const FuriEventLoopTickRequest* request = &item->tick_request;
             furi_event_loop_process_tick_request(instance, request);
 
         } else if(item->type == FuriEventLoopRequestTypePending) {
-            const FuriEventLoopPendingRequest* request = &item->pending;
+            const FuriEventLoopPendingRequest* request = &item->pending_request;
             request->callback(request->context);
 
         } else {
@@ -510,10 +510,10 @@ void furi_event_loop_timer_free(FuriEventLoopTimer* timer) {
 
     const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypeTimer,
-        .timer =
+        .timer_request =
             {
                 .type = FuriEventLoopTimerRequestTypeFree,
-                .instance = timer,
+                .timer = timer,
             },
     };
 
@@ -526,10 +526,10 @@ void furi_event_loop_timer_start(FuriEventLoopTimer* timer, uint32_t interval) {
 
     const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypeTimer,
-        .timer =
+        .timer_request =
             {
                 .type = FuriEventLoopTimerRequestTypeStart,
-                .instance = timer,
+                .timer = timer,
                 .interval = interval,
             },
     };
@@ -543,10 +543,10 @@ void furi_event_loop_timer_restart(FuriEventLoopTimer* timer) {
 
     const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypeTimer,
-        .timer =
+        .timer_request =
             {
                 .type = FuriEventLoopTimerRequestTypeStart,
-                .instance = timer,
+                .timer = timer,
                 .interval = timer->interval,
             },
     };
@@ -560,10 +560,10 @@ void furi_event_loop_timer_stop(FuriEventLoopTimer* timer) {
 
     const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypeTimer,
-        .timer =
+        .timer_request =
             {
                 .type = FuriEventLoopTimerRequestTypeStop,
-                .instance = timer,
+                .timer = timer,
             },
     };
 
@@ -599,7 +599,7 @@ void furi_event_loop_pend_callback(
 
     const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypePending,
-        .pending =
+        .pending_request =
             {
                 .callback = callback,
                 .context = context,
@@ -624,7 +624,7 @@ void furi_event_loop_tick_set(
 
     const FuriEventLoopRequestQueueItem item = {
         .type = FuriEventLoopRequestTypeTick,
-        .tick =
+        .tick_request =
             {
                 .callback = callback,
                 .interval = interval,
