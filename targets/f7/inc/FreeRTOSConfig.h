@@ -29,13 +29,9 @@
 // #define configTOTAL_HEAP_SIZE                    ((size_t)0)
 #define configMAX_TASK_NAME_LEN (32)
 
-/* Run-time stats - broken ATM, to be fixed */
-/*
 #define configGENERATE_RUN_TIME_STATS 1
-#define configRUN_TIME_COUNTER_TYPE uint64_t
 #define portGET_RUN_TIME_COUNTER_VALUE() (DWT->CYCCNT)
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
-*/
 
 #define configUSE_TRACE_FACILITY 1
 #define configUSE_16_BIT_TICKS 0
@@ -86,8 +82,12 @@ to exclude the API function. */
 #define INCLUDE_xTaskGetSchedulerState 1
 #define INCLUDE_xTimerPendFunctionCall 1
 
-/* Furi-specific */
-#define configTASK_NOTIFICATION_ARRAY_ENTRIES 2
+/* Workaround for various notification issues:
+ * - First one used by system primitives
+ * - Second one by thread event notification
+ * - Third one by FuriEventLoop
+ */
+#define configTASK_NOTIFICATION_ARRAY_ENTRIES 3
 
 extern __attribute__((__noreturn__)) void furi_thread_catch(void);
 #define configTASK_RETURN_ADDRESS (furi_thread_catch + 2)
