@@ -23,7 +23,7 @@ class Main(App):
     #  No compression, plain tar
     RESOURCE_TAR_MODE = "w:"
     RESOURCE_TAR_FORMAT = tarfile.USTAR_FORMAT
-    RESOURCE_FILE_NAME = "resources.tar"
+    RESOURCE_FILE_NAME = "resources.ths"  # .Tar.HeatShrink
     RESOURCE_ENTRY_NAME_MAX_LENGTH = 100
 
     WHITELISTED_STACK_TYPES = set(
@@ -139,7 +139,7 @@ class Main(App):
                 self.args.radiobin, join(self.args.directory, radiobin_basename)
             )
         if self.args.resources:
-            resources_basename = self.RESOURCE_FILE_NAME + ".hs"
+            resources_basename = self.RESOURCE_FILE_NAME
             if not self.package_resources(
                 self.args.resources, join(self.args.directory, resources_basename)
             ):
@@ -251,13 +251,16 @@ class Main(App):
                 )
                 f.write(header.pack())
                 with open(plain_tar_name, "rb") as src:
-                    f.write(
-                        heatshrink2.compress(
-                            src.read(),
-                            self.HEATSHRINK_WINDOW_SIZE,
-                            self.HEATSHRINK_LOOKAHEAD_SIZE,
-                        )
+                    src_data = src.read()
+                    compressed = heatshrink2.compress(
+                        src_data,
+                        self.HEATSHRINK_WINDOW_SIZE,
+                        self.HEATSHRINK_LOOKAHEAD_SIZE,
                     )
+                    f.write(compressed)
+            self.logger.info(
+                f"Resources compression ratio: {len(compressed) * 100 / len(src_data):.2f}%"
+            )
             os.remove(plain_tar_name)
 
             return True

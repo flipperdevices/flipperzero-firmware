@@ -9,6 +9,8 @@
 #include <update_util/lfs_backup.h>
 #include <update_util/update_operation.h>
 
+#define TAG "UpdWorker"
+
 static const char* update_task_stage_descr[] = {
     [UpdateTaskStageProgress] = "...",
     [UpdateTaskStageReadManifest] = "Loading update manifest",
@@ -304,7 +306,7 @@ static void update_task_calc_completed_stages(UpdateTask* update_task) {
 
 void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, uint8_t progress) {
     if(stage != UpdateTaskStageProgress) {
-        FURI_LOG_I("TAG", "Stage %d, progress %d", stage, progress);
+        FURI_LOG_I(TAG, "Stage %d, progress %d", stage, progress);
         /* do not override more specific error states */
         if((stage >= UpdateTaskStageError) && (update_task->state.stage >= UpdateTaskStageError)) {
             return;

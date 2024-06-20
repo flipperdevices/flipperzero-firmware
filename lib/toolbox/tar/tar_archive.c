@@ -15,6 +15,7 @@
 
 typedef struct TarArchive {
     Storage* storage;
+    File* stream;
     mtar_t tar;
     tar_unpack_file_cb unpack_cb;
     void* unpack_cb_context;
@@ -39,7 +40,6 @@ static int mtar_storage_file_seek(void* stream, unsigned offset) {
 static int mtar_storage_file_close(void* stream) {
     if(stream) {
         storage_file_close(stream);
-        storage_file_free(stream);
     }
     return MTAR_ESUCCESS;
 }
@@ -114,6 +114,7 @@ TarArchive* tar_archive_alloc(Storage* storage) {
     furi_check(storage);
     TarArchive* archive = malloc(sizeof(TarArchive));
     archive->storage = storage;
+    archive->stream = storage_file_alloc(archive->storage);
     archive->unpack_cb = NULL;
     return archive;
 }
@@ -151,18 +152,18 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
         return false;
     }
 
-    File* stream = storage_file_alloc(archive->storage);
+    File* stream = archive->stream;
     if(!storage_file_open(stream, path, access_mode, open_mode)) {
-        storage_file_free(stream);
         return false;
     }
+
     if(compressed) {
         /* Read and validate stream header */
         HeatshrinkStreamHeader header;
         if(storage_file_read(stream, &header, sizeof(HeatshrinkStreamHeader)) !=
                sizeof(HeatshrinkStreamHeader) ||
            header.magic != HEATSHRINK_MAGIC) {
-            storage_file_free(stream);
+            storage_file_close(stream);
             return false;
         }
 
@@ -186,6 +187,7 @@ void tar_archive_free(TarArchive* archive) {
     if(mtar_is_open(&archive->tar)) {
         mtar_close(&archive->tar);
     }
+    storage_file_free(archive->stream);
     free(archive);
 }
 
@@ -211,6 +213,17 @@ int32_t tar_archive_get_entries_count(TarArchive* archive) {
         counter = -1;
     }
     return counter;
+}
+
+bool tar_archive_get_read_progress(TarArchive* archive, int32_t* processed, int32_t* total) {
+    furi_check(archive);
+    if(mtar_access_mode(&archive->tar) != MTAR_READ) {
+        return false;
+    }
+
+    *processed = storage_file_tell(archive->stream);
+    *total = storage_file_size(archive->stream);
+    return true;
 }
 
 bool tar_archive_dir_add_element(TarArchive* archive, const char* dirpath) {

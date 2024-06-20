@@ -37,18 +37,17 @@ static bool update_task_pre_update(UpdateTask* update_task) {
 }
 typedef struct {
     UpdateTask* update_task;
-    int32_t total_files, processed_files;
+    TarArchive* archive;
 } TarUnpackProgress;
 
 static bool update_task_resource_unpack_cb(const char* name, bool is_directory, void* context) {
     UNUSED(name);
     UNUSED(is_directory);
     TarUnpackProgress* unpack_progress = context;
-    unpack_progress->processed_files++;
+    int32_t progress = 0, total = 0;
+    tar_archive_get_read_progress(unpack_progress->archive, &progress, &total);
     update_task_set_progress(
-        unpack_progress->update_task,
-        UpdateTaskStageProgress,
-        (unpack_progress->processed_files * 100) / (unpack_progress->total_files));
+        unpack_progress->update_task, UpdateTaskStageProgress, (progress * 100) / (total + 1));
     return true;
 }
 
@@ -165,8 +164,7 @@ static bool update_task_post_update(UpdateTask* update_task) {
         if(update_task->state.groups & UpdateTaskStageGroupResources) {
             TarUnpackProgress progress = {
                 .update_task = update_task,
-                .total_files = 1,
-                .processed_files = 0,
+                .archive = archive,
             };
 
             path_concat(
@@ -174,16 +172,13 @@ static bool update_task_post_update(UpdateTask* update_task) {
                 furi_string_get_cstr(update_task->manifest->resource_bundle),
                 file_path);
 
-            tar_archive_set_file_callback(archive, update_task_resource_unpack_cb, &progress);
             CHECK_RESULT(
                 tar_archive_open(archive, furi_string_get_cstr(file_path), TAR_OPEN_MODE_READ_HS));
 
             update_task_cleanup_resources(update_task);
 
             update_task_set_progress(update_task, UpdateTaskStageResourcesFileUnpack, 0);
-            FURI_LOG_I(TAG, "Counting resources to unpack");
-            progress.total_files = tar_archive_get_entries_count(archive);
-            FURI_LOG_I(TAG, "Total files to unpack: %li", progress.total_files);
+            tar_archive_set_file_callback(archive, update_task_resource_unpack_cb, &progress);
             CHECK_RESULT(tar_archive_unpack_to(archive, STORAGE_EXT_PATH_PREFIX, NULL));
         }
 
