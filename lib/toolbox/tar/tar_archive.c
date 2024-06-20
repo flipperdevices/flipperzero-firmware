@@ -350,7 +350,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
 
     furi_string_free(converted_fname);
     furi_string_free(full_extracted_fname);
-    return success ? 0 : -1;
+    return success ? 0 : MTAR_EFAILURE;
 }
 
 bool tar_archive_unpack_to(

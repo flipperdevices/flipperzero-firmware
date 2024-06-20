@@ -453,7 +453,6 @@ static bool compress_decode_stream_chunk(
     void* read_context,
     uint8_t* decompressed_chunk,
     size_t decomp_chunk_size) {
-    bool failed = false;
     HSD_sink_res sink_res;
     HSD_poll_res poll_res;
 
@@ -465,6 +464,10 @@ static bool compress_decode_stream_chunk(
     Then, read more data from the input and sink it to the decoder.
     Repeat until the input is exhausted or output buffer is full.
     */
+
+    bool failed = false;
+    bool can_sink_more = true;
+    bool can_read_more = true;
 
     do {
         do {
@@ -483,7 +486,15 @@ static bool compress_decode_stream_chunk(
             break;
         }
 
-        bool can_sink_more = true;
+        if(can_read_more && (sd->decode_buffer_position < sd->decode_buffer_size)) {
+            size_t read_size = read_cb(
+                read_context,
+                &sd->decode_buffer[sd->decode_buffer_position],
+                sd->decode_buffer_size - sd->decode_buffer_position);
+            sd->decode_buffer_position += read_size;
+            can_read_more = read_size > 0;
+        }
+
         while(sd->decode_buffer_position && can_sink_more) {
             size_t sink_size = 0;
             sink_res = heatshrink_decoder_sink(
@@ -501,17 +512,9 @@ static bool compress_decode_stream_chunk(
                     sd->decode_buffer, &sd->decode_buffer[sink_size], sd->decode_buffer_position);
             }
         }
+    } while(!failed);
 
-        if(can_sink_more) {
-            size_t read_size = read_cb(read_context, sd->decode_buffer, sd->decode_buffer_size);
-            sd->decode_buffer_position = read_size;
-            if(!read_size) {
-                break;
-            }
-        }
-    } while(!failed && decomp_chunk_size);
-
-    return !failed;
+    return decomp_chunk_size == 0;
 }
 
 bool compress_stream_decoder_read(
