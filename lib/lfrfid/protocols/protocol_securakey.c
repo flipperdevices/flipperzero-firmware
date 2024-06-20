@@ -234,7 +234,6 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
         bit_lib_copy_bits(protocol->RKKTH_encoded_data, 38, 8, protocol->data, 24);
         bit_lib_copy_bits(protocol->RKKTH_encoded_data, 47, 8, protocol->data, 32);
         bit_lib_copy_bits(protocol->RKKTH_encoded_data, 56, 8, protocol->data, 40);
-        FURI_LOG_D(TAG, "RKKTH encoded: %s", protocol_securakey_get_encoded_data_debug(protocol));
     } else {
         // write the preamble to the beginning of the RKKT_encoded_data
         bit_lib_set_bits(protocol->RKKT_encoded_data, 0, 0b01111111, 8);
@@ -286,6 +285,8 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
     // for sending we start at bit 0.
     protocol->encoded_data_index = 0;
     protocol->encoded_polarity = true;
+    bit_lib_copy_bits(protocol->RKKTH_encoded_data, 47, 8, protocol->data, 32);
+    FURI_LOG_D(TAG, "encoded: %s", protocol_securakey_get_encoded_data_debug(protocol));
     return true;
 };
 
@@ -318,23 +319,14 @@ LevelDuration protocol_securakey_encoder_yield(ProtocolSecurakey* protocol) {
 };
 
 bool protocol_securakey_write_data(ProtocolSecurakey* protocol, void* data) {
+    protocol_securakey_encoder_start(protocol);
+    FURI_LOG_D(TAG, "pre-request encoded: %s", protocol_securakey_get_encoded_data_debug(protocol));
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
     // Write T5577
     if(bit_lib_get_bits_16(protocol->data, 0, 16) == 0) {
-        // set all of our encoded_data bits to zeros.
-        memset(protocol->RKKTH_encoded_data, 0, SECURAKEY_RKKTH_ENCODED_FULL_SIZE_BYTE);
-        // write the preamble to the beginning of the RKKT_encoded_data
-        bit_lib_set_bits(protocol->RKKTH_encoded_data, 0, 0b01111111, 8);
-        bit_lib_set_bits(protocol->RKKTH_encoded_data, 8, 0b110, 3); //preamble cont.
-        // write card number (c)
-        bit_lib_copy_bits(protocol->RKKTH_encoded_data, 29, 8, protocol->data, 16);
-        // skip spacers (they are zero already by memset)
-        bit_lib_copy_bits(protocol->RKKTH_encoded_data, 38, 8, protocol->data, 24);
-        bit_lib_copy_bits(protocol->RKKTH_encoded_data, 47, 8, protocol->data, 32);
-        bit_lib_copy_bits(protocol->RKKTH_encoded_data, 56, 8, protocol->data, 40);
-        FURI_LOG_D(TAG, "write encoded: %s", protocol_securakey_get_encoded_data_debug(protocol));
-
+        protocol_securakey_encoder_start(protocol);
+        FURI_LOG_D(TAG, "re-encode encoded: %s", protocol_securakey_get_encoded_data_debug(protocol));
         if(request->write_type == LFRFIDWriteTypeT5577) {
             request->t5577.block[0] =
                 (LFRFID_T5577_MODULATION_MANCHESTER | LFRFID_T5577_BITRATE_RF_40 |
