@@ -38,7 +38,6 @@ typedef struct {
     uint8_t RKKT_encoded_data[SECURAKEY_RKKT_ENCODED_FULL_SIZE_BYTE];
     uint8_t RKKTH_encoded_data[SECURAKEY_RKKTH_ENCODED_FULL_SIZE_BYTE];
     uint8_t encoded_data_index;
-    FuriString* debug_string;
     bool encoded_polarity;
     ManchesterState decoder_manchester_state;
     uint8_t bit_format;
@@ -46,26 +45,15 @@ typedef struct {
 
 ProtocolSecurakey* protocol_securakey_alloc(void) {
     ProtocolSecurakey* protocol = malloc(sizeof(ProtocolSecurakey));
-    protocol->debug_string = furi_string_alloc();
     return (void*)protocol;
 };
 
 void protocol_securakey_free(ProtocolSecurakey* protocol) {
-    free(protocol->debug_string);
     free(protocol);
 };
 
 uint8_t* protocol_securakey_get_data(ProtocolSecurakey* protocol) {
     return protocol->data;
-};
-
-static const char* protocol_securakey_get_encoded_data_debug(ProtocolSecurakey* protocol) {
-    furi_string_reset(protocol->debug_string);
-    for(size_t i = 0; i < SECURAKEY_RKKTH_ENCODED_FULL_SIZE_BITS; i++) {
-        furi_string_cat(
-            protocol->debug_string, bit_lib_get_bit(protocol->RKKTH_encoded_data, i) ? "1" : "0");
-    }
-    return furi_string_get_cstr(protocol->debug_string);
 };
 
 static bool protocol_securakey_can_be_decoded(ProtocolSecurakey* protocol) {
@@ -221,7 +209,10 @@ void protocol_securakey_render_data(ProtocolSecurakey* protocol, FuriString* res
 };
 
 bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
-     // set all of our encoded_data bits to zeros.
+    // for sending we start at bit 0.
+    protocol->encoded_data_index = 0;
+    protocol->encoded_polarity = true;
+    // set all of our encoded_data bits to zeros.
     memset(protocol->RKKTH_encoded_data, 0, SECURAKEY_RKKTH_ENCODED_FULL_SIZE_BYTE);
     memset(protocol->RKKT_encoded_data, 0, SECURAKEY_RKKT_ENCODED_FULL_SIZE_BYTE);
     if(bit_lib_get_bits_16(protocol->data, 0, 16) == 0) {
@@ -282,11 +273,6 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
         // CS2
         bit_lib_copy_bits(protocol->RKKT_encoded_data, 74, 8, protocol->data, 40);
     }
-    // for sending we start at bit 0.
-    protocol->encoded_data_index = 0;
-    protocol->encoded_polarity = true;
-    bit_lib_copy_bits(protocol->RKKTH_encoded_data, 47, 8, protocol->data, 32);
-    FURI_LOG_D(TAG, "encoded: %s", protocol_securakey_get_encoded_data_debug(protocol));
     return true;
 };
 
@@ -320,13 +306,10 @@ LevelDuration protocol_securakey_encoder_yield(ProtocolSecurakey* protocol) {
 
 bool protocol_securakey_write_data(ProtocolSecurakey* protocol, void* data) {
     protocol_securakey_encoder_start(protocol);
-    FURI_LOG_D(TAG, "pre-request encoded: %s", protocol_securakey_get_encoded_data_debug(protocol));
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
     // Write T5577
     if(bit_lib_get_bits_16(protocol->data, 0, 16) == 0) {
-        protocol_securakey_encoder_start(protocol);
-        FURI_LOG_D(TAG, "re-encode encoded: %s", protocol_securakey_get_encoded_data_debug(protocol));
         if(request->write_type == LFRFIDWriteTypeT5577) {
             request->t5577.block[0] =
                 (LFRFID_T5577_MODULATION_MANCHESTER | LFRFID_T5577_BITRATE_RF_40 |
