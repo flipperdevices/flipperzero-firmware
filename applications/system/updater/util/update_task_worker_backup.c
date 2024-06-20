@@ -70,18 +70,10 @@ static void update_task_cleanup_resources(UpdateTask* update_task) {
                 n_dir_entries++;
             }
         }
-
-        FURI_LOG_I(
-            TAG,
-            "Found %li files and %li directories in old manifest",
-            n_file_entries,
-            n_dir_entries);
-
         resource_manifest_rewind(manifest_reader);
 
-        uint32_t n_processed_file_entries = 0, n_processed_dir_entries = 0;
-
         update_task_set_progress(update_task, UpdateTaskStageResourcesFileCleanup, 0);
+        uint32_t n_processed_file_entries = 0;
         while((entry_ptr = resource_manifest_reader_next(manifest_reader))) {
             if(entry_ptr->type == ResourceManifestEntryTypeFile) {
                 update_task_set_progress(
@@ -110,6 +102,7 @@ static void update_task_cleanup_resources(UpdateTask* update_task) {
         }
 
         update_task_set_progress(update_task, UpdateTaskStageResourcesDirCleanup, 0);
+        uint32_t n_processed_dir_entries = 0;
         while((entry_ptr = resource_manifest_reader_previous(manifest_reader))) {
             if(entry_ptr->type == ResourceManifestEntryTypeDirectory) {
                 update_task_set_progress(

@@ -221,8 +221,12 @@ bool tar_archive_get_read_progress(TarArchive* archive, int32_t* processed, int3
         return false;
     }
 
-    *processed = storage_file_tell(archive->stream);
-    *total = storage_file_size(archive->stream);
+    if(processed) {
+        *processed = storage_file_tell(archive->stream);
+    }
+    if(total) {
+        *total = storage_file_size(archive->stream);
+    }
     return true;
 }
 
