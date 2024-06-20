@@ -112,7 +112,7 @@ bool compress_decode(
     size_t data_out_size,
     size_t* data_res_size);
 
-typedef size_t (*compress_io_cb_t)(uint8_t* buffer, size_t size, void* context);
+typedef int32_t (*compress_io_cb_t)(void* context, uint8_t* buffer, int32_t size);
 
 bool compress_decode_stream(
     Compress* compress,
@@ -120,6 +120,24 @@ bool compress_decode_stream(
     void* read_context,
     compress_io_cb_t write_cb,
     void* write_context);
+
+//////////////////////////////////////////////////////////////////////////
+
+typedef struct CompressStreamDecoder CompressStreamDecoder;
+
+CompressStreamDecoder* compress_stream_decoder_alloc(
+    const CompressConfigHeatshrink* config,
+    compress_io_cb_t read_cb,
+    void* read_context);
+
+void compress_stream_decoder_free(CompressStreamDecoder* instance);
+
+bool compress_stream_decoder_read(
+    CompressStreamDecoder* instance,
+    uint8_t* data_out,
+    size_t data_out_size);
+
+bool compress_stream_decoder_seek(CompressStreamDecoder* instance, size_t position);
 
 #ifdef __cplusplus
 }

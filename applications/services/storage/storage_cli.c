@@ -498,12 +498,12 @@ static void storage_cli_md5(Cli* cli, FuriString* path) {
 
 #include <toolbox/compress.h>
 
-static size_t hs_unpacker_file_read(uint8_t* buffer, size_t size, void* context) {
+static int32_t hs_unpacker_file_read(void* context, uint8_t* buffer, int32_t size) {
     File* file = (File*)context;
     return storage_file_read(file, buffer, size);
 }
 
-static size_t hs_unpacker_file_write(uint8_t* buffer, size_t size, void* context) {
+static int32_t hs_unpacker_file_write(void* context, uint8_t* buffer, int32_t size) {
     File* file = (File*)context;
     return storage_file_write(file, buffer, size);
 }
@@ -557,6 +557,37 @@ static void storage_cli_unpack(Cli* cli, FuriString* old_path, FuriString* args)
     furi_string_free(new_path);
     storage_file_free(comp_file);
     storage_file_free(dest_file);
+    furi_record_close(RECORD_STORAGE);
+}
+
+#include <toolbox/tar/tar_archive.h>
+
+static void storage_cli_unpack_hs(Cli* cli, FuriString* old_path, FuriString* args) {
+    UNUSED(cli);
+    FuriString* new_path = furi_string_alloc();
+
+    if(!args_read_probably_quoted_string_and_trim(args, new_path)) {
+        storage_cli_print_usage();
+        furi_string_free(new_path);
+        return;
+    }
+
+    Storage* api = furi_record_open(RECORD_STORAGE);
+
+    TarArchive* archive = tar_archive_alloc(api);
+    furi_check(tar_archive_open(archive, furi_string_get_cstr(old_path), TAR_OPEN_MODE_READ_HS));
+    do {
+        uint32_t start_tick = furi_get_tick();
+        bool success = tar_archive_unpack_to(archive, furi_string_get_cstr(new_path), NULL);
+        uint32_t end_tick = furi_get_tick();
+        printf(
+            "Decompression %s in %lu ticks \r\n",
+            success ? "success" : "failed",
+            end_tick - start_tick);
+    } while(false);
+
+    tar_archive_free(archive);
+    furi_string_free(new_path);
     furi_record_close(RECORD_STORAGE);
 }
 
@@ -655,6 +686,11 @@ void storage_cli(Cli* cli, FuriString* args, void* context) {
 
         if(furi_string_cmp_str(cmd, "unpack") == 0) {
             storage_cli_unpack(cli, path, args);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "hs") == 0) {
+            storage_cli_unpack_hs(cli, path, args);
             break;
         }
 

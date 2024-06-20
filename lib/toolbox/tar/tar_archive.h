@@ -15,7 +15,7 @@ typedef struct Storage Storage;
 typedef enum {
     TAR_OPEN_MODE_READ = 'r',
     TAR_OPEN_MODE_WRITE = 'w',
-    TAR_OPEN_MODE_STDOUT = 's' /* to be implemented */
+    TAR_OPEN_MODE_READ_HS = 'h' /* read only heatshrink compressed tar */,
 } TarOpenMode;
 
 TarArchive* tar_archive_alloc(Storage* storage);
