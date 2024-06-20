@@ -181,7 +181,7 @@ typedef void (*FuriEventLoopPendingCallback)(void* context);
 /**
  * @brief Call a function when all preceding timer commands are processed
  *
- * This function may be useful to call another function when the even loop has been started.
+ * This function may be useful to call another function when the event loop has been started.
  *
  * @param[in,out] instance pointer to the current FuriEventLoop instance
  * @param[in] callback pointer to the callback to be executed when previous commands have been processed
