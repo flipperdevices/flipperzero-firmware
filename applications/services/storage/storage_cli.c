@@ -543,7 +543,7 @@ static void storage_cli_unpack(Cli* cli, FuriString* old_path, FuriString* args)
         }
 
         uint32_t start_tick = furi_get_tick();
-        bool success = compress_decode_stream(
+        bool success = compress_decode_streamed(
             compress, hs_unpacker_file_read, comp_file, hs_unpacker_file_write, dest_file);
 
         uint32_t end_tick = furi_get_tick();

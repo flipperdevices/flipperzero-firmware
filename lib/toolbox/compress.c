@@ -384,7 +384,7 @@ bool compress_decode(
         compress->decoder, data_in, data_in_size, data_out, data_out_size, data_res_size);
 }
 
-bool compress_decode_stream(
+bool compress_decode_streamed(
     Compress* compress,
     compress_io_cb_t read_cb,
     void* read_context,
@@ -419,15 +419,20 @@ struct CompressStreamDecoder {
 };
 
 CompressStreamDecoder* compress_stream_decoder_alloc(
-    const CompressConfigHeatshrink* config,
+    CompressType type,
+    const void* config,
     compress_io_cb_t read_cb,
     void* read_context) {
+    furi_check(type == COMPRESS_TYPE_HEATSHRINK);
+    furi_check(config);
+
+    const CompressConfigHeatshrink* hs_config = (const CompressConfigHeatshrink*)config;
     CompressStreamDecoder* instance = malloc(sizeof(CompressStreamDecoder));
     instance->decoder = heatshrink_decoder_alloc(
-        config->input_buffer_sz, config->window_sz2, config->lookahead_sz2);
+        hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
     instance->stream_position = 0;
-    instance->decode_buffer_size = config->input_buffer_sz;
-    instance->decode_buffer = malloc(config->input_buffer_sz);
+    instance->decode_buffer_size = hs_config->input_buffer_sz;
+    instance->decode_buffer = malloc(hs_config->input_buffer_sz);
     instance->decode_buffer_position = 0;
     instance->read_cb = read_cb;
     instance->read_context = read_context;
@@ -442,22 +447,6 @@ void compress_stream_decoder_free(CompressStreamDecoder* instance) {
     free(instance);
 }
 
-typedef struct {
-    uint8_t* data_ptr;
-    size_t data_size;
-} DataOut;
-
-int32_t compress_stream_out_cb(void* context, uint8_t* ptr, int32_t size) {
-    DataOut* instance = (DataOut*)context;
-    furi_check(size <= (int32_t)instance->data_size);
-    if(instance->data_ptr) {
-        memcpy(instance->data_ptr, ptr, size);
-    }
-    instance->data_ptr += size;
-    instance->data_size -= size;
-    return size;
-}
-
 static bool compress_decode_stream_chunk(
     CompressStreamDecoder* sd,
     compress_io_cb_t read_cb,
@@ -470,7 +459,7 @@ static bool compress_decode_stream_chunk(
 
     /* 
     First, try to output data from decoder to the output buffer. 
-    If the output buffer is filled, return
+    If the we could fill the output buffer, return
     If the output buffer is not full, keep polling the decoder 
         until it has no more data to output.
     Then, read more data from the input and sink it to the decoder.
@@ -525,14 +514,12 @@ static bool compress_decode_stream_chunk(
     return !failed;
 }
 
-// Decode requested amount of data from the stream
 bool compress_stream_decoder_read(
     CompressStreamDecoder* instance,
     uint8_t* data_out,
     size_t data_out_size) {
     furi_check(instance);
     furi_check(data_out);
-    // furi_check(data_out_size <= instance->decode_buffer_size);
 
     if(compress_decode_stream_chunk(
            instance, instance->read_cb, instance->read_context, data_out, data_out_size)) {
@@ -545,14 +532,11 @@ bool compress_stream_decoder_read(
 bool compress_stream_decoder_seek(CompressStreamDecoder* instance, size_t position) {
     furi_check(instance);
 
-    if(position < instance->stream_position) {
-        // Reset decoder and read data from the beginning
-        FURI_LOG_W(TAG, "Seeking backwards in compressed stream");
-        heatshrink_decoder_reset(instance->decoder);
-        instance->stream_position = 0;
-    }
+    /* Check if requested position is ahead of current position 
+       we can't rewind the input stream */
+    furi_check(position >= instance->stream_position);
 
-    // Read and discard data up to requested position
+    /* Read and discard data up to requested position */
     uint8_t* dummy_buffer = malloc(instance->decode_buffer_size);
     bool success = true;
 
@@ -569,4 +553,9 @@ bool compress_stream_decoder_seek(CompressStreamDecoder* instance, size_t positi
 
     free(dummy_buffer);
     return success;
+}
+
+size_t compress_stream_decoder_tell(CompressStreamDecoder* instance) {
+    furi_check(instance);
+    return instance->stream_position;
 }
