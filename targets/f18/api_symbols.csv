@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,67.0,,
+Version,+,67.1,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -791,6 +791,7 @@ Function,+,compress_icon_free,void,CompressIcon*
 Function,+,compress_stream_decoder_alloc,CompressStreamDecoder*,"CompressType, const void*, compress_io_cb_t, void*"
 Function,+,compress_stream_decoder_free,void,CompressStreamDecoder*
 Function,+,compress_stream_decoder_read,_Bool,"CompressStreamDecoder*, uint8_t*, size_t"
+Function,+,compress_stream_decoder_rewind,_Bool,CompressStreamDecoder*
 Function,+,compress_stream_decoder_seek,_Bool,"CompressStreamDecoder*, size_t"
 Function,+,compress_stream_decoder_tell,size_t,CompressStreamDecoder*
 Function,-,copysign,double,"double, double"

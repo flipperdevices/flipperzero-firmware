@@ -88,6 +88,8 @@ void compress_free(Compress* compress);
  * @param[in]  data_out_size  The data out size
  * @param      data_res_size  pointer to result output data size
  *
+ * @note       Prepends compressed stream with a header. If data is not compressible,
+ *             it will be stored as is after the header.
  * @return     true on success
  */
 bool compress_encode(
@@ -107,6 +109,7 @@ bool compress_encode(
  * @param[in]  data_out_size  The data out size
  * @param      data_res_size  pointer to result output data size
  *
+ * @note       Expects compressed stream with a header, as produced by `compress_encode`.
  * @return     true on success
  */
 bool compress_decode(
@@ -135,6 +138,7 @@ typedef int32_t (*compress_io_cb_t)(void* context, uint8_t* buffer, int32_t size
  * @param      write_cb       write callback
  * @param      write_context  write callback context
  *
+ * @note       Does not expect a header, just compressed data stream.
  * @return     true on success
  */
 bool compress_decode_streamed(
@@ -200,6 +204,15 @@ bool compress_stream_decoder_seek(CompressStreamDecoder* instance, size_t positi
  * @return     current position
  */
 size_t compress_stream_decoder_tell(CompressStreamDecoder* instance);
+
+/** Reset stream decoder to the beginning
+ * @warning    Read callback must be repositioned by caller separately
+ *
+ * @param      instance  The CompressStreamDecoder instance
+ *
+ * @return     true on success
+ */
+bool compress_stream_decoder_rewind(CompressStreamDecoder* instance);
 
 #ifdef __cplusplus
 }

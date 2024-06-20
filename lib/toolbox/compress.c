@@ -432,8 +432,8 @@ CompressStreamDecoder* compress_stream_decoder_alloc(
         hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
     instance->stream_position = 0;
     instance->decode_buffer_size = hs_config->input_buffer_sz;
-    instance->decode_buffer = malloc(hs_config->input_buffer_sz);
     instance->decode_buffer_position = 0;
+    instance->decode_buffer = malloc(hs_config->input_buffer_sz);
     instance->read_cb = read_cb;
     instance->read_context = read_context;
 
@@ -558,4 +558,15 @@ bool compress_stream_decoder_seek(CompressStreamDecoder* instance, size_t positi
 size_t compress_stream_decoder_tell(CompressStreamDecoder* instance) {
     furi_check(instance);
     return instance->stream_position;
+}
+
+bool compress_stream_decoder_rewind(CompressStreamDecoder* instance) {
+    furi_check(instance);
+
+    /* Reset decoder and read buffer */
+    heatshrink_decoder_reset(instance->decoder);
+    instance->stream_position = 0;
+    instance->decode_buffer_position = 0;
+
+    return true;
 }

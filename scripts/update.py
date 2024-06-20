@@ -7,8 +7,10 @@ import tarfile
 import zlib
 from os.path import exists, join
 
+import heatshrink2
 from flipper.app import App
 from flipper.assets.coprobin import CoproBinary, get_stack_type
+from flipper.assets.heatshrink_stream import HeatshrinkDataStreamHeader
 from flipper.assets.obdata import ObReferenceValues, OptionBytesData
 from flipper.utils.fff import FlipperFormatFile
 from slideshow import Main as SlideshowMain
@@ -33,6 +35,9 @@ class Main(App):
 
     FLASH_BASE = 0x8000000
     MIN_LFS_PAGES = 6
+
+    HEATSHRINK_WINDOW_SIZE = 13
+    HEATSHRINK_LOOKAHEAD_SIZE = 6
 
     # Post-update slideshow
     SPLASH_BIN_NAME = "splash.bin"
@@ -134,7 +139,7 @@ class Main(App):
                 self.args.radiobin, join(self.args.directory, radiobin_basename)
             )
         if self.args.resources:
-            resources_basename = self.RESOURCE_FILE_NAME
+            resources_basename = self.RESOURCE_FILE_NAME + ".hs"
             if not self.package_resources(
                 self.args.resources, join(self.args.directory, resources_basename)
             ):
@@ -228,14 +233,33 @@ class Main(App):
 
     def package_resources(self, srcdir: str, dst_name: str):
         try:
+            plain_tar_name = dst_name + ".src"
             with tarfile.open(
-                dst_name, self.RESOURCE_TAR_MODE, format=self.RESOURCE_TAR_FORMAT
+                plain_tar_name,
+                self.RESOURCE_TAR_MODE,
+                format=self.RESOURCE_TAR_FORMAT,
             ) as tarball:
                 tarball.add(
                     srcdir,
                     arcname="",
                     filter=self._tar_filter,
                 )
+
+            with open(dst_name, "wb") as f:
+                header = HeatshrinkDataStreamHeader(
+                    self.HEATSHRINK_WINDOW_SIZE, self.HEATSHRINK_LOOKAHEAD_SIZE
+                )
+                f.write(header.pack())
+                with open(plain_tar_name, "rb") as src:
+                    f.write(
+                        heatshrink2.compress(
+                            src.read(),
+                            self.HEATSHRINK_WINDOW_SIZE,
+                            self.HEATSHRINK_LOOKAHEAD_SIZE,
+                        )
+                    )
+            os.remove(plain_tar_name)
+
             return True
         except ValueError as e:
             self.logger.error(f"Cannot package resources: {e}")

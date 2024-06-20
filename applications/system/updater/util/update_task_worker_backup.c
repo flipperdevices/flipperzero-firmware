@@ -178,9 +178,11 @@ static bool update_task_post_update(UpdateTask* update_task) {
 
             tar_archive_set_file_callback(archive, update_task_resource_unpack_cb, &progress);
             CHECK_RESULT(
-                tar_archive_open(archive, furi_string_get_cstr(file_path), TAR_OPEN_MODE_READ));
+                tar_archive_open(archive, furi_string_get_cstr(file_path), TAR_OPEN_MODE_READ_HS));
 
+            FURI_LOG_I(TAG, "Counting resources to unpack");
             progress.total_files = tar_archive_get_entries_count(archive);
+            FURI_LOG_I(TAG, "Total files to unpack: %li", progress.total_files);
             if(progress.total_files > 0) {
                 update_task_cleanup_resources(update_task, progress.total_files);
 
