@@ -15,7 +15,7 @@
 #define SECURAKEY_RKKT_ENCODED_FULL_SIZE_BYTE (12)
 
 #define SECURAKEY_RKKTH_ENCODED_FULL_SIZE_BITS (64)
-#define SECURAKEY_RKKTH_ENCODED_FULL_SIZE_BYTE (6)
+#define SECURAKEY_RKKTH_ENCODED_FULL_SIZE_BYTE (8)
 
 #define SECURAKEY_DECODED_DATA_SIZE_BITS \
     (48) // 16-bit for facility code/number, 16-bit for card number, 16-bit for two checksum
