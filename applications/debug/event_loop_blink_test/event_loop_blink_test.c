@@ -82,7 +82,7 @@ static bool input_queue_callback(FuriMessageQueue* queue, void* context) {
     EventLoopBlinkTestApp* app = context;
 
     InputEvent event;
-    FuriStatus status = furi_message_queue_get(queue, &event, FuriWaitForever);
+    FuriStatus status = furi_message_queue_get(queue, &event, 0);
     furi_assert(status == FuriStatusOk);
 
     if(event.type == InputTypeShort) {
