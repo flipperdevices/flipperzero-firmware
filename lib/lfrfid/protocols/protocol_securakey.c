@@ -17,8 +17,9 @@
 #define SECURAKEY_RKKTH_ENCODED_FULL_SIZE_BITS (64)
 #define SECURAKEY_RKKTH_ENCODED_FULL_SIZE_BYTE (8)
 
-#define SECURAKEY_DECODED_DATA_SIZE_BITS \
-    (48) // 16-bit for facility code/number, 16-bit for card number, 16-bit for two checksum
+#define SECURAKEY_DECODED_DATA_SIZE_BITS (48)
+// RKKT: 16-bit for facility code/number, 16-bit for card number, 16-bit for two checksum
+// RKKTH: 16-bit zero padding, 32-bit card number
 #define SECURAKEY_DECODED_DATA_SIZE_BYTES (SECURAKEY_DECODED_DATA_SIZE_BITS / 8)
 #define LFRFID_FREQUENCY (125000)
 #define SECURAKEY_CLOCK_PER_BIT (40) // RF/40
@@ -144,6 +145,8 @@ static void protocol_securakey_decode(ProtocolSecurakey* protocol) {
 };
 
 void protocol_securakey_decoder_start(ProtocolSecurakey* protocol) {
+    // always takes in encoded data as RKKT for simplicity
+    // this part is feeding decoder which will delineate the format anyway
     memset(protocol->RKKT_encoded_data, 0, SECURAKEY_RKKT_ENCODED_FULL_SIZE_BYTE);
     manchester_advance(
         protocol->decoder_manchester_state,
@@ -209,9 +212,6 @@ void protocol_securakey_render_data(ProtocolSecurakey* protocol, FuriString* res
 };
 
 bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
-    // for sending we start at bit 0.
-    protocol->encoded_data_index = 0;
-    protocol->encoded_polarity = true;
     // set all of our encoded_data bits to zeros.
     memset(protocol->RKKTH_encoded_data, 0, SECURAKEY_RKKTH_ENCODED_FULL_SIZE_BYTE);
     memset(protocol->RKKT_encoded_data, 0, SECURAKEY_RKKT_ENCODED_FULL_SIZE_BYTE);
@@ -273,6 +273,9 @@ bool protocol_securakey_encoder_start(ProtocolSecurakey* protocol) {
         // CS2
         bit_lib_copy_bits(protocol->RKKT_encoded_data, 74, 8, protocol->data, 40);
     }
+    // for sending we start at bit 0.
+    protocol->encoded_data_index = 0;
+    protocol->encoded_polarity = true;
     return true;
 };
 
@@ -321,54 +324,6 @@ bool protocol_securakey_write_data(ProtocolSecurakey* protocol, void* data) {
             result = true;
         }
     } else {
-        // set all of our encoded_data bits to zeros.
-        memset(protocol->RKKT_encoded_data, 0, SECURAKEY_RKKT_ENCODED_FULL_SIZE_BYTE);
-        // write the preamble to the beginning of the RKKT_encoded_data
-        bit_lib_set_bits(protocol->RKKT_encoded_data, 0, 0b01111111, 8);
-        bit_lib_set_bits(protocol->RKKT_encoded_data, 8, 0b11001, 5); //preamble cont.
-        if(bit_lib_get_bits(protocol->data, 0, 8) == 0) {
-            protocol->bit_format = 26;
-            // set bit length
-            bit_lib_set_bits(protocol->RKKT_encoded_data, 13, protocol->bit_format, 6);
-            // set even parity & odd parity
-            if(!bit_lib_test_parity(protocol->data, 8, 12, BitLibParityOdd, 12)) {
-                bit_lib_set_bit(protocol->RKKT_encoded_data, 35, 1);
-            }
-            if(bit_lib_test_parity(protocol->data, 20, 12, BitLibParityOdd, 12)) {
-                bit_lib_set_bit(protocol->RKKT_encoded_data, 63, 1);
-            }
-            // write facility number (f)
-            bit_lib_copy_bits(protocol->RKKT_encoded_data, 36, 1, protocol->data, 8);
-            // have to skip one spacer
-            bit_lib_copy_bits(protocol->RKKT_encoded_data, 38, 7, protocol->data, 9);
-        } else {
-            protocol->bit_format = 32;
-            // set bit length
-            bit_lib_set_bits(protocol->RKKT_encoded_data, 13, protocol->bit_format, 6);
-            // set EP & OP
-            if(!bit_lib_test_parity(protocol->data, 2, 15, BitLibParityOdd, 15)) {
-                bit_lib_set_bit(protocol->RKKT_encoded_data, 29, 1);
-            }
-            if(bit_lib_test_parity(protocol->data, 17, 15, BitLibParityOdd, 15)) {
-                bit_lib_set_bit(protocol->RKKT_encoded_data, 63, 1);
-            }
-            // write facility number (f)
-            bit_lib_copy_bits(protocol->RKKT_encoded_data, 30, 7, protocol->data, 2);
-            // have to skip one spacer
-            bit_lib_copy_bits(protocol->RKKT_encoded_data, 38, 7, protocol->data, 3);
-        }
-
-        // write card number (c)
-        bit_lib_copy_bits(protocol->RKKT_encoded_data, 45, 1, protocol->data, 16);
-        // same skips here
-        bit_lib_copy_bits(protocol->RKKT_encoded_data, 47, 8, protocol->data, 17);
-        bit_lib_copy_bits(protocol->RKKT_encoded_data, 56, 7, protocol->data, 25);
-
-        // unsure about CS yet might as well just copy it from saved
-        // CS1
-        bit_lib_copy_bits(protocol->RKKT_encoded_data, 65, 8, protocol->data, 32);
-        // CS2
-        bit_lib_copy_bits(protocol->RKKT_encoded_data, 74, 8, protocol->data, 40);
         if(request->write_type == LFRFIDWriteTypeT5577) {
             request->t5577.block[0] =
                 (LFRFID_T5577_MODULATION_MANCHESTER | LFRFID_T5577_BITRATE_RF_40 |
