@@ -42,6 +42,16 @@ typedef enum {
 } FuriThreadPriority;
 
 /**
+ * @brief Enumeration of possible FuriThread signal values.
+ *
+ * User signals SHALL have values greater than or equal to FuriThreadSignalUser.
+ */
+typedef enum {
+    FuriThreadSignalExit, /**< Request the thread to exit */
+    FuriThreadSignalUser = 100, /**< User-defined signals start here */
+} FuriThreadSignal;
+
+/**
  * @brief FuriThread opaque type.
  */
 typedef struct FuriThread FuriThread;
@@ -85,6 +95,17 @@ typedef void (*FuriThreadStdoutWriteCallback)(const char* data, size_t size);
  * @param[in,out] context pointer to a user-specified object
  */
 typedef void (*FuriThreadStateCallback)(FuriThreadState state, void* context);
+
+/**
+ * @brief Signal handler callback function pointer type.
+ *
+ * The function to be used as a signal handler callback MUS follow this signature.
+ *
+ * @param[in] signal value of the signal to be handled by the recipient
+ * @param[in,out] context pointer to a user-specified object
+ * @returns true if the signal was handled, false otherwise
+ */
+typedef bool (*FuriThreadSignalCallback)(uint32_t signal, void* context);
 
 /**
  * @brief Create a FuriThread instance.
@@ -254,6 +275,28 @@ void furi_thread_set_state_context(FuriThread* thread, void* context);
  * @return thread state value
  */
 FuriThreadState furi_thread_get_state(FuriThread* thread);
+
+/**
+ * @brief Set a signal handler callback for a FuriThread instance.
+ *
+ * The thread MUST be stopped when calling this function.
+ *
+ * @param[in,out] thread pointer to the FuriThread instance to be modified
+ * @param[in] callback pointer to a user-specified callback function
+ * @param[in] context pointer to a user-specified object (will be passed to the callback, can be NULL)
+ */
+void furi_thread_set_signal_callback(
+    FuriThread* thread,
+    FuriThreadSignalCallback callback,
+    void* context);
+
+/**
+ * @brief Send a signal to a FuriThread instance.
+ *
+ * @param[in] thread pointer to the FuriThread instance to be signaled
+ * @param[in] signal signal value to be sent
+ */
+bool furi_thread_signal(const FuriThread* thread, uint32_t signal);
 
 /**
  * @brief Start a FuriThread instance.
