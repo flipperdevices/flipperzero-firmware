@@ -318,11 +318,11 @@ void furi_thread_set_signal_callback(
     thread->signal_context = context;
 }
 
-bool furi_thread_signal(const FuriThread* thread, uint32_t signal) {
+bool furi_thread_signal(const FuriThread* thread, uint32_t signal, void* arg) {
     furi_check(thread);
 
     if(thread->signal_callback) {
-        return thread->signal_callback(signal, thread->signal_context);
+        return thread->signal_callback(signal, arg, thread->signal_context);
     }
 
     return false;

@@ -42,16 +42,6 @@ typedef enum {
 } FuriThreadPriority;
 
 /**
- * @brief Enumeration of possible FuriThread signal values.
- *
- * User signals SHALL have values greater than or equal to FuriThreadSignalUser.
- */
-typedef enum {
-    FuriThreadSignalExit, /**< Request the thread to exit */
-    FuriThreadSignalUser = 100, /**< User-defined signals start here */
-} FuriThreadSignal;
-
-/**
  * @brief FuriThread opaque type.
  */
 typedef struct FuriThread FuriThread;
@@ -102,10 +92,11 @@ typedef void (*FuriThreadStateCallback)(FuriThreadState state, void* context);
  * The function to be used as a signal handler callback MUS follow this signature.
  *
  * @param[in] signal value of the signal to be handled by the recipient
+ * @param[in,out] arg optional argument (can be of any value, including NULL)
  * @param[in,out] context pointer to a user-specified object
  * @returns true if the signal was handled, false otherwise
  */
-typedef bool (*FuriThreadSignalCallback)(uint32_t signal, void* context);
+typedef bool (*FuriThreadSignalCallback)(uint32_t signal, void* arg, void* context);
 
 /**
  * @brief Create a FuriThread instance.
@@ -295,8 +286,9 @@ void furi_thread_set_signal_callback(
  *
  * @param[in] thread pointer to the FuriThread instance to be signaled
  * @param[in] signal signal value to be sent
+ * @param[in,out] arg optional argument (can be of any value, including NULL)
  */
-bool furi_thread_signal(const FuriThread* thread, uint32_t signal);
+bool furi_thread_signal(const FuriThread* thread, uint32_t signal, void* arg);
 
 /**
  * @brief Start a FuriThread instance.
