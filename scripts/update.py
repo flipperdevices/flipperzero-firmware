@@ -235,9 +235,7 @@ class Main(App):
         try:
             plain_tar_name = dst_name + ".src"
             with tarfile.open(
-                plain_tar_name,
-                self.RESOURCE_TAR_MODE,
-                format=self.RESOURCE_TAR_FORMAT,
+                plain_tar_name, self.RESOURCE_TAR_MODE, format=self.RESOURCE_TAR_FORMAT
             ) as tarball:
                 tarball.add(
                     srcdir,
@@ -252,12 +250,13 @@ class Main(App):
                 f.write(header.pack())
                 with open(plain_tar_name, "rb") as src:
                     src_data = src.read()
-                    compressed = heatshrink2.compress(
-                        src_data,
-                        self.HEATSHRINK_WINDOW_SIZE,
-                        self.HEATSHRINK_LOOKAHEAD_SIZE,
-                    )
-                    f.write(compressed)
+                compressed = heatshrink2.compress(
+                    src_data,
+                    self.HEATSHRINK_WINDOW_SIZE,
+                    self.HEATSHRINK_LOOKAHEAD_SIZE,
+                )
+                f.write(compressed)
+
             self.logger.info(
                 f"Resources compression ratio: {len(compressed) * 100 / len(src_data):.2f}%"
             )
