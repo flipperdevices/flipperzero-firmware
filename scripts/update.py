@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import io
 import math
 import os
 import shutil
@@ -230,27 +231,25 @@ class Main(App):
 
     def package_resources(self, srcdir: str, dst_name: str):
         try:
-            plain_tar_name = dst_name + ".src"
+            plain_tar = io.BytesIO()
             with tarfile.open(
-                plain_tar_name, self.RESOURCE_TAR_MODE, format=FLIPPER_TAR_FORMAT
+                fileobj=plain_tar,
+                mode=self.RESOURCE_TAR_MODE,
+                format=FLIPPER_TAR_FORMAT,
             ) as tarball:
                 tarball.add(
                     srcdir,
                     arcname="",
                     filter=self._tar_filter,
                 )
-
-            with open(plain_tar_name, "rb") as src:
-                src_data = src.read()
-            os.remove(plain_tar_name)
+            plain_tar.seek(0)
 
             header = HeatshrinkDataStreamHeader(
                 self.HEATSHRINK_WINDOW_SIZE, self.HEATSHRINK_LOOKAHEAD_SIZE
             )
+            src_data = plain_tar.read()
             compressed = heatshrink2.compress(
-                src_data,
-                self.HEATSHRINK_WINDOW_SIZE,
-                self.HEATSHRINK_LOOKAHEAD_SIZE,
+                src_data, self.HEATSHRINK_WINDOW_SIZE, self.HEATSHRINK_LOOKAHEAD_SIZE
             )
 
             with open(dst_name, "wb") as f:
@@ -260,7 +259,6 @@ class Main(App):
             self.logger.info(
                 f"Resources compression ratio: {len(compressed) * 100 / len(src_data):.2f}%"
             )
-
             return True
         except ValueError as e:
             self.logger.error(f"Cannot package resources: {e}")
