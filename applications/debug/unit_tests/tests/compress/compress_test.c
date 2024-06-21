@@ -1,6 +1,7 @@
 #include "../test.h" // IWYU pragma: keep
 
 #include <toolbox/compress.h>
+#include <toolbox/md5_calc.h>
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -146,9 +147,103 @@ static void compress_test_random_comp_decomp() {
     compress_free(comp);
 }
 
+static int32_t hs_unpacker_file_read(void* context, uint8_t* buffer, int32_t size) {
+    File* file = (File*)context;
+    return storage_file_read(file, buffer, size);
+}
+
+static int32_t hs_unpacker_file_write(void* context, uint8_t* buffer, int32_t size) {
+    File* file = (File*)context;
+    return storage_file_write(file, buffer, size);
+}
+/*
+Source file was generated with:
+```python3
+import random, string
+random.seed(1337)
+with open("hsstream.out.bin", "wb") as f:
+    for c in random.choices(string.printable, k=1024):
+        for _ in range(random.randint(1, 10)):
+            f.write(c.encode())
+```
+
+It was compressed with heatshrink using the following command:
+`python3 -m heatshrink2 compress -w 9 -l 4 hsstream.out.bin hsstream.in.bin`
+*/
+
+static void compress_test_heatshrink_stream() {
+    Storage* api = furi_record_open(RECORD_STORAGE);
+    File* comp_file = storage_file_alloc(api);
+    File* dest_file = storage_file_alloc(api);
+
+    CompressConfigHeatshrink config = {
+        .window_sz2 = 9,
+        .lookahead_sz2 = 4,
+        .input_buffer_sz = 128,
+    };
+    Compress* compress = compress_alloc(COMPRESS_TYPE_HEATSHRINK, &config);
+
+    do {
+        mu_assert(
+            storage_file_open(
+                comp_file,
+                COMPRESS_UNIT_TESTS_PATH("hsstream.in.bin"),
+                FSAM_READ,
+                FSOM_OPEN_EXISTING),
+            "Failed to open compressed file");
+
+        mu_assert(
+            storage_file_open(
+                dest_file,
+                COMPRESS_UNIT_TESTS_PATH("hsstream.out.bin"),
+                FSAM_WRITE,
+                FSOM_OPEN_ALWAYS),
+            "Failed to open decompressed file");
+
+        mu_assert(
+            compress_decode_streamed(
+                compress, hs_unpacker_file_read, comp_file, hs_unpacker_file_write, dest_file),
+            "Decompression failed");
+
+        storage_file_close(dest_file);
+
+        unsigned char md5[16];
+        FS_Error file_error;
+        mu_assert(
+            md5_calc_file(
+                dest_file, COMPRESS_UNIT_TESTS_PATH("hsstream.out.bin"), md5, &file_error),
+            "Failed to calculate md5");
+
+        const unsigned char expected_md5[16] = {
+            0xa3,
+            0x70,
+            0xe8,
+            0x8b,
+            0xa9,
+            0x42,
+            0x74,
+            0xf4,
+            0xaa,
+            0x12,
+            0x8d,
+            0x41,
+            0xd2,
+            0xb6,
+            0x71,
+            0xc9};
+        mu_assert(memcmp(md5, expected_md5, sizeof(md5)) == 0, "MD5 mismatch after decompression");
+    } while(false);
+
+    compress_free(compress);
+    storage_file_free(comp_file);
+    storage_file_free(dest_file);
+    furi_record_close(RECORD_STORAGE);
+}
+
 MU_TEST_SUITE(test_compress) {
     MU_RUN_TEST(compress_test_random_comp_decomp);
     MU_RUN_TEST(compress_test_reference_comp_decomp);
+    MU_RUN_TEST(compress_test_heatshrink_stream);
 }
 
 int run_minunit_test_compress(void) {

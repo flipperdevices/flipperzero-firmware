@@ -498,68 +498,6 @@ static void storage_cli_md5(Cli* cli, FuriString* path) {
     furi_record_close(RECORD_STORAGE);
 }
 
-// static int32_t hs_unpacker_file_read(void* context, uint8_t* buffer, int32_t size) {
-//     File* file = (File*)context;
-//     return storage_file_read(file, buffer, size);
-// }
-
-// static int32_t hs_unpacker_file_write(void* context, uint8_t* buffer, int32_t size) {
-//     File* file = (File*)context;
-//     return storage_file_write(file, buffer, size);
-// }
-
-// static void storage_cli_unpack(Cli* cli, FuriString* old_path, FuriString* args) {
-//     UNUSED(cli);
-//     FuriString* new_path = furi_string_alloc();
-
-//     if(!args_read_probably_quoted_string_and_trim(args, new_path)) {
-//         storage_cli_print_usage();
-//         furi_string_free(new_path);
-//         return;
-//     }
-
-//     Storage* api = furi_record_open(RECORD_STORAGE);
-//     File* comp_file = storage_file_alloc(api);
-//     File* dest_file = storage_file_alloc(api);
-
-//     CompressConfigHeatshrink config = {
-//         .window_sz2 = 14,
-//         .lookahead_sz2 = 5,
-//         .input_buffer_sz = 512,
-//     };
-//     Compress* compress = compress_alloc(COMPRESS_TYPE_HEATSHRINK, &config);
-
-//     do {
-//         if(!storage_file_open(
-//                comp_file, furi_string_get_cstr(old_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-//             storage_cli_print_error(storage_file_get_error(comp_file));
-//             break;
-//         }
-
-//         if(!storage_file_open(
-//                dest_file, furi_string_get_cstr(new_path), FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
-//             storage_cli_print_error(storage_file_get_error(dest_file));
-//             break;
-//         }
-
-//         uint32_t start_tick = furi_get_tick();
-//         bool success = compress_decode_streamed(
-//             compress, hs_unpacker_file_read, comp_file, hs_unpacker_file_write, dest_file);
-
-//         uint32_t end_tick = furi_get_tick();
-//         printf(
-//             "Decompression %s in %lu ticks \r\n",
-//             success ? "success" : "failed",
-//             end_tick - start_tick);
-//     } while(false);
-
-//     compress_free(compress);
-//     furi_string_free(new_path);
-//     storage_file_free(comp_file);
-//     storage_file_free(dest_file);
-//     furi_record_close(RECORD_STORAGE);
-// }
-
 static bool tar_extract_file_callback(const char* name, bool is_directory, void* context) {
     UNUSED(context);
     printf("\t%s %s\r\n", is_directory ? "D" : "F", name);
