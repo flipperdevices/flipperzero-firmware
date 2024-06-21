@@ -361,7 +361,6 @@ bool view_dispatcher_handle_signal_event(uint32_t signal, void* arg, void* conte
         if(is_consumed) break;
 
         switch(signal) {
-        case FuriSignalInterrupt:
         case FuriSignalExit:
             is_consumed = view_dispatcher_handle_signal_exit(instance);
             break;
