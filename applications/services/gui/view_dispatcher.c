@@ -67,9 +67,6 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
         FuriEventLoopEventIn,
         view_dispatcher_run_event_callback,
         view_dispatcher);
-
-    furi_thread_set_signal_callback(
-        furi_thread_get_current(), view_dispatcher_handle_signal, view_dispatcher);
 }
 
 void view_dispatcher_set_navigation_event_callback(
@@ -406,29 +403,4 @@ bool view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context) 
     view_dispatcher_handle_input(instance, &input);
 
     return true;
-}
-
-static bool view_dispatcher_handle_signal_exit(ViewDispatcher* instance) {
-    bool is_consumed = false;
-
-    if(instance->event_loop) {
-        furi_event_loop_stop(instance->event_loop);
-        is_consumed = true;
-    }
-
-    return is_consumed;
-}
-
-bool view_dispatcher_handle_signal(uint32_t signal, void* arg, void* context) {
-    furi_assert(context);
-    ViewDispatcher* instance = context;
-    UNUSED(arg);
-
-    switch(signal) {
-    case FuriSignalExit:
-        return view_dispatcher_handle_signal_exit(instance);
-    // Room for possible other standard signal handlers
-    default:
-        return false;
-    }
 }

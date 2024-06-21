@@ -60,6 +60,3 @@ bool view_dispatcher_run_event_callback(FuriMessageQueue* queue, void* context);
 
 /** ViewDispatcher run event loop input callback */
 bool view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context);
-
-/** ViewDispatcher signal handler callback - default implementation */
-bool view_dispatcher_handle_signal(uint32_t signal, void* arg, void* context);
