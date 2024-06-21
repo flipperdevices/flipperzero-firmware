@@ -11,7 +11,7 @@
 #include "view_i.h"
 #include "gui_i.h"
 
-DICT_DEF2(ViewDict, uint32_t, M_DEFAULT_OPLIST, View*, M_PTR_OPLIST)
+DICT_DEF2(ViewDict, uint32_t, M_DEFAULT_OPLIST, View*, M_PTR_OPLIST) // NOLINT
 
 struct ViewDispatcher {
     FuriEventLoop* event_loop;
@@ -30,7 +30,6 @@ struct ViewDispatcher {
     ViewDispatcherCustomEventCallback custom_event_callback;
     ViewDispatcherNavigationEventCallback navigation_event_callback;
     ViewDispatcherTickEventCallback tick_event_callback;
-    ViewDispatcherSignalEventCallback signal_callback;
     uint32_t tick_period;
     void* event_context;
 };
@@ -50,9 +49,6 @@ void view_dispatcher_handle_tick_event(void* context);
 /** Custom event handler */
 void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32_t event);
 
-/** Signal event handler */
-bool view_dispatcher_handle_signal_event(uint32_t signal, void* arg, void* context);
-
 /** Set current view, dispatches view enter and exit */
 void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* view);
 
@@ -64,3 +60,6 @@ bool view_dispatcher_run_event_callback(FuriMessageQueue* queue, void* context);
 
 /** ViewDispatcher run event loop input callback */
 bool view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context);
+
+/** ViewDispatcher signal handler callback - default implementation */
+bool view_dispatcher_handle_signal(uint32_t signal, void* arg, void* context);

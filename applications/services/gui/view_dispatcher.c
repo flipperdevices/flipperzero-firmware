@@ -69,7 +69,7 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
         view_dispatcher);
 
     furi_thread_set_signal_callback(
-        furi_thread_get_current(), view_dispatcher_handle_signal_event, view_dispatcher);
+        furi_thread_get_current(), view_dispatcher_handle_signal, view_dispatcher);
 }
 
 void view_dispatcher_set_navigation_event_callback(
@@ -98,13 +98,6 @@ void view_dispatcher_set_tick_event_callback(
 void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context) {
     furi_check(view_dispatcher);
     view_dispatcher->event_context = context;
-}
-
-void view_dispatcher_set_signal_event_callback(
-    ViewDispatcher* view_dispatcher,
-    ViewDispatcherSignalEventCallback callback) {
-    furi_check(view_dispatcher);
-    view_dispatcher->signal_callback = callback;
 }
 
 FuriEventLoop* view_dispatcher_get_event_loop(ViewDispatcher* view_dispatcher) {
@@ -336,44 +329,6 @@ void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32
     }
 }
 
-static bool view_dispatcher_handle_signal_exit(ViewDispatcher* instance) {
-    bool is_consumed = false;
-
-    if(instance->event_loop) {
-        furi_event_loop_stop(instance->event_loop);
-        is_consumed = true;
-    }
-
-    return is_consumed;
-}
-
-bool view_dispatcher_handle_signal_event(uint32_t signal, void* arg, void* context) {
-    furi_assert(context);
-    ViewDispatcher* instance = context;
-
-    bool is_consumed = false;
-
-    do {
-        if(instance->signal_callback) {
-            is_consumed = instance->signal_callback(signal, arg, instance->event_context);
-        }
-
-        if(is_consumed) break;
-
-        switch(signal) {
-        case FuriSignalExit:
-            is_consumed = view_dispatcher_handle_signal_exit(instance);
-            break;
-        // Room for possible other standard signal handlers
-        default:
-            break;
-        }
-
-    } while(false);
-
-    return is_consumed;
-}
-
 void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t event) {
     furi_check(view_dispatcher);
     furi_check(view_dispatcher->event_loop);
@@ -451,4 +406,29 @@ bool view_dispatcher_run_input_callback(FuriMessageQueue* queue, void* context) 
     view_dispatcher_handle_input(instance, &input);
 
     return true;
+}
+
+static bool view_dispatcher_handle_signal_exit(ViewDispatcher* instance) {
+    bool is_consumed = false;
+
+    if(instance->event_loop) {
+        furi_event_loop_stop(instance->event_loop);
+        is_consumed = true;
+    }
+
+    return is_consumed;
+}
+
+bool view_dispatcher_handle_signal(uint32_t signal, void* arg, void* context) {
+    furi_assert(context);
+    ViewDispatcher* instance = context;
+    UNUSED(arg);
+
+    switch(signal) {
+    case FuriSignalExit:
+        return view_dispatcher_handle_signal_exit(instance);
+    // Room for possible other standard signal handlers
+    default:
+        return false;
+    }
 }

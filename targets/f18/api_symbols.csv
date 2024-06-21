@@ -2723,7 +2723,6 @@ Function,+,view_dispatcher_send_to_front,void,ViewDispatcher*
 Function,+,view_dispatcher_set_custom_event_callback,void,"ViewDispatcher*, ViewDispatcherCustomEventCallback"
 Function,+,view_dispatcher_set_event_callback_context,void,"ViewDispatcher*, void*"
 Function,+,view_dispatcher_set_navigation_event_callback,void,"ViewDispatcher*, ViewDispatcherNavigationEventCallback"
-Function,+,view_dispatcher_set_signal_event_callback,void,"ViewDispatcher*, ViewDispatcherSignalEventCallback"
 Function,+,view_dispatcher_set_tick_event_callback,void,"ViewDispatcher*, ViewDispatcherTickEventCallback, uint32_t"
 Function,+,view_dispatcher_stop,void,ViewDispatcher*
 Function,+,view_dispatcher_switch_to_view,void,"ViewDispatcher*, uint32_t"
