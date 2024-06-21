@@ -2,6 +2,7 @@
 
 import operator
 from functools import reduce
+import time
 
 from flipper.app import App
 from flipper.storage import FlipperStorage, FlipperStorageOperations
@@ -9,6 +10,8 @@ from flipper.utils.cdc import resolve_port
 
 
 class Main(App):
+    APP_POST_CLOSE_DELAY_SEC = 1
+
     def init(self):
         self.parser.add_argument("-p", "--port", help="CDC Port", default="auto")
         self.parser.add_argument(
@@ -66,6 +69,20 @@ class Main(App):
                 startup_command = f"{fap_host_app}"
                 if self.args.host_app:
                     startup_command = self.args.host_app
+
+                self.logger.info("Closing current app, if any")
+                storage.send_and_wait_eol("loader close\r")
+                result = storage.read.until(storage.CLI_EOL)
+                if b"was closed" in result:
+                    self.logger.info("App closed")
+                    time.sleep(self.APP_POST_CLOSE_DELAY_SEC)
+                elif result.startswith(b"No application"):
+                    pass
+                else:
+                    self.logger.error(f"Unexpected response: {result.decode('ascii')}")
+                    return 4
+
+                storage.read.until(storage.CLI_EOL)
 
                 self.logger.info(f"Launching app: {startup_command}")
                 storage.send_and_wait_eol(f"loader open {startup_command}\r")
