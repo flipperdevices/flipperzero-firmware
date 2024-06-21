@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
+import heatshrink2 as hs
 from flipper.app import App
 from flipper.assets.heatshrink_stream import HeatshrinkDataStreamHeader
-from flipper.assets.tarball import package_tree
-import heatshrink2 as hs
+from flipper.assets.tarball import compress_tree_tarball
 
 
 class HSWrapper(App):
@@ -129,7 +129,7 @@ class HSWrapper(App):
     def tar(self):
         args = self.args
 
-        orig_size, compressed_size = package_tree(
+        orig_size, compressed_size = compress_tree_tarball(
             args.dir, args.output, hs_window=args.window, hs_lookahead=args.lookahead
         )
 

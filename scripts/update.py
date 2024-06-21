@@ -13,7 +13,7 @@ from flipper.app import App
 from flipper.assets.coprobin import CoproBinary, get_stack_type
 from flipper.assets.heatshrink_stream import HeatshrinkDataStreamHeader
 from flipper.assets.obdata import ObReferenceValues, OptionBytesData
-from flipper.assets.tarball import package_tree, tar_sanitizer_filter
+from flipper.assets.tarball import compress_tree_tarball, tar_sanitizer_filter
 from flipper.utils.fff import FlipperFormatFile
 from slideshow import Main as SlideshowMain
 
@@ -231,7 +231,7 @@ class Main(App):
 
     def package_resources(self, srcdir: str, dst_name: str):
         try:
-            src_size, compressed_size = package_tree(
+            src_size, compressed_size = compress_tree_tarball(
                 srcdir, dst_name, filter=self._tar_filter
             )
 

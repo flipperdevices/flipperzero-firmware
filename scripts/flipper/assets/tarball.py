@@ -1,8 +1,9 @@
 import io
 import tarfile
 
-from .heatshrink_stream import HeatshrinkDataStreamHeader
 import heatshrink2
+
+from .heatshrink_stream import HeatshrinkDataStreamHeader
 
 FLIPPER_TAR_FORMAT = tarfile.USTAR_FORMAT
 TAR_HEATSRINK_EXTENSION = ".ths"
@@ -15,7 +16,7 @@ def tar_sanitizer_filter(tarinfo: tarfile.TarInfo):
     return tarinfo
 
 
-def package_tree(
+def compress_tree_tarball(
     src_dir, output_name, filter=tar_sanitizer_filter, hs_window=13, hs_lookahead=6
 ):
     plain_tar = io.BytesIO()
