@@ -17,9 +17,18 @@ typedef struct Storage Storage;
 typedef enum {
     TAR_OPEN_MODE_READ = 'r',
     TAR_OPEN_MODE_WRITE = 'w',
-    /* single-pass read-only heatshrink compressed tar */
+    /* read-only heatshrink compressed tar */
     TAR_OPEN_MODE_READ_HS = 'h',
 } TarOpenMode;
+
+/** Get expected open mode for archive at the path.
+ * Used for automatic mode detection based on the file extension.
+ *
+ * @param[in]   path          Path to the archive
+ *
+ * @return open mode from TarOpenMode enum
+ */
+TarOpenMode tar_get_mode_for_path(const char* path);
 
 /** Tar archive constructor
  *

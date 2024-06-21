@@ -13,6 +13,20 @@
 #define FILE_OPEN_NTRIES 10
 #define FILE_OPEN_RETRY_DELAY 25
 
+TarOpenMode tar_get_mode_for_path(const char* path) {
+    char ext[8];
+
+    FuriString* path_str = furi_string_alloc_set_str(path);
+    path_extract_extension(path_str, ext, sizeof(ext) - 1);
+    furi_string_free(path_str);
+
+    if(strcmp(ext, ".ths") == 0) {
+        return TAR_OPEN_MODE_READ_HS;
+    } else {
+        return TAR_OPEN_MODE_READ;
+    }
+}
+
 typedef struct TarArchive {
     Storage* storage;
     File* stream;

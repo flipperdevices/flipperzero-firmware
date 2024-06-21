@@ -5,6 +5,7 @@
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/md5_calc.h>
 #include <lib/toolbox/dir_walk.h>
+#include <lib/toolbox/tar/tar_archive.h>
 #include <storage/storage.h>
 #include <storage/storage_sd_api.h>
 #include <power/power_service/power.h>
@@ -33,6 +34,7 @@ static void storage_cli_print_usage(void) {
     printf("\tmd5\t - md5 hash of the file\r\n");
     printf("\tstat\t - info about file or dir\r\n");
     printf("\ttimestamp\t - last modification timestamp\r\n");
+    printf("\textract\t - extract tar archive to destination\r\n");
 };
 
 static void storage_cli_print_error(FS_Error error) {
@@ -496,73 +498,75 @@ static void storage_cli_md5(Cli* cli, FuriString* path) {
     furi_record_close(RECORD_STORAGE);
 }
 
-#include <toolbox/compress.h>
+// static int32_t hs_unpacker_file_read(void* context, uint8_t* buffer, int32_t size) {
+//     File* file = (File*)context;
+//     return storage_file_read(file, buffer, size);
+// }
 
-static int32_t hs_unpacker_file_read(void* context, uint8_t* buffer, int32_t size) {
-    File* file = (File*)context;
-    return storage_file_read(file, buffer, size);
+// static int32_t hs_unpacker_file_write(void* context, uint8_t* buffer, int32_t size) {
+//     File* file = (File*)context;
+//     return storage_file_write(file, buffer, size);
+// }
+
+// static void storage_cli_unpack(Cli* cli, FuriString* old_path, FuriString* args) {
+//     UNUSED(cli);
+//     FuriString* new_path = furi_string_alloc();
+
+//     if(!args_read_probably_quoted_string_and_trim(args, new_path)) {
+//         storage_cli_print_usage();
+//         furi_string_free(new_path);
+//         return;
+//     }
+
+//     Storage* api = furi_record_open(RECORD_STORAGE);
+//     File* comp_file = storage_file_alloc(api);
+//     File* dest_file = storage_file_alloc(api);
+
+//     CompressConfigHeatshrink config = {
+//         .window_sz2 = 14,
+//         .lookahead_sz2 = 5,
+//         .input_buffer_sz = 512,
+//     };
+//     Compress* compress = compress_alloc(COMPRESS_TYPE_HEATSHRINK, &config);
+
+//     do {
+//         if(!storage_file_open(
+//                comp_file, furi_string_get_cstr(old_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+//             storage_cli_print_error(storage_file_get_error(comp_file));
+//             break;
+//         }
+
+//         if(!storage_file_open(
+//                dest_file, furi_string_get_cstr(new_path), FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
+//             storage_cli_print_error(storage_file_get_error(dest_file));
+//             break;
+//         }
+
+//         uint32_t start_tick = furi_get_tick();
+//         bool success = compress_decode_streamed(
+//             compress, hs_unpacker_file_read, comp_file, hs_unpacker_file_write, dest_file);
+
+//         uint32_t end_tick = furi_get_tick();
+//         printf(
+//             "Decompression %s in %lu ticks \r\n",
+//             success ? "success" : "failed",
+//             end_tick - start_tick);
+//     } while(false);
+
+//     compress_free(compress);
+//     furi_string_free(new_path);
+//     storage_file_free(comp_file);
+//     storage_file_free(dest_file);
+//     furi_record_close(RECORD_STORAGE);
+// }
+
+static bool tar_extract_file_callback(const char* name, bool is_directory, void* context) {
+    UNUSED(context);
+    printf("\t%s %s\r\n", is_directory ? "D" : "F", name);
+    return true;
 }
 
-static int32_t hs_unpacker_file_write(void* context, uint8_t* buffer, int32_t size) {
-    File* file = (File*)context;
-    return storage_file_write(file, buffer, size);
-}
-
-static void storage_cli_unpack(Cli* cli, FuriString* old_path, FuriString* args) {
-    UNUSED(cli);
-    FuriString* new_path = furi_string_alloc();
-
-    if(!args_read_probably_quoted_string_and_trim(args, new_path)) {
-        storage_cli_print_usage();
-        furi_string_free(new_path);
-        return;
-    }
-
-    Storage* api = furi_record_open(RECORD_STORAGE);
-    File* comp_file = storage_file_alloc(api);
-    File* dest_file = storage_file_alloc(api);
-
-    CompressConfigHeatshrink config = {
-        .window_sz2 = 14,
-        .lookahead_sz2 = 5,
-        .input_buffer_sz = 512,
-    };
-    Compress* compress = compress_alloc(COMPRESS_TYPE_HEATSHRINK, &config);
-
-    do {
-        if(!storage_file_open(
-               comp_file, furi_string_get_cstr(old_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-            storage_cli_print_error(storage_file_get_error(comp_file));
-            break;
-        }
-
-        if(!storage_file_open(
-               dest_file, furi_string_get_cstr(new_path), FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
-            storage_cli_print_error(storage_file_get_error(dest_file));
-            break;
-        }
-
-        uint32_t start_tick = furi_get_tick();
-        bool success = compress_decode_streamed(
-            compress, hs_unpacker_file_read, comp_file, hs_unpacker_file_write, dest_file);
-
-        uint32_t end_tick = furi_get_tick();
-        printf(
-            "Decompression %s in %lu ticks \r\n",
-            success ? "success" : "failed",
-            end_tick - start_tick);
-    } while(false);
-
-    compress_free(compress);
-    furi_string_free(new_path);
-    storage_file_free(comp_file);
-    storage_file_free(dest_file);
-    furi_record_close(RECORD_STORAGE);
-}
-
-#include <toolbox/tar/tar_archive.h>
-
-static void storage_cli_unpack_hs(Cli* cli, FuriString* old_path, FuriString* args) {
+static void storage_cli_extract(Cli* cli, FuriString* old_path, FuriString* args) {
     UNUSED(cli);
     FuriString* new_path = furi_string_alloc();
 
@@ -575,9 +579,15 @@ static void storage_cli_unpack_hs(Cli* cli, FuriString* old_path, FuriString* ar
     Storage* api = furi_record_open(RECORD_STORAGE);
 
     TarArchive* archive = tar_archive_alloc(api);
-    furi_check(tar_archive_open(archive, furi_string_get_cstr(old_path), TAR_OPEN_MODE_READ_HS));
+    TarOpenMode tar_mode = tar_get_mode_for_path(furi_string_get_cstr(old_path));
     do {
+        if(!tar_archive_open(archive, furi_string_get_cstr(old_path), tar_mode)) {
+            printf("Failed to open archive\r\n");
+            break;
+        }
         uint32_t start_tick = furi_get_tick();
+        tar_archive_set_file_callback(archive, tar_extract_file_callback, NULL);
+        printf("Unpacking to %s\r\n", furi_string_get_cstr(new_path));
         bool success = tar_archive_unpack_to(archive, furi_string_get_cstr(new_path), NULL);
         uint32_t end_tick = furi_get_tick();
         printf(
@@ -684,13 +694,8 @@ void storage_cli(Cli* cli, FuriString* args, void* context) {
             break;
         }
 
-        if(furi_string_cmp_str(cmd, "unpack") == 0) {
-            storage_cli_unpack(cli, path, args);
-            break;
-        }
-
-        if(furi_string_cmp_str(cmd, "hs") == 0) {
-            storage_cli_unpack_hs(cli, path, args);
+        if(furi_string_cmp_str(cmd, "extract") == 0) {
+            storage_cli_extract(cli, path, args);
             break;
         }
 

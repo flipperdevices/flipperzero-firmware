@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,67.2,,
+Version,+,67.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
@@ -3460,6 +3460,7 @@ Function,+,tar_archive_set_file_callback,void,"TarArchive*, tar_unpack_file_cb, 
 Function,+,tar_archive_store_data,_Bool,"TarArchive*, const char*, const uint8_t*, const int32_t"
 Function,+,tar_archive_unpack_file,_Bool,"TarArchive*, const char*, const char*"
 Function,+,tar_archive_unpack_to,_Bool,"TarArchive*, const char*, Storage_name_converter"
+Function,+,tar_get_mode_for_path,TarOpenMode,const char*
 Function,-,tempnam,char*,"const char*, const char*"
 Function,+,text_box_alloc,TextBox*,
 Function,+,text_box_free,void,TextBox*
