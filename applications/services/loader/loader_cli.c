@@ -72,7 +72,7 @@ static void loader_cli_close(Loader* loader) {
     } else if(!loader_signal(loader, FuriSignalExit, NULL)) {
         printf("Application \"%s\" has to be closed manually\r\n", furi_string_get_cstr(app_name));
     } else {
-        printf("Applicaton \"%s\" was closed\r\n", furi_string_get_cstr(app_name));
+        printf("Application \"%s\" was closed\r\n", furi_string_get_cstr(app_name));
     }
 
     furi_string_free(app_name);

@@ -100,7 +100,7 @@ FuriPubSub* loader_get_pubsub(Loader* instance);
 bool loader_signal(Loader* instance, uint32_t signal, void* arg);
 
 /**
- * @brief Get the name of the currently running applicaton
+ * @brief Get the name of the currently running application
  *
  * @param[in] instance pointer to the loader instance
  * @param[in,out] name pointer to the string to contain the name (must be allocated)
