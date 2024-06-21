@@ -13,7 +13,7 @@ from flipper.app import App
 from flipper.assets.coprobin import CoproBinary, get_stack_type
 from flipper.assets.heatshrink_stream import HeatshrinkDataStreamHeader
 from flipper.assets.obdata import ObReferenceValues, OptionBytesData
-from flipper.assets.tarball import FLIPPER_TAR_FORMAT, tar_sanitizer_filter
+from flipper.assets.tarball import package_tree, tar_sanitizer_filter
 from flipper.utils.fff import FlipperFormatFile
 from slideshow import Main as SlideshowMain
 
@@ -231,36 +231,15 @@ class Main(App):
 
     def package_resources(self, srcdir: str, dst_name: str):
         try:
-            plain_tar = io.BytesIO()
-            with tarfile.open(
-                fileobj=plain_tar,
-                mode=self.RESOURCE_TAR_MODE,
-                format=FLIPPER_TAR_FORMAT,
-            ) as tarball:
-                tarball.add(
-                    srcdir,
-                    arcname="",
-                    filter=self._tar_filter,
-                )
-            plain_tar.seek(0)
-
-            header = HeatshrinkDataStreamHeader(
-                self.HEATSHRINK_WINDOW_SIZE, self.HEATSHRINK_LOOKAHEAD_SIZE
+            src_size, compressed_size = package_tree(
+                srcdir, dst_name, filter=self._tar_filter
             )
-            src_data = plain_tar.read()
-            compressed = heatshrink2.compress(
-                src_data, self.HEATSHRINK_WINDOW_SIZE, self.HEATSHRINK_LOOKAHEAD_SIZE
-            )
-
-            with open(dst_name, "wb") as f:
-                f.write(header.pack())
-                f.write(compressed)
 
             self.logger.info(
-                f"Resources compression ratio: {len(compressed) * 100 / len(src_data):.2f}%"
+                f"Resources compression ratio: {compressed_size * 100 / src_size:.2f}%"
             )
             return True
-        except ValueError as e:
+        except Exception as e:
             self.logger.error(f"Cannot package resources: {e}")
             return False
 
