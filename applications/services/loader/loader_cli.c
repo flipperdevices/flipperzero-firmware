@@ -1,8 +1,10 @@
+#include "loader.h"
+
 #include <furi.h>
 #include <cli/cli.h>
 #include <applications.h>
 #include <lib/toolbox/args.h>
-#include "loader.h"
+#include <notification/notification_messages.h>
 
 static void loader_cli_print_usage(void) {
     printf("Usage:\r\n");
@@ -57,6 +59,12 @@ static void loader_cli_open(FuriString* args, Loader* loader) {
         FuriString* error_message = furi_string_alloc();
         if(loader_start(loader, app_name_str, args_str, error_message) != LoaderStatusOk) {
             printf("%s\r\n", furi_string_get_cstr(error_message));
+        } else {
+#ifdef SRV_NOTIFICATION
+            NotificationApp* notification_srv = furi_record_open(RECORD_NOTIFICATION);
+            notification_message(notification_srv, &sequence_display_backlight_on);
+            furi_record_close(RECORD_NOTIFICATION);
+#endif
         }
         furi_string_free(error_message);
     } while(false);
