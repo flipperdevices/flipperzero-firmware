@@ -517,7 +517,7 @@ static void storage_cli_extract(Cli* cli, FuriString* old_path, FuriString* args
     Storage* api = furi_record_open(RECORD_STORAGE);
 
     TarArchive* archive = tar_archive_alloc(api);
-    TarOpenMode tar_mode = tar_get_mode_for_path(furi_string_get_cstr(old_path));
+    TarOpenMode tar_mode = tar_archive_get_mode_for_path(furi_string_get_cstr(old_path));
     do {
         if(!tar_archive_open(archive, furi_string_get_cstr(old_path), tar_mode)) {
             printf("Failed to open archive\r\n");

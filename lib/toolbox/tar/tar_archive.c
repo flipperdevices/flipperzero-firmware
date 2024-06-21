@@ -13,7 +13,7 @@
 #define FILE_OPEN_NTRIES 10
 #define FILE_OPEN_RETRY_DELAY 25
 
-TarOpenMode tar_get_mode_for_path(const char* path) {
+TarOpenMode tar_archive_get_mode_for_path(const char* path) {
     char ext[8];
 
     FuriString* path_str = furi_string_alloc_set_str(path);

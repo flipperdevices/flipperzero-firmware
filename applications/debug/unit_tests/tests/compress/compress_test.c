@@ -276,7 +276,7 @@ static void compress_test_heatshrink_tar() {
         mu_assert(storage_simply_mkdir(api, HS_TAR_EXTRACT_PATH), "Failed to create extract dir");
 
         mu_assert(
-            tar_get_mode_for_path(HS_TAR_PATH) == TAR_OPEN_MODE_READ_HS,
+            tar_archive_get_mode_for_path(HS_TAR_PATH) == TAR_OPEN_MODE_READ_HS,
             "Invalid mode for heatshrink tar");
 
         mu_assert(

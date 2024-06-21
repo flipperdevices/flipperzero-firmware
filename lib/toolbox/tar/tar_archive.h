@@ -28,7 +28,7 @@ typedef enum {
  *
  * @return open mode from TarOpenMode enum
  */
-TarOpenMode tar_get_mode_for_path(const char* path);
+TarOpenMode tar_archive_get_mode_for_path(const char* path);
 
 /** Tar archive constructor
  *
