@@ -45,7 +45,9 @@ class TarHS(App):
         with open(args.file, "rb") as f:
             data = f.read()
 
-        compressed = hs.compress(data, args.window, args.lookahead)
+        compressed = hs.compress(
+            data, window_sz2=args.window, lookahead_sz2=args.lookahead
+        )
 
         with open(args.output, "wb") as f:
             header = HeatshrinkDataStreamHeader(args.window, args.lookahead)
@@ -69,7 +71,11 @@ class TarHS(App):
             f"Decompressing with window size {header.window_size} and lookahead size {header.lookahead_size}"
         )
 
-        data = hs.decompress(compressed, header.window_size, header.lookahead_size)
+        data = hs.decompress(
+            compressed,
+            window_sz2=header.window_size,
+            lookahead_sz2=header.lookahead_size,
+        )
 
         with open(args.output, "wb") as f:
             f.write(data)
