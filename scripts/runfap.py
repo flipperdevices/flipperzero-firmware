@@ -10,7 +10,7 @@ from flipper.utils.cdc import resolve_port
 
 
 class Main(App):
-    APP_POST_CLOSE_DELAY_SEC = 1
+    APP_POST_CLOSE_DELAY_SEC = 0.2
 
     def init(self):
         self.parser.add_argument("-p", "--port", help="CDC Port", default="auto")
@@ -71,18 +71,21 @@ class Main(App):
                     startup_command = self.args.host_app
 
                 self.logger.info("Closing current app, if any")
-                storage.send_and_wait_eol("loader close\r")
-                result = storage.read.until(storage.CLI_EOL)
-                if b"was closed" in result:
-                    self.logger.info("App closed")
-                    time.sleep(self.APP_POST_CLOSE_DELAY_SEC)
-                elif result.startswith(b"No application"):
-                    pass
-                else:
-                    self.logger.error(f"Unexpected response: {result.decode('ascii')}")
-                    return 4
-
-                storage.read.until(storage.CLI_EOL)
+                for _ in range(10):
+                    storage.send_and_wait_eol("loader close\r")
+                    result = storage.read.until(storage.CLI_EOL)
+                    if b"was closed" in result:
+                        self.logger.info("App closed")
+                        storage.read.until(storage.CLI_EOL)
+                        time.sleep(self.APP_POST_CLOSE_DELAY_SEC)
+                    elif result.startswith(b"No application"):
+                        storage.read.until(storage.CLI_EOL)
+                        break
+                    else:
+                        self.logger.error(
+                            f"Unexpected response: {result.decode('ascii')}"
+                        )
+                        return 4
 
                 self.logger.info(f"Launching app: {startup_command}")
                 storage.send_and_wait_eol(f"loader open {startup_command}\r")
