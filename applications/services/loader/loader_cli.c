@@ -14,6 +14,7 @@ static void loader_cli_print_usage(void) {
     printf("\topen <Application Name:string>\t - Open application by name\r\n");
     printf("\tinfo\t - Show loader state\r\n");
     printf("\tclose\t - Close the current application\r\n");
+    printf("\tsignal <signal:number> [arg:hex]\t - Send a signal with an optional argument\r\n");
 }
 
 static void loader_cli_list(void) {
@@ -86,6 +87,24 @@ static void loader_cli_close(Loader* loader) {
     furi_string_free(app_name);
 }
 
+static void loader_cli_signal(FuriString* args, Loader* loader) {
+    uint32_t signal;
+    void* arg = NULL;
+
+    if(!sscanf(furi_string_get_cstr(args), "%lu %p", &signal, &arg)) {
+        printf("Signal must be a decimal number\r\n");
+    } else if(!loader_is_locked(loader)) {
+        printf("No application is running\r\n");
+    } else {
+        const bool is_handled = loader_signal(loader, signal, arg);
+        printf(
+            "Signal %lu with argument 0x%p was %s\r\n",
+            signal,
+            arg,
+            is_handled ? "handled" : "ignored");
+    }
+}
+
 static void loader_cli(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(context);
@@ -104,6 +123,8 @@ static void loader_cli(Cli* cli, FuriString* args, void* context) {
         loader_cli_info(loader);
     } else if(furi_string_equal(cmd, "close")) {
         loader_cli_close(loader);
+    } else if(furi_string_equal(cmd, "signal")) {
+        loader_cli_signal(args, loader);
     } else {
         loader_cli_print_usage();
     }
