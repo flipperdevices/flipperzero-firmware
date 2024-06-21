@@ -67,11 +67,9 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
         FuriEventLoopEventIn,
         view_dispatcher_run_event_callback,
         view_dispatcher);
-}
 
-void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context) {
-    furi_check(view_dispatcher);
-    view_dispatcher->event_context = context;
+    furi_thread_set_signal_callback(
+        furi_thread_get_current(), view_dispatcher_handle_signal_event, view_dispatcher);
 }
 
 void view_dispatcher_set_navigation_event_callback(
@@ -95,6 +93,18 @@ void view_dispatcher_set_tick_event_callback(
     furi_check(view_dispatcher);
     view_dispatcher->tick_event_callback = callback;
     view_dispatcher->tick_period = tick_period;
+}
+
+void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context) {
+    furi_check(view_dispatcher);
+    view_dispatcher->event_context = context;
+}
+
+void view_dispatcher_set_signal_event_callback(
+    ViewDispatcher* view_dispatcher,
+    ViewDispatcherSignalEventCallback callback) {
+    furi_check(view_dispatcher);
+    view_dispatcher->signal_callback = callback;
 }
 
 FuriEventLoop* view_dispatcher_get_event_loop(ViewDispatcher* view_dispatcher) {
@@ -324,6 +334,45 @@ void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32
     if(!is_consumed && view_dispatcher->custom_event_callback) {
         view_dispatcher->custom_event_callback(view_dispatcher->event_context, event);
     }
+}
+
+static bool view_dispatcher_handle_signal_exit(ViewDispatcher* instance) {
+    bool is_consumed = false;
+
+    if(instance->event_loop) {
+        furi_event_loop_stop(instance->event_loop);
+        is_consumed = true;
+    }
+
+    return is_consumed;
+}
+
+bool view_dispatcher_handle_signal_event(uint32_t signal, void* arg, void* context) {
+    furi_assert(context);
+    ViewDispatcher* instance = context;
+
+    bool is_consumed = false;
+
+    do {
+        if(instance->signal_callback) {
+            is_consumed = instance->signal_callback(signal, arg, instance->event_context);
+        }
+
+        if(is_consumed) break;
+
+        switch(signal) {
+        case FuriSignalInterrupt:
+        case FuriSignalExit:
+            is_consumed = view_dispatcher_handle_signal_exit(instance);
+            break;
+        // Room for possible other standard signal handlers
+        default:
+            break;
+        }
+
+    } while(false);
+
+    return is_consumed;
 }
 
 void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t event) {

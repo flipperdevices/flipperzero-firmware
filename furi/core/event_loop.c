@@ -198,7 +198,6 @@ void furi_event_loop_run(FuriEventLoop* instance) {
 
 void furi_event_loop_stop(FuriEventLoop* instance) {
     furi_check(instance);
-    furi_check(instance->thread_id == furi_thread_get_current_id());
 
     xTaskNotifyIndexed(
         instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagStop, eSetBits);

@@ -33,6 +33,9 @@ typedef bool (*ViewDispatcherNavigationEventCallback)(void* context);
 /** Prototype for tick event callback */
 typedef void (*ViewDispatcherTickEventCallback)(void* context);
 
+/** Prototype for signal event callback */
+typedef bool (*ViewDispatcherSignalEventCallback)(uint32_t signal, void* arg, void* context);
+
 /** Allocate ViewDispatcher instance
  *
  * @return     pointer to ViewDispatcher instance
@@ -94,6 +97,15 @@ void view_dispatcher_set_tick_event_callback(
     ViewDispatcherTickEventCallback callback,
     uint32_t tick_period);
 
+/** Set custom signal event callback
+ *
+ * @param      view_dispatcher  ViewDispatcher instance
+ * @param      callback         ViewDispatcherSignalEventCallback
+ */
+void view_dispatcher_set_signal_event_callback(
+    ViewDispatcher* view_dispatcher,
+    ViewDispatcherSignalEventCallback callback);
+
 /** Set event callback context
  *
  * @param      view_dispatcher  ViewDispatcher instance
@@ -107,7 +119,7 @@ void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher,
  * in view_dispatcher_run.
  *
  * You can add your objects into event_loop instance, but don't run the loop on
- * your side it will cause issues with input processing on dispatcher stop.
+ * your side as it will cause issues with input processing on dispatcher stop.
  *
  * @param      view_dispatcher  ViewDispatcher instance
  *

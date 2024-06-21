@@ -312,7 +312,7 @@ void furi_thread_set_signal_callback(
     FuriThreadSignalCallback callback,
     void* context) {
     furi_check(thread);
-    furi_check(thread->state == FuriThreadStateStopped);
+    furi_check(thread->state == FuriThreadStateStopped || thread == furi_thread_get_current());
 
     thread->signal_callback = callback;
     thread->signal_context = context;
@@ -321,11 +321,13 @@ void furi_thread_set_signal_callback(
 bool furi_thread_signal(const FuriThread* thread, uint32_t signal, void* arg) {
     furi_check(thread);
 
+    bool is_consumed = false;
+
     if(thread->signal_callback) {
-        return thread->signal_callback(signal, arg, thread->signal_context);
+        is_consumed = thread->signal_callback(signal, arg, thread->signal_context);
     }
 
-    return false;
+    return is_consumed;
 }
 
 void furi_thread_start(FuriThread* thread) {

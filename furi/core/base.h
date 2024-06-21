@@ -41,8 +41,10 @@ typedef enum {
 } FuriStatus;
 
 typedef enum {
-    FuriSignalExit,
-    FuriSignalUser = 100,
+    FuriSignalInterrupt, /**< Keyboard interrupt (Ctrl+C) received. */
+    FuriSignalExit, /**< Request (graceful) exit. */
+
+    FuriSignalUser = 100, /**< User signal values start from here. */
 } FuriSignal;
 
 #ifdef __cplusplus
