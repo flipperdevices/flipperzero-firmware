@@ -12,6 +12,7 @@ from flipper.app import App
 from flipper.assets.coprobin import CoproBinary, get_stack_type
 from flipper.assets.heatshrink_stream import HeatshrinkDataStreamHeader
 from flipper.assets.obdata import ObReferenceValues, OptionBytesData
+from flipper.assets.tarball import FLIPPER_TAR_FORMAT, tar_sanitizer_filter
 from flipper.utils.fff import FlipperFormatFile
 from slideshow import Main as SlideshowMain
 
@@ -22,7 +23,6 @@ class Main(App):
 
     #  No compression, plain tar
     RESOURCE_TAR_MODE = "w:"
-    RESOURCE_TAR_FORMAT = tarfile.USTAR_FORMAT
     RESOURCE_FILE_NAME = "resources.ths"  # .Tar.HeatShrink
     RESOURCE_ENTRY_NAME_MAX_LENGTH = 100
 
@@ -226,16 +226,13 @@ class Main(App):
                 f"Cannot package resource: name '{tarinfo.name}' too long"
             )
             raise ValueError("Resource name too long")
-        tarinfo.gid = tarinfo.uid = 0
-        tarinfo.mtime = 0
-        tarinfo.uname = tarinfo.gname = "furippa"
-        return tarinfo
+        return tar_sanitizer_filter(tarinfo)
 
     def package_resources(self, srcdir: str, dst_name: str):
         try:
             plain_tar_name = dst_name + ".src"
             with tarfile.open(
-                plain_tar_name, self.RESOURCE_TAR_MODE, format=self.RESOURCE_TAR_FORMAT
+                plain_tar_name, self.RESOURCE_TAR_MODE, format=FLIPPER_TAR_FORMAT
             ) as tarball:
                 tarball.add(
                     srcdir,
@@ -243,24 +240,26 @@ class Main(App):
                     filter=self._tar_filter,
                 )
 
+            with open(plain_tar_name, "rb") as src:
+                src_data = src.read()
+            os.remove(plain_tar_name)
+
+            header = HeatshrinkDataStreamHeader(
+                self.HEATSHRINK_WINDOW_SIZE, self.HEATSHRINK_LOOKAHEAD_SIZE
+            )
+            compressed = heatshrink2.compress(
+                src_data,
+                self.HEATSHRINK_WINDOW_SIZE,
+                self.HEATSHRINK_LOOKAHEAD_SIZE,
+            )
+
             with open(dst_name, "wb") as f:
-                header = HeatshrinkDataStreamHeader(
-                    self.HEATSHRINK_WINDOW_SIZE, self.HEATSHRINK_LOOKAHEAD_SIZE
-                )
                 f.write(header.pack())
-                with open(plain_tar_name, "rb") as src:
-                    src_data = src.read()
-                compressed = heatshrink2.compress(
-                    src_data,
-                    self.HEATSHRINK_WINDOW_SIZE,
-                    self.HEATSHRINK_LOOKAHEAD_SIZE,
-                )
                 f.write(compressed)
 
             self.logger.info(
                 f"Resources compression ratio: {len(compressed) * 100 / len(src_data):.2f}%"
             )
-            os.remove(plain_tar_name)
 
             return True
         except ValueError as e:

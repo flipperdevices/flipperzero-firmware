@@ -251,7 +251,7 @@ static bool file_counter(const char* name, bool is_dir, void* context) {
 }
 
 /*
-Heatshrink tar file contetns and MD5 sums:
+Heatshrink tar file contents and MD5 sums:
 file1.txt:                      64295676ceed5cce2d0dcac402e4bda4
 file2.txt:                      188f67f297eedd7bf3d6a4d3c2fc31c4
 dir/file3.txt:                  34d98ad8135ffe502dba374690136d16
@@ -259,7 +259,7 @@ dir/big_file.txt:               ee169c1e1791a4d319dbfaefaa850e98
 dir/nested_dir/file4.txt:       e099fcb2aaa0672375eaedc549247ee6
 dir/nested_dir/empty_file.txt:  d41d8cd98f00b204e9800998ecf8427e 
 
-XOR or all MD5 sums:            92ed5729786d0e1176d047e35f52d376
+XOR of all MD5 sums:            92ed5729786d0e1176d047e35f52d376
 */
 
 static void compress_test_heatshrink_tar() {
