@@ -29,12 +29,12 @@ static const GpioPin* blink_gpio_pins[] = {
 static_assert(COUNT_OF(blink_gpio_pins) == TIMER_COUNT);
 
 static const uint32_t timer_intervals[] = {
-    320,
-    750,
-    1000,
-    500,
-    150,
-    210,
+    25,
+    50,
+    100,
+    200,
+    400,
+    800,
 };
 
 static_assert(COUNT_OF(timer_intervals) == TIMER_COUNT);
