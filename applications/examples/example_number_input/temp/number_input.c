@@ -17,12 +17,10 @@ typedef struct {
 
 typedef struct {
     const char* header;
-    //char header[50];
     FuriString* text_buffer;
     bool clear_default_text;
     int32_t max_value;
     int32_t min_value;
-    bool useSign;
     char sign;
     NumberInputCallback callback;
     void* callback_context;
@@ -117,6 +115,13 @@ static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
     canvas_draw_str(canvas, text_x, text_y, furi_string_get_cstr(text));
 }
 
+static bool number_input_use_sign(NumberInputModel* model) {
+    if (model->min_value < 0 && model->max_value >= 0) {
+        return true;
+    }
+    return false;
+}
+
 static void number_input_backspace_cb(NumberInputModel* model) {
     size_t text_length = model->clear_default_text ? 1 :
                                                       furi_string_utf8_length(model->text_buffer);
@@ -157,7 +162,7 @@ static void number_input_handle_down(NumberInputModel* model) {
         model->selected_row += 1;
     }
     const NumberInputKey* keys = number_input_get_row(model->selected_row);
-    if(keys[model->selected_column].text == sign_symbol && !model->useSign) {
+    if(keys[model->selected_column].text == sign_symbol && !number_input_use_sign(model)) {
         model->selected_column--;
     }
 }
@@ -173,7 +178,7 @@ static void number_input_handle_left(NumberInputModel* model) {
         model->selected_column = number_input_get_row_size(model->selected_row) - 1;
     }
     const NumberInputKey* keys = number_input_get_row(model->selected_row);
-    if(keys[model->selected_column].text == sign_symbol && !model->useSign) {
+    if(keys[model->selected_column].text == sign_symbol && !number_input_use_sign(model)) {
         model->selected_column--;
     }
 }
@@ -189,7 +194,7 @@ static void number_input_handle_right(NumberInputModel* model) {
         model->selected_column = 0;
     }
     const NumberInputKey* keys = number_input_get_row(model->selected_row);
-    if(keys[model->selected_column].text == sign_symbol && !model->useSign) {
+    if(keys[model->selected_column].text == sign_symbol && !number_input_use_sign(model)) {
         model->selected_column++;
     }
 }
@@ -277,7 +282,7 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
         const NumberInputKey* keys = number_input_get_row(row);
 
         for(size_t column = 0; column < column_count; column++) {
-            if(keys[column].text == sign_symbol && !model->useSign) {
+            if(keys[column].text == sign_symbol && !number_input_use_sign(model)) {
                 continue;
             }
 
@@ -413,7 +418,6 @@ void number_input_reset(NumberInput* number_input) {
             model->callback_context = NULL;
             model->max_value = 0;
             model->min_value = 0;
-            model->useSign = 0;
             model->sign = '+';
         },
         true);
@@ -454,7 +458,6 @@ void number_input_set_result_callback(
     FuriString* text_buffer,
     int32_t min_value,
     int32_t max_value,
-    bool useSign,
     bool clear_default_text) {
     with_view_model(
         number_input->view,
@@ -466,7 +469,6 @@ void number_input_set_result_callback(
             model->clear_default_text = clear_default_text;
             model->min_value = min_value;
             model->max_value = max_value;
-            model->useSign = useSign;
             model->sign = '+';
         },
         true);

@@ -10,18 +10,14 @@ void example_number_input_scene_input_number_on_enter(void* context) {
     furi_assert(context);
     ExampleNumberInput* app = context;
     NumberInput* number_input = app->number_input;
-    size_t enter_name_length = 5;
-
+    
     int32_t min = -128;
     int32_t max = 8120;
     static char str[50];
     snprintf(str, sizeof(str), "Enter a number (%ld - %ld)", min, max);
-    //char* str = "Enter a number (0 - 9999)";
     const char* constStr = str;
-    //char* constStr = str;
     
     number_input_set_header_text(number_input, constStr);
-    //number_input_set_header_text(number_input, str);
     number_input_set_result_callback(
         number_input,
         example_number_input_scene_input_number_callback,
@@ -29,10 +25,8 @@ void example_number_input_scene_input_number_on_enter(void* context) {
         app->text_buffer,
         min,
         max,
-        true,
         false);
-    UNUSED(enter_name_length);
-
+    
     view_dispatcher_switch_to_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
 }
 
