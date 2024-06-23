@@ -17,6 +17,7 @@ typedef struct {
 
 typedef struct {
     const char* header;
+    //char header[50];
     FuriString* text_buffer;
     bool clear_default_text;
     int32_t max_value;
@@ -434,10 +435,9 @@ NumberInput* number_input_alloc(void) {
 void number_input_free(NumberInput* number_input) {
     furi_assert(number_input);
     with_view_model(
-        number_input->view,
-        NumberInputModel * model,
-        {},
-        true);
+        number_input->view, NumberInputModel * model, { 
+            free((void*)model->header);
+            }, true);
     view_free(number_input->view);
     free(number_input);
 }
@@ -474,5 +474,11 @@ void number_input_set_result_callback(
 
 void number_input_set_header_text(NumberInput* number_input, const char* text) {
     with_view_model(
-        number_input->view, NumberInputModel * model, { model->header = text; }, true);
+        number_input->view, NumberInputModel * model, { 
+            if (model->header != NULL) {
+                free((void*)model->header);
+            }
+
+            model->header = strdup(text);
+            }, true);
 }
