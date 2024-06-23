@@ -8,7 +8,6 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/number_input.h>
 #include <gui/view.h>
-#include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
@@ -24,7 +23,7 @@ typedef struct ExampleNumberInputShowNumber ExampleNumberInputShowNumber;
 typedef enum {
     ExampleNumberInputViewIdShowNumber,
     ExampleNumberInputViewIdNumberInput,
-    ExampleNumberInputViewIdStack,
+    //ExampleNumberInputViewIdStack,
 } ExampleNumberInputViewId;
 
 typedef struct {
@@ -34,6 +33,5 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     FuriString* text_buffer;
     NumberInput* number_input;
-    ViewStack* view_stack;
     ExampleNumberInputShowNumber* show_number;
 } ExampleNumberInput;

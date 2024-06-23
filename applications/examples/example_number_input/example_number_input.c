@@ -31,10 +31,7 @@ static ExampleNumberInput* example_number_input_alloc() {
         app->view_dispatcher,
         ExampleNumberInputViewIdShowNumber,
         example_number_input_show_number_get_view(app->show_number));
-    app->view_stack = view_stack_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, ExampleNumberInputViewIdStack, view_stack_get_view(app->view_stack));
-
+    
     return app;
 }
 
@@ -42,10 +39,8 @@ static void example_number_input_free(ExampleNumberInput* app) {
     furi_assert(app);
     view_dispatcher_remove_view(app->view_dispatcher, ExampleNumberInputViewIdShowNumber);
     view_dispatcher_remove_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
-    view_dispatcher_remove_view(app->view_dispatcher, ExampleNumberInputViewIdStack);
     scene_manager_free(app->scene_manager);
     number_input_free(app->number_input);
-    view_stack_free(app->view_stack);
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);

@@ -265,7 +265,6 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
     uint8_t text_length = model->text_buffer ? furi_string_utf8_length(model->text_buffer) : 0;
     UNUSED(text_length);
 
-    canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
     number_input_draw_input(canvas, model);
