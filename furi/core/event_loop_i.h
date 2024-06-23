@@ -1,35 +1,87 @@
 #pragma once
 
 #include "event_loop.h"
+#include "event_loop_link_i.h"
+#include "event_loop_timer_i.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <m-bptree.h>
+#include <m-i-list.h>
 
-typedef struct FuriEventLoopItem FuriEventLoopItem;
+#include "thread.h"
 
-/* Link between Event Loop  */
+struct FuriEventLoopItem {
+    // Source
+    FuriEventLoop* owner;
 
-typedef struct {
-    FuriEventLoopItem* item_in;
-    FuriEventLoopItem* item_out;
-} FuriEventLoopLink;
+    // Tracking item
+    const FuriEventLoopContract* contract;
+    void* object;
+    FuriEventLoopEvent event;
 
-void furi_event_loop_link_notify(FuriEventLoopLink* instance, FuriEventLoopEvent event);
+    // Callback and context
+    FuriEventLoopMessageQueueCallback callback;
+    void* callback_context;
 
-/* Contract between event loop and an object */
+    // Waiting list
+    ILIST_INTERFACE(WaitingList, struct FuriEventLoopItem);
+};
 
-typedef FuriEventLoopLink* (*FuriEventLoopContractGetLink)(void* object);
+ILIST_DEF(WaitingList, FuriEventLoopItem, M_POD_OPLIST)
 
-typedef uint32_t (*FuriEventLoopContractGetLevel)(void* object, FuriEventLoopEvent event);
+/* Event Loop RB tree */
+#define FURI_EVENT_LOOP_TREE_RANK (4)
 
-typedef struct {
-    const FuriEventLoopContractGetLink get_link;
-    const FuriEventLoopContractGetLevel get_level;
-} FuriEventLoopContract;
+BPTREE_DEF2( // NOLINT
+    FuriEventLoopTree,
+    FURI_EVENT_LOOP_TREE_RANK,
+    void*, /* pointer to object we track */
+    M_PTR_OPLIST,
+    FuriEventLoopItem*, /* pointer to the FuriEventLoopItem */
+    M_PTR_OPLIST)
 
-bool furi_event_loop_signal_callback(uint32_t signal, void* arg, void* context);
+#define M_OPL_FuriEventLoopTree_t() BPTREE_OPLIST(FuriEventLoopTree, M_POD_OPLIST)
 
-#ifdef __cplusplus
-}
-#endif
+#define FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX (2)
+
+typedef enum {
+    FuriEventLoopFlagEvent = (1 << 0),
+    FuriEventLoopFlagStop = (1 << 1),
+    FuriEventLoopFlagRequest = (1 << 2),
+} FuriEventLoopFlag;
+
+#define FuriEventLoopFlagAll \
+    (FuriEventLoopFlagEvent | FuriEventLoopFlagStop | FuriEventLoopFlagRequest)
+
+typedef enum {
+    FuriEventLoopProcessStatusComplete,
+    FuriEventLoopProcessStatusIncomplete,
+    FuriEventLoopProcessStatusAgain,
+} FuriEventLoopProcessStatus;
+
+typedef enum {
+    FuriEventLoopStateStopped,
+    FuriEventLoopStateIdle,
+    FuriEventLoopStateProcessing,
+} FuriEventLoopState;
+
+struct FuriEventLoop {
+    // Only works if all operations are done from the same thread
+    FuriThreadId thread_id;
+
+    // Poller state
+    volatile FuriEventLoopState state;
+
+    // Event handling
+    FuriEventLoopTree_t tree;
+    WaitingList_t waiting_list;
+
+    // Pending request handling
+    TimerList_t timer_list;
+    RequestQueue_t request_queue;
+
+    // Tick event
+    uint32_t tick_interval;
+    uint32_t tick_prev_time;
+    FuriEventLoopTickCallback tick_callback;
+    void* tick_callback_context;
+};
