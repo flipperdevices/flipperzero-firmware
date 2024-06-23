@@ -406,7 +406,8 @@ void number_input_reset(NumberInput* number_input) {
             model->selected_row = 0;
             model->selected_column = 0;
             model->clear_default_text = false;
-            model->text_buffer = furi_string_alloc();
+            //model->text_buffer = furi_string_alloc();
+            //furi_string_set_str(model->text_buffer, "");
             model->callback = NULL;
             model->callback_context = NULL;
             model->max_value = 0;
@@ -435,7 +436,7 @@ void number_input_free(NumberInput* number_input) {
     with_view_model(
         number_input->view,
         NumberInputModel * model,
-        { furi_string_free(model->text_buffer); },
+        {},
         true);
     view_free(number_input->view);
     free(number_input);
