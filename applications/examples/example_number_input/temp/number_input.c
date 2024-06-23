@@ -265,8 +265,6 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
     size_t text_length = model->text_buffer ? furi_string_utf8_length(model->text_buffer) : 0;
     UNUSED(text_length);
 
-    canvas_set_color(canvas, ColorBlack);
-
     number_input_draw_input(canvas, model);
 
     canvas_set_font(canvas, FontSecondary);
@@ -283,7 +281,6 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
             }
 
             if(keys[column].text == enter_symbol) {
-                canvas_set_color(canvas, ColorBlack);
                 if(model->selected_row == row && model->selected_column == column) {
                     canvas_draw_icon(
                         canvas,
@@ -298,7 +295,6 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                         &I_KeySave_24x11);
                 }
             } else if(keys[column].text == backspace_symbol) {
-                canvas_set_color(canvas, ColorBlack);
                 if(model->selected_row == row && model->selected_column == column) {
                     canvas_draw_icon(
                         canvas,
@@ -313,7 +309,6 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                         &I_KeyBackspace_16x9);
                 }
             } else if(keys[column].text == sign_symbol) {
-                canvas_set_color(canvas, ColorBlack);
                 if(model->selected_row == row && model->selected_column == column) {
                     canvas_draw_icon(
                         canvas,
@@ -328,7 +323,6 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                         &I_KeySign_21x11);
                 }
             } else {
-                canvas_set_color(canvas, ColorBlack);
                 if(model->selected_row == row && model->selected_column == column) {
                     canvas_draw_box(
                         canvas,
@@ -344,6 +338,7 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                     keyboard_origin_x + keys[column].x,
                     keyboard_origin_y + keys[column].y,
                     keys[column].text);
+                canvas_set_color(canvas, ColorBlack);
             }
         }
     }
