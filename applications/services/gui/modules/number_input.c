@@ -11,8 +11,8 @@ struct NumberInput {
 
 typedef struct {
     const char text;
-    const uint8_t x;
-    const uint8_t y;
+    const size_t x;
+    const size_t y;
 } NumberInputKey;
 
 typedef struct {
@@ -25,16 +25,16 @@ typedef struct {
     char sign;
     NumberInputCallback callback;
     void* callback_context;
-    int8_t selected_row;
-    uint8_t selected_column;
+    size_t selected_row;
+    size_t selected_column;
 } NumberInputModel;
 
-static const uint8_t keyboard_origin_x = 7;
-static const uint8_t keyboard_origin_y = 31;
-static const uint8_t keyboard_row_count = 2;
-static const uint8_t enter_symbol = '\r';
-static const uint8_t backspace_symbol = '\b';
-static const uint8_t sign_symbol = '-';
+static const size_t keyboard_origin_x = 7;
+static const size_t keyboard_origin_y = 31;
+static const size_t keyboard_row_count = 2;
+static const size_t enter_symbol = '\r';
+static const size_t backspace_symbol = '\b';
+static const size_t sign_symbol = '-';
 
 static const NumberInputKey keyboard_keys_row_1[] = {
     {'0', 0, 12},
@@ -59,10 +59,10 @@ static const NumberInputKey keyboard_keys_row_2[] = {
  *
  * @param      row_index  Index of row
  *
- * @return     uint8_t Row size
+ * @return     size_t Row size
  */
-static uint8_t number_input_get_row_size(uint8_t row_index) {
-    uint8_t row_size = 0;
+static size_t number_input_get_row_size(size_t row_index) {
+    size_t row_size = 0;
 
     switch(row_index + 1) {
     case 1:
@@ -84,7 +84,7 @@ static uint8_t number_input_get_row_size(uint8_t row_index) {
  *
  * @return     const NumberInputKey* Row pointer
  */
-static const NumberInputKey* number_input_get_row(uint8_t row_index) {
+static const NumberInputKey* number_input_get_row(size_t row_index) {
     const NumberInputKey* row = NULL;
 
     switch(row_index + 1) {
@@ -107,8 +107,8 @@ static const NumberInputKey* number_input_get_row(uint8_t row_index) {
  * @param      model   The model
  */
 static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
-    const uint8_t text_x = 8;
-    const uint8_t text_y = 25;
+    const size_t text_x = 8;
+    const size_t text_y = 25;
 
     elements_slightly_rounded_frame(canvas, 6, 14, 116, 15);
 
@@ -262,7 +262,7 @@ static void number_input_handle_ok(NumberInputModel* model) {
  */
 static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
     NumberInputModel* model = _model;
-    uint8_t text_length = model->text_buffer ? furi_string_utf8_length(model->text_buffer) : 0;
+    size_t text_length = model->text_buffer ? furi_string_utf8_length(model->text_buffer) : 0;
     UNUSED(text_length);
 
     canvas_set_color(canvas, ColorBlack);
@@ -273,8 +273,8 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str(canvas, 2, 9, model->header);
     canvas_set_font(canvas, FontKeyboard);
     // Draw keyboard
-    for(uint8_t row = 0; row < keyboard_row_count; row++) {
-        const uint8_t column_count = number_input_get_row_size(row);
+    for(size_t row = 0; row < keyboard_row_count; row++) {
+        const size_t column_count = number_input_get_row_size(row);
         const NumberInputKey* keys = number_input_get_row(row);
 
         for(size_t column = 0; column < column_count; column++) {
@@ -328,8 +328,8 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                         &I_KeySign_21x11);
                 }
             } else {
+                canvas_set_color(canvas, ColorBlack);
                 if(model->selected_row == row && model->selected_column == column) {
-                    canvas_set_color(canvas, ColorBlack);
                     canvas_draw_box(
                         canvas,
                         keyboard_origin_x + keys[column].x - 3,
@@ -337,16 +337,6 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                         11,
                         13);
                     canvas_set_color(canvas, ColorWhite);
-                } else if(model->selected_row == -1 && row == 0 && model->selected_column == column) {
-                    canvas_set_color(canvas, ColorBlack);
-                    canvas_draw_frame(
-                        canvas,
-                        keyboard_origin_x + keys[column].x - 3,
-                        keyboard_origin_y + keys[column].y - 10,
-                        11,
-                        13);
-                } else {
-                    canvas_set_color(canvas, ColorBlack);
                 }
 
                 canvas_draw_glyph(
@@ -379,8 +369,6 @@ static bool number_input_view_input_callback(InputEvent* event, void* context) {
     if(event->type == InputTypeShort || event->type == InputTypeLong ||
        event->type == InputTypeRepeat) {
         consumed = true;
-        FURI_LOG_D("TEST", "selected_row %d", model->selected_row);
-        FURI_LOG_D("TEST", "selected_column %d", model->selected_column);
         switch(event->key) {
         case InputKeyLeft:
             number_input_handle_left(model);
