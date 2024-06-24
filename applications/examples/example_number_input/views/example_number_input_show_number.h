@@ -11,7 +11,7 @@ typedef void (
 
 void example_number_input_show_number_model_set_number(
     ExampleNumberInputShowNumber* instance,
-    FuriString* number);
+    int32_t number);
 void example_number_input_show_number_set_callback(
     ExampleNumberInputShowNumber* example_number_input_show_number,
     ExampleNumberInputShowNumberCallback callback,

@@ -7,7 +7,7 @@ struct ExampleNumberInputShowNumber {
 };
 
 typedef struct {
-    const char* number;
+    FuriString* number;
 } ExampleNumberInputShowNumberModel;
 
 void example_number_input_show_number_set_callback(
@@ -28,23 +28,22 @@ void example_number_input_show_number_draw(
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "The Number is");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, model->number);
+    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, furi_string_get_cstr(model->number));
 
     elements_button_center(canvas, "Change");
-    UNUSED(model);
 }
 
 static void
     example_number_input_show_number_model_init(ExampleNumberInputShowNumberModel* const model) {
-    model->number = "1";
+    model->number = furi_string_alloc();
 }
 
 void example_number_input_show_number_model_set_number(
     ExampleNumberInputShowNumber* instance,
-    FuriString* number) {
+    int32_t number) {
     furi_assert(instance);
     ExampleNumberInputShowNumberModel* model = view_get_model(instance->view);
-    model->number = furi_string_get_cstr(number);
+    furi_string_printf(model->number, "%ld", number);
     view_commit_model(instance->view, false);
 }
 
@@ -88,12 +87,6 @@ void example_number_input_show_number_exit(void* context) {
 
 void example_number_input_show_number_enter(void* context) {
     furi_assert(context);
-    ExampleNumberInputShowNumber* instance = (ExampleNumberInputShowNumber*)context;
-    with_view_model(
-        instance->view,
-        ExampleNumberInputShowNumberModel * model,
-        { example_number_input_show_number_model_init(model); },
-        true);
 }
 
 ExampleNumberInputShowNumber* example_number_input_show_number_alloc() {
@@ -117,7 +110,11 @@ ExampleNumberInputShowNumber* example_number_input_show_number_alloc() {
 
 void example_number_input_show_number_free(ExampleNumberInputShowNumber* instance) {
     furi_assert(instance);
-
+    with_view_model(
+        instance->view,
+        ExampleNumberInputShowNumberModel * model,
+        { furi_string_free(model->number); },
+        true);
     view_free(instance->view);
     free(instance);
 }

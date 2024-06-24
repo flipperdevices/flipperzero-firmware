@@ -53,7 +53,6 @@ void number_input_set_result_callback(
     NumberInput* number_input,
     NumberInputCallback input_callback,
     void* callback_context,
-    FuriString* text_buffer,
     int32_t current_number,
     int32_t min_value,
     int32_t max_value,

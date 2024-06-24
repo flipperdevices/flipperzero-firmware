@@ -24,7 +24,6 @@ typedef struct ExampleNumberInputShowNumber ExampleNumberInputShowNumber;
 typedef enum {
     ExampleNumberInputViewIdShowNumber,
     ExampleNumberInputViewIdNumberInput,
-    //ExampleNumberInputViewIdStack,
 } ExampleNumberInputViewId;
 
 typedef struct {
@@ -33,6 +32,7 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     FuriString* text_buffer;
+    int32_t current_number;
     NumberInput* number_input;
     ExampleNumberInputShowNumber* show_number;
 } ExampleNumberInput;

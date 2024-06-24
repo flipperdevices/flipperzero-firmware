@@ -11,7 +11,8 @@ void example_number_input_scene_show_number_callback(
 void example_number_input_scene_show_number_on_enter(void* context) {
     furi_assert(context);
     ExampleNumberInput* app = context;
-    example_number_input_show_number_model_set_number(app->show_number, app->text_buffer);
+    //example_number_input_show_number_model_set_number(app->show_number, app->text_buffer);
+    example_number_input_show_number_model_set_number(app->show_number, app->current_number);
     example_number_input_show_number_set_callback(
         app->show_number, example_number_input_scene_show_number_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, ExampleNumberInputViewIdShowNumber);

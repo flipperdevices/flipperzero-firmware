@@ -22,7 +22,6 @@ typedef struct {
     bool clear_default_text;
     int32_t max_value;
     int32_t min_value;
-    char sign;
     NumberInputCallback callback;
     void* callback_context;
     size_t selected_row;
@@ -112,8 +111,7 @@ static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
 
     elements_slightly_rounded_frame(canvas, 6, 14, 116, 15);
 
-    FuriString* text = model->text_buffer;
-    canvas_draw_str(canvas, text_x, text_y, furi_string_get_cstr(text));
+    canvas_draw_str(canvas, text_x, text_y, furi_string_get_cstr(model->text_buffer));
 }
 
 static bool number_input_use_sign(NumberInputModel* model) {
@@ -277,9 +275,7 @@ static void number_input_handle_ok(NumberInputModel* model) {
  */
 static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
     NumberInputModel* model = _model;
-    size_t text_length = model->text_buffer ? furi_string_utf8_length(model->text_buffer) : 0;
-    UNUSED(text_length);
-
+    
     number_input_draw_input(canvas, model);
 
     canvas_set_font(canvas, FontSecondary);
@@ -411,26 +407,6 @@ static bool number_input_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-void number_input_reset(NumberInput* number_input) {
-    furi_assert(number_input);
-    with_view_model(
-        number_input->view,
-        NumberInputModel * model,
-        {
-            model->header = "";
-            model->selected_row = 0;
-            model->selected_column = 0;
-            model->clear_default_text = false;
-            //model->text_buffer = furi_string_alloc();
-            //furi_string_set_str(model->text_buffer, "");
-            model->callback = NULL;
-            model->callback_context = NULL;
-            model->max_value = 0;
-            model->min_value = 0;
-        },
-        true);
-}
-
 NumberInput* number_input_alloc(void) {
     NumberInput* number_input = malloc(sizeof(NumberInput));
     number_input->view = view_alloc();
@@ -438,8 +414,6 @@ NumberInput* number_input_alloc(void) {
     view_allocate_model(number_input->view, ViewModelTypeLocking, sizeof(NumberInputModel));
     view_set_draw_callback(number_input->view, number_input_view_draw_callback);
     view_set_input_callback(number_input->view, number_input_view_input_callback);
-
-    number_input_reset(number_input);
 
     return number_input;
 }
@@ -449,6 +423,7 @@ void number_input_free(NumberInput* number_input) {
     with_view_model(
         number_input->view, NumberInputModel * model, { 
             free((void*)model->header);
+            furi_string_free(model->text_buffer);
             }, true);
     view_free(number_input->view);
     free(number_input);
@@ -463,7 +438,6 @@ void number_input_set_result_callback(
     NumberInput* number_input,
     NumberInputCallback callback,
     void* callback_context,
-    FuriString* text_buffer,
     int32_t current_number,
     int32_t min_value,
     int32_t max_value,
@@ -475,7 +449,8 @@ void number_input_set_result_callback(
             model->callback = callback;
             model->callback_context = callback_context;
             model->current_number = current_number;
-            model->text_buffer = text_buffer;
+            model->text_buffer = furi_string_alloc_printf("%ld", current_number);
+            //model->text_buffer = furi_string_alloc_set_str(int32_to_string(model->current_number));
             model->clear_default_text = clear_default_text;
             model->min_value = min_value;
             model->max_value = max_value;
