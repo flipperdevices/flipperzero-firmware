@@ -447,6 +447,22 @@ void rpc_system_gui_free(void* context) {
     RpcGuiSystem* rpc_gui = context;
     furi_assert(rpc_gui->gui);
 
+    // Release ongoing inputs to avoid lockup
+    for(InputKey key = 0; key < InputKeyMAX; key++) {
+        if(rpc_gui->input_key_counter[key] != RPC_GUI_INPUT_RESET) {
+            InputEvent event = {
+                .key = key,
+                .type = InputTypeRelease,
+                .sequence_source = INPUT_SEQUENCE_SOURCE_SOFTWARE,
+                .sequence_counter = rpc_gui->input_key_counter[key],
+            };
+            FuriPubSub* input_events = furi_record_open(RECORD_INPUT_EVENTS);
+            furi_check(input_events);
+            furi_pubsub_publish(input_events, &event);
+            furi_record_close(RECORD_INPUT_EVENTS);
+        }
+    }
+
     if(rpc_gui->virtual_display_view_port) {
         gui_remove_view_port(rpc_gui->gui, rpc_gui->virtual_display_view_port);
         view_port_free(rpc_gui->virtual_display_view_port);
