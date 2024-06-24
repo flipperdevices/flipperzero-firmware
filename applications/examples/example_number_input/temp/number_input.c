@@ -20,7 +20,6 @@ typedef struct {
     FuriString* text_buffer;
     int32_t original_number;
     int32_t current_number;
-    bool clear_default_text;
     int32_t max_value;
     int32_t min_value;
     NumberInputCallback callback;
@@ -123,8 +122,7 @@ static bool number_input_use_sign(NumberInputModel* model) {
 }
 
 static void number_input_backspace_cb(NumberInputModel* model) {
-    size_t text_length = model->clear_default_text ? 1 :
-                                                      furi_string_utf8_length(model->text_buffer);
+    size_t text_length = furi_string_utf8_length(model->text_buffer);
     if(text_length < 1 || (text_length < 2 && model->current_number <= 0)) {
         return;
     }
@@ -260,7 +258,6 @@ static void number_input_handle_ok(NumberInputModel* model) {
         //furi_string_cat_str(model->text_buffer, temp_str);
         //prevent_to_large_number(model);
     }
-    model->clear_default_text = false;
 }
 
 /** Draw callback
@@ -451,8 +448,7 @@ void number_input_set_result_callback(
     void* callback_context,
     int32_t current_number,
     int32_t min_value,
-    int32_t max_value,
-    bool clear_default_text) {
+    int32_t max_value) {
     with_view_model(
         number_input->view,
         NumberInputModel * model,
@@ -468,7 +464,6 @@ void number_input_set_result_callback(
             }
             model->current_number = current_number;
             model->text_buffer = furi_string_alloc_printf("%ld", current_number);
-            model->clear_default_text = clear_default_text;
             model->min_value = min_value;
             model->max_value = max_value;
         },

@@ -12,6 +12,8 @@ static ExampleNumberInput* example_number_input_alloc() {
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     app->text_buffer = furi_string_alloc();
     app->current_number = 5;
+    app->min_value = -128;
+    app->max_value = 2345;
     furi_string_set(app->text_buffer, "5");
     //Turn backlight on, believe me this makes testing your app easier
     notification_message(app->notification, &sequence_display_backlight_on);

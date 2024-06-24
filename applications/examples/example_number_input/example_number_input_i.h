@@ -33,6 +33,8 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     FuriString* text_buffer;
     int32_t current_number;
+    int32_t min_value;
+    int32_t max_value;
     NumberInput* number_input;
     ExampleNumberInputShowNumber* show_number;
 } ExampleNumberInput;

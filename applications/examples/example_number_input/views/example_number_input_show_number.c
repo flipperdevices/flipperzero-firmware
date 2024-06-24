@@ -30,6 +30,8 @@ void example_number_input_show_number_draw(
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, furi_string_get_cstr(model->number));
 
+    elements_button_left(canvas, "Min");
+    elements_button_right(canvas, "Max");
     elements_button_center(canvas, "Change");
 }
 
@@ -71,6 +73,28 @@ bool example_number_input_show_number_input(InputEvent* event, void* context) {
                     UNUSED(model);
                     instance->callback(
                         ExampleNumberInputCustomEventShowNumberOk, instance->context);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+            with_view_model(
+                instance->view,
+                ExampleNumberInputShowNumberModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(
+                        ExampleNumberInputCustomEventShowNumberLeft, instance->context);
+                },
+                true);
+            break;
+        case InputKeyRight:
+            with_view_model(
+                instance->view,
+                ExampleNumberInputShowNumberModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(
+                        ExampleNumberInputCustomEventShowNumberRight, instance->context);
                 },
                 true);
             break;

@@ -46,7 +46,6 @@ View* number_input_get_view(NumberInput* number_input);
  * @param      text_buffer        buffer to use
  * @param      min_value          Min number value
  * @param      max_value          Max number value
- * @param      clear_default_text clear previous entry
  */
 
 void number_input_set_result_callback(
@@ -55,8 +54,7 @@ void number_input_set_result_callback(
     void* callback_context,
     int32_t current_number,
     int32_t min_value,
-    int32_t max_value,
-    bool clear_default_text);
+    int32_t max_value);
 
 /** Set byte input header text
  *

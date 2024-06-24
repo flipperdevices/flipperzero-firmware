@@ -32,6 +32,14 @@ bool example_number_input_scene_show_number_on_event(void* context, SceneManager
             view_dispatcher_stop(app->view_dispatcher);
             consumed = true;
             break;
+        case ExampleNumberInputCustomEventShowNumberLeft:
+            scene_manager_next_scene(app->scene_manager, ExampleNumberInputSceneInputMin);
+            consumed = true;
+            break;
+        case ExampleNumberInputCustomEventShowNumberRight:
+            scene_manager_next_scene(app->scene_manager, ExampleNumberInputSceneInputMax);
+            consumed = true;
+            break;
         default:
             break;
         }

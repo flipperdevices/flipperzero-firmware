@@ -1,34 +1,36 @@
 #include "../example_number_input_i.h"
 
-void example_number_input_scene_input_number_callback(void* context, int32_t number) {
+void example_number_input_scene_input_max_callback(void* context, int32_t number) {
     ExampleNumberInput* app = context;
-    app->current_number = number;
+    app->max_value = number;
     view_dispatcher_send_custom_event(
         app->view_dispatcher, ExampleNumberInputCustomEventTextInput);
 }
 
-void example_number_input_scene_input_number_on_enter(void* context) {
+void example_number_input_scene_input_max_on_enter(void* context) {
     furi_assert(context);
     ExampleNumberInput* app = context;
     NumberInput* number_input = app->number_input;
     
+    int32_t min = -2147483648;
+    int32_t max = 2147483647;
     static char str[50];
-    snprintf(str, sizeof(str), "Set Number (%ld - %ld)", app->min_value, app->max_value);
+    snprintf(str, sizeof(str), "Enter the maximum value");
     const char* constStr = str;
     
     number_input_set_header_text(number_input, constStr);
     number_input_set_result_callback(
         number_input,
-        example_number_input_scene_input_number_callback,
+        example_number_input_scene_input_max_callback,
         context,
-        app->current_number,
-        app->min_value,
-        app->max_value);
+        app->max_value,
+        min,
+        max);
     
     view_dispatcher_switch_to_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
 }
 
-bool example_number_input_scene_input_number_on_event(void* context, SceneManagerEvent event) {
+bool example_number_input_scene_input_max_on_event(void* context, SceneManagerEvent event) {
     ExampleNumberInput* app = context;
     bool consumed = false;
 
@@ -42,7 +44,7 @@ bool example_number_input_scene_input_number_on_event(void* context, SceneManage
     return consumed;
 }
 
-void example_number_input_scene_input_number_on_exit(void* context) {
+void example_number_input_scene_input_max_on_exit(void* context) {
     ExampleNumberInput* app = context;
     UNUSED(app);
 }
