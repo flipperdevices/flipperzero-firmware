@@ -726,7 +726,7 @@ Function,+,number_input_alloc,NumberInput*,
 Function,+,number_input_free,void,NumberInput*
 Function,+,number_input_get_view,View*,NumberInput*
 Function,+,number_input_set_header_text,void,"NumberInput*, const char*"
-Function,+,number_input_set_result_callback,void,"NumberInput*, NumberInputCallback, void*, FuriString*, int32_t, int32_t, _Bool, _Bool"
+Function,+,number_input_set_result_callback,void,"NumberInput*, NumberInputCallback, void*, int32_t, int32_t, int32_t"
 Function,-,bzero,void,"void*, size_t"
 Function,+,calloc,void*,"size_t, size_t"
 Function,+,canvas_clear,void,Canvas*

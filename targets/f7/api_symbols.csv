@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,66.2,,
+Version,+,67.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
@@ -2787,7 +2787,7 @@ Function,+,number_input_alloc,NumberInput*,
 Function,+,number_input_free,void,NumberInput*
 Function,+,number_input_get_view,View*,NumberInput*
 Function,+,number_input_set_header_text,void,"NumberInput*, const char*"
-Function,+,number_input_set_result_callback,void,"NumberInput*, NumberInputCallback, void*, FuriString*, int32_t, int32_t, int32_t, _Bool"
+Function,+,number_input_set_result_callback,void,"NumberInput*, NumberInputCallback, void*, int32_t, int32_t, int32_t"
 Function,-,on_exit,int,"void (*)(int, void*), void*"
 Function,+,onewire_host_alloc,OneWireHost*,const GpioPin*
 Function,+,onewire_host_free,void,OneWireHost*
