@@ -287,18 +287,34 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
             }
 
             if(keys[column].text == enter_symbol) {
-                if(model->selected_row == row && model->selected_column == column) {
-                    canvas_draw_icon(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        &I_KeySaveSelected_24x11);
+                if(is_number_too_small(model) || is_number_too_large(model)) {
+                    if(model->selected_row == row && model->selected_column == column) {
+                        canvas_draw_icon(
+                            canvas,
+                            keyboard_origin_x + keys[column].x,
+                            keyboard_origin_y + keys[column].y,
+                            &I_KeySaveBlockedSelected_24x11);
+                    } else {
+                        canvas_draw_icon(
+                            canvas,
+                            keyboard_origin_x + keys[column].x,
+                            keyboard_origin_y + keys[column].y,
+                            &I_KeySaveBlocked_24x11);
+                    }
                 } else {
-                    canvas_draw_icon(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        &I_KeySave_24x11);
+                    if(model->selected_row == row && model->selected_column == column) {
+                        canvas_draw_icon(
+                            canvas,
+                            keyboard_origin_x + keys[column].x,
+                            keyboard_origin_y + keys[column].y,
+                            &I_KeySaveSelected_24x11);
+                    } else {
+                        canvas_draw_icon(
+                            canvas,
+                            keyboard_origin_x + keys[column].x,
+                            keyboard_origin_y + keys[column].y,
+                            &I_KeySave_24x11);
+                    }
                 }
             } else if(keys[column].text == backspace_symbol) {
                 if(model->selected_row == row && model->selected_column == column) {
