@@ -12,8 +12,7 @@ void example_number_input_scene_input_min_on_enter(void* context) {
     ExampleNumberInput* app = context;
     NumberInput* number_input = app->number_input;
     
-    int32_t min = -2147483648;
-    int32_t max = 2147483647;
+    int32_t min = -2147483647; //has no effect if smaller
     static char str[50];
     snprintf(str, sizeof(str), "Enter the minimum value");
     const char* constStr = str;
@@ -25,7 +24,7 @@ void example_number_input_scene_input_min_on_enter(void* context) {
         context,
         app->min_value,
         min,
-        max);
+        app->max_value);
     
     view_dispatcher_switch_to_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
 }

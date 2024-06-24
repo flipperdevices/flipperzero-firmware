@@ -16,13 +16,12 @@ typedef struct {
 } NumberInputKey;
 
 typedef struct {
-    const char* header;
+    FuriString* header;
     FuriString* text_buffer;
+    int32_t original_number;
     int32_t current_number;
-    bool clear_default_text;
     int32_t max_value;
     int32_t min_value;
-    char sign;
     NumberInputCallback callback;
     void* callback_context;
     size_t selected_row;
@@ -112,11 +111,11 @@ static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
 
     elements_slightly_rounded_frame(canvas, 6, 14, 116, 15);
 
-    FuriString* text = model->text_buffer;
-    canvas_draw_str(canvas, text_x, text_y, furi_string_get_cstr(text));
+    canvas_draw_str(canvas, text_x, text_y, furi_string_get_cstr(model->text_buffer));
 }
 
 static bool number_input_use_sign(NumberInputModel* model) {
+    //only show sign button if allowed number range needs it
     if (model->min_value < 0 && model->max_value >= 0) {
         return true;
     }
@@ -124,18 +123,13 @@ static bool number_input_use_sign(NumberInputModel* model) {
 }
 
 static void number_input_backspace_cb(NumberInputModel* model) {
-    size_t text_length = model->clear_default_text ? 1 :
-                                                      furi_string_utf8_length(model->text_buffer);
-    if(text_length > 0) {
-        furi_string_set_strn(
-            model->text_buffer, furi_string_get_cstr(model->text_buffer), text_length - 1);
+    size_t text_length = furi_string_utf8_length(model->text_buffer);
+    if(text_length < 1 || (text_length < 2 && model->current_number <= 0)) {
+        return;
     }
-}
-
-static char* int32_to_string(int32_t value) {
-    char* buffer = (char*)malloc(12);
-    snprintf(buffer, 12, "%ld", value);
-    return buffer;
+    furi_string_set_strn(
+        model->text_buffer, furi_string_get_cstr(model->text_buffer), text_length - 1);
+    model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
 }
 
 /** Handle up button
@@ -214,36 +208,28 @@ static bool is_number_too_small(NumberInputModel* model) {
     return false;
 }
 
-static void prevent_to_large_number(NumberInputModel* model) {
-    if(is_number_too_large(model)) {
-        char* str = int32_to_string(model->max_value);
-        furi_string_set_str(model->text_buffer, str);
-        free(str);
-    }
-    // Added in prevent large, as it would block the input of small positive numbers
-    if(is_number_too_small(model)) {
-        char* str = int32_to_string(model->min_value);
-        furi_string_set_str(model->text_buffer, str);
-        free(str);
-    }
-}
-
-static void prevent_to_small_number(NumberInputModel* model) {
-    if (is_number_too_small(model)) {
-        char* str = int32_to_string(model->min_value);
-        furi_string_set_str(model->text_buffer, str);
-        free(str);
-    }
-}
-
 static void number_input_sign(NumberInputModel* model) {
     int32_t number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
     number = number * -1;
-    char* str = int32_to_string(number);
-    furi_string_set_str(model->text_buffer, str);
-    free(str);
-    prevent_to_small_number(model);
-    prevent_to_large_number(model);
+    furi_string_printf(model->text_buffer, "%ld", number);
+    if (is_number_too_large(model) || is_number_too_small(model)) {
+        furi_string_printf(model->text_buffer, "%ld", model->current_number);
+        return;
+    }
+    model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
+    if(model->current_number == 0) {
+        furi_string_set_str(model->text_buffer, ""); //show empty if 0, better for usability
+    }
+}
+
+static void number_input_add_digit(NumberInputModel* model, char* newChar) {
+    furi_string_cat_str(model->text_buffer, newChar);
+    if ((model->max_value >= 0 && is_number_too_large(model)) || (model->min_value < 0 && is_number_too_small(model))) {
+        //you still need to be able to type invalid numbers in some cases to reach valid numbers on later keypress
+        furi_string_printf(model->text_buffer, "%ld", model->current_number);
+        return;
+    }
+    model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
 }
 
 /** Handle OK button
@@ -256,18 +242,18 @@ static void number_input_handle_ok(NumberInputModel* model) {
     temp_str[0] = selected;
     temp_str[1] = '\0';
     if(selected == enter_symbol) {
-        prevent_to_small_number(model);
-        prevent_to_large_number(model);
-        model->callback(model->callback_context);
+        if (is_number_too_large(model) || is_number_too_small(model)) {
+            return; //Do nothing if number outside allowed range
+        }
+        model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
+        model->callback(model->callback_context, model->current_number);
     } else if(selected == backspace_symbol) {
         number_input_backspace_cb(model);
     } else if(selected == sign_symbol) {
         number_input_sign(model);
     } else {
-        furi_string_cat_str(model->text_buffer, temp_str);
-        prevent_to_large_number(model);
+        number_input_add_digit(model, temp_str);
     }
-    model->clear_default_text = false;
 }
 
 /** Draw callback
@@ -277,37 +263,52 @@ static void number_input_handle_ok(NumberInputModel* model) {
  */
 static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
     NumberInputModel* model = _model;
-    size_t text_length = model->text_buffer ? furi_string_utf8_length(model->text_buffer) : 0;
-    UNUSED(text_length);
-
+    
     number_input_draw_input(canvas, model);
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 9, model->header);
+    canvas_draw_str(canvas, 2, 9, furi_string_get_cstr(model->header));
     canvas_set_font(canvas, FontKeyboard);
     // Draw keyboard
     for(size_t row = 0; row < keyboard_row_count; row++) {
         const size_t column_count = number_input_get_row_size(row);
         const NumberInputKey* keys = number_input_get_row(row);
-
+        
         for(size_t column = 0; column < column_count; column++) {
             if(keys[column].text == sign_symbol && !number_input_use_sign(model)) {
                 continue;
             }
 
             if(keys[column].text == enter_symbol) {
-                if(model->selected_row == row && model->selected_column == column) {
-                    canvas_draw_icon(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        &I_KeySaveSelected_24x11);
+                if(is_number_too_small(model) || is_number_too_large(model)) {
+                    //in some cases you need to be able to type a number smaller/larger than the limits (expl. min = 50, clear all and editor must allow to type 9 and later 0 for 90)
+                    if(model->selected_row == row && model->selected_column == column) {
+                        canvas_draw_icon(
+                            canvas,
+                            keyboard_origin_x + keys[column].x,
+                            keyboard_origin_y + keys[column].y,
+                            &I_KeySaveBlockedSelected_24x11);
+                    } else {
+                        canvas_draw_icon(
+                            canvas,
+                            keyboard_origin_x + keys[column].x,
+                            keyboard_origin_y + keys[column].y,
+                            &I_KeySaveBlocked_24x11);
+                    }
                 } else {
-                    canvas_draw_icon(
-                        canvas,
-                        keyboard_origin_x + keys[column].x,
-                        keyboard_origin_y + keys[column].y,
-                        &I_KeySave_24x11);
+                    if(model->selected_row == row && model->selected_column == column) {
+                        canvas_draw_icon(
+                            canvas,
+                            keyboard_origin_x + keys[column].x,
+                            keyboard_origin_y + keys[column].y,
+                            &I_KeySaveSelected_24x11);
+                    } else {
+                        canvas_draw_icon(
+                            canvas,
+                            keyboard_origin_x + keys[column].x,
+                            keyboard_origin_y + keys[column].y,
+                            &I_KeySave_24x11);
+                    }
                 }
             } else if(keys[column].text == backspace_symbol) {
                 if(model->selected_row == row && model->selected_column == column) {
@@ -396,8 +397,8 @@ static bool number_input_view_input_callback(InputEvent* event, void* context) {
             number_input_handle_ok(model);
             break;
         case InputKeyBack:
-            prevent_to_small_number(model);
-            model->callback(model->callback_context);
+            //Will revert to the number set before opening the keyboard
+            model->callback(model->callback_context, model->original_number);
             break;
         default:
             consumed = false;
@@ -411,26 +412,6 @@ static bool number_input_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-void number_input_reset(NumberInput* number_input) {
-    furi_assert(number_input);
-    with_view_model(
-        number_input->view,
-        NumberInputModel * model,
-        {
-            model->header = "";
-            model->selected_row = 0;
-            model->selected_column = 0;
-            model->clear_default_text = false;
-            //model->text_buffer = furi_string_alloc();
-            //furi_string_set_str(model->text_buffer, "");
-            model->callback = NULL;
-            model->callback_context = NULL;
-            model->max_value = 0;
-            model->min_value = 0;
-        },
-        true);
-}
-
 NumberInput* number_input_alloc(void) {
     NumberInput* number_input = malloc(sizeof(NumberInput));
     number_input->view = view_alloc();
@@ -439,8 +420,6 @@ NumberInput* number_input_alloc(void) {
     view_set_draw_callback(number_input->view, number_input_view_draw_callback);
     view_set_input_callback(number_input->view, number_input_view_input_callback);
 
-    number_input_reset(number_input);
-
     return number_input;
 }
 
@@ -448,7 +427,8 @@ void number_input_free(NumberInput* number_input) {
     furi_assert(number_input);
     with_view_model(
         number_input->view, NumberInputModel * model, { 
-            free((void*)model->header);
+            furi_string_free(model->header);
+            furi_string_free(model->text_buffer);
             }, true);
     view_free(number_input->view);
     free(number_input);
@@ -463,20 +443,24 @@ void number_input_set_result_callback(
     NumberInput* number_input,
     NumberInputCallback callback,
     void* callback_context,
-    FuriString* text_buffer,
     int32_t current_number,
     int32_t min_value,
-    int32_t max_value,
-    bool clear_default_text) {
+    int32_t max_value) {
     with_view_model(
         number_input->view,
         NumberInputModel * model,
         {
             model->callback = callback;
             model->callback_context = callback_context;
+            model->original_number = current_number;
+            if (current_number < min_value) {
+                current_number = min_value; //additional failsafe
+            }
+            if (current_number > max_value) {
+                current_number = max_value; //additional failsafe
+            }
             model->current_number = current_number;
-            model->text_buffer = text_buffer;
-            model->clear_default_text = clear_default_text;
+            model->text_buffer = furi_string_alloc_printf("%ld", current_number);
             model->min_value = min_value;
             model->max_value = max_value;
         },
@@ -487,9 +471,10 @@ void number_input_set_header_text(NumberInput* number_input, const char* text) {
     with_view_model(
         number_input->view, NumberInputModel * model, { 
             if (model->header != NULL) {
-                free((void*)model->header);
+                furi_string_free(model->header);
             }
 
-            model->header = strdup(text);
+            model->header = furi_string_alloc();
+            furi_string_set_str(model->header, text);
             }, true);
 }

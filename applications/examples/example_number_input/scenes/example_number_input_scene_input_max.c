@@ -12,8 +12,7 @@ void example_number_input_scene_input_max_on_enter(void* context) {
     ExampleNumberInput* app = context;
     NumberInput* number_input = app->number_input;
     
-    int32_t min = -2147483648;
-    int32_t max = 2147483647;
+    int32_t max = 2147483646; //has no effect if larger
     static char str[50];
     snprintf(str, sizeof(str), "Enter the maximum value");
     const char* constStr = str;
@@ -24,7 +23,7 @@ void example_number_input_scene_input_max_on_enter(void* context) {
         example_number_input_scene_input_max_callback,
         context,
         app->max_value,
-        min,
+        app->min_value,
         max);
     
     view_dispatcher_switch_to_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
