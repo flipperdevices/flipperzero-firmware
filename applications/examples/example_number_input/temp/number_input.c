@@ -18,6 +18,7 @@ typedef struct {
 typedef struct {
     const char* header;
     FuriString* text_buffer;
+    int32_t original_number;
     int32_t current_number;
     bool clear_default_text;
     int32_t max_value;
@@ -124,16 +125,12 @@ static bool number_input_use_sign(NumberInputModel* model) {
 static void number_input_backspace_cb(NumberInputModel* model) {
     size_t text_length = model->clear_default_text ? 1 :
                                                       furi_string_utf8_length(model->text_buffer);
-    if(text_length > 0) {
-        furi_string_set_strn(
-            model->text_buffer, furi_string_get_cstr(model->text_buffer), text_length - 1);
+    if(text_length < 1 || (text_length < 2 && model->current_number <= 0)) {
+        return;
     }
-}
-
-static char* int32_to_string(int32_t value) {
-    char* buffer = (char*)malloc(12);
-    snprintf(buffer, 12, "%ld", value);
-    return buffer;
+    furi_string_set_strn(
+        model->text_buffer, furi_string_get_cstr(model->text_buffer), text_length - 1);
+    model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
 }
 
 /** Handle up button
@@ -212,36 +209,28 @@ static bool is_number_too_small(NumberInputModel* model) {
     return false;
 }
 
-static void prevent_to_large_number(NumberInputModel* model) {
-    if(is_number_too_large(model)) {
-        char* str = int32_to_string(model->max_value);
-        furi_string_set_str(model->text_buffer, str);
-        free(str);
-    }
-    // Added in prevent large, as it would block the input of small positive numbers
-    if(is_number_too_small(model)) {
-        char* str = int32_to_string(model->min_value);
-        furi_string_set_str(model->text_buffer, str);
-        free(str);
-    }
-}
-
-static void prevent_to_small_number(NumberInputModel* model) {
-    if (is_number_too_small(model)) {
-        char* str = int32_to_string(model->min_value);
-        furi_string_set_str(model->text_buffer, str);
-        free(str);
-    }
-}
-
 static void number_input_sign(NumberInputModel* model) {
     int32_t number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
     number = number * -1;
-    char* str = int32_to_string(number);
-    furi_string_set_str(model->text_buffer, str);
-    free(str);
-    prevent_to_small_number(model);
-    prevent_to_large_number(model);
+    furi_string_printf(model->text_buffer, "%ld", number);
+    if (is_number_too_large(model) || is_number_too_small(model)) {
+        furi_string_printf(model->text_buffer, "%ld", model->current_number);
+        return;
+    }
+    model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
+    
+    //prevent_to_small_number(model);
+    //prevent_to_large_number(model);
+}
+
+static void number_input_add_digit(NumberInputModel* model, char* newChar) {
+    furi_string_cat_str(model->text_buffer, newChar);
+    if ((model->max_value >= 0 && is_number_too_large(model)) || (model->min_value < 10 && is_number_too_small(model))) {
+        furi_string_printf(model->text_buffer, "%ld", model->current_number);
+        return;
+    }
+    model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
+    //prevent_to_large_number(model);
 }
 
 /** Handle OK button
@@ -254,16 +243,21 @@ static void number_input_handle_ok(NumberInputModel* model) {
     temp_str[0] = selected;
     temp_str[1] = '\0';
     if(selected == enter_symbol) {
-        prevent_to_small_number(model);
-        prevent_to_large_number(model);
-        model->callback(model->callback_context);
+        //prevent_to_small_number(model);
+        //prevent_to_large_number(model);
+        if (is_number_too_large(model) || is_number_too_small(model)) {
+            return; //Do nothing if number outside allowed range
+        }
+        model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
+        model->callback(model->callback_context, model->current_number);
     } else if(selected == backspace_symbol) {
         number_input_backspace_cb(model);
     } else if(selected == sign_symbol) {
         number_input_sign(model);
     } else {
-        furi_string_cat_str(model->text_buffer, temp_str);
-        prevent_to_large_number(model);
+        number_input_add_digit(model, temp_str);
+        //furi_string_cat_str(model->text_buffer, temp_str);
+        //prevent_to_large_number(model);
     }
     model->clear_default_text = false;
 }
@@ -392,8 +386,8 @@ static bool number_input_view_input_callback(InputEvent* event, void* context) {
             number_input_handle_ok(model);
             break;
         case InputKeyBack:
-            prevent_to_small_number(model);
-            model->callback(model->callback_context);
+            //Will revert to the number set before opening the keyboard
+            model->callback(model->callback_context, model->original_number);
             break;
         default:
             consumed = false;
@@ -438,7 +432,7 @@ void number_input_set_result_callback(
     NumberInput* number_input,
     NumberInputCallback callback,
     void* callback_context,
-    int32_t* current_number,
+    int32_t current_number,
     int32_t min_value,
     int32_t max_value,
     bool clear_default_text) {
@@ -448,9 +442,15 @@ void number_input_set_result_callback(
         {
             model->callback = callback;
             model->callback_context = callback_context;
+            model->original_number = current_number;
+            if (current_number < min_value) {
+                current_number = min_value; //prevent blocked input
+            }
+            if (current_number > max_value) {
+                current_number = max_value; //prevent blocked input
+            }
             model->current_number = current_number;
             model->text_buffer = furi_string_alloc_printf("%ld", current_number);
-            //model->text_buffer = furi_string_alloc_set_str(int32_to_string(model->current_number));
             model->clear_default_text = clear_default_text;
             model->min_value = min_value;
             model->max_value = max_value;

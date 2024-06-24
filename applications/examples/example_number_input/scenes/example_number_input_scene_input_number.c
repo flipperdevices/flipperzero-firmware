@@ -1,7 +1,8 @@
 #include "../example_number_input_i.h"
 
-void example_number_input_scene_input_number_callback(void* context) {
+void example_number_input_scene_input_number_callback(void* context, int32_t number) {
     ExampleNumberInput* app = context;
+    app->current_number = number;
     view_dispatcher_send_custom_event(
         app->view_dispatcher, ExampleNumberInputCustomEventTextInput);
 }
@@ -11,8 +12,8 @@ void example_number_input_scene_input_number_on_enter(void* context) {
     ExampleNumberInput* app = context;
     NumberInput* number_input = app->number_input;
     
-    int32_t min = -128;
-    int32_t max = 8120;
+    int32_t min = -200;
+    int32_t max = -50;
     static char str[50];
     snprintf(str, sizeof(str), "Enter a number (%ld - %ld)", min, max);
     const char* constStr = str;

@@ -15,7 +15,7 @@ extern "C" {
 typedef struct NumberInput NumberInput;
 
 /** callback that is executed on save button press */
-typedef void (*NumberInputCallback)(void* context);
+typedef void (*NumberInputCallback)(void* context, int32_t number);
 
 /** Allocate and initialize Number input. This Number input is used to enter Numbers (Integers).
  *
