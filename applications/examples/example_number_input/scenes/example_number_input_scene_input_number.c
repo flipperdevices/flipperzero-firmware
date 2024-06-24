@@ -12,8 +12,8 @@ void example_number_input_scene_input_number_on_enter(void* context) {
     ExampleNumberInput* app = context;
     NumberInput* number_input = app->number_input;
     
-    int32_t min = -200;
-    int32_t max = -50;
+    int32_t min = 5;
+    int32_t max = 500;
     static char str[50];
     snprintf(str, sizeof(str), "Enter a number (%ld - %ld)", min, max);
     const char* constStr = str;

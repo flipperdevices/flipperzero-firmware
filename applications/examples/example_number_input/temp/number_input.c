@@ -225,7 +225,8 @@ static void number_input_sign(NumberInputModel* model) {
 
 static void number_input_add_digit(NumberInputModel* model, char* newChar) {
     furi_string_cat_str(model->text_buffer, newChar);
-    if ((model->max_value >= 0 && is_number_too_large(model)) || (model->min_value < 10 && is_number_too_small(model))) {
+    if ((model->max_value >= 0 && is_number_too_large(model)) || (model->min_value < 0 && is_number_too_small(model))) {
+        //you still need to be able to type invalid numbers
         furi_string_printf(model->text_buffer, "%ld", model->current_number);
         return;
     }
