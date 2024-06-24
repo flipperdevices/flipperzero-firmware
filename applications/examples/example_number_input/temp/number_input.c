@@ -438,7 +438,7 @@ void number_input_set_result_callback(
     NumberInput* number_input,
     NumberInputCallback callback,
     void* callback_context,
-    int32_t current_number,
+    int32_t* current_number,
     int32_t min_value,
     int32_t max_value,
     bool clear_default_text) {

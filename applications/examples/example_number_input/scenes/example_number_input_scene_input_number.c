@@ -13,7 +13,6 @@ void example_number_input_scene_input_number_on_enter(void* context) {
     
     int32_t min = -128;
     int32_t max = 8120;
-    //current_number = 100;
     static char str[50];
     snprintf(str, sizeof(str), "Enter a number (%ld - %ld)", min, max);
     const char* constStr = str;
