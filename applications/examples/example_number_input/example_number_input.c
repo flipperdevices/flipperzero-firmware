@@ -34,7 +34,7 @@ static ExampleNumberInput* example_number_input_alloc() {
         app->view_dispatcher,
         ExampleNumberInputViewIdShowNumber,
         example_number_input_show_number_get_view(app->show_number));
-    
+
     return app;
 }
 

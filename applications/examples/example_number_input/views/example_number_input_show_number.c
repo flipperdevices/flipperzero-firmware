@@ -28,7 +28,8 @@ void example_number_input_show_number_draw(
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "The Number is");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, furi_string_get_cstr(model->number));
+    canvas_draw_str_aligned(
+        canvas, 64, 22, AlignCenter, AlignTop, furi_string_get_cstr(model->number));
 
     elements_button_left(canvas, "Min");
     elements_button_right(canvas, "Max");
