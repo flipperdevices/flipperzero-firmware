@@ -3,7 +3,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexEmulate,
-    SubmenuIndexWriteBlank,
+    SubmenuIndexWriteId,
     SubmenuIndexWriteCopy,
     SubmenuIndexEdit,
     SubmenuIndexDelete,
@@ -19,9 +19,9 @@ void ibutton_scene_saved_key_menu_on_enter(void* context) {
 
     submenu_add_item(submenu, "Emulate", SubmenuIndexEmulate, ibutton_submenu_callback, ibutton);
 
-    if(features & iButtonProtocolFeatureWriteBlank) {
+    if(features & iButtonProtocolFeatureWriteId) {
         submenu_add_item(
-            submenu, "Write ID", SubmenuIndexWriteBlank, ibutton_submenu_callback, ibutton);
+            submenu, "Write ID", SubmenuIndexWriteId, ibutton_submenu_callback, ibutton);
     }
 
     if(features & iButtonProtocolFeatureWriteCopy) {
@@ -53,8 +53,8 @@ bool ibutton_scene_saved_key_menu_on_event(void* context, SceneManagerEvent even
         if(event.event == SubmenuIndexEmulate) {
             scene_manager_next_scene(scene_manager, iButtonSceneEmulate);
             dolphin_deed(DolphinDeedIbuttonEmulate);
-        } else if(event.event == SubmenuIndexWriteBlank) {
-            ibutton->write_mode = iButtonWriteModeBlank;
+        } else if(event.event == SubmenuIndexWriteId) {
+            ibutton->write_mode = iButtonWriteModeId;
             scene_manager_next_scene(scene_manager, iButtonSceneWrite);
         } else if(event.event == SubmenuIndexWriteCopy) {
             ibutton->write_mode = iButtonWriteModeCopy;
