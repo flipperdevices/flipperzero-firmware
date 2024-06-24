@@ -181,7 +181,10 @@ bool furi_event_loop_process_expired_timer(FuriEventLoop* instance) {
     TimerList_unlink(timer);
 
     if(timer->periodic) {
-        timer->start_time = xTaskGetTickCount();
+        const uint32_t num_events =
+            furi_event_loop_timer_get_elapsed_time(timer) / timer->interval;
+
+        timer->start_time += timer->interval * num_events;
         furi_event_loop_schedule_timer(instance, timer);
     }
 
