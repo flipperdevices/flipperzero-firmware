@@ -15,13 +15,11 @@
 
 #define COMPRESS_ICON_ENCODED_BUFF_SIZE (256u)
 
-static const CompressConfigHeatshrink COMPRESS_CONFIG_HEATSHRINK = {
+const CompressConfigHeatshrink compress_config_heatshrink_default = {
     .window_sz2 = COMPRESS_EXP_BUFF_SIZE_LOG,
     .lookahead_sz2 = COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG,
     .input_buffer_sz = COMPRESS_ICON_ENCODED_BUFF_SIZE,
 };
-
-const CompressConfigHeatshrink* compress_config_heatshrink_default = &COMPRESS_CONFIG_HEATSHRINK;
 
 /** Buffer size for input data */
 static bool compress_decode_internal(

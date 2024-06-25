@@ -62,7 +62,7 @@ typedef struct {
 } CompressConfigHeatshrink;
 
 /** Default configuration for heatshrink compression. Used for image assets. */
-extern const CompressConfigHeatshrink* compress_config_heatshrink_default;
+extern const CompressConfigHeatshrink compress_config_heatshrink_default;
 
 /** Allocate encoder and decoder
  *
