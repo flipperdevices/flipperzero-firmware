@@ -95,7 +95,7 @@ struct Compress {
 };
 
 Compress* compress_alloc(CompressType type, const void* config) {
-    furi_check(type == COMPRESS_TYPE_HEATSHRINK);
+    furi_check(type == CompressTypeHeatshrink);
     furi_check(config);
 
     Compress* compress = malloc(sizeof(Compress));
@@ -200,7 +200,7 @@ static inline bool compress_decoder_poll(
     heatshrink_decoder* decoder,
     uint8_t* decompressed_chunk,
     size_t decomp_buffer_size,
-    compress_io_cb_t write_cb,
+    CompressIoCallback write_cb,
     void* write_context) {
     HSD_poll_res poll_res;
     size_t poll_size;
@@ -224,9 +224,9 @@ static inline bool compress_decoder_poll(
 static bool compress_decode_stream_internal(
     heatshrink_decoder* decoder,
     const size_t work_buffer_size,
-    compress_io_cb_t read_cb,
+    CompressIoCallback read_cb,
     void* read_context,
-    compress_io_cb_t write_cb,
+    CompressIoCallback write_cb,
     void* write_context) {
     bool decode_failed = false;
     HSD_sink_res sink_res;
@@ -384,9 +384,9 @@ bool compress_decode(
 
 bool compress_decode_streamed(
     Compress* compress,
-    compress_io_cb_t read_cb,
+    CompressIoCallback read_cb,
     void* read_context,
-    compress_io_cb_t write_cb,
+    CompressIoCallback write_cb,
     void* write_context) {
     CompressConfigHeatshrink* hs_config = (CompressConfigHeatshrink*)compress->config;
     if(!compress->decoder) {
@@ -412,16 +412,16 @@ struct CompressStreamDecoder {
     size_t decode_buffer_size;
     size_t decode_buffer_position;
     uint8_t* decode_buffer;
-    compress_io_cb_t read_cb;
+    CompressIoCallback read_cb;
     void* read_context;
 };
 
 CompressStreamDecoder* compress_stream_decoder_alloc(
     CompressType type,
     const void* config,
-    compress_io_cb_t read_cb,
+    CompressIoCallback read_cb,
     void* read_context) {
-    furi_check(type == COMPRESS_TYPE_HEATSHRINK);
+    furi_check(type == CompressTypeHeatshrink);
     furi_check(config);
 
     const CompressConfigHeatshrink* hs_config = (const CompressConfigHeatshrink*)config;
@@ -447,7 +447,7 @@ void compress_stream_decoder_free(CompressStreamDecoder* instance) {
 
 static bool compress_decode_stream_chunk(
     CompressStreamDecoder* sd,
-    compress_io_cb_t read_cb,
+    CompressIoCallback read_cb,
     void* read_context,
     uint8_t* decompressed_chunk,
     size_t decomp_chunk_size) {

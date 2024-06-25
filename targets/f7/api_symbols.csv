@@ -859,13 +859,13 @@ Function,+,composite_api_resolver_free,void,CompositeApiResolver*
 Function,+,composite_api_resolver_get,const ElfApiInterface*,CompositeApiResolver*
 Function,+,compress_alloc,Compress*,"CompressType, const void*"
 Function,+,compress_decode,_Bool,"Compress*, uint8_t*, size_t, uint8_t*, size_t, size_t*"
-Function,+,compress_decode_streamed,_Bool,"Compress*, compress_io_cb_t, void*, compress_io_cb_t, void*"
+Function,+,compress_decode_streamed,_Bool,"Compress*, CompressIoCallback, void*, CompressIoCallback, void*"
 Function,+,compress_encode,_Bool,"Compress*, uint8_t*, size_t, uint8_t*, size_t, size_t*"
 Function,+,compress_free,void,Compress*
 Function,+,compress_icon_alloc,CompressIcon*,size_t
 Function,+,compress_icon_decode,void,"CompressIcon*, const uint8_t*, uint8_t**"
 Function,+,compress_icon_free,void,CompressIcon*
-Function,+,compress_stream_decoder_alloc,CompressStreamDecoder*,"CompressType, const void*, compress_io_cb_t, void*"
+Function,+,compress_stream_decoder_alloc,CompressStreamDecoder*,"CompressType, const void*, CompressIoCallback, void*"
 Function,+,compress_stream_decoder_free,void,CompressStreamDecoder*
 Function,+,compress_stream_decoder_read,_Bool,"CompressStreamDecoder*, uint8_t*, size_t"
 Function,+,compress_stream_decoder_rewind,_Bool,CompressStreamDecoder*

@@ -51,7 +51,7 @@ typedef struct Compress Compress;
 
 /** Supported compression types */
 typedef enum {
-    COMPRESS_TYPE_HEATSHRINK = 0,
+    CompressTypeHeatshrink = 0,
 } CompressType;
 
 /** Configuration for heatshrink compression */
@@ -128,7 +128,7 @@ bool compress_decode(
  * 
  * @return number of bytes read/written, 0 on end of stream, negative on error
  */
-typedef int32_t (*compress_io_cb_t)(void* context, uint8_t* buffer, int32_t size);
+typedef int32_t (*CompressIoCallback)(void* context, uint8_t* buffer, int32_t size);
 
 /** Decompress streamed data
  *
@@ -143,9 +143,9 @@ typedef int32_t (*compress_io_cb_t)(void* context, uint8_t* buffer, int32_t size
  */
 bool compress_decode_streamed(
     Compress* compress,
-    compress_io_cb_t read_cb,
+    CompressIoCallback read_cb,
     void* read_context,
-    compress_io_cb_t write_cb,
+    CompressIoCallback write_cb,
     void* write_context);
 
 //////////////////////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@ typedef struct CompressStreamDecoder CompressStreamDecoder;
 CompressStreamDecoder* compress_stream_decoder_alloc(
     CompressType type,
     const void* config,
-    compress_io_cb_t read_cb,
+    CompressIoCallback read_cb,
     void* read_context);
 
 /** Free stream decoder

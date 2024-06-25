@@ -59,7 +59,7 @@ static void compress_test_reference_comp_decomp() {
     furi_record_close(RECORD_STORAGE);
 
     uint8_t* temp_buffer = malloc(1024);
-    Compress* comp = compress_alloc(COMPRESS_TYPE_HEATSHRINK, &compress_config_heatshrink_default);
+    Compress* comp = compress_alloc(CompressTypeHeatshrink, &compress_config_heatshrink_default);
 
     size_t encoded_size = 0;
     mu_assert(
@@ -101,7 +101,7 @@ static void compress_test_random_comp_decomp() {
     // We only fill half of the buffer with random data, so if anything goes wrong, there's no overflow
     static const size_t src_data_size = src_buffer_size / 2;
 
-    Compress* comp = compress_alloc(COMPRESS_TYPE_HEATSHRINK, &compress_config_heatshrink_default);
+    Compress* comp = compress_alloc(CompressTypeHeatshrink, &compress_config_heatshrink_default);
     uint8_t* src_buff = malloc(src_buffer_size);
     uint8_t* encoded_buff = malloc(encoded_buffer_size);
     uint8_t* decoded_buff = malloc(src_buffer_size);
@@ -186,7 +186,7 @@ static void compress_test_heatshrink_stream() {
         .lookahead_sz2 = 4,
         .input_buffer_sz = 128,
     };
-    Compress* compress = compress_alloc(COMPRESS_TYPE_HEATSHRINK, &config);
+    Compress* compress = compress_alloc(CompressTypeHeatshrink, &config);
 
     do {
         storage_simply_remove(api, HSSTREAM_OUT);

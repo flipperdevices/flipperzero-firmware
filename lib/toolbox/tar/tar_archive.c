@@ -187,7 +187,7 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
         hs_stream->heatshrink_config.lookahead_sz2 = header.lookahead_sz2;
         hs_stream->heatshrink_config.input_buffer_sz = FILE_BLOCK_SIZE;
         hs_stream->decoder = compress_stream_decoder_alloc(
-            COMPRESS_TYPE_HEATSHRINK, &hs_stream->heatshrink_config, file_read_cb, stream);
+            CompressTypeHeatshrink, &hs_stream->heatshrink_config, file_read_cb, stream);
         mtar_init(&archive->tar, mtar_access, &heatshrink_ops, hs_stream);
     } else {
         mtar_init(&archive->tar, mtar_access, &filesystem_ops, stream);
