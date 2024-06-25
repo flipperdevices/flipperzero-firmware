@@ -680,6 +680,13 @@ void mf_ultralight_3des_shift_data(uint8_t* const data) {
     data[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE - 1] = buf;
 }
 
+bool mf_ultralight_3des_key_valid(const MfUltralightData* data) {
+    furi_check(data);
+    furi_check(data->type == MfUltralightTypeMfulC);
+
+    return !(data->pages_read == data->pages_total - 4);
+}
+
 const uint8_t* mf_ultralight_3des_get_key(const MfUltralightData* data) {
     furi_check(data);
     furi_check(data->type == MfUltralightTypeMfulC);

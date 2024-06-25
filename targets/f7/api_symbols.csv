@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,72.0,,
+Version,+,72.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
@@ -2540,10 +2540,6 @@ Function,+,mf_desfire_save,_Bool,"const MfDesfireData*, FlipperFormat*"
 Function,+,mf_desfire_send_chunks,MfDesfireError,"MfDesfirePoller*, const BitBuffer*, BitBuffer*"
 Function,+,mf_desfire_set_uid,_Bool,"MfDesfireData*, const uint8_t*, size_t"
 Function,+,mf_desfire_verify,_Bool,"MfDesfireData*, const FuriString*"
-Function,+,mf_ultralight_3des_decrypt,void,"mbedtls_des3_context*, const uint8_t*, const uint8_t*, const uint8_t*, const uint8_t, uint8_t*"
-Function,+,mf_ultralight_3des_encrypt,void,"mbedtls_des3_context*, const uint8_t*, const uint8_t*, const uint8_t*, const uint8_t, uint8_t*"
-Function,+,mf_ultralight_3des_get_key,const uint8_t*,const MfUltralightData*
-Function,+,mf_ultralight_3des_shift_data,void,uint8_t*
 Function,+,mf_plus_alloc,MfPlusData*,
 Function,+,mf_plus_copy,void,"MfPlusData*, const MfPlusData*"
 Function,+,mf_plus_free,void,MfPlusData*
@@ -2557,6 +2553,11 @@ Function,+,mf_plus_reset,void,MfPlusData*
 Function,+,mf_plus_save,_Bool,"const MfPlusData*, FlipperFormat*"
 Function,+,mf_plus_set_uid,_Bool,"MfPlusData*, const uint8_t*, size_t"
 Function,+,mf_plus_verify,_Bool,"MfPlusData*, const FuriString*"
+Function,+,mf_ultralight_3des_decrypt,void,"mbedtls_des3_context*, const uint8_t*, const uint8_t*, const uint8_t*, const uint8_t, uint8_t*"
+Function,+,mf_ultralight_3des_encrypt,void,"mbedtls_des3_context*, const uint8_t*, const uint8_t*, const uint8_t*, const uint8_t, uint8_t*"
+Function,+,mf_ultralight_3des_get_key,const uint8_t*,const MfUltralightData*
+Function,+,mf_ultralight_3des_key_valid,_Bool,const MfUltralightData*
+Function,+,mf_ultralight_3des_shift_data,void,uint8_t*
 Function,+,mf_ultralight_alloc,MfUltralightData*,
 Function,+,mf_ultralight_copy,void,"MfUltralightData*, const MfUltralightData*"
 Function,+,mf_ultralight_detect_protocol,_Bool,const Iso14443_3aData*

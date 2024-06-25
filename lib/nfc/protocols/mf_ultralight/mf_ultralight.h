@@ -241,6 +241,8 @@ bool mf_ultralight_is_counter_configured(const MfUltralightData* data);
 
 void mf_ultralight_3des_shift_data(uint8_t* const arr);
 
+bool mf_ultralight_3des_key_valid(const MfUltralightData* data);
+
 const uint8_t* mf_ultralight_3des_get_key(const MfUltralightData* data);
 
 void mf_ultralight_3des_encrypt(
