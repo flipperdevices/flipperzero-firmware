@@ -165,8 +165,8 @@ static bool update_task_post_update(UpdateTask* update_task) {
                 furi_string_get_cstr(update_task->manifest->resource_bundle),
                 file_path);
 
-            CHECK_RESULT(
-                tar_archive_open(archive, furi_string_get_cstr(file_path), TAR_OPEN_MODE_READ_HS));
+            CHECK_RESULT(tar_archive_open(
+                archive, furi_string_get_cstr(file_path), TarOpenModeReadHeatshrink));
 
             update_task_cleanup_resources(update_task);
 

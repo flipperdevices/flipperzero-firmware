@@ -21,9 +21,9 @@ TarOpenMode tar_archive_get_mode_for_path(const char* path) {
     furi_string_free(path_str);
 
     if(strcmp(ext, ".ths") == 0) {
-        return TAR_OPEN_MODE_READ_HS;
+        return TarOpenModeReadHeatshrink;
     } else {
-        return TAR_OPEN_MODE_READ;
+        return TarOpenModeRead;
     }
 }
 
@@ -146,17 +146,17 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
     int mtar_access = 0;
 
     switch(mode) {
-    case TAR_OPEN_MODE_READ:
+    case TarOpenModeRead:
         mtar_access = MTAR_READ;
         access_mode = FSAM_READ;
         open_mode = FSOM_OPEN_EXISTING;
         break;
-    case TAR_OPEN_MODE_WRITE:
+    case TarOpenModeWrite:
         mtar_access = MTAR_WRITE;
         access_mode = FSAM_WRITE;
         open_mode = FSOM_CREATE_ALWAYS;
         break;
-    case TAR_OPEN_MODE_READ_HS:
+    case TarOpenModeReadHeatshrink:
         mtar_access = MTAR_READ;
         access_mode = FSAM_READ;
         open_mode = FSOM_OPEN_EXISTING;
