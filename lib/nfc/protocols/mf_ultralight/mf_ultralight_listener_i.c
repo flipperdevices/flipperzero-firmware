@@ -615,6 +615,8 @@ bool mf_ultralight_c_check_access(
     bool is_write_op = (access_type == MfUltralightListenerAccessTypeWrite);
 
     do {
+        if(start_page >= 44) break;
+
         const uint8_t auth0 = data->page[42].data[0];
         const uint8_t auth1 = data->page[43].data[0] & 0x01;
 

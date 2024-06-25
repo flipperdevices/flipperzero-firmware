@@ -552,7 +552,8 @@ static MfUltralightCommand
     UNUSED(instance);
     do {
         if(bit_buffer_get_byte(buffer, 0) != 0xAF ||
-           bit_buffer_get_size_bytes(buffer) != MF_ULTRALIGHT_C_ENCRYPTED_PACK_SIZE)
+           bit_buffer_get_size_bytes(buffer) != MF_ULTRALIGHT_C_ENCRYPTED_PACK_SIZE ||
+           !mf_ultralight_3des_key_valid(instance->data))
             break;
 
         const uint8_t* data = bit_buffer_get_data(buffer) + 1;
