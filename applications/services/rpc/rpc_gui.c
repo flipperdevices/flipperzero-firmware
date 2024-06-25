@@ -55,6 +55,7 @@ typedef struct {
     RpcSession* session;
     Gui* gui;
     const Icon* icon;
+    FuriPubSub* input_events;
 
     // Receive part
     ViewPort* virtual_display_view_port;
@@ -234,10 +235,7 @@ static void
     }
 
     // Submit event
-    FuriPubSub* input_events = furi_record_open(RECORD_INPUT_EVENTS);
-    furi_check(input_events);
-    furi_pubsub_publish(input_events, &event);
-    furi_record_close(RECORD_INPUT_EVENTS);
+    furi_pubsub_publish(rpc_gui->input_events, &event);
     rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
 }
 
@@ -401,6 +399,7 @@ void* rpc_system_gui_alloc(RpcSession* session) {
 
     RpcGuiSystem* rpc_gui = malloc(sizeof(RpcGuiSystem));
     rpc_gui->gui = furi_record_open(RECORD_GUI);
+    rpc_gui->input_events = furi_record_open(RECORD_INPUT_EVENTS);
     rpc_gui->session = session;
 
     // Active session icon
@@ -456,10 +455,7 @@ void rpc_system_gui_free(void* context) {
                 .sequence_source = INPUT_SEQUENCE_SOURCE_SOFTWARE,
                 .sequence_counter = rpc_gui->input_key_counter[key],
             };
-            FuriPubSub* input_events = furi_record_open(RECORD_INPUT_EVENTS);
-            furi_check(input_events);
-            furi_pubsub_publish(input_events, &event);
-            furi_record_close(RECORD_INPUT_EVENTS);
+            furi_pubsub_publish(rpc_gui->input_events, &event);
         }
     }
 
@@ -490,6 +486,7 @@ void rpc_system_gui_free(void* context) {
         free(rpc_gui->transmit_frame);
         rpc_gui->transmit_frame = NULL;
     }
+    furi_record_close(RECORD_INPUT_EVENTS);
     furi_record_close(RECORD_GUI);
     free(rpc_gui);
 }
