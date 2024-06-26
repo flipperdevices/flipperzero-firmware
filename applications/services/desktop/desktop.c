@@ -1,26 +1,17 @@
-#include <storage/storage.h>
-#include <assets_icons.h>
-#include <gui/gui.h>
-#include <gui/gui_i.h>
-#include <gui/view_stack.h>
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
-#include <furi.h>
-#include <furi_hal.h>
+#include "desktop_i.h"
+
 #include <cli/cli.h>
 #include <cli/cli_vcp.h>
-#include <locale/locale.h>
-#include <toolbox/saved_struct.h>
 
-#include "animations/animation_manager.h"
-#include "desktop/scenes/desktop_scene.h"
-#include "desktop/scenes/desktop_scene_i.h"
-#include "desktop/views/desktop_view_locked.h"
-#include "desktop/views/desktop_view_pin_input.h"
-#include "desktop/views/desktop_view_pin_timeout.h"
-#include "desktop_i.h"
-#include "helpers/pin_code.h"
-#include "helpers/slideshow_filename.h"
+#include <gui/gui_i.h>
+
+#include <locale/locale.h>
+#include <storage/storage.h>
+
+#include <assets_icons.h>
+
+#include "scenes/desktop_scene.h"
+#include "scenes/desktop_scene_locked.h"
 
 #define TAG "Desktop"
 
@@ -42,6 +33,18 @@ static void desktop_loader_callback(const void* message, void* context) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalAfterAppFinished);
     }
 }
+
+#if 0
+static void desktop_storage_callback(const void* message, void* context) {
+    furi_assert(context);
+    Desktop* desktop = context;
+    const StorageEvent* event = message;
+
+    if(event->type == StorageEventTypeCardMount) {
+        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalLoadSettings);
+    }
+}
+#endif
 
 static void desktop_lock_icon_draw_callback(Canvas* canvas, void* context) {
     UNUSED(context);
@@ -131,6 +134,7 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         desktop_auto_lock_inhibit(desktop);
         furi_semaphore_release(desktop->animation_semaphore);
         return true;
+
     case DesktopGlobalAfterAppFinished:
         animation_manager_load_and_continue_animation(desktop->animation_manager);
         desktop_settings_load(&desktop->settings);
@@ -139,10 +143,15 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
 
         desktop_auto_lock_arm(desktop);
         return true;
+
     case DesktopGlobalAutoLock:
         if(!loader_is_locked(desktop->loader) && !desktop->locked) {
             desktop_lock(desktop);
         }
+        return true;
+
+    case DesktopGlobalLoadSettings:
+        desktop_settings_load(&desktop->settings);
         return true;
     }
 
@@ -228,7 +237,7 @@ void desktop_lock(Desktop* desktop) {
 
     desktop_auto_lock_inhibit(desktop);
     scene_manager_set_scene_state(
-        desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
+        desktop->scene_manager, DesktopSceneLocked, DesktopSceneLockedStateFirstEnter);
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
 
     DesktopStatus status = {.locked = true};
@@ -283,56 +292,6 @@ void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
     }
     view_port_enabled_set(desktop->stealth_mode_icon_viewport, enabled);
     desktop->in_transition = false;
-}
-
-void desktop_settings_load(DesktopSettings* settings) {
-    bool success = false;
-
-    do {
-        uint8_t version;
-        if(!saved_struct_get_metadata(DESKTOP_SETTINGS_PATH, NULL, &version, NULL)) break;
-
-        if(version == DESKTOP_SETTINGS_VER) {
-            success = saved_struct_load(
-                DESKTOP_SETTINGS_PATH,
-                settings,
-                sizeof(DesktopSettings),
-                DESKTOP_SETTINGS_MAGIC,
-                DESKTOP_SETTINGS_VER);
-
-        } else if(version == DESKTOP_SETTINGS_VER_10) {
-            DesktopSettingsV10 settings_v10;
-            success = saved_struct_load(
-                DESKTOP_SETTINGS_PATH,
-                &settings_v10,
-                sizeof(DesktopSettingsV10),
-                DESKTOP_SETTINGS_MAGIC,
-                DESKTOP_SETTINGS_VER_10);
-
-            if(success) {
-                *settings = settings_v10.settings;
-            }
-        }
-
-    } while(false);
-
-    if(!success) {
-        FURI_LOG_W(TAG, "Failed to load settings, overwriting with defaults");
-        desktop_settings_save(settings);
-    }
-}
-
-void desktop_settings_save(const DesktopSettings* settings) {
-    const bool success = saved_struct_save(
-        DESKTOP_SETTINGS_PATH,
-        settings,
-        sizeof(DesktopSettings),
-        DESKTOP_SETTINGS_MAGIC,
-        DESKTOP_SETTINGS_VER);
-
-    if(!success) {
-        FURI_LOG_E(TAG, "Failed to save settings at %s", DESKTOP_SETTINGS_PATH);
-    }
 }
 
 Desktop* desktop_alloc(void) {
@@ -447,11 +406,10 @@ Desktop* desktop_alloc(void) {
     desktop->loader = furi_record_open(RECORD_LOADER);
 
     desktop->notification = furi_record_open(RECORD_NOTIFICATION);
-    desktop->app_start_stop_subscription = furi_pubsub_subscribe(
-        loader_get_pubsub(desktop->loader), desktop_loader_callback, desktop);
+
+    furi_pubsub_subscribe(loader_get_pubsub(desktop->loader), desktop_loader_callback, desktop);
 
     desktop->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
-    desktop->input_events_subscription = NULL;
 
     desktop->auto_lock_timer =
         furi_timer_alloc(desktop_auto_lock_timer_callback, FuriTimerTypeOnce, desktop);
@@ -515,10 +473,8 @@ int32_t desktop_srv(void* p) {
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
         desktop_lock(desktop);
-    } else {
-        if(!loader_is_locked(desktop->loader)) {
-            desktop_auto_lock_arm(desktop);
-        }
+    } else if(!loader_is_locked(desktop->loader)) {
+        desktop_auto_lock_arm(desktop);
     }
 
     if(desktop_check_file_flag(SLIDESHOW_FS_PATH)) {
@@ -552,7 +508,6 @@ int32_t desktop_srv(void* p) {
 
     view_dispatcher_run(desktop->view_dispatcher);
 
-    furi_crash("That was unexpected");
-
+    // Shold never get here (a service thread will crash automatically if it returns)
     return 0;
 }

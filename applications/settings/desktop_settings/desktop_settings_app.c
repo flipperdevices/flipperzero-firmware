@@ -2,9 +2,10 @@
 #include <gui/modules/popup.h>
 #include <gui/scene_manager.h>
 
+#include <desktop/views/desktop_view_pin_input.h>
+
 #include "desktop_settings_app.h"
 #include "scenes/desktop_settings_scene.h"
-#include <desktop/views/desktop_view_pin_input.h>
 
 static bool desktop_settings_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -90,14 +91,12 @@ void desktop_settings_app_free(DesktopSettingsApp* app) {
 }
 
 extern int32_t desktop_settings_app(void* p) {
+    UNUSED(p);
+
     DesktopSettingsApp* app = desktop_settings_app_alloc();
     desktop_settings_load(&app->settings);
 
-    if(p && (strcmp(p, DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG) == 0)) {
-        scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinSetupHowto);
-    } else {
-        scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneStart);
-    }
+    scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneStart);
 
     view_dispatcher_run(app->view_dispatcher);
 

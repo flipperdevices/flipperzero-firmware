@@ -12,8 +12,6 @@
 #include "views/desktop_view_debug.h"
 #include "views/desktop_view_slideshow.h"
 
-#include <furi.h>
-
 #include <gui/gui.h>
 #include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
@@ -75,9 +73,9 @@ struct Desktop {
     Loader* loader;
     NotificationApp* notification;
 
-    FuriPubSubSubscription* app_start_stop_subscription;
     FuriPubSub* input_events_pubsub;
     FuriPubSubSubscription* input_events_subscription;
+
     FuriTimer* auto_lock_timer;
     FuriTimer* update_clock_timer;
 
@@ -91,9 +89,6 @@ struct Desktop {
     FuriSemaphore* animation_semaphore;
 };
 
-Desktop* desktop_alloc(void);
-
-void desktop_free(Desktop* desktop);
 void desktop_lock(Desktop* desktop);
 void desktop_unlock(Desktop* desktop);
 void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled);
