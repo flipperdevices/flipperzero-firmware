@@ -1,6 +1,8 @@
 #pragma once
 
 #include "desktop.h"
+#include "desktop_settings.h"
+
 #include "animations/animation_manager.h"
 #include "views/desktop_view_pin_timeout.h"
 #include "views/desktop_view_pin_input.h"
@@ -9,9 +11,9 @@
 #include "views/desktop_view_lock_menu.h"
 #include "views/desktop_view_debug.h"
 #include "views/desktop_view_slideshow.h"
-#include <desktop/desktop_settings.h>
 
 #include <furi.h>
+
 #include <gui/gui.h>
 #include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>

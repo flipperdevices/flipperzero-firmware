@@ -10,6 +10,7 @@
 #include <cli/cli.h>
 #include <cli/cli_vcp.h>
 #include <locale/locale.h>
+#include <toolbox/saved_struct.h>
 
 #include "animations/animation_manager.h"
 #include "desktop/scenes/desktop_scene.h"
@@ -18,7 +19,7 @@
 #include "desktop/views/desktop_view_pin_input.h"
 #include "desktop/views/desktop_view_pin_timeout.h"
 #include "desktop_i.h"
-#include "helpers/pin.h"
+#include "helpers/pin_code.h"
 #include "helpers/slideshow_filename.h"
 
 #define TAG "Desktop"
@@ -132,7 +133,7 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         return true;
     case DesktopGlobalAfterAppFinished:
         animation_manager_load_and_continue_animation(desktop->animation_manager);
-        DESKTOP_SETTINGS_LOAD(&desktop->settings);
+        desktop_settings_load(&desktop->settings);
 
         desktop_clock_reconfigure(desktop);
 
@@ -219,7 +220,7 @@ void desktop_lock(Desktop* desktop) {
 
     furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
 
-    if(desktop->settings.pin_code.length) {
+    if(desktop_pin_code_is_set()) {
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_close(cli);
         furi_record_close(RECORD_CLI);
@@ -249,7 +250,7 @@ void desktop_unlock(Desktop* desktop) {
     furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
     furi_hal_rtc_set_pin_fails(0);
 
-    if(desktop->settings.pin_code.length) {
+    if(desktop_pin_code_is_set()) {
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_open(cli, &cli_vcp);
         furi_record_close(RECORD_CLI);
@@ -263,11 +264,13 @@ void desktop_unlock(Desktop* desktop) {
 
 void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
     desktop->in_transition = true;
+
     view_port_enabled_set(desktop->dummy_mode_icon_viewport, enabled);
     desktop_main_set_dummy_mode_state(desktop->main_view, enabled);
     animation_manager_set_dummy_mode_state(desktop->animation_manager, enabled);
     desktop->settings.dummy_mode = enabled;
-    DESKTOP_SETTINGS_SAVE(&desktop->settings);
+    desktop_settings_save(&desktop->settings);
+
     desktop->in_transition = false;
 }
 
@@ -280,6 +283,56 @@ void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
     }
     view_port_enabled_set(desktop->stealth_mode_icon_viewport, enabled);
     desktop->in_transition = false;
+}
+
+void desktop_settings_load(DesktopSettings* settings) {
+    bool success = false;
+
+    do {
+        uint8_t version;
+        if(!saved_struct_get_metadata(DESKTOP_SETTINGS_PATH, NULL, &version, NULL)) break;
+
+        if(version == DESKTOP_SETTINGS_VER) {
+            success = saved_struct_load(
+                DESKTOP_SETTINGS_PATH,
+                settings,
+                sizeof(DesktopSettings),
+                DESKTOP_SETTINGS_MAGIC,
+                DESKTOP_SETTINGS_VER);
+
+        } else if(version == DESKTOP_SETTINGS_VER_10) {
+            DesktopSettingsV10 settings_v10;
+            success = saved_struct_load(
+                DESKTOP_SETTINGS_PATH,
+                &settings_v10,
+                sizeof(DesktopSettingsV10),
+                DESKTOP_SETTINGS_MAGIC,
+                DESKTOP_SETTINGS_VER_10);
+
+            if(success) {
+                *settings = settings_v10.settings;
+            }
+        }
+
+    } while(false);
+
+    if(!success) {
+        FURI_LOG_W(TAG, "Failed to load settings, overwriting with defaults");
+        desktop_settings_save(settings);
+    }
+}
+
+void desktop_settings_save(const DesktopSettings* settings) {
+    const bool success = saved_struct_save(
+        DESKTOP_SETTINGS_PATH,
+        settings,
+        sizeof(DesktopSettings),
+        DESKTOP_SETTINGS_MAGIC,
+        DESKTOP_SETTINGS_VER);
+
+    if(!success) {
+        FURI_LOG_E(TAG, "Failed to save settings at %s", DESKTOP_SETTINGS_PATH);
+    }
 }
 
 Desktop* desktop_alloc(void) {
@@ -448,11 +501,7 @@ int32_t desktop_srv(void* p) {
 
     Desktop* desktop = desktop_alloc();
 
-    bool loaded = DESKTOP_SETTINGS_LOAD(&desktop->settings);
-    if(!loaded) {
-        memset(&desktop->settings, 0, sizeof(desktop->settings));
-        DESKTOP_SETTINGS_SAVE(&desktop->settings);
-    }
+    desktop_settings_load(&desktop->settings);
 
     view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
 

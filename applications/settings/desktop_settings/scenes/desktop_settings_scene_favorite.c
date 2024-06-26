@@ -226,7 +226,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
         };
         consumed = true;
 
-        DESKTOP_SETTINGS_SAVE(&app->settings);
+        desktop_settings_save(&app->settings);
     }
 
     furi_string_free(temp_path);
