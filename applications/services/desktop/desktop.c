@@ -224,77 +224,15 @@ static void desktop_clock_timer_callback(void* context) {
     }
 }
 
-void desktop_lock(Desktop* desktop) {
-    furi_assert(!desktop->locked);
+static bool desktop_check_file_flag(const char* flag_path) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    bool exists = storage_common_stat(storage, flag_path, NULL) == FSE_OK;
+    furi_record_close(RECORD_STORAGE);
 
-    furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
-
-    if(desktop_pin_code_is_set()) {
-        Cli* cli = furi_record_open(RECORD_CLI);
-        cli_session_close(cli);
-        furi_record_close(RECORD_CLI);
-    }
-
-    desktop_auto_lock_inhibit(desktop);
-    scene_manager_set_scene_state(
-        desktop->scene_manager, DesktopSceneLocked, DesktopSceneLockedStateFirstEnter);
-    scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
-
-    DesktopStatus status = {.locked = true};
-    furi_pubsub_publish(desktop->status_pubsub, &status);
-
-    desktop->locked = true;
+    return exists;
 }
 
-void desktop_unlock(Desktop* desktop) {
-    furi_assert(desktop->locked);
-
-    view_port_enabled_set(desktop->lock_icon_viewport, false);
-    Gui* gui = furi_record_open(RECORD_GUI);
-    gui_set_lockdown(gui, false);
-    furi_record_close(RECORD_GUI);
-    desktop_view_locked_unlock(desktop->locked_view);
-    scene_manager_search_and_switch_to_previous_scene(desktop->scene_manager, DesktopSceneMain);
-    desktop_auto_lock_arm(desktop);
-    furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
-    furi_hal_rtc_set_pin_fails(0);
-
-    if(desktop_pin_code_is_set()) {
-        Cli* cli = furi_record_open(RECORD_CLI);
-        cli_session_open(cli, &cli_vcp);
-        furi_record_close(RECORD_CLI);
-    }
-
-    DesktopStatus status = {.locked = false};
-    furi_pubsub_publish(desktop->status_pubsub, &status);
-
-    desktop->locked = false;
-}
-
-void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
-    desktop->in_transition = true;
-
-    view_port_enabled_set(desktop->dummy_mode_icon_viewport, enabled);
-    desktop_main_set_dummy_mode_state(desktop->main_view, enabled);
-    animation_manager_set_dummy_mode_state(desktop->animation_manager, enabled);
-    desktop->settings.dummy_mode = enabled;
-    desktop_settings_save(&desktop->settings);
-
-    desktop->in_transition = false;
-}
-
-void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
-    desktop->in_transition = true;
-    if(enabled) {
-        furi_hal_rtc_set_flag(FuriHalRtcFlagStealthMode);
-    } else {
-        furi_hal_rtc_reset_flag(FuriHalRtcFlagStealthMode);
-    }
-    view_port_enabled_set(desktop->stealth_mode_icon_viewport, enabled);
-    desktop->in_transition = false;
-}
-
-Desktop* desktop_alloc(void) {
+static Desktop* desktop_alloc(void) {
     Desktop* desktop = malloc(sizeof(Desktop));
 
     desktop->animation_semaphore = furi_semaphore_alloc(1, 0);
@@ -424,13 +362,83 @@ Desktop* desktop_alloc(void) {
     return desktop;
 }
 
-static bool desktop_check_file_flag(const char* flag_path) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    bool exists = storage_common_stat(storage, flag_path, NULL) == FSE_OK;
-    furi_record_close(RECORD_STORAGE);
+/*
+ * Private API
+ */
 
-    return exists;
+void desktop_lock(Desktop* desktop) {
+    furi_assert(!desktop->locked);
+
+    furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
+
+    if(desktop_pin_code_is_set()) {
+        Cli* cli = furi_record_open(RECORD_CLI);
+        cli_session_close(cli);
+        furi_record_close(RECORD_CLI);
+    }
+
+    desktop_auto_lock_inhibit(desktop);
+    scene_manager_set_scene_state(
+        desktop->scene_manager, DesktopSceneLocked, DesktopSceneLockedStateFirstEnter);
+    scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
+
+    DesktopStatus status = {.locked = true};
+    furi_pubsub_publish(desktop->status_pubsub, &status);
+
+    desktop->locked = true;
 }
+
+void desktop_unlock(Desktop* desktop) {
+    furi_assert(desktop->locked);
+
+    view_port_enabled_set(desktop->lock_icon_viewport, false);
+    Gui* gui = furi_record_open(RECORD_GUI);
+    gui_set_lockdown(gui, false);
+    furi_record_close(RECORD_GUI);
+    desktop_view_locked_unlock(desktop->locked_view);
+    scene_manager_search_and_switch_to_previous_scene(desktop->scene_manager, DesktopSceneMain);
+    desktop_auto_lock_arm(desktop);
+    furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
+    furi_hal_rtc_set_pin_fails(0);
+
+    if(desktop_pin_code_is_set()) {
+        Cli* cli = furi_record_open(RECORD_CLI);
+        cli_session_open(cli, &cli_vcp);
+        furi_record_close(RECORD_CLI);
+    }
+
+    DesktopStatus status = {.locked = false};
+    furi_pubsub_publish(desktop->status_pubsub, &status);
+
+    desktop->locked = false;
+}
+
+void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
+    desktop->in_transition = true;
+
+    view_port_enabled_set(desktop->dummy_mode_icon_viewport, enabled);
+    desktop_main_set_dummy_mode_state(desktop->main_view, enabled);
+    animation_manager_set_dummy_mode_state(desktop->animation_manager, enabled);
+    desktop->settings.dummy_mode = enabled;
+    desktop_settings_save(&desktop->settings);
+
+    desktop->in_transition = false;
+}
+
+void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
+    desktop->in_transition = true;
+    if(enabled) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagStealthMode);
+    } else {
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagStealthMode);
+    }
+    view_port_enabled_set(desktop->stealth_mode_icon_viewport, enabled);
+    desktop->in_transition = false;
+}
+
+/*
+ *  Public API
+ */
 
 bool desktop_api_is_locked(Desktop* instance) {
     furi_assert(instance);
@@ -446,6 +454,10 @@ FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {
     furi_assert(instance);
     return instance->status_pubsub;
 }
+
+/*
+ * Application thread
+ */
 
 int32_t desktop_srv(void* p) {
     UNUSED(p);
