@@ -1,10 +1,16 @@
+from SCons.Script import GetOption
+
 App(
     appid="system_apps",
     name="Applications not shown in menus",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "updater_app",
-        "storage_move_to_sd",
+        *(
+            ("storage_move_to_sd",)
+            if "STORAGE_INT_ON_LFS" in GetOption("extra_defines")
+            else ()
+        ),
         "js_app",
         "js_app_start",
         # "archive",
