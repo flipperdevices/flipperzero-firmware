@@ -26,11 +26,6 @@
 // Workaround for math.h leaking through HAL in older versions
 #include <math.h>
 
-// Set by FBT for external apps, makes APP_DATA_PATH() and APP_ASSETS_PATH() work
-#ifndef FURI_APPID
-#define FURI_APPID "system"
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
