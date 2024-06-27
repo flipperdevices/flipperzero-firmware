@@ -41,13 +41,15 @@ appenv.AppendUnique(
         "-Xlinker",
         "-Map=${TARGET}.map",
         "-specs=nano.specs",
-        "-specs=nosys.specs",
     ],
     LIBS=[
         "m",
         "gcc",
         "stdc++",
         "supc++",
+    ],
+    CFLAGS=[
+        "-Wno-strict-prototypes",
     ],
 )
 

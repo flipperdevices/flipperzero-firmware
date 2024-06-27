@@ -30,8 +30,11 @@ class HardwareTargetLoader:
         if not target_json_file.exists():
             raise Exception(f"Target file {target_json_file} does not exist")
         with open(target_json_file.get_abspath(), "r") as f:
-            vals = json.load(f)
-            return vals
+            try:
+                vals = json.load(f)
+                return vals
+            except json.JSONDecodeError as e:
+                raise Exception(f"Failed to parse target file {target_json_file}: {e}")
 
     def _processTargetDefinitions(self, target_id):
         target_dir = self._getTargetDir(target_id)
@@ -73,7 +76,9 @@ class HardwareTargetLoader:
             self._processTargetDefinitions(inherited_target)
 
     def gatherSources(self):
-        sources = [self.startup_script]
+        sources = []
+        if self.startup_script:
+            sources.append(self.startup_script)
         seen_filenames = set(self.excluded_sources)
         # print("Layers: ", self.layered_target_dirs)
         for target_dir in self.layered_target_dirs:

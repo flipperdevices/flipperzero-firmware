@@ -10,13 +10,13 @@
 extern "C" {
 #endif
 
-typedef void FuriEventFlag;
+typedef struct FuriEventFlag FuriEventFlag;
 
 /** Allocate FuriEventFlag
  *
  * @return     pointer to FuriEventFlag
  */
-FuriEventFlag* furi_event_flag_alloc();
+FuriEventFlag* furi_event_flag_alloc(void);
 
 /** Deallocate FuriEventFlag
  *

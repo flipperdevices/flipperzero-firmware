@@ -1,5 +1,4 @@
 #include "u2f.h"
-#include "u2f_hid.h"
 #include "u2f_data.h"
 
 #include <furi.h>
@@ -108,7 +107,7 @@ static int u2f_uecc_random_cb(void* context, uint8_t* dest, unsigned size) {
     return 0;
 }
 
-U2fData* u2f_alloc() {
+U2fData* u2f_alloc(void) {
     return malloc(sizeof(U2fData));
 }
 

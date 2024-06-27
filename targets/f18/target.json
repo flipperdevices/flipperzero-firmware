@@ -27,15 +27,18 @@
         "assets",
         "one_wire",
         "music_worker",
+        "mjs",
         "mbedtls",
         "flipper_application",
-        "toolbox",
         "u8g2",
         "nanopb",
         "update_util",
         "heatshrink",
         "flipperformat",
-        "flipper18"
+        "flipper18",
+        "bit_lib",
+        "toolbox",
+        "datetime"
     ],
     "excluded_sources": [
         "furi_hal_infrared.c",

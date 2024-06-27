@@ -36,11 +36,11 @@ float locale_celsius_to_fahrenheit(float temp_c) {
 
 void locale_format_time(
     FuriString* out_str,
-    const FuriHalRtcDateTime* datetime,
+    const DateTime* datetime,
     const LocaleTimeFormat format,
     const bool show_seconds) {
-    furi_assert(out_str);
-    furi_assert(datetime);
+    furi_check(out_str);
+    furi_check(datetime);
 
     uint8_t hours = datetime->hour;
     uint8_t am_pm = 0;
@@ -69,12 +69,12 @@ void locale_format_time(
 
 void locale_format_date(
     FuriString* out_str,
-    const FuriHalRtcDateTime* datetime,
+    const DateTime* datetime,
     const LocaleDateFormat format,
     const char* separator) {
-    furi_assert(out_str);
-    furi_assert(datetime);
-    furi_assert(separator);
+    furi_check(out_str);
+    furi_check(datetime);
+    furi_check(separator);
 
     if(format == LocaleDateFormatDMY) {
         furi_string_printf(

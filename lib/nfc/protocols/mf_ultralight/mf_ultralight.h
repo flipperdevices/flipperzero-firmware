@@ -48,7 +48,7 @@ typedef enum {
 } MfUltralightError;
 
 typedef enum {
-    MfUltralightTypeUnknown,
+    MfUltralightTypeOrigin,
     MfUltralightTypeNTAG203,
     MfUltralightTypeMfulC,
     MfUltralightTypeUL11,
@@ -177,7 +177,7 @@ typedef struct {
 
 extern const NfcDeviceBase nfc_device_mf_ultralight;
 
-MfUltralightData* mf_ultralight_alloc();
+MfUltralightData* mf_ultralight_alloc(void);
 
 void mf_ultralight_free(MfUltralightData* data);
 
@@ -209,6 +209,8 @@ uint16_t mf_ultralight_get_pages_total(MfUltralightType type);
 uint32_t mf_ultralight_get_feature_support_set(MfUltralightType type);
 
 uint16_t mf_ultralight_get_config_page_num(MfUltralightType type);
+
+uint8_t mf_ultralight_get_write_end_page(MfUltralightType type);
 
 uint8_t mf_ultralight_get_pwd_page_num(MfUltralightType type);
 

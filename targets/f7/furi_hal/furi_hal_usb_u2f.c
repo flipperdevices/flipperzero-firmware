@@ -79,7 +79,7 @@ static const struct HidConfigDescriptor hid_u2f_cfg_desc = {
             .bConfigurationValue = 1,
             .iConfiguration = NO_DESCRIPTOR,
             .bmAttributes = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
-            .bMaxPower = USB_CFG_POWER_MA(100),
+            .bMaxPower = USB_CFG_POWER_MA(500),
         },
     .iad_0 =
         {
@@ -153,7 +153,7 @@ static bool hid_u2f_connected = false;
 static HidU2fCallback callback;
 static void* cb_ctx;
 
-bool furi_hal_hid_u2f_is_connected() {
+bool furi_hal_hid_u2f_is_connected(void) {
     return hid_u2f_connected;
 }
 

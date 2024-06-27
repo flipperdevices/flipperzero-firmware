@@ -1,6 +1,7 @@
 #include "cli_commands.h"
 #include "cli_command_gpio.h"
 
+#include <core/thread.h>
 #include <furi_hal.h>
 #include <furi_hal_info.h>
 #include <task_control_block.h>
@@ -82,7 +83,7 @@ void cli_command_help(Cli* cli, FuriString* args, void* context) {
     };
 
     if(furi_string_size(args) > 0) {
-        cli_nl();
+        cli_nl(cli);
         printf("`");
         printf("%s", furi_string_get_cstr(args));
         printf("` command not found");
@@ -101,7 +102,7 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(context);
 
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
 
     if(furi_string_size(args) > 0) {
         uint16_t hours, minutes, seconds, month, day, year, weekday;
@@ -135,7 +136,7 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
             return;
         }
 
-        if(!furi_hal_rtc_validate_datetime(&datetime)) {
+        if(!datetime_validate_datetime(&datetime)) {
             printf("Invalid datetime data");
             return;
         }
@@ -271,7 +272,7 @@ void cli_command_sysctl_heap_track(Cli* cli, FuriString* args, void* context) {
     }
 }
 
-void cli_command_sysctl_print_usage() {
+void cli_command_sysctl_print_usage(void) {
     printf("Usage:\r\n");
     printf("sysctl <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
@@ -381,34 +382,69 @@ void cli_command_led(Cli* cli, FuriString* args, void* context) {
     furi_record_close(RECORD_NOTIFICATION);
 }
 
-void cli_command_ps(Cli* cli, FuriString* args, void* context) {
+static void cli_command_top(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
-    UNUSED(args);
     UNUSED(context);
 
-    const uint8_t threads_num_max = 32;
-    FuriThreadId threads_ids[threads_num_max];
-    uint8_t thread_num = furi_thread_enumerate(threads_ids, threads_num_max);
-    printf(
-        "%-20s %-20s %-14s %-8s %-8s %s\r\n",
-        "AppID",
-        "Name",
-        "Stack start",
-        "Heap",
-        "Stack",
-        "Stack min free");
-    for(uint8_t i = 0; i < thread_num; i++) {
-        TaskControlBlock* tcb = (TaskControlBlock*)threads_ids[i];
+    int interval = 1000;
+    args_read_int_and_trim(args, &interval);
+
+    FuriThreadList* thread_list = furi_thread_list_alloc();
+    while(!cli_cmd_interrupt_received(cli)) {
+        uint32_t tick = furi_get_tick();
+        furi_thread_enumerate(thread_list);
+
+        if(interval) printf("\e[2J\e[0;0f"); // Clear display and return to 0
+
+        uint32_t uptime = tick / furi_kernel_get_tick_frequency();
         printf(
-            "%-20s %-20s 0x%-12lx %-8zu %-8lu %-8lu\r\n",
-            furi_thread_get_appid(threads_ids[i]),
-            furi_thread_get_name(threads_ids[i]),
-            (uint32_t)tcb->pxStack,
-            memmgr_heap_get_thread_memory(threads_ids[i]),
-            (uint32_t)(tcb->pxEndOfStack - tcb->pxStack + 1) * sizeof(StackType_t),
-            furi_thread_get_stack_space(threads_ids[i]));
+            "Threads: %zu, Uptime: %luh%lum%lus\r\n",
+            furi_thread_list_size(thread_list),
+            uptime / 60 / 60,
+            uptime / 60 % 60,
+            uptime % 60);
+
+        printf(
+            "Heap: total %zu, free %zu, minimum %zu, max block %zu\r\n\r\n",
+            memmgr_get_total_heap(),
+            memmgr_get_free_heap(),
+            memmgr_get_minimum_free_heap(),
+            memmgr_heap_get_max_free_block());
+
+        printf(
+            "%-17s %-20s %-10s %5s %12s %6s %10s %7s %5s\r\n",
+            "AppID",
+            "Name",
+            "State",
+            "Prio",
+            "Stack start",
+            "Stack",
+            "Stack Min",
+            "Heap",
+            "CPU");
+
+        for(size_t i = 0; i < furi_thread_list_size(thread_list); i++) {
+            const FuriThreadListItem* item = furi_thread_list_get_at(thread_list, i);
+            printf(
+                "%-17s %-20s %-10s %5d   0x%08lx %6lu %10lu %7zu %5.1f\r\n",
+                item->app_id,
+                item->name,
+                item->state,
+                item->priority,
+                item->stack_address,
+                item->stack_size,
+                item->stack_min_free,
+                item->heap,
+                (double)item->cpu);
+        }
+
+        if(interval > 0) {
+            furi_delay_ms(interval);
+        } else {
+            break;
+        }
     }
-    printf("\r\nTotal: %d", thread_num);
+    furi_thread_list_free(thread_list);
 }
 
 void cli_command_free(Cli* cli, FuriString* args, void* context) {
@@ -468,7 +504,7 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "date", CliCommandFlagParallelSafe, cli_command_date, NULL);
     cli_add_command(cli, "log", CliCommandFlagParallelSafe, cli_command_log, NULL);
     cli_add_command(cli, "sysctl", CliCommandFlagDefault, cli_command_sysctl, NULL);
-    cli_add_command(cli, "ps", CliCommandFlagParallelSafe, cli_command_ps, NULL);
+    cli_add_command(cli, "top", CliCommandFlagParallelSafe, cli_command_top, NULL);
     cli_add_command(cli, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
     cli_add_command(cli, "free_blocks", CliCommandFlagParallelSafe, cli_command_free_blocks, NULL);
 

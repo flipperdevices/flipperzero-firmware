@@ -1,7 +1,5 @@
 #include "subghz_frequency_analyzer.h"
-#include "../subghz_i.h"
 
-#include <math.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
@@ -433,7 +431,7 @@ void subghz_frequency_analyzer_exit(void* context) {
         true);
 }
 
-SubGhzFrequencyAnalyzer* subghz_frequency_analyzer_alloc() {
+SubGhzFrequencyAnalyzer* subghz_frequency_analyzer_alloc(void) {
     SubGhzFrequencyAnalyzer* instance = malloc(sizeof(SubGhzFrequencyAnalyzer));
 
     // View allocation and configuration

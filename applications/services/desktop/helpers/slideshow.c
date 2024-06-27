@@ -1,6 +1,5 @@
 #include "slideshow.h"
 
-#include <stddef.h>
 #include <storage/storage.h>
 #include <gui/icon.h>
 #include <gui/icon_i.h>
@@ -33,7 +32,7 @@ _Static_assert(sizeof(SlideshowFrameHeader) == 2, "Incorrect SlideshowFrameHeade
 
 #pragma pack(pop)
 
-Slideshow* slideshow_alloc() {
+Slideshow* slideshow_alloc(void) {
     Slideshow* ret = malloc(sizeof(Slideshow));
     ret->loaded = false;
     return ret;

@@ -24,7 +24,7 @@
 #include <flipper_application/flipper_application.h>
 
 #include <nfc/nfc_device.h>
-#include <nfc/helpers/nfc_util.h>
+#include <bit_lib/bit_lib.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
 #define TAG "WashCity"
@@ -57,19 +57,20 @@ static bool washcity_verify(Nfc* nfc) {
     bool verified = false;
 
     do {
-        const uint8_t ticket_sector_number = 0;
-        const uint8_t ticket_block_number =
-            mf_classic_get_first_block_num_of_sector(ticket_sector_number) + 1;
-        FURI_LOG_D(TAG, "Verifying sector %u", ticket_sector_number);
+        const uint8_t verify_sector_number = 1;
+        const uint8_t verify_block_number =
+            mf_classic_get_first_block_num_of_sector(verify_sector_number);
+        FURI_LOG_D(TAG, "Verifying sector %u", verify_sector_number);
 
         MfClassicKey key = {0};
-        nfc_util_num2bytes(washcity_1k_keys[ticket_sector_number].a, COUNT_OF(key.data), key.data);
+        bit_lib_num_to_bytes_be(
+            washcity_1k_keys[verify_sector_number].a, COUNT_OF(key.data), key.data);
 
         MfClassicAuthContext auth_context;
         MfClassicError error = mf_classic_poller_sync_auth(
-            nfc, ticket_block_number, &key, MfClassicKeyTypeA, &auth_context);
+            nfc, verify_block_number, &key, MfClassicKeyTypeA, &auth_context);
         if(error != MfClassicErrorNone) {
-            FURI_LOG_D(TAG, "Failed to read block %u: %d", ticket_block_number, error);
+            FURI_LOG_D(TAG, "Failed to read block %u: %d", verify_block_number, error);
             break;
         }
 
@@ -101,9 +102,11 @@ static bool washcity_read(Nfc* nfc, NfcDevice* device) {
             .key_b_mask = 0,
         };
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
-            nfc_util_num2bytes(washcity_1k_keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
+            bit_lib_num_to_bytes_be(
+                washcity_1k_keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
-            nfc_util_num2bytes(washcity_1k_keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
+            bit_lib_num_to_bytes_be(
+                washcity_1k_keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
             FURI_BIT_SET(keys.key_b_mask, i);
         }
 
@@ -138,7 +141,8 @@ static bool washcity_parse(const NfcDevice* device, FuriString* parsed_data) {
         const MfClassicSectorTrailer* sec_tr =
             mf_classic_get_sector_trailer_by_sector(data, ticket_sector_number);
 
-        const uint64_t key = nfc_util_bytes2num(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
+        const uint64_t key =
+            bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
         if(key != washcity_1k_keys[ticket_sector_number].a) break;
 
         // Parse data
@@ -148,7 +152,7 @@ static bool washcity_parse(const NfcDevice* device, FuriString* parsed_data) {
         const uint8_t* block_start_ptr =
             &data->block[start_block_num + ticket_block_number].data[0];
 
-        uint32_t balance = nfc_util_bytes2num(block_start_ptr + 2, 2);
+        uint32_t balance = bit_lib_bytes_to_num_be(block_start_ptr + 2, 2);
 
         uint32_t balance_eur = balance / 100;
         uint8_t balance_cents = balance % 100;
@@ -157,7 +161,7 @@ static bool washcity_parse(const NfcDevice* device, FuriString* parsed_data) {
         const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
 
         // Card Number is printed in HEX (equal to UID)
-        uint64_t card_number = nfc_util_bytes2num(uid, uid_len);
+        uint64_t card_number = bit_lib_bytes_to_num_be(uid, uid_len);
 
         furi_string_printf(
             parsed_data,
@@ -188,6 +192,6 @@ static const FlipperAppPluginDescriptor washcity_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* washcity_plugin_ep() {
+const FlipperAppPluginDescriptor* washcity_plugin_ep(void) {
     return &washcity_plugin_descriptor;
 }

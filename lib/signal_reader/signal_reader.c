@@ -1,6 +1,5 @@
 #include "signal_reader.h"
 
-#include <limits.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_gpio.h>
@@ -86,9 +85,9 @@ SignalReader* signal_reader_alloc(const GpioPin* gpio_pin, uint32_t size) {
 }
 
 void signal_reader_free(SignalReader* instance) {
-    furi_assert(instance);
-    furi_assert(instance->gpio_buffer);
-    furi_assert(instance->bitstream_buffer);
+    furi_check(instance);
+    furi_check(instance->gpio_buffer);
+    furi_check(instance->bitstream_buffer);
 
     free(instance->gpio_buffer);
     free(instance->bitstream_buffer);
@@ -96,13 +95,13 @@ void signal_reader_free(SignalReader* instance) {
 }
 
 void signal_reader_set_pull(SignalReader* instance, GpioPull pull) {
-    furi_assert(instance);
+    furi_check(instance);
 
     instance->pull = pull;
 }
 
 void signal_reader_set_polarity(SignalReader* instance, SignalReaderPolarity polarity) {
-    furi_assert(instance);
+    furi_check(instance);
 
     instance->polarity = polarity;
 }
@@ -111,14 +110,14 @@ void signal_reader_set_sample_rate(
     SignalReader* instance,
     SignalReaderTimeUnit time_unit,
     uint32_t time) {
-    furi_assert(instance);
+    furi_check(instance);
     UNUSED(time_unit);
 
     instance->tim_arr = time;
 }
 
 void signal_reader_set_trigger(SignalReader* instance, SignalReaderTrigger trigger) {
-    furi_assert(instance);
+    furi_check(instance);
 
     instance->trigger = trigger;
 }
@@ -186,8 +185,8 @@ static void furi_hal_sw_digital_pin_dma_rx_isr(void* context) {
 }
 
 void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, void* context) {
-    furi_assert(instance);
-    furi_assert(callback);
+    furi_check(instance);
+    furi_check(callback);
 
     instance->callback = callback;
     instance->context = context;
@@ -228,6 +227,7 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
     /* We need the EXTI to be configured as interrupt generating line, but no ISR registered */
     furi_hal_gpio_init(
         instance->pin, GpioModeInterruptRiseFall, instance->pull, GpioSpeedVeryHigh);
+    furi_hal_gpio_enable_int_callback(instance->pin);
 
     /* Set DMAMUX request generation signal ID on specified DMAMUX channel */
     LL_DMAMUX_SetRequestSignalID(
@@ -305,9 +305,11 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
 }
 
 void signal_reader_stop(SignalReader* instance) {
-    furi_assert(instance);
+    furi_check(instance);
 
     furi_hal_interrupt_set_isr(SIGNAL_READER_DMA_GPIO_IRQ, NULL, NULL);
+
+    furi_hal_gpio_disable_int_callback(instance->pin);
 
     // Deinit DMA Rx pin
     LL_DMA_DeInit(SIGNAL_READER_DMA_GPIO_DEF);

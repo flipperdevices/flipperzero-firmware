@@ -81,7 +81,7 @@ typedef enum {
 } FuriHalInterruptPriority;
 
 /** Initialize interrupt subsystem */
-void furi_hal_interrupt_init();
+void furi_hal_interrupt_init(void);
 
 /** Set ISR and enable interrupt with default priority
  *
@@ -109,6 +109,14 @@ void furi_hal_interrupt_set_isr_ex(
     FuriHalInterruptPriority priority,
     FuriHalInterruptISR isr,
     void* context);
+
+/** Get interrupt name by exception number.
+ * Exception number can be obtained from IPSR register.
+ * 
+ * @param exception_number 
+ * @return const char* or NULL if interrupt name is not found
+ */
+const char* furi_hal_interrupt_get_name(uint8_t exception_number);
 
 #ifdef __cplusplus
 }
