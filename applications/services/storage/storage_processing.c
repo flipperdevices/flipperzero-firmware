@@ -1,7 +1,6 @@
 #include "storage_processing.h"
 #include <m-list.h>
 #include <m-dict.h>
-#include <m-string.h>
 
 #define STORAGE_PATH_PREFIX_LEN 4u
 _Static_assert(
@@ -526,7 +525,7 @@ void storage_process_alias(Storage* app, FuriString* path, bool create_folders) 
         FuriString* apps_data_appid = furi_string_alloc_set(path);
         size_t slash =
             furi_string_search_char(apps_data_appid, '/', strlen(STORAGE_APPS_DATA_STEM "/"));
-        if(slash != STRING_FAILURE) {
+        if(slash != FURI_STRING_FAILURE) {
             furi_string_left(apps_data_appid, slash);
         }
 
