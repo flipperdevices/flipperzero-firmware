@@ -522,16 +522,17 @@ static FS_Error storage_process_sd_status(Storage* app) {
 /******************** Aliases processing *******************/
 
 void storage_process_alias(Storage* app, FuriString* path, bool create_folders) {
-    if(furi_string_start_with(path, APPS_DATA_PATH "/")) {
+    if(furi_string_start_with(path, STORAGE_APPS_DATA_STEM "/")) {
         FuriString* apps_data_appid = furi_string_alloc_set(path);
-        size_t slash = furi_string_search_char(apps_data_appid, '/', strlen(APPS_DATA_PATH "/"));
+        size_t slash =
+            furi_string_search_char(apps_data_appid, '/', strlen(STORAGE_APPS_DATA_STEM "/"));
         if(slash != STRING_FAILURE) {
             furi_string_left(apps_data_appid, slash);
         }
 
         // Create app data folder if not exists
         if(create_folders && storage_process_common_stat(app, apps_data_appid, NULL) != FSE_OK) {
-            FuriString* apps_data = furi_string_alloc_set(APPS_DATA_PATH);
+            FuriString* apps_data = furi_string_alloc_set(STORAGE_APPS_DATA_STEM);
             storage_process_common_mkdir(app, apps_data);
             furi_string_free(apps_data);
             storage_process_common_mkdir(app, apps_data_appid);

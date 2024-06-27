@@ -34,7 +34,7 @@ typedef enum {
 
 static FuriString* flipper_application_assets_alloc_app_full_path(FuriString* app_name) {
     furi_assert(app_name);
-    FuriString* full_path = furi_string_alloc_set(APPS_ASSETS_PATH "/");
+    FuriString* full_path = furi_string_alloc_set(STORAGE_APPS_ASSETS_STEM "/");
     furi_string_cat(full_path, app_name);
     return full_path;
 }
@@ -309,7 +309,7 @@ bool flipper_application_assets_load(File* file, const char* elf_path, size_t of
             FURI_LOG_D(TAG, "Assets removed");
         }
 
-        if(!storage_simply_mkdir(storage, APPS_ASSETS_PATH)) {
+        if(!storage_simply_mkdir(storage, STORAGE_APPS_ASSETS_STEM)) {
             break;
         }
 
