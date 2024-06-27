@@ -67,13 +67,11 @@ static bool flipper_application_assets_process_files(
     furi_assert(file);
     furi_assert(full_path);
 
-    UNUSED(storage);
-
     bool success = false;
-    uint32_t length = 0;
     char* path = NULL;
     FuriString* file_path = furi_string_alloc();
     File* destination = storage_file_alloc(storage);
+    uint32_t length = 0;
 
     for(uint32_t i = 0; i < files_count; i++) {
         path = (char*)flipper_application_assets_alloc_and_load_data(file, NULL);
@@ -131,39 +129,36 @@ static bool flipper_application_assets_process_dirs(
     furi_assert(full_path);
 
     bool success = false;
+    char* path = NULL;
+    FuriString* dir_path = furi_string_alloc();
 
-    do {
-        FuriString* dir_path = furi_string_alloc();
-        char* path = NULL;
+    for(uint32_t i = 0; i < dirs_count; i++) {
+        path = (char*)flipper_application_assets_alloc_and_load_data(file, NULL);
 
-        for(uint32_t i = 0; i < dirs_count; i++) {
-            path = (char*)flipper_application_assets_alloc_and_load_data(file, NULL);
-
-            if(path == NULL) {
-                break;
-            }
-
-            path_concat(full_path, path, dir_path);
-
-            if(!storage_simply_mkdir(storage, furi_string_get_cstr(dir_path))) {
-                FURI_LOG_E(TAG, "Can't create directory: %s", furi_string_get_cstr(dir_path));
-                break;
-            }
-
-            free(path);
-            path = NULL;
-
-            if(i == dirs_count - 1) {
-                success = true;
-            }
+        if(path == NULL) {
+            break;
         }
 
-        if(path != NULL) {
-            free(path);
+        path_concat(full_path, path, dir_path);
+
+        if(!storage_simply_mkdir(storage, furi_string_get_cstr(dir_path))) {
+            FURI_LOG_E(TAG, "Can't create directory: %s", furi_string_get_cstr(dir_path));
+            break;
         }
 
-        furi_string_free(dir_path);
-    } while(false);
+        free(path);
+        path = NULL;
+
+        if(i == dirs_count - 1) {
+            success = true;
+        }
+    }
+
+    if(path != NULL) {
+        free(path);
+    }
+
+    furi_string_free(dir_path);
 
     return success;
 }
