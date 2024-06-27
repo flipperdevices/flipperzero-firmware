@@ -523,6 +523,8 @@ static FS_Error storage_process_sd_status(Storage* app) {
 void storage_process_alias(Storage* app, FuriString* path, bool create_folders) {
     if(furi_string_start_with(path, STORAGE_APPS_DATA_STEM "/")) {
         FuriString* apps_data_appid = furi_string_alloc_set(path);
+        // Only create "/ext/apps_data/appid", not any subdir
+        // "/ext/apps_data/appid/whatever" -> "/ext/apps_data/appid"
         size_t slash =
             furi_string_search_char(apps_data_appid, '/', strlen(STORAGE_APPS_DATA_STEM "/"));
         if(slash != FURI_STRING_FAILURE) {
