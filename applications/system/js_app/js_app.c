@@ -98,7 +98,9 @@ static void js_app_free(JsApp* app) {
 int32_t js_app(void* arg) {
     JsApp* app = js_app_alloc();
 
+#define FAP_APPID "js_app"
     FuriString* script_path = furi_string_alloc_set(APP_ASSETS_PATH());
+#undef FAP_APPID
     do {
         if(arg != NULL && strlen(arg) > 0) {
             furi_string_set(script_path, (const char*)arg);
