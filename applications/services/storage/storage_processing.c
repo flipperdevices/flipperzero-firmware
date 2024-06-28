@@ -82,18 +82,17 @@ static FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** s
 
     if(storage_type_is_valid(type)) {
         if(type == ST_ANY) {
-            type = ST_INT;
-            if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusOK) {
-                type = ST_EXT;
-            }
+            type = ST_EXT; // /any phase-out: Redirect all "/any" paths to "/ext"
             storage_path_change_to_real_storage(path, type);
         }
 
         furi_assert(type == ST_EXT || type == ST_INT);
 
+#ifndef STORAGE_INT_ON_LFS
         if(storage_data_status(&app->storage[ST_EXT]) != StorageStatusOK) {
             return FSE_NOT_READY;
         }
+#endif
 
         *storage = &app->storage[type];
 
