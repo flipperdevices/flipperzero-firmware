@@ -60,39 +60,27 @@ static StorageType storage_get_type_by_path(FuriString* path) {
 
     return type;
 }
-static void storage_path_change_to_real_storage(FuriString* path, StorageType real_storage) {
-    if(furi_string_search(path, STORAGE_ANY_PATH_PREFIX) == 0) {
-        switch(real_storage) {
-        case ST_EXT:
-            furi_string_replace_at(
-                path, 0, strlen(STORAGE_EXT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX);
-            break;
-        case ST_INT:
-            furi_string_replace_at(
-                path, 0, strlen(STORAGE_INT_PATH_PREFIX), STORAGE_INT_PATH_PREFIX);
-            break;
-        default:
-            break;
-        }
-    }
-}
 
 static FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** storage) {
     StorageType type = storage_get_type_by_path(path);
 
     if(storage_type_is_valid(type)) {
+        // Any storage phase-out: redirect "/any" to "/ext"
         if(type == ST_ANY) {
-            type = ST_EXT; // /any phase-out: Redirect all "/any" paths to "/ext"
-            storage_path_change_to_real_storage(path, type);
+            furi_string_replace_at(
+                path, 0, strlen(STORAGE_EXT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX);
+            type = ST_EXT;
         }
-
-        furi_assert(type == ST_EXT || type == ST_INT);
 
 #ifndef STORAGE_INT_ON_LFS
-        if(storage_data_status(&app->storage[ST_EXT]) != StorageStatusOK) {
+        furi_assert(type == ST_EXT);
+#else
+        furi_assert(type == ST_EXT || type == ST_INT);
+#endif
+
+        if(storage_data_status(&app->storage[type]) != StorageStatusOK) {
             return FSE_NOT_READY;
         }
-#endif
 
         *storage = &app->storage[type];
 

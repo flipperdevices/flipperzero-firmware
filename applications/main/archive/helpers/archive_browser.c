@@ -460,9 +460,6 @@ void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active) {
 }
 
 static bool archive_is_dir_exists(FuriString* path) {
-    if(furi_string_equal(path, STORAGE_ANY_PATH_PREFIX)) {
-        return true;
-    }
     bool state = false;
     FileInfo file_info;
     Storage* storage = furi_record_open(RECORD_STORAGE);
