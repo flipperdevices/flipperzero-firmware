@@ -32,6 +32,7 @@ typedef enum {
     BtMessageTypeSetProfile,
     BtMessageTypeDisconnect,
     BtMessageTypeForgetBondedDevices,
+    BtMessageTypeReloadSettings,
 } BtMessageType;
 
 typedef struct {
