@@ -261,6 +261,8 @@ static void desktop_apply_settings(Desktop* desktop) {
 }
 
 static void desktop_init_settings(Desktop* desktop) {
+    furi_thread_set_signal_callback(furi_thread_get_current(), desktop_signal_callback, desktop);
+
 #ifndef STORAGE_INT_ON_LFS
     Storage* storage = furi_record_open(RECORD_STORAGE);
     furi_pubsub_subscribe(storage_get_pubsub(storage), desktop_storage_callback, desktop);
@@ -269,7 +271,6 @@ static void desktop_init_settings(Desktop* desktop) {
         return;
     }
 #endif
-    furi_thread_set_signal_callback(furi_thread_get_current(), desktop_signal_callback, desktop);
 
     desktop_apply_settings(desktop);
 }
