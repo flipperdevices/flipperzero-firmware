@@ -454,14 +454,14 @@ static void bt_apply_settings(Bt* bt) {
     bt->current_profile =
         furi_hal_bt_change_app(ble_profile_serial, NULL, bt_on_gap_event_callback, bt);
 
-    if(bt->current_profile) {
-        if(bt->bt_settings.enabled) {
-            furi_hal_bt_start_advertising();
-        }
-        furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
-
-    } else {
+    if(!bt->current_profile) {
         FURI_LOG_E(TAG, "BLE App start failed");
+    }
+
+    if(bt->bt_settings.enabled) {
+        furi_hal_bt_start_advertising();
+    } else {
+        furi_hal_bt_stop_advertising();
     }
 }
 
@@ -496,6 +496,8 @@ int32_t bt_srv(void* p) {
     if(!furi_hal_bt_start_radio_stack()) {
         FURI_LOG_E(TAG, "Radio stack start failed");
     }
+
+    furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
 
     // Initialise and load settings
     bt_init_settings(bt);
