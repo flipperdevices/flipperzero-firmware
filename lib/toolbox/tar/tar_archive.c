@@ -133,7 +133,7 @@ TarArchive* tar_archive_alloc(Storage* storage) {
     return archive;
 }
 
-static int32_t file_read_cb(void* context, uint8_t* buffer, int32_t buffer_size) {
+static int32_t file_read_cb(void* context, uint8_t* buffer, size_t buffer_size) {
     File* file = context;
     return storage_file_read(file, buffer, buffer_size);
 }

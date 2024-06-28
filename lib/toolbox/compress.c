@@ -283,11 +283,11 @@ static bool compress_decode_stream_internal(
 
 typedef struct {
     uint8_t* data_ptr;
-    int32_t data_size;
+    size_t data_size;
     bool is_source;
 } MemoryStreamState;
 
-static int32_t memory_stream_io_callback(void* context, uint8_t* ptr, int32_t size) {
+static int32_t memory_stream_io_callback(void* context, uint8_t* ptr, size_t size) {
     MemoryStreamState* state = (MemoryStreamState*)context;
 
     if(size > state->data_size) {

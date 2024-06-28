@@ -128,7 +128,7 @@ bool compress_decode(
  * 
  * @return number of bytes read/written, 0 on end of stream, negative on error
  */
-typedef int32_t (*CompressIoCallback)(void* context, uint8_t* buffer, int32_t size);
+typedef int32_t (*CompressIoCallback)(void* context, uint8_t* buffer, size_t size);
 
 /** Decompress streamed data
  *
