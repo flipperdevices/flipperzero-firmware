@@ -149,12 +149,12 @@ static void compress_test_random_comp_decomp() {
     compress_free(comp);
 }
 
-static int32_t hs_unpacker_file_read(void* context, uint8_t* buffer, int32_t size) {
+static int32_t hs_unpacker_file_read(void* context, uint8_t* buffer, size_t size) {
     File* file = (File*)context;
     return storage_file_read(file, buffer, size);
 }
 
-static int32_t hs_unpacker_file_write(void* context, uint8_t* buffer, int32_t size) {
+static int32_t hs_unpacker_file_write(void* context, uint8_t* buffer, size_t size) {
     File* file = (File*)context;
     return storage_file_write(file, buffer, size);
 }
