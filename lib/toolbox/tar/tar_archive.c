@@ -17,7 +17,7 @@ TarOpenMode tar_archive_get_mode_for_path(const char* path) {
     char ext[8];
 
     FuriString* path_str = furi_string_alloc_set_str(path);
-    path_extract_extension(path_str, ext, sizeof(ext) - 1);
+    path_extract_extension(path_str, ext, sizeof(ext));
     furi_string_free(path_str);
 
     if(strcmp(ext, ".ths") == 0) {
