@@ -21,6 +21,8 @@ typedef struct {
 static_assert(sizeof(DesktopSettingsV10) == 1044);
 
 void desktop_settings_load(DesktopSettings* settings) {
+    furi_assert(settings);
+
     bool success = false;
 
     do {
@@ -52,12 +54,15 @@ void desktop_settings_load(DesktopSettings* settings) {
     } while(false);
 
     if(!success) {
-        FURI_LOG_W(TAG, "Failed to load settings, overwriting with defaults");
+        FURI_LOG_W(TAG, "Failed to load settings, using defaults");
+        memset(settings, 0, sizeof(DesktopSettings));
         desktop_settings_save(settings);
     }
 }
 
 void desktop_settings_save(const DesktopSettings* settings) {
+    furi_assert(settings);
+
     const bool success = saved_struct_save(
         DESKTOP_SETTINGS_PATH,
         settings,
@@ -66,6 +71,6 @@ void desktop_settings_save(const DesktopSettings* settings) {
         DESKTOP_SETTINGS_VER);
 
     if(!success) {
-        FURI_LOG_E(TAG, "Failed to save settings at %s", DESKTOP_SETTINGS_PATH);
+        FURI_LOG_E(TAG, "Failed to save settings");
     }
 }
