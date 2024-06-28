@@ -101,6 +101,13 @@ extern int32_t desktop_settings_app(void* p) {
     view_dispatcher_run(app->view_dispatcher);
 
     desktop_settings_save(&app->settings);
+
+    FuriThread* desktop_thread = furi_thread_get_by_name("DesktopSrv");
+
+    if(desktop_thread) {
+        furi_thread_signal(desktop_thread, FuriSignalReloadFile, NULL);
+    }
+
     desktop_settings_app_free(app);
 
     return 0;

@@ -42,6 +42,7 @@ typedef enum {
 
 typedef enum {
     FuriSignalExit, /**< Request (graceful) exit. */
+    FuriSignalReloadFile, /**< Request to reload a file (path may be supplied in the free parameter). */
     // Other standard signals may be added in the future
     FuriSignalCustom = 100, /**< Custom signal values start from here. */
 } FuriSignal;

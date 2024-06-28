@@ -375,6 +375,14 @@ FuriThreadId furi_thread_get_current_id(void);
 FuriThread* furi_thread_get_current(void);
 
 /**
+ * @brief Get the FuriThread instance by its name.
+ *
+ * @param[in] thread_name pointer to a zero-teriminated string containing the name to look for
+ * @return pointer to a FuriThread instance or NULL if a thread with the given name does not exist
+ */
+FuriThread* furi_thread_get_by_name(const char* thread_name);
+
+/**
  * @brief Return control to the scheduler.
  */
 void furi_thread_yield(void);

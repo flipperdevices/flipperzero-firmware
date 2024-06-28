@@ -165,15 +165,22 @@ int32_t storage_move_to_sd_app(void* p) {
     return 0;
 }
 
+static void storage_move_to_sd_pending_callback(void* context, uint32_t arg) {
+    UNUSED(context);
+    UNUSED(arg);
+
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    loader_start(loader, "StorageMoveToSd", NULL, NULL);
+    furi_record_close(RECORD_LOADER);
+}
+
 static void storage_move_to_sd_mount_callback(const void* message, void* context) {
     UNUSED(context);
 
     const StorageEvent* storage_event = message;
 
     if(storage_event->type == StorageEventTypeCardMount) {
-        Loader* loader = furi_record_open(RECORD_LOADER);
-        loader_start(loader, "StorageMoveToSd", NULL, NULL);
-        furi_record_close(RECORD_LOADER);
+        furi_timer_pending_callback(storage_move_to_sd_pending_callback, NULL, 0);
     }
 }
 

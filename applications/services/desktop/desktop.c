@@ -18,6 +18,7 @@
 static void desktop_auto_lock_arm(Desktop*);
 static void desktop_auto_lock_inhibit(Desktop*);
 static void desktop_start_auto_lock_timer(Desktop*);
+static void desktop_apply_settings(Desktop*);
 
 static void desktop_loader_callback(const void* message, void* context) {
     furi_assert(context);
@@ -34,17 +35,15 @@ static void desktop_loader_callback(const void* message, void* context) {
     }
 }
 
-#if 0
 static void desktop_storage_callback(const void* message, void* context) {
     furi_assert(context);
     Desktop* desktop = context;
     const StorageEvent* event = message;
 
     if(event->type == StorageEventTypeCardMount) {
-        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalLoadSettings);
+        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalReloadSettings);
     }
 }
-#endif
 
 static void desktop_lock_icon_draw_callback(Canvas* canvas, void* context) {
     UNUSED(context);
@@ -126,36 +125,34 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Desktop* desktop = (Desktop*)context;
 
-    switch(event) {
-    case DesktopGlobalBeforeAppStarted:
+    if(event == DesktopGlobalBeforeAppStarted) {
         if(animation_manager_is_animation_loaded(desktop->animation_manager)) {
             animation_manager_unload_and_stall_animation(desktop->animation_manager);
         }
+
         desktop_auto_lock_inhibit(desktop);
+        desktop->app_running = true;
+
         furi_semaphore_release(desktop->animation_semaphore);
-        return true;
 
-    case DesktopGlobalAfterAppFinished:
+    } else if(event == DesktopGlobalAfterAppFinished) {
         animation_manager_load_and_continue_animation(desktop->animation_manager);
-        desktop_settings_load(&desktop->settings);
-
-        desktop_clock_reconfigure(desktop);
-
         desktop_auto_lock_arm(desktop);
-        return true;
+        desktop->app_running = false;
 
-    case DesktopGlobalAutoLock:
-        if(!loader_is_locked(desktop->loader) && !desktop->locked) {
+    } else if(event == DesktopGlobalAutoLock) {
+        if(!desktop->app_running && !desktop->locked) {
             desktop_lock(desktop);
         }
-        return true;
 
-    case DesktopGlobalLoadSettings:
-        desktop_settings_load(&desktop->settings);
-        return true;
+    } else if(event == DesktopGlobalReloadSettings) {
+        desktop_apply_settings(desktop);
+
+    } else {
+        return scene_manager_handle_custom_event(desktop->scene_manager, event);
     }
 
-    return scene_manager_handle_custom_event(desktop->scene_manager, event);
+    return true;
 }
 
 static bool desktop_back_event_callback(void* context) {
@@ -178,6 +175,18 @@ static void desktop_input_event_callback(const void* value, void* context) {
     if(event->type == InputTypePress) {
         desktop_start_auto_lock_timer(desktop);
     }
+}
+
+static bool desktop_signal_callback(uint32_t signal, void* arg, void* context) {
+    UNUSED(arg);
+    Desktop* desktop = context;
+
+    if(signal == FuriSignalReloadFile) {
+        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalReloadSettings);
+        return true;
+    }
+
+    return false;
 }
 
 static void desktop_auto_lock_timer_callback(void* context) {
@@ -215,13 +224,13 @@ static void desktop_clock_timer_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
 
-    if(gui_active_view_port_count(desktop->gui, GuiLayerStatusBarLeft) < 6) {
-        desktop_clock_update(desktop);
+    const bool clock_enabled = gui_active_view_port_count(desktop->gui, GuiLayerStatusBarLeft) < 6;
 
-        view_port_enabled_set(desktop->clock_viewport, true);
-    } else {
-        view_port_enabled_set(desktop->clock_viewport, false);
+    if(clock_enabled) {
+        desktop_clock_update(desktop);
     }
+
+    view_port_enabled_set(desktop->clock_viewport, clock_enabled);
 }
 
 static bool desktop_check_file_flag(const char* flag_path) {
@@ -230,6 +239,39 @@ static bool desktop_check_file_flag(const char* flag_path) {
     furi_record_close(RECORD_STORAGE);
 
     return exists;
+}
+
+static void desktop_apply_settings(Desktop* desktop) {
+    desktop_settings_load(&desktop->settings);
+
+    desktop->in_transition = true;
+
+    desktop_clock_reconfigure(desktop);
+
+    view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
+    desktop_main_set_dummy_mode_state(desktop->main_view, desktop->settings.dummy_mode);
+    animation_manager_set_dummy_mode_state(
+        desktop->animation_manager, desktop->settings.dummy_mode);
+
+    if(!desktop->app_running && !desktop->locked) {
+        desktop_auto_lock_arm(desktop);
+    }
+
+    desktop->in_transition = false;
+}
+
+static void desktop_init_settings(Desktop* desktop) {
+#ifndef STORAGE_INT_ON_LFS
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    furi_pubsub_subscribe(storage_get_pubsub(storage), desktop_storage_callback, desktop);
+    if(storage_sd_status(storage) != FSE_OK) {
+        FURI_LOG_D(TAG, "SD Card not ready, skipping settings");
+        return;
+    }
+#endif
+    furi_thread_set_signal_callback(furi_thread_get_current(), desktop_signal_callback, desktop);
+
+    desktop_apply_settings(desktop);
 }
 
 static Desktop* desktop_alloc(void) {
@@ -341,12 +383,11 @@ static Desktop* desktop_alloc(void) {
     }
     gui_add_view_port(desktop->gui, desktop->stealth_mode_icon_viewport, GuiLayerStatusBarLeft);
 
+    // Unload animations before starting an application
     desktop->loader = furi_record_open(RECORD_LOADER);
-
-    desktop->notification = furi_record_open(RECORD_NOTIFICATION);
-
     furi_pubsub_subscribe(loader_get_pubsub(desktop->loader), desktop_loader_callback, desktop);
 
+    desktop->notification = furi_record_open(RECORD_NOTIFICATION);
     desktop->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
 
     desktop->auto_lock_timer =
@@ -356,6 +397,8 @@ static Desktop* desktop_alloc(void) {
 
     desktop->update_clock_timer =
         furi_timer_alloc(desktop_clock_timer_callback, FuriTimerTypePeriodic, desktop);
+
+    desktop->app_running = loader_is_locked(desktop->loader);
 
     furi_record_create(RECORD_DESKTOP, desktop);
 
@@ -420,19 +463,23 @@ void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
     desktop_main_set_dummy_mode_state(desktop->main_view, enabled);
     animation_manager_set_dummy_mode_state(desktop->animation_manager, enabled);
     desktop->settings.dummy_mode = enabled;
-    desktop_settings_save(&desktop->settings);
 
     desktop->in_transition = false;
+
+    desktop_settings_save(&desktop->settings);
 }
 
 void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
     desktop->in_transition = true;
+
     if(enabled) {
         furi_hal_rtc_set_flag(FuriHalRtcFlagStealthMode);
     } else {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagStealthMode);
     }
+
     view_port_enabled_set(desktop->stealth_mode_icon_viewport, enabled);
+
     desktop->in_transition = false;
 }
 
@@ -471,22 +518,12 @@ int32_t desktop_srv(void* p) {
 
     Desktop* desktop = desktop_alloc();
 
-    desktop_settings_load(&desktop->settings);
-
-    view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
-
-    desktop_clock_reconfigure(desktop);
-
-    desktop_main_set_dummy_mode_state(desktop->main_view, desktop->settings.dummy_mode);
-    animation_manager_set_dummy_mode_state(
-        desktop->animation_manager, desktop->settings.dummy_mode);
+    desktop_init_settings(desktop);
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
         desktop_lock(desktop);
-    } else if(!loader_is_locked(desktop->loader)) {
-        desktop_auto_lock_arm(desktop);
     }
 
     if(desktop_check_file_flag(SLIDESHOW_FS_PATH)) {
@@ -513,13 +550,12 @@ int32_t desktop_srv(void* p) {
     }
 
     // Special case: autostart application is already running
-    if(loader_is_locked(desktop->loader) &&
-       animation_manager_is_animation_loaded(desktop->animation_manager)) {
+    if(desktop->app_running && animation_manager_is_animation_loaded(desktop->animation_manager)) {
         animation_manager_unload_and_stall_animation(desktop->animation_manager);
     }
 
     view_dispatcher_run(desktop->view_dispatcher);
 
-    // Shold never get here (a service thread will crash automatically if it returns)
+    // Should never get here (a service thread will crash automatically if it returns)
     return 0;
 }

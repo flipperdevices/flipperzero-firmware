@@ -420,6 +420,30 @@ FuriThread* furi_thread_get_current(void) {
     return thread;
 }
 
+FuriThread* furi_thread_get_by_name(const char* thread_name) {
+    furi_check(thread_name);
+
+    FuriThread* ret = NULL;
+    FuriThreadList* thread_list = furi_thread_list_alloc();
+
+    do {
+        if(!furi_thread_enumerate(thread_list)) break;
+
+        for(size_t i = 0; i < furi_thread_list_size(thread_list); ++i) {
+            FuriThreadListItem* item = furi_thread_list_get_at(thread_list, i);
+            if(strcmp(item->name, thread_name) == 0) {
+                ret = item->thread;
+                break;
+            }
+        }
+
+    } while(false);
+
+    furi_thread_list_free(thread_list);
+
+    return ret;
+}
+
 void furi_thread_yield(void) {
     furi_check(!FURI_IS_IRQ_MODE());
     taskYIELD();

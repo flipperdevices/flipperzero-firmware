@@ -111,6 +111,9 @@ FuriEventLoop* furi_event_loop_alloc(void) {
     ulTaskNotifyValueClearIndexed(
         instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, 0xFFFFFFFF);
 
+    furi_thread_set_signal_callback(
+        instance->thread_id, furi_event_loop_signal_callback, instance);
+
     return instance;
 }
 
@@ -148,9 +151,6 @@ static FuriEventLoopProcessStatus
 void furi_event_loop_run(FuriEventLoop* instance) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
-
-    furi_thread_set_signal_callback(
-        instance->thread_id, furi_event_loop_signal_callback, instance);
 
     uint32_t timeout = instance->tick_callback ? instance->tick_interval : FuriWaitForever;
 
