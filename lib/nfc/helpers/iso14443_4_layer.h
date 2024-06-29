@@ -24,6 +24,12 @@ bool iso14443_4_layer_decode_block(
     BitBuffer* output_data,
     const BitBuffer* block_data);
 
+void iso14443_4_layer_update_pcb(Iso14443_4Layer* instance);
+void iso14443_4_layer_r_ack(Iso14443_4Layer* instance, BitBuffer* block_data);
+bool iso14443_4_layer_is_block_chaining(
+    const Iso14443_4Layer* instance,
+    const BitBuffer* block_data);
+
 #ifdef __cplusplus
 }
 #endif

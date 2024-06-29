@@ -63,6 +63,7 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     furi_check(tx_buffer);
     furi_check(rx_buffer);
 
+    bit_buffer_reset(rx_buffer);
     bit_buffer_reset(instance->tx_buffer);
     iso14443_4_layer_encode_block(instance->iso14443_4_layer, tx_buffer, instance->tx_buffer);
 
@@ -109,6 +110,28 @@ Iso14443_4aError iso14443_4a_poller_send_block(
                instance->iso14443_4_layer, rx_buffer, instance->rx_buffer)) {
             error = Iso14443_4aErrorProtocol;
             break;
+        }
+
+        if(iso14443_4_layer_is_block_chaining(instance->iso14443_4_layer, instance->rx_buffer)) {
+            bit_buffer_reset(instance->tx_buffer);
+            iso14443_4_layer_r_ack(instance->iso14443_4_layer, instance->tx_buffer);
+            iso14443_3a_error = iso14443_3a_poller_send_standard_frame(
+                instance->iso14443_3a_poller,
+                instance->tx_buffer,
+                instance->rx_buffer,
+                iso14443_4a_get_fwt_fc_max(instance->data));
+
+            if(iso14443_3a_error != Iso14443_3aErrorNone) {
+                error = iso14443_4a_process_error(iso14443_3a_error);
+                break;
+            }
+            iso14443_4_layer_update_pcb(instance->iso14443_4_layer);
+
+            if(!iso14443_4_layer_decode_block(
+                   instance->iso14443_4_layer, rx_buffer, instance->rx_buffer)) {
+                error = Iso14443_4aErrorProtocol;
+                break;
+            }
         }
     } while(false);
 
