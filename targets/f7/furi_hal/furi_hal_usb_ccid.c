@@ -21,8 +21,9 @@
 #define CCID_DATABLOCK_SIZE \
     (4 + 1 + CCID_SHORT_APDU_SIZE + 1) //APDU Header + Lc + Short APDU size + Le
 
-#define ENDPOINT_DIR_IN  (0x80)
-#define ENDPOINT_DIR_OUT (0x00)
+#define ENDPOINT_DIR_IN         (0x80)
+#define ENDPOINT_DIR_OUT        (0x00)
+#define ENDPOINT_DIR_INTERRUPT  (0x40)
 
 #define INTERFACE_ID_CCID (0)
 
@@ -30,6 +31,8 @@
 
 /** Endpoint address of the CCID data OUT endpoint, for host-to-device data transfers. */
 #define CCID_OUT_EPADDR (ENDPOINT_DIR_OUT | 1)
+
+#define CCID_INTERRUPT_EPADDR (ENDPOINT_DIR_INTERRUPT | 2)
 
 /** Endpoint size in bytes of the CCID data being sent between IN and OUT endpoints. */
 #define CCID_EPSIZE 64
@@ -39,6 +42,7 @@ struct CcidIntfDescriptor {
     struct usb_ccid_descriptor ccid_desc;
     struct usb_endpoint_descriptor ccid_bulk_in;
     struct usb_endpoint_descriptor ccid_bulk_out;
+    struct usb_endpoint_descriptor ccid_interrupt;
 } FURI_PACKED;
 
 struct CcidConfigDescriptor {
@@ -65,8 +69,10 @@ enum CCID_Features_ExchangeLevel_t {
 };
 
 typedef enum {
-    WorkerEvtStop = (1 << 0),
-    WorkerEvtRequest = (1 << 1),
+    WorkerEvtStop           = (1 << 0),
+    WorkerEvtRequest        = (1 << 1),
+    WorkerEvtInsertSmartcard = (1 << 2),
+    WorkerEvtRemoveSmartcard = (1 << 3),
 } WorkerEvtFlags;
 
 typedef struct ccid_bulk_message_header {
@@ -75,6 +81,7 @@ typedef struct ccid_bulk_message_header {
     uint8_t bSlot;
     uint8_t bSeq;
 } FURI_PACKED ccid_bulk_message_header_t;
+
 
 /* Device descriptor */
 static struct usb_device_descriptor ccid_device_desc = {
@@ -145,7 +152,7 @@ static const struct CcidConfigDescriptor ccid_cfg_desc = {
                                CCID_Features_Auto_ParameterConfiguration |
                                CCID_Features_Auto_ICCActivation |
                                CCID_Features_Auto_VoltageSelection,
-                 .dwMaxCCIDMessageLength = 0x0c00,
+                 .dwMaxCCIDMessageLength = sizeof(ccid_bulk_message_header_t) + CCID_DATABLOCK_SIZE,
                  .bClassGetResponse = 0xff,
                  .bClassEnvelope = 0xff,
                  .wLcdLayout = 0,
@@ -165,6 +172,13 @@ static const struct CcidConfigDescriptor ccid_cfg_desc = {
                  .bDescriptorType = USB_DTYPE_ENDPOINT,
                  .bEndpointAddress = CCID_OUT_EPADDR,
                  .bmAttributes = USB_EPTYPE_BULK,
+                 .wMaxPacketSize = CCID_EPSIZE,
+                 .bInterval = 0x05},
+            .ccid_interrupt =
+                {.bLength = sizeof(struct usb_endpoint_descriptor),
+                 .bDescriptorType = USB_DTYPE_ENDPOINT,
+                 .bEndpointAddress = CCID_INTERRUPT_EPADDR,
+                 .bmAttributes = USB_EPTYPE_INTERRUPT,
                  .wMaxPacketSize = CCID_EPSIZE,
                  .bInterval = 0x05},
         },
@@ -437,16 +451,27 @@ void CALLBACK_CCID_XfrBlock(
     }
 }
 
+void CCID_NotifySlotChange(struct rdr_to_pc_notify_slot_change* message, uint8_t slot, bool inserted) {
+    if(slot == CCID_SLOT_INDEX && inserted != furi_hal_usb_ccid->smartcard_inserted) {
+        message->bMessageType =  RDR_TO_PC_NOTIFYSLOTCHANGE;
+        if(inserted) {
+            message->bmSlotICCState[0] = 0x40; //ICC inserted for slot 0
+        } else {
+            message->bmSlotICCState[0] = 0x80; //ICC removed for slot 0
+        }
+    }
+}
+
 void furi_hal_usb_ccid_insert_smartcard(void) {
     furi_check(furi_hal_usb_ccid);
-
     furi_hal_usb_ccid->smartcard_inserted = true;
+    furi_thread_flags_set(furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtInsertSmartcard);
 }
 
 void furi_hal_usb_ccid_remove_smartcard(void) {
     furi_check(furi_hal_usb_ccid);
-
     furi_hal_usb_ccid->smartcard_inserted = false;
+    furi_thread_flags_set(furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtRemoveSmartcard);
 }
 
 void furi_hal_usb_ccid_set_callbacks(CcidCallbacks* cb, void* context) {
@@ -507,7 +532,7 @@ static void ccid_tx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
             furi_thread_flags_set(
                 furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtRequest);
         }
-    }
+    } 
 }
 
 static int32_t ccid_worker(void* context) {
@@ -603,6 +628,25 @@ static int32_t ccid_worker(void* context) {
             }
         } else if(flags & WorkerEvtStop) {
             break;
+        } else if(flags & WorkerEvtInsertSmartcard) {
+            if (!furi_hal_usb_ccid->smartcard_inserted)
+            {
+                struct rdr_to_pc_notify_slot_change* responseNotifySlotChange =
+                    (struct rdr_to_pc_notify_slot_change*)&furi_hal_usb_ccid->send_buffer;
+
+                CCID_NotifySlotChange(responseNotifySlotChange, CCID_SLOT_INDEX, true);
+
+                usbd_ep_write(furi_hal_usb_ccid->usb_dev, CCID_INTERRUPT_EPADDR, furi_hal_usb_ccid->send_buffer, sizeof(struct rdr_to_pc_notify_slot_change) + sizeof(uint8_t));
+            }
+        } else if(flags & WorkerEvtRemoveSmartcard) {
+            if (furi_hal_usb_ccid->smartcard_inserted)
+            {
+                struct rdr_to_pc_notify_slot_change* responseNotifySlotChange =
+                    (struct rdr_to_pc_notify_slot_change*)&furi_hal_usb_ccid->send_buffer;
+                    
+                CCID_NotifySlotChange(responseNotifySlotChange, CCID_SLOT_INDEX, false);
+                usbd_ep_write(furi_hal_usb_ccid->usb_dev, CCID_INTERRUPT_EPADDR, furi_hal_usb_ccid->send_buffer, sizeof(struct rdr_to_pc_notify_slot_change) + sizeof(uint8_t));
+            }
         }
     }
     return 0;
@@ -615,6 +659,8 @@ static usbd_respond ccid_ep_config(usbd_device* dev, uint8_t cfg) {
         /* deconfiguring device */
         usbd_ep_deconfig(dev, CCID_IN_EPADDR);
         usbd_ep_deconfig(dev, CCID_OUT_EPADDR);
+        usbd_ep_deconfig(dev, CCID_INTERRUPT_EPADDR);
+
         usbd_reg_endpoint(dev, CCID_IN_EPADDR, 0);
         usbd_reg_endpoint(dev, CCID_OUT_EPADDR, 0);
         return usbd_ack;
@@ -622,6 +668,8 @@ static usbd_respond ccid_ep_config(usbd_device* dev, uint8_t cfg) {
         /* configuring device */
         usbd_ep_config(dev, CCID_IN_EPADDR, USB_EPTYPE_BULK, CCID_EPSIZE);
         usbd_ep_config(dev, CCID_OUT_EPADDR, USB_EPTYPE_BULK, CCID_EPSIZE);
+        usbd_ep_config(dev, CCID_INTERRUPT_EPADDR, USB_EPTYPE_INTERRUPT, CCID_EPSIZE);
+
         usbd_reg_endpoint(dev, CCID_IN_EPADDR, ccid_rx_ep_callback);
         usbd_reg_endpoint(dev, CCID_OUT_EPADDR, ccid_tx_ep_callback);
         return usbd_ack;
