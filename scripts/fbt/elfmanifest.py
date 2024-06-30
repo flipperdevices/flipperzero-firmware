@@ -42,7 +42,7 @@ class ElfManifestV2:
             bytes(self.name.encode("ascii")),
             bool(self.icon),
             self.icon,
-            bytes(self.appid.encode("ascii"))
+            bytes(self.appid.encode("ascii")),
         )
 
 
@@ -78,7 +78,7 @@ def assemble_manifest_data(
         app_version=app_version_as_int,
         name=app_manifest.name,
         icon=image_data,
-        appid=app_manifest.appid
+        appid=app_manifest.appid,
     ).as_bytes()
 
     return data
