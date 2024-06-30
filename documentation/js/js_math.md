@@ -13,7 +13,7 @@ The number π = 3.14159265358979323846264338327950288.
 The number e (Euler's number) = 2.71828182845904523536028747135266250.
 
 ## EPSILON
-The smallest number that satisfies the condition: 1.0 + EPSILON != 1.0.  
+The smallest number that satisfies the condition: 1.0 + EPSILON != 1.0.
 EPSILON = 2.2204460492503131e-16.
 
 # Methods
