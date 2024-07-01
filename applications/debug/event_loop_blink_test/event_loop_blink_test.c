@@ -49,9 +49,11 @@ static void blink_gpio_init(void) {
 
 static void blink_gpio_deinit(void) {
     for(size_t i = 0; i < TIMER_COUNT; ++i) {
+        furi_hal_gpio_write(blink_gpio_pins[i], false);
         furi_hal_gpio_init_simple(blink_gpio_pins[i], GpioModeAnalog);
     }
 
+    furi_hal_gpio_write(&gpio_ext_pc0, false);
     furi_hal_gpio_init_simple(&gpio_ext_pc0, GpioModeAnalog);
 }
 
