@@ -10,6 +10,10 @@
 
 #define TAG "FuriEventLoop"
 
+/*
+ * Private functions
+ */
+
 static FuriEventLoopItem* furi_event_loop_item_alloc(
     FuriEventLoop* owner,
     const FuriEventLoopContract* contract,
@@ -25,6 +29,14 @@ static void furi_event_loop_item_set_callback(
 
 static void furi_event_loop_item_notify(FuriEventLoopItem* instance);
 
+static void furi_event_loop_process_pending_callbacks(FuriEventLoop* instance) {
+    for(; !PendingQueue_empty_p(instance->pending_queue);
+        PendingQueue_pop_back(NULL, instance->pending_queue)) {
+        const FuriEventLoopPendingQueueItem* item = PendingQueue_back(instance->pending_queue);
+        item->callback(item->context);
+    }
+}
+
 /*
  * Main public API
  */
@@ -38,7 +50,7 @@ FuriEventLoop* furi_event_loop_alloc(void) {
     WaitingList_init(instance->waiting_list);
     TimerList_init(instance->timer_list);
     TimerQueue_init(instance->timer_queue);
-    RequestQueue_init(instance->request_queue);
+    PendingQueue_init(instance->pending_queue);
 
     // Clear notification state and value
     xTaskNotifyStateClearIndexed(instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX);
@@ -56,10 +68,8 @@ void furi_event_loop_free(FuriEventLoop* instance) {
     furi_event_loop_process_timer_queue(instance);
     furi_check(TimerList_empty_p(instance->timer_list));
 
-    furi_event_loop_process_request_queue(instance);
-
     FuriEventLoopTree_clear(instance->tree);
-    RequestQueue_clear(instance->request_queue);
+    PendingQueue_clear(instance->pending_queue);
 
     uint32_t flags = 0;
     BaseType_t ret = xTaskNotifyWaitIndexed(
@@ -97,13 +107,17 @@ void furi_event_loop_run(FuriEventLoop* instance) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
+    furi_event_loop_init_tick(instance);
+
     furi_thread_set_signal_callback(
         instance->thread_id, furi_event_loop_signal_callback, instance);
 
     while(true) {
         instance->state = FuriEventLoopStateIdle;
 
-        const TickType_t xTicksToWait = furi_event_loop_get_wait_time(instance);
+        const TickType_t xTicksToWait =
+            MIN(furi_event_loop_get_timer_wait_time(instance),
+                furi_event_loop_get_tick_wait_time(instance));
 
         uint32_t flags = 0;
         BaseType_t ret = xTaskNotifyWaitIndexed(
@@ -151,14 +165,14 @@ void furi_event_loop_run(FuriEventLoop* instance) {
                 furi_event_loop_process_timer_queue(instance);
                 furi_event_loop_restore_flags(instance, flags & ~FuriEventLoopFlagTimer);
 
-            } else if(flags & FuriEventLoopFlagRequest) {
-                furi_event_loop_process_request_queue(instance);
+            } else if(flags & FuriEventLoopFlagPending) {
+                furi_event_loop_process_pending_callbacks(instance);
 
             } else {
                 furi_crash();
             }
 
-        } else if(!furi_event_loop_process_expired_timer(instance)) {
+        } else if(!furi_event_loop_process_expired_timers(instance)) {
             furi_event_loop_process_tick(instance);
         }
     }
@@ -171,6 +185,29 @@ void furi_event_loop_stop(FuriEventLoop* instance) {
 
     xTaskNotifyIndexed(
         instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagStop, eSetBits);
+}
+
+/*
+ * Public deferred function call API
+ */
+
+void furi_event_loop_pend_callback(
+    FuriEventLoop* instance,
+    FuriEventLoopPendingCallback callback,
+    void* context) {
+    furi_check(instance);
+    furi_check(instance->thread_id == furi_thread_get_current_id());
+    furi_check(callback);
+
+    const FuriEventLoopPendingQueueItem item = {
+        .callback = callback,
+        .context = context,
+    };
+
+    PendingQueue_push_front(instance->pending_queue, item);
+
+    xTaskNotifyIndexed(
+        instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagPending, eSetBits);
 }
 
 /*

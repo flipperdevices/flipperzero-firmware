@@ -3,7 +3,9 @@
 #include "event_loop.h"
 #include "event_loop_link_i.h"
 #include "event_loop_timer_i.h"
+#include "event_loop_tick_i.h"
 
+#include <m-list.h>
 #include <m-bptree.h>
 #include <m-i-list.h>
 
@@ -47,12 +49,12 @@ typedef enum {
     FuriEventLoopFlagEvent = (1 << 0),
     FuriEventLoopFlagStop = (1 << 1),
     FuriEventLoopFlagTimer = (1 << 2),
-    FuriEventLoopFlagRequest = (1 << 3),
+    FuriEventLoopFlagPending = (1 << 3),
 } FuriEventLoopFlag;
 
 #define FuriEventLoopFlagAll                                                   \
     (FuriEventLoopFlagEvent | FuriEventLoopFlagStop | FuriEventLoopFlagTimer | \
-     FuriEventLoopFlagRequest)
+     FuriEventLoopFlagPending)
 
 typedef enum {
     FuriEventLoopProcessStatusComplete,
@@ -65,6 +67,13 @@ typedef enum {
     FuriEventLoopStateIdle,
     FuriEventLoopStateProcessing,
 } FuriEventLoopState;
+
+typedef struct {
+    FuriEventLoopPendingCallback callback;
+    void* context;
+} FuriEventLoopPendingQueueItem;
+
+LIST_DUAL_PUSH_DEF(PendingQueue, FuriEventLoopPendingQueueItem, M_POD_OPLIST)
 
 struct FuriEventLoop {
     // Only works if all operations are done from the same thread
@@ -81,12 +90,8 @@ struct FuriEventLoop {
     TimerList_t timer_list;
     // Timer request queue
     TimerQueue_t timer_queue;
-    // Pending request handling
-    RequestQueue_t request_queue;
-
+    // Pending callback queue
+    PendingQueue_t pending_queue;
     // Tick event
-    uint32_t tick_interval;
-    uint32_t tick_prev_time;
-    FuriEventLoopTickCallback tick_callback;
-    void* tick_callback_context;
+    FuriEventLoopTick tick;
 };
