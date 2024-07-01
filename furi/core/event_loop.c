@@ -37,6 +37,7 @@ FuriEventLoop* furi_event_loop_alloc(void) {
     FuriEventLoopTree_init(instance->tree);
     WaitingList_init(instance->waiting_list);
     TimerList_init(instance->timer_list);
+    TimerQueue_init(instance->timer_queue);
     RequestQueue_init(instance->request_queue);
 
     // Clear notification state and value
@@ -52,8 +53,10 @@ void furi_event_loop_free(FuriEventLoop* instance) {
     furi_check(instance->thread_id == furi_thread_get_current_id());
     furi_check(instance->state == FuriEventLoopStateStopped);
 
-    furi_event_loop_process_request_queue(instance);
+    furi_event_loop_process_timer_queue(instance);
     furi_check(TimerList_empty_p(instance->timer_list));
+
+    furi_event_loop_process_request_queue(instance);
 
     FuriEventLoopTree_clear(instance->tree);
     RequestQueue_clear(instance->request_queue);
@@ -143,6 +146,10 @@ void furi_event_loop_run(FuriEventLoop* instance) {
                 }
 
                 furi_event_loop_restore_flags(instance, flags & ~FuriEventLoopFlagEvent);
+
+            } else if(flags & FuriEventLoopFlagTimer) {
+                furi_event_loop_process_timer_queue(instance);
+                furi_event_loop_restore_flags(instance, flags & ~FuriEventLoopFlagTimer);
 
             } else if(flags & FuriEventLoopFlagRequest) {
                 furi_event_loop_process_request_queue(instance);

@@ -46,11 +46,13 @@ BPTREE_DEF2( // NOLINT
 typedef enum {
     FuriEventLoopFlagEvent = (1 << 0),
     FuriEventLoopFlagStop = (1 << 1),
-    FuriEventLoopFlagRequest = (1 << 2),
+    FuriEventLoopFlagTimer = (1 << 2),
+    FuriEventLoopFlagRequest = (1 << 3),
 } FuriEventLoopFlag;
 
-#define FuriEventLoopFlagAll \
-    (FuriEventLoopFlagEvent | FuriEventLoopFlagStop | FuriEventLoopFlagRequest)
+#define FuriEventLoopFlagAll                                                   \
+    (FuriEventLoopFlagEvent | FuriEventLoopFlagStop | FuriEventLoopFlagTimer | \
+     FuriEventLoopFlagRequest)
 
 typedef enum {
     FuriEventLoopProcessStatusComplete,
@@ -75,8 +77,11 @@ struct FuriEventLoop {
     FuriEventLoopTree_t tree;
     WaitingList_t waiting_list;
 
-    // Pending request handling
+    // Active timer list
     TimerList_t timer_list;
+    // Timer request queue
+    TimerQueue_t timer_queue;
+    // Pending request handling
     RequestQueue_t request_queue;
 
     // Tick event
