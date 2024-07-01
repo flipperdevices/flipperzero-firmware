@@ -5,6 +5,7 @@
 #include <m-i-list.h>
 
 typedef enum {
+    FuriEventLoopTimerRequestNone,
     FuriEventLoopTimerRequestStart,
     FuriEventLoopTimerRequestStop,
     FuriEventLoopTimerRequestFree,
@@ -27,7 +28,6 @@ struct FuriEventLoopTimer {
     ILIST_INTERFACE(TimerQueue, FuriEventLoopTimer);
 
     FuriEventLoopTimerRequest request;
-    bool request_pending;
 
     bool active;
     bool periodic;
