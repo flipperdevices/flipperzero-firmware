@@ -1,5 +1,4 @@
 name: 'Unit tests'
-
 on:
   pull_request:
 
@@ -40,7 +39,7 @@ jobs:
         timeout-minutes: 5
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+          python3 scripts/testops.py await_flipper -p ${{steps.device.outputs.flipper}}
           python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
 
       - name: 'Copy assets and unit data, reboot and wait for flipper'
@@ -49,11 +48,11 @@ jobs:
         timeout-minutes: 7
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+          python3 scripts/testops.py await_flipper -p ${{steps.device.outputs.flipper}}
           rm -rf build/latest/resources/dolphin
           python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send build/latest/resources /ext
           python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
-          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+          python3 scripts/testops.py await_flipper -p ${{steps.device.outputs.flipper}}
 
       - name: 'Run units and validate results'
         id: run_units
@@ -61,7 +60,7 @@ jobs:
         timeout-minutes: 7
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 scripts/testing/units.py ${{steps.device.outputs.flipper}}
+          python3 scripts/testops.py run_units -p ${{steps.device.outputs.flipper}}
 
       - name: 'Check GDB output'
         if: failure() && steps.flashing.outcome == 'success'
