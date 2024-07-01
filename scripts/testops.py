@@ -14,6 +14,7 @@ class Main(App):
     # this is basic use without sub-commands, simply to reboot flipper / power it off, not meant as a full CLI wrapper
     def init(self):
         self.parser.add_argument("-p", "--port", help="CDC Port", default="auto")
+        self.parser.add_argument("-t", "--timeout", help="Timeout in seconds", type=int, default=10)
 
         self.subparsers = self.parser.add_subparsers(help="sub-command help")
 
@@ -48,7 +49,7 @@ class Main(App):
         return flipper
 
     def await_flipper(self):
-        if not (flipper := self._get_flipper(retry_count=90)):
+        if not (flipper := self._get_flipper(retry_count=self.args.timeout)):
             return 1
 
         self.logger.info("Flipper started")
