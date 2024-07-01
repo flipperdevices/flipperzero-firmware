@@ -1,8 +1,6 @@
 name: 'Updater test'
-
 on:
   pull_request:
-
 env:
   TARGETS: f7
   DEFAULT_TARGET: f7
@@ -15,7 +13,6 @@ jobs:
     steps:
       - name: 'Wipe workspace'
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -28,7 +25,6 @@ jobs:
         run: |
           echo "flipper=Rekigyn" >> $GITHUB_OUTPUT
           echo "stlink=0F020D026415303030303032" >> $GITHUB_OUTPUT
-
       - name: 'Flashing target firmware'
         id: first_full_flash
         timeout-minutes: 10
@@ -36,7 +32,6 @@ jobs:
           source scripts/toolchain/fbtenv.sh
           ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FORCE=1
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
-
       - name: 'Validating updater'
         id: second_full_flash
         timeout-minutes: 10
@@ -45,13 +40,11 @@ jobs:
           source scripts/toolchain/fbtenv.sh
           ./fbt flash_usb PORT=${{steps.device.outputs.flipper}} FORCE=1
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
-
       - name: 'Get last release tag'
         id: release_tag
         if: failure()
         run: |
           echo "tag=$(git tag -l --sort=-version:refname | grep -v "rc\|RC" | head -1)" >> $GITHUB_OUTPUT
-
       - name: 'Wipe workspace'
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
@@ -66,7 +59,6 @@ jobs:
         if: failure()
         run: |
           ./fbt flash SWD_TRANSPORT_SERIAL=${{steps.device.outputs.stlink}} FORCE=1
-
       - name: 'Wait for flipper and format ext'
         if: failure()
         run: |
