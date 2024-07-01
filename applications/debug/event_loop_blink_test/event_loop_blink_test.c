@@ -42,9 +42,11 @@ static_assert(COUNT_OF(timer_intervals) == TIMER_COUNT);
 static void blink_gpio_init(void) {
     for(size_t i = 0; i < TIMER_COUNT; ++i) {
         furi_hal_gpio_init_simple(blink_gpio_pins[i], GpioModeOutputPushPull);
+        furi_hal_gpio_write(blink_gpio_pins[i], false);
     }
 
     furi_hal_gpio_init_simple(&gpio_ext_pc0, GpioModeOutputPushPull);
+    furi_hal_gpio_write(&gpio_ext_pc0, false);
 }
 
 static void blink_gpio_deinit(void) {
