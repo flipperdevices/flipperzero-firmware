@@ -24,7 +24,7 @@ jobs:
       - name: 'Get flipper from device manager (mock)'
         id: device
         run: |
-          echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
+          echo "flipper=auto" >> $GITHUB_OUTPUT
 
       - name: 'Flash unit tests firmware'
         id: flashing
