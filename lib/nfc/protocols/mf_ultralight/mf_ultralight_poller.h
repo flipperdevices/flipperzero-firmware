@@ -42,7 +42,7 @@ typedef enum {
  */
 typedef struct {
     MfUltralightAuthPassword password; /**< Password to be used for authentication. */
-    MfUltralightC3DesAuthKey _3des_key;
+    MfUltralightC3DesAuthKey tdes_key;
     MfUltralightAuthPack pack; /**< Pack received on successfull authentication. */
     bool auth_success; /**< Set to true if authentication succeeded, false otherwise. */
     bool skip_auth; /**< Set to true if authentication should be skipped, false otherwise. */

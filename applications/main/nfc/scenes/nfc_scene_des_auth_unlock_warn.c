@@ -21,7 +21,7 @@ void nfc_scene_des_auth_unlock_warn_on_enter(void* context) {
 
     NfcProtocol protocol = nfc_device_get_protocol(nfc->nfc_device);
     uint8_t* key = (protocol == NfcProtocolFelica) ? nfc->felica_auth->card_key.data :
-                                                     nfc->mf_ul_auth->_3des_key.data;
+                                                     nfc->mf_ul_auth->tdes_key.data;
 
     for(uint8_t i = 0; i < FELICA_DATA_BLOCK_SIZE; i++)
         furi_string_cat_printf(str, "%02X ", key[i]);

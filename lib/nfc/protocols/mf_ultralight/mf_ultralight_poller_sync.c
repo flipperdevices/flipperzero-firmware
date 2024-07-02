@@ -255,7 +255,7 @@ static NfcCommand mf_ultralight_poller_read_callback(NfcGenericEvent event, void
                mfu_poller->feature_set, MfUltralightFeatureSupportAuthenticate)) {
             mfu_event->data->auth_context.skip_auth = false;
             memset(
-                mfu_poller->auth_context._3des_key.data, 0x00, MF_ULTRALIGHT_C_AUTH_DES_KEY_SIZE);
+                mfu_poller->auth_context.tdes_key.data, 0x00, MF_ULTRALIGHT_C_AUTH_DES_KEY_SIZE);
         }
     }
 

@@ -12,7 +12,7 @@ void nfc_scene_des_auth_key_input_on_enter(void* context) {
     // Setup view
     NfcProtocol protocol = nfc_device_get_protocol(nfc->nfc_device);
     uint8_t* key = (protocol == NfcProtocolFelica) ? nfc->felica_auth->card_key.data :
-                                                     nfc->mf_ul_auth->_3des_key.data;
+                                                     nfc->mf_ul_auth->tdes_key.data;
 
     ByteInput* byte_input = nfc->byte_input;
     byte_input_set_header_text(byte_input, "Enter key in hex");

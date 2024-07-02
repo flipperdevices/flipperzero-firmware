@@ -452,7 +452,7 @@ static NfcCommand mf_ultralight_poller_handler_auth_ultralight_c(MfUltralightPol
         command = instance->callback(instance->general_event, instance->context);
         if(!instance->mfu_event.data->auth_context.skip_auth) {
             FURI_LOG_D(TAG, "Trying to authenticate with 3des key");
-            instance->auth_context._3des_key = instance->mfu_event.data->auth_context._3des_key;
+            instance->auth_context.tdes_key = instance->mfu_event.data->auth_context.tdes_key;
             do {
                 uint8_t output[MF_ULTRALIGHT_C_AUTH_DATA_SIZE];
                 uint8_t RndA[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE] = {0};
@@ -596,7 +596,7 @@ static NfcCommand
 
         memcpy(
             &instance->data->page[44],
-            instance->auth_context._3des_key.data,
+            instance->auth_context.tdes_key.data,
             MF_ULTRALIGHT_C_AUTH_DES_KEY_SIZE);
         instance->data->pages_read = instance->pages_total;
         instance->pages_read = instance->pages_total;
