@@ -270,6 +270,8 @@ static void desktop_init_settings(Desktop* desktop) {
         FURI_LOG_D(TAG, "SD Card not ready, skipping settings");
         return;
     }
+#else
+    UNUSED(desktop_storage_callback);
 #endif
 
     desktop_apply_settings(desktop);
