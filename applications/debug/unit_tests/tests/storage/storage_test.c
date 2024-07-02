@@ -412,70 +412,26 @@ MU_TEST_SUITE(storage_rename) {
 
 #define APPSDATA_APP_PATH(path) STORAGE_APPS_DATA_STEM "/" path
 
-static const char* storage_test_apps[] = {
-    "-_twilight_-",
-    "-_rainbow_-",
-    "-_pinkie_-",
-    "-_apple_-",
-    "-_flutter_-",
-    "-_rare_-",
-};
-
-static size_t storage_test_apps_count = COUNT_OF(storage_test_apps);
-
-static int32_t storage_test_app(void* arg) {
-    UNUSED(arg);
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_remove(storage, "/data/test");
-    int32_t ret = storage_file_create(storage, "/data/test", "test");
-    furi_record_close(RECORD_STORAGE);
-    return ret;
-}
-
-MU_TEST(test_storage_data_path_apps) {
-    for(size_t i = 0; i < storage_test_apps_count; i++) {
-        FuriThread* thread =
-            furi_thread_alloc_ex(storage_test_apps[i], 1024, storage_test_app, NULL);
-        furi_thread_set_appid(thread, storage_test_apps[i]);
-        furi_thread_start(thread);
-        furi_thread_join(thread);
-
-        mu_assert_int_eq(true, furi_thread_get_return_code(thread));
-
-        // Check if app data dir and file exists
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        FuriString* expected = furi_string_alloc();
-        furi_string_printf(expected, APPSDATA_APP_PATH("%s"), storage_test_apps[i]);
-
-        mu_check(storage_dir_exists(storage, furi_string_get_cstr(expected)));
-        furi_string_cat(expected, "/test");
-        mu_check(storage_file_exists(storage, furi_string_get_cstr(expected)));
-
-        furi_string_printf(expected, APPSDATA_APP_PATH("%s"), storage_test_apps[i]);
-        storage_simply_remove_recursive(storage, furi_string_get_cstr(expected));
-
-        furi_record_close(RECORD_STORAGE);
-
-        furi_string_free(expected);
-        furi_thread_free(thread);
-    }
-}
-
-MU_TEST(test_storage_data_path) {
+MU_TEST(test_storage_apps_data_path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     File* file = storage_file_alloc(storage);
-    mu_check(storage_dir_open(file, "/data"));
-    mu_check(storage_dir_close(file));
+    mu_check(storage_file_open(
+        file, APPSDATA_APP_PATH("test/file.txt"), FSAM_WRITE, FSOM_CREATE_ALWAYS));
+    mu_check(storage_file_close(file));
     storage_file_free(file);
 
     // check that appsdata folder exists
     mu_check(storage_dir_exists(storage, STORAGE_APPS_DATA_STEM));
 
-    // check that cli folder exists
-    mu_check(storage_dir_exists(storage, APPSDATA_APP_PATH("cli")));
+    // check that test folder exists
+    mu_check(storage_dir_exists(storage, APPSDATA_APP_PATH("test")));
 
-    storage_simply_remove(storage, APPSDATA_APP_PATH("cli"));
+    // check that file exists
+    mu_check(storage_file_exists(storage, APPSDATA_APP_PATH("test/file.txt")));
+
+    storage_simply_remove(storage, APPSDATA_APP_PATH("test/file.txt"));
+    storage_simply_remove(storage, APPSDATA_APP_PATH("test"));
 
     furi_record_close(RECORD_STORAGE);
 }
@@ -689,9 +645,8 @@ MU_TEST(test_md5_calc) {
     furi_record_close(RECORD_STORAGE);
 }
 
-MU_TEST_SUITE(test_data_path) {
-    MU_RUN_TEST(test_storage_data_path);
-    MU_RUN_TEST(test_storage_data_path_apps);
+MU_TEST_SUITE(test_apps_data_path) {
+    MU_RUN_TEST(test_storage_apps_data_path);
 }
 
 MU_TEST_SUITE(test_storage_common) {
@@ -707,7 +662,7 @@ int run_minunit_test_storage(void) {
     MU_RUN_SUITE(storage_file_64k);
     MU_RUN_SUITE(storage_dir);
     MU_RUN_SUITE(storage_rename);
-    MU_RUN_SUITE(test_data_path);
+    MU_RUN_SUITE(test_apps_data_path);
     MU_RUN_SUITE(test_storage_common);
     MU_RUN_SUITE(test_md5_calc_suite);
     return MU_EXIT_CODE;
