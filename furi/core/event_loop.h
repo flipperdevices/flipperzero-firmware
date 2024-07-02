@@ -34,7 +34,7 @@ typedef struct FuriEventLoop FuriEventLoop;
  * Couple things to keep in mind:
  * - You can have 1 event_loop per 1 thread
  * - You can not use event_loop instance in the other thread
- * - Do not use blocking api to query object delegated to Event Loop
+ * - Do not use blocking API to query object delegated to Event Loop
  *
  * @return     The Event Loop instance
  */
@@ -74,7 +74,7 @@ typedef void (*FuriEventLoopTickCallback)(void* context);
  *
  * Tick callback is called periodically after specified inactivity time.
  * It acts like a low-priority timer: it will only fire if there is time
- * left after processing the synchronisation primitives and the regular timers.
+ * left after processing the synchronization primitives and the regular timers.
  * Therefore, it is not monotonic: ticks will be skipped if the event loop is busy.
  *
  * @param      instance  The Event Loop instance

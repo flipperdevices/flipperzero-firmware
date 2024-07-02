@@ -41,7 +41,7 @@ typedef struct FuriEventLoopTimer FuriEventLoopTimer;
  *
  * @param[in,out] instance pointer to the current FuriEventLoop instance
  * @param[in] callback pointer to the callback function to be executed upon timer timeout
- * @param[in] type timer type value to determine its behavior (signle-shot or periodic)
+ * @param[in] type timer type value to determine its behavior (single-shot or periodic)
  * @param[in,out] context pointer to a user-specific object (will be passed to the callback)
  * @returns pointer to the created timer instance
  */
