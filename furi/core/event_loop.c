@@ -115,13 +115,13 @@ void furi_event_loop_run(FuriEventLoop* instance) {
     while(true) {
         instance->state = FuriEventLoopStateIdle;
 
-        const TickType_t xTicksToWait =
+        const TickType_t ticks_to_sleep =
             MIN(furi_event_loop_get_timer_wait_time(instance),
                 furi_event_loop_get_tick_wait_time(instance));
 
         uint32_t flags = 0;
         BaseType_t ret = xTaskNotifyWaitIndexed(
-            FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, 0, FuriEventLoopFlagAll, &flags, xTicksToWait);
+            FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, 0, FuriEventLoopFlagAll, &flags, ticks_to_sleep);
 
         instance->state = FuriEventLoopStateProcessing;
 
