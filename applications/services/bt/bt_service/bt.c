@@ -446,16 +446,24 @@ static void bt_apply_settings(Bt* bt) {
         return;
     }
 
-    bt_close_rpc_connection(bt);
-
     bt_settings_load(&bt->bt_settings);
-    bt_keys_storage_load(bt->keys_storage);
 
-    bt->current_profile =
-        furi_hal_bt_change_app(ble_profile_serial, NULL, bt_on_gap_event_callback, bt);
+    if(bt_keys_storage_is_changed(bt->keys_storage)) {
+        FURI_LOG_I(TAG, "Loading new keys");
 
-    if(!bt->current_profile) {
-        FURI_LOG_E(TAG, "BLE App start failed");
+        bt_close_rpc_connection(bt);
+
+        bt_keys_storage_load(bt->keys_storage);
+
+        bt->current_profile =
+            furi_hal_bt_change_app(ble_profile_serial, NULL, bt_on_gap_event_callback, bt);
+
+        if(!bt->current_profile) {
+            FURI_LOG_E(TAG, "BLE App start failed");
+        }
+
+    } else {
+        FURI_LOG_I(TAG, "Keys already loaded");
     }
 
     if(bt->bt_settings.enabled) {
