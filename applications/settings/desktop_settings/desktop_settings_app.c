@@ -2,6 +2,7 @@
 #include <gui/modules/popup.h>
 #include <gui/scene_manager.h>
 
+#include <desktop/desktop.h>
 #include <desktop/views/desktop_view_pin_input.h>
 
 #include "desktop_settings_app.h"
@@ -102,11 +103,9 @@ extern int32_t desktop_settings_app(void* p) {
 
     desktop_settings_save(&app->settings);
 
-    FuriThread* desktop_thread = furi_thread_get_by_name("DesktopSrv");
-
-    if(desktop_thread) {
-        furi_thread_signal(desktop_thread, FuriSignalReloadFile, NULL);
-    }
+    Desktop* desktop = furi_record_open(RECORD_DESKTOP);
+    desktop_api_reload_settings(desktop);
+    furi_record_close(RECORD_DESKTOP);
 
     desktop_settings_app_free(app);
 

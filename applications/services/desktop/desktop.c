@@ -177,18 +177,6 @@ static void desktop_input_event_callback(const void* value, void* context) {
     }
 }
 
-static bool desktop_signal_callback(uint32_t signal, void* arg, void* context) {
-    UNUSED(arg);
-    Desktop* desktop = context;
-
-    if(signal == FuriSignalReloadFile) {
-        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalReloadSettings);
-        return true;
-    }
-
-    return false;
-}
-
 static void desktop_auto_lock_timer_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
@@ -261,8 +249,6 @@ static void desktop_apply_settings(Desktop* desktop) {
 }
 
 static void desktop_init_settings(Desktop* desktop) {
-    furi_thread_set_signal_callback(furi_thread_get_current(), desktop_signal_callback, desktop);
-
 #ifndef STORAGE_INT_ON_LFS
     Storage* storage = furi_record_open(RECORD_STORAGE);
     furi_pubsub_subscribe(storage_get_pubsub(storage), desktop_storage_callback, desktop);
@@ -503,6 +489,11 @@ void desktop_api_unlock(Desktop* instance) {
 FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {
     furi_assert(instance);
     return instance->status_pubsub;
+}
+
+void desktop_api_reload_settings(Desktop* instance) {
+    furi_assert(instance);
+    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopGlobalReloadSettings);
 }
 
 /*

@@ -15,3 +15,5 @@ typedef struct {
 } DesktopStatus;
 
 FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance);
+
+void desktop_api_reload_settings(Desktop* instance);

@@ -1620,7 +1620,6 @@ Function,+,furi_thread_flags_set,uint32_t,"FuriThreadId, uint32_t"
 Function,+,furi_thread_flags_wait,uint32_t,"uint32_t, uint32_t, uint32_t"
 Function,+,furi_thread_free,void,FuriThread*
 Function,+,furi_thread_get_appid,const char*,FuriThreadId
-Function,+,furi_thread_get_by_name,FuriThread*,const char*
 Function,+,furi_thread_get_current,FuriThread*,
 Function,+,furi_thread_get_current_id,FuriThreadId,
 Function,+,furi_thread_get_current_priority,FuriThreadPriority,
