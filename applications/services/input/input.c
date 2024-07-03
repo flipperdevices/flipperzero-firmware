@@ -84,7 +84,7 @@ int32_t input_srv(void* p) {
 
     const FuriThreadId thread_id = furi_thread_get_current_id();
     FuriPubSub* event_pubsub = furi_pubsub_alloc();
-    uint32_t counter = 0;
+    uint32_t counter = 1;
     furi_record_create(RECORD_INPUT_EVENTS, event_pubsub);
 
 #ifdef INPUT_DEBUG
@@ -131,7 +131,7 @@ int32_t input_srv(void* p) {
 
                 // Short / Long / Repeat timer routine
                 if(state) {
-                    pin_states[i].counter = ++counter;
+                    pin_states[i].counter = counter++;
                     event.sequence_counter = pin_states[i].counter;
                     furi_timer_start(pin_states[i].press_timer, INPUT_PRESS_TICKS);
                 } else {
