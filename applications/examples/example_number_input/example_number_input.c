@@ -56,7 +56,7 @@ int32_t example_number_input(void* p) {
     scene_manager_next_scene(app->scene_manager, ExampleNumberInputSceneShowNumber);
 
     view_dispatcher_run(app->view_dispatcher);
-
+    
     example_number_input_free(app);
 
     return 0;
