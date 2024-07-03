@@ -438,7 +438,9 @@ void number_input_free(NumberInput* number_input) {
             if (model->header != NULL) { 
                 furi_string_free(model->header);
             }
-            furi_string_free(model->text_buffer);
+            if (model->text_buffer != NULL) {
+                furi_string_free(model->text_buffer);
+            }
         },
         true);
     view_free(number_input->view);
