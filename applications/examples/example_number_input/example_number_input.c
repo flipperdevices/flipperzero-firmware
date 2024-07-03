@@ -9,15 +9,10 @@ bool example_number_input_custom_event_callback(void* context, uint32_t event) {
 static ExampleNumberInput* example_number_input_alloc() {
     ExampleNumberInput* app = malloc(sizeof(ExampleNumberInput));
     app->gui = furi_record_open(RECORD_GUI);
-    app->notification = furi_record_open(RECORD_NOTIFICATION);
-    app->text_buffer = furi_string_alloc();
     app->current_number = 5;
     app->min_value = -128;
     app->max_value = 2345;
-    furi_string_set(app->text_buffer, "5");
-    //Turn backlight on, believe me this makes testing your app easier
-    notification_message(app->notification, &sequence_display_backlight_on);
-
+    
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
     app->scene_manager = scene_manager_alloc(&example_number_input_scene_handlers, app);
@@ -46,10 +41,7 @@ static void example_number_input_free(ExampleNumberInput* app) {
     number_input_free(app->number_input);
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_NOTIFICATION);
     app->gui = NULL;
-    app->notification = NULL;
-    furi_string_free(app->text_buffer);
 
     //Remove whatever is left
     free(app);
@@ -63,11 +55,7 @@ int32_t example_number_input(void* p) {
 
     scene_manager_next_scene(app->scene_manager, ExampleNumberInputSceneShowNumber);
 
-    furi_hal_power_suppress_charge_enter();
-
     view_dispatcher_run(app->view_dispatcher);
-
-    furi_hal_power_suppress_charge_exit();
 
     example_number_input_free(app);
 

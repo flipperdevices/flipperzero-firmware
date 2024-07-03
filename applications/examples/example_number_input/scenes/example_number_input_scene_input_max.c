@@ -44,6 +44,5 @@ bool example_number_input_scene_input_max_on_event(void* context, SceneManagerEv
 }
 
 void example_number_input_scene_input_max_on_exit(void* context) {
-    ExampleNumberInput* app = context;
-    UNUSED(app);
+    UNUSED(context);
 }

@@ -10,13 +10,9 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <input/input.h>
-#include <notification/notification_messages.h>
 #include "example_number_input_custom_event.h"
 #include "scenes/example_number_input_scene.h"
 #include "views/example_number_input_show_number.h"
-
-#define EXAMPLE_TEXT_STORE_NUM 3
-#define EXAMPLE_TEXT_STORE_SIZE 128
 
 typedef struct ExampleNumberInputShowNumber ExampleNumberInputShowNumber;
 
@@ -27,10 +23,8 @@ typedef enum {
 
 typedef struct {
     Gui* gui;
-    NotificationApp* notification;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
-    FuriString* text_buffer;
     int32_t current_number;
     int32_t min_value;
     int32_t max_value;
