@@ -31,9 +31,9 @@ typedef struct {
 static const size_t keyboard_origin_x = 7;
 static const size_t keyboard_origin_y = 31;
 static const size_t keyboard_row_count = 2;
-static const size_t enter_symbol = '\r';
-static const size_t backspace_symbol = '\b';
-static const size_t sign_symbol = '-';
+static const char enter_symbol = '\r';
+static const char backspace_symbol = '\b';
+static const char sign_symbol = '-';
 
 static const NumberInputKey keyboard_keys_row_1[] = {
     {'0', 0, 12},
