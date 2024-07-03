@@ -112,9 +112,6 @@ void furi_event_loop_run(FuriEventLoop* instance) {
 
     furi_event_loop_init_tick(instance);
 
-    furi_thread_set_signal_callback(
-        instance->thread_id, furi_event_loop_signal_callback, instance);
-
     while(true) {
         instance->state = FuriEventLoopStateIdle;
 
