@@ -625,7 +625,7 @@ bool mf_ultralight_c_check_access(
             break;
         }
 
-        if((auth0 <= start_page) && ((auth1 == 0) || (auth1 == 1 || is_write_op))) {
+        if((auth0 <= start_page) && ((auth1 == 0) || (auth1 == 1 || is_write_op))) { //-V560
             break;
         }
 

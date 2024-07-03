@@ -166,7 +166,7 @@ MfUltralightError mf_ultralight_poller_authenticate_end(
     furi_check(request);
     furi_check(response);
 
-    uint8_t auth_cmd[MF_ULTRALIGHT_C_ENCRYPTED_PACK_SIZE] = {0xAF};
+    uint8_t auth_cmd[MF_ULTRALIGHT_C_ENCRYPTED_PACK_SIZE] = {0xAF}; //-V1009
     memcpy(&auth_cmd[1], request, MF_ULTRALIGHT_C_AUTH_DATA_SIZE);
     bit_buffer_copy_bytes(instance->tx_buffer, auth_cmd, sizeof(auth_cmd));
 
