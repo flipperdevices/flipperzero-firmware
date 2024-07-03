@@ -51,7 +51,8 @@ static bool ds1971_emulate_read_mem(OneWireSlave* bus, const uint8_t* data, size
 
 const iButtonProtocolDallasBase ibutton_protocol_ds1971 = {
     .family_code = DS1971_FAMILY_CODE,
-    .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteCopy,
+    .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteId |
+                iButtonProtocolFeatureWriteCopy,
     .data_size = sizeof(DS1971ProtocolData),
     .manufacturer = DALLAS_COMMON_MANUFACTURER_NAME,
     .name = DS1971_FAMILY_NAME,
