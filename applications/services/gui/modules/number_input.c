@@ -270,8 +270,10 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
 
     number_input_draw_input(canvas, model);
 
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 9, furi_string_get_cstr(model->header));
+    if (model->header != NULL) {
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 2, 9, furi_string_get_cstr(model->header));
+    }
     canvas_set_font(canvas, FontKeyboard);
     // Draw keyboard
     for(size_t row = 0; row < keyboard_row_count; row++) {
@@ -433,7 +435,9 @@ void number_input_free(NumberInput* number_input) {
         number_input->view,
         NumberInputModel * model,
         {
-            furi_string_free(model->header);
+            if (model->header != NULL) { 
+                furi_string_free(model->header);
+            }
             furi_string_free(model->text_buffer);
         },
         true);
