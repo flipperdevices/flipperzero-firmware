@@ -12,8 +12,8 @@ void example_number_input_scene_input_min_on_enter(void* context) {
     ExampleNumberInput* app = context;
     NumberInput* number_input = app->number_input;
 
-    int32_t min = -2147483647; //has no effect if smaller
-    static char str[50];
+    int32_t min = INT32_MIN + 1; // -2147483647 limit has no effect if smaller
+    char str[50];
     snprintf(str, sizeof(str), "Enter the minimum value");
     const char* constStr = str;
 

@@ -12,7 +12,7 @@ void example_number_input_scene_input_number_on_enter(void* context) {
     ExampleNumberInput* app = context;
     NumberInput* number_input = app->number_input;
 
-    static char str[50];
+    char str[50];
     snprintf(str, sizeof(str), "Set Number (%ld - %ld)", app->min_value, app->max_value);
     const char* constStr = str;
 

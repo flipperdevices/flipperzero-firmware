@@ -12,8 +12,8 @@ void example_number_input_scene_input_max_on_enter(void* context) {
     ExampleNumberInput* app = context;
     NumberInput* number_input = app->number_input;
 
-    int32_t max = 2147483646; //has no effect if larger
-    static char str[50];
+    int32_t max = INT32_MAX - 1; // 2147483646, limit has no effect if larger
+    char str[50];
     snprintf(str, sizeof(str), "Enter the maximum value");
     const char* constStr = str;
 
