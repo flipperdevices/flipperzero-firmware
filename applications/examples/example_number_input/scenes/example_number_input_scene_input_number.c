@@ -32,10 +32,7 @@ bool example_number_input_scene_input_number_on_event(void* context, SceneManage
     ExampleNumberInput* app = context;
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeBack) {
-        scene_manager_previous_scene(app->scene_manager);
-        return true;
-    } else if(event.type == SceneManagerEventTypeCustom) {
+    if(event.type == SceneManagerEventTypeCustom) { //Back button pressed
         scene_manager_previous_scene(app->scene_manager);
         return true;
     }

@@ -6,13 +6,13 @@
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <gui/scene_manager.h>
+#include <gui/modules/dialog_ex.h>
 #include <gui/modules/number_input.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <input/input.h>
 #include "example_number_input_custom_event.h"
 #include "scenes/example_number_input_scene.h"
-#include "views/example_number_input_show_number.h"
 
 typedef struct ExampleNumberInputShowNumber ExampleNumberInputShowNumber;
 
@@ -29,5 +29,5 @@ typedef struct {
     int32_t min_value;
     int32_t max_value;
     NumberInput* number_input;
-    ExampleNumberInputShowNumber* show_number;
+    DialogEx* dialog_ex;
 } ExampleNumberInput;

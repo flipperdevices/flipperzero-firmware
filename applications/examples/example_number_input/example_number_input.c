@@ -6,6 +6,12 @@ bool example_number_input_custom_event_callback(void* context, uint32_t event) {
     return scene_manager_handle_custom_event(app->scene_manager, event);
 }
 
+static bool example_number_input_back_event_callback(void* context) {
+    furi_assert(context);
+    ExampleNumberInput* app = context;
+    return scene_manager_handle_back_event(app->scene_manager);
+}
+
 static ExampleNumberInput* example_number_input_alloc() {
     ExampleNumberInput* app = malloc(sizeof(ExampleNumberInput));
     app->gui = furi_record_open(RECORD_GUI);
@@ -19,16 +25,16 @@ static ExampleNumberInput* example_number_input_alloc() {
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
     view_dispatcher_set_custom_event_callback(
         app->view_dispatcher, example_number_input_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        app->view_dispatcher, example_number_input_back_event_callback);
     app->number_input = number_input_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         ExampleNumberInputViewIdNumberInput,
         number_input_get_view(app->number_input));
-    app->show_number = example_number_input_show_number_alloc();
+    app->dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        ExampleNumberInputViewIdShowNumber,
-        example_number_input_show_number_get_view(app->show_number));
+        app->view_dispatcher, ExampleNumberInputViewIdShowNumber, dialog_ex_get_view(app->dialog_ex));
 
     return app;
 }
@@ -39,6 +45,7 @@ static void example_number_input_free(ExampleNumberInput* app) {
     view_dispatcher_remove_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
     scene_manager_free(app->scene_manager);
     number_input_free(app->number_input);
+    dialog_ex_free(app->dialog_ex);
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
     app->gui = NULL;
