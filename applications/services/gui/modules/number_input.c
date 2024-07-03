@@ -231,7 +231,7 @@ static void number_input_add_digit(NumberInputModel* model, char* newChar) {
         return;
     }
     model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
-    if (model->current_number == 0) {
+    if(model->current_number == 0) {
         furi_string_reset(model->text_buffer);
     }
 }
@@ -270,7 +270,7 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
 
     number_input_draw_input(canvas, model);
 
-    if (model->header != NULL) {
+    if(model->header != NULL) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 2, 9, furi_string_get_cstr(model->header));
     }
@@ -435,10 +435,10 @@ void number_input_free(NumberInput* number_input) {
         number_input->view,
         NumberInputModel * model,
         {
-            if (model->header != NULL) { 
+            if(model->header != NULL) {
                 furi_string_free(model->header);
             }
-            if (model->text_buffer != NULL) {
+            if(model->text_buffer != NULL) {
                 furi_string_free(model->text_buffer);
             }
         },

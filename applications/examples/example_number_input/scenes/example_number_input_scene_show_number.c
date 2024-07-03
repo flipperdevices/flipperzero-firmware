@@ -18,20 +18,19 @@ static void
 static void example_number_input_scene_update_view(void* context) {
     ExampleNumberInput* app = context;
     DialogEx* dialog_ex = app->dialog_ex;
-    
+
     dialog_ex_set_header(dialog_ex, "The number is", 64, 0, AlignCenter, AlignTop);
 
     static char buffer[12]; //needs static for extended lifetime
 
     snprintf(buffer, sizeof(buffer), "%ld", app->current_number);
     dialog_ex_set_text(dialog_ex, buffer, 64, 29, AlignCenter, AlignCenter);
-    
+
     dialog_ex_set_left_button_text(dialog_ex, "Min");
     dialog_ex_set_right_button_text(dialog_ex, "Max");
     dialog_ex_set_center_button_text(dialog_ex, "Change");
 
-    dialog_ex_set_result_callback(
-        dialog_ex, example_number_input_scene_confirm_dialog_callback);
+    dialog_ex_set_result_callback(dialog_ex, example_number_input_scene_confirm_dialog_callback);
     dialog_ex_set_context(dialog_ex, app);
 }
 

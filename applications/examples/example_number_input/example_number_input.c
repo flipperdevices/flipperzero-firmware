@@ -18,7 +18,7 @@ static ExampleNumberInput* example_number_input_alloc() {
     app->current_number = 5;
     app->min_value = -128;
     app->max_value = 2345;
-    
+
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
     app->scene_manager = scene_manager_alloc(&example_number_input_scene_handlers, app);
@@ -34,7 +34,9 @@ static ExampleNumberInput* example_number_input_alloc() {
         number_input_get_view(app->number_input));
     app->dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, ExampleNumberInputViewIdShowNumber, dialog_ex_get_view(app->dialog_ex));
+        app->view_dispatcher,
+        ExampleNumberInputViewIdShowNumber,
+        dialog_ex_get_view(app->dialog_ex));
 
     return app;
 }
@@ -63,7 +65,7 @@ int32_t example_number_input(void* p) {
     scene_manager_next_scene(app->scene_manager, ExampleNumberInputSceneShowNumber);
 
     view_dispatcher_run(app->view_dispatcher);
-    
+
     example_number_input_free(app);
 
     return 0;
