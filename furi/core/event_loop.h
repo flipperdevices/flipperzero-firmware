@@ -15,6 +15,7 @@
 #pragma once
 
 #include "base.h"
+#include "event_loop_contract.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,7 +31,7 @@ typedef enum {
 typedef struct FuriEventLoop FuriEventLoop;
 
 /** Opaque type of an object participating in event loop */
-typedef struct FuriEventLoopBase FuriEventLoopBase;
+typedef void FuriEventLoopObject;
 
 /** Callback type
  *
@@ -40,7 +41,7 @@ typedef struct FuriEventLoopBase FuriEventLoopBase;
  *
  * @return     true if event was processed, false if we need to delay processing
  */
-typedef bool (*FuriEventLoopCallback)(FuriEventLoopBase* object, void* context);
+typedef bool (*FuriEventLoopCallback)(FuriEventLoopObject* object, void* context);
 
 /** Allocate Event Loop instance
  *
@@ -104,14 +105,16 @@ void furi_event_loop_tick_set(
  * @warning you can only have one subscription for one event type.
  *
  * @param      instance       The Event Loop instance
- * @param      object         The object to subscribe to
+ * @param      object         The message object to add
+ * @param[in]  contract       The Event Loop interface for the object
  * @param[in]  event          The Event Loop event to trigger on
  * @param[in]  callback       The callback to call on event
  * @param      context        The context for callback
  */
 void furi_event_loop_subscribe(
     FuriEventLoop* instance,
-    FuriEventLoopBase* object,
+    FuriEventLoopObject* object,
+    const FuriEventLoopContract* contract,
     FuriEventLoopEvent event,
     FuriEventLoopCallback callback,
     void* context);
@@ -121,7 +124,7 @@ void furi_event_loop_subscribe(
  * @param      instance       The Event Loop instance
  * @param      object         The object to unsubscribe from
  */
-void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopBase* object);
+void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object);
 
 #ifdef __cplusplus
 }

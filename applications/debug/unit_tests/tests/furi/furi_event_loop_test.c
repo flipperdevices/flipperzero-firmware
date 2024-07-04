@@ -16,11 +16,11 @@ typedef struct {
     uint32_t consumer_counter;
 } TestFuriData;
 
-bool test_furi_event_loop_producer_callback(FuriEventLoopBase* object, void* context) {
+bool test_furi_event_loop_producer_callback(FuriEventLoopObject* object, void* context) {
     furi_check(context);
 
     TestFuriData* data = context;
-    furi_check(data->mq == (FuriMessageQueue*)object, "Invalid queue");
+    furi_check(data->mq == object, "Invalid queue");
 
     FURI_LOG_I(
         TAG, "producer_mq_callback: %lu %lu", data->producer_counter, data->consumer_counter);
@@ -60,14 +60,15 @@ int32_t test_furi_event_loop_producer(void* p) {
     data->producer_event_loop = furi_event_loop_alloc();
     furi_event_loop_subscribe(
         data->producer_event_loop,
-        (FuriEventLoopBase*)data->mq,
+        data->mq,
+        furi_message_queue_get_contract(),
         FuriEventLoopEventOut,
         test_furi_event_loop_producer_callback,
         data);
 
     furi_event_loop_run(data->producer_event_loop);
 
-    furi_event_loop_unsubscribe(data->producer_event_loop, (FuriEventLoopBase*)data->mq);
+    furi_event_loop_unsubscribe(data->producer_event_loop, data->mq);
     furi_event_loop_free(data->producer_event_loop);
 
     FURI_LOG_I(TAG, "producer end");
@@ -75,11 +76,11 @@ int32_t test_furi_event_loop_producer(void* p) {
     return 0;
 }
 
-bool test_furi_event_loop_consumer_callback(FuriEventLoopBase* object, void* context) {
+bool test_furi_event_loop_consumer_callback(FuriEventLoopObject* object, void* context) {
     furi_check(context);
 
     TestFuriData* data = context;
-    furi_check(data->mq == (FuriMessageQueue*)object);
+    furi_check(data->mq == object);
 
     furi_delay_us(furi_hal_random_get() % 1000);
     furi_check(furi_message_queue_get(data->mq, &data->consumer_counter, 0) == FuriStatusOk);
@@ -116,14 +117,15 @@ int32_t test_furi_event_loop_consumer(void* p) {
     data->consumer_event_loop = furi_event_loop_alloc();
     furi_event_loop_subscribe(
         data->consumer_event_loop,
-        (FuriEventLoopBase*)data->mq,
+        data->mq,
+        furi_message_queue_get_contract(),
         FuriEventLoopEventIn,
         test_furi_event_loop_consumer_callback,
         data);
 
     furi_event_loop_run(data->consumer_event_loop);
 
-    furi_event_loop_unsubscribe(data->consumer_event_loop, (FuriEventLoopBase*)data->mq);
+    furi_event_loop_unsubscribe(data->consumer_event_loop, data->mq);
     furi_event_loop_free(data->consumer_event_loop);
 
     FURI_LOG_I(TAG, "consumer end");

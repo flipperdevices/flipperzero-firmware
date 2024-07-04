@@ -5,6 +5,7 @@
 #pragma once
 
 #include "base.h"
+#include "event_loop_contract.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,6 +88,11 @@ uint32_t furi_message_queue_get_space(FuriMessageQueue* instance);
  * @return     The furi status.
  */
 FuriStatus furi_message_queue_reset(FuriMessageQueue* instance);
+
+/**
+ *
+ */
+const FuriEventLoopContract* furi_message_queue_get_contract(void);
 
 #ifdef __cplusplus
 }
