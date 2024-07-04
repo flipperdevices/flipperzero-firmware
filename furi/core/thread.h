@@ -46,6 +46,9 @@ typedef enum {
  */
 typedef struct FuriThread FuriThread;
 
+/** FuriThreadList type */
+typedef struct FuriThreadList FuriThreadList;
+
 /**
  * @brief Unique thread identifier type (used by the OS kernel).
  */
@@ -82,6 +85,18 @@ typedef void (*FuriThreadStdoutWriteCallback)(const char* data, size_t size);
  * @param[in,out] context pointer to a user-specified object
  */
 typedef void (*FuriThreadStateCallback)(FuriThreadState state, void* context);
+
+/**
+ * @brief Signal handler callback function pointer type.
+ *
+ * The function to be used as a signal handler callback MUS follow this signature.
+ *
+ * @param[in] signal value of the signal to be handled by the recipient
+ * @param[in,out] arg optional argument (can be of any value, including NULL)
+ * @param[in,out] context pointer to a user-specified object
+ * @returns true if the signal was handled, false otherwise
+ */
+typedef bool (*FuriThreadSignalCallback)(uint32_t signal, void* arg, void* context);
 
 /**
  * @brief Create a FuriThread instance.
@@ -253,6 +268,29 @@ void furi_thread_set_state_context(FuriThread* thread, void* context);
 FuriThreadState furi_thread_get_state(FuriThread* thread);
 
 /**
+ * @brief Set a signal handler callback for a FuriThread instance.
+ *
+ * The thread MUST be stopped when calling this function.
+ *
+ * @param[in,out] thread pointer to the FuriThread instance to be modified
+ * @param[in] callback pointer to a user-specified callback function
+ * @param[in] context pointer to a user-specified object (will be passed to the callback, can be NULL)
+ */
+void furi_thread_set_signal_callback(
+    FuriThread* thread,
+    FuriThreadSignalCallback callback,
+    void* context);
+
+/**
+ * @brief Send a signal to a FuriThread instance.
+ *
+ * @param[in] thread pointer to the FuriThread instance to be signaled
+ * @param[in] signal signal value to be sent
+ * @param[in,out] arg optional argument (can be of any value, including NULL)
+ */
+bool furi_thread_signal(const FuriThread* thread, uint32_t signal, void* arg);
+
+/**
  * @brief Start a FuriThread instance.
  *
  * The thread MUST be stopped when calling this function.
@@ -379,13 +417,13 @@ uint32_t furi_thread_flags_get(void);
 uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeout);
 
 /**
- * @brief Enumerate all threads.
- * 
- * @param[out] thread_array pointer to the output array (must be properly allocated)
- * @param[in] array_item_count output array capacity in elements (NOT bytes)
- * @return total thread count (array_item_count or less)
+ * @brief      Enumerate all threads.
+ *
+ * @param[out] thread_list  pointer to the FuriThreadList container
+ *
+ * @return     true on success, false otherwise
  */
-uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_item_count);
+bool furi_thread_enumerate(FuriThreadList* thread_list);
 
 /**
  * @brief Get the name of a thread based on its unique identifier.
