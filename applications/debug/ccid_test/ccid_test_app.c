@@ -123,6 +123,7 @@ static const CcidCallbacks ccid_cb = {
 //APDU example: 0x01:0x01:0x00:0x00
 //response: SW1=0x90, SW2=0x00
 void handle_instruction_01(ISO7816_Response_APDU* responseAPDU) {
+    responseAPDU->DataLen = 0;
     iso7816_set_response(responseAPDU, ISO7816_RESPONSE_OK);
 }
 
@@ -134,14 +135,12 @@ void handle_instruction_02(
     uint8_t p2,
     uint8_t lc,
     uint8_t le,
-    ISO7816_Response_APDU* responseAPDU,
-    uint8_t* responseApduDataBuffer,
-    uint16_t* responseApduDataBufferLen) {
+    ISO7816_Response_APDU* responseAPDU) {
     if(p1 == 0 && p2 == 0 && lc == 0 && le >= 2) {
-        responseApduDataBuffer[0] = 0x62;
-        responseApduDataBuffer[1] = 0x63;
+        responseAPDU->Data[0] = 0x62;
+        responseAPDU->Data[1] = 0x63;
 
-        *responseApduDataBufferLen = 2;
+        responseAPDU->DataLen = 2;
 
         iso7816_set_response(responseAPDU, ISO7816_RESPONSE_OK);
     } else if(p1 != 0 || p2 != 0) {
@@ -154,12 +153,9 @@ void handle_instruction_02(
 //Instruction 3: sends a command with a body with two bytes, receives a response with no bytes
 //APDU example: 0x01:0x03:0x00:0x00:0x02:CA:FE
 //response SW1=0x90, SW2=0x00
-void handle_instruction_03(
-    uint8_t p1,
-    uint8_t p2,
-    uint8_t lc,
-    ISO7816_Response_APDU* responseAPDU) {
+void handle_instruction_03(uint8_t p1, uint8_t p2, uint8_t lc, ISO7816_Response_APDU* responseAPDU) {
     if(p1 == 0 && p2 == 0 && lc == 2) {
+        responseAPDU->DataLen = 0;
         iso7816_set_response(responseAPDU, ISO7816_RESPONSE_OK);
     } else if(p1 != 0 || p2 != 0) {
         iso7816_set_response(responseAPDU, ISO7816_RESPONSE_WRONG_PARAMETERS_P1_P2);
@@ -177,15 +173,13 @@ void handle_instruction_04(
     uint8_t lc,
     uint8_t le,
     const uint8_t* commandApduDataBuffer,
-    ISO7816_Response_APDU* responseAPDU,
-    uint8_t* responseApduDataBuffer,
-    uint16_t* responseApduDataBufferLen) {
+    ISO7816_Response_APDU* responseAPDU) {
     if(p1 == 0 && p2 == 0 && lc > 0 && le > 0 && le >= lc) {
         for(uint16_t i = 0; i < lc; i++) {
-            responseApduDataBuffer[i] = commandApduDataBuffer[i];
+            responseAPDU->Data[i] = commandApduDataBuffer[i];
         }
 
-        *responseApduDataBufferLen = lc;
+        responseAPDU->DataLen = lc;
 
         iso7816_set_response(responseAPDU, ISO7816_RESPONSE_OK);
     } else if(p1 != 0 || p2 != 0) {
@@ -203,16 +197,10 @@ void iso7816_answer_to_reset(Iso7816Atr* atr) {
 
 void iso7816_process_command(
     const ISO7816_Command_APDU* commandAPDU,
-    ISO7816_Response_APDU* responseAPDU,
-    const uint8_t* commandApduDataBuffer,
-    uint16_t commandApduDataBufferLen,
-    uint8_t* responseApduDataBuffer,
-    uint16_t* responseApduDataBufferLen) {
+    ISO7816_Response_APDU* responseAPDU) {
     //example 1: sends a command with no body, receives a response with no body
     //sends APDU 0x01:0x01:0x00:0x00
     //receives SW1=0x90, SW2=0x00
-
-    furi_assert(commandApduDataBufferLen == commandAPDU->Lc);
 
     if(commandAPDU->CLA == 0x01) {
         switch(commandAPDU->INS) {
@@ -221,13 +209,7 @@ void iso7816_process_command(
             break;
         case 0x02:
             handle_instruction_02(
-                commandAPDU->P1,
-                commandAPDU->P2,
-                commandAPDU->Lc,
-                commandAPDU->Le,
-                responseAPDU,
-                responseApduDataBuffer,
-                responseApduDataBufferLen);
+                commandAPDU->P1, commandAPDU->P2, commandAPDU->Lc, commandAPDU->Le, responseAPDU);
             break;
         case 0x03:
             handle_instruction_03(commandAPDU->P1, commandAPDU->P2, commandAPDU->Lc, responseAPDU);
@@ -238,10 +220,8 @@ void iso7816_process_command(
                 commandAPDU->P2,
                 commandAPDU->Lc,
                 commandAPDU->Le,
-                commandApduDataBuffer,
-                responseAPDU,
-                responseApduDataBuffer,
-                responseApduDataBufferLen);
+                commandAPDU->Data,
+                responseAPDU);
             break;
         default:
             iso7816_set_response(responseAPDU, ISO7816_RESPONSE_INSTRUCTION_NOT_SUPPORTED);

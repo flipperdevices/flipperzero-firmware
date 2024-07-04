@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <furi.h>
+#include <furi_hal.h>
 #include "iso7816_t0_apdu.h"
 
 //reads dataBuffer with dataLen size, translate it into a ISO7816_Command_APDU type
@@ -9,16 +10,11 @@
 uint8_t iso7816_read_command_apdu(
     ISO7816_Command_APDU* command,
     const uint8_t* dataBuffer,
-    uint32_t dataLen,
-    const uint8_t** commandApduDataBuffer) {
-    (void)commandApduDataBuffer;
-
+    uint32_t dataLen) {
     command->CLA = dataBuffer[0];
     command->INS = dataBuffer[1];
     command->P1 = dataBuffer[2];
     command->P2 = dataBuffer[3];
-
-    *commandApduDataBuffer = NULL;
 
     if(dataLen == 4) {
         command->Lc = 0;
@@ -44,8 +40,8 @@ uint8_t iso7816_read_command_apdu(
         //short lc
 
         command->Lc = dataBuffer[4];
-        if(command->Lc > 0) {
-            *commandApduDataBuffer = &dataBuffer[5];
+        if(command->Lc > 0 && command->Lc < CCID_SHORT_APDU_SIZE) {
+            memcpy(command->Data, &dataBuffer[5], command->Lc);
 
             //does it have a short le too?
             if(dataLen == (uint32_t)(command->Lc + 5)) {
@@ -77,16 +73,13 @@ uint8_t iso7816_read_command_apdu(
 void iso7816_write_response_apdu(
     const ISO7816_Response_APDU* response,
     uint8_t* readerToPcDataBlock,
-    uint32_t* readerToPcDataBlockLen,
-    uint8_t* responseDataBuffer,
-    uint32_t responseDataLen) {
+    uint32_t* readerToPcDataBlockLen) {
     uint32_t responseDataBufferIndex = 0;
 
     //response body
-    if(responseDataLen > 0) {
-        while(responseDataBufferIndex < responseDataLen) {
-            readerToPcDataBlock[responseDataBufferIndex] =
-                responseDataBuffer[responseDataBufferIndex];
+    if(response->DataLen > 0) {
+        while(responseDataBufferIndex < response->DataLen) {
+            readerToPcDataBlock[responseDataBufferIndex] = response->Data[responseDataBufferIndex];
             responseDataBufferIndex++;
         }
     }

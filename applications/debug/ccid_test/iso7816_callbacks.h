@@ -8,11 +8,7 @@ typedef struct {
     void (*iso7816_answer_to_reset)(Iso7816Atr* atr);
     void (*iso7816_process_command)(
         const ISO7816_Command_APDU* command,
-        ISO7816_Response_APDU* response,
-        const uint8_t* commandApduDataBuffer,
-        uint16_t commandApduDataBufferLen,
-        uint8_t* responseApduDataBuffer,
-        uint16_t* responseApduDataBufferLen);
+        ISO7816_Response_APDU* response);
 } Iso7816Callbacks;
 
 void iso7816_set_callbacks(Iso7816Callbacks* cb);
