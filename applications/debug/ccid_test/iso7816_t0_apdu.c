@@ -7,7 +7,7 @@
 //reads dataBuffer with dataLen size, translate it into a ISO7816_Command_APDU type
 //extra data will be pointed to commandDataBuffer
 uint8_t iso7816_read_command_apdu(
-    struct ISO7816_Command_APDU* command,
+    ISO7816_Command_APDU* command,
     const uint8_t* dataBuffer,
     uint32_t dataLen,
     const uint8_t** commandApduDataBuffer) {
@@ -75,7 +75,7 @@ uint8_t iso7816_read_command_apdu(
 
 //data buffer countains the whole APU response (response + trailer (SW1+SW2))
 void iso7816_write_response_apdu(
-    const struct ISO7816_Response_APDU* response,
+    const ISO7816_Response_APDU* response,
     uint8_t* readerToPcDataBlock,
     uint32_t* readerToPcDataBlockLen,
     uint8_t* responseDataBuffer,

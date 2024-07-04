@@ -37,12 +37,12 @@ void iso7816_xfr_datablock_callback(
     uint32_t pcToReaderDataBlockLen,
     uint8_t* readerToPcDataBlock,
     uint32_t* readerToPcDataBlockLen) {
-    struct ISO7816_Response_APDU responseAPDU;
+    ISO7816_Response_APDU responseAPDU;
     uint8_t responseApduDataBuffer[CCID_SHORT_APDU_SIZE];
     uint16_t responseApduDataBufferLen = 0;
 
     if(callbacks != NULL) {
-        struct ISO7816_Command_APDU commandAPDU;
+        ISO7816_Command_APDU commandAPDU;
 
         const uint8_t* commandApduDataBuffer = NULL;
         uint16_t commandApduDataBufferLen = 0;

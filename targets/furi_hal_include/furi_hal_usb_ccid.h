@@ -5,7 +5,7 @@
 #include "hid_usage_consumer.h"
 #include "hid_usage_led.h"
 
-#define CCID_SHORT_APDU_SIZE 0xFF
+#define CCID_SHORT_APDU_SIZE (0xFF)
 
 #ifdef __cplusplus
 extern "C" {

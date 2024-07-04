@@ -122,7 +122,7 @@ static const CcidCallbacks ccid_cb = {
 //Instruction 1: returns an OK response unconditionally
 //APDU example: 0x01:0x01:0x00:0x00
 //response: SW1=0x90, SW2=0x00
-void handle_instruction_01(struct ISO7816_Response_APDU* responseAPDU) {
+void handle_instruction_01(ISO7816_Response_APDU* responseAPDU) {
     iso7816_set_response(responseAPDU, ISO7816_RESPONSE_OK);
 }
 
@@ -134,7 +134,7 @@ void handle_instruction_02(
     uint8_t p2,
     uint8_t lc,
     uint8_t le,
-    struct ISO7816_Response_APDU* responseAPDU,
+    ISO7816_Response_APDU* responseAPDU,
     uint8_t* responseApduDataBuffer,
     uint16_t* responseApduDataBufferLen) {
     if(p1 == 0 && p2 == 0 && lc == 0 && le >= 2) {
@@ -158,7 +158,7 @@ void handle_instruction_03(
     uint8_t p1,
     uint8_t p2,
     uint8_t lc,
-    struct ISO7816_Response_APDU* responseAPDU) {
+    ISO7816_Response_APDU* responseAPDU) {
     if(p1 == 0 && p2 == 0 && lc == 2) {
         iso7816_set_response(responseAPDU, ISO7816_RESPONSE_OK);
     } else if(p1 != 0 || p2 != 0) {
@@ -177,7 +177,7 @@ void handle_instruction_04(
     uint8_t lc,
     uint8_t le,
     const uint8_t* commandApduDataBuffer,
-    struct ISO7816_Response_APDU* responseAPDU,
+    ISO7816_Response_APDU* responseAPDU,
     uint8_t* responseApduDataBuffer,
     uint16_t* responseApduDataBufferLen) {
     if(p1 == 0 && p2 == 0 && lc > 0 && le > 0 && le >= lc) {
@@ -202,8 +202,8 @@ void iso7816_answer_to_reset(Iso7816Atr* atr) {
 }
 
 void iso7816_process_command(
-    const struct ISO7816_Command_APDU* commandAPDU,
-    struct ISO7816_Response_APDU* responseAPDU,
+    const ISO7816_Command_APDU* commandAPDU,
+    ISO7816_Response_APDU* responseAPDU,
     const uint8_t* commandApduDataBuffer,
     uint16_t commandApduDataBufferLen,
     uint8_t* responseApduDataBuffer,
