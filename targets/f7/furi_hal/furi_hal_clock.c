@@ -35,7 +35,8 @@ void furi_hal_clock_init(void) {
     LL_RCC_HSE_SetCapacitorTuning(0x26);
     LL_RCC_HSE_Enable();
     LL_RCC_HSI_Enable();
-    while(!HS_CLOCK_IS_READY());
+    while(!HS_CLOCK_IS_READY())
+        ;
     /* Select HSI as system clock source after Wake Up from Stop mode
      * Must be set before enabling CSS */
     LL_RCC_SetClkAfterWakeFromStop(LL_RCC_STOP_WAKEUPCLOCK_HSI);
@@ -47,7 +48,8 @@ void furi_hal_clock_init(void) {
     LL_RCC_LSE_SetDriveCapability(LL_RCC_LSEDRIVE_HIGH);
     LL_RCC_LSE_Enable();
     LL_RCC_LSI1_Enable();
-    while(!LS_CLOCK_IS_READY());
+    while(!LS_CLOCK_IS_READY())
+        ;
 
     LL_EXTI_EnableIT_0_31(
         LL_EXTI_LINE_18); /* Why? Because that's why. See RM0434, Table 61. CPU1 vector table. */
@@ -62,7 +64,8 @@ void furi_hal_clock_init(void) {
     LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_2, 8, LL_RCC_PLLR_DIV_2);
     LL_RCC_PLL_Enable();
     LL_RCC_PLL_EnableDomain_SYS();
-    while(LL_RCC_PLL_IsReady() != 1);
+    while(LL_RCC_PLL_IsReady() != 1)
+        ;
 
     LL_RCC_PLLSAI1_ConfigDomain_48M(
         LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_2, 6, LL_RCC_PLLSAI1Q_DIV_2);
@@ -71,7 +74,8 @@ void furi_hal_clock_init(void) {
     LL_RCC_PLLSAI1_Enable();
     LL_RCC_PLLSAI1_EnableDomain_48M();
     LL_RCC_PLLSAI1_EnableDomain_ADC();
-    while(LL_RCC_PLLSAI1_IsReady() != 1);
+    while(LL_RCC_PLLSAI1_IsReady() != 1)
+        ;
 
     /* Sysclk activation on the main PLL */
     /* Set CPU1 prescaler */
@@ -82,10 +86,12 @@ void furi_hal_clock_init(void) {
 
     /* Prepare Flash memory for work on 64MHz system clock */
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3);
+    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
+        ;
 
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+        ;
 
     /* Set AHB SHARED prescaler*/
     LL_RCC_SetAHB4Prescaler(LL_RCC_SYSCLK_DIV_1);
@@ -98,7 +104,8 @@ void furi_hal_clock_init(void) {
 
     /* Disable MSI */
     LL_RCC_MSI_Disable();
-    while(LL_RCC_MSI_IsReady() != 0);
+    while(LL_RCC_MSI_IsReady() != 0)
+        ;
 
     /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
     LL_SetSystemCoreClock(CPU_CLOCK_PLL_HZ);
@@ -122,15 +129,18 @@ void furi_hal_clock_init(void) {
 void furi_hal_clock_switch_hse2hsi(void) {
     LL_RCC_HSI_Enable();
 
-    while(!LL_RCC_HSI_IsReady());
+    while(!LL_RCC_HSI_IsReady())
+        ;
 
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSI);
     furi_check(LL_RCC_GetSMPSClockSelection() == LL_RCC_SMPS_CLKSOURCE_HSI);
 
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSI);
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSI)
+        ;
 
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_0);
+    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_0)
+        ;
 }
 
 void furi_hal_clock_switch_hsi2hse(void) {
@@ -139,14 +149,17 @@ void furi_hal_clock_switch_hsi2hse(void) {
 #endif
 
     LL_RCC_HSE_Enable();
-    while(!LL_RCC_HSE_IsReady());
+    while(!LL_RCC_HSE_IsReady())
+        ;
 
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_1);
-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_1);
+    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_1)
+        ;
 
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSE);
 
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE)
+        ;
 
 #ifdef FURI_HAL_CLOCK_TRACK_STARTUP
     uint32_t total = DWT->CYCCNT - clock_start_time;
@@ -162,8 +175,10 @@ bool furi_hal_clock_switch_hse2pll(void) {
     LL_RCC_PLL_Enable();
     LL_RCC_PLLSAI1_Enable();
 
-    while(!LL_RCC_PLL_IsReady());
-    while(!LL_RCC_PLLSAI1_IsReady());
+    while(!LL_RCC_PLL_IsReady())
+        ;
+    while(!LL_RCC_PLLSAI1_IsReady())
+        ;
 
     // This API returns garbage if stack version < 1.20.0
     SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL);
@@ -182,7 +197,8 @@ bool furi_hal_clock_switch_pll2hse(void) {
     furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
 
     LL_RCC_HSE_Enable();
-    while(!LL_RCC_HSE_IsReady());
+    while(!LL_RCC_HSE_IsReady())
+        ;
 
     // This API returns garbage if stack version < 1.20.0
     SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE);
@@ -212,7 +228,8 @@ void furi_hal_clock_mco_enable(FuriHalClockMcoSourceId source, FuriHalClockMcoDi
         LL_RCC_ConfigMCO(LL_RCC_MCO1SOURCE_SYSCLK, div);
     } else {
         LL_RCC_MSI_Enable();
-        while(LL_RCC_MSI_IsReady() != 1);
+        while(LL_RCC_MSI_IsReady() != 1)
+            ;
         switch(source) {
         case FuriHalClockMcoMsi100k:
             LL_RCC_MSI_SetRange(LL_RCC_MSIRANGE_0);
@@ -260,5 +277,6 @@ void furi_hal_clock_mco_enable(FuriHalClockMcoSourceId source, FuriHalClockMcoDi
 void furi_hal_clock_mco_disable(void) {
     LL_RCC_ConfigMCO(LL_RCC_MCO1SOURCE_NOCLOCK, FuriHalClockMcoDiv1);
     LL_RCC_MSI_Disable();
-    while(LL_RCC_MSI_IsReady() != 0);
+    while(LL_RCC_MSI_IsReady() != 0)
+        ;
 }

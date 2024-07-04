@@ -71,7 +71,8 @@ static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement*
             line_tmp.horizontal = AlignLeft;
             furi_string_reset(line_tmp.text);
             // Process control symbols
-            while(widget_element_text_scroll_process_ctrl_symbols(&line_tmp, model->text));
+            while(widget_element_text_scroll_process_ctrl_symbols(&line_tmp, model->text))
+                ;
         }
         // Set canvas font
         canvas_set_font(canvas, line_tmp.font);

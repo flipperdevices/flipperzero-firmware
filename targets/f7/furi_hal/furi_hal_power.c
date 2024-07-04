@@ -200,7 +200,8 @@ static inline void furi_hal_power_deep_sleep(void) {
         return;
     }
 
-    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
+        ;
 
     if(!LL_HSEM_1StepLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID)) {
         if(LL_PWR_IsActiveFlag_C2DS() || LL_PWR_IsActiveFlag_C2SB()) {
@@ -241,7 +242,8 @@ static inline void furi_hal_power_deep_sleep(void) {
     /* Release ENTRY_STOP_MODE semaphore */
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
 
-    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
+        ;
 
     if(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSI) {
         furi_hal_clock_switch_hsi2hse();
@@ -299,7 +301,8 @@ void furi_hal_power_shutdown(void) {
 
     furi_hal_bt_reinit();
 
-    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
+        ;
 
     if(!LL_HSEM_1StepLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID)) {
         if(LL_PWR_IsActiveFlag_C2DS() || LL_PWR_IsActiveFlag_C2SB()) {
