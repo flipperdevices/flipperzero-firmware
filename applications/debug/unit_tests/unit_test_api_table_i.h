@@ -7,7 +7,6 @@
 #include <rpc/rpc_i.h>
 #include <flipper.pb.h>
 #include <core/event_loop.h>
-#include <core/message_queue.h>
 
 static constexpr auto unit_tests_api_table = sort(create_array_t<sym_entry>(
     API_METHOD(resource_manifest_reader_alloc, ResourceManifestReader*, (Storage*)),
@@ -31,16 +30,14 @@ static constexpr auto unit_tests_api_table = sort(create_array_t<sym_entry>(
     API_METHOD(furi_event_loop_alloc, FuriEventLoop*, (void)),
     API_METHOD(furi_event_loop_free, void, (FuriEventLoop*)),
     API_METHOD(
-        furi_event_loop_subscribe,
+        furi_event_loop_message_queue_subscribe,
         void,
         (FuriEventLoop*,
-         FuriEventLoopObject*,
-         const FuriEventLoopContract*,
+         FuriMessageQueue*,
          FuriEventLoopEvent,
-         FuriEventLoopCallback,
+         FuriEventLoopMessageQueueCallback,
          void*)),
-    API_METHOD(furi_event_loop_unsubscribe, void, (FuriEventLoop*, FuriEventLoopObject*)),
+    API_METHOD(furi_event_loop_message_queue_unsubscribe, void, (FuriEventLoop*, FuriMessageQueue*)),
     API_METHOD(furi_event_loop_run, void, (FuriEventLoop*)),
     API_METHOD(furi_event_loop_stop, void, (FuriEventLoop*)),
-    API_METHOD(furi_message_queue_get_contract, const FuriEventLoopContract*, (void)),
     API_VARIABLE(PB_Main_msg, PB_Main_msg_t)));
