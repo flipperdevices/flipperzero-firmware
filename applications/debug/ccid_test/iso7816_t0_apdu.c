@@ -28,12 +28,6 @@ uint8_t iso7816_read_command_apdu(
         command->Lc = 0;
         command->Le = dataBuffer[4];
         command->LePresent = true;
-        if(command->Le == 0x00) {
-            //not supported in this implementation
-            return ISO7816_READ_COMMAND_APDU_ERROR_WRONG_LE;
-        } else {
-            return ISO7816_READ_COMMAND_APDU_OK;
-        }
 
         return ISO7816_READ_COMMAND_APDU_OK;
     } else if(dataLen > 5 && dataBuffer[4] != 0x00) {
@@ -51,12 +45,7 @@ uint8_t iso7816_read_command_apdu(
             } else if(dataLen == (uint32_t)(command->Lc + 6)) {
                 command->Le = dataBuffer[dataLen - 1];
                 command->LePresent = true;
-                if(command->Le == 0x00) {
-                    //not supported in this implementation
-                    return ISO7816_READ_COMMAND_APDU_ERROR_WRONG_LE;
-                } else {
-                    return ISO7816_READ_COMMAND_APDU_OK;
-                }
+
                 return ISO7816_READ_COMMAND_APDU_OK;
             } else {
                 return ISO7816_READ_COMMAND_APDU_ERROR_WRONG_LENGTH;
