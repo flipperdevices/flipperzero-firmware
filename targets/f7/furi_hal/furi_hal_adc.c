@@ -223,25 +223,21 @@ void furi_hal_adc_configure_ex(
     LL_ADC_EnableInternalRegulator(handle->adc);
     // Delay for ADC internal voltage regulator stabilization.
     timer = furi_hal_cortex_timer_get(LL_ADC_DELAY_INTERNAL_REGUL_STAB_US);
-    while(!furi_hal_cortex_timer_is_expired(timer))
-        ;
+    while(!furi_hal_cortex_timer_is_expired(timer));
 
     // Run ADC self calibration
     LL_ADC_StartCalibration(handle->adc, LL_ADC_SINGLE_ENDED);
     // Poll for ADC effectively calibrated
-    while(LL_ADC_IsCalibrationOnGoing(handle->adc) != 0)
-        ;
+    while(LL_ADC_IsCalibrationOnGoing(handle->adc) != 0);
     // Delay between ADC end of calibration and ADC enable
     size_t end =
         DWT->CYCCNT + (LL_ADC_DELAY_CALIB_ENABLE_ADC_CYCLES * furi_hal_adc_clock_div[clock]);
-    while(DWT->CYCCNT < end)
-        ;
+    while(DWT->CYCCNT < end);
 
     // Enable ADC
     LL_ADC_ClearFlag_ADRDY(handle->adc);
     LL_ADC_Enable(handle->adc);
-    while(LL_ADC_IsActiveFlag_ADRDY(handle->adc) == 0)
-        ;
+    while(LL_ADC_IsActiveFlag_ADRDY(handle->adc) == 0);
 }
 
 uint16_t furi_hal_adc_read(FuriHalAdcHandle* handle, FuriHalAdcChannel channel) {
@@ -256,8 +252,7 @@ uint16_t furi_hal_adc_read(FuriHalAdcHandle* handle, FuriHalAdcChannel channel) 
 
     LL_ADC_REG_StartConversion(handle->adc);
 
-    while(LL_ADC_IsActiveFlag_EOC(handle->adc) == 0)
-        ;
+    while(LL_ADC_IsActiveFlag_EOC(handle->adc) == 0);
     uint16_t value = LL_ADC_REG_ReadConversionData12(handle->adc);
 
     return value;

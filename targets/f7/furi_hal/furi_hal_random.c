@@ -39,8 +39,7 @@ void furi_hal_random_init(void) {
 }
 
 uint32_t furi_hal_random_get(void) {
-    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RNG_SEMID))
-        ;
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RNG_SEMID));
     LL_RNG_Enable(RNG);
 
     const uint32_t random_val = furi_hal_random_read_rng();
@@ -56,8 +55,7 @@ void furi_hal_random_fill_buf(uint8_t* buf, uint32_t len) {
     furi_check(buf);
     furi_check(len);
 
-    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RNG_SEMID))
-        ;
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RNG_SEMID));
     LL_RNG_Enable(RNG);
 
     for(uint32_t i = 0; i < len; i += 4) {

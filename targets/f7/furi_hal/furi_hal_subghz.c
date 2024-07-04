@@ -93,8 +93,7 @@ void furi_hal_subghz_init(void) {
         FuriHalCortexTimer timeout = furi_hal_cortex_timer_get(10000);
         cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHW);
         while(furi_hal_gpio_read(&gpio_cc1101_g0) != false &&
-              !furi_hal_cortex_timer_is_expired(timeout))
-            ;
+              !furi_hal_cortex_timer_is_expired(timeout));
 
         if(furi_hal_gpio_read(&gpio_cc1101_g0) != false) {
             break;
@@ -105,8 +104,7 @@ void furi_hal_subghz_init(void) {
         cc1101_write_reg(
             &furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHW | CC1101_IOCFG_INV);
         while(furi_hal_gpio_read(&gpio_cc1101_g0) != true &&
-              !furi_hal_cortex_timer_is_expired(timeout))
-            ;
+              !furi_hal_cortex_timer_is_expired(timeout));
 
         if(furi_hal_gpio_read(&gpio_cc1101_g0) != true) {
             break;

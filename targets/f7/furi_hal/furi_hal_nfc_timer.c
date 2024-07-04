@@ -151,8 +151,7 @@ static void furi_hal_nfc_timer_start_core_ticks(FuriHalNfcTimer timer, uint64_t 
     LL_TIM_SetAutoReload(config->timer, arr_reg);
 
     LL_TIM_GenerateEvent_UPDATE(config->timer);
-    while(!LL_TIM_IsActiveFlag_UPDATE(config->timer))
-        ;
+    while(!LL_TIM_IsActiveFlag_UPDATE(config->timer));
     LL_TIM_ClearFlag_UPDATE(config->timer);
 
     LL_TIM_EnableIT_UPDATE(config->timer);

@@ -27,8 +27,7 @@ static inline void furi_hal_idle_timer_start(uint32_t count) {
     count--;
     // Enable timer
     LL_LPTIM_Enable(FURI_HAL_IDLE_TIMER);
-    while(!LL_LPTIM_IsEnabled(FURI_HAL_IDLE_TIMER))
-        ;
+    while(!LL_LPTIM_IsEnabled(FURI_HAL_IDLE_TIMER));
 
     // Enable compare match interrupt
     LL_LPTIM_EnableIT_CMPM(FURI_HAL_IDLE_TIMER);

@@ -162,8 +162,7 @@ static inline bool onewire_slave_bus_start(OneWireSlave* bus) {
     furi_hal_gpio_disable_int_callback(bus->gpio_pin);
     furi_hal_gpio_init(bus->gpio_pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
 
-    while(onewire_slave_receive_and_process_command(bus))
-        ;
+    while(onewire_slave_receive_and_process_command(bus));
 
     const bool result = (bus->error == OneWireSlaveErrorNone);
 
