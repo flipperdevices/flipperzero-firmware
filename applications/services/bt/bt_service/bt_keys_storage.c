@@ -67,6 +67,15 @@ void bt_keys_storage_set_ram_params(BtKeysStorage* instance, uint8_t* buff, uint
     instance->nvm_sram_buff_size = size;
 }
 
+static bool bt_keys_storage_file_exists(const char* file_path) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FileInfo file_info;
+    const bool ret = storage_common_stat(storage, file_path, &file_info) == FSE_OK &&
+                     file_info.size != 0;
+    furi_record_close(RECORD_STORAGE);
+    return ret;
+}
+
 static bool bt_keys_storage_validate_file(const char* file_path, size_t* payload_size) {
     uint8_t magic, version;
     size_t size;
@@ -87,19 +96,19 @@ static bool bt_keys_storage_validate_file(const char* file_path, size_t* payload
 bool bt_keys_storage_is_changed(BtKeysStorage* instance) {
     furi_assert(instance);
 
-    bool is_changed = true;
+    bool is_changed = false;
     uint8_t* data_buffer = NULL;
 
     do {
         const char* file_path = furi_string_get_cstr(instance->file_path);
-
         size_t payload_size;
-        if(!bt_keys_storage_validate_file(file_path, &payload_size)) {
-            FURI_LOG_E(TAG, "Invalid or corrupted file");
+
+        if(!bt_keys_storage_file_exists(file_path)) {
+            FURI_LOG_W(TAG, "Missing or empty file");
             break;
 
-        } else if(payload_size != instance->current_size) {
-            FURI_LOG_D(TAG, "Size mismatch");
+        } else if(!bt_keys_storage_validate_file(file_path, &payload_size)) {
+            FURI_LOG_E(TAG, "Invalid or corrupted file");
             break;
         }
 
@@ -111,12 +120,16 @@ bool bt_keys_storage_is_changed(BtKeysStorage* instance) {
         if(!data_loaded) {
             FURI_LOG_E(TAG, "Failed to load file");
             break;
+
+        } else if(payload_size == instance->current_size) {
+            furi_hal_bt_nvm_sram_sem_acquire();
+            is_changed = memcmp(data_buffer, instance->nvm_sram_buff, payload_size);
+            furi_hal_bt_nvm_sram_sem_release();
+
+        } else {
+            FURI_LOG_D(TAG, "Size mismatch");
+            is_changed = true;
         }
-
-        furi_hal_bt_nvm_sram_sem_acquire();
-        is_changed = memcmp(data_buffer, instance->nvm_sram_buff, payload_size);
-        furi_hal_bt_nvm_sram_sem_release();
-
     } while(false);
 
     if(data_buffer) {

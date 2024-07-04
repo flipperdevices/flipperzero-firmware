@@ -463,7 +463,7 @@ static void bt_apply_settings(Bt* bt) {
         }
 
     } else {
-        FURI_LOG_I(TAG, "Keys already loaded");
+        FURI_LOG_I(TAG, "Keys unchanged");
     }
 
     if(bt->bt_settings.enabled) {
