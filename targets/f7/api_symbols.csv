@@ -1210,13 +1210,22 @@ Function,+,furi_event_flag_free,void,FuriEventFlag*
 Function,+,furi_event_flag_get,uint32_t,FuriEventFlag*
 Function,+,furi_event_flag_set,uint32_t,"FuriEventFlag*, uint32_t"
 Function,+,furi_event_flag_wait,uint32_t,"FuriEventFlag*, uint32_t, uint32_t, uint32_t"
-Function,-,furi_event_loop_alloc,FuriEventLoop*,
-Function,-,furi_event_loop_free,void,FuriEventLoop*
-Function,-,furi_event_loop_message_queue_subscribe,void,"FuriEventLoop*, FuriMessageQueue*, FuriEventLoopEvent, FuriEventLoopMessageQueueCallback, void*"
-Function,-,furi_event_loop_message_queue_unsubscribe,void,"FuriEventLoop*, FuriMessageQueue*"
-Function,-,furi_event_loop_run,void,FuriEventLoop*
-Function,-,furi_event_loop_stop,void,FuriEventLoop*
-Function,-,furi_event_loop_tick_set,void,"FuriEventLoop*, uint32_t, FuriEventLoopTickCallback, void*"
+Function,+,furi_event_loop_alloc,FuriEventLoop*,
+Function,+,furi_event_loop_free,void,FuriEventLoop*
+Function,+,furi_event_loop_message_queue_subscribe,void,"FuriEventLoop*, FuriMessageQueue*, FuriEventLoopEvent, FuriEventLoopMessageQueueCallback, void*"
+Function,+,furi_event_loop_message_queue_unsubscribe,void,"FuriEventLoop*, FuriMessageQueue*"
+Function,+,furi_event_loop_pend_callback,void,"FuriEventLoop*, FuriEventLoopPendingCallback, void*"
+Function,+,furi_event_loop_run,void,FuriEventLoop*
+Function,+,furi_event_loop_stop,void,FuriEventLoop*
+Function,+,furi_event_loop_tick_set,void,"FuriEventLoop*, uint32_t, FuriEventLoopTickCallback, void*"
+Function,+,furi_event_loop_timer_alloc,FuriEventLoopTimer*,"FuriEventLoop*, FuriEventLoopTimerCallback, FuriEventLoopTimerType, void*"
+Function,+,furi_event_loop_timer_free,void,FuriEventLoopTimer*
+Function,+,furi_event_loop_timer_get_interval,uint32_t,const FuriEventLoopTimer*
+Function,+,furi_event_loop_timer_get_remaining_time,uint32_t,const FuriEventLoopTimer*
+Function,+,furi_event_loop_timer_is_running,_Bool,const FuriEventLoopTimer*
+Function,+,furi_event_loop_timer_restart,void,FuriEventLoopTimer*
+Function,+,furi_event_loop_timer_start,void,"FuriEventLoopTimer*, uint32_t"
+Function,+,furi_event_loop_timer_stop,void,FuriEventLoopTimer*
 Function,+,furi_get_tick,uint32_t,
 Function,+,furi_hal_adc_acquire,FuriHalAdcHandle*,
 Function,+,furi_hal_adc_configure,void,FuriHalAdcHandle*
@@ -2565,6 +2574,11 @@ Function,+,mf_plus_reset,void,MfPlusData*
 Function,+,mf_plus_save,_Bool,"const MfPlusData*, FlipperFormat*"
 Function,+,mf_plus_set_uid,_Bool,"MfPlusData*, const uint8_t*, size_t"
 Function,+,mf_plus_verify,_Bool,"MfPlusData*, const FuriString*"
+Function,+,mf_ultralight_3des_decrypt,void,"mbedtls_des3_context*, const uint8_t*, const uint8_t*, const uint8_t*, const uint8_t, uint8_t*"
+Function,+,mf_ultralight_3des_encrypt,void,"mbedtls_des3_context*, const uint8_t*, const uint8_t*, const uint8_t*, const uint8_t, uint8_t*"
+Function,+,mf_ultralight_3des_get_key,const uint8_t*,const MfUltralightData*
+Function,+,mf_ultralight_3des_key_valid,_Bool,const MfUltralightData*
+Function,+,mf_ultralight_3des_shift_data,void,uint8_t*
 Function,+,mf_ultralight_alloc,MfUltralightData*,
 Function,+,mf_ultralight_copy,void,"MfUltralightData*, const MfUltralightData*"
 Function,+,mf_ultralight_detect_protocol,_Bool,const Iso14443_3aData*
@@ -2585,7 +2599,8 @@ Function,+,mf_ultralight_is_equal,_Bool,"const MfUltralightData*, const MfUltral
 Function,+,mf_ultralight_is_page_pwd_or_pack,_Bool,"MfUltralightType, uint16_t"
 Function,+,mf_ultralight_load,_Bool,"MfUltralightData*, FlipperFormat*, uint32_t"
 Function,+,mf_ultralight_poller_auth_pwd,MfUltralightError,"MfUltralightPoller*, MfUltralightPollerAuthContext*"
-Function,+,mf_ultralight_poller_authenticate,MfUltralightError,MfUltralightPoller*
+Function,+,mf_ultralight_poller_authenticate_end,MfUltralightError,"MfUltralightPoller*, const uint8_t*, const uint8_t*, uint8_t*"
+Function,+,mf_ultralight_poller_authenticate_start,MfUltralightError,"MfUltralightPoller*, const uint8_t*, uint8_t*"
 Function,+,mf_ultralight_poller_read_counter,MfUltralightError,"MfUltralightPoller*, uint8_t, MfUltralightCounter*"
 Function,+,mf_ultralight_poller_read_page,MfUltralightError,"MfUltralightPoller*, uint8_t, MfUltralightPageReadCommandData*"
 Function,+,mf_ultralight_poller_read_page_from_sector,MfUltralightError,"MfUltralightPoller*, uint8_t, uint8_t, MfUltralightPageReadCommandData*"
