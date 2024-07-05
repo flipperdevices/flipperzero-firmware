@@ -145,7 +145,12 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
             desktop_lock(desktop);
         }
 
+    } else if(event == DesktopGlobalSaveSettings) {
+        desktop_settings_save(&desktop->settings);
+        desktop_apply_settings(desktop);
+
     } else if(event == DesktopGlobalReloadSettings) {
+        desktop_settings_load(&desktop->settings);
         desktop_apply_settings(desktop);
 
     } else {
@@ -230,8 +235,6 @@ static bool desktop_check_file_flag(const char* flag_path) {
 }
 
 static void desktop_apply_settings(Desktop* desktop) {
-    desktop_settings_load(&desktop->settings);
-
     desktop->in_transition = true;
 
     desktop_clock_reconfigure(desktop);
@@ -260,6 +263,7 @@ static void desktop_init_settings(Desktop* desktop) {
     UNUSED(desktop_storage_callback);
 #endif
 
+    desktop_settings_load(&desktop->settings);
     desktop_apply_settings(desktop);
 }
 
@@ -494,6 +498,21 @@ FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {
 void desktop_api_reload_settings(Desktop* instance) {
     furi_assert(instance);
     view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopGlobalReloadSettings);
+}
+
+void desktop_api_get_settings(Desktop* instance, DesktopSettings* settings) {
+    furi_assert(instance);
+    furi_assert(settings);
+
+    *settings = instance->settings;
+}
+
+void desktop_api_set_settings(Desktop* instance, const DesktopSettings* settings) {
+    furi_assert(instance);
+    furi_assert(settings);
+
+    instance->settings = *settings;
+    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopGlobalSaveSettings);
 }
 
 /*

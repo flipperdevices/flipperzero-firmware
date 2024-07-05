@@ -95,16 +95,15 @@ extern int32_t desktop_settings_app(void* p) {
     UNUSED(p);
 
     DesktopSettingsApp* app = desktop_settings_app_alloc();
-    desktop_settings_load(&app->settings);
+    Desktop* desktop = furi_record_open(RECORD_DESKTOP);
+
+    desktop_api_get_settings(desktop, &app->settings);
 
     scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneStart);
 
     view_dispatcher_run(app->view_dispatcher);
 
-    desktop_settings_save(&app->settings);
-
-    Desktop* desktop = furi_record_open(RECORD_DESKTOP);
-    desktop_api_reload_settings(desktop);
+    desktop_api_set_settings(desktop, &app->settings);
     furi_record_close(RECORD_DESKTOP);
 
     desktop_settings_app_free(app);
