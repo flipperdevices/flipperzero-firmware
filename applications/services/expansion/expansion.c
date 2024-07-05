@@ -247,7 +247,7 @@ static void expansion_storage_callback(const void* message, void* context) {
             .api_lock = NULL,
         };
 
-        furi_message_queue_put(instance->queue, &em, FuriWaitForever);
+        furi_check(furi_message_queue_put(instance->queue, &em, FuriWaitForever) == FuriStatusOk);
     }
 }
 
