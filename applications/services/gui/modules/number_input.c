@@ -210,7 +210,7 @@ static bool is_number_too_small(NumberInputModel* model) {
 
 static void number_input_sign(NumberInputModel* model) {
     int32_t number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
-    if (number == 0 && furi_string_cmp_str(model->text_buffer, "-") != 0)  {
+    if(number == 0 && furi_string_cmp_str(model->text_buffer, "-") != 0) {
         furi_string_set_str(model->text_buffer, "-");
         return;
     }
