@@ -34,7 +34,7 @@ uint8_t iso7816_read_command_apdu(
         //short lc
 
         command->Lc = dataBuffer[4];
-        if(command->Lc > 0 && command->Lc < CCID_SHORT_APDU_SIZE) {
+        if(command->Lc > 0 && command->Lc < CCID_SHORT_APDU_SIZE) { //-V560
             memcpy(command->Data, &dataBuffer[5], command->Lc);
 
             //does it have a short le too?
@@ -58,7 +58,7 @@ uint8_t iso7816_read_command_apdu(
     }
 }
 
-//data buffer countains the whole APU response (response + trailer (SW1+SW2))
+//data buffer contains the whole APU response (response + trailer (SW1+SW2))
 void iso7816_write_response_apdu(
     const ISO7816_Response_APDU* response,
     uint8_t* readerToPcDataBlock,
