@@ -6,8 +6,10 @@
 #include <gui/elements.h>
 
 #include <assets_icons.h>
+
+#define TAG "SubGhzReadRaw"
+
 #define SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE 100
-#define TAG                               "SubGhzReadRaw"
 
 struct SubGhzReadRAW {
     View* view;

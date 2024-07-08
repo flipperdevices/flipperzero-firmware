@@ -4,7 +4,8 @@
 #include <bit_lib/bit_lib.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
-#define TAG              "MiZIP"
+#define TAG "MiZIP"
+
 #define KEY_LENGTH       6
 #define MIZIP_KEY_TO_GEN 5
 #define UID_LENGTH       4

@@ -9,9 +9,10 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
+#define TAG "UartEcho"
+
 #define LINES_ON_SCREEN   6
 #define COLUMNS_ON_SCREEN 21
-#define TAG               "UartEcho"
 #define DEFAULT_BAUD_RATE 230400
 
 typedef struct UartDumpModel UartDumpModel;

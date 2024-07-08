@@ -11,7 +11,8 @@
 #include <mbedtls/ecdsa.h>
 #include <mbedtls/error.h>
 
-#define TAG        "U2f"
+#define TAG "U2f"
+
 #define WORKER_TAG TAG "Worker"
 
 #define MCHECK(expr) furi_check((expr) == 0)

@@ -3,7 +3,8 @@
 #include <furi_hal.h>
 #include <toolbox/path.h>
 
-#define TAG                   "StorageInt"
+#define TAG "StorageInt"
+
 #define STORAGE_PATH          STORAGE_INT_PATH_PREFIX
 #define LFS_CLEAN_FINGERPRINT 0
 

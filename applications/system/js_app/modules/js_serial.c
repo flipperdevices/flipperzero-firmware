@@ -3,7 +3,8 @@
 #include "../js_modules.h"
 #include <m-array.h>
 
-#define TAG        "js_serial"
+#define TAG "JsSerial"
+
 #define RX_BUF_LEN 2048
 
 typedef struct {

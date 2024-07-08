@@ -12,7 +12,8 @@
  *
  */
 
-#define TAG                "SubGhzProtocolCame"
+#define TAG "SubGhzProtocolCame"
+
 #define CAME_12_COUNT_BIT  12
 #define CAME_24_COUNT_BIT  24
 #define PRASTEL_COUNT_BIT  25

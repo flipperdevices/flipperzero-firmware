@@ -4,7 +4,8 @@
 #include <bit_lib/bit_lib.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
-#define TAG        "Microel"
+#define TAG "Microel"
+
 #define KEY_LENGTH 6
 #define UID_LENGTH 4
 

@@ -6,7 +6,8 @@
 #include <toolbox/path.h>
 #include <toolbox/compress.h>
 
-#define TAG             "TarArch"
+#define TAG "TarArch"
+
 #define MAX_NAME_LEN    255
 #define FILE_BLOCK_SIZE 512
 
