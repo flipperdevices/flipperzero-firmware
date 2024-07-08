@@ -94,9 +94,10 @@ const FuriHalRegion* furi_hal_region_get(void) {
         ret = furi_hal_static_regions[region];
 
     } else {
-        furi_mutex_acquire(furi_hal_dynamic_region_mutex, FuriWaitForever);
+        furi_check(
+            furi_mutex_acquire(furi_hal_dynamic_region_mutex, FuriWaitForever) == FuriStatusOk);
         ret = furi_hal_dynamic_region;
-        furi_mutex_release(furi_hal_dynamic_region_mutex);
+        furi_check(furi_mutex_release(furi_hal_dynamic_region_mutex) == FuriStatusOk);
     }
 
     return ret;
@@ -105,7 +106,7 @@ const FuriHalRegion* furi_hal_region_get(void) {
 void furi_hal_region_set(FuriHalRegion* region) {
     furi_check(region);
 
-    furi_mutex_acquire(furi_hal_dynamic_region_mutex, FuriWaitForever);
+    furi_check(furi_mutex_acquire(furi_hal_dynamic_region_mutex, FuriWaitForever) == FuriStatusOk);
 
     if(furi_hal_dynamic_region) {
         free(furi_hal_dynamic_region);
@@ -113,7 +114,7 @@ void furi_hal_region_set(FuriHalRegion* region) {
 
     furi_hal_dynamic_region = region;
 
-    furi_mutex_release(furi_hal_dynamic_region_mutex);
+    furi_check(furi_mutex_release(furi_hal_dynamic_region_mutex) == FuriStatusOk);
 }
 
 bool furi_hal_region_is_provisioned(void) {
