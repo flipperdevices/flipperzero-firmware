@@ -231,7 +231,7 @@ int32_t ducky_execute_cmd(BadUsbScript* bad_usb, const char* line) {
             if(ducky_commands[i].callback == NULL) {
                 return 0;
             } else {
-                return ((ducky_commands[i].callback)(bad_usb, line, ducky_commands[i].param));
+                return (ducky_commands[i].callback)(bad_usb, line, ducky_commands[i].param);
             }
         }
     }

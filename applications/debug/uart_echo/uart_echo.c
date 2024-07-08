@@ -147,7 +147,7 @@ static void uart_echo_push_to_list(UartDumpModel* model, const char data) {
         bool new_string_needed = false;
         if(furi_string_size(model->list[model->line]->text) >= COLUMNS_ON_SCREEN) {
             new_string_needed = true;
-        } else if((data == '\n' || data == '\r')) {
+        } else if(data == '\n' || data == '\r') {
             // pack line breaks
             if(model->last_char != '\n' && model->last_char != '\r') {
                 new_string_needed = true;

@@ -178,7 +178,7 @@ QualifierAlignment: Leave
 ReferenceAlignment: Pointer
 ReflowComments:  false
 RemoveBracesLLVM: false
-RemoveParentheses: Leave
+RemoveParentheses: ReturnStatement
 RemoveSemicolon: false
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope

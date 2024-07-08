@@ -287,7 +287,7 @@ static bool storage_int_check_for_free_space(StorageData* storage) {
         lfs_size_t free_space =
             (lfs_data->config.block_count - result) * lfs_data->config.block_size;
 
-        return (free_space > LFS_RESERVED_PAGES_COUNT * furi_hal_flash_get_page_size());
+        return free_space > LFS_RESERVED_PAGES_COUNT * furi_hal_flash_get_page_size();
     }
 
     return false;
@@ -344,7 +344,7 @@ static bool storage_int_file_open(
 
     file->error_id = storage_int_parse_error(file->internal_error_id);
 
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static bool storage_int_file_close(void* ctx, File* file) {
@@ -360,7 +360,7 @@ static bool storage_int_file_close(void* ctx, File* file) {
 
     file->error_id = storage_int_parse_error(file->internal_error_id);
     lfs_handle_free(handle);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static uint16_t
@@ -430,7 +430,7 @@ static bool
     }
 
     file->error_id = storage_int_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static uint64_t storage_int_file_tell(void* ctx, File* file) {
@@ -475,7 +475,7 @@ static bool storage_int_file_truncate(void* ctx, File* file) {
         file->error_id = storage_int_parse_error(file->internal_error_id);
     }
 
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static bool storage_int_file_sync(void* ctx, File* file) {
@@ -490,7 +490,7 @@ static bool storage_int_file_sync(void* ctx, File* file) {
     }
 
     file->error_id = storage_int_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static uint64_t storage_int_file_size(void* ctx, File* file) {
@@ -557,7 +557,7 @@ static bool storage_int_dir_open(void* ctx, File* file, const char* path) {
     }
 
     file->error_id = storage_int_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static bool storage_int_dir_close(void* ctx, File* file) {
@@ -573,7 +573,7 @@ static bool storage_int_dir_close(void* ctx, File* file) {
 
     file->error_id = storage_int_parse_error(file->internal_error_id);
     lfs_handle_free(handle);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static bool storage_int_dir_read(
@@ -614,7 +614,7 @@ static bool storage_int_dir_read(
         file->error_id = storage_int_parse_error(file->internal_error_id);
     }
 
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static bool storage_int_dir_rewind(void* ctx, File* file) {
@@ -629,7 +629,7 @@ static bool storage_int_dir_rewind(void* ctx, File* file) {
     }
 
     file->error_id = storage_int_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 /******************* Common FS Functions *******************/

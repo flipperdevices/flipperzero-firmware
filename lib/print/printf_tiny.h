@@ -55,7 +55,7 @@ void _putchar(char character);
  * \param format A string that specifies the format of the output
  * \return The number of characters that are written into the array, not counting the terminating null character
  */
-int printf_(const char* format, ...) _ATTRIBUTE((__format__(__printf__, 1, 2)));
+int printf_(const char* format, ...) _ATTRIBUTE(__format__(__printf__, 1, 2));
 
 /**
  * Tiny sprintf implementation
@@ -64,7 +64,7 @@ int printf_(const char* format, ...) _ATTRIBUTE((__format__(__printf__, 1, 2)));
  * \param format A string that specifies the format of the output
  * \return The number of characters that are WRITTEN into the buffer, not counting the terminating null character
  */
-int sprintf_(char* buffer, const char* format, ...) _ATTRIBUTE((__format__(__printf__, 2, 3)));
+int sprintf_(char* buffer, const char* format, ...) _ATTRIBUTE(__format__(__printf__, 2, 3));
 
 /**
  * Tiny snprintf/vsnprintf implementation
@@ -77,7 +77,7 @@ int sprintf_(char* buffer, const char* format, ...) _ATTRIBUTE((__format__(__pri
  *         is non-negative and less than count, the string has been completely written.
  */
 int snprintf_(char* buffer, size_t count, const char* format, ...)
-    _ATTRIBUTE((__format__(__printf__, 3, 4)));
+    _ATTRIBUTE(__format__(__printf__, 3, 4));
 int vsnprintf_(char* buffer, size_t count, const char* format, va_list va);
 
 /**
@@ -97,7 +97,7 @@ int vprintf_(const char* format, va_list va);
  * \return The number of characters that are sent to the output function, not counting the terminating null character
  */
 int fctprintf(void (*out)(char character, void* arg), void* arg, const char* format, ...)
-    _ATTRIBUTE((__format__(__printf__, 3, 4)));
+    _ATTRIBUTE(__format__(__printf__, 3, 4));
 
 #ifdef __cplusplus
 }

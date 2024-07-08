@@ -159,7 +159,7 @@ size_t stream_write_cstring(Stream* stream, const char* string);
  * @return size_t how many bytes was written
  */
 size_t stream_write_format(Stream* stream, const char* format, ...)
-    _ATTRIBUTE((__format__(__printf__, 2, 3)));
+    _ATTRIBUTE(__format__(__printf__, 2, 3));
 
 /**
  * Write formatted string to the stream, va_list version
@@ -217,7 +217,7 @@ bool stream_insert_cstring(Stream* stream, const char* string);
  * @return false on error
  */
 bool stream_insert_format(Stream* stream, const char* format, ...)
-    _ATTRIBUTE((__format__(__printf__, 2, 3)));
+    _ATTRIBUTE(__format__(__printf__, 2, 3));
 
 /**
  * Insert formatted string to the stream, va_list version
@@ -269,7 +269,7 @@ bool stream_delete_and_insert_cstring(Stream* stream, size_t delete_size, const 
  * @return false on error
  */
 bool stream_delete_and_insert_format(Stream* stream, size_t delete_size, const char* format, ...)
-    _ATTRIBUTE((__format__(__printf__, 3, 4)));
+    _ATTRIBUTE(__format__(__printf__, 3, 4));
 
 /**
  * Delete N chars from the stream and insert formatted string to the stream, va_list version

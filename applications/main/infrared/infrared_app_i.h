@@ -249,7 +249,7 @@ bool infrared_blocking_task_finalize(InfraredApp* infrared);
  * @param[in] ... additional arguments.
  */
 void infrared_text_store_set(InfraredApp* infrared, uint32_t bank, const char* fmt, ...)
-    _ATTRIBUTE((__format__(__printf__, 3, 4)));
+    _ATTRIBUTE(__format__(__printf__, 3, 4));
 
 /**
  * @brief Clear the internal text store.
@@ -277,7 +277,7 @@ void infrared_play_notification_message(
  * @param[in] ... additional arguments.
  */
 void infrared_show_error_message(const InfraredApp* infrared, const char* fmt, ...)
-    _ATTRIBUTE((__format__(__printf__, 2, 3)));
+    _ATTRIBUTE(__format__(__printf__, 2, 3));
 
 /**
  * @brief Set which pin will be used to transmit infrared signals.

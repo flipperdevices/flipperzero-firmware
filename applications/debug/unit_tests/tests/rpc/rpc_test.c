@@ -554,7 +554,7 @@ static bool test_rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_
     time_left = MAX(time_left, 0);
     bytes_received =
         furi_stream_buffer_receive(session_context->output_stream, buf, count, time_left);
-    return (count == bytes_received);
+    return count == bytes_received;
 }
 
 static void
