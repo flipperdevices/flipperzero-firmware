@@ -27,17 +27,17 @@ typedef struct {
 } FuriHalRtcHeader;
 
 typedef struct {
-    uint8_t log_level : 4;
+    uint8_t log_level    : 4;
     uint8_t log_reserved : 4;
     uint8_t flags;
-    FuriHalRtcBootMode boot_mode : 4;
-    FuriHalRtcHeapTrackMode heap_track_mode : 2;
-    FuriHalRtcLocaleUnits locale_units : 1;
+    FuriHalRtcBootMode boot_mode                 : 4;
+    FuriHalRtcHeapTrackMode heap_track_mode      : 2;
+    FuriHalRtcLocaleUnits locale_units           : 1;
     FuriHalRtcLocaleTimeFormat locale_timeformat : 1;
     FuriHalRtcLocaleDateFormat locale_dateformat : 2;
-    FuriHalRtcLogDevice log_device : 2;
-    FuriHalRtcLogBaudRate log_baud_rate : 3;
-    uint8_t reserved : 1;
+    FuriHalRtcLogDevice log_device               : 2;
+    FuriHalRtcLogBaudRate log_baud_rate          : 3;
+    uint8_t reserved                             : 1;
 } SystemReg;
 
 _Static_assert(sizeof(SystemReg) == 4, "SystemReg size mismatch");

@@ -32,9 +32,9 @@ typedef struct {
     uint8_t icode_type;
     union {
         struct {
-            uint8_t unused_1 : 3;
+            uint8_t unused_1       : 3;
             uint8_t type_indicator : 2;
-            uint8_t unused_2 : 3;
+            uint8_t unused_2       : 3;
         };
         uint8_t serial_num[5];
     };

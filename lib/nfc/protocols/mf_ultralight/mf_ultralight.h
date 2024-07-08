@@ -147,10 +147,10 @@ typedef struct FURI_PACKED {
     union {
         uint8_t value;
         struct {
-            uint8_t rfui1 : 2;
-            bool strg_mod_en : 1;
-            bool rfui2 : 1;
-            uint8_t mirror_byte : 2;
+            uint8_t rfui1                      : 2;
+            bool strg_mod_en                   : 1;
+            bool rfui2                         : 1;
+            uint8_t mirror_byte                : 2;
             MfUltralightMirrorConf mirror_conf : 2;
         };
     } mirror;
@@ -160,12 +160,12 @@ typedef struct FURI_PACKED {
     union {
         uint8_t value;
         struct {
-            uint8_t authlim : 3;
+            uint8_t authlim       : 3;
             bool nfc_cnt_pwd_prot : 1;
-            bool nfc_cnt_en : 1;
-            bool nfc_dis_sec1 : 1; // NTAG I2C Plus only
-            bool cfglck : 1;
-            bool prot : 1;
+            bool nfc_cnt_en       : 1;
+            bool nfc_dis_sec1     : 1; // NTAG I2C Plus only
+            bool cfglck           : 1;
+            bool prot             : 1;
         };
     } access;
     uint8_t vctid;

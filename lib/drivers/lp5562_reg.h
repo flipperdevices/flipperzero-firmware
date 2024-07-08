@@ -28,8 +28,8 @@ typedef struct {
     EngExec ENG3_EXEC : 2;
     EngExec ENG2_EXEC : 2;
     EngExec ENG1_EXEC : 2;
-    bool CHIP_EN : 1;
-    bool LOG_EN : 1;
+    bool CHIP_EN      : 1;
+    bool LOG_EN       : 1;
 } Reg00_Enable;
 
 typedef enum {
@@ -43,39 +43,39 @@ typedef struct {
     EngMode ENG3_MODE : 2;
     EngMode ENG2_MODE : 2;
     EngMode ENG1_MODE : 2;
-    uint8_t reserved : 2;
+    uint8_t reserved  : 2;
 } Reg01_OpMode;
 
 typedef struct {
-    bool INT_CLK_EN : 1;
-    bool CLK_DET_EN : 1;
+    bool INT_CLK_EN   : 1;
+    bool CLK_DET_EN   : 1;
     uint8_t reserved0 : 3;
-    bool PS_EN : 1;
-    bool PWM_HF : 1;
+    bool PS_EN        : 1;
+    bool PWM_HF       : 1;
     uint8_t reserved1 : 1;
 } Reg08_Config;
 
 typedef struct {
-    uint8_t pc : 3;
+    uint8_t pc       : 3;
     uint8_t reserved : 5;
 } Reg09_Engine1PC;
 
 typedef struct {
-    uint8_t pc : 3;
+    uint8_t pc       : 3;
     uint8_t reserved : 5;
 } Reg0A_Engine2PC;
 
 typedef struct {
-    uint8_t pc : 3;
+    uint8_t pc       : 3;
     uint8_t reserved : 5;
 } Reg0B_Engine3PC;
 
 typedef struct {
-    bool ENG3_INT : 1;
-    bool ENG2_INT : 1;
-    bool ENG1_INT : 1;
+    bool ENG3_INT     : 1;
+    bool ENG2_INT     : 1;
+    bool ENG1_INT     : 1;
     bool EXT_CLK_USED : 1;
-    uint8_t reserved : 5;
+    uint8_t reserved  : 5;
 } Reg0C_Status;
 
 typedef struct {
@@ -90,8 +90,8 @@ typedef enum {
 } EngSelect;
 
 typedef struct {
-    EngSelect blue : 2;
+    EngSelect blue  : 2;
     EngSelect green : 2;
-    EngSelect red : 2;
+    EngSelect red   : 2;
     EngSelect white : 2;
 } Reg70_LedMap;

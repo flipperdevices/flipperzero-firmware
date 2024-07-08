@@ -23,11 +23,11 @@
 
 typedef struct {
     uint8_t bit_rate_capability;
-    uint8_t protocol_type : 4;
+    uint8_t protocol_type  : 4;
     uint8_t max_frame_size : 4;
-    uint8_t fo : 2;
-    uint8_t adc : 2;
-    uint8_t fwi : 4;
+    uint8_t fo             : 2;
+    uint8_t adc            : 2;
+    uint8_t fwi            : 4;
 } Iso14443_3bProtocolInfo;
 
 struct Iso14443_3bData {

@@ -78,12 +78,12 @@ bool mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* bu
 bool mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* buf) {
     typedef struct FURI_PACKED {
         bool is_master_key_changeable : 1;
-        bool is_free_directory_list : 1;
-        bool is_free_create_delete : 1;
-        bool is_config_changeable : 1;
-        uint8_t change_key_id : 4;
-        uint8_t max_keys : 4;
-        uint8_t flags : 4;
+        bool is_free_directory_list   : 1;
+        bool is_free_create_delete    : 1;
+        bool is_config_changeable     : 1;
+        uint8_t change_key_id         : 4;
+        uint8_t max_keys              : 4;
+        uint8_t flags                 : 4;
     } MfDesfireKeySettingsLayout;
 
     const bool can_parse = bit_buffer_get_size_bytes(buf) == sizeof(MfDesfireKeySettingsLayout);
@@ -164,8 +164,8 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
 
     typedef struct FURI_PACKED {
         uint32_t size : 3 * BITS_IN_BYTE;
-        uint32_t max : 3 * BITS_IN_BYTE;
-        uint32_t cur : 3 * BITS_IN_BYTE;
+        uint32_t max  : 3 * BITS_IN_BYTE;
+        uint32_t cur  : 3 * BITS_IN_BYTE;
     } MfDesfireFileSettingsRecord;
 
     typedef struct FURI_PACKED {

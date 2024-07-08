@@ -32,7 +32,7 @@ typedef struct {
     union {
         uint32_t sequence;
         struct {
-            uint8_t sequence_source : 2;
+            uint8_t sequence_source   : 2;
             uint32_t sequence_counter : 30;
         };
     };

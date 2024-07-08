@@ -86,7 +86,7 @@ typedef struct {
     bool is_transmitting; /**< Whether a signal is currently being transmitted. */
     bool is_otg_enabled; /**< Whether OTG power (external 5V) is enabled. */
     InfraredEditTarget edit_target : 8; /**< Selected editing target (a remote or a button). */
-    InfraredEditMode edit_mode : 8; /**< Selected editing operation (rename or delete). */
+    InfraredEditMode edit_mode     : 8; /**< Selected editing operation (rename or delete). */
     int32_t current_button_index; /**< Selected button index (move destination). */
     int32_t prev_button_index; /**< Previous button index (move source). */
     uint32_t last_transmit_time; /**< Lat time a signal was transmitted. */

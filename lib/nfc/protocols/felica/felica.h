@@ -174,8 +174,8 @@ typedef struct {
 
 typedef struct {
     uint8_t service_code : 4;
-    uint8_t access_mode : 3;
-    uint8_t length : 1;
+    uint8_t access_mode  : 3;
+    uint8_t length       : 1;
     uint8_t block_number;
 } FelicaBlockListElement;
 

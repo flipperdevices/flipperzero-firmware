@@ -188,8 +188,8 @@ typedef enum {
 
 typedef struct {
     uint8_t FIFO_BYTES_AVAILABLE : 4;
-    CC1101State STATE : 3;
-    bool CHIP_RDYn : 1;
+    CC1101State STATE            : 3;
+    bool CHIP_RDYn               : 1;
 } CC1101Status;
 
 typedef union {
@@ -198,12 +198,12 @@ typedef union {
 } CC1101StatusRaw;
 
 typedef struct {
-    uint8_t NUM_TXBYTES : 7;
+    uint8_t NUM_TXBYTES   : 7;
     bool TXFIFO_UNDERFLOW : 1;
 } CC1101TxBytes;
 
 typedef struct {
-    uint8_t NUM_RXBYTES : 7;
+    uint8_t NUM_RXBYTES  : 7;
     bool RXFIFO_OVERFLOW : 1;
 } CC1101RxBytes;
 

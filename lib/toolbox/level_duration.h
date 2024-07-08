@@ -14,7 +14,7 @@
 
 typedef struct {
     uint32_t duration : 30;
-    uint8_t level : 2;
+    uint8_t level     : 2;
 } LevelDuration;
 
 static inline LevelDuration level_duration_make(bool level, uint32_t duration) {
