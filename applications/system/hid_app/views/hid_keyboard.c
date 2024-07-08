@@ -40,10 +40,10 @@ typedef struct {
 } HidKeyboardPoint;
 // 4 BY 12
 #define MARGIN_TOP 0
-#define MARGIN_LEFT 4
-#define KEY_WIDTH 9
-#define KEY_HEIGHT 12
-#define KEY_PADDING 1
+#define MARGIN_LEFT 3
+#define KEY_WIDTH 11
+#define KEY_HEIGHT 13
+#define KEY_PADDING -1
 #define ROW_COUNT 7
 #define COLUMN_COUNT 12
 
@@ -74,7 +74,7 @@ const HidKeyboardKey hid_keyboard_keyset[ROW_COUNT][COLUMN_COUNT] = {
         {.width = 1, .icon = NULL, .key = '8', .shift_key = '*', .value = HID_KEYBOARD_8},
         {.width = 1, .icon = NULL, .key = '9', .shift_key = '(', .value = HID_KEYBOARD_9},
         {.width = 1, .icon = NULL, .key = '0', .shift_key = ')', .value = HID_KEYBOARD_0},
-        {.width = 2, .icon = &I_Backspace_9x7, .value = HID_KEYBOARD_DELETE},
+        {.width = 2, .icon = &I_backspace_19x11, .value = HID_KEYBOARD_DELETE},
         {.width = 0, .value = HID_KEYBOARD_DELETE},
     },
     {
@@ -126,7 +126,7 @@ const HidKeyboardKey hid_keyboard_keyset[ROW_COUNT][COLUMN_COUNT] = {
     {
         {.width = 1,
          .icon = &I_Pin_arrow_up_7x9,
-         .icon_toggled = &I_Shift_pressed_7x10,
+         .icon_toggled = &I_Shift_active_9x11,
          .value = HID_KEYBOARD_L_SHIFT},
         {.width = 1, .icon = NULL, .key = ',', .shift_key = '<', .value = HID_KEYBOARD_COMMA},
         {.width = 1, .icon = NULL, .key = '.', .shift_key = '>', .value = HID_KEYBOARD_DOT},
@@ -143,17 +143,17 @@ const HidKeyboardKey hid_keyboard_keyset[ROW_COUNT][COLUMN_COUNT] = {
     {
         {.width = 2,
          .icon = &I_Ctrl_17x10,
-         .icon_toggled = &I_Ctrl_pressed_17x10,
+         .icon_toggled = &I_Ctrl_active_17x9,
          .value = HID_KEYBOARD_L_CTRL},
         {.width = 0, .value = HID_KEYBOARD_L_CTRL},
         {.width = 2,
          .icon = &I_Alt_17x10,
-         .icon_toggled = &I_Alt_pressed_17x10,
+         .icon_toggled = &I_Alt_active_17x9,
          .value = HID_KEYBOARD_L_ALT},
         {.width = 0, .value = HID_KEYBOARD_L_ALT},
         {.width = 2,
          .icon = &I_Cmd_17x10,
-         .icon_toggled = &I_Cmd_pressed_17x10,
+         .icon_toggled = &I_Cmd_active_17x9,
          .value = HID_KEYBOARD_L_GUI},
         {.width = 0, .value = HID_KEYBOARD_L_GUI},
         {.width = 2, .icon = &I_Tab_17x10, .value = HID_KEYBOARD_TAB},
@@ -400,8 +400,7 @@ HidKeyboard* hid_keyboard_alloc(Hid* bt_hid) {
     view_set_draw_callback(hid_keyboard->view, hid_keyboard_draw_callback);
     view_set_input_callback(hid_keyboard->view, hid_keyboard_input_callback);
 
-    with_view_model(
-        hid_keyboard->view, HidKeyboardModel * model, { model->y = 1; }, true);
+    with_view_model(hid_keyboard->view, HidKeyboardModel * model, { model->y = 1; }, true);
 
     return hid_keyboard;
 }
