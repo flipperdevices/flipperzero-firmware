@@ -58,7 +58,7 @@ FuriString* furi_string_alloc_set_str(const char cstr_source[]);
  * @return FuriString* 
  */
 FuriString* furi_string_alloc_printf(const char format[], ...)
-    _ATTRIBUTE(__format__(__printf__, 1, 2));
+    _ATTRIBUTE((__format__(__printf__, 1, 2)));
 
 /**
  * @brief Allocate new FuriString and printf to it.
@@ -216,7 +216,7 @@ void furi_string_set_n(FuriString* string, const FuriString* source, size_t offs
  * @return int 
  */
 int furi_string_printf(FuriString* string, const char format[], ...)
-    _ATTRIBUTE(__format__(__printf__, 2, 3));
+    _ATTRIBUTE((__format__(__printf__, 2, 3)));
 
 /**
  * @brief Format in the string the given printf format
@@ -262,7 +262,7 @@ void furi_string_cat_str(FuriString* string_1, const char cstring_2[]);
  * @return int 
  */
 int furi_string_cat_printf(FuriString* string, const char format[], ...)
-    _ATTRIBUTE(__format__(__printf__, 2, 3));
+    _ATTRIBUTE((__format__(__printf__, 2, 3)));
 
 /**
  * @brief Append to the string the formatted string of the given printf format.
