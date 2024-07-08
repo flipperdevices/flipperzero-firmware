@@ -57,9 +57,6 @@ FuriEventLoop* furi_event_loop_alloc(void) {
     ulTaskNotifyValueClearIndexed(
         instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, 0xFFFFFFFF);
 
-    furi_thread_set_signal_callback(
-        instance->thread_id, furi_event_loop_signal_callback, instance);
-
     return instance;
 }
 
@@ -109,6 +106,12 @@ static void furi_event_loop_restore_flags(FuriEventLoop* instance, uint32_t flag
 void furi_event_loop_run(FuriEventLoop* instance) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
+
+    // Set the default signal callback if none was previously set
+    if(furi_thread_get_signal_callback(instance->thread_id) == NULL) {
+        furi_thread_set_signal_callback(
+            instance->thread_id, furi_event_loop_signal_callback, instance);
+    }
 
     furi_event_loop_init_tick(instance);
 
@@ -177,7 +180,10 @@ void furi_event_loop_run(FuriEventLoop* instance) {
         }
     }
 
-    furi_thread_set_signal_callback(instance->thread_id, NULL, NULL);
+    // Disable the default signal callback
+    if(furi_thread_get_signal_callback(instance->thread_id) == furi_event_loop_signal_callback) {
+        furi_thread_set_signal_callback(instance->thread_id, NULL, NULL);
+    }
 }
 
 void furi_event_loop_stop(FuriEventLoop* instance) {
