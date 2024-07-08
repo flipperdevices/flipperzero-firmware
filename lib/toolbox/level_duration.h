@@ -6,11 +6,11 @@
 
 #ifdef LEVEL_DURATION_BIG
 
-#define LEVEL_DURATION_RESET 0U
-#define LEVEL_DURATION_LEVEL_LOW 1U
+#define LEVEL_DURATION_RESET      0U
+#define LEVEL_DURATION_LEVEL_LOW  1U
 #define LEVEL_DURATION_LEVEL_HIGH 2U
-#define LEVEL_DURATION_WAIT 3U
-#define LEVEL_DURATION_RESERVED 0x800000U
+#define LEVEL_DURATION_WAIT       3U
+#define LEVEL_DURATION_RESERVED   0x800000U
 
 typedef struct {
     uint32_t duration : 30;
@@ -54,7 +54,7 @@ static inline uint32_t level_duration_get_duration(LevelDuration level_duration)
 
 #else
 
-#define LEVEL_DURATION_RESET 0U
+#define LEVEL_DURATION_RESET    0U
 #define LEVEL_DURATION_RESERVED 0x800000U
 
 typedef int32_t LevelDuration;

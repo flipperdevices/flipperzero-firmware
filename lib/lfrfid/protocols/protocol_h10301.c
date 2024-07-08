@@ -5,14 +5,14 @@
 #include "lfrfid_protocols.h"
 
 #define JITTER_TIME (20)
-#define MIN_TIME (64 - JITTER_TIME)
-#define MAX_TIME (80 + JITTER_TIME)
+#define MIN_TIME    (64 - JITTER_TIME)
+#define MAX_TIME    (80 + JITTER_TIME)
 
-#define H10301_DECODED_DATA_SIZE (3)
+#define H10301_DECODED_DATA_SIZE     (3)
 #define H10301_ENCODED_DATA_SIZE_U32 (3)
-#define H10301_ENCODED_DATA_SIZE (sizeof(uint32_t) * H10301_ENCODED_DATA_SIZE_U32)
+#define H10301_ENCODED_DATA_SIZE     (sizeof(uint32_t) * H10301_ENCODED_DATA_SIZE_U32)
 
-#define H10301_BIT_SIZE (sizeof(uint32_t) * 8)
+#define H10301_BIT_SIZE     (sizeof(uint32_t) * 8)
 #define H10301_BIT_MAX_SIZE (H10301_BIT_SIZE * H10301_DECODED_DATA_SIZE)
 
 typedef struct {

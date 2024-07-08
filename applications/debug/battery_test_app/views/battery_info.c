@@ -3,7 +3,7 @@
 #include <gui/elements.h>
 #include <assets_icons.h>
 
-#define LOW_CHARGE_THRESHOLD 10
+#define LOW_CHARGE_THRESHOLD         10
 #define HIGH_DRAIN_CURRENT_THRESHOLD 100
 
 struct BatteryInfo {

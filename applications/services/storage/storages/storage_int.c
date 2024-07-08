@@ -3,8 +3,8 @@
 #include <furi_hal.h>
 #include <toolbox/path.h>
 
-#define TAG "StorageInt"
-#define STORAGE_PATH STORAGE_INT_PATH_PREFIX
+#define TAG                   "StorageInt"
+#define STORAGE_PATH          STORAGE_INT_PATH_PREFIX
 #define LFS_CLEAN_FINGERPRINT 0
 
 /* When less than LFS_RESERVED_PAGES_COUNT are left free, creation & 

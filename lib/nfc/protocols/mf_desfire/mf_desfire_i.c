@@ -11,15 +11,15 @@
     MF_DESFIRE_FFF_PICC_PREFIX " "  \
                                "Free Memory"
 
-#define MF_DESFIRE_FFF_CHANGE_KEY_ID_KEY "Change Key ID"
-#define MF_DESFIRE_FFF_CONFIG_CHANGEABLE_KEY "Config Changeable"
+#define MF_DESFIRE_FFF_CHANGE_KEY_ID_KEY      "Change Key ID"
+#define MF_DESFIRE_FFF_CONFIG_CHANGEABLE_KEY  "Config Changeable"
 #define MF_DESFIRE_FFF_FREE_CREATE_DELETE_KEY "Free Create Delete"
-#define MF_DESFIRE_FFF_FREE_DIR_LIST_KEY "Free Directory List"
-#define MF_DESFIRE_FFF_KEY_CHANGEABLE_KEY "Key Changeable"
-#define MF_DESFIRE_FFF_FLAGS_KEY "Flags"
-#define MF_DESFIRE_FFF_MAX_KEYS_KEY "Max Keys"
+#define MF_DESFIRE_FFF_FREE_DIR_LIST_KEY      "Free Directory List"
+#define MF_DESFIRE_FFF_KEY_CHANGEABLE_KEY     "Key Changeable"
+#define MF_DESFIRE_FFF_FLAGS_KEY              "Flags"
+#define MF_DESFIRE_FFF_MAX_KEYS_KEY           "Max Keys"
 
-#define MF_DESFIRE_FFF_KEY_SUB_PREFIX "Key"
+#define MF_DESFIRE_FFF_KEY_SUB_PREFIX  "Key"
 #define MF_DESFIRE_FFF_KEY_VERSION_KEY "Version"
 
 #define MF_DESFIRE_FFF_APPLICATION_COUNT_KEY \
@@ -33,15 +33,15 @@
 #define MF_DESFIRE_FFF_FILE_IDS_KEY    \
     MF_DESFIRE_FFF_FILE_SUB_PREFIX " " \
                                    "IDs"
-#define MF_DESFIRE_FFF_FILE_TYPE_KEY "Type"
+#define MF_DESFIRE_FFF_FILE_TYPE_KEY          "Type"
 #define MF_DESFIRE_FFF_FILE_COMM_SETTINGS_KEY "Communication Settings"
 #define MF_DESFIRE_FFF_FILE_ACCESS_RIGHTS_KEY "Access Rights"
 
 #define MF_DESFIRE_FFF_FILE_SIZE_KEY "Size"
 
-#define MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY "Hi Limit"
-#define MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY "Lo Limit"
-#define MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY "Limited Credit Value"
+#define MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY             "Hi Limit"
+#define MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY             "Lo Limit"
+#define MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY   "Limited Credit Value"
 #define MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_ENABLED_KEY "Limited Credit Enabled"
 
 #define MF_DESFIRE_FFF_FILE_MAX_KEY "Max"

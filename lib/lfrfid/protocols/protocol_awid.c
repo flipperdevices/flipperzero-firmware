@@ -6,12 +6,12 @@
 #include "lfrfid_protocols.h"
 
 #define JITTER_TIME (20)
-#define MIN_TIME (64 - JITTER_TIME)
-#define MAX_TIME (80 + JITTER_TIME)
+#define MIN_TIME    (64 - JITTER_TIME)
+#define MAX_TIME    (80 + JITTER_TIME)
 
 #define AWID_DECODED_DATA_SIZE (9)
 
-#define AWID_ENCODED_BIT_SIZE (96)
+#define AWID_ENCODED_BIT_SIZE  (96)
 #define AWID_ENCODED_DATA_SIZE (((AWID_ENCODED_BIT_SIZE) / 8) + 1)
 #define AWID_ENCODED_DATA_LAST (AWID_ENCODED_DATA_SIZE - 1)
 

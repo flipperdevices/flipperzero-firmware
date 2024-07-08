@@ -11,12 +11,12 @@
 #define sd_spi_debug(...)
 #endif
 
-#define SD_CMD_LENGTH (6)
-#define SD_DUMMY_BYTE (0xFF)
+#define SD_CMD_LENGTH         (6)
+#define SD_DUMMY_BYTE         (0xFF)
 #define SD_ANSWER_RETRY_COUNT (8)
-#define SD_IDLE_RETRY_COUNT (100)
-#define SD_TIMEOUT_MS (1000)
-#define SD_BLOCK_SIZE (512)
+#define SD_IDLE_RETRY_COUNT   (100)
+#define SD_TIMEOUT_MS         (1000)
+#define SD_BLOCK_SIZE         (512)
 
 #define FLAG_SET(x, y) (((x) & (y)) == (y))
 

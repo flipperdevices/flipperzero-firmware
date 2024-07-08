@@ -6,18 +6,18 @@
 typedef uint64_t EM4100DecodedData;
 typedef uint64_t EM4100Epilogue;
 
-#define EM_HEADER_POS (55)
+#define EM_HEADER_POS  (55)
 #define EM_HEADER_MASK (0x1FFLLU << EM_HEADER_POS)
 
 #define EM_FIRST_ROW_POS (50)
 
-#define EM_ROW_COUNT (10)
-#define EM_COLUMN_COUNT (4)
+#define EM_ROW_COUNT          (10)
+#define EM_COLUMN_COUNT       (4)
 #define EM_BITS_PER_ROW_COUNT (EM_COLUMN_COUNT + 1)
 
 #define EM_COLUMN_POS (4)
-#define EM_STOP_POS (0)
-#define EM_STOP_MASK (0x1LLU << EM_STOP_POS)
+#define EM_STOP_POS   (0)
+#define EM_STOP_MASK  (0x1LLU << EM_STOP_POS)
 
 #define EM_HEADER_AND_STOP_MASK (EM_HEADER_MASK | EM_STOP_MASK)
 #define EM_HEADER_AND_STOP_DATA (EM_HEADER_MASK)
@@ -25,8 +25,8 @@ typedef uint64_t EM4100Epilogue;
 #define EM4100_DECODED_DATA_SIZE (5)
 #define EM4100_ENCODED_DATA_SIZE (sizeof(EM4100DecodedData))
 
-#define EM_READ_SHORT_TIME_BASE (256)
-#define EM_READ_LONG_TIME_BASE (512)
+#define EM_READ_SHORT_TIME_BASE  (256)
+#define EM_READ_LONG_TIME_BASE   (512)
 #define EM_READ_JITTER_TIME_BASE (100)
 
 #define EM_ENCODED_DATA_HEADER (0xFF80000000000000ULL)

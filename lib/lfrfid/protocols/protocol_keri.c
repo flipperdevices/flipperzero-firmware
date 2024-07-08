@@ -3,17 +3,17 @@
 #include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 
-#define KERI_PREAMBLE_BIT_SIZE (33)
+#define KERI_PREAMBLE_BIT_SIZE  (33)
 #define KERI_PREAMBLE_DATA_SIZE (5)
 
-#define KERI_ENCODED_BIT_SIZE (64)
+#define KERI_ENCODED_BIT_SIZE  (64)
 #define KERI_ENCODED_DATA_SIZE (((KERI_ENCODED_BIT_SIZE) / 8) + KERI_PREAMBLE_DATA_SIZE)
 #define KERI_ENCODED_DATA_LAST ((KERI_ENCODED_BIT_SIZE) / 8)
 
-#define KERI_DECODED_BIT_SIZE (28)
+#define KERI_DECODED_BIT_SIZE  (28)
 #define KERI_DECODED_DATA_SIZE (4)
 
-#define KERI_US_PER_BIT (255)
+#define KERI_US_PER_BIT             (255)
 #define KERI_ENCODER_PULSES_PER_BIT (16)
 
 typedef struct {

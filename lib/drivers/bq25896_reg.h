@@ -7,15 +7,15 @@
 #error Bit structures defined in this file is not portable to BE
 #endif
 
-#define BQ25896_ADDRESS 0xD6
+#define BQ25896_ADDRESS     0xD6
 #define BQ25896_I2C_TIMEOUT 50
 
 #define IILIM_1600 (1 << 5)
-#define IILIM_800 (1 << 4)
-#define IILIM_400 (1 << 3)
-#define IILIM_200 (1 << 2)
-#define IILIM_100 (1 << 1)
-#define IILIM_50 (1 << 0)
+#define IILIM_800  (1 << 4)
+#define IILIM_400  (1 << 3)
+#define IILIM_200  (1 << 2)
+#define IILIM_100  (1 << 1)
+#define IILIM_50   (1 << 0)
 
 typedef struct {
     uint8_t IINLIM : 6; // Input Current Limit, mA, offset: +100mA
@@ -24,10 +24,10 @@ typedef struct {
 } REG00;
 
 #define VINDPM_OS_1600 (1 << 4)
-#define VINDPM_OS_800 (1 << 3)
-#define VINDPM_OS_400 (1 << 2)
-#define VINDPM_OS_200 (1 << 1)
-#define VINDPM_OS_100 (1 << 0)
+#define VINDPM_OS_800  (1 << 3)
+#define VINDPM_OS_400  (1 << 2)
+#define VINDPM_OS_200  (1 << 1)
+#define VINDPM_OS_100  (1 << 0)
 
 typedef enum {
     Bhot34 = 0b00, // – VBHOT1 Threshold (34.75%) (default)
@@ -68,10 +68,10 @@ typedef struct {
 #define ICHG_4096 (1 << 6)
 #define ICHG_2048 (1 << 5)
 #define ICHG_1024 (1 << 4)
-#define ICHG_512 (1 << 3)
-#define ICHG_256 (1 << 2)
-#define ICHG_128 (1 << 1)
-#define ICHG_64 (1 << 0)
+#define ICHG_512  (1 << 3)
+#define ICHG_256  (1 << 2)
+#define ICHG_128  (1 << 1)
+#define ICHG_64   (1 << 0)
 
 typedef struct {
     uint8_t ICHG  : 7; // Fast Charge Current Limit, mA
@@ -81,7 +81,7 @@ typedef struct {
 #define IPRETERM_512 (1 << 3)
 #define IPRETERM_256 (1 << 2)
 #define IPRETERM_128 (1 << 1)
-#define IPRETERM_64 (1 << 0)
+#define IPRETERM_64  (1 << 0)
 
 typedef struct {
     uint8_t ITERM   : 4; // Termination Current Limit, offset: +64mA
@@ -91,9 +91,9 @@ typedef struct {
 #define VREG_512 (1 << 5)
 #define VREG_256 (1 << 4)
 #define VREG_128 (1 << 3)
-#define VREG_64 (1 << 2)
-#define VREG_32 (1 << 1)
-#define VREG_16 (1 << 0)
+#define VREG_64  (1 << 2)
+#define VREG_32  (1 << 1)
+#define VREG_16  (1 << 0)
 
 typedef struct {
     bool VRECHG  : 1; // Battery Recharge Threshold Offset
@@ -129,11 +129,11 @@ typedef struct {
 #define BAT_COMP_20 (1 << 0)
 
 #define VCLAMP_128 (1 << 2)
-#define VCLAMP_64 (1 << 1)
-#define VCLAMP_32 (1 << 0)
+#define VCLAMP_64  (1 << 1)
+#define VCLAMP_32  (1 << 0)
 
-#define TREG_60 (0b00)
-#define TREG_80 (0b01)
+#define TREG_60  (0b00)
+#define TREG_80  (0b01)
 #define TREG_100 (0b10)
 #define TREG_120 (0b11)
 
@@ -157,7 +157,7 @@ typedef struct {
 #define BOOSTV_512 (1 << 3)
 #define BOOSTV_256 (1 << 2)
 #define BOOSTV_128 (1 << 1)
-#define BOOSTV_64 (1 << 0)
+#define BOOSTV_64  (1 << 0)
 
 typedef enum {
     BoostLim_500 = 0b000,
@@ -224,10 +224,10 @@ typedef struct {
 #define VINDPM_6400 (1 << 6)
 #define VINDPM_3200 (1 << 5)
 #define VINDPM_1600 (1 << 4)
-#define VINDPM_800 (1 << 3)
-#define VINDPM_400 (1 << 2)
-#define VINDPM_200 (1 << 1)
-#define VINDPM_100 (1 << 0)
+#define VINDPM_800  (1 << 3)
+#define VINDPM_400  (1 << 2)
+#define VINDPM_200  (1 << 1)
+#define VINDPM_100  (1 << 0)
 
 typedef struct {
     uint8_t VINDPM    : 7; // Absolute VINDPM Threshold, offset: +2600mV

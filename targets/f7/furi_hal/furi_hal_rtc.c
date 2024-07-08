@@ -17,7 +17,7 @@
 
 #define FURI_HAL_RTC_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
-#define FURI_HAL_RTC_HEADER_MAGIC 0x10F1
+#define FURI_HAL_RTC_HEADER_MAGIC   0x10F1
 #define FURI_HAL_RTC_HEADER_VERSION 0
 
 typedef struct {

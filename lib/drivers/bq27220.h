@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <furi_hal_i2c.h>
 
-#define BQ27220_ERROR 0x0
+#define BQ27220_ERROR   0x0
 #define BQ27220_SUCCESS 0x1
 
 typedef struct {
