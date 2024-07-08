@@ -226,7 +226,7 @@ SpacesInParensOptions:
   InEmptyParentheses: false
   Other:           false
 SpacesInSquareBrackets: false
-Standard:        c++03
+Standard:        c++20
 StatementAttributeLikeMacros:
   - Q_EMIT
 StatementMacros:
