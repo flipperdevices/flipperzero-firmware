@@ -397,7 +397,7 @@ bool tar_archive_unpack_to(
     FURI_LOG_I(TAG, "Restoring '%s'", destination);
 
     return mtar_foreach(&archive->tar, archive_extract_foreach_cb, &param) == MTAR_ESUCCESS;
-};
+}
 
 bool tar_archive_add_file(
     TarArchive* archive,

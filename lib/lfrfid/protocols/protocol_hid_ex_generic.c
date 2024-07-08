@@ -43,21 +43,21 @@ ProtocolHIDEx* protocol_hid_ex_generic_alloc(void) {
     protocol->encoder.fsk_osc = fsk_osc_alloc(8, 10, 50);
 
     return protocol;
-};
+}
 
 void protocol_hid_ex_generic_free(ProtocolHIDEx* protocol) {
     fsk_demod_free(protocol->decoder.fsk_demod);
     fsk_osc_free(protocol->encoder.fsk_osc);
     free(protocol);
-};
+}
 
 uint8_t* protocol_hid_ex_generic_get_data(ProtocolHIDEx* protocol) {
     return protocol->data;
-};
+}
 
 void protocol_hid_ex_generic_decoder_start(ProtocolHIDEx* protocol) {
     memset(protocol->encoded_data, 0, HID_ENCODED_DATA_SIZE);
-};
+}
 
 static bool protocol_hid_ex_generic_can_be_decoded(const uint8_t* data) {
     // check preamble
@@ -110,7 +110,7 @@ bool protocol_hid_ex_generic_decoder_feed(ProtocolHIDEx* protocol, bool level, u
     }
 
     return result;
-};
+}
 
 static void protocol_hid_ex_generic_encode(ProtocolHIDEx* protocol) {
     protocol->encoded_data[0] = HID_PREAMBLE;
@@ -135,7 +135,7 @@ bool protocol_hid_ex_generic_encoder_start(ProtocolHIDEx* protocol) {
     protocol_hid_ex_generic_encode(protocol);
 
     return true;
-};
+}
 
 LevelDuration protocol_hid_ex_generic_encoder_yield(ProtocolHIDEx* protocol) {
     bool level = 0;
@@ -165,7 +165,7 @@ LevelDuration protocol_hid_ex_generic_encoder_yield(ProtocolHIDEx* protocol) {
     }
 
     return level_duration_make(level, duration);
-};
+}
 
 bool protocol_hid_ex_generic_write_data(ProtocolHIDEx* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
@@ -190,7 +190,7 @@ bool protocol_hid_ex_generic_write_data(ProtocolHIDEx* protocol, void* data) {
         result = true;
     }
     return result;
-};
+}
 
 void protocol_hid_ex_generic_render_data(ProtocolHIDEx* protocol, FuriString* result) {
     UNUSED(protocol);
@@ -200,7 +200,7 @@ void protocol_hid_ex_generic_render_data(ProtocolHIDEx* protocol, FuriString* re
         result,
         "Type: Generic HID Extended\n"
         "Data: Unknown");
-};
+}
 
 const ProtocolBase protocol_hid_ex_generic = {
     .name = "HIDExt",

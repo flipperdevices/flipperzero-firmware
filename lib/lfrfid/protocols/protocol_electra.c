@@ -116,15 +116,15 @@ typedef struct {
 ProtocolElectra* protocol_electra_alloc(void) {
     ProtocolElectra* proto = malloc(sizeof(ProtocolElectra));
     return (void*)proto;
-};
+}
 
 void protocol_electra_free(ProtocolElectra* proto) {
     free(proto);
-};
+}
 
 uint8_t* protocol_electra_get_data(ProtocolElectra* proto) {
     return proto->data;
-};
+}
 
 static void electra_decode(
     const uint8_t* encoded_base_data,
@@ -242,7 +242,7 @@ void protocol_electra_decoder_start(ProtocolElectra* proto) {
         ManchesterEventReset,
         &proto->decoder_manchester_state,
         NULL);
-};
+}
 
 bool protocol_electra_decoder_feed(ProtocolElectra* proto, bool level, uint32_t duration) {
     bool result = false;
@@ -299,7 +299,7 @@ bool protocol_electra_decoder_feed(ProtocolElectra* proto, bool level, uint32_t 
     }
 
     return result;
-};
+}
 
 static void em_write_nibble(bool low_nibble, uint8_t data, ElectraDecodedData* encoded_base_data) {
     uint8_t parity_sum = 0;
@@ -354,7 +354,7 @@ bool protocol_electra_encoder_start(ProtocolElectra* proto) {
     }
 
     return true;
-};
+}
 
 LevelDuration protocol_electra_encoder_yield(ProtocolElectra* proto) {
     bool level;
@@ -378,7 +378,7 @@ LevelDuration protocol_electra_encoder_yield(ProtocolElectra* proto) {
     }
 
     return level_duration_make(level, duration);
-};
+}
 
 bool protocol_electra_write_data(ProtocolElectra* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
@@ -408,12 +408,12 @@ bool protocol_electra_write_data(ProtocolElectra* protocol, void* data) {
         result = true;
     }
     return result;
-};
+}
 
 void protocol_electra_render_data(ProtocolElectra* protocol, FuriString* result) {
     protocol_electra_encoder_start(protocol);
     furi_string_printf(result, "Epilogue: %016llX", protocol->encoded_epilogue);
-};
+}
 
 const ProtocolBase protocol_electra = {
     .name = "Electra",

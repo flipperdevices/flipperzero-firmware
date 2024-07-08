@@ -179,7 +179,7 @@ ReferenceAlignment: Pointer
 ReflowComments:  false
 RemoveBracesLLVM: false
 RemoveParentheses: ReturnStatement
-RemoveSemicolon: false
+RemoveSemicolon: true
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope
 SeparateDefinitionBlocks: Leave

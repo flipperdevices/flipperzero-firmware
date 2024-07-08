@@ -34,20 +34,20 @@ typedef struct {
 ProtocolJablotron* protocol_jablotron_alloc(void) {
     ProtocolJablotron* protocol = malloc(sizeof(ProtocolJablotron));
     return protocol;
-};
+}
 
 void protocol_jablotron_free(ProtocolJablotron* protocol) {
     free(protocol);
-};
+}
 
 uint8_t* protocol_jablotron_get_data(ProtocolJablotron* proto) {
     return proto->data;
-};
+}
 
 void protocol_jablotron_decoder_start(ProtocolJablotron* protocol) {
     memset(protocol->encoded_data, 0, JABLOTRON_ENCODED_BYTE_FULL_SIZE);
     protocol->last_short = false;
-};
+}
 
 uint8_t protocol_jablotron_checksum(uint8_t* bits) {
     uint8_t chksum = 0;
@@ -115,7 +115,7 @@ bool protocol_jablotron_decoder_feed(ProtocolJablotron* protocol, bool level, ui
     }
 
     return false;
-};
+}
 
 bool protocol_jablotron_encoder_start(ProtocolJablotron* protocol) {
     // preamble
@@ -133,7 +133,7 @@ bool protocol_jablotron_encoder_start(ProtocolJablotron* protocol) {
     protocol->last_short = false;
     protocol->last_level = false;
     return true;
-};
+}
 
 LevelDuration protocol_jablotron_encoder_yield(ProtocolJablotron* protocol) {
     uint32_t duration;
@@ -158,12 +158,12 @@ LevelDuration protocol_jablotron_encoder_yield(ProtocolJablotron* protocol) {
     }
 
     return level_duration_make(protocol->last_level, duration);
-};
+}
 
 void protocol_jablotron_render_data(ProtocolJablotron* protocol, FuriString* result) {
     uint64_t id = protocol_jablotron_card_id(protocol->data);
     furi_string_printf(result, "Card: %llX", id);
-};
+}
 
 bool protocol_jablotron_write_data(ProtocolJablotron* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
@@ -184,7 +184,7 @@ bool protocol_jablotron_write_data(ProtocolJablotron* protocol, void* data) {
         result = true;
     }
     return result;
-};
+}
 
 const ProtocolBase protocol_jablotron = {
     .name = "Jablotron",

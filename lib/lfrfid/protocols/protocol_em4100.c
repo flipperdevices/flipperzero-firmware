@@ -93,27 +93,27 @@ ProtocolEM4100* protocol_em4100_alloc(void) {
     ProtocolEM4100* proto = malloc(sizeof(ProtocolEM4100));
     proto->clock_per_bit = 64;
     return (void*)proto;
-};
+}
 
 ProtocolEM4100* protocol_em4100_16_alloc(void) {
     ProtocolEM4100* proto = malloc(sizeof(ProtocolEM4100));
     proto->clock_per_bit = 16;
     return (void*)proto;
-};
+}
 
 ProtocolEM4100* protocol_em4100_32_alloc(void) {
     ProtocolEM4100* proto = malloc(sizeof(ProtocolEM4100));
     proto->clock_per_bit = 32;
     return (void*)proto;
-};
+}
 
 void protocol_em4100_free(ProtocolEM4100* proto) {
     free(proto);
-};
+}
 
 uint8_t* protocol_em4100_get_data(ProtocolEM4100* proto) {
     return proto->data;
-};
+}
 
 static void em4100_decode(
     const uint8_t* encoded_data,
@@ -202,7 +202,7 @@ void protocol_em4100_decoder_start(ProtocolEM4100* proto) {
         ManchesterEventReset,
         &proto->decoder_manchester_state,
         NULL);
-};
+}
 
 bool protocol_em4100_decoder_feed(ProtocolEM4100* proto, bool level, uint32_t duration) {
     bool result = false;
@@ -252,7 +252,7 @@ bool protocol_em4100_decoder_feed(ProtocolEM4100* proto, bool level, uint32_t du
     }
 
     return result;
-};
+}
 
 static void em4100_write_nibble(bool low_nibble, uint8_t data, EM4100DecodedData* encoded_data) {
     uint8_t parity_sum = 0;
@@ -296,7 +296,7 @@ bool protocol_em4100_encoder_start(ProtocolEM4100* proto) {
     proto->encoded_polarity = true;
 
     return true;
-};
+}
 
 LevelDuration protocol_em4100_encoder_yield(ProtocolEM4100* proto) {
     bool level = (proto->encoded_data >> (63 - proto->encoded_data_index)) & 1;
@@ -315,7 +315,7 @@ LevelDuration protocol_em4100_encoder_yield(ProtocolEM4100* proto) {
     }
 
     return level_duration_make(level, duration);
-};
+}
 
 bool protocol_em4100_write_data(ProtocolEM4100* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
@@ -341,7 +341,7 @@ bool protocol_em4100_write_data(ProtocolEM4100* protocol, void* data) {
         result = true;
     }
     return result;
-};
+}
 
 void protocol_em4100_render_data(ProtocolEM4100* protocol, FuriString* result) {
     uint8_t* data = protocol->data;
@@ -352,7 +352,7 @@ void protocol_em4100_render_data(ProtocolEM4100* protocol, FuriString* result) {
         data[2],
         (uint16_t)((data[3] << 8) | (data[4])),
         protocol->clock_per_bit);
-};
+}
 
 const ProtocolBase protocol_em4100 = {
     .name = "EM4100",

@@ -160,7 +160,7 @@ static LFSData* storage_int_lfs_data_alloc(void) {
     lfs_data->config.lookahead_size = 16;
 
     return lfs_data;
-};
+}
 
 // Returns true if fingerprint was invalid and LFS reformatting is needed
 static bool storage_int_check_and_set_fingerprint(LFSData* lfs_data) {

@@ -35,15 +35,15 @@ typedef struct {
 ProtocolViking* protocol_viking_alloc(void) {
     ProtocolViking* proto = malloc(sizeof(ProtocolViking));
     return (void*)proto;
-};
+}
 
 void protocol_viking_free(ProtocolViking* protocol) {
     free(protocol);
-};
+}
 
 uint8_t* protocol_viking_get_data(ProtocolViking* protocol) {
     return protocol->data;
-};
+}
 
 static void protocol_viking_decode(ProtocolViking* protocol) {
     // Copy Card ID
@@ -80,7 +80,7 @@ void protocol_viking_decoder_start(ProtocolViking* protocol) {
         ManchesterEventReset,
         &protocol->decoder_manchester_state,
         NULL);
-};
+}
 
 bool protocol_viking_decoder_feed(ProtocolViking* protocol, bool level, uint32_t duration) {
     bool result = false;
@@ -117,7 +117,7 @@ bool protocol_viking_decoder_feed(ProtocolViking* protocol, bool level, uint32_t
     }
 
     return result;
-};
+}
 
 bool protocol_viking_encoder_start(ProtocolViking* protocol) {
     // Preamble
@@ -135,7 +135,7 @@ bool protocol_viking_encoder_start(ProtocolViking* protocol) {
     bit_lib_set_bits(protocol->encoded_data, 56, checksum, 8);
 
     return true;
-};
+}
 
 LevelDuration protocol_viking_encoder_yield(ProtocolViking* protocol) {
     bool level = bit_lib_get_bit(protocol->encoded_data, protocol->encoded_data_index);
@@ -151,7 +151,7 @@ LevelDuration protocol_viking_encoder_yield(ProtocolViking* protocol) {
     }
 
     return level_duration_make(level, duration);
-};
+}
 
 bool protocol_viking_write_data(ProtocolViking* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
@@ -173,11 +173,11 @@ bool protocol_viking_write_data(ProtocolViking* protocol, void* data) {
         result = true;
     }
     return result;
-};
+}
 
 void protocol_viking_render_data(ProtocolViking* protocol, FuriString* result) {
     furi_string_printf(result, "ID: %08lX", bit_lib_get_bits_32(protocol->data, 0, 32));
-};
+}
 
 const ProtocolBase protocol_viking = {
     .name = "Viking",
