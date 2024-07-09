@@ -10,12 +10,6 @@ env.Append(
 libenv = env.Clone(FW_LIB_NAME="tlsf")
 libenv.ApplyLibFlags()
 
-libenv.Append(
-    CPPDEFINES=[
-        "CONFIG_MALLOC_ALIGNMENT=4",
-    ],
-)
-
 sources = [File("tlsf/tlsf.c")]
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)

@@ -298,7 +298,7 @@ extern void* pvPortRealloc(void* pv, size_t xSize) {
     if(xSize > old_size) {
         memset((uint8_t*)data + old_size, 0, xSize - old_size);
     }
-    
+
     return data;
 }
 
