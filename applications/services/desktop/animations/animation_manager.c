@@ -47,13 +47,13 @@ struct AnimationManager {
     int32_t freezed_animation_time_left;
     ViewStack* view_stack;
 
-    bool dummy_mode;
-    bool blocking_shown_url;
-    bool blocking_shown_sd_bad;
-    bool blocking_shown_no_db;
-    bool blocking_shown_sd_ok;
-    bool levelup_pending;
-    bool levelup_active;
+    bool dummy_mode : 1;
+    bool blocking_shown_url : 1;
+    bool blocking_shown_sd_bad : 1;
+    bool blocking_shown_no_db : 1;
+    bool blocking_shown_sd_ok : 1;
+    bool levelup_pending : 1;
+    bool levelup_active : 1;
 };
 
 static StorageAnimation*
