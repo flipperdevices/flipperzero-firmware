@@ -1,13 +1,5 @@
 #include "../example_number_input_i.h"
 
-void example_number_input_scene_show_number_callback(
-    ExampleNumberInputCustomEvent event,
-    void* context) {
-    furi_assert(context);
-    ExampleNumberInput* app = context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, event);
-}
-
 static void
     example_number_input_scene_confirm_dialog_callback(DialogExResult result, void* context) {
     ExampleNumberInput* app = context;
