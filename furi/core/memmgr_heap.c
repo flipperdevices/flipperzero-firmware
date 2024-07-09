@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <tlsf.h>
-// #include <tlsf_block_functions.h>
+#include <tlsf_block_functions.h>
 #include <FreeRTOS.h>
 #include <task.h>
 #include <m-dict.h>
@@ -45,7 +45,7 @@ static void memmgr_heap_init(void) {
 
 __attribute__((constructor)) static void memmgr_init(void) {
     size_t pool_size = (size_t)&__heap_end__ - (size_t)&__heap_start__;
-    tlsf = tlsf_create_with_pool((void*)&__heap_start__, pool_size);
+    tlsf = tlsf_create_with_pool((void*)&__heap_start__, pool_size, 0);
     memmgr_heap_init();
 }
 
@@ -116,7 +116,7 @@ size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
                 MemmgrHeapAllocDict_next(alloc_dict_it)) {
                 MemmgrHeapAllocDict_itref_t* data = MemmgrHeapAllocDict_ref(alloc_dict_it);
                 if(data->key != 0) {
-                    if(!tlsf_pointer_is_free((uint8_t*)data->key)) {
+                    if(!block_is_free(block_from_ptr((void*)data->key))) {
                         leftovers += data->value;
                     }
                 }
@@ -128,7 +128,7 @@ size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
     return leftovers;
 }
 
-static void tlsf_walker_max_free(void* ptr, size_t size, int used, void* user) {
+static bool tlsf_walker_max_free(void* ptr, size_t size, int used, void* user) {
     UNUSED(ptr);
 
     bool free = !used;
@@ -136,6 +136,8 @@ static void tlsf_walker_max_free(void* ptr, size_t size, int used, void* user) {
     if(free && size > *max_free_block_size) {
         *max_free_block_size = size;
     }
+
+    return true;
 }
 
 size_t memmgr_heap_get_max_free_block(void) {
@@ -156,9 +158,9 @@ typedef struct {
     void* context;
 } BlockWalkerWrapper;
 
-static void tlsf_walker_wrapper(void* ptr, size_t size, int used, void* user) {
+static bool tlsf_walker_wrapper(void* ptr, size_t size, int used, void* user) {
     BlockWalkerWrapper* wrapper = (BlockWalkerWrapper*)user;
-    wrapper->walker(ptr, size, used, wrapper->context);
+    return wrapper->walker(ptr, size, used, wrapper->context);
 }
 
 void memmgr_heap_walk_blocks(BlockWalker walker, void* context) {
@@ -169,42 +171,6 @@ void memmgr_heap_walk_blocks(BlockWalker walker, void* context) {
     tlsf_walk_pool(pool, tlsf_walker_wrapper, &wrapper);
 
     memmgr_unlock();
-}
-
-void* pvPortMalloc(size_t xSize) {
-    // memory management in ISR is not allowed
-    if(FURI_IS_IRQ_MODE()) {
-        furi_crash("memmgt in ISR");
-    }
-
-    memmgr_lock();
-
-    // allocate block
-    void* data = tlsf_malloc(tlsf, xSize);
-    if(data == NULL) {
-        if(xSize == 0) {
-            furi_crash("malloc(0)");
-        } else {
-            furi_crash("out of memory");
-        }
-    }
-
-    // update heap usage
-    heap_used += tlsf_block_size(data);
-    heap_used += tlsf_alloc_overhead();
-    if(heap_used > heap_max_used) {
-        heap_max_used = heap_used;
-    }
-
-    // trace allocation
-    memmgr_heap_trace_malloc(data, xSize);
-
-    memmgr_unlock();
-
-    // clear block content
-    memset(data, 0, xSize);
-
-    return data;
 }
 
 void vPortFree(void* pv) {
@@ -278,6 +244,10 @@ extern void* pvPortAllocAligned(size_t xSize, size_t xAlignment) {
     return data;
 }
 
+void* pvPortMalloc(size_t xSize) {
+    return pvPortAllocAligned(xSize, 8);
+}
+
 extern void* pvPortRealloc(void* pv, size_t xSize) {
     // realloc(ptr, 0) is equivalent to free(ptr)
     if(xSize == 0) {
@@ -328,12 +298,12 @@ extern void* pvPortRealloc(void* pv, size_t xSize) {
     if(xSize > old_size) {
         memset((uint8_t*)data + old_size, 0, xSize - old_size);
     }
-
+    
     return data;
 }
 
 size_t xPortGetFreeHeapSize(void) {
-    return memmgr_get_heap_size() - heap_used - tlsf_struct_size();
+    return memmgr_get_heap_size() - heap_used - tlsf_size(tlsf);
     return 0;
 }
 
@@ -342,6 +312,6 @@ size_t xPortGetTotalHeapSize(void) {
 }
 
 size_t xPortGetMinimumEverFreeHeapSize(void) {
-    return memmgr_get_heap_size() - heap_max_used - tlsf_struct_size();
+    return memmgr_get_heap_size() - heap_max_used - tlsf_size(tlsf);
     return 0;
 }

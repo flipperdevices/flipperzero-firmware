@@ -312,14 +312,35 @@ void test_furi_memmgr_advanced(void) {
 
 void test_furi_memmgr_aligned8(void) {
     const size_t repeat_count = 100;
-
     for(size_t i = 0; i < repeat_count; i++) {
-        uintptr_t ptr = (uintptr_t)malloc(10);
+        size_t alloc_size = 10 * (i + 1);
+
+        uintptr_t ptr = (uintptr_t)malloc(alloc_size);
         mu_assert_int_eq(0, ptr % 8);
-        ptr = (uintptr_t)realloc((void*)ptr, 20);
+        ptr = (uintptr_t)realloc((void*)ptr, alloc_size * 2);
         mu_assert_int_eq(0, ptr % 8);
-        ptr = (uintptr_t)realloc((void*)ptr, 30);
+        ptr = (uintptr_t)realloc((void*)ptr, alloc_size * 3);
         mu_assert_int_eq(0, ptr % 8);
         free((void*)ptr);
+    }
+
+    for(size_t i = 0; i < repeat_count; i++) {
+        size_t alloc_size = 4 * (i + 1);
+
+        uintptr_t ptr = (uintptr_t)malloc(alloc_size);
+        mu_assert_int_eq(0, ptr % 8);
+
+        void* barrier_1 = malloc(alloc_size * (rand() % 10 + 1));
+        ptr = (uintptr_t)realloc((void*)ptr, alloc_size * 2);
+        mu_assert_int_eq(0, ptr % 8);
+
+        barrier_1 = realloc(barrier_1, alloc_size * (rand() % 10 + 1));
+        void* barrier_2 = malloc(alloc_size * (rand() % 10 + 1));
+        ptr = (uintptr_t)realloc((void*)ptr, alloc_size * 3);
+        mu_assert_int_eq(0, ptr % 8);
+
+        free((void*)ptr);
+        free(barrier_1);
+        free(barrier_2);
     }
 }
