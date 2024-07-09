@@ -468,7 +468,7 @@ typedef struct {
     size_t size;
 } FreeBlockInfo;
 
-#define FREE_BLOCK_INFO_MAX 128
+#define FREE_BLOCK_INFO_MAX 512
 
 typedef struct {
     FreeBlockInfo free_blocks[FREE_BLOCK_INFO_MAX];
@@ -493,6 +493,8 @@ void cli_command_free_blocks(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(args);
     UNUSED(context);
+
+    printf("Taking %zu bytes for free block info\r\n", sizeof(FreeBlockContext));
 
     FreeBlockContext* free_blocks = malloc(sizeof(FreeBlockContext));
     free_blocks->free_blocks_count = 0;

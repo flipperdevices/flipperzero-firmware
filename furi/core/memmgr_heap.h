@@ -44,8 +44,7 @@ typedef bool (*BlockWalker)(void* pointer, size_t size, bool used, void* context
 
 /**
  * @brief Walk through all heap blocks
- * @warning This function will lock memory manager and may cause deadlocks if any malloc/free is called inside the callback.
- *          Also, printf and furi_log contains malloc calls, so do not use them.
+ * @warning This function will lock memory manager and/or kernel, so any interprocess communication should be avoided. For example, if you use printf() in the walker function in cli, it will cause a deadlock.
  * 
  * @param walker 
  * @param context 

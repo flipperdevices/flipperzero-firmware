@@ -50,8 +50,9 @@ void flipper_init(void) {
     FURI_LOG_I(TAG, "Startup complete");
 }
 
-PLACE_IN_SECTION("MB_MEM2") static StaticTask_t idle_task_tcb;
-PLACE_IN_SECTION("MB_MEM2") static StackType_t idle_task_stack[configIDLE_TASK_STACK_DEPTH];
+// Magically bruteforced allocations to maximize aux heap usage
+static StaticTask_t idle_task_tcb;
+static StackType_t idle_task_stack[configIDLE_TASK_STACK_DEPTH];
 PLACE_IN_SECTION("MB_MEM2") static StaticTask_t timer_task_tcb;
 PLACE_IN_SECTION("MB_MEM2") static StackType_t timer_task_stack[configTIMER_TASK_STACK_DEPTH];
 
