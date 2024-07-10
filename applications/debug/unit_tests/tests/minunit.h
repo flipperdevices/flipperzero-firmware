@@ -86,6 +86,8 @@ void minunit_printf_warning(const char* format, ...);
 /*  Definitions */
 #define MU_TEST(method_name) static void method_name(void)
 #define MU_TEST_1(method_name, arg_1) static void method_name(arg_1)
+#define MU_TEST_4(method_name, arg_1, arg_2, arg_3, arg_4) \
+    static void method_name(arg_1, arg_2, arg_3, arg_4)
 #define MU_TEST_SUITE(suite_name) static void suite_name(void)
 
 #define MU__SAFE_BLOCK(block) \
@@ -134,6 +136,23 @@ void minunit_printf_warning(const char* format, ...);
             minunit_print_fail(minunit_last_message);            \
             minunit_status = 0;                                  \
         } fflush(stdout);                                        \
+        if(minunit_teardown)(*minunit_teardown)();)
+
+#define MU_RUN_TEST_4(test, arg_1, arg_2, arg_3, arg_4)                       \
+    MU__SAFE_BLOCK(                                                           \
+        if(minunit_real_timer == 0 && minunit_proc_timer == 0) {              \
+            minunit_real_timer = mu_timer_real();                             \
+            minunit_proc_timer = mu_timer_cpu();                              \
+        } if(minunit_setup) (*minunit_setup)();                               \
+        minunit_status = 0;                                                   \
+        printf(#test "(" #arg_1 ", " #arg_2 ", " #arg_3 ", " #arg_4 ")\r\n"); \
+        test(arg_1, arg_2, arg_3, arg_4);                                     \
+        minunit_run++;                                                        \
+        if(minunit_status) {                                                  \
+            minunit_fail++;                                                   \
+            minunit_print_fail(minunit_last_message);                         \
+            minunit_status = 0;                                               \
+        } fflush(stdout);                                                     \
         if(minunit_teardown)(*minunit_teardown)();)
 
 /*  Report */
