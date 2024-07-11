@@ -16,6 +16,7 @@
         "SConstruct": "python",
         "*.fam": "python"
     },
+    "clangd.path": "toolchain/current/bin/clangd",
     "clangd.arguments": [
         // We might be able to tighten this a bit more to only include the correct toolchain.
         "--query-driver=**",
