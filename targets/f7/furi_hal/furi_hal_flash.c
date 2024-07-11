@@ -319,9 +319,9 @@ void furi_hal_flash_erase(uint8_t page) {
     op_stat = DWT->CYCCNT - op_stat;
     FURI_LOG_T(
         TAG,
-        "erase took %lu clocks or %fus",
+        "erase took %lu clocks or %luus",
         op_stat,
-        (double)((float)op_stat / (float)furi_hal_cortex_instructions_per_microsecond()));
+        op_stat / furi_hal_cortex_instructions_per_microsecond());
 }
 
 static inline void furi_hal_flash_write_dword_internal_nowait(size_t address, uint64_t* data) {
@@ -448,9 +448,9 @@ void furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16
     op_stat = DWT->CYCCNT - op_stat;
     FURI_LOG_T(
         TAG,
-        "program_page took %lu clocks or %fus",
+        "program_page took %lu clocks or %luus",
         op_stat,
-        (double)((float)op_stat / (float)furi_hal_cortex_instructions_per_microsecond()));
+        op_stat / furi_hal_cortex_instructions_per_microsecond());
 }
 
 int16_t furi_hal_flash_get_page_number(size_t address) {
@@ -509,8 +509,7 @@ typedef struct {
     uint32_t* ob_register_address;
 } FuriHalFlashObMapping;
 
-#define OB_REG_DEF(INDEX, REG) \
-    { .ob_reg = INDEX, .ob_register_address = (uint32_t*)(REG) }
+#define OB_REG_DEF(INDEX, REG) {.ob_reg = INDEX, .ob_register_address = (uint32_t*)(REG)}
 
 static const FuriHalFlashObMapping furi_hal_flash_ob_reg_map[FURI_HAL_FLASH_OB_TOTAL_WORDS] = {
     OB_REG_DEF(FuriHalFlashObRegisterUserRead, (&FLASH->OPTR)),
