@@ -47,7 +47,6 @@ distenv = coreenv.Clone(
     ],
     ENV=os.environ,
     UPDATE_BUNDLE_DIR="dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}",
-    VSCODE_LANG_SERVER=ARGUMENTS.get("LANG_SERVER", "cpptools"),
 )
 
 firmware_env = distenv.AddFwProject(
@@ -404,12 +403,11 @@ distenv.PhonyTarget(
 )
 
 # Prepare vscode environment
-VSCODE_LANG_SERVER = cmd_environment["LANG_SERVER"]
 vscode_dist = distenv.Install(
     "#.vscode",
     [
         distenv.Glob("#.vscode/example/*.json", exclude="*.tmpl"),
-        distenv.Glob(f"#.vscode/example/{VSCODE_LANG_SERVER}/*.json"),
+        distenv.Glob("#.vscode/example/${LANG_SERVER}/*.json"),
     ],
 )
 for template_file in distenv.Glob("#.vscode/example/*.tmpl"):
@@ -418,7 +416,7 @@ for template_file in distenv.Glob("#.vscode/example/*.tmpl"):
             distenv.Dir("#.vscode").File(template_file.name.replace(".tmpl", "")),
             template_file,
             SUBST_DICT={
-                "@FBT_PLATFORM_EXECUTABLE_EXT@": (".exe" if os.name == "nt" else "")
+                "@FBT_PLATFORM_EXECUTABLE_EXT@": ".exe" if os.name == "nt" else ""
             },
         )
     )
