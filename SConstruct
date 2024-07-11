@@ -418,11 +418,7 @@ for template_file in distenv.Glob("#.vscode/example/*.tmpl"):
             distenv.Dir("#.vscode").File(template_file.name.replace(".tmpl", "")),
             template_file,
             SUBST_DICT={
-                "@VSCODE_SETTINGS_CLANGD_PATH@": (
-                    "${workspaceFolder}/toolchain/current/bin/clangd" + ".exe"
-                    if os.name == "nt"
-                    else ""
-                )
+                "@FBT_PLATFORM_EXECUTABLE_EXT@": (".exe" if os.name == "nt" else "")
             },
         )
     )
