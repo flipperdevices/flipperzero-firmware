@@ -228,7 +228,7 @@ static void hid_keyboard_draw_key(
 
         if((model->ctrl && key.value == HID_KEYBOARD_L_CTRL) ||
            (model->alt && key.value == HID_KEYBOARD_L_ALT) ||
-           (model->shift && key.value == HID_KEYBOARD_L_SHIFT) ||
+           (key.value == HID_KEYBOARD_L_SHIFT) ||
            (model->gui && key.value == HID_KEYBOARD_L_GUI)) {
             if(key.icon_toggled) {
                 key_icon = key.icon_toggled;
