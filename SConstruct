@@ -43,6 +43,7 @@ distenv = coreenv.Clone(
         "blackmagic",
         "jflash",
         "doxygen",
+        "textfile",
     ],
     ENV=os.environ,
     UPDATE_BUNDLE_DIR="dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}",
@@ -407,10 +408,24 @@ VSCODE_LANG_SERVER = cmd_environment["LANG_SERVER"]
 vscode_dist = distenv.Install(
     "#.vscode",
     [
-        distenv.Glob("#.vscode/example/*.json"),
+        distenv.Glob("#.vscode/example/*.json", exclude="*.tmpl"),
         distenv.Glob(f"#.vscode/example/{VSCODE_LANG_SERVER}/*.json"),
     ],
 )
+for template_file in distenv.Glob("#.vscode/example/*.tmpl"):
+    vscode_dist.append(
+        distenv.Substfile(
+            distenv.Dir("#.vscode").File(template_file.name.replace(".tmpl", "")),
+            template_file,
+            SUBST_DICT={
+                "@VSCODE_SETTINGS_CLANGD_PATH@": (
+                    "${workspaceFolder}/toolchain/current/bin/clangd" + ".exe"
+                    if os.name == "nt"
+                    else ""
+                )
+            },
+        )
+    )
 distenv.Precious(vscode_dist)
 distenv.NoClean(vscode_dist)
 distenv.Alias("vscode_dist", (vscode_dist, firmware_env["FW_CDB"]))

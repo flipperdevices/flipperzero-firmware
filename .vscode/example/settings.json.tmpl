@@ -5,7 +5,6 @@
     "workbench.tree.indent": 12,
     "cortex-debug.enableTelemetry": false,
     "cortex-debug.variableUseNaturalFormat": true,
-    "cortex-debug.showRTOS": true,
     "cortex-debug.armToolchainPath": "${workspaceFolder}/toolchain/current/bin",
     "cortex-debug.openocdPath": "${workspaceFolder}/toolchain/current/bin/openocd",
     "cortex-debug.gdbPath": "${workspaceFolder}/toolchain/current/bin/arm-none-eabi-gdb-py3",
@@ -16,10 +15,9 @@
         "SConstruct": "python",
         "*.fam": "python"
     },
-    "clangd.path": "toolchain/current/bin/clangd",
+    "clangd.path": "@VSCODE_SETTINGS_CLANGD_PATH@",
     "clangd.arguments": [
-        // We might be able to tighten this a bit more to only include the correct toolchain.
-        "--query-driver=**",
+        "--query-driver=**/arm-none-eabi-*",
         "--compile-commands-dir=${workspaceFolder}/build/latest",
         "--clang-tidy",
         "--header-insertion=never"
