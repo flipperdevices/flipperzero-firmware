@@ -98,6 +98,8 @@ void bit_buffer_copy_bits(BitBuffer* buf, const uint8_t* data, size_t size_bits)
  * @param [in,out] buf pointer to a BitBuffer instance to copy into
  * @param [in] data pointer to the byte array to be copied
  * @param [in] size_bitss size of the data to be copied, in bits
+ * @note Parity bits are placed starting with the least significant bit of each byte and moving up.
+ * @note Example: PDDDDDDD DPDDDDDD DDPD...
  */
 void bit_buffer_copy_bytes_with_parity(BitBuffer* buf, const uint8_t* data, size_t size_bits);
 
@@ -122,6 +124,8 @@ void bit_buffer_write_bytes(const BitBuffer* buf, void* dest, size_t size_bytes)
  * @param [out] dest pointer to the destination memory location
  * @param [in] size_bytes maximum destination data size, in bytes
  * @param [out] bits_written actual number of bits writen, in bits
+ * @note Parity bits are placed starting with the least significant bit of each byte and moving up.
+ * @note Example: PDDDDDDD DPDDDDDD DDPD...
  */
 void bit_buffer_write_bytes_with_parity(
     const BitBuffer* buf,
@@ -222,10 +226,10 @@ uint8_t bit_buffer_get_byte_from_bit(const BitBuffer* buf, size_t index_bits);
 const uint8_t* bit_buffer_get_data(const BitBuffer* buf);
 
 /**
- * Get the pointer to a BitBuffer instance's underlying data.
+ * Get the pointer to the parity data of a BitBuffer instance.
  *
  * @param [in] buf pointer to a BitBuffer instance to be queried
- * @return pointer to the underlying data
+ * @return pointer to the parity data
  */
 const uint8_t* bit_buffer_get_parity(const BitBuffer* buf);
 
