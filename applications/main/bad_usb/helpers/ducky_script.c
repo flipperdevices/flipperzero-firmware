@@ -7,12 +7,10 @@
 #include "ducky_script.h"
 #include "ducky_script_i.h"
 #include <dolphin/dolphin.h>
+#include "helpers/keyboard.h"
 
 #define TAG "BadUsb"
 #define WORKER_TAG TAG "Worker"
-
-#define BADUSB_ASCII_TO_KEY(script, x) \
-    (((uint8_t)x < 128) ? (script->layout[(uint8_t)x]) : HID_KEYBOARD_NONE)
 
 typedef enum {
     WorkerEvtStartStop = (1 << 0),
@@ -56,7 +54,7 @@ uint16_t ducky_get_keycode(BadUsbScript* bad_usb, const char* param, bool accept
     }
 
     if((accept_chars) && (strlen(param) > 0)) {
-        return (BADUSB_ASCII_TO_KEY(bad_usb, param[0]) & 0xFF);
+        return (bad_usb_keyboard_get_key(bad_usb->layout, param[0]) & 0xFF);
     }
     return 0;
 }
@@ -134,44 +132,27 @@ int32_t ducky_error(BadUsbScript* bad_usb, const char* text, ...) {
 }
 
 bool ducky_string(BadUsbScript* bad_usb, const char* param) {
-    uint32_t i = 0;
+    bad_usb_keyboard_type_string(bad_usb->layout, bad_usb->hid, bad_usb->hid_inst, param);
 
-    while(param[i] != '\0') {
-        if(param[i] != '\n') {
-            uint16_t keycode = BADUSB_ASCII_TO_KEY(bad_usb, param[i]);
-            if(keycode != HID_KEYBOARD_NONE) {
-                bad_usb->hid->kb_press(bad_usb->hid_inst, keycode);
-                bad_usb->hid->kb_release(bad_usb->hid_inst, keycode);
-            }
-        } else {
-            bad_usb->hid->kb_press(bad_usb->hid_inst, HID_KEYBOARD_RETURN);
-            bad_usb->hid->kb_release(bad_usb->hid_inst, HID_KEYBOARD_RETURN);
-        }
-        i++;
-    }
     bad_usb->stringdelay = 0;
     return true;
 }
 
 static bool ducky_string_next(BadUsbScript* bad_usb) {
-    if(bad_usb->string_print_pos >= furi_string_size(bad_usb->string_print)) {
-        return true;
-    }
-
-    char print_char = furi_string_get_char(bad_usb->string_print, bad_usb->string_print_pos);
-
-    if(print_char != '\n') {
-        uint16_t keycode = BADUSB_ASCII_TO_KEY(bad_usb, print_char);
-        if(keycode != HID_KEYBOARD_NONE) {
-            bad_usb->hid->kb_press(bad_usb->hid_inst, keycode);
-            bad_usb->hid->kb_release(bad_usb->hid_inst, keycode);
+    FuriStringUTF8State utf8state = FuriStringUTF8StateStarting;
+    FuriStringUnicodeValue codepoint;
+    do {
+        if(bad_usb->string_print_pos >= furi_string_size(bad_usb->string_print)) {
+            return true;
         }
-    } else {
-        bad_usb->hid->kb_press(bad_usb->hid_inst, HID_KEYBOARD_RETURN);
-        bad_usb->hid->kb_release(bad_usb->hid_inst, HID_KEYBOARD_RETURN);
-    }
 
-    bad_usb->string_print_pos++;
+        char print_char = furi_string_get_char(bad_usb->string_print, bad_usb->string_print_pos);
+        furi_string_utf8_decode(print_char, &utf8state, &codepoint);
+
+        bad_usb->string_print_pos++;
+    } while(utf8state != FuriStringUTF8StateStarting);
+
+    bad_usb_keyboard_type_codepoint(bad_usb->layout, bad_usb->hid, bad_usb->hid_inst, codepoint);
 
     return false;
 }
@@ -642,19 +623,13 @@ static int32_t bad_usb_worker(void* context) {
     return 0;
 }
 
-static void bad_usb_script_set_default_keyboard_layout(BadUsbScript* bad_usb) {
-    furi_assert(bad_usb);
-    memset(bad_usb->layout, HID_KEYBOARD_NONE, sizeof(bad_usb->layout));
-    memcpy(bad_usb->layout, hid_asciimap, MIN(sizeof(hid_asciimap), sizeof(bad_usb->layout)));
-}
-
 BadUsbScript* bad_usb_script_open(FuriString* file_path, BadUsbHidInterface interface) {
     furi_assert(file_path);
 
     BadUsbScript* bad_usb = malloc(sizeof(BadUsbScript));
     bad_usb->file_path = furi_string_alloc();
     furi_string_set(bad_usb->file_path, file_path);
-    bad_usb_script_set_default_keyboard_layout(bad_usb);
+    bad_usb->layout = bad_usb_keyboard_alloc_default();
 
     bad_usb->st.state = BadUsbStateInit;
     bad_usb->st.error[0] = '\0';
@@ -686,14 +661,16 @@ void bad_usb_script_set_keyboard_layout(BadUsbScript* bad_usb, FuriString* layou
     if(!furi_string_empty(layout_path)) { //-V1051
         if(storage_file_open(
                layout_file, furi_string_get_cstr(layout_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-            uint16_t layout[128];
-            if(storage_file_read(layout_file, layout, sizeof(layout)) == sizeof(layout)) {
-                memcpy(bad_usb->layout, layout, sizeof(layout));
+            bad_usb_keyboard_free(bad_usb->layout);
+            bad_usb->layout = bad_usb_keyboard_alloc_read(layout_file);
+            if(!bad_usb->layout) {
+                bad_usb->layout = bad_usb_keyboard_alloc_default();
             }
         }
         storage_file_close(layout_file);
     } else {
-        bad_usb_script_set_default_keyboard_layout(bad_usb);
+        bad_usb_keyboard_free(bad_usb->layout);
+        bad_usb->layout = bad_usb_keyboard_alloc_default();
     }
     storage_file_free(layout_file);
 }
