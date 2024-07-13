@@ -40,9 +40,16 @@ size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id);
  */
 size_t memmgr_heap_get_max_free_block(void);
 
-/** Print the address and size of all free blocks to stdout
+typedef bool (*BlockWalker)(void* pointer, size_t size, bool used, void* context);
+
+/**
+ * @brief Walk through all heap blocks
+ * @warning This function will lock memory manager and/or kernel, so any interprocess communication should be avoided. For example, if you use printf() in the walker function in cli, it will cause a deadlock.
+ * 
+ * @param walker 
+ * @param context 
  */
-void memmgr_heap_printf_free_blocks(void);
+void memmgr_heap_walk_blocks(BlockWalker walker, void* context);
 
 #ifdef __cplusplus
 }

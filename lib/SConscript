@@ -15,6 +15,7 @@ libs = env.BuildModules(
     [
         "mlib",
         "stm32wb",
+        "tlsf",
         "freertos",
         "print",
         "microtar",

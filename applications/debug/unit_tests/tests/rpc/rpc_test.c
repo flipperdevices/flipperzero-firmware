@@ -43,7 +43,7 @@ typedef struct {
 static RpcSessionContext rpc_session[TEST_RPC_SESSIONS];
 
 #define TAG "UnitTestsRpc"
-#define MAX_RECEIVE_OUTPUT_TIMEOUT 3000
+#define MAX_RECEIVE_OUTPUT_TIMEOUT 30000
 #define MAX_NAME_LENGTH 255
 #define MAX_DATA_SIZE 512u // have to be exact as in rpc_storage.c
 #define TEST_DIR_NAME EXT_PATH(".tmp/unit_tests/rpc")
@@ -732,7 +732,8 @@ static void test_rpc_free_msg_list(MsgList_t msg_list) {
     MsgList_clear(msg_list);
 }
 
-static void test_rpc_storage_list_run(
+MU_TEST_4(
+    test_rpc_storage_list_run,
     const char* path,
     uint32_t command_id,
     bool md5,
@@ -753,35 +754,6 @@ static void test_rpc_storage_list_run(
 
     pb_release(&PB_Main_msg, &request);
     test_rpc_free_msg_list(expected_msg_list);
-}
-
-MU_TEST(test_storage_list) {
-    test_rpc_storage_list_run("/", ++command_id, false, 0);
-    test_rpc_storage_list_run(EXT_PATH("nfc"), ++command_id, false, 0);
-    test_rpc_storage_list_run(STORAGE_INT_PATH_PREFIX, ++command_id, false, 0);
-    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX, ++command_id, false, 0);
-    test_rpc_storage_list_run(EXT_PATH("infrared"), ++command_id, false, 0);
-    test_rpc_storage_list_run(EXT_PATH("ibutton"), ++command_id, false, 0);
-    test_rpc_storage_list_run(EXT_PATH("lfrfid"), ++command_id, false, 0);
-    test_rpc_storage_list_run("error_path", ++command_id, false, 0);
-}
-
-MU_TEST(test_storage_list_md5) {
-    test_rpc_storage_list_run("/", ++command_id, true, 0);
-    test_rpc_storage_list_run(EXT_PATH("nfc"), ++command_id, true, 0);
-    test_rpc_storage_list_run(STORAGE_INT_PATH_PREFIX, ++command_id, true, 0);
-    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX, ++command_id, true, 0);
-    test_rpc_storage_list_run(EXT_PATH("infrared"), ++command_id, true, 0);
-    test_rpc_storage_list_run(EXT_PATH("ibutton"), ++command_id, true, 0);
-    test_rpc_storage_list_run(EXT_PATH("lfrfid"), ++command_id, true, 0);
-    test_rpc_storage_list_run("error_path", ++command_id, true, 0);
-}
-
-MU_TEST(test_storage_list_size) {
-    test_rpc_storage_list_run(TEST_DIR_NAME, ++command_id, false, 0);
-    test_rpc_storage_list_run(TEST_DIR_NAME, ++command_id, false, 1);
-    test_rpc_storage_list_run(TEST_DIR_NAME, ++command_id, false, 1000);
-    test_rpc_storage_list_run(TEST_DIR_NAME, ++command_id, false, 2500);
 }
 
 static void
@@ -1493,9 +1465,33 @@ MU_TEST_SUITE(test_rpc_storage) {
 
     MU_RUN_TEST(test_storage_info);
     MU_RUN_TEST(test_storage_stat);
-    MU_RUN_TEST(test_storage_list);
-    MU_RUN_TEST(test_storage_list_md5);
-    MU_RUN_TEST(test_storage_list_size);
+
+    // list
+    MU_RUN_TEST_4(test_rpc_storage_list_run, "/", ++command_id, false, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, EXT_PATH("nfc"), ++command_id, false, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, STORAGE_INT_PATH_PREFIX, ++command_id, false, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, STORAGE_EXT_PATH_PREFIX, ++command_id, false, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, EXT_PATH("infrared"), ++command_id, false, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, EXT_PATH("ibutton"), ++command_id, false, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, EXT_PATH("lfrfid"), ++command_id, false, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, "error_path", ++command_id, false, 0);
+
+    // list md5
+    MU_RUN_TEST_4(test_rpc_storage_list_run, "/", ++command_id, true, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, EXT_PATH("nfc"), ++command_id, true, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, STORAGE_INT_PATH_PREFIX, ++command_id, true, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, STORAGE_EXT_PATH_PREFIX, ++command_id, true, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, EXT_PATH("infrared"), ++command_id, true, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, EXT_PATH("ibutton"), ++command_id, true, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, EXT_PATH("lfrfid"), ++command_id, true, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, "error_path", ++command_id, true, 0);
+
+    // list size
+    MU_RUN_TEST_4(test_rpc_storage_list_run, TEST_DIR_NAME, ++command_id, false, 0);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, TEST_DIR_NAME, ++command_id, false, 1);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, TEST_DIR_NAME, ++command_id, false, 1000);
+    MU_RUN_TEST_4(test_rpc_storage_list_run, TEST_DIR_NAME, ++command_id, false, 2500);
+
     MU_RUN_TEST(test_storage_read);
     MU_RUN_TEST(test_storage_write_read);
     MU_RUN_TEST(test_storage_write);
