@@ -35,7 +35,7 @@
 
 #include <lfrfid/scenes/lfrfid_scene.h>
 
-#define LFRFID_KEY_NAME_SIZE 22
+#define LFRFID_KEY_NAME_SIZE   22
 #define LFRFID_TEXT_STORE_SIZE 40
 
 #define LFRFID_APP_FOLDER EXT_PATH("lfrfid")

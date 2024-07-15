@@ -18,8 +18,8 @@
 
 #define BAD_USB_APP_BASE_FOLDER EXT_PATH("badusb")
 #define BAD_USB_APP_PATH_LAYOUT_FOLDER BAD_USB_APP_BASE_FOLDER "/assets/layouts"
-#define BAD_USB_APP_SCRIPT_EXTENSION ".txt"
-#define BAD_USB_APP_LAYOUT_EXTENSION ".kl"
+#define BAD_USB_APP_SCRIPT_EXTENSION   ".txt"
+#define BAD_USB_APP_LAYOUT_EXTENSION   ".kl"
 
 typedef enum {
     BadUsbAppErrorNoFiles,
