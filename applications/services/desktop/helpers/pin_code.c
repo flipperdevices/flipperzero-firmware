@@ -43,7 +43,7 @@ static const uint8_t desktop_helpers_fails_timeout[] = {
 
 static uint32_t desktop_pin_code_pack(const DesktopPinCode* pin_code) {
     furi_check(pin_code);
-    furi_check(pin_code->length <= DESKTOP_PIN_CODE_MAX_LEN);
+    furi_check(pin_code->length <= sizeof(pin_code->data));
 
     uint32_t reg_value = 0;
 
@@ -75,9 +75,9 @@ bool desktop_pin_code_check(const DesktopPinCode* pin_code) {
 
 bool desktop_pin_code_is_equal(const DesktopPinCode* pin_code1, const DesktopPinCode* pin_code2) {
     furi_check(pin_code1);
-    furi_check(pin_code1->length <= DESKTOP_PIN_CODE_MAX_LEN);
+    furi_check(pin_code1->length <= sizeof(pin_code1->data));
     furi_check(pin_code2);
-    furi_check(pin_code2->length <= DESKTOP_PIN_CODE_MAX_LEN);
+    furi_check(pin_code2->length <= sizeof(pin_code2->data));
 
     return pin_code1->length == pin_code2->length &&
            memcmp(pin_code1->data, pin_code2->data, pin_code1->length) == 0;
