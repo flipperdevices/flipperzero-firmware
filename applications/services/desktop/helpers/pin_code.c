@@ -79,18 +79,8 @@ bool desktop_pin_code_is_equal(const DesktopPinCode* pin_code1, const DesktopPin
     furi_check(pin_code2);
     furi_check(pin_code2->length <= DESKTOP_PIN_CODE_MAX_LEN);
 
-    if(pin_code1->length == pin_code2->length) {
-        for(uint8_t i = 0; i < pin_code1->length; ++i) {
-            if(pin_code1->data[i] != pin_code2->data[i]) {
-                return false;
-            }
-        }
-
-        return true;
-
-    } else {
-        return false;
-    }
+    return pin_code1->length == pin_code2->length &&
+           memcmp(pin_code1->data, pin_code2->data, pin_code1->length) == 0;
 }
 
 void desktop_pin_lock_error_notify(void) {
