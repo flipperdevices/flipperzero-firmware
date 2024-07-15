@@ -39,12 +39,12 @@ typedef struct {
     int8_t y;
 } HidKeyboardPoint;
 // 4 BY 12
-#define MARGIN_TOP 0
-#define MARGIN_LEFT 4
-#define KEY_WIDTH 9
-#define KEY_HEIGHT 12
-#define KEY_PADDING 1
-#define ROW_COUNT 7
+#define MARGIN_TOP   0
+#define MARGIN_LEFT  4
+#define KEY_WIDTH    9
+#define KEY_HEIGHT   12
+#define KEY_PADDING  1
+#define ROW_COUNT    7
 #define COLUMN_COUNT 12
 
 // 0 width items are not drawn, but their value is used
@@ -400,8 +400,7 @@ HidKeyboard* hid_keyboard_alloc(Hid* bt_hid) {
     view_set_draw_callback(hid_keyboard->view, hid_keyboard_draw_callback);
     view_set_input_callback(hid_keyboard->view, hid_keyboard_input_callback);
 
-    with_view_model(
-        hid_keyboard->view, HidKeyboardModel * model, { model->y = 1; }, true);
+    with_view_model(hid_keyboard->view, HidKeyboardModel * model, { model->y = 1; }, true);
 
     return hid_keyboard;
 }
