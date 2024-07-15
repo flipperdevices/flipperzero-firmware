@@ -90,15 +90,15 @@ const FuriHalRegion* furi_hal_region_get(void) {
     const FuriHalVersionRegion region = furi_hal_version_get_hw_region();
     const FuriHalRegion* ret;
 
-    if(region < FuriHalVersionRegionWorld) {
-        ret = furi_hal_static_regions[region];
+    furi_check(furi_mutex_acquire(furi_hal_dynamic_region_mutex, FuriWaitForever) == FuriStatusOk);
 
+    if(region < FuriHalVersionRegionWorld && furi_hal_dynamic_region == NULL) {
+        ret = furi_hal_static_regions[region];
     } else {
-        furi_check(
-            furi_mutex_acquire(furi_hal_dynamic_region_mutex, FuriWaitForever) == FuriStatusOk);
         ret = furi_hal_dynamic_region;
-        furi_check(furi_mutex_release(furi_hal_dynamic_region_mutex) == FuriStatusOk);
     }
+
+    furi_check(furi_mutex_release(furi_hal_dynamic_region_mutex) == FuriStatusOk);
 
     return ret;
 }
