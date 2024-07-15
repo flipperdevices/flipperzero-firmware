@@ -425,9 +425,9 @@ void furi_hal_ccid_send_packet(uint8_t* data, uint8_t len) {
     }
 }
 
-void furi_hal_ccid_send_response(uint8_t* data, uint8_t len) {
-    int dataToSendLen = len;
-    int dataIndex = 0;
+void furi_hal_ccid_send_response(uint8_t* data, uint32_t len) {
+    uint32_t dataToSendLen = len;
+    uint32_t dataIndex = 0;
     while(dataToSendLen >= CCID_EPSIZE) {
         furi_hal_ccid_send_packet(&data[dataIndex], CCID_EPSIZE);
         dataToSendLen = dataToSendLen - CCID_EPSIZE;
