@@ -10,8 +10,8 @@
 #define NO_ACTIVITY_TIMEOUT 15000
 
 #define PIN_CELL_WIDTH 13
-#define DEFAULT_PIN_X 64
-#define DEFAULT_PIN_Y 32
+#define DEFAULT_PIN_X  64
+#define DEFAULT_PIN_Y  32
 
 #define MIN_PIN_LENGTH 4
 #define MAX_PIN_LENGTH 10
