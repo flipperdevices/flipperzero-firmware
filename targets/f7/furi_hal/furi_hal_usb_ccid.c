@@ -435,15 +435,15 @@ void furi_hal_ccid_send_packet(uint8_t* data, uint8_t len) {
 }
 
 void furi_hal_ccid_send_response(uint8_t* data, uint32_t len) {
-    uint32_t dataToSendLen = len;
-    uint32_t dataIndex = 0;
-    while(dataToSendLen >= CCID_EPSIZE) {
-        furi_hal_ccid_send_packet(&data[dataIndex], CCID_EPSIZE);
-        dataToSendLen = dataToSendLen - CCID_EPSIZE;
-        dataIndex = dataIndex + CCID_EPSIZE;
+    uint32_t data_to_send = len;
+    uint32_t data_index = 0;
+    while(data_to_send >= CCID_EPSIZE) {
+        furi_hal_ccid_send_packet(&data[data_index], CCID_EPSIZE);
+        data_to_send = data_to_send - CCID_EPSIZE;
+        data_index = data_index + CCID_EPSIZE;
     }
 
-    furi_hal_ccid_send_packet(&data[dataIndex], dataToSendLen);
+    furi_hal_ccid_send_packet(&data[data_index], data_to_send);
 }
 
 static void ccid_rx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
