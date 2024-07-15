@@ -6,7 +6,7 @@
 #include <notification/notification_messages.h>
 
 #define DESKTOP_PIN_CODE_DIGIT_BIT_WIDTH (2)
-#define DESKTOP_PIN_CODE_LENGTH_OFFSET (28)
+#define DESKTOP_PIN_CODE_LENGTH_OFFSET   (28)
 
 static const NotificationSequence sequence_pin_fail = {
     &message_display_backlight_on,

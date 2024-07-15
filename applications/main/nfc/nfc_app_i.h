@@ -64,11 +64,11 @@
 #define NFC_NAME_SIZE             22
 #define NFC_TEXT_STORE_SIZE       128
 #define NFC_BYTE_INPUT_STORE_SIZE 10
-#define NFC_LOG_SIZE_MAX (1024)
-#define NFC_APP_FOLDER EXT_PATH("nfc")
-#define NFC_APP_EXTENSION ".nfc"
-#define NFC_APP_SHADOW_EXTENSION ".shd"
-#define NFC_APP_FILENAME_PREFIX "NFC"
+#define NFC_LOG_SIZE_MAX          (1024)
+#define NFC_APP_FOLDER            EXT_PATH("nfc")
+#define NFC_APP_EXTENSION         ".nfc"
+#define NFC_APP_SHADOW_EXTENSION  ".shd"
+#define NFC_APP_FILENAME_PREFIX   "NFC"
 
 #define NFC_APP_MFKEY32_LOGS_FILE_NAME ".mfkey32.log"
 #define NFC_APP_MFKEY32_LOGS_FILE_PATH (NFC_APP_FOLDER "/" NFC_APP_MFKEY32_LOGS_FILE_NAME)
