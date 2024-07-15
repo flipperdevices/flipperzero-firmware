@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define DESKTOP_PIN_CODE_MAX_LEN (14)
+#define DESKTOP_PIN_CODE_MAX_LEN (10)
 
 typedef struct {
     uint8_t data[DESKTOP_PIN_CODE_MAX_LEN];

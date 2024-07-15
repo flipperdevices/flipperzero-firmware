@@ -14,7 +14,7 @@
 #define DEFAULT_PIN_Y  32
 
 #define MIN_PIN_LENGTH 4
-#define MAX_PIN_LENGTH 10
+#define MAX_PIN_LENGTH DESKTOP_PIN_CODE_MAX_LEN
 
 struct DesktopViewPinInput {
     View* view;
