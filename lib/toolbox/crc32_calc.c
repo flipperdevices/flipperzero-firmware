@@ -3,7 +3,9 @@
 
 #define CRC_DATA_BUFFER_MAX_LEN 512
 
-static inline uint32_t crc32_lfs_crc(uint32_t crc, const void* buffer, size_t size) {
+uint32_t crc32_calc_buffer(uint32_t crc, const void* buffer, size_t size) {
+    crc = ~crc;
+
     static const uint32_t rtable[16] = {
         0x00000000,
         0x1db71064,
@@ -30,12 +32,7 @@ static inline uint32_t crc32_lfs_crc(uint32_t crc, const void* buffer, size_t si
         crc = (crc >> 4) ^ rtable[(crc ^ (data[i] >> 4)) & 0xf];
     }
 
-    return crc;
-}
-
-uint32_t crc32_calc_buffer(uint32_t crc, const void* buffer, size_t size) {
-    // TODO FL-3547: consider removing dependency on LFS
-    return ~crc32_lfs_crc(~crc, buffer, size);
+    return ~crc;
 }
 
 uint32_t crc32_calc_file(File* file, const FileCrcProgressCb progress_cb, void* context) {
