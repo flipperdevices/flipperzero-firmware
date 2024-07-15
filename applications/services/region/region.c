@@ -90,7 +90,7 @@ static int32_t region_load_file(void* context) {
         memcpy(
             region->country_code,
             pb_region.country_code->bytes,
-            pb_region.country_code->size < 4 ? pb_region.country_code->size : 3);
+            MIN(pb_region.country_code->size, sizeof(region->country_code) - 1));
 
         furi_hal_region_set(region);
 
