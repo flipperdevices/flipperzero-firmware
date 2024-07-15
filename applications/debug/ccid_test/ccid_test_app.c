@@ -253,8 +253,10 @@ int32_t ccid_test_app(void* p) {
 
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_unlock();
-    furi_hal_ccid_set_callbacks((CcidCallbacks*)&ccid_cb, NULL);
+
     furi_check(furi_hal_usb_set_config(&usb_ccid, &app->ccid_cfg) == true);
+    furi_hal_ccid_set_callbacks((CcidCallbacks*)&ccid_cb, NULL);
+    furi_hal_ccid_ccid_insert_smartcard();
 
     iso7816_set_callbacks((Iso7816Callbacks*)&iso87816_cb);
 
