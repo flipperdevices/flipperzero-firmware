@@ -38,17 +38,20 @@ void desktop_settings_load(DesktopSettings* settings) {
                 DESKTOP_SETTINGS_VER);
 
         } else if(version == DESKTOP_SETTINGS_VER_10) {
-            DesktopSettingsV10 settings_v10;
+            DesktopSettingsV10* settings_v10 = malloc(sizeof(DesktopSettingsV10));
+
             success = saved_struct_load(
                 DESKTOP_SETTINGS_PATH,
-                &settings_v10,
+                settings_v10,
                 sizeof(DesktopSettingsV10),
                 DESKTOP_SETTINGS_MAGIC,
                 DESKTOP_SETTINGS_VER_10);
 
             if(success) {
-                *settings = settings_v10.settings;
+                *settings = settings_v10->settings;
             }
+
+            free(settings_v10);
         }
 
     } while(false);
