@@ -2,6 +2,8 @@
 #include <m-list.h>
 #include <m-dict.h>
 
+#define TAG "Storage"
+
 #define STORAGE_PATH_PREFIX_LEN 4u
 _Static_assert(
     sizeof(STORAGE_ANY_PATH_PREFIX) == STORAGE_PATH_PREFIX_LEN + 1,
@@ -67,6 +69,9 @@ static FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** s
     if(storage_type_is_valid(type)) {
         // Any storage phase-out: redirect "/any" to "/ext"
         if(type == ST_ANY) {
+            FURI_LOG_W(
+                TAG,
+                STORAGE_ANY_PATH_PREFIX " is deprecated, use " STORAGE_EXT_PATH_PREFIX " instead");
             furi_string_replace_at(
                 path, 0, strlen(STORAGE_EXT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX);
             type = ST_EXT;
