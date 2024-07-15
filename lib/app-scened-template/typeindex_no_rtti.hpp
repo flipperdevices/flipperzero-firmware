@@ -50,8 +50,7 @@ struct type_index {
      * Creates a type_index object for the specified type.
      */
     template <typename T>
-    type_index(tag_type<T>) noexcept
-        : hash_code_{index<T>} {
+    type_index(tag_type<T>) noexcept : hash_code_{index<T>} {
     }
 
     /**

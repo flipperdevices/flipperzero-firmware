@@ -11,9 +11,9 @@ AlignConsecutiveAssignments:
   AlignFunctionPointers: false
   PadOperators:    true
 AlignConsecutiveBitFields:
-  Enabled:         true
-  AcrossEmptyLines: true
-  AcrossComments:  true
+  Enabled:         false
+  AcrossEmptyLines: false
+  AcrossComments:  false
   AlignCompound:   false
   AlignFunctionPointers: false
   PadOperators:    true
@@ -25,10 +25,10 @@ AlignConsecutiveDeclarations:
   AlignFunctionPointers: false
   PadOperators:    true
 AlignConsecutiveMacros:
-  Enabled:         true
+  Enabled:         false
   AcrossEmptyLines: false
-  AcrossComments:  true
-  AlignCompound:   true
+  AcrossComments:  false
+  AlignCompound:   false
   AlignFunctionPointers: false
   PadOperators:    true
 AlignConsecutiveShortCaseStatements:
@@ -47,7 +47,7 @@ AllowBreakBeforeNoexceptSpecifier: Never
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortCompoundRequirementOnASingleLine: true
-AllowShortEnumsOnASingleLine: false
+AllowShortEnumsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortLambdasOnASingleLine: All
@@ -108,7 +108,6 @@ ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
-  - M_EACH
 IfMacros:
   - KJ_IF_MAYBE
 IncludeBlocks:   Preserve
@@ -137,7 +136,7 @@ IndentRequiresClause: false
 IndentWidth:     4
 IndentWrappedFunctionNames: true
 InsertBraces:    false
-InsertNewlineAtEOF: true
+InsertNewlineAtEOF: false
 InsertTrailingCommas: None
 IntegerLiteralSeparator:
   Binary:          0
@@ -180,7 +179,7 @@ ReferenceAlignment: Pointer
 ReflowComments:  false
 RemoveBracesLLVM: false
 RemoveParentheses: Leave
-RemoveSemicolon: true
+RemoveSemicolon: false
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope
 SeparateDefinitionBlocks: Leave
@@ -227,7 +226,7 @@ SpacesInParensOptions:
   InEmptyParentheses: false
   Other:           false
 SpacesInSquareBrackets: false
-Standard:        c++20
+Standard:        c++03
 StatementAttributeLikeMacros:
   - Q_EMIT
 StatementMacros:
