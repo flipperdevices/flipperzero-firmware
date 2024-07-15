@@ -66,6 +66,7 @@ struct Desktop {
     ViewPort* stealth_mode_icon_viewport;
 
     Loader* loader;
+    Storage* storage;
     NotificationApp* notification;
 
     FuriPubSub* status_pubsub;

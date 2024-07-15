@@ -226,14 +226,6 @@ static void desktop_clock_timer_callback(void* context) {
     view_port_enabled_set(desktop->clock_viewport, clock_enabled);
 }
 
-static bool desktop_check_file_flag(const char* flag_path) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    bool exists = storage_common_stat(storage, flag_path, NULL) == FSE_OK;
-    furi_record_close(RECORD_STORAGE);
-
-    return exists;
-}
-
 static void desktop_apply_settings(Desktop* desktop) {
     desktop->in_transition = true;
 
@@ -253,9 +245,8 @@ static void desktop_apply_settings(Desktop* desktop) {
 
 static void desktop_init_settings(Desktop* desktop) {
 #ifndef STORAGE_INT_ON_LFS
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    furi_pubsub_subscribe(storage_get_pubsub(storage), desktop_storage_callback, desktop);
-    if(storage_sd_status(storage) != FSE_OK) {
+    furi_pubsub_subscribe(storage_get_pubsub(desktop->storage), desktop_storage_callback, desktop);
+    if(storage_sd_status(desktop->storage) != FSE_OK) {
         FURI_LOG_D(TAG, "SD Card not ready, skipping settings");
         return;
     }
@@ -380,6 +371,7 @@ static Desktop* desktop_alloc(void) {
     desktop->loader = furi_record_open(RECORD_LOADER);
     furi_pubsub_subscribe(loader_get_pubsub(desktop->loader), desktop_loader_callback, desktop);
 
+    desktop->storage = furi_record_open(RECORD_STORAGE);
     desktop->notification = furi_record_open(RECORD_NOTIFICATION);
     desktop->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
 
@@ -539,7 +531,7 @@ int32_t desktop_srv(void* p) {
         desktop_lock(desktop);
     }
 
-    if(desktop_check_file_flag(SLIDESHOW_FS_PATH)) {
+    if(storage_file_exists(desktop->storage, SLIDESHOW_FS_PATH)) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneSlideshow);
     }
 
