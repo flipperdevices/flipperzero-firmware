@@ -284,27 +284,21 @@ static void hid_keyboard_draw_key(
 
     if(key.key != 0) {
         // Text with no shift
-        char key_str[2] = "\0\0";
-        key_str[0] = key.key;
+        char key_str[2] = {key.key, '\0'};
+        uint8_t key_offset = 0;
 
+        // Special case for numbers, draw them one pixel lower
         if(key.value >= HID_KEYBOARD_1 && key.value <= HID_KEYBOARD_0) {
-            // Special case for numbers, draw them one pixel lower
-            canvas_draw_str_aligned(
-                canvas,
-                MARGIN_LEFT + x * (KEY_WIDTH + KEY_PADDING) + keyWidth / 2 + 1,
-                MARGIN_TOP + y * (KEY_HEIGHT + KEY_PADDING) + KEY_HEIGHT / 2 + 1,
-                AlignCenter,
-                AlignCenter,
-                key_str);
-        } else {
-            canvas_draw_str_aligned(
-                canvas,
-                MARGIN_LEFT + x * (KEY_WIDTH + KEY_PADDING) + keyWidth / 2 + 1,
-                MARGIN_TOP + y * (KEY_HEIGHT + KEY_PADDING) + KEY_HEIGHT / 2,
-                AlignCenter,
-                AlignCenter,
-                key_str);
+            key_offset = 1;
         }
+
+        canvas_draw_str_aligned(
+            canvas,
+            MARGIN_LEFT + x * (KEY_WIDTH + KEY_PADDING) + keyWidth / 2 + 1,
+            MARGIN_TOP + y * (KEY_HEIGHT + KEY_PADDING) + KEY_HEIGHT / 2 + key_offset,
+            AlignCenter,
+            AlignCenter,
+            key_str);
 
         return;
     }
