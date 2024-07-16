@@ -377,6 +377,7 @@ void LPUART1_IRQHandler(void) {
     furi_hal_interrupt_call(FuriHalInterruptIdLpUart1);
 }
 
+// Potential space-saver for updater build
 const char* furi_hal_interrupt_get_name(uint8_t exception_number) {
     int32_t id = (int32_t)exception_number - 16;
 
