@@ -119,8 +119,6 @@ void HW_IPCC_SYS_SendCmd(void) {
 
     while(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
         furi_check(!furi_hal_cortex_timer_is_expired(timer), "HW_IPCC_SYS_SendCmd timeout");
-        // Give time for FreeRTOS timers if kernel is running
-        furi_delay_ms(5);
     }
 
     HW_IPCC_SYS_CmdEvtHandler();
