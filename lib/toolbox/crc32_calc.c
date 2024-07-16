@@ -1,5 +1,4 @@
 #include "crc32_calc.h"
-#include <littlefs/lfs_util.h>
 
 #define CRC_DATA_BUFFER_MAX_LEN 512
 

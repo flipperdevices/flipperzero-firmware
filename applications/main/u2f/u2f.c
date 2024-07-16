@@ -4,7 +4,6 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_random.h>
-#include <littlefs/lfs_util.h> // for lfs_tobe32
 
 #include <mbedtls/sha256.h>
 #include <mbedtls/md.h>
@@ -319,6 +318,25 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     return sizeof(U2fRegisterResp) + cert_len + signature_len + 2;
 }
 
+static inline uint32_t u2f_to_big_endian(uint32_t a) {
+#if !defined(LFS_NO_INTRINSICS) && ( \
+    (defined(  BYTE_ORDER  ) && defined(  ORDER_LITTLE_ENDIAN  ) &&   BYTE_ORDER   ==   ORDER_LITTLE_ENDIAN  ) || \
+    (defined(__BYTE_ORDER  ) && defined(__ORDER_LITTLE_ENDIAN  ) && __BYTE_ORDER   == __ORDER_LITTLE_ENDIAN  ) || \
+    (defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__))
+    return __builtin_bswap32(a);
+#elif (defined(  BYTE_ORDER  ) && defined(  ORDER_BIG_ENDIAN  ) &&   BYTE_ORDER   ==   ORDER_BIG_ENDIAN  ) || \
+    (defined(__BYTE_ORDER  ) && defined(__ORDER_BIG_ENDIAN  ) && __BYTE_ORDER   == __ORDER_BIG_ENDIAN  ) || \
+    (defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+    return a;
+#else
+    return (((uint8_t*)&a)[0] << 24) |
+           (((uint8_t*)&a)[1] << 16) |
+           (((uint8_t*)&a)[2] <<  8) |
+           (((uint8_t*)&a)[3] <<  0);
+    static_assert(false);
+#endif
+}
+
 static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     U2fAuthReq* req = (U2fAuthReq*)buf;
     U2fAuthResp* resp = (U2fAuthResp*)buf;
@@ -348,7 +366,7 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     U2F->user_present = false;
 
     // The 4 byte counter is represented in big endian. Increment it before use
-    be_u2f_counter = lfs_tobe32(U2F->counter + 1);
+    be_u2f_counter = u2f_to_big_endian(U2F->counter + 1);
 
     // Generate hash
     {

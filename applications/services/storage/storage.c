@@ -3,7 +3,6 @@
 #include "storage_message.h"
 #include "storage_processing.h"
 #include "storage/storage_glue.h"
-#include "storages/storage_int.h"
 #include "storages/storage_ext.h"
 #include <assets_icons.h>
 
