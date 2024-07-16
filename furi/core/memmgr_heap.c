@@ -133,6 +133,10 @@ void memmgr_heap_init(void) {
 }
 
 void memmgr_heap_enable_thread_trace(FuriThreadId thread_id) {
+#ifdef FURI_RAM_EXEC
+    UNUSED(thread_id);
+    return;
+#endif
     vTaskSuspendAll();
     {
         memmgr_heap_thread_trace_depth++;
@@ -147,6 +151,10 @@ void memmgr_heap_enable_thread_trace(FuriThreadId thread_id) {
 }
 
 void memmgr_heap_disable_thread_trace(FuriThreadId thread_id) {
+#ifdef FURI_RAM_EXEC
+    UNUSED(thread_id);
+    return;
+#endif
     vTaskSuspendAll();
     {
         memmgr_heap_thread_trace_depth++;
@@ -157,6 +165,10 @@ void memmgr_heap_disable_thread_trace(FuriThreadId thread_id) {
 }
 
 size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
+#ifdef FURI_RAM_EXEC
+    UNUSED(thread_id);
+    return 0;
+#endif
     size_t leftovers = MEMMGR_HEAP_UNKNOWN;
     vTaskSuspendAll();
     {
@@ -188,6 +200,7 @@ size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
     return leftovers;
 }
 
+#ifndef FURI_RAM_EXEC
 #undef traceMALLOC
 static inline void traceMALLOC(void* pointer, size_t size) {
     FuriThreadId thread_id = furi_thread_get_current_id();
@@ -201,7 +214,9 @@ static inline void traceMALLOC(void* pointer, size_t size) {
         memmgr_heap_thread_trace_depth--;
     }
 }
+#endif
 
+#ifndef FURI_RAM_EXEC
 #undef traceFREE
 static inline void traceFREE(void* pointer, size_t size) {
     UNUSED(size);
@@ -218,6 +233,7 @@ static inline void traceFREE(void* pointer, size_t size) {
         memmgr_heap_thread_trace_depth--;
     }
 }
+#endif
 
 size_t memmgr_heap_get_max_free_block(void) {
     size_t max_free_size = 0;
