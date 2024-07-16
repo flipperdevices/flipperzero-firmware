@@ -40,12 +40,8 @@ static void ble_profile_serial_stop(FuriHalBleProfileBase* profile) {
     ble_svc_serial_stop(serial_profile->serial_svc);
 }
 
-#ifdef STORAGE_INT_ON_LFS
 // AN5289: 4.7, we need at least 25ms + advertisement, which is 30 ms
-#define CONNECTION_INTERVAL_MIN (0x18)
-#else
-#define CONNECTION_INTERVAL_MIN (0x0006)
-#endif
+#define CONNECTION_INTERVAL_MIN (0x06)
 // Up to 45 ms
 #define CONNECTION_INTERVAL_MAX (0x24)
 

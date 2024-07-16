@@ -244,15 +244,12 @@ static void desktop_apply_settings(Desktop* desktop) {
 }
 
 static void desktop_init_settings(Desktop* desktop) {
-#ifndef STORAGE_INT_ON_LFS
     furi_pubsub_subscribe(storage_get_pubsub(desktop->storage), desktop_storage_callback, desktop);
+
     if(storage_sd_status(desktop->storage) != FSE_OK) {
         FURI_LOG_D(TAG, "SD Card not ready, skipping settings");
         return;
     }
-#else
-    UNUSED(desktop_storage_callback);
-#endif
 
     desktop_settings_load(&desktop->settings);
     desktop_apply_settings(desktop);

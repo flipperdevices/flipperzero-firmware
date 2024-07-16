@@ -77,11 +77,7 @@ static FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** s
             type = ST_EXT;
         }
 
-#ifndef STORAGE_INT_ON_LFS
         furi_assert(type == ST_EXT);
-#else
-        furi_assert(type == ST_EXT || type == ST_INT);
-#endif
 
         if(storage_data_status(&app->storage[type]) != StorageStatusOK) {
             return FSE_NOT_READY;
@@ -556,7 +552,7 @@ void storage_process_alias(
             furi_string_get_cstr(apps_assets_path_with_appsid));
 
         furi_string_free(apps_assets_path_with_appsid);
-#ifndef STORAGE_INT_ON_LFS
+
     } else if(furi_string_start_with(path, STORAGE_INT_PATH_PREFIX)) {
         furi_string_replace_at(
             path, 0, strlen(STORAGE_INT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX "/.int");
@@ -566,7 +562,6 @@ void storage_process_alias(
             storage_process_common_mkdir(app, int_on_ext_path);
         }
         furi_string_free(int_on_ext_path);
-#endif
     }
 }
 

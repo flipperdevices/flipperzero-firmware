@@ -258,16 +258,13 @@ void expansion_on_system_start(void* arg) {
     furi_record_create(RECORD_EXPANSION, instance);
     furi_thread_start(instance->thread);
 
-#ifndef STORAGE_INT_ON_LFS
     Storage* storage = furi_record_open(RECORD_STORAGE);
     furi_pubsub_subscribe(storage_get_pubsub(storage), expansion_storage_callback, instance);
+
     if(storage_sd_status(storage) != FSE_OK) {
         FURI_LOG_D(TAG, "SD Card not ready, skipping settings");
         return;
     }
-#else
-    UNUSED(expansion_storage_callback);
-#endif
 
     expansion_enable(instance);
 }

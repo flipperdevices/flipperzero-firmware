@@ -373,12 +373,8 @@ bool ble_profile_hid_mouse_scroll(FuriHalBleProfileBase* profile, int8_t delta) 
     return state;
 }
 
-#ifdef STORAGE_INT_ON_LFS
 // AN5289: 4.7, we need at least 25ms + advertisement, which is 30 ms
-#define CONNECTION_INTERVAL_MIN (0x18)
-#else
 #define CONNECTION_INTERVAL_MIN (0x0006)
-#endif
 // Up to 45 ms
 #define CONNECTION_INTERVAL_MAX (0x24)
 

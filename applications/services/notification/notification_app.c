@@ -576,16 +576,13 @@ static void notification_apply_settings(NotificationApp* app) {
 }
 
 static void notification_init_settings(NotificationApp* app) {
-#ifndef STORAGE_INT_ON_LFS
     Storage* storage = furi_record_open(RECORD_STORAGE);
     furi_pubsub_subscribe(storage_get_pubsub(storage), notification_storage_callback, app);
+
     if(storage_sd_status(storage) != FSE_OK) {
         FURI_LOG_D(TAG, "SD Card not ready, skipping settings");
         return;
     }
-#else
-    UNUSED(notification_storage_callback);
-#endif
 
     notification_apply_settings(app);
 }

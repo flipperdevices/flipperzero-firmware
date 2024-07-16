@@ -8,13 +8,8 @@
 
 #define GAP_MS_TO_SCAN_INTERVAL(x) ((uint16_t)((x) / 0.625))
 
-// Also used as an indicator of whether the beacon had ever been configured
-#ifdef STORAGE_INT_ON_LFS
 // AN5289: 4.7, we need at least 25ms + advertisement, which is 30 ms
-#define GAP_MIN_ADV_INTERVAL_MS (30u)
-#else
-#define GAP_MIN_ADV_INTERVAL_MS (20u)
-#endif
+#define GAP_MIN_ADV_INTERVAL_MS (20U)
 
 typedef struct {
     GapExtraBeaconConfig last_config;

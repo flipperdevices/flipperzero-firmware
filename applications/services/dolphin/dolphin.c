@@ -252,16 +252,13 @@ static void dolphin_storage_callback(const void* message, void* context) {
 }
 
 static void dolphin_init_state(Dolphin* dolphin) {
-#ifndef STORAGE_INT_ON_LFS
     Storage* storage = furi_record_open(RECORD_STORAGE);
     furi_pubsub_subscribe(storage_get_pubsub(storage), dolphin_storage_callback, dolphin);
+
     if(storage_sd_status(storage) != FSE_OK) {
         FURI_LOG_D(TAG, "SD Card not ready, skipping state");
         return;
     }
-#else
-    UNUSED(dolphin_storage_callback);
-#endif
 
     dolphin_state_load(dolphin->state);
 }

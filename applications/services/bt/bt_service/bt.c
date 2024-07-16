@@ -506,7 +506,6 @@ static void bt_handle_reload_keys_settings(Bt* bt) {
 }
 
 static void bt_init_keys_settings(Bt* bt) {
-#ifndef STORAGE_INT_ON_LFS
     Storage* storage = furi_record_open(RECORD_STORAGE);
     furi_pubsub_subscribe(storage_get_pubsub(storage), bt_storage_callback, bt);
 
@@ -517,9 +516,6 @@ static void bt_init_keys_settings(Bt* bt) {
         bt_start_application(bt);
         return;
     }
-#else
-    UNUSED(bt_storage_callback);
-#endif
 
     bt_handle_reload_keys_settings(bt);
 }
