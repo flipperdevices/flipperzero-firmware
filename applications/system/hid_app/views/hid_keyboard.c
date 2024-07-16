@@ -40,12 +40,12 @@ typedef struct {
     int8_t y;
 } HidKeyboardPoint;
 // 4 BY 12
-#define MARGIN_TOP 0
-#define MARGIN_LEFT 3
-#define KEY_WIDTH 11
-#define KEY_HEIGHT 13
-#define KEY_PADDING -1
-#define ROW_COUNT 7
+#define MARGIN_TOP   0
+#define MARGIN_LEFT  3
+#define KEY_WIDTH    11
+#define KEY_HEIGHT   13
+#define KEY_PADDING  -1
+#define ROW_COUNT    7
 #define COLUMN_COUNT 12
 
 // 0 width items are not drawn, but their value is used
