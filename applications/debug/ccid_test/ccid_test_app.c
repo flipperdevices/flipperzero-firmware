@@ -255,8 +255,8 @@ int32_t ccid_test_app(void* p) {
     furi_hal_usb_unlock();
 
     furi_check(furi_hal_usb_set_config(&usb_ccid, &app->ccid_cfg) == true);
-    furi_hal_ccid_set_callbacks((CcidCallbacks*)&ccid_cb, NULL);
-    furi_hal_ccid_ccid_insert_smartcard();
+    furi_hal_usb_ccid_set_callbacks((CcidCallbacks*)&ccid_cb, NULL);
+    furi_hal_usb_ccid_insert_smartcard();
 
     iso7816_set_callbacks((Iso7816Callbacks*)&iso87816_cb);
 
@@ -278,7 +278,7 @@ int32_t ccid_test_app(void* p) {
 
     //tear down USB
     furi_hal_usb_set_config(usb_mode_prev, NULL);
-    furi_hal_ccid_set_callbacks(NULL, NULL);
+    furi_hal_usb_ccid_set_callbacks(NULL, NULL);
 
     iso7816_set_callbacks(NULL);
 
