@@ -129,10 +129,6 @@ typedef void FuriEventLoopObject;
  */
 typedef bool (*FuriEventLoopEventCallback)(FuriEventLoopObject* object, void* context);
 
-/*
- * FuriMessageQueue specialization
- */
-
 /** Opaque message queue type */
 typedef struct FuriMessageQueue FuriMessageQueue;
 
@@ -149,6 +145,26 @@ typedef struct FuriMessageQueue FuriMessageQueue;
 void furi_event_loop_subscribe_message_queue(
     FuriEventLoop* instance,
     FuriMessageQueue* message_queue,
+    FuriEventLoopEvent event,
+    FuriEventLoopEventCallback callback,
+    void* context);
+
+/** Opaque stream buffer type */
+typedef struct FuriStreamBuffer FuriStreamBuffer;
+
+/** Subscribe to stream buffer events
+ *
+ * @warning you can only have one subscription for one event type.
+ *
+ * @param      instance       The Event Loop instance
+ * @param      stream_buffer  The stream buffer to add
+ * @param[in]  event          The Event Loop event to trigger on
+ * @param[in]  callback       The callback to call on event
+ * @param      context        The context for callback
+ */
+void furi_event_loop_subscribe_stream_buffer(
+    FuriEventLoop* instance,
+    FuriStreamBuffer* stream_buffer,
     FuriEventLoopEvent event,
     FuriEventLoopEventCallback callback,
     void* context);

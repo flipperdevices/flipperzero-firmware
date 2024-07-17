@@ -283,6 +283,18 @@ void furi_event_loop_subscribe_message_queue(
         instance, message_queue, &furi_message_queue_event_loop_contract, event, callback, context);
 }
 
+void furi_event_loop_subscribe_stream_buffer(
+    FuriEventLoop* instance,
+    FuriStreamBuffer* stream_buffer,
+    FuriEventLoopEvent event,
+    FuriEventLoopEventCallback callback,
+    void* context) {
+    extern const FuriEventLoopContract furi_stream_buffer_event_loop_contract;
+
+    furi_event_loop_object_subscribe(
+        instance, stream_buffer, &furi_stream_buffer_event_loop_contract, event, callback, context);
+}
+
 void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
     furi_check(instance);
     furi_check(instance->state == FuriEventLoopStateStopped);

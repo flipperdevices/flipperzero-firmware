@@ -1,13 +1,16 @@
 #include "stream_buffer.h"
 
-#include "check.h"
-#include "common_defines.h"
-
 #include <FreeRTOS.h>
 #include <FreeRTOS-Kernel/include/stream_buffer.h>
 
+#include "check.h"
+#include "common_defines.h"
+
+#include "event_loop_link_i.h"
+
 struct FuriStreamBuffer {
     StaticStreamBuffer_t container;
+    FuriEventLoopLink event_loop_link;
     uint8_t buffer[];
 };
 
@@ -33,6 +36,10 @@ FuriStreamBuffer* furi_stream_buffer_alloc(size_t size, size_t trigger_level) {
 
 void furi_stream_buffer_free(FuriStreamBuffer* stream_buffer) {
     furi_check(stream_buffer);
+
+    // Event Loop must be disconnected
+    furi_check(!stream_buffer->event_loop_link.item_in);
+    furi_check(!stream_buffer->event_loop_link.item_out);
 
     vStreamBufferDelete((StreamBufferHandle_t)stream_buffer);
     free(stream_buffer);
@@ -61,6 +68,10 @@ size_t furi_stream_buffer_send(
         ret = xStreamBufferSend((StreamBufferHandle_t)stream_buffer, data, length, timeout);
     }
 
+    if(ret > 0) {
+        furi_event_loop_link_notify(&stream_buffer->event_loop_link, FuriEventLoopEventIn);
+    }
+
     return ret;
 }
 
@@ -80,6 +91,10 @@ size_t furi_stream_buffer_receive(
         portYIELD_FROM_ISR(yield);
     } else {
         ret = xStreamBufferReceive((StreamBufferHandle_t)stream_buffer, data, length, timeout);
+    }
+
+    if(ret > 0) {
+        furi_event_loop_link_notify(&stream_buffer->event_loop_link, FuriEventLoopEventOut);
     }
 
     return ret;
@@ -112,9 +127,42 @@ bool furi_stream_buffer_is_empty(FuriStreamBuffer* stream_buffer) {
 FuriStatus furi_stream_buffer_reset(FuriStreamBuffer* stream_buffer) {
     furi_check(stream_buffer);
 
+    FuriStatus status;
+
     if(xStreamBufferReset((StreamBufferHandle_t)stream_buffer) == pdPASS) {
-        return FuriStatusOk;
+        status = FuriStatusOk;
     } else {
-        return FuriStatusError;
+        status = FuriStatusError;
+    }
+
+    if(status == FuriStatusOk) {
+        furi_event_loop_link_notify(&stream_buffer->event_loop_link, FuriEventLoopEventOut);
+    }
+
+    return status;
+}
+
+static FuriEventLoopLink* furi_stream_buffer_event_loop_get_link(FuriEventLoopObject* object) {
+    FuriStreamBuffer* stream_buffer = object;
+    furi_assert(stream_buffer);
+    return &stream_buffer->event_loop_link;
+}
+
+static uint32_t
+    furi_stream_buffer_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
+    FuriStreamBuffer* stream_buffer = object;
+    furi_assert(stream_buffer);
+
+    if(event == FuriEventLoopEventIn) {
+        return furi_stream_buffer_bytes_available(stream_buffer);
+    } else if(event == FuriEventLoopEventOut) {
+        return furi_stream_buffer_spaces_available(stream_buffer);
+    } else {
+        furi_crash();
     }
 }
+
+const FuriEventLoopContract furi_stream_buffer_event_loop_contract = {
+    .get_link = furi_stream_buffer_event_loop_get_link,
+    .get_level = furi_stream_buffer_event_loop_get_level,
+};

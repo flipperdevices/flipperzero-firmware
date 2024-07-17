@@ -15,10 +15,7 @@
 
 struct FuriMessageQueue {
     StaticQueue_t container;
-
-    // Event Loop Link
     FuriEventLoopLink event_loop_link;
-
     uint8_t buffer[];
 };
 
