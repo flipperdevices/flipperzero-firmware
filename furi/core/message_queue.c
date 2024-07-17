@@ -1,10 +1,12 @@
-#include "message_queue_i.h"
+#include "message_queue.h"
 
 #include <FreeRTOS.h>
 #include <queue.h>
 
 #include "kernel.h"
 #include "check.h"
+
+#include "event_loop_link_i.h"
 
 // Internal FreeRTOS member names
 #define uxMessagesWaiting uxDummy4[0]

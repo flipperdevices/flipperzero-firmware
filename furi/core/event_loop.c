@@ -1,5 +1,4 @@
 #include "event_loop_i.h"
-#include "message_queue_i.h"
 
 #include "log.h"
 #include "check.h"
@@ -236,6 +235,13 @@ static void furi_event_loop_object_subscribe(
     FuriEventLoopEvent event,
     FuriEventLoopEventCallback callback,
     void* context) {
+    furi_check(instance);
+    furi_check(instance->thread_id == furi_thread_get_current_id());
+    furi_check(instance->state == FuriEventLoopStateStopped);
+    furi_check(object);
+    furi_assert(contract);
+    furi_check(callback);
+
     FURI_CRITICAL_ENTER();
 
     furi_check(FuriEventLoopTree_get(instance->tree, object) == NULL);
@@ -271,10 +277,7 @@ void furi_event_loop_subscribe_message_queue(
     FuriEventLoopEvent event,
     FuriEventLoopEventCallback callback,
     void* context) {
-    furi_check(instance);
-    furi_check(instance->thread_id == furi_thread_get_current_id());
-    furi_check(instance->state == FuriEventLoopStateStopped);
-    furi_check(message_queue);
+    extern const FuriEventLoopContract furi_message_queue_event_loop_contract;
 
     furi_event_loop_object_subscribe(
         instance, message_queue, &furi_message_queue_event_loop_contract, event, callback, context);
