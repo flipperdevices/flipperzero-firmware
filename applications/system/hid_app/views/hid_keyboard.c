@@ -243,7 +243,7 @@ static void hid_keyboard_draw_key(
 
         return;
     }
-    if(model->shift && key.key != 0) {
+    if(model->shift && key.shift_key != 0) {
         // Text and shift
         char key_str[2] = "\0\0";
 
