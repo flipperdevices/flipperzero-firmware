@@ -115,21 +115,26 @@ void furi_event_loop_pend_callback(
     void* context);
 
 /*
- * Message queue related APIs
+ * Event subscription/notification APIs
  */
 
-/** Anonymous message queue type */
-typedef struct FuriMessageQueue FuriMessageQueue;
+typedef void FuriEventLoopObject;
 
-/** Callback type for message queue
+/** Callback type for event loop events
  *
- * @param      queue    The queue that triggered event
- * @param      context  The context that was provided on
- *                      furi_event_loop_message_queue_subscribe call
+ * @param      object   The object that triggered the event
+ * @param      context  The context that was provided upon subscription
  *
  * @return     true if event was processed, false if we need to delay processing
  */
-typedef bool (*FuriEventLoopMessageQueueCallback)(FuriMessageQueue* queue, void* context);
+typedef bool (*FuriEventLoopEventCallback)(FuriEventLoopObject* object, void* context);
+
+/*
+ * FuriMessageQueue specialization
+ */
+
+/** Opaque message queue type */
+typedef struct FuriMessageQueue FuriMessageQueue;
 
 /** Subscribe to message queue events
  * 
@@ -141,21 +146,19 @@ typedef bool (*FuriEventLoopMessageQueueCallback)(FuriMessageQueue* queue, void*
  * @param[in]  callback       The callback to call on event
  * @param      context        The context for callback
  */
-void furi_event_loop_message_queue_subscribe(
+void furi_event_loop_subscribe_message_queue(
     FuriEventLoop* instance,
     FuriMessageQueue* message_queue,
     FuriEventLoopEvent event,
-    FuriEventLoopMessageQueueCallback callback,
+    FuriEventLoopEventCallback callback,
     void* context);
 
-/** Unsubscribe from message queue
+/** Unsubscribe from events (common)
  *
  * @param      instance       The Event Loop instance
- * @param      message_queue  The message queue
+ * @param      object         The object to unsubscribe from
  */
-void furi_event_loop_message_queue_unsubscribe(
-    FuriEventLoop* instance,
-    FuriMessageQueue* message_queue);
+void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object);
 
 #ifdef __cplusplus
 }

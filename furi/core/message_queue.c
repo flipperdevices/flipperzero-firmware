@@ -208,13 +208,14 @@ FuriStatus furi_message_queue_reset(FuriMessageQueue* instance) {
     return stat;
 }
 
-static FuriEventLoopLink* furi_message_queue_event_loop_get_link(void* object) {
+static FuriEventLoopLink* furi_message_queue_event_loop_get_link(FuriEventLoopObject* object) {
     FuriMessageQueue* instance = object;
     furi_assert(instance);
     return &instance->event_loop_link;
 }
 
-static uint32_t furi_message_queue_event_loop_get_level(void* object, FuriEventLoopEvent event) {
+static uint32_t
+    furi_message_queue_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
     FuriMessageQueue* instance = object;
     furi_assert(instance);
 

@@ -24,7 +24,7 @@ static void furi_event_loop_item_free(FuriEventLoopItem* instance);
 
 static void furi_event_loop_item_set_callback(
     FuriEventLoopItem* instance,
-    FuriEventLoopMessageQueueCallback callback,
+    FuriEventLoopEventCallback callback,
     void* callback_context);
 
 static void furi_event_loop_item_notify(FuriEventLoopItem* instance);
@@ -34,6 +34,21 @@ static void furi_event_loop_process_pending_callbacks(FuriEventLoop* instance) {
         PendingQueue_pop_back(NULL, instance->pending_queue)) {
         const FuriEventLoopPendingQueueItem* item = PendingQueue_back(instance->pending_queue);
         item->callback(item->context);
+    }
+}
+
+static bool furi_event_loop_signal_callback(uint32_t signal, void* arg, void* context) {
+    furi_assert(context);
+    FuriEventLoop* instance = context;
+    UNUSED(arg);
+
+    switch(signal) {
+    case FuriSignalExit:
+        furi_event_loop_stop(instance);
+        return true;
+    // Room for possible other standard signal handlers
+    default:
+        return false;
     }
 }
 
@@ -214,29 +229,24 @@ void furi_event_loop_pend_callback(
  * Message queue API
  */
 
-void furi_event_loop_message_queue_subscribe(
+static void furi_event_loop_object_subscribe(
     FuriEventLoop* instance,
-    FuriMessageQueue* message_queue,
+    FuriEventLoopObject* object,
+    const FuriEventLoopContract* contract,
     FuriEventLoopEvent event,
-    FuriEventLoopMessageQueueCallback callback,
+    FuriEventLoopEventCallback callback,
     void* context) {
-    furi_check(instance);
-    furi_check(instance->thread_id == furi_thread_get_current_id());
-    furi_check(instance->state == FuriEventLoopStateStopped);
-    furi_check(message_queue);
-
     FURI_CRITICAL_ENTER();
 
-    furi_check(FuriEventLoopTree_get(instance->tree, message_queue) == NULL);
+    furi_check(FuriEventLoopTree_get(instance->tree, object) == NULL);
 
     // Allocate and setup item
-    FuriEventLoopItem* item = furi_event_loop_item_alloc(
-        instance, &furi_message_queue_event_loop_contract, message_queue, event);
+    FuriEventLoopItem* item = furi_event_loop_item_alloc(instance, contract, object, event);
     furi_event_loop_item_set_callback(item, callback, context);
 
-    FuriEventLoopTree_set_at(instance->tree, message_queue, item);
+    FuriEventLoopTree_set_at(instance->tree, object, item);
 
-    FuriEventLoopLink* link = item->contract->get_link(message_queue);
+    FuriEventLoopLink* link = item->contract->get_link(object);
 
     if(item->event == FuriEventLoopEventIn) {
         furi_check(link->item_in == NULL);
@@ -255,23 +265,36 @@ void furi_event_loop_message_queue_subscribe(
     FURI_CRITICAL_EXIT();
 }
 
-void furi_event_loop_message_queue_unsubscribe(
+void furi_event_loop_subscribe_message_queue(
     FuriEventLoop* instance,
-    FuriMessageQueue* message_queue) {
+    FuriMessageQueue* message_queue,
+    FuriEventLoopEvent event,
+    FuriEventLoopEventCallback callback,
+    void* context) {
+    furi_check(instance);
+    furi_check(instance->thread_id == furi_thread_get_current_id());
+    furi_check(instance->state == FuriEventLoopStateStopped);
+    furi_check(message_queue);
+
+    furi_event_loop_object_subscribe(
+        instance, message_queue, &furi_message_queue_event_loop_contract, event, callback, context);
+}
+
+void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
     furi_check(instance);
     furi_check(instance->state == FuriEventLoopStateStopped);
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
     FURI_CRITICAL_ENTER();
 
-    FuriEventLoopItem** item_ptr = FuriEventLoopTree_get(instance->tree, message_queue);
+    FuriEventLoopItem** item_ptr = FuriEventLoopTree_get(instance->tree, object);
     furi_check(item_ptr);
 
     FuriEventLoopItem* item = *item_ptr;
     furi_check(item);
     furi_check(item->owner == instance);
 
-    FuriEventLoopLink* link = item->contract->get_link(message_queue);
+    FuriEventLoopLink* link = item->contract->get_link(object);
 
     if(item->event == FuriEventLoopEventIn) {
         furi_check(link->item_in == item);
@@ -285,13 +308,13 @@ void furi_event_loop_message_queue_unsubscribe(
 
     furi_event_loop_item_free(item);
 
-    FuriEventLoopTree_erase(instance->tree, message_queue);
+    FuriEventLoopTree_erase(instance->tree, object);
 
     FURI_CRITICAL_EXIT();
 }
 
 /* 
- * Event Loop Item API, used internally
+ * Private Event Loop Item functions
  */
 
 static FuriEventLoopItem* furi_event_loop_item_alloc(
@@ -321,7 +344,7 @@ static void furi_event_loop_item_free(FuriEventLoopItem* instance) {
 
 static void furi_event_loop_item_set_callback(
     FuriEventLoopItem* instance,
-    FuriEventLoopMessageQueueCallback callback,
+    FuriEventLoopEventCallback callback,
     void* callback_context) {
     furi_assert(instance);
     furi_assert(!instance->callback);
@@ -348,6 +371,10 @@ static void furi_event_loop_item_notify(FuriEventLoopItem* instance) {
         eSetBits);
 }
 
+/*
+ * Internal event loop link API, used by supported primitives
+ */
+
 void furi_event_loop_link_notify(FuriEventLoopLink* instance, FuriEventLoopEvent event) {
     furi_assert(instance);
 
@@ -362,19 +389,4 @@ void furi_event_loop_link_notify(FuriEventLoopLink* instance, FuriEventLoopEvent
     }
 
     FURI_CRITICAL_EXIT();
-}
-
-bool furi_event_loop_signal_callback(uint32_t signal, void* arg, void* context) {
-    furi_assert(context);
-    FuriEventLoop* instance = context;
-    UNUSED(arg);
-
-    switch(signal) {
-    case FuriSignalExit:
-        furi_event_loop_stop(instance);
-        return true;
-    // Room for possible other standard signal handlers
-    default:
-        return false;
-    }
 }
