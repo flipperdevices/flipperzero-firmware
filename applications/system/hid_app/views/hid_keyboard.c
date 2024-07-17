@@ -245,10 +245,8 @@ static void hid_keyboard_draw_key(
     }
     if(model->shift && key.shift_key != 0) {
         // Text and shift
-        char key_str[2] = "\0\0";
+        char key_str[2] = {key.shift_key, '\0'};
 
-        // If shift is toggled use the shift key when available
-        key_str[0] = key.shift_key != 0 ? key.shift_key : key.key;
         canvas_draw_str_aligned(
             canvas,
             MARGIN_LEFT + x * (KEY_WIDTH + KEY_PADDING) + keyWidth / 2 + 1,
