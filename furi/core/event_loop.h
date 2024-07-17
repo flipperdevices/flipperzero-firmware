@@ -169,6 +169,26 @@ void furi_event_loop_subscribe_stream_buffer(
     FuriEventLoopEventCallback callback,
     void* context);
 
+/** Opaque semaphore type */
+typedef struct FuriSemaphore FuriSemaphore;
+
+/** Subscribe to semaphore events
+ *
+ * @warning you can only have one subscription for one event type.
+ *
+ * @param      instance       The Event Loop instance
+ * @param      semaphore      The semaphore to add
+ * @param[in]  event          The Event Loop event to trigger on
+ * @param[in]  callback       The callback to call on event
+ * @param      context        The context for callback
+ */
+void furi_event_loop_subscribe_semaphore(
+    FuriEventLoop* instance,
+    FuriSemaphore* semaphore,
+    FuriEventLoopEvent event,
+    FuriEventLoopEventCallback callback,
+    void* context);
+
 /** Unsubscribe from events (common)
  *
  * @param      instance       The Event Loop instance

@@ -225,7 +225,7 @@ void furi_event_loop_pend_callback(
 }
 
 /*
- * Message queue API
+ * Private generic susbscription API
  */
 
 static void furi_event_loop_object_subscribe(
@@ -271,6 +271,10 @@ static void furi_event_loop_object_subscribe(
     FURI_CRITICAL_EXIT();
 }
 
+/**
+ * Public specialized subscription API
+ */
+
 void furi_event_loop_subscribe_message_queue(
     FuriEventLoop* instance,
     FuriMessageQueue* message_queue,
@@ -294,6 +298,22 @@ void furi_event_loop_subscribe_stream_buffer(
     furi_event_loop_object_subscribe(
         instance, stream_buffer, &furi_stream_buffer_event_loop_contract, event, callback, context);
 }
+
+void furi_event_loop_subscribe_semaphore(
+    FuriEventLoop* instance,
+    FuriSemaphore* semaphore,
+    FuriEventLoopEvent event,
+    FuriEventLoopEventCallback callback,
+    void* context) {
+    extern const FuriEventLoopContract furi_semaphore_event_loop_contract;
+
+    furi_event_loop_object_subscribe(
+        instance, semaphore, &furi_semaphore_event_loop_contract, event, callback, context);
+}
+
+/**
+ * Public generic unsubscription API
+ */
 
 void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
     furi_check(instance);
