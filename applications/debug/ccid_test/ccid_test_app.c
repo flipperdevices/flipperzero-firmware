@@ -279,7 +279,6 @@ int32_t ccid_test_app(void* p) {
     //tear down USB
     furi_hal_usb_ccid_set_callbacks(NULL, NULL);
     furi_hal_usb_set_config(usb_mode_prev, NULL);
-    
 
     iso7816_set_callbacks(NULL);
 
