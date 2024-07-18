@@ -127,6 +127,7 @@ static void test_rpc_teardown(void) {
     furi_check(
         furi_semaphore_acquire(rpc_session[0].terminate_semaphore, FuriWaitForever) ==
         FuriStatusOk);
+    furi_delay_ms(1); // Temporary workaround: do not delete the semaphore immediately after taking it
     furi_record_close(RECORD_RPC);
     furi_stream_buffer_free(rpc_session[0].output_stream);
     furi_semaphore_free(rpc_session[0].close_session_semaphore);
@@ -145,6 +146,7 @@ static void test_rpc_teardown_second_session(void) {
     furi_check(
         furi_semaphore_acquire(rpc_session[1].terminate_semaphore, FuriWaitForever) ==
         FuriStatusOk);
+    furi_delay_ms(1); // Temporary workaround: do not delete the semaphore immediately after taking it
     furi_stream_buffer_free(rpc_session[1].output_stream);
     furi_semaphore_free(rpc_session[1].close_session_semaphore);
     furi_semaphore_free(rpc_session[1].terminate_semaphore);
