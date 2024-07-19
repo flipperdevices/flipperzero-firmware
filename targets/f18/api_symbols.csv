@@ -1111,6 +1111,7 @@ Function,+,furi_event_loop_pend_callback,void,"FuriEventLoop*, FuriEventLoopPend
 Function,+,furi_event_loop_run,void,FuriEventLoop*
 Function,+,furi_event_loop_stop,void,FuriEventLoop*
 Function,+,furi_event_loop_subscribe_message_queue,void,"FuriEventLoop*, FuriMessageQueue*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
+Function,+,furi_event_loop_subscribe_mutex,void,"FuriEventLoop*, FuriMutex*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
 Function,+,furi_event_loop_subscribe_semaphore,void,"FuriEventLoop*, FuriSemaphore*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
 Function,+,furi_event_loop_subscribe_stream_buffer,void,"FuriEventLoop*, FuriStreamBuffer*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
 Function,+,furi_event_loop_tick_set,void,"FuriEventLoop*, uint32_t, FuriEventLoopTickCallback, void*"

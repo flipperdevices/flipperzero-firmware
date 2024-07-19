@@ -311,6 +311,18 @@ void furi_event_loop_subscribe_semaphore(
         instance, semaphore, &furi_semaphore_event_loop_contract, event, callback, context);
 }
 
+void furi_event_loop_subscribe_mutex(
+    FuriEventLoop* instance,
+    FuriMutex* mutex,
+    FuriEventLoopEvent event,
+    FuriEventLoopEventCallback callback,
+    void* context) {
+    extern const FuriEventLoopContract furi_mutex_event_loop_contract;
+
+    furi_event_loop_object_subscribe(
+        instance, mutex, &furi_mutex_event_loop_contract, event, callback, context);
+}
+
 /**
  * Public generic unsubscription API
  */

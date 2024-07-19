@@ -189,6 +189,26 @@ void furi_event_loop_subscribe_semaphore(
     FuriEventLoopEventCallback callback,
     void* context);
 
+/** Opaque mutex type */
+typedef struct FuriMutex FuriMutex;
+
+/** Subscribe to mutex events
+ *
+ * @warning you can only have one subscription for one event type.
+ *
+ * @param      instance       The Event Loop instance
+ * @param      mutex          The mutex to add
+ * @param[in]  event          The Event Loop event to trigger on
+ * @param[in]  callback       The callback to call on event
+ * @param      context        The context for callback
+ */
+void furi_event_loop_subscribe_mutex(
+    FuriEventLoop* instance,
+    FuriMutex* mutex,
+    FuriEventLoopEvent event,
+    FuriEventLoopEventCallback callback,
+    void* context);
+
 /** Unsubscribe from events (common)
  *
  * @param      instance       The Event Loop instance
