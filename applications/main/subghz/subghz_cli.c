@@ -1067,7 +1067,7 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
                         furi_string_push_back(output, message[i]);
                         if(message[i] == '\n') {
                             printf("\r");
-                            for(uint8_t i = 0; i < 80; i++) {
+                            for(uint8_t j = 0; j < 80; i++) {
                                 printf(" ");
                             }
                             printf("\r %s", furi_string_get_cstr(output));
