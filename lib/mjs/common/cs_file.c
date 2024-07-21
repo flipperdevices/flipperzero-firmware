@@ -41,6 +41,7 @@ char* cs_read_file(const char* path, size_t* size) {
             fseek(fp, 0, SEEK_SET); /* Some platforms might not have rewind(), Oo */
             if(fread(data, 1, *size, fp) != *size) {
                 free(data);
+                fclose(fp);
                 return NULL;
             }
             data[*size] = '\0';
