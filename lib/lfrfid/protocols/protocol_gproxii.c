@@ -5,9 +5,10 @@
 #include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 
-#define GPROXII_PREAMBLE_BIT_SIZE  (6)
-#define GPROXII_ENCODED_BIT_SIZE   (90)
-#define GPROXII_ENCODED_BYTE_FULL_SIZE (((GPROXII_PREAMBLE_BIT_SIZE + GPROXII_ENCODED_BIT_SIZE) / 8))
+#define GPROXII_PREAMBLE_BIT_SIZE (6)
+#define GPROXII_ENCODED_BIT_SIZE  (90)
+#define GPROXII_ENCODED_BYTE_FULL_SIZE \
+    (((GPROXII_PREAMBLE_BIT_SIZE + GPROXII_ENCODED_BIT_SIZE) / 8))
 
 #define GPROXII_DATA_SIZE (12)
 
@@ -24,7 +25,7 @@ typedef struct {
     bool last_short;
     bool last_level;
     size_t encoded_index;
-    uint8_t xor;
+    uint8_t xor_code;
     uint8_t card_len;
     uint8_t crc_info;
     uint16_t profile;
@@ -57,32 +58,33 @@ static bool protocol_gproxii_can_be_decoded(ProtocolGProxII* protocol) {
     if(bit_lib_get_bits(protocol->data, 0, 6) != 0b111110) return false;
 
     // Check always 0 parity on every 5th bit after preamble
-    if(bit_lib_test_parity(protocol->data, 5, GPROXII_ENCODED_BIT_SIZE, BitLibParityAlways0, 5)) return false;
+    if(bit_lib_test_parity(protocol->data, 5, GPROXII_ENCODED_BIT_SIZE, BitLibParityAlways0, 5))
+        return false;
 
-    // Start GProx II decode 
+    // Start GProx II decode
     bit_lib_copy_bits(protocol->decoded_data, 0, GPROXII_ENCODED_BIT_SIZE, protocol->data, 6);
 
     // Remove parity
     bit_lib_remove_bit_every_nth(protocol->decoded_data, 0, GPROXII_ENCODED_BIT_SIZE, 5);
 
     // Reverse bytes
-    for (int i = 0; i < 9; i++) {
+    for(int i = 0; i < 9; i++) {
         protocol->decoded_data[i] = bit_lib_reverse_8_fast(protocol->decoded_data[i]);
     }
 
     // DeXOR from byte 1 using byte 0
-    for (int i = 1; i < 9; i++) {
+    for(int i = 1; i < 9; i++) {
         protocol->decoded_data[i] = protocol->decoded_data[0] ^ protocol->decoded_data[i];
     }
 
-    protocol->xor = bit_lib_get_bits(protocol->decoded_data, 0, 8);
-    protocol->card_len = bit_lib_get_bits(protocol->decoded_data, 8, 6);;
+    protocol->xor_code = bit_lib_get_bits(protocol->decoded_data, 0, 8);
+    protocol->card_len = bit_lib_get_bits(protocol->decoded_data, 8, 6);
     protocol->crc_info = bit_lib_get_bits(protocol->decoded_data, 14, 2);
     protocol->profile = bit_lib_get_bits_16(protocol->decoded_data, 16, 16);
     protocol->facility_code = bit_lib_get_bits(protocol->decoded_data, 33, 8);
     protocol->card_code = bit_lib_get_bits_16(protocol->decoded_data, 41, 16);
 
-    // Only supporting GProx 26 cards right now 
+    // Only supporting GProx 26 cards right now
     if(protocol->card_len == 26) return true;
 
     return false;
@@ -113,7 +115,7 @@ bool protocol_gproxii_decoder_feed(ProtocolGProxII* protocol, bool level, uint32
         // reset
         protocol->last_short = false;
     }
- 
+
     if(pushed && protocol_gproxii_can_be_decoded(protocol)) {
         return true;
     }
@@ -155,9 +157,19 @@ LevelDuration protocol_gproxii_encoder_yield(ProtocolGProxII* protocol) {
 
 void protocol_gproxii_render_data(ProtocolGProxII* protocol, FuriString* result) {
     // Print FC, Card and Profile
-    furi_string_cat_printf(result, "FC: %hhu Card: %hu P: %04hX\n", protocol->facility_code, protocol->card_code, protocol->profile);
+    furi_string_cat_printf(
+        result,
+        "FC: %hhu Card: %hu P: %04hX\n",
+        protocol->facility_code,
+        protocol->card_code,
+        protocol->profile);
     // XOR Key, Length and CRC
-    furi_string_cat_printf(result, "XOR: %hhu LEN: %hhu CRC: %hhu", protocol->xor, protocol->card_len, protocol->crc_info);
+    furi_string_cat_printf(
+        result,
+        "XOR: %hhu LEN: %hhu CRC: %hhu",
+        protocol->xor_code,
+        protocol->card_len,
+        protocol->crc_info);
 }
 
 bool protocol_gproxii_write_data(ProtocolGProxII* protocol, void* data) {
@@ -165,7 +177,8 @@ bool protocol_gproxii_write_data(ProtocolGProxII* protocol, void* data) {
     bool result = false;
 
     if(request->write_type == LFRFIDWriteTypeT5577) {
-        request->t5577.block[0] = LFRFID_T5577_MODULATION_BIPHASE | LFRFID_T5577_BITRATE_RF_64 | (3 << LFRFID_T5577_MAXBLOCK_SHIFT);
+        request->t5577.block[0] = LFRFID_T5577_MODULATION_BIPHASE | LFRFID_T5577_BITRATE_RF_64 |
+                                  (3 << LFRFID_T5577_MAXBLOCK_SHIFT);
         request->t5577.block[1] = bit_lib_get_bits_32(protocol->data, 0, 32);
         request->t5577.block[2] = bit_lib_get_bits_32(protocol->data, 32, 32);
         request->t5577.block[3] = bit_lib_get_bits_32(protocol->data, 64, 32);
