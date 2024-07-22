@@ -13,12 +13,12 @@
 
 #define TAG "UpdWorkerRam"
 
-#define STM_DFU_VENDOR_ID 0x0483
-#define STM_DFU_PRODUCT_ID 0xDF11
+#define STM_DFU_VENDOR_ID            0x0483
+#define STM_DFU_PRODUCT_ID           0xDF11
 /* Written into DFU file by build pipeline */
 #define FLIPPER_ZERO_DFU_DEVICE_CODE 0xFFFF
 /* Time, in ms, to wait for system restart by C2 before crashing */
-#define C2_MODE_SWITCH_TIMEOUT 10000
+#define C2_MODE_SWITCH_TIMEOUT       10000
 
 static const DfuValidationParams flipper_dfu_params = {
     .device = FLIPPER_ZERO_DFU_DEVICE_CODE,
@@ -36,7 +36,7 @@ static bool page_task_compare_flash(
     const uint8_t* update_block,
     uint16_t update_block_len) {
     const size_t page_addr = furi_hal_flash_get_base() + furi_hal_flash_get_page_size() * i_page;
-    return (memcmp(update_block, (void*)page_addr, update_block_len) == 0);
+    return memcmp(update_block, (void*)page_addr, update_block_len) == 0;
 }
 
 /* Verifies a flash operation address for fitting into writable memory
@@ -44,7 +44,7 @@ static bool page_task_compare_flash(
 static bool check_address_boundaries(const size_t address) {
     const size_t min_allowed_address = furi_hal_flash_get_base();
     const size_t max_allowed_address = (size_t)furi_hal_flash_get_free_end_address();
-    return ((address >= min_allowed_address) && (address < max_allowed_address));
+    return (address >= min_allowed_address) && (address < max_allowed_address);
 }
 
 static bool update_task_flash_program_page(
@@ -348,6 +348,8 @@ int32_t update_task_worker_flash_writer(void* context) {
         // Production
         furi_hal_rtc_set_log_level(FuriLogLevelDefault);
         furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagLegacySleep);
+        furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeNone);
 #endif
         update_task_set_progress(update_task, UpdateTaskStageCompleted, 100);
         success = true;
