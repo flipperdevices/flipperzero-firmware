@@ -148,7 +148,7 @@ static void furi_event_loop_process_waiting_list(FuriEventLoop* instance) {
             furi_event_loop_item_notify(item);
             break;
             // Unsubscribed from inside the callback, delete item
-        } else if(ret == FuriEventLoopProcessStatusFreeLater) {
+        } else if(ret == FuriEventLoopProcessStatusFreeLater) { //-V547
             furi_event_loop_item_free(item);
             break;
         } else {
