@@ -71,7 +71,7 @@ static bool protocol_gproxii_can_be_decoded(ProtocolGProxII* protocol) {
     // 01234567 890123 45 6789012345678901 2 34567890 1234567890123456 7 89012345678901
     // --------------------------------------------------------------------------------
     // XXXXXXXX LLLLLL DD PPPPPPPPPPPPPPPP E FFFFFFFF CCCCCCCCCCCCCCCC O UUUUUUUUUUUUUU
-    // 10010000 011010 11 0000000100000000 0 00000000 0000000000000001 0 00000000000000 - Length: 26 Profile: 256 FC: 0 Card: 1
+    // 10010000 011010 11 0000000100000000 0 00000000 0000000000000001 0 00000000000000 - Profile: 256 FC: 0 Card: 1
 
     // 72 Bit Guardall/Verex/Chubb GProx II 36 bit key with 26 bit profile
     // 0          10          20        30        40          50         60         70

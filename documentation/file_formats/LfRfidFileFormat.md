@@ -47,4 +47,4 @@ The file stores a single RFID key of the type defined by the `Key type` paramete
 | PAC/Stanley | PAC/Stanley       |
 | Keri        | Keri              |
 | Gallagher   | Gallagher         |
-| GProx II    | GProxII           |
+| GProx II    | GProx II          |
