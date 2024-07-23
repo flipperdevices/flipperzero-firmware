@@ -1064,16 +1064,26 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
                     memset(message, 0x00, message_max_len);
                     size_t len = subghz_chat_worker_read(subghz_chat, message, message_max_len);
                     for(size_t i = 0; i < len; i++) {
-                        furi_string_push_back(output, message[i]);
                         if(message[i] == '\n') {
-                            printf("\r");
-                            for(uint8_t j = 0; j < 80; i++) {
+                            // Check it was \r before
+                            if((i > 0 && message[i - 1] != '\r') || i == 0) {
+                                furi_string_push_back(output, '\r');
+                            }
+                            furi_string_push_back(output, message[i]);
+
+                            // Extra space to put line on the right side
+                            for(uint8_t j = 0; j < 80; j++) {
                                 printf(" ");
                             }
-                            printf("\r %s", furi_string_get_cstr(output));
+                            printf("%s", furi_string_get_cstr(output));
+
+                            // Next line, put input to the left side
                             printf("%s", furi_string_get_cstr(input));
                             fflush(stdout);
                             furi_string_reset(output);
+                        } else {
+                            // Accumulate symbols
+                            furi_string_push_back(output, message[i]);
                         }
                     }
                 } while(subghz_chat_worker_available(subghz_chat));
