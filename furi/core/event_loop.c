@@ -21,12 +21,16 @@ static FuriEventLoopItem* furi_event_loop_item_alloc(
 
 static void furi_event_loop_item_free(FuriEventLoopItem* instance);
 
+static void furi_event_loop_item_free_later(FuriEventLoopItem* instance);
+
 static void furi_event_loop_item_set_callback(
     FuriEventLoopItem* instance,
     FuriEventLoopEventCallback callback,
     void* callback_context);
 
 static void furi_event_loop_item_notify(FuriEventLoopItem* instance);
+
+static bool furi_event_loop_item_is_waiting(FuriEventLoopItem* instance);
 
 static void furi_event_loop_process_pending_callbacks(FuriEventLoop* instance) {
     for(; !PendingQueue_empty_p(instance->pending_queue);
@@ -81,6 +85,7 @@ void furi_event_loop_free(FuriEventLoop* instance) {
 
     furi_event_loop_process_timer_queue(instance);
     furi_check(TimerList_empty_p(instance->timer_list));
+    furi_check(WaitingList_empty_p(instance->waiting_list));
 
     FuriEventLoopTree_clear(instance->tree);
     PendingQueue_clear(instance->pending_queue);
@@ -99,11 +104,11 @@ static FuriEventLoopProcessStatus
     furi_event_loop_poll_process_event(FuriEventLoop* instance, FuriEventLoopItem* item) {
     UNUSED(instance);
 
-    if(!item->contract->get_level(item->object, item->event)) {
+    if(item->owner == NULL) {
+        return FuriEventLoopProcessStatusFreeLater;
+    } else if(!item->contract->get_level(item->object, item->event)) {
         return FuriEventLoopProcessStatusComplete;
-    }
-
-    if(item->callback(item->object, item->callback_context)) {
+    } else if(item->callback(item->object, item->callback_context)) {
         return FuriEventLoopProcessStatusIncomplete;
     } else {
         return FuriEventLoopProcessStatusAgain;
@@ -114,6 +119,41 @@ static void furi_event_loop_restore_flags(FuriEventLoop* instance, uint32_t flag
     if(flags) {
         xTaskNotifyIndexed(
             instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, flags, eSetBits);
+    }
+}
+
+static void furi_event_loop_process_waiting_list(FuriEventLoop* instance) {
+    FuriEventLoopItem* item = NULL;
+
+    FURI_CRITICAL_ENTER();
+
+    if(!WaitingList_empty_p(instance->waiting_list)) {
+        item = WaitingList_pop_front(instance->waiting_list);
+        WaitingList_init_field(item);
+    }
+
+    FURI_CRITICAL_EXIT();
+
+    if(!item) return;
+
+    while(true) {
+        FuriEventLoopProcessStatus ret = furi_event_loop_poll_process_event(instance, item);
+
+        if(ret == FuriEventLoopProcessStatusComplete) {
+            // Event processing complete, break from loop
+            break;
+        } else if(ret == FuriEventLoopProcessStatusIncomplete) {
+            // Event processing incomplete more processing needed
+        } else if(ret == FuriEventLoopProcessStatusAgain) { //-V547
+            furi_event_loop_item_notify(item);
+            break;
+            // Unsubscribed from inside the callback, delete item
+        } else if(ret == FuriEventLoopProcessStatusFreeLater) {
+            furi_event_loop_item_free(item);
+            break;
+        } else {
+            furi_crash();
+        }
     }
 }
 
@@ -145,34 +185,7 @@ void furi_event_loop_run(FuriEventLoop* instance) {
                 break;
 
             } else if(flags & FuriEventLoopFlagEvent) {
-                FuriEventLoopItem* item = NULL;
-                FURI_CRITICAL_ENTER();
-
-                if(!WaitingList_empty_p(instance->waiting_list)) {
-                    item = WaitingList_pop_front(instance->waiting_list);
-                    WaitingList_init_field(item);
-                }
-
-                FURI_CRITICAL_EXIT();
-
-                if(item) {
-                    while(true) {
-                        FuriEventLoopProcessStatus ret =
-                            furi_event_loop_poll_process_event(instance, item);
-                        if(ret == FuriEventLoopProcessStatusComplete) {
-                            // Event processing complete, break from loop
-                            break;
-                        } else if(ret == FuriEventLoopProcessStatusIncomplete) {
-                            // Event processing incomplete more processing needed
-                        } else if(ret == FuriEventLoopProcessStatusAgain) { //-V547
-                            furi_event_loop_item_notify(item);
-                            break;
-                        } else {
-                            furi_crash();
-                        }
-                    }
-                }
-
+                furi_event_loop_process_waiting_list(instance);
                 furi_event_loop_restore_flags(instance, flags & ~FuriEventLoopFlagEvent);
 
             } else if(flags & FuriEventLoopFlagTimer) {
@@ -237,7 +250,6 @@ static void furi_event_loop_object_subscribe(
     void* context) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
-    furi_check(instance->state == FuriEventLoopStateStopped);
     furi_check(object);
     furi_assert(contract);
     furi_check(callback);
@@ -329,15 +341,13 @@ void furi_event_loop_subscribe_mutex(
 
 void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
     furi_check(instance);
-    furi_check(instance->state == FuriEventLoopStateStopped);
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
     FURI_CRITICAL_ENTER();
 
-    FuriEventLoopItem** item_ptr = FuriEventLoopTree_get(instance->tree, object);
-    furi_check(item_ptr);
+    FuriEventLoopItem* item = NULL;
+    furi_check(FuriEventLoopTree_pop_at(&item, instance->tree, object));
 
-    FuriEventLoopItem* item = *item_ptr;
     furi_check(item);
     furi_check(item->owner == instance);
 
@@ -353,9 +363,15 @@ void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* o
         furi_crash();
     }
 
-    furi_event_loop_item_free(item);
+    if(furi_event_loop_item_is_waiting(item)) {
+        WaitingList_unlink(item);
+    }
 
-    FuriEventLoopTree_erase(instance->tree, object);
+    if(instance->state == FuriEventLoopStateProcessing) {
+        furi_event_loop_item_free_later(item);
+    } else {
+        furi_event_loop_item_free(item);
+    }
 
     FURI_CRITICAL_EXIT();
 }
@@ -386,7 +402,14 @@ static FuriEventLoopItem* furi_event_loop_item_alloc(
 
 static void furi_event_loop_item_free(FuriEventLoopItem* instance) {
     furi_assert(instance);
+    furi_assert(!furi_event_loop_item_is_waiting(instance));
     free(instance);
+}
+
+static void furi_event_loop_item_free_later(FuriEventLoopItem* instance) {
+    furi_assert(instance);
+    furi_assert(!furi_event_loop_item_is_waiting(instance));
+    instance->owner = NULL;
 }
 
 static void furi_event_loop_item_set_callback(
@@ -405,17 +428,21 @@ static void furi_event_loop_item_notify(FuriEventLoopItem* instance) {
 
     FURI_CRITICAL_ENTER();
 
-    if(!instance->WaitingList.prev && !instance->WaitingList.next) {
-        WaitingList_push_back(instance->owner->waiting_list, instance);
+    FuriEventLoop* owner = instance->owner;
+    furi_assert(owner);
+
+    if(!furi_event_loop_item_is_waiting(instance)) {
+        WaitingList_push_back(owner->waiting_list, instance);
     }
 
     FURI_CRITICAL_EXIT();
 
     xTaskNotifyIndexed(
-        instance->owner->thread_id,
-        FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX,
-        FuriEventLoopFlagEvent,
-        eSetBits);
+        owner->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagEvent, eSetBits);
+}
+
+static bool furi_event_loop_item_is_waiting(FuriEventLoopItem* instance) {
+    return instance->WaitingList.prev || instance->WaitingList.next;
 }
 
 /*

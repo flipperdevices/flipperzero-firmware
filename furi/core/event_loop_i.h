@@ -25,7 +25,7 @@ struct FuriEventLoopItem {
     void* callback_context;
 
     // Waiting list
-    ILIST_INTERFACE(WaitingList, struct FuriEventLoopItem);
+    ILIST_INTERFACE(WaitingList, FuriEventLoopItem);
 };
 
 ILIST_DEF(WaitingList, FuriEventLoopItem, M_POD_OPLIST)
@@ -60,6 +60,7 @@ typedef enum {
     FuriEventLoopProcessStatusComplete,
     FuriEventLoopProcessStatusIncomplete,
     FuriEventLoopProcessStatusAgain,
+    FuriEventLoopProcessStatusFreeLater,
 } FuriEventLoopProcessStatus;
 
 typedef enum {

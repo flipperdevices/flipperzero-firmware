@@ -28,16 +28,15 @@ bool test_furi_event_loop_producer_mq_callback(FuriEventLoopObject* object, void
     FURI_LOG_I(
         TAG, "producer_mq_callback: %lu %lu", data->producer_counter, data->consumer_counter);
 
-    // Remove and add should not cause crash
-    // if(data->producer_counter == EVENT_LOOP_EVENT_COUNT/2) {
-    //     furi_event_loop_message_queue_remove(data->producer_event_loop, data->mq);
-    //     furi_event_loop_message_queue_add(
-    //     data->producer_event_loop,
-    //     data->mq,
-    //     FuriEventLoopEventOut,
-    //     test_furi_event_loop_producer_mq_callback,
-    //     data);
-    // }
+    if(data->producer_counter == EVENT_LOOP_EVENT_COUNT / 2) {
+        furi_event_loop_unsubscribe(data->producer_event_loop, data->mq);
+        furi_event_loop_subscribe_message_queue(
+            data->producer_event_loop,
+            data->mq,
+            FuriEventLoopEventOut,
+            test_furi_event_loop_producer_mq_callback,
+            data);
+    }
 
     if(data->producer_counter == EVENT_LOOP_EVENT_COUNT) {
         furi_event_loop_stop(data->producer_event_loop);
@@ -110,16 +109,15 @@ bool test_furi_event_loop_consumer_mq_callback(FuriEventLoopObject* object, void
     FURI_LOG_I(
         TAG, "consumer_mq_callback: %lu %lu", data->producer_counter, data->consumer_counter);
 
-    // Remove and add should not cause crash
-    // if(data->producer_counter == EVENT_LOOP_EVENT_COUNT/2) {
-    //     furi_event_loop_message_queue_remove(data->consumer_event_loop, data->mq);
-    //     furi_event_loop_message_queue_add(
-    //     data->consumer_event_loop,
-    //     data->mq,
-    //     FuriEventLoopEventIn,
-    //     test_furi_event_loop_producer_mq_callback,
-    //     data);
-    // }
+    if(data->consumer_counter == EVENT_LOOP_EVENT_COUNT / 2) {
+        furi_event_loop_unsubscribe(data->consumer_event_loop, data->mq);
+        furi_event_loop_subscribe_message_queue(
+            data->consumer_event_loop,
+            data->mq,
+            FuriEventLoopEventIn,
+            test_furi_event_loop_consumer_mq_callback,
+            data);
+    }
 
     if(data->consumer_counter == EVENT_LOOP_EVENT_COUNT) {
         furi_event_loop_stop(data->consumer_event_loop);
