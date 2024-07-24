@@ -121,14 +121,23 @@ static inline FuriEventLoopProcessStatus
 }
 
 static inline FuriEventLoopProcessStatus
-    furi_event_loop_poll_process_event(FuriEventLoopItem* item) {
-    if(item->owner == NULL) {
-        return FuriEventLoopProcessStatusFreeLater;
-    } else if(item->event == FuriEventLoopEventIn || item->event == FuriEventLoopEventOut) {
-        return furi_event_loop_poll_process_level_event(item);
-    } else {
-        return furi_event_loop_poll_process_edge_event(item);
+    furi_event_loop_poll_process_event(FuriEventLoop* instance, FuriEventLoopItem* item) {
+    FuriEventLoopProcessStatus status;
+    if(item->event & FuriEventLoopEventFlagOneShot) {
+        furi_event_loop_unsubscribe(instance, item->object);
     }
+
+    if(item->event & FuriEventLoopEventFlagEdgeTrigger) {
+        status = furi_event_loop_poll_process_edge_event(item);
+    } else {
+        status = furi_event_loop_poll_process_level_event(item);
+    }
+
+    if(item->owner == NULL) {
+        status = FuriEventLoopProcessStatusFreeLater;
+    }
+
+    return status;
 }
 
 static void furi_event_loop_process_waiting_list(FuriEventLoop* instance) {
@@ -146,7 +155,7 @@ static void furi_event_loop_process_waiting_list(FuriEventLoop* instance) {
     if(!item) return;
 
     while(true) {
-        FuriEventLoopProcessStatus ret = furi_event_loop_poll_process_event(item);
+        FuriEventLoopProcessStatus ret = furi_event_loop_poll_process_event(instance, item);
 
         if(ret == FuriEventLoopProcessStatusComplete) {
             // Event processing complete, break from loop
@@ -281,19 +290,20 @@ static void furi_event_loop_object_subscribe(
     FuriEventLoopTree_set_at(instance->tree, object, item);
 
     FuriEventLoopLink* link = item->contract->get_link(object);
+    FuriEventLoopEvent event_noflags = item->event & FuriEventLoopEventMask;
 
-    if(item->event == FuriEventLoopEventIn || item->event == FuriEventLoopEventEdgeIn) {
+    if(event_noflags == FuriEventLoopEventIn) {
         furi_check(link->item_in == NULL);
         link->item_in = item;
-    } else if(item->event == FuriEventLoopEventOut || item->event == FuriEventLoopEventEdgeOut) {
+    } else if(event_noflags == FuriEventLoopEventOut) {
         furi_check(link->item_out == NULL);
         link->item_out = item;
     } else {
         furi_crash();
     }
 
-    if(item->event == FuriEventLoopEventIn || item->event == FuriEventLoopEventOut) {
-        if(item->contract->get_level(item->object, item->event)) {
+    if(!(item->event & FuriEventLoopEventFlagEdgeTrigger)) {
+        if(item->contract->get_level(item->object, event_noflags)) {
             furi_event_loop_item_notify(item);
         }
     }
@@ -370,11 +380,12 @@ void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* o
     furi_check(item->owner == instance);
 
     FuriEventLoopLink* link = item->contract->get_link(object);
+    FuriEventLoopEvent event_noflags = item->event & FuriEventLoopEventMask;
 
-    if(item->event == FuriEventLoopEventIn || item->event == FuriEventLoopEventEdgeIn) {
+    if(event_noflags == FuriEventLoopEventIn) {
         furi_check(link->item_in == item);
         link->item_in = NULL;
-    } else if(item->event == FuriEventLoopEventOut || item->event == FuriEventLoopEventEdgeOut) {
+    } else if(event_noflags == FuriEventLoopEventOut) {
         furi_check(link->item_out == item);
         link->item_out = NULL;
     } else {
@@ -472,9 +483,9 @@ void furi_event_loop_link_notify(FuriEventLoopLink* instance, FuriEventLoopEvent
 
     FURI_CRITICAL_ENTER();
 
-    if(event == FuriEventLoopEventIn) {
+    if(event & FuriEventLoopEventIn) {
         if(instance->item_in) furi_event_loop_item_notify(instance->item_in);
-    } else if(event == FuriEventLoopEventOut) {
+    } else if(event & FuriEventLoopEventOut) {
         if(instance->item_out) furi_event_loop_item_notify(instance->item_out);
     } else {
         furi_crash();
