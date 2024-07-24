@@ -100,13 +100,9 @@ void furi_event_loop_free(FuriEventLoop* instance) {
     free(instance);
 }
 
-static FuriEventLoopProcessStatus
-    furi_event_loop_poll_process_event(FuriEventLoop* instance, FuriEventLoopItem* item) {
-    UNUSED(instance);
-
-    if(item->owner == NULL) {
-        return FuriEventLoopProcessStatusFreeLater;
-    } else if(!item->contract->get_level(item->object, item->event)) {
+static inline FuriEventLoopProcessStatus
+    furi_event_loop_poll_process_level_event(FuriEventLoopItem* item) {
+    if(!item->contract->get_level(item->object, item->event)) {
         return FuriEventLoopProcessStatusComplete;
     } else if(item->callback(item->object, item->callback_context)) {
         return FuriEventLoopProcessStatusIncomplete;
@@ -115,10 +111,23 @@ static FuriEventLoopProcessStatus
     }
 }
 
-static void furi_event_loop_restore_flags(FuriEventLoop* instance, uint32_t flags) {
-    if(flags) {
-        xTaskNotifyIndexed(
-            instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, flags, eSetBits);
+static inline FuriEventLoopProcessStatus
+    furi_event_loop_poll_process_edge_event(FuriEventLoopItem* item) {
+    if(item->callback(item->object, item->callback_context)) {
+        return FuriEventLoopProcessStatusComplete;
+    } else {
+        return FuriEventLoopProcessStatusAgain;
+    }
+}
+
+static inline FuriEventLoopProcessStatus
+    furi_event_loop_poll_process_event(FuriEventLoopItem* item) {
+    if(item->owner == NULL) {
+        return FuriEventLoopProcessStatusFreeLater;
+    } else if(item->event == FuriEventLoopEventIn || item->event == FuriEventLoopEventOut) {
+        return furi_event_loop_poll_process_level_event(item);
+    } else {
+        return furi_event_loop_poll_process_edge_event(item);
     }
 }
 
@@ -137,7 +146,7 @@ static void furi_event_loop_process_waiting_list(FuriEventLoop* instance) {
     if(!item) return;
 
     while(true) {
-        FuriEventLoopProcessStatus ret = furi_event_loop_poll_process_event(instance, item);
+        FuriEventLoopProcessStatus ret = furi_event_loop_poll_process_event(item);
 
         if(ret == FuriEventLoopProcessStatusComplete) {
             // Event processing complete, break from loop
@@ -154,6 +163,13 @@ static void furi_event_loop_process_waiting_list(FuriEventLoop* instance) {
         } else {
             furi_crash();
         }
+    }
+}
+
+static void furi_event_loop_restore_flags(FuriEventLoop* instance, uint32_t flags) {
+    if(flags) {
+        xTaskNotifyIndexed(
+            instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, flags, eSetBits);
     }
 }
 
@@ -266,10 +282,10 @@ static void furi_event_loop_object_subscribe(
 
     FuriEventLoopLink* link = item->contract->get_link(object);
 
-    if(item->event == FuriEventLoopEventIn) {
+    if(item->event == FuriEventLoopEventIn || item->event == FuriEventLoopEventEdgeIn) {
         furi_check(link->item_in == NULL);
         link->item_in = item;
-    } else if(item->event == FuriEventLoopEventOut) {
+    } else if(item->event == FuriEventLoopEventOut || item->event == FuriEventLoopEventEdgeOut) {
         furi_check(link->item_out == NULL);
         link->item_out = item;
     } else {

@@ -22,8 +22,10 @@ extern "C" {
 
 /** Event Loop events */
 typedef enum {
-    FuriEventLoopEventOut, /**< On departure: item was retrieved from container, flag reset, etc... */
     FuriEventLoopEventIn, /**< On arrival: item was inserted into container, flag set, etc... */
+    FuriEventLoopEventEdgeIn, /**< Same as FuriEventLoopEventIn, edge-triggered */
+    FuriEventLoopEventOut, /**< On departure: item was retrieved from container, flag reset, etc... */
+    FuriEventLoopEventEdgeOut, /**< Same as FuriEventLoopEventOut, edge-triggered */
 } FuriEventLoopEvent;
 
 /** Anonymous message queue type */
