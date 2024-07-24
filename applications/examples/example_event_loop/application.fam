@@ -5,3 +5,11 @@ App(
     entry_point="example_event_loop_timer_app",
     fap_category="Examples",
 )
+
+App(
+    appid="example_event_loop_mutex",
+    name="Example: Event Loop Mutex",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="example_event_loop_mutex_app",
+    fap_category="Examples",
+)
