@@ -29,7 +29,7 @@ typedef enum {
     FuriEventLoopEventMask = 0x00000003U, /**< Special value containing the event bits */
 
     FuriEventLoopEventFlagEdgeTrigger =
-        0x00000004U, /**< Use edge triggered events istead of level triggered ones */
+        0x00000004U, /**< Use edge triggered events instead of level triggered ones */
     FuriEventLoopEventFlagOneShot =
         0x00000008U, /**< Automatically unsubscribe from events after one time */
     FuriEventLoopEventFlagMask = 0xFFFFFFFCU, /**< Special value containing the event flag bits */
