@@ -292,8 +292,10 @@ static void furi_event_loop_object_subscribe(
         furi_crash();
     }
 
-    if(item->contract->get_level(item->object, item->event)) {
-        furi_event_loop_item_notify(item);
+    if(item->event == FuriEventLoopEventIn || item->event == FuriEventLoopEventOut) {
+        if(item->contract->get_level(item->object, item->event)) {
+            furi_event_loop_item_notify(item);
+        }
     }
 
     FURI_CRITICAL_EXIT();
@@ -369,10 +371,10 @@ void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* o
 
     FuriEventLoopLink* link = item->contract->get_link(object);
 
-    if(item->event == FuriEventLoopEventIn) {
+    if(item->event == FuriEventLoopEventIn || item->event == FuriEventLoopEventEdgeIn) {
         furi_check(link->item_in == item);
         link->item_in = NULL;
-    } else if(item->event == FuriEventLoopEventOut) {
+    } else if(item->event == FuriEventLoopEventOut || item->event == FuriEventLoopEventEdgeOut) {
         furi_check(link->item_out == item);
         link->item_out = NULL;
     } else {
