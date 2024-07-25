@@ -8,6 +8,9 @@
 
 #include "event_loop_link_i.h"
 
+// Internal FreeRTOS member names
+#define xTriggerLevelBytes uxDummy1[3]
+
 struct FuriStreamBuffer {
     StaticStreamBuffer_t container;
     FuriEventLoopLink event_loop_link;
@@ -69,7 +72,13 @@ size_t furi_stream_buffer_send(
     }
 
     if(ret > 0) {
-        furi_event_loop_link_notify(&stream_buffer->event_loop_link, FuriEventLoopEventIn);
+        const size_t bytes_available =
+            xStreamBufferBytesAvailable((StreamBufferHandle_t)stream_buffer);
+        const size_t trigger_level = ((StaticStreamBuffer_t*)stream_buffer)->xTriggerLevelBytes;
+
+        if(bytes_available >= trigger_level) {
+            furi_event_loop_link_notify(&stream_buffer->event_loop_link, FuriEventLoopEventIn);
+        }
     }
 
     return ret;
@@ -154,9 +163,9 @@ static uint32_t
     furi_assert(stream_buffer);
 
     if(event == FuriEventLoopEventIn) {
-        return furi_stream_buffer_bytes_available(stream_buffer);
+        return xStreamBufferBytesAvailable((StreamBufferHandle_t)stream_buffer);
     } else if(event == FuriEventLoopEventOut) {
-        return furi_stream_buffer_spaces_available(stream_buffer);
+        return xStreamBufferSpacesAvailable((StreamBufferHandle_t)stream_buffer);
     } else {
         furi_crash();
     }
