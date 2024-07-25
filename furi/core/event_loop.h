@@ -22,19 +22,22 @@ extern "C" {
 
 /** Event Loop events */
 typedef enum {
-    FuriEventLoopEventIn =
-        0x00000001U, /**< On arrival: item was inserted into container, flag set, etc... */
-    FuriEventLoopEventOut =
-        0x00000002U, /**< On departure: item was retrieved from container, flag reset, etc... */
-    FuriEventLoopEventMask = 0x00000003U, /**< Special value containing the event bits */
+    /** On arrival: item was inserted into container, flag set, etc... */
+    FuriEventLoopEventIn = 0x00000001U,
+    /** On departure: item was retrieved from container, flag reset, etc... */
+    FuriEventLoopEventOut = 0x00000002U,
+    /** Special value containing the event bits */
+    FuriEventLoopEventMask = 0x00000003U,
 
-    FuriEventLoopEventFlagEdgeTrigger =
-        0x00000004U, /**< Use edge triggered events instead of level triggered ones */
-    FuriEventLoopEventFlagOneShot =
-        0x00000008U, /**< Automatically unsubscribe from events after one time */
-    FuriEventLoopEventFlagMask = 0xFFFFFFFCU, /**< Special value containing the event flag bits */
+    /** Use edge triggered events instead of level triggered ones */
+    FuriEventLoopEventFlagEdgeTrigger = 0x00000004U,
+    /** Automatically unsubscribe from events after one time */
+    FuriEventLoopEventFlagOneShot = 0x00000008U,
+    /** Special value containing the event flag bits */
+    FuriEventLoopEventFlagMask = 0xFFFFFFFCU,
 
-    FuriEventLoopEventReserved = UINT32_MAX, /**< Special value to force enum to 32-bit values */
+    /** Special value to force the enum to 32-bit values */
+    FuriEventLoopEventReserved = UINT32_MAX,
 } FuriEventLoopEvent;
 
 /** Anonymous message queue type */
