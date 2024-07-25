@@ -1,5 +1,5 @@
 /**
- * @file example_event_loop_timer.c
+ * @file example_event_loop_mutex.c
  * @brief Example application that demonstrates the FuriEventLoop and FuriMutex integration.
  *
  * This application simulates a use case where a time-consuming blocking operation is executed
