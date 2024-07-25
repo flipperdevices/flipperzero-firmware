@@ -186,6 +186,8 @@ void elements_button_right(Canvas* canvas, const char* str) {
 }
 
 void elements_button_up(Canvas* canvas, const char* str) {
+    furi_check(canvas);
+
     const Icon* icon = &I_ButtonUp_7x4;
 
     const size_t button_height = 12;
@@ -216,6 +218,8 @@ void elements_button_up(Canvas* canvas, const char* str) {
 }
 
 void elements_button_down(Canvas* canvas, const char* str) {
+    furi_check(canvas);
+
     const Icon* icon = &I_ButtonDown_7x4;
 
     const size_t button_height = 12;
