@@ -13,3 +13,11 @@ App(
     entry_point="example_event_loop_mutex_app",
     fap_category="Examples",
 )
+
+App(
+    appid="example_event_loop_stream_buffer",
+    name="Example: Event Loop Stream Buffer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="example_event_loop_stream_buffer_app",
+    fap_category="Examples",
+)
