@@ -21,3 +21,12 @@ App(
     entry_point="example_event_loop_stream_buffer_app",
     fap_category="Examples",
 )
+
+App(
+    appid="example_event_loop_multi",
+    name="Example: Event Loop Multi",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="example_event_loop_multi_app",
+    requires=["gui"],
+    fap_category="Examples",
+)
