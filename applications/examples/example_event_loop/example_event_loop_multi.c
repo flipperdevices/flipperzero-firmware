@@ -81,25 +81,6 @@ static void event_loop_multi_app_worker_timer_callback(void* context) {
         furi_stream_buffer_send(worker->stream_buffer, &data, sizeof(data), 0) == sizeof(data));
 }
 
-// This function executes each time a signal is sent to the worker thread. (It is run in the caller's context,
-// not in the worker thread).
-static bool
-    event_loop_multi_app_worker_thread_signal_callback(uint32_t signal, void* arg, void* context) {
-    UNUSED(arg);
-    furi_assert(context);
-    EventLoopMultiAppWorker* worker = context;
-
-    // Check if the signal is of the right type
-    const bool handled = (signal == FuriSignalExit);
-
-    if(handled) {
-        // Request the worker event loop to stop
-        furi_event_loop_stop(worker->event_loop);
-    }
-
-    return handled;
-}
-
 static EventLoopMultiAppWorker*
     event_loop_multi_app_worker_alloc(FuriStreamBuffer* stream_buffer) {
     EventLoopMultiAppWorker* worker = malloc(sizeof(EventLoopMultiAppWorker));
@@ -122,9 +103,6 @@ static EventLoopMultiAppWorker*
         FuriEventLoopEventOut | FuriEventLoopEventFlagEdge,
         event_loop_multi_app_stream_buffer_worker_callback,
         worker);
-    // Assign a signal handler to the worker thread - it will be used to stop the worker later.
-    furi_thread_set_signal_callback(
-        furi_thread_get_current(), event_loop_multi_app_worker_thread_signal_callback, worker);
 
     return worker;
 }
@@ -260,6 +238,7 @@ static void event_loop_multi_app_exit_timer_callback(void* context) {
         FURI_LOG_I(TAG, "Exiting NOW!");
 
         // Send a signal to the worker thread to exit.
+        // A signal handler that handles FuriSignalExit is already set by default.
         furi_thread_signal(app->worker_thread, FuriSignalExit, NULL);
         // Request the application event loop to stop.
         furi_event_loop_stop(app->event_loop);
