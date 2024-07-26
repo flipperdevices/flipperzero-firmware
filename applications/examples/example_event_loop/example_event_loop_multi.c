@@ -119,7 +119,7 @@ static EventLoopMultiAppWorker*
     furi_event_loop_subscribe_stream_buffer(
         worker->event_loop,
         worker->stream_buffer,
-        FuriEventLoopEventOut | FuriEventLoopEventFlagEdgeTrigger,
+        FuriEventLoopEventOut | FuriEventLoopEventFlagEdge,
         event_loop_multi_app_stream_buffer_worker_callback,
         worker);
     // Assign a signal handler to the worker thread - it will be used to stop the worker later.
@@ -307,7 +307,7 @@ static EventLoopMultiApp* event_loop_multi_app_alloc(void) {
     furi_event_loop_subscribe_stream_buffer(
         app->event_loop,
         app->stream_buffer,
-        FuriEventLoopEventIn | FuriEventLoopEventFlagEdgeTrigger,
+        FuriEventLoopEventIn | FuriEventLoopEventFlagEdge,
         event_loop_multi_app_stream_buffer_callback,
         app);
 

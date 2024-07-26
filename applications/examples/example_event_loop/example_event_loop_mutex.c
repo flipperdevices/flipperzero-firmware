@@ -17,7 +17,7 @@
 // using edge trigger mode (reacting only to changes in mutex state) and
 // employing one-shot mode to automatically unsubscribe before the event is processed.
 #define MUTEX_EVENT_AND_FLAGS \
-    (FuriEventLoopEventIn | FuriEventLoopEventFlagEdgeTrigger | FuriEventLoopEventFlagOneShot)
+    (FuriEventLoopEventIn | FuriEventLoopEventFlagEdge | FuriEventLoopEventFlagOnce)
 
 typedef struct {
     FuriEventLoop* event_loop;

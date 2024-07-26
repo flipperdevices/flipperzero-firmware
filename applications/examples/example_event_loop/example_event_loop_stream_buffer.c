@@ -17,7 +17,7 @@
 
 #define STREAM_BUFFER_SIZE            (32)
 #define STREAM_BUFFER_TRIG_LEVEL      (STREAM_BUFFER_SIZE / 2)
-#define STREAM_BUFFER_EVENT_AND_FLAGS (FuriEventLoopEventIn | FuriEventLoopEventFlagEdgeTrigger)
+#define STREAM_BUFFER_EVENT_AND_FLAGS (FuriEventLoopEventIn | FuriEventLoopEventFlagEdge)
 
 typedef struct {
     FuriEventLoop* event_loop;

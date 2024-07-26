@@ -123,11 +123,11 @@ static inline FuriEventLoopProcessStatus
 static inline FuriEventLoopProcessStatus
     furi_event_loop_poll_process_event(FuriEventLoop* instance, FuriEventLoopItem* item) {
     FuriEventLoopProcessStatus status;
-    if(item->event & FuriEventLoopEventFlagOneShot) {
+    if(item->event & FuriEventLoopEventFlagOnce) {
         furi_event_loop_unsubscribe(instance, item->object);
     }
 
-    if(item->event & FuriEventLoopEventFlagEdgeTrigger) {
+    if(item->event & FuriEventLoopEventFlagEdge) {
         status = furi_event_loop_poll_process_edge_event(item);
     } else {
         status = furi_event_loop_poll_process_level_event(item);
@@ -302,7 +302,7 @@ static void furi_event_loop_object_subscribe(
         furi_crash();
     }
 
-    if(!(item->event & FuriEventLoopEventFlagEdgeTrigger)) {
+    if(!(item->event & FuriEventLoopEventFlagEdge)) {
         if(item->contract->get_level(item->object, event_noflags)) {
             furi_event_loop_item_notify(item);
         }
