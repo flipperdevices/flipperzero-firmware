@@ -79,26 +79,24 @@ void view_holder_set_back_callback(
  */
 void view_holder_attach_to_gui(ViewHolder* view_holder, Gui* gui);
 
-/**
- * @brief Enable view processing
- * 
- * @param view_holder 
- */
-void view_holder_start(ViewHolder* view_holder);
-
-/**
- * @brief Disable view processing
- * 
- * @param view_holder 
- */
-void view_holder_stop(ViewHolder* view_holder);
-
 /** View Update Handler
  *
  * @param      view     View Instance
  * @param      context  ViewHolder instance
  */
 void view_holder_update(View* view, void* context);
+
+/** Send ViewPort of this ViewHolder instance to front
+ *
+ * @param      view_holder  ViewHolder instance
+ */
+void view_holder_send_to_front(ViewHolder* view_holder);
+
+/** Send ViewPort of this ViewHolder instance to back
+ *
+ * @param      view_holder  ViewHolder instance
+ */
+void view_holder_send_to_back(ViewHolder* view_holder);
 
 #ifdef __cplusplus
 }
