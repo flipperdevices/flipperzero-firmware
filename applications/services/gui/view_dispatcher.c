@@ -14,40 +14,6 @@ ViewDispatcher* view_dispatcher_alloc(void) {
 
     ViewDict_init(view_dispatcher->views);
 
-    return view_dispatcher;
-}
-
-void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
-    // Detach from gui
-    if(view_dispatcher->gui) {
-        gui_remove_view_port(view_dispatcher->gui, view_dispatcher->view_port);
-    }
-    // Crash if not all views were freed
-    furi_check(!ViewDict_size(view_dispatcher->views));
-
-    ViewDict_clear(view_dispatcher->views);
-    // Free ViewPort
-    view_port_free(view_dispatcher->view_port);
-    // Free internal queue
-    if(view_dispatcher->input_queue) {
-        furi_event_loop_unsubscribe(view_dispatcher->event_loop, view_dispatcher->input_queue);
-        furi_message_queue_free(view_dispatcher->input_queue);
-    }
-    if(view_dispatcher->event_queue) {
-        furi_event_loop_unsubscribe(view_dispatcher->event_loop, view_dispatcher->event_queue);
-        furi_message_queue_free(view_dispatcher->event_queue);
-    }
-    if(view_dispatcher->event_loop) {
-        furi_event_loop_free(view_dispatcher->event_loop);
-    }
-    // Free dispatcher
-    free(view_dispatcher);
-}
-
-void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
-    furi_check(view_dispatcher);
-    furi_check(view_dispatcher->event_loop == NULL);
-
     view_dispatcher->event_loop = furi_event_loop_alloc();
 
     view_dispatcher->input_queue = furi_message_queue_alloc(16, sizeof(InputEvent));
@@ -65,6 +31,35 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
         FuriEventLoopEventIn,
         view_dispatcher_run_event_callback,
         view_dispatcher);
+
+    return view_dispatcher;
+}
+
+void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
+    // Detach from gui
+    if(view_dispatcher->gui) {
+        gui_remove_view_port(view_dispatcher->gui, view_dispatcher->view_port);
+    }
+    // Crash if not all views were freed
+    furi_check(!ViewDict_size(view_dispatcher->views));
+
+    ViewDict_clear(view_dispatcher->views);
+    // Free ViewPort
+    view_port_free(view_dispatcher->view_port);
+    // Free internal queue
+    furi_event_loop_unsubscribe(view_dispatcher->event_loop, view_dispatcher->input_queue);
+    furi_event_loop_unsubscribe(view_dispatcher->event_loop, view_dispatcher->event_queue);
+
+    furi_message_queue_free(view_dispatcher->input_queue);
+    furi_message_queue_free(view_dispatcher->event_queue);
+
+    furi_event_loop_free(view_dispatcher->event_loop);
+    // Free dispatcher
+    free(view_dispatcher);
+}
+
+void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
+    UNUSED(view_dispatcher)
 }
 
 void view_dispatcher_set_navigation_event_callback(
@@ -362,9 +357,7 @@ void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* vie
         view_port_update(view_dispatcher->view_port);
     } else {
         view_port_enabled_set(view_dispatcher->view_port, false);
-        if(view_dispatcher->event_loop) {
-            view_dispatcher_stop(view_dispatcher);
-        }
+        view_dispatcher_stop(view_dispatcher);
     }
 }
 

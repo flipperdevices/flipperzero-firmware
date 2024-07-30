@@ -52,7 +52,7 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher);
  *
  * @param      view_dispatcher  ViewDispatcher instance
  */
-void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher);
+FURI_DEPRECATED void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher);
 
 /** Send custom event
  *
