@@ -15,7 +15,7 @@ void furi_run(void) {
     furi_check(!furi_kernel_is_irq_or_masked());
     furi_check(xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED);
 
-#if(__ARM_ARCH_7A__ == 0U)
+#if !defined(__ARM_ARCH_7A__) || (__ARM_ARCH_7A__ == 0U)
     /* Service Call interrupt might be configured before kernel start      */
     /* and when its priority is lower or equal to BASEPRI, svc instruction */
     /* causes a Hard Fault.                                                */

@@ -1,4 +1,4 @@
-#include <projdefs.h>
+#include <FreeRTOS.h>
 #include <stdint.h>
 #include <furi.h>
 #include <gui/elements.h>
