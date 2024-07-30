@@ -6,7 +6,8 @@ AccessorAppViewManager::AccessorAppViewManager() {
     event_queue = furi_message_queue_alloc(10, sizeof(AccessorEvent));
 
     view_holder = view_holder_alloc();
-    auto callback = cbc::obtain_connector(this, &AccessorAppViewManager::view_holder_back_callback);
+    auto callback =
+        cbc::obtain_connector(this, &AccessorAppViewManager::view_holder_back_callback);
 
     // allocate views
     submenu = submenu_alloc();
