@@ -59,7 +59,7 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
 }
 
 void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
-    UNUSED(view_dispatcher)
+    UNUSED(view_dispatcher);
 }
 
 void view_dispatcher_set_navigation_event_callback(
