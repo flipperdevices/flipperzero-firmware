@@ -74,7 +74,7 @@ FURI_NORETURN void __furi_halt_implementation(void);
     M_APPLY(__furi_check, M_DEFAULT_ARGS(2, (__FURI_CHECK_MESSAGE_FLAG), __VA_ARGS__))
 
 /** Only in debug build: Assert condition and crash if assert failed  */
-#ifdef FURI_DEBUG
+#if FURI_DEBUG
 #define __furi_assert(__e, __m) \
     do {                        \
         if(!(__e)) {            \

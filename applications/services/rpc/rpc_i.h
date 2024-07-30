@@ -11,6 +11,10 @@
 extern "C" {
 #endif
 
+#ifndef SRV_RPC_DEBUG
+#define SRV_RPC_DEBUG 0
+#endif
+
 typedef void* (*RpcSystemAlloc)(RpcSession* session);
 typedef void (*RpcSystemFree)(void* context);
 typedef void (*PBMessageHandler)(const PB_Main* msg_request, void* context);

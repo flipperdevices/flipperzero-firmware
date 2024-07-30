@@ -75,6 +75,10 @@ void __furi_critical_exit(__FuriCriticalInfo info);
 #define FURI_DEFAULT(x) __attribute__((weak, alias(x)))
 #endif
 
+#ifndef FURI_DEBUG
+#define FURI_DEBUG 0
+#endif
+
 #ifdef __cplusplus
 }
 #endif
