@@ -14,7 +14,7 @@ void nfc_scene_select_protocol_on_enter(void* context) {
     const char* prefix;
     if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneExtraActions)) {
         prefix = "Read";
-        nfc_detected_protocols_fill(instance->detected_protocols);
+        nfc_detected_protocols_fill_all_protocols(instance->detected_protocols);
     } else {
         prefix = "Read as";
         submenu_set_header(submenu, "Multi-protocol card");

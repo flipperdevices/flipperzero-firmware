@@ -63,7 +63,7 @@ NfcProtocol nfc_detected_protocols_get_protocol(NfcDetectedProtocols* instance, 
     return instance->protocols_detected[idx];
 }
 
-void nfc_detected_protocols_fill(NfcDetectedProtocols* instance) {
+void nfc_detected_protocols_fill_all_protocols(NfcDetectedProtocols* instance) {
     furi_assert(instance);
 
     instance->protocols_detected_num = NfcProtocolNum;
