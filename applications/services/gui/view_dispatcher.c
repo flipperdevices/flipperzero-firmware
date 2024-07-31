@@ -2,6 +2,8 @@
 
 #define TAG "ViewDispatcher"
 
+#define VIEW_DISPATCHER_QUEUE_LEN (16U)
+
 ViewDispatcher* view_dispatcher_alloc(void) {
     ViewDispatcher* view_dispatcher = malloc(sizeof(ViewDispatcher));
 
@@ -16,7 +18,8 @@ ViewDispatcher* view_dispatcher_alloc(void) {
 
     view_dispatcher->event_loop = furi_event_loop_alloc();
 
-    view_dispatcher->input_queue = furi_message_queue_alloc(16, sizeof(InputEvent));
+    view_dispatcher->input_queue =
+        furi_message_queue_alloc(VIEW_DISPATCHER_QUEUE_LEN, sizeof(InputEvent));
     furi_event_loop_subscribe_message_queue(
         view_dispatcher->event_loop,
         view_dispatcher->input_queue,
@@ -24,7 +27,8 @@ ViewDispatcher* view_dispatcher_alloc(void) {
         view_dispatcher_run_input_callback,
         view_dispatcher);
 
-    view_dispatcher->event_queue = furi_message_queue_alloc(16, sizeof(uint32_t));
+    view_dispatcher->event_queue =
+        furi_message_queue_alloc(VIEW_DISPATCHER_QUEUE_LEN, sizeof(uint32_t));
     furi_event_loop_subscribe_message_queue(
         view_dispatcher->event_loop,
         view_dispatcher->event_queue,
