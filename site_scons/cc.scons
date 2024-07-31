@@ -30,7 +30,7 @@ ENV.AppendUnique(
         "-Wdouble-promotion",
         "-fdata-sections",
         "-ffunction-sections",
-        "-fsingle-precision-constant",
+        # "-fsingle-precision-constant",
         "-fno-math-errno",
         # Generates .su files with stack usage information
         # "-fstack-usage",
