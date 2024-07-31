@@ -70,7 +70,7 @@ static bool protocol_gproxii_can_be_decoded(ProtocolGProxII* protocol) {
     // |          |           |         |           |          |           |         |
     // 01234567 890123 45 6789012345678901 2 34567890 1234567890123456 7 89012345678901
     // --------------------------------------------------------------------------------
-    // XXXXXXXX LLLLLL DD PPPPPPPPPPPPPPPP E FFFFFFFF CCCCCCCCCCCCCCCC O UUUUUUUUUUUUUU
+    // XORVALUE LLLLLL DD PPPPPPPPPPPPPPPP E FFFFFFFF CCCCCCCCCCCCCCCC O UUUUUUUUUUUUUU
     // 10010000 011010 11 0000000100000000 0 00000000 0000000000000001 0 00000000000000 - Profile: 256 FC: 0 Card: 1
 
     // 72 Bit Guardall/Verex/Chubb GProx II 36 bit key with 26 bit profile
@@ -78,7 +78,7 @@ static bool protocol_gproxii_can_be_decoded(ProtocolGProxII* protocol) {
     // |          |           |         |         |           |          |          |
     // 01234567 890123 45 67890123456789012345678901 2 34567890 1234567890123456 7 8901
     // --------------------------------------------------------------------------------
-    // XXXXXXXX LLLLLL DD PPPPPPPPPPPPPPPPPPPPPPPPPP E FFFFFFFF CCCCCCCCCCCCCCCC O UUUU
+    // XORVALUE LLLLLL DD PPPPPPPPPPPPPPPPPPPPPPPPPP E FFFFFFFF CCCCCCCCCCCCCCCC O UUUU
     // 10111000 100100 10 00000001000000000000000000 1 01000000 1000100010111000 1 0000 - Profile: 262144 FC: 64 Card: 35000
 
     // X = XOR Key, L = Message length, D = 2 bit check digits, P = Profile, E = Wiegand leading even parity
