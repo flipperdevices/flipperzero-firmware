@@ -3,7 +3,7 @@
  * @brief GUI: ViewHolder API
  *
  * ViewHolder is used to connect a single View to a Gui instance. This is useful in smaller applications
- * with a simple user interface. If advanced view switching capabilites are required, see ViewDispatcher instead.
+ * with a simple user interface. If advanced view switching capabilites are required, consider using ViewDispatcher instead.
  *
  * @warning Views added to a ViewHolder MUST NOT be in a ViewStack at the same time.
  */
