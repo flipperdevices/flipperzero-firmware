@@ -44,16 +44,19 @@ FuriPubSub* power_get_pubsub(Power* power) {
 bool power_is_battery_healthy(Power* power) {
     furi_check(power);
 
+    bool ret = false;
+
     PowerMessage msg = {
         .type = PowerMessageTypeIsBatteryHealthy,
         .lock = api_lock_alloc_locked(),
+        .bool_param = &ret,
     };
 
     furi_check(
         furi_message_queue_put(power->message_queue, &msg, FuriWaitForever) == FuriStatusOk);
     api_lock_wait_unlock_and_free(msg.lock);
 
-    return msg.bool_param;
+    return ret;
 }
 
 void power_enable_low_battery_level_notification(Power* power, bool enable) {
@@ -61,7 +64,7 @@ void power_enable_low_battery_level_notification(Power* power, bool enable) {
 
     PowerMessage msg = {
         .type = PowerMessageTypeShowBatteryLowWarning,
-        .bool_param = enable,
+        .bool_param = &enable,
     };
 
     furi_check(

@@ -211,10 +211,10 @@ static bool power_message_callback(FuriEventLoopObject* object, void* context) {
         *msg.power_info = power->info;
         break;
     case PowerMessageTypeIsBatteryHealthy:
-        msg.bool_param = power->info.health > POWER_HEALTH_LOW_THRESHOLD;
+        *msg.bool_param = power->info.health > POWER_HEALTH_LOW_THRESHOLD;
         break;
     case PowerMessageTypeShowBatteryLowWarning:
-        power->show_battery_low_warning = msg.bool_param;
+        power->show_battery_low_warning = *msg.bool_param;
         break;
     default:
         furi_crash();

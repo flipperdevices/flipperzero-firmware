@@ -55,7 +55,7 @@ typedef struct {
     union {
         PowerBootMode boot_mode;
         PowerInfo* power_info;
-        bool bool_param;
+        bool* bool_param;
     };
     FuriApiLock lock;
 } PowerMessage;
