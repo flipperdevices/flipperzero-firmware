@@ -25,3 +25,5 @@ NfcProtocol nfc_detected_protocols_get_protocol(NfcDetectedProtocols* instance, 
 void nfc_detected_protocols_fill_all_protocols(NfcDetectedProtocols* instance);
 
 NfcProtocol nfc_detected_protocols_get_selected(NfcDetectedProtocols* instance);
+
+uint32_t nfc_detected_protocols_get_selected_idx(NfcDetectedProtocols* instance);

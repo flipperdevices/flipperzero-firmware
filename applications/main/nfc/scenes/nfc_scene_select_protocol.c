@@ -38,9 +38,8 @@ void nfc_scene_select_protocol_on_enter(void* context) {
     }
     furi_string_free(temp_str);
 
-    const uint32_t state =
-        scene_manager_get_scene_state(instance->scene_manager, NfcSceneSelectProtocol);
-    submenu_set_selected_item(submenu, state);
+    submenu_set_selected_item(
+        submenu, nfc_detected_protocols_get_selected_idx(instance->detected_protocols));
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewMenu);
 }
@@ -52,8 +51,6 @@ bool nfc_scene_select_protocol_on_event(void* context, SceneManagerEvent event) 
     if(event.type == SceneManagerEventTypeCustom) {
         nfc_detected_protocols_select(instance->detected_protocols, event.event);
         scene_manager_next_scene(instance->scene_manager, NfcSceneRead);
-        scene_manager_set_scene_state(
-            instance->scene_manager, NfcSceneSelectProtocol, event.event);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeBack) {
         if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneDetect)) {

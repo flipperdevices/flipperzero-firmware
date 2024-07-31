@@ -70,11 +70,16 @@ void nfc_detected_protocols_fill_all_protocols(NfcDetectedProtocols* instance) {
     for(uint32_t i = 0; i < NfcProtocolNum; i++) {
         instance->protocols_detected[i] = i;
     }
-    instance->selected_idx = 0;
 }
 
 NfcProtocol nfc_detected_protocols_get_selected(NfcDetectedProtocols* instance) {
     furi_assert(instance);
 
     return instance->protocols_detected[instance->selected_idx];
+}
+
+uint32_t nfc_detected_protocols_get_selected_idx(NfcDetectedProtocols* instance) {
+    furi_assert(instance);
+
+    return instance->selected_idx;
 }
