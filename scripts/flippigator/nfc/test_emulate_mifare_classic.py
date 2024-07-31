@@ -2156,8 +2156,14 @@ class TestEmulateClassic:
             retry_count = 6
 
             if expected not in result:
-                if any(error in error for error in skip_errors) and "rdbl" not in command:
-                    # Some errors can be safely ingored because their results will be double-checked with read commands later
+                if (
+                    any(
+                        any(error in output for error in skip_errors)
+                        for output in result
+                    )
+                    and "rdbl" not in command
+                ):
+                    # Some errors can be safely ignored because their results will be double-checked with read commands later
                     continue
                 else:
                     while retry_count > 0:
