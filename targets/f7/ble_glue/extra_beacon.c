@@ -6,7 +6,7 @@
 
 #define TAG "BleExtraBeacon"
 
-#define GAP_MS_TO_SCAN_INTERVAL(x) ((uint16_t)((x) / 0.625))
+#define GAP_MS_TO_SCAN_INTERVAL(x) ((uint16_t)((x) / 0.625f))
 
 // Also used as an indicator of whether the beacon had ever been configured
 // AN5289: 4.7, we need at least 25ms + advertisement, which is 30 ms

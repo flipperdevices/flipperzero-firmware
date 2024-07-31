@@ -630,7 +630,7 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
     infrared_tim_tx.buffer[1].polarity = malloc(alloc_size_polarity);
 
     infrared_tim_tx.stop_semaphore = furi_semaphore_alloc(1, 0);
-    infrared_tim_tx.cycle_duration = 1000000.0 / freq;
+    infrared_tim_tx.cycle_duration = 1000000.0f / freq;
     infrared_tim_tx.tx_timing_rest_duration = 0;
 
     furi_hal_infrared_tx_fill_buffer(0, INFRARED_POLARITY_SHIFT);
