@@ -60,7 +60,7 @@ void power_enable_low_battery_level_notification(Power* power, bool enable) {
     furi_check(power);
 
     PowerMessage msg = {
-        .type = PowerMessageTypeIsBatteryHealthy,
+        .type = PowerMessageTypeShowBatteryLowWarning,
         .bool_param = enable,
     };
 
