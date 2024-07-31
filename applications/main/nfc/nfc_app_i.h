@@ -26,7 +26,7 @@
 #include "views/dict_attack.h"
 
 #include <nfc/scenes/nfc_scene.h>
-#include "helpers/detected_protocols.h"
+#include "helpers/nfc_detected_protocols.h"
 #include "helpers/nfc_custom_event.h"
 #include "helpers/mf_ultralight_auth.h"
 #include "helpers/mf_user_dict.h"

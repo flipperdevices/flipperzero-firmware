@@ -1,6 +1,7 @@
 #pragma once
 
-#include <lib/nfc/protocols/nfc_protocol.h>
+#include <stdint.h>
+#include <nfc/protocols/nfc_protocol.h>
 
 typedef struct NfcDetectedProtocols NfcDetectedProtocols;
 

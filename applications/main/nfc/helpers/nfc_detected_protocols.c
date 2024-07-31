@@ -1,11 +1,12 @@
-#include <furi.h>
-#include <lib/nfc/protocols/nfc_protocol.h>
+#include "nfc_detected_protocols.h"
 
-typedef struct {
+#include <furi.h>
+
+struct NfcDetectedProtocols {
     uint32_t protocols_detected_num;
     NfcProtocol protocols_detected[NfcProtocolNum];
     uint32_t selected_idx;
-} NfcDetectedProtocols;
+};
 
 NfcDetectedProtocols* nfc_detected_protocols_alloc(void) {
     NfcDetectedProtocols* instance = malloc(sizeof(NfcDetectedProtocols));
