@@ -15,7 +15,7 @@ env:
 
 jobs:
   main:
-    runs-on: [self-hosted, FlipperZeroShell]
+    runs-on: [self-hosted, FlipperZeroShellRPI]
     strategy:
       fail-fast: false
       matrix:
