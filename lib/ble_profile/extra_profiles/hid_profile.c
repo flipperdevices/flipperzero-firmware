@@ -373,7 +373,8 @@ bool ble_profile_hid_mouse_scroll(FuriHalBleProfileBase* profile, int8_t delta) 
     return state;
 }
 
-// AN5289: 4.7, we need at least 25ms + advertisement, which is 30 ms
+// AN5289: 4.7, in order to use flash controller interval must be at least 25ms + advertisement, which is 30 ms
+// Since we don't use flash controller anymore interval can be lowered to 7.5ms
 #define CONNECTION_INTERVAL_MIN (0x0006)
 // Up to 45 ms
 #define CONNECTION_INTERVAL_MAX (0x24)
