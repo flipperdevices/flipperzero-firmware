@@ -20,23 +20,74 @@
 extern "C" {
 #endif
 
-/** Event Loop events */
+/**
+ * @brief Enumeration of event types, flags and masks.
+ *
+ * Only one event direction (In or Out) can be used per subscription.
+ * An object can have no more than one subscription for each direction.
+ *
+ * Additional flags that modify the behaviour can be
+ * set using the bitwise OR operation (see flag description).
+ */
 typedef enum {
-    /** On arrival: item was inserted into container, flag set, etc... */
+    /**
+     * @brief Subscribe to In events.
+     *
+     * In events occur on the following conditions:
+     * - One or more items were inserted into a FuriMessageQueue,
+     * - Enough data has been written to a FuriStreamBuffer,
+     * - A FuriSemaphore has been released at least once,
+     * - A FuriMutex has been released.
+     */
     FuriEventLoopEventIn = 0x00000001U,
-    /** On departure: item was retrieved from container, flag reset, etc... */
+    /**
+     * @brief Subscribe to Out events.
+     *
+     * Out events occur on the following conditions:
+     * - One or more items were removed from a FuriMessageQueue,
+     * - Any amount of data has been read out of a FuriStreamBuffer,
+     * - A FuriSemaphore has been acquired at least once,
+     * - A FuriMutex has been acquired.
+     */
     FuriEventLoopEventOut = 0x00000002U,
-    /** Special value containing the event bits */
+    /**
+     * @brief Special value containing the event direction bits, used internally.
+     */
     FuriEventLoopEventMask = 0x00000003U,
-
-    /** Use edge triggered events instead of level triggered ones */
+    /**
+     * @brief Use edge triggered events.
+     *
+     * By default, level triggered events are used. A level above zero
+     * is reported based on the following conditions:
+     * - a FuriMessageQueue contains one or more items,
+     * - a FuriStreamBuffer has been filled to or above its trigger value,
+     * - a FuriSemaphore can be acquired at least once,
+     * - a FuriMutex can be acquired.
+     *
+     * If this flag is NOT set, the event will be generated repeatedly until
+     * the level becomes zero (e.g. all items have been removed from
+     * a FuriMessageQueue in case of the "In" event, etc.)
+     *
+     * If this flag IS set, then the above check is skipped and the event
+     * is generated ONLY when a change occurs, with the event direction
+     * (In or Out) taken into account.
+     */
     FuriEventLoopEventFlagEdge = 0x00000004U,
-    /** Automatically unsubscribe from events after one time */
+    /**
+     * @brief Automatically unsubscribe from events after one time.
+     *
+     * By default, events will be generated each time the specified conditions
+     * have been met. If this flag IS set, the event subscription will be cancelled
+     * upon the first occurred event and no further events will be generated.
+     */
     FuriEventLoopEventFlagOnce = 0x00000008U,
-    /** Special value containing the event flag bits */
+    /**
+     * @brief Special value containing the event flag bits, used internally.
+     */
     FuriEventLoopEventFlagMask = 0xFFFFFFFCU,
-
-    /** Special value to force the enum to 32-bit values */
+    /**
+     * @brief Special value to force the enum to 32-bit values.
+     */
     FuriEventLoopEventReserved = UINT32_MAX,
 } FuriEventLoopEvent;
 
