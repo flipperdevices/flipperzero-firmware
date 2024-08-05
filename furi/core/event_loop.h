@@ -59,10 +59,18 @@ typedef enum {
      *
      * By default, level triggered events are used. A level above zero
      * is reported based on the following conditions:
+     *
+     * In events:
      * - a FuriMessageQueue contains one or more items,
-     * - a FuriStreamBuffer has been filled to or above its trigger value,
+     * - a FuriStreamBuffer contains one or more bytes,
      * - a FuriSemaphore can be acquired at least once,
      * - a FuriMutex can be acquired.
+     *
+     * Out events:
+     * - a FuriMessageQueue has at least one item of free space,
+     * - a FuriStreamBuffer has at least one byte of free space,
+     * - a FuriSemaphore has been acquired at least once,
+     * - a FuriMutex has been acquired.
      *
      * If this flag is NOT set, the event will be generated repeatedly until
      * the level becomes zero (e.g. all items have been removed from
