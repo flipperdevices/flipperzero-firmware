@@ -77,14 +77,7 @@ void Default_Handler(void) {
     furi_crash("NotImplemented");
 }
 
-/** Start your journey here */
-FURI_NAKED void Reset_Handler(void) {
-    // Funny thing: SP and MSP are set to _stack_end if we came here after MCU reset
-    // Now, what if we came from boot loader? Lets set SP to _stack_end again.
-    // By the way Furi stage loader doing it too, but we don't know who called us.
-    asm volatile("ldr r0, =_stack_end");
-    asm volatile("mov sp, r0");
-
+void __attribute__((optnone)) reset_handler_impl() {
     // ST chip initialization routine
     SystemInit();
 
@@ -105,6 +98,16 @@ FURI_NAKED void Reset_Handler(void) {
 
     // You should never exit from main, but we'll catch you if you do
     furi_crash("WhyExit?");
+}
+
+/** Start your journey here */
+FURI_NAKED void Reset_Handler(void) {
+    // Funny thing: SP and MSP are set to _stack_end if we came here after MCU reset
+    // Now, what if we came from boot loader? Lets set SP to _stack_end again.
+    // By the way Furi stage loader doing it too, but we don't know who called us.
+    asm volatile("ldr r0, =_stack_end");
+    asm volatile("mov sp, r0");
+    asm volatile("b reset_handler_impl");
 }
 
 /** ISR type */

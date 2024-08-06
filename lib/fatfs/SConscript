@@ -4,6 +4,7 @@ Import("env")
 libenv = env.Clone(FW_LIB_NAME="fatfs")
 libenv.ApplyLibFlags()
 
+libenv.AppendUnique(CCFLAGS="-Wno-error=constant-logical-operand")
 
 sources = ["option/unicode.c"]
 sources += Glob("*.c", source=True)

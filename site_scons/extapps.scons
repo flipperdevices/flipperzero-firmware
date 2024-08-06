@@ -22,7 +22,7 @@ appenv.Replace(
 
 appenv.AppendUnique(
     CCFLAGS=[
-        "-mword-relocations",
+        # "-mword-relocations",
         "-mlong-calls",
         "-fno-common",
         "-nostdlib",

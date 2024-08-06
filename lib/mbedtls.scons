@@ -26,7 +26,7 @@ libenv.ApplyLibFlags()
 libenv.AppendUnique(
     CCFLAGS=[
         # Required for lib to be linkable with .faps
-        "-mword-relocations",
+        # "-mword-relocations",
         "-mlong-calls",
         # Crappy code :)
         "-Wno-redundant-decls",

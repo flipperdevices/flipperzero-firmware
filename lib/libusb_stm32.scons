@@ -17,6 +17,9 @@ libenv.Append(
     CPPDEFINES=[
         ("USB_PMASIZE", "0x400"),
     ],
+    CCFLAGS=[
+        "-Wno-error=unknown-attributes",
+    ],
 )
 
 

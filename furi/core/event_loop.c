@@ -214,7 +214,7 @@ void furi_event_loop_pend_callback(
  * Message queue API
  */
 
-void furi_event_loop_message_queue_subscribe(
+void __attribute__((optnone)) furi_event_loop_message_queue_subscribe(
     FuriEventLoop* instance,
     FuriMessageQueue* message_queue,
     FuriEventLoopEvent event,
@@ -227,6 +227,8 @@ void furi_event_loop_message_queue_subscribe(
 
     FURI_CRITICAL_ENTER();
 
+    // BUGBUG: clang: generates always-failing assert with optimization on
+    // see attribute ^^^
     furi_check(FuriEventLoopTree_get(instance->tree, message_queue) == NULL);
 
     // Allocate and setup item

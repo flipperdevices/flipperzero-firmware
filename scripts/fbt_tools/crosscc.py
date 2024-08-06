@@ -84,6 +84,21 @@ def generate(env, **kw):
                 f"Toolchain version is not supported. Allowed: {whitelisted_versions}, toolchain: {cc_version} "
             )
 
+    # Temporary compiler override for clang evaluation
+    env.Replace(
+        CC=[
+            "clang",
+            "--sysroot",
+            # From `arm-none-eabi-gcc -print-sysroot`
+            env.Dir("#/toolchain/current/bin/../arm-none-eabi"),
+            "--target=arm-none-eabi",
+            # Those don't go to cc.scons, because they solve gcc compatibility issues
+            "-fshort-enums",
+            "-meabi",
+            "gnu",
+        ]
+    )
+
 
 def exists(env):
     return True

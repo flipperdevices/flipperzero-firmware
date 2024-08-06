@@ -275,18 +275,8 @@ static inline void sd_spi_write_byte(uint8_t data) {
     furi_check(furi_hal_spi_bus_trx(furi_hal_sd_spi_handle, &data, NULL, 1, SD_TIMEOUT_MS));
 }
 
-static inline uint8_t sd_spi_write_and_read_byte(uint8_t data) {
-    uint8_t responce;
-    furi_check(furi_hal_spi_bus_trx(furi_hal_sd_spi_handle, &data, &responce, 1, SD_TIMEOUT_MS));
-    return responce;
-}
-
 static inline void sd_spi_write_bytes(uint8_t* data, uint32_t size) {
     furi_check(furi_hal_spi_bus_trx(furi_hal_sd_spi_handle, data, NULL, size, SD_TIMEOUT_MS));
-}
-
-static inline void sd_spi_read_bytes(uint8_t* data, uint32_t size) {
-    furi_check(furi_hal_spi_bus_trx(furi_hal_sd_spi_handle, NULL, data, size, SD_TIMEOUT_MS));
 }
 
 static inline void sd_spi_write_bytes_dma(uint8_t* data, uint32_t size) {

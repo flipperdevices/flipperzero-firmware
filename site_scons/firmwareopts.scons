@@ -18,7 +18,7 @@ elif ENV["COMPACT"]:
             "NDEBUG",
         ],
         CCFLAGS=[
-            "-Os",
+            "-Oz",
         ],
     )
 else:

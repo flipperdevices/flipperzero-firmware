@@ -107,6 +107,7 @@ def DistCommand(env, name, source, **kw):
                     "-s",
                     "${DIST_SUFFIX}",
                     "${DIST_EXTRA}",
+                    "${ARGS}",
                 ]
             ],
             "${DISTCOMSTR}",

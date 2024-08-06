@@ -37,7 +37,10 @@ libenv.Append(
         "#/lib/stm32wb_copro/wpan/interface/patterns/ble_thread/shci",
         "#/lib/stm32wb_copro/wpan/interface/patterns/ble_thread/tl",
         "#/lib/stm32wb_copro/wpan/utilities",
-    ]
+    ],
+    CCFLAGS=[
+        "-Wno-error=unused-variable",
+    ],
 )
 libenv.ApplyLibFlags()
 

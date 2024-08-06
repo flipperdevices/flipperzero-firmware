@@ -331,7 +331,7 @@ mjs_val_t
         }
         case MJS_STRUCT_FIELD_TYPE_FLOAT: {
             float value = *(float*)ptr;
-            v = mjs_mk_number(mjs, value);
+            v = mjs_mk_number(mjs, (double)value);
             break;
         }
         case MJS_STRUCT_FIELD_TYPE_CHAR_PTR: {

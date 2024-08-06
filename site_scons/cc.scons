@@ -32,6 +32,12 @@ ENV.AppendUnique(
         "-ffunction-sections",
         # "-fsingle-precision-constant",
         "-fno-math-errno",
+        #
+        # Temporary overrides for clang evaluation
+        "-Wno-error=format",
+        "-Wno-error=char-subscripts",
+        "-Wno-error=double-promotion",
+        #
         # Generates .su files with stack usage information
         # "-fstack-usage",
         "-g",

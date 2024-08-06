@@ -42,7 +42,7 @@ env = ENV.Clone(
     FW_LIB_OPTS={
         "Default": {
             "CCFLAGS": [
-                "-Og" if ENV["LIB_DEBUG"] else "-Os",
+                "-Og" if ENV["LIB_DEBUG"] else "-Oz",
             ],
             "CPPDEFINES": [
                 "NDEBUG",
@@ -54,7 +54,7 @@ env = ENV.Clone(
         # for furi_check to respect build type
         "furi": {
             "CCFLAGS": [
-                "-Os",
+                "-Oz",
             ],
             "CPPDEFINES": [
                 "NDEBUG",

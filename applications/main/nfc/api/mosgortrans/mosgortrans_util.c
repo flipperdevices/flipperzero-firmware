@@ -432,11 +432,11 @@ void parse_layout_F0B(BlockData* data_block, const MfClassicBlock* block) {
 }
 
 void parse_transport_type(BlockData* data_block, FuriString* transport) {
+    uint8_t transport_type =
+        (data_block->transport_type1 || data_block->transport_type2 ||
+         data_block->transport_type3 || data_block->transport_type4);
     switch(data_block->transport_type_flag) {
     case 1:
-        uint8_t transport_type =
-            (data_block->transport_type1 || data_block->transport_type2 ||
-             data_block->transport_type3 || data_block->transport_type4);
         switch(transport_type) {
         case 1:
             furi_string_cat(transport, "Metro");

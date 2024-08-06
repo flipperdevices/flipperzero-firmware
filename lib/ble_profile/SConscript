@@ -14,7 +14,7 @@ libenv = env.Clone(FW_LIB_NAME="ble_profile")
 libenv.AppendUnique(
     CCFLAGS=[
         # Required for lib to be linkable with .faps
-        "-mword-relocations",
+        # "-mword-relocations",
         "-mlong-calls",
     ],
 )

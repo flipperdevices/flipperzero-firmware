@@ -375,7 +375,7 @@ static union ffi_cb_data_val ffi_cb_impl_generic(void* param, struct ffi_cb_data
             args[i] = mjs_mk_number(mjs, data->args[i].d);
             break;
         case MJS_FFI_CTYPE_FLOAT:
-            args[i] = mjs_mk_number(mjs, data->args[i].f);
+            args[i] = mjs_mk_number(mjs, (double)data->args[i].f);
             break;
         case MJS_FFI_CTYPE_STRUCT_MG_STR_PTR: {
             struct mg_str* s = (struct mg_str*)(void*)data->args[i].w;
@@ -995,7 +995,7 @@ MJS_PRIVATE mjs_err_t mjs_ffi_call2(struct mjs* mjs) {
         resv = mjs_mk_number(mjs, res.v.d);
         break;
     case MJS_FFI_CTYPE_FLOAT:
-        resv = mjs_mk_number(mjs, res.v.f);
+        resv = mjs_mk_number(mjs, (double)res.v.f);
         break;
     default:
         resv = mjs_mk_undefined();

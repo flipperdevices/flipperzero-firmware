@@ -151,7 +151,7 @@ Iso15693Signal* iso15693_signal_alloc(const GpioPin* pin) {
 
     Iso15693Signal* instance = malloc(sizeof(Iso15693Signal));
 
-    instance->tx_sequence = digital_sequence_alloc(BITS_IN_BYTE * 255 + 2, pin);
+    instance->tx_sequence = digital_sequence_alloc(255 * BITS_IN_BYTE + 2, pin);
 
     for(uint32_t i = 0; i < Iso15693SignalDataRateNum; ++i) {
         iso15693_signal_bank_fill(instance, i);

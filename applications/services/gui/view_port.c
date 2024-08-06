@@ -8,6 +8,8 @@
 
 #define TAG "ViewPort"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconstant-logical-operand"
 _Static_assert(ViewPortOrientationMAX == 4, "Incorrect ViewPortOrientation count");
 _Static_assert(
     (ViewPortOrientationHorizontal == 0 && ViewPortOrientationHorizontalFlip == 1 &&
@@ -18,6 +20,7 @@ _Static_assert(
     (InputKeyUp == 0 && InputKeyDown == 1 && InputKeyRight == 2 && InputKeyLeft == 3 &&
      InputKeyOk == 4 && InputKeyBack == 5),
     "Incorrect InputKey order");
+#pragma GCC diagnostic pop
 
 /** InputKey directional keys mappings for different screen orientations
 * 
