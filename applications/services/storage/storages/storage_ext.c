@@ -94,43 +94,46 @@ static bool sd_mount_card_internal(StorageData* storage, bool notify) {
 }
 
 static bool sd_remove_recursive(const char* path) {
-    FRESULT res;
-
-    DIR* dir = malloc(sizeof(DIR));
-    FILINFO* fno = malloc(sizeof(FILINFO));
+    SDDir* current_dir = malloc(sizeof(DIR));
+    SDFileInfo* file_info = malloc(sizeof(FILINFO));
     FuriString* current_path = furi_string_alloc_set(path);
 
     bool go_deeper = false;
+    SDError status;
 
     while(true) {
-        res = f_opendir(dir, furi_string_get_cstr(current_path));
-        if(res != FR_OK) break;
+        status = f_opendir(current_dir, furi_string_get_cstr(current_path));
+        if(status != FR_OK) break;
 
         while(true) {
-            res = f_readdir(dir, fno);
-            if(res != FR_OK || !strlen(fno->fname)) break;
+            status = f_readdir(current_dir, file_info);
+            if(status != FR_OK || !strlen(file_info->fname)) break;
 
-            if(fno->fattrib & AM_DIR) {
-                furi_string_cat_printf(current_path, "/%s", fno->fname);
+            if(file_info->fattrib & AM_DIR) {
+                furi_string_cat_printf(current_path, "/%s", file_info->fname);
                 go_deeper = true;
                 break;
 
             } else {
                 FuriString* file_path = furi_string_alloc_printf(
-                    "%s/%s", furi_string_get_cstr(current_path), fno->fname);
-                res = f_unlink(furi_string_get_cstr(file_path));
+                    "%s/%s", furi_string_get_cstr(current_path), file_info->fname);
+                status = f_unlink(furi_string_get_cstr(file_path));
                 furi_string_free(file_path);
+
+                if(status != FR_OK) break;
             }
         }
 
-        f_closedir(dir);
+        status = f_closedir(current_dir);
+        if(status != FR_OK) break;
 
         if(go_deeper) {
             go_deeper = false;
             continue;
         }
 
-        res = f_unlink(furi_string_get_cstr(current_path));
+        status = f_unlink(furi_string_get_cstr(current_path));
+        if(status != FR_OK) break;
 
         if(!furi_string_equal(current_path, path)) {
             size_t last_char_pos = furi_string_search_rchar(current_path, '/');
@@ -141,11 +144,11 @@ static bool sd_remove_recursive(const char* path) {
         }
     }
 
-    free(dir);
-    free(fno);
+    free(current_dir);
+    free(file_info);
     furi_string_free(current_path);
 
-    return res == FR_OK;
+    return status == FR_OK;
 }
 
 FS_Error sd_unmount_card(StorageData* storage) {
@@ -167,27 +170,27 @@ FS_Error sd_mount_card(StorageData* storage, bool notify) {
 
     if(storage->status != StorageStatusOK) {
         FURI_LOG_E(TAG, "sd init error: %s", storage_data_status_text(storage));
-        if(notify) {
-            NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-            sd_notify_error(notification);
-            furi_record_close(RECORD_NOTIFICATION);
-        }
         error = FSE_INTERNAL;
+
     } else {
         FURI_LOG_I(TAG, "card mounted");
 
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStorageFormatInternal)) {
-            FURI_LOG_I(TAG, "Removing internal storage directory");
+            FURI_LOG_I(TAG, "removing internal storage directory");
             error = sd_remove_recursive(".int") ? FSE_OK : FSE_INTERNAL;
         } else {
             error = FSE_OK;
         }
+    }
 
-        if(notify) {
-            NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    if(notify) {
+        NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+        if(error != FSE_OK) {
+            sd_notify_error(notification);
+        } else {
             sd_notify_success(notification);
-            furi_record_close(RECORD_NOTIFICATION);
         }
+        furi_record_close(RECORD_NOTIFICATION);
     }
 
     return error;
