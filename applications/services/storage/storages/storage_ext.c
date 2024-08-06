@@ -1,9 +1,12 @@
-#include "fatfs.h"
-#include "../filesystem_api_internal.h"
-#include "storage_ext.h"
+#include <fatfs.h>
 #include <furi_hal.h>
-#include "sd_notify.h"
 #include <furi_hal_sd.h>
+
+#include "sd_notify.h"
+#include "storage_ext.h"
+
+#include "../filesystem_api_internal.h"
+#include "../storage_internal_dirname_i.h"
 
 typedef FIL SDFile;
 typedef DIR SDDir;
@@ -176,8 +179,8 @@ FS_Error sd_mount_card(StorageData* storage, bool notify) {
         FURI_LOG_I(TAG, "card mounted");
 
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStorageFormatInternal)) {
-            FURI_LOG_I(TAG, "removing internal storage directory");
-            error = sd_remove_recursive(".int") ? FSE_OK : FSE_INTERNAL;
+            FURI_LOG_I(TAG, "deleting internal storage directory");
+            error = sd_remove_recursive(STORAGE_INTERNAL_DIR_NAME) ? FSE_OK : FSE_INTERNAL;
         } else {
             error = FSE_OK;
         }
