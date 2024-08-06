@@ -93,6 +93,61 @@ static bool sd_mount_card_internal(StorageData* storage, bool notify) {
     return result;
 }
 
+static bool sd_remove_recursive(const char* path) {
+    FRESULT res;
+
+    DIR* dir = malloc(sizeof(DIR));
+    FILINFO* fno = malloc(sizeof(FILINFO));
+    FuriString* current_path = furi_string_alloc_set(path);
+
+    bool go_deeper = false;
+
+    while(true) {
+        res = f_opendir(dir, furi_string_get_cstr(current_path));
+        if(res != FR_OK) break;
+
+        while(true) {
+            res = f_readdir(dir, fno);
+            if(res != FR_OK || !strlen(fno->fname)) break;
+
+            if(fno->fattrib & AM_DIR) {
+                furi_string_cat_printf(current_path, "/%s", fno->fname);
+                go_deeper = true;
+                break;
+
+            } else {
+                FuriString* file_path = furi_string_alloc_printf(
+                    "%s/%s", furi_string_get_cstr(current_path), fno->fname);
+                res = f_unlink(furi_string_get_cstr(file_path));
+                furi_string_free(file_path);
+            }
+        }
+
+        f_closedir(dir);
+
+        if(go_deeper) {
+            go_deeper = false;
+            continue;
+        }
+
+        res = f_unlink(furi_string_get_cstr(current_path));
+
+        if(!furi_string_equal(current_path, path)) {
+            size_t last_char_pos = furi_string_search_rchar(current_path, '/');
+            furi_assert(last_char_pos != FURI_STRING_FAILURE);
+            furi_string_left(current_path, last_char_pos);
+        } else {
+            break;
+        }
+    }
+
+    free(dir);
+    free(fno);
+    furi_string_free(current_path);
+
+    return res == FR_OK;
+}
+
 FS_Error sd_unmount_card(StorageData* storage) {
     SDData* sd_data = storage->data;
     SDError error;
@@ -120,13 +175,19 @@ FS_Error sd_mount_card(StorageData* storage, bool notify) {
         error = FSE_INTERNAL;
     } else {
         FURI_LOG_I(TAG, "card mounted");
+
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStorageFormatInternal)) {
+            FURI_LOG_I(TAG, "Removing internal storage directory");
+            error = sd_remove_recursive(".int") ? FSE_OK : FSE_INTERNAL;
+        } else {
+            error = FSE_OK;
+        }
+
         if(notify) {
             NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
             sd_notify_success(notification);
             furi_record_close(RECORD_NOTIFICATION);
         }
-
-        error = FSE_OK;
     }
 
     return error;
@@ -654,4 +715,6 @@ void storage_ext_init(StorageData* storage) {
 
     // do not notify on first launch, notifications app is waiting for our thread to read settings
     storage_ext_tick_internal(storage, false);
+    // always reset the flag to prevent accidental wipe on SD card insertion
+    furi_hal_rtc_reset_flag(FuriHalRtcFlagStorageFormatInternal);
 }
