@@ -8,9 +8,9 @@
 #include <furi_hal_gpio.h>
 
 #define INPUT_DEBOUNCE_TICKS_HALF (INPUT_DEBOUNCE_TICKS / 2)
-#define INPUT_PRESS_TICKS 150
-#define INPUT_LONG_PRESS_COUNTS 2
-#define INPUT_THREAD_FLAG_ISR 0x00000001
+#define INPUT_PRESS_TICKS         150
+#define INPUT_LONG_PRESS_COUNTS   2
+#define INPUT_THREAD_FLAG_ISR     0x00000001
 
 /** Input pin state */
 typedef struct {
@@ -137,7 +137,8 @@ int32_t input_srv(void* p) {
                 } else {
                     event.sequence_counter = pin_states[i].counter;
                     furi_timer_stop(pin_states[i].press_timer);
-                    while(furi_timer_is_running(pin_states[i].press_timer)) furi_delay_tick(1);
+                    while(furi_timer_is_running(pin_states[i].press_timer))
+                        furi_delay_tick(1);
                     if(pin_states[i].press_counter < INPUT_LONG_PRESS_COUNTS) {
                         event.type = InputTypeShort;
                         furi_pubsub_publish(event_pubsub, &event);

@@ -10,11 +10,11 @@
 #define TAG "InfraredApp"
 
 #define INFRARED_TX_MIN_INTERVAL_MS (50U)
-#define INFRARED_TASK_STACK_SIZE (2048UL)
+#define INFRARED_TASK_STACK_SIZE    (2048UL)
 
-#define INFRARED_SETTINGS_PATH INT_PATH(".infrared.settings")
+#define INFRARED_SETTINGS_PATH    INT_PATH(".infrared.settings")
 #define INFRARED_SETTINGS_VERSION (1)
-#define INFRARED_SETTINGS_MAGIC (0x1F)
+#define INFRARED_SETTINGS_MAGIC   (0x1F)
 
 typedef struct {
     FuriHalInfraredTxPin tx_pin;
@@ -159,7 +159,6 @@ static InfraredApp* infrared_alloc(void) {
     infrared->gui = furi_record_open(RECORD_GUI);
 
     ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
-    view_dispatcher_enable_queue(view_dispatcher);
     view_dispatcher_set_event_callback_context(view_dispatcher, infrared);
     view_dispatcher_set_custom_event_callback(view_dispatcher, infrared_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(view_dispatcher, infrared_back_event_callback);

@@ -21,8 +21,7 @@
 
 #define TAG "FuriHalBt"
 
-#define furi_hal_bt_DEFAULT_MAC_ADDR \
-    { 0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72 }
+#define furi_hal_bt_DEFAULT_MAC_ADDR {0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72}
 
 /* Time, in ms, to wait for mode transition before crashing */
 #define C2_MODE_SWITCH_TIMEOUT 10000
@@ -88,10 +87,9 @@ static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
 }
 
 bool furi_hal_bt_start_radio_stack(void) {
-    bool res = false;
-    furi_check(furi_hal_bt.core2_mtx);
+    furi_hal_bt_lock_core2();
 
-    furi_mutex_acquire(furi_hal_bt.core2_mtx, FuriWaitForever);
+    bool res = false;
 
     // Explicitly tell that we are in charge of CLK48 domain
     furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
@@ -124,7 +122,8 @@ bool furi_hal_bt_start_radio_stack(void) {
         }
         res = true;
     } while(false);
-    furi_mutex_release(furi_hal_bt.core2_mtx);
+
+    furi_hal_bt_unlock_core2();
 
     gap_extra_beacon_init();
     return res;
@@ -199,6 +198,8 @@ FuriHalBleProfileBase* furi_hal_bt_start_app(
 }
 
 void furi_hal_bt_reinit(void) {
+    furi_hal_bt_lock_core2();
+
     furi_hal_power_insomnia_enter();
     FURI_LOG_I(TAG, "Disconnect and stop advertising");
     furi_hal_bt_stop_advertising();
@@ -230,6 +231,7 @@ void furi_hal_bt_reinit(void) {
     furi_hal_bus_disable(FuriHalBusCRC);
 
     furi_hal_bt_init();
+    furi_hal_bt_unlock_core2();
     furi_hal_bt_start_radio_stack();
     furi_hal_power_insomnia_exit();
 }

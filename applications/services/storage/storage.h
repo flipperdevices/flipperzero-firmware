@@ -510,7 +510,7 @@ FS_Error storage_sd_status(Storage* storage);
 
 /******************* Internal LFS Functions *******************/
 
-typedef void (*Storage_name_converter)(FuriString*);
+typedef void (*StorageNameConverter)(FuriString*);
 
 /**
  * @brief Back up the internal storage contents to a *.tar archive.
@@ -530,7 +530,7 @@ FS_Error storage_int_backup(Storage* storage, const char* dstname);
  * @return FSE_OK if the storage was successfully restored, any other error code on failure.
  */
 FS_Error
-    storage_int_restore(Storage* storage, const char* dstname, Storage_name_converter converter);
+    storage_int_restore(Storage* storage, const char* dstname, StorageNameConverter converter);
 
 /***************** Simplified Functions ******************/
 
