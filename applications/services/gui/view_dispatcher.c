@@ -96,14 +96,12 @@ void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher,
 
 FuriEventLoop* view_dispatcher_get_event_loop(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->event_loop);
 
     return view_dispatcher->event_loop;
 }
 
 void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->event_loop);
 
     uint32_t tick_period = view_dispatcher->tick_period == 0 ? FuriWaitForever :
                                                                view_dispatcher->tick_period;
@@ -131,7 +129,6 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
 
 void view_dispatcher_stop(ViewDispatcher* view_dispatcher) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->event_loop);
     furi_event_loop_stop(view_dispatcher->event_loop);
 }
 
@@ -325,7 +322,6 @@ void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32
 
 void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t event) {
     furi_check(view_dispatcher);
-    furi_check(view_dispatcher->event_loop);
 
     furi_check(
         furi_message_queue_put(view_dispatcher->event_queue, &event, FuriWaitForever) ==
