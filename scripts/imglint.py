@@ -29,7 +29,7 @@ def _check_image(image, do_fixup=False):
             _logger.info(f"Fixed image {image}")
 
     if failed_checks:
-        _logger.warn(f"Image {image} issues: {'; '.join(failed_checks)}")
+        _logger.warning(f"Image {image} issues: {'; '.join(failed_checks)}")
     return len(failed_checks) == 0
 
 
