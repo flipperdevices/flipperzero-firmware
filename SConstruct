@@ -393,6 +393,9 @@ distenv.PhonyTarget(
     IMG_LINT_SOURCES=firmware_env["IMG_LINT_SOURCES"],
 )
 
+distenv.Alias("lint_all", ["lint", "lint_py", "lint_img"])
+distenv.Alias("format_all", ["format", "format_py", "format_img"])
+
 
 # Start Flipper CLI via PySerial's miniterm
 distenv.PhonyTarget(
