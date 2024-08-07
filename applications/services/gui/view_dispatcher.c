@@ -236,13 +236,9 @@ void view_dispatcher_draw_callback(Canvas* canvas, void* context) {
 
 void view_dispatcher_input_callback(InputEvent* event, void* context) {
     ViewDispatcher* view_dispatcher = context;
-    if(view_dispatcher->input_queue) {
-        furi_check(
-            furi_message_queue_put(view_dispatcher->input_queue, event, FuriWaitForever) ==
-            FuriStatusOk);
-    } else {
-        view_dispatcher_handle_input(view_dispatcher, event);
-    }
+    furi_check(
+        furi_message_queue_put(view_dispatcher->input_queue, event, FuriWaitForever) ==
+        FuriStatusOk);
 }
 
 void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* event) {
