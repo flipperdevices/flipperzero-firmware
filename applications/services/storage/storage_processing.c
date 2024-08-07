@@ -541,7 +541,7 @@ void storage_process_alias(Storage* app, FuriString* path, bool create_folders) 
         if(storage_process_common_stat(app, int_on_ext_path, NULL) != FSE_OK) {
             storage_process_common_mkdir(app, int_on_ext_path);
         }
-        
+
         furi_string_free(int_on_ext_path);
     }
 }
