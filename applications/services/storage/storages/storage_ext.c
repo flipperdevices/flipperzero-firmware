@@ -178,12 +178,17 @@ FS_Error sd_mount_card(StorageData* storage, bool notify) {
     } else {
         FURI_LOG_I(TAG, "card mounted");
 
+#ifndef FURI_RAM_EXEC
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStorageFormatInternal)) {
             FURI_LOG_I(TAG, "deleting internal storage directory");
             error = sd_remove_recursive(STORAGE_INTERNAL_DIR_NAME) ? FSE_OK : FSE_INTERNAL;
         } else {
             error = FSE_OK;
         }
+#else
+        UNUSED(sd_remove_recursive);
+        error = FSE_OK;
+#endif
     }
 
     if(notify) {
@@ -721,6 +726,8 @@ void storage_ext_init(StorageData* storage) {
 
     // do not notify on first launch, notifications app is waiting for our thread to read settings
     storage_ext_tick_internal(storage, false);
+#ifndef FURI_RAM_EXEC
     // always reset the flag to prevent accidental wipe on SD card insertion
     furi_hal_rtc_reset_flag(FuriHalRtcFlagStorageFormatInternal);
+#endif
 }
