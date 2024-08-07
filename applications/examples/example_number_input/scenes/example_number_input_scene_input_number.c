@@ -3,8 +3,7 @@
 void example_number_input_scene_input_number_callback(void* context, int32_t number) {
     ExampleNumberInput* app = context;
     app->current_number = number;
-    view_dispatcher_send_custom_event(
-        app->view_dispatcher, ExampleNumberInputCustomEventTextInput);
+    view_dispatcher_send_custom_event(app->view_dispatcher, 0);
 }
 
 void example_number_input_scene_input_number_on_enter(void* context) {
@@ -14,9 +13,8 @@ void example_number_input_scene_input_number_on_enter(void* context) {
 
     char str[50];
     snprintf(str, sizeof(str), "Set Number (%ld - %ld)", app->min_value, app->max_value);
-    const char* constStr = str;
 
-    number_input_set_header_text(number_input, constStr);
+    number_input_set_header_text(number_input, str);
     number_input_set_result_callback(
         number_input,
         example_number_input_scene_input_number_callback,

@@ -3,8 +3,7 @@
 void example_number_input_scene_input_max_callback(void* context, int32_t number) {
     ExampleNumberInput* app = context;
     app->max_value = number;
-    view_dispatcher_send_custom_event(
-        app->view_dispatcher, ExampleNumberInputCustomEventTextInput);
+    view_dispatcher_send_custom_event(app->view_dispatcher, 0);
 }
 
 void example_number_input_scene_input_max_on_enter(void* context) {
@@ -12,19 +11,14 @@ void example_number_input_scene_input_max_on_enter(void* context) {
     ExampleNumberInput* app = context;
     NumberInput* number_input = app->number_input;
 
-    int32_t max = INT32_MAX - 1; // 2147483646, limit has no effect if larger
-    char str[50];
-    snprintf(str, sizeof(str), "Enter the maximum value");
-    const char* constStr = str;
-
-    number_input_set_header_text(number_input, constStr);
+    number_input_set_header_text(number_input, "Enter the maximum value");
     number_input_set_result_callback(
         number_input,
         example_number_input_scene_input_max_callback,
         context,
         app->max_value,
         app->min_value,
-        max);
+        INT32_MAX);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, ExampleNumberInputViewIdNumberInput);
 }
