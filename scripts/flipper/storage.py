@@ -373,7 +373,7 @@ class FlipperStorage:
         try:
             self._check_no_error(response, path)
         except FlipperStorageException as exc:
-            if StorageErrorCode.EXIST not in str(exc):
+            if StorageErrorCode.EXIST.value not in str(exc):
                 raise
 
     def format_ext(self):
