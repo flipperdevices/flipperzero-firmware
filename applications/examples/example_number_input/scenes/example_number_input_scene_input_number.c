@@ -1,4 +1,4 @@
-#include "../example_number_input_i.h"
+#include "../example_number_input.h"
 
 void example_number_input_scene_input_number_callback(void* context, int32_t number) {
     ExampleNumberInput* app = context;

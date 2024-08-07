@@ -1,4 +1,4 @@
-#include "../example_number_input_i.h"
+#include "../example_number_input.h"
 
 static void
     example_number_input_scene_confirm_dialog_callback(DialogExResult result, void* context) {
