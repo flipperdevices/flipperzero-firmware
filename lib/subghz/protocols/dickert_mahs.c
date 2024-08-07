@@ -17,21 +17,7 @@
  */
 
 #define TAG "SubGhzProtocolDicketMAHS"
-#define DICKERT_MAHS_12_COUNT_BIT 12
-#define DICKERT_MAHS_24_COUNT_BIT 24
-#define PRASTEL_COUNT_BIT 25
-#define PRASTEL_NAME "Prastel"
-#define AIRFORCE_COUNT_BIT 18
-#define AIRFORCE_NAME "Airforce"
 
-#define MINUS 0x0
-#define ZERO 0x1
-#define PLUS 0x3
-
-Storage* storage;
-File* file;
-const char* file_path = "/ext/subghz/dickert_log.txt";
-// PCM, Short: 450, Long: 450, Gap: 1300, Sync: n/a (452+-52us, 852,0+-73us)
 static const SubGhzBlockConst subghz_protocol_dickert_mahs_const = {
     .te_short = 400,
     .te_long = 800,
@@ -161,7 +147,6 @@ SubGhzProtocolStatus
     SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize(&instance->generic, flipper_format);
-        //printf("Dickert_deserialized()\n");
         if(ret != SubGhzProtocolStatusOk) {
             break;
         }
@@ -217,21 +202,6 @@ void* subghz_protocol_decoder_dickert_mahs_alloc(SubGhzEnvironment* environment)
     instance->generic.protocol_name = instance->base.protocol->name;
     instance->tmp_cnt = 0;
 
-    storage = furi_record_open("storage");
-    file = storage_file_alloc(storage);
-    if(!storage_file_open(file, file_path, FSAM_WRITE, FSOM_OPEN_APPEND)) {
-        FURI_LOG_E("dickert", "Couldn´t open log file");
-    } else {
-        FURI_LOG_I("dickert", "Log file opened: 0x%p", file);
-        FuriString* msg = furi_string_alloc_set("+++++++++++++++++++++++++++++++++\r\n");
-        log_to_file(msg);
-        furi_string_set(msg, "Dickert_MAHS Decoder starting up.\r\n");
-        log_to_file(msg);
-        furi_string_set(msg, "+++++++++++++++++++++++++++++++++\r\n");
-        log_to_file(msg);
-        furi_string_free(msg);
-    }
-
     return instance;
 }
 
@@ -239,24 +209,12 @@ void subghz_protocol_decoder_dickert_mahs_free(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderDickertMAHS* instance = context;
     free(instance);
-
-    FuriString* msg = furi_string_alloc_set("+++++++++++++++++++++++++++++++++++\r\n");
-    log_to_file(msg);
-    furi_string_set(msg, "Dickert_MAHS Decoder shutting down.\r\n");
-    log_to_file(msg);
-    furi_string_set(msg, "+++++++++++++++++++++++++++++++++++\r\n");
-    log_to_file(msg);
-    furi_string_free(msg);
-    storage_file_close(file);
-    storage_file_free(file);
-    furi_record_close("storage");
 }
 
 void subghz_protocol_decoder_dickert_mahs_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderDickertMAHS* instance = context;
     instance->decoder.parser_step = DickertMAHSDecoderStepReset;
-    // printf("Decoder_Dickert_MAHS_reset()\n");
 }
 
 void subghz_protocol_decoder_dickert_mahs_feed(void* context, bool level, uint32_t duration) {
@@ -360,7 +318,6 @@ SubGhzProtocolStatus
     furi_assert(context);
     SubGhzProtocolDecoderDickertMAHS* instance = context;
     SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
-    // printf("Decoder_Dickert_MAHS_deserialize()\n");
     do {
         ret = subghz_block_generic_deserialize(&instance->generic, flipper_format);
         if(ret != SubGhzProtocolStatusOk) {
@@ -390,9 +347,6 @@ void parseBuffer(void* context, FuriString* output) {
     full_64bit[65] = '\n';
     full_64bit[66] = '\0';
     // Read the bit array 2 bit at a time and build our symbols
-    //char code[19] = {0};
-    //char user_dips[11] = {0};
-    //char fact_dips[9] = {0};
 
     // Convert uint64_t into bit array
     for(int i = 35; i >= 0; i--) {
@@ -417,11 +371,11 @@ void parseBuffer(void* context, FuriString* output) {
         //  PLUS  = 3, // 0b11
         //  ZERO  = 1, // 0b01
         //  MINUS = 0, // 0x00
-        if(dip == ZERO) {
+        if(dip == 0x01) {
             furi_string_cat(code, "0");
-        } else if(dip == MINUS) {
+        } else if(dip == 0x00) {
             furi_string_cat(code, "-");
-        } else if(dip == PLUS) {
+        } else if(dip == 0x03) {
             furi_string_cat(code, "+");
         } else {
             furi_string_cat(code, "?");
@@ -435,7 +389,6 @@ void parseBuffer(void* context, FuriString* output) {
 
     FuriString* full_buf = furi_string_alloc();
     furi_string_set_str(full_buf, full_64bit);
-    log_to_file(full_buf);
     furi_string_free(full_buf);
 
     furi_string_cat_printf(
@@ -446,7 +399,6 @@ void parseBuffer(void* context, FuriString* output) {
         instance->generic.protocol_name,
         furi_string_get_cstr(user_dips),
         furi_string_get_cstr(fact_dips));
-    log_to_file(output);
     furi_string_free(user_dips);
     furi_string_free(fact_dips);
     furi_string_free(code);
@@ -455,33 +407,4 @@ void parseBuffer(void* context, FuriString* output) {
 void subghz_protocol_decoder_dickert_mahs_get_string(void* context, FuriString* output) {
     furi_assert(context);
     parseBuffer(context, output);
-}
-
-void log_to_file(FuriString* message) {
-    char* msgbuf;
-    DateTime datetime = {0};
-    furi_hal_rtc_get_datetime(&datetime);
-
-    msgbuf = (char*)malloc(256 * sizeof(char));
-
-    snprintf(
-        msgbuf,
-        256,
-        "%04i%02i%02i%02i%02i%02i: ",
-        datetime.year,
-        datetime.month,
-        datetime.day,
-        datetime.hour,
-        datetime.minute,
-        datetime.second);
-
-    const char* msg = furi_string_get_cstr(message);
-    strncat(msgbuf, msg, 256 - strlen(msgbuf));
-    if(file == NULL) {
-        FURI_LOG_E("dickert", "Logfile handle is NULL. Won´t log.");
-    } else {
-        storage_file_write(file, msgbuf, strlen(msgbuf));
-        FURI_LOG_I("dickert", "Written to logfile.");
-    }
-    free(msgbuf);
 }

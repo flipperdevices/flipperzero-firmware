@@ -108,9 +108,4 @@ SubGhzProtocolStatus
  */
 void subghz_protocol_decoder_dickert_mahs_get_string(void* context, FuriString* output);
 
-/**
- * Custom logger function to write a log to SD card
- * @param message A FuriString with the text to log
- */
-void log_to_file(FuriString* message);
 void parseBuffer(void* context, FuriString* output);
