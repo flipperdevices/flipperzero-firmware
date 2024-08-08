@@ -233,7 +233,7 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
 
     number_input_draw_input(canvas, model);
 
-    if(model->header != NULL) {
+    if(!furi_string_empty(model->header)) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 2, 9, furi_string_get_cstr(model->header));
     }
@@ -377,6 +377,15 @@ NumberInput* number_input_alloc(void) {
     view_set_draw_callback(number_input->view, number_input_view_draw_callback);
     view_set_input_callback(number_input->view, number_input_view_input_callback);
 
+    with_view_model(
+        number_input->view,
+        NumberInputModel * model,
+        {
+            model->header = furi_string_alloc();
+            model->text_buffer = furi_string_alloc();
+        },
+        true);
+
     return number_input;
 }
 
@@ -386,12 +395,8 @@ void number_input_free(NumberInput* number_input) {
         number_input->view,
         NumberInputModel * model,
         {
-            if(model->header != NULL) {
-                furi_string_free(model->header);
-            }
-            if(model->text_buffer != NULL) {
-                furi_string_free(model->text_buffer);
-            }
+            furi_string_free(model->header);
+            furi_string_free(model->text_buffer);
         },
         true);
     view_free(number_input->view);
@@ -421,7 +426,7 @@ void number_input_set_result_callback(
             model->callback = callback;
             model->callback_context = callback_context;
             model->current_number = current_number;
-            model->text_buffer = furi_string_alloc_printf("%ld", current_number);
+            furi_string_printf(model->text_buffer, "%ld", current_number);
             model->min_value = min_value;
             model->max_value = max_value;
         },
@@ -433,12 +438,6 @@ void number_input_set_header_text(NumberInput* number_input, const char* text) {
     with_view_model(
         number_input->view,
         NumberInputModel * model,
-        {
-            if(model->header != NULL) {
-                furi_string_free(model->header);
-            }
-
-            model->header = furi_string_alloc_set(text);
-        },
+        { furi_string_set(model->header, text); },
         true);
 }
