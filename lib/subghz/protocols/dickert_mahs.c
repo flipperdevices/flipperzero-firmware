@@ -110,7 +110,7 @@ static bool
     subghz_protocol_encoder_dickert_mahs_get_upload(SubGhzProtocolEncoderDickertMAHS* instance) {
     furi_assert(instance);
     size_t index = 0;
-    size_t size_upload = (instance->generic.data_count_bit * 2 + 2);
+    size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
     if(size_upload > instance->encoder.size_upload) {
         FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
         return false;
@@ -120,7 +120,7 @@ static bool
 
     instance->encoder.upload[index++] =
         level_duration_make(false, (uint32_t)subghz_protocol_dickert_mahs_const.te_short * 112);
-    //Send start bit
+    // Send start bit
     instance->encoder.upload[index++] =
         level_duration_make(true, (uint32_t)subghz_protocol_dickert_mahs_const.te_short);
 
@@ -140,6 +140,7 @@ static bool
                 level_duration_make(true, (uint32_t)subghz_protocol_dickert_mahs_const.te_long);
         }
     }
+
     return true;
 }
 
