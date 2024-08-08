@@ -28,16 +28,15 @@ typedef struct {
     TextElement text;
     IconElement icon;
 
-    const char* left_text;
-    const char* center_text;
-    const char* right_text;
+    FuriString* left_text;
+    FuriString* center_text;
+    FuriString* right_text;
 } DialogExModel;
 
 static void dialog_ex_view_draw_callback(Canvas* canvas, void* _model) {
     DialogExModel* model = _model;
 
     // Prepare canvas
-    canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
     if(model->icon.icon != NULL) {
@@ -69,71 +68,71 @@ static void dialog_ex_view_draw_callback(Canvas* canvas, void* _model) {
     }
 
     // Draw buttons
-    if(model->left_text != NULL) {
-        elements_button_left(canvas, model->left_text);
+    if(furi_string_size(model->left_text)) {
+        elements_button_left(canvas, furi_string_get_cstr(model->left_text));
     }
 
-    if(model->center_text != NULL) {
-        elements_button_center(canvas, model->center_text);
+    if(furi_string_size(model->center_text)) {
+        elements_button_center(canvas, furi_string_get_cstr(model->center_text));
     }
 
-    if(model->right_text != NULL) {
-        elements_button_right(canvas, model->right_text);
+    if(furi_string_size(model->right_text)) {
+        elements_button_right(canvas, furi_string_get_cstr(model->right_text));
     }
 }
 
 static bool dialog_ex_view_input_callback(InputEvent* event, void* context) {
     DialogEx* dialog_ex = context;
     bool consumed = false;
-    const char* left_text = NULL;
-    const char* center_text = NULL;
-    const char* right_text = NULL;
+    bool left_text_present = false;
+    bool center_text_present = false;
+    bool right_text_present = false;
 
     with_view_model(
         dialog_ex->view,
         DialogExModel * model,
         {
-            left_text = model->left_text;
-            center_text = model->center_text;
-            right_text = model->right_text;
+            left_text_present = furi_string_size(model->left_text);
+            center_text_present = furi_string_size(model->center_text);
+            right_text_present = furi_string_size(model->right_text);
         },
-        true);
+        false);
 
     if(dialog_ex->callback) {
         if(event->type == InputTypeShort) {
-            if(event->key == InputKeyLeft && left_text != NULL) {
+            if(event->key == InputKeyLeft && left_text_present) {
                 dialog_ex->callback(DialogExResultLeft, dialog_ex->context);
                 consumed = true;
-            } else if(event->key == InputKeyOk && center_text != NULL) {
+            } else if(event->key == InputKeyOk && center_text_present) {
                 dialog_ex->callback(DialogExResultCenter, dialog_ex->context);
                 consumed = true;
-            } else if(event->key == InputKeyRight && right_text != NULL) {
+            } else if(event->key == InputKeyRight && right_text_present) {
                 dialog_ex->callback(DialogExResultRight, dialog_ex->context);
                 consumed = true;
             }
         }
 
         if(event->type == InputTypePress && dialog_ex->enable_extended_events) {
-            if(event->key == InputKeyLeft && left_text != NULL) {
+            if(event->key == InputKeyLeft && left_text_present) {
                 dialog_ex->callback(DialogExPressLeft, dialog_ex->context);
                 consumed = true;
-            } else if(event->key == InputKeyOk && center_text != NULL) {
+            } else if(event->key == InputKeyOk && center_text_present) {
                 dialog_ex->callback(DialogExPressCenter, dialog_ex->context);
                 consumed = true;
-            } else if(event->key == InputKeyRight && right_text != NULL) {
+            } else if(event->key == InputKeyRight && right_text_present) {
                 dialog_ex->callback(DialogExPressRight, dialog_ex->context);
                 consumed = true;
             }
         }
 
         if(event->type == InputTypeRelease && dialog_ex->enable_extended_events) {
-            if(event->key == InputKeyLeft && left_text != NULL) {
+            if(event->key == InputKeyLeft && left_text_present) {
                 dialog_ex->callback(DialogExReleaseLeft, dialog_ex->context);
                 consumed = true;
-            } else if(event->key == InputKeyOk && center_text != NULL) {
+            } else if(event->key == InputKeyOk && center_text_present) {
                 dialog_ex->callback(DialogExReleaseCenter, dialog_ex->context);
                 consumed = true;
-            } else if(event->key == InputKeyRight && right_text != NULL) {
+            } else if(event->key == InputKeyRight && right_text_present) {
                 dialog_ex->callback(DialogExReleaseRight, dialog_ex->context);
                 consumed = true;
             }
@@ -170,17 +169,26 @@ DialogEx* dialog_ex_alloc(void) {
             model->icon.y = 0;
             model->icon.icon = NULL;
 
-            model->left_text = NULL;
-            model->center_text = NULL;
-            model->right_text = NULL;
+            model->left_text = furi_string_alloc();
+            model->center_text = furi_string_alloc();
+            model->right_text = furi_string_alloc();
         },
-        true);
+        false);
     dialog_ex->enable_extended_events = false;
     return dialog_ex;
 }
 
 void dialog_ex_free(DialogEx* dialog_ex) {
     furi_check(dialog_ex);
+    with_view_model(
+        dialog_ex->view,
+        DialogExModel * model,
+        {
+            furi_string_free(model->left_text);
+            furi_string_free(model->center_text);
+            furi_string_free(model->right_text);
+        },
+        false);
     view_free(dialog_ex->view);
     free(dialog_ex);
 }
@@ -257,17 +265,26 @@ void dialog_ex_set_icon(DialogEx* dialog_ex, uint8_t x, uint8_t y, const Icon* i
 
 void dialog_ex_set_left_button_text(DialogEx* dialog_ex, const char* text) {
     furi_check(dialog_ex);
-    with_view_model(dialog_ex->view, DialogExModel * model, { model->left_text = text; }, true);
+    with_view_model(
+        dialog_ex->view, DialogExModel * model, { furi_string_set(model->left_text, text); }, true);
 }
 
 void dialog_ex_set_center_button_text(DialogEx* dialog_ex, const char* text) {
     furi_check(dialog_ex);
-    with_view_model(dialog_ex->view, DialogExModel * model, { model->center_text = text; }, true);
+    with_view_model(
+        dialog_ex->view,
+        DialogExModel * model,
+        { furi_string_set(model->center_text, text); },
+        true);
 }
 
 void dialog_ex_set_right_button_text(DialogEx* dialog_ex, const char* text) {
     furi_check(dialog_ex);
-    with_view_model(dialog_ex->view, DialogExModel * model, { model->right_text = text; }, true);
+    with_view_model(
+        dialog_ex->view,
+        DialogExModel * model,
+        { furi_string_set(model->right_text, text); },
+        true);
 }
 
 void dialog_ex_reset(DialogEx* dialog_ex) {
@@ -282,9 +299,9 @@ void dialog_ex_reset(DialogEx* dialog_ex) {
             model->header = clean_text_el;
             model->text = clean_text_el;
             model->icon = clean_icon_el;
-            model->left_text = NULL;
-            model->center_text = NULL;
-            model->right_text = NULL;
+            furi_string_reset(model->left_text);
+            furi_string_reset(model->center_text);
+            furi_string_reset(model->right_text);
         },
         true);
     dialog_ex->context = NULL;
