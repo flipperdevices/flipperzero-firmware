@@ -87,7 +87,7 @@ void* subghz_protocol_encoder_dickert_mahs_alloc(SubGhzEnvironment* environment)
     instance->base.protocol = &subghz_protocol_dickert_mahs;
     instance->generic.protocol_name = instance->base.protocol->name;
 
-    instance->encoder.repeat = 10;
+    instance->encoder.repeat = 1;
     instance->encoder.size_upload = 128;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_running = false;
@@ -110,7 +110,7 @@ static bool
     subghz_protocol_encoder_dickert_mahs_get_upload(SubGhzProtocolEncoderDickertMAHS* instance) {
     furi_assert(instance);
     size_t index = 0;
-    size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
+    size_t size_upload = (instance->generic.data_count_bit * 2 + 2);
     if(size_upload > instance->encoder.size_upload) {
         FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
         return false;
@@ -118,9 +118,12 @@ static bool
         instance->encoder.size_upload = size_upload;
     }
 
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)subghz_protocol_dickert_mahs_const.te_short * 112);
     //Send start bit
     instance->encoder.upload[index++] =
         level_duration_make(true, (uint32_t)subghz_protocol_dickert_mahs_const.te_short);
+
     //Send key data
     for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
         if(bit_read(instance->generic.data, i - 1)) {
