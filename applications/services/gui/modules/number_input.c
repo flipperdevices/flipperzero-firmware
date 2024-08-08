@@ -4,7 +4,6 @@
 #include <furi.h>
 #include <assets_icons.h>
 
-/** NumberInput type */
 struct NumberInput {
     View* view;
 };
@@ -18,12 +17,14 @@ typedef struct {
 typedef struct {
     FuriString* header;
     FuriString* text_buffer;
-    int32_t original_number;
+
     int32_t current_number;
     int32_t max_value;
     int32_t min_value;
+
     NumberInputCallback callback;
     void* callback_context;
+
     size_t selected_row;
     size_t selected_column;
 } NumberInputModel;
@@ -54,12 +55,6 @@ static const NumberInputKey keyboard_keys_row_2[] = {
     {enter_symbol, 95, 17},
 };
 
-/** Get row size
- *
- * @param      row_index  Index of row
- *
- * @return     size_t Row size
- */
 static size_t number_input_get_row_size(size_t row_index) {
     size_t row_size = 0;
 
@@ -77,12 +72,6 @@ static size_t number_input_get_row_size(size_t row_index) {
     return row_size;
 }
 
-/** Get row pointer
- *
- * @param      row_index  Index of row
- *
- * @return     const NumberInputKey* Row pointer
- */
 static const NumberInputKey* number_input_get_row(size_t row_index) {
     const NumberInputKey* row = NULL;
 
@@ -100,11 +89,6 @@ static const NumberInputKey* number_input_get_row(size_t row_index) {
     return row;
 }
 
-/** Draw input box (common view)
- *
- * @param      canvas  The canvas
- * @param      model   The model
- */
 static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
     const size_t text_x = 8;
     const size_t text_y = 25;
@@ -132,10 +116,6 @@ static void number_input_backspace_cb(NumberInputModel* model) {
     model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
 }
 
-/** Handle up button
- *
- * @param      model  The model
- */
 static void number_input_handle_up(NumberInputModel* model) {
     if(model->selected_row > 0) {
         model->selected_row--;
@@ -145,10 +125,6 @@ static void number_input_handle_up(NumberInputModel* model) {
     }
 }
 
-/** Handle down button
- *
- * @param      model  The model
- */
 static void number_input_handle_down(NumberInputModel* model) {
     if(model->selected_row < keyboard_row_count - 1) {
         if(model->selected_column >= number_input_get_row_size(model->selected_row) - 1) {
@@ -162,10 +138,6 @@ static void number_input_handle_down(NumberInputModel* model) {
     }
 }
 
-/** Handle left button
- *
- * @param      model  The model
- */
 static void number_input_handle_left(NumberInputModel* model) {
     if(model->selected_column > 0) {
         model->selected_column--;
@@ -178,10 +150,6 @@ static void number_input_handle_left(NumberInputModel* model) {
     }
 }
 
-/** Handle right button
- *
- * @param      model  The model
- */
 static void number_input_handle_right(NumberInputModel* model) {
     if(model->selected_column < number_input_get_row_size(model->selected_row) - 1) {
         model->selected_column++;
@@ -195,14 +163,16 @@ static void number_input_handle_right(NumberInputModel* model) {
 }
 
 static bool is_number_too_large(NumberInputModel* model) {
-    if(strtol(furi_string_get_cstr(model->text_buffer), NULL, 10) > model->max_value) {
+    int64_t value = strtoll(furi_string_get_cstr(model->text_buffer), NULL, 10);
+    if(value > (int64_t)model->max_value) {
         return true;
     }
     return false;
 }
 
 static bool is_number_too_small(NumberInputModel* model) {
-    if(strtol(furi_string_get_cstr(model->text_buffer), NULL, 10) < model->min_value) {
+    int64_t value = strtoll(furi_string_get_cstr(model->text_buffer), NULL, 10);
+    if(value < (int64_t)model->min_value) {
         return true;
     }
     return false;
@@ -240,15 +210,9 @@ static void number_input_add_digit(NumberInputModel* model, char* newChar) {
     }
 }
 
-/** Handle OK button
- *
- * @param      model  The model
- */
 static void number_input_handle_ok(NumberInputModel* model) {
     char selected = number_input_get_row(model->selected_row)[model->selected_column].text;
-    char temp_str[2];
-    temp_str[0] = selected;
-    temp_str[1] = '\0';
+    char temp_str[2] = {selected, '\0'};
     if(selected == enter_symbol) {
         if(is_number_too_large(model) || is_number_too_small(model)) {
             return; //Do nothing if number outside allowed range
@@ -264,11 +228,6 @@ static void number_input_handle_ok(NumberInputModel* model) {
     }
 }
 
-/** Draw callback
- *
- * @param      canvas  The canvas
- * @param      _model  The model
- */
 static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
     NumberInputModel* model = _model;
 
@@ -370,17 +329,9 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
     }
 }
 
-/** Input callback
- *
- * @param      event    The event
- * @param      context  The context
- *
- * @return     true
- * @return     false
- */
 static bool number_input_view_input_callback(InputEvent* event, void* context) {
+    furi_assert(context);
     NumberInput* number_input = context;
-    furi_assert(number_input);
 
     bool consumed = false;
 
@@ -406,10 +357,6 @@ static bool number_input_view_input_callback(InputEvent* event, void* context) {
         case InputKeyOk:
             number_input_handle_ok(model);
             break;
-        case InputKeyBack:
-            //Will revert to the number set before opening the keyboard
-            model->callback(model->callback_context, model->original_number);
-            break;
         default:
             consumed = false;
             break;
@@ -434,7 +381,7 @@ NumberInput* number_input_alloc(void) {
 }
 
 void number_input_free(NumberInput* number_input) {
-    furi_assert(number_input);
+    furi_check(number_input);
     with_view_model(
         number_input->view,
         NumberInputModel * model,
@@ -452,7 +399,7 @@ void number_input_free(NumberInput* number_input) {
 }
 
 View* number_input_get_view(NumberInput* number_input) {
-    furi_assert(number_input);
+    furi_check(number_input);
     return number_input->view;
 }
 
@@ -463,19 +410,16 @@ void number_input_set_result_callback(
     int32_t current_number,
     int32_t min_value,
     int32_t max_value) {
+    furi_check(number_input);
+
+    current_number = CLAMP(current_number, max_value, min_value);
+
     with_view_model(
         number_input->view,
         NumberInputModel * model,
         {
             model->callback = callback;
             model->callback_context = callback_context;
-            model->original_number = current_number;
-            if(current_number < min_value) {
-                current_number = min_value; //additional failsafe
-            }
-            if(current_number > max_value) {
-                current_number = max_value; //additional failsafe
-            }
             model->current_number = current_number;
             model->text_buffer = furi_string_alloc_printf("%ld", current_number);
             model->min_value = min_value;
@@ -485,6 +429,7 @@ void number_input_set_result_callback(
 }
 
 void number_input_set_header_text(NumberInput* number_input, const char* text) {
+    furi_check(number_input);
     with_view_model(
         number_input->view,
         NumberInputModel * model,
@@ -493,8 +438,7 @@ void number_input_set_header_text(NumberInput* number_input, const char* text) {
                 furi_string_free(model->header);
             }
 
-            model->header = furi_string_alloc();
-            furi_string_set_str(model->header, text);
+            model->header = furi_string_alloc_set(text);
         },
         true);
 }

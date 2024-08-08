@@ -14,10 +14,12 @@ extern "C" {
 /** Number input anonymous structure  */
 typedef struct NumberInput NumberInput;
 
-/** callback that is executed on save button press */
+/** Callback to be called on save button press */
 typedef void (*NumberInputCallback)(void* context, int32_t number);
 
-/** Allocate and initialize Number input. This Number input is used to enter Numbers (Integers).
+/** Allocate and initialize Number input.
+ *
+ * This Number input is used to enter Numbers (Integers).
  *
  * @return     NumberInput instance pointer
  */
@@ -39,13 +41,12 @@ View* number_input_get_view(NumberInput* number_input);
 
 /** Set byte input result callback
  *
- * @param      number_input          byte input instance
- * @param      input_callback     input callback fn
- * @param      changed_callback   changed callback fn
- * @param      callback_context   callback context
- * @param      text_buffer        buffer to use
- * @param      min_value          Min number value
- * @param      max_value          Max number value
+ * @param      number_input      byte input instance
+ * @param      input_callback    input callback fn
+ * @param      callback_context  callback context
+ * @param[in]  current_number    The current number
+ * @param      min_value         Min number value
+ * @param      max_value         Max number value
  */
 
 void number_input_set_result_callback(
@@ -59,7 +60,7 @@ void number_input_set_result_callback(
 /** Set byte input header text
  *
  * @param      number_input  byte input instance
- * @param      text        text to be shown
+ * @param      text          text to be shown
  */
 void number_input_set_header_text(NumberInput* number_input, const char* text);
 
