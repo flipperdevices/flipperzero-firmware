@@ -665,6 +665,13 @@ MU_TEST(subghz_decoder_mastercode_test) {
         "Test decoder " SUBGHZ_PROTOCOL_MASTERCODE_NAME " error\r\n");
 }
 
+MU_TEST(subghz_decoder_dickert_test) {
+    mu_assert(
+        subghz_decoder_test(
+            EXT_PATH("unit_tests/subghz/dickert_raw.sub"), SUBGHZ_PROTOCOL_DICKERT_MAHS_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_DICKERT_MAHS_NAME " error\r\n");
+}
+
 //test encoders
 MU_TEST(subghz_encoder_princeton_test) {
     mu_assert(
@@ -879,6 +886,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_nice_one_test);
     MU_RUN_TEST(subghz_decoder_kinggates_stylo4k_test);
     MU_RUN_TEST(subghz_decoder_mastercode_test);
+    MU_RUN_TEST(subghz_decoder_dickert_test);
 
     MU_RUN_TEST(subghz_encoder_princeton_test);
     MU_RUN_TEST(subghz_encoder_came_test);
