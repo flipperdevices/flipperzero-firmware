@@ -10,7 +10,7 @@ struct DialogEx {
 };
 
 typedef struct {
-    const char* text;
+    FuriString* text;
     uint8_t x;
     uint8_t y;
     Align horizontal;
@@ -52,7 +52,7 @@ static void dialog_ex_view_draw_callback(Canvas* canvas, void* _model) {
             model->header.y,
             model->header.horizontal,
             model->header.vertical,
-            model->header.text);
+            furi_string_get_cstr(model->header.text));
     }
 
     // Draw text
@@ -64,7 +64,7 @@ static void dialog_ex_view_draw_callback(Canvas* canvas, void* _model) {
             model->text.y,
             model->text.horizontal,
             model->text.vertical,
-            model->text.text);
+            furi_string_get_cstr(model->text.text));
     }
 
     // Draw buttons
@@ -153,13 +153,13 @@ DialogEx* dialog_ex_alloc(void) {
         dialog_ex->view,
         DialogExModel * model,
         {
-            model->header.text = NULL;
+            model->header.text = furi_string_alloc();
             model->header.x = 0;
             model->header.y = 0;
             model->header.horizontal = AlignLeft;
             model->header.vertical = AlignBottom;
 
-            model->text.text = NULL;
+            model->text.text = furi_string_alloc();
             model->text.x = 0;
             model->text.y = 0;
             model->text.horizontal = AlignLeft;
@@ -184,6 +184,8 @@ void dialog_ex_free(DialogEx* dialog_ex) {
         dialog_ex->view,
         DialogExModel * model,
         {
+            furi_string_free(model->header.text);
+            furi_string_free(model->text.text);
             furi_string_free(model->left_text);
             furi_string_free(model->center_text);
             furi_string_free(model->right_text);
@@ -220,7 +222,7 @@ void dialog_ex_set_header(
         dialog_ex->view,
         DialogExModel * model,
         {
-            model->header.text = text;
+            furi_string_set(model->header.text, text);
             model->header.x = x;
             model->header.y = y;
             model->header.horizontal = horizontal;
@@ -241,7 +243,7 @@ void dialog_ex_set_text(
         dialog_ex->view,
         DialogExModel * model,
         {
-            model->text.text = text;
+            furi_string_set(model->text.text, text);
             model->text.x = x;
             model->text.y = y;
             model->text.horizontal = horizontal;
@@ -299,6 +301,8 @@ void dialog_ex_reset(DialogEx* dialog_ex) {
             model->header = clean_text_el;
             model->text = clean_text_el;
             model->icon = clean_icon_el;
+            furi_string_reset(model->header.text);
+            furi_string_reset(model->text.text);
             furi_string_reset(model->left_text);
             furi_string_reset(model->center_text);
             furi_string_reset(model->right_text);
