@@ -27,15 +27,12 @@ static uint32_t expansion_settings_app_exit(void* context) {
 static ExpansionSettingsApp* expansion_settings_app_alloc(void) {
     ExpansionSettingsApp* app = malloc(sizeof(ExpansionSettingsApp));
 
-    if(!expansion_settings_load(&app->settings)) {
-        expansion_settings_save(&app->settings);
-    }
+    expansion_settings_load(&app->settings);
 
     app->gui = furi_record_open(RECORD_GUI);
     app->expansion = furi_record_open(RECORD_EXPANSION);
 
     app->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
