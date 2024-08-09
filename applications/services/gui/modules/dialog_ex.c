@@ -45,7 +45,7 @@ static void dialog_ex_view_draw_callback(Canvas* canvas, void* _model) {
 
     // Draw header
     canvas_set_font(canvas, FontPrimary);
-    if(model->header.text != NULL) {
+    if(furi_string_size(model->header.text)) {
         elements_multiline_text_aligned(
             canvas,
             model->header.x,
@@ -57,7 +57,7 @@ static void dialog_ex_view_draw_callback(Canvas* canvas, void* _model) {
 
     // Draw text
     canvas_set_font(canvas, FontSecondary);
-    if(model->text.text != NULL) {
+    if(furi_string_size(model->text.text)) {
         elements_multiline_text_aligned(
             canvas,
             model->text.x,
@@ -291,18 +291,14 @@ void dialog_ex_set_right_button_text(DialogEx* dialog_ex, const char* text) {
 
 void dialog_ex_reset(DialogEx* dialog_ex) {
     furi_check(dialog_ex);
-    TextElement clean_text_el = {
-        .text = NULL, .x = 0, .y = 0, .horizontal = AlignLeft, .vertical = AlignLeft};
-    IconElement clean_icon_el = {.icon = NULL, .x = 0, .y = 0};
     with_view_model(
         dialog_ex->view,
         DialogExModel * model,
         {
-            model->header = clean_text_el;
-            model->text = clean_text_el;
-            model->icon = clean_icon_el;
+            model->icon.icon = NULL;
             furi_string_reset(model->header.text);
             furi_string_reset(model->text.text);
+
             furi_string_reset(model->left_text);
             furi_string_reset(model->center_text);
             furi_string_reset(model->right_text);
