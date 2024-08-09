@@ -82,7 +82,7 @@ static void subghz_protocol_encoder_dickert_mahs_parse_buffer(
     uint8_t bits[36] = {};
 
     // Convert uint64_t into bit array
-    for(size_t i = 35; i >= 0; i--) {
+    for(int i = 35; i >= 0; i--) {
         if(data & 1) {
             bits[i] = 1;
         }
