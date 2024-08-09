@@ -6,11 +6,16 @@
  * 13 -> 16 (USART TX to LPUART RX)
  * 14 -> 15 (USART RX to LPUART TX)
  *
+ * Optional: Connect an LED with an appropriate series resistor
+ * between pins 1 and 8. It will always be on if the device is
+ * connected to USB power, so unplug it before running the app.
+ *
  * What this application does:
  *
  * - Enables module support and emulates the module on a single device
  *   (hence the above connection),
  * - Connects to the expansion module service, sets baud rate,
+ * - Enables OTG (5V) on GPIO,
  * - Starts the RPC session,
  * - Creates a directory at `/ext/ExpansionTest` and writes a file
  *   named `test.txt` under it,
@@ -18,6 +23,7 @@
  * - Waits 10 cycles of idle loop,
  * - Stops the RPC session,
  * - Waits another 10 cycles of idle loop,
+ * - Disables OTG (5V) on GPIO,
  * - Exits (plays a sound if any of the above steps failed).
  */
 #include <furi.h>
