@@ -66,6 +66,8 @@ typedef enum {
 typedef enum {
     ExpansionFrameControlCommandStartRpc = 0x00, /**< Start an RPC session. */
     ExpansionFrameControlCommandStopRpc = 0x01, /**< Stop an open RPC session. */
+    ExpansionFrameControlCommandEnableOtg = 0x02, /**< Enable OTG (5V) on external GPIO. */
+    ExpansionFrameControlCommandDisableOtg = 0x03, /**< Disable OTG (5V) on external GPIO. */
 } ExpansionFrameControlCommand;
 
 #pragma pack(push, 1)

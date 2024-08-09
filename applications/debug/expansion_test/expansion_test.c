@@ -302,6 +302,22 @@ static bool expansion_test_app_handshake(ExpansionTestApp* instance) {
     return success;
 }
 
+static bool expansion_test_app_enable_otg(ExpansionTestApp* instance, bool enable) {
+    bool success = false;
+
+    do {
+        const ExpansionFrameControlCommand command = enable ?
+                                                         ExpansionFrameControlCommandEnableOtg :
+                                                         ExpansionFrameControlCommandDisableOtg;
+        if(!expansion_test_app_send_control_request(instance, command)) break;
+        if(!expansion_test_app_receive_frame(instance, &instance->frame)) break;
+        if(!expansion_test_app_is_success_response(&instance->frame)) break;
+        success = true;
+    } while(false);
+
+    return success;
+}
+
 static bool expansion_test_app_start_rpc(ExpansionTestApp* instance) {
     bool success = false;
 
@@ -434,12 +450,14 @@ int32_t expansion_test_app(void* p) {
         if(!expansion_test_app_send_presence(instance)) break;
         if(!expansion_test_app_wait_ready(instance)) break;
         if(!expansion_test_app_handshake(instance)) break;
+        if(!expansion_test_app_enable_otg(instance, true)) break;
         if(!expansion_test_app_start_rpc(instance)) break;
         if(!expansion_test_app_rpc_mkdir(instance)) break;
         if(!expansion_test_app_rpc_write(instance)) break;
         if(!expansion_test_app_rpc_alert(instance)) break;
         if(!expansion_test_app_idle(instance, 10)) break;
         if(!expansion_test_app_stop_rpc(instance)) break;
+        if(!expansion_test_app_enable_otg(instance, false)) break;
         if(!expansion_test_app_idle(instance, 10)) break;
         success = true;
     } while(false);
