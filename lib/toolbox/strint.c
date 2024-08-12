@@ -18,20 +18,21 @@ StrintParseError strint_to_uint32(char* str, char** end, uint32_t* out, uint8_t 
     if(negative) return StrintParseSignError; // TODO: int32_t
 
     // infer base
-    if(base == 0) {
-        if(memcmp(str, "0x", 2) == 0 || memcmp(str, "0X", 2) == 0) {
-            base = 16;
-            str += 2;
-        } else if(memcmp(str, "0b", 2) == 0 || memcmp(str, "0B", 2) == 0) {
-            base = 2;
-            str += 2;
-        } else if(*str == '0') {
-            base = 8;
-            str++;
-        } else {
-            base = 10;
-        }
+    // not assigning directly to `base' to permit prefixes with explicit bases
+    uint8_t inferred_base = 0;
+    if(memcmp(str, "0x", 2) == 0 || memcmp(str, "0X", 2) == 0) {
+        base = 16;
+        str += 2;
+    } else if(memcmp(str, "0b", 2) == 0 || memcmp(str, "0B", 2) == 0) {
+        base = 2;
+        str += 2;
+    } else if(*str == '0') {
+        base = 8;
+        str++;
+    } else {
+        inferred_base = 10;
     }
+    if(base == 0) base = inferred_base;
 
     // read digits
     uint32_t result = 0;

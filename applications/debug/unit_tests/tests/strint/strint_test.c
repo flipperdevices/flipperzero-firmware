@@ -59,6 +59,8 @@ MU_TEST(strint_test_bases) {
     mu_assert_int_eq(0x123, result);
     mu_assert_int_eq(StrintParseNoError, strint_to_uint32("0xDEADBEEF", NULL, &result, 0));
     mu_assert_int_eq(0xDEADBEEF, result);
+    mu_assert_int_eq(StrintParseNoError, strint_to_uint32("0xDEADBEEF", NULL, &result, 16));
+    mu_assert_int_eq(0xDEADBEEF, result);
     mu_assert_int_eq(StrintParseNoError, strint_to_uint32("123", NULL, &result, 16));
     mu_assert_int_eq(0x123, result);
 
@@ -67,10 +69,14 @@ MU_TEST(strint_test_bases) {
 
     mu_assert_int_eq(StrintParseNoError, strint_to_uint32("0123", NULL, &result, 0));
     mu_assert_int_eq(0123, result);
+    mu_assert_int_eq(StrintParseNoError, strint_to_uint32("0123", NULL, &result, 8));
+    mu_assert_int_eq(0123, result);
     mu_assert_int_eq(StrintParseNoError, strint_to_uint32("123", NULL, &result, 8));
     mu_assert_int_eq(0123, result);
 
     mu_assert_int_eq(StrintParseNoError, strint_to_uint32("0b101", NULL, &result, 0));
+    mu_assert_int_eq(0b101, result);
+    mu_assert_int_eq(StrintParseNoError, strint_to_uint32("0b101", NULL, &result, 2));
     mu_assert_int_eq(0b101, result);
     mu_assert_int_eq(StrintParseNoError, strint_to_uint32("0B101", NULL, &result, 0));
     mu_assert_int_eq(0b101, result);
