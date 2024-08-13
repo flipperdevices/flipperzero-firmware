@@ -19,7 +19,7 @@
  * sign is positive
  */
 StrintParseError strint_to_uint64_internal(
-    char* str,
+    const char* str,
     char** end,
     uint64_t* abs_out,
     bool* sign_out,
@@ -90,12 +90,12 @@ StrintParseError strint_to_uint64_internal(
 
     if(abs_out) *abs_out = result;
     if(sign_out) *sign_out = negative;
-    if(end) *end = str;
+    if(end) *end = (char*)str;
     return StrintParseNoError;
 }
 
 #define STRINT_MONO(name, type, neg, pos)                                              \
-    StrintParseError name(char* str, char** end, type* out, uint8_t base) {            \
+    StrintParseError name(const char* str, char** end, type* out, uint8_t base) {      \
         uint64_t absolute;                                                             \
         bool sign;                                                                     \
         StrintParseError err =                                                         \
@@ -110,6 +110,8 @@ StrintParseError strint_to_uint64_internal(
         return StrintParseNoError;                                                     \
     }
 
+STRINT_MONO(strint_to_uint64, uint64_t, 0, UINT64_MAX)
+STRINT_MONO(strint_to_int64, int64_t, (uint64_t)INT64_MAX + 1, INT64_MAX)
 STRINT_MONO(strint_to_uint32, uint32_t, 0, UINT32_MAX)
 STRINT_MONO(strint_to_int32, int32_t, (uint64_t)INT32_MAX + 1, INT32_MAX)
 STRINT_MONO(strint_to_uint16, uint16_t, 0, UINT16_MAX)

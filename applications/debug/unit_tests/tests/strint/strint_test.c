@@ -90,6 +90,20 @@ MU_TEST(strint_test_bases) {
 }
 
 MU_TEST_SUITE(strint_test_limits) {
+    uint64_t result_u64 = 0;
+    mu_assert_int_eq(
+        StrintParseNoError, strint_to_uint64("18446744073709551615", NULL, &result_u64, 0));
+    // `mu_assert_int_eq' does not support longs :(
+    mu_assert(UINT64_MAX == result_u64, "result does not equal UINT64_MAX");
+
+    int64_t result_i64 = 0;
+    mu_assert_int_eq(
+        StrintParseNoError, strint_to_int64("9223372036854775807", NULL, &result_i64, 0));
+    mu_assert(INT64_MAX == result_i64, "result does not equal INT64_MAX");
+    mu_assert_int_eq(
+        StrintParseNoError, strint_to_int64("-9223372036854775808", NULL, &result_i64, 0));
+    mu_assert(INT64_MIN == result_i64, "result does not equal INT64_MIN");
+
     uint32_t result_u32 = 0;
     mu_assert_int_eq(StrintParseNoError, strint_to_uint32("4294967295", NULL, &result_u32, 0));
     mu_assert_int_eq(UINT32_MAX, result_u32);
