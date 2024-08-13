@@ -36,7 +36,7 @@ StrintParseError strint_to_int64(const char* str, char** end, int64_t* out, uint
 /**
  * @brief Converts a string to a `uint32_t`
  * @param [in] str Input string
- * @param [out] str Pointer to first character after the number in input string
+ * @param [out] end Pointer to first character after the number in input string
  * @param [out] out Parse result
  * @param [in] base Integer base
  * @returns Parse error
