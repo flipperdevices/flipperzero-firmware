@@ -1,5 +1,6 @@
 #include "args.h"
 #include "hex.h"
+#include "strint.h"
 
 size_t args_get_first_word_length(FuriString* args) {
     size_t ws = furi_string_search_char(args, ' ');
@@ -21,7 +22,8 @@ bool args_read_int_and_trim(FuriString* args, int* value) {
         return false;
     }
 
-    if(sscanf(furi_string_get_cstr(args), "%d", value) == 1) {
+    if(strint_to_int32(furi_string_get_cstr(args), NULL, (int32_t*)value, 10) ==
+       StrintParseNoError) {
         furi_string_right(args, cmd_length);
         furi_string_trim(args);
         return true;

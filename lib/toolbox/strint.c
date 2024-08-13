@@ -38,18 +38,19 @@ StrintParseError strint_to_uint64_internal(
         str++;
     }
     if(*str == '+' || *str == '-') return StrintParseSignError;
+    if(max_abs_negative == 0 && negative) return StrintParseSignError;
 
     // infer base
     // not assigning directly to `base' to permit prefixes with explicit bases
     uint8_t inferred_base = 0;
     if(memcmp(str, "0x", 2) == 0 || memcmp(str, "0X", 2) == 0) {
-        base = 16;
+        inferred_base = 16;
         str += 2;
     } else if(memcmp(str, "0b", 2) == 0 || memcmp(str, "0B", 2) == 0) {
-        base = 2;
+        inferred_base = 2;
         str += 2;
     } else if(*str == '0') {
-        base = 8;
+        inferred_base = 8;
         str++;
     } else {
         inferred_base = 10;
@@ -86,7 +87,14 @@ StrintParseError strint_to_uint64_internal(
         str++;
     }
 
-    if(read_total == 0) return StrintParseAbsentError;
+    if(read_total == 0) {
+        if(inferred_base == 8) {
+            // there's just a single zero
+            result = 0;
+        } else {
+            return StrintParseAbsentError;
+        }
+    }
 
     if(abs_out) *abs_out = result;
     if(sign_out) *sign_out = negative;
@@ -100,13 +108,8 @@ StrintParseError strint_to_uint64_internal(
         bool sign;                                                                     \
         StrintParseError err =                                                         \
             strint_to_uint64_internal(str, end, &absolute, &sign, base, (neg), (pos)); \
-        if(err) {                                                                      \
-            return err;                                                                \
-        }                                                                              \
-        if(sign && (neg) == 0) {                                                       \
-            return StrintParseSignError;                                               \
-        }                                                                              \
-        *out = sign ? (-(type)absolute) : ((type)absolute);                            \
+        if(err) return err;                                                            \
+        if(out) *out = (sign ? (-(type)absolute) : ((type)absolute));                  \
         return StrintParseNoError;                                                     \
     }
 

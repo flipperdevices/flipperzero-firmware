@@ -189,9 +189,11 @@ static bool infrared_cli_parse_raw(const char* str, InfraredSignal* signal) {
         }
 
         char timing_str[INFRARED_CLI_BUF_SIZE];
-        if(sscanf(str, "%9s", timing_str) != 1) {
+        if(strlen(str) > 9) {
             break;
         }
+        strncpy(timing_str, str, sizeof(timing_str));
+        timing_str[sizeof(timing_str) - 1] = 0;
 
         str += strlen(timing_str);
         uint32_t timing = atoi(timing_str);
