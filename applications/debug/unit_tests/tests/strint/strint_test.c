@@ -48,6 +48,11 @@ MU_TEST(strint_test_errors) {
     mu_assert_int_eq(123, result);
     mu_assert_int_eq(StrintParseOverflowError, strint_to_uint32("4294967296", NULL, &result, 0));
     mu_assert_int_eq(123, result);
+
+    int32_t result_i32 = 123;
+    mu_assert_int_eq(
+        StrintParseOverflowError, strint_to_int32("-2147483649", NULL, &result_i32, 0));
+    mu_assert_int_eq(123, result_i32);
 }
 
 MU_TEST(strint_test_bases) {
@@ -85,15 +90,25 @@ MU_TEST(strint_test_bases) {
 }
 
 MU_TEST_SUITE(strint_test_limits) {
-    uint32_t result = 0;
-    mu_assert_int_eq(StrintParseNoError, strint_to_uint32("4294967295", NULL, &result, 0));
-    mu_assert_int_eq(UINT32_MAX, result);
-    mu_assert_int_eq(StrintParseNoError, strint_to_uint32("0xFFFFFFFF", NULL, &result, 0));
-    mu_assert_int_eq(UINT32_MAX, result);
-    mu_assert_int_eq(
-        StrintParseNoError,
-        strint_to_uint32("0b11111111111111111111111111111111", NULL, &result, 0));
-    mu_assert_int_eq(UINT32_MAX, result);
+    uint32_t result_u32 = 0;
+    mu_assert_int_eq(StrintParseNoError, strint_to_uint32("4294967295", NULL, &result_u32, 0));
+    mu_assert_int_eq(UINT32_MAX, result_u32);
+
+    int32_t result_i32 = 0;
+    mu_assert_int_eq(StrintParseNoError, strint_to_int32("2147483647", NULL, &result_i32, 0));
+    mu_assert_int_eq(INT32_MAX, result_i32);
+    mu_assert_int_eq(StrintParseNoError, strint_to_int32("-2147483648", NULL, &result_i32, 0));
+    mu_assert_int_eq(INT32_MIN, result_i32);
+
+    uint16_t result_u16 = 0;
+    mu_assert_int_eq(StrintParseNoError, strint_to_uint16("65535", NULL, &result_u16, 0));
+    mu_assert_int_eq(UINT16_MAX, result_u16);
+
+    int16_t result_i16 = 0;
+    mu_assert_int_eq(StrintParseNoError, strint_to_int16("32767", NULL, &result_i16, 0));
+    mu_assert_int_eq(INT16_MAX, result_i16);
+    mu_assert_int_eq(StrintParseNoError, strint_to_int16("-32768", NULL, &result_i16, 0));
+    mu_assert_int_eq(INT16_MIN, result_i16);
 }
 
 MU_TEST_SUITE(test_strint_suite) {

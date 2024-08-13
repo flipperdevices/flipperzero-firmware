@@ -52,6 +52,21 @@ typedef enum {
  */
 StrintParseError strint_to_uint32(char* str, char** end, uint32_t* out, uint8_t base);
 
+/**
+ * @brief See `strint_to_uint32`
+ */
+StrintParseError strint_to_int32(char* str, char** end, int32_t* out, uint8_t base);
+
+/**
+ * @brief See `strint_to_uint32`
+ */
+StrintParseError strint_to_uint16(char* str, char** end, uint16_t* out, uint8_t base);
+
+/**
+ * @brief See `strint_to_uint32`
+ */
+StrintParseError strint_to_int16(char* str, char** end, int16_t* out, uint8_t base);
+
 #ifdef __cplusplus
 }
 #endif
