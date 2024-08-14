@@ -11,7 +11,7 @@
  * @param [in] str Input string
  * @param [out] end Pointer to first character after the number in input string
  * @param [out] abs_out Absolute part of result
- * @param [out] sign_out Sign part of result (true=negative, false=positive)
+ * @param [out] negative_out Sign part of result (true=negative, false=positive)
  * @param [in] base Integer base
  * @param [in] max_abs_negative Largest permissible absolute part of result if
  * the sign is negative
@@ -22,12 +22,12 @@ StrintParseError strint_to_uint64_internal(
     const char* str,
     char** end,
     uint64_t* abs_out,
-    bool* sign_out,
+    bool* negative_out,
     uint8_t base,
     uint64_t max_abs_negative,
     uint64_t max_positive) {
     // skip whitespace
-    while(((*str >= 9) && (*str <= 13)) || *str == 32) {
+    while(((*str >= '\t') && (*str <= '\r')) || *str == ' ') {
         str++;
     }
 
@@ -97,20 +97,20 @@ StrintParseError strint_to_uint64_internal(
     }
 
     if(abs_out) *abs_out = result;
-    if(sign_out) *sign_out = negative;
+    if(negative_out) *negative_out = negative;
     if(end) *end = (char*)str;
     return StrintParseNoError;
 }
 
-#define STRINT_MONO(name, type, neg, pos)                                              \
-    StrintParseError name(const char* str, char** end, type* out, uint8_t base) {      \
-        uint64_t absolute;                                                             \
-        bool sign;                                                                     \
-        StrintParseError err =                                                         \
-            strint_to_uint64_internal(str, end, &absolute, &sign, base, (neg), (pos)); \
-        if(err) return err;                                                            \
-        if(out) *out = (sign ? (-(type)absolute) : ((type)absolute));                  \
-        return StrintParseNoError;                                                     \
+#define STRINT_MONO(name, ret_type, neg_abs_limit, pos_limit)                         \
+    StrintParseError name(const char* str, char** end, ret_type* out, uint8_t base) { \
+        uint64_t absolute;                                                            \
+        bool negative;                                                                \
+        StrintParseError err = strint_to_uint64_internal(                             \
+            str, end, &absolute, &negative, base, (neg_abs_limit), (pos_limit));      \
+        if(err) return err;                                                           \
+        if(out) *out = (negative ? (-(ret_type)absolute) : ((ret_type)absolute));     \
+        return StrintParseNoError;                                                    \
     }
 
 STRINT_MONO(strint_to_uint64, uint64_t, 0, UINT64_MAX)
