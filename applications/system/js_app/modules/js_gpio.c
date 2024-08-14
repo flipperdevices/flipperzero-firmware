@@ -7,26 +7,24 @@ typedef struct {
     FuriHalAdcHandle* handle;
 } JsGpioInst;
 
-typedef struct {
+static const struct {
     const GpioPin* pin;
     const char* name;
-    const FuriHalAdcChannel channel;
-} GpioPinCtx;
-
-static const GpioPinCtx js_gpio_pins[] = {
-    {.pin = &gpio_ext_pa7, .name = "PA7", .channel = FuriHalAdcChannel12}, // 2
-    {.pin = &gpio_ext_pa6, .name = "PA6", .channel = FuriHalAdcChannel11}, // 3
-    {.pin = &gpio_ext_pa4, .name = "PA4", .channel = FuriHalAdcChannel9}, // 4
-    {.pin = &gpio_ext_pb3, .name = "PB3", .channel = FuriHalAdcChannelNone}, // 5
-    {.pin = &gpio_ext_pb2, .name = "PB2", .channel = FuriHalAdcChannelNone}, // 6
-    {.pin = &gpio_ext_pc3, .name = "PC3", .channel = FuriHalAdcChannel4}, // 7
-    {.pin = &gpio_swclk, .name = "PA14", .channel = FuriHalAdcChannelNone}, // 10
-    {.pin = &gpio_swdio, .name = "PA13", .channel = FuriHalAdcChannelNone}, // 12
-    {.pin = &gpio_usart_tx, .name = "PB6", .channel = FuriHalAdcChannelNone}, // 13
-    {.pin = &gpio_usart_rx, .name = "PB7", .channel = FuriHalAdcChannelNone}, // 14
-    {.pin = &gpio_ext_pc1, .name = "PC1", .channel = FuriHalAdcChannel2}, // 15
-    {.pin = &gpio_ext_pc0, .name = "PC0", .channel = FuriHalAdcChannel1}, // 16
-    {.pin = &gpio_ibutton, .name = "PB14", .channel = FuriHalAdcChannelNone}, // 17
+    const FuriHalAdcChannel adc_channel;
+} js_gpio_pins[] = {
+    {&gpio_ext_pa7, "PA7", FuriHalAdcChannel12}, // 2
+    {&gpio_ext_pa6, "PA6", FuriHalAdcChannel11}, // 3
+    {&gpio_ext_pa4, "PA4", FuriHalAdcChannel9}, // 4
+    {&gpio_ext_pb3, "PB3", FuriHalAdcChannelNone}, // 5
+    {&gpio_ext_pb2, "PB2", FuriHalAdcChannelNone}, // 6
+    {&gpio_ext_pc3, "PC3", FuriHalAdcChannel4}, // 7
+    {&gpio_swclk, "PA14", FuriHalAdcChannelNone}, // 10
+    {&gpio_swdio, "PA13", FuriHalAdcChannelNone}, // 12
+    {&gpio_usart_tx, "PB6", FuriHalAdcChannelNone}, // 13
+    {&gpio_usart_rx, "PB7", FuriHalAdcChannelNone}, // 14
+    {&gpio_ext_pc1, "PC1", FuriHalAdcChannel2}, // 15
+    {&gpio_ext_pc0, "PC0", FuriHalAdcChannel1}, // 16
+    {&gpio_ibutton, "PB14", FuriHalAdcChannelNone}, // 17
 };
 
 bool js_gpio_get_gpio_pull(const char* pull, GpioPull* value) {
@@ -46,46 +44,31 @@ bool js_gpio_get_gpio_pull(const char* pull, GpioPull* value) {
     return false;
 }
 
-bool js_gpio_get_gpio_mode(const char* mode, GpioMode* value) {
-    if(strcmp(mode, "input") == 0) {
-        *value = GpioModeInput;
-        return true;
-    } else if(strcmp(mode, "outputPushPull") == 0) {
-        *value = GpioModeOutputPushPull;
-        return true;
-    } else if(strcmp(mode, "outputOpenDrain") == 0) {
-        *value = GpioModeOutputOpenDrain;
-        return true;
-    } else if(strcmp(mode, "altFunctionPushPull") == 0) {
-        *value = GpioModeAltFunctionPushPull;
-        return true;
-    } else if(strcmp(mode, "altFunctionOpenDrain") == 0) {
-        *value = GpioModeAltFunctionOpenDrain;
-        return true;
-    } else if(strcmp(mode, "analog") == 0) {
-        *value = GpioModeAnalog;
-        return true;
-    } else if(strcmp(mode, "interruptRise") == 0) {
-        *value = GpioModeInterruptRise;
-        return true;
-    } else if(strcmp(mode, "interruptFall") == 0) {
-        *value = GpioModeInterruptFall;
-        return true;
-    } else if(strcmp(mode, "interruptRiseFall") == 0) {
-        *value = GpioModeInterruptRiseFall;
-        return true;
-    } else if(strcmp(mode, "eventRise") == 0) {
-        *value = GpioModeEventRise;
-        return true;
-    } else if(strcmp(mode, "eventFall") == 0) {
-        *value = GpioModeEventFall;
-        return true;
-    } else if(strcmp(mode, "eventRiseFall") == 0) {
-        *value = GpioModeEventRiseFall;
-        return true;
-    } else {
-        return false;
+bool js_gpio_parse_mode(const char* mode_name, GpioMode* mode_out) {
+    static const struct {
+        const char* js_mode_name;
+        GpioMode mode;
+    } name_map[] = {
+        {"input", GpioModeInput},
+        {"outputPushPull", GpioModeOutputPushPull},
+        {"outputOpenDrain", GpioModeOutputOpenDrain},
+        {"analog", GpioModeAnalog},
+        {"interruptRise", GpioModeInterruptRise},
+        {"interruptFall", GpioModeInterruptFall},
+        {"interruptRiseFall", GpioModeInterruptFall},
+        {"eventRise", GpioModeInterruptRiseFall},
+        {"eventFall", GpioModeEventFall},
+        {"eventRiseFall", GpioModeEventRiseFall},
+    };
+
+    for(uint32_t i = 0; i < sizeof(name_map) / sizeof(*name_map); i++) {
+        if(strcmp(mode_name, name_map[i].js_mode_name) == 0) {
+            *mode_out = name_map[i].mode;
+            return true;
+        }
     }
+
+    return false;
 }
 
 const GpioPin* js_gpio_get_gpio_pin(const char* name) {
@@ -97,10 +80,10 @@ const GpioPin* js_gpio_get_gpio_pin(const char* name) {
     return NULL;
 }
 
-FuriHalAdcChannel js_gpio_get_gpio_channel(const char* name) {
+FuriHalAdcChannel js_gpio_get_adc_channel(const char* name) {
     for(size_t i = 0; i < COUNT_OF(js_gpio_pins); i++) {
         if(strcmp(js_gpio_pins[i].name, name) == 0) {
-            return js_gpio_pins[i].channel;
+            return js_gpio_pins[i].adc_channel;
         }
     }
     return FuriHalAdcChannelNone;
@@ -158,7 +141,7 @@ static void js_gpio_init(struct mjs* mjs) {
     }
 
     GpioMode gpio_mode;
-    if(!js_gpio_get_gpio_mode(mode_name, &gpio_mode)) {
+    if(!js_gpio_parse_mode(mode_name, &gpio_mode)) {
         mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid mode name");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
@@ -272,7 +255,7 @@ static void js_gpio_read_analog(struct mjs* mjs) {
         return;
     }
 
-    FuriHalAdcChannel channel = js_gpio_get_gpio_channel(pin_name);
+    FuriHalAdcChannel channel = js_gpio_get_adc_channel(pin_name);
     if(channel == FuriHalAdcChannelNone) {
         mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid pin name");
         mjs_return(mjs, MJS_UNDEFINED);
