@@ -417,7 +417,9 @@ void number_input_set_result_callback(
     int32_t max_value) {
     furi_check(number_input);
 
-    current_number = CLAMP(current_number, max_value, min_value);
+    if(current_number != 0) {
+        current_number = CLAMP(current_number, max_value, min_value);
+    }
 
     with_view_model(
         number_input->view,
@@ -426,7 +428,11 @@ void number_input_set_result_callback(
             model->callback = callback;
             model->callback_context = callback_context;
             model->current_number = current_number;
-            furi_string_printf(model->text_buffer, "%ld", current_number);
+            if(current_number != 0) {
+                furi_string_printf(model->text_buffer, "%ld", current_number);
+            } else {
+                furi_string_set(model->text_buffer, "");
+            }
             model->min_value = min_value;
             model->max_value = max_value;
         },
