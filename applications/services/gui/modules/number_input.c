@@ -93,7 +93,7 @@ static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
     const size_t text_x = 8;
     const size_t text_y = 25;
 
-    elements_slightly_rounded_frame(canvas, 6, 14, 116, 15);
+    elements_slightly_rounded_frame(canvas, 4, 14, 120, 15);
 
     canvas_draw_str(canvas, text_x, text_y, furi_string_get_cstr(model->text_buffer));
 }
