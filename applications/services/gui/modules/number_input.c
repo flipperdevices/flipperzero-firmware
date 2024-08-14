@@ -206,7 +206,7 @@ static void number_input_add_digit(NumberInputModel* model, char* newChar) {
     }
     model->current_number = strtol(furi_string_get_cstr(model->text_buffer), NULL, 10);
     if(model->current_number == 0) {
-        furi_string_reset(model->text_buffer);
+        furi_string_set(model->text_buffer, "0");
     }
 }
 
