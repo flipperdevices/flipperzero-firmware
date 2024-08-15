@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "checkJs": true,
+        "module": "CommonJS",
+        "typeRoots": [
+            "./applications/system/js_app/types"
+        ]
+    },
+    "include": [
+        "applications/system/js_app/examples/apps/Scripts"
+    ]
+}
