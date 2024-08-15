@@ -43,10 +43,10 @@ StrintParseError strint_to_uint64_internal(
     // infer base
     // not assigning directly to `base' to permit prefixes with explicit bases
     uint8_t inferred_base = 0;
-    if(memcmp(str, "0x", 2) == 0 || memcmp(str, "0X", 2) == 0) {
+    if(strncasecmp(str, "0x", 2) == 0) {
         inferred_base = 16;
         str += 2;
-    } else if(memcmp(str, "0b", 2) == 0 || memcmp(str, "0B", 2) == 0) {
+    } else if(strncasecmp(str, "0b", 2) == 0) {
         inferred_base = 2;
         str += 2;
     } else if(*str == '0') {

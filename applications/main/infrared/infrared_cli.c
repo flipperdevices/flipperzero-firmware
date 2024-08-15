@@ -5,6 +5,7 @@
 #include <furi_hal_infrared.h>
 #include <flipper_format.h>
 #include <toolbox/args.h>
+#include <toolbox/strint.h>
 #include <m-dict.h>
 
 #include "infrared_signal.h"
@@ -188,15 +189,11 @@ static bool infrared_cli_parse_raw(const char* str, InfraredSignal* signal) {
             ++str;
         }
 
-        char timing_str[INFRARED_CLI_BUF_SIZE];
-        if(strlen(str) > 9) {
+        char* next_token;
+        uint32_t timing;
+        if(strint_to_uint32(str, &next_token, &timing, 10) != StrintParseNoError) {
             break;
         }
-        strncpy(timing_str, str, sizeof(timing_str));
-        timing_str[sizeof(timing_str) - 1] = 0;
-
-        str += strlen(timing_str);
-        uint32_t timing = atoi(timing_str);
 
         if((timing <= 0) || (timings_size >= MAX_TIMINGS_AMOUNT)) {
             break;
