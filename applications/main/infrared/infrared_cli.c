@@ -189,9 +189,8 @@ static bool infrared_cli_parse_raw(const char* str, InfraredSignal* signal) {
             ++str;
         }
 
-        char* next_token;
         uint32_t timing;
-        if(strint_to_uint32(str, &next_token, &timing, 10) != StrintParseNoError) {
+        if(strint_to_uint32(str, &str, &timing, 10) != StrintParseNoError) {
             break;
         }
 
