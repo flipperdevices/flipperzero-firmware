@@ -1,341 +1,262 @@
-#include "../js_modules.h"
+#include "../js_modules.h" // IWYU pragma: keep
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
 #include <expansion/expansion.h>
+#include <limits.h>
 
 typedef struct {
-    FuriHalAdcHandle* handle;
+    int dummy;
 } JsGpioInst;
 
-static const struct {
+typedef struct {
     const GpioPin* pin;
-    const char* name;
-    const FuriHalAdcChannel adc_channel;
-} js_gpio_pins[] = {
-    {&gpio_ext_pa7, "PA7", FuriHalAdcChannel12}, // 2
-    {&gpio_ext_pa6, "PA6", FuriHalAdcChannel11}, // 3
-    {&gpio_ext_pa4, "PA4", FuriHalAdcChannel9}, // 4
-    {&gpio_ext_pb3, "PB3", FuriHalAdcChannelNone}, // 5
-    {&gpio_ext_pb2, "PB2", FuriHalAdcChannelNone}, // 6
-    {&gpio_ext_pc3, "PC3", FuriHalAdcChannel4}, // 7
-    {&gpio_swclk, "PA14", FuriHalAdcChannelNone}, // 10
-    {&gpio_swdio, "PA13", FuriHalAdcChannelNone}, // 12
-    {&gpio_usart_tx, "PB6", FuriHalAdcChannelNone}, // 13
-    {&gpio_usart_rx, "PB7", FuriHalAdcChannelNone}, // 14
-    {&gpio_ext_pc1, "PC1", FuriHalAdcChannel2}, // 15
-    {&gpio_ext_pc0, "PC0", FuriHalAdcChannel1}, // 16
-    {&gpio_ibutton, "PB14", FuriHalAdcChannelNone}, // 17
-};
+    GpioMode previous_mode;
+    GpioPull previous_pull;
+} JsGpioPinInst;
 
-bool js_gpio_get_gpio_pull(const char* pull, GpioPull* value) {
-    if(strcmp(pull, "no") == 0) {
-        *value = GpioPullNo;
-        return true;
-    } else if(strcmp(pull, "up") == 0) {
-        *value = GpioPullUp;
-        return true;
-    } else if(strcmp(pull, "down") == 0) {
-        *value = GpioPullDown;
-        return true;
-    } else {
-        *value = GpioPullNo;
-        return true;
-    }
-    return false;
-}
-
-bool js_gpio_parse_mode(const char* mode_name, GpioMode* mode_out) {
-    static const struct {
-        const char* js_mode_name;
-        GpioMode mode;
-    } name_map[] = {
-        {"input", GpioModeInput},
-        {"outputPushPull", GpioModeOutputPushPull},
-        {"outputOpenDrain", GpioModeOutputOpenDrain},
-        {"analog", GpioModeAnalog},
-        {"interruptRise", GpioModeInterruptRise},
-        {"interruptFall", GpioModeInterruptFall},
-        {"interruptRiseFall", GpioModeInterruptFall},
-        {"eventRise", GpioModeInterruptRiseFall},
-        {"eventFall", GpioModeEventFall},
-        {"eventRiseFall", GpioModeEventRiseFall},
-    };
-
-    for(uint32_t i = 0; i < sizeof(name_map) / sizeof(*name_map); i++) {
-        if(strcmp(mode_name, name_map[i].js_mode_name) == 0) {
-            *mode_out = name_map[i].mode;
-            return true;
-        }
-    }
-
-    return false;
-}
-
-const GpioPin* js_gpio_get_gpio_pin(const char* name) {
-    for(size_t i = 0; i < COUNT_OF(js_gpio_pins); i++) {
-        if(strcmp(js_gpio_pins[i].name, name) == 0) {
-            return js_gpio_pins[i].pin;
-        }
-    }
-    return NULL;
-}
-
-FuriHalAdcChannel js_gpio_get_adc_channel(const char* name) {
-    for(size_t i = 0; i < COUNT_OF(js_gpio_pins); i++) {
-        if(strcmp(js_gpio_pins[i].name, name) == 0) {
-            return js_gpio_pins[i].adc_channel;
-        }
-    }
-    return FuriHalAdcChannelNone;
-}
-
+/**
+ * @brief Initializes a GPIO pin according to the provided mode object
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let led = gpio.get("pc3");
+ * led.init({ direction: "out", outMode: "push_pull" });
+ * ```
+ */
 static void js_gpio_init(struct mjs* mjs) {
-    mjs_val_t pin_arg = mjs_arg(mjs, 0);
-    mjs_val_t mode_arg = mjs_arg(mjs, 1);
-    mjs_val_t pull_arg = mjs_arg(mjs, 2);
+    // deconstruct mode object
+    mjs_val_t mode_arg = mjs_arg(mjs, 0);
+    if(!mjs_is_object(mode_arg)) {
+        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: expected mode object");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+    mjs_val_t direction_arg = mjs_get(mjs, mode_arg, "direction", ~0);
+    mjs_val_t out_mode_arg = mjs_get(mjs, mode_arg, "outMode", ~0);
+    mjs_val_t in_mode_arg = mjs_get(mjs, mode_arg, "inMode", ~0);
+    mjs_val_t edge_arg = mjs_get(mjs, mode_arg, "edge", ~0);
+    mjs_val_t pull_arg = mjs_get(mjs, mode_arg, "pull", ~0);
 
-    if(!mjs_is_string(pin_arg)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Argument must be a string");
+    // get strings
+    const char* direction = mjs_get_string(mjs, &direction_arg, NULL);
+    const char* out_mode = mjs_get_string(mjs, &out_mode_arg, NULL);
+    const char* in_mode = mjs_get_string(mjs, &in_mode_arg, NULL);
+    const char* edge = mjs_get_string(mjs, &edge_arg, NULL);
+    const char* pull = mjs_get_string(mjs, &pull_arg, NULL);
+    if(!direction) {
+        mjs_prepend_errorf(
+            mjs,
+            MJS_BAD_ARGS_ERROR,
+            "Invalid argument: expected string in \"direction\" field of mode object");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+    if(!out_mode) out_mode = "open_drain";
+    if(!in_mode) in_mode = "plain_digital";
+    if(!edge) edge = "rising";
+
+    // convert strings to mode
+    // FIXME: make me pretty ^_^
+    GpioMode mode;
+    if(strcmp(direction, "out") == 0 && strcmp(out_mode, "push_pull") == 0) {
+        mode = GpioModeOutputPushPull;
+    } else if(strcmp(direction, "out") == 0 && strcmp(out_mode, "open_drain") == 0) {
+        mode = GpioModeOutputOpenDrain;
+    } else if(strcmp(direction, "in") == 0 && strcmp(in_mode, "analog") == 0) {
+        mode = GpioModeAnalog;
+    } else if(strcmp(direction, "in") == 0 && strcmp(in_mode, "plain_digital") == 0) {
+        mode = GpioModeInput;
+    } else if(
+        strcmp(direction, "in") == 0 && strcmp(in_mode, "interrupt") == 0 &&
+        strcmp(edge, "rising") == 0) {
+        mode = GpioModeInterruptRise;
+    } else if(
+        strcmp(direction, "in") == 0 && strcmp(in_mode, "interrupt") == 0 &&
+        strcmp(edge, "falling") == 0) {
+        mode = GpioModeInterruptFall;
+    } else if(
+        strcmp(direction, "in") == 0 && strcmp(in_mode, "interrupt") == 0 &&
+        strcmp(edge, "both") == 0) {
+        mode = GpioModeInterruptRiseFall;
+    } else if(
+        strcmp(direction, "in") == 0 && strcmp(in_mode, "event") == 0 &&
+        strcmp(edge, "rising") == 0) {
+        mode = GpioModeEventRise;
+    } else if(
+        strcmp(direction, "in") == 0 && strcmp(in_mode, "event") == 0 &&
+        strcmp(edge, "falling") == 0) {
+        mode = GpioModeEventFall;
+    } else if(
+        strcmp(direction, "in") == 0 && strcmp(in_mode, "event") == 0 &&
+        strcmp(edge, "both") == 0) {
+        mode = GpioModeEventRiseFall;
+    } else {
+        mjs_prepend_errorf(
+            mjs,
+            MJS_BAD_ARGS_ERROR,
+            "Invalid argument: invalid combination of fields in mode object");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
 
-    const char* pin_name = mjs_get_string(mjs, &pin_arg, NULL);
-    if(!pin_name) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Failed to get pin name");
+    // convert pull
+    GpioPull pull_mode;
+    if(!pull) {
+        pull_mode = GpioPullNo;
+    } else if(strcmp(pull, "up") == 0) {
+        pull_mode = GpioPullUp;
+    } else if(strcmp(pull, "down") == 0) {
+        pull_mode = GpioPullDown;
+    } else {
+        mjs_prepend_errorf(
+            mjs,
+            MJS_BAD_ARGS_ERROR,
+            "Invalid argument: invalid combination of fields in mode object");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
 
-    if(!mjs_is_string(mode_arg)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Argument must be a string");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
+    // get state
+    mjs_val_t manager = mjs_get_this(mjs);
+    JsGpioPinInst* manager_data =
+        (JsGpioPinInst*)(uint32_t)(mjs_get(mjs, manager, INST_PROP_NAME, ~0) & 0xFFFFFFFF);
 
-    const char* mode_name = mjs_get_string(mjs, &mode_arg, NULL);
-    if(!mode_name) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Failed to get mode name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    if(!mjs_is_string(pull_arg)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Argument must be a string");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    const char* pull_name = mjs_get_string(mjs, &pull_arg, NULL);
-    if(!pull_name) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Failed to get pull name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    const GpioPin* gpio_pin = js_gpio_get_gpio_pin(pin_name);
-    if(gpio_pin == NULL) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid pin name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    GpioMode gpio_mode;
-    if(!js_gpio_parse_mode(mode_name, &gpio_mode)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid mode name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    GpioPull gpio_pull;
-    if(!js_gpio_get_gpio_pull(pull_name, &gpio_pull)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid pull name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    expansion_disable(furi_record_open(RECORD_EXPANSION));
-    furi_record_close(RECORD_EXPANSION);
-
-    furi_hal_gpio_init(gpio_pin, gpio_mode, gpio_pull, GpioSpeedVeryHigh);
+    // init GPIO
+    furi_hal_gpio_init(manager_data->pin, mode, pull_mode, GpioSpeedVeryHigh);
 
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
+/**
+ * @brief Writes a logic value to a GPIO pin 
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let led = gpio.get("pc3");
+ * led.init({ direction: "out", outMode: "push_pull" });
+ * led.write(true);
+ */
 static void js_gpio_write(struct mjs* mjs) {
-    mjs_val_t pin_arg = mjs_arg(mjs, 0);
-    mjs_val_t value_arg = mjs_arg(mjs, 1);
-
-    if(!mjs_is_string(pin_arg)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Argument must be a string");
+    // get argument
+    mjs_val_t level_arg = mjs_arg(mjs, 0);
+    if(!mjs_is_boolean(level_arg)) {
+        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: expected boolean");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
+    bool logic_level = mjs_get_bool(mjs, level_arg);
 
-    const char* pin_name = mjs_get_string(mjs, &pin_arg, NULL);
-    if(!pin_name) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Failed to get pin name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
+    // get state
+    mjs_val_t manager = mjs_get_this(mjs);
+    JsGpioPinInst* manager_data =
+        (JsGpioPinInst*)(uint32_t)(mjs_get(mjs, manager, INST_PROP_NAME, ~0) & 0xFFFFFFFF);
 
-    if(!mjs_is_boolean(value_arg)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Argument must be a boolean");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    bool value = mjs_get_bool(mjs, value_arg);
-
-    const GpioPin* gpio_pin = js_gpio_get_gpio_pin(pin_name);
-
-    if(gpio_pin == NULL) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid pin name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    furi_hal_gpio_write(gpio_pin, value);
+    // set level
+    furi_hal_gpio_write(manager_data->pin, logic_level);
 
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
+/**
+ * @brief Reads a logic value from a GPIO pin
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let button = gpio.get("pc1");
+ * button.init({ direction: "in" });
+ * if(button.read())
+ *     print("hi button!!!!!");
+ */
 static void js_gpio_read(struct mjs* mjs) {
-    mjs_val_t pin_arg = mjs_arg(mjs, 0);
+    // get state
+    mjs_val_t manager = mjs_get_this(mjs);
+    JsGpioPinInst* manager_data =
+        (JsGpioPinInst*)(uint32_t)(mjs_get(mjs, manager, INST_PROP_NAME, ~0) & 0xFFFFFFFF);
 
-    if(!mjs_is_string(pin_arg)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Argument must be a string");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    const char* pin_name = mjs_get_string(mjs, &pin_arg, NULL);
-    if(!pin_name) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Failed to get pin name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    const GpioPin* gpio_pin = js_gpio_get_gpio_pin(pin_name);
-
-    if(gpio_pin == NULL) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid pin name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    bool value = furi_hal_gpio_read(gpio_pin);
+    // get level
+    bool value = furi_hal_gpio_read(manager_data->pin);
 
     mjs_return(mjs, mjs_mk_boolean(mjs, value));
 }
 
-static void js_gpio_read_analog(struct mjs* mjs) {
-    mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
-    JsGpioInst* gpio = mjs_get_ptr(mjs, obj_inst);
-    furi_assert(gpio);
+/**
+ * @brief Returns an object that manages a specified pin.
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let led = gpio.get("pc3");
+ * ```
+ */
+static void js_gpio_get(struct mjs* mjs) {
+    mjs_val_t name_arg = mjs_arg(mjs, 0);
+    const char* name_string = mjs_get_string(mjs, &name_arg, NULL);
+    const GpioPinRecord* pin_record = NULL;
 
-    if(gpio->handle == NULL) {
-        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Analog mode not started");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    mjs_val_t pin_arg = mjs_arg(mjs, 0);
-
-    if(!mjs_is_string(pin_arg)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Argument must be a string");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    const char* pin_name = mjs_get_string(mjs, &pin_arg, NULL);
-    if(!pin_name) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Failed to get pin name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    FuriHalAdcChannel channel = js_gpio_get_adc_channel(pin_name);
-    if(channel == FuriHalAdcChannelNone) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid pin name");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    uint16_t adc_value = furi_hal_adc_read(gpio->handle, channel);
-    float adc_mv = furi_hal_adc_convert_to_voltage(gpio->handle, adc_value);
-
-    mjs_return(mjs, mjs_mk_number(mjs, adc_mv));
-}
-
-static void js_gpio_start_analog(struct mjs* mjs) {
-    mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
-    JsGpioInst* gpio = mjs_get_ptr(mjs, obj_inst);
-    furi_assert(gpio);
-
-    FuriHalAdcScale scale = FuriHalAdcScale2048;
-    if(mjs_nargs(mjs) > 0) {
-        mjs_val_t scale_arg = mjs_arg(mjs, 0);
-
-        if(!mjs_is_number(scale_arg)) {
-            mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Argument must be a number");
-            mjs_return(mjs, MJS_UNDEFINED);
-            return;
+    // parse input argument to a pin pointer
+    if(name_string) {
+        // find pin with matching name ignoring case
+        FuriString* name_fstr = furi_string_alloc();
+        furi_string_set(name_fstr, name_string);
+        for(size_t i = 0; i < gpio_pins_count; i++) {
+            if(furi_string_cmpi_str(name_fstr, gpio_pins[i].name) == 0) {
+                pin_record = &gpio_pins[i];
+                break;
+            }
         }
-
-        int32_t scale_num = mjs_get_int32(mjs, scale_arg);
-        if(scale_num == 2048 || scale_num == 2000) { // 2 volt reference
-            scale = FuriHalAdcScale2048;
-        } else if(scale_num == 2500) { // 2.5 volt reference
-            scale = FuriHalAdcScale2500;
-        } else {
-            mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid scale");
-            mjs_return(mjs, MJS_UNDEFINED);
-            return;
+        furi_string_free(name_fstr);
+    } else if(mjs_is_number(name_arg)) {
+        // find pin with matching number
+        int name_int = mjs_get_int(mjs, name_arg);
+        for(size_t i = 0; i < gpio_pins_count; i++) {
+            if(name_int == gpio_pins[i].number) {
+                pin_record = &gpio_pins[i];
+                break;
+            }
         }
-    }
-
-    if(gpio->handle != NULL) {
-        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Analog mode already started");
+    } else {
+        mjs_prepend_errorf(
+            mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: must be either a string or a number");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
 
-    gpio->handle = furi_hal_adc_acquire();
-    furi_hal_adc_configure_ex(
-        gpio->handle,
-        scale,
-        FuriHalAdcClockSync64,
-        FuriHalAdcOversample64,
-        FuriHalAdcSamplingtime247_5);
-}
-
-static void js_gpio_stop_analog(struct mjs* mjs) {
-    mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
-    JsGpioInst* gpio = mjs_get_ptr(mjs, obj_inst);
-    furi_assert(gpio);
-
-    if(gpio->handle == NULL) {
-        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Analog mode not started");
+    if(!pin_record) {
+        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: pin not found on device");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
 
-    furi_hal_adc_release(gpio->handle);
-    gpio->handle = NULL;
+    if(pin_record->debug) {
+        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: pin is used for debugging");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
+    // return pin manager object
+    mjs_val_t manager = mjs_mk_object(mjs);
+    JsGpioPinInst* manager_data = malloc(sizeof(JsGpioPinInst));
+    manager_data->pin = pin_record->pin;
+    mjs_set(mjs, manager, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, manager_data));
+    mjs_set(mjs, manager, "init", ~0, MJS_MK_FN(js_gpio_init));
+    mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
+    mjs_set(mjs, manager, "read", ~0, MJS_MK_FN(js_gpio_read));
+    mjs_return(mjs, manager);
 }
 
 static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
     JsGpioInst* gpio = malloc(sizeof(JsGpioInst));
-    gpio->handle = NULL;
+
     mjs_val_t gpio_obj = mjs_mk_object(mjs);
     mjs_set(mjs, gpio_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, gpio));
-    mjs_set(mjs, gpio_obj, "init", ~0, MJS_MK_FN(js_gpio_init));
-    mjs_set(mjs, gpio_obj, "write", ~0, MJS_MK_FN(js_gpio_write));
-    mjs_set(mjs, gpio_obj, "read", ~0, MJS_MK_FN(js_gpio_read));
-    mjs_set(mjs, gpio_obj, "readAnalog", ~0, MJS_MK_FN(js_gpio_read_analog));
-    mjs_set(mjs, gpio_obj, "startAnalog", ~0, MJS_MK_FN(js_gpio_start_analog));
-    mjs_set(mjs, gpio_obj, "stopAnalog", ~0, MJS_MK_FN(js_gpio_stop_analog));
+    mjs_set(mjs, gpio_obj, "get", ~0, MJS_MK_FN(js_gpio_get));
     *object = gpio_obj;
 
     return (void*)gpio;
@@ -344,18 +265,11 @@ static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
 static void js_gpio_destroy(void* inst) {
     if(inst != NULL) {
         JsGpioInst* gpio = (JsGpioInst*)inst;
-        if(gpio->handle != NULL) {
-            furi_hal_adc_release(gpio->handle);
-            gpio->handle = NULL;
-        }
+        // TODO: release resources
         free(gpio);
     }
 
-    // loop through all pins and reset them to analog mode
-    for(size_t i = 0; i < COUNT_OF(js_gpio_pins); i++) {
-        furi_hal_gpio_write(js_gpio_pins[i].pin, false);
-        furi_hal_gpio_init(js_gpio_pins[i].pin, GpioModeAnalog, GpioPullNo, GpioSpeedVeryHigh);
-    }
+    // TODO: reset pins
 
     expansion_enable(furi_record_open(RECORD_EXPANSION));
     furi_record_close(RECORD_EXPANSION);

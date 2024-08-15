@@ -1,31 +1,35 @@
+/// <reference types="../../../types/global" />
+/// <reference types="../../../types/gpio" />
 let gpio = require("gpio");
 
 // initialize pins
-gpio.init("PC3", "outputPushPull", "up"); // pin, mode, pull
-print("PC3 is initialized as outputPushPull with pull-up");
+let led = gpio.get("pc3"); // same as `gpio.get(7)`
+let button = gpio.get("pc1"); // same as `gpio.get(15)`
+led.init({ direction: "out", outMode: "push_pull" });
+button.init({ direction: "in", pull: "down" });
 
-gpio.init("PC1", "input", "down"); // pin, mode, pull
-print("PC1 is initialized as input with pull-down");
-
-// let led on PC3 blink
-gpio.write("PC3", true); // high
+// blink led twice
+print("Commencing blinking")
+led.write(true);
 delay(1000);
-gpio.write("PC3", false); // low
+led.write(false);
 delay(1000);
-gpio.write("PC3", true);  // high
+led.write(true);
 delay(1000);
-gpio.write("PC3", false); // low
+led.write(false);
 
 // read value from PC1 and write it to PC3
+print("Mirroring button to LED every 100ms");
 while (true) {
-    let value = gpio.read("PC1");
-    gpio.write("PC3", value);
+    let value = button.read();
+    led.write(value);
 
     value ? print("PC1 is high") : print("PC1 is low");
 
     delay(100);
 }
 
+// TODO: interrupts and events
 
 // possible pins https://docs.flipper.net/gpio-and-modules#miFsS
 // "PA7" aka 2
@@ -43,20 +47,17 @@ while (true) {
 // "PB14" aka 17
 
 // possible modes
-// "input"
-// "outputPushPull"
-// "outputOpenDrain"
-// "altFunctionPushPull"
-// "altFunctionOpenDrain"
-// "analog"
-// "interruptRise"
-// "interruptFall"
-// "interruptRiseFall"
-// "eventRise"
-// "eventFall"
-// "eventRiseFall"
-
-// possible pull
-// "no"
-// "up"
-// "down"
+// { direction: "out", outMode: "push_pull" }
+// { direction: "out", outMode: "open_drain" }
+// { direction: "out", outMode: "push_pull", altFn: true }
+// { direction: "out", outMode: "open_drain", altFn: true }
+// { direction: "in", inMode: "analog" }
+// { direction: "in", inMode: "plain_digital" }
+// { direction: "in", inMode: "interrupt", edge: "rising" }
+// { direction: "in", inMode: "interrupt", edge: "falling" }
+// { direction: "in", inMode: "interrupt", edge: "both" }
+// { direction: "in", inMode: "event", edge: "rising" }
+// { direction: "in", inMode: "event", edge: "falling" }
+// { direction: "in", inMode: "event", edge: "both" }
+// all variants support an optional `pull` field which can either be undefined,
+// "up" or "down"
