@@ -80,43 +80,43 @@ static void js_gpio_init(struct mjs* mjs) {
     if(!edge) edge = "rising";
 
     // convert strings to mode
-    // FIXME: make me pretty ^_^
+    // FIXME: make me even prettier, maybe? ^_^
     GpioMode mode;
-    if(strcmp(direction, "out") == 0 && strcmp(out_mode, "push_pull") == 0) {
-        mode = GpioModeOutputPushPull;
-    } else if(strcmp(direction, "out") == 0 && strcmp(out_mode, "open_drain") == 0) {
-        mode = GpioModeOutputOpenDrain;
-    } else if(strcmp(direction, "in") == 0 && strcmp(in_mode, "analog") == 0) {
-        mode = GpioModeAnalog;
-    } else if(strcmp(direction, "in") == 0 && strcmp(in_mode, "plain_digital") == 0) {
-        mode = GpioModeInput;
-    } else if(
-        strcmp(direction, "in") == 0 && strcmp(in_mode, "interrupt") == 0 &&
-        strcmp(edge, "rising") == 0) {
-        mode = GpioModeInterruptRise;
-    } else if(
-        strcmp(direction, "in") == 0 && strcmp(in_mode, "interrupt") == 0 &&
-        strcmp(edge, "falling") == 0) {
-        mode = GpioModeInterruptFall;
-    } else if(
-        strcmp(direction, "in") == 0 && strcmp(in_mode, "interrupt") == 0 &&
-        strcmp(edge, "both") == 0) {
-        mode = GpioModeInterruptRiseFall;
-    } else if(
-        strcmp(direction, "in") == 0 && strcmp(in_mode, "event") == 0 &&
-        strcmp(edge, "rising") == 0) {
-        mode = GpioModeEventRise;
-    } else if(
-        strcmp(direction, "in") == 0 && strcmp(in_mode, "event") == 0 &&
-        strcmp(edge, "falling") == 0) {
-        mode = GpioModeEventFall;
-    } else if(
-        strcmp(direction, "in") == 0 && strcmp(in_mode, "event") == 0 &&
-        strcmp(edge, "both") == 0) {
-        mode = GpioModeEventRiseFall;
+    if(strcmp(direction, "out") == 0) {
+        if(strcmp(out_mode, "push_pull") == 0)
+            mode = GpioModeOutputPushPull;
+        else if(strcmp(out_mode, "open_drain") == 0)
+            mode = GpioModeOutputOpenDrain;
+        else
+            JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "invalid outMode");
+    } else if(strcmp(direction, "in") == 0) {
+        if(strcmp(in_mode, "analog") == 0) {
+            mode = GpioModeAnalog;
+        } else if(strcmp(in_mode, "plain_digital") == 0) {
+            mode = GpioModeInput;
+        } else if(strcmp(in_mode, "interrupt") == 0) {
+            if(strcmp(edge, "rising") == 0)
+                mode = GpioModeInterruptRise;
+            else if(strcmp(edge, "falling") == 0)
+                mode = GpioModeInterruptFall;
+            else if(strcmp(edge, "both") == 0)
+                mode = GpioModeInterruptRiseFall;
+            else
+                JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "invalid edge");
+        } else if(strcmp(in_mode, "event") == 0) {
+            if(strcmp(edge, "rising") == 0)
+                mode = GpioModeEventRise;
+            else if(strcmp(edge, "falling") == 0)
+                mode = GpioModeEventFall;
+            else if(strcmp(edge, "both") == 0)
+                mode = GpioModeEventRiseFall;
+            else
+                JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "invalid edge");
+        } else {
+            JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "invalid inMode");
+        }
     } else {
-        JS_ERROR_AND_RETURN(
-            mjs, MJS_BAD_ARGS_ERROR, "Invalid combination of fields in mode object");
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "invalid direction");
     }
 
     // convert pull
@@ -128,7 +128,7 @@ static void js_gpio_init(struct mjs* mjs) {
     } else if(strcmp(pull, "down") == 0) {
         pull_mode = GpioPullDown;
     } else {
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Invalid pull mode");
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "invalid pull");
     }
 
     // get state
@@ -410,7 +410,7 @@ static void js_gpio_destroy(void* inst) {
             // The module destructor is only ever called shortly before the mjs
             // destructor is called, which may not free our owned object. It looks
             // like it does do so (since no memory leaks manifest themselves),
-            // but idk \(-_-)/
+            // but idk, seems janky \(-_-)/
         }
 
         // free buffers
@@ -422,6 +422,8 @@ static void js_gpio_destroy(void* inst) {
     expansion_enable(furi_record_open(RECORD_EXPANSION));
     furi_record_close(RECORD_EXPANSION);
 }
+
+// TODO: ADC
 
 static const JsModuleDescriptor js_gpio_desc = {
     "gpio",
