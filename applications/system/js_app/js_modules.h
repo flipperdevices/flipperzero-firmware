@@ -7,6 +7,13 @@
 #define PLUGIN_APP_ID      "js"
 #define PLUGIN_API_VERSION 1
 
+#define JS_ERROR_AND_RETURN(mjs, error_code, ...)         \
+    do {                                                  \
+        mjs_prepend_errorf(mjs, error_code, __VA_ARGS__); \
+        mjs_return(mjs, MJS_UNDEFINED);                   \
+        return;                                           \
+    } while(0);
+
 typedef void* (*JsModeConstructor)(struct mjs* mjs, mjs_val_t* object);
 typedef void (*JsModeDestructor)(void* inst);
 

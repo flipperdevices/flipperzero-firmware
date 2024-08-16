@@ -6,10 +6,10 @@ let gpio = require("gpio");
 let led = gpio.get("pc3"); // same as `gpio.get(7)`
 let button = gpio.get("pc1"); // same as `gpio.get(15)`
 led.init({ direction: "out", outMode: "push_pull" });
-button.init({ direction: "in", pull: "down" });
+button.init({ direction: "in", pull: "down", inMode: "interrupt", edge: "rising" });
 
 // blink led twice
-print("Commencing blinking")
+print("Commencing blinking (PC3)");
 led.write(true);
 delay(1000);
 led.write(false);
@@ -18,18 +18,16 @@ led.write(true);
 delay(1000);
 led.write(false);
 
-// read value from PC1 and write it to PC3
-print("Mirroring button to LED every 100ms");
-while (true) {
-    let value = button.read();
-    led.write(value);
+// attach interrupt handler
+print("Press the button (PC1)");
+button.attach_handler(function (button) {
+    print("Button pressed");
+    button.detach_handler();
+    print("Press the back button");
+});
 
-    value ? print("PC1 is high") : print("PC1 is low");
-
-    delay(100);
-}
-
-// TODO: interrupts and events
+// the program will just exit unless this is here
+while (true) gpio.process_interrupts(true);
 
 // possible pins https://docs.flipper.net/gpio-and-modules#miFsS
 // "PA7" aka 2

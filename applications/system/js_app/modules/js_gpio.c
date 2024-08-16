@@ -4,14 +4,28 @@
 #include <expansion/expansion.h>
 #include <limits.h>
 
+#define INTERRUPT_QUEUE_LEN 16
+
 typedef struct {
-    int dummy;
+    FuriMessageQueue* interrupt_queue;
 } JsGpioInst;
+
+typedef struct {
+    mjs_val_t callback;
+    mjs_val_t manager;
+} JsGpioInterruptMessage;
+
+typedef struct {
+    FuriMessageQueue* interrupt_queue;
+    JsGpioInterruptMessage message;
+} JsGpioIsrContext;
 
 typedef struct {
     const GpioPin* pin;
     GpioMode previous_mode;
     GpioPull previous_pull;
+    FuriMessageQueue* interrupt_queue;
+    JsGpioIsrContext* isr_context;
 } JsGpioPinInst;
 
 /**
@@ -28,11 +42,8 @@ typedef struct {
 static void js_gpio_init(struct mjs* mjs) {
     // deconstruct mode object
     mjs_val_t mode_arg = mjs_arg(mjs, 0);
-    if(!mjs_is_object(mode_arg)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: expected mode object");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
+    if(!mjs_is_object(mode_arg))
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: expected mode object");
     mjs_val_t direction_arg = mjs_get(mjs, mode_arg, "direction", ~0);
     mjs_val_t out_mode_arg = mjs_get(mjs, mode_arg, "outMode", ~0);
     mjs_val_t in_mode_arg = mjs_get(mjs, mode_arg, "inMode", ~0);
@@ -45,14 +56,9 @@ static void js_gpio_init(struct mjs* mjs) {
     const char* in_mode = mjs_get_string(mjs, &in_mode_arg, NULL);
     const char* edge = mjs_get_string(mjs, &edge_arg, NULL);
     const char* pull = mjs_get_string(mjs, &pull_arg, NULL);
-    if(!direction) {
-        mjs_prepend_errorf(
-            mjs,
-            MJS_BAD_ARGS_ERROR,
-            "Invalid argument: expected string in \"direction\" field of mode object");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
+    if(!direction)
+        JS_ERROR_AND_RETURN(
+            mjs, MJS_BAD_ARGS_ERROR, "Expected string in \"direction\" field of mode object");
     if(!out_mode) out_mode = "open_drain";
     if(!in_mode) in_mode = "plain_digital";
     if(!edge) edge = "rising";
@@ -93,12 +99,8 @@ static void js_gpio_init(struct mjs* mjs) {
         strcmp(edge, "both") == 0) {
         mode = GpioModeEventRiseFall;
     } else {
-        mjs_prepend_errorf(
-            mjs,
-            MJS_BAD_ARGS_ERROR,
-            "Invalid argument: invalid combination of fields in mode object");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
+        JS_ERROR_AND_RETURN(
+            mjs, MJS_BAD_ARGS_ERROR, "Invalid combination of fields in mode object");
     }
 
     // convert pull
@@ -110,12 +112,7 @@ static void js_gpio_init(struct mjs* mjs) {
     } else if(strcmp(pull, "down") == 0) {
         pull_mode = GpioPullDown;
     } else {
-        mjs_prepend_errorf(
-            mjs,
-            MJS_BAD_ARGS_ERROR,
-            "Invalid argument: invalid combination of fields in mode object");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Invalid pull mode");
     }
 
     // get state
@@ -139,15 +136,13 @@ static void js_gpio_init(struct mjs* mjs) {
  * let led = gpio.get("pc3");
  * led.init({ direction: "out", outMode: "push_pull" });
  * led.write(true);
+ * ```
  */
 static void js_gpio_write(struct mjs* mjs) {
     // get argument
     mjs_val_t level_arg = mjs_arg(mjs, 0);
-    if(!mjs_is_boolean(level_arg)) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: expected boolean");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
+    if(!mjs_is_boolean(level_arg))
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Must be a boolean");
     bool logic_level = mjs_get_bool(mjs, level_arg);
 
     // get state
@@ -172,6 +167,7 @@ static void js_gpio_write(struct mjs* mjs) {
  * button.init({ direction: "in" });
  * if(button.read())
  *     print("hi button!!!!!");
+ * ```
  */
 static void js_gpio_read(struct mjs* mjs) {
     // get state
@@ -183,6 +179,84 @@ static void js_gpio_read(struct mjs* mjs) {
     bool value = furi_hal_gpio_read(manager_data->pin);
 
     mjs_return(mjs, mjs_mk_boolean(mjs, value));
+}
+
+/**
+ * @brief Interrupt callback
+ */
+static void js_gpio_int_cb(void* arg) {
+    JsGpioIsrContext* context = (JsGpioIsrContext*)arg;
+    furi_message_queue_put(context->interrupt_queue, &context->message, 0);
+}
+
+/**
+ * @brief Attaches an interrupt handler to a GPIO pin
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let button = gpio.get("pc1");
+ * button.init({ direction: "in", inMode: "interrupt", edge: "rising" });
+ * button.attach_handler(function () {
+ *     print("Button pressed");
+ * });
+ * while(true) gpio.process_interrupts(true);
+ * ```
+ */
+static void js_gpio_attach_handler(struct mjs* mjs) {
+    // get argument
+    mjs_val_t callback_arg = mjs_arg(mjs, 0);
+    if(!mjs_is_function(callback_arg))
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Must be a function");
+
+    // get state
+    mjs_val_t manager = mjs_get_this(mjs);
+    JsGpioPinInst* manager_data =
+        (JsGpioPinInst*)(uint32_t)(mjs_get(mjs, manager, INST_PROP_NAME, ~0) & 0xFFFFFFFF);
+
+    // attach interrupt
+    if(manager_data->isr_context) free(manager_data->isr_context);
+    JsGpioIsrContext* context = malloc(sizeof(JsGpioIsrContext));
+    context->interrupt_queue = manager_data->interrupt_queue;
+    context->message.callback = callback_arg;
+    context->message.manager = manager;
+    manager_data->isr_context = context;
+    furi_hal_gpio_remove_int_callback(manager_data->pin);
+    furi_hal_gpio_add_int_callback(manager_data->pin, js_gpio_int_cb, (void*)context);
+    furi_hal_gpio_enable_int_callback(manager_data->pin);
+
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
+/**
+ * @brief Detaches an interrupt handler from a GPIO pin
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let button = gpio.get("pc1");
+ * button.init({ direction: "in", inMode: "interrupt", edge: "rising" });
+ * button.attach_handler(function () {
+ *     print("Button pressed");
+ *     button.detach_handler();
+ * });
+ * while(true) gpio.process_interrupts(true);
+ * ```
+ */
+static void js_gpio_detach_handler(struct mjs* mjs) {
+    // get state
+    mjs_val_t manager = mjs_get_this(mjs);
+    JsGpioPinInst* manager_data =
+        (JsGpioPinInst*)(uint32_t)(mjs_get(mjs, manager, INST_PROP_NAME, ~0) & 0xFFFFFFFF);
+
+    // detach interrupt
+    if(manager_data->isr_context) free(manager_data->isr_context);
+    furi_hal_gpio_remove_int_callback(manager_data->pin);
+    furi_message_queue_reset(manager_data->interrupt_queue);
+
+    mjs_return(mjs, MJS_UNDEFINED);
 }
 
 /**
@@ -222,44 +296,74 @@ static void js_gpio_get(struct mjs* mjs) {
             }
         }
     } else {
-        mjs_prepend_errorf(
-            mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: must be either a string or a number");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Must be either a string or a number");
     }
 
-    if(!pin_record) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: pin not found on device");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    if(pin_record->debug) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: pin is used for debugging");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
+    if(!pin_record) JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Pin not found on device");
+    if(pin_record->debug)
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Pin is used for debugging");
 
     // return pin manager object
+    JsGpioInst* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
     mjs_val_t manager = mjs_mk_object(mjs);
     JsGpioPinInst* manager_data = malloc(sizeof(JsGpioPinInst));
     manager_data->pin = pin_record->pin;
+    manager_data->interrupt_queue = module->interrupt_queue;
     mjs_set(mjs, manager, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, manager_data));
     mjs_set(mjs, manager, "init", ~0, MJS_MK_FN(js_gpio_init));
     mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
     mjs_set(mjs, manager, "read", ~0, MJS_MK_FN(js_gpio_read));
+    mjs_set(mjs, manager, "attach_handler", ~0, MJS_MK_FN(js_gpio_attach_handler));
+    mjs_set(mjs, manager, "detach_handler", ~0, MJS_MK_FN(js_gpio_detach_handler));
     mjs_return(mjs, manager);
 }
 
+/**
+ * @brief Processes GPIO interrupts in either a blocking or a non-blocking
+ * fashion
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let button = gpio.get("pc1");
+ * button.init({ direction: "in", inMode: "interrupt", edge: "rising" });
+ * button.attach_handler(function () {
+ *     print("Button pressed");
+ * });
+ * while(true) gpio.process_interrupts(true);
+ * ```
+ */
+static void js_gpio_process_interrupts(struct mjs* mjs) {
+    // get argument
+    mjs_val_t block_arg = mjs_arg(mjs, 0);
+    if(!mjs_is_boolean(block_arg))
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Must be a boolean");
+    bool block = mjs_get_bool(mjs, block_arg);
+
+    // get new messages
+    JsGpioInst* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+    JsGpioInterruptMessage message;
+    while(furi_message_queue_get(
+              module->interrupt_queue, (void*)&message, block ? FuriWaitForever : 0) ==
+          FuriStatusOk) {
+        mjs_call(mjs, NULL, message.callback, MJS_UNDEFINED, 1, message.manager);
+    }
+}
+
 static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
-    JsGpioInst* gpio = malloc(sizeof(JsGpioInst));
+    JsGpioInst* module = malloc(sizeof(JsGpioInst));
+    module->interrupt_queue =
+        furi_message_queue_alloc(INTERRUPT_QUEUE_LEN, sizeof(JsGpioInterruptMessage));
 
     mjs_val_t gpio_obj = mjs_mk_object(mjs);
-    mjs_set(mjs, gpio_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, gpio));
+
+    mjs_set(mjs, gpio_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
     mjs_set(mjs, gpio_obj, "get", ~0, MJS_MK_FN(js_gpio_get));
+    mjs_set(mjs, gpio_obj, "process_interrupts", ~0, MJS_MK_FN(js_gpio_process_interrupts));
     *object = gpio_obj;
 
-    return (void*)gpio;
+    return (void*)module;
 }
 
 static void js_gpio_destroy(void* inst) {
