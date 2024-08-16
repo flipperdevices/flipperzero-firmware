@@ -6,27 +6,43 @@
 
 #define INTERRUPT_QUEUE_LEN 16
 
-typedef struct {
-    FuriMessageQueue* interrupt_queue;
-} JsGpioInst;
-
+/**
+ * ISRs send messages to the module's `interrupt_queue` to be processed later
+ */
 typedef struct {
     mjs_val_t callback;
     mjs_val_t manager;
 } JsGpioInterruptMessage;
 
+/**
+ * ISR arguments
+ */
 typedef struct {
     FuriMessageQueue* interrupt_queue;
     JsGpioInterruptMessage message;
 } JsGpioIsrContext;
 
+/**
+ * Per-pin control structure
+ */
 typedef struct {
     const GpioPin* pin;
     GpioMode previous_mode;
     GpioPull previous_pull;
+    GpioSpeed previous_speed;
+    bool had_interrupt;
     FuriMessageQueue* interrupt_queue;
     JsGpioIsrContext* isr_context;
 } JsGpioPinInst;
+
+/**
+ * Per-module instance control structure
+ */
+typedef struct {
+    FuriMessageQueue* interrupt_queue;
+    JsGpioPinInst** managed_pins;
+    uint32_t managed_pins_length;
+} JsGpioInst;
 
 /**
  * @brief Initializes a GPIO pin according to the provided mode object
@@ -117,12 +133,10 @@ static void js_gpio_init(struct mjs* mjs) {
 
     // get state
     mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data =
-        (JsGpioPinInst*)(uint32_t)(mjs_get(mjs, manager, INST_PROP_NAME, ~0) & 0xFFFFFFFF);
+    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
 
     // init GPIO
     furi_hal_gpio_init(manager_data->pin, mode, pull_mode, GpioSpeedVeryHigh);
-
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
@@ -147,12 +161,10 @@ static void js_gpio_write(struct mjs* mjs) {
 
     // get state
     mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data =
-        (JsGpioPinInst*)(uint32_t)(mjs_get(mjs, manager, INST_PROP_NAME, ~0) & 0xFFFFFFFF);
+    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
 
     // set level
     furi_hal_gpio_write(manager_data->pin, logic_level);
-
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
@@ -172,12 +184,10 @@ static void js_gpio_write(struct mjs* mjs) {
 static void js_gpio_read(struct mjs* mjs) {
     // get state
     mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data =
-        (JsGpioPinInst*)(uint32_t)(mjs_get(mjs, manager, INST_PROP_NAME, ~0) & 0xFFFFFFFF);
+    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
 
     // get level
     bool value = furi_hal_gpio_read(manager_data->pin);
-
     mjs_return(mjs, mjs_mk_boolean(mjs, value));
 }
 
@@ -212,16 +222,16 @@ static void js_gpio_attach_handler(struct mjs* mjs) {
 
     // get state
     mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data =
-        (JsGpioPinInst*)(uint32_t)(mjs_get(mjs, manager, INST_PROP_NAME, ~0) & 0xFFFFFFFF);
+    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
 
     // attach interrupt
-    if(manager_data->isr_context) free(manager_data->isr_context);
+    free(manager_data->isr_context);
     JsGpioIsrContext* context = malloc(sizeof(JsGpioIsrContext));
     context->interrupt_queue = manager_data->interrupt_queue;
     context->message.callback = callback_arg;
     context->message.manager = manager;
     manager_data->isr_context = context;
+    manager_data->had_interrupt = true;
     furi_hal_gpio_remove_int_callback(manager_data->pin);
     furi_hal_gpio_add_int_callback(manager_data->pin, js_gpio_int_cb, (void*)context);
     furi_hal_gpio_enable_int_callback(manager_data->pin);
@@ -248,11 +258,10 @@ static void js_gpio_attach_handler(struct mjs* mjs) {
 static void js_gpio_detach_handler(struct mjs* mjs) {
     // get state
     mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data =
-        (JsGpioPinInst*)(uint32_t)(mjs_get(mjs, manager, INST_PROP_NAME, ~0) & 0xFFFFFFFF);
+    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
 
     // detach interrupt
-    if(manager_data->isr_context) free(manager_data->isr_context);
+    free(manager_data->isr_context);
     furi_hal_gpio_remove_int_callback(manager_data->pin);
     furi_message_queue_reset(manager_data->interrupt_queue);
 
@@ -309,6 +318,11 @@ static void js_gpio_get(struct mjs* mjs) {
     JsGpioPinInst* manager_data = malloc(sizeof(JsGpioPinInst));
     manager_data->pin = pin_record->pin;
     manager_data->interrupt_queue = module->interrupt_queue;
+    // TODO: somehow get actual previous mode
+    manager_data->previous_mode = GpioModeInput;
+    manager_data->previous_pull = GpioPullNo;
+    manager_data->previous_speed = GpioSpeedLow;
+    mjs_own(mjs, &manager);
     mjs_set(mjs, manager, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, manager_data));
     mjs_set(mjs, manager, "init", ~0, MJS_MK_FN(js_gpio_init));
     mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
@@ -316,6 +330,12 @@ static void js_gpio_get(struct mjs* mjs) {
     mjs_set(mjs, manager, "attach_handler", ~0, MJS_MK_FN(js_gpio_attach_handler));
     mjs_set(mjs, manager, "detach_handler", ~0, MJS_MK_FN(js_gpio_detach_handler));
     mjs_return(mjs, manager);
+
+    // remember pin
+    module->managed_pins_length++;
+    module->managed_pins =
+        realloc(module->managed_pins, sizeof(JsGpioPinInst) * module->managed_pins_length);
+    module->managed_pins[module->managed_pins_length - 1] = manager_data;
 }
 
 /**
@@ -344,6 +364,7 @@ static void js_gpio_process_interrupts(struct mjs* mjs) {
     // get new messages
     JsGpioInst* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
     JsGpioInterruptMessage message;
+    // FIXME: FuriWaitForever hangs the device when JS is exited
     while(furi_message_queue_get(
               module->interrupt_queue, (void*)&message, block ? FuriWaitForever : 0) ==
           FuriStatusOk) {
@@ -353,11 +374,12 @@ static void js_gpio_process_interrupts(struct mjs* mjs) {
 
 static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
     JsGpioInst* module = malloc(sizeof(JsGpioInst));
+    module->managed_pins = NULL;
+    module->managed_pins_length = 0;
     module->interrupt_queue =
         furi_message_queue_alloc(INTERRUPT_QUEUE_LEN, sizeof(JsGpioInterruptMessage));
 
     mjs_val_t gpio_obj = mjs_mk_object(mjs);
-
     mjs_set(mjs, gpio_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
     mjs_set(mjs, gpio_obj, "get", ~0, MJS_MK_FN(js_gpio_get));
     mjs_set(mjs, gpio_obj, "process_interrupts", ~0, MJS_MK_FN(js_gpio_process_interrupts));
@@ -367,13 +389,35 @@ static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
 }
 
 static void js_gpio_destroy(void* inst) {
-    if(inst != NULL) {
-        JsGpioInst* gpio = (JsGpioInst*)inst;
-        // TODO: release resources
-        free(gpio);
-    }
+    if(inst) {
+        // reset pins
+        JsGpioInst* module = (JsGpioInst*)inst;
+        for(uint32_t i = 0; i < module->managed_pins_length; i++) {
+            JsGpioPinInst* manager_data = module->managed_pins[i];
+            if(manager_data->had_interrupt) {
+                furi_hal_gpio_disable_int_callback(manager_data->pin);
+                furi_hal_gpio_remove_int_callback(manager_data->pin);
+            }
+            furi_hal_gpio_init(
+                manager_data->pin,
+                manager_data->previous_mode,
+                manager_data->previous_pull,
+                manager_data->previous_speed);
+            free(manager_data);
+            // TODO: research `mjs_own` and `mjs_disown`
+            // porta: Ideally, pin managers should be disowned via `mjs_disown`,
+            // which requires a reference to the mjs structure that we don't have.
+            // The module destructor is only ever called shortly before the mjs
+            // destructor is called, which may not free our owned object. It looks
+            // like it does do so (since no memory leaks manifest themselves),
+            // but idk \(-_-)/
+        }
 
-    // TODO: reset pins
+        // free buffers
+        furi_message_queue_free(module->interrupt_queue);
+        free(module->managed_pins);
+        free(module);
+    }
 
     expansion_enable(furi_record_open(RECORD_EXPANSION));
     furi_record_close(RECORD_EXPANSION);
