@@ -5,6 +5,10 @@
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
 
+#define DESKTOP_LOCK_MENU_VISIBLE_ITEM_COUNT 3
+#define DESKTOP_LOCK_MENU_NEEDS_SCROLL_BAR()                                   \
+  DesktopLockMenuIndexTotalCount - 1 > DESKTOP_LOCK_MENU_VISIBLE_ITEM_COUNT
+
 typedef enum {
     DesktopLockMenuIndexLock,
     DesktopLockMenuIndexStealth,
@@ -53,31 +57,50 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
     canvas_draw_icon(canvas, 116, 0 + STATUS_BAR_Y_SHIFT, &I_DoorRight_70x55);
     canvas_set_font(canvas, FontSecondary);
 
-    for(size_t i = 0; i < DesktopLockMenuIndexTotalCount; ++i) {
-        const char* str = NULL;
+    for (size_t i = 0; i < DESKTOP_LOCK_MENU_VISIBLE_ITEM_COUNT; ++i) {
 
-        if(i == DesktopLockMenuIndexLock) {
-            str = "Lock";
-        } else if(i == DesktopLockMenuIndexStealth) {
-            if(m->stealth_mode) {
-                str = "Unmute";
-            } else {
-                str = "Mute";
+        const char *str = NULL;
+
+        const DesktopLockMenuIndex menu_index = m->first_item + i;
+        switch (menu_index) {
+            case DesktopLockMenuIndexLock:
+                str = "Lock";
+                break;
+
+            case DesktopLockMenuIndexStealth: {
+                if (m->stealth_mode) {
+                    str = "Unmute";
+                } else {
+                    str = "Mute";
+                }
+
+                break;
             }
-        } else if(i == DesktopLockMenuIndexDummy) { //-V547
-            if(m->dummy_mode) {
-                str = "Default Mode";
-            } else {
-                str = "Dummy Mode";
+
+            case DesktopLockMenuIndexDummy: {
+                if (m->dummy_mode) {
+                    str = "Default Mode";
+                } else {
+                    str = "Dummy Mode";
+                }
+
+                break;
             }
+
+            default:
+                break;
         }
 
-        if(str) //-V547
-            canvas_draw_str_aligned(
-                canvas, 64, 9 + (i * 17) + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter, str);
+        if (str)
+            canvas_draw_str_aligned(canvas, 64, 9 + (i * 17) + STATUS_BAR_Y_SHIFT,
+                                AlignCenter, AlignCenter, str);
 
-        if(m->idx == i) elements_frame(canvas, 15, 1 + (i * 17) + STATUS_BAR_Y_SHIFT, 98, 15);
+        if (m->idx == menu_index)
+            elements_frame(canvas, 15, 1 + (i * 17) + STATUS_BAR_Y_SHIFT, DESKTOP_LOCK_MENU_NEEDS_SCROLL_BAR() ? 95 : 98, 15);
     }
+
+    if (DESKTOP_LOCK_MENU_NEEDS_SCROLL_BAR())
+        elements_scrollbar_pos(canvas, 115, 1 + STATUS_BAR_Y_SHIFT, 50, m->idx, DesktopLockMenuIndexTotalCount);
 }
 
 View* desktop_lock_menu_get_view(DesktopLockMenuView* lock_menu) {
@@ -117,6 +140,15 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                     }
                     update = true;
                     consumed = true;
+                }
+
+                if (DESKTOP_LOCK_MENU_NEEDS_SCROLL_BAR()) {
+                    if (model->idx < 1)
+                        model->first_item = 0;
+                    else if (model->idx > DesktopLockMenuIndexTotalCount - DESKTOP_LOCK_MENU_VISIBLE_ITEM_COUNT + 1)
+                        model->first_item = DesktopLockMenuIndexTotalCount - DESKTOP_LOCK_MENU_VISIBLE_ITEM_COUNT;
+                    else
+                        model->first_item = model->idx - 1;
                 }
             }
             idx = model->idx;
