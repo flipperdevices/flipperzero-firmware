@@ -6,34 +6,42 @@ export interface Mode {
     pull?: "up" | "down";
 }
 
+type Lit = string | number | boolean | undefined | null | void | {};
+
 export interface Pin {
     /**
      * Configures a pin. This may be done several times.
      * @param mode Pin configuration object
      */
-    init(mode: Mode): undefined;
+    init(mode: Mode): void;
     /**
      * Sets the output value of a pin if it's been configured with
      * `direction: "out"`.
      * @param value Logic value to output
      */
-    write(value: boolean): undefined;
+    write(value: boolean): void;
     /**
      * Gets the input value of a pin if it's been configured with
      * `direction: "in"`, but not `inMode: "analog"`.
      */
     read(): boolean;
     /**
-     * Attaches a callback to a pin if it's been configured with
-     * `inMode: "interrupt"`. The triggering edge is specified with the `edge`
-     * mode parameter. Any previously attached handlers are detached.
-     * @param handler Function to call back when the interrupt is triggered
+     * Gets the input voltage of a pin in millivolts if it's been configured
+     * with `direction: "in"` and `inMode: "analog"`
      */
-    attach_handler(handler: (pin: Pin) => any): undefined;
+    read_analog(): number;
+    /**
+     * Attaches a callback to a pin if it's been configured with
+     * `inMode: "interrupt"` or `"event"`. The triggering edge is specified with
+     * the `edge` mode parameter. Any previously attached handlers are detached.
+     * @param handler Function to call back when the interrupt is triggered
+     * @param args Additional arguments to supply to the handlers
+     */
+    attach_handler<T extends Lit[]>(handler: (pin: Pin, ...args: T) => void, ...args: T): void;
     /**
      * Detaches a previously attached callback from a pin.
      */
-    detach_handler(): undefined;
+    detach_handler(): void;
 }
 
 /**
@@ -48,4 +56,4 @@ export function get(pin: string | number): Pin;
  * @param block If set to true, this function will not return unless at least
  * one interrupt is processed.
  */
-export function process_interrupts(block: boolean): undefined;
+export function process_interrupts(block: boolean): void;

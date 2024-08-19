@@ -1,2 +1,2 @@
-declare function delay(ms: number);
-declare function print(text: string);
+declare function delay(ms: number): void;
+declare function print(...args: any[]): void;

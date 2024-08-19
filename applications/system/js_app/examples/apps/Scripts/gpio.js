@@ -4,9 +4,11 @@ let gpio = require("gpio");
 
 // initialize pins
 let led = gpio.get("pc3"); // same as `gpio.get(7)`
+let pot = gpio.get("pc0"); // same as `gpio.get(16)`
 let button = gpio.get("pc1"); // same as `gpio.get(15)`
 led.init({ direction: "out", outMode: "push_pull" });
-button.init({ direction: "in", pull: "down", inMode: "interrupt", edge: "rising" });
+pot.init({ direction: "in", inMode: "analog" });
+button.init({ direction: "in", pull: "up", inMode: "interrupt", edge: "falling" });
 
 // blink led twice
 print("Commencing blinking (PC3)");
@@ -20,14 +22,13 @@ led.write(false);
 
 // attach interrupt handler
 print("Press the button (PC1)");
-button.attach_handler(function (button) {
-    print("Button pressed");
-    button.detach_handler();
-    print("Press the back button");
-});
+button.attach_handler(function (_button, pot) {
+    let voltage = pot.read_analog();
+    print("PC0 is at", voltage, "mV");
+}, pot); // mJS does not support closures, so we pass `pot` via `attach_handler`
 
 // the program will just exit unless this is here
-while (true) gpio.process_interrupts(true);
+while (true) gpio.process_interrupts(false);
 
 // possible pins https://docs.flipper.net/gpio-and-modules#miFsS
 // "PA7" aka 2

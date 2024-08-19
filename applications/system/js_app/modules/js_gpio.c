@@ -12,7 +12,9 @@
  */
 typedef struct {
     mjs_val_t callback;
-    mjs_val_t manager;
+    // NOTE: not using an mlib array because resizing is not needed
+    mjs_val_t* args;
+    size_t args_len;
 } JsGpioInterruptMessage;
 
 /**
@@ -31,6 +33,8 @@ typedef struct {
     bool had_interrupt;
     FuriMessageQueue* interrupt_queue;
     JsGpioIsrContext* isr_context;
+    FuriHalAdcChannel adc_channel;
+    FuriHalAdcHandle* adc_handle;
 } JsGpioPinInst;
 
 ARRAY_DEF(ManagedPinsArray, JsGpioPinInst*, M_PTR_OPLIST); //-V575
@@ -41,6 +45,7 @@ ARRAY_DEF(ManagedPinsArray, JsGpioPinInst*, M_PTR_OPLIST); //-V575
 typedef struct {
     FuriMessageQueue* interrupt_queue;
     ManagedPinsArray_t managed_pins;
+    FuriHalAdcHandle* adc_handle;
 } JsGpioInst;
 
 /**
@@ -190,6 +195,29 @@ static void js_gpio_read(struct mjs* mjs) {
 }
 
 /**
+ * @brief Reads a voltage from a GPIO pin in analog mode
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let pot = gpio.get("pc0");
+ * pot.init({ direction: "in", inMode: "analog" });
+ * print("voltage:" pot.read_analog(), "mV");
+ * ```
+ */
+static void js_gpio_read_analog(struct mjs* mjs) {
+    // get state
+    mjs_val_t manager = mjs_get_this(mjs);
+    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
+
+    // get mV (ADC is configured for 12 bits and 2048 mV max)
+    uint16_t millivolts =
+        furi_hal_adc_read(manager_data->adc_handle, manager_data->adc_channel) / 2;
+    mjs_return(mjs, mjs_mk_number(mjs, (double)millivolts));
+}
+
+/**
  * @brief Interrupt callback
  */
 static void js_gpio_int_cb(void* arg) {
@@ -222,14 +250,25 @@ static void js_gpio_attach_handler(struct mjs* mjs) {
     mjs_val_t manager = mjs_get_this(mjs);
     JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
 
-    // attach interrupt
+    // set up context
+    if(manager_data->isr_context) free(manager_data->isr_context->message.args);
     free(manager_data->isr_context);
     JsGpioIsrContext* context = malloc(sizeof(JsGpioIsrContext));
+    mjs_val_t* args = calloc(mjs_nargs(mjs), sizeof(mjs_val_t));
+    args[0] = manager; // already `mjs_own`ed
+    for(int i = 1; i < mjs_nargs(mjs); i++) {
+        mjs_val_t arg = mjs_arg(mjs, i);
+        mjs_own(mjs, &arg);
+        args[i] = arg;
+    }
     context->interrupt_queue = manager_data->interrupt_queue;
     context->message.callback = callback_arg;
-    context->message.manager = manager;
+    context->message.args = args;
+    context->message.args_len = mjs_nargs(mjs);
     manager_data->isr_context = context;
     manager_data->had_interrupt = true;
+
+    // attach interrupt
     furi_hal_gpio_remove_int_callback(manager_data->pin);
     furi_hal_gpio_add_int_callback(manager_data->pin, js_gpio_int_cb, (void*)context);
     furi_hal_gpio_enable_int_callback(manager_data->pin);
@@ -259,7 +298,14 @@ static void js_gpio_detach_handler(struct mjs* mjs) {
     JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
 
     // detach interrupt
-    free(manager_data->isr_context);
+    JsGpioIsrContext* context = manager_data->isr_context;
+    if(context) {
+        for(size_t i = 0; i < context->message.args_len; i++) {
+            mjs_disown(mjs, &context->message.args[i]);
+        }
+        free(context->message.args);
+    }
+    free(context);
     furi_hal_gpio_remove_int_callback(manager_data->pin);
     furi_message_queue_reset(manager_data->interrupt_queue);
 
@@ -313,11 +359,14 @@ static void js_gpio_get(struct mjs* mjs) {
     JsGpioPinInst* manager_data = malloc(sizeof(JsGpioPinInst));
     manager_data->pin = pin_record->pin;
     manager_data->interrupt_queue = module->interrupt_queue;
+    manager_data->adc_handle = module->adc_handle;
+    manager_data->adc_channel = pin_record->channel;
     mjs_own(mjs, &manager); // NOTE(extensibility): read `js_gpio_destroy`
     mjs_set(mjs, manager, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, manager_data));
     mjs_set(mjs, manager, "init", ~0, MJS_MK_FN(js_gpio_init));
     mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
     mjs_set(mjs, manager, "read", ~0, MJS_MK_FN(js_gpio_read));
+    mjs_set(mjs, manager, "read_analog", ~0, MJS_MK_FN(js_gpio_read_analog));
     mjs_set(mjs, manager, "attach_handler", ~0, MJS_MK_FN(js_gpio_attach_handler));
     mjs_set(mjs, manager, "detach_handler", ~0, MJS_MK_FN(js_gpio_detach_handler));
     mjs_return(mjs, manager);
@@ -355,7 +404,7 @@ static void js_gpio_process_interrupts(struct mjs* mjs) {
     while(furi_message_queue_get(
               module->interrupt_queue, (void*)&message, block ? FuriWaitForever : 0) ==
           FuriStatusOk) {
-        mjs_call(mjs, NULL, message.callback, MJS_UNDEFINED, 1, message.manager);
+        mjs_apply(mjs, NULL, message.callback, MJS_UNDEFINED, message.args_len, message.args);
     }
 }
 
@@ -364,6 +413,8 @@ static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
     ManagedPinsArray_init(module->managed_pins);
     module->interrupt_queue =
         furi_message_queue_alloc(INTERRUPT_QUEUE_LEN, sizeof(JsGpioInterruptMessage));
+    module->adc_handle = furi_hal_adc_acquire();
+    furi_hal_adc_configure(module->adc_handle);
 
     mjs_val_t gpio_obj = mjs_mk_object(mjs);
     mjs_set(mjs, gpio_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
@@ -388,19 +439,22 @@ static void js_gpio_destroy(void* inst) {
                 furi_hal_gpio_remove_int_callback(manager_data->pin);
             }
             furi_hal_gpio_init(manager_data->pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-            // NOTE(extensibility): Ideally, pin managers should be disowned via
-            // `mjs_disown`, which requires a reference to the mjs structure
-            // that we don't have. In practice, our module destructor is only
-            // ever called shortly before `mjs_destroy` is called, which frees
-            // everything including owned objects. No memory leaks seem to be
-            // manifesting themselves as of right now, but if the JS subsystem
-            // is ever extended so that modules may be are loaded and unloaded
-            // throughout the lifetime of the interpreter, this is an area to
-            // look into.
+            // NOTE(extensibility): Ideally, pin managers and interrupt handler
+            // arguments should be disowned via `mjs_disown`, which requires a
+            // reference to the mjs structure that we don't have. In practice,
+            // our module destructor is only ever called shortly before
+            // `mjs_destroy` is called, which frees everything including owned
+            // objects. No memory leaks seem to be manifesting themselves as of
+            // right now, but if the JS subsystem is ever extended so that
+            // modules may be are loaded and unloaded throughout the lifetime of
+            // the interpreter, this is an area to look into.
+            if(manager_data->isr_context) free(manager_data->isr_context->message.args);
+            free(manager_data->isr_context);
             free(manager_data);
         }
 
         // free buffers
+        furi_hal_adc_release(module->adc_handle);
         ManagedPinsArray_clear(module->managed_pins);
         furi_message_queue_free(module->interrupt_queue);
         free(module);
