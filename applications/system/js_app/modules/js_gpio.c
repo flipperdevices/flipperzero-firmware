@@ -3,6 +3,7 @@
 #include <furi_hal_resources.h>
 #include <expansion/expansion.h>
 #include <limits.h>
+#include <mlib/m-array.h>
 
 #define INTERRUPT_QUEUE_LEN 16
 
@@ -27,21 +28,19 @@ typedef struct {
  */
 typedef struct {
     const GpioPin* pin;
-    GpioMode previous_mode;
-    GpioPull previous_pull;
-    GpioSpeed previous_speed;
     bool had_interrupt;
     FuriMessageQueue* interrupt_queue;
     JsGpioIsrContext* isr_context;
 } JsGpioPinInst;
+
+ARRAY_DEF(ManagedPinsArray, JsGpioPinInst*, M_PTR_OPLIST); //-V575
 
 /**
  * Per-module instance control structure
  */
 typedef struct {
     FuriMessageQueue* interrupt_queue;
-    JsGpioPinInst** managed_pins;
-    uint32_t managed_pins_length;
+    ManagedPinsArray_t managed_pins;
 } JsGpioInst;
 
 /**
@@ -80,7 +79,6 @@ static void js_gpio_init(struct mjs* mjs) {
     if(!edge) edge = "rising";
 
     // convert strings to mode
-    // FIXME: make me even prettier, maybe? ^_^
     GpioMode mode;
     if(strcmp(direction, "out") == 0) {
         if(strcmp(out_mode, "push_pull") == 0)
@@ -286,15 +284,12 @@ static void js_gpio_get(struct mjs* mjs) {
     // parse input argument to a pin pointer
     if(name_string) {
         // find pin with matching name ignoring case
-        FuriString* name_fstr = furi_string_alloc();
-        furi_string_set(name_fstr, name_string);
         for(size_t i = 0; i < gpio_pins_count; i++) {
-            if(furi_string_cmpi_str(name_fstr, gpio_pins[i].name) == 0) {
+            if(strcasecmp(name_string, gpio_pins[i].name) == 0) {
                 pin_record = &gpio_pins[i];
                 break;
             }
         }
-        furi_string_free(name_fstr);
     } else if(mjs_is_number(name_arg)) {
         // find pin with matching number
         int name_int = mjs_get_int(mjs, name_arg);
@@ -318,11 +313,7 @@ static void js_gpio_get(struct mjs* mjs) {
     JsGpioPinInst* manager_data = malloc(sizeof(JsGpioPinInst));
     manager_data->pin = pin_record->pin;
     manager_data->interrupt_queue = module->interrupt_queue;
-    // TODO: somehow get actual previous mode
-    manager_data->previous_mode = GpioModeInput;
-    manager_data->previous_pull = GpioPullNo;
-    manager_data->previous_speed = GpioSpeedLow;
-    mjs_own(mjs, &manager);
+    mjs_own(mjs, &manager); // NOTE(extensibility): read `js_gpio_destroy`
     mjs_set(mjs, manager, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, manager_data));
     mjs_set(mjs, manager, "init", ~0, MJS_MK_FN(js_gpio_init));
     mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
@@ -332,10 +323,7 @@ static void js_gpio_get(struct mjs* mjs) {
     mjs_return(mjs, manager);
 
     // remember pin
-    module->managed_pins_length++;
-    module->managed_pins =
-        realloc(module->managed_pins, sizeof(JsGpioPinInst) * module->managed_pins_length);
-    module->managed_pins[module->managed_pins_length - 1] = manager_data;
+    ManagedPinsArray_push_back(module->managed_pins, manager_data);
 }
 
 /**
@@ -364,7 +352,6 @@ static void js_gpio_process_interrupts(struct mjs* mjs) {
     // get new messages
     JsGpioInst* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
     JsGpioInterruptMessage message;
-    // FIXME: FuriWaitForever hangs the device when JS is exited
     while(furi_message_queue_get(
               module->interrupt_queue, (void*)&message, block ? FuriWaitForever : 0) ==
           FuriStatusOk) {
@@ -374,8 +361,7 @@ static void js_gpio_process_interrupts(struct mjs* mjs) {
 
 static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
     JsGpioInst* module = malloc(sizeof(JsGpioInst));
-    module->managed_pins = NULL;
-    module->managed_pins_length = 0;
+    ManagedPinsArray_init(module->managed_pins);
     module->interrupt_queue =
         furi_message_queue_alloc(INTERRUPT_QUEUE_LEN, sizeof(JsGpioInterruptMessage));
 
@@ -390,32 +376,33 @@ static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
 
 static void js_gpio_destroy(void* inst) {
     if(inst) {
-        // reset pins
         JsGpioInst* module = (JsGpioInst*)inst;
-        for(uint32_t i = 0; i < module->managed_pins_length; i++) {
-            JsGpioPinInst* manager_data = module->managed_pins[i];
+
+        // reset pins
+        ManagedPinsArray_it_t iterator;
+        for(ManagedPinsArray_it(iterator, module->managed_pins); !ManagedPinsArray_end_p(iterator);
+            ManagedPinsArray_next(iterator)) {
+            JsGpioPinInst* manager_data = *ManagedPinsArray_cref(iterator);
             if(manager_data->had_interrupt) {
                 furi_hal_gpio_disable_int_callback(manager_data->pin);
                 furi_hal_gpio_remove_int_callback(manager_data->pin);
             }
-            furi_hal_gpio_init(
-                manager_data->pin,
-                manager_data->previous_mode,
-                manager_data->previous_pull,
-                manager_data->previous_speed);
+            furi_hal_gpio_init(manager_data->pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+            // NOTE(extensibility): Ideally, pin managers should be disowned via
+            // `mjs_disown`, which requires a reference to the mjs structure
+            // that we don't have. In practice, our module destructor is only
+            // ever called shortly before `mjs_destroy` is called, which frees
+            // everything including owned objects. No memory leaks seem to be
+            // manifesting themselves as of right now, but if the JS subsystem
+            // is ever extended so that modules may be are loaded and unloaded
+            // throughout the lifetime of the interpreter, this is an area to
+            // look into.
             free(manager_data);
-            // TODO: research `mjs_own` and `mjs_disown`
-            // porta: Ideally, pin managers should be disowned via `mjs_disown`,
-            // which requires a reference to the mjs structure that we don't have.
-            // The module destructor is only ever called shortly before the mjs
-            // destructor is called, which may not free our owned object. It looks
-            // like it does do so (since no memory leaks manifest themselves),
-            // but idk, seems janky \(-_-)/
         }
 
         // free buffers
+        ManagedPinsArray_clear(module->managed_pins);
         furi_message_queue_free(module->interrupt_queue);
-        free(module->managed_pins);
         free(module);
     }
 
@@ -423,6 +410,7 @@ static void js_gpio_destroy(void* inst) {
     furi_record_close(RECORD_EXPANSION);
 }
 
+// TODO: event loop
 // TODO: ADC
 
 static const JsModuleDescriptor js_gpio_desc = {
