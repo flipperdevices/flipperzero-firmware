@@ -1,0 +1,40 @@
+ID 1234:abcd Generic:USB Keyboard
+REM Declare ourselves as a generic usb keyboard
+
+REM This will install qFlipper on Linux/Gnome, using the AppImage package
+
+REM Open a terminal
+ALT F2
+DELAY 1000
+STRINGLN gnome-terminal --maximize
+DELAY 1000
+
+REM Get the latest release tag name from github
+STRINGLN release_tag=$(curl -v https://github.com/flipperdevices/qFlipper/releases/latest 2>&1 | grep releases/tag/ | awk -F '/' '{print $NF}' | tr -dc '[[:print:]]')
+
+REM Ensure we have a folder to run executables from
+STRINGLN mkdir -p $HOME/.local/bin
+STRINGLN export PATH="$HOME/.local/bin:$PATH"
+
+REM Download the latest AppImage
+STRINGLN curl -fsSL "https://update.flipperzero.one/builds/qFlipper/$release_tag/qFlipper-x86_64-$release_tag.AppImage" -o "$HOME/.local/bin/qFlipper"
+DELAY 1000
+
+REM Make it executable
+STRINGLN chmod +x $HOME/.local/bin/qFlipper
+
+STRINGLN echo "
+ENTER
+REPEAT 60
+STRINGLN ==========================================================================================
+STRINGLN qFlipper $release_tag has been installed to $HOME/.local/bin/
+STRINGLN You can run it with the 'qFlipper' command
+ENTER
+STRINGLN You need to persist the PATH environment variable in your shell's rc file (e.g. ~/.bashrc)
+STRINGLN or you will have to use the absolute path when you'll close this terminal.
+ENTER
+STRINGLN Additional configurations might be required by your Linux distribution such as 
+STRINGLN group membership, udev rules or else.
+STRINGLN ==========================================================================================
+STRINGLN "
+STRINGLN qFlipper --print-usage || true
