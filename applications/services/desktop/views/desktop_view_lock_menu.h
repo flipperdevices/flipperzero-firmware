@@ -19,7 +19,7 @@ typedef struct {
     uint8_t idx;
     bool dummy_mode;
     bool stealth_mode;
-    int8_t first_item;
+    float display_brightness;
 } DesktopLockMenuViewModel;
 
 void desktop_lock_menu_set_callback(
