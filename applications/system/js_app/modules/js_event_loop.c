@@ -3,10 +3,16 @@
 #include <expansion/expansion.h>
 #include <furi/core/event_loop_i.h>
 
+/**
+ * @brief Per-module instance control structure
+ */
 typedef struct {
     FuriEventLoop* loop;
 } JsEventLoop;
 
+/**
+ * @brief Context passed to the generic event callback
+ */
 typedef struct {
     struct mjs* mjs;
     mjs_val_t callback;
@@ -14,6 +20,9 @@ typedef struct {
     mjs_val_t* arguments;
 } JsEventLoopCallbackContext;
 
+/**
+ * @brief Generic event callback, handles all events
+ */
 static void js_event_loop_callback(void* param) {
     JsEventLoopCallbackContext* context = (JsEventLoopCallbackContext*)param;
     mjs_val_t result;
@@ -25,7 +34,7 @@ static void js_event_loop_callback(void* param) {
         context->arity,
         context->arguments);
 
-    // save returned value until next call
+    // save returned value as args for next call
     if(mjs_array_length(context->mjs, result) != context->arity - 1) return;
     for(size_t i = 0; i < context->arity - 1; i++) {
         mjs_disown(context->mjs, &context->arguments[i + 1]);
@@ -34,6 +43,9 @@ static void js_event_loop_callback(void* param) {
     }
 }
 
+/**
+ * @brief Subscribes a JavaScript function to an event
+ */
 static void js_event_loop_subscribe(struct mjs* mjs) {
     // get arguments
     if(mjs_nargs(mjs) < 2)
@@ -73,16 +85,26 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
     }
 }
 
+/**
+ * @brief Runs the event loop until it is stopped
+ */
 static void js_event_loop_run(struct mjs* mjs) {
     JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
     furi_event_loop_run(module->loop);
 }
 
+/**
+ * @brief Stops a running event loop
+ */
 static void js_event_loop_stop(struct mjs* mjs) {
     JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
     furi_event_loop_stop(module->loop);
 }
 
+/**
+ * @brief Creates a timer event that can be subscribed to just like and other
+ * event
+ */
 static void js_event_loop_timer(struct mjs* mjs) {
     // get arguments
     if(mjs_nargs(mjs) != 2) JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "requires 2 arguments");
@@ -110,6 +132,8 @@ static void js_event_loop_timer(struct mjs* mjs) {
     contract->timer_type = mode;
     mjs_return(mjs, mjs_mk_foreign(mjs, contract));
 }
+
+// TODO: memory freeing, subscription cancellation
 
 static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_val_t event_loop_obj = mjs_mk_object(mjs);
