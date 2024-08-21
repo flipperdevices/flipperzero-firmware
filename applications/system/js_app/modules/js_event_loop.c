@@ -21,10 +21,19 @@ typedef struct {
 } JsEventLoopCallbackContext;
 
 /**
+ * @brief Contains data needed to cancel a subscription
+ */
+typedef struct {
+    FuriEventLoop* loop;
+    JsEventLoopObjectType object_type;
+    FuriEventLoopObject* object;
+} JsEventLoopSubscription;
+
+/**
  * @brief Generic event callback, handles all events
  */
 static void js_event_loop_callback(void* param) {
-    JsEventLoopCallbackContext* context = (JsEventLoopCallbackContext*)param;
+    JsEventLoopCallbackContext* context = param;
     mjs_val_t result;
     mjs_apply(
         context->mjs,
@@ -35,6 +44,7 @@ static void js_event_loop_callback(void* param) {
         context->arguments);
 
     // save returned value as args for next call
+    // argument 0 never changes and contains the subscription object
     if(mjs_array_length(context->mjs, result) != context->arity - 1) return;
     for(size_t i = 0; i < context->arity - 1; i++) {
         mjs_disown(context->mjs, &context->arguments[i + 1]);
@@ -44,9 +54,29 @@ static void js_event_loop_callback(void* param) {
 }
 
 /**
+ * @brief Cancels an event subscription
+ */
+static void js_event_loop_subscription_cancel(struct mjs* mjs) {
+    JsEventLoopSubscription* subscription =
+        mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+
+    switch(subscription->object_type) {
+    case JsEventLoopObjectTypeTimer: {
+        furi_event_loop_timer_stop(subscription->object);
+    } break;
+    default:
+        break;
+    }
+
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
+/**
  * @brief Subscribes a JavaScript function to an event
  */
 static void js_event_loop_subscribe(struct mjs* mjs) {
+    JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+
     // get arguments
     if(mjs_nargs(mjs) < 2)
         JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "requires at least 2 arguments");
@@ -56,33 +86,45 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
         JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "invalid contract");
     if(!mjs_is_function(callback))
         JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "callback must be a function");
-    JsEventLoopContract* contract = (JsEventLoopContract*)mjs_get_ptr(mjs, contract_arg);
+    JsEventLoopContract* contract = mjs_get_ptr(mjs, contract_arg);
+
+    // create subscription object
+    JsEventLoopSubscription* subscription = malloc(sizeof(JsEventLoopSubscription));
+    subscription->loop = module->loop;
+    subscription->object_type = contract->object_type;
+    mjs_val_t subscription_obj = mjs_mk_object(mjs);
+    mjs_set(mjs, subscription_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, subscription));
+    mjs_set(mjs, subscription_obj, "cancel", ~0, MJS_MK_FN(js_event_loop_subscription_cancel));
 
     // create callback context
     JsEventLoopCallbackContext* context = malloc(sizeof(JsEventLoopCallbackContext));
     context->arity = mjs_nargs(mjs) - 1;
     context->arguments = calloc(context->arity, sizeof(mjs_val_t));
-    context->arguments[0] = MJS_UNDEFINED;
+    context->arguments[0] = subscription_obj;
     for(size_t i = 1; i < context->arity; i++) {
         mjs_val_t arg = mjs_arg(mjs, i + 1);
-        mjs_own(mjs, &arg);
         context->arguments[i] = arg;
+        mjs_own(mjs, &context->arguments[i]);
     }
-    mjs_own(mjs, &callback);
-    context->callback = callback;
     context->mjs = mjs;
+    context->callback = callback;
+    mjs_own(mjs, &context->callback);
+    mjs_own(mjs, &context->arguments[0]);
 
     // subscribe
-    JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
     switch(contract->object_type) {
     case JsEventLoopObjectTypeTimer: {
         FuriEventLoopTimer* timer = furi_event_loop_timer_alloc(
             module->loop, js_event_loop_callback, contract->timer_type, context);
         furi_event_loop_timer_start(timer, contract->interval_ticks);
+        contract->object = timer;
     } break;
     default:
         break;
     }
+
+    subscription->object = contract->object;
+    mjs_return(mjs, subscription_obj);
 }
 
 /**
@@ -133,7 +175,7 @@ static void js_event_loop_timer(struct mjs* mjs) {
     mjs_return(mjs, mjs_mk_foreign(mjs, contract));
 }
 
-// TODO: memory freeing, subscription cancellation
+// TODO: memory freeing
 
 static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_val_t event_loop_obj = mjs_mk_object(mjs);
@@ -150,12 +192,12 @@ static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, event_loop_obj, "timer", ~0, MJS_MK_FN(js_event_loop_timer));
 
     *object = event_loop_obj;
-    return (void*)module;
+    return module;
 }
 
 static void js_event_loop_destroy(void* inst) {
     if(inst) {
-        JsEventLoop* module = (JsEventLoop*)inst;
+        JsEventLoop* module = inst;
         free(module);
     }
 
