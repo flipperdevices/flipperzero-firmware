@@ -1,3 +1,5 @@
+import type { Contract } from "../event_loop";
+
 export interface Mode {
     direction: "in" | "out";
     outMode?: "push_pull" | "open_drain";
@@ -5,8 +7,6 @@ export interface Mode {
     edge?: "rising" | "falling" | "both";
     pull?: "up" | "down";
 }
-
-type Lit = string | number | boolean | undefined | null | void | {};
 
 export interface Pin {
     /**
@@ -31,17 +31,10 @@ export interface Pin {
      */
     read_analog(): number;
     /**
-     * Attaches a callback to a pin if it's been configured with
-     * `inMode: "interrupt"` or `"event"`. The triggering edge is specified with
-     * the `edge` mode parameter. Any previously attached handlers are detached.
-     * @param handler Function to call back when the interrupt is triggered
-     * @param args Additional arguments to supply to the handlers
+     * Returns an `event_loop` event that can be used to listen to interrupts,
+     * as configured by `init`
      */
-    attach_handler<T extends Lit[]>(handler: (pin: Pin, ...args: T) => void, ...args: T): void;
-    /**
-     * Detaches a previously attached callback from a pin.
-     */
-    detach_handler(): void;
+    interrupt(): Contract;
 }
 
 /**
@@ -50,10 +43,3 @@ export interface Pin {
  * @param pin Pin name (e.g. `"PC3"`) or number (e.g. `7`)
  */
 export function get(pin: string | number): Pin;
-/**
- * Calls the handlers of the interrupts that have happened since the last call
- * to this function.
- * @param block If set to true, this function will not return unless at least
- * one interrupt is processed.
- */
-export function process_interrupts(block: boolean): void;

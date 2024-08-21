@@ -1,6 +1,8 @@
 /// <reference types="../../../types/global" />
 /// <reference types="../../../types/gpio" />
 let gpio = require("gpio");
+/// <reference types="../../../types/event_loop" />
+let event_loop = require("event_loop");
 
 // initialize pins
 let led = gpio.get("pc3"); // same as `gpio.get(7)`
@@ -10,25 +12,21 @@ led.init({ direction: "out", outMode: "push_pull" });
 pot.init({ direction: "in", inMode: "analog" });
 button.init({ direction: "in", pull: "up", inMode: "interrupt", edge: "falling" });
 
-// blink led twice
+// blink led
 print("Commencing blinking (PC3)");
-led.write(true);
-delay(1000);
-led.write(false);
-delay(1000);
-led.write(true);
-delay(1000);
-led.write(false);
+event_loop.subscribe(event_loop.timer("periodic", 1000), function (_, led, state) {
+    led.write(state);
+    return [led, !state];
+}, led, true);
 
-// attach interrupt handler
+// read potentiometer when button is pressed
 print("Press the button (PC1)");
-button.attach_handler(function (_button, pot) {
-    let voltage = pot.read_analog();
-    print("PC0 is at", voltage, "mV");
-}, pot); // mJS does not support closures, so we pass `pot` via `attach_handler`
+event_loop.subscribe(button.interrupt(), function (_, pot) {
+    print("PC0 is at", pot.read_analog(), "mV");
+}, pot);
 
 // the program will just exit unless this is here
-while (true) gpio.process_interrupts(false);
+event_loop.run();
 
 // possible pins https://docs.flipper.net/gpio-and-modules#miFsS
 // "PA7" aka 2

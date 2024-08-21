@@ -14,6 +14,7 @@ typedef struct {
  * @brief Context passed to the generic event callback
  */
 typedef struct {
+    JsEventLoopObjectType object_type;
     struct mjs* mjs;
     mjs_val_t callback;
     size_t arity;
@@ -30,9 +31,9 @@ typedef struct {
 } JsEventLoopSubscription;
 
 /**
- * @brief Generic event callback, handles all events
+ * @brief Generic event callback, handles all events by calling the JS callbacks
  */
-static void js_event_loop_callback(void* param) {
+static void js_event_loop_callback_generic(void* param) {
     JsEventLoopCallbackContext* context = param;
     mjs_val_t result;
     mjs_apply(
@@ -54,6 +55,23 @@ static void js_event_loop_callback(void* param) {
 }
 
 /**
+ * @brief Handles non-timer events
+ */
+static bool js_event_loop_callback(void* object, void* param) {
+    JsEventLoopCallbackContext* context = param;
+    switch(context->object_type) {
+    case JsEventLoopObjectTypeSemaphore: {
+        FuriSemaphore* semaphore = object;
+        furi_check(furi_semaphore_acquire(semaphore, 0) == FuriStatusOk);
+    } break;
+    default:
+        break;
+    }
+    js_event_loop_callback_generic(param);
+    return true;
+}
+
+/**
  * @brief Cancels an event subscription
  */
 static void js_event_loop_subscription_cancel(struct mjs* mjs) {
@@ -63,6 +81,9 @@ static void js_event_loop_subscription_cancel(struct mjs* mjs) {
     switch(subscription->object_type) {
     case JsEventLoopObjectTypeTimer: {
         furi_event_loop_timer_stop(subscription->object);
+    } break;
+    case JsEventLoopObjectTypeSemaphore: {
+        furi_event_loop_unsubscribe(subscription->loop, subscription->object);
     } break;
     default:
         break;
@@ -98,6 +119,7 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
 
     // create callback context
     JsEventLoopCallbackContext* context = malloc(sizeof(JsEventLoopCallbackContext));
+    context->object_type = contract->object_type;
     context->arity = mjs_nargs(mjs) - 1;
     context->arguments = calloc(context->arity, sizeof(mjs_val_t));
     context->arguments[0] = subscription_obj;
@@ -115,9 +137,14 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
     switch(contract->object_type) {
     case JsEventLoopObjectTypeTimer: {
         FuriEventLoopTimer* timer = furi_event_loop_timer_alloc(
-            module->loop, js_event_loop_callback, contract->timer_type, context);
+            module->loop, js_event_loop_callback_generic, contract->timer_type, context);
         furi_event_loop_timer_start(timer, contract->interval_ticks);
         contract->object = timer;
+    } break;
+    case JsEventLoopObjectTypeSemaphore: {
+        FuriSemaphore* semaphore = contract->object;
+        furi_event_loop_subscribe_semaphore(
+            module->loop, semaphore, contract->event, js_event_loop_callback, context);
     } break;
     default:
         break;
@@ -175,7 +202,7 @@ static void js_event_loop_timer(struct mjs* mjs) {
     mjs_return(mjs, mjs_mk_foreign(mjs, contract));
 }
 
-// TODO: memory freeing
+// TODO: memory freeing, integrate with other modules
 
 static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_val_t event_loop_obj = mjs_mk_object(mjs);

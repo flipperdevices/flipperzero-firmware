@@ -1,4 +1,5 @@
 #include "../js_modules.h" // IWYU pragma: keep
+#include "js_event_loop.h"
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
 #include <expansion/expansion.h>
@@ -8,31 +9,12 @@
 #define INTERRUPT_QUEUE_LEN 16
 
 /**
- * ISRs send messages to the module's `interrupt_queue` to be processed later
- */
-typedef struct {
-    mjs_val_t callback;
-    // NOTE: not using an mlib array because resizing is not needed
-    mjs_val_t* args;
-    size_t args_len;
-} JsGpioInterruptMessage;
-
-/**
- * ISR arguments
- */
-typedef struct {
-    FuriMessageQueue* interrupt_queue;
-    JsGpioInterruptMessage message;
-} JsGpioIsrContext;
-
-/**
  * Per-pin control structure
  */
 typedef struct {
     const GpioPin* pin;
     bool had_interrupt;
-    FuriMessageQueue* interrupt_queue;
-    JsGpioIsrContext* isr_context;
+    FuriSemaphore* interrupt_semaphore;
     FuriHalAdcChannel adc_channel;
     FuriHalAdcHandle* adc_handle;
 } JsGpioPinInst;
@@ -43,10 +25,17 @@ ARRAY_DEF(ManagedPinsArray, JsGpioPinInst*, M_PTR_OPLIST); //-V575
  * Per-module instance control structure
  */
 typedef struct {
-    FuriMessageQueue* interrupt_queue;
     ManagedPinsArray_t managed_pins;
     FuriHalAdcHandle* adc_handle;
 } JsGpioInst;
+
+/**
+ * @brief Interrupt callback
+ */
+static void js_gpio_int_cb(void* arg) {
+    FuriSemaphore* semaphore = arg;
+    furi_semaphore_release(semaphore);
+}
 
 /**
  * @brief Initializes a GPIO pin according to the provided mode object
@@ -195,6 +184,41 @@ static void js_gpio_read(struct mjs* mjs) {
 }
 
 /**
+ * @brief Returns a event loop contract that can be used to listen to interrupts
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let button = gpio.get("pc1");
+ * let event_loop = require("event_loop");
+ * button.init({ direction: "in", pull: "up", inMode: "interrupt", edge: "falling" });
+ * event_loop.subscribe(button.interrupt(), function (_) { print("Hi!"); });
+ * event_loop.run();
+ * ```
+ */
+static void js_gpio_interrupt(struct mjs* mjs) {
+    // get state
+    mjs_val_t manager = mjs_get_this(mjs);
+    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
+
+    // interrupt handling
+    if(!manager_data->had_interrupt) {
+        furi_hal_gpio_add_int_callback(
+            manager_data->pin, js_gpio_int_cb, manager_data->interrupt_semaphore);
+        furi_hal_gpio_enable_int_callback(manager_data->pin);
+        manager_data->had_interrupt = true;
+    }
+
+    // make contract
+    JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
+    contract->object_type = JsEventLoopObjectTypeSemaphore;
+    contract->object = manager_data->interrupt_semaphore;
+    contract->event = FuriEventLoopEventIn;
+    mjs_return(mjs, mjs_mk_foreign(mjs, contract));
+}
+
+/**
  * @brief Reads a voltage from a GPIO pin in analog mode
  * 
  * Example usage:
@@ -215,101 +239,6 @@ static void js_gpio_read_analog(struct mjs* mjs) {
     uint16_t millivolts =
         furi_hal_adc_read(manager_data->adc_handle, manager_data->adc_channel) / 2;
     mjs_return(mjs, mjs_mk_number(mjs, (double)millivolts));
-}
-
-/**
- * @brief Interrupt callback
- */
-static void js_gpio_int_cb(void* arg) {
-    JsGpioIsrContext* context = (JsGpioIsrContext*)arg;
-    furi_message_queue_put(context->interrupt_queue, &context->message, 0);
-}
-
-/**
- * @brief Attaches an interrupt handler to a GPIO pin
- * 
- * Example usage:
- * 
- * ```js
- * let gpio = require("gpio");
- * let button = gpio.get("pc1");
- * button.init({ direction: "in", inMode: "interrupt", edge: "rising" });
- * button.attach_handler(function () {
- *     print("Button pressed");
- * });
- * while(true) gpio.process_interrupts(true);
- * ```
- */
-static void js_gpio_attach_handler(struct mjs* mjs) {
-    // get argument
-    mjs_val_t callback_arg = mjs_arg(mjs, 0);
-    if(!mjs_is_function(callback_arg))
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Must be a function");
-
-    // get state
-    mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
-
-    // set up context
-    if(manager_data->isr_context) free(manager_data->isr_context->message.args);
-    free(manager_data->isr_context);
-    JsGpioIsrContext* context = malloc(sizeof(JsGpioIsrContext));
-    mjs_val_t* args = calloc(mjs_nargs(mjs), sizeof(mjs_val_t));
-    args[0] = manager; // already `mjs_own`ed
-    for(int i = 1; i < mjs_nargs(mjs); i++) {
-        mjs_val_t arg = mjs_arg(mjs, i);
-        mjs_own(mjs, &arg);
-        args[i] = arg;
-    }
-    context->interrupt_queue = manager_data->interrupt_queue;
-    context->message.callback = callback_arg;
-    context->message.args = args;
-    context->message.args_len = mjs_nargs(mjs);
-    manager_data->isr_context = context;
-    manager_data->had_interrupt = true;
-
-    // attach interrupt
-    furi_hal_gpio_remove_int_callback(manager_data->pin);
-    furi_hal_gpio_add_int_callback(manager_data->pin, js_gpio_int_cb, (void*)context);
-    furi_hal_gpio_enable_int_callback(manager_data->pin);
-
-    mjs_return(mjs, MJS_UNDEFINED);
-}
-
-/**
- * @brief Detaches an interrupt handler from a GPIO pin
- * 
- * Example usage:
- * 
- * ```js
- * let gpio = require("gpio");
- * let button = gpio.get("pc1");
- * button.init({ direction: "in", inMode: "interrupt", edge: "rising" });
- * button.attach_handler(function () {
- *     print("Button pressed");
- *     button.detach_handler();
- * });
- * while(true) gpio.process_interrupts(true);
- * ```
- */
-static void js_gpio_detach_handler(struct mjs* mjs) {
-    // get state
-    mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
-
-    // detach interrupt
-    JsGpioIsrContext* context = manager_data->isr_context;
-    if(context) {
-        for(size_t i = 0; i < context->message.args_len; i++) {
-            mjs_disown(mjs, &context->message.args[i]);
-        }
-        free(context->message.args);
-    }
-    free(context);
-    furi_hal_gpio_remove_int_callback(manager_data->pin);
-    furi_message_queue_reset(manager_data->interrupt_queue);
-
-    mjs_return(mjs, MJS_UNDEFINED);
 }
 
 /**
@@ -358,7 +287,7 @@ static void js_gpio_get(struct mjs* mjs) {
     mjs_val_t manager = mjs_mk_object(mjs);
     JsGpioPinInst* manager_data = malloc(sizeof(JsGpioPinInst));
     manager_data->pin = pin_record->pin;
-    manager_data->interrupt_queue = module->interrupt_queue;
+    manager_data->interrupt_semaphore = furi_semaphore_alloc(UINT32_MAX, 0);
     manager_data->adc_handle = module->adc_handle;
     manager_data->adc_channel = pin_record->channel;
     mjs_own(mjs, &manager); // NOTE(extensibility): read `js_gpio_destroy`
@@ -367,59 +296,22 @@ static void js_gpio_get(struct mjs* mjs) {
     mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
     mjs_set(mjs, manager, "read", ~0, MJS_MK_FN(js_gpio_read));
     mjs_set(mjs, manager, "read_analog", ~0, MJS_MK_FN(js_gpio_read_analog));
-    mjs_set(mjs, manager, "attach_handler", ~0, MJS_MK_FN(js_gpio_attach_handler));
-    mjs_set(mjs, manager, "detach_handler", ~0, MJS_MK_FN(js_gpio_detach_handler));
+    mjs_set(mjs, manager, "interrupt", ~0, MJS_MK_FN(js_gpio_interrupt));
     mjs_return(mjs, manager);
 
     // remember pin
     ManagedPinsArray_push_back(module->managed_pins, manager_data);
 }
 
-/**
- * @brief Processes GPIO interrupts in either a blocking or a non-blocking
- * fashion
- * 
- * Example usage:
- * 
- * ```js
- * let gpio = require("gpio");
- * let button = gpio.get("pc1");
- * button.init({ direction: "in", inMode: "interrupt", edge: "rising" });
- * button.attach_handler(function () {
- *     print("Button pressed");
- * });
- * while(true) gpio.process_interrupts(true);
- * ```
- */
-static void js_gpio_process_interrupts(struct mjs* mjs) {
-    // get argument
-    mjs_val_t block_arg = mjs_arg(mjs, 0);
-    if(!mjs_is_boolean(block_arg))
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Must be a boolean");
-    bool block = mjs_get_bool(mjs, block_arg);
-
-    // get new messages
-    JsGpioInst* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
-    JsGpioInterruptMessage message;
-    while(furi_message_queue_get(
-              module->interrupt_queue, (void*)&message, block ? FuriWaitForever : 0) ==
-          FuriStatusOk) {
-        mjs_apply(mjs, NULL, message.callback, MJS_UNDEFINED, message.args_len, message.args);
-    }
-}
-
 static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
     JsGpioInst* module = malloc(sizeof(JsGpioInst));
     ManagedPinsArray_init(module->managed_pins);
-    module->interrupt_queue =
-        furi_message_queue_alloc(INTERRUPT_QUEUE_LEN, sizeof(JsGpioInterruptMessage));
     module->adc_handle = furi_hal_adc_acquire();
     furi_hal_adc_configure(module->adc_handle);
 
     mjs_val_t gpio_obj = mjs_mk_object(mjs);
     mjs_set(mjs, gpio_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
     mjs_set(mjs, gpio_obj, "get", ~0, MJS_MK_FN(js_gpio_get));
-    mjs_set(mjs, gpio_obj, "process_interrupts", ~0, MJS_MK_FN(js_gpio_process_interrupts));
     *object = gpio_obj;
 
     return (void*)module;
@@ -448,15 +340,13 @@ static void js_gpio_destroy(void* inst) {
             // right now, but if the JS subsystem is ever extended so that
             // modules may be are loaded and unloaded throughout the lifetime of
             // the interpreter, this is an area to look into.
-            if(manager_data->isr_context) free(manager_data->isr_context->message.args);
-            free(manager_data->isr_context);
+            furi_semaphore_free(manager_data->interrupt_semaphore);
             free(manager_data);
         }
 
         // free buffers
         furi_hal_adc_release(module->adc_handle);
         ManagedPinsArray_clear(module->managed_pins);
-        furi_message_queue_free(module->interrupt_queue);
         free(module);
     }
 
