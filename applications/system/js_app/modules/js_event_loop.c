@@ -30,12 +30,18 @@ typedef struct {
 
 ARRAY_DEF(SubscriptionArray, JsEventLoopSubscription*, M_PTR_OPLIST); //-V575
 
+typedef struct {
+    FuriEventLoop* loop;
+    struct mjs* mjs;
+} JsEventLoopTickContext;
+
 /**
  * @brief Per-module instance control structure
  */
 typedef struct {
     FuriEventLoop* loop;
     SubscriptionArray_t subscriptions;
+    JsEventLoopTickContext* tick_context;
 } JsEventLoop;
 
 /**
@@ -166,7 +172,7 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
         FuriEventLoopTimer* timer = furi_event_loop_timer_alloc(
             module->loop, js_event_loop_callback_generic, contract->timer_type, context);
         furi_event_loop_timer_start(timer, contract->interval_ticks);
-        subscription->object = contract->object = timer;
+        contract->object = timer;
     } break;
     case JsEventLoopObjectTypeSemaphore: {
         FuriSemaphore* semaphore = contract->object;
@@ -177,6 +183,7 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
         furi_crash("unimplemented");
     }
 
+    subscription->object = contract->object;
     SubscriptionArray_push_back(module->subscriptions, subscription);
     mjs_return(mjs, subscription_obj);
 }
@@ -231,10 +238,27 @@ static void js_event_loop_timer(struct mjs* mjs) {
 
 // TODO: integrate with other modules
 
+static void js_event_loop_tick(void* param) {
+    JsEventLoopTickContext* context = param;
+    uint32_t flags = furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny | FuriFlagNoClear, 0);
+    if(flags & FuriFlagError) {
+        return;
+    }
+    if(flags & ThreadEventStop) {
+        furi_event_loop_stop(context->loop);
+        mjs_exit(context->mjs);
+    }
+}
+
 static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_val_t event_loop_obj = mjs_mk_object(mjs);
     JsEventLoop* module = malloc(sizeof(JsEventLoop));
+    JsEventLoopTickContext* tick_ctx = malloc(sizeof(JsEventLoopTickContext));
     module->loop = furi_event_loop_alloc();
+    tick_ctx->loop = module->loop;
+    tick_ctx->mjs = mjs;
+    module->tick_context = tick_ctx;
+    furi_event_loop_tick_set(module->loop, 10, js_event_loop_tick, tick_ctx);
     SubscriptionArray_init(module->subscriptions);
 
     mjs_set(mjs, event_loop_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
@@ -260,6 +284,7 @@ static void js_event_loop_destroy(void* inst) {
 
         furi_event_loop_free(module->loop);
         SubscriptionArray_clear(module->subscriptions);
+        free(module->tick_context);
         free(module);
     }
 
