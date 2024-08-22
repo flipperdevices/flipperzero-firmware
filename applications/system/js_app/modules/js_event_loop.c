@@ -2,13 +2,7 @@
 #include "../js_modules.h" // IWYU pragma: keep
 #include <expansion/expansion.h>
 #include <furi/core/event_loop_i.h>
-
-/**
- * @brief Per-module instance control structure
- */
-typedef struct {
-    FuriEventLoop* loop;
-} JsEventLoop;
+#include <mlib/m-array.h>
 
 /**
  * @brief Context passed to the generic event callback
@@ -17,6 +11,7 @@ typedef struct {
     JsEventLoopObjectType object_type;
     struct mjs* mjs;
     mjs_val_t callback;
+    // NOTE: not using an mlib array because resizing is not needed.
     size_t arity;
     mjs_val_t* arguments;
 } JsEventLoopCallbackContext;
@@ -28,7 +23,20 @@ typedef struct {
     FuriEventLoop* loop;
     JsEventLoopObjectType object_type;
     FuriEventLoopObject* object;
+    JsEventLoopCallbackContext* context;
+    JsEventLoopContract* contract;
+    void* subscriptions; // SubscriptionArray_t, which we can't reference in this definition
 } JsEventLoopSubscription;
+
+ARRAY_DEF(SubscriptionArray, JsEventLoopSubscription*, M_PTR_OPLIST); //-V575
+
+/**
+ * @brief Per-module instance control structure
+ */
+typedef struct {
+    FuriEventLoop* loop;
+    SubscriptionArray_t subscriptions;
+} JsEventLoop;
 
 /**
  * @brief Generic event callback, handles all events by calling the JS callbacks
@@ -65,7 +73,7 @@ static bool js_event_loop_callback(void* object, void* param) {
         furi_check(furi_semaphore_acquire(semaphore, 0) == FuriStatusOk);
     } break;
     default:
-        break;
+        furi_crash("unimplemented");
     }
     js_event_loop_callback_generic(param);
     return true;
@@ -74,21 +82,37 @@ static bool js_event_loop_callback(void* object, void* param) {
 /**
  * @brief Cancels an event subscription
  */
+static void js_event_loop_do_unsubscribe(JsEventLoopSubscription* subscription) {
+    if(subscription->object_type == JsEventLoopObjectTypeTimer) {
+        // timer objects and contracts are freed by us, read the docs for `JsEventLoopContract`
+        furi_event_loop_timer_stop(subscription->object);
+        furi_event_loop_timer_free(subscription->object);
+        free(subscription->contract);
+    } else {
+        furi_event_loop_unsubscribe(subscription->loop, subscription->object);
+    }
+    free(subscription->context->arguments);
+    free(subscription->context);
+
+    // find and remove ourselves from the array
+    SubscriptionArray_it_t iterator;
+    for(SubscriptionArray_it(iterator, subscription->subscriptions);
+        !SubscriptionArray_end_p(iterator);
+        SubscriptionArray_next(iterator)) {
+        JsEventLoopSubscription* item = *SubscriptionArray_cref(iterator);
+        if(item == subscription) break;
+    }
+    SubscriptionArray_remove(subscription->subscriptions, iterator);
+    free(subscription);
+}
+
+/**
+ * @brief Cancels an event subscription, callable from JS
+ */
 static void js_event_loop_subscription_cancel(struct mjs* mjs) {
     JsEventLoopSubscription* subscription =
         mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
-
-    switch(subscription->object_type) {
-    case JsEventLoopObjectTypeTimer: {
-        furi_event_loop_timer_stop(subscription->object);
-    } break;
-    case JsEventLoopObjectTypeSemaphore: {
-        furi_event_loop_unsubscribe(subscription->loop, subscription->object);
-    } break;
-    default:
-        break;
-    }
-
+    js_event_loop_do_unsubscribe(subscription);
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
@@ -111,14 +135,17 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
 
     // create subscription object
     JsEventLoopSubscription* subscription = malloc(sizeof(JsEventLoopSubscription));
+    JsEventLoopCallbackContext* context = malloc(sizeof(JsEventLoopCallbackContext));
     subscription->loop = module->loop;
     subscription->object_type = contract->object_type;
+    subscription->context = context;
+    subscription->subscriptions = module->subscriptions;
+    if(contract->object_type == JsEventLoopObjectTypeTimer) subscription->contract = contract;
     mjs_val_t subscription_obj = mjs_mk_object(mjs);
     mjs_set(mjs, subscription_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, subscription));
     mjs_set(mjs, subscription_obj, "cancel", ~0, MJS_MK_FN(js_event_loop_subscription_cancel));
 
     // create callback context
-    JsEventLoopCallbackContext* context = malloc(sizeof(JsEventLoopCallbackContext));
     context->object_type = contract->object_type;
     context->arity = mjs_nargs(mjs) - 1;
     context->arguments = calloc(context->arity, sizeof(mjs_val_t));
@@ -139,7 +166,7 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
         FuriEventLoopTimer* timer = furi_event_loop_timer_alloc(
             module->loop, js_event_loop_callback_generic, contract->timer_type, context);
         furi_event_loop_timer_start(timer, contract->interval_ticks);
-        contract->object = timer;
+        subscription->object = contract->object = timer;
     } break;
     case JsEventLoopObjectTypeSemaphore: {
         FuriSemaphore* semaphore = contract->object;
@@ -147,10 +174,10 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
             module->loop, semaphore, contract->event, js_event_loop_callback, context);
     } break;
     default:
-        break;
+        furi_crash("unimplemented");
     }
 
-    subscription->object = contract->object;
+    SubscriptionArray_push_back(module->subscriptions, subscription);
     mjs_return(mjs, subscription_obj);
 }
 
@@ -202,20 +229,18 @@ static void js_event_loop_timer(struct mjs* mjs) {
     mjs_return(mjs, mjs_mk_foreign(mjs, contract));
 }
 
-// TODO: memory freeing, integrate with other modules
+// TODO: integrate with other modules
 
 static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_val_t event_loop_obj = mjs_mk_object(mjs);
     JsEventLoop* module = malloc(sizeof(JsEventLoop));
     module->loop = furi_event_loop_alloc();
+    SubscriptionArray_init(module->subscriptions);
 
-    // event loop control
     mjs_set(mjs, event_loop_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
     mjs_set(mjs, event_loop_obj, "subscribe", ~0, MJS_MK_FN(js_event_loop_subscribe));
     mjs_set(mjs, event_loop_obj, "run", ~0, MJS_MK_FN(js_event_loop_run));
     mjs_set(mjs, event_loop_obj, "stop", ~0, MJS_MK_FN(js_event_loop_stop));
-
-    // built-in contracts
     mjs_set(mjs, event_loop_obj, "timer", ~0, MJS_MK_FN(js_event_loop_timer));
 
     *object = event_loop_obj;
@@ -225,6 +250,16 @@ static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object) {
 static void js_event_loop_destroy(void* inst) {
     if(inst) {
         JsEventLoop* module = inst;
+        furi_event_loop_stop(module->loop);
+
+        // free subscriptions
+        while(!SubscriptionArray_empty_p(module->subscriptions)) {
+            JsEventLoopSubscription** sub = SubscriptionArray_get(module->subscriptions, 0);
+            js_event_loop_do_unsubscribe(*sub);
+        }
+
+        furi_event_loop_free(module->loop);
+        SubscriptionArray_clear(module->subscriptions);
         free(module);
     }
 

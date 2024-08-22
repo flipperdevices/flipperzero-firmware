@@ -17,7 +17,7 @@ event_loop.subscribe(event_loop.timer("periodic", 100), function (subscription, 
 
 // count up to 15 with a delay of 100ms between increments
 // and stop the program when the count reaches 15
-event_loop.subscribe(event_loop.timer("periodic", 100), function (_subscription, event_loop, counter) {
+event_loop.subscribe(event_loop.timer("periodic", 100), function (subscription, event_loop, counter) {
     print("Counter one:", counter);
     if (counter === 15)
         event_loop.stop();
