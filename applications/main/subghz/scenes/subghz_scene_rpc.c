@@ -8,23 +8,33 @@ typedef enum {
 
 void subghz_scene_rpc_on_enter(void* context) {
     SubGhz* subghz = context;
+    scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneRpc, SubGhzRpcStateIdle);
+}
+
+static void subghz_format_file_name_tmp(SubGhz* subghz) {
+    FuriString* file_name;
+    file_name = furi_string_alloc();
+    path_extract_filename(subghz->file_path, file_name, true);
+    snprintf(
+        subghz->file_name_tmp, SUBGHZ_MAX_LEN_NAME, "loaded\n%s", furi_string_get_cstr(file_name));
+    furi_string_free(file_name);
+}
+
+static void subghz_scene_rpc_emulation_show(SubGhz* subghz) {
     Popup* popup = subghz->popup;
 
+    subghz_format_file_name_tmp(subghz);
     popup_set_header(popup, "Sub-GHz", 89, 42, AlignCenter, AlignBottom);
-    popup_set_text(popup, "RPC mode", 89, 44, AlignCenter, AlignTop);
-
     popup_set_icon(popup, 0, 12, &I_RFIDDolphinSend_97x61);
+    popup_set_text(popup, subghz->file_name_tmp, 89, 44, AlignCenter, AlignTop);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdPopup);
-
-    scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneRpc, SubGhzRpcStateIdle);
 
     notification_message(subghz->notifications, &sequence_display_backlight_on);
 }
 
 bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
-    Popup* popup = subghz->popup;
     bool consumed = false;
     SubGhzRpcState state = scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneRpc);
 
@@ -75,21 +85,10 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             bool result = false;
             if(state == SubGhzRpcStateIdle) {
                 if(subghz_key_load(subghz, furi_string_get_cstr(subghz->file_path), false)) {
+                    subghz_scene_rpc_emulation_show(subghz);
                     scene_manager_set_scene_state(
                         subghz->scene_manager, SubGhzSceneRpc, SubGhzRpcStateLoaded);
                     result = true;
-                    FuriString* file_name;
-                    file_name = furi_string_alloc();
-                    path_extract_filename(subghz->file_path, file_name, true);
-
-                    snprintf(
-                        subghz->file_name_tmp,
-                        SUBGHZ_MAX_LEN_NAME,
-                        "loaded\n%s",
-                        furi_string_get_cstr(file_name));
-                    popup_set_text(popup, subghz->file_name_tmp, 89, 44, AlignCenter, AlignTop);
-
-                    furi_string_free(file_name);
                 } else {
                     rpc_system_app_set_error_code(subghz->rpc_ctx, SubGhzErrorTypeParseFile);
                     rpc_system_app_set_error_text(subghz->rpc_ctx, "Cannot parse file");
