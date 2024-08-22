@@ -69,6 +69,15 @@ typedef enum {
 } InfraredEditTarget;
 
 /**
+ * @brief Enumeration of errors which can be sent through rpc
+ */
+typedef enum {
+    InfraredRpcErrorTypeNoError = 0, /** There are no errors */
+    InfraredRpcErrorTypeParseFile =
+        1, /** File parsing error, or wrong file structure, or missing required parameters. more accurate data can be obtained through the debug port */
+} InfraredRpcErrorType;
+
+/**
  * @brief Enumeration of editing modes.
  */
 typedef enum {
