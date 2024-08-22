@@ -43,6 +43,9 @@ bool lfrfid_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                 if(lfrfid_load_key_data(app, app->file_path, false)) {
                     lfrfid_rpc_start_emulation(app);
                     result = true;
+                } else {
+                    rpc_system_app_set_error_code(app->rpc_ctx, LfRfidRpcErrorTypeParseFile);
+                    rpc_system_app_set_error_text(app->rpc_ctx, "Cannot load key file");
                 }
             }
             rpc_system_app_confirm(app->rpc_ctx, result);
