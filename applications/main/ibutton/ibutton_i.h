@@ -35,6 +35,12 @@
 #define IBUTTON_KEY_NAME_SIZE 22
 
 typedef enum {
+    iButtonRpcErrorTypeNoError = 0, /** There are no errors */
+    iButtonRpcErrorTypeParseFile =
+        1, /** File parsing error, or wrong file structure, or missing required parameters. more accurate data can be obtained through the debug port */
+} iButtonRpcErrorType;
+
+typedef enum {
     iButtonWriteModeInvalid,
     iButtonWriteModeId,
     iButtonWriteModeCopy,
