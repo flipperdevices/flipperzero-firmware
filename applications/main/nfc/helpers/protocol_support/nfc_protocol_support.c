@@ -718,7 +718,8 @@ static bool nfc_protocol_support_scene_rpc_on_event(NfcApp* instance, SceneManag
                     nfc_protocol_support_scene_rpc_setup_ui_and_emulate(instance);
                     success = true;
                 } else {
-                    rpc_system_app_set_error_code(instance->rpc_ctx, NfcRpcErrorTypeParseFile);
+                    rpc_system_app_set_error_code(
+                        instance->rpc_ctx, RpcAppSystemErrorCodeParseFile);
                     rpc_system_app_set_error_text(instance->rpc_ctx, "Cannot load key file");
                 }
             }

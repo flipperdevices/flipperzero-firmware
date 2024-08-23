@@ -90,7 +90,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                         subghz->scene_manager, SubGhzSceneRpc, SubGhzRpcStateLoaded);
                     result = true;
                 } else {
-                    rpc_system_app_set_error_code(subghz->rpc_ctx, SubGhzErrorTypeParseFile);
+                    rpc_system_app_set_error_code(subghz->rpc_ctx, RpcAppSystemErrorCodeParseFile);
                     rpc_system_app_set_error_text(subghz->rpc_ctx, "Cannot parse file");
                 }
             }

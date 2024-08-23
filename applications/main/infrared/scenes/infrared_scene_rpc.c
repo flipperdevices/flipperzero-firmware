@@ -66,7 +66,7 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                 furi_string_printf(
                     str, "Failed to load\n%s", furi_string_get_cstr(infrared->file_path));
 
-                rpc_system_app_set_error_code(infrared->rpc_ctx, InfraredRpcErrorTypeParseFile);
+                rpc_system_app_set_error_code(infrared->rpc_ctx, RpcAppSystemErrorCodeParseFile);
                 rpc_system_app_set_error_text(infrared->rpc_ctx, furi_string_get_cstr(str));
 
                 furi_string_free(str);

@@ -34,7 +34,7 @@ bool ibutton_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                 ibutton_rpc_start_emulation(ibutton);
                 result = true;
             } else {
-                rpc_system_app_set_error_code(ibutton->rpc, iButtonRpcErrorTypeParseFile);
+                rpc_system_app_set_error_code(ibutton->rpc, RpcAppSystemErrorCodeParseFile);
                 rpc_system_app_set_error_text(ibutton->rpc, "Cannot load key file");
             }
             rpc_system_app_confirm(ibutton->rpc, result);
