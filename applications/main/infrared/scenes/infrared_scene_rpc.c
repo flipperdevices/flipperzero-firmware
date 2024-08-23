@@ -98,7 +98,7 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                         result = true;
                     } else {
                         rpc_system_app_set_error_code(
-                            infrared->rpc_ctx, InfraredRpcErrorTypeParseFile);
+                            infrared->rpc_ctx, InfraredRpcErroTypeButtonParseFailed);
                         rpc_system_app_set_error_text(
                             infrared->rpc_ctx, "Cannot load button data");
                         result = false;
