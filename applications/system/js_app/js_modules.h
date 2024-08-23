@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 #include "js_thread_i.h"
 #include <flipper_application/flipper_application.h>
 #include <flipper_application/plugins/plugin_manager.h>

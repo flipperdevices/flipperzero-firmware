@@ -220,3 +220,11 @@ App(
     entry_point="get_api",
     requires=["unit_tests"],
 )
+
+App(
+    appid="test_js",
+    sources=["tests/common/*.c", "tests/js/*.c"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="get_api",
+    requires=["unit_tests", "js_app"],
+)

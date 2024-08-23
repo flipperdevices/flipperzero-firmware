@@ -1,7 +1,11 @@
 #include <core/common_defines.h>
 #include "js_modules.h"
 #include <m-dict.h>
+
 #include "modules/js_flipper.h"
+#ifdef FW_CFG_unit_tests
+#include "modules/js_tests.h"
+#endif
 
 #define TAG "JS modules"
 
@@ -18,6 +22,9 @@ DICT_DEF2(JsModuleDict, FuriString*, FURI_STRING_OPLIST, JsModuleData, M_POD_OPL
 
 static const JsModuleDescriptor modules_builtin[] = {
     {"flipper", js_flipper_create, NULL},
+#ifdef FW_CFG_unit_tests
+    {"tests", js_tests_create, NULL},
+#endif
 };
 
 struct JsModules {
