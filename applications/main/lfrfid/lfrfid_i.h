@@ -73,11 +73,8 @@ typedef enum {
     LfRfidRpcStateEmulating,
 } LfRfidRpcState;
 
-typedef enum {
-    LfRfidRpcErrorTypeNoError = 0, /** There are no errors */
-    LfRfidRpcErrorTypeParseFile =
-        1, /** File parsing error, or wrong file structure, or missing required parameters. more accurate data can be obtained through the debug port */
-} LfRfidRpcErrorType;
+/* typedef enum {
+} LfRfidRpcErrorType; */
 
 typedef struct LfRfid LfRfid;
 

@@ -82,12 +82,6 @@ typedef enum {
     NfcRpcStateEmulating,
 } NfcRpcState;
 
-typedef enum {
-    NfcRpcErrorTypeNoError = 0, /** There are no errors */
-    NfcRpcErrorTypeParseFile =
-        1, /** File parsing error, or wrong file structure, or missing required parameters. more accurate data can be obtained through the debug port */
-} NfcRpcErrorType;
-
 typedef struct {
     KeysDict* dict;
     uint8_t sectors_total;
