@@ -79,7 +79,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
 }
 
 void desktop_scene_lock_menu_on_exit(void* context) {
-    Desktop* desktop = (Desktop *)context;
+    Desktop* desktop = (Desktop*)context;
 
     if(desktop_lock_menu_did_notification_settings_change(desktop->lock_menu)) {
         notification_message_save_settings(desktop->notification);

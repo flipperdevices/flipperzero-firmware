@@ -8,7 +8,7 @@
 #define NOTIFICATION_EVENT_COMPLETE 0x00000001U
 
 #define BACKLIGHT_COUNT 5
-extern const char * backlight_text[BACKLIGHT_COUNT];
+extern const char* backlight_text[BACKLIGHT_COUNT];
 extern float backlight_value[BACKLIGHT_COUNT];
 
 typedef enum {
