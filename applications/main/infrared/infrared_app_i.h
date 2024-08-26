@@ -69,14 +69,6 @@ typedef enum {
 } InfraredEditTarget;
 
 /**
- * @brief Enumeration of errors which can be sent through rpc
- */
-typedef enum {
-    InfraredRpcErroTypeButtonParseFailed =
-        RpcAppSystemErrorCodesReserved, /** Button parsing error*/
-} InfraredRpcErrorCodes;
-
-/**
  * @brief Enumeration of editing modes.
  */
 typedef enum {
