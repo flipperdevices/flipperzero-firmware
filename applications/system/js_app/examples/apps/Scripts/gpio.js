@@ -14,14 +14,14 @@ button.init({ direction: "in", pull: "up", inMode: "interrupt", edge: "falling" 
 
 // blink led
 print("Commencing blinking (PC3)");
-event_loop.subscribe(event_loop.timer("periodic", 1000), function (_, led, state) {
+event_loop.subscribe(event_loop.timer("periodic", 1000), function (_, _item, led, state) {
     led.write(state);
     return [led, !state];
 }, led, true);
 
 // read potentiometer when button is pressed
 print("Press the button (PC1)");
-event_loop.subscribe(button.interrupt(), function (_, pot) {
+event_loop.subscribe(button.interrupt(), function (_, _item, pot) {
     print("PC0 is at", pot.read_analog(), "mV");
 }, pot);
 

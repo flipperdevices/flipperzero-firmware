@@ -31,6 +31,17 @@ static void js_tests_assert_eq(struct mjs* mjs) {
             mjs_prepend_errorf(
                 mjs, MJS_INTERNAL_ERROR, "expected \"%s\", found \"%s\"", expected, result);
         }
+    } else if(mjs_is_boolean(expected_arg) && mjs_is_boolean(result_arg)) {
+        bool expected = mjs_get_bool(mjs, expected_arg);
+        bool result = mjs_get_bool(mjs, result_arg);
+        if(expected != result) {
+            mjs_prepend_errorf(
+                mjs,
+                MJS_INTERNAL_ERROR,
+                "expected %s, found %s",
+                expected ? "true" : "false",
+                result ? "true" : "false");
+        }
     } else {
         furi_crash();
     }

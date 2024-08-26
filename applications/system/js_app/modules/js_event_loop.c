@@ -5,15 +5,24 @@
 #include <mlib/m-array.h>
 
 /**
+ * @brief Number of arguments that callbacks receive from this module that they can't modify
+ */
+#define SYSTEM_ARGS 2
+
+/**
  * @brief Context passed to the generic event callback
  */
 typedef struct {
     JsEventLoopObjectType object_type;
+
     struct mjs* mjs;
     mjs_val_t callback;
     // NOTE: not using an mlib array because resizing is not needed.
-    size_t arity;
     mjs_val_t* arguments;
+    size_t arity;
+
+    JsEventLoopTransformer transformer;
+    void* transformer_context;
 } JsEventLoopCallbackContext;
 
 /**
@@ -28,12 +37,13 @@ typedef struct {
     void* subscriptions; // SubscriptionArray_t, which we can't reference in this definition
 } JsEventLoopSubscription;
 
-ARRAY_DEF(SubscriptionArray, JsEventLoopSubscription*, M_PTR_OPLIST); //-V575
-
 typedef struct {
     FuriEventLoop* loop;
     struct mjs* mjs;
 } JsEventLoopTickContext;
+
+ARRAY_DEF(SubscriptionArray, JsEventLoopSubscription*, M_PTR_OPLIST); //-V575
+ARRAY_DEF(ContractArray, JsEventLoopContract*, M_PTR_OPLIST); //-V575
 
 /**
  * @brief Per-module instance control structure
@@ -41,6 +51,7 @@ typedef struct {
 typedef struct {
     FuriEventLoop* loop;
     SubscriptionArray_t subscriptions;
+    ContractArray_t contracts; //<! Contracts that were produced by this module
     JsEventLoopTickContext* tick_context;
 } JsEventLoop;
 
@@ -58,13 +69,12 @@ static void js_event_loop_callback_generic(void* param) {
         context->arity,
         context->arguments);
 
-    // save returned value as args for next call
-    // argument 0 never changes and contains the subscription object
-    if(mjs_array_length(context->mjs, result) != context->arity - 1) return;
-    for(size_t i = 0; i < context->arity - 1; i++) {
-        mjs_disown(context->mjs, &context->arguments[i + 1]);
-        context->arguments[i + 1] = mjs_array_get(context->mjs, result, i);
-        mjs_own(context->mjs, &context->arguments[i + 1]);
+    // save returned args for next call
+    if(mjs_array_length(context->mjs, result) != context->arity - SYSTEM_ARGS) return;
+    for(size_t i = 0; i < context->arity - SYSTEM_ARGS; i++) {
+        mjs_disown(context->mjs, &context->arguments[i + SYSTEM_ARGS]);
+        context->arguments[i + SYSTEM_ARGS] = mjs_array_get(context->mjs, result, i);
+        mjs_own(context->mjs, &context->arguments[i + SYSTEM_ARGS]);
     }
 }
 
@@ -73,15 +83,26 @@ static void js_event_loop_callback_generic(void* param) {
  */
 static bool js_event_loop_callback(void* object, void* param) {
     JsEventLoopCallbackContext* context = param;
-    switch(context->object_type) {
-    case JsEventLoopObjectTypeSemaphore: {
-        FuriSemaphore* semaphore = object;
-        furi_check(furi_semaphore_acquire(semaphore, 0) == FuriStatusOk);
-    } break;
-    default:
-        furi_crash("unimplemented");
+
+    if(context->transformer) {
+        mjs_disown(context->mjs, &context->arguments[1]);
+        context->arguments[1] = context->transformer(object, context->transformer_context);
+        mjs_own(context->mjs, &context->arguments[1]);
+    } else {
+        // default behavior: take semaphores and mutexes
+        switch(context->object_type) {
+        case JsEventLoopObjectTypeSemaphore: {
+            FuriSemaphore* semaphore = object;
+            furi_check(furi_semaphore_acquire(semaphore, 0) == FuriStatusOk);
+        } break;
+        default:
+            // the corresponding check has been performed when we were given the contract
+            furi_crash();
+        }
     }
+
     js_event_loop_callback_generic(param);
+
     return true;
 }
 
@@ -90,13 +111,11 @@ static bool js_event_loop_callback(void* object, void* param) {
  */
 static void js_event_loop_do_unsubscribe(JsEventLoopSubscription* subscription) {
     if(subscription->object_type == JsEventLoopObjectTypeTimer) {
-        // timer objects and contracts are freed by us, read the docs for `JsEventLoopContract`
         furi_event_loop_timer_stop(subscription->object);
-        furi_event_loop_timer_free(subscription->object);
-        free(subscription->contract);
     } else {
         furi_event_loop_unsubscribe(subscription->loop, subscription->object);
     }
+
     free(subscription->context->arguments);
     free(subscription->context);
 
@@ -153,11 +172,12 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
 
     // create callback context
     context->object_type = contract->object_type;
-    context->arity = mjs_nargs(mjs) - 1;
+    context->arity = mjs_nargs(mjs);
     context->arguments = calloc(context->arity, sizeof(mjs_val_t));
     context->arguments[0] = subscription_obj;
-    for(size_t i = 1; i < context->arity; i++) {
-        mjs_val_t arg = mjs_arg(mjs, i + 1);
+    context->arguments[1] = MJS_UNDEFINED;
+    for(size_t i = SYSTEM_ARGS; i < context->arity; i++) {
+        mjs_val_t arg = mjs_arg(mjs, i - SYSTEM_ARGS + 2);
         context->arguments[i] = arg;
         mjs_own(mjs, &context->arguments[i]);
     }
@@ -165,6 +185,16 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
     context->callback = callback;
     mjs_own(mjs, &context->callback);
     mjs_own(mjs, &context->arguments[0]);
+    mjs_own(mjs, &context->arguments[1]);
+
+    // queue and stream contracts must have a transform callback, others are allowed to delegate
+    // the obvious default behavior to this module
+    if(contract->object_type == JsEventLoopObjectTypeQueue ||
+       contract->object_type == JsEventLoopObjectTypeStream) {
+        furi_check(contract->transformer);
+    }
+    context->transformer = contract->transformer;
+    context->transformer_context = contract->transformer_context;
 
     // subscribe
     switch(contract->object_type) {
@@ -174,11 +204,14 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
         furi_event_loop_timer_start(timer, contract->interval_ticks);
         contract->object = timer;
     } break;
-    case JsEventLoopObjectTypeSemaphore: {
-        FuriSemaphore* semaphore = contract->object;
+    case JsEventLoopObjectTypeSemaphore:
         furi_event_loop_subscribe_semaphore(
-            module->loop, semaphore, contract->event, js_event_loop_callback, context);
-    } break;
+            module->loop, contract->object, contract->event, js_event_loop_callback, context);
+        break;
+    case JsEventLoopObjectTypeQueue:
+        furi_event_loop_subscribe_message_queue(
+            module->loop, contract->object, contract->event, js_event_loop_callback, context);
+        break;
     default:
         furi_crash("unimplemented");
     }
@@ -205,7 +238,7 @@ static void js_event_loop_stop(struct mjs* mjs) {
 }
 
 /**
- * @brief Creates a timer event that can be subscribed to just like and other
+ * @brief Creates a timer event that can be subscribed to just like any other
  * event
  */
 static void js_event_loop_timer(struct mjs* mjs) {
@@ -226,6 +259,7 @@ static void js_event_loop_timer(struct mjs* mjs) {
         JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "unknown mode");
     }
     int32_t interval = mjs_get_int32(mjs, interval_arg);
+    JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
 
     // make timer contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
@@ -233,7 +267,69 @@ static void js_event_loop_timer(struct mjs* mjs) {
     contract->object = NULL;
     contract->interval_ticks = furi_ms_to_ticks((uint32_t)interval);
     contract->timer_type = mode;
+    ContractArray_push_back(module->contracts, contract);
     mjs_return(mjs, mjs_mk_foreign(mjs, contract));
+}
+
+/**
+ * @brief Queue transformer. Takes `mjs_val_t` pointers out of a queue and
+ * returns their dereferenced value
+ */
+static mjs_val_t js_event_loop_queue_transformer(FuriEventLoopObject* object, void* context) {
+    struct mjs* mjs = context;
+    mjs_val_t* message_ptr;
+    furi_check(furi_message_queue_get(object, &message_ptr, 0) == FuriStatusOk);
+    mjs_val_t message = *message_ptr;
+    mjs_disown(mjs, message_ptr);
+    free(message_ptr);
+    return message;
+}
+
+/**
+ * @brief Sends a message to a queue
+ */
+static void js_event_loop_queue_send(struct mjs* mjs) {
+    // get arguments
+    if(mjs_nargs(mjs) != 1) JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "requires 1 argument");
+    mjs_val_t message = mjs_arg(mjs, 0);
+    JsEventLoopContract* contract = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), "input", ~0));
+
+    // send message
+    mjs_val_t* message_ptr = malloc(sizeof(mjs_val_t));
+    *message_ptr = message;
+    mjs_own(mjs, message_ptr);
+    furi_message_queue_put(contract->object, &message_ptr, 0);
+
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
+/**
+ * @brief Creates a queue
+ */
+static void js_event_loop_queue(struct mjs* mjs) {
+    // get arguments
+    if(mjs_nargs(mjs) != 1) JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "requires 1 argument");
+    mjs_val_t length_arg = mjs_arg(mjs, 0);
+    if(!mjs_is_number(length_arg))
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "length must be a number");
+    size_t length = mjs_get_int32(mjs, length_arg);
+    JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+
+    // make queue contract
+    JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
+    contract->object_type = JsEventLoopObjectTypeQueue;
+    // we could store `mjs_val_t`s in the queue directly if not for mJS' requirement to have consistent pointers to owned values
+    contract->object = furi_message_queue_alloc(length, sizeof(mjs_val_t*));
+    contract->event = FuriEventLoopEventIn;
+    contract->transformer = js_event_loop_queue_transformer;
+    contract->transformer_context = mjs;
+    ContractArray_push_back(module->contracts, contract);
+
+    // return object with control methods
+    mjs_val_t queue = mjs_mk_object(mjs);
+    mjs_set(mjs, queue, "input", ~0, mjs_mk_foreign(mjs, contract));
+    mjs_set(mjs, queue, "send", ~0, MJS_MK_FN(js_event_loop_queue_send));
+    mjs_return(mjs, queue);
 }
 
 // TODO: integrate with other modules
@@ -260,12 +356,14 @@ static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object) {
     module->tick_context = tick_ctx;
     furi_event_loop_tick_set(module->loop, 10, js_event_loop_tick, tick_ctx);
     SubscriptionArray_init(module->subscriptions);
+    ContractArray_init(module->contracts);
 
     mjs_set(mjs, event_loop_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
     mjs_set(mjs, event_loop_obj, "subscribe", ~0, MJS_MK_FN(js_event_loop_subscribe));
     mjs_set(mjs, event_loop_obj, "run", ~0, MJS_MK_FN(js_event_loop_run));
     mjs_set(mjs, event_loop_obj, "stop", ~0, MJS_MK_FN(js_event_loop_stop));
     mjs_set(mjs, event_loop_obj, "timer", ~0, MJS_MK_FN(js_event_loop_timer));
+    mjs_set(mjs, event_loop_obj, "queue", ~0, MJS_MK_FN(js_event_loop_queue));
 
     *object = event_loop_obj;
     return module;
@@ -281,9 +379,31 @@ static void js_event_loop_destroy(void* inst) {
             JsEventLoopSubscription** sub = SubscriptionArray_get(module->subscriptions, 0);
             js_event_loop_do_unsubscribe(*sub);
         }
+        SubscriptionArray_clear(module->subscriptions);
+
+        // free owned contracts
+        ContractArray_it_t iterator;
+        for(ContractArray_it(iterator, module->contracts); !ContractArray_end_p(iterator);
+            ContractArray_next(iterator)) {
+            JsEventLoopContract* contract = *ContractArray_cref(iterator);
+            switch(contract->object_type) {
+            case JsEventLoopObjectTypeTimer:
+                furi_event_loop_timer_free(contract->object);
+                break;
+            case JsEventLoopObjectTypeSemaphore:
+                furi_semaphore_free(contract->object);
+                break;
+            case JsEventLoopObjectTypeQueue:
+                furi_message_queue_free(contract->object);
+                break;
+            default:
+                furi_crash("unimplemented");
+            }
+            free(contract);
+        }
+        ContractArray_clear(module->contracts);
 
         furi_event_loop_free(module->loop);
-        SubscriptionArray_clear(module->subscriptions);
         free(module->tick_context);
         free(module);
     }

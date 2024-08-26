@@ -10,9 +10,11 @@ typedef enum {
     JsEventLoopObjectTypeStream,
 } JsEventLoopObjectType;
 
+typedef mjs_val_t (*JsEventLoopTransformer)(FuriEventLoopObject* object, void* context);
+
 /**
  * @brief Adapter for other JS modules that wish to integrate with the event
- * loop
+ * loop JS module
  * 
  * If another module wishes to integrate with `js_event_loop`, it needs to
  * implement a function callable from JS that returns an mJS foreign pointer to
@@ -20,32 +22,30 @@ typedef enum {
  * `subscribe` function.
  * 
  * There are two fundamental variants of this structure:
- *   - `object_type` is `JsEventLoopObjectTypeTimer`: the event loop assumes
- *     ownership of the contract. It is responsible for both instantiating and
- *     freeing the timer, as well as freeing the contract. The fields
- *     `timer_type` and `interval_ticks` specify timer parameters.
- *   - `object_type` is something else: the provider is responsible for both
- *     instantiating and freeing the object, as well as freeing the contract.
- *     The field `event` will be passed to `furi_event_loop_subscribe`.
+ *   - `object_type` is `JsEventLoopObjectTypeTimer`: the fields `timer_type`
+ *     and `interval_ticks` specify timer parameters.
+ *   - `object_type` is something else: the field `event` will be passed to
+ *     `furi_event_loop_subscribe`. The specified `callback` will be called to
+ *     transform an object into a JS value (called an item) that's passed to the
+ *     JS callback. This is useful for example to take an item out of a message
+ *     queue and pass it to JS code in a convenient format. If `callback` is
+ *     NULL, the event loop will take semaphores and mutexes on its own.
  * 
- * The interface has been designed this way because it is possible for JS code
- * to make your module produce a contract that is never seen by the event loop,
- * resulting in a memory leak if the event loop were to always assume ownership.
- * Timers are special because it does not make sense for a foreign module to
- * produce a timer contract, given that the event loop JS module has a function
- * that produces them. Timers are still handled via contracts in order to reduce
- * code complexity in both the implementation of `js_event_loop` and in JS user
- * code.
+ * The producer of the contract is responsible for freeing both the contract and
+ * the object that it points to when the interpreter is torn down.
  */
 typedef struct {
     JsEventLoopObjectType object_type;
     FuriEventLoopObject* object;
     union {
-        FuriEventLoopEvent event; //<! Event bitfield. Valid for all object types except timers
         struct {
-            FuriEventLoopTimerType
-                timer_type; //<! Timer type (periodic or oneshot). Only valid for timers
-            uint32_t interval_ticks; //<! Timer interval in ticks. Only valid for timers
+            FuriEventLoopEvent event; //<! Valid for all object types except timers
+            JsEventLoopTransformer transformer; //!< Valid for queues and streams
+            void* transformer_context; //<! Valid for queues and streams
+        };
+        struct {
+            FuriEventLoopTimerType timer_type; //<! Only valid for timers
+            uint32_t interval_ticks; //<! Only valid for timers
         };
     };
 } JsEventLoopContract;
