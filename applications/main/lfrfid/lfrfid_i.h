@@ -73,9 +73,6 @@ typedef enum {
     LfRfidRpcStateEmulating,
 } LfRfidRpcState;
 
-/* typedef enum {
-} LfRfidRpcErrorType; */
-
 typedef struct LfRfid LfRfid;
 
 struct LfRfid {
