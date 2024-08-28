@@ -188,7 +188,8 @@ bool infrared_add_remote_with_button(
  * @param[in] new_name pointer to a zero-terminated string containing the new remote name.
  * @return true if the remote was successfully renamed, false otherwise.
  */
-bool infrared_rename_current_remote(const InfraredApp* infrared, const char* new_name);
+InfraredErrorCode
+    infrared_rename_current_remote(const InfraredApp* infrared, const char* new_name);
 
 /**
  * @brief Begin transmission of the currently loaded signal.
@@ -238,7 +239,7 @@ void infrared_blocking_task_start(InfraredApp* infrared, FuriThreadCallback call
  * @param[in,out] infrared pointer to the application instance.
  * @return true if the blocking task finished successfully, false otherwise.
  */
-bool infrared_blocking_task_finalize(InfraredApp* infrared);
+InfraredErrorCode infrared_blocking_task_finalize(InfraredApp* infrared);
 
 /**
  * @brief Set the internal text store with formatted text.

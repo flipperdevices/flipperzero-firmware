@@ -228,9 +228,11 @@ static void infrared_cli_start_ir_tx(Cli* cli, FuriString* args) {
 
 static bool
     infrared_cli_save_signal(InfraredSignal* signal, FlipperFormat* file, const char* name) {
-    bool ret = infrared_signal_save(signal, file, name);
-    if(!ret) {
-        printf("Failed to save signal: \"%s\"\r\n", name);
+    bool ret = true;
+    InfraredErrorCode error = infrared_signal_save(signal, file, name);
+    if(error != InfraredErrorCodeNone) {
+        printf("Failed to save signal: \"%s\" code: 0x%02X\r\n", name, error);
+        ret = false;
     }
     return ret;
 }
@@ -292,7 +294,7 @@ static bool infrared_cli_decode_file(FlipperFormat* input_file, FlipperFormat* o
     FuriString* tmp;
     tmp = furi_string_alloc();
 
-    while(infrared_signal_read(signal, input_file, tmp)) {
+    while(infrared_signal_read(signal, input_file, tmp) == InfraredErrorCodeNone) {
         ret = false;
         if(!infrared_signal_is_valid(signal)) {
             printf("Invalid signal\r\n");
@@ -460,7 +462,7 @@ static void
             printf("Missing signal name.\r\n");
             break;
         }
-        if(!infrared_brute_force_calculate_messages(brute_force)) {
+        if(infrared_brute_force_calculate_messages(brute_force) != InfraredErrorCode) {
             printf("Invalid remote name.\r\n");
             break;
         }

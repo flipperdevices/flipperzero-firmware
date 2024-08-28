@@ -324,7 +324,8 @@ bool infrared_add_remote_with_button(
     return success;
 }
 
-bool infrared_rename_current_remote(const InfraredApp* infrared, const char* new_name) {
+InfraredErrorCode
+    infrared_rename_current_remote(const InfraredApp* infrared, const char* new_name) {
     InfraredRemote* remote = infrared->remote;
     const char* old_path = infrared_remote_get_path(remote);
 
@@ -344,12 +345,13 @@ bool infrared_rename_current_remote(const InfraredApp* infrared, const char* new
     path_append(new_path_fstr, furi_string_get_cstr(new_name_fstr));
     furi_string_cat(new_path_fstr, INFRARED_APP_EXTENSION);
 
-    const bool success = infrared_remote_rename(remote, furi_string_get_cstr(new_path_fstr));
+    const InfraredErrorCode error =
+        infrared_remote_rename(remote, furi_string_get_cstr(new_path_fstr));
 
     furi_string_free(new_name_fstr);
     furi_string_free(new_path_fstr);
 
-    return success;
+    return error;
 }
 
 void infrared_tx_start(InfraredApp* infrared) {
@@ -385,7 +387,8 @@ void infrared_tx_start(InfraredApp* infrared) {
 void infrared_tx_start_button_index(InfraredApp* infrared, size_t button_index) {
     furi_assert(button_index < infrared_remote_get_signal_count(infrared->remote));
 
-    if(infrared_remote_load_signal(infrared->remote, infrared->current_signal, button_index)) {
+    if(infrared_remote_load_signal(infrared->remote, infrared->current_signal, button_index) ==
+       InfraredErrorCodeNone) {
         infrared_tx_start(infrared);
     } else {
         infrared_show_error_message(
@@ -415,7 +418,7 @@ void infrared_blocking_task_start(InfraredApp* infrared, FuriThreadCallback call
     furi_thread_start(infrared->task_thread);
 }
 
-bool infrared_blocking_task_finalize(InfraredApp* infrared) {
+InfraredErrorCode infrared_blocking_task_finalize(InfraredApp* infrared) {
     furi_thread_join(infrared->task_thread);
     return furi_thread_get_return_code(infrared->task_thread);
 }
