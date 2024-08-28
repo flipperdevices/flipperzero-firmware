@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "infrared_error_code.h"
 
 /**
  * @brief InfraredBruteForce opaque type declaration.

@@ -8,6 +8,7 @@
  */
 #pragma once
 
+#include "infrared_error_code.h"
 #include <flipper_format/flipper_format.h>
 #include <infrared/encoder_decoder/infrared.h>
 
