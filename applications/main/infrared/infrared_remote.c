@@ -130,7 +130,6 @@ bool infrared_remote_get_signal_index(
     return false;
 }
 
-///TODO: check external calls
 InfraredErrorCode infrared_remote_append_signal(
     InfraredRemote* remote,
     const InfraredSignal* signal,

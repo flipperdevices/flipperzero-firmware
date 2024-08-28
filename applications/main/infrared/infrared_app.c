@@ -297,7 +297,7 @@ static void infrared_free(InfraredApp* infrared) {
     free(infrared);
 }
 
-bool infrared_add_remote_with_button(
+InfraredErrorCode infrared_add_remote_with_button(
     const InfraredApp* infrared,
     const char* button_name,
     const InfraredSignal* signal) {
@@ -310,18 +310,19 @@ bool infrared_add_remote_with_button(
     furi_string_cat_printf(
         new_path, "/%s%s", furi_string_get_cstr(new_name), INFRARED_APP_EXTENSION);
 
-    bool success = false;
+    InfraredErrorCode error = InfraredErrorCodeNone;
 
     do {
-        if(!infrared_remote_create(remote, furi_string_get_cstr(new_path))) break;
-        if(!infrared_remote_append_signal(remote, signal, button_name)) break;
-        success = true;
+        error = infrared_remote_create(remote, furi_string_get_cstr(new_path));
+        if(error != InfraredErrorCodeNone) break;
+
+        error = infrared_remote_append_signal(remote, signal, button_name);
     } while(false);
 
     furi_string_free(new_name);
     furi_string_free(new_path);
 
-    return success;
+    return error;
 }
 
 InfraredErrorCode

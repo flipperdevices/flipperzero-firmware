@@ -176,7 +176,7 @@ typedef enum {
  * @param[in] signal pointer to the signal to be added.
  * @return true if the remote was successfully created, false otherwise.
  */
-bool infrared_add_remote_with_button(
+InfraredErrorCode infrared_add_remote_with_button(
     const InfraredApp* infrared,
     const char* name,
     const InfraredSignal* signal);
