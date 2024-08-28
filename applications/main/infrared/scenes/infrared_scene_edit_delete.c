@@ -39,11 +39,15 @@ void infrared_scene_edit_delete_on_enter(void* context) {
         const int32_t current_button_index = infrared->app_state.current_button_index;
         furi_check(current_button_index != InfraredButtonIndexNone);
 
-        if(!infrared_remote_load_signal(remote, infrared->current_signal, current_button_index)) {
+        InfraredErrorCode error =
+            infrared_remote_load_signal(remote, infrared->current_signal, current_button_index);
+        if(error != InfraredErrorCodeNone) {
+            const char* format =
+                (error == InfraredErrorCodeSignalRawUnableToReadTooLongData) ?
+                    "Unable to delete,\nsignal \"%s\" is too long.\nTry to edit file from pc" :
+                    "Failed to load\n\"%s\"";
             infrared_show_error_message(
-                infrared,
-                "Failed to load\n\"%s\"",
-                infrared_remote_get_signal_name(remote, current_button_index));
+                infrared, format, infrared_remote_get_signal_name(remote, current_button_index));
             scene_manager_previous_scene(infrared->scene_manager);
             return;
         }
@@ -107,11 +111,11 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
             infrared_blocking_task_start(infrared, infrared_scene_edit_delete_task_callback);
 
         } else if(event.event == InfraredCustomEventTypeTaskFinished) {
-            const bool task_success = infrared_blocking_task_finalize(infrared);
+            const InfraredErrorCode task_error = infrared_blocking_task_finalize(infrared);
 
             InfraredAppState* app_state = &infrared->app_state;
 
-            if(task_success) {
+            if(task_error == InfraredErrorCodeNone) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEditDeleteDone);
             } else {
                 const char* edit_target_text =

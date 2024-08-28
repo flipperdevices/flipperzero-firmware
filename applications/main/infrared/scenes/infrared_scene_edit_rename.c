@@ -89,10 +89,10 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
             infrared_blocking_task_start(infrared, infrared_scene_edit_rename_task_callback);
 
         } else if(event.event == InfraredCustomEventTypeTaskFinished) {
-            const bool task_success = infrared_blocking_task_finalize(infrared);
+            const InfraredErrorCode task_error = infrared_blocking_task_finalize(infrared);
             InfraredAppState* app_state = &infrared->app_state;
 
-            if(task_success) {
+            if(task_error == InfraredErrorCodeNone) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEditRenameDone);
             } else {
                 const char* edit_target_text =

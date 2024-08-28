@@ -93,9 +93,9 @@ bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent e
                     scene_manager_next_scene(scene_manager, InfraredSceneErrorDatabases);
                 }
             } else if(event_type == InfraredCustomEventTypeTaskFinished) {
-                const bool task_success = infrared_blocking_task_finalize(infrared);
+                const InfraredErrorCode task_error = infrared_blocking_task_finalize(infrared);
 
-                if(!task_success) {
+                if(task_error != InfraredErrorCodeNone) {
                     scene_manager_next_scene(infrared->scene_manager, InfraredSceneErrorDatabases);
                 } else {
                     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
