@@ -2,11 +2,11 @@
 
 static int32_t infrared_scene_remote_list_task_callback(void* context) {
     InfraredApp* infrared = context;
-    const bool success =
+    const InfraredErrorCode error =
         infrared_remote_load(infrared->remote, furi_string_get_cstr(infrared->file_path));
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
-    return success;
+    return error;
 }
 
 static void infrared_scene_remote_list_select_and_load(InfraredApp* infrared) {

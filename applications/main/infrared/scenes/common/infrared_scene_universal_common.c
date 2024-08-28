@@ -34,12 +34,12 @@ static void infrared_scene_universal_common_hide_popup(InfraredApp* infrared) {
 
 static int32_t infrared_scene_universal_common_task_callback(void* context) {
     InfraredApp* infrared = context;
-    const bool success = infrared_brute_force_calculate_messages(infrared->brute_force);
+    const InfraredErrorCode error = infrared_brute_force_calculate_messages(infrared->brute_force);
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher,
         infrared_custom_event_pack(InfraredCustomEventTypeTaskFinished, 0));
 
-    return success;
+    return error;
 }
 
 void infrared_scene_universal_common_on_enter(void* context) {

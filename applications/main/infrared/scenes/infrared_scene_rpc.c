@@ -11,11 +11,11 @@ typedef enum {
 
 static int32_t infrared_scene_rpc_task_callback(void* context) {
     InfraredApp* infrared = context;
-    const bool success =
+    const InfraredErrorCode error =
         infrared_remote_load(infrared->remote, furi_string_get_cstr(infrared->file_path));
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
-    return success;
+    return error;
 }
 
 void infrared_scene_rpc_on_enter(void* context) {

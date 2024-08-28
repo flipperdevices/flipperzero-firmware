@@ -11,12 +11,12 @@ static int32_t infrared_scene_edit_delete_task_callback(void* context) {
     InfraredAppState* app_state = &infrared->app_state;
     const InfraredEditTarget edit_target = app_state->edit_target;
 
-    bool success;
+    InfraredErrorCode error = InfraredErrorCodeNone;
     if(edit_target == InfraredEditTargetButton) {
         furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
-        success = infrared_remote_delete_signal(infrared->remote, app_state->current_button_index);
+        error = infrared_remote_delete_signal(infrared->remote, app_state->current_button_index);
     } else if(edit_target == InfraredEditTargetRemote) {
-        success = infrared_remote_remove(infrared->remote);
+        error = infrared_remote_remove(infrared->remote);
     } else {
         furi_crash();
     }
@@ -24,7 +24,7 @@ static int32_t infrared_scene_edit_delete_task_callback(void* context) {
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
 
-    return success;
+    return error;
 }
 
 void infrared_scene_edit_delete_on_enter(void* context) {

@@ -2,14 +2,14 @@
 
 static int32_t infrared_scene_edit_move_task_callback(void* context) {
     InfraredApp* infrared = context;
-    const bool success = infrared_remote_move_signal(
+    const InfraredErrorCode error = infrared_remote_move_signal(
         infrared->remote,
         infrared->app_state.prev_button_index,
         infrared->app_state.current_button_index);
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
 
-    return success;
+    return error;
 }
 
 static void infrared_scene_edit_move_button_callback(

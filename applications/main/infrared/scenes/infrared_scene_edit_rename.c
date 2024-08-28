@@ -8,13 +8,13 @@ static int32_t infrared_scene_edit_rename_task_callback(void* context) {
     InfraredAppState* app_state = &infrared->app_state;
     const InfraredEditTarget edit_target = app_state->edit_target;
 
-    bool success;
+    InfraredErrorCode error = InfraredErrorCodeNone;
     if(edit_target == InfraredEditTargetButton) {
         furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
-        success = infrared_remote_rename_signal(
+        error = infrared_remote_rename_signal(
             infrared->remote, app_state->current_button_index, infrared->text_store[0]);
     } else if(edit_target == InfraredEditTargetRemote) {
-        success = infrared_rename_current_remote(infrared, infrared->text_store[0]);
+        error = infrared_rename_current_remote(infrared, infrared->text_store[0]);
     } else {
         furi_crash();
     }
@@ -22,7 +22,7 @@ static int32_t infrared_scene_edit_rename_task_callback(void* context) {
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
 
-    return success;
+    return error;
 }
 
 void infrared_scene_edit_rename_on_enter(void* context) {
