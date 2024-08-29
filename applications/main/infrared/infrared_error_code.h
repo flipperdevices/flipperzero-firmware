@@ -1,33 +1,33 @@
 #pragma once
 
 typedef enum {
-    InfraredErrorCodeNone,
-    InfraredErrorCodeFileOperationFailed,
+    InfraredErrorCodeNone = 0,
+    InfraredErrorCodeFileOperationFailed = 0x800000,
 
     //Common signal errors
-    InfraredErrorCodeSignalTypeUnkown,
-    InfraredErrorCodeSignalNameNotFound,
-    InfraredErrorCodeSignalUnableToReadType,
-    InfraredErrorCodeSignalUnableToWriteType,
+    InfraredErrorCodeSignalTypeUnkown = 0x80000100,
+    InfraredErrorCodeSignalNameNotFound = 0x80000200,
+    InfraredErrorCodeSignalUnableToReadType = 0x80000300,
+    InfraredErrorCodeSignalUnableToWriteType = 0x80000400,
 
     //Raw signal errors
-    InfraredErrorCodeSignalRawUnableToReadFrequency,
-    InfraredErrorCodeSignalRawUnableToReadDutyCycle,
-    InfraredErrorCodeSignalRawUnableToReadTimingsSize,
-    InfraredErrorCodeSignalRawUnableToReadTooLongData,
-    InfraredErrorCodeSignalRawUnableToReadData,
+    InfraredErrorCodeSignalRawUnableToReadFrequency = 0x80000500,
+    InfraredErrorCodeSignalRawUnableToReadDutyCycle = 0x80000600,
+    InfraredErrorCodeSignalRawUnableToReadTimingsSize = 0x80000700,
+    InfraredErrorCodeSignalRawUnableToReadTooLongData = 0x80000800,
+    InfraredErrorCodeSignalRawUnableToReadData = 0x80000900,
 
-    InfraredErrorCodeSignalRawUnableToWriteFrequency,
-    InfraredErrorCodeSignalRawUnableToWriteDutyCycle,
-    InfraredErrorCodeSignalRawUnableToWriteData,
+    InfraredErrorCodeSignalRawUnableToWriteFrequency = 0x80000A00,
+    InfraredErrorCodeSignalRawUnableToWriteDutyCycle = 0x80000B00,
+    InfraredErrorCodeSignalRawUnableToWriteData = 0x80000C00,
 
     //Message signal errors
-    InfraredErrorCodeSignalMessageUnableToReadProtocol,
-    InfraredErrorCodeSignalMessageUnableToReadAddress,
-    InfraredErrorCodeSignalMessageUnableToReadCommand,
-    InfraredErrorCodeSignalMessageIsInvalid,
+    InfraredErrorCodeSignalMessageUnableToReadProtocol = 0x80000D00,
+    InfraredErrorCodeSignalMessageUnableToReadAddress = 0x80000E00,
+    InfraredErrorCodeSignalMessageUnableToReadCommand = 0x80000F00,
+    InfraredErrorCodeSignalMessageIsInvalid = 0x80001000,
 
-    InfraredErrorCodeSignalMessageUnableToWriteProtocol,
-    InfraredErrorCodeSignalMessageUnableToWriteAddress,
-    InfraredErrorCodeSignalMessageUnableToWriteCommand,
+    InfraredErrorCodeSignalMessageUnableToWriteProtocol = 0x80001100,
+    InfraredErrorCodeSignalMessageUnableToWriteAddress = 0x80001200,
+    InfraredErrorCodeSignalMessageUnableToWriteCommand = 0x80001300,
 } InfraredErrorCode;
