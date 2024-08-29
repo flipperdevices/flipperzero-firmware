@@ -7,9 +7,7 @@ env.Append(
     CPPPATH=[
         "#/lib/softspi",
     ],
-    SDK_HEADERS=[
-        File("softspi.h"),
-    ],
+    SDK_HEADERS=[],
 )
 
 libenv = env.Clone(FW_LIB_NAME="softspi")

@@ -45,7 +45,7 @@ void softspi_release(SoftspiConfig* config) {
     furi_hal_gpio_init(config->miso, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
-static void furi_hal_spi_softbus_timer_isr(void* param) {
+static void softspi_timer_isr(void* param) {
     if(!LL_TIM_IsActiveFlag_UPDATE(SOFTSPI_TIM)) return;
 
     do {
@@ -111,7 +111,7 @@ void softspi_trx(
 
     furi_hal_bus_enable(SOFTSPI_TIM_BUS);
     furi_hal_interrupt_set_isr_ex(
-        SOFTSPI_TIM_IRQ, FuriHalInterruptPriorityHighest, furi_hal_spi_softbus_timer_isr, &context);
+        SOFTSPI_TIM_IRQ, FuriHalInterruptPriorityHighest, softspi_timer_isr, &context);
     LL_TIM_SetPrescaler(SOFTSPI_TIM, 0);
     LL_TIM_SetCounterMode(SOFTSPI_TIM, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetAutoReload(

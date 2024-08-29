@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,v,72.2,,
+Version,+,72.1,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -120,7 +120,6 @@ Header,+,lib/one_wire/one_wire_slave.h,,
 Header,+,lib/print/wrappers.h,,
 Header,+,lib/pulse_reader/pulse_reader.h,,
 Header,+,lib/signal_reader/signal_reader.h,,
-Header,+,lib/softspi/softspi.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_adc.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_bus.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_comp.h,,
@@ -2455,11 +2454,6 @@ Function,-,siprintf,int,"char*, const char*, ..."
 Function,-,siscanf,int,"const char*, const char*, ..."
 Function,-,sniprintf,int,"char*, size_t, const char*, ..."
 Function,+,snprintf,int,"char*, size_t, const char*, ..."
-Function,+,softspi_acquire,void,SoftspiConfig*
-Function,+,softspi_release,void,SoftspiConfig*
-Function,+,softspi_rx,void,"SoftspiConfig*, uint8_t*, size_t, uint32_t"
-Function,+,softspi_trx,void,"SoftspiConfig*, const uint8_t*, uint8_t*, size_t, uint32_t"
-Function,+,softspi_tx,void,"SoftspiConfig*, const uint8_t*, size_t, uint32_t"
 Function,-,sprintf,int,"char*, const char*, ..."
 Function,-,sqrt,double,double
 Function,-,sqrtf,float,float
