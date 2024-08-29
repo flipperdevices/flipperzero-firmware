@@ -54,9 +54,19 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
             const InfraredErrorCode task_error = infrared_blocking_task_finalize(infrared);
 
             if(INFRARED_ERROR_PRESENT(task_error)) {
-                const char* signal_name = infrared_remote_get_signal_name(
-                    infrared->remote, infrared->app_state.current_button_index);
-                infrared_show_error_message(infrared, "Failed to move\n\"%s\"", signal_name);
+                const char* format = "Failed to move\n\"%s\"";
+                uint8_t signal_index = infrared->app_state.prev_button_index;
+
+                if(INFRARED_ERROR_CHECK(
+                       task_error, InfraredErrorCodeSignalRawUnableToReadTooLongData)) {
+                    signal_index = INFRARED_ERROR_GET_INDEX(task_error);
+                    format = "Failed to move\n\"%s\" is too long.\nTry to edit file from pc";
+                }
+                furi_assert(format);
+
+                const char* signal_name =
+                    infrared_remote_get_signal_name(infrared->remote, signal_index);
+                infrared_show_error_message(infrared, format, signal_name);
                 scene_manager_search_and_switch_to_previous_scene(
                     infrared->scene_manager, InfraredSceneRemoteList);
             } else {
