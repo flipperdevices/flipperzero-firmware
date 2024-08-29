@@ -7,7 +7,6 @@ from datetime import date, datetime
 
 from flipper.app import App
 
-
 class GitVersion:
     REVISION_SUFFIX_LENGTH = 8
 
@@ -81,7 +80,6 @@ class GitVersion:
             .strip()
             .decode()
         )
-
 
 class Main(App):
     def init(self):
