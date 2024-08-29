@@ -66,7 +66,7 @@ void furi_hal_spi_release(FuriHalSpiBusHandle* handle);
  * @param      size     transaction size (buffer size)
  * @param      timeout  operation timeout in ms
  *
- * @return     true on sucess
+ * @return     true on success
  */
 bool furi_hal_spi_bus_rx(
     FuriHalSpiBusHandle* handle,
