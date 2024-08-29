@@ -230,8 +230,12 @@ static bool
     infrared_cli_save_signal(InfraredSignal* signal, FlipperFormat* file, const char* name) {
     bool ret = true;
     InfraredErrorCode error = infrared_signal_save(signal, file, name);
-    if(error != InfraredErrorCodeNone) {
-        printf("Failed to save signal: \"%s\" code: 0x%02X\r\n", name, error);
+    if(INFRARED_ERROR_PRESENT(error)) {
+        printf(
+            "Failed to save signal: \"%s\" code: 0x%X index: 0x%02X\r\n",
+            name,
+            INFRARED_ERROR_GET_CODE(error),
+            INFRARED_ERROR_GET_INDEX(error));
         ret = false;
     }
     return ret;

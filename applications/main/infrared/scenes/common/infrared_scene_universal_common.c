@@ -95,7 +95,7 @@ bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent e
             } else if(event_type == InfraredCustomEventTypeTaskFinished) {
                 const InfraredErrorCode task_error = infrared_blocking_task_finalize(infrared);
 
-                if(task_error != InfraredErrorCodeNone) {
+                if(INFRARED_ERROR_PRESENT(task_error)) {
                     scene_manager_next_scene(infrared->scene_manager, InfraredSceneErrorDatabases);
                 } else {
                     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);

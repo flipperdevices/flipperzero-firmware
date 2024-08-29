@@ -314,7 +314,7 @@ InfraredErrorCode infrared_add_remote_with_button(
 
     do {
         error = infrared_remote_create(remote, furi_string_get_cstr(new_path));
-        if(error != InfraredErrorCodeNone) break;
+        if(INFRARED_ERROR_PRESENT(error)) break;
 
         error = infrared_remote_append_signal(remote, signal, button_name);
     } while(false);

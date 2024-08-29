@@ -40,7 +40,7 @@ bool infrared_scene_remote_list_on_event(void* context, SceneManagerEvent event)
         if(event.event == InfraredCustomEventTypeTaskFinished) {
             const InfraredErrorCode task_error = infrared_blocking_task_finalize(infrared);
 
-            if(task_error == InfraredErrorCodeNone) {
+            if(!INFRARED_ERROR_PRESENT(task_error)) {
                 scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
             } else {
                 infrared_show_error_message(

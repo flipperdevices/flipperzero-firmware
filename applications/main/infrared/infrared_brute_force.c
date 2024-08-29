@@ -69,7 +69,7 @@ InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* br
         bool signals_valid = false;
         while(infrared_signal_read_name(ff, signal_name) == InfraredErrorCodeNone) {
             error = infrared_signal_read_body(signal, ff);
-            signals_valid = (error == InfraredErrorCodeNone) && infrared_signal_is_valid(signal);
+            signals_valid = (!INFRARED_ERROR_PRESENT(error)) && infrared_signal_is_valid(signal);
             if(!signals_valid) break;
 
             InfraredBruteForceRecord* record =

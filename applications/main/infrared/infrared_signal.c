@@ -365,7 +365,7 @@ InfraredErrorCode
 
     do {
         error = infrared_signal_read_name(ff, name);
-        if(error != InfraredErrorCodeNone) break;
+        if(INFRARED_ERROR_PRESENT(error)) break;
 
         error = infrared_signal_read_body(signal, ff);
     } while(false);
@@ -388,7 +388,7 @@ InfraredErrorCode infrared_signal_search_by_name_and_read(
 
     do {
         error = infrared_signal_read_name(ff, tmp);
-        if(error != InfraredErrorCodeNone) break;
+        if(INFRARED_ERROR_PRESENT(error)) break;
 
         if(furi_string_equal(tmp, name)) {
             error = infrared_signal_read_body(signal, ff);
@@ -409,7 +409,7 @@ InfraredErrorCode infrared_signal_search_by_index_and_read(
 
     for(uint32_t i = 0;; ++i) {
         error = infrared_signal_read_name(ff, tmp);
-        if(error != InfraredErrorCodeNone) break;
+        if(INFRARED_ERROR_PRESENT(error)) break;
 
         if(i == index) {
             error = infrared_signal_read_body(signal, ff);

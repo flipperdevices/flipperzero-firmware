@@ -46,7 +46,7 @@ bool infrared_scene_learn_enter_name_on_event(void* context, SceneManagerEvent e
                     infrared_add_remote_with_button(infrared, signal_name, signal) :
                     infrared_remote_append_signal(infrared->remote, signal, signal_name);
 
-            if(error == InfraredErrorCodeNone) {
+            if(!INFRARED_ERROR_PRESENT(error)) {
                 scene_manager_next_scene(scene_manager, InfraredSceneLearnDone);
                 dolphin_deed(DolphinDeedIrSave);
             } else {

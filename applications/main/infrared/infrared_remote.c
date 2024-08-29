@@ -99,7 +99,7 @@ InfraredErrorCode infrared_remote_load_signal(
         }
 
         error = infrared_signal_search_by_index_and_read(signal, ff, index);
-        if(error != InfraredErrorCodeNone) {
+        if(INFRARED_ERROR_PRESENT(error)) {
             const char* signal_name = infrared_remote_get_signal_name(remote, index);
             FURI_LOG_E(TAG, "Failed to load signal '%s' from file '%s'", signal_name, path);
             break;
@@ -147,7 +147,7 @@ InfraredErrorCode infrared_remote_append_signal(
         }
 
         error = infrared_signal_save(signal, ff, name);
-        if(error != InfraredErrorCodeNone) break;
+        if(INFRARED_ERROR_PRESENT(error)) break;
 
         StringArray_push_back(remote->signal_names, name);
     } while(false);
@@ -202,12 +202,18 @@ static InfraredErrorCode infrared_remote_batch_start(
         for(; batch_context.signal_index < signal_count; ++batch_context.signal_index) {
             error = infrared_signal_read(
                 batch_context.signal, batch_context.ff_in, batch_context.signal_name);
-            if(error != InfraredErrorCodeNone) break;
+            if(INFRARED_ERROR_PRESENT(error)) {
+                INFRARED_ERROR_SET_INDEX(error, batch_context.signal_index);
+                break;
+            }
 
             error = batch_callback(&batch_context, target);
-            if(error != InfraredErrorCodeNone) break;
+            if(INFRARED_ERROR_PRESENT(error)) {
+                INFRARED_ERROR_SET_INDEX(error, batch_context.signal_index);
+                break;
+            }
         }
-        if(error != InfraredErrorCodeNone) break;
+        if(INFRARED_ERROR_PRESENT(error)) break;
 
         if(!flipper_format_buffered_file_close(batch_context.ff_out) ||
            !flipper_format_buffered_file_close(batch_context.ff_in)) {
@@ -220,7 +226,8 @@ static InfraredErrorCode infrared_remote_batch_start(
                                                             InfraredErrorCodeFileOperationFailed;
     } while(false);
 
-    if(error != InfraredErrorCodeNone) {
+    if(INFRARED_ERROR_PRESENT(error)) {
+        //Remove all temp data and rollback signal names
         flipper_format_buffered_file_close(batch_context.ff_out);
         flipper_format_buffered_file_close(batch_context.ff_in);
         status = storage_common_stat(storage, path_out, NULL);
@@ -249,7 +256,7 @@ static InfraredErrorCode infrared_remote_insert_signal_callback(
     if(batch->signal_index == target->signal_index) {
         InfraredErrorCode error =
             infrared_signal_save(target->signal, batch->ff_out, target->signal_name);
-        if(error != InfraredErrorCodeNone) return error;
+        if(INFRARED_ERROR_PRESENT(error)) return error;
 
         StringArray_push_at(
             batch->remote->signal_names, target->signal_index, target->signal_name);
@@ -353,10 +360,10 @@ InfraredErrorCode
 
     do {
         error = infrared_remote_load_signal(remote, signal, index);
-        if(error != InfraredErrorCodeNone) break;
+        if(INFRARED_ERROR_PRESENT(error)) break;
 
         error = infrared_remote_delete_signal(remote, index);
-        if(error != InfraredErrorCodeNone) break;
+        if(INFRARED_ERROR_PRESENT(error)) break;
 
         error = infrared_remote_insert_signal(remote, signal, signal_name, new_index);
     } while(false);
