@@ -187,6 +187,8 @@ static InfraredErrorCode infrared_remote_batch_start(
 
     InfraredErrorCode error = InfraredErrorCodeNone;
 
+    StringArray_t buf_names;
+    StringArray_init_set(buf_names, remote->signal_names);
     do {
         if(!flipper_format_buffered_file_open_existing(batch_context.ff_in, path_in) ||
            !flipper_format_buffered_file_open_always(batch_context.ff_out, path_out) ||
@@ -202,20 +204,10 @@ static InfraredErrorCode infrared_remote_batch_start(
                 batch_context.signal, batch_context.ff_in, batch_context.signal_name);
             if(error != InfraredErrorCodeNone) break;
 
-            /*  if(!infrared_signal_read(
-                   batch_context.signal, batch_context.ff_in, batch_context.signal_name)) {
-                error = InfraredErrorCodeUnkownError;
-                break;
-            } */
             error = batch_callback(&batch_context, target);
             if(error != InfraredErrorCodeNone) break;
         }
         if(error != InfraredErrorCodeNone) break;
-
-        /*       if(batch_context.signal_index != signal_count) {
-            error = InfraredErrorCodeUnkownError;
-            break;
-        } */
 
         if(!flipper_format_buffered_file_close(batch_context.ff_out) ||
            !flipper_format_buffered_file_close(batch_context.ff_in)) {
@@ -224,9 +216,8 @@ static InfraredErrorCode infrared_remote_batch_start(
         }
 
         const FS_Error status = storage_common_rename(storage, path_out, path_in);
-        error = (status == FSE_OK || status == FSE_EXIST) ?
-                    InfraredErrorCodeNone :
-                    InfraredErrorCodeFileOperationFailed; //Unable to rename file
+        error = (status == FSE_OK || status == FSE_EXIST) ? InfraredErrorCodeNone :
+                                                            InfraredErrorCodeFileOperationFailed;
     } while(false);
 
     if(error != InfraredErrorCodeNone) {
@@ -234,8 +225,12 @@ static InfraredErrorCode infrared_remote_batch_start(
         flipper_format_buffered_file_close(batch_context.ff_in);
         status = storage_common_stat(storage, path_out, NULL);
         if(status == FSE_OK || status == FSE_EXIST) storage_common_remove(storage, path_out);
+
+        StringArray_reset(remote->signal_names);
+        StringArray_set(remote->signal_names, buf_names);
     }
 
+    StringArray_clear(buf_names);
     infrared_signal_free(batch_context.signal);
     furi_string_free(batch_context.signal_name);
     flipper_format_free(batch_context.ff_out);
