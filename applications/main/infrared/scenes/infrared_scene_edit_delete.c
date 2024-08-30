@@ -134,7 +134,7 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
                         infrared, "Failed to\ndelete %s", edit_target_text);
                 }
 
-                const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneStart};
+                const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneRemote};
                 scene_manager_search_and_switch_to_previous_scene_one_of(
                     scene_manager, possible_scenes, COUNT_OF(possible_scenes));
             }

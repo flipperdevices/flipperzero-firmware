@@ -98,8 +98,10 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
                 const char* edit_target_text =
                     app_state->edit_target == InfraredEditTargetButton ? "button" : "file";
                 infrared_show_error_message(infrared, "Failed to\nrename %s", edit_target_text);
-                scene_manager_search_and_switch_to_previous_scene(
-                    scene_manager, InfraredSceneRemoteList);
+
+                const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneRemote};
+                scene_manager_search_and_switch_to_previous_scene_one_of(
+                    scene_manager, possible_scenes, COUNT_OF(possible_scenes));
             }
 
             app_state->current_button_index = InfraredButtonIndexNone;

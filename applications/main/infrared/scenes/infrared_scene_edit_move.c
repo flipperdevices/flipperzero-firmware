@@ -67,8 +67,10 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
                 const char* signal_name =
                     infrared_remote_get_signal_name(infrared->remote, signal_index);
                 infrared_show_error_message(infrared, format, signal_name);
-                scene_manager_search_and_switch_to_previous_scene(
-                    infrared->scene_manager, InfraredSceneRemoteList);
+
+                const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneRemote};
+                scene_manager_search_and_switch_to_previous_scene_one_of(
+                    infrared->scene_manager, possible_scenes, COUNT_OF(possible_scenes));
             } else {
                 view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewMove);
             }
