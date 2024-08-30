@@ -409,10 +409,16 @@ InfraredErrorCode infrared_signal_search_by_index_and_read(
 
     for(uint32_t i = 0;; ++i) {
         error = infrared_signal_read_name(ff, tmp);
-        if(INFRARED_ERROR_PRESENT(error)) break;
+        if(INFRARED_ERROR_PRESENT(error)) {
+            INFRARED_ERROR_SET_INDEX(error, i);
+            break;
+        }
 
         if(i == index) {
             error = infrared_signal_read_body(signal, ff);
+            if(INFRARED_ERROR_PRESENT(error)) {
+                INFRARED_ERROR_SET_INDEX(error, i);
+            }
             break;
         }
     }
