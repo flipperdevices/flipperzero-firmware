@@ -569,7 +569,8 @@ int32_t infrared_app(void* p) {
             is_rpc_mode = true;
         } else {
             const char* file_path = (const char*)p;
-            is_remote_loaded = infrared_remote_load(infrared->remote, file_path);
+            is_remote_loaded = infrared_remote_load(infrared->remote, file_path) ==
+                               InfraredErrorCodeNone;
 
             if(!is_remote_loaded) {
                 infrared_show_error_message(infrared, "Failed to load\n\"%s\"", file_path);
