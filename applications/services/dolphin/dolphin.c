@@ -47,6 +47,33 @@ void dolphin_deed(DolphinDeed deed) {
     furi_record_close(RECORD_DOLPHIN);
 }
 
+DolphinSettings dolphin_get_settings(void) {
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+
+    DolphinEvent event;
+    DolphinSettings settings;
+    event.type = DolphinEventTypeSettingsGet;
+    event.settings = &settings;
+
+    dolphin_event_send_wait(dolphin, &event);
+
+    furi_record_close(RECORD_DOLPHIN);
+
+    return settings;
+}
+
+void dolphin_set_settings(DolphinSettings* settings) {
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+
+    DolphinEvent event;
+    event.type = DolphinEventTypeSettingsSet;
+    event.settings = settings;
+
+    dolphin_event_send_wait(dolphin, &event);
+
+    furi_record_close(RECORD_DOLPHIN);
+}
+
 DolphinStats dolphin_stats(Dolphin* dolphin) {
     furi_check(dolphin);
 
@@ -211,7 +238,9 @@ static bool dolphin_process_event(FuriEventLoopObject* object, void* context) {
 
     } else if(event.type == DolphinEventTypeStats) {
         event.stats->icounter = dolphin->state->data.icounter;
-        event.stats->butthurt = dolphin->state->data.butthurt;
+        event.stats->butthurt = (dolphin->state->data.flags & DolphinFlagHappyMode) ?
+                                    0 :
+                                    dolphin->state->data.butthurt;
         event.stats->timestamp = dolphin->state->data.timestamp;
         event.stats->level = dolphin_get_level(dolphin->state->data.icounter);
         event.stats->level_up_is_pending =
@@ -227,6 +256,13 @@ static bool dolphin_process_event(FuriEventLoopObject* object, void* context) {
     } else if(event.type == DolphinEventTypeReloadState) {
         dolphin_state_load(dolphin->state);
         furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
+
+    } else if(event.type == DolphinEventTypeSettingsGet) {
+        event.settings->happy_mode = dolphin->state->data.flags & DolphinFlagHappyMode;
+
+    } else if(event.type == DolphinEventTypeSettingsSet) {
+        dolphin->state->data.flags &= ~DolphinFlagHappyMode;
+        if(event.settings->happy_mode) dolphin->state->data.flags |= DolphinFlagHappyMode;
 
     } else {
         furi_crash();
