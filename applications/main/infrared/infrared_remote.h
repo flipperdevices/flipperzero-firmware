@@ -105,7 +105,7 @@ bool infrared_remote_get_signal_index(
  * @param[in] remote pointer to the instance to load from.
  * @param[out] signal pointer to the signal to load into. Must be allocated.
  * @param[in] index index of the signal to be loaded. Must be less than the total signal count.
- * @return true if the signal was successfully loaded, false otherwise.
+ * @return InfraredErrorCodeNone if the signal was successfully loaded, otherwise error code.
  */
 InfraredErrorCode
     infrared_remote_load_signal(const InfraredRemote* remote, InfraredSignal* signal, size_t index);
@@ -119,7 +119,7 @@ InfraredErrorCode
  * @param[in,out] remote pointer to the instance to append to.
  * @param[in] signal pointer to the signal to be appended.
  * @param[in] name pointer to a zero-terminated string containing the name of the signal.
- * @returns true if the signal was successfully appended, false otherwise.
+ * @returns InfraredErrorCodeNone if the signal was successfully appended, otherwise error code.
  */
 InfraredErrorCode infrared_remote_append_signal(
     InfraredRemote* remote,
@@ -139,7 +139,8 @@ InfraredErrorCode infrared_remote_append_signal(
  * @param[in] signal pointer to the signal to be inserted.
  * @param[in] name pointer to a zero-terminated string containing the name of the signal.
  * @param[in] index the index under which the signal shall be inserted.
- * @returns true if the signal was successfully inserted, false otherwise.
+ * @returns InfraredErrorCodeNone if the signal was successfully inserted, otherwise error
+ * code describing what error happened ORed with index pointing which signal caused an error.
  */
 InfraredErrorCode infrared_remote_insert_signal(
     InfraredRemote* remote,
@@ -155,7 +156,7 @@ InfraredErrorCode infrared_remote_insert_signal(
  * @param[in,out] remote pointer to the instance to be modified.
  * @param[in] index index of the signal to be renamed. Must be less than the total signal count.
  * @param[in] new_name pointer to a zero-terminated string containig the signal's new name.
- * @returns true if the signal was successfully renamed, false otherwise.
+ * @returns InfraredErrorCodeNone if the signal was successfully renamed, otherwise error code.
  */
 InfraredErrorCode
     infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const char* new_name);
@@ -168,6 +169,8 @@ InfraredErrorCode
  * @param[in,out] remote pointer to the instance to be modified.
  * @param[in] index index of the signal to be moved. Must be less than the total signal count.
  * @param[in] new_index index of the signal to be moved. Must be less than the total signal count.
+ * @returns InfraredErrorCodeNone if the signal was moved successfully, otherwise error
+ * code describing what error happened ORed with index pointing which signal caused an error.
  */
 InfraredErrorCode
     infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t new_index);
@@ -177,7 +180,8 @@ InfraredErrorCode
  *
  * @param[in,out] remote pointer to the instance to be modified.
  * @param[in] index index of the signal to be deleted. Must be less than the total signal count.
- * @returns true if the signal was successfully deleted, false otherwise.
+ * @returns InfraredErrorCodeNone if the signal was successfully deleted, otherwise error
+ * code describing what error happened ORed with index pointing which signal caused an error.
  */
 InfraredErrorCode infrared_remote_delete_signal(InfraredRemote* remote, size_t index);
 
@@ -188,7 +192,7 @@ InfraredErrorCode infrared_remote_delete_signal(InfraredRemote* remote, size_t i
  *
  * @param[in,out] remote pointer to the instance to be assigned with a new file.
  * @param[in] path pointer to a zero-terminated string containing the full file path.
- * @returns true if the file was successfully created, false otherwise.
+ * @returns InfraredErrorCodeNone if the file was successfully created, otherwise error code.
  */
 InfraredErrorCode infrared_remote_create(InfraredRemote* remote, const char* path);
 
@@ -200,7 +204,7 @@ InfraredErrorCode infrared_remote_create(InfraredRemote* remote, const char* pat
  *
  * @param[in,out] remote pointer to the instance to be assigned with an existing file.
  * @param[in] path pointer to a zero-terminated string containing the full file path.
- * @returns true if the file was successfully loaded, false otherwise.
+ * @returns InfraredErrorCodeNone if the file was successfully loaded, otherwise error code.
  */
 InfraredErrorCode infrared_remote_load(InfraredRemote* remote, const char* path);
 
@@ -211,7 +215,7 @@ InfraredErrorCode infrared_remote_load(InfraredRemote* remote, const char* path)
  *
  * @param[in,out] remote pointer to the instance to be modified.
  * @param[in] new_path pointer to a zero-terminated string containing the new full file path.
- * @returns true if the file was successfully renamed, false otherwise.
+ * @returns InfraredErrorCodeNone if the file was successfully renamed, otherwise error code.
  */
 InfraredErrorCode infrared_remote_rename(InfraredRemote* remote, const char* new_path);
 
@@ -224,6 +228,6 @@ InfraredErrorCode infrared_remote_rename(InfraredRemote* remote, const char* new
  * infrared_remote_create() or infrared_remote_load() are successfully executed.
  *
  * @param[in,out] remote pointer to the instance to be modified.
- * @returns true if the file was successfully removed, false otherwise.
+ * @returns InfraredErrorCodeNone if the file was successfully removed, otherwise error code.
  */
 InfraredErrorCode infrared_remote_remove(InfraredRemote* remote);

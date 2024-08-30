@@ -137,7 +137,7 @@ const InfraredMessage* infrared_signal_get_message(const InfraredSignal* signal)
  * @param[in,out] signal pointer to the instance to be read into.
  * @param[in,out] ff pointer to the FlipperFormat file instance to read from.
  * @param[out] name pointer to the string to hold the signal name. Must be properly allocated.
- * @returns true if a signal was successfully read, false otherwise (e.g. no more signals to read).
+ * @returns InfraredErrorCodeNone if a signal was successfully read, otherwise error code
  */
 InfraredErrorCode
     infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString* name);
@@ -149,7 +149,7 @@ InfraredErrorCode
  *
  * @param[in,out] ff pointer to the FlipperFormat file instance to read from.
  * @param[out] name pointer to the string to hold the signal name. Must be properly allocated.
- * @returns true if a signal name was successfully read, false otherwise (e.g. no more signals to read).
+ * @returns InfraredErrorCodeNone if a signal name was successfully read, otherwise error code
  */
 InfraredErrorCode infrared_signal_read_name(FlipperFormat* ff, FuriString* name);
 
@@ -160,7 +160,7 @@ InfraredErrorCode infrared_signal_read_name(FlipperFormat* ff, FuriString* name)
  *
  * @param[in,out] ff pointer to the FlipperFormat file instance to read from.
  * @param[out] body pointer to the InfraredSignal instance to hold the signal body. Must be properly allocated.
- * @returns true if a signal body was successfully read, false otherwise (e.g. syntax error).
+ * @returns InfraredErrorCodeNone if a signal body was successfully read, otherwise error code.
  */
 InfraredErrorCode infrared_signal_read_body(InfraredSignal* signal, FlipperFormat* ff);
 
@@ -173,7 +173,7 @@ InfraredErrorCode infrared_signal_read_body(InfraredSignal* signal, FlipperForma
  * @param[in,out] signal pointer to the instance to be read into.
  * @param[in,out] ff pointer to the FlipperFormat file instance to read from.
  * @param[in] name pointer to a zero-terminated string containing the requested signal name.
- * @returns true if a signal was found and successfully read, false otherwise (e.g. the signal was not found).
+ * @returns InfraredErrorCodeNone if a signal was found and successfully read, otherwise error code.
  */
 InfraredErrorCode infrared_signal_search_by_name_and_read(
     InfraredSignal* signal,
@@ -189,7 +189,7 @@ InfraredErrorCode infrared_signal_search_by_name_and_read(
  * @param[in,out] signal pointer to the instance to be read into.
  * @param[in,out] ff pointer to the FlipperFormat file instance to read from.
  * @param[in] index the requested signal index.
- * @returns true if a signal was found and successfully read, false otherwise (e.g. the signal was not found).
+ * @returns InfraredErrorCodeNone if a signal was found and successfully read, otherwise error code.
  */
 InfraredErrorCode infrared_signal_search_by_index_and_read(
     InfraredSignal* signal,
@@ -205,6 +205,7 @@ InfraredErrorCode infrared_signal_search_by_index_and_read(
  * @param[in] signal pointer to the instance holding the signal to be saved.
  * @param[in,out] ff pointer to the FlipperFormat file instance to write to.
  * @param[in] name pointer to a zero-terminated string contating the name of the signal.
+ * @returns InfraredErrorCodeNone if a signal was successfully saved, otherwise error code
  */
 InfraredErrorCode
     infrared_signal_save(const InfraredSignal* signal, FlipperFormat* ff, const char* name);
