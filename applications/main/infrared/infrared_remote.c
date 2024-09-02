@@ -8,8 +8,9 @@
 
 #define TAG "InfraredRemote"
 
-#define INFRARED_FILE_HEADER  "IR signals file"
-#define INFRARED_FILE_VERSION (1)
+#define INFRARED_FILE_HEADER    "IR signals file"
+#define INFRARED_LIBRARY_HEADER "IR library file"
+#define INFRARED_FILE_VERSION   (1)
 
 ARRAY_DEF(StringArray, const char*, M_CSTR_DUP_OPLIST); //-V575
 
@@ -406,16 +407,34 @@ InfraredErrorCode infrared_remote_load(InfraredRemote* remote, const char* path)
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
 
     FuriString* tmp = furi_string_alloc();
-    bool success = false;
+    InfraredErrorCode error = InfraredErrorCodeNone;
 
     do {
-        if(!flipper_format_buffered_file_open_existing(ff, path)) break;
+        if(!flipper_format_buffered_file_open_existing(ff, path)) {
+            error = InfraredErrorCodeFileOperationFailed;
+            break;
+        }
 
         uint32_t version;
         if(!flipper_format_read_header(ff, tmp, &version)) break;
 
-        if(!furi_string_equal(tmp, INFRARED_FILE_HEADER) || (version != INFRARED_FILE_VERSION))
+        if(furi_string_equal(tmp, INFRARED_LIBRARY_HEADER)) {
+            FURI_LOG_E(TAG, "Library file can't be loaded in this context");
+            error = InfraredErrorCodeWrongFileType;
             break;
+        }
+
+        if(!furi_string_equal(tmp, INFRARED_FILE_HEADER)) {
+            error = InfraredErrorCodeWrongFileType;
+            FURI_LOG_E(TAG, "Filetype unknown");
+            break;
+        }
+
+        if(version != INFRARED_FILE_VERSION) {
+            error = InfraredErrorCodeWrongFileVersion;
+            FURI_LOG_E(TAG, "Wrong file version");
+            break;
+        }
 
         infrared_remote_set_path(remote, path);
         StringArray_reset(remote->signal_names);
@@ -423,15 +442,13 @@ InfraredErrorCode infrared_remote_load(InfraredRemote* remote, const char* path)
         while(infrared_signal_read_name(ff, tmp) == InfraredErrorCodeNone) {
             StringArray_push_back(remote->signal_names, furi_string_get_cstr(tmp));
         }
-
-        success = true;
     } while(false);
 
     furi_string_free(tmp);
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
 
-    return success ? InfraredErrorCodeNone : InfraredErrorCodeFileOperationFailed;
+    return error;
 }
 
 InfraredErrorCode infrared_remote_rename(InfraredRemote* remote, const char* new_path) {
