@@ -43,8 +43,14 @@ bool infrared_scene_remote_list_on_event(void* context, SceneManagerEvent event)
             if(!INFRARED_ERROR_PRESENT(task_error)) {
                 scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
             } else {
+                bool wrong_file_type =
+                    INFRARED_ERROR_CHECK(task_error, InfraredErrorCodeWrongFileType);
+                const char* format = wrong_file_type ?
+                                         "Library file\n\"%s\" can't be openned as a remote" :
+                                         "Failed to load\n\"%s\"";
+
                 infrared_show_error_message(
-                    infrared, "Failed to load\n\"%s\"", furi_string_get_cstr(infrared->file_path));
+                    infrared, format, furi_string_get_cstr(infrared->file_path));
                 infrared_scene_remote_list_select_and_load(infrared);
             }
         }

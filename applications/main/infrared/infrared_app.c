@@ -569,11 +569,18 @@ int32_t infrared_app(void* p) {
             is_rpc_mode = true;
         } else {
             const char* file_path = (const char*)p;
-            is_remote_loaded = infrared_remote_load(infrared->remote, file_path) ==
-                               InfraredErrorCodeNone;
+            InfraredErrorCode error = infrared_remote_load(infrared->remote, file_path);
 
-            if(!is_remote_loaded) {
-                infrared_show_error_message(infrared, "Failed to load\n\"%s\"", file_path);
+            if(!INFRARED_ERROR_PRESENT(error)) {
+                is_remote_loaded = true;
+            } else {
+                is_remote_loaded = false;
+                bool wrong_file_type = INFRARED_ERROR_CHECK(error, InfraredErrorCodeWrongFileType);
+                const char* format = wrong_file_type ?
+                                         "Library file\n\"%s\" can't be openned as a remote" :
+                                         "Failed to load\n\"%s\"";
+
+                infrared_show_error_message(infrared, format, file_path);
                 return -1;
             }
 
