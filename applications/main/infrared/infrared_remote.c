@@ -416,7 +416,10 @@ InfraredErrorCode infrared_remote_load(InfraredRemote* remote, const char* path)
         }
 
         uint32_t version;
-        if(!flipper_format_read_header(ff, tmp, &version)) break;
+        if(!flipper_format_read_header(ff, tmp, &version)) {
+            error = InfraredErrorCodeFileOperationFailed;
+            break;
+        }
 
         if(furi_string_equal(tmp, INFRARED_LIBRARY_HEADER)) {
             FURI_LOG_E(TAG, "Library file can't be loaded in this context");
