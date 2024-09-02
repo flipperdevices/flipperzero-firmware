@@ -3,33 +3,35 @@
 typedef enum {
     InfraredErrorCodeNone = 0,
     InfraredErrorCodeFileOperationFailed = 0x800000,
+    InfraredErrorCodeWrongFileType = 0x80000100,
+    InfraredErrorCodeWrongFileVersion = 0x80000200,
 
     //Common signal errors
-    InfraredErrorCodeSignalTypeUnkown = 0x80000100,
-    InfraredErrorCodeSignalNameNotFound = 0x80000200,
-    InfraredErrorCodeSignalUnableToReadType = 0x80000300,
-    InfraredErrorCodeSignalUnableToWriteType = 0x80000400,
+    InfraredErrorCodeSignalTypeUnkown = 0x80000300,
+    InfraredErrorCodeSignalNameNotFound = 0x80000400,
+    InfraredErrorCodeSignalUnableToReadType = 0x80000500,
+    InfraredErrorCodeSignalUnableToWriteType = 0x80000600,
 
     //Raw signal errors
-    InfraredErrorCodeSignalRawUnableToReadFrequency = 0x80000500,
-    InfraredErrorCodeSignalRawUnableToReadDutyCycle = 0x80000600,
-    InfraredErrorCodeSignalRawUnableToReadTimingsSize = 0x80000700,
-    InfraredErrorCodeSignalRawUnableToReadTooLongData = 0x80000800,
-    InfraredErrorCodeSignalRawUnableToReadData = 0x80000900,
+    InfraredErrorCodeSignalRawUnableToReadFrequency = 0x80000700,
+    InfraredErrorCodeSignalRawUnableToReadDutyCycle = 0x80000800,
+    InfraredErrorCodeSignalRawUnableToReadTimingsSize = 0x80000900,
+    InfraredErrorCodeSignalRawUnableToReadTooLongData = 0x80000A00,
+    InfraredErrorCodeSignalRawUnableToReadData = 0x80000B00,
 
-    InfraredErrorCodeSignalRawUnableToWriteFrequency = 0x80000A00,
-    InfraredErrorCodeSignalRawUnableToWriteDutyCycle = 0x80000B00,
-    InfraredErrorCodeSignalRawUnableToWriteData = 0x80000C00,
+    InfraredErrorCodeSignalRawUnableToWriteFrequency = 0x80000C00,
+    InfraredErrorCodeSignalRawUnableToWriteDutyCycle = 0x80000D00,
+    InfraredErrorCodeSignalRawUnableToWriteData = 0x80000E00,
 
     //Message signal errors
-    InfraredErrorCodeSignalMessageUnableToReadProtocol = 0x80000D00,
-    InfraredErrorCodeSignalMessageUnableToReadAddress = 0x80000E00,
-    InfraredErrorCodeSignalMessageUnableToReadCommand = 0x80000F00,
-    InfraredErrorCodeSignalMessageIsInvalid = 0x80001000,
+    InfraredErrorCodeSignalMessageUnableToReadProtocol = 0x80000F00,
+    InfraredErrorCodeSignalMessageUnableToReadAddress = 0x80001000,
+    InfraredErrorCodeSignalMessageUnableToReadCommand = 0x80001100,
+    InfraredErrorCodeSignalMessageIsInvalid = 0x80001200,
 
-    InfraredErrorCodeSignalMessageUnableToWriteProtocol = 0x80001100,
-    InfraredErrorCodeSignalMessageUnableToWriteAddress = 0x80001200,
-    InfraredErrorCodeSignalMessageUnableToWriteCommand = 0x80001300,
+    InfraredErrorCodeSignalMessageUnableToWriteProtocol = 0x80001300,
+    InfraredErrorCodeSignalMessageUnableToWriteAddress = 0x80001400,
+    InfraredErrorCodeSignalMessageUnableToWriteCommand = 0x80001500,
 } InfraredErrorCode;
 
 #define INFRARED_ERROR_CODE_MASK  (0xFFFFFF00)
