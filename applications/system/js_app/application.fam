@@ -20,7 +20,10 @@ App(
     apptype=FlipperAppType.PLUGIN,
     entry_point="js_event_loop_ep",
     requires=["js_app"],
-    sources=["modules/js_event_loop/js_event_loop.c", "modules/js_event_loop/js_event_loop_api_table.cpp"],
+    sources=[
+        "modules/js_event_loop/js_event_loop.c",
+        "modules/js_event_loop/js_event_loop_api_table.cpp"
+    ],
 )
 
 App(

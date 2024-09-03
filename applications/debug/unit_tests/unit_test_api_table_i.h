@@ -33,6 +33,9 @@ static constexpr auto unit_tests_api_table = sort(create_array_t<sym_entry>(
         xQueueGenericSend,
         BaseType_t,
         (QueueHandle_t, const void* const, TickType_t, const BaseType_t)),
-    API_METHOD(js_thread_run, JsThread*, (const char* script_path, JsThreadCallback callback, void* context)),
-    API_METHOD(js_thread_stop, void, (JsThread* worker)),
+    API_METHOD(
+        js_thread_run,
+        JsThread*,
+        (const char* script_path, JsThreadCallback callback, void* context)),
+    API_METHOD(js_thread_stop, void, (JsThread * worker)),
     API_VARIABLE(PB_Main_msg, PB_Main_msg_t)));
