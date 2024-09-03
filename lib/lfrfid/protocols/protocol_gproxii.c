@@ -109,7 +109,48 @@ static bool protocol_gproxii_can_be_decoded(ProtocolGProxII* protocol) {
 
     // Check card length is either 26 or 36
     int card_len = bit_lib_get_bits(protocol->decoded_data, 8, 6);
+
     if(card_len == 26 || card_len == 36) {
+        // wiegand parity
+        if(card_len == 26) {
+            uint8_t even_parity_sum = 0;
+            uint32_t fc_and_card = bit_lib_get_bits_32(protocol->decoded_data, 33, 24);
+            uint8_t even_parity = bit_lib_get_bits_32(protocol->decoded_data, 32, 1);
+            uint8_t odd_parity = bit_lib_get_bits_32(protocol->decoded_data, 57, 1);
+            for(int8_t i = 12; i < 24; i++) {
+                if(((fc_and_card >> i) & 1) == 1) {
+                    even_parity_sum++;
+                }
+            }
+            if(even_parity_sum % 2 != even_parity) return false;
+
+            uint8_t odd_parity_sum = 1;
+            for(int8_t i = 0; i < 12; i++) {
+                if(((fc_and_card >> i) & 1) == 1) {
+                    odd_parity_sum++;
+                }
+            }
+            if(odd_parity_sum % 2 != odd_parity) return false;
+        } else if(card_len == 36) {
+            uint8_t even_parity_sum = 0;
+            uint32_t fc_and_card = bit_lib_get_bits_32(protocol->decoded_data, 43, 24);
+            uint8_t even_parity = bit_lib_get_bits_32(protocol->decoded_data, 42, 1);
+            uint8_t odd_parity = bit_lib_get_bits_32(protocol->decoded_data, 67, 1);
+            for(int8_t i = 12; i < 24; i++) {
+                if(((fc_and_card >> i) & 1) == 1) {
+                    even_parity_sum++;
+                }
+            }
+            if(even_parity_sum % 2 != even_parity) return false;
+
+            uint8_t odd_parity_sum = 1;
+            for(int8_t i = 0; i < 12; i++) {
+                if(((fc_and_card >> i) & 1) == 1) {
+                    odd_parity_sum++;
+                }
+            }
+            if(odd_parity_sum % 2 != odd_parity) return false;
+        }
         return true;
     } else {
         return false; // If we don't get a 26 or 36 it's not a known card type
