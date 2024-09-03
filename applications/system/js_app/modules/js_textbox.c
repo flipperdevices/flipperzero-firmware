@@ -161,7 +161,8 @@ static void js_textbox_close(struct mjs* mjs) {
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-static void* js_textbox_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_textbox_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     JsTextboxInst* textbox = malloc(sizeof(JsTextboxInst));
 
     mjs_val_t textbox_obj = mjs_mk_object(mjs);
@@ -206,6 +207,7 @@ static const JsModuleDescriptor js_textbox_desc = {
     "textbox",
     js_textbox_create,
     js_textbox_destroy,
+    NULL,
 };
 
 static const FlipperAppPluginDescriptor textbox_plugin_descriptor = {

@@ -112,7 +112,8 @@ static void js_submenu_show(struct mjs* mjs) {
     }
 }
 
-static void* js_submenu_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_submenu_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     JsSubmenuInst* submenu = malloc(sizeof(JsSubmenuInst));
     mjs_val_t submenu_obj = mjs_mk_object(mjs);
     mjs_set(mjs, submenu_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, submenu));
@@ -134,6 +135,7 @@ static const JsModuleDescriptor js_submenu_desc = {
     "submenu",
     js_submenu_create,
     js_submenu_destroy,
+    NULL,
 };
 
 static const FlipperAppPluginDescriptor submenu_plugin_descriptor = {

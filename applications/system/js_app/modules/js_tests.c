@@ -75,7 +75,8 @@ static void js_tests_assert_float_close(struct mjs* mjs) {
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-void* js_tests_create(struct mjs* mjs, mjs_val_t* object) {
+void* js_tests_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     mjs_val_t tests_obj = mjs_mk_object(mjs);
     mjs_set(mjs, tests_obj, "fail", ~0, MJS_MK_FN(js_tests_fail));
     mjs_set(mjs, tests_obj, "assert_eq", ~0, MJS_MK_FN(js_tests_assert_eq));

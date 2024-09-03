@@ -1,5 +1,5 @@
 #include "../js_modules.h" // IWYU pragma: keep
-#include "js_event_loop.h"
+#include "./js_event_loop/js_event_loop.h"
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
 #include <expansion/expansion.h>
@@ -303,7 +303,8 @@ static void js_gpio_get(struct mjs* mjs) {
     ManagedPinsArray_push_back(module->managed_pins, manager_data);
 }
 
-static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     JsGpioInst* module = malloc(sizeof(JsGpioInst));
     ManagedPinsArray_init(module->managed_pins);
     module->adc_handle = furi_hal_adc_acquire();
@@ -361,6 +362,7 @@ static const JsModuleDescriptor js_gpio_desc = {
     "gpio",
     js_gpio_create,
     js_gpio_destroy,
+    NULL,
 };
 
 static const FlipperAppPluginDescriptor plugin_descriptor = {

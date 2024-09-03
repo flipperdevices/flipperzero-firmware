@@ -1,6 +1,12 @@
-#include "../js_modules.h" // IWYU pragma: keep
+#include "../../js_modules.h" // IWYU pragma: keep
 #include <furi/core/event_loop.h>
 #include <furi/core/event_loop_timer.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct JsEventLoop JsEventLoop;
 
 typedef enum {
     JsEventLoopObjectTypeTimer,
@@ -49,3 +55,9 @@ typedef struct {
         };
     };
 } JsEventLoopContract;
+
+FuriEventLoop* js_event_loop_get_loop(JsEventLoop* loop);
+
+#ifdef __cplusplus
+}
+#endif

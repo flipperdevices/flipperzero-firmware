@@ -1,4 +1,5 @@
 #pragma once
+
 #include <stdint.h>
 #include "js_thread_i.h"
 #include <flipper_application/flipper_application.h>
@@ -15,19 +16,25 @@
         return;                                           \
     } while(0);
 
-typedef void* (*JsModeConstructor)(struct mjs* mjs, mjs_val_t* object);
-typedef void (*JsModeDestructor)(void* inst);
+typedef struct JsModules JsModules;
+
+typedef void* (*JsModuleConstructor)(struct mjs* mjs, mjs_val_t* object, JsModules* modules);
+typedef void (*JsModuleDestructor)(void* inst);
 
 typedef struct {
     char* name;
-    JsModeConstructor create;
-    JsModeDestructor destroy;
+    JsModuleConstructor create;
+    JsModuleDestructor destroy;
+    const ElfApiInterface* api_interface;
 } JsModuleDescriptor;
-
-typedef struct JsModules JsModules;
 
 JsModules* js_modules_create(struct mjs* mjs, CompositeApiResolver* resolver);
 
 void js_modules_destroy(JsModules* modules);
 
 mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_len);
+
+/**
+ * @brief Gets a module instance by its name
+ */
+void* js_module_get(JsModules* modules, const char* name);

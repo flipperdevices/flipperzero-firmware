@@ -13,17 +13,17 @@
 #define MODULES_PATH "/ext/apps_data/js_app/plugins"
 
 typedef struct {
-    JsModeConstructor create;
-    JsModeDestructor destroy;
+    JsModuleConstructor create;
+    JsModuleDestructor destroy;
     void* context;
 } JsModuleData;
 
 DICT_DEF2(JsModuleDict, FuriString*, FURI_STRING_OPLIST, JsModuleData, M_POD_OPLIST);
 
 static const JsModuleDescriptor modules_builtin[] = {
-    {"flipper", js_flipper_create, NULL},
+    {"flipper", js_flipper_create, NULL, NULL},
 #ifdef FW_CFG_unit_tests
-    {"tests", js_tests_create, NULL},
+    {"tests", js_tests_create, NULL, NULL},
 #endif
 };
 
@@ -31,6 +31,7 @@ struct JsModules {
     struct mjs* mjs;
     JsModuleDict_t module_dict;
     PluginManager* plugin_manager;
+    CompositeApiResolver* resolver;
 };
 
 JsModules* js_modules_create(struct mjs* mjs, CompositeApiResolver* resolver) {
@@ -40,6 +41,8 @@ JsModules* js_modules_create(struct mjs* mjs, CompositeApiResolver* resolver) {
 
     modules->plugin_manager = plugin_manager_alloc(
         PLUGIN_APP_ID, PLUGIN_API_VERSION, composite_api_resolver_get(resolver));
+
+    modules->resolver = resolver;
 
     return modules;
 }
@@ -98,6 +101,10 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
             PluginManagerError load_error = plugin_manager_load_single(
                 modules->plugin_manager, furi_string_get_cstr(module_path));
             if(load_error != PluginManagerErrorNone) {
+                FURI_LOG_E(
+                    TAG,
+                    "Module %s load error. It may depend on other modules that are not yet loaded.",
+                    name);
                 break;
             }
             const JsModuleDescriptor* plugin =
@@ -105,11 +112,16 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
             furi_assert(plugin);
 
             if(strncmp(name, plugin->name, name_len) != 0) {
-                FURI_LOG_E(TAG, "Module name missmatch %s", plugin->name);
+                FURI_LOG_E(TAG, "Module name mismatch %s", plugin->name);
                 break;
             }
             JsModuleData module = {.create = plugin->create, .destroy = plugin->destroy};
             JsModuleDict_set_at(modules->module_dict, module_name, module);
+
+            if(plugin->api_interface) {
+                FURI_LOG_I(TAG, "Added module API to composite resolver: %s", plugin->name);
+                composite_api_resolver_add(modules->resolver, plugin->api_interface);
+            }
 
             module_found = true;
         } while(0);
@@ -122,7 +134,7 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
         module_inst = JsModuleDict_get(modules->module_dict, module_name);
         furi_assert(module_inst);
         if(module_inst->create) { //-V779
-            module_inst->context = module_inst->create(modules->mjs, &module_object);
+            module_inst->context = module_inst->create(modules->mjs, &module_object, modules);
         }
     }
 
@@ -133,4 +145,11 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
     furi_string_free(module_name);
 
     return module_object;
+}
+
+void* js_module_get(JsModules* modules, const char* name) {
+    FuriString* module_name = furi_string_alloc_set_str(name);
+    JsModuleData* module_inst = JsModuleDict_get(modules->module_dict, module_name);
+    furi_string_free(module_name);
+    return module_inst ? module_inst->context : NULL;
 }

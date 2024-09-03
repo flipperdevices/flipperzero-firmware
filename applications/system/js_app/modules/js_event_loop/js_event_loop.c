@@ -1,7 +1,6 @@
 #include "js_event_loop.h"
-#include "../js_modules.h" // IWYU pragma: keep
+#include "../../js_modules.h" // IWYU pragma: keep
 #include <expansion/expansion.h>
-#include <furi/core/event_loop_i.h>
 #include <mlib/m-array.h>
 
 /**
@@ -48,12 +47,12 @@ ARRAY_DEF(ContractArray, JsEventLoopContract*, M_PTR_OPLIST); //-V575
 /**
  * @brief Per-module instance control structure
  */
-typedef struct {
+struct JsEventLoop {
     FuriEventLoop* loop;
     SubscriptionArray_t subscriptions;
     ContractArray_t contracts; //<! Contracts that were produced by this module
     JsEventLoopTickContext* tick_context;
-} JsEventLoop;
+};
 
 /**
  * @brief Generic event callback, handles all events by calling the JS callbacks
@@ -332,8 +331,6 @@ static void js_event_loop_queue(struct mjs* mjs) {
     mjs_return(mjs, queue);
 }
 
-// TODO: integrate with other modules
-
 static void js_event_loop_tick(void* param) {
     JsEventLoopTickContext* context = param;
     uint32_t flags = furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny | FuriFlagNoClear, 0);
@@ -346,7 +343,8 @@ static void js_event_loop_tick(void* param) {
     }
 }
 
-static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     mjs_val_t event_loop_obj = mjs_mk_object(mjs);
     JsEventLoop* module = malloc(sizeof(JsEventLoop));
     JsEventLoopTickContext* tick_ctx = malloc(sizeof(JsEventLoopTickContext));
@@ -412,10 +410,13 @@ static void js_event_loop_destroy(void* inst) {
     furi_record_close(RECORD_EXPANSION);
 }
 
+extern const ElfApiInterface js_event_loop_hashtable_api_interface;
+
 static const JsModuleDescriptor js_event_loop_desc = {
     "event_loop",
     js_event_loop_create,
     js_event_loop_destroy,
+    &js_event_loop_hashtable_api_interface,
 };
 
 static const FlipperAppPluginDescriptor plugin_descriptor = {
@@ -426,4 +427,8 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
 
 const FlipperAppPluginDescriptor* js_event_loop_ep(void) {
     return &plugin_descriptor;
+}
+
+FuriEventLoop* js_event_loop_get_loop(JsEventLoop* loop) {
+    return loop->loop;
 }

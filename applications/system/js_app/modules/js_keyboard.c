@@ -169,7 +169,8 @@ static void js_keyboard_byte(struct mjs* mjs) {
     free(buffer);
 }
 
-static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     JsKeyboardInst* keyboard = malloc(sizeof(JsKeyboardInst));
     mjs_val_t keyboard_obj = mjs_mk_object(mjs);
     mjs_set(mjs, keyboard_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, keyboard));
@@ -193,6 +194,7 @@ static const JsModuleDescriptor js_keyboard_desc = {
     "keyboard",
     js_keyboard_create,
     js_keyboard_destroy,
+    NULL,
 };
 
 static const FlipperAppPluginDescriptor plugin_descriptor = {

@@ -378,7 +378,8 @@ static void js_badusb_println(struct mjs* mjs) {
     badusb_print(mjs, true);
 }
 
-static void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_badusb_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     JsBadusbInst* badusb = malloc(sizeof(JsBadusbInst));
     mjs_val_t badusb_obj = mjs_mk_object(mjs);
     mjs_set(mjs, badusb_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, badusb));
@@ -409,6 +410,7 @@ static const JsModuleDescriptor js_badusb_desc = {
     "badusb",
     js_badusb_create,
     js_badusb_destroy,
+    NULL,
 };
 
 static const FlipperAppPluginDescriptor plugin_descriptor = {
