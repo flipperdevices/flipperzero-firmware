@@ -78,7 +78,7 @@ static bool protocol_gproxii_can_be_decoded(ProtocolGProxII* protocol) {
     // |          |           |          |           |          |         |           |
     // 01234567 890123 45 67890123 45678901 2 34567890123456 78901234567890123456 7 8901
     // --------------------------------------------------------------------------------
-    // XORVALUE LLLLLL DD PPPPPPPP PPPPPPPP E UUUUUUFFFFFFFF UUUUCCCCCCCCCCCCCCCC O UUUU 
+    // XORVALUE LLLLLL DD PPPPPPPP PPPPPPPP E UUUUUUFFFFFFFF UUUUCCCCCCCCCCCCCCCC O UUUU
     // 10111000 100100 10 00000001 00000000 0 00000000010100 00001000100010111000 1 0000 - Profile: 256 FC: 20 Card: 35000
 
     // X = XOR Key, L = Message length, D = 2 bit check digits, P = Profile, E = Wiegand leading even parity
