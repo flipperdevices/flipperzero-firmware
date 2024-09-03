@@ -264,7 +264,7 @@ InfraredErrorCode infrared_signal_read_body(InfraredSignal* signal, FlipperForma
             error = infrared_signal_read_message(signal, ff);
         } else {
             FURI_LOG_E(TAG, "Unknown signal type: %s", furi_string_get_cstr(tmp));
-            error = InfraredErrorCodeSignalTypeUnkown;
+            error = InfraredErrorCodeSignalTypeUnknown;
             break;
         }
     } while(false);

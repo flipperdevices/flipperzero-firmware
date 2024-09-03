@@ -7,7 +7,7 @@ typedef enum {
     InfraredErrorCodeWrongFileVersion = 0x80000200,
 
     //Common signal errors
-    InfraredErrorCodeSignalTypeUnkown = 0x80000300,
+    InfraredErrorCodeSignalTypeUnknown = 0x80000300,
     InfraredErrorCodeSignalNameNotFound = 0x80000400,
     InfraredErrorCodeSignalUnableToReadType = 0x80000500,
     InfraredErrorCodeSignalUnableToWriteType = 0x80000600,
