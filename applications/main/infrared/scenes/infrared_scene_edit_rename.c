@@ -95,9 +95,20 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
             if(!INFRARED_ERROR_PRESENT(task_error)) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEditRenameDone);
             } else {
-                const char* edit_target_text =
-                    app_state->edit_target == InfraredEditTargetButton ? "button" : "file";
-                infrared_show_error_message(infrared, "Failed to\nrename %s", edit_target_text);
+                bool long_signal = INFRARED_ERROR_CHECK(
+                    task_error, InfraredErrorCodeSignalRawUnableToReadTooLongData);
+
+                const char* format = "Failed to rename\n%s";
+                const char* target = infrared->app_state.edit_target == InfraredEditTargetButton ?
+                                         "button" :
+                                         "file";
+                if(long_signal) {
+                    format = "Failed to rename\n\"%s\" is too long.\nTry to edit file from pc";
+                    target = infrared_remote_get_signal_name(
+                        infrared->remote, INFRARED_ERROR_GET_INDEX(task_error));
+                }
+
+                infrared_show_error_message(infrared, format, target);
 
                 const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneRemote};
                 scene_manager_search_and_switch_to_previous_scene_one_of(
