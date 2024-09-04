@@ -4,9 +4,9 @@ let event_loop = require("event_loop");
 /// <reference types="../../../types/gui" />
 let gui = require("gui");
 /// <reference types="../../../types/gui/loading" />
-let Loading = require("gui/loading");
+let loadingView = require("gui/loading");
 
-let loading = Loading();
+let loading = loadingView.make();
 let loadingAssoc = gui.viewDispatcher.add(loading);
 
 event_loop.subscribe(gui.viewDispatcher.event("custom"), function (_sub, item) {

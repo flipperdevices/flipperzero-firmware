@@ -3,7 +3,7 @@ import type { Contract } from "../event_loop";
 type Lit = number | string | null | undefined | {};
 
 export interface View {
-    _: symbol;
+    _view: symbol;
 }
 
 /**

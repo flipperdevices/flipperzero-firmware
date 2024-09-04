@@ -9,6 +9,8 @@
 #define PLUGIN_APP_ID      "js"
 #define PLUGIN_API_VERSION 1
 
+#define JS_GET_CONTEXT(mjs) mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0))
+
 #define JS_ERROR_AND_RETURN(mjs, error_code, ...)         \
     do {                                                  \
         mjs_prepend_errorf(mjs, error_code, __VA_ARGS__); \

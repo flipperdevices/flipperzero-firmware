@@ -1,11 +1,30 @@
 #include "../../js_modules.h" // IWYU pragma: keep
+#include "js_gui.h"
 #include <mlib/m-array.h>
 #include <gui/view_dispatcher.h>
 #include "../js_event_loop/js_event_loop.h"
+#include <m-array.h>
 
+/**
+ * @brief A view instance bound to a view instance freer
+ * 
+ * In order to reduce boilerplate in glue code for various views, the
+ * responsibility of freeing views is placed on the main GUI module. This may
+ * violate the single responsibility principle, but I assert that the code is
+ * actually more writable and readable this way, as view modules do not have to
+ * define, allocate, iterate over and free its own view array.
+ */
 typedef struct {
+    void (*freer)(void*);
+    void* instance;
+} JsViewGhost;
+
+ARRAY_DEF(JsViewGhosts, JsViewGhost, M_POD_OPLIST);
+
+struct JsGui {
     ViewDispatcher* dispatcher;
-} JsGui;
+    JsViewGhosts_t ghosts;
+};
 
 /**
  * @brief `viewDispatcher.add`
@@ -26,6 +45,7 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
 
     // create C object
     JsGui* module = malloc(sizeof(JsGui));
+    JsViewGhosts_init(module->ghosts);
     module->dispatcher = view_dispatcher_alloc_ex(loop);
 
     // create viewDispatcher object
@@ -44,14 +64,32 @@ static void js_gui_destroy(void* inst) {
     if(!inst) return;
     JsGui* module = inst;
     view_dispatcher_free(module->dispatcher);
+
+    // execute deferred frees
+    JsViewGhosts_it_t it;
+    for(JsViewGhosts_it(it, module->ghosts); !JsViewGhosts_end_p(it); JsViewGhosts_next(it)) {
+        const JsViewGhost* ghost = JsViewGhosts_cref(it);
+        ghost->freer(ghost->instance);
+    }
+
+    JsViewGhosts_clear(module->ghosts);
     free(module);
 }
+
+void js_gui_defer_free(JsGui* module, void (*freer)(void*), void* instance) {
+    furi_check(module);
+    furi_check(freer);
+    furi_check(instance);
+    JsViewGhosts_push_back(module->ghosts, (JsViewGhost){freer, instance});
+}
+
+extern const ElfApiInterface js_gui_hashtable_api_interface;
 
 static const JsModuleDescriptor js_gui_desc = {
     "gui",
     js_gui_create,
     js_gui_destroy,
-    NULL,
+    &js_gui_hashtable_api_interface,
 };
 
 static const FlipperAppPluginDescriptor plugin_descriptor = {
