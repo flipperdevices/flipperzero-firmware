@@ -38,12 +38,52 @@ void protocol_gproxii_free(ProtocolGProxII* protocol) {
     free(protocol);
 }
 
-uint8_t* protocol_gproxii_get_data(ProtocolGProxII* proto) {
-    return proto->data;
+uint8_t* protocol_gproxii_get_data(ProtocolGProxII* protocol) {
+    return protocol->decoded_data;
+}
+
+bool wiegand_check(uint64_t fc_and_card, bool even_parity, bool odd_parity, int card_len) {
+    uint8_t even_parity_sum = 0;
+    uint8_t odd_parity_sum = 1;
+    switch(card_len) {
+    case 26:
+        for(int8_t i = 12; i < 24; i++) {
+            if(((fc_and_card >> i) & 1) == 1) {
+                even_parity_sum++;
+            }
+        }
+        if(even_parity_sum % 2 != even_parity) return false;
+
+        for(int8_t i = 0; i < 12; i++) {
+            if(((fc_and_card >> i) & 1) == 1) {
+                odd_parity_sum++;
+            }
+        }
+        if(odd_parity_sum % 2 != odd_parity) return false;
+        break;
+    case 36:
+        for(int8_t i = 17; i < 34; i++) {
+            if(((fc_and_card >> i) & 1) == 1) {
+                even_parity_sum++;
+            }
+        }
+        if(even_parity_sum % 2 != even_parity) return false;
+
+        for(int8_t i = 0; i < 17; i++) {
+            if(((fc_and_card >> i) & 1) == 1) {
+                odd_parity_sum++;
+            }
+        }
+        if(odd_parity_sum % 2 != odd_parity) return false;
+        break;
+    default:    
+    }
+    return true;
 }
 
 void protocol_gproxii_decoder_start(ProtocolGProxII* protocol) {
     memset(protocol->data, 0, GPROXII_ENCODED_BYTE_FULL_SIZE);
+    memset(protocol->decoded_data, 0, GPROXII_DATA_SIZE);
     protocol->last_short = false;
 }
 
@@ -88,7 +128,7 @@ static bool protocol_gproxii_can_be_decoded(ProtocolGProxII* protocol) {
     if(bit_lib_get_bits(protocol->data, 0, 6) != 0b111110) return false;
 
     // Check always 0 parity on every 5th bit after preamble
-    if(bit_lib_test_parity(protocol->data, 5, GPROXII_ENCODED_BIT_SIZE, BitLibParityAlways0, 5))
+    if(!bit_lib_test_parity(protocol->data, 6, GPROXII_ENCODED_BIT_SIZE, BitLibParityAlways0, 5))
         return false;
 
     // Start GProx II decode
@@ -113,43 +153,15 @@ static bool protocol_gproxii_can_be_decoded(ProtocolGProxII* protocol) {
     if(card_len == 26 || card_len == 36) {
         // wiegand parity
         if(card_len == 26) {
-            uint8_t even_parity_sum = 0;
-            uint32_t fc_and_card = bit_lib_get_bits_32(protocol->decoded_data, 33, 24);
-            uint8_t even_parity = bit_lib_get_bits(protocol->decoded_data, 32, 1);
-            uint8_t odd_parity = bit_lib_get_bits(protocol->decoded_data, 57, 1);
-            for(int8_t i = 12; i < 24; i++) {
-                if(((fc_and_card >> i) & 1) == 1) {
-                    even_parity_sum++;
-                }
-            }
-            if(even_parity_sum % 2 != even_parity) return false;
-
-            uint8_t odd_parity_sum = 1;
-            for(int8_t i = 0; i < 12; i++) {
-                if(((fc_and_card >> i) & 1) == 1) {
-                    odd_parity_sum++;
-                }
-            }
-            if(odd_parity_sum % 2 != odd_parity) return false;
+            uint64_t fc_and_card = bit_lib_get_bits_64(protocol->decoded_data, 33, 24);
+            bool even_parity = bit_lib_get_bits(protocol->decoded_data, 32, 1);
+            bool odd_parity = bit_lib_get_bits(protocol->decoded_data, 57, 1);
+            if(!wiegand_check(fc_and_card, even_parity, odd_parity, card_len)) return false;
         } else if(card_len == 36) {
-            uint8_t even_parity_sum = 0;
-            uint32_t fc_and_card = bit_lib_get_bits_64(protocol->decoded_data, 33, 34);
+            uint64_t fc_and_card = bit_lib_get_bits_64(protocol->decoded_data, 33, 34);
             uint8_t even_parity = bit_lib_get_bits(protocol->decoded_data, 32, 1);
             uint8_t odd_parity = bit_lib_get_bits(protocol->decoded_data, 67, 1);
-            for(int8_t i = 17; i < 34; i++) {
-                if(((fc_and_card >> i) & 1) == 1) {
-                    even_parity_sum++;
-                }
-            }
-            if(even_parity_sum % 2 != even_parity) return false;
-
-            uint8_t odd_parity_sum = 1;
-            for(int8_t i = 0; i < 17; i++) {
-                if(((fc_and_card >> i) & 1) == 1) {
-                    odd_parity_sum++;
-                }
-            }
-            if(odd_parity_sum % 2 != odd_parity) return false;
+            if(!wiegand_check(fc_and_card, even_parity, odd_parity, card_len)) return false;
         }
         return true;
     } else {
@@ -230,7 +242,7 @@ void protocol_gproxii_render_data(ProtocolGProxII* protocol, FuriString* result)
         // Print FC, Card and Length
         furi_string_cat_printf(
             result,
-            "FC: %hhu Card: %hu LEN: %hhu\n",
+            "FC: %u Card: %u LEN: %hhu\n",
             bit_lib_get_bits(protocol->decoded_data, 33, 8),
             bit_lib_get_bits_16(protocol->decoded_data, 41, 16),
             card_len);
@@ -245,14 +257,14 @@ void protocol_gproxii_render_data(ProtocolGProxII* protocol, FuriString* result)
         // Print FC, Card and Length
         furi_string_cat_printf(
             result,
-            "FC: %u Card: %lu LEN: %hhu\n",
+            "FC: %u Card: %u LEN: %hhu\n",
             bit_lib_get_bits_16(protocol->decoded_data, 33, 14),
             bit_lib_get_bits_16(protocol->decoded_data, 51, 16),
             card_len);
         // XOR Key, CRC and Profile
         furi_string_cat_printf(
             result,
-            "XOR: %hhu CRC: %hhu P: %06lX",
+            "XOR: %hhu CRC: %hhu P: %04hX",
             xor_code,
             crc_code,
             bit_lib_get_bits_16(protocol->decoded_data, 16, 16));
