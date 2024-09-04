@@ -35,6 +35,14 @@ App(
 )
 
 App(
+    appid="js_gui__loading",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_gui_loading_ep",
+    requires=["js_app", "js_gui"],
+    sources=["modules/js_gui/loading.c"],
+)
+
+App(
     appid="js_dialog",
     apptype=FlipperAppType.PLUGIN,
     entry_point="js_dialog_ep",

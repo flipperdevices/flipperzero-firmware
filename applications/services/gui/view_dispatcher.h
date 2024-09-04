@@ -48,7 +48,7 @@ typedef void (*ViewDispatcherTickEventCallback)(void* context);
 ViewDispatcher* view_dispatcher_alloc(void);
 
 /** Allocate ViewDispatcher instance with an externally owned event loop. If
- * this constructor is used instead of view_dispatcher_alloc, the burden of
+ * this constructor is used instead of `view_dispatcher_alloc`, the burden of
  * freeing the event loop is placed on the caller.
  *
  * @param loop pointer to FuriEventLoop instance

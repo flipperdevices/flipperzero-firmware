@@ -430,5 +430,6 @@ const FlipperAppPluginDescriptor* js_event_loop_ep(void) {
 }
 
 FuriEventLoop* js_event_loop_get_loop(JsEventLoop* loop) {
+    // porta: not the proudest function that i ever wrote
     return loop->loop;
 }

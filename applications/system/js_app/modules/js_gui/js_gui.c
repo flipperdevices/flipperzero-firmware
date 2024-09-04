@@ -17,31 +17,34 @@ static void js_gui_vd_add(struct mjs* mjs) {
 static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
     // get event loop
     JsEventLoop* js_loop = js_module_get(modules, "event_loop");
-    if(!js_loop) {
-        // `event_loop` module must be imported before `gui`
-        *object = MJS_UNDEFINED;
+    if(M_UNLIKELY(!js_loop)) {
+        // `event_loop` must be imported before `gui`
+        // likely dead code because our module would fail to link
         return NULL;
     }
     FuriEventLoop* loop = js_event_loop_get_loop(js_loop);
 
     // create C object
-    JsGui* gui = malloc(sizeof(JsGui));
-    gui->dispatcher = view_dispatcher_alloc_ex(loop);
+    JsGui* module = malloc(sizeof(JsGui));
+    module->dispatcher = view_dispatcher_alloc_ex(loop);
 
     // create viewDispatcher object
     mjs_val_t view_dispatcher = mjs_mk_object(mjs);
     mjs_set(mjs, view_dispatcher, "add", ~0, MJS_MK_FN(js_gui_vd_add));
 
-    mjs_val_t module = mjs_mk_object(mjs);
-    mjs_set(mjs, module, "viewDispatcher", ~0, view_dispatcher);
+    // create API object
+    mjs_val_t api = mjs_mk_object(mjs);
+    mjs_set(mjs, api, "viewDispatcher", ~0, view_dispatcher);
 
-    *object = module;
-    return gui;
+    *object = api;
+    return module;
 }
 
 static void js_gui_destroy(void* inst) {
     if(!inst) return;
-    // TODO:
+    JsGui* module = inst;
+    view_dispatcher_free(module->dispatcher);
+    free(module);
 }
 
 static const JsModuleDescriptor js_gui_desc = {

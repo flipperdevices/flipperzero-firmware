@@ -36,5 +36,8 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
 
 /**
  * @brief Gets a module instance by its name
+ * This is useful when a module wants to access a stateful API of another
+ * module.
+ * @returns Pointer to module context, NULL if the module is not instantiated
  */
 void* js_module_get(JsModules* modules, const char* name);

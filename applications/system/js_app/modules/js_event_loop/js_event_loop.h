@@ -56,6 +56,15 @@ typedef struct {
     };
 } JsEventLoopContract;
 
+/**
+ * @brief Gets the FuriEventLoop owned by a JsEventLoop
+ * 
+ * This function is useful in case your JS module wishes to integrate with
+ * the event loop without passing contracts through JS code. Your module will be
+ * dynamically linked to this one if you use this function, but only if JS code
+ * imports `event_loop` _before_ your module. An instance of `JsEventLoop` may
+ * be obtained via `js_module_get`.
+ */
 FuriEventLoop* js_event_loop_get_loop(JsEventLoop* loop);
 
 #ifdef __cplusplus
