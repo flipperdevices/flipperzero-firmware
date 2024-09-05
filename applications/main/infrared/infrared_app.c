@@ -385,17 +385,16 @@ void infrared_tx_start(InfraredApp* infrared) {
     infrared->app_state.is_transmitting = true;
 }
 
-bool infrared_tx_start_button_index(InfraredApp* infrared, size_t button_index) {
+InfraredErrorCode infrared_tx_start_button_index(InfraredApp* infrared, size_t button_index) {
     furi_assert(button_index < infrared_remote_get_signal_count(infrared->remote));
 
     InfraredErrorCode error =
         infrared_remote_load_signal(infrared->remote, infrared->current_signal, button_index);
-    bool result = !INFRARED_ERROR_PRESENT(error);
 
-    if(result) {
+    if(!INFRARED_ERROR_PRESENT(error)) {
         infrared_tx_start(infrared);
     }
-    return result;
+    return error;
 }
 
 void infrared_tx_stop(InfraredApp* infrared) {
