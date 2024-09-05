@@ -105,7 +105,7 @@ static void loader_cli_signal(FuriString* args, Loader* loader) {
         printf(
             "Signal %lu with argument 0x%p was %s\r\n",
             signal,
-            arg,
+            (void*)arg,
             is_handled ? "handled" : "ignored");
     }
 }
