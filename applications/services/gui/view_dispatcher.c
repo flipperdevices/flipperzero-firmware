@@ -91,6 +91,7 @@ void view_dispatcher_set_tick_event_callback(
     ViewDispatcherTickEventCallback callback,
     uint32_t tick_period) {
     furi_check(view_dispatcher);
+    furi_check(view_dispatcher->is_event_loop_owned);
     view_dispatcher->tick_event_callback = callback;
     view_dispatcher->tick_period = tick_period;
 }
@@ -112,11 +113,12 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
     uint32_t tick_period = view_dispatcher->tick_period == 0 ? FuriWaitForever :
                                                                view_dispatcher->tick_period;
 
-    furi_event_loop_tick_set(
-        view_dispatcher->event_loop,
-        tick_period,
-        view_dispatcher_handle_tick_event,
-        view_dispatcher);
+    if(view_dispatcher->is_event_loop_owned)
+        furi_event_loop_tick_set(
+            view_dispatcher->event_loop,
+            tick_period,
+            view_dispatcher_handle_tick_event,
+            view_dispatcher);
 
     furi_event_loop_run(view_dispatcher->event_loop);
 

@@ -106,6 +106,10 @@ void view_dispatcher_set_navigation_event_callback(
 
 /** Set tick event handler
  *
+ * @warning Requires the event loop to be owned by the view dispatcher, i.e.
+ * it should have been instantiated with `view_dispatcher_alloc`, not
+ * `view_dispatcher_alloc_ex`.
+ * 
  * @param      view_dispatcher  ViewDispatcher instance
  * @param      callback         ViewDispatcherTickEventCallback
  * @param      tick_period      callback call period

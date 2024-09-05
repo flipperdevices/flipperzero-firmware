@@ -50,7 +50,7 @@ ARRAY_DEF(ContractArray, JsEventLoopContract*, M_PTR_OPLIST); //-V575
 struct JsEventLoop {
     FuriEventLoop* loop;
     SubscriptionArray_t subscriptions;
-    ContractArray_t contracts; //<! Contracts that were produced by this module
+    ContractArray_t owned_contracts; //<! Contracts that were produced by this module
     JsEventLoopTickContext* tick_context;
 };
 
@@ -108,7 +108,10 @@ static bool js_event_loop_callback(void* object, void* param) {
 /**
  * @brief Cancels an event subscription
  */
-static void js_event_loop_do_unsubscribe(JsEventLoopSubscription* subscription) {
+static void js_event_loop_subscription_cancel(struct mjs* mjs) {
+    JsEventLoopSubscription* subscription =
+        mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+
     if(subscription->object_type == JsEventLoopObjectTypeTimer) {
         furi_event_loop_timer_stop(subscription->object);
     } else {
@@ -128,15 +131,7 @@ static void js_event_loop_do_unsubscribe(JsEventLoopSubscription* subscription) 
     }
     SubscriptionArray_remove(subscription->subscriptions, iterator);
     free(subscription);
-}
 
-/**
- * @brief Cancels an event subscription, callable from JS
- */
-static void js_event_loop_subscription_cancel(struct mjs* mjs) {
-    JsEventLoopSubscription* subscription =
-        mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
-    js_event_loop_do_unsubscribe(subscription);
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
@@ -266,7 +261,7 @@ static void js_event_loop_timer(struct mjs* mjs) {
     contract->object = NULL;
     contract->interval_ticks = furi_ms_to_ticks((uint32_t)interval);
     contract->timer_type = mode;
-    ContractArray_push_back(module->contracts, contract);
+    ContractArray_push_back(module->owned_contracts, contract);
     mjs_return(mjs, mjs_mk_foreign(mjs, contract));
 }
 
@@ -322,7 +317,7 @@ static void js_event_loop_queue(struct mjs* mjs) {
     contract->event = FuriEventLoopEventIn;
     contract->transformer = js_event_loop_queue_transformer;
     contract->transformer_context = mjs;
-    ContractArray_push_back(module->contracts, contract);
+    ContractArray_push_back(module->owned_contracts, contract);
 
     // return object with control methods
     mjs_val_t queue = mjs_mk_object(mjs);
@@ -354,7 +349,7 @@ static void* js_event_loop_create(struct mjs* mjs, mjs_val_t* object, JsModules*
     module->tick_context = tick_ctx;
     furi_event_loop_tick_set(module->loop, 10, js_event_loop_tick, tick_ctx);
     SubscriptionArray_init(module->subscriptions);
-    ContractArray_init(module->contracts);
+    ContractArray_init(module->owned_contracts);
 
     mjs_set(mjs, event_loop_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
     mjs_set(mjs, event_loop_obj, "subscribe", ~0, MJS_MK_FN(js_event_loop_subscribe));
@@ -373,17 +368,30 @@ static void js_event_loop_destroy(void* inst) {
         furi_event_loop_stop(module->loop);
 
         // free subscriptions
-        while(!SubscriptionArray_empty_p(module->subscriptions)) {
-            JsEventLoopSubscription** sub = SubscriptionArray_get(module->subscriptions, 0);
-            js_event_loop_do_unsubscribe(*sub);
+        SubscriptionArray_it_t sub_iterator;
+        for(SubscriptionArray_it(sub_iterator, module->subscriptions);
+            !SubscriptionArray_end_p(sub_iterator);
+            SubscriptionArray_next(sub_iterator)) {
+            JsEventLoopSubscription* const* sub = SubscriptionArray_cref(sub_iterator);
+            free((*sub)->context->arguments);
+            free((*sub)->context);
+            free(*sub);
         }
         SubscriptionArray_clear(module->subscriptions);
 
         // free owned contracts
         ContractArray_it_t iterator;
-        for(ContractArray_it(iterator, module->contracts); !ContractArray_end_p(iterator);
+        for(ContractArray_it(iterator, module->owned_contracts); !ContractArray_end_p(iterator);
             ContractArray_next(iterator)) {
+            // unsubscribe object
             JsEventLoopContract* contract = *ContractArray_cref(iterator);
+            if(contract->object_type == JsEventLoopObjectTypeTimer) {
+                furi_event_loop_timer_stop(contract->object);
+            } else {
+                furi_event_loop_unsubscribe(module->loop, contract->object);
+            }
+
+            // free object
             switch(contract->object_type) {
             case JsEventLoopObjectTypeTimer:
                 furi_event_loop_timer_free(contract->object);
@@ -397,9 +405,10 @@ static void js_event_loop_destroy(void* inst) {
             default:
                 furi_crash("unimplemented");
             }
+
             free(contract);
         }
-        ContractArray_clear(module->contracts);
+        ContractArray_clear(module->owned_contracts);
 
         furi_event_loop_free(module->loop);
         free(module->tick_context);

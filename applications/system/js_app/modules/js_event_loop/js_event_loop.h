@@ -2,6 +2,27 @@
 #include <furi/core/event_loop.h>
 #include <furi/core/event_loop_timer.h>
 
+/**
+ * @file js_event_loop.h
+ * 
+ * In JS interpreter code, `js_event_loop` always creates and maintains the
+ * event loop. There are two ways in which other modules can integrate with this
+ * loop:
+ *   - Via contracts: The user of your module would have to acquire an opaque
+ *     JS value from you and pass it to `js_event_loop`. This is useful for
+ *     events that they user may be interested in. For more info, look at
+ *     `JsEventLoopContract`.
+ *   - Directly: When your module is created, you can acquire an instance of
+ *     `JsEventLoop` which you can use to acquire an instance of
+ *     `FuriEventLoop` that you can manipulate directly, without the JS
+ *     programmer having to pass contracts around. This is useful for
+ *     "behind-the-scenes" events that the user does not need to know about. For
+ *     more info, look at `js_event_loop_get_loop`.
+ * 
+ * In both cases, your module is responsible for both instantiating,
+ * unsubscribing and freeing the object that the event loop subscribes to.
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -16,12 +16,12 @@ declare class ViewDispatcher {
      * Sends a number to the custom event handler
      * @param event number to send
      */
-    send_custom(event: number): void;
+    sendCustom(event: number): void;
     /**
      * Returns a contract that can be used to subscribe to an event in an event loop
-     * @param event Event type: `"custom"`, `"navigation"` or `"tick"`
+     * @param event Event type: `"custom"` or `"navigation"`
      */
-    event<T extends "custom" | "navigation" | "tick">(event: T): Contract<T extends "custom" ? number : undefined>;
+    event<T extends "custom" | "navigation">(event: T): Contract<T extends "custom" ? number : undefined>;
     /**
      * Associates a View with a ViewDispatcher
      * @param view View to add
@@ -37,13 +37,13 @@ declare class ViewDispatcher {
      * Switches to a view
      * @param assoc View-ViewDispatcher association as returned by `add`
      */
-    switch_to(assoc: Association): void;
+    switchTo(assoc: Association): void;
     /**
      * Sends this ViewDispatcher to the front or back, above or below all other
      * GUI viewports
      * @param direction Either `"front"` or `"back"`
      */
-    send_to(direction: "front" | "back"): void;
+    sendTo(direction: "front" | "back"): void;
 }
 
 export const viewDispatcher: ViewDispatcher;

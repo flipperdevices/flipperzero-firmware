@@ -14,12 +14,12 @@ event_loop.subscribe(gui.viewDispatcher.event("custom"), function (_sub, item) {
 });
 
 event_loop.subscribe(gui.viewDispatcher.event("navigation"), function (_sub, _item, gui) {
-    gui.viewDispatcher.send_custom(123);
+    gui.viewDispatcher.sendCustom(123);
 }, gui);
 
 event_loop.subscribe(event_loop.timer("oneshot", 1000), function (_sub, _item, loop) {
     loop.stop();
 }, event_loop);
 
-gui.viewDispatcher.switch_to(loadingAssoc);
+gui.viewDispatcher.switchTo(loadingAssoc);
 event_loop.run();
