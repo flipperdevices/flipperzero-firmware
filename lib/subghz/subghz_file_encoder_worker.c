@@ -58,7 +58,7 @@ bool subghz_file_encoder_worker_data_parse(SubGhzFileEncoderWorker* instance, co
 
         // Parse next element
         int32_t duration;
-        while(strint_to_int32(str, (char**)&str, &duration, 10) == StrintParseNoError) {
+        while(strint_to_int32(str, &str, &duration, 10) == StrintParseNoError) {
             subghz_file_encoder_worker_add_level_duration(instance, duration);
             if(*str == ',') str++; // could also be `\0`
         }
