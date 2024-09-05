@@ -3,7 +3,7 @@
 #include <gui/modules/loading.h>
 
 static void js_gui_loading_make(struct mjs* mjs) {
-    JS_FETCH_ARGS_OR_RETURN(mjs); // 0 args
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY); // 0 args
 
     Loading* loading = loading_alloc();
     JsGui* gui = JS_GET_CONTEXT(mjs);

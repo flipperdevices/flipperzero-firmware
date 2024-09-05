@@ -109,8 +109,7 @@ static bool js_event_loop_callback(void* object, void* param) {
  * @brief Cancels an event subscription
  */
 static void js_event_loop_subscription_cancel(struct mjs* mjs) {
-    JsEventLoopSubscription* subscription =
-        mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+    JsEventLoopSubscription* subscription = JS_GET_CONTEXT(mjs);
 
     if(subscription->object_type == JsEventLoopObjectTypeTimer) {
         furi_event_loop_timer_stop(subscription->object);
@@ -139,18 +138,12 @@ static void js_event_loop_subscription_cancel(struct mjs* mjs) {
  * @brief Subscribes a JavaScript function to an event
  */
 static void js_event_loop_subscribe(struct mjs* mjs) {
-    JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+    JsEventLoop* module = JS_GET_CONTEXT(mjs);
 
     // get arguments
-    if(mjs_nargs(mjs) < 2)
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "requires at least 2 arguments");
-    mjs_val_t contract_arg = mjs_arg(mjs, 0);
-    mjs_val_t callback = mjs_arg(mjs, 1);
-    if(!mjs_is_foreign(contract_arg))
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "invalid contract");
-    if(!mjs_is_function(callback))
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "callback must be a function");
-    JsEventLoopContract* contract = mjs_get_ptr(mjs, contract_arg);
+    JsEventLoopContract* contract;
+    mjs_val_t callback;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_AT_LEAST, JS_ARG_PTR(&contract), JS_ARG_FN(&callback));
 
     // create subscription object
     JsEventLoopSubscription* subscription = malloc(sizeof(JsEventLoopSubscription));
@@ -166,7 +159,7 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
 
     // create callback context
     context->object_type = contract->object_type;
-    context->arity = mjs_nargs(mjs);
+    context->arity = mjs_nargs(mjs) - SYSTEM_ARGS + 2;
     context->arguments = calloc(context->arity, sizeof(mjs_val_t));
     context->arguments[0] = subscription_obj;
     context->arguments[1] = MJS_UNDEFINED;
@@ -219,7 +212,7 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
  * @brief Runs the event loop until it is stopped
  */
 static void js_event_loop_run(struct mjs* mjs) {
-    JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+    JsEventLoop* module = JS_GET_CONTEXT(mjs);
     furi_event_loop_run(module->loop);
 }
 
@@ -227,7 +220,7 @@ static void js_event_loop_run(struct mjs* mjs) {
  * @brief Stops a running event loop
  */
 static void js_event_loop_stop(struct mjs* mjs) {
-    JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+    JsEventLoop* module = JS_GET_CONTEXT(mjs);
     furi_event_loop_stop(module->loop);
 }
 
@@ -237,23 +230,19 @@ static void js_event_loop_stop(struct mjs* mjs) {
  */
 static void js_event_loop_timer(struct mjs* mjs) {
     // get arguments
-    if(mjs_nargs(mjs) != 2) JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "requires 2 arguments");
-    mjs_val_t mode_arg = mjs_arg(mjs, 0);
-    mjs_val_t interval_arg = mjs_arg(mjs, 1);
-    const char* mode_str = mjs_get_string(mjs, &mode_arg, NULL);
-    if(!mode_str) JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "mode must be a string");
-    if(!mjs_is_number(interval_arg))
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "interval must be a number");
+    const char* mode_str;
+    int32_t interval;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&mode_str), JS_ARG_INT32(&interval));
+    JsEventLoop* module = JS_GET_CONTEXT(mjs);
+
     FuriEventLoopTimerType mode;
     if(strcasecmp(mode_str, "periodic") == 0) {
         mode = FuriEventLoopTimerTypePeriodic;
     } else if(strcasecmp(mode_str, "oneshot") == 0) {
         mode = FuriEventLoopTimerTypeOnce;
     } else {
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "unknown mode");
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "argument 0: unknown mode");
     }
-    int32_t interval = mjs_get_int32(mjs, interval_arg);
-    JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
 
     // make timer contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
@@ -284,9 +273,9 @@ static mjs_val_t js_event_loop_queue_transformer(FuriEventLoopObject* object, vo
  */
 static void js_event_loop_queue_send(struct mjs* mjs) {
     // get arguments
-    if(mjs_nargs(mjs) != 1) JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "requires 1 argument");
-    mjs_val_t message = mjs_arg(mjs, 0);
-    JsEventLoopContract* contract = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), "input", ~0));
+    mjs_val_t message;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_ANY(&message));
+    JsEventLoopContract* contract = JS_GET_CONTEXT(mjs);
 
     // send message
     mjs_val_t* message_ptr = malloc(sizeof(mjs_val_t));
@@ -302,18 +291,15 @@ static void js_event_loop_queue_send(struct mjs* mjs) {
  */
 static void js_event_loop_queue(struct mjs* mjs) {
     // get arguments
-    if(mjs_nargs(mjs) != 1) JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "requires 1 argument");
-    mjs_val_t length_arg = mjs_arg(mjs, 0);
-    if(!mjs_is_number(length_arg))
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "length must be a number");
-    size_t length = mjs_get_int32(mjs, length_arg);
-    JsEventLoop* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+    int32_t length;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_INT32(&length));
+    JsEventLoop* module = JS_GET_CONTEXT(mjs);
 
     // make queue contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
     contract->object_type = JsEventLoopObjectTypeQueue;
     // we could store `mjs_val_t`s in the queue directly if not for mJS' requirement to have consistent pointers to owned values
-    contract->object = furi_message_queue_alloc(length, sizeof(mjs_val_t*));
+    contract->object = furi_message_queue_alloc((size_t)length, sizeof(mjs_val_t*));
     contract->event = FuriEventLoopEventIn;
     contract->transformer = js_event_loop_queue_transformer;
     contract->transformer_context = mjs;

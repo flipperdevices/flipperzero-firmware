@@ -39,7 +39,7 @@ struct JsGui {
  */
 static void js_gui_vd_add(struct mjs* mjs) {
     mjs_val_t view_arg;
-    JS_FETCH_ARGS_OR_RETURN(mjs, &view_arg);
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_ANY(&view_arg));
 
     View* view = mjs_get_ptr(mjs, mjs_get(mjs, view_arg, "_view", ~0));
     if(!view) JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Expected argument 0 to be a View");
@@ -89,11 +89,9 @@ static bool js_gui_vd_nav_callback(void* context) {
 static void js_gui_vd_event(struct mjs* mjs) {
     // get argument
     bool is_navigation_event;
-    mjs_val_t event_arg;
-    JS_FETCH_ARGS_OR_RETURN(mjs, &event_arg);
-    const char* event_type = mjs_get_cstring(mjs, &event_arg);
-    if(!event_type)
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Expected argument 0 to be a string");
+    const char* event_type;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&event_type));
+
     if(strcmp(event_type, "custom") == 0) {
         is_navigation_event = false;
     } else if(strcmp(event_type, "navigation") == 0) {
@@ -129,11 +127,8 @@ static void js_gui_vd_event(struct mjs* mjs) {
  * @brief `viewDispatcher.sendCustom`
  */
 static void js_gui_vd_send_custom(struct mjs* mjs) {
-    mjs_val_t event_arg;
-    JS_FETCH_ARGS_OR_RETURN(mjs, &event_arg);
-    if(!mjs_is_number(event_arg))
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Expected argument 0 to be a number");
-    int32_t event = mjs_get_int32(mjs, event_arg);
+    int32_t event;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_INT32(&event));
 
     JsGui* module = JS_GET_CONTEXT(mjs);
     view_dispatcher_send_custom_event(module->dispatcher, (uint32_t)event);
@@ -143,14 +138,8 @@ static void js_gui_vd_send_custom(struct mjs* mjs) {
  * @brief `viewDispatcher.switchTo`
  */
 static void js_gui_vd_switch_to(struct mjs* mjs) {
-    mjs_val_t assoc_arg;
-    JS_FETCH_ARGS_OR_RETURN(mjs, &assoc_arg);
-    if(!mjs_is_number(assoc_arg))
-        JS_ERROR_AND_RETURN(
-            mjs,
-            MJS_BAD_ARGS_ERROR,
-            "Expected argument 0 to be a View-ViewDispatcher association");
-    int32_t view_id = mjs_get_int32(mjs, assoc_arg);
+    int32_t view_id;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_INT32(&view_id));
 
     JsGui* module = JS_GET_CONTEXT(mjs);
     view_dispatcher_switch_to_view(module->dispatcher, (uint32_t)view_id);
@@ -197,10 +186,6 @@ static void js_gui_destroy(void* inst) {
     if(!inst) return;
     JsGui* module = inst;
 
-    // unsubscribe event sources
-    furi_event_loop_unsubscribe(module->loop, module->custom);
-    furi_event_loop_unsubscribe(module->loop, module->navigation);
-
     // remove views from dispatcher
     for(uint32_t id = 0; id < module->next_view_id; id++) {
         view_dispatcher_remove_view(module->dispatcher, id);
@@ -215,8 +200,11 @@ static void js_gui_destroy(void* inst) {
     }
     JsViewGhosts_clear(module->ghosts);
 
+    furi_event_loop_unsubscribe(module->loop, module->custom);
+    furi_event_loop_unsubscribe(module->loop, module->navigation);
     furi_message_queue_free(module->custom);
     furi_semaphore_free(module->navigation);
+
     furi_record_close(RECORD_GUI);
     free(module);
 }

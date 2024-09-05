@@ -11,7 +11,8 @@
  *   - Via contracts: The user of your module would have to acquire an opaque
  *     JS value from you and pass it to `js_event_loop`. This is useful for
  *     events that they user may be interested in. For more info, look at
- *     `JsEventLoopContract`.
+ *     `JsEventLoopContract`. Also look at `js_event_loop_get_loop`, which
+ *     you will need to unsubscribe the event loop from your object.
  *   - Directly: When your module is created, you can acquire an instance of
  *     `JsEventLoop` which you can use to acquire an instance of
  *     `FuriEventLoop` that you can manipulate directly, without the JS

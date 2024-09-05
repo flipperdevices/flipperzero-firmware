@@ -25,6 +25,7 @@ ARRAY_DEF(ManagedPinsArray, JsGpioPinInst*, M_PTR_OPLIST); //-V575
  * Per-module instance control structure
  */
 typedef struct {
+    FuriEventLoop* loop;
     ManagedPinsArray_t managed_pins;
     FuriHalAdcHandle* adc_handle;
 } JsGpioInst;
@@ -50,9 +51,8 @@ static void js_gpio_int_cb(void* arg) {
  */
 static void js_gpio_init(struct mjs* mjs) {
     // deconstruct mode object
-    mjs_val_t mode_arg = mjs_arg(mjs, 0);
-    if(!mjs_is_object(mode_arg))
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Invalid argument: expected mode object");
+    mjs_val_t mode_arg;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_OBJ(&mode_arg));
     mjs_val_t direction_arg = mjs_get(mjs, mode_arg, "direction", ~0);
     mjs_val_t out_mode_arg = mjs_get(mjs, mode_arg, "outMode", ~0);
     mjs_val_t in_mode_arg = mjs_get(mjs, mode_arg, "inMode", ~0);
@@ -123,11 +123,8 @@ static void js_gpio_init(struct mjs* mjs) {
         JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "invalid pull");
     }
 
-    // get state
-    mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
-
     // init GPIO
+    JsGpioPinInst* manager_data = JS_GET_CONTEXT(mjs);
     furi_hal_gpio_init(manager_data->pin, mode, pull_mode, GpioSpeedVeryHigh);
     mjs_return(mjs, MJS_UNDEFINED);
 }
@@ -145,18 +142,10 @@ static void js_gpio_init(struct mjs* mjs) {
  * ```
  */
 static void js_gpio_write(struct mjs* mjs) {
-    // get argument
-    mjs_val_t level_arg = mjs_arg(mjs, 0);
-    if(!mjs_is_boolean(level_arg))
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Must be a boolean");
-    bool logic_level = mjs_get_bool(mjs, level_arg);
-
-    // get state
-    mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
-
-    // set level
-    furi_hal_gpio_write(manager_data->pin, logic_level);
+    bool level;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_BOOL(&level));
+    JsGpioPinInst* manager_data = JS_GET_CONTEXT(mjs);
+    furi_hal_gpio_write(manager_data->pin, level);
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
@@ -174,11 +163,8 @@ static void js_gpio_write(struct mjs* mjs) {
  * ```
  */
 static void js_gpio_read(struct mjs* mjs) {
-    // get state
-    mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
-
     // get level
+    JsGpioPinInst* manager_data = JS_GET_CONTEXT(mjs);
     bool value = furi_hal_gpio_read(manager_data->pin);
     mjs_return(mjs, mjs_mk_boolean(mjs, value));
 }
@@ -198,9 +184,7 @@ static void js_gpio_read(struct mjs* mjs) {
  * ```
  */
 static void js_gpio_interrupt(struct mjs* mjs) {
-    // get state
-    mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
+    JsGpioPinInst* manager_data = JS_GET_CONTEXT(mjs);
 
     // interrupt handling
     if(!manager_data->had_interrupt) {
@@ -231,11 +215,8 @@ static void js_gpio_interrupt(struct mjs* mjs) {
  * ```
  */
 static void js_gpio_read_analog(struct mjs* mjs) {
-    // get state
-    mjs_val_t manager = mjs_get_this(mjs);
-    JsGpioPinInst* manager_data = mjs_get_ptr(mjs, mjs_get(mjs, manager, INST_PROP_NAME, ~0));
-
     // get mV (ADC is configured for 12 bits and 2048 mV max)
+    JsGpioPinInst* manager_data = JS_GET_CONTEXT(mjs);
     uint16_t millivolts =
         furi_hal_adc_read(manager_data->adc_handle, manager_data->adc_channel) / 2;
     mjs_return(mjs, mjs_mk_number(mjs, (double)millivolts));
@@ -252,7 +233,8 @@ static void js_gpio_read_analog(struct mjs* mjs) {
  * ```
  */
 static void js_gpio_get(struct mjs* mjs) {
-    mjs_val_t name_arg = mjs_arg(mjs, 0);
+    mjs_val_t name_arg;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_ANY(&name_arg));
     const char* name_string = mjs_get_string(mjs, &name_arg, NULL);
     const GpioPinRecord* pin_record = NULL;
 
@@ -283,7 +265,7 @@ static void js_gpio_get(struct mjs* mjs) {
         JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Pin is used for debugging");
 
     // return pin manager object
-    JsGpioInst* module = mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0));
+    JsGpioInst* module = JS_GET_CONTEXT(mjs);
     mjs_val_t manager = mjs_mk_object(mjs);
     JsGpioPinInst* manager_data = malloc(sizeof(JsGpioPinInst));
     manager_data->pin = pin_record->pin;
@@ -304,10 +286,14 @@ static void js_gpio_get(struct mjs* mjs) {
 }
 
 static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
-    UNUSED(modules);
+    JsEventLoop* js_loop = js_module_get(modules, "event_loop");
+    if(M_UNLIKELY(!js_loop)) return NULL;
+    FuriEventLoop* loop = js_event_loop_get_loop(js_loop);
+
     JsGpioInst* module = malloc(sizeof(JsGpioInst));
     ManagedPinsArray_init(module->managed_pins);
     module->adc_handle = furi_hal_adc_acquire();
+    module->loop = loop;
     furi_hal_adc_configure(module->adc_handle);
 
     mjs_val_t gpio_obj = mjs_mk_object(mjs);
@@ -330,17 +316,9 @@ static void js_gpio_destroy(void* inst) {
             if(manager_data->had_interrupt) {
                 furi_hal_gpio_disable_int_callback(manager_data->pin);
                 furi_hal_gpio_remove_int_callback(manager_data->pin);
+                furi_event_loop_unsubscribe(module->loop, manager_data->interrupt_semaphore);
             }
             furi_hal_gpio_init(manager_data->pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-            // NOTE(extensibility): Ideally, pin managers and interrupt handler
-            // arguments should be disowned via `mjs_disown`, which requires a
-            // reference to the mjs structure that we don't have. In practice,
-            // our module destructor is only ever called shortly before
-            // `mjs_destroy` is called, which frees everything including owned
-            // objects. No memory leaks seem to be manifesting themselves as of
-            // right now, but if the JS subsystem is ever extended so that
-            // modules may be are loaded and unloaded throughout the lifetime of
-            // the interpreter, this is an area to look into.
             furi_semaphore_free(manager_data->interrupt_semaphore);
             free(manager_data);
         }
@@ -354,9 +332,6 @@ static void js_gpio_destroy(void* inst) {
     expansion_enable(furi_record_open(RECORD_EXPANSION));
     furi_record_close(RECORD_EXPANSION);
 }
-
-// TODO: event loop
-// TODO: ADC
 
 static const JsModuleDescriptor js_gpio_desc = {
     "gpio",

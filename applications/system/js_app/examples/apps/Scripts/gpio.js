@@ -1,8 +1,8 @@
 /// <reference types="../../../types/global" />
-/// <reference types="../../../types/gpio" />
-let gpio = require("gpio");
 /// <reference types="../../../types/event_loop" />
 let event_loop = require("event_loop");
+/// <reference types="../../../types/gpio" />
+let gpio = require("gpio");
 
 // initialize pins
 let led = gpio.get("pc3"); // same as `gpio.get(7)`
