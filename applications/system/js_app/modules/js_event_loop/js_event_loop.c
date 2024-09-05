@@ -307,6 +307,7 @@ static void js_event_loop_queue(struct mjs* mjs) {
 
     // return object with control methods
     mjs_val_t queue = mjs_mk_object(mjs);
+    mjs_set(mjs, queue, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, contract));
     mjs_set(mjs, queue, "input", ~0, mjs_mk_foreign(mjs, contract));
     mjs_set(mjs, queue, "send", ~0, MJS_MK_FN(js_event_loop_queue_send));
     mjs_return(mjs, queue);

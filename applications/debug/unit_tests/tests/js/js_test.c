@@ -45,8 +45,8 @@ static void js_test_run(const char* script_path) {
         furi_crash();
     }
     if(flags & JsTestsError) {
-        mu_fail(furi_string_get_cstr(context->error_string));
         furi_string_free(context->error_string);
+        mu_fail(furi_string_get_cstr(context->error_string));
     }
     js_thread_stop(thread);
 

@@ -102,6 +102,7 @@ void minunit_printf_warning(const char* format, ...);
     MU__SAFE_BLOCK(minunit_setup = setup_fun; minunit_teardown = teardown_fun;)
 
 /*  Test runner */
+//-V:MU_RUN_TEST:550
 #define MU_RUN_TEST(test)                                        \
     MU__SAFE_BLOCK(                                              \
         if(minunit_real_timer == 0 && minunit_proc_timer == 0) { \

@@ -61,6 +61,7 @@ static inline void _js_passthrough(struct mjs* mjs, mjs_val_t in, void* out) {
 #define JS_ARG_OBJ(out) ((_js_arg_decl){out, mjs_is_object, _js_passthrough, "any"})
 #define JS_ARG_FN(out)  ((_js_arg_decl){out, mjs_is_function, _js_passthrough, "function"})
 
+//-V:JS_FETCH_ARGS_OR_RETURN:1008
 /**
  * @brief Fetches and validates the arguments passed to a JS function
  * 
