@@ -15,6 +15,7 @@ typedef struct {
     const GpioPin* pin;
     bool had_interrupt;
     FuriSemaphore* interrupt_semaphore;
+    JsEventLoopContract* interrupt_contract;
     FuriHalAdcChannel adc_channel;
     FuriHalAdcHandle* adc_handle;
 } JsGpioPinInst;
@@ -196,6 +197,7 @@ static void js_gpio_interrupt(struct mjs* mjs) {
 
     // make contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
+    manager_data->interrupt_contract = contract;
     contract->object_type = JsEventLoopObjectTypeSemaphore;
     contract->object = manager_data->interrupt_semaphore;
     contract->event = FuriEventLoopEventIn;
@@ -316,10 +318,11 @@ static void js_gpio_destroy(void* inst) {
             if(manager_data->had_interrupt) {
                 furi_hal_gpio_disable_int_callback(manager_data->pin);
                 furi_hal_gpio_remove_int_callback(manager_data->pin);
-                furi_event_loop_unsubscribe(module->loop, manager_data->interrupt_semaphore);
             }
             furi_hal_gpio_init(manager_data->pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+            furi_event_loop_maybe_unsubscribe(module->loop, manager_data->interrupt_semaphore);
             furi_semaphore_free(manager_data->interrupt_semaphore);
+            free(manager_data->interrupt_contract);
             free(manager_data);
         }
 

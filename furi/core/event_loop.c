@@ -373,42 +373,55 @@ void furi_event_loop_subscribe_mutex(
  * Public generic unsubscription API
  */
 
-void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
+bool furi_event_loop_maybe_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
     furi_check(instance);
     furi_check(instance->thread_id == furi_thread_get_current_id());
 
+    bool result = true;
     FURI_CRITICAL_ENTER();
 
-    FuriEventLoopItem* item = NULL;
-    furi_check(FuriEventLoopTree_pop_at(&item, instance->tree, object));
+    do {
+        FuriEventLoopItem** tree_item = FuriEventLoopTree_get_at(instance->tree, object);
+        furi_check(tree_item);
+        if(!*tree_item) {
+            result = false;
+            break;
+        }
+        FuriEventLoopItem* item;
+        furi_check(FuriEventLoopTree_pop_at(&item, instance->tree, object));
+        furi_check(item);
+        furi_check(item->owner == instance);
 
-    furi_check(item);
-    furi_check(item->owner == instance);
+        FuriEventLoopLink* link = item->contract->get_link(object);
+        FuriEventLoopEvent event_noflags = item->event & FuriEventLoopEventMask;
 
-    FuriEventLoopLink* link = item->contract->get_link(object);
-    FuriEventLoopEvent event_noflags = item->event & FuriEventLoopEventMask;
+        if(event_noflags == FuriEventLoopEventIn) {
+            furi_check(link->item_in == item);
+            link->item_in = NULL;
+        } else if(event_noflags == FuriEventLoopEventOut) {
+            furi_check(link->item_out == item);
+            link->item_out = NULL;
+        } else {
+            furi_crash();
+        }
 
-    if(event_noflags == FuriEventLoopEventIn) {
-        furi_check(link->item_in == item);
-        link->item_in = NULL;
-    } else if(event_noflags == FuriEventLoopEventOut) {
-        furi_check(link->item_out == item);
-        link->item_out = NULL;
-    } else {
-        furi_crash();
-    }
+        if(furi_event_loop_item_is_waiting(item)) {
+            WaitingList_unlink(item);
+        }
 
-    if(furi_event_loop_item_is_waiting(item)) {
-        WaitingList_unlink(item);
-    }
-
-    if(instance->state == FuriEventLoopStateProcessing) {
-        furi_event_loop_item_free_later(item);
-    } else {
-        furi_event_loop_item_free(item);
-    }
+        if(instance->state == FuriEventLoopStateProcessing) {
+            furi_event_loop_item_free_later(item);
+        } else {
+            furi_event_loop_item_free(item);
+        }
+    } while(0);
 
     FURI_CRITICAL_EXIT();
+    return result;
+}
+
+void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
+    furi_check(furi_event_loop_maybe_unsubscribe(instance, object));
 }
 
 /* 

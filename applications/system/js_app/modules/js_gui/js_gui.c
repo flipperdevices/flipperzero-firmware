@@ -200,8 +200,8 @@ static void js_gui_destroy(void* inst) {
     }
     JsViewGhosts_clear(module->ghosts);
 
-    furi_event_loop_unsubscribe(module->loop, module->custom);
-    furi_event_loop_unsubscribe(module->loop, module->navigation);
+    furi_event_loop_maybe_unsubscribe(module->loop, module->custom);
+    furi_event_loop_maybe_unsubscribe(module->loop, module->navigation);
     furi_message_queue_free(module->custom);
     furi_semaphore_free(module->navigation);
 
