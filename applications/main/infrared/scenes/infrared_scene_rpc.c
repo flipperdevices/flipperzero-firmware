@@ -93,7 +93,9 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                         TAG, "Sending signal with index \"%ld\"", app_state->current_button_index);
                 }
                 if(infrared->app_state.current_button_index != InfraredButtonIndexNone) {
-                    if(infrared_tx_start_button_index(infrared, app_state->current_button_index)) {
+                    InfraredErrorCode error =
+                        infrared_tx_start_button_index(infrared, app_state->current_button_index);
+                    if(!INFRARED_ERROR_PRESENT(error)) {
                         const char* remote_name = infrared_remote_get_name(infrared->remote);
                         infrared_text_store_set(infrared, 0, "emulating\n%s", remote_name);
 
