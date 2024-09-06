@@ -7,7 +7,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 
-#include <lib/softspi/softspi.h>
+#include <lib/softio/softio_spi.h>
 
 #define TAG "SpiTest"
 
@@ -41,7 +41,7 @@ static void spi_test_submenu_callback(void* context, uint32_t index) {
         furi_hal_spi_release(handle);
         furi_hal_spi_bus_handle_deinit(handle);
     } else {
-        SoftspiConfig config = {
+        SoftIoSpiConfig config = {
             .miso = &gpio_ext_pa6,
             .mosi = &gpio_ext_pa7,
             .sck = &gpio_ext_pb3,
@@ -50,9 +50,9 @@ static void spi_test_submenu_callback(void* context, uint32_t index) {
             .clk_polarity = 0,
             .clk_phase = 0,
         };
-        softspi_acquire(&config);
-        softspi_trx(&config, tx_buffer, rx_buffer, sizeof(tx_buffer), FuriWaitForever);
-        softspi_release(&config);
+        softio_spi_acquire(&config);
+        softio_spi_trx(&config, tx_buffer, rx_buffer, sizeof(tx_buffer), FuriWaitForever);
+        softio_spi_release(&config);
     }
 
     FURI_LOG_I(

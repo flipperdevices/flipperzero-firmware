@@ -1,4 +1,4 @@
-#include "softspi.h"
+#include "softio_spi.h"
 #include <stm32wbxx_ll_tim.h>
 #include <furi_hal_bus.h>
 #include <furi_hal_gpio.h>
@@ -11,7 +11,7 @@
 #define SOFTSPI_TIM_FQ_KHZ 64000UL
 
 typedef struct {
-    SoftspiConfig* config;
+    SoftIoSpiConfig* config;
     const uint8_t* tx_buffer;
     uint8_t* rx_buffer;
     FuriSemaphore* done_semaphore;
@@ -24,7 +24,7 @@ typedef struct {
     uint8_t bit;
 } SoftspiTimerIsrContext;
 
-void softspi_acquire(SoftspiConfig* config) {
+void softio_spi_acquire(SoftIoSpiConfig* config) {
     furi_check(config);
     furi_hal_gpio_write(config->cs, true);
     furi_hal_gpio_write(config->sck, config->clk_polarity);
@@ -36,7 +36,7 @@ void softspi_acquire(SoftspiConfig* config) {
     furi_hal_gpio_write(config->cs, false);
 }
 
-void softspi_release(SoftspiConfig* config) {
+void softio_spi_release(SoftIoSpiConfig* config) {
     furi_check(config);
     furi_hal_gpio_write(config->cs, true);
     furi_hal_gpio_init(config->cs, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
@@ -45,7 +45,7 @@ void softspi_release(SoftspiConfig* config) {
     furi_hal_gpio_init(config->miso, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
-static void softspi_timer_isr(void* param) {
+static void softio_spi_timer_isr(void* param) {
     if(!LL_TIM_IsActiveFlag_UPDATE(SOFTSPI_TIM)) return;
 
     do {
@@ -85,8 +85,8 @@ static void softspi_timer_isr(void* param) {
     LL_TIM_ClearFlag_UPDATE(SOFTSPI_TIM);
 }
 
-void softspi_trx(
-    SoftspiConfig* config,
+void softio_spi_trx(
+    SoftIoSpiConfig* config,
     const uint8_t* tx_buffer,
     uint8_t* rx_buffer,
     size_t size,
@@ -111,7 +111,7 @@ void softspi_trx(
 
     furi_hal_bus_enable(SOFTSPI_TIM_BUS);
     furi_hal_interrupt_set_isr_ex(
-        SOFTSPI_TIM_IRQ, FuriHalInterruptPriorityHighest, softspi_timer_isr, &context);
+        SOFTSPI_TIM_IRQ, FuriHalInterruptPriorityHighest, softio_spi_timer_isr, &context);
     LL_TIM_SetPrescaler(SOFTSPI_TIM, 0);
     LL_TIM_SetCounterMode(SOFTSPI_TIM, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetAutoReload(
@@ -131,12 +131,12 @@ void softspi_trx(
     furi_semaphore_free(context.done_semaphore);
 }
 
-void softspi_tx(SoftspiConfig* config, const uint8_t* buffer, size_t size, uint32_t timeout) {
+void softio_spi_tx(SoftIoSpiConfig* config, const uint8_t* buffer, size_t size, uint32_t timeout) {
     furi_check(buffer);
-    softspi_trx(config, buffer, NULL, size, timeout);
+    softio_spi_trx(config, buffer, NULL, size, timeout);
 }
 
-void softspi_rx(SoftspiConfig* config, uint8_t* buffer, size_t size, uint32_t timeout) {
+void softio_spi_rx(SoftIoSpiConfig* config, uint8_t* buffer, size_t size, uint32_t timeout) {
     furi_check(buffer);
-    softspi_trx(config, NULL, buffer, size, timeout);
+    softio_spi_trx(config, NULL, buffer, size, timeout);
 }

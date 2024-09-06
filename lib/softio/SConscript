@@ -5,12 +5,12 @@ env.Append(
         Dir("."),
     ],
     CPPPATH=[
-        "#/lib/softspi",
+        "#/lib/softio",
     ],
     SDK_HEADERS=[],
 )
 
-libenv = env.Clone(FW_LIB_NAME="softspi")
+libenv = env.Clone(FW_LIB_NAME="softio")
 libenv.ApplyLibFlags()
 
 sources = libenv.GlobRecursive("*.c*")
