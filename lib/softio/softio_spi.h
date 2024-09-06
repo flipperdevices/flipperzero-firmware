@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @file softio.h
+ * @file softio_spi.h
  * Software (bit-banged) SPI implementation. Master-only. Supports all 4 modes
  * with clock rates of up to 200kHz.
  */
