@@ -47,31 +47,18 @@ void dolphin_deed(DolphinDeed deed) {
     furi_record_close(RECORD_DOLPHIN);
 }
 
-DolphinSettings dolphin_get_settings(void) {
-    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-
+void dolphin_get_settings(Dolphin* dolphin, DolphinSettings* settings) {
     DolphinEvent event;
-    DolphinSettings settings;
     event.type = DolphinEventTypeSettingsGet;
-    event.settings = &settings;
-
+    event.settings = settings;
     dolphin_event_send_wait(dolphin, &event);
-
-    furi_record_close(RECORD_DOLPHIN);
-
-    return settings;
 }
 
-void dolphin_set_settings(DolphinSettings* settings) {
-    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-
+void dolphin_set_settings(Dolphin* dolphin, DolphinSettings* settings) {
     DolphinEvent event;
     event.type = DolphinEventTypeSettingsSet;
     event.settings = settings;
-
     dolphin_event_send_wait(dolphin, &event);
-
-    furi_record_close(RECORD_DOLPHIN);
 }
 
 DolphinStats dolphin_stats(Dolphin* dolphin) {
@@ -263,6 +250,8 @@ static bool dolphin_process_event(FuriEventLoopObject* object, void* context) {
     } else if(event.type == DolphinEventTypeSettingsSet) {
         dolphin->state->data.flags &= ~DolphinFlagHappyMode;
         if(event.settings->happy_mode) dolphin->state->data.flags |= DolphinFlagHappyMode;
+        dolphin->state->dirty = true;
+        dolphin_state_save(dolphin->state);
 
     } else {
         furi_crash();

@@ -955,8 +955,8 @@ Function,+,dolphin_deed_get_app_limit,uint8_t,DolphinApp
 Function,+,dolphin_deed_get_weight,uint8_t,DolphinDeed
 Function,+,dolphin_flush,void,Dolphin*
 Function,+,dolphin_get_pubsub,FuriPubSub*,Dolphin*
-Function,+,dolphin_get_settings,DolphinSettings,
-Function,+,dolphin_set_settings,void,DolphinSettings*
+Function,+,dolphin_get_settings,void,"Dolphin*, DolphinSettings*"
+Function,+,dolphin_set_settings,void,"Dolphin*, DolphinSettings*"
 Function,+,dolphin_stats,DolphinStats,Dolphin*
 Function,+,dolphin_upgrade_level,void,Dolphin*
 Function,-,dprintf,int,"int, const char*, ..."

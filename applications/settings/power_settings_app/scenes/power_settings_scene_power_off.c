@@ -10,7 +10,10 @@ void power_settings_scene_power_off_dialog_callback(DialogExResult result, void*
 void power_settings_scene_power_off_on_enter(void* context) {
     PowerSettingsApp* app = context;
     DialogEx* dialog = app->dialog;
-    DolphinSettings settings = dolphin_get_settings();
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+    DolphinSettings settings;
+    dolphin_get_settings(dolphin, &settings);
+    furi_record_close(RECORD_DOLPHIN);
 
     dialog_ex_set_header(
         dialog,

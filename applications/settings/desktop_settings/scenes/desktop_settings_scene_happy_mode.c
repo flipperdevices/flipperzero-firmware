@@ -6,20 +6,25 @@
 
 #include "desktop_settings_scene.h"
 #include "../desktop_settings_app.h"
-
-#define SCENE_EXIT_EVENT (0U)
+#include "../desktop_settings_custom_event.h"
 
 static void desktop_settings_scene_happy_mode_done_callback(DialogExResult result, void* context) {
     DesktopSettingsApp* app = context;
-    DolphinSettings settings = dolphin_get_settings();
+    DolphinSettings settings;
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+    dolphin_get_settings(dolphin, &settings);
     settings.happy_mode = (result == DialogExResultRight);
-    dolphin_set_settings(&settings);
-    view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_EXIT_EVENT);
+    dolphin_set_settings(dolphin, &settings);
+    furi_record_close(RECORD_DOLPHIN);
+    view_dispatcher_send_custom_event(app->view_dispatcher, DesktopSettingsCustomEventExit);
 }
 
 void desktop_settings_scene_happy_mode_on_enter(void* context) {
     DesktopSettingsApp* app = context;
-    DolphinSettings settings = dolphin_get_settings();
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+    DolphinSettings settings;
+    dolphin_get_settings(dolphin, &settings);
+    furi_record_close(RECORD_DOLPHIN);
 
     dialog_ex_set_header(app->dialog_ex, "Happy Mode", 64, 0, AlignCenter, AlignTop);
     dialog_ex_set_text(
@@ -43,7 +48,7 @@ bool desktop_settings_scene_happy_mode_on_event(void* context, SceneManagerEvent
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case SCENE_EXIT_EVENT:
+        case DesktopSettingsCustomEventExit:
             scene_manager_previous_scene(app->scene_manager);
             consumed = true;
             break;

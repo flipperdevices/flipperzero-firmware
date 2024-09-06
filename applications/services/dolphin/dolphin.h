@@ -35,9 +35,9 @@ typedef enum {
  */
 void dolphin_deed(DolphinDeed deed);
 
-DolphinSettings dolphin_get_settings(void);
+void dolphin_get_settings(Dolphin* dolphin, DolphinSettings* settings);
 
-void dolphin_set_settings(DolphinSettings* settings);
+void dolphin_set_settings(Dolphin* dolphin, DolphinSettings* settings);
 
 /** Retrieve dolphin stats
  * Thread safe, blocking
