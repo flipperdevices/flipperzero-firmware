@@ -318,6 +318,12 @@ void furi_thread_set_signal_callback(
     thread->signal_context = context;
 }
 
+FuriThreadSignalCallback furi_thread_get_signal_callback(const FuriThread* thread) {
+    furi_check(thread);
+
+    return thread->signal_callback;
+}
+
 bool furi_thread_signal(const FuriThread* thread, uint32_t signal, void* arg) {
     furi_check(thread);
 
@@ -426,11 +432,11 @@ void furi_thread_yield(void) {
 }
 
 /* Limits */
-#define MAX_BITS_TASK_NOTIFY 31U
+#define MAX_BITS_TASK_NOTIFY  31U
 #define MAX_BITS_EVENT_GROUPS 24U
 
 #define THREAD_FLAGS_INVALID_BITS (~((1UL << MAX_BITS_TASK_NOTIFY) - 1U))
-#define EVENT_FLAGS_INVALID_BITS (~((1UL << MAX_BITS_EVENT_GROUPS) - 1U))
+#define EVENT_FLAGS_INVALID_BITS  (~((1UL << MAX_BITS_EVENT_GROUPS) - 1U))
 
 uint32_t furi_thread_flags_set(FuriThreadId thread_id, uint32_t flags) {
     TaskHandle_t hTask = (TaskHandle_t)thread_id;

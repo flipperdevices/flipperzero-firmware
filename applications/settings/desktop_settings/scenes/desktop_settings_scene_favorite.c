@@ -8,17 +8,17 @@
 
 #define APPS_COUNT (FLIPPER_APPS_COUNT + FLIPPER_EXTERNAL_APPS_COUNT)
 
-#define DEFAULT_INDEX (0)
-#define EXTERNAL_BROWSER_NAME ("(   ) Apps Menu (Default)")
+#define DEFAULT_INDEX                  (0)
+#define EXTERNAL_BROWSER_NAME          ("(   ) Apps Menu (Default)")
 #define EXTERNAL_BROWSER_NAME_SELECTED ("(*) Apps Menu (Default)")
-#define PASSPORT_NAME ("(   ) Passport (Default)")
-#define PASSPORT_NAME_SELECTED ("(*) Passport (Default)")
+#define PASSPORT_NAME                  ("(   ) Passport (Default)")
+#define PASSPORT_NAME_SELECTED         ("(*) Passport (Default)")
 
-#define SELECTED_PREFIX ("(*) ")
+#define SELECTED_PREFIX     ("(*) ")
 #define NOT_SELECTED_PREFIX ("(   ) ")
 
-#define EXTERNAL_APPLICATION_INDEX (1)
-#define EXTERNAL_APPLICATION_NAME ("(   ) [Select App]")
+#define EXTERNAL_APPLICATION_INDEX         (1)
+#define EXTERNAL_APPLICATION_NAME          ("(   ) [Select App]")
 #define EXTERNAL_APPLICATION_NAME_SELECTED ("(*) [Select App]")
 
 #define PRESELECTED_SPECIAL 0xffffffff
@@ -212,13 +212,17 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                 strncpy(
                     curr_favorite_app->name_or_path,
                     furi_string_get_cstr(temp_path),
-                    MAX_APP_LENGTH);
+                    sizeof(curr_favorite_app->name_or_path));
                 consumed = true;
             }
         } else {
             size_t app_index = event.event - 2;
             const char* name = favorite_fap_get_app_name(app_index);
-            if(name) strncpy(curr_favorite_app->name_or_path, name, MAX_APP_LENGTH);
+            if(name)
+                strncpy(
+                    curr_favorite_app->name_or_path,
+                    name,
+                    sizeof(curr_favorite_app->name_or_path));
             consumed = true;
         }
         if(consumed) {
@@ -226,7 +230,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
         };
         consumed = true;
 
-        DESKTOP_SETTINGS_SAVE(&app->settings);
+        desktop_settings_save(&app->settings);
     }
 
     furi_string_free(temp_path);

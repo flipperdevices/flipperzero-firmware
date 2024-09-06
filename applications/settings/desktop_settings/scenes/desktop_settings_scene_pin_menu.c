@@ -5,8 +5,8 @@
 #include "desktop_settings_scene.h"
 #include "desktop_settings_scene_i.h"
 
-#define SCENE_EVENT_SET_PIN 0
-#define SCENE_EVENT_CHANGE_PIN 1
+#define SCENE_EVENT_SET_PIN     0
+#define SCENE_EVENT_CHANGE_PIN  1
 #define SCENE_EVENT_DISABLE_PIN 2
 
 static void desktop_settings_scene_pin_menu_submenu_callback(void* context, uint32_t index) {
@@ -19,7 +19,7 @@ void desktop_settings_scene_pin_menu_on_enter(void* context) {
     Submenu* submenu = app->submenu;
     submenu_reset(submenu);
 
-    if(!app->settings.pin_code.length) {
+    if(!desktop_pin_code_is_set()) {
         submenu_add_item(
             submenu,
             "Set PIN",

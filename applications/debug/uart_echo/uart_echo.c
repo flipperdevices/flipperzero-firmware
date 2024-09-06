@@ -6,12 +6,15 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
 
+#include <lib/toolbox/strint.h>
+
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-#define LINES_ON_SCREEN 6
-#define COLUMNS_ON_SCREEN 21
 #define TAG "UartEcho"
+
+#define LINES_ON_SCREEN   6
+#define COLUMNS_ON_SCREEN 21
 #define DEFAULT_BAUD_RATE 230400
 
 typedef struct UartDumpModel UartDumpModel;
@@ -147,7 +150,7 @@ static void uart_echo_push_to_list(UartDumpModel* model, const char data) {
         bool new_string_needed = false;
         if(furi_string_size(model->list[model->line]->text) >= COLUMNS_ON_SCREEN) {
             new_string_needed = true;
-        } else if((data == '\n' || data == '\r')) {
+        } else if(data == '\n' || data == '\r') {
             // pack line breaks
             if(model->last_char != '\n' && model->last_char != '\r') {
                 new_string_needed = true;
@@ -241,7 +244,6 @@ static UartEchoApp* uart_echo_app_alloc(uint32_t baudrate) {
 
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // Views
@@ -320,7 +322,7 @@ int32_t uart_echo_app(void* p) {
     uint32_t baudrate = DEFAULT_BAUD_RATE;
     if(p) {
         const char* baudrate_str = p;
-        if(sscanf(baudrate_str, "%lu", &baudrate) != 1) {
+        if(strint_to_uint32(baudrate_str, NULL, &baudrate, 10) != StrintParseNoError) {
             FURI_LOG_E(TAG, "Invalid baudrate: %s", baudrate_str);
             baudrate = DEFAULT_BAUD_RATE;
         }

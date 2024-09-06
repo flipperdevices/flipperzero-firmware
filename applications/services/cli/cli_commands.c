@@ -9,6 +9,7 @@
 #include <notification/notification_messages.h>
 #include <loader/loader.h>
 #include <lib/toolbox/args.h>
+#include <lib/toolbox/strint.h>
 
 // Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
 #define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
@@ -168,7 +169,7 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
     }
 }
 
-#define CLI_COMMAND_LOG_RING_SIZE 2048
+#define CLI_COMMAND_LOG_RING_SIZE   2048
 #define CLI_COMMAND_LOG_BUFFER_SIZE 64
 
 void cli_command_log_tx_callback(const uint8_t* buffer, size_t size, void* context) {
@@ -260,7 +261,7 @@ void cli_command_sysctl_heap_track(Cli* cli, FuriString* args, void* context) {
     } else if(!furi_string_cmp(args, "main")) {
         furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeMain);
         printf("Heap tracking enabled for application main thread");
-#if FURI_DEBUG
+#ifdef FURI_DEBUG
     } else if(!furi_string_cmp(args, "tree")) {
         furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeTree);
         printf("Heap tracking enabled for application main and child threads");
@@ -279,7 +280,7 @@ void cli_command_sysctl_print_usage(void) {
     printf("Cmd list:\r\n");
 
     printf("\tdebug <0|1>\t - Enable or disable system debug\r\n");
-#if FURI_DEBUG
+#ifdef FURI_DEBUG
     printf("\theap_track <none|main|tree|all>\t - Set heap allocation tracking mode\r\n");
 #else
     printf("\theap_track <none|main>\t - Set heap allocation tracking mode\r\n");
@@ -361,9 +362,9 @@ void cli_command_led(Cli* cli, FuriString* args, void* context) {
     }
     furi_string_free(light_name);
     // Read light value from the rest of the string
-    char* end_ptr;
-    uint32_t value = strtoul(furi_string_get_cstr(args), &end_ptr, 0);
-    if(!(value < 256 && *end_ptr == '\0')) {
+    uint32_t value;
+    if(strint_to_uint32(furi_string_get_cstr(args), NULL, &value, 0) != StrintParseNoError ||
+       value >= 256) {
         cli_print_usage("led", "<r|g|b|bl> <0-255>", furi_string_get_cstr(args));
         return;
     }

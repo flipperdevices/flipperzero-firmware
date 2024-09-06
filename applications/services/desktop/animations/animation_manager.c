@@ -14,14 +14,14 @@
 
 #define TAG "AnimationManager"
 
-#define HARDCODED_ANIMATION_NAME "L1_Tv_128x47"
-#define NO_SD_ANIMATION_NAME "L1_NoSd_128x49"
+#define HARDCODED_ANIMATION_NAME   "L1_Tv_128x47"
+#define NO_SD_ANIMATION_NAME       "L1_NoSd_128x49"
 #define BAD_BATTERY_ANIMATION_NAME "L1_BadBattery_128x47"
 
-#define NO_DB_ANIMATION_NAME "L0_NoDb_128x51"
-#define BAD_SD_ANIMATION_NAME "L0_SdBad_128x51"
-#define SD_OK_ANIMATION_NAME "L0_SdOk_128x51"
-#define URL_ANIMATION_NAME "L0_Url_128x51"
+#define NO_DB_ANIMATION_NAME    "L0_NoDb_128x51"
+#define BAD_SD_ANIMATION_NAME   "L0_SdBad_128x51"
+#define SD_OK_ANIMATION_NAME    "L0_SdOk_128x51"
+#define URL_ANIMATION_NAME      "L0_Url_128x51"
 #define NEW_MAIL_ANIMATION_NAME "L0_NewMail_128x51"
 
 typedef enum {
@@ -47,13 +47,13 @@ struct AnimationManager {
     int32_t freezed_animation_time_left;
     ViewStack* view_stack;
 
-    bool dummy_mode : 1;
-    bool blocking_shown_url : 1;
+    bool dummy_mode            : 1;
+    bool blocking_shown_url    : 1;
     bool blocking_shown_sd_bad : 1;
-    bool blocking_shown_no_db : 1;
-    bool blocking_shown_sd_ok : 1;
-    bool levelup_pending : 1;
-    bool levelup_active : 1;
+    bool blocking_shown_no_db  : 1;
+    bool blocking_shown_sd_ok  : 1;
+    bool levelup_pending       : 1;
+    bool levelup_active        : 1;
 };
 
 static StorageAnimation*
@@ -97,11 +97,14 @@ void animation_manager_set_interact_callback(
 
 void animation_manager_set_dummy_mode_state(AnimationManager* animation_manager, bool enabled) {
     furi_assert(animation_manager);
-    animation_manager->dummy_mode = enabled;
-    animation_manager_start_new_idle(animation_manager);
+    // Prevent change of animations if mode is the same
+    if(animation_manager->dummy_mode != enabled) {
+        animation_manager->dummy_mode = enabled;
+        animation_manager_start_new_idle(animation_manager);
+    }
 }
 
-static void animation_manager_check_blocking_callback(const void* message, void* context) {
+static void animation_manager_storage_callback(const void* message, void* context) {
     const StorageEvent* storage_event = message;
 
     switch(storage_event->type) {
@@ -115,6 +118,22 @@ static void animation_manager_check_blocking_callback(const void* message, void*
         }
         break;
 
+    default:
+        break;
+    }
+}
+
+static void animation_manager_dolphin_callback(const void* message, void* context) {
+    const DolphinPubsubEvent* dolphin_event = message;
+
+    switch(*dolphin_event) {
+    case DolphinPubsubEventUpdate:
+        furi_assert(context);
+        AnimationManager* animation_manager = context;
+        if(animation_manager->check_blocking_callback) {
+            animation_manager->check_blocking_callback(animation_manager->context);
+        }
+        break;
     default:
         break;
     }
@@ -297,12 +316,12 @@ AnimationManager* animation_manager_alloc(void) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     animation_manager->pubsub_subscription_storage = furi_pubsub_subscribe(
-        storage_get_pubsub(storage), animation_manager_check_blocking_callback, animation_manager);
+        storage_get_pubsub(storage), animation_manager_storage_callback, animation_manager);
     furi_record_close(RECORD_STORAGE);
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     animation_manager->pubsub_subscription_dolphin = furi_pubsub_subscribe(
-        dolphin_get_pubsub(dolphin), animation_manager_check_blocking_callback, animation_manager);
+        dolphin_get_pubsub(dolphin), animation_manager_dolphin_callback, animation_manager);
     furi_record_close(RECORD_DOLPHIN);
 
     animation_manager->blocking_shown_sd_ok = true;

@@ -39,18 +39,18 @@
 #include "views/infrared_debug_view.h"
 #include "views/infrared_move_view.h"
 
-#define INFRARED_FILE_NAME_SIZE 100
-#define INFRARED_TEXT_STORE_NUM 2
+#define INFRARED_FILE_NAME_SIZE  100
+#define INFRARED_TEXT_STORE_NUM  2
 #define INFRARED_TEXT_STORE_SIZE 128
 
 #define INFRARED_MAX_BUTTON_NAME_LENGTH 22
 #define INFRARED_MAX_REMOTE_NAME_LENGTH 22
 
-#define INFRARED_APP_FOLDER ANY_PATH("infrared")
+#define INFRARED_APP_FOLDER    EXT_PATH("infrared")
 #define INFRARED_APP_EXTENSION ".ir"
 
 #define INFRARED_DEFAULT_REMOTE_NAME "Remote"
-#define INFRARED_LOG_TAG "InfraredApp"
+#define INFRARED_LOG_TAG             "InfraredApp"
 
 /**
  * @brief Enumeration of invalid remote button indices.
@@ -86,7 +86,7 @@ typedef struct {
     bool is_transmitting; /**< Whether a signal is currently being transmitted. */
     bool is_otg_enabled; /**< Whether OTG power (external 5V) is enabled. */
     InfraredEditTarget edit_target : 8; /**< Selected editing target (a remote or a button). */
-    InfraredEditMode edit_mode : 8; /**< Selected editing operation (rename or delete). */
+    InfraredEditMode edit_mode     : 8; /**< Selected editing operation (rename or delete). */
     int32_t current_button_index; /**< Selected button index (move destination). */
     int32_t prev_button_index; /**< Previous button index (move source). */
     uint32_t last_transmit_time; /**< Lat time a signal was transmitted. */
@@ -174,9 +174,9 @@ typedef enum {
  * @param[in] infrared pointer to the application instance.
  * @param[in] name pointer to a zero-terminated string containing the signal name.
  * @param[in] signal pointer to the signal to be added.
- * @return true if the remote was successfully created, false otherwise.
+ * @return InfraredErrorCodeNone if the remote was successfully created, otherwise error code.
  */
-bool infrared_add_remote_with_button(
+InfraredErrorCode infrared_add_remote_with_button(
     const InfraredApp* infrared,
     const char* name,
     const InfraredSignal* signal);
@@ -186,9 +186,10 @@ bool infrared_add_remote_with_button(
  *
  * @param[in] infrared pointer to the application instance.
  * @param[in] new_name pointer to a zero-terminated string containing the new remote name.
- * @return true if the remote was successfully renamed, false otherwise.
+ * @return InfraredErrorCodeNone if the remote was successfully renamed, otherwise error code.
  */
-bool infrared_rename_current_remote(const InfraredApp* infrared, const char* new_name);
+InfraredErrorCode
+    infrared_rename_current_remote(const InfraredApp* infrared, const char* new_name);
 
 /**
  * @brief Begin transmission of the currently loaded signal.
@@ -206,9 +207,9 @@ void infrared_tx_start(InfraredApp* infrared);
  *
  * @param[in,out] infrared pointer to the application instance.
  * @param[in] button_index index of the signal to be loaded.
- * @returns true if the signal could be loaded, false otherwise.
+ * @returns InfraredErrorCodeNone if the signal could be loaded, otherwise error code.
  */
-void infrared_tx_start_button_index(InfraredApp* infrared, size_t button_index);
+InfraredErrorCode infrared_tx_start_button_index(InfraredApp* infrared, size_t button_index);
 
 /**
  * @brief Stop transmission of the currently loaded signal.
@@ -236,9 +237,9 @@ void infrared_blocking_task_start(InfraredApp* infrared, FuriThreadCallback call
  * (e.g. to display the results), the caller code MUST set it explicitly.
  *
  * @param[in,out] infrared pointer to the application instance.
- * @return true if the blocking task finished successfully, false otherwise.
+ * @return InfraredErrorCodeNone if the blocking task finished successfully, otherwise error code.
  */
-bool infrared_blocking_task_finalize(InfraredApp* infrared);
+InfraredErrorCode infrared_blocking_task_finalize(InfraredApp* infrared);
 
 /**
  * @brief Set the internal text store with formatted text.

@@ -5,9 +5,9 @@
 #include <lib/toolbox/path.h>
 #include <flipper_format/flipper_format.h>
 
-#define BAD_USB_SETTINGS_PATH BAD_USB_APP_BASE_FOLDER "/.badusb.settings"
-#define BAD_USB_SETTINGS_FILE_TYPE "Flipper BadUSB Settings File"
-#define BAD_USB_SETTINGS_VERSION 1
+#define BAD_USB_SETTINGS_PATH           BAD_USB_APP_BASE_FOLDER "/.badusb.settings"
+#define BAD_USB_SETTINGS_FILE_TYPE      "Flipper BadUSB Settings File"
+#define BAD_USB_SETTINGS_VERSION        1
 #define BAD_USB_SETTINGS_DEFAULT_LAYOUT BAD_USB_APP_PATH_LAYOUT_FOLDER "/en-US.kl"
 
 static bool bad_usb_app_custom_event_callback(void* context, uint32_t event) {
@@ -112,8 +112,6 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(app->view_dispatcher);
-
     app->scene_manager = scene_manager_alloc(&bad_usb_scene_handlers, app);
 
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);

@@ -3,8 +3,9 @@
 
 #include <cli/cli.h>
 #include <lib/toolbox/args.h>
-#include <lib/toolbox/md5_calc.h>
 #include <lib/toolbox/dir_walk.h>
+#include <lib/toolbox/md5_calc.h>
+#include <lib/toolbox/strint.h>
 #include <lib/toolbox/tar/tar_archive.h>
 #include <storage/storage.h>
 #include <storage/storage_sd_api.h>
@@ -33,7 +34,7 @@ static void storage_cli_info(Cli* cli, FuriString* path, FuriString* args) {
             storage_cli_print_error(error);
         } else {
             printf(
-                "Label: %s\r\nType: LittleFS\r\n%luKiB total\r\n%luKiB free\r\n",
+                "Label: %s\r\nType: Virtual\r\n%luKiB total\r\n%luKiB free\r\n",
                 furi_hal_version_get_name_ptr() ? furi_hal_version_get_name_ptr() : "Unknown",
                 (uint32_t)(total_space / 1024),
                 (uint32_t)(free_space / 1024));
@@ -66,7 +67,7 @@ static void storage_cli_info(Cli* cli, FuriString* path, FuriString* args) {
     }
 
     furi_record_close(RECORD_STORAGE);
-};
+}
 
 static void storage_cli_format(Cli* cli, FuriString* path, FuriString* args) {
     UNUSED(args);
@@ -93,7 +94,7 @@ static void storage_cli_format(Cli* cli, FuriString* path, FuriString* args) {
     } else {
         storage_cli_print_usage();
     }
-};
+}
 
 static void storage_cli_list(Cli* cli, FuriString* path, FuriString* args) {
     UNUSED(cli);
@@ -241,7 +242,7 @@ static void storage_cli_write(Cli* cli, FuriString* path, FuriString* args) {
             fflush(stdout);
             read_index++;
 
-            if(((read_index % buffer_size) == 0)) {
+            if((read_index % buffer_size) == 0) {
                 size_t written_size = storage_file_write(file, buffer, buffer_size);
 
                 if(written_size != buffer_size) {
@@ -267,9 +268,8 @@ static void storage_cli_read_chunks(Cli* cli, FuriString* path, FuriString* args
     File* file = storage_file_alloc(api);
 
     uint32_t buffer_size;
-    int parsed_count = sscanf(furi_string_get_cstr(args), "%lu", &buffer_size);
-
-    if(parsed_count != 1) {
+    if(strint_to_uint32(furi_string_get_cstr(args), NULL, &buffer_size, 10) !=
+       StrintParseNoError) {
         storage_cli_print_usage();
     } else if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t file_size = storage_file_size(file);
@@ -307,9 +307,8 @@ static void storage_cli_write_chunk(Cli* cli, FuriString* path, FuriString* args
     File* file = storage_file_alloc(api);
 
     uint32_t buffer_size;
-    int parsed_count = sscanf(furi_string_get_cstr(args), "%lu", &buffer_size);
-
-    if(parsed_count != 1) {
+    if(strint_to_uint32(furi_string_get_cstr(args), NULL, &buffer_size, 10) !=
+       StrintParseNoError) {
         storage_cli_print_usage();
     } else {
         if(storage_file_open(file, furi_string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
@@ -630,7 +629,7 @@ static void storage_cli_print_usage(void) {
         printf(
             "\t%s%s - %s\r\n", cli_cmd, strlen(cli_cmd) > 8 ? "\t" : "\t\t", command_descr->help);
     }
-};
+}
 
 void storage_cli(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
@@ -675,9 +674,12 @@ static void storage_cli_factory_reset(Cli* cli, FuriString* args, void* context)
     char c = cli_getc(cli);
     if(c == 'y' || c == 'Y') {
         printf("Data will be wiped after reboot.\r\n");
+
         furi_hal_rtc_reset_registers();
         furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
-        power_reboot(PowerBootModeNormal);
+
+        Power* power = furi_record_open(RECORD_POWER);
+        power_reboot(power, PowerBootModeNormal);
     } else {
         printf("Safe choice.\r\n");
     }

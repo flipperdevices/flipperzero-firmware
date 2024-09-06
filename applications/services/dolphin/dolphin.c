@@ -1,26 +1,27 @@
 #include "dolphin_i.h"
 
 #include <furi_hal.h>
+#include <storage/storage.h>
 
 #define TAG "Dolphin"
 
 #define DOLPHIN_LOCK_EVENT_FLAG (0x1)
-#define EVENT_QUEUE_SIZE (8)
+#define EVENT_QUEUE_SIZE        (8)
 
-#define SECONDS_IN_TICKS(x) ((x) * 1000UL)
-#define MINUTES_IN_TICKS(x) (SECONDS_IN_TICKS(x) * 60UL)
-#define HOURS_IN_TICKS(x) (MINUTES_IN_TICKS(x) * 60UL)
+#define SECONDS_IN_TICKS(x)    ((x) * 1000UL)
+#define MINUTES_IN_TICKS(x)    (SECONDS_IN_TICKS(x) * 60UL)
+#define HOURS_IN_TICKS(x)      (MINUTES_IN_TICKS(x) * 60UL)
 #define DATE_IN_TICKS(h, m, s) (HOURS_IN_TICKS(h) + MINUTES_IN_TICKS(m) + SECONDS_IN_TICKS(s))
 
 #define FLUSH_TIMEOUT_TICKS (SECONDS_IN_TICKS(30UL))
 
 #ifndef DOLPHIN_DEBUG
-#define BUTTHURT_INCREASE_PERIOD_TICKS (HOURS_IN_TICKS(48UL))
-#define CLEAR_LIMITS_PERIOD_TICKS (HOURS_IN_TICKS(24UL))
+#define BUTTHURT_INCREASE_PERIOD_TICKS   (HOURS_IN_TICKS(48UL))
+#define CLEAR_LIMITS_PERIOD_TICKS        (HOURS_IN_TICKS(24UL))
 #define CLEAR_LIMITS_UPDATE_PERIOD_TICKS (HOURS_IN_TICKS(1UL))
 #else
-#define BUTTHURT_INCREASE_PERIOD_TICKS (SECONDS_IN_TICKS(30UL))
-#define CLEAR_LIMITS_PERIOD_TICKS (MINUTES_IN_TICKS(1))
+#define BUTTHURT_INCREASE_PERIOD_TICKS   (SECONDS_IN_TICKS(30UL))
+#define CLEAR_LIMITS_PERIOD_TICKS        (MINUTES_IN_TICKS(1))
 #define CLEAR_LIMITS_UPDATE_PERIOD_TICKS (SECONDS_IN_TICKS(5UL))
 #endif
 
@@ -191,8 +192,8 @@ static void dolphin_update_clear_limits_timer_period(void* context) {
     FURI_LOG_D(TAG, "Daily limits reset in %lu ms", time_to_clear_limits);
 }
 
-static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
-    UNUSED(queue);
+static bool dolphin_process_event(FuriEventLoopObject* object, void* context) {
+    UNUSED(object);
 
     Dolphin* dolphin = context;
     DolphinEvent event;
@@ -203,8 +204,8 @@ static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
     if(event.type == DolphinEventTypeDeed) {
         dolphin_state_on_deed(dolphin->state, event.deed);
 
-        DolphinPubsubEvent event = DolphinPubsubEventUpdate;
-        furi_pubsub_publish(dolphin->pubsub, &event);
+        DolphinPubsubEvent pubsub_event = DolphinPubsubEventUpdate;
+        furi_pubsub_publish(dolphin->pubsub, &pubsub_event);
         furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
         furi_event_loop_timer_start(dolphin->flush_timer, FLUSH_TIMEOUT_TICKS);
 
@@ -223,6 +224,10 @@ static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
         dolphin_state_increase_level(dolphin->state);
         furi_event_loop_timer_start(dolphin->flush_timer, FLUSH_TIMEOUT_TICKS);
 
+    } else if(event.type == DolphinEventTypeReloadState) {
+        dolphin_state_load(dolphin->state);
+        furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
+
     } else {
         furi_crash();
     }
@@ -230,6 +235,32 @@ static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
     dolphin_event_release(&event);
 
     return true;
+}
+
+static void dolphin_storage_callback(const void* message, void* context) {
+    furi_assert(context);
+    Dolphin* dolphin = context;
+    const StorageEvent* event = message;
+
+    if(event->type == StorageEventTypeCardMount) {
+        DolphinEvent event = {
+            .type = DolphinEventTypeReloadState,
+        };
+
+        dolphin_event_send_async(dolphin, &event);
+    }
+}
+
+static void dolphin_init_state(Dolphin* dolphin) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    furi_pubsub_subscribe(storage_get_pubsub(storage), dolphin_storage_callback, dolphin);
+
+    if(storage_sd_status(storage) != FSE_OK) {
+        FURI_LOG_D(TAG, "SD Card not ready, skipping state");
+        return;
+    }
+
+    dolphin_state_load(dolphin->state);
 }
 
 // Application thread
@@ -247,9 +278,9 @@ int32_t dolphin_srv(void* p) {
     Dolphin* dolphin = dolphin_alloc();
     furi_record_create(RECORD_DOLPHIN, dolphin);
 
-    dolphin_state_load(dolphin->state);
+    dolphin_init_state(dolphin);
 
-    furi_event_loop_message_queue_subscribe(
+    furi_event_loop_subscribe_message_queue(
         dolphin->event_loop,
         dolphin->event_queue,
         FuriEventLoopEventIn,

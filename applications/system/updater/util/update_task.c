@@ -6,7 +6,6 @@
 #include <storage/storage.h>
 #include <toolbox/path.h>
 #include <update_util/dfu_file.h>
-#include <update_util/lfs_backup.h>
 #include <update_util/update_operation.h>
 
 #define TAG "UpdWorker"
@@ -23,8 +22,8 @@ static const char* update_task_stage_descr[] = {
     [UpdateTaskStageRadioInstall] = "Installing radio FW",
     [UpdateTaskStageRadioBusy] = "Core 2 busy",
     [UpdateTaskStageOBValidation] = "Validating opt. bytes",
-    [UpdateTaskStageLfsBackup] = "Backing up LFS",
-    [UpdateTaskStageLfsRestore] = "Restoring LFS",
+    [UpdateTaskStageIntBackup] = "Backing up configuration",
+    [UpdateTaskStageIntRestore] = "Restoring configuration",
     [UpdateTaskStageResourcesFileCleanup] = "Cleaning up files",
     [UpdateTaskStageResourcesDirCleanup] = "Cleaning up directories",
     [UpdateTaskStageResourcesFileUnpack] = "Extracting resources",
@@ -83,7 +82,7 @@ static const struct {
     },
 #ifndef FURI_RAM_EXEC
     {
-        .stage = UpdateTaskStageLfsBackup,
+        .stage = UpdateTaskStageIntBackup,
         .percent_min = 0,
         .percent_max = 100,
         .descr = "FS R/W error",
@@ -194,10 +193,10 @@ static const struct {
 #endif
 #ifndef FURI_RAM_EXEC
     {
-        .stage = UpdateTaskStageLfsRestore,
+        .stage = UpdateTaskStageIntRestore,
         .percent_min = 0,
         .percent_max = 100,
-        .descr = "LFS I/O error",
+        .descr = "SD card I/O error",
     },
     {
         .stage = UpdateTaskStageResourcesFileCleanup,
@@ -246,7 +245,7 @@ static const UpdateTaskStageGroupMap update_task_stage_progress[] = {
     [UpdateTaskStageProgress] = STAGE_DEF(UpdateTaskStageGroupMisc, 0),
 
     [UpdateTaskStageReadManifest] = STAGE_DEF(UpdateTaskStageGroupPreUpdate, 45),
-    [UpdateTaskStageLfsBackup] = STAGE_DEF(UpdateTaskStageGroupPreUpdate, 5),
+    [UpdateTaskStageIntBackup] = STAGE_DEF(UpdateTaskStageGroupPreUpdate, 5),
 
     [UpdateTaskStageRadioImageValidate] = STAGE_DEF(UpdateTaskStageGroupRadio, 15),
     [UpdateTaskStageRadioErase] = STAGE_DEF(UpdateTaskStageGroupRadio, 25),
@@ -260,7 +259,7 @@ static const UpdateTaskStageGroupMap update_task_stage_progress[] = {
     [UpdateTaskStageFlashWrite] = STAGE_DEF(UpdateTaskStageGroupFirmware, 100),
     [UpdateTaskStageFlashValidate] = STAGE_DEF(UpdateTaskStageGroupFirmware, 20),
 
-    [UpdateTaskStageLfsRestore] = STAGE_DEF(UpdateTaskStageGroupPostUpdate, 5),
+    [UpdateTaskStageIntRestore] = STAGE_DEF(UpdateTaskStageGroupPostUpdate, 5),
 
     [UpdateTaskStageResourcesFileCleanup] = STAGE_DEF(UpdateTaskStageGroupResources, 100),
     [UpdateTaskStageResourcesDirCleanup] = STAGE_DEF(UpdateTaskStageGroupResources, 50),

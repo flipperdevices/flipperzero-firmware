@@ -150,8 +150,7 @@ static void nfc_protocol_support_scene_read_on_enter(NfcApp* instance) {
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
-    const NfcProtocol protocol =
-        instance->protocols_detected[instance->protocols_detected_selected_idx];
+    const NfcProtocol protocol = nfc_detected_protocols_get_selected(instance->detected_protocols);
     instance->poller = nfc_poller_alloc(instance->nfc, protocol);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
@@ -186,7 +185,7 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
                 consumed = true;
             } else {
                 const NfcProtocol protocol =
-                    instance->protocols_detected[instance->protocols_detected_selected_idx];
+                    nfc_detected_protocols_get_selected(instance->detected_protocols);
                 consumed = nfc_protocol_support[protocol]->scene_read.on_event(instance, event);
             }
         } else if(event.event == NfcCustomEventPollerFailure) {
@@ -199,7 +198,7 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
             consumed = true;
         } else if(event.event == NfcCustomEventCardDetected) {
             const NfcProtocol protocol =
-                instance->protocols_detected[instance->protocols_detected_selected_idx];
+                nfc_detected_protocols_get_selected(instance->detected_protocols);
             consumed = nfc_protocol_support[protocol]->scene_read.on_event(instance, event);
         }
     } else if(event.type == SceneManagerEventTypeBack) {
@@ -718,6 +717,10 @@ static bool nfc_protocol_support_scene_rpc_on_event(NfcApp* instance, SceneManag
                 if(nfc_load_file(instance, instance->file_path, false)) {
                     nfc_protocol_support_scene_rpc_setup_ui_and_emulate(instance);
                     success = true;
+                } else {
+                    rpc_system_app_set_error_code(
+                        instance->rpc_ctx, RpcAppSystemErrorCodeParseFile);
+                    rpc_system_app_set_error_text(instance->rpc_ctx, "Cannot load key file");
                 }
             }
             rpc_system_app_confirm(instance->rpc_ctx, success);
