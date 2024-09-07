@@ -79,6 +79,7 @@ bool wiegand_check(uint64_t fc_and_card, bool even_parity, bool odd_parity, int 
     default:
     }
     return true;
+
 }
 
 void protocol_gproxii_decoder_start(ProtocolGProxII* protocol) {
@@ -128,8 +129,10 @@ static bool protocol_gproxii_can_be_decoded(ProtocolGProxII* protocol) {
     if(bit_lib_get_bits(protocol->data, 0, 6) != 0b111110) return false;
 
     // Check always 0 parity on every 5th bit after preamble
-    if(!bit_lib_test_parity(protocol->data, 6, GPROXII_ENCODED_BIT_SIZE, BitLibParityAlways0, 5))
+    if(!bit_lib_test_parity(protocol->data, 6, GPROXII_ENCODED_BIT_SIZE, BitLibParityAlways0, 5)) {
+
         return false;
+    }
 
     // Start GProx II decode
     bit_lib_copy_bits(protocol->decoded_data, 0, GPROXII_ENCODED_BIT_SIZE, protocol->data, 6);
