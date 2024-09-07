@@ -9,7 +9,7 @@
 
 #define BACKLIGHT_COUNT 5
 extern const char* backlight_text[BACKLIGHT_COUNT];
-extern float backlight_value[BACKLIGHT_COUNT];
+extern const float backlight_value[BACKLIGHT_COUNT];
 
 typedef enum {
     NotificationLayerMessage,

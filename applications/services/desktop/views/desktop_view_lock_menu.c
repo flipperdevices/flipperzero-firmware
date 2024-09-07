@@ -135,19 +135,22 @@ FuriString* desktop_lock_menu_display_brightness_get_text(
     bool is_selected) {
     furi_assert(item);
     furi_assert(model);
+    UNUSED(is_selected);
 
     const char* value_string = backlight_text[model->display_brightness_index];
     FuriString* str = furi_string_alloc_set("Display ");
 
-    if(is_selected) {
-        if(model->display_brightness_index > 0) furi_string_cat(str, "< ");
+    if(model->display_brightness_index > 0)
+        furi_string_cat(str, "< ");
+    else
+        furi_string_cat(str, "  ");
 
-        furi_string_cat(str, value_string);
+    furi_string_cat(str, value_string);
 
-        if(model->display_brightness_index < BACKLIGHT_COUNT - 1) furi_string_cat(str, " >");
-    } else {
-        furi_string_cat(str, value_string);
-    }
+    if(model->display_brightness_index < BACKLIGHT_COUNT - 1)
+        furi_string_cat(str, " >");
+    else
+        furi_string_cat(str, "  ");
 
     return str;
 }
@@ -184,9 +187,9 @@ bool desktop_lock_menu_display_brightness_on_input(
                     model->notification_settings_changed = true;
                 }
             },
-            update)
+            update);
 
-            if(update) {
+        if(update) {
             view->notification_record->settings.display_brightness = backlight_value[index];
             notification_message(view->notification_record, &sequence_display_backlight_on);
         }
@@ -215,7 +218,7 @@ const DesktopLockMenuItem menu_items[] = {
         .on_input = desktop_lock_menu_display_brightness_on_input,
     },
 };
-#define DESKTOP_LOCK_MENU_ITEM_COUNT (uint8_t)(sizeof(menu_items) / sizeof(DesktopLockMenuItem))
+#define DESKTOP_LOCK_MENU_ITEM_COUNT COUNT_OF(menu_items)
 
 #define DESKTOP_LOCK_MENU_NEEDS_SCROLL_BAR \
     DESKTOP_LOCK_MENU_ITEM_COUNT > DESKTOP_LOCK_MENU_VISIBLE_ITEM_COUNT
@@ -343,7 +346,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
 
     if(DESKTOP_LOCK_MENU_NEEDS_SCROLL_BAR)
         elements_scrollbar_pos(
-            canvas, 115, 1 + STATUS_BAR_Y_SHIFT, 50, m->idx, DESKTOP_LOCK_MENU_ITEM_COUNT);
+            canvas, 115, 1 + STATUS_BAR_Y_SHIFT, 51, m->idx, DESKTOP_LOCK_MENU_ITEM_COUNT);
 }
 
 View* desktop_lock_menu_get_view(DesktopLockMenuView* lock_menu) {
@@ -369,7 +372,8 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                     if(model->idx == 0) {
                         model->idx = DESKTOP_LOCK_MENU_ITEM_COUNT - 1;
                     } else {
-                        model->idx = CLAMP(model->idx - 1, DESKTOP_LOCK_MENU_ITEM_COUNT - 1, 0);
+                        model->idx =
+                            CLAMP(model->idx - 1, (int8_t)DESKTOP_LOCK_MENU_ITEM_COUNT - 1, 0);
                     }
                     update = true;
                     consumed = true;
@@ -377,7 +381,8 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                     if(model->idx == DESKTOP_LOCK_MENU_ITEM_COUNT - 1) {
                         model->idx = 0;
                     } else {
-                        model->idx = CLAMP(model->idx + 1, DESKTOP_LOCK_MENU_ITEM_COUNT - 1, 0);
+                        model->idx =
+                            CLAMP(model->idx + 1, (int8_t)DESKTOP_LOCK_MENU_ITEM_COUNT - 1, 0);
                     }
                     update = true;
                     consumed = true;

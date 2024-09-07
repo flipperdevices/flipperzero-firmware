@@ -39,7 +39,7 @@ const char* backlight_text[BACKLIGHT_COUNT] = {
     "75%",
     "100%",
 };
-float backlight_value[BACKLIGHT_COUNT] = {
+const float backlight_value[BACKLIGHT_COUNT] = {
     0.0f,
     0.25f,
     0.5f,
