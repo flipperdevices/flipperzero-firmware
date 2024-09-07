@@ -247,6 +247,26 @@ void furi_hal_rtc_set_datetime(DateTime* datetime);
  */
 void furi_hal_rtc_get_datetime(DateTime* datetime);
 
+/** Set alarm
+ *
+ * @param      datetime  The date time to set or NULL to clear alarm
+ */
+void furi_hal_rtc_set_alarm(DateTime* datetime);
+
+typedef void (*FuriHalRtcAlarmCallback)(void* context);
+
+/** Set alarm callback
+ *
+ * Use it to subscribe to alarm trigger event. Setting alarm callback is
+ * independent from setting alarm.
+ *
+ * @warning    RTC will deliver this callbacks from ISR context.
+ *
+ * @param[in]  callback  The callback
+ * @param      context   The context
+ */
+void furi_hal_rtc_set_alarm_callback(FuriHalRtcAlarmCallback callback, void* context);
+
 /** Set RTC Fault Data
  *
  * @param[in]  value  The value

@@ -168,6 +168,10 @@ static void power_check_battery_level_change(Power* power) {
 }
 
 static void power_handle_shutdown(Power* power) {
+    DateTime dt;
+    furi_hal_rtc_get_datetime(&dt);
+    dt.minute += 1;
+    furi_hal_rtc_set_alarm(&dt);
     furi_hal_power_off();
     // Notify user if USB is plugged
     view_holder_send_to_front(power->view_holder);
