@@ -48,6 +48,9 @@ void dolphin_deed(DolphinDeed deed) {
 }
 
 void dolphin_get_settings(Dolphin* dolphin, DolphinSettings* settings) {
+    furi_check(dolphin);
+    furi_check(settings);
+
     DolphinEvent event;
     event.type = DolphinEventTypeSettingsGet;
     event.settings = settings;
@@ -55,6 +58,9 @@ void dolphin_get_settings(Dolphin* dolphin, DolphinSettings* settings) {
 }
 
 void dolphin_set_settings(Dolphin* dolphin, DolphinSettings* settings) {
+    furi_check(dolphin);
+    furi_check(settings);
+
     DolphinEvent event;
     event.type = DolphinEventTypeSettingsSet;
     event.settings = settings;
