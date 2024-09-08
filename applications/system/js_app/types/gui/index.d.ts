@@ -13,15 +13,18 @@ export type Association = number;
 
 declare class ViewDispatcher {
     /**
+     * Event source for `sendCustom` events
+     */
+    custom: Contract<number>;
+    /**
+     * Event source for navigation events
+     */
+    navigation: Contract;
+    /**
      * Sends a number to the custom event handler
      * @param event number to send
      */
     sendCustom(event: number): void;
-    /**
-     * Returns a contract that can be used to subscribe to an event in an event loop
-     * @param event Event type: `"custom"` or `"navigation"`
-     */
-    event<T extends "custom" | "navigation">(event: T): Contract<T extends "custom" ? number : undefined>;
     /**
      * Associates a View with a ViewDispatcher
      * @param view View to add

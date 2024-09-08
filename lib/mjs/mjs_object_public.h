@@ -122,7 +122,7 @@ mjs_val_t mjs_next(struct mjs* mjs, mjs_val_t obj, mjs_val_t* iterator);
 typedef void (*mjs_custom_obj_destructor_t)(struct mjs* mjs, mjs_val_t object);
 
 /*
- * Destructor property name. If set, must be a function pointer to a function
+ * Destructor property name. If set, must be a foreign pointer to a function
  * that will be called just before the object is freed.
  */
 #define MJS_DESTRUCTOR_PROP_NAME "__d"

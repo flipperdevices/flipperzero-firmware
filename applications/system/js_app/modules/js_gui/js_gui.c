@@ -1,5 +1,4 @@
 #include "../../js_modules.h" // IWYU pragma: keep
-#include "js_gui.h"
 #include <furi.h>
 #include <mlib/m-array.h>
 #include <gui/view_dispatcher.h>
@@ -8,31 +7,17 @@
 
 #define EVENT_QUEUE_SIZE 16
 
-/**
- * @brief An opaque instance bound to an instance freer
- * 
- * In order to reduce boilerplate in glue code for various views, the
- * responsibility of freeing views is placed on the main GUI module. This may
- * violate the single responsibility principle, but I assert that the code is
- * actually more writable and readable this way, as view modules do not have to
- * define, allocate, iterate over and free its own view array.
- */
 typedef struct {
-    void (*freer)(void*);
-    void* instance;
-} JsViewGhost;
-
-ARRAY_DEF(JsViewGhosts, JsViewGhost, M_POD_OPLIST);
-
-struct JsGui {
     uint32_t next_view_id;
     FuriEventLoop* loop;
     Gui* gui;
     ViewDispatcher* dispatcher;
-    JsViewGhosts_t ghosts;
+    // event stuff
+    JsEventLoopContract custom_contract;
     FuriMessageQueue* custom;
+    JsEventLoopContract navigation_contract;
     FuriSemaphore* navigation;
-};
+} JsGui;
 
 /**
  * @brief `viewDispatcher.add`
@@ -84,46 +69,6 @@ static bool js_gui_vd_nav_callback(void* context) {
 }
 
 /**
- * @brief `viewDispatcher.event`
- */
-static void js_gui_vd_event(struct mjs* mjs) {
-    // get argument
-    bool is_navigation_event;
-    const char* event_type;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&event_type));
-
-    if(strcmp(event_type, "custom") == 0) {
-        is_navigation_event = false;
-    } else if(strcmp(event_type, "navigation") == 0) {
-        is_navigation_event = true;
-    } else {
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Invalid event type");
-    }
-
-    // subscribe to event
-    JsGui* module = JS_GET_CONTEXT(mjs);
-    view_dispatcher_set_event_callback_context(module->dispatcher, module);
-    if(is_navigation_event)
-        view_dispatcher_set_custom_event_callback(module->dispatcher, js_gui_vd_custom_callback);
-    else
-        view_dispatcher_set_navigation_event_callback(module->dispatcher, js_gui_vd_nav_callback);
-
-    // make contract
-    JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
-    contract->object = is_navigation_event ? (FuriEventLoopObject*)module->navigation :
-                                             (FuriEventLoopObject*)module->custom;
-    contract->object_type = is_navigation_event ? JsEventLoopObjectTypeSemaphore :
-                                                  JsEventLoopObjectTypeQueue;
-    contract->event = FuriEventLoopEventIn;
-    if(!is_navigation_event) {
-        contract->transformer = js_gui_vd_custom_transformer;
-        contract->transformer_context = mjs;
-    }
-    js_gui_defer_free(module, free, contract);
-    mjs_return(mjs, mjs_mk_foreign(mjs, contract));
-}
-
-/**
  * @brief `viewDispatcher.sendCustom`
  */
 static void js_gui_vd_send_custom(struct mjs* mjs) {
@@ -148,16 +93,11 @@ static void js_gui_vd_switch_to(struct mjs* mjs) {
 static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
     // get event loop
     JsEventLoop* js_loop = js_module_get(modules, "event_loop");
-    if(M_UNLIKELY(!js_loop)) {
-        // `event_loop` must be imported before `gui`
-        // likely dead code because our module would fail to link
-        return NULL;
-    }
+    if(M_UNLIKELY(!js_loop)) return NULL;
     FuriEventLoop* loop = js_event_loop_get_loop(js_loop);
 
     // create C object
     JsGui* module = malloc(sizeof(JsGui));
-    JsViewGhosts_init(module->ghosts);
     module->loop = loop;
     module->gui = furi_record_open(RECORD_GUI);
     module->dispatcher = view_dispatcher_alloc_ex(loop);
@@ -166,13 +106,32 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
     view_dispatcher_attach_to_gui(module->dispatcher, module->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_send_to_front(module->dispatcher);
 
+    // subscribe to events and create contracts
+    view_dispatcher_set_event_callback_context(module->dispatcher, module);
+    view_dispatcher_set_custom_event_callback(module->dispatcher, js_gui_vd_custom_callback);
+    view_dispatcher_set_navigation_event_callback(module->dispatcher, js_gui_vd_nav_callback);
+    module->custom_contract = (JsEventLoopContract){
+        .object = module->custom,
+        .object_type = JsEventLoopObjectTypeQueue,
+        .event = FuriEventLoopEventIn,
+        .transformer = js_gui_vd_custom_transformer,
+        .transformer_context = mjs,
+    };
+    module->navigation_contract = (JsEventLoopContract){
+        .object = module->navigation,
+        .object_type = JsEventLoopObjectTypeSemaphore,
+        .event = FuriEventLoopEventIn,
+    };
+
     // create viewDispatcher object
     mjs_val_t view_dispatcher = mjs_mk_object(mjs);
     mjs_set(mjs, view_dispatcher, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
     mjs_set(mjs, view_dispatcher, "add", ~0, MJS_MK_FN(js_gui_vd_add));
-    mjs_set(mjs, view_dispatcher, "event", ~0, MJS_MK_FN(js_gui_vd_event));
     mjs_set(mjs, view_dispatcher, "sendCustom", ~0, MJS_MK_FN(js_gui_vd_send_custom));
     mjs_set(mjs, view_dispatcher, "switchTo", ~0, MJS_MK_FN(js_gui_vd_switch_to));
+    mjs_set(mjs, view_dispatcher, "custom", ~0, mjs_mk_foreign(mjs, &module->custom_contract));
+    mjs_set(
+        mjs, view_dispatcher, "navigation", ~0, mjs_mk_foreign(mjs, &module->navigation_contract));
 
     // create API object
     mjs_val_t api = mjs_mk_object(mjs);
@@ -192,14 +151,6 @@ static void js_gui_destroy(void* inst) {
     }
     view_dispatcher_free(module->dispatcher);
 
-    // execute deferred frees
-    JsViewGhosts_it_t it;
-    for(JsViewGhosts_it(it, module->ghosts); !JsViewGhosts_end_p(it); JsViewGhosts_next(it)) {
-        const JsViewGhost* ghost = JsViewGhosts_cref(it);
-        ghost->freer(ghost->instance);
-    }
-    JsViewGhosts_clear(module->ghosts);
-
     furi_event_loop_maybe_unsubscribe(module->loop, module->custom);
     furi_event_loop_maybe_unsubscribe(module->loop, module->navigation);
     furi_message_queue_free(module->custom);
@@ -209,20 +160,11 @@ static void js_gui_destroy(void* inst) {
     free(module);
 }
 
-void js_gui_defer_free(JsGui* module, void (*freer)(void*), void* instance) {
-    furi_check(module);
-    furi_check(freer);
-    furi_check(instance);
-    JsViewGhosts_push_back(module->ghosts, (JsViewGhost){freer, instance});
-}
-
-extern const ElfApiInterface js_gui_hashtable_api_interface;
-
 static const JsModuleDescriptor js_gui_desc = {
     "gui",
     js_gui_create,
     js_gui_destroy,
-    &js_gui_hashtable_api_interface,
+    NULL,
 };
 
 static const FlipperAppPluginDescriptor plugin_descriptor = {

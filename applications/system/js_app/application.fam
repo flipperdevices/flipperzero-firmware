@@ -31,10 +31,7 @@ App(
     apptype=FlipperAppType.PLUGIN,
     entry_point="js_gui_ep",
     requires=["js_app", "js_event_loop"],
-    sources=[
-        "modules/js_gui/js_gui.c",
-        "modules/js_gui/js_gui_api_table.cpp",
-    ],
+    sources=["modules/js_gui/js_gui.c"],
 )
 
 App(

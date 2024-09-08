@@ -1,5 +1,4 @@
 #include "../../js_modules.h" // IWYU pragma: keep
-#include "js_gui.h"
 #include "../js_event_loop/js_event_loop.h"
 #include <gui/modules/submenu.h>
 
