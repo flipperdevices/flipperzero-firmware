@@ -282,25 +282,30 @@ void furi_event_loop_subscribe_mutex(
     FuriEventLoopEventCallback callback,
     void* context);
 
-/** Unsubscribe from events (common). Unlike `furi_event_loop_unsubscribe`,
- * does not crash if the object was never subscribed to.
- *
- * @param      instance       The Event Loop instance
- * @param      object         The object to unsubscribe from
- * 
- * @returns    `true` if unsubscribed, `false` if the object was never subscribed to
- */
-bool furi_event_loop_maybe_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object);
-
 /** Unsubscribe from events (common)
- * 
- * @warning if you're not sure you've ever subscribed, use
- * `furi_event_loop_maybe_unsubscribe` instead
  *
  * @param      instance       The Event Loop instance
  * @param      object         The object to unsubscribe from
  */
 void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object);
+
+/**
+ * @brief Checks if the loop is subscribed to an object of any kind
+ * 
+ * @param      instance       Event Loop instance
+ * @param      object         Object to check
+ */
+bool furi_event_loop_is_subscribed(FuriEventLoop* instance, FuriEventLoopObject* object);
+
+/**
+ * @brief Convenience function for `if(is_subscribed()) unsubscribe()`
+ */
+static inline void furi_event_loop_maybe_unsubscribe(
+    FuriEventLoop* instance,
+    FuriEventLoopObject* object) {
+    if(furi_event_loop_is_subscribed(instance, object))
+        furi_event_loop_unsubscribe(instance, object);
+}
 
 #ifdef __cplusplus
 }

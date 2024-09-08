@@ -9,9 +9,10 @@
  * event loop. There are two ways in which other modules can integrate with this
  * loop:
  *   - Via contracts: The user of your module would have to acquire an opaque
- *     JS value from you and pass it to `js_event_loop`'s `subscribe`. This is
- *     useful for events that the user may be interested in. For more info, look
- *     at `JsEventLoopContract`.
+ *     JS value from you and pass it to `js_event_loop`. This is useful for
+ *     events that they user may be interested in. For more info, look at
+ *     `JsEventLoopContract`. Also look at `js_event_loop_get_loop`, which
+ *     you will need to unsubscribe the event loop from your object.
  *   - Directly: When your module is created, you can acquire an instance of
  *     `JsEventLoop` which you can use to acquire an instance of
  *     `FuriEventLoop` that you can manipulate directly, without the JS
@@ -59,8 +60,7 @@ typedef mjs_val_t (*JsEventLoopTransformer)(FuriEventLoopObject* object, void* c
  *     NULL, the event loop will take semaphores and mutexes on its own.
  * 
  * The producer of the contract is responsible for freeing both the contract and
- * the object that it points to when the interpreter is torn down, as well as
- * unsubscribing the even loop from the object.
+ * the object that it points to when the interpreter is torn down.
  */
 typedef struct {
     JsEventLoopObjectType object_type;
