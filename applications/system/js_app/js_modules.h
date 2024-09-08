@@ -60,6 +60,7 @@ static inline void _js_passthrough(struct mjs* mjs, mjs_val_t in, void* out) {
 #define JS_ARG_ANY(out) ((_js_arg_decl){out, NULL, _js_passthrough, "any"})
 #define JS_ARG_OBJ(out) ((_js_arg_decl){out, mjs_is_object, _js_passthrough, "any"})
 #define JS_ARG_FN(out)  ((_js_arg_decl){out, mjs_is_function, _js_passthrough, "function"})
+#define JS_ARG_ARR(out) ((_js_arg_decl){out, mjs_is_array, _js_passthrough, "array"})
 
 //-V:JS_FETCH_ARGS_OR_RETURN:1008
 /**
@@ -95,9 +96,13 @@ static inline void _js_passthrough(struct mjs* mjs, mjs_val_t in, void* out) {
     }
 
 /**
+ * @brief Returns the foreign pointer in `obj["_"]`
+ */
+#define JS_GET_INST(mjs, obj) mjs_get_ptr(mjs, mjs_get(mjs, obj, INST_PROP_NAME, ~0))
+/**
  * @brief Returns the foreign pointer in `this["_"]`
  */
-#define JS_GET_CONTEXT(mjs) mjs_get_ptr(mjs, mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0))
+#define JS_GET_CONTEXT(mjs)   JS_GET_INST(mjs, mjs_get_this(mjs))
 
 /**
  * @brief Prepends an error, sets the JS return value to `undefined` and returns

@@ -1,7 +1,7 @@
 import type { View } from ".";
 
 /**
- * Simple loading screen
+ * Simple loading screen with a hourglass
  */
 export class Loading implements View {
     _view: symbol;

@@ -296,8 +296,8 @@ static int32_t js_thread(void* arg) {
         }
     }
 
-    js_modules_destroy(worker->modules);
     mjs_destroy(mjs);
+    js_modules_destroy(worker->modules);
 
     composite_api_resolver_free(worker->resolver);
 
