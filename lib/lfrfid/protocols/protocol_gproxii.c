@@ -77,6 +77,7 @@ bool wiegand_check(uint64_t fc_and_card, bool even_parity, bool odd_parity, int 
         if(odd_parity_sum % 2 != odd_parity) return false;
         break;
     default:
+        furi_crash();
     }
     return true;
 }
