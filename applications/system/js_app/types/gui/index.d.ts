@@ -1,7 +1,5 @@
 import type { Contract } from "../event_loop";
 
-type Lit = number | string | null | undefined | {};
-
 export interface View {
     _view: symbol;
 }

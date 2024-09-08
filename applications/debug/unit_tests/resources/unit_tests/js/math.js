@@ -1,6 +1,4 @@
-/// <reference types="../../../../../system/js_app/types/tests" />
 let tests = require("tests");
-/// <reference types="../../../../../system/js_app/types/math" />
 let math = require("math");
 
 // math.EPSILON on Flipper Zero is 2.22044604925031308085e-16

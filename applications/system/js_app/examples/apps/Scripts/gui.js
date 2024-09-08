@@ -1,16 +1,16 @@
-/// <reference types="../../../types/global" />
-/// <reference types="../../../types/event_loop" />
 let eventLoop = require("event_loop");
-/// <reference types="../../../types/gui" />
 let gui = require("gui");
-/// <reference types="../../../types/gui/loading" />
 let loadingView = require("gui/loading");
-/// <reference types="../../../types/gui/submenu" />
 let submenuView = require("gui/submenu");
+let emptyView = require("gui/empty_screen");
 
 // loading screen
 let loading = loadingView.make();
 let loadingAssoc = gui.viewDispatcher.add(loading);
+
+// empty screen
+let empty = emptyView.make();
+let emptyAssoc = gui.viewDispatcher.add(empty);
 
 // demo chooser screen
 let demoChooser = submenuView.make();
@@ -19,15 +19,15 @@ demoChooser.setItems([
     "Empty screen",
     "Exit app",
 ]);
-eventLoop.subscribe(demoChooser.chosen, function (_sub, index, gui, eventLoop, loadingAssoc) {
+eventLoop.subscribe(demoChooser.chosen, function (_sub, index, gui, eventLoop, loadingAssoc, emptyAssoc) {
     if (index === 0) {
         gui.viewDispatcher.switchTo(loadingAssoc);
     } else if (index === 1) {
-        print("not implemented");
+        gui.viewDispatcher.switchTo(emptyAssoc);
     } else if (index === 2) {
         eventLoop.stop();
     }
-}, gui, eventLoop, loadingAssoc);
+}, gui, eventLoop, loadingAssoc, emptyAssoc);
 let demoChooserAssoc = gui.viewDispatcher.add(demoChooser);
 
 // run UI

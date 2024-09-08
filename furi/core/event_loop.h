@@ -300,9 +300,8 @@ bool furi_event_loop_is_subscribed(FuriEventLoop* instance, FuriEventLoopObject*
 /**
  * @brief Convenience function for `if(is_subscribed()) unsubscribe()`
  */
-static inline void furi_event_loop_maybe_unsubscribe(
-    FuriEventLoop* instance,
-    FuriEventLoopObject* object) {
+static inline void
+    furi_event_loop_maybe_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
     if(furi_event_loop_is_subscribed(instance, object))
         furi_event_loop_unsubscribe(instance, object);
 }

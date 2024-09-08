@@ -1,14 +1,12 @@
-/// <reference types="../../../types/global" />
-/// <reference types="../../../types/event_loop" />
-let event_loop = require("event_loop");
+let eventLoop = require("event_loop");
 
 // print a string after 1337 milliseconds
-event_loop.subscribe(event_loop.timer("oneshot", 1337), function (_subscription, _item) {
+eventLoop.subscribe(eventLoop.timer("oneshot", 1337), function (_subscription, _item) {
     print("Hi after 1337 ms");
 });
 
 // count up to 5 with a delay of 100ms between increments
-event_loop.subscribe(event_loop.timer("periodic", 100), function (subscription, _item, counter) {
+eventLoop.subscribe(eventLoop.timer("periodic", 100), function (subscription, _item, counter) {
     print("Counter two:", counter);
     if (counter === 5)
         subscription.cancel();
@@ -17,11 +15,11 @@ event_loop.subscribe(event_loop.timer("periodic", 100), function (subscription, 
 
 // count up to 15 with a delay of 100ms between increments
 // and stop the program when the count reaches 15
-event_loop.subscribe(event_loop.timer("periodic", 100), function (subscription, _item, event_loop, counter) {
+eventLoop.subscribe(eventLoop.timer("periodic", 100), function (subscription, _item, event_loop, counter) {
     print("Counter one:", counter);
     if (counter === 15)
         event_loop.stop();
     return [event_loop, counter + 1];
-}, event_loop, 0);
+}, eventLoop, 0);
 
-event_loop.run();
+eventLoop.run();

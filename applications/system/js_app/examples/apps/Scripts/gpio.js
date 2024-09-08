@@ -1,7 +1,4 @@
-/// <reference types="../../../types/global" />
-/// <reference types="../../../types/event_loop" />
-let event_loop = require("event_loop");
-/// <reference types="../../../types/gpio" />
+let eventLoop = require("event_loop");
 let gpio = require("gpio");
 
 // initialize pins
@@ -14,19 +11,19 @@ button.init({ direction: "in", pull: "up", inMode: "interrupt", edge: "falling" 
 
 // blink led
 print("Commencing blinking (PC3)");
-event_loop.subscribe(event_loop.timer("periodic", 1000), function (_, _item, led, state) {
+eventLoop.subscribe(eventLoop.timer("periodic", 1000), function (_, _item, led, state) {
     led.write(state);
     return [led, !state];
 }, led, true);
 
 // read potentiometer when button is pressed
 print("Press the button (PC1)");
-event_loop.subscribe(button.interrupt(), function (_, _item, pot) {
+eventLoop.subscribe(button.interrupt(), function (_, _item, pot) {
     print("PC0 is at", pot.read_analog(), "mV");
 }, pot);
 
 // the program will just exit unless this is here
-event_loop.run();
+eventLoop.run();
 
 // possible pins https://docs.flipper.net/gpio-and-modules#miFsS
 // "PA7" aka 2

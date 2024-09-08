@@ -1,6 +1,4 @@
-/// <reference types="../../../../../system/js_app/types/tests" />
 let tests = require("tests");
-/// <reference types="../../../../../system/js_app/types/event_loop" />
 let event_loop = require("event_loop");
 
 let ext = {

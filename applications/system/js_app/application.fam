@@ -43,6 +43,14 @@ App(
 )
 
 App(
+    appid="js_gui__empty_screen",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_gui_empty_screen_ep",
+    requires=["js_app", "js_gui", "js_event_loop"],
+    sources=["modules/js_gui/empty_screen.c"],
+)
+
+App(
     appid="js_gui__submenu",
     apptype=FlipperAppType.PLUGIN,
     entry_point="js_gui_submenu_ep",
