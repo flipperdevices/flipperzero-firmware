@@ -15,7 +15,7 @@ declare class ViewDispatcher {
      */
     custom: Contract<number>;
     /**
-     * Event source for navigation events
+     * Event source for navigation events (back key presses)
      */
     navigation: Contract;
     /**

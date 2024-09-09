@@ -94,6 +94,11 @@ eventLoop.subscribe(demoChooser.chosen, function (_sub, index, gui, eventLoop, l
 }, gui, eventLoop, loadingAssoc, emptyAssoc);
 let demoChooserAssoc = gui.viewDispatcher.add(demoChooser);
 
+// go to the demo chooser screen when the back key is pressed
+eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, gui, demoChooserAssoc) {
+    gui.viewDispatcher.switchTo(demoChooserAssoc);
+}, gui, demoChooserAssoc);
+
 // run UI
 gui.viewDispatcher.switchTo(demoChooserAssoc);
 eventLoop.run();
@@ -145,4 +150,4 @@ triggered by `ViewDispatcher.sendCustom(event)`
 
 ### `ViewDispatcher.navigation`
 An event loop `Contract` object that identifies the navigation event source,
-triggered by `ViewDispatcher.switchTo(assoc)`
+triggered when the back key is pressed

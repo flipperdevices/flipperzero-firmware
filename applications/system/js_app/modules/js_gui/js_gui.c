@@ -65,6 +65,7 @@ static bool js_gui_vd_nav_callback(void* context) {
     furi_check(context);
     JsGui* module = context;
     furi_semaphore_release(module->navigation);
+    FURI_LOG_W("amogus", "sus");
     return true;
 }
 
