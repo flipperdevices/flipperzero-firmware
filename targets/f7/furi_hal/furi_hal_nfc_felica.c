@@ -161,7 +161,8 @@ FuriHalNfcError furi_hal_nfc_felica_listener_set_sensf_res_data(
     const uint8_t* idm,
     const uint8_t idm_len,
     const uint8_t* pmm,
-    const uint8_t pmm_len) {
+    const uint8_t pmm_len,
+    const uint16_t sys_code) {
     furi_check(idm);
     furi_check(pmm);
 
