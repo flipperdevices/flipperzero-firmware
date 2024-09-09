@@ -17,16 +17,16 @@ For an example refer to the GUI example.
 ## `make()`
 Makes a `Submenu` object
 
-### `Submenu.setItems(items)`
+## `Submenu.setItems(items)`
 
-#### Parameters
+### Parameters
   - `items`: list of strings that represent the entries of the menu
 
-### `Submenu.setHeader(header)`
+## `Submenu.setHeader(header)`
 
-#### Parameters
+### Parameters
   - `header`: optional title of the menu
 
-### `Submenu.chosen`
+## `Submenu.chosen`
 An event loop `Contract` object that triggers when an item has been chosen.
 The data that the event produces is the index of the chosen item.

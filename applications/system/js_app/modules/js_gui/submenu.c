@@ -44,7 +44,6 @@ static void js_gui_submenu_set_header(struct mjs* mjs) {
     const char* header;
     JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&header));
     JsGuiSubmenu* object = JS_GET_CONTEXT(mjs);
-    FURI_LOG_W("header", "header %s", header);
     submenu_set_header(object->submenu, header);
 }
 

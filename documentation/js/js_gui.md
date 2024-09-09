@@ -37,7 +37,7 @@ are available (not all of which are unfortunately currently implemented in JS):
 | `popup`              | ❌              |
 | `submenu`            | ✅              |
 | `text_box`           | ❌              |
-| `text_input`         | ❌              |
+| `text_input`         | ✅              |
 | `variable_item_list` | ❌              |
 | `widget`             | ❌              |
 
