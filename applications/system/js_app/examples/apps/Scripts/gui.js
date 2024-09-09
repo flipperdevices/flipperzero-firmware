@@ -4,6 +4,7 @@ let loadingView = require("gui/loading");
 let submenuView = require("gui/submenu");
 let emptyView = require("gui/empty_screen");
 let textInputView = require("gui/text_input");
+let textBoxView = require("gui/text_box");
 
 // loading screen
 let loading = loadingView.make();
@@ -16,6 +17,10 @@ let emptyAssoc = gui.viewDispatcher.add(empty);
 // text input
 let keyboard = textInputView.make("Enter your name", 0, 32);
 let keyboardAssoc = gui.viewDispatcher.add(keyboard);
+
+// text box
+let textBox = textBoxView.make("text", "start");
+let textBoxAssoc = gui.viewDispatcher.add(textBox);
 
 // demo chooser screen
 let demoChooser = submenuView.make();
@@ -50,10 +55,10 @@ eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, gui, demoC
 }, gui, demoChooserAssoc);
 
 // print text from the keyboard
-eventLoop.subscribe(keyboard.input, function (_sub, text, gui, demoChooserAssoc) {
-    print("Hello,", text); // this will only be visible once we exit the app
-    gui.viewDispatcher.switchTo(demoChooserAssoc);
-}, gui, demoChooserAssoc);
+eventLoop.subscribe(keyboard.input, function (_sub, name, gui, textBox, textBoxAssoc) {
+    textBox.setText("Hello, " + name + "! Nice to meet you");
+    gui.viewDispatcher.switchTo(textBoxAssoc);
+}, gui, textBox, textBoxAssoc);
 
 // run UI
 gui.viewDispatcher.switchTo(demoChooserAssoc);

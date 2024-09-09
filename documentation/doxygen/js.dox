@@ -24,6 +24,7 @@ JS modules use the Flipper app plugin system. Each module is compiled into a .fa
   - @subpage js_gui__loading - Hourglass (Loading) view
   - @subpage js_gui__empty_screen - Empty view
   - @subpage js_gui__text_input - Keyboard-like text input
+  - @subpage js_gui__text_box - Simple multiline text box
 
 All modules have corresponding TypeScript declaration files, so you can set up your IDE to show suggestions when writing JS scripts.
 

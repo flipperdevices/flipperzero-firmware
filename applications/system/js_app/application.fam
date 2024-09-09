@@ -67,6 +67,14 @@ App(
 )
 
 App(
+    appid="js_gui__text_box",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_gui_text_box_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/text_box.c"],
+)
+
+App(
     appid="js_dialog",
     apptype=FlipperAppType.PLUGIN,
     entry_point="js_dialog_ep",
@@ -112,12 +120,4 @@ App(
     entry_point="js_math_ep",
     requires=["js_app"],
     sources=["modules/js_math.c"],
-)
-
-App(
-    appid="js_textbox",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="js_textbox_ep",
-    requires=["js_app"],
-    sources=["modules/js_textbox.c"],
 )

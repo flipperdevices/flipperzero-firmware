@@ -11,7 +11,7 @@ typedef struct {
     JsEventLoopContract* contract;
     size_t buffer_size;
     char* buffer;
-    const char* header;
+    char* header;
 } JsGuiTextInput;
 
 static mjs_val_t js_gui_text_input_transformer(FuriEventLoopObject* object, void* context) {
@@ -37,6 +37,7 @@ static void js_gui_text_input_destructor(struct mjs* mjs, mjs_val_t obj) {
     furi_message_queue_free(object->input_queue);
     free(object->contract);
     free(object->buffer);
+    free(object->header);
     free(object);
 }
 
