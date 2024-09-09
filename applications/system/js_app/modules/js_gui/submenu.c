@@ -40,6 +40,14 @@ static void js_gui_submenu_set_items(struct mjs* mjs) {
     }
 }
 
+static void js_gui_submenu_set_header(struct mjs* mjs) {
+    const char* header;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&header));
+    JsGuiSubmenu* object = JS_GET_CONTEXT(mjs);
+    FURI_LOG_W("header", "header %s", header);
+    submenu_set_header(object->submenu, header);
+}
+
 static void js_gui_submenu_destructor(struct mjs* mjs, mjs_val_t obj) {
     JsGuiSubmenu* object = JS_GET_INST(mjs, obj);
     submenu_free(object->submenu);
@@ -69,6 +77,7 @@ static void js_gui_submenu_make(struct mjs* mjs) {
     mjs_set(mjs, js_submenu, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, object));
     mjs_set(mjs, js_submenu, MJS_DESTRUCTOR_PROP_NAME, ~0, MJS_MK_FN(js_gui_submenu_destructor));
     mjs_set(mjs, js_submenu, "setItems", ~0, MJS_MK_FN(js_gui_submenu_set_items));
+    mjs_set(mjs, js_submenu, "setHeader", ~0, MJS_MK_FN(js_gui_submenu_set_header));
     mjs_set(mjs, js_submenu, "chosen", ~0, mjs_mk_foreign(mjs, object->contract));
     mjs_set(mjs, js_submenu, "_view", ~0, mjs_mk_foreign(mjs, submenu_get_view(object->submenu)));
     mjs_return(mjs, js_submenu);

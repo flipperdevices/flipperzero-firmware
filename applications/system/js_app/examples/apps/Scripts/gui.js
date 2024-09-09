@@ -19,16 +19,22 @@ demoChooser.setItems([
     "Empty screen",
     "Exit app",
 ]);
-eventLoop.subscribe(demoChooser.chosen, function (_sub, index, gui, eventLoop, loadingAssoc, emptyAssoc) {
+demoChooser.setHeader("Choose demo");
+let demoChooserAssoc = gui.viewDispatcher.add(demoChooser);
+eventLoop.subscribe(demoChooser.chosen, function (_sub, index, gui, eventLoop, loadingAssoc, emptyAssoc, demoChooserAssoc) {
     if (index === 0) {
         gui.viewDispatcher.switchTo(loadingAssoc);
+        // the loading view captures all back events, preventing our navigation callback from firing
+        // switch to the demo chooser after a second
+        eventLoop.subscribe(eventLoop.timer("oneshot", 1000), function (_sub, _, gui, demoChooserAssoc) {
+            gui.viewDispatcher.switchTo(demoChooserAssoc);
+        }, gui, demoChooserAssoc);
     } else if (index === 1) {
         gui.viewDispatcher.switchTo(emptyAssoc);
     } else if (index === 2) {
         eventLoop.stop();
     }
-}, gui, eventLoop, loadingAssoc, emptyAssoc);
-let demoChooserAssoc = gui.viewDispatcher.add(demoChooser);
+}, gui, eventLoop, loadingAssoc, emptyAssoc, demoChooserAssoc);
 
 // go to the demo chooser screen when the back key is pressed
 eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, gui, demoChooserAssoc) {
