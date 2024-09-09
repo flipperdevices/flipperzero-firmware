@@ -31,7 +31,7 @@ extern "C" {
 #include <Windows.h>
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #define snprintf _snprintf
-#define __func__ __FUNCTION__
+#define __func__ __FUNCTION__ //-V1059
 #endif
 
 #elif defined(__unix__) || defined(__unix) || defined(unix) || \
@@ -56,7 +56,7 @@ extern "C" {
 #endif
 
 #if __GNUC__ >= 5 && !defined(__STDC_VERSION__)
-#define __func__ __extension__ __FUNCTION__
+#define __func__ __extension__ __FUNCTION__ //-V1059
 #endif
 
 #else
