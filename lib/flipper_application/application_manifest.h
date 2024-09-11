@@ -13,10 +13,11 @@ extern "C" {
 #endif
 
 #define FAP_MANIFEST_MAGIC 0x52474448
-#define FAP_MANIFEST_SUPPORTED_VERSION 1
+#define FAP_MANIFEST_SUPPORTED_VERSION 2
 
 #define FAP_MANIFEST_MAX_APP_NAME_LENGTH 32
 #define FAP_MANIFEST_MAX_ICON_SIZE 32 // TODO FL-3524: reduce size?
+#define FAP_MANIFEST_MAX_APPID_LENGTH 32
 
 #pragma pack(push, 1)
 
@@ -40,9 +41,10 @@ typedef struct {
     char name[FAP_MANIFEST_MAX_APP_NAME_LENGTH];
     char has_icon;
     char icon[FAP_MANIFEST_MAX_ICON_SIZE];
-} FlipperApplicationManifestV1;
+    char appid[FAP_MANIFEST_MAX_APPID_LENGTH];
+} FlipperApplicationManifestV2;
 
-typedef FlipperApplicationManifestV1 FlipperApplicationManifest;
+typedef FlipperApplicationManifestV2 FlipperApplicationManifest;
 
 #pragma pack(pop)
 

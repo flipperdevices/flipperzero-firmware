@@ -370,7 +370,11 @@ class FlipperStorage:
         self.send_and_wait_eol(f'storage mkdir "{path}"\r')
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
-        self._check_no_error(response, path)
+        try:
+            self._check_no_error(response, path)
+        except FlipperStorageException as exc:
+            if StorageErrorCode.EXIST.value not in str(exc):
+                raise
 
     def format_ext(self):
         """Format external storage on Flipper"""

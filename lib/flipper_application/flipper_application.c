@@ -138,23 +138,25 @@ static bool flipper_application_process_manifest_section(
            storage_file_read(file, manifest, size) == size;
 }
 
-// we can't use const char* as context because we will lose the const qualifier
-typedef struct {
-    const char* path;
-} FlipperApplicationPreloadAssetsContext;
-
 static bool flipper_application_process_assets_section(
     File* file,
     size_t offset,
     size_t size,
     void* context) {
-    FlipperApplicationPreloadAssetsContext* preload_context = context;
-    return flipper_application_assets_load(file, preload_context->path, offset, size);
+    FlipperApplicationManifest* manifest = context;
+    return flipper_application_assets_load(file, manifest->appid, offset, size);
 }
 
 static FlipperApplicationPreloadStatus
     flipper_application_load(FlipperApplication* app, const char* path, bool load_full) {
     if(!elf_file_open(app->elf, path)) {
+        return FlipperApplicationPreloadStatusInvalidFile;
+    }
+
+    // load manifest section
+    if(elf_process_section(
+           app->elf, ".fapmeta", flipper_application_process_manifest_section, &app->manifest) !=
+       ElfProcessSectionResultSuccess) {
         return FlipperApplicationPreloadStatusInvalidFile;
     }
 
@@ -169,21 +171,13 @@ static FlipperApplicationPreloadStatus
         }
 
         // load assets section
-        FlipperApplicationPreloadAssetsContext preload_context = {.path = path};
         if(elf_process_section(
                app->elf,
                ".fapassets",
                flipper_application_process_assets_section,
-               &preload_context) == ElfProcessSectionResultCannotProcess) {
+               &app->manifest) == ElfProcessSectionResultCannotProcess) {
             return FlipperApplicationPreloadStatusInvalidFile;
         }
-    }
-
-    // load manifest section
-    if(elf_process_section(
-           app->elf, ".fapmeta", flipper_application_process_manifest_section, &app->manifest) !=
-       ElfProcessSectionResultSuccess) {
-        return FlipperApplicationPreloadStatusInvalidFile;
     }
 
     return flipper_application_validate_manifest(app);
