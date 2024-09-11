@@ -41,18 +41,32 @@ static void spi_test_submenu_callback(void* context, uint32_t index) {
         furi_hal_spi_release(handle);
         furi_hal_spi_bus_handle_deinit(handle);
     } else {
-        SoftIoSpiConfig config = {
+        // initialize
+        SoftIoSpiBusConfig bus_cfg = {
             .miso = &gpio_ext_pa6,
             .mosi = &gpio_ext_pa7,
             .sck = &gpio_ext_pb3,
-            .cs = &gpio_ext_pa4,
-            .clk_fq_khz = 100,
             .clk_polarity = 0,
+        };
+        SoftIoSpiSlaveConfig dev_cfg = {
+            .cs = &gpio_ext_pa4,
+            .clk_fq_khz = 200,
             .clk_phase = 0,
         };
-        softio_spi_acquire(&config);
-        softio_spi_trx(&config, tx_buffer, rx_buffer, sizeof(tx_buffer), FuriWaitForever);
-        softio_spi_release(&config);
+        SoftIoSpiBus* bus = softio_spi_alloc(&bus_cfg);
+        SoftIoSpiSlave* device = softio_spi_attach_slave(bus, &dev_cfg);
+        softio_spi_init(bus);
+        furi_delay_ms(100);
+
+        // transmit
+        softio_spi_acquire(device);
+        softio_spi_trx(device, tx_buffer, rx_buffer, sizeof(tx_buffer), FuriWaitForever);
+        softio_spi_release(device);
+
+        // deinitialize
+        softio_spi_deinit(bus);
+        softio_spi_detach_slave(bus, device);
+        softio_spi_free(bus);
     }
 
     FURI_LOG_I(
