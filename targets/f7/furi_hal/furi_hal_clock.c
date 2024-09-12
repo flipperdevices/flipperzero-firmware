@@ -15,10 +15,10 @@
 
 #define CPU_CLOCK_EARLY_HZ 4000000
 #define CPU_CLOCK_HSI16_HZ 16000000
-#define CPU_CLOCK_HSE_HZ 32000000
-#define CPU_CLOCK_PLL_HZ 64000000
+#define CPU_CLOCK_HSE_HZ   32000000
+#define CPU_CLOCK_PLL_HZ   64000000
 
-#define TICK_INT_PRIORITY 15U
+#define TICK_INT_PRIORITY   15U
 #define HS_CLOCK_IS_READY() (LL_RCC_HSE_IsReady() && LL_RCC_HSI_IsReady())
 #define LS_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
@@ -133,7 +133,7 @@ void furi_hal_clock_switch_hse2hsi(void) {
         ;
 
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSI);
-    furi_assert(LL_RCC_GetSMPSClockSelection() == LL_RCC_SMPS_CLKSOURCE_HSI);
+    furi_check(LL_RCC_GetSMPSClockSelection() == LL_RCC_SMPS_CLKSOURCE_HSI);
 
     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSI)
         ;
@@ -170,7 +170,7 @@ void furi_hal_clock_switch_hsi2hse(void) {
 }
 
 bool furi_hal_clock_switch_hse2pll(void) {
-    furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
+    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
 
     LL_RCC_PLL_Enable();
     LL_RCC_PLLSAI1_Enable();
@@ -180,11 +180,12 @@ bool furi_hal_clock_switch_hse2pll(void) {
     while(!LL_RCC_PLLSAI1_IsReady())
         ;
 
-    if(SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL) != SHCI_Success) {
+    // This API returns garbage if stack version < 1.20.0
+    SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL);
+    // So we'll check results by asking hardware directly
+    if(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
         return false;
     }
-
-    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
 
     LL_SetSystemCoreClock(CPU_CLOCK_PLL_HZ);
     SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
@@ -193,17 +194,18 @@ bool furi_hal_clock_switch_hse2pll(void) {
 }
 
 bool furi_hal_clock_switch_pll2hse(void) {
-    furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
+    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
 
     LL_RCC_HSE_Enable();
     while(!LL_RCC_HSE_IsReady())
         ;
 
-    if(SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE) != SHCI_Success) {
+    // This API returns garbage if stack version < 1.20.0
+    SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE);
+    // So we'll check results by asking hardware directly
+    if(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE) {
         return false;
     }
-
-    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
 
     LL_SetSystemCoreClock(CPU_CLOCK_HSE_HZ);
     SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);

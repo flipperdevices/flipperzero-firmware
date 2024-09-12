@@ -1,14 +1,14 @@
 #include <core/log.h>
 #include <core/record.h>
 #include "storage.h"
-#include "storage_i.h"
+#include "storage_i.h" // IWYU pragma: keep
 #include "storage_message.h"
 #include <toolbox/stream/file_stream.h>
 #include <toolbox/dir_walk.h>
 #include "toolbox/path.h"
 
-#define MAX_NAME_LENGTH 256
-#define MAX_EXT_LEN 16
+#define MAX_NAME_LENGTH  256
+#define MAX_EXT_LEN      16
 #define FILE_BUFFER_SIZE 512
 
 #define TAG "StorageApi"
@@ -41,10 +41,10 @@
             .file = file, \
         }};
 
-#define S_RETURN_BOOL (return_data.bool_value);
-#define S_RETURN_UINT16 (return_data.uint16_value);
-#define S_RETURN_UINT64 (return_data.uint64_value);
-#define S_RETURN_ERROR (return_data.error_value);
+#define S_RETURN_BOOL    (return_data.bool_value);
+#define S_RETURN_UINT16  (return_data.uint16_value);
+#define S_RETURN_UINT64  (return_data.uint64_value);
+#define S_RETURN_ERROR   (return_data.error_value);
 #define S_RETURN_CSTRING (return_data.cstring_value);
 
 typedef enum {
@@ -929,12 +929,12 @@ File* storage_file_alloc(Storage* storage) {
 
 bool storage_file_is_open(File* file) {
     furi_check(file);
-    return (file->type != FileTypeClosed);
+    return file->type != FileTypeClosed;
 }
 
 bool storage_file_is_dir(File* file) {
     furi_check(file);
-    return (file->type == FileTypeOpenDir);
+    return file->type == FileTypeOpenDir;
 }
 
 void storage_file_free(File* file) {

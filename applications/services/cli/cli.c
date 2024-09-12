@@ -19,7 +19,6 @@ Cli* cli_alloc(void) {
     cli->session = NULL;
 
     cli->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    furi_check(cli->mutex);
 
     cli->idle_sem = furi_semaphore_alloc(1, 0);
 
@@ -76,7 +75,7 @@ size_t cli_read_timeout(Cli* cli, uint8_t* buffer, size_t size, uint32_t timeout
 bool cli_is_connected(Cli* cli) {
     furi_check(cli);
     if(cli->session != NULL) {
-        return (cli->session->is_connected());
+        return cli->session->is_connected();
     }
     return false;
 }

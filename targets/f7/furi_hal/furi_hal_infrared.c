@@ -11,7 +11,7 @@
 #include <math.h>
 
 #define INFRARED_TIM_TX_DMA_BUFFER_SIZE 200
-#define INFRARED_POLARITY_SHIFT 1
+#define INFRARED_POLARITY_SHIFT         1
 
 #define INFRARED_TX_CCMR_HIGH \
     (TIM_CCMR2_OC3PE | LL_TIM_OCMODE_PWM2) /* Mark time - enable PWM2 mode */
@@ -19,23 +19,23 @@
     (TIM_CCMR2_OC3PE | LL_TIM_OCMODE_FORCED_INACTIVE) /* Space time - force low */
 
 /* DMA Channels definition */
-#define INFRARED_DMA DMA2
+#define INFRARED_DMA             DMA2
 #define INFRARED_DMA_CH1_CHANNEL LL_DMA_CHANNEL_1
 #define INFRARED_DMA_CH2_CHANNEL LL_DMA_CHANNEL_2
-#define INFRARED_DMA_CH1_IRQ FuriHalInterruptIdDma2Ch1
-#define INFRARED_DMA_CH2_IRQ FuriHalInterruptIdDma2Ch2
-#define INFRARED_DMA_CH1_DEF INFRARED_DMA, INFRARED_DMA_CH1_CHANNEL
-#define INFRARED_DMA_CH2_DEF INFRARED_DMA, INFRARED_DMA_CH2_CHANNEL
+#define INFRARED_DMA_CH1_IRQ     FuriHalInterruptIdDma2Ch1
+#define INFRARED_DMA_CH2_IRQ     FuriHalInterruptIdDma2Ch2
+#define INFRARED_DMA_CH1_DEF     INFRARED_DMA, INFRARED_DMA_CH1_CHANNEL
+#define INFRARED_DMA_CH2_DEF     INFRARED_DMA, INFRARED_DMA_CH2_CHANNEL
 
 /* Timers definition */
-#define INFRARED_RX_TIMER TIM2
-#define INFRARED_DMA_TIMER TIM1
-#define INFRARED_RX_TIMER_BUS FuriHalBusTIM2
+#define INFRARED_RX_TIMER      TIM2
+#define INFRARED_DMA_TIMER     TIM1
+#define INFRARED_RX_TIMER_BUS  FuriHalBusTIM2
 #define INFRARED_DMA_TIMER_BUS FuriHalBusTIM1
 
 /* Misc */
 #define INFRARED_RX_GPIO_ALT GpioAltFn1TIM2
-#define INFRARED_RX_IRQ FuriHalInterruptIdTIM2
+#define INFRARED_RX_IRQ      FuriHalInterruptIdTIM2
 
 typedef struct {
     FuriHalInfraredRxCaptureCallback capture_callback;
@@ -54,6 +54,7 @@ typedef struct {
 
 typedef struct {
     float cycle_duration;
+    float cycle_remainder;
     FuriHalInfraredTxGetDataISRCallback data_callback;
     FuriHalInfraredTxSignalSentISRCallback signal_sent_callback;
     void* data_context;
@@ -512,7 +513,11 @@ static void furi_hal_infrared_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_s
 
         status = infrared_tim_tx.data_callback(infrared_tim_tx.data_context, &duration, &level);
 
-        uint32_t num_of_impulses = roundf(duration / infrared_tim_tx.cycle_duration);
+        const float num_of_impulses_f =
+            duration / infrared_tim_tx.cycle_duration + infrared_tim_tx.cycle_remainder;
+        const uint32_t num_of_impulses = roundf(num_of_impulses_f);
+        // Save the remainder (in carrier periods) for later use
+        infrared_tim_tx.cycle_remainder = num_of_impulses_f - num_of_impulses;
 
         if(num_of_impulses == 0) {
             if((*size == 0) && (status == FuriHalInfraredTxGetDataStateDone)) {
@@ -521,7 +526,7 @@ static void furi_hal_infrared_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_s
                  */
                 status = FuriHalInfraredTxGetDataStateOk;
             }
-        } else if((num_of_impulses - 1) > 0xFFFF) {
+        } else if((num_of_impulses - 1) > UINT16_MAX) {
             infrared_tim_tx.tx_timing_rest_duration = num_of_impulses - 1;
             infrared_tim_tx.tx_timing_rest_status = status;
             infrared_tim_tx.tx_timing_rest_level = level;
@@ -632,6 +637,7 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
     infrared_tim_tx.stop_semaphore = furi_semaphore_alloc(1, 0);
     infrared_tim_tx.cycle_duration = 1000000.0 / freq;
     infrared_tim_tx.tx_timing_rest_duration = 0;
+    infrared_tim_tx.cycle_remainder = 0;
 
     furi_hal_infrared_tx_fill_buffer(0, INFRARED_POLARITY_SHIFT);
 
@@ -655,7 +661,7 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
     const GpioPin* tx_gpio = infrared_tx_pins[infrared_tx_output];
     LL_GPIO_ResetOutputPin(tx_gpio->port, tx_gpio->pin); /* when disable it prevents false pulse */
     furi_hal_gpio_init_ex(
-        tx_gpio, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedHigh, GpioAltFn1TIM1);
+        tx_gpio, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedHigh, GpioAltFn1TIM1);
 
     FURI_CRITICAL_ENTER();
     LL_TIM_GenerateEvent_UPDATE(INFRARED_DMA_TIMER); /* TIMx_RCR -> Repetition counter */

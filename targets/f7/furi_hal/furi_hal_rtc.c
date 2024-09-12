@@ -17,7 +17,7 @@
 
 #define FURI_HAL_RTC_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
-#define FURI_HAL_RTC_HEADER_MAGIC 0x10F1
+#define FURI_HAL_RTC_HEADER_MAGIC   0x10F1
 #define FURI_HAL_RTC_HEADER_VERSION 0
 
 typedef struct {
@@ -27,17 +27,17 @@ typedef struct {
 } FuriHalRtcHeader;
 
 typedef struct {
-    uint8_t log_level : 4;
+    uint8_t log_level    : 4;
     uint8_t log_reserved : 4;
     uint8_t flags;
-    FuriHalRtcBootMode boot_mode : 4;
-    FuriHalRtcHeapTrackMode heap_track_mode : 2;
-    FuriHalRtcLocaleUnits locale_units : 1;
+    FuriHalRtcBootMode boot_mode                 : 4;
+    FuriHalRtcHeapTrackMode heap_track_mode      : 2;
+    FuriHalRtcLocaleUnits locale_units           : 1;
     FuriHalRtcLocaleTimeFormat locale_timeformat : 1;
     FuriHalRtcLocaleDateFormat locale_dateformat : 2;
-    FuriHalRtcLogDevice log_device : 2;
-    FuriHalRtcLogBaudRate log_baud_rate : 3;
-    uint8_t reserved : 1;
+    FuriHalRtcLogDevice log_device               : 2;
+    FuriHalRtcLogBaudRate log_baud_rate          : 3;
+    uint8_t reserved                             : 1;
 } SystemReg;
 
 _Static_assert(sizeof(SystemReg) == 4, "SystemReg size mismatch");
@@ -409,6 +409,14 @@ void furi_hal_rtc_set_pin_fails(uint32_t value) {
 
 uint32_t furi_hal_rtc_get_pin_fails(void) {
     return furi_hal_rtc_get_register(FuriHalRtcRegisterPinFails);
+}
+
+void furi_hal_rtc_set_pin_value(uint32_t value) {
+    furi_hal_rtc_set_register(FuriHalRtcRegisterPinValue, value);
+}
+
+uint32_t furi_hal_rtc_get_pin_value(void) {
+    return furi_hal_rtc_get_register(FuriHalRtcRegisterPinValue);
 }
 
 uint32_t furi_hal_rtc_get_timestamp(void) {

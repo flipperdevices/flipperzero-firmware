@@ -1,0 +1,23 @@
+{
+    "folders":
+    [
+        {
+            "path": ".",
+        }
+    ],
+    "settings": {
+        "LSP": {
+            "clangd": {
+                "enabled": true,
+                "initializationOptions": {
+                    // Set `"binary": "custom",` option in LSP-clangd config to use toolchain clangd
+                    "custom_command": ["toolchain/current/bin/clangd"],
+                    "clangd.compile-commands-dir": "build/latest",
+                    "clangd.header-insertion": "never",
+                    "clangd.query-driver": "**/arm-none-eabi-*",
+                    "clangd.clang-tidy": true,
+                },
+            },
+        },
+   },
+}

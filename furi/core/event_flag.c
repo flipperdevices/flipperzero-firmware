@@ -6,20 +6,29 @@
 #include <event_groups.h>
 
 #define FURI_EVENT_FLAG_MAX_BITS_EVENT_GROUPS 24U
-#define FURI_EVENT_FLAG_INVALID_BITS (~((1UL << FURI_EVENT_FLAG_MAX_BITS_EVENT_GROUPS) - 1U))
+#define FURI_EVENT_FLAG_INVALID_BITS          (~((1UL << FURI_EVENT_FLAG_MAX_BITS_EVENT_GROUPS) - 1U))
+
+struct FuriEventFlag {
+    StaticEventGroup_t container;
+};
+
+// IMPORTANT: container MUST be the FIRST struct member
+static_assert(offsetof(FuriEventFlag, container) == 0);
 
 FuriEventFlag* furi_event_flag_alloc(void) {
     furi_check(!FURI_IS_IRQ_MODE());
 
-    EventGroupHandle_t handle = xEventGroupCreate();
-    furi_check(handle);
+    FuriEventFlag* instance = malloc(sizeof(FuriEventFlag));
 
-    return ((FuriEventFlag*)handle);
+    furi_check(xEventGroupCreateStatic(&instance->container) == (EventGroupHandle_t)instance);
+
+    return instance;
 }
 
 void furi_event_flag_free(FuriEventFlag* instance) {
     furi_check(!FURI_IS_IRQ_MODE());
     vEventGroupDelete((EventGroupHandle_t)instance);
+    free(instance);
 }
 
 uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
@@ -39,11 +48,13 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
             portYIELD_FROM_ISR(yield);
         }
     } else {
+        vTaskSuspendAll();
         rflags = xEventGroupSetBits(hEventGroup, (EventBits_t)flags);
+        (void)xTaskResumeAll();
     }
 
     /* Return event flags after setting */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
@@ -69,7 +80,7 @@ uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
     }
 
     /* Return event flags before clearing */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_event_flag_get(FuriEventFlag* instance) {
@@ -85,7 +96,7 @@ uint32_t furi_event_flag_get(FuriEventFlag* instance) {
     }
 
     /* Return current event flags */
-    return (rflags);
+    return rflags;
 }
 
 uint32_t furi_event_flag_wait(
@@ -136,5 +147,5 @@ uint32_t furi_event_flag_wait(
     }
 
     /* Return event flags before clearing */
-    return (rflags);
+    return rflags;
 }

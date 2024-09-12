@@ -25,15 +25,15 @@
 #include <furi_hal_power.h>
 
 #define UPDATE_PERIOD_MS 1000UL
-#define TEXT_STORE_SIZE 64U
+#define TEXT_STORE_SIZE  64U
 
-#define DS18B20_CMD_SKIP_ROM 0xccU
-#define DS18B20_CMD_CONVERT 0x44U
+#define DS18B20_CMD_SKIP_ROM        0xccU
+#define DS18B20_CMD_CONVERT         0x44U
 #define DS18B20_CMD_READ_SCRATCHPAD 0xbeU
 
-#define DS18B20_CFG_RESOLUTION_POS 5U
+#define DS18B20_CFG_RESOLUTION_POS  5U
 #define DS18B20_CFG_RESOLUTION_MASK 0x03U
-#define DS18B20_DECIMAL_PART_MASK 0x0fU
+#define DS18B20_DECIMAL_PART_MASK   0x0fU
 
 #define DS18B20_SIGN_MASK 0xf0U
 
@@ -257,7 +257,7 @@ static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
         snprintf(text_store, TEXT_STORE_SIZE, "Temperature: %+.1f%c", (double)temp, temp_units);
     } else {
         /* Or show a message that no data is available */
-        strncpy(text_store, "-- No data --", TEXT_STORE_SIZE);
+        strlcpy(text_store, "-- No data --", TEXT_STORE_SIZE);
     }
 
     canvas_draw_str_aligned(canvas, middle_x, 58, AlignCenter, AlignBottom, text_store);

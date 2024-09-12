@@ -8,15 +8,13 @@
 
 #include "../desktop.h"
 #include "../desktop_i.h"
-#include "../animations/animation_manager.h"
 #include "../views/desktop_events.h"
 #include "../views/desktop_view_pin_input.h"
-#include "../helpers/pin.h"
+#include "../helpers/pin_code.h"
 #include "desktop_scene.h"
-#include "desktop_scene_i.h"
 
 #define WRONG_PIN_HEADER_TIMEOUT 3000
-#define INPUT_PIN_VIEW_TIMEOUT 15000
+#define INPUT_PIN_VIEW_TIMEOUT   15000
 
 typedef struct {
     FuriTimer* timer;
@@ -51,10 +49,12 @@ static void desktop_scene_pin_input_back_callback(void* context) {
     view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopPinInputEventBack);
 }
 
-static void desktop_scene_pin_input_done_callback(const PinCode* pin_code, void* context) {
+static void desktop_scene_pin_input_done_callback(const DesktopPinCode* pin_code, void* context) {
     Desktop* desktop = (Desktop*)context;
-    if(desktop_pin_compare(&desktop->settings.pin_code, pin_code)) {
+
+    if(desktop_pin_code_check(pin_code)) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopPinInputEventUnlocked);
+
     } else {
         uint32_t pin_fails = furi_hal_rtc_get_pin_fails();
         furi_hal_rtc_set_pin_fails(pin_fails + 1);
