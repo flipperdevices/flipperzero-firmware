@@ -18,13 +18,13 @@ static int32_t errno_fuzzer(void* context) {
     for(int i = 0; i < ITER_CNT; i++) {
         errno = 0;
         furi_thread_yield();
-        UNUSED(strtol("123456", NULL, 10));
+        UNUSED(strtol("123456", NULL, 10)); // -V530
         furi_thread_yield();
         if(errno != 0) fails++;
 
         errno = 0;
         furi_thread_yield();
-        UNUSED(strtol("123456123456123456123456123456123456123456123456", NULL, 10));
+        UNUSED(strtol("123456123456123456123456123456123456123456123456", NULL, 10)); // -V530
         furi_thread_yield();
         if(errno != ERANGE) fails++;
     }
