@@ -93,10 +93,20 @@ static void hid_mouse_clicker_timer_callback(void* context) {
         hid_mouse_clicker->view,
         HidMouseClickerModel * model,
         {
-            if(model->running) {
-                hid_hal_mouse_press(hid_mouse_clicker->hid, HID_MOUSE_BTN_LEFT);
-                hid_hal_mouse_release(hid_mouse_clicker->hid, HID_MOUSE_BTN_LEFT);
+            if(model->rate == 0) {
+    // Fast clicking without waiting for timer
+            while(model->running) {
+            hid_hal_mouse_press(hid_mouse_clicker->hid, HID_MOUSE_BTN_LEFT);
+            hid_hal_mouse_release(hid_mouse_clicker->hid, HID_MOUSE_BTN_LEFT);
+        // Add a minimal delay to prevent freezing (e.g., 1ms)
+            furi_delay_ms(1);
             }
+            } else {
+    // Normal timer-based clicking
+            hid_hal_mouse_press(hid_mouse_clicker->hid, HID_MOUSE_BTN_LEFT);
+            hid_hal_mouse_release(hid_mouse_clicker->hid, HID_MOUSE_BTN_LEFT);
+            }
+
         },
         false);
 }
@@ -139,7 +149,7 @@ static bool hid_mouse_clicker_input_callback(InputEvent* event, void* context) {
                 consumed = true;
                 break;
             case InputKeyDown:
-                if(model->rate > 1) {
+                if(model->rate > 0) {
                     model->rate--;
                 }
                 rate_changed = true;
