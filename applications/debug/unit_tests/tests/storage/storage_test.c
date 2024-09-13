@@ -382,20 +382,29 @@ MU_TEST(storage_file_rename) {
     furi_record_close(RECORD_STORAGE);
 }
 
+static const char* dir_rename_tests[][2] = {
+    {EXT_PATH("dir.old"), EXT_PATH("dir.new")},
+    {EXT_PATH("test_dir"), EXT_PATH("test_dir-new")},
+    {EXT_PATH("test"), EXT_PATH("test-test")},
+};
+
 MU_TEST(storage_dir_rename) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    storage_dir_create(storage, EXT_PATH("dir.old"));
+    for(size_t i = 0; i < COUNT_OF(dir_rename_tests); i++) {
+        const char* old_path = dir_rename_tests[i][0];
+        const char* new_path = dir_rename_tests[i][1];
 
-    mu_check(storage_dir_rename_check(storage, EXT_PATH("dir.old")));
+        storage_dir_create(storage, old_path);
+        mu_check(storage_dir_rename_check(storage, old_path));
 
-    mu_assert_int_eq(
-        FSE_OK, storage_common_rename(storage, EXT_PATH("dir.old"), EXT_PATH("dir.new")));
-    mu_assert_int_eq(FSE_NOT_EXIST, storage_common_stat(storage, EXT_PATH("dir.old"), NULL));
-    mu_check(storage_dir_rename_check(storage, EXT_PATH("dir.new")));
+        mu_assert_int_eq(FSE_OK, storage_common_rename(storage, old_path, new_path));
+        mu_assert_int_eq(FSE_NOT_EXIST, storage_common_stat(storage, old_path, NULL));
+        mu_check(storage_dir_rename_check(storage, new_path));
 
-    storage_dir_remove(storage, EXT_PATH("dir.new"));
-    mu_assert_int_eq(FSE_NOT_EXIST, storage_common_stat(storage, EXT_PATH("dir.new"), NULL));
+        storage_dir_remove(storage, new_path);
+        mu_assert_int_eq(FSE_NOT_EXIST, storage_common_stat(storage, new_path, NULL));
+    }
 
     furi_record_close(RECORD_STORAGE);
 }
@@ -405,8 +414,10 @@ MU_TEST_SUITE(storage_rename) {
     MU_RUN_TEST(storage_dir_rename);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_dir_remove(storage, EXT_PATH("dir.old"));
-    storage_dir_remove(storage, EXT_PATH("dir.new"));
+    for(size_t i = 0; i < COUNT_OF(dir_rename_tests); i++) {
+        storage_dir_remove(storage, dir_rename_tests[i][0]);
+        storage_dir_remove(storage, dir_rename_tests[i][1]);
+    }
     furi_record_close(RECORD_STORAGE);
 }
 
