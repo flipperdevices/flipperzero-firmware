@@ -6,7 +6,7 @@
 #define ITER_CNT   1000
 
 static int32_t errno_fuzzer(void* context) {
-    int start_value = *(int*)context;
+    int start_value = (int)context;
     int32_t fails = 0;
 
     for(int i = start_value; i < start_value + ITER_CNT; i++) {
@@ -34,16 +34,12 @@ static int32_t errno_fuzzer(void* context) {
 
 int32_t errno_test_app(void* p) {
     UNUSED(p);
-    int start_values[THREAD_CNT];
     FuriThread* threads[THREAD_CNT];
 
     for(int i = 0; i < THREAD_CNT; i++) {
-        start_values[i] = i * ITER_CNT;
-        threads[i] = furi_thread_alloc_ex("ErrnoFuzzer", 1024, errno_fuzzer, &start_values[i]);
-        furi_thread_set_priority(
-            threads[i],
-            FuriThreadPriorityIsr); // our threads will most likely be preempting each other
-
+        int start_value = i * ITER_CNT;
+        threads[i] = furi_thread_alloc_ex("ErrnoFuzzer", 1024, errno_fuzzer, (void*)start_value);
+        furi_thread_set_priority(threads[i], FuriThreadPriorityNormal);
         furi_thread_start(threads[i]);
     }
 
@@ -53,7 +49,7 @@ int32_t errno_test_app(void* p) {
         furi_thread_free(threads[i]);
 
         if(failed)
-            FURI_LOG_E(TAG, "thread %d failed %ld out of %d times", i, failed, ITER_CNT);
+            FURI_LOG_E(TAG, "thread %d failed %ld out of %d times", i, failed, ITER_CNT * 2);
         else
             FURI_LOG_D(TAG, "thread %d pass", i);
     }
