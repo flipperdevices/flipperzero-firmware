@@ -409,9 +409,33 @@ MU_TEST(storage_dir_rename) {
     furi_record_close(RECORD_STORAGE);
 }
 
+MU_TEST(storage_equiv_and_subdir) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    mu_assert_int_eq(
+        true, storage_common_equivalent_path(storage, EXT_PATH("blah"), EXT_PATH("blah")));
+    mu_assert_int_eq(
+        true, storage_common_equivalent_path(storage, EXT_PATH("blah/"), EXT_PATH("blah/")));
+    mu_assert_int_eq(
+        false, storage_common_equivalent_path(storage, EXT_PATH("blah"), EXT_PATH("blah-blah")));
+    mu_assert_int_eq(
+        false, storage_common_equivalent_path(storage, EXT_PATH("blah/"), EXT_PATH("blah-blah/")));
+
+    mu_assert_int_eq(true, storage_common_is_subdir(storage, EXT_PATH("blah"), EXT_PATH("blah")));
+    mu_assert_int_eq(
+        true, storage_common_is_subdir(storage, EXT_PATH("blah"), EXT_PATH("blah/blah")));
+    mu_assert_int_eq(
+        false, storage_common_is_subdir(storage, EXT_PATH("blah/blah"), EXT_PATH("blah")));
+    mu_assert_int_eq(
+        false, storage_common_is_subdir(storage, EXT_PATH("blah"), EXT_PATH("blah-blah")));
+
+    furi_record_close(RECORD_STORAGE);
+}
+
 MU_TEST_SUITE(storage_rename) {
     MU_RUN_TEST(storage_file_rename);
     MU_RUN_TEST(storage_dir_rename);
+    MU_RUN_TEST(storage_equiv_and_subdir);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     for(size_t i = 0; i < COUNT_OF(dir_rename_tests); i++) {
