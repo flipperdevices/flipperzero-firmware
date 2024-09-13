@@ -7,7 +7,7 @@
 #include <storage/storage_i.h>
 
 #define TEST_RESOURCES_PATH(path) EXT_PATH("unit_tests/" path)
-#define TEST_TMP_PATH(path) EXT_PATH(".tmp/unit_tests/" path)
+#define TEST_TMP_PATH(path)       EXT_PATH(".tmp/unit_tests/" path)
 
 #define STORAGE_LOCKED_FILE TEST_TMP_PATH("locked_file.test")
 #define STORAGE_LOCKED_DIR  STORAGE_INT_PATH_PREFIX
@@ -373,7 +373,8 @@ MU_TEST(storage_file_rename) {
     mu_check(write_file_13DA(storage, TEST_TMP_PATH("file.old")));
     mu_check(check_file_13DA(storage, TEST_TMP_PATH("file.old")));
     mu_assert_int_eq(
-        FSE_OK, storage_common_rename(storage, TEST_TMP_PATH("file.old"), TEST_TMP_PATH("file.new")));
+        FSE_OK,
+        storage_common_rename(storage, TEST_TMP_PATH("file.old"), TEST_TMP_PATH("file.new")));
     mu_assert_int_eq(FSE_NOT_EXIST, storage_common_stat(storage, TEST_TMP_PATH("file.old"), NULL));
     mu_assert_int_eq(FSE_OK, storage_common_stat(storage, TEST_TMP_PATH("file.new"), NULL));
     mu_check(check_file_13DA(storage, TEST_TMP_PATH("file.new")));
@@ -414,21 +415,30 @@ MU_TEST(storage_equiv_and_subdir) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     mu_assert_int_eq(
-        true, storage_common_equivalent_path(storage, TEST_TMP_PATH("blah"), TEST_TMP_PATH("blah")));
+        true,
+        storage_common_equivalent_path(storage, TEST_TMP_PATH("blah"), TEST_TMP_PATH("blah")));
     mu_assert_int_eq(
-        true, storage_common_equivalent_path(storage, TEST_TMP_PATH("blah/"), TEST_TMP_PATH("blah/")));
+        true,
+        storage_common_equivalent_path(storage, TEST_TMP_PATH("blah/"), TEST_TMP_PATH("blah/")));
     mu_assert_int_eq(
-        false, storage_common_equivalent_path(storage, TEST_TMP_PATH("blah"), TEST_TMP_PATH("blah-blah")));
+        false,
+        storage_common_equivalent_path(storage, TEST_TMP_PATH("blah"), TEST_TMP_PATH("blah-blah")));
     mu_assert_int_eq(
-        false, storage_common_equivalent_path(storage, TEST_TMP_PATH("blah/"), TEST_TMP_PATH("blah-blah/")));
+        false,
+        storage_common_equivalent_path(
+            storage, TEST_TMP_PATH("blah/"), TEST_TMP_PATH("blah-blah/")));
 
-    mu_assert_int_eq(true, storage_common_is_subdir(storage, TEST_TMP_PATH("blah"), TEST_TMP_PATH("blah")));
     mu_assert_int_eq(
-        true, storage_common_is_subdir(storage, TEST_TMP_PATH("blah"), TEST_TMP_PATH("blah/blah")));
+        true, storage_common_is_subdir(storage, TEST_TMP_PATH("blah"), TEST_TMP_PATH("blah")));
     mu_assert_int_eq(
-        false, storage_common_is_subdir(storage, TEST_TMP_PATH("blah/blah"), TEST_TMP_PATH("blah")));
+        true,
+        storage_common_is_subdir(storage, TEST_TMP_PATH("blah"), TEST_TMP_PATH("blah/blah")));
     mu_assert_int_eq(
-        false, storage_common_is_subdir(storage, TEST_TMP_PATH("blah"), TEST_TMP_PATH("blah-blah")));
+        false,
+        storage_common_is_subdir(storage, TEST_TMP_PATH("blah/blah"), TEST_TMP_PATH("blah")));
+    mu_assert_int_eq(
+        false,
+        storage_common_is_subdir(storage, TEST_TMP_PATH("blah"), TEST_TMP_PATH("blah-blah")));
 
     furi_record_close(RECORD_STORAGE);
 }
