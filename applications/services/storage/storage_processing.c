@@ -695,7 +695,7 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         storage_process_alias(app, path1, message->data->cequivpath.thread_id, false);
         storage_process_alias(app, path2, message->data->cequivpath.thread_id, false);
         if(message->data->cequivpath.check_subdir) {
-            // by appending slashes at the end and then truncating the first path, we can
+            // by appending slashes at the end and then truncating the second path, we can
             // effectively check for shared path components:
             // example 1:
             //   path1: "/ext/blah"      -> "/ext/blah/"      -> "/ext/blah/"
