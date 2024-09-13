@@ -1,5 +1,6 @@
 #include <furi.h>
 #include <errno.h>
+#include "../test.h" // IWYU pragma: keep
 
 #define TAG        "ErrnoTest"
 #define THREAD_CNT 16
@@ -32,8 +33,7 @@ static int32_t errno_fuzzer(void* context) {
     return fails;
 }
 
-int32_t errno_test_app(void* p) {
-    UNUSED(p);
+void test_errno_saving(void) {
     FuriThread* threads[THREAD_CNT];
 
     for(int i = 0; i < THREAD_CNT; i++) {
@@ -45,14 +45,7 @@ int32_t errno_test_app(void* p) {
 
     for(int i = 0; i < THREAD_CNT; i++) {
         furi_thread_join(threads[i]);
-        int32_t failed = furi_thread_get_return_code(threads[i]);
+        mu_assert_int_eq(0, furi_thread_get_return_code(threads[i]));
         furi_thread_free(threads[i]);
-
-        if(failed)
-            FURI_LOG_E(TAG, "thread %d failed %ld out of %d times", i, failed, ITER_CNT * 2);
-        else
-            FURI_LOG_D(TAG, "thread %d pass", i);
     }
-
-    return 0;
 }
