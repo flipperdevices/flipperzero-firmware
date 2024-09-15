@@ -3,6 +3,7 @@
 #include "kernel.h"
 
 #include <FreeRTOS.h>
+#include <event_groups.h>
 #include <timers.h>
 
 struct FuriTimer {
@@ -13,6 +14,8 @@ struct FuriTimer {
 
 // IMPORTANT: container MUST be the FIRST struct member
 static_assert(offsetof(FuriTimer, container) == 0);
+
+#define TIMER_DELETED_EVENT (1U << 0)
 
 static void TimerCallback(TimerHandle_t hTimer) {
     FuriTimer* instance = pvTimerGetTimerID(hTimer);
@@ -41,8 +44,10 @@ static void furi_timer_epilogue(void* context, uint32_t arg) {
     furi_assert(context);
     UNUSED(arg);
 
-    volatile bool* can_be_removed = context;
-    *can_be_removed = true;
+    EventGroupHandle_t hEvent = context;
+    vTaskSuspendAll();
+    xEventGroupSetBits(hEvent, TIMER_DELETED_EVENT);
+    (void)xTaskResumeAll();
 }
 
 void furi_timer_free(FuriTimer* instance) {
@@ -52,14 +57,14 @@ void furi_timer_free(FuriTimer* instance) {
     TimerHandle_t hTimer = (TimerHandle_t)instance;
     furi_check(xTimerDelete(hTimer, portMAX_DELAY) == pdPASS);
 
-    volatile bool can_be_removed = false;
-    furi_check(
-        xTimerPendFunctionCall(furi_timer_epilogue, (void*)&can_be_removed, 0, portMAX_DELAY) ==
-        pdPASS);
+    StaticEventGroup_t event_container = {};
+    EventGroupHandle_t hEvent = xEventGroupCreateStatic(&event_container);
+    furi_check(xTimerPendFunctionCall(furi_timer_epilogue, hEvent, 0, portMAX_DELAY) == pdPASS);
 
-    while(!can_be_removed) {
-        furi_delay_tick(2);
-    }
+    furi_check(
+        xEventGroupWaitBits(hEvent, TIMER_DELETED_EVENT, pdFALSE, pdTRUE, portMAX_DELAY) ==
+        TIMER_DELETED_EVENT);
+    vEventGroupDelete(hEvent);
 
     free(instance);
 }
