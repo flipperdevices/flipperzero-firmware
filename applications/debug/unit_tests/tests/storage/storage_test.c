@@ -6,8 +6,8 @@
 // This is a hack to access internal storage functions and definitions
 #include <storage/storage_i.h>
 
-#define UINTTEST_RESOURCES_PATH(path) EXT_PATH("unit_tests/" path)
-#define UNIT_TESTS_PATH(path)         EXT_PATH(".tmp/unit_tests/" path)
+#define UNIT_TESTS_RESOURCES_PATH(path) EXT_PATH("unit_tests/" path)
+#define UNIT_TESTS_PATH(path)           EXT_PATH(".tmp/unit_tests/" path)
 
 #define STORAGE_LOCKED_FILE UNIT_TESTS_PATH("locked_file.test")
 #define STORAGE_LOCKED_DIR  STORAGE_INT_PATH_PREFIX
@@ -702,7 +702,7 @@ MU_TEST(test_md5_calc) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
-    const char* path = UINTTEST_RESOURCES_PATH("storage/md5.txt");
+    const char* path = UNIT_TESTS_RESOURCES_PATH("storage/md5.txt");
     const char* md5_cstr = "2a456fa43e75088fdde41c93159d62a2";
     const uint8_t md5[MD5_HASH_SIZE] = {
         0x2a,
