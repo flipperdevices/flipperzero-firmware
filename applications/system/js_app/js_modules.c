@@ -95,7 +95,10 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
 
         if(strncmp(name, modules_builtin[i].name, name_compare_len) == 0) {
             JsModuleData module = {
-                .create = modules_builtin[i].create, .destroy = modules_builtin[i].destroy};
+                .create = modules_builtin[i].create,
+                .destroy = modules_builtin[i].destroy,
+                .name = furi_string_alloc_set_str(name),
+            };
             JsModuleArray_push_at(modules->modules, 0, module);
             module_found = true;
             FURI_LOG_I(TAG, "Using built-in module %s", name);
