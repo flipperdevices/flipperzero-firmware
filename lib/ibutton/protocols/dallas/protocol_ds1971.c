@@ -5,17 +5,19 @@
 
 #include "dallas_common.h"
 
+#include "../blanks/tm2004.h"
+
 #define DS1971_FAMILY_CODE 0x14U
 #define DS1971_FAMILY_NAME "DS1971"
 
-#define DS1971_EEPROM_DATA_SIZE 32U
-#define DS1971_SRAM_PAGE_SIZE 32U
+#define DS1971_EEPROM_DATA_SIZE      32U
+#define DS1971_SRAM_PAGE_SIZE        32U
 #define DS1971_COPY_SCRATCH_DELAY_US 250U
 
 #define DS1971_DATA_BYTE_COUNT 4U
 
 #define DS1971_EEPROM_DATA_KEY "Eeprom Data"
-#define DS1971_MEMORY_TYPE "EEPROM"
+#define DS1971_MEMORY_TYPE     "EEPROM"
 
 #define DS1971_CMD_FINALIZATION 0xA5
 
@@ -31,6 +33,7 @@ typedef struct {
 } DS1971ProtocolData;
 
 static bool dallas_ds1971_read(OneWireHost*, void*);
+static bool dallas_ds1971_write_id(OneWireHost*, iButtonProtocolData*);
 static bool dallas_ds1971_write_copy(OneWireHost*, iButtonProtocolData*);
 static void dallas_ds1971_emulate(OneWireSlave*, iButtonProtocolData*);
 static bool dallas_ds1971_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
@@ -48,13 +51,14 @@ static bool ds1971_emulate_read_mem(OneWireSlave* bus, const uint8_t* data, size
 
 const iButtonProtocolDallasBase ibutton_protocol_ds1971 = {
     .family_code = DS1971_FAMILY_CODE,
-    .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteCopy,
+    .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteId |
+                iButtonProtocolFeatureWriteCopy,
     .data_size = sizeof(DS1971ProtocolData),
     .manufacturer = DALLAS_COMMON_MANUFACTURER_NAME,
     .name = DS1971_FAMILY_NAME,
 
     .read = dallas_ds1971_read,
-    .write_blank = NULL, // TODO FL-3531: Implement writing to blank
+    .write_id = dallas_ds1971_write_id,
     .write_copy = dallas_ds1971_write_copy,
     .emulate = dallas_ds1971_emulate,
     .save = dallas_ds1971_save,
@@ -72,6 +76,11 @@ bool dallas_ds1971_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS1971ProtocolData* data = protocol_data;
     return onewire_host_reset(host) && dallas_common_read_rom(host, &data->rom_data) &&
            dallas_ds1971_read_mem(host, 0, data->eeprom_data, DS1971_EEPROM_DATA_SIZE);
+}
+
+bool dallas_ds1971_write_id(OneWireHost* host, iButtonProtocolData* protocol_data) {
+    DS1971ProtocolData* data = protocol_data;
+    return tm2004_write(host, data->rom_data.bytes, sizeof(DallasCommonRomData));
 }
 
 bool dallas_ds1971_write_copy(OneWireHost* host, iButtonProtocolData* protocol_data) {
@@ -218,19 +227,15 @@ void dallas_ds1971_render_uid(FuriString* result, const iButtonProtocolData* pro
 
 void dallas_ds1971_render_data(FuriString* result, const iButtonProtocolData* protocol_data) {
     const DS1971ProtocolData* data = protocol_data;
-    FuriString* data_string = furi_string_alloc();
+
+    furi_string_cat_printf(result, "\e#Memory Data\n--------------------\n");
 
     pretty_format_bytes_hex_canonical(
-        data_string,
+        result,
         DS1971_DATA_BYTE_COUNT,
         PRETTY_FORMAT_FONT_MONOSPACE,
         data->eeprom_data,
         DS1971_EEPROM_DATA_SIZE);
-
-    furi_string_cat_printf(result, "\e#Memory Data\n--------------------\n");
-    furi_string_cat_printf(result, "%s", furi_string_get_cstr(data_string));
-
-    furi_string_free(data_string);
 }
 
 void dallas_ds1971_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {

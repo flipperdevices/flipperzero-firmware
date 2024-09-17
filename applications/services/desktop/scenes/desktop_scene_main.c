@@ -8,7 +8,6 @@
 #include "../views/desktop_events.h"
 #include "../views/desktop_view_main.h"
 #include "desktop_scene.h"
-#include "desktop_scene_i.h"
 
 #define TAG "DesktopSrv"
 
@@ -142,25 +141,21 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
 
         case DesktopMainEventOpenFavoriteLeftShort:
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
             desktop_scene_main_start_favorite(
                 desktop, &desktop->settings.favorite_apps[FavoriteAppLeftShort]);
             consumed = true;
             break;
         case DesktopMainEventOpenFavoriteLeftLong:
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
             desktop_scene_main_start_favorite(
                 desktop, &desktop->settings.favorite_apps[FavoriteAppLeftLong]);
             consumed = true;
             break;
         case DesktopMainEventOpenFavoriteRightShort:
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
             desktop_scene_main_start_favorite(
                 desktop, &desktop->settings.favorite_apps[FavoriteAppRightShort]);
             consumed = true;
             break;
         case DesktopMainEventOpenFavoriteRightLong:
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
             desktop_scene_main_start_favorite(
                 desktop, &desktop->settings.favorite_apps[FavoriteAppRightLong]);
             consumed = true;
@@ -176,7 +171,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopAnimationEventInteractAnimation:
             if(!animation_manager_interact_process(desktop->animation_manager)) {
-                DESKTOP_SETTINGS_LOAD(&desktop->settings);
                 if(!desktop->settings.dummy_mode) {
                     desktop_scene_main_open_app_or_profile(
                         desktop, &desktop->settings.favorite_apps[FavoriteAppRightShort]);

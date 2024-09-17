@@ -1,6 +1,5 @@
 #include "subghz_setting.h"
-#include "types.h"
-//#include "subghz_i.h"
+#include "types.h" // IWYU pragma: keep
 
 #include <furi.h>
 #include <m-list.h>
@@ -8,11 +7,11 @@
 
 #define TAG "SubGhzSetting"
 
-#define SUBGHZ_SETTING_FILE_TYPE "Flipper SubGhz Setting File"
+#define SUBGHZ_SETTING_FILE_TYPE    "Flipper SubGhz Setting File"
 #define SUBGHZ_SETTING_FILE_VERSION 1
 
 #define FREQUENCY_FLAG_DEFAULT (1 << 31)
-#define FREQUENCY_MASK (0xFFFFFFFF ^ FREQUENCY_FLAG_DEFAULT)
+#define FREQUENCY_MASK         (0xFFFFFFFF ^ FREQUENCY_FLAG_DEFAULT)
 
 /* Default */
 static const uint32_t subghz_frequency_list[] = {

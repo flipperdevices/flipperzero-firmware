@@ -4,16 +4,15 @@
 struct ProtocolDict {
     const ProtocolBase** base;
     size_t count;
-    void** data;
+    void* data[];
 };
 
 ProtocolDict* protocol_dict_alloc(const ProtocolBase** protocols, size_t count) {
     furi_check(protocols);
 
-    ProtocolDict* dict = malloc(sizeof(ProtocolDict));
+    ProtocolDict* dict = malloc(sizeof(ProtocolDict) + (sizeof(void*) * count));
     dict->base = protocols;
     dict->count = count;
-    dict->data = malloc(sizeof(void*) * dict->count);
 
     for(size_t i = 0; i < dict->count; i++) {
         dict->data[i] = dict->base[i]->alloc();
@@ -29,7 +28,6 @@ void protocol_dict_free(ProtocolDict* dict) {
         dict->base[i]->free(dict->data[i]);
     }
 
-    free(dict->data);
     free(dict);
 }
 
@@ -198,12 +196,21 @@ LevelDuration protocol_dict_encoder_yield(ProtocolDict* dict, size_t protocol_in
     }
 }
 
+void protocol_dict_render_uid(ProtocolDict* dict, FuriString* result, size_t protocol_index) {
+    furi_check(protocol_index < dict->count);
+    ProtocolRenderData fn = dict->base[protocol_index]->render_uid;
+
+    if(fn) {
+        fn(dict->data[protocol_index], result);
+    }
+}
+
 void protocol_dict_render_data(ProtocolDict* dict, FuriString* result, size_t protocol_index) {
     furi_check(protocol_index < dict->count);
     ProtocolRenderData fn = dict->base[protocol_index]->render_data;
 
     if(fn) {
-        return fn(dict->data[protocol_index], result);
+        fn(dict->data[protocol_index], result);
     }
 }
 
@@ -212,7 +219,7 @@ void protocol_dict_render_brief_data(ProtocolDict* dict, FuriString* result, siz
     ProtocolRenderData fn = dict->base[protocol_index]->render_brief_data;
 
     if(fn) {
-        return fn(dict->data[protocol_index], result);
+        fn(dict->data[protocol_index], result);
     }
 }
 

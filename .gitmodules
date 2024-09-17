@@ -1,9 +1,6 @@
 [submodule "lib/mlib"]
 	path = lib/mlib
 	url = https://github.com/P-p-H-d/mlib.git
-[submodule "lib/littlefs"]
-	path = lib/littlefs
-	url = https://github.com/littlefs-project/littlefs.git
 [submodule "lib/nanopb"]
 	path = lib/nanopb
 	url = https://github.com/nanopb/nanopb.git
@@ -23,9 +20,6 @@
 [submodule "lib/mbedtls"]
 	path = lib/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
-[submodule "lib/cxxheaderparser"]
-	path = lib/cxxheaderparser
-	url = https://github.com/robotpy/cxxheaderparser.git
 [submodule "lib/heatshrink"]
 	path = lib/heatshrink
 	url = https://github.com/flipperdevices/heatshrink.git

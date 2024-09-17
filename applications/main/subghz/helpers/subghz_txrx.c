@@ -1,4 +1,4 @@
-#include "subghz_txrx_i.h"
+#include "subghz_txrx_i.h" // IWYU pragma: keep
 
 #include <lib/subghz/protocols/protocol_items.h>
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
@@ -508,22 +508,19 @@ SubGhzProtocolDecoderBase* subghz_txrx_get_decoder(SubGhzTxRx* instance) {
 
 bool subghz_txrx_protocol_is_serializable(SubGhzTxRx* instance) {
     furi_assert(instance);
-    return (
-        (instance->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
-        SubGhzProtocolFlag_Save);
+    return (instance->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
+           SubGhzProtocolFlag_Save;
 }
 
 bool subghz_txrx_protocol_is_transmittable(SubGhzTxRx* instance, bool check_type) {
     furi_assert(instance);
     const SubGhzProtocol* protocol = instance->decoder_result->protocol;
     if(check_type) {
-        return (
-            ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
-            protocol->encoder->deserialize && protocol->type == SubGhzProtocolTypeStatic);
+        return ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
+               protocol->encoder->deserialize && protocol->type == SubGhzProtocolTypeStatic;
     }
-    return (
-        ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
-        protocol->encoder->deserialize);
+    return ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
+           protocol->encoder->deserialize;
 }
 
 void subghz_txrx_receiver_set_filter(SubGhzTxRx* instance, SubGhzProtocolFlag filter) {

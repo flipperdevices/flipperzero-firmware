@@ -3,14 +3,13 @@
 #include "storage_message.h"
 #include "storage_processing.h"
 #include "storage/storage_glue.h"
-#include "storages/storage_int.h"
 #include "storages/storage_ext.h"
 #include <assets_icons.h>
 
 #define STORAGE_TICK 1000
 
 #define ICON_SD_MOUNTED &I_SDcardMounted_11x8
-#define ICON_SD_ERROR &I_SDcardFail_11x8
+#define ICON_SD_ERROR   &I_SDcardFail_11x8
 
 #define TAG "Storage"
 
@@ -42,9 +41,6 @@ Storage* storage_app_alloc(void) {
         storage_data_timestamp(&app->storage[i]);
     }
 
-#ifndef FURI_RAM_EXEC
-    storage_int_init(&app->storage[ST_INT]);
-#endif
     storage_ext_init(&app->storage[ST_EXT]);
 
     // sd icon gui
