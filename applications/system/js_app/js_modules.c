@@ -13,7 +13,7 @@
 #define MODULES_PATH "/ext/apps_data/js_app/plugins"
 
 typedef struct {
-    char name[32];
+    FuriString* name;
     const JsModuleConstructor create;
     const JsModuleDestructor destroy;
     void* context;
@@ -58,7 +58,7 @@ void js_modules_destroy(JsModules* modules) {
     JsModuleArray_it_t it;
     for(JsModuleArray_it(it, modules->modules); !JsModuleArray_end_p(it); JsModuleArray_next(it)) {
         const JsModuleData* module = JsModuleArray_cref(it);
-        FURI_LOG_T(TAG, "Tearing down %s", module->name);
+        FURI_LOG_T(TAG, "Tearing down %s", furi_string_get_cstr(module->name));
         if(module->destroy) module->destroy(module->context);
     }
     plugin_manager_free(modules->plugin_manager);
@@ -70,7 +70,7 @@ JsModuleData* js_find_loaded_module(JsModules* modules, const char* name) {
     JsModuleArray_it_t it;
     for(JsModuleArray_it(it, modules->modules); !JsModuleArray_end_p(it); JsModuleArray_next(it)) {
         JsModuleData* module = JsModuleArray_ref(it);
-        if(strncmp(module->name, name, sizeof(module->name)) == 0) return module;
+        if(furi_string_cmp_str(module->name, name) == 0) return module;
     }
     return NULL;
 }
@@ -96,7 +96,6 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
         if(strncmp(name, modules_builtin[i].name, name_compare_len) == 0) {
             JsModuleData module = {
                 .create = modules_builtin[i].create, .destroy = modules_builtin[i].destroy};
-            strncpy(module.name, name, sizeof(module.name));
             JsModuleArray_push_at(modules->modules, 0, module);
             module_found = true;
             FURI_LOG_I(TAG, "Using built-in module %s", name);
@@ -132,8 +131,11 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
                 FURI_LOG_E(TAG, "Module name mismatch %s", plugin->name);
                 break;
             }
-            JsModuleData module = {.create = plugin->create, .destroy = plugin->destroy};
-            strncpy(module.name, name, sizeof(module.name));
+            JsModuleData module = {
+                .create = plugin->create,
+                .destroy = plugin->destroy,
+                .name = furi_string_alloc_set_str(name),
+            };
             JsModuleArray_push_at(modules->modules, 0, module);
 
             if(plugin->api_interface) {
