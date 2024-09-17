@@ -149,17 +149,33 @@ static void furi_hal_rtc_recover(void) {
 static void furi_hal_rtc_alarm_handler(void* context) {
     UNUSED(context);
 
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_17)) {
-        if(LL_RTC_IsActiveFlag_ALRA(RTC) != 0) {
-            /* Clear the Alarm interrupt pending bit */
-            LL_RTC_ClearFlag_ALRA(RTC);
+    if(LL_RTC_IsActiveFlag_ALRA(RTC) != 0) {
+        /* Clear the Alarm interrupt pending bit */
+        LL_RTC_ClearFlag_ALRA(RTC);
 
-            /* Alarm callback */
-            furi_check(furi_hal_rtc.alarm_callback);
-            furi_hal_rtc.alarm_callback(furi_hal_rtc.alarm_callback_context);
-        }
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_17);
+        /* Alarm callback */
+        furi_check(furi_hal_rtc.alarm_callback);
+        furi_hal_rtc.alarm_callback(furi_hal_rtc.alarm_callback_context);
     }
+    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_17);
+}
+
+static void furi_hal_rtc_set_alarm_out(bool enable) {
+    FURI_CRITICAL_ENTER();
+    LL_RTC_DisableWriteProtection(RTC);
+    furi_hal_rtc_enter_init_mode();
+    if(enable) {
+        LL_RTC_SetAlarmOutEvent(RTC, LL_RTC_ALARMOUT_ALMA);
+        LL_RTC_SetOutputPolarity(RTC, LL_RTC_OUTPUTPOLARITY_PIN_LOW);
+        LL_RTC_SetAlarmOutputType(RTC, LL_RTC_ALARM_OUTPUTTYPE_OPENDRAIN);
+    } else {
+        LL_RTC_SetAlarmOutEvent(RTC, LL_RTC_ALARMOUT_DISABLE);
+        LL_RTC_SetOutputPolarity(RTC, LL_RTC_OUTPUTPOLARITY_PIN_LOW);
+        LL_RTC_SetAlarmOutputType(RTC, LL_RTC_ALARM_OUTPUTTYPE_OPENDRAIN);
+    }
+    furi_hal_rtc_exit_init_mode();
+    LL_RTC_EnableWriteProtection(RTC);
+    FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_rtc_init_early(void) {
@@ -184,8 +200,6 @@ void furi_hal_rtc_init_early(void) {
     } else {
         furi_hal_debug_disable();
     }
-
-    furi_hal_rtc_set_alarm(NULL);
 }
 
 void furi_hal_rtc_deinit_early(void) {
@@ -204,6 +218,11 @@ void furi_hal_rtc_init(void) {
         furi_hal_rtc_log_baud_rates[furi_hal_rtc_get_log_baud_rate()]);
 
     FURI_LOG_I(TAG, "Init OK");
+    furi_hal_rtc_set_alarm_out(false);
+}
+
+void furi_hal_rtc_prepare_for_shutdown(void) {
+    furi_hal_rtc_set_alarm_out(true);
 }
 
 void furi_hal_rtc_sync_shadow(void) {
@@ -428,7 +447,7 @@ void furi_hal_rtc_get_datetime(DateTime* datetime) {
     datetime->weekday = __LL_RTC_CONVERT_BCD2BIN((date >> 24) & 0xFF);
 }
 
-void furi_hal_rtc_set_alarm(DateTime* datetime) {
+void furi_hal_rtc_set_alarm(const DateTime* datetime) {
     furi_check(!FURI_IS_IRQ_MODE());
 
     FURI_CRITICAL_ENTER();
@@ -444,19 +463,11 @@ void furi_hal_rtc_set_alarm(DateTime* datetime) {
             __LL_RTC_CONVERT_BIN2BCD(datetime->second));
         LL_RTC_ALMA_SetMask(RTC, LL_RTC_ALMA_MASK_DATEWEEKDAY);
 
-        LL_RTC_SetAlarmOutEvent(RTC, LL_RTC_ALARMOUT_ALMA);
-        LL_RTC_SetOutputPolarity(RTC, LL_RTC_OUTPUTPOLARITY_PIN_LOW);
-        LL_RTC_SetAlarmOutputType(RTC, LL_RTC_ALARM_OUTPUTTYPE_OPENDRAIN);
-
         LL_RTC_ClearFlag_ALRA(RTC);
         LL_RTC_ALMA_Enable(RTC);
     } else {
         LL_RTC_ALMA_Disable(RTC);
         LL_RTC_ClearFlag_ALRA(RTC);
-
-        LL_RTC_SetAlarmOutEvent(RTC, LL_RTC_ALARMOUT_DISABLE);
-        LL_RTC_SetOutputPolarity(RTC, LL_RTC_OUTPUTPOLARITY_PIN_LOW);
-        LL_RTC_SetAlarmOutputType(RTC, LL_RTC_ALARM_OUTPUTTYPE_OPENDRAIN);
     }
 
     furi_hal_rtc_exit_init_mode();
@@ -464,23 +475,54 @@ void furi_hal_rtc_set_alarm(DateTime* datetime) {
     FURI_CRITICAL_EXIT();
 }
 
+bool furi_hal_rtc_get_alarm(DateTime* datetime) {
+    furi_check(datetime);
+
+    memset(datetime, 0, sizeof(DateTime));
+
+    datetime->hour = __LL_RTC_CONVERT_BCD2BIN(LL_RTC_ALMA_GetHour(RTC));
+    datetime->minute = __LL_RTC_CONVERT_BCD2BIN(LL_RTC_ALMA_GetMinute(RTC));
+
+    return READ_BIT(RTC->CR, RTC_CR_ALRAE);
+}
+
 void furi_hal_rtc_set_alarm_callback(FuriHalRtcAlarmCallback callback, void* context) {
+    FURI_CRITICAL_ENTER();
+    LL_RTC_DisableWriteProtection(RTC);
+    furi_hal_rtc_enter_init_mode();
+
     if(callback) {
         furi_check(!furi_hal_rtc.alarm_callback);
-
+        // Set our callbacks
         furi_hal_rtc.alarm_callback = callback;
         furi_hal_rtc.alarm_callback_context = context;
-
+        // Enable RTC ISR
         furi_hal_interrupt_set_isr(FuriHalInterruptIdRtcAlarm, furi_hal_rtc_alarm_handler, NULL);
-
+        // Hello EXTI my old friend
+        // Chain: RTC->LINE-17->EXTI->NVIC->FuriHalInterruptIdRtcAlarm
+        LL_EXTI_EnableRisingTrig_0_31(LL_EXTI_LINE_17);
+        LL_EXTI_EnableIT_0_31(LL_EXTI_LINE_17);
+        // Enable alarm interrupt
         LL_RTC_EnableIT_ALRA(RTC);
+        // Force trigger
+        furi_hal_rtc_alarm_handler(NULL);
     } else {
+        // Cleanup EXTI flags and config
+        LL_EXTI_DisableIT_0_31(LL_EXTI_LINE_17);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_17);
+        LL_EXTI_DisableRisingTrig_0_31(LL_EXTI_LINE_17);
+        // Cleanup NVIC flags and config
+        furi_hal_interrupt_set_isr(FuriHalInterruptIdRtcAlarm, NULL, NULL);
         furi_check(furi_hal_rtc.alarm_callback);
-
+        // Disable alarm interrupt
         LL_RTC_DisableIT_ALRA(RTC);
+
         furi_hal_rtc.alarm_callback = NULL;
         furi_hal_rtc.alarm_callback_context = NULL;
     }
+    furi_hal_rtc_exit_init_mode();
+    LL_RTC_EnableWriteProtection(RTC);
+    FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_rtc_set_fault_data(uint32_t value) {

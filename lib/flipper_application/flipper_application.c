@@ -242,9 +242,6 @@ static int32_t flipper_application_thread(void* context) {
 
     // wait until all notifications from RAM are completed
     NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
-    const NotificationSequence sequence_empty = {
-        NULL,
-    };
     notification_message_block(notifications, &sequence_empty);
     furi_record_close(RECORD_NOTIFICATION);
 

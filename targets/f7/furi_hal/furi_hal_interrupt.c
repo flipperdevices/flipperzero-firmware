@@ -263,7 +263,6 @@ void RTC_Alarm_IRQHandler(void) {
     furi_hal_interrupt_call(FuriHalInterruptIdRtcAlarm);
 }
 
-
 void HSEM_IRQHandler(void) {
     furi_hal_interrupt_call(FuriHalInterruptIdHsem);
 }

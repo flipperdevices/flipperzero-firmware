@@ -98,6 +98,14 @@ void furi_hal_rtc_deinit_early(void);
 /** Initialize RTC subsystem */
 void furi_hal_rtc_init(void);
 
+/** Prepare system for shutdown
+ *
+ * This function must be called before system sent to transport mode(power off).
+ * FlipperZero implementation configures and enables ALARM output on pin PC13
+ * (Back button). This allows system to woke-up charger from transport mode.
+ */
+void furi_hal_rtc_prepare_for_shutdown(void);
+
 /** Force sync shadow registers */
 void furi_hal_rtc_sync_shadow(void);
 
@@ -249,10 +257,19 @@ void furi_hal_rtc_get_datetime(DateTime* datetime);
 
 /** Set alarm
  *
- * @param      datetime  The date time to set or NULL to clear alarm
+ * @param[in]  datetime  The date time to set or NULL to clear alarm
  */
-void furi_hal_rtc_set_alarm(DateTime* datetime);
+void furi_hal_rtc_set_alarm(const DateTime* datetime);
 
+/** Get alarm
+ *
+ * @param      datetime  The date time to get
+ *
+ * @return     true if alarm was set, false otherwise
+ */
+bool furi_hal_rtc_get_alarm(DateTime* datetime);
+
+/** Furi HAL RTC alarm callback signature */
 typedef void (*FuriHalRtcAlarmCallback)(void* context);
 
 /** Set alarm callback
@@ -260,7 +277,9 @@ typedef void (*FuriHalRtcAlarmCallback)(void* context);
  * Use it to subscribe to alarm trigger event. Setting alarm callback is
  * independent from setting alarm.
  *
- * @warning    RTC will deliver this callbacks from ISR context.
+ * @warning    Normally this callback will be delivered from ISR, however we may
+ *             deliver it while you calling this function. This happens when
+ *             alarm already triggered, but there were no ISR set.
  *
  * @param[in]  callback  The callback
  * @param      context   The context
