@@ -1,5 +1,5 @@
 #include "thread.h"
-#include "thread_list.h"
+#include "thread_list_i.h"
 #include "kernel.h"
 #include "memmgr.h"
 #include "memmgr_heap.h"
