@@ -163,7 +163,6 @@ static void furi_hal_rtc_alarm_handler(void* context) {
 static void furi_hal_rtc_set_alarm_out(bool enable) {
     FURI_CRITICAL_ENTER();
     LL_RTC_DisableWriteProtection(RTC);
-    furi_hal_rtc_enter_init_mode();
     if(enable) {
         LL_RTC_SetAlarmOutEvent(RTC, LL_RTC_ALARMOUT_ALMA);
         LL_RTC_SetOutputPolarity(RTC, LL_RTC_OUTPUTPOLARITY_PIN_LOW);
@@ -173,7 +172,6 @@ static void furi_hal_rtc_set_alarm_out(bool enable) {
         LL_RTC_SetOutputPolarity(RTC, LL_RTC_OUTPUTPOLARITY_PIN_LOW);
         LL_RTC_SetAlarmOutputType(RTC, LL_RTC_ALARM_OUTPUTTYPE_OPENDRAIN);
     }
-    furi_hal_rtc_exit_init_mode();
     LL_RTC_EnableWriteProtection(RTC);
     FURI_CRITICAL_EXIT();
 }
@@ -452,7 +450,6 @@ void furi_hal_rtc_set_alarm(const DateTime* datetime) {
 
     FURI_CRITICAL_ENTER();
     LL_RTC_DisableWriteProtection(RTC);
-    furi_hal_rtc_enter_init_mode();
 
     if(datetime) {
         LL_RTC_ALMA_ConfigTime(
@@ -470,7 +467,6 @@ void furi_hal_rtc_set_alarm(const DateTime* datetime) {
         LL_RTC_ClearFlag_ALRA(RTC);
     }
 
-    furi_hal_rtc_exit_init_mode();
     LL_RTC_EnableWriteProtection(RTC);
     FURI_CRITICAL_EXIT();
 }
@@ -489,8 +485,6 @@ bool furi_hal_rtc_get_alarm(DateTime* datetime) {
 void furi_hal_rtc_set_alarm_callback(FuriHalRtcAlarmCallback callback, void* context) {
     FURI_CRITICAL_ENTER();
     LL_RTC_DisableWriteProtection(RTC);
-    furi_hal_rtc_enter_init_mode();
-
     if(callback) {
         furi_check(!furi_hal_rtc.alarm_callback);
         // Set our callbacks
@@ -507,20 +501,19 @@ void furi_hal_rtc_set_alarm_callback(FuriHalRtcAlarmCallback callback, void* con
         // Force trigger
         furi_hal_rtc_alarm_handler(NULL);
     } else {
+        furi_check(furi_hal_rtc.alarm_callback);
         // Cleanup EXTI flags and config
         LL_EXTI_DisableIT_0_31(LL_EXTI_LINE_17);
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_17);
         LL_EXTI_DisableRisingTrig_0_31(LL_EXTI_LINE_17);
         // Cleanup NVIC flags and config
         furi_hal_interrupt_set_isr(FuriHalInterruptIdRtcAlarm, NULL, NULL);
-        furi_check(furi_hal_rtc.alarm_callback);
         // Disable alarm interrupt
         LL_RTC_DisableIT_ALRA(RTC);
 
         furi_hal_rtc.alarm_callback = NULL;
         furi_hal_rtc.alarm_callback_context = NULL;
     }
-    furi_hal_rtc_exit_init_mode();
     LL_RTC_EnableWriteProtection(RTC);
     FURI_CRITICAL_EXIT();
 }
