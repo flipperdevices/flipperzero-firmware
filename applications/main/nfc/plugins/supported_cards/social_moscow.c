@@ -227,7 +227,7 @@ static bool social_moscow_parse(const NfcDevice* device, FuriString* parsed_data
         }
         furi_string_free(ground_result);
         furi_string_free(metro_result);
-        parsed = result1 || result2;
+        parsed = card_code != 0;
     } while(false);
 
     return parsed;
