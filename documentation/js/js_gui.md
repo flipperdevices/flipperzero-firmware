@@ -10,36 +10,46 @@ This module depends on the `event_loop` module, so it _must_ only be imported
 after `event_loop` is imported.
 
 ## Conceptualizing GUI
+### Event loop
+It is highly recommended to familiarize yourself with the event loop first
+before doing GUI-related things.
+
 ### Canvas
 The canvas is just a drawing area with no abstractions over it. Drawing on the
-canvas directly (i.e. not through a viewport) is highly discouraged and
-impossible from JS.
+canvas directly (i.e. not through a viewport) is useful in case you want to
+implement a custom design element, but this is rather uncommon.
 
 ### Viewport
-A viewport is a window into a rectangular portion of the canvas. Drawing on a
-viewport is permitted, but currently inaccessible from JS.
+A viewport is a window into a rectangular portion of the canvas. Applications
+always access the canvas through a viewport.
 
 ### View
 In Flipper's terminology, a "View" is a fullscreen design element that assumes
 control over the entire viewport and all input events. Different types of views
 are available (not all of which are unfortunately currently implemented in JS):
-| View                 | Has JS adapter? |
-|----------------------|-----------------|
-| `button_menu`        | ❌              |
-| `button_panel`       | ❌              |
-| `byte_input`         | ❌              |
-| `dialog_ex`          | ❌              |
-| `empty_screen`       | ✅              |
-| `file_browser`       | ❌              |
-| `loading`            | ✅              |
-| `menu`               | ❌              |
-| `number_input`       | ❌              |
-| `popup`              | ❌              |
-| `submenu`            | ✅              |
-| `text_box`           | ✅              |
-| `text_input`         | ✅              |
-| `variable_item_list` | ❌              |
-| `widget`             | ❌              |
+| View                 | Has JS adapter?  |
+|----------------------|------------------|
+| `button_menu`        | ❌               |
+| `button_panel`       | ❌               |
+| `byte_input`         | ❌               |
+| `dialog_ex`          | ✅ (as `dialog`) |
+| `empty_screen`       | ✅               |
+| `file_browser`       | ❌               |
+| `loading`            | ✅               |
+| `menu`               | ❌               |
+| `number_input`       | ❌               |
+| `popup`              | ❌               |
+| `submenu`            | ✅               |
+| `text_box`           | ✅               |
+| `text_input`         | ✅               |
+| `variable_item_list` | ❌               |
+| `widget`             | ❌               |
+
+In JS, each view has its own set of properties (or just "props"). The programmer
+can manipulate these properties in two ways:
+  - Instantiate a `View` using the `makeWith(props)` method, passing an object
+    with the initial properties
+  - Call `set(name, value)` to modify a property of an existing `View`
 
 ### View Dispatcher
 The view dispatcher holds references to all the views that an application needs
@@ -68,39 +78,39 @@ let loadingView = require("gui/loading");
 let submenuView = require("gui/submenu");
 let emptyView = require("gui/empty_screen");
 
-// loading screen
-let loading = loadingView.make();
-let loadingAssoc = gui.viewDispatcher.add(loading);
+// Common pattern: declare all the views in an object. This is absolutely not
+// required, but adds clarity to the script.
+let views = {
+    // the view dispatcher auto-✨magically✨ remembers views as they are created
+    loading: loadingView.make(),
+    empty: emptyView.make(),
+    demos: submenuView.makeWith({
+        items: [
+            "Hourglass screen",
+            "Empty screen",
+            "Exit app",
+        ],
+    }),
+};
 
-// empty screen
-let empty = emptyView.make();
-let emptyAssoc = gui.viewDispatcher.add(empty);
-
-// demo chooser screen
-let demoChooser = submenuView.make();
-demoChooser.setItems([
-    "Hourglass screen",
-    "Empty screen",
-    "Exit app",
-]);
-eventLoop.subscribe(demoChooser.chosen, function (_sub, index, gui, eventLoop, loadingAssoc, emptyAssoc) {
+// go to different screens depending on what was selected
+eventLoop.subscribe(views.demos.chosen, function (_sub, index, gui, eventLoop, views) {
     if (index === 0) {
-        gui.viewDispatcher.switchTo(loadingAssoc);
+        gui.viewDispatcher.switchTo(views.loading);
     } else if (index === 1) {
-        gui.viewDispatcher.switchTo(emptyAssoc);
+        gui.viewDispatcher.switchTo(views.empty);
     } else if (index === 2) {
         eventLoop.stop();
     }
-}, gui, eventLoop, loadingAssoc, emptyAssoc);
-let demoChooserAssoc = gui.viewDispatcher.add(demoChooser);
+}, gui, eventLoop, views);
 
 // go to the demo chooser screen when the back key is pressed
-eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, gui, demoChooserAssoc) {
-    gui.viewDispatcher.switchTo(demoChooserAssoc);
-}, gui, demoChooserAssoc);
+eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, gui, views) {
+    gui.viewDispatcher.switchTo(views.demos);
+}, gui, views);
 
 // run UI
-gui.viewDispatcher.switchTo(demoChooserAssoc);
+gui.viewDispatcher.switchTo(views.demos);
 eventLoop.run();
 ```
 
@@ -108,29 +118,13 @@ eventLoop.run();
 ## `viewDispatcher`
 The `viewDispatcher` constant holds the `ViewDispatcher` singleton.
 
-### `ViewDispatcher.add(view)`
-Adds a view to the dispatcher, creating and returning a View-ViewDispatcher
-association.
+### `viewDispatcher.switchTo(view)`
+Switches to a view, giving it control over the display and input
 
 #### Parameters
-  - `view`: the view to associate with the view dispatcher
+  - `view`: the `View` to switch to
 
-#### Returns
-An opaque association between the view and the view dispatcher
-
-### `ViewDispatcher.remove(assoc)`
-Removes a view from the dispatcher
-
-#### Parameters
-  - `assoc`: the View-ViewDispatcher association
-
-### `ViewDispatcher.switchTo(assoc)`
-Switches to an associated view, giving it control over the display and input
-
-#### Parameters
-  - `assoc`: the View-ViewDispatcher association
-
-### `ViewDispatcher.sendTo(direction)`
+### `viewDispatcher.sendTo(direction)`
 Sends the viewport that the dispatcher manages to the front of the stackup
 (effectively making it visible), or to the back (effectively making it
 invisible)
@@ -138,16 +132,30 @@ invisible)
 #### Parameters
   - `direction`: either `"front"` or `"back"`
 
-### `ViewDispatcher.sendCustom(event)`
+### `viewDispatcher.sendCustom(event)`
 Sends a custom number to the `custom` event handler
 
 #### Parameters
   - `event`: number to send
 
-### `ViewDispatcher.custom`
+### `viewDispatcher.custom`
 An event loop `Contract` object that identifies the custom event source,
 triggered by `ViewDispatcher.sendCustom(event)`
 
-### `ViewDispatcher.navigation`
+### `viewDispatcher.navigation`
 An event loop `Contract` object that identifies the navigation event source,
 triggered when the back key is pressed
+
+## `ViewFactory`
+When you import a module implementing a view, a `ViewFactory` is instantiated.
+For example, in the example above, `loadingView`, `submenuView` and `emptyView`
+are view factories.
+
+### `ViewFactory.make()`
+Creates an instance of a `View`
+
+### `ViewFactory.make(props)`
+Creates an instance of a `View` and assigns initial properties from `props`
+
+#### Parameters
+  - `props`: simple key-value object, e.g. `{ header: "Header" }`
