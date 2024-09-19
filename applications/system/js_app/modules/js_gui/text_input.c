@@ -1,116 +1,116 @@
 #include "../../js_modules.h" // IWYU pragma: keep
+#include "js_gui.h"
 #include "../js_event_loop/js_event_loop.h"
 #include <gui/modules/text_input.h>
 
-#define INPUT_QUEUE_SIZE 4
+#define DEFAULT_BUF_SZ 33
 
 typedef struct {
-    TextInput* text_input;
-    FuriEventLoop* loop;
-    FuriMessageQueue* input_queue;
-    JsEventLoopContract* contract;
-    size_t buffer_size;
     char* buffer;
-    char* header;
-} JsGuiTextInput;
+    size_t buffer_size;
+    FuriString* header;
+    FuriSemaphore* input_semaphore;
+    JsEventLoopContract contract;
+} JsKbdContext;
 
-static mjs_val_t js_gui_text_input_transformer(FuriEventLoopObject* object, void* context) {
-    struct mjs* mjs = context;
-    FuriMessageQueue* queue = object;
-    FuriString* string;
-    furi_check(furi_message_queue_get(queue, &string, FuriWaitForever) == FuriStatusOk);
-    mjs_val_t js_string = mjs_mk_string(mjs, furi_string_get_cstr(string), ~0, true);
-    furi_string_free(string);
-    return js_string;
+static mjs_val_t
+    input_transformer(struct mjs* mjs, FuriSemaphore* semaphore, JsKbdContext* context) {
+    furi_check(furi_semaphore_acquire(semaphore, 0) == FuriStatusOk);
+    return mjs_mk_string(mjs, context->buffer, ~0, true);
 }
 
-static void js_gui_text_input_callback(void* context) {
-    JsGuiTextInput* input = context;
-    FuriString* string = furi_string_alloc_set_str(input->buffer);
-    furi_check(furi_message_queue_put(input->input_queue, &string, 0) == FuriStatusOk);
+static void input_callback(JsKbdContext* context) {
+    furi_semaphore_release(context->input_semaphore);
 }
 
-static void js_gui_text_input_destructor(struct mjs* mjs, mjs_val_t obj) {
-    JsGuiTextInput* object = JS_GET_INST(mjs, obj);
-    text_input_free(object->text_input);
-    furi_event_loop_maybe_unsubscribe(object->loop, object->input_queue);
-    furi_message_queue_free(object->input_queue);
-    free(object->contract);
-    free(object->buffer);
-    free(object->header);
-    free(object);
+static bool
+    header_assign(struct mjs* mjs, TextInput* input, JsViewPropValue value, JsKbdContext* context) {
+    UNUSED(mjs);
+    furi_string_set(context->header, value.string);
+    text_input_set_header_text(input, furi_string_get_cstr(context->header));
+    return true;
 }
 
-static void js_gui_text_input_make(struct mjs* mjs) {
-    const char* header;
-    int32_t min_length, max_length;
-    JS_FETCH_ARGS_OR_RETURN(
-        mjs, JS_EXACTLY, JS_ARG_STR(&header), JS_ARG_INT32(&min_length), JS_ARG_INT32(&max_length));
+static bool min_len_assign(
+    struct mjs* mjs,
+    TextInput* input,
+    JsViewPropValue value,
+    JsKbdContext* context) {
+    UNUSED(mjs);
+    UNUSED(context);
+    text_input_set_minimum_length(input, (size_t)value.number);
+    return true;
+}
 
-    JsGuiTextInput* object = malloc(sizeof(JsGuiTextInput));
-    object->text_input = text_input_alloc();
-    object->input_queue = furi_message_queue_alloc(INPUT_QUEUE_SIZE, sizeof(FuriString*));
-    object->loop = JS_GET_CONTEXT(mjs);
-    object->buffer = malloc(max_length + 1);
-    object->header = strdup(header);
-    text_input_set_minimum_length(object->text_input, min_length);
-    text_input_set_header_text(object->text_input, object->header);
+static bool max_len_assign(
+    struct mjs* mjs,
+    TextInput* input,
+    JsViewPropValue value,
+    JsKbdContext* context) {
+    UNUSED(mjs);
+    context->buffer_size = (size_t)(value.number + 1);
+    context->buffer = realloc(context->buffer, context->buffer_size);
     text_input_set_result_callback(
-        object->text_input,
-        js_gui_text_input_callback,
-        object,
-        object->buffer,
-        max_length + 1,
+        input,
+        (TextInputCallback)input_callback,
+        context,
+        context->buffer,
+        context->buffer_size,
         true);
-
-    JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
-    contract->object = object->input_queue;
-    contract->object_type = JsEventLoopObjectTypeQueue;
-    contract->event = FuriEventLoopEventIn;
-    contract->transformer = js_gui_text_input_transformer;
-    contract->transformer_context = mjs;
-    object->contract = contract;
-
-    mjs_val_t js_text_input = mjs_mk_object(mjs);
-    mjs_set(mjs, js_text_input, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, object));
-    mjs_set(
-        mjs, js_text_input, MJS_DESTRUCTOR_PROP_NAME, ~0, MJS_MK_FN(js_gui_text_input_destructor));
-    mjs_set(mjs, js_text_input, "input", ~0, mjs_mk_foreign(mjs, object->contract));
-    mjs_set(
-        mjs,
-        js_text_input,
-        "_view",
-        ~0,
-        mjs_mk_foreign(mjs, text_input_get_view(object->text_input)));
-    mjs_return(mjs, js_text_input);
+    return true;
 }
 
-static void* js_gui_text_input_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
-    JsEventLoop* js_loop = js_module_get(modules, "event_loop");
-    if(M_UNLIKELY(!js_loop)) return NULL;
-    if(M_UNLIKELY(!js_module_get(modules, "gui"))) return NULL;
-
-    mjs_val_t ctor = mjs_mk_object(mjs);
-    mjs_set(mjs, ctor, INST_PROP_NAME, ~0, MJS_MK_FN(js_event_loop_get_loop(js_loop)));
-    mjs_set(mjs, ctor, "make", ~0, MJS_MK_FN(js_gui_text_input_make));
-
-    *object = ctor;
-    return NULL;
+static JsKbdContext* ctx_make(struct mjs* mjs, TextInput* input, mjs_val_t view_obj) {
+    UNUSED(input);
+    JsKbdContext* context = malloc(sizeof(JsKbdContext));
+    *context = (JsKbdContext){
+        .buffer_size = DEFAULT_BUF_SZ,
+        .buffer = malloc(DEFAULT_BUF_SZ),
+        .header = furi_string_alloc(),
+        .input_semaphore = furi_semaphore_alloc(1, 0),
+    };
+    context->contract = (JsEventLoopContract){
+        .object_type = JsEventLoopObjectTypeSemaphore,
+        .object = context->input_semaphore,
+        .event = FuriEventLoopEventIn,
+        .transformer = (JsEventLoopTransformer)input_transformer,
+        .transformer_context = context,
+    };
+    UNUSED(mjs);
+    UNUSED(view_obj);
+    mjs_set(mjs, view_obj, "input", ~0, mjs_mk_foreign(mjs, &context->contract));
+    return context;
 }
 
-static const JsModuleDescriptor js_gui_text_input_desc = {
-    "gui__text_input",
-    js_gui_text_input_create,
-    NULL,
-    NULL,
-};
-
-static const FlipperAppPluginDescriptor plugin_descriptor = {
-    .appid = PLUGIN_APP_ID,
-    .ep_api_version = PLUGIN_API_VERSION,
-    .entry_point = &js_gui_text_input_desc,
-};
-
-const FlipperAppPluginDescriptor* js_gui_text_input_ep(void) {
-    return &plugin_descriptor;
+static void ctx_destroy(TextInput* input, JsKbdContext* context, FuriEventLoop* loop) {
+    UNUSED(input);
+    furi_event_loop_maybe_unsubscribe(loop, context->input_semaphore);
+    furi_semaphore_free(context->input_semaphore);
+    furi_string_free(context->header);
+    free(context->buffer);
+    free(context);
 }
+
+static const JsViewDescriptor view_descriptor = {
+    .alloc = (JsViewAlloc)text_input_alloc,
+    .free = (JsViewFree)text_input_free,
+    .get_view = (JsViewGetView)text_input_get_view,
+    .custom_make = (JsViewCustomMake)ctx_make,
+    .custom_destroy = (JsViewCustomDestroy)ctx_destroy,
+    .prop_cnt = 3,
+    .props = {
+        (JsViewPropDescriptor){
+            .name = "header",
+            .type = JsViewPropTypeString,
+            .assign = (JsViewPropAssign)header_assign},
+        (JsViewPropDescriptor){
+            .name = "minLength",
+            .type = JsViewPropTypeNumber,
+            .assign = (JsViewPropAssign)min_len_assign},
+        (JsViewPropDescriptor){
+            .name = "maxLength",
+            .type = JsViewPropTypeNumber,
+            .assign = (JsViewPropAssign)max_len_assign},
+    }};
+
+JS_GUI_VIEW_DEF(text_input, &view_descriptor);

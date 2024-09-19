@@ -1,10 +1,7 @@
-import type { View } from ".";
+import type { View, ViewFactory } from ".";
 
-/**
- * Empty screen
- */
-export class EmptyScreen implements View {
-    _view: symbol;
-}
-
-export function make(): EmptyScreen;
+type Props = {};
+declare class EmptyScreen extends View<Props> { }
+declare class EmptyScreenFactory extends ViewFactory<Props, EmptyScreen> { }
+declare const factory: EmptyScreenFactory;
+export = factory;

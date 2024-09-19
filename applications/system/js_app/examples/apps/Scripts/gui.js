@@ -1,3 +1,4 @@
+// import modules
 let eventLoop = require("event_loop");
 let gui = require("gui");
 let loadingView = require("gui/loading");
@@ -5,61 +6,71 @@ let submenuView = require("gui/submenu");
 let emptyView = require("gui/empty_screen");
 let textInputView = require("gui/text_input");
 let textBoxView = require("gui/text_box");
+let dialogView = require("gui/dialog");
 
-// loading screen
-let loading = loadingView.make();
-let loadingAssoc = gui.viewDispatcher.add(loading);
+// declare view instances
+let views = {
+    loading: loadingView.make(),
+    empty: emptyView.make(),
+    keyboard: textInputView.makeWith({
+        header: "Enter your name",
+        minLength: 0,
+        maxLength: 32,
+    }),
+    helloDialog: dialogView.makeWith({
+        center: "Hi Flipper! :)",
+    }),
+    longText: textBoxView.makeWith({
+        text: "This is a very long string that demonstrates the TextBox view. Use the D-Pad to scroll backwards and forwards.\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse rhoncus est malesuada quam egestas ultrices. Maecenas non eros a nulla eleifend vulputate et ut risus. Quisque in mauris mattis, venenatis risus eget, aliquam diam. Fusce pretium feugiat mauris, ut faucibus ex volutpat in. Phasellus volutpat ex sed gravida consectetur. Aliquam sed lectus feugiat, tristique lectus et, bibendum lacus. Ut sit amet augue eu sapien elementum aliquam quis vitae tortor. Vestibulum quis commodo odio. In elementum fermentum massa, eu pellentesque nibh cursus at. Integer eleifend lacus nec purus elementum sodales. Nulla elementum neque urna, non vulputate massa semper sed. Fusce ut nisi vitae dui blandit congue pretium vitae turpis.",
+    }),
+    demos: submenuView.makeWith({
+        items: [
+            "Hourglass screen",
+            "Empty screen",
+            "Text input & Dialog",
+            "Text box",
+            "Exit app",
+        ],
+    }),
+};
 
-// empty screen
-let empty = emptyView.make();
-let emptyAssoc = gui.viewDispatcher.add(empty);
-
-// text input
-let keyboard = textInputView.make("Enter your name", 0, 32);
-let keyboardAssoc = gui.viewDispatcher.add(keyboard);
-
-// text box
-let textBox = textBoxView.make("text", "start");
-let textBoxAssoc = gui.viewDispatcher.add(textBox);
-
-// demo chooser screen
-let demoChooser = submenuView.make();
-demoChooser.setItems([
-    "Hourglass screen",
-    "Empty screen",
-    "Text input",
-    "Exit app",
-]);
-demoChooser.setHeader("Choose demo");
-let demoChooserAssoc = gui.viewDispatcher.add(demoChooser);
-eventLoop.subscribe(demoChooser.chosen, function (_sub, index, gui, eventLoop, loadingAssoc, emptyAssoc, demoChooserAssoc, keyboardAssoc) {
+// demo selector
+eventLoop.subscribe(views.demos.chosen, function (_sub, index, gui, eventLoop, views) {
     if (index === 0) {
-        gui.viewDispatcher.switchTo(loadingAssoc);
+        gui.viewDispatcher.switchTo(views.loading);
         // the loading view captures all back events, preventing our navigation callback from firing
         // switch to the demo chooser after a second
-        eventLoop.subscribe(eventLoop.timer("oneshot", 1000), function (_sub, _, gui, demoChooserAssoc) {
-            gui.viewDispatcher.switchTo(demoChooserAssoc);
-        }, gui, demoChooserAssoc);
+        eventLoop.subscribe(eventLoop.timer("oneshot", 1000), function (_sub, _, gui, views) {
+            gui.viewDispatcher.switchTo(views.demos);
+        }, gui, views);
     } else if (index === 1) {
-        gui.viewDispatcher.switchTo(emptyAssoc);
+        gui.viewDispatcher.switchTo(views.empty);
     } else if (index === 2) {
-        gui.viewDispatcher.switchTo(keyboardAssoc);
+        gui.viewDispatcher.switchTo(views.keyboard);
     } else if (index === 3) {
+        gui.viewDispatcher.switchTo(views.longText);
+    } else if (index === 4) {
         eventLoop.stop();
     }
-}, gui, eventLoop, loadingAssoc, emptyAssoc, demoChooserAssoc, keyboardAssoc);
+}, gui, eventLoop, views);
+
+// say hi after keyboard input
+eventLoop.subscribe(views.keyboard.input, function (_sub, name, gui, views) {
+    views.helloDialog.set("text", "Hi " + name + "! :)");
+    gui.viewDispatcher.switchTo(views.helloDialog);
+}, gui, views);
+
+// go back after the greeting dialog
+eventLoop.subscribe(views.helloDialog.input, function (_sub, button, gui, views) {
+    if (button === "center")
+        gui.viewDispatcher.switchTo(views.demos);
+}, gui, views);
 
 // go to the demo chooser screen when the back key is pressed
-eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, gui, demoChooserAssoc) {
-    gui.viewDispatcher.switchTo(demoChooserAssoc);
-}, gui, demoChooserAssoc);
-
-// print text from the keyboard
-eventLoop.subscribe(keyboard.input, function (_sub, name, gui, textBox, textBoxAssoc) {
-    textBox.setText("Hello, " + name + "! Nice to meet you");
-    gui.viewDispatcher.switchTo(textBoxAssoc);
-}, gui, textBox, textBoxAssoc);
+eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, gui, views) {
+    gui.viewDispatcher.switchTo(views.demos);
+}, gui, views);
 
 // run UI
-gui.viewDispatcher.switchTo(demoChooserAssoc);
+gui.viewDispatcher.switchTo(views.demos);
 eventLoop.run();

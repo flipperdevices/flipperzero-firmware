@@ -1,22 +1,13 @@
-import type { View } from ".";
+import type { View, ViewFactory } from ".";
 import type { Contract } from "../event_loop";
 
-/**
- * Menu with text entries
- */
-export class Submenu implements View {
-    _view: symbol;
+type Props = {
+    header: string,
+    items: string[],
+};
+declare class Submenu extends View<Props> {
     chosen: Contract<number>;
-    /**
-     * Sets the optional header
-     * @param header 
-     */
-    setHeader(header: string): void;
-    /**
-     * Resets the header, item list and adds items from the supplied array
-     * @param items list of menu items
-     */
-    setItems(items: string[]): void;
 }
-
-export function make(): Submenu;
+declare class SubmenuFactory extends ViewFactory<Props, Submenu> { }
+declare const factory: SubmenuFactory;
+export = factory;

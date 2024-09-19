@@ -31,13 +31,13 @@ App(
     apptype=FlipperAppType.PLUGIN,
     entry_point="js_gui_ep",
     requires=["js_app", "js_event_loop"],
-    sources=["modules/js_gui/js_gui.c"],
+    sources=["modules/js_gui/js_gui.c", "modules/js_gui/js_gui_api_table.cpp"],
 )
 
 App(
     appid="js_gui__loading",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="js_gui_loading_ep",
+    entry_point="js_view_loading_ep",
     requires=["js_app", "js_gui", "js_event_loop"],
     sources=["modules/js_gui/loading.c"],
 )
@@ -45,7 +45,7 @@ App(
 App(
     appid="js_gui__empty_screen",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="js_gui_empty_screen_ep",
+    entry_point="js_view_empty_screen_ep",
     requires=["js_app", "js_gui", "js_event_loop"],
     sources=["modules/js_gui/empty_screen.c"],
 )
@@ -53,7 +53,7 @@ App(
 App(
     appid="js_gui__submenu",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="js_gui_submenu_ep",
+    entry_point="js_view_submenu_ep",
     requires=["js_app", "js_gui"],
     sources=["modules/js_gui/submenu.c"],
 )
@@ -61,7 +61,7 @@ App(
 App(
     appid="js_gui__text_input",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="js_gui_text_input_ep",
+    entry_point="js_view_text_input_ep",
     requires=["js_app", "js_gui", "js_event_loop"],
     sources=["modules/js_gui/text_input.c"],
 )
@@ -69,17 +69,17 @@ App(
 App(
     appid="js_gui__text_box",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="js_gui_text_box_ep",
+    entry_point="js_view_text_box_ep",
     requires=["js_app"],
     sources=["modules/js_gui/text_box.c"],
 )
 
 App(
-    appid="js_dialog",
+    appid="js_gui__dialog",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="js_dialog_ep",
+    entry_point="js_view_dialog_ep",
     requires=["js_app"],
-    sources=["modules/js_dialog.c"],
+    sources=["modules/js_gui/dialog.c"],
 )
 
 App(

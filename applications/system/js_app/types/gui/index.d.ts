@@ -1,13 +1,15 @@
 import type { Contract } from "../event_loop";
 
-export interface View {
-    _view: symbol;
+type Properties = { [K: string]: any };
+
+export declare class View<Props extends Properties> {
+    set<P extends keyof Props>(property: P, value: Props[P]): void;
 }
 
-/**
- * Opaque association between a View and a ViewDispatcher
- */
-export type Association = number;
+export declare class ViewFactory<Props extends Properties, V extends View<Props>> {
+    make(): V;
+    makeWith(initial: Partial<Props>): V;
+}
 
 declare class ViewDispatcher {
     /**
@@ -24,21 +26,10 @@ declare class ViewDispatcher {
      */
     sendCustom(event: number): void;
     /**
-     * Associates a View with a ViewDispatcher
-     * @param view View to add
-     * @returns Association identifier that can be used with `remove` and `switch_to`
-     */
-    add(view: View): Association;
-    /**
-     * Removes a view
-     * @param assoc View-ViewDispatcher association as returned by `add`
-     */
-    remove(assoc: Association): void;
-    /**
      * Switches to a view
      * @param assoc View-ViewDispatcher association as returned by `add`
      */
-    switchTo(assoc: Association): void;
+    switchTo(assoc: View<any>): void;
     /**
      * Sends this ViewDispatcher to the front or back, above or below all other
      * GUI viewports

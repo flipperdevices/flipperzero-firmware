@@ -1,16 +1,14 @@
-import type { View } from ".";
+import type { View, ViewFactory } from ".";
 import type { Contract } from "../event_loop";
 
-/**
- * Simple text box
- */
-export class TextBox implements View {
-    _view: symbol;
-    input: Contract<string>;
-    setText(text: string): void;
+type Props = {
+    text: string,
+    font: "text" | "hex",
+    focus: "start" | "end",
 }
-
-/**
- * Creates a text box
- */
-export function make(font: "text" | "hex", focus: "start" | "end"): TextBox;
+declare class TextBox extends View<Props> {
+    chosen: Contract<number>;
+}
+declare class TextBoxFactory extends ViewFactory<Props, TextBox> { }
+declare const factory: TextBoxFactory;
+export = factory;

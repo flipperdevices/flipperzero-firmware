@@ -60,6 +60,7 @@ void js_modules_destroy(JsModules* modules) {
         const JsModuleData* module = JsModuleArray_cref(it);
         FURI_LOG_T(TAG, "Tearing down %s", furi_string_get_cstr(module->name));
         if(module->destroy) module->destroy(module->context);
+        furi_string_free(module->name);
     }
     plugin_manager_free(modules->plugin_manager);
     JsModuleArray_clear(modules->modules);

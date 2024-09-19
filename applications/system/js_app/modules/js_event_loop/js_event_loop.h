@@ -38,7 +38,8 @@ typedef enum {
     JsEventLoopObjectTypeStream,
 } JsEventLoopObjectType;
 
-typedef mjs_val_t (*JsEventLoopTransformer)(FuriEventLoopObject* object, void* context);
+typedef mjs_val_t (
+    *JsEventLoopTransformer)(struct mjs* mjs, FuriEventLoopObject* object, void* context);
 
 /**
  * @brief Adapter for other JS modules that wish to integrate with the event

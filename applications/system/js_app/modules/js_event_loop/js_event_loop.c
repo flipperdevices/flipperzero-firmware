@@ -85,7 +85,8 @@ static bool js_event_loop_callback(void* object, void* param) {
 
     if(context->transformer) {
         mjs_disown(context->mjs, &context->arguments[1]);
-        context->arguments[1] = context->transformer(object, context->transformer_context);
+        context->arguments[1] =
+            context->transformer(context->mjs, object, context->transformer_context);
         mjs_own(context->mjs, &context->arguments[1]);
     } else {
         // default behavior: take semaphores and mutexes
@@ -258,8 +259,9 @@ static void js_event_loop_timer(struct mjs* mjs) {
  * @brief Queue transformer. Takes `mjs_val_t` pointers out of a queue and
  * returns their dereferenced value
  */
-static mjs_val_t js_event_loop_queue_transformer(FuriEventLoopObject* object, void* context) {
-    struct mjs* mjs = context;
+static mjs_val_t
+    js_event_loop_queue_transformer(struct mjs* mjs, FuriEventLoopObject* object, void* context) {
+    UNUSED(context);
     mjs_val_t* message_ptr;
     furi_check(furi_message_queue_get(object, &message_ptr, 0) == FuriStatusOk);
     mjs_val_t message = *message_ptr;
@@ -302,7 +304,6 @@ static void js_event_loop_queue(struct mjs* mjs) {
     contract->object = furi_message_queue_alloc((size_t)length, sizeof(mjs_val_t*));
     contract->event = FuriEventLoopEventIn;
     contract->transformer = js_event_loop_queue_transformer;
-    contract->transformer_context = mjs;
     ContractArray_push_back(module->owned_contracts, contract);
 
     // return object with control methods
@@ -401,9 +402,6 @@ static void js_event_loop_destroy(void* inst) {
         free(module->tick_context);
         free(module);
     }
-
-    expansion_enable(furi_record_open(RECORD_EXPANSION));
-    furi_record_close(RECORD_EXPANSION);
 }
 
 extern const ElfApiInterface js_event_loop_hashtable_api_interface;

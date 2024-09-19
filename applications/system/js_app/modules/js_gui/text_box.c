@@ -1,90 +1,78 @@
 #include "../../js_modules.h" // IWYU pragma: keep
-#include "../js_event_loop/js_event_loop.h"
+#include "js_gui.h"
 #include <gui/modules/text_box.h>
 
-typedef struct {
-    TextBox* text_box;
-    char* text;
-} JsTextBox;
-
-static void js_gui_text_box_destructor(struct mjs* mjs, mjs_val_t obj) {
-    JsTextBox* object = JS_GET_INST(mjs, obj);
-    text_box_free(object->text_box);
-    free(object->text);
-    free(object);
+static bool
+    text_assign(struct mjs* mjs, TextBox* text_box, JsViewPropValue value, FuriString* context) {
+    UNUSED(mjs);
+    furi_string_set(context, value.string);
+    text_box_set_text(text_box, furi_string_get_cstr(context));
+    return true;
 }
 
-static void js_gui_text_box_set_text(struct mjs* mjs) {
-    const char* text;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&text));
-    JsTextBox* object = JS_GET_CONTEXT(mjs);
-    free(object->text);
-    object->text = strdup(text);
-    text_box_set_text(object->text_box, object->text);
-}
-
-static void js_gui_text_box_make(struct mjs* mjs) {
-    char *font_str, *focus_str;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&font_str), JS_ARG_STR(&focus_str));
+static bool font_assign(struct mjs* mjs, TextBox* text_box, JsViewPropValue value, void* context) {
+    UNUSED(context);
     TextBoxFont font;
-    if(strcmp(font_str, "text") == 0) {
-        font = TextBoxFontText;
-    } else if(strcmp(font_str, "hex") == 0) {
+    if(strcasecmp(value.string, "hex") == 0) {
         font = TextBoxFontHex;
+    } else if(strcasecmp(value.string, "text") == 0) {
+        font = TextBoxFontText;
     } else {
-        JS_ERROR_AND_RETURN(
-            mjs, MJS_BAD_ARGS_ERROR, "argument 0: expected either \"text\" or \"hex\"");
+        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "must be one of: \"text\", \"hex\"");
+        return false;
     }
+    text_box_set_font(text_box, font);
+    return true;
+}
+
+static bool
+    focus_assign(struct mjs* mjs, TextBox* text_box, JsViewPropValue value, void* context) {
+    UNUSED(context);
     TextBoxFocus focus;
-    if(strcmp(focus_str, "start") == 0) {
+    if(strcasecmp(value.string, "start") == 0) {
         focus = TextBoxFocusStart;
-    } else if(strcmp(focus_str, "end") == 0) {
+    } else if(strcasecmp(value.string, "end") == 0) {
         focus = TextBoxFocusEnd;
     } else {
-        JS_ERROR_AND_RETURN(
-            mjs, MJS_BAD_ARGS_ERROR, "argument 1: expected either \"start\" or \"end\"");
+        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "must be one of: \"start\", \"end\"");
+        return false;
     }
-
-    JsTextBox* object = malloc(sizeof(JsTextBox));
-    object->text_box = text_box_alloc();
-    text_box_set_font(object->text_box, font);
-    text_box_set_focus(object->text_box, focus);
-
-    mjs_val_t js_text_box = mjs_mk_object(mjs);
-    mjs_set(mjs, js_text_box, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, object));
-    mjs_set(mjs, js_text_box, MJS_DESTRUCTOR_PROP_NAME, ~0, MJS_MK_FN(js_gui_text_box_destructor));
-    mjs_set(mjs, js_text_box, "setText", ~0, MJS_MK_FN(js_gui_text_box_set_text));
-    mjs_set(
-        mjs, js_text_box, "_view", ~0, mjs_mk_foreign(mjs, text_box_get_view(object->text_box)));
-    mjs_return(mjs, js_text_box);
+    text_box_set_focus(text_box, focus);
+    return true;
 }
 
-static void* js_gui_text_box_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
-    JsEventLoop* js_loop = js_module_get(modules, "event_loop");
-    if(M_UNLIKELY(!js_loop)) return NULL;
-    if(M_UNLIKELY(!js_module_get(modules, "gui"))) return NULL;
-
-    mjs_val_t ctor = mjs_mk_object(mjs);
-    mjs_set(mjs, ctor, INST_PROP_NAME, ~0, MJS_MK_FN(js_event_loop_get_loop(js_loop)));
-    mjs_set(mjs, ctor, "make", ~0, MJS_MK_FN(js_gui_text_box_make));
-
-    *object = ctor;
-    return NULL;
+FuriString* ctx_make(struct mjs* mjs, TextBox* specific_view, mjs_val_t view_obj) {
+    UNUSED(mjs);
+    UNUSED(specific_view);
+    UNUSED(view_obj);
+    return furi_string_alloc();
 }
 
-static const JsModuleDescriptor js_gui_text_box_desc = {
-    "gui__text_box",
-    js_gui_text_box_create,
-    NULL,
-    NULL,
-};
-
-static const FlipperAppPluginDescriptor plugin_descriptor = {
-    .appid = PLUGIN_APP_ID,
-    .ep_api_version = PLUGIN_API_VERSION,
-    .entry_point = &js_gui_text_box_desc,
-};
-
-const FlipperAppPluginDescriptor* js_gui_text_box_ep(void) {
-    return &plugin_descriptor;
+void ctx_destroy(TextBox* specific_view, FuriString* context, FuriEventLoop* loop) {
+    UNUSED(specific_view);
+    UNUSED(loop);
+    furi_string_free(context);
 }
+
+static const JsViewDescriptor view_descriptor = {
+    .alloc = (JsViewAlloc)text_box_alloc,
+    .free = (JsViewFree)text_box_free,
+    .get_view = (JsViewGetView)text_box_get_view,
+    .custom_make = (JsViewCustomMake)ctx_make,
+    .custom_destroy = (JsViewCustomDestroy)ctx_destroy,
+    .prop_cnt = 3,
+    .props = {
+        (JsViewPropDescriptor){
+            .name = "text",
+            .type = JsViewPropTypeString,
+            .assign = (JsViewPropAssign)text_assign},
+        (JsViewPropDescriptor){
+            .name = "font",
+            .type = JsViewPropTypeString,
+            .assign = (JsViewPropAssign)font_assign},
+        (JsViewPropDescriptor){
+            .name = "focus",
+            .type = JsViewPropTypeString,
+            .assign = (JsViewPropAssign)focus_assign},
+    }};
+JS_GUI_VIEW_DEF(text_box, &view_descriptor);

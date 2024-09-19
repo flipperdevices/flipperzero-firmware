@@ -1,4 +1,5 @@
 #include "../../js_modules.h" // IWYU pragma: keep
+#include "./js_gui.h"
 #include <furi.h>
 #include <mlib/m-array.h>
 #include <gui/view_dispatcher.h>
@@ -19,29 +20,23 @@ typedef struct {
     FuriSemaphore* navigation;
 } JsGui;
 
-/**
- * @brief `viewDispatcher.add`
- */
-static void js_gui_vd_add(struct mjs* mjs) {
-    mjs_val_t view_arg;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_ANY(&view_arg));
+// Useful for factories
+static JsGui* js_gui;
 
-    View* view = mjs_get_ptr(mjs, mjs_get(mjs, view_arg, "_view", ~0));
-    if(!view) JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Expected argument 0 to be a View");
-
-    JsGui* module = JS_GET_CONTEXT(mjs);
-    view_dispatcher_add_view(module->dispatcher, module->next_view_id, view);
-    mjs_return(mjs, mjs_mk_number(mjs, module->next_view_id));
-    module->next_view_id++;
-}
+typedef struct {
+    uint32_t id;
+    const JsViewDescriptor* descriptor;
+    void* specific_view;
+    void* custom_data;
+} JsGuiViewData;
 
 /**
  * @brief Transformer for custom events
  */
-static mjs_val_t js_gui_vd_custom_transformer(FuriEventLoopObject* object, void* context) {
-    furi_check(context);
+static mjs_val_t
+    js_gui_vd_custom_transformer(struct mjs* mjs, FuriEventLoopObject* object, void* context) {
+    UNUSED(context);
     furi_check(object);
-    struct mjs* mjs = context;
     FuriMessageQueue* queue = object;
     uint32_t event;
     furi_check(furi_message_queue_get(queue, &event, 0) == FuriStatusOk);
@@ -83,11 +78,11 @@ static void js_gui_vd_send_custom(struct mjs* mjs) {
  * @brief `viewDispatcher.switchTo`
  */
 static void js_gui_vd_switch_to(struct mjs* mjs) {
-    int32_t view_id;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_INT32(&view_id));
-
+    mjs_val_t view;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_OBJ(&view));
+    JsGuiViewData* view_data = JS_GET_INST(mjs, view);
     JsGui* module = JS_GET_CONTEXT(mjs);
-    view_dispatcher_switch_to_view(module->dispatcher, (uint32_t)view_id);
+    view_dispatcher_switch_to_view(module->dispatcher, (uint32_t)view_data->id);
 }
 
 static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
@@ -115,7 +110,6 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
         .object_type = JsEventLoopObjectTypeQueue,
         .event = FuriEventLoopEventIn,
         .transformer = js_gui_vd_custom_transformer,
-        .transformer_context = mjs,
     };
     module->navigation_contract = (JsEventLoopContract){
         .object = module->navigation,
@@ -126,7 +120,6 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
     // create viewDispatcher object
     mjs_val_t view_dispatcher = mjs_mk_object(mjs);
     mjs_set(mjs, view_dispatcher, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
-    mjs_set(mjs, view_dispatcher, "add", ~0, MJS_MK_FN(js_gui_vd_add));
     mjs_set(mjs, view_dispatcher, "sendCustom", ~0, MJS_MK_FN(js_gui_vd_send_custom));
     mjs_set(mjs, view_dispatcher, "switchTo", ~0, MJS_MK_FN(js_gui_vd_switch_to));
     mjs_set(mjs, view_dispatcher, "custom", ~0, mjs_mk_foreign(mjs, &module->custom_contract));
@@ -138,6 +131,7 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
     mjs_set(mjs, api, "viewDispatcher", ~0, view_dispatcher);
 
     *object = api;
+    js_gui = module;
     return module;
 }
 
@@ -145,12 +139,7 @@ static void js_gui_destroy(void* inst) {
     if(!inst) return;
     JsGui* module = inst;
 
-    // remove views from dispatcher
-    for(uint32_t id = 0; id < module->next_view_id; id++) {
-        view_dispatcher_remove_view(module->dispatcher, id);
-    }
     view_dispatcher_free(module->dispatcher);
-
     furi_event_loop_maybe_unsubscribe(module->loop, module->custom);
     furi_event_loop_maybe_unsubscribe(module->loop, module->navigation);
     furi_message_queue_free(module->custom);
@@ -158,13 +147,164 @@ static void js_gui_destroy(void* inst) {
 
     furi_record_close(RECORD_GUI);
     free(module);
+    js_gui = NULL;
 }
+
+/**
+ * @brief Assigns a `View` property. Not available from JS.
+ */
+static bool
+    js_gui_view_assign(struct mjs* mjs, const char* name, mjs_val_t value, JsGuiViewData* data) {
+    const JsViewDescriptor* descriptor = data->descriptor;
+    for(size_t i = 0; i < descriptor->prop_cnt; i++) {
+        JsViewPropDescriptor prop = descriptor->props[i];
+        if(strcmp(prop.name, name) != 0) continue;
+
+        // convert JS value to C
+        JsViewPropValue c_value;
+        const char* expected_type = NULL;
+        switch(prop.type) {
+        case JsViewPropTypeNumber: {
+            if(!mjs_is_number(value)) {
+                expected_type = "number";
+                break;
+            }
+            c_value = (JsViewPropValue){.number = mjs_get_int32(mjs, value)};
+        } break;
+        case JsViewPropTypeString: {
+            if(!mjs_is_string(value)) {
+                expected_type = "string";
+                break;
+            }
+            c_value = (JsViewPropValue){.string = mjs_get_string(mjs, &value, NULL)};
+        } break;
+        case JsViewPropTypeArr: {
+            if(!mjs_is_array(value)) {
+                expected_type = "array";
+                break;
+            }
+            c_value = (JsViewPropValue){.array = value};
+        } break;
+        }
+
+        if(expected_type) {
+            mjs_prepend_errorf(
+                mjs, MJS_BAD_ARGS_ERROR, "view prop \"%s\" requires %s value", name, expected_type);
+            return false;
+        } else {
+            return prop.assign(mjs, data->specific_view, c_value, data->custom_data);
+        }
+    }
+
+    mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "view has no prop named \"%s\"", name);
+    return false;
+}
+
+/**
+ * @brief `View.set`
+ */
+static void js_gui_view_set(struct mjs* mjs) {
+    const char* name;
+    mjs_val_t value;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&name), JS_ARG_ANY(&value));
+    JsGuiViewData* data = JS_GET_CONTEXT(mjs);
+    bool success = js_gui_view_assign(mjs, name, value, data);
+    UNUSED(success);
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
+/**
+ * @brief `View` destructor
+ */
+static void js_gui_view_destructor(struct mjs* mjs, mjs_val_t obj) {
+    JsGuiViewData* data = JS_GET_INST(mjs, obj);
+    view_dispatcher_remove_view(js_gui->dispatcher, data->id);
+    if(data->descriptor->custom_destroy)
+        data->descriptor->custom_destroy(data->specific_view, data->custom_data, js_gui->loop);
+    data->descriptor->free(data->specific_view);
+    free(data);
+}
+
+/**
+ * @brief Creates a `View` object from a descriptor. Not available from JS.
+ */
+static mjs_val_t js_gui_make_view(struct mjs* mjs, const JsViewDescriptor* descriptor) {
+    void* specific_view = descriptor->alloc();
+    View* view = descriptor->get_view(specific_view);
+    uint32_t view_id = js_gui->next_view_id++;
+    view_dispatcher_add_view(js_gui->dispatcher, view_id, view);
+
+    // generic view API
+    mjs_val_t view_obj = mjs_mk_object(mjs);
+    mjs_set(mjs, view_obj, "set", ~0, MJS_MK_FN(js_gui_view_set));
+
+    // object data
+    JsGuiViewData* data = malloc(sizeof(JsGuiViewData));
+    *data = (JsGuiViewData){
+        .descriptor = descriptor,
+        .id = view_id,
+        .specific_view = specific_view,
+        .custom_data =
+            descriptor->custom_make ? descriptor->custom_make(mjs, specific_view, view_obj) : NULL,
+    };
+    mjs_set(mjs, view_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, data));
+    mjs_set(mjs, view_obj, MJS_DESTRUCTOR_PROP_NAME, ~0, MJS_MK_FN(js_gui_view_destructor));
+
+    return view_obj;
+}
+
+/**
+ * @brief `ViewFactory.make`
+ */
+static void js_gui_vf_make(struct mjs* mjs) {
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY); // 0 args
+    const JsViewDescriptor* descriptor = JS_GET_CONTEXT(mjs);
+    mjs_return(mjs, js_gui_make_view(mjs, descriptor));
+}
+
+/**
+ * @brief `ViewFactory.makeWith`
+ */
+static void js_gui_vf_make_with(struct mjs* mjs) {
+    mjs_val_t props;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_OBJ(&props));
+    const JsViewDescriptor* descriptor = JS_GET_CONTEXT(mjs);
+
+    // make the object like normal
+    mjs_val_t view_obj = js_gui_make_view(mjs, descriptor);
+    JsGuiViewData* data = JS_GET_INST(mjs, view_obj);
+
+    // assign properties one by one
+    mjs_val_t key, iter = MJS_UNDEFINED;
+    while((key = mjs_next(mjs, props, &iter)) != MJS_UNDEFINED) {
+        furi_check(mjs_is_string(key));
+        const char* name = mjs_get_string(mjs, &key, NULL);
+        mjs_val_t value = mjs_get(mjs, props, name, ~0);
+
+        if(!js_gui_view_assign(mjs, name, value, data)) {
+            mjs_return(mjs, MJS_UNDEFINED);
+            return;
+        }
+    }
+
+    mjs_return(mjs, view_obj);
+}
+
+mjs_val_t js_gui_make_view_factory(struct mjs* mjs, const JsViewDescriptor* view_descriptor) {
+    mjs_val_t factory = mjs_mk_object(mjs);
+    mjs_set(mjs, factory, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, (void*)view_descriptor));
+    mjs_set(mjs, factory, "make", ~0, MJS_MK_FN(js_gui_vf_make));
+    mjs_set(mjs, factory, "makeWith", ~0, MJS_MK_FN(js_gui_vf_make_with));
+    return factory;
+}
+
+extern const ElfApiInterface js_gui_hashtable_api_interface;
 
 static const JsModuleDescriptor js_gui_desc = {
     "gui",
     js_gui_create,
     js_gui_destroy,
-    NULL,
+    &js_gui_hashtable_api_interface,
 };
 
 static const FlipperAppPluginDescriptor plugin_descriptor = {
