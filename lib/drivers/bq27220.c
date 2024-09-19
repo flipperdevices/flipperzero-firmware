@@ -368,7 +368,7 @@ bool bq27220_full_access(FuriHalI2cBusHandle* handle) {
         }
 
         // Explosion!!!
-        bq27220_control(handle, 0xffff);//-V760
+        bq27220_control(handle, 0xffff); //-V760
         furi_delay_us(5000);
         bq27220_control(handle, 0xffff);
         furi_delay_us(5000);
