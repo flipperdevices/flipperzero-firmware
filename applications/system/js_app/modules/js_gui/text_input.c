@@ -49,7 +49,7 @@ static bool max_len_assign(
     JsKbdContext* context) {
     UNUSED(mjs);
     context->buffer_size = (size_t)(value.number + 1);
-    context->buffer = realloc(context->buffer, context->buffer_size);
+    context->buffer = realloc(context->buffer, context->buffer_size); //-V701
     text_input_set_result_callback(
         input,
         (TextInputCallback)input_callback,
