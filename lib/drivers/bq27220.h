@@ -50,43 +50,123 @@ _Static_assert(sizeof(OperationStatus) == 2, "Incorrect structure size");
 typedef struct BQ27220DMData BQ27220DMData;
 
 /** Initialize Driver
- * @return true on success, false otherwise
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     true on success, false otherwise
  */
-bool bq27220_init(FuriHalI2cBusHandle* handle);
+bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory);
 
-/** Initialize Driver
- * @return true on success, false otherwise
+/** Reset gauge
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     true on success, false otherwise
  */
-bool bq27220_apply_data_memory(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory);
+bool bq27220_reset(FuriHalI2cBusHandle* handle);
 
-/** Get battery voltage in mV or error */
+/** Seal gauge access
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     true on success, false otherwise
+ */
+bool bq27220_seal(FuriHalI2cBusHandle* handle);
+
+/** Unseal gauge access
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     true on success, false otherwise
+ */
+bool bq27220_unseal(FuriHalI2cBusHandle* handle);
+
+/** Get full access
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     true on success, false otherwise
+ */
+bool bq27220_full_access(FuriHalI2cBusHandle* handle);
+
+/** Get battery voltage
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     voltage in mV or BQ27220_ERROR
+ */
 uint16_t bq27220_get_voltage(FuriHalI2cBusHandle* handle);
 
-/** Get current in mA or error*/
+/** Get current
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     current in mA or BQ27220_ERROR
+ */
 int16_t bq27220_get_current(FuriHalI2cBusHandle* handle);
 
-/** Get battery status */
+/** Get battery status
+ *
+ * @param      handle          The handle
+ * @param      battery_status  The battery status
+ *
+ * @return     true on success, false otherwise
+ */
 bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, BatteryStatus* battery_status);
 
-/** Get operation status */
+/** Get operation status
+ *
+ * @param      handle            The handle
+ * @param      operation_status  The operation status
+ *
+ * @return     true on success, false otherwise
+ */
 bool bq27220_get_operation_status(FuriHalI2cBusHandle* handle, OperationStatus* operation_status);
 
-/** Get temperature in units of 0.1°K */
+/** Get temperature
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     temperature in units of 0.1°K
+ */
 uint16_t bq27220_get_temperature(FuriHalI2cBusHandle* handle);
 
-/** Get compensated full charge capacity in in mAh */
+/** Get compensated full charge capacity
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     full charge capacity in mAh or BQ27220_ERROR
+ */
 uint16_t bq27220_get_full_charge_capacity(FuriHalI2cBusHandle* handle);
 
-/** Get design capacity in mAh */
+/** Get design capacity
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     design capacity in mAh or BQ27220_ERROR
+ */
 uint16_t bq27220_get_design_capacity(FuriHalI2cBusHandle* handle);
 
-/** Get remaining capacity in in mAh */
+/** Get remaining capacity
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     remaining capacity in mAh or BQ27220_ERROR
+ */
 uint16_t bq27220_get_remaining_capacity(FuriHalI2cBusHandle* handle);
 
-/** Get predicted remaining battery capacity in percents */
+/** Get predicted remaining battery capacity
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     state of charge in percents or BQ27220_ERROR
+ */
 uint16_t bq27220_get_state_of_charge(FuriHalI2cBusHandle* handle);
 
-/** Get ratio of full charge capacity over design capacity in percents */
+/** Get ratio of full charge capacity over design capacity
+ *
+ * @param      handle  The I2C Bus handle
+ *
+ * @return     state of health in percents or BQ27220_ERROR
+ */
 uint16_t bq27220_get_state_of_health(FuriHalI2cBusHandle* handle);
-
-void bq27220_change_design_capacity(FuriHalI2cBusHandle* handle, uint16_t capacity);

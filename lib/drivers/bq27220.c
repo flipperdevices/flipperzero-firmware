@@ -10,18 +10,29 @@ _Static_assert(sizeof(BQ27220DMGaugingConfig) == 2, "Incorrect structure size");
 
 #define TAG "Gauge"
 
+// See 5.3 I2C Command Waiting Time
+// expected to be 66us, fails till we get to 125us
+#define BQ27220_CMD_DELAY_US (250u)
+
 static uint16_t bq27220_read_word(FuriHalI2cBusHandle* handle, uint8_t address) {
     uint16_t buf = 0;
 
     furi_hal_i2c_read_mem(
         handle, BQ27220_ADDRESS, address, (uint8_t*)&buf, 2, BQ27220_I2C_TIMEOUT);
 
+    furi_delay_us(BQ27220_CMD_DELAY_US);
+
     return buf;
 }
 
 static bool bq27220_control(FuriHalI2cBusHandle* handle, uint16_t control) {
-    bool ret = furi_hal_i2c_write_mem(
-        handle, BQ27220_ADDRESS, CommandControl, (uint8_t*)&control, 2, BQ27220_I2C_TIMEOUT);
+    bool ret = true;
+    ret &= furi_hal_i2c_write_reg_8(
+        handle, BQ27220_ADDRESS, CommandControl, (control >> 0) & 0xff, BQ27220_I2C_TIMEOUT);
+    furi_delay_us(BQ27220_CMD_DELAY_US);
+    ret &= furi_hal_i2c_write_reg_8(
+        handle, BQ27220_ADDRESS, CommandControl + 1, (control >> 8) & 0xff, BQ27220_I2C_TIMEOUT);
+    furi_delay_us(BQ27220_CMD_DELAY_US);
 
     return ret;
 }
@@ -92,10 +103,14 @@ static bool bq27220_parameter_check(
                 break;
             }
 
+            furi_delay_us(BQ27220_CMD_DELAY_US);
+
             if(!furi_hal_i2c_rx(handle, BQ27220_ADDRESS, old_data, size, BQ27220_I2C_TIMEOUT)) {
                 FURI_LOG_I(TAG, "DM read failed");
                 break;
             }
+
+            furi_delay_us(BQ27220_CMD_DELAY_US);
 
             if(*(uint32_t*)&(old_data[0]) != *(uint32_t*)&(buffer[2])) {
                 FURI_LOG_W( //-V641
@@ -187,35 +202,190 @@ static bool bq27220_data_memory_check(
     return result;
 }
 
-bool bq27220_init(FuriHalI2cBusHandle* handle) {
-    // Request device number(chip PN)
-    if(!bq27220_control(handle, Control_DEVICE_NUMBER)) {
-        FURI_LOG_E(TAG, "Device is not present");
-        return false;
-    };
-    // Check control response
-    uint16_t data = 0;
-    data = bq27220_read_word(handle, CommandControl);
-    if(data != 0xFF00) {
-        FURI_LOG_E(TAG, "Invalid control response: %x", data);
-        return false;
-    };
+bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory) {
+    OperationStatus status = {0};
+    bool result = false;
 
-    data = bq27220_read_word(handle, CommandMACData);
-    FURI_LOG_I(TAG, "Device Number %04x", data);
+    do {
+        // Unseal device since we are going to read protected configuration
+        if(!bq27220_unseal(handle)) {
+            break;
+        }
 
-    return data == 0x0220;
+        // Request device number(chip PN)
+        if(!bq27220_control(handle, Control_DEVICE_NUMBER)) {
+            FURI_LOG_E(TAG, "Device is not responding");
+            break;
+        };
+        // Enterprise wait(MAC read fails if less than 500us)
+        furi_delay_us(999);
+        // Read id data from MAC scratch space
+        uint16_t data = bq27220_read_word(handle, CommandMACData);
+        if(data != 0x0220) {
+            FURI_LOG_E(TAG, "Invalid Device Number %04x == 0x0220", data);
+            break;
+        }
+
+        // Get full access to read and modify parameters
+        if(!bq27220_full_access(handle)) {
+            break;
+        }
+
+        if(!bq27220_get_operation_status(handle, &status)) {
+            FURI_LOG_E(TAG, "Failed to get operation status");
+            break;
+        }
+
+        // Once upon
+        if(status.INITCOMP != true) {
+            FURI_LOG_W(TAG, "Device initialization is incomplete, trying to reset");
+            if(!bq27220_reset(handle)) {
+                FURI_LOG_E(TAG, "Failed to reset incompletely initialized device");
+                break;
+            }
+
+            // Ensure full access after reset
+            if(!bq27220_full_access(handle)) {
+                break;
+            }
+        }
+
+        if(!bq27220_data_memory_check(handle, data_memory, false)) {
+            FURI_LOG_W(TAG, "Updating data memory");
+            bq27220_control(handle, Control_SET_PROFILE_1);
+            bq27220_data_memory_check(handle, data_memory, true);
+        }
+
+        if(!bq27220_seal(handle)) {
+            break;
+        }
+
+        result = true;
+    } while(0);
+
+    return result;
 }
 
-bool bq27220_apply_data_memory(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory) {
-    FURI_LOG_I(TAG, "Verifying data memory");
-    if(!bq27220_data_memory_check(handle, data_memory, false)) {
-        FURI_LOG_I(TAG, "Updating data memory");
-        bq27220_data_memory_check(handle, data_memory, true);
-    }
-    FURI_LOG_I(TAG, "Data memory verification complete");
+bool bq27220_reset(FuriHalI2cBusHandle* handle) {
+    bool result = false;
+    if(bq27220_control(handle, Control_RESET)) {
+        uint32_t timeout = 100;
+        OperationStatus status = {0};
+        while((status.INITCOMP != true) && (timeout-- > 0)) {
+            bq27220_get_operation_status(handle, &status);
+        }
+        if(!timeout) {
+            FURI_LOG_E(TAG, "INITCOMP timeout after reset");
+        } else {
+            result = true;
+        }
+    } else {
+        FURI_LOG_E(TAG, "reset request failed");
+    };
+    return result;
+}
 
-    return true;
+bool bq27220_seal(FuriHalI2cBusHandle* handle) {
+    OperationStatus status = {0};
+    bool result = false;
+    do {
+        if(!bq27220_get_operation_status(handle, &status)) {
+            FURI_LOG_E(TAG, "status query failed");
+            break;
+        }
+        if(status.SEC == 0b11) {
+            result = true;
+            break;
+        }
+
+        if(!bq27220_control(handle, Control_SEALED)) {
+            FURI_LOG_E(TAG, "seal request failed");
+            break;
+        }
+
+        furi_delay_us(999);
+
+        if(!bq27220_get_operation_status(handle, &status)) {
+            FURI_LOG_E(TAG, "status query failed");
+            break;
+        }
+        if(status.SEC != 0b11) {
+            FURI_LOG_E(TAG, "seal failed");
+            break;
+        }
+
+        result = true;
+    } while(0);
+
+    return result;
+}
+
+bool bq27220_unseal(FuriHalI2cBusHandle* handle) {
+    OperationStatus status = {0};
+    bool result = false;
+    do {
+        if(!bq27220_get_operation_status(handle, &status)) {
+            FURI_LOG_E(TAG, "status query failed");
+            break;
+        }
+        if(status.SEC != 0b11) {
+            result = true;
+            break;
+        }
+
+        // Hai, Kazuma desu
+        bq27220_control(handle, 0x0414);
+        furi_delay_us(5000);
+        bq27220_control(handle, 0x3672);
+        furi_delay_us(5000);
+
+        if(!bq27220_get_operation_status(handle, &status)) {
+            FURI_LOG_E(TAG, "status query failed");
+            break;
+        }
+        if(status.SEC != 0b10) {
+            FURI_LOG_E(TAG, "unseal failed %u", status.SEC);
+            break;
+        }
+
+        result = true;
+    } while(0);
+
+    return result;
+}
+
+bool bq27220_full_access(FuriHalI2cBusHandle* handle) {
+    OperationStatus status = {0};
+    bool result = false;
+    do {
+        if(!bq27220_get_operation_status(handle, &status)) {
+            FURI_LOG_E(TAG, "status query failed");
+            break;
+        }
+        if(status.SEC != 0b10) {
+            result = true;
+            break;
+        }
+
+        // Explosion!!!
+        bq27220_control(handle, 0xffff);
+        furi_delay_us(5000);
+        bq27220_control(handle, 0xffff);
+        furi_delay_us(5000);
+
+        if(!bq27220_get_operation_status(handle, &status)) {
+            FURI_LOG_E(TAG, "status query failed");
+            break;
+        }
+        if(status.SEC != 0b01) {
+            FURI_LOG_E(TAG, "full access failed %u", status.SEC);
+            break;
+        }
+
+        result = true;
+    } while(0);
+
+    return result;
 }
 
 uint16_t bq27220_get_voltage(FuriHalI2cBusHandle* handle) {

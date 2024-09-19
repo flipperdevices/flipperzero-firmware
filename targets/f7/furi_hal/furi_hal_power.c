@@ -73,11 +73,8 @@ void furi_hal_power_init(void) {
     // Find and init gauge
     size_t retry = 2;
     while(retry > 0) {
-        furi_hal_power.gauge_ok = bq27220_init(&furi_hal_i2c_handle_power);
-        if(furi_hal_power.gauge_ok) {
-            furi_hal_power.gauge_ok = bq27220_apply_data_memory(
-                &furi_hal_i2c_handle_power, furi_hal_power_gauge_data_memory);
-        }
+        furi_hal_power.gauge_ok =
+            bq27220_init(&furi_hal_i2c_handle_power, furi_hal_power_gauge_data_memory);
         if(furi_hal_power.gauge_ok) {
             break;
         } else {
