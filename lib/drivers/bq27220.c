@@ -37,6 +37,26 @@ static bool bq27220_control(FuriHalI2cBusHandle* handle, uint16_t control) {
     return ret;
 }
 
+static bool bq27220_write(
+    FuriHalI2cBusHandle* handle,
+    uint8_t address,
+    const uint8_t* buffer,
+    size_t buffer_size) {
+    bool ret = true;
+
+    for(size_t i = 0; i < buffer_size && ret; i++) {
+        ret &= furi_hal_i2c_write_reg_8(
+            handle, BQ27220_ADDRESS, address + i, buffer[i], BQ27220_I2C_TIMEOUT);
+        furi_delay_us(BQ27220_CMD_DELAY_US);
+    }
+
+    return ret;
+}
+
+static bool bq27220_read(FuriHalI2cBusHandle* handle, uint8_t* buffer, size_t buffer_size) {
+    return furi_hal_i2c_rx(handle, BQ27220_ADDRESS, buffer, buffer_size, BQ27220_I2C_TIMEOUT);
+}
+
 static uint8_t bq27220_get_checksum(uint8_t* data, uint16_t len) {
     uint8_t ret = 0;
     for(uint16_t i = 0; i < len; i++) {
@@ -69,13 +89,7 @@ static bool bq27220_parameter_check(
             // https://e2e.ti.com/support/power-management-group/power-management/f/power-management-forum/719878/bq27220-technical-reference-manual-sluubd4-is-missing-extended-data-commands-chapter
 
             // 2. Write the address AND the parameter data to 0x3E+ (auto increment)
-            if(!furi_hal_i2c_write_mem(
-                   handle,
-                   BQ27220_ADDRESS,
-                   CommandSelectSubclass,
-                   buffer,
-                   size + 2,
-                   BQ27220_I2C_TIMEOUT)) {
+            if(!bq27220_write(handle, CommandSelectSubclass, buffer, size + 2)) {
                 FURI_LOG_I(TAG, "DM write failed");
                 break;
             }
@@ -88,8 +102,7 @@ static bool bq27220_parameter_check(
             buffer[0] = checksum;
             // 2 bytes address, `size` bytes data, 1 byte check sum, 1 byte length
             buffer[1] = 2 + size + 1 + 1;
-            if(!furi_hal_i2c_write_mem(
-                   handle, BQ27220_ADDRESS, CommandMACDataSum, buffer, 2, BQ27220_I2C_TIMEOUT)) {
+            if(!bq27220_write(handle, CommandMACDataSum, buffer, 2)) {
                 FURI_LOG_I(TAG, "CRC write failed");
                 break;
             }
@@ -97,15 +110,14 @@ static bool bq27220_parameter_check(
             furi_delay_us(10000);
             ret = true;
         } else {
-            if(!furi_hal_i2c_write_mem(
-                   handle, BQ27220_ADDRESS, CommandSelectSubclass, buffer, 2, BQ27220_I2C_TIMEOUT)) {
+            if(!bq27220_write(handle, CommandSelectSubclass, buffer, 2)) {
                 FURI_LOG_I(TAG, "DM SelectSubclass for read failed");
                 break;
             }
 
             furi_delay_us(BQ27220_CMD_DELAY_US);
 
-            if(!furi_hal_i2c_rx(handle, BQ27220_ADDRESS, old_data, size, BQ27220_I2C_TIMEOUT)) {
+            if(!bq27220_read(handle, old_data, size)) {
                 FURI_LOG_I(TAG, "DM read failed");
                 break;
             }
