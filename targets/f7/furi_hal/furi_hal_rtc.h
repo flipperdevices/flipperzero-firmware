@@ -277,9 +277,9 @@ typedef void (*FuriHalRtcAlarmCallback)(void* context);
  * Use it to subscribe to alarm trigger event. Setting alarm callback is
  * independent from setting alarm.
  *
- * @warning    Normally this callback will be delivered from ISR, however we may
- *             deliver it while you calling this function. This happens when
- *             alarm already triggered, but there were no ISR set.
+ * @warning    Normally this callback will be delivered from the ISR, however we may
+ *             deliver it while this function is called. This happens when
+ *             the alarm has already triggered, but there was no ISR set.
  *
  * @param[in]  callback  The callback
  * @param      context   The context
