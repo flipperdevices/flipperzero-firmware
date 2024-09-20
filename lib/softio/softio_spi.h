@@ -49,28 +49,16 @@ extern "C" {
 typedef struct SoftIoSpiBus SoftIoSpiBus;
 
 /**
- * @brief Opaque software SPI bus device handle
- */
-typedef struct SoftIoSpiSlave SoftIoSpiSlave;
-
-/**
  * @brief Software SPI bus configuration
  */
 typedef struct {
     const GpioPin* miso;
     const GpioPin* mosi;
     const GpioPin* sck;
+    uint32_t clk_fq_khz;
+    uint8_t clk_phase    : 1;
     uint8_t clk_polarity : 1;
 } SoftIoSpiBusConfig;
-
-/**
- * @brief Software SPI bus device configuration
- */
-typedef struct {
-    const GpioPin* cs;
-    uint32_t clk_fq_khz;
-    uint8_t clk_phase : 1;
-} SoftIoSpiSlaveConfig;
 
 /**
  * @brief Allocates a software SPI bus with the specified configuration
@@ -85,20 +73,6 @@ SoftIoSpiBus* softio_spi_alloc(SoftIoSpiBusConfig* config);
 void softio_spi_free(SoftIoSpiBus* bus);
 
 /**
- * @brief Registers a slave with a software SPI bus
- * @param [in] bus Software SPI bus
- * @param [in] config Pointer to the configuration structure. Does not have to remain valid after the function exits.
- */
-SoftIoSpiSlave* softio_spi_attach_slave(SoftIoSpiBus* bus, SoftIoSpiSlaveConfig* config);
-
-/**
- * @brief Detaches a CS pin from a software SPI bus
- * @param [in] bus Software SPI bus
- * @param [in] device Software SPI bus device
- */
-void softio_spi_detach_slave(SoftIoSpiBus* bus, SoftIoSpiSlave* device);
-
-/**
  * @brief Initializes bus pins: MOSI, MISO and SCK and all CS pins
  * @param [in] bus Software SPI bus
  */
@@ -111,27 +85,15 @@ void softio_spi_init(SoftIoSpiBus* bus);
 void softio_spi_deinit(SoftIoSpiBus* bus);
 
 /**
- * @brief Brings the CS pin associated with a slave low
- * @param [in] device Software SPI bus device
- */
-void softio_spi_acquire(SoftIoSpiSlave* device);
-
-/**
- * @brief Brings the CS pin associated with a slave high
- * @param [in] device Software SPI bus device
- */
-void softio_spi_release(SoftIoSpiSlave* device);
-
-/**
  * @brief Simultaneously transmits and receives a buffer on the software SPI bus
- * @param [in] device Software SPI bus device
+ * @param [in] bus Software SPI bus
  * @param [in] tx_buffer Buffer to transmit. May be NULL if transmission is not required.
  * @param [in] rx_buffer Buffer to receive data into. May be NULL if reception is not required.
  * @param size Buffer length (both buffers must be of the same size)
  * @param timeout Timeout in ticks. Transaction will be interrupted abruptly if this timeout is reached.
  */
 void softio_spi_trx(
-    SoftIoSpiSlave* device,
+    SoftIoSpiBus* bus,
     const uint8_t* tx_buffer,
     uint8_t* rx_buffer,
     size_t size,
@@ -139,21 +101,21 @@ void softio_spi_trx(
 
 /**
  * @brief Transmits a buffer on the software SPI bus
- * @param [in] device Software SPI bus device
+ * @param [in] bus Software SPI bus
  * @param [in] buffer Buffer to transmit
  * @param size Buffer length
  * @param timeout Timeout in ticks. Transmission will be interrupted abruptly if this timeout is reached.
  */
-void softio_spi_tx(SoftIoSpiSlave* device, const uint8_t* buffer, size_t size, uint32_t timeout);
+void softio_spi_tx(SoftIoSpiBus* bus, const uint8_t* buffer, size_t size, uint32_t timeout);
 
 /**
  * @brief Receives a buffer from the software SPI bus
- * @param [in] device Software SPI bus device
+ * @param [in] bus Software SPI bus
  * @param [in] buffer Buffer to receive into
  * @param size Buffer length
  * @param timeout Timeout in ticks. Reception will be interrupted abruptly if this timeout is reached.
  */
-void softio_spi_rx(SoftIoSpiSlave* device, uint8_t* buffer, size_t size, uint32_t timeout);
+void softio_spi_rx(SoftIoSpiBus* bus, uint8_t* buffer, size_t size, uint32_t timeout);
 
 #ifdef __cplusplus
 }

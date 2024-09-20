@@ -47,25 +47,22 @@ static void spi_test_submenu_callback(void* context, uint32_t index) {
             .mosi = &gpio_ext_pa7,
             .sck = &gpio_ext_pb3,
             .clk_polarity = 0,
-        };
-        SoftIoSpiSlaveConfig dev_cfg = {
-            .cs = &gpio_ext_pa4,
             .clk_fq_khz = 200,
             .clk_phase = 0,
         };
         SoftIoSpiBus* bus = softio_spi_alloc(&bus_cfg);
-        SoftIoSpiSlave* device = softio_spi_attach_slave(bus, &dev_cfg);
         softio_spi_init(bus);
-        furi_delay_ms(100);
+        furi_hal_gpio_write(&gpio_ext_pa4, true);
+        furi_hal_gpio_init(&gpio_ext_pa4, GpioModeOutputOpenDrain, GpioPullUp, GpioSpeedVeryHigh);
 
         // transmit
-        softio_spi_acquire(device);
-        softio_spi_trx(device, tx_buffer, rx_buffer, sizeof(tx_buffer), FuriWaitForever);
-        softio_spi_release(device);
+        furi_hal_gpio_write(&gpio_ext_pa4, false);
+        softio_spi_trx(bus, tx_buffer, rx_buffer, sizeof(tx_buffer), FuriWaitForever);
+        furi_hal_gpio_write(&gpio_ext_pa4, true);
 
         // deinitialize
+        furi_hal_gpio_init(&gpio_ext_pa4, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         softio_spi_deinit(bus);
-        softio_spi_detach_slave(bus, device);
         softio_spi_free(bus);
     }
 
