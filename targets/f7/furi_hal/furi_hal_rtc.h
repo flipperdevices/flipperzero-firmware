@@ -102,7 +102,7 @@ void furi_hal_rtc_init(void);
  *
  * This function must be called before system sent to transport mode(power off).
  * FlipperZero implementation configures and enables ALARM output on pin PC13
- * (Back button). This allows system to woke-up charger from transport mode.
+ * (Back button). This allows the system to wake-up charger from transport mode.
  */
 void furi_hal_rtc_prepare_for_shutdown(void);
 
