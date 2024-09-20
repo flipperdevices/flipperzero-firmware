@@ -171,6 +171,44 @@ static bool social_moscow_read(Nfc* nfc, NfcDevice* device) {
     return is_read;
 }
 
+static uint8_t calculate_luhn(uint64_t number) {
+    // https://en.wikipedia.org/wiki/Luhn_algorithm
+    // Drop existing check digit to form payload
+    uint64_t payload = number / 10;
+    int sum = 0;
+    int position = 0;
+
+    while(payload > 0) {
+        int digit = payload % 10;
+        if(position % 2 == 0) {
+            digit *= 2;
+        }
+        if(digit > 9) {
+            digit = (digit / 10) + (digit % 10);
+        }
+        sum += digit;
+        payload /= 10;
+        position++;
+    }
+
+    return (10 - (sum % 10)) % 10;
+}
+
+static uint64_t hex_num(uint64_t hex) {
+    uint64_t result = 0;
+    for(uint8_t i = 0; i < 8; ++i) {
+        uint8_t half_byte = hex & 0x0F;
+        uint64_t num = 0;
+        for(uint8_t j = 0; j < 4; ++j) {
+            num += (half_byte & 0x1) * (1 << j);
+            half_byte = half_byte >> 1;
+        }
+        result += num * pow(10, i);
+        hex = hex >> 4;
+    }
+    return result;
+}
+
 static bool social_moscow_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
 
@@ -201,10 +239,19 @@ static bool social_moscow_parse(const NfcDevice* device, FuriString* parsed_data
         uint8_t year = data->block[60].data[11];
         uint8_t month = data->block[60].data[12];
 
+        uint64_t number = hex_num(card_control) + hex_num(card_number) * 10 +
+                          hex_num(card_region) * 10 * 10000000000 +
+                          hex_num(card_code) * 10 * 10000000000 * 100;
+
+        uint8_t luhn = calculate_luhn(number);
+        if(luhn != card_control) break;
+
         FuriString* metro_result = furi_string_alloc();
         FuriString* ground_result = furi_string_alloc();
-        bool result1 = mosgortrans_parse_transport_block(&data->block[4], metro_result);
-        bool result2 = mosgortrans_parse_transport_block(&data->block[16], ground_result);
+        bool is_metro_data_present =
+            mosgortrans_parse_transport_block(&data->block[4], metro_result);
+        bool is_ground_data_present =
+            mosgortrans_parse_transport_block(&data->block[16], ground_result);
         furi_string_cat_printf(
             parsed_data,
             "\e#Social \ecard\nNumber: %lx %x %llx %x\nOMC: %llx\nValid for: %02x/%02x %02x%02x\n",
@@ -217,17 +264,17 @@ static bool social_moscow_parse(const NfcDevice* device, FuriString* parsed_data
             year,
             data->block[60].data[13],
             data->block[60].data[14]);
-        if(result1) {
+        if(is_metro_data_present) {
             furi_string_cat_printf(
                 parsed_data, "\e#Metro\n%s\n", furi_string_get_cstr(metro_result));
         }
-        if(result2) {
+        if(is_ground_data_present) {
             furi_string_cat_printf(
                 parsed_data, "\e#Ground\n%s\n", furi_string_get_cstr(ground_result));
         }
         furi_string_free(ground_result);
         furi_string_free(metro_result);
-        parsed = card_code != 0;
+        parsed = true;
     } while(false);
 
     return parsed;
