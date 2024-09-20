@@ -1,4 +1,4 @@
-#include "furi_hal_interrupt.h"
+#include <furi_hal_interrupt.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_light.h>
 #include <furi_hal_debug.h>
