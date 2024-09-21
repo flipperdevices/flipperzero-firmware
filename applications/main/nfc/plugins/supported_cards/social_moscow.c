@@ -264,13 +264,13 @@ static bool social_moscow_parse(const NfcDevice* device, FuriString* parsed_data
             year,
             data->block[60].data[13],
             data->block[60].data[14]);
-        if(is_metro_data_present) {
-            furi_string_cat_printf(
-                parsed_data, "\e#Metro\n%s\n", furi_string_get_cstr(metro_result));
+        if(is_metro_data_present && !furi_string_empty(metro_result)) {
+            render_section_header(parsed_data, "Metro", 22, 21);
+            furi_string_cat_printf(parsed_data, "%s\n", furi_string_get_cstr(metro_result));
         }
-        if(is_ground_data_present) {
-            furi_string_cat_printf(
-                parsed_data, "\e#Ground\n%s\n", furi_string_get_cstr(ground_result));
+        if(is_ground_data_present && !furi_string_empty(ground_result)) {
+            render_section_header(parsed_data, "Ground", 21, 20);
+            furi_string_cat_printf(parsed_data, "%s\n", furi_string_get_cstr(ground_result));
         }
         furi_string_free(ground_result);
         furi_string_free(metro_result);
