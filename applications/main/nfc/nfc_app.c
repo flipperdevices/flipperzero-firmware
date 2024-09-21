@@ -36,12 +36,11 @@ static void nfc_app_rpc_command_callback(const RpcAppSystemEvent* event, void* c
     }
 }
 
-NfcApp* nfc_app_alloc() {
+NfcApp* nfc_app_alloc(void) {
     NfcApp* instance = malloc(sizeof(NfcApp));
 
     instance->view_dispatcher = view_dispatcher_alloc();
     instance->scene_manager = scene_manager_alloc(&nfc_scene_handlers, instance);
-    view_dispatcher_enable_queue(instance->view_dispatcher);
     view_dispatcher_set_event_callback_context(instance->view_dispatcher, instance);
     view_dispatcher_set_custom_event_callback(
         instance->view_dispatcher, nfc_custom_event_callback);
@@ -50,6 +49,8 @@ NfcApp* nfc_app_alloc() {
 
     instance->nfc = nfc_alloc();
 
+    instance->detected_protocols = nfc_detected_protocols_alloc();
+    instance->felica_auth = felica_auth_alloc();
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
     instance->slix_unlock = slix_unlock_alloc();
     instance->mfc_key_cache = mf_classic_key_cache_alloc();
@@ -141,6 +142,8 @@ void nfc_app_free(NfcApp* instance) {
 
     nfc_free(instance->nfc);
 
+    nfc_detected_protocols_free(instance->detected_protocols);
+    felica_auth_free(instance->felica_auth);
     mf_ultralight_auth_free(instance->mf_ul_auth);
     slix_unlock_free(instance->slix_unlock);
     mf_classic_key_cache_free(instance->mfc_key_cache);
@@ -431,44 +434,24 @@ void nfc_show_loading_popup(void* context, bool show) {
     }
 }
 
-void nfc_app_set_detected_protocols(NfcApp* instance, const NfcProtocol* types, uint32_t count) {
-    furi_assert(instance);
-    furi_assert(types);
-    furi_assert(count < NfcProtocolNum);
-
-    memcpy(instance->protocols_detected, types, count);
-    instance->protocols_detected_num = count;
-    instance->protocols_detected_selected_idx = 0;
-}
-
-void nfc_app_reset_detected_protocols(NfcApp* instance) {
-    furi_assert(instance);
-
-    instance->protocols_detected_selected_idx = 0;
-    instance->protocols_detected_num = 0;
-}
-
 void nfc_append_filename_string_when_present(NfcApp* instance, FuriString* string) {
     furi_assert(instance);
     furi_assert(string);
 
     if(!furi_string_empty(instance->file_name)) {
-        furi_string_cat_printf(string, "Name:%s\n", furi_string_get_cstr(instance->file_name));
+        furi_string_cat_printf(string, "Name: %s\n", furi_string_get_cstr(instance->file_name));
     }
 }
 
-static bool nfc_is_hal_ready() {
+static bool nfc_is_hal_ready(void) {
     if(furi_hal_nfc_is_hal_ready() != FuriHalNfcErrorNone) {
         // No connection to the chip, show an error screen
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();
+        dialog_message_set_header(message, "Error: NFC Chip Failed", 64, 0, AlignCenter, AlignTop);
         dialog_message_set_text(
-            message,
-            "Error!\nNFC chip failed to start\n\n\nSend a photo of this to:\nsupport@flipperzero.one",
-            0,
-            0,
-            AlignLeft,
-            AlignTop);
+            message, "Send error photo via\nsupport.flipper.net", 0, 63, AlignLeft, AlignBottom);
+        dialog_message_set_icon(message, &I_err_09, 128 - 25, 64 - 25);
         dialog_message_show(dialogs, message);
         dialog_message_free(message);
         furi_record_close(RECORD_DIALOGS);
@@ -505,7 +488,7 @@ int32_t nfc_app(void* p) {
                 nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
 
             furi_string_set(nfc->file_path, args);
-            if(nfc_load_file(nfc, nfc->file_path, false)) {
+            if(nfc_load_file(nfc, nfc->file_path, true)) {
                 nfc_show_initial_scene_for_device(nfc);
             } else {
                 view_dispatcher_stop(nfc->view_dispatcher);

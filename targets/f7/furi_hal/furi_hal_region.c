@@ -1,5 +1,6 @@
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>
+#include <furi.h>
 
 const FuriHalRegion furi_hal_region_zero = {
     .country_code = "00",
@@ -70,64 +71,80 @@ const FuriHalRegion furi_hal_region_jp = {
             .duty_cycle = 50,
         }}};
 
-static const FuriHalRegion* furi_hal_region = NULL;
+static const FuriHalRegion* const furi_hal_static_regions[] = {
+    [FuriHalVersionRegionUnknown] = &furi_hal_region_zero,
+    [FuriHalVersionRegionEuRu] = &furi_hal_region_eu_ru,
+    [FuriHalVersionRegionUsCaAu] = &furi_hal_region_us_ca_au,
+    [FuriHalVersionRegionJp] = &furi_hal_region_jp,
+};
 
-void furi_hal_region_init() {
-    FuriHalVersionRegion region = furi_hal_version_get_hw_region();
+static FuriHalRegion* furi_hal_dynamic_region;
+static FuriMutex* furi_hal_dynamic_region_mutex;
 
-    if(region == FuriHalVersionRegionUnknown) {
-        furi_hal_region = &furi_hal_region_zero;
-    } else if(region == FuriHalVersionRegionEuRu) {
-        furi_hal_region = &furi_hal_region_eu_ru;
-    } else if(region == FuriHalVersionRegionUsCaAu) {
-        furi_hal_region = &furi_hal_region_us_ca_au;
-    } else if(region == FuriHalVersionRegionJp) {
-        furi_hal_region = &furi_hal_region_jp;
-    }
+void furi_hal_region_init(void) {
+    furi_assert(furi_hal_dynamic_region_mutex == NULL);
+    furi_hal_dynamic_region_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
-const FuriHalRegion* furi_hal_region_get() {
-    return furi_hal_region;
+const FuriHalRegion* furi_hal_region_get(void) {
+    const FuriHalVersionRegion region = furi_hal_version_get_hw_region();
+    const FuriHalRegion* ret;
+
+    furi_check(furi_mutex_acquire(furi_hal_dynamic_region_mutex, FuriWaitForever) == FuriStatusOk);
+
+    if(region < FuriHalVersionRegionWorld && furi_hal_dynamic_region == NULL) {
+        ret = furi_hal_static_regions[region];
+    } else {
+        ret = furi_hal_dynamic_region;
+    }
+
+    furi_check(furi_mutex_release(furi_hal_dynamic_region_mutex) == FuriStatusOk);
+
+    return ret;
 }
 
 void furi_hal_region_set(FuriHalRegion* region) {
-    furi_hal_region = region;
+    furi_check(region);
+
+    furi_check(furi_mutex_acquire(furi_hal_dynamic_region_mutex, FuriWaitForever) == FuriStatusOk);
+
+    if(furi_hal_dynamic_region) {
+        free(furi_hal_dynamic_region);
+    }
+
+    furi_hal_dynamic_region = region;
+
+    furi_check(furi_mutex_release(furi_hal_dynamic_region_mutex) == FuriStatusOk);
 }
 
-bool furi_hal_region_is_provisioned() {
-    return furi_hal_region != NULL;
+bool furi_hal_region_is_provisioned(void) {
+    return furi_hal_region_get() != NULL;
 }
 
-const char* furi_hal_region_get_name() {
-    if(furi_hal_region) {
-        return furi_hal_region->country_code;
+const char* furi_hal_region_get_name(void) {
+    const FuriHalRegion* region = furi_hal_region_get();
+
+    if(region) {
+        return region->country_code;
     } else {
         return "--";
     }
 }
 
 bool furi_hal_region_is_frequency_allowed(uint32_t frequency) {
-    if(!furi_hal_region) {
-        return false;
-    }
-
-    const FuriHalRegionBand* band = furi_hal_region_get_band(frequency);
-    if(!band) {
-        return false;
-    }
-
-    return true;
+    return furi_hal_region_get_band(frequency) != NULL;
 }
 
 const FuriHalRegionBand* furi_hal_region_get_band(uint32_t frequency) {
-    if(!furi_hal_region) {
+    const FuriHalRegion* region = furi_hal_region_get();
+
+    if(!region) {
         return NULL;
     }
 
-    for(size_t i = 0; i < furi_hal_region->bands_count; i++) {
-        if(furi_hal_region->bands[i].start <= frequency &&
-           furi_hal_region->bands[i].end >= frequency) {
-            return &furi_hal_region->bands[i];
+    for(size_t i = 0; i < region->bands_count; i++) {
+        if(region->bands[i].start <= frequency && region->bands[i].end >= frequency) {
+            return &region->bands[i];
         }
     }
 

@@ -1,6 +1,5 @@
 #include "signal_reader.h"
 
-#include <limits.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_gpio.h>
@@ -14,18 +13,18 @@
 
 #define SIGNAL_READER_DMA DMA2
 
-#define SIGNAL_READER_CAPTURE_TIM (TIM16)
+#define SIGNAL_READER_CAPTURE_TIM         (TIM16)
 #define SIGNAL_READER_CAPTURE_TIM_CHANNEL LL_TIM_CHANNEL_CH1
 
-#define SIGNAL_READER_DMA_GPIO LL_DMA_CHANNEL_2
+#define SIGNAL_READER_DMA_GPIO     LL_DMA_CHANNEL_2
 #define SIGNAL_READER_DMA_GPIO_IRQ FuriHalInterruptIdDma2Ch2
 #define SIGNAL_READER_DMA_GPIO_DEF SIGNAL_READER_DMA, SIGNAL_READER_DMA_GPIO
 
-#define SIGNAL_READER_DMA_TRIGGER LL_DMA_CHANNEL_3
+#define SIGNAL_READER_DMA_TRIGGER     LL_DMA_CHANNEL_3
 #define SIGNAL_READER_DMA_TRIGGER_IRQ FuriHalInterruptIdDma2Ch3
 #define SIGNAL_READER_DMA_TRIGGER_DEF SIGNAL_READER_DMA, SIGNAL_READER_DMA_TRIGGER
 
-#define SIGNAL_READER_DMA_CNT_SYNC LL_DMA_CHANNEL_5
+#define SIGNAL_READER_DMA_CNT_SYNC     LL_DMA_CHANNEL_5
 #define SIGNAL_READER_DMA_CNT_SYNC_IRQ FuriHalInterruptIdDma2Ch5
 #define SIGNAL_READER_DMA_CNT_SYNC_DEF SIGNAL_READER_DMA, SIGNAL_READER_DMA_CNT_SYNC
 
@@ -86,9 +85,9 @@ SignalReader* signal_reader_alloc(const GpioPin* gpio_pin, uint32_t size) {
 }
 
 void signal_reader_free(SignalReader* instance) {
-    furi_assert(instance);
-    furi_assert(instance->gpio_buffer);
-    furi_assert(instance->bitstream_buffer);
+    furi_check(instance);
+    furi_check(instance->gpio_buffer);
+    furi_check(instance->bitstream_buffer);
 
     free(instance->gpio_buffer);
     free(instance->bitstream_buffer);
@@ -96,13 +95,13 @@ void signal_reader_free(SignalReader* instance) {
 }
 
 void signal_reader_set_pull(SignalReader* instance, GpioPull pull) {
-    furi_assert(instance);
+    furi_check(instance);
 
     instance->pull = pull;
 }
 
 void signal_reader_set_polarity(SignalReader* instance, SignalReaderPolarity polarity) {
-    furi_assert(instance);
+    furi_check(instance);
 
     instance->polarity = polarity;
 }
@@ -111,14 +110,14 @@ void signal_reader_set_sample_rate(
     SignalReader* instance,
     SignalReaderTimeUnit time_unit,
     uint32_t time) {
-    furi_assert(instance);
+    furi_check(instance);
     UNUSED(time_unit);
 
     instance->tim_arr = time;
 }
 
 void signal_reader_set_trigger(SignalReader* instance, SignalReaderTrigger trigger) {
-    furi_assert(instance);
+    furi_check(instance);
 
     instance->trigger = trigger;
 }
@@ -186,8 +185,8 @@ static void furi_hal_sw_digital_pin_dma_rx_isr(void* context) {
 }
 
 void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, void* context) {
-    furi_assert(instance);
-    furi_assert(callback);
+    furi_check(instance);
+    furi_check(callback);
 
     instance->callback = callback;
     instance->context = context;
@@ -306,7 +305,7 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
 }
 
 void signal_reader_stop(SignalReader* instance) {
-    furi_assert(instance);
+    furi_check(instance);
 
     furi_hal_interrupt_set_isr(SIGNAL_READER_DMA_GPIO_IRQ, NULL, NULL);
 

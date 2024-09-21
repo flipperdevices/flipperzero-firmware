@@ -1,5 +1,7 @@
 #include "mf_desfire_i.h"
 
+#define TAG "MfDesfire"
+
 #define BITS_IN_BYTE (8U)
 
 #define MF_DESFIRE_FFF_VERSION_KEY \
@@ -9,15 +11,15 @@
     MF_DESFIRE_FFF_PICC_PREFIX " "  \
                                "Free Memory"
 
-#define MF_DESFIRE_FFF_CHANGE_KEY_ID_KEY "Change Key ID"
-#define MF_DESFIRE_FFF_CONFIG_CHANGEABLE_KEY "Config Changeable"
+#define MF_DESFIRE_FFF_CHANGE_KEY_ID_KEY      "Change Key ID"
+#define MF_DESFIRE_FFF_CONFIG_CHANGEABLE_KEY  "Config Changeable"
 #define MF_DESFIRE_FFF_FREE_CREATE_DELETE_KEY "Free Create Delete"
-#define MF_DESFIRE_FFF_FREE_DIR_LIST_KEY "Free Directory List"
-#define MF_DESFIRE_FFF_KEY_CHANGEABLE_KEY "Key Changeable"
-#define MF_DESFIRE_FFF_FLAGS_KEY "Flags"
-#define MF_DESFIRE_FFF_MAX_KEYS_KEY "Max Keys"
+#define MF_DESFIRE_FFF_FREE_DIR_LIST_KEY      "Free Directory List"
+#define MF_DESFIRE_FFF_KEY_CHANGEABLE_KEY     "Key Changeable"
+#define MF_DESFIRE_FFF_FLAGS_KEY              "Flags"
+#define MF_DESFIRE_FFF_MAX_KEYS_KEY           "Max Keys"
 
-#define MF_DESFIRE_FFF_KEY_SUB_PREFIX "Key"
+#define MF_DESFIRE_FFF_KEY_SUB_PREFIX  "Key"
 #define MF_DESFIRE_FFF_KEY_VERSION_KEY "Version"
 
 #define MF_DESFIRE_FFF_APPLICATION_COUNT_KEY \
@@ -31,15 +33,15 @@
 #define MF_DESFIRE_FFF_FILE_IDS_KEY    \
     MF_DESFIRE_FFF_FILE_SUB_PREFIX " " \
                                    "IDs"
-#define MF_DESFIRE_FFF_FILE_TYPE_KEY "Type"
+#define MF_DESFIRE_FFF_FILE_TYPE_KEY          "Type"
 #define MF_DESFIRE_FFF_FILE_COMM_SETTINGS_KEY "Communication Settings"
 #define MF_DESFIRE_FFF_FILE_ACCESS_RIGHTS_KEY "Access Rights"
 
 #define MF_DESFIRE_FFF_FILE_SIZE_KEY "Size"
 
-#define MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY "Hi Limit"
-#define MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY "Lo Limit"
-#define MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY "Limited Credit Value"
+#define MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY             "Hi Limit"
+#define MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY             "Lo Limit"
+#define MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY   "Limited Credit Value"
 #define MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_ENABLED_KEY "Limited Credit Enabled"
 
 #define MF_DESFIRE_FFF_FILE_MAX_KEY "Max"
@@ -76,12 +78,12 @@ bool mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* bu
 bool mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* buf) {
     typedef struct FURI_PACKED {
         bool is_master_key_changeable : 1;
-        bool is_free_directory_list : 1;
-        bool is_free_create_delete : 1;
-        bool is_config_changeable : 1;
-        uint8_t change_key_id : 4;
-        uint8_t max_keys : 4;
-        uint8_t flags : 4;
+        bool is_free_directory_list   : 1;
+        bool is_free_create_delete    : 1;
+        bool is_config_changeable     : 1;
+        uint8_t change_key_id         : 4;
+        uint8_t max_keys              : 4;
+        uint8_t flags                 : 4;
     } MfDesfireKeySettingsLayout;
 
     const bool can_parse = bit_buffer_get_size_bytes(buf) == sizeof(MfDesfireKeySettingsLayout);
@@ -162,8 +164,8 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
 
     typedef struct FURI_PACKED {
         uint32_t size : 3 * BITS_IN_BYTE;
-        uint32_t max : 3 * BITS_IN_BYTE;
-        uint32_t cur : 3 * BITS_IN_BYTE;
+        uint32_t max  : 3 * BITS_IN_BYTE;
+        uint32_t cur  : 3 * BITS_IN_BYTE;
     } MfDesfireFileSettingsRecord;
 
     typedef struct FURI_PACKED {
@@ -175,59 +177,88 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
         };
     } MfDesfireFileSettingsLayout;
 
+    MfDesfireFileSettings file_settings_temp = {};
     do {
         const size_t data_size = bit_buffer_get_size_bytes(buf);
+        const uint8_t* data_ptr = bit_buffer_get_data(buf);
         const size_t min_data_size =
             sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsData);
-        const size_t max_data_size =
-            sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsValue);
 
-        if(data_size < min_data_size) break;
-        if(data_size <= max_data_size) {
-            MfDesfireFileSettingsLayout layout;
-            bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireFileSettingsLayout));
-
-            data->type = layout.header.type;
-            data->comm = layout.header.comm;
-            data->access_rights = layout.header.access_rights;
-
-            if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
-                if(data_size != min_data_size) break;
-
-                data->data.size = layout.data.size;
-            } else if(data->type == MfDesfireFileTypeValue) {
-                if(data_size !=
-                   sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsValue))
-                    break;
-
-                data->value.lo_limit = layout.value.lo_limit;
-                data->value.hi_limit = layout.value.hi_limit;
-                data->value.limited_credit_value = layout.value.limited_credit_value;
-                data->value.limited_credit_enabled = layout.value.limited_credit_enabled;
-
-            } else if(
-                data->type == MfDesfireFileTypeLinearRecord ||
-                data->type == MfDesfireFileTypeCyclicRecord) {
-                if(data_size !=
-                   sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsRecord))
-                    break;
-
-                data->record.size = layout.record.size;
-                data->record.max = layout.record.max;
-                data->record.cur = layout.record.cur;
-
-            } else {
-                break;
-            }
-        } else {
-            // TODO FL-3750: process HID Desfire command response here
-            // Set default fields for now
-            data->type = 0;
-            data->comm = 0;
-            data->access_rights = 0;
-            data->data.size = 0;
+        if(data_size < min_data_size) {
+            FURI_LOG_E(
+                TAG, "File settings size %zu less than minimum %zu", data_size, min_data_size);
+            break;
         }
 
+        size_t bytes_processed = sizeof(MfDesfireFileSettingsHeader);
+        MfDesfireFileSettingsLayout layout = {};
+        memcpy(&layout.header, data_ptr, sizeof(MfDesfireFileSettingsHeader));
+        bool has_additional_access_rights = (layout.header.comm & 0x80) != 0;
+
+        file_settings_temp.type = layout.header.type;
+        file_settings_temp.comm = layout.header.comm & 0x03;
+        file_settings_temp.access_rights_len = 1;
+        file_settings_temp.access_rights[0] = layout.header.access_rights;
+
+        if(file_settings_temp.type == MfDesfireFileTypeStandard ||
+           file_settings_temp.type == MfDesfireFileTypeBackup) {
+            memcpy(
+                &layout.data,
+                &data_ptr[sizeof(MfDesfireFileSettingsHeader)],
+                sizeof(MfDesfireFileSettingsData));
+            file_settings_temp.data.size = layout.data.size;
+            bytes_processed += sizeof(MfDesfireFileSettingsData);
+        } else if(file_settings_temp.type == MfDesfireFileTypeValue) {
+            memcpy(
+                &layout.value,
+                &data_ptr[sizeof(MfDesfireFileSettingsHeader)],
+                sizeof(MfDesfireFileSettingsValue));
+            file_settings_temp.value.lo_limit = layout.value.lo_limit;
+            file_settings_temp.value.hi_limit = layout.value.hi_limit;
+            file_settings_temp.value.limited_credit_value = layout.value.limited_credit_value;
+            file_settings_temp.value.limited_credit_enabled = layout.value.limited_credit_enabled;
+            bytes_processed += sizeof(MfDesfireFileSettingsValue);
+        } else if(
+            file_settings_temp.type == MfDesfireFileTypeLinearRecord ||
+            file_settings_temp.type == MfDesfireFileTypeCyclicRecord) {
+            memcpy(
+                &layout.record,
+                &data_ptr[sizeof(MfDesfireFileSettingsHeader)],
+                sizeof(MfDesfireFileSettingsRecord));
+            file_settings_temp.record.size = layout.record.size;
+            file_settings_temp.record.max = layout.record.max;
+            file_settings_temp.record.cur = layout.record.cur;
+            bytes_processed += sizeof(MfDesfireFileSettingsRecord);
+        } else {
+            FURI_LOG_W(TAG, "Unknown file type: %02x", file_settings_temp.type);
+            break;
+        }
+
+        if(has_additional_access_rights) {
+            uint8_t additional_access_rights_len = bit_buffer_get_byte(buf, bytes_processed);
+            FURI_LOG_D(TAG, "Has additional rights: %d", additional_access_rights_len);
+            if(data_size != bytes_processed +
+                                additional_access_rights_len * sizeof(MfDesfireFileAccessRights) +
+                                1) {
+                FURI_LOG_W(TAG, "Unexpected command length: %zu", data_size);
+                for(size_t i = 0; i < bit_buffer_get_size_bytes(buf); i++) {
+                    printf("%02X ", bit_buffer_get_byte(buf, i));
+                }
+                printf("\r\n");
+                break;
+            }
+            if(additional_access_rights_len >
+               MF_DESFIRE_MAX_KEYS * sizeof(MfDesfireFileAccessRights))
+                break;
+
+            memcpy(
+                &file_settings_temp.access_rights[1],
+                &data_ptr[bytes_processed],
+                additional_access_rights_len * sizeof(MfDesfireFileAccessRights));
+            file_settings_temp.access_rights_len += additional_access_rights_len;
+        }
+
+        *data = file_settings_temp;
         parsed = true;
     } while(false);
 
@@ -392,18 +423,19 @@ bool mf_desfire_file_settings_load(
             break;
 
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_ACCESS_RIGHTS_KEY);
-        if(!flipper_format_read_hex(
-               ff,
-               furi_string_get_cstr(key),
-               (uint8_t*)&data->access_rights,
-               sizeof(MfDesfireFileAccessRights)))
+        uint32_t access_rights_len = 0;
+        if(!flipper_format_get_value_count(ff, furi_string_get_cstr(key), &access_rights_len))
             break;
+        if((access_rights_len == 0) || ((access_rights_len % 2) != 0)) break;
+        if(!flipper_format_read_hex(
+               ff, furi_string_get_cstr(key), (uint8_t*)&data->access_rights, access_rights_len))
+            break;
+        data->access_rights_len = access_rights_len / sizeof(MfDesfireFileAccessRights);
 
         if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_SIZE_KEY);
             if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->data.size, 1))
                 break;
-
         } else if(data->type == MfDesfireFileTypeValue) {
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY);
             if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->value.hi_limit, 1))
@@ -641,8 +673,8 @@ bool mf_desfire_file_settings_save(
         if(!flipper_format_write_hex(
                ff,
                furi_string_get_cstr(key),
-               (const uint8_t*)&data->access_rights,
-               sizeof(MfDesfireFileAccessRights)))
+               (const uint8_t*)data->access_rights,
+               data->access_rights_len * sizeof(MfDesfireFileAccessRights)))
             break;
 
         if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
@@ -737,8 +769,11 @@ bool mf_desfire_application_save(
         if(i != key_version_count) break;
 
         const uint32_t file_count = simple_array_get_count(data->file_ids);
-        if(!mf_desfire_file_ids_save(simple_array_get_data(data->file_ids), file_count, prefix, ff))
-            break;
+        if(file_count > 0) {
+            if(!mf_desfire_file_ids_save(
+                   simple_array_get_data(data->file_ids), file_count, prefix, ff))
+                break;
+        }
 
         for(i = 0; i < file_count; ++i) {
             const MfDesfireFileId* file_id = simple_array_cget(data->file_ids, i);

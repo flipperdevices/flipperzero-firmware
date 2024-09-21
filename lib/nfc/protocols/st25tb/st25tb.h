@@ -9,13 +9,13 @@ extern "C" {
 #define ST25TB_UID_SIZE (8U)
 
 //#define ST25TB_FDT_FC (4205U)
-#define ST25TB_FDT_FC (8494U)
-#define ST25TB_GUARD_TIME_US (5000U)
+#define ST25TB_FDT_FC           (8494U)
+#define ST25TB_GUARD_TIME_US    (5000U)
 #define ST25TB_POLL_POLL_MIN_US (1280U)
 
-#define ST25TB_MAX_BLOCKS (128U)
+#define ST25TB_MAX_BLOCKS       (128U)
 #define ST25TB_SYSTEM_OTP_BLOCK (0xFFU)
-#define ST25TB_BLOCK_SIZE (4U)
+#define ST25TB_BLOCK_SIZE       (4U)
 
 typedef enum {
     St25tbErrorNone,
@@ -48,7 +48,7 @@ typedef struct {
 
 extern const NfcDeviceBase nfc_device_st25tb;
 
-St25tbData* st25tb_alloc();
+St25tbData* st25tb_alloc(void);
 
 void st25tb_free(St25tbData* data);
 

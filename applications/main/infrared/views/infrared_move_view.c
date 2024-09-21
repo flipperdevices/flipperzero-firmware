@@ -7,9 +7,9 @@
 
 #include <toolbox/m_cstr_dup.h>
 
-#define LIST_ITEMS 4U
-#define LIST_LINE_H 13U
-#define HEADER_H 12U
+#define LIST_ITEMS    4U
+#define LIST_LINE_H   13U
+#define HEADER_H      12U
 #define MOVE_X_OFFSET 5U
 
 struct InfraredMoveView {
@@ -34,7 +34,7 @@ static void infrared_move_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(
-        canvas, canvas_width(canvas) / 2, 0, AlignCenter, AlignTop, "Select a button to move");
+        canvas, canvas_width(canvas) / 2, 0, AlignCenter, AlignTop, "Select a Button to Move");
 
     const size_t btn_number = InfraredMoveViewItemArray_size(model->labels);
     const bool show_scrollbar = btn_number > LIST_ITEMS;
@@ -98,7 +98,7 @@ static bool infrared_move_view_input_callback(InputEvent* event, void* context) 
 
     bool consumed = false;
 
-    if(((event->type == InputTypeShort || event->type == InputTypeRepeat)) &&
+    if((event->type == InputTypeShort || event->type == InputTypeRepeat) &&
        ((event->key == InputKeyUp) || (event->key == InputKeyDown))) {
         with_view_model(
             move_view->view,

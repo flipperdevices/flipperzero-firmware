@@ -4,11 +4,11 @@
 #include "protocol_cyfral.h"
 
 #define CYFRAL_DATA_SIZE sizeof(uint16_t)
-#define CYFRAL_PERIOD (125 * furi_hal_cortex_instructions_per_microsecond())
-#define CYFRAL_0_LOW (CYFRAL_PERIOD * 0.66f)
-#define CYFRAL_0_HI (CYFRAL_PERIOD * 0.33f)
-#define CYFRAL_1_LOW (CYFRAL_PERIOD * 0.33f)
-#define CYFRAL_1_HI (CYFRAL_PERIOD * 0.66f)
+#define CYFRAL_PERIOD    (125 * furi_hal_cortex_instructions_per_microsecond())
+#define CYFRAL_0_LOW     (CYFRAL_PERIOD * 0.66f)
+#define CYFRAL_0_HI      (CYFRAL_PERIOD * 0.33f)
+#define CYFRAL_1_LOW     (CYFRAL_PERIOD * 0.33f)
+#define CYFRAL_1_HI      (CYFRAL_PERIOD * 0.66f)
 
 #define CYFRAL_MAX_PERIOD_US 230
 
@@ -325,10 +325,15 @@ static LevelDuration protocol_cyfral_encoder_yield(ProtocolCyfral* proto) {
     return result;
 }
 
-static void protocol_cyfral_render_brief_data(ProtocolCyfral* proto, FuriString* result) {
+static void protocol_cyfral_render_uid(ProtocolCyfral* proto, FuriString* result) {
+    furi_string_cat_printf(result, "ID: ");
     for(size_t i = 0; i < CYFRAL_DATA_SIZE; ++i) {
         furi_string_cat_printf(result, "%02X ", ((uint8_t*)&proto->data)[i]);
     }
+}
+
+static void protocol_cyfral_render_brief_data(ProtocolCyfral* proto, FuriString* result) {
+    protocol_cyfral_render_uid(proto, result);
 }
 
 const ProtocolBase ibutton_protocol_misc_cyfral = {
@@ -348,5 +353,6 @@ const ProtocolBase ibutton_protocol_misc_cyfral = {
             .start = (ProtocolEncoderStart)protocol_cyfral_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_cyfral_encoder_yield,
         },
+    .render_uid = (ProtocolRenderData)protocol_cyfral_render_uid,
     .render_brief_data = (ProtocolRenderData)protocol_cyfral_render_brief_data,
 };

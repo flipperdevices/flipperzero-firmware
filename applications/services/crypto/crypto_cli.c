@@ -4,7 +4,7 @@
 #include <lib/toolbox/args.h>
 #include <cli/cli.h>
 
-void crypto_cli_print_usage() {
+void crypto_cli_print_usage(void) {
     printf("Usage:\r\n");
     printf("crypto <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
@@ -15,7 +15,7 @@ void crypto_cli_print_usage() {
     printf("\thas_key <key_slot:int>\t - Check if secure enclave has key in slot\r\n");
     printf(
         "\tstore_key <key_slot:int> <key_type:str> <key_size:int> <key_data:hex>\t - Store key in secure enclave. !!! NON-REVERSABLE OPERATION - READ MANUAL FIRST !!!\r\n");
-};
+}
 
 void crypto_cli_encrypt(Cli* cli, FuriString* args) {
     int key_slot = 0;
@@ -316,7 +316,7 @@ static void crypto_cli(Cli* cli, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-void crypto_on_system_start() {
+void crypto_on_system_start(void) {
 #ifdef SRV_CLI
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_add_command(cli, "crypto", CliCommandFlagDefault, crypto_cli, NULL);

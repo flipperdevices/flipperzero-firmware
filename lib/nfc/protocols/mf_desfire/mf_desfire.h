@@ -8,28 +8,26 @@
 extern "C" {
 #endif
 
-#define MF_DESFIRE_CMD_GET_VERSION (0x60)
-#define MF_DESFIRE_CMD_GET_FREE_MEMORY (0x6E)
-#define MF_DESFIRE_CMD_GET_KEY_SETTINGS (0x45)
-#define MF_DESFIRE_CMD_GET_KEY_VERSION (0x64)
+#define MF_DESFIRE_CMD_GET_VERSION         (0x60)
+#define MF_DESFIRE_CMD_GET_FREE_MEMORY     (0x6E)
+#define MF_DESFIRE_CMD_GET_KEY_SETTINGS    (0x45)
+#define MF_DESFIRE_CMD_GET_KEY_VERSION     (0x64)
 #define MF_DESFIRE_CMD_GET_APPLICATION_IDS (0x6A)
-#define MF_DESFIRE_CMD_SELECT_APPLICATION (0x5A)
-#define MF_DESFIRE_CMD_GET_FILE_IDS (0x6F)
-#define MF_DESFIRE_CMD_GET_FILE_SETTINGS (0xF5)
+#define MF_DESFIRE_CMD_SELECT_APPLICATION  (0x5A)
+#define MF_DESFIRE_CMD_GET_FILE_IDS        (0x6F)
+#define MF_DESFIRE_CMD_GET_FILE_SETTINGS   (0xF5)
 
-#define MF_DESFIRE_CMD_READ_DATA (0xBD)
-#define MF_DESFIRE_CMD_GET_VALUE (0x6C)
+#define MF_DESFIRE_CMD_READ_DATA    (0xBD)
+#define MF_DESFIRE_CMD_GET_VALUE    (0x6C)
 #define MF_DESFIRE_CMD_READ_RECORDS (0xBB)
 
-#define MF_DESFIRE_FLAG_HAS_NEXT (0xAF)
-
-#define MF_DESFIRE_MAX_KEYS (14)
+#define MF_DESFIRE_MAX_KEYS  (14)
 #define MF_DESFIRE_MAX_FILES (32)
 
-#define MF_DESFIRE_UID_SIZE (7)
-#define MF_DESFIRE_BATCH_SIZE (5)
+#define MF_DESFIRE_UID_SIZE    (7)
+#define MF_DESFIRE_BATCH_SIZE  (5)
 #define MF_DESFIRE_APP_ID_SIZE (3)
-#define MF_DESFIRE_VALUE_SIZE (4)
+#define MF_DESFIRE_VALUE_SIZE  (4)
 
 typedef struct {
     uint8_t hw_vendor;
@@ -71,11 +69,6 @@ typedef struct {
 
 typedef uint8_t MfDesfireKeyVersion;
 
-typedef struct {
-    MfDesfireKeySettings key_settings;
-    SimpleArray* key_versions;
-} MfDesfireKeyConfiguration;
-
 typedef enum {
     MfDesfireFileTypeStandard = 0,
     MfDesfireFileTypeBackup = 1,
@@ -96,7 +89,8 @@ typedef uint16_t MfDesfireFileAccessRights;
 typedef struct {
     MfDesfireFileType type;
     MfDesfireFileCommunicationSettings comm;
-    MfDesfireFileAccessRights access_rights;
+    MfDesfireFileAccessRights access_rights[MF_DESFIRE_MAX_KEYS];
+    uint8_t access_rights_len;
     union {
         struct {
             uint32_t size;
@@ -136,6 +130,7 @@ typedef enum {
     MfDesfireErrorNotPresent,
     MfDesfireErrorProtocol,
     MfDesfireErrorTimeout,
+    MfDesfireErrorAuthentication,
 } MfDesfireError;
 
 typedef struct {
@@ -152,7 +147,7 @@ extern const NfcDeviceBase nfc_device_mf_desfire;
 
 // Virtual methods
 
-MfDesfireData* mf_desfire_alloc();
+MfDesfireData* mf_desfire_alloc(void);
 
 void mf_desfire_free(MfDesfireData* data);
 

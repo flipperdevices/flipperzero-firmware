@@ -155,7 +155,7 @@ static const struct HidConfigDescriptor hid_cfg_desc = {
             .bConfigurationValue = 1,
             .iConfiguration = NO_DESCRIPTOR,
             .bmAttributes = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
-            .bMaxPower = USB_CFG_POWER_MA(100),
+            .bMaxPower = USB_CFG_POWER_MA(500),
         },
     .intf_0 =
         {
@@ -257,11 +257,11 @@ static void* cb_ctx;
 static uint8_t led_state;
 static bool boot_protocol = false;
 
-bool furi_hal_hid_is_connected() {
+bool furi_hal_hid_is_connected(void) {
     return hid_connected;
 }
 
-uint8_t furi_hal_hid_get_led_state() {
+uint8_t furi_hal_hid_get_led_state(void) {
     return led_state;
 }
 
@@ -300,7 +300,7 @@ bool furi_hal_hid_kb_release(uint16_t button) {
     return hid_send_report(ReportIdKeyboard);
 }
 
-bool furi_hal_hid_kb_release_all() {
+bool furi_hal_hid_kb_release_all(void) {
     for(uint8_t key_nb = 0; key_nb < HID_KB_MAX_KEYS; key_nb++) {
         hid_report.keyboard.boot.btn[key_nb] = 0;
     }
@@ -354,6 +354,13 @@ bool furi_hal_hid_consumer_key_release(uint16_t button) {
     return hid_send_report(ReportIdConsumer);
 }
 
+bool furi_hal_hid_consumer_key_release_all(void) {
+    for(uint8_t key_nb = 0; key_nb < HID_CONSUMER_MAX_KEYS; key_nb++) {
+        hid_report.consumer.btn[key_nb] = 0;
+    }
+    return hid_send_report(ReportIdConsumer);
+}
+
 static void* hid_set_string_descr(char* str) {
     furi_assert(str);
 
@@ -361,7 +368,8 @@ static void* hid_set_string_descr(char* str) {
     struct usb_string_descriptor* dev_str_desc = malloc(len * 2 + 2);
     dev_str_desc->bLength = len * 2 + 2;
     dev_str_desc->bDescriptorType = USB_DTYPE_STRING;
-    for(size_t i = 0; i < len; i++) dev_str_desc->wString[i] = str[i];
+    for(size_t i = 0; i < len; i++)
+        dev_str_desc->wString[i] = str[i];
 
     return dev_str_desc;
 }

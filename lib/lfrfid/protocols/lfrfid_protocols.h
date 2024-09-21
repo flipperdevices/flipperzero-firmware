@@ -11,6 +11,7 @@ typedef enum {
     LFRFIDProtocolEM4100,
     LFRFIDProtocolEM410032,
     LFRFIDProtocolEM410016,
+    LFRFIDProtocolElectra,
     LFRFIDProtocolH10301,
     LFRFIDProtocolIdteck,
     LFRFIDProtocolIndala26,
@@ -28,6 +29,8 @@ typedef enum {
     LFRFIDProtocolKeri,
     LFRFIDProtocolGallagher,
     LFRFIDProtocolNexwatch,
+    LFRFIDProtocolSecurakey,
+    LFRFIDProtocolGProxII,
     LFRFIDProtocolMax,
 } LFRFIDProtocol;
 

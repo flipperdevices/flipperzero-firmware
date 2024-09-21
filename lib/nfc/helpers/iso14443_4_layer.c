@@ -2,7 +2,7 @@
 
 #include <furi.h>
 
-#define ISO14443_4_BLOCK_PCB (1U << 1)
+#define ISO14443_4_BLOCK_PCB   (1U << 1)
 #define ISO14443_4_BLOCK_PCB_I (0U)
 #define ISO14443_4_BLOCK_PCB_R (5U << 5)
 #define ISO14443_4_BLOCK_PCB_S (3U << 6)
@@ -17,7 +17,7 @@ static inline void iso14443_4_layer_update_pcb(Iso14443_4Layer* instance) {
     instance->pcb ^= (uint8_t)0x01;
 }
 
-Iso14443_4Layer* iso14443_4_layer_alloc() {
+Iso14443_4Layer* iso14443_4_layer_alloc(void) {
     Iso14443_4Layer* instance = malloc(sizeof(Iso14443_4Layer));
 
     iso14443_4_layer_reset(instance);

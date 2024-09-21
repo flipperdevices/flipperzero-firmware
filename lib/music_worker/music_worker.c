@@ -12,12 +12,12 @@
 #define TAG "MusicWorker"
 
 #define MUSIC_PLAYER_FILETYPE "Flipper Music Format"
-#define MUSIC_PLAYER_VERSION 0
+#define MUSIC_PLAYER_VERSION  0
 
 #define SEMITONE_PAUSE 0xFF
 
-#define NOTE_C4 261.63f
-#define NOTE_C4_SEMITONE (4.0f * 12.0f)
+#define NOTE_C4             261.63f
+#define NOTE_C4_SEMITONE    (4.0f * 12.0f)
 #define TWO_POW_TWELTH_ROOT 1.059463094359f
 
 typedef struct {
@@ -97,7 +97,7 @@ static int32_t music_worker_thread_callback(void* context) {
     return 0;
 }
 
-MusicWorker* music_worker_alloc() {
+MusicWorker* music_worker_alloc(void) {
     MusicWorker* instance = malloc(sizeof(MusicWorker));
 
     NoteBlockArray_init(instance->notes);

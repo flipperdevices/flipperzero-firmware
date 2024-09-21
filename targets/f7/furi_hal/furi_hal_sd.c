@@ -11,12 +11,12 @@
 #define sd_spi_debug(...)
 #endif
 
-#define SD_CMD_LENGTH (6)
-#define SD_DUMMY_BYTE (0xFF)
+#define SD_CMD_LENGTH         (6)
+#define SD_DUMMY_BYTE         (0xFF)
 #define SD_ANSWER_RETRY_COUNT (8)
-#define SD_IDLE_RETRY_COUNT (100)
-#define SD_TIMEOUT_MS (1000)
-#define SD_BLOCK_SIZE (512)
+#define SD_IDLE_RETRY_COUNT   (100)
+#define SD_TIMEOUT_MS         (1000)
+#define SD_BLOCK_SIZE         (512)
 
 #define FLAG_SET(x, y) (((x) & (y)) == (y))
 
@@ -125,53 +125,53 @@ typedef enum {
  */
 typedef struct {
     /* Header part */
-    uint8_t CSDStruct : 2; /* CSD structure */
-    uint8_t Reserved1 : 6; /* Reserved */
-    uint8_t TAAC : 8; /* Data read access-time 1 */
-    uint8_t NSAC : 8; /* Data read access-time 2 in CLK cycles */
-    uint8_t MaxBusClkFreq : 8; /* Max. bus clock frequency */
+    uint8_t CSDStruct        : 2; /* CSD structure */
+    uint8_t Reserved1        : 6; /* Reserved */
+    uint8_t TAAC             : 8; /* Data read access-time 1 */
+    uint8_t NSAC             : 8; /* Data read access-time 2 in CLK cycles */
+    uint8_t MaxBusClkFreq    : 8; /* Max. bus clock frequency */
     uint16_t CardComdClasses : 12; /* Card command classes */
-    uint8_t RdBlockLen : 4; /* Max. read data block length */
-    uint8_t PartBlockRead : 1; /* Partial blocks for read allowed */
-    uint8_t WrBlockMisalign : 1; /* Write block misalignment */
-    uint8_t RdBlockMisalign : 1; /* Read block misalignment */
-    uint8_t DSRImpl : 1; /* DSR implemented */
+    uint8_t RdBlockLen       : 4; /* Max. read data block length */
+    uint8_t PartBlockRead    : 1; /* Partial blocks for read allowed */
+    uint8_t WrBlockMisalign  : 1; /* Write block misalignment */
+    uint8_t RdBlockMisalign  : 1; /* Read block misalignment */
+    uint8_t DSRImpl          : 1; /* DSR implemented */
 
     /* v1 or v2 struct */
     union csd_version {
         struct {
-            uint8_t Reserved1 : 2; /* Reserved */
-            uint16_t DeviceSize : 12; /* Device Size */
+            uint8_t Reserved1          : 2; /* Reserved */
+            uint16_t DeviceSize        : 12; /* Device Size */
             uint8_t MaxRdCurrentVDDMin : 3; /* Max. read current @ VDD min */
             uint8_t MaxRdCurrentVDDMax : 3; /* Max. read current @ VDD max */
             uint8_t MaxWrCurrentVDDMin : 3; /* Max. write current @ VDD min */
             uint8_t MaxWrCurrentVDDMax : 3; /* Max. write current @ VDD max */
-            uint8_t DeviceSizeMul : 3; /* Device size multiplier */
+            uint8_t DeviceSizeMul      : 3; /* Device size multiplier */
         } v1;
         struct {
-            uint8_t Reserved1 : 6; /* Reserved */
+            uint8_t Reserved1   : 6; /* Reserved */
             uint32_t DeviceSize : 22; /* Device Size */
-            uint8_t Reserved2 : 1; /* Reserved */
+            uint8_t Reserved2   : 1; /* Reserved */
         } v2;
     } version;
 
     uint8_t EraseSingleBlockEnable : 1; /* Erase single block enable */
-    uint8_t EraseSectorSize : 7; /* Erase group size multiplier */
-    uint8_t WrProtectGrSize : 7; /* Write protect group size */
-    uint8_t WrProtectGrEnable : 1; /* Write protect group enable */
-    uint8_t Reserved2 : 2; /* Reserved */
-    uint8_t WrSpeedFact : 3; /* Write speed factor */
-    uint8_t MaxWrBlockLen : 4; /* Max. write data block length */
-    uint8_t WriteBlockPartial : 1; /* Partial blocks for write allowed */
-    uint8_t Reserved3 : 5; /* Reserved */
-    uint8_t FileFormatGrouop : 1; /* File format group */
-    uint8_t CopyFlag : 1; /* Copy flag (OTP) */
-    uint8_t PermWrProtect : 1; /* Permanent write protection */
-    uint8_t TempWrProtect : 1; /* Temporary write protection */
-    uint8_t FileFormat : 2; /* File Format */
-    uint8_t Reserved4 : 2; /* Reserved */
-    uint8_t crc : 7; /* Reserved */
-    uint8_t Reserved5 : 1; /* always 1*/
+    uint8_t EraseSectorSize        : 7; /* Erase group size multiplier */
+    uint8_t WrProtectGrSize        : 7; /* Write protect group size */
+    uint8_t WrProtectGrEnable      : 1; /* Write protect group enable */
+    uint8_t Reserved2              : 2; /* Reserved */
+    uint8_t WrSpeedFact            : 3; /* Write speed factor */
+    uint8_t MaxWrBlockLen          : 4; /* Max. write data block length */
+    uint8_t WriteBlockPartial      : 1; /* Partial blocks for write allowed */
+    uint8_t Reserved3              : 5; /* Reserved */
+    uint8_t FileFormatGrouop       : 1; /* File format group */
+    uint8_t CopyFlag               : 1; /* Copy flag (OTP) */
+    uint8_t PermWrProtect          : 1; /* Permanent write protection */
+    uint8_t TempWrProtect          : 1; /* Temporary write protection */
+    uint8_t FileFormat             : 2; /* File Format */
+    uint8_t Reserved4              : 2; /* Reserved */
+    uint8_t crc                    : 7; /* Reserved */
+    uint8_t Reserved5              : 1; /* always 1*/
 
 } SD_CSD;
 
@@ -206,17 +206,17 @@ typedef struct {
 /** Pointer to currently used SPI Handle */
 FuriHalSpiBusHandle* furi_hal_sd_spi_handle = NULL;
 
-static inline void sd_spi_select_card() {
+static inline void sd_spi_select_card(void) {
     furi_hal_gpio_write(furi_hal_sd_spi_handle->cs, false);
     furi_delay_us(10); // Entry guard time for some SD cards
 }
 
-static inline void sd_spi_deselect_card() {
+static inline void sd_spi_deselect_card(void) {
     furi_delay_us(10); // Exit guard time for some SD cards
     furi_hal_gpio_write(furi_hal_sd_spi_handle->cs, true);
 }
 
-static void sd_spi_bus_to_ground() {
+static void sd_spi_bus_to_ground(void) {
     furi_hal_gpio_init_ex(
         furi_hal_sd_spi_handle->miso,
         GpioModeOutputPushPull,
@@ -242,7 +242,7 @@ static void sd_spi_bus_to_ground() {
     furi_hal_gpio_write(furi_hal_sd_spi_handle->sck, false);
 }
 
-static void sd_spi_bus_rise_up() {
+static void sd_spi_bus_rise_up(void) {
     sd_spi_deselect_card();
 
     furi_hal_gpio_init_ex(
@@ -324,17 +324,17 @@ static FuriStatus sd_spi_wait_for_data(uint8_t data, uint32_t timeout_ms) {
         if(furi_hal_cortex_timer_is_expired(timer)) {
             return FuriStatusErrorTimeout;
         }
-    } while((byte != data));
+    } while(byte != data);
 
     return FuriStatusOk;
 }
 
-static inline void sd_spi_deselect_card_and_purge() {
+static inline void sd_spi_deselect_card_and_purge(void) {
     sd_spi_deselect_card();
     sd_spi_read_byte();
 }
 
-static inline void sd_spi_purge_crc() {
+static inline void sd_spi_purge_crc(void) {
     sd_spi_read_byte();
     sd_spi_read_byte();
 }
@@ -833,7 +833,7 @@ static inline void sd_cache_invalidate_range(uint32_t start_sector, uint32_t end
     sector_cache_invalidate_range(start_sector, end_sector);
 }
 
-static inline void sd_cache_invalidate_all() {
+static inline void sd_cache_invalidate_all(void) {
     sector_cache_init();
 }
 
@@ -907,7 +907,7 @@ bool furi_hal_sd_is_present(void) {
     return result;
 }
 
-uint8_t furi_hal_sd_max_mount_retry_count() {
+uint8_t furi_hal_sd_max_mount_retry_count(void) {
     return 10;
 }
 
@@ -972,6 +972,8 @@ FuriStatus furi_hal_sd_get_card_state(void) {
 }
 
 FuriStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_t count) {
+    furi_check(buff);
+
     FuriStatus status;
     bool single_sector = count == 1;
 
@@ -1009,6 +1011,8 @@ FuriStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_t cou
 }
 
 FuriStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, uint32_t count) {
+    furi_check(buff);
+
     FuriStatus status;
 
     sd_cache_invalidate_range(sector, sector + count);
@@ -1037,6 +1041,8 @@ FuriStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, uint3
 }
 
 FuriStatus furi_hal_sd_info(FuriHalSdInfo* info) {
+    furi_check(info);
+
     FuriStatus status;
     SD_CSD csd;
     SD_CID cid;

@@ -3,14 +3,13 @@
 #include "storage_message.h"
 #include "storage_processing.h"
 #include "storage/storage_glue.h"
-#include "storages/storage_int.h"
 #include "storages/storage_ext.h"
 #include <assets_icons.h>
 
 #define STORAGE_TICK 1000
 
 #define ICON_SD_MOUNTED &I_SDcardMounted_11x8
-#define ICON_SD_ERROR &I_SDcardFail_11x8
+#define ICON_SD_ERROR   &I_SDcardFail_11x8
 
 #define TAG "Storage"
 
@@ -32,7 +31,7 @@ static void storage_app_sd_icon_draw_callback(Canvas* canvas, void* context) {
     }
 }
 
-Storage* storage_app_alloc() {
+Storage* storage_app_alloc(void) {
     Storage* app = malloc(sizeof(Storage));
     app->message_queue = furi_message_queue_alloc(8, sizeof(StorageMessage));
     app->pubsub = furi_pubsub_alloc();
@@ -42,9 +41,6 @@ Storage* storage_app_alloc() {
         storage_data_timestamp(&app->storage[i]);
     }
 
-#ifndef FURI_RAM_EXEC
-    storage_int_init(&app->storage[ST_INT]);
-#endif
     storage_ext_init(&app->storage[ST_EXT]);
 
     // sd icon gui

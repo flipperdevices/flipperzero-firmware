@@ -7,13 +7,13 @@
 #include "usb.h"
 #include "usb_cdc.h"
 
-#define CDC0_RXD_EP 0x02
+#define CDC0_RXD_EP 0x01
 #define CDC0_TXD_EP 0x82
-#define CDC0_NTF_EP 0x81
+#define CDC0_NTF_EP 0x83
 
 #define CDC1_RXD_EP 0x04
-#define CDC1_TXD_EP 0x84
-#define CDC1_NTF_EP 0x83
+#define CDC1_TXD_EP 0x85
+#define CDC1_NTF_EP 0x86
 
 #define CDC_NTF_SZ 0x08
 
@@ -75,7 +75,7 @@ static const struct CdcConfigDescriptorSingle cdc_cfg_desc_single = {
             .bConfigurationValue = 1,
             .iConfiguration = NO_DESCRIPTOR,
             .bmAttributes = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
-            .bMaxPower = USB_CFG_POWER_MA(100),
+            .bMaxPower = USB_CFG_POWER_MA(500),
         },
     .iad_0 =
         {
@@ -188,7 +188,7 @@ static const struct CdcConfigDescriptorDual
                     .bConfigurationValue = 1,
                     .iConfiguration = NO_DESCRIPTOR,
                     .bmAttributes = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
-                    .bMaxPower = USB_CFG_POWER_MA(100),
+                    .bMaxPower = USB_CFG_POWER_MA(500),
                 },
             .iad_0 =
                 {
@@ -472,7 +472,7 @@ static void cdc_deinit(usbd_device* dev) {
 }
 
 void furi_hal_cdc_set_callbacks(uint8_t if_num, CdcCallbacks* cb, void* context) {
-    furi_assert(if_num < IF_NUM_MAX);
+    furi_check(if_num < IF_NUM_MAX);
 
     if(callbacks[if_num] != NULL) {
         if(callbacks[if_num]->state_callback != NULL) {
@@ -494,12 +494,12 @@ void furi_hal_cdc_set_callbacks(uint8_t if_num, CdcCallbacks* cb, void* context)
 }
 
 struct usb_cdc_line_coding* furi_hal_cdc_get_port_settings(uint8_t if_num) {
-    furi_assert(if_num < IF_NUM_MAX);
+    furi_check(if_num < IF_NUM_MAX);
     return &cdc_config[if_num];
 }
 
 uint8_t furi_hal_cdc_get_ctrl_line_state(uint8_t if_num) {
-    furi_assert(if_num < IF_NUM_MAX);
+    furi_check(if_num < IF_NUM_MAX);
     return cdc_ctrl_line_state[if_num];
 }
 
@@ -518,7 +518,7 @@ int32_t furi_hal_cdc_receive(uint8_t if_num, uint8_t* buf, uint16_t max_len) {
     } else {
         len = usbd_ep_read(usb_dev, CDC1_RXD_EP, buf, max_len);
     }
-    return ((len < 0) ? 0 : len);
+    return (len < 0) ? 0 : len;
 }
 
 static void cdc_on_wakeup(usbd_device* dev) {

@@ -1,4 +1,6 @@
-#include "dialogs_i.h"
+#include "dialogs.h"
+#include "dialogs_message.h"
+#include <gui/view_holder.h>
 #include <toolbox/api_lock.h>
 #include <gui/modules/dialog_ex.h>
 
@@ -86,12 +88,11 @@ DialogMessageButton dialogs_app_process_module_message(const DialogsAppMessageDa
     dialog_ex_set_right_button_text(dialog_ex, message->right_button_text);
 
     view_holder_set_view(view_holder, dialog_ex_get_view(dialog_ex));
-    view_holder_start(view_holder);
     api_lock_wait_unlock(message_context->lock);
 
     ret = message_context->result;
 
-    view_holder_stop(view_holder);
+    view_holder_set_view(view_holder, NULL);
     view_holder_free(view_holder);
     dialog_ex_free(dialog_ex);
     api_lock_free(message_context->lock);
@@ -101,12 +102,13 @@ DialogMessageButton dialogs_app_process_module_message(const DialogsAppMessageDa
     return ret;
 }
 
-DialogMessage* dialog_message_alloc() {
+DialogMessage* dialog_message_alloc(void) {
     DialogMessage* message = malloc(sizeof(DialogMessage));
     return message;
 }
 
 void dialog_message_free(DialogMessage* message) {
+    furi_check(message);
     free(message);
 }
 
@@ -117,6 +119,8 @@ void dialog_message_set_text(
     uint8_t y,
     Align horizontal,
     Align vertical) {
+    furi_check(message);
+
     message->dialog_text = text;
     message->dialog_text_x = x;
     message->dialog_text_y = y;
@@ -131,6 +135,8 @@ void dialog_message_set_header(
     uint8_t y,
     Align horizontal,
     Align vertical) {
+    furi_check(message);
+
     message->header_text = text;
     message->header_text_x = x;
     message->header_text_y = y;
@@ -139,6 +145,8 @@ void dialog_message_set_header(
 }
 
 void dialog_message_set_icon(DialogMessage* message, const Icon* icon, uint8_t x, uint8_t y) {
+    furi_check(message);
+
     message->icon = icon;
     message->icon_x = x;
     message->icon_y = y;
@@ -149,6 +157,8 @@ void dialog_message_set_buttons(
     const char* left,
     const char* center,
     const char* right) {
+    furi_check(message);
+
     message->left_button_text = left;
     message->center_button_text = center;
     message->right_button_text = right;

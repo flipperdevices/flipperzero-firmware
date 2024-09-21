@@ -12,12 +12,11 @@ static bool lfrfid_debug_back_event_callback(void* context) {
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-static LfRfidDebug* lfrfid_debug_alloc() {
+static LfRfidDebug* lfrfid_debug_alloc(void) {
     LfRfidDebug* app = malloc(sizeof(LfRfidDebug));
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&lfrfid_debug_scene_handlers, app);
-    view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
     view_dispatcher_set_custom_event_callback(
         app->view_dispatcher, lfrfid_debug_custom_event_callback);

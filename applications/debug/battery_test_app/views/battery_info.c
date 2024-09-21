@@ -3,7 +3,7 @@
 #include <gui/elements.h>
 #include <assets_icons.h>
 
-#define LOW_CHARGE_THRESHOLD 10
+#define LOW_CHARGE_THRESHOLD         10
 #define HIGH_DRAIN_CURRENT_THRESHOLD 100
 
 struct BatteryInfo {
@@ -17,7 +17,7 @@ static void draw_stat(Canvas* canvas, int x, int y, const Icon* icon, char* val)
     canvas_draw_box(canvas, x - 4, y + 16, 24, 6);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_str_aligned(canvas, x + 8, y + 22, AlignCenter, AlignBottom, val);
-};
+}
 
 static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
     char emote[20] = {};
@@ -68,7 +68,7 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
             drain_current > HIGH_DRAIN_CURRENT_THRESHOLD ? "mA!" : "mA");
     } else if(drain_current != 0) {
         snprintf(header, 20, "...");
-    } else if(data->charging_voltage < 4.2) {
+    } else if(data->charging_voltage < 4.2f) {
         // Non-default battery charging limit, mention it
         snprintf(emote, sizeof(emote), "Charged!");
         snprintf(header, sizeof(header), "Limited to");
@@ -85,7 +85,7 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
     canvas_draw_str_aligned(canvas, 92, y + 3, AlignCenter, AlignCenter, emote);
     canvas_draw_str_aligned(canvas, 92, y + 15, AlignCenter, AlignCenter, header);
     canvas_draw_str_aligned(canvas, 92, y + 27, AlignCenter, AlignCenter, value);
-};
+}
 
 static void battery_info_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
@@ -116,7 +116,7 @@ static void battery_info_draw_callback(Canvas* canvas, void* context) {
     draw_stat(canvas, 104, 42, &I_Health_16x16, health);
 }
 
-BatteryInfo* battery_info_alloc() {
+BatteryInfo* battery_info_alloc(void) {
     BatteryInfo* battery_info = malloc(sizeof(BatteryInfo));
     battery_info->view = view_alloc();
     view_set_context(battery_info->view, battery_info);

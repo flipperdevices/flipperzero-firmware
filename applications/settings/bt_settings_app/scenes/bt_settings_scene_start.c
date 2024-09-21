@@ -53,7 +53,7 @@ void bt_settings_scene_start_on_enter(void* context) {
             variable_item_set_current_value_index(item, BtSettingOff);
             variable_item_set_current_value_text(item, bt_settings_text[BtSettingOff]);
         }
-        variable_item_list_add(var_item_list, "Forget All Paired Devices", 1, NULL, NULL);
+        variable_item_list_add(var_item_list, "Unpair All Devices", 1, NULL, NULL);
         variable_item_list_set_enter_callback(
             var_item_list, bt_settings_scene_start_var_list_enter_callback, app);
     } else {
@@ -70,18 +70,17 @@ bool bt_settings_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == BtSettingOn) {
-            furi_hal_bt_start_advertising();
             app->settings.enabled = true;
             consumed = true;
         } else if(event.event == BtSettingOff) {
             app->settings.enabled = false;
-            furi_hal_bt_stop_advertising();
             consumed = true;
         } else if(event.event == BtSettingsCustomEventForgetDevices) {
             scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneForgetDevConfirm);
             consumed = true;
         }
     }
+
     return consumed;
 }
 

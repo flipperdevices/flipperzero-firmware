@@ -1,12 +1,11 @@
 #include "assets_icons.h"
 #include "toolbox/path.h"
 #include <furi.h>
-#include "../archive_i.h"
 #include "archive_browser_view.h"
 #include "../helpers/archive_browser.h"
 
 #define SCROLL_INTERVAL (333)
-#define SCROLL_DELAY (2)
+#define SCROLL_DELAY    (2)
 
 static const char* ArchiveTabNames[] = {
     [ArchiveTabFavorites] = "Favorites",
@@ -436,7 +435,7 @@ static void browser_view_exit(void* context) {
     furi_timer_stop(browser->scroll_timer);
 }
 
-ArchiveBrowserView* browser_alloc() {
+ArchiveBrowserView* browser_alloc(void) {
     ArchiveBrowserView* browser = malloc(sizeof(ArchiveBrowserView));
     browser->view = view_alloc();
     view_allocate_model(browser->view, ViewModelTypeLocking, sizeof(ArchiveBrowserViewModel));

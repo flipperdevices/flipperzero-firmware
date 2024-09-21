@@ -3,16 +3,16 @@
 #include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 
-#define NEXWATCH_PREAMBLE_BIT_SIZE (8)
+#define NEXWATCH_PREAMBLE_BIT_SIZE  (8)
 #define NEXWATCH_PREAMBLE_DATA_SIZE (1)
 
-#define NEXWATCH_ENCODED_BIT_SIZE (96)
+#define NEXWATCH_ENCODED_BIT_SIZE  (96)
 #define NEXWATCH_ENCODED_DATA_SIZE ((NEXWATCH_ENCODED_BIT_SIZE) / 8)
 
-#define NEXWATCH_DECODED_BIT_SIZE (NEXWATCH_DECODED_DATA_SIZE * 8)
+#define NEXWATCH_DECODED_BIT_SIZE  (NEXWATCH_DECODED_DATA_SIZE * 8)
 #define NEXWATCH_DECODED_DATA_SIZE (8)
 
-#define NEXWATCH_US_PER_BIT (255)
+#define NEXWATCH_US_PER_BIT             (255)
 #define NEXWATCH_ENCODER_PULSES_PER_BIT (16)
 
 typedef struct {
@@ -47,22 +47,22 @@ typedef struct {
 ProtocolNexwatch* protocol_nexwatch_alloc(void) {
     ProtocolNexwatch* protocol = malloc(sizeof(ProtocolNexwatch));
     return protocol;
-};
+}
 
 void protocol_nexwatch_free(ProtocolNexwatch* protocol) {
     free(protocol);
-};
+}
 
 uint8_t* protocol_nexwatch_get_data(ProtocolNexwatch* protocol) {
     return protocol->data;
-};
+}
 
 void protocol_nexwatch_decoder_start(ProtocolNexwatch* protocol) {
     memset(protocol->encoded_data, 0, NEXWATCH_ENCODED_DATA_SIZE);
     memset(protocol->negative_encoded_data, 0, NEXWATCH_ENCODED_DATA_SIZE);
     memset(protocol->corrupted_encoded_data, 0, NEXWATCH_ENCODED_DATA_SIZE);
     memset(protocol->corrupted_negative_encoded_data, 0, NEXWATCH_ENCODED_DATA_SIZE);
-};
+}
 
 static bool protocol_nexwatch_check_preamble(uint8_t* data, size_t bit_index) {
     // 01010110
@@ -71,7 +71,7 @@ static bool protocol_nexwatch_check_preamble(uint8_t* data, size_t bit_index) {
 }
 
 static uint8_t protocol_nexwatch_parity_swap(uint8_t parity) {
-    uint8_t a = (((parity >> 3) & 1));
+    uint8_t a = ((parity >> 3) & 1);
     a |= (((parity >> 1) & 1) << 1);
     a |= (((parity >> 2) & 1) << 2);
     a |= ((parity & 1) << 3);
@@ -215,7 +215,7 @@ bool protocol_nexwatch_decoder_feed(ProtocolNexwatch* protocol, bool level, uint
     }
 
     return result;
-};
+}
 
 bool protocol_nexwatch_encoder_start(ProtocolNexwatch* protocol) {
     memset(protocol->encoded_data, 0, NEXWATCH_ENCODED_DATA_SIZE);
@@ -231,7 +231,7 @@ bool protocol_nexwatch_encoder_start(ProtocolNexwatch* protocol) {
     protocol->encoder.bit_clock_index = 0;
 
     return true;
-};
+}
 
 LevelDuration protocol_nexwatch_encoder_yield(ProtocolNexwatch* protocol) {
     LevelDuration level_duration;
@@ -261,9 +261,12 @@ LevelDuration protocol_nexwatch_encoder_yield(ProtocolNexwatch* protocol) {
     }
 
     return level_duration;
-};
+}
 
-void protocol_nexwatch_render_data(ProtocolNexwatch* protocol, FuriString* result) {
+static void protocol_nexwatch_render_data_internal(
+    ProtocolNexwatch* protocol,
+    FuriString* result,
+    bool brief) {
     uint32_t id = 0;
     uint32_t scrambled = bit_lib_get_bits_32(protocol->data, 8, 32);
     protocol_nexwatch_descramble(&id, &scrambled);
@@ -272,13 +275,42 @@ void protocol_nexwatch_render_data(ProtocolNexwatch* protocol, FuriString* resul
     uint8_t mode = bit_lib_get_bits(protocol->data, 40, 4);
     uint8_t parity = bit_lib_get_bits(protocol->data, 44, 4);
     uint8_t chk = bit_lib_get_bits(protocol->data, 48, 8);
-    for(m_idx = 0; m_idx < 3; m_idx++) {
+
+    for(m_idx = 0; m_idx < COUNT_OF(magic_items); m_idx++) {
         magic_items[m_idx].chk = protocol_nexwatch_checksum(magic_items[m_idx].magic, id, parity);
         if(magic_items[m_idx].chk == chk) {
             break;
         }
     }
-    furi_string_printf(result, "ID: %lu, M:%u\r\nType: %s\r\n", id, mode, magic_items[m_idx].desc);
+
+    const char* type = m_idx < COUNT_OF(magic_items) ? magic_items[m_idx].desc : "Unknown";
+
+    if(brief) {
+        furi_string_printf(
+            result,
+            "ID: %lu\n"
+            "Mode: %hhu; Type: %s",
+            id,
+            mode,
+            type);
+    } else {
+        furi_string_printf(
+            result,
+            "ID: %lu\n"
+            "Mode: %hhu\n"
+            "Type: %s",
+            id,
+            mode,
+            type);
+    }
+}
+
+void protocol_nexwatch_render_data(ProtocolNexwatch* protocol, FuriString* result) {
+    protocol_nexwatch_render_data_internal(protocol, result, false);
+}
+
+void protocol_nexwatch_render_brief_data(ProtocolNexwatch* protocol, FuriString* result) {
+    protocol_nexwatch_render_data_internal(protocol, result, true);
 }
 
 bool protocol_nexwatch_write_data(ProtocolNexwatch* protocol, void* data) {
@@ -296,7 +328,7 @@ bool protocol_nexwatch_write_data(ProtocolNexwatch* protocol, void* data) {
         result = true;
     }
     return result;
-};
+}
 
 const ProtocolBase protocol_nexwatch = {
     .name = "Nexwatch",
@@ -318,6 +350,6 @@ const ProtocolBase protocol_nexwatch = {
             .yield = (ProtocolEncoderYield)protocol_nexwatch_encoder_yield,
         },
     .render_data = (ProtocolRenderData)protocol_nexwatch_render_data,
-    .render_brief_data = (ProtocolRenderData)protocol_nexwatch_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_nexwatch_render_brief_data,
     .write_data = (ProtocolWriteData)protocol_nexwatch_write_data,
 };

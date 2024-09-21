@@ -12,7 +12,7 @@ static bool storage_settings_back_event_callback(void* context) {
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-static StorageSettings* storage_settings_alloc() {
+static StorageSettings* storage_settings_alloc(void) {
     StorageSettings* app = malloc(sizeof(StorageSettings));
 
     app->gui = furi_record_open(RECORD_GUI);
@@ -23,7 +23,6 @@ static StorageSettings* storage_settings_alloc() {
     app->scene_manager = scene_manager_alloc(&storage_settings_scene_handlers, app);
     app->text_string = furi_string_alloc();
 
-    view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
 
     view_dispatcher_set_custom_event_callback(

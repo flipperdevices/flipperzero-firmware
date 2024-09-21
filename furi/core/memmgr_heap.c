@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stm32wbxx.h>
+#include <stm32wb55_linker.h>
 #include <core/log.h>
 #include <core/common_defines.h>
 
@@ -56,10 +57,6 @@ task.h is included from an application file. */
 #error This feature is broken, logging transport must be replaced with RTT
 #endif
 
-#if(configSUPPORT_DYNAMIC_ALLOCATION == 0)
-#error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
-#endif
-
 /* Block sizes must not get too small. */
 #define heapMINIMUM_BLOCK_SIZE ((size_t)(xHeapStructSize << 1))
 
@@ -67,8 +64,6 @@ task.h is included from an application file. */
 #define heapBITS_PER_BYTE ((size_t)8)
 
 /* Heap start end symbols provided by linker */
-extern const void __heap_start__;
-extern const void __heap_end__;
 uint8_t* ucHeap = (uint8_t*)&__heap_start__;
 
 /* Define the linked list structure.  This is used to link free blocks in order
@@ -133,7 +128,7 @@ static MemmgrHeapThreadDict_t memmgr_heap_thread_dict = {0};
 static volatile uint32_t memmgr_heap_thread_trace_depth = 0;
 
 /* Initialize tracing storage on start */
-void memmgr_heap_init() {
+void memmgr_heap_init(void) {
     MemmgrHeapThreadDict_init(memmgr_heap_thread_dict);
 }
 
@@ -224,7 +219,7 @@ static inline void traceFREE(void* pointer, size_t size) {
     }
 }
 
-size_t memmgr_heap_get_max_free_block() {
+size_t memmgr_heap_get_max_free_block(void) {
     size_t max_free_size = 0;
     BlockLink_t* pxBlock;
     vTaskSuspendAll();
@@ -241,9 +236,9 @@ size_t memmgr_heap_get_max_free_block() {
     return max_free_size;
 }
 
-void memmgr_heap_printf_free_blocks() {
+void memmgr_heap_printf_free_blocks(void) {
     BlockLink_t* pxBlock;
-    //TODO enable when we can do printf with a locked scheduler
+    //can be enabled once we can do printf with a locked scheduler
     //vTaskSuspendAll();
 
     pxBlock = xStart.pxNextFreeBlock;
@@ -283,7 +278,7 @@ char* ultoa(unsigned long num, char* str, int radix) {
     return str;
 }
 
-static void print_heap_init() {
+static void print_heap_init(void) {
     char tmp_str[33];
     size_t heap_start = (size_t)&__heap_start__;
     size_t heap_end = (size_t)&__heap_end__;
@@ -486,7 +481,7 @@ void* pvPortMalloc(size_t xWantedSize) {
 
     configASSERT((((size_t)pvReturn) & (size_t)portBYTE_ALIGNMENT_MASK) == 0);
 
-    furi_check(pvReturn);
+    furi_check(pvReturn, xWantedSize ? "out of memory" : "malloc(0)");
     pvReturn = memset(pvReturn, 0, to_wipe);
     return pvReturn;
 }
@@ -533,7 +528,7 @@ void vPortFree(void* pv) {
                     xFreeBytesRemaining += pxLink->xBlockSize;
                     traceFREE(pv, pxLink->xBlockSize);
                     memset(pv, 0, pxLink->xBlockSize - xHeapStructSize);
-                    prvInsertBlockIntoFreeList(((BlockLink_t*)pxLink));
+                    prvInsertBlockIntoFreeList((BlockLink_t*)pxLink);
                 }
                 (void)xTaskResumeAll();
             } else {

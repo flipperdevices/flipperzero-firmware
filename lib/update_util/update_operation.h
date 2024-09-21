@@ -8,8 +8,8 @@ extern "C" {
 #endif
 
 #define UPDATE_OPERATION_ROOT_DIR_PACKAGE_MAGIC 0
-#define UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN 255u
-#define UPDATE_OPERATION_MIN_MANIFEST_VERSION 2
+#define UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN  255u
+#define UPDATE_OPERATION_MIN_MANIFEST_VERSION   2
 
 /* 
  * Checks if supplied full manifest path is valid
@@ -56,12 +56,12 @@ bool update_operation_get_current_package_manifest_path(Storage* storage, FuriSt
 /* 
  * Checks if an update operation step is pending after reset
  */
-bool update_operation_is_armed();
+bool update_operation_is_armed(void);
 
 /* 
  * Cancels pending update operation
  */
-void update_operation_disarm();
+void update_operation_disarm(void);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,4 @@
 #include "dialogs_message.h"
-#include "dialogs_i.h"
 #include <toolbox/api_lock.h>
 #include <assets_icons.h>
 #include <storage/storage.h>
@@ -65,6 +64,8 @@ bool dialog_file_browser_show(
 /****************** Message ******************/
 
 DialogMessageButton dialog_message_show(DialogsApp* context, const DialogMessage* dialog_message) {
+    furi_check(context);
+
     FuriApiLock lock = api_lock_alloc_locked();
     furi_check(lock != NULL);
 
@@ -91,6 +92,8 @@ DialogMessageButton dialog_message_show(DialogsApp* context, const DialogMessage
 /****************** Storage error ******************/
 
 void dialog_message_show_storage_error(DialogsApp* context, const char* error_text) {
+    furi_check(context);
+
     DialogMessage* message = dialog_message_alloc();
     dialog_message_set_text(message, error_text, 88, 32, AlignCenter, AlignCenter);
     dialog_message_set_icon(message, &I_SDQuestion_35x43, 5, 6);

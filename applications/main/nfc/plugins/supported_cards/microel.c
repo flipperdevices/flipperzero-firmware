@@ -5,6 +5,7 @@
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
 #define TAG "Microel"
+
 #define KEY_LENGTH 6
 #define UID_LENGTH 4
 
@@ -225,6 +226,6 @@ static const FlipperAppPluginDescriptor microel_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* microel_plugin_ep() {
+const FlipperAppPluginDescriptor* microel_plugin_ep(void) {
     return &microel_plugin_descriptor;
 }

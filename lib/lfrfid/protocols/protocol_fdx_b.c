@@ -6,22 +6,22 @@
 #include "lfrfid_protocols.h"
 #include <furi_hal_rtc.h>
 
-#define FDX_B_ENCODED_BIT_SIZE (128)
-#define FDX_B_ENCODED_BYTE_SIZE (((FDX_B_ENCODED_BIT_SIZE) / 8))
-#define FDX_B_PREAMBLE_BIT_SIZE (11)
-#define FDX_B_PREAMBLE_BYTE_SIZE (2)
+#define FDX_B_ENCODED_BIT_SIZE       (128)
+#define FDX_B_ENCODED_BYTE_SIZE      (((FDX_B_ENCODED_BIT_SIZE) / 8))
+#define FDX_B_PREAMBLE_BIT_SIZE      (11)
+#define FDX_B_PREAMBLE_BYTE_SIZE     (2)
 #define FDX_B_ENCODED_BYTE_FULL_SIZE (FDX_B_ENCODED_BYTE_SIZE + FDX_B_PREAMBLE_BYTE_SIZE)
 
 #define FDXB_DECODED_DATA_SIZE (11)
 
-#define FDX_B_SHORT_TIME (128)
-#define FDX_B_LONG_TIME (256)
+#define FDX_B_SHORT_TIME  (128)
+#define FDX_B_LONG_TIME   (256)
 #define FDX_B_JITTER_TIME (60)
 
-#define FDX_B_SHORT_TIME_LOW (FDX_B_SHORT_TIME - FDX_B_JITTER_TIME)
+#define FDX_B_SHORT_TIME_LOW  (FDX_B_SHORT_TIME - FDX_B_JITTER_TIME)
 #define FDX_B_SHORT_TIME_HIGH (FDX_B_SHORT_TIME + FDX_B_JITTER_TIME)
-#define FDX_B_LONG_TIME_LOW (FDX_B_LONG_TIME - FDX_B_JITTER_TIME)
-#define FDX_B_LONG_TIME_HIGH (FDX_B_LONG_TIME + FDX_B_JITTER_TIME)
+#define FDX_B_LONG_TIME_LOW   (FDX_B_LONG_TIME - FDX_B_JITTER_TIME)
+#define FDX_B_LONG_TIME_HIGH  (FDX_B_LONG_TIME + FDX_B_JITTER_TIME)
 
 typedef struct {
     bool last_short;
@@ -34,20 +34,20 @@ typedef struct {
 ProtocolFDXB* protocol_fdx_b_alloc(void) {
     ProtocolFDXB* protocol = malloc(sizeof(ProtocolFDXB));
     return protocol;
-};
+}
 
 void protocol_fdx_b_free(ProtocolFDXB* protocol) {
     free(protocol);
-};
+}
 
 uint8_t* protocol_fdx_b_get_data(ProtocolFDXB* proto) {
     return proto->data;
-};
+}
 
 void protocol_fdx_b_decoder_start(ProtocolFDXB* protocol) {
     memset(protocol->encoded_data, 0, FDX_B_ENCODED_BYTE_FULL_SIZE);
     protocol->last_short = false;
-};
+}
 
 static bool protocol_fdx_b_can_be_decoded(ProtocolFDXB* protocol) {
     bool result = false;
@@ -179,7 +179,7 @@ bool protocol_fdx_b_decoder_feed(ProtocolFDXB* protocol, bool level, uint32_t du
     }
 
     return result;
-};
+}
 
 bool protocol_fdx_b_encoder_start(ProtocolFDXB* protocol) {
     memset(protocol->encoded_data, 0, FDX_B_ENCODED_BYTE_FULL_SIZE);
@@ -203,7 +203,7 @@ bool protocol_fdx_b_encoder_start(ProtocolFDXB* protocol) {
     protocol->last_short = false;
     protocol->last_level = false;
     return true;
-};
+}
 
 LevelDuration protocol_fdx_b_encoder_yield(ProtocolFDXB* protocol) {
     uint32_t duration;
@@ -228,7 +228,7 @@ LevelDuration protocol_fdx_b_encoder_yield(ProtocolFDXB* protocol) {
     }
 
     return level_duration_make(protocol->last_level, duration);
-};
+}
 
 // 0  nnnnnnnn
 // 8  nnnnnnnn	  38 bit (12 digit) National code.
@@ -288,27 +288,39 @@ void protocol_fdx_b_render_data(ProtocolFDXB* protocol, FuriString* result) {
     uint8_t replacement_number = bit_lib_get_bits(protocol->data, 60, 3);
     bool animal_flag = bit_lib_get_bit(protocol->data, 63);
 
-    furi_string_printf(result, "ID: %03u-%012llu\r\n", country_code, national_code);
-    furi_string_cat_printf(result, "Animal: %s, ", animal_flag ? "Yes" : "No");
+    furi_string_printf(
+        result,
+        "ID: %03hu-%012llu\n"
+        "Country Code: %hu\n"
+        "Temperature: ",
+        country_code,
+        national_code,
+        country_code);
 
     float temperature;
     if(protocol_fdx_b_get_temp(protocol->data, &temperature)) {
-        float temperature_c = (temperature - 32) / 1.8;
-        furi_string_cat_printf(
-            result, "T: %.2fF, %.2fC\r\n", (double)temperature, (double)temperature_c);
+        if(furi_hal_rtc_get_locale_units() == FuriHalRtcLocaleUnitsMetric) {
+            float temperature_c = (temperature - 32.0f) / 1.8f;
+            furi_string_cat_printf(result, "%.2fC", (double)temperature_c);
+        } else {
+            furi_string_cat_printf(result, "%.2fF", (double)temperature);
+        }
     } else {
-        furi_string_cat_printf(result, "T: ---\r\n");
+        furi_string_cat(result, "---");
     }
 
     furi_string_cat_printf(
         result,
-        "Bits: %X-%X-%X-%X-%X",
+        "\n"
+        "Animal: %s\n"
+        "Bits: %hhX-%hhX-%hhX-%hhX-%hhX",
+        animal_flag ? "Yes" : "No",
         block_status,
         rudi_bit,
         reserved,
         user_info,
         replacement_number);
-};
+}
 
 void protocol_fdx_b_render_brief_data(ProtocolFDXB* protocol, FuriString* result) {
     // 38 bits of national code
@@ -317,23 +329,26 @@ void protocol_fdx_b_render_brief_data(ProtocolFDXB* protocol, FuriString* result
     // 10 bit of country code
     uint16_t country_code = protocol_fdx_b_get_country_code(protocol->data);
 
-    bool animal_flag = bit_lib_get_bit(protocol->data, 63);
-
-    furi_string_printf(result, "ID: %03u-%012llu\r\n", country_code, national_code);
-    furi_string_cat_printf(result, "Animal: %s, ", animal_flag ? "Yes" : "No");
+    furi_string_printf(
+        result,
+        "ID: %03hu-%012llu\n"
+        "Country: %hu; Temp.: ",
+        country_code,
+        national_code,
+        country_code);
 
     float temperature;
     if(protocol_fdx_b_get_temp(protocol->data, &temperature)) {
         if(furi_hal_rtc_get_locale_units() == FuriHalRtcLocaleUnitsMetric) {
             float temperature_c = (temperature - 32.0f) / 1.8f;
-            furi_string_cat_printf(result, "T: %.2fC", (double)temperature_c);
+            furi_string_cat_printf(result, "%.2fC", (double)temperature_c);
         } else {
-            furi_string_cat_printf(result, "T: %.2fF", (double)temperature);
+            furi_string_cat_printf(result, "%.2fF", (double)temperature);
         }
     } else {
-        furi_string_cat_printf(result, "T: ---");
+        furi_string_cat(result, "---");
     }
-};
+}
 
 bool protocol_fdx_b_write_data(ProtocolFDXB* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
@@ -356,7 +371,7 @@ bool protocol_fdx_b_write_data(ProtocolFDXB* protocol, void* data) {
         result = true;
     }
     return result;
-};
+}
 
 const ProtocolBase protocol_fdx_b = {
     .name = "FDX-B",

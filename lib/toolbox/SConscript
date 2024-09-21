@@ -29,12 +29,16 @@ env.Append(
         File("stream/file_stream.h"),
         File("stream/string_stream.h"),
         File("stream/buffered_file_stream.h"),
+        File("strint.h"),
         File("protocols/protocol_dict.h"),
         File("pretty_format.h"),
         File("hex.h"),
         File("simple_array.h"),
         File("bit_buffer.h"),
         File("keys_dict.h"),
+        File("pulse_protocols/pulse_glue.h"),
+        File("md5_calc.h"),
+        File("varint.h"),
     ],
 )
 

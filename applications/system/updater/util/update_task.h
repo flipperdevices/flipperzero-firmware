@@ -9,14 +9,14 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#define UPDATE_DELAY_OPERATION_OK 10
+#define UPDATE_DELAY_OPERATION_OK    10
 #define UPDATE_DELAY_OPERATION_ERROR INT_MAX
 
 typedef enum {
     UpdateTaskStageProgress = 0,
 
     UpdateTaskStageReadManifest,
-    UpdateTaskStageLfsBackup,
+    UpdateTaskStageIntBackup,
 
     UpdateTaskStageRadioImageValidate,
     UpdateTaskStageRadioErase,
@@ -30,8 +30,10 @@ typedef enum {
     UpdateTaskStageFlashWrite,
     UpdateTaskStageFlashValidate,
 
-    UpdateTaskStageLfsRestore,
-    UpdateTaskStageResourcesUpdate,
+    UpdateTaskStageIntRestore,
+    UpdateTaskStageResourcesFileCleanup,
+    UpdateTaskStageResourcesDirCleanup,
+    UpdateTaskStageResourcesFileUnpack,
     UpdateTaskStageSplashscreenInstall,
 
     UpdateTaskStageCompleted,
@@ -69,7 +71,7 @@ typedef struct UpdateTask UpdateTask;
 typedef void (
     *updateProgressCb)(const char* status, const uint8_t stage_pct, bool failed, void* state);
 
-UpdateTask* update_task_alloc();
+UpdateTask* update_task_alloc(void);
 
 void update_task_free(UpdateTask* update_task);
 

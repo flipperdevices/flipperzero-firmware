@@ -46,7 +46,7 @@
 
 /* Test macro definitions */
 #define FURI_HAL_BUS_IS_ALL_CLEAR(reg, value) (READ_BIT((reg), (value)) == 0UL)
-#define FURI_HAL_BUS_IS_ALL_SET(reg, value) (READ_BIT((reg), (value)) == (value))
+#define FURI_HAL_BUS_IS_ALL_SET(reg, value)   (READ_BIT((reg), (value)) == (value))
 
 #define FURI_HAL_BUS_IS_CLOCK_ENABLED(bus, value, ...) \
     (FURI_HAL_BUS_IS_ALL_SET(RCC->bus##ENR##__VA_ARGS__, (value)))
@@ -67,10 +67,10 @@
      FURI_HAL_BUS_IS_RESET_ASSERTED(bus, (value), __VA_ARGS__))
 
 /* Control macro definitions */
-#define FURI_HAL_BUS_RESET_ASSERT(bus, value, grp) LL_##bus##_GRP##grp##_ForceReset(value)
+#define FURI_HAL_BUS_RESET_ASSERT(bus, value, grp)   LL_##bus##_GRP##grp##_ForceReset(value)
 #define FURI_HAL_BUS_RESET_DEASSERT(bus, value, grp) LL_##bus##_GRP##grp##_ReleaseReset(value)
 
-#define FURI_HAL_BUS_CLOCK_ENABLE(bus, value, grp) LL_##bus##_GRP##grp##_EnableClock(value)
+#define FURI_HAL_BUS_CLOCK_ENABLE(bus, value, grp)  LL_##bus##_GRP##grp##_EnableClock(value)
 #define FURI_HAL_BUS_CLOCK_DISABLE(bus, value, grp) LL_##bus##_GRP##grp##_DisableClock(value)
 
 #define FURI_HAL_BUS_PERIPH_ENABLE(bus, value, grp) \
@@ -143,7 +143,7 @@ static const uint32_t furi_hal_bus[] = {
     [FuriHalBusRF] = LL_APB3_GRP1_PERIPH_RF,
 };
 
-void furi_hal_bus_init_early() {
+void furi_hal_bus_init_early(void) {
     FURI_CRITICAL_ENTER();
 
     // FURI_HAL_BUS_PERIPH_DISABLE(AHB1, FURI_HAL_BUS_AHB1_GRP1, 1);
@@ -158,7 +158,7 @@ void furi_hal_bus_init_early() {
     FURI_CRITICAL_EXIT();
 }
 
-void furi_hal_bus_deinit_early() {
+void furi_hal_bus_deinit_early(void) {
     FURI_CRITICAL_ENTER();
 
     // FURI_HAL_BUS_PERIPH_ENABLE(AHB1, FURI_HAL_BUS_AHB1_GRP1, 1);

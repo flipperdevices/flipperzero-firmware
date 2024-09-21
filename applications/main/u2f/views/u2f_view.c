@@ -59,7 +59,7 @@ static bool u2f_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-U2fView* u2f_view_alloc() {
+U2fView* u2f_view_alloc(void) {
     U2fView* u2f = malloc(sizeof(U2fView));
 
     u2f->view = view_alloc();
@@ -97,6 +97,5 @@ void u2f_view_set_ok_callback(U2fView* u2f, U2fOkCallback callback, void* contex
 }
 
 void u2f_view_set_state(U2fView* u2f, U2fViewMsg msg) {
-    with_view_model(
-        u2f->view, U2fModel * model, { model->display_msg = msg; }, true);
+    with_view_model(u2f->view, U2fModel * model, { model->display_msg = msg; }, true);
 }

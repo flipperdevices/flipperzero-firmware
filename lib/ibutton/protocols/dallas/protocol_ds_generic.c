@@ -8,7 +8,7 @@
 #include "../blanks/tm2004.h"
 
 #define DALLAS_GENERIC_FAMILY_CODE 0x00U
-#define DALLAS_GENERIC_FAMILY_NAME "DSGeneric"
+#define DALLAS_GENERIC_FAMILY_NAME "(non-specific)"
 
 typedef struct {
     OneWireSlave* bus;
@@ -20,10 +20,11 @@ typedef struct {
 } DallasGenericProtocolData;
 
 static bool ds_generic_read(OneWireHost*, iButtonProtocolData*);
-static bool ds_generic_write_blank(OneWireHost*, iButtonProtocolData*);
+static bool ds_generic_write_id(OneWireHost*, iButtonProtocolData*);
 static void ds_generic_emulate(OneWireSlave*, iButtonProtocolData*);
 static bool ds_generic_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool ds_generic_save(FlipperFormat*, const iButtonProtocolData*);
+static void ds_generic_render_uid(FuriString*, const iButtonProtocolData*);
 static void ds_generic_render_brief_data(FuriString*, const iButtonProtocolData*);
 static void ds_generic_render_error(FuriString*, const iButtonProtocolData*);
 static bool ds_generic_is_data_valid(const iButtonProtocolData*);
@@ -32,18 +33,19 @@ static void ds_generic_apply_edits(iButtonProtocolData*);
 
 const iButtonProtocolDallasBase ibutton_protocol_ds_generic = {
     .family_code = DALLAS_GENERIC_FAMILY_CODE,
-    .features = iButtonProtocolFeatureWriteBlank,
+    .features = iButtonProtocolFeatureWriteId,
     .data_size = sizeof(DallasGenericProtocolData),
     .manufacturer = DALLAS_COMMON_MANUFACTURER_NAME,
     .name = DALLAS_GENERIC_FAMILY_NAME,
 
     .read = ds_generic_read,
-    .write_blank = ds_generic_write_blank,
+    .write_id = ds_generic_write_id,
     .write_copy = NULL, /* No data to write a copy */
     .emulate = ds_generic_emulate,
     .save = ds_generic_save,
     .load = ds_generic_load,
     .render_data = NULL, /* No data to render */
+    .render_uid = ds_generic_render_uid,
     .render_brief_data = ds_generic_render_brief_data,
     .render_error = ds_generic_render_error,
     .is_valid = ds_generic_is_data_valid,
@@ -56,7 +58,7 @@ bool ds_generic_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     return onewire_host_reset(host) && dallas_common_read_rom(host, &data->rom_data);
 }
 
-bool ds_generic_write_blank(OneWireHost* host, iButtonProtocolData* protocol_data) {
+bool ds_generic_write_id(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DallasGenericProtocolData* data = protocol_data;
     return tm2004_write(host, data->rom_data.bytes, sizeof(DallasCommonRomData));
 }
@@ -111,9 +113,15 @@ bool ds_generic_load(
     return dallas_common_load_rom_data(ff, format_version, &data->rom_data);
 }
 
+void ds_generic_render_uid(FuriString* result, const iButtonProtocolData* protocol_data) {
+    const DallasGenericProtocolData* data = protocol_data;
+    dallas_common_render_uid(result, &data->rom_data);
+}
+
 void ds_generic_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {
     const DallasGenericProtocolData* data = protocol_data;
 
+    furi_string_cat_printf(result, "ID: ");
     for(size_t i = 0; i < sizeof(DallasCommonRomData); ++i) {
         furi_string_cat_printf(result, "%02X ", data->rom_data.bytes[i]);
     }

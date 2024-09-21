@@ -5,7 +5,7 @@
 
 #include <string.h>
 
-#define TAG "ble_beacon_app"
+#define TAG "BleBeaconApp"
 
 static bool ble_beacon_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -57,7 +57,7 @@ static void ble_beacon_app_restore_beacon_state(BleBeaconApp* app) {
     app->beacon_data_len = furi_hal_bt_extra_beacon_get_data(app->beacon_data);
 }
 
-static BleBeaconApp* ble_beacon_app_alloc() {
+static BleBeaconApp* ble_beacon_app_alloc(void) {
     BleBeaconApp* app = malloc(sizeof(BleBeaconApp));
 
     app->gui = furi_record_open(RECORD_GUI);
@@ -75,7 +75,6 @@ static BleBeaconApp* ble_beacon_app_alloc() {
     view_dispatcher_set_tick_event_callback(
         app->view_dispatcher, ble_beacon_app_tick_event_callback, 100);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-    view_dispatcher_enable_queue(app->view_dispatcher);
 
     app->submenu = submenu_alloc();
     view_dispatcher_add_view(

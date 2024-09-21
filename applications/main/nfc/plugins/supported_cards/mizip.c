@@ -5,9 +5,10 @@
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
 #define TAG "MiZIP"
-#define KEY_LENGTH 6
+
+#define KEY_LENGTH       6
 #define MIZIP_KEY_TO_GEN 5
-#define UID_LENGTH 4
+#define UID_LENGTH       4
 
 typedef struct {
     uint64_t a;
@@ -251,6 +252,6 @@ static const FlipperAppPluginDescriptor mizip_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* mizip_plugin_ep() {
+const FlipperAppPluginDescriptor* mizip_plugin_ep(void) {
     return &mizip_plugin_descriptor;
 }

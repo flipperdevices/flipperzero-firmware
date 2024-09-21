@@ -21,7 +21,7 @@ static void gpio_app_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-GpioApp* gpio_app_alloc() {
+GpioApp* gpio_app_alloc(void) {
     GpioApp* app = malloc(sizeof(GpioApp));
 
     app->expansion = furi_record_open(RECORD_EXPANSION);
@@ -32,7 +32,6 @@ GpioApp* gpio_app_alloc() {
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&gpio_scene_handlers, app);
-    view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
 
     view_dispatcher_set_custom_event_callback(

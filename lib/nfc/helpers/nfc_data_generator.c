@@ -49,7 +49,7 @@ static void nfc_generate_mf_ul_orig(NfcDevice* nfc_device) {
     MfUltralightData* mfu_data = mf_ultralight_alloc();
     nfc_generate_mf_ul_common(mfu_data);
 
-    mfu_data->type = MfUltralightTypeUnknown;
+    mfu_data->type = MfUltralightTypeOrigin;
     mfu_data->pages_total = 16;
     mfu_data->pages_read = 16;
     memset(&mfu_data->page[4], 0xff, sizeof(MfUltralightPage));
@@ -552,9 +552,14 @@ static const NfcDataGenerator nfc_data_generator[NfcDataGeneratorTypeNum] = {
 };
 
 const char* nfc_data_generator_get_name(NfcDataGeneratorType type) {
+    furi_check(type < NfcDataGeneratorTypeNum);
+
     return nfc_data_generator[type].name;
 }
 
 void nfc_data_generator_fill_data(NfcDataGeneratorType type, NfcDevice* nfc_device) {
+    furi_check(type < NfcDataGeneratorTypeNum);
+    furi_check(nfc_device);
+
     nfc_data_generator[type].handler(nfc_device);
 }

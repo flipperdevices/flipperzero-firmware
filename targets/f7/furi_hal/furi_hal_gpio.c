@@ -5,7 +5,7 @@
 #include <stm32wbxx_ll_comp.h>
 #include <stm32wbxx_ll_pwr.h>
 
-static uint32_t furi_hal_gpio_invalid_argument_crash() {
+static uint32_t furi_hal_gpio_invalid_argument_crash(void) {
     furi_crash("Invalid argument");
     return 0;
 }
@@ -39,11 +39,11 @@ static uint32_t furi_hal_gpio_invalid_argument_crash() {
                                    furi_hal_gpio_invalid_argument_crash())
 
 #define GET_SYSCFG_EXTI_PORT(port) GPIO_PORT_MAP(port, LL_SYSCFG_EXTI_PORT)
-#define GET_SYSCFG_EXTI_LINE(pin) GPIO_PIN_MAP(pin, LL_SYSCFG_EXTI_LINE)
-#define GET_EXTI_LINE(pin) GPIO_PIN_MAP(pin, LL_EXTI_LINE_)
+#define GET_SYSCFG_EXTI_LINE(pin)  GPIO_PIN_MAP(pin, LL_SYSCFG_EXTI_LINE)
+#define GET_EXTI_LINE(pin)         GPIO_PIN_MAP(pin, LL_EXTI_LINE_)
 
 #define GET_PWR_PORT(port) GPIO_PORT_MAP(port, LL_PWR_GPIO_)
-#define GET_PWR_PIN(pin) GPIO_PIN_MAP(pin, LL_PWR_GPIO_BIT_)
+#define GET_PWR_PIN(pin)   GPIO_PIN_MAP(pin, LL_PWR_GPIO_BIT_)
 
 static volatile GpioInterrupt gpio_interrupt[GPIO_NUMBER];
 
@@ -194,8 +194,8 @@ void furi_hal_gpio_init_ex(
 }
 
 void furi_hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* ctx) {
-    furi_assert(gpio);
-    furi_assert(cb);
+    furi_check(gpio);
+    furi_check(cb);
 
     FURI_CRITICAL_ENTER();
 
@@ -211,7 +211,7 @@ void furi_hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, vo
 }
 
 void furi_hal_gpio_enable_int_callback(const GpioPin* gpio) {
-    furi_assert(gpio);
+    furi_check(gpio);
 
     FURI_CRITICAL_ENTER();
 
@@ -222,7 +222,7 @@ void furi_hal_gpio_enable_int_callback(const GpioPin* gpio) {
 }
 
 void furi_hal_gpio_disable_int_callback(const GpioPin* gpio) {
-    furi_assert(gpio);
+    furi_check(gpio);
 
     FURI_CRITICAL_ENTER();
 
@@ -234,7 +234,7 @@ void furi_hal_gpio_disable_int_callback(const GpioPin* gpio) {
 }
 
 void furi_hal_gpio_remove_int_callback(const GpioPin* gpio) {
-    furi_assert(gpio);
+    furi_check(gpio);
 
     FURI_CRITICAL_ENTER();
 
@@ -249,7 +249,7 @@ void furi_hal_gpio_remove_int_callback(const GpioPin* gpio) {
     FURI_CRITICAL_EXIT();
 }
 
-FURI_ALWAYS_STATIC_INLINE void furi_hal_gpio_int_call(uint16_t pin_num) {
+FURI_ALWAYS_INLINE static void furi_hal_gpio_int_call(uint16_t pin_num) {
     if(gpio_interrupt[pin_num].callback) {
         gpio_interrupt[pin_num].callback(gpio_interrupt[pin_num].context);
     }
