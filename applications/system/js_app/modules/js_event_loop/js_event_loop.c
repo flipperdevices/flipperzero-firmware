@@ -144,7 +144,8 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
     // get arguments
     JsEventLoopContract* contract;
     mjs_val_t callback;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_AT_LEAST, JS_ARG_PTR(&contract), JS_ARG_FN(&callback));
+    JS_FETCH_ARGS_OR_RETURN(
+        mjs, JS_AT_LEAST, JS_ARG_STRUCT(JsEventLoopContract, &contract), JS_ARG_FN(&callback));
 
     // create subscription object
     JsEventLoopSubscription* subscription = malloc(sizeof(JsEventLoopSubscription));
@@ -247,6 +248,7 @@ static void js_event_loop_timer(struct mjs* mjs) {
 
     // make timer contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
+    contract->magic = JsForeignMagic_JsEventLoopContract;
     contract->object_type = JsEventLoopObjectTypeTimer;
     contract->object = NULL;
     contract->interval_ticks = furi_ms_to_ticks((uint32_t)interval);
@@ -299,6 +301,7 @@ static void js_event_loop_queue(struct mjs* mjs) {
 
     // make queue contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
+    contract->magic = JsForeignMagic_JsEventLoopContract;
     contract->object_type = JsEventLoopObjectTypeQueue;
     // we could store `mjs_val_t`s in the queue directly if not for mJS' requirement to have consistent pointers to owned values
     contract->object = furi_message_queue_alloc((size_t)length, sizeof(mjs_val_t*));

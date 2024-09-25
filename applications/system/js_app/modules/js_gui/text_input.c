@@ -70,6 +70,7 @@ static JsKbdContext* ctx_make(struct mjs* mjs, TextInput* input, mjs_val_t view_
         .input_semaphore = furi_semaphore_alloc(1, 0),
     };
     context->contract = (JsEventLoopContract){
+        .magic = JsForeignMagic_JsEventLoopContract,
         .object_type = JsEventLoopObjectTypeSemaphore,
         .object = context->input_semaphore,
         .event = FuriEventLoopEventIn,

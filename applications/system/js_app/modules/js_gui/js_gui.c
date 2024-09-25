@@ -106,12 +106,14 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
     view_dispatcher_set_custom_event_callback(module->dispatcher, js_gui_vd_custom_callback);
     view_dispatcher_set_navigation_event_callback(module->dispatcher, js_gui_vd_nav_callback);
     module->custom_contract = (JsEventLoopContract){
+        .magic = JsForeignMagic_JsEventLoopContract,
         .object = module->custom,
         .object_type = JsEventLoopObjectTypeQueue,
         .event = FuriEventLoopEventIn,
         .transformer = js_gui_vd_custom_transformer,
     };
     module->navigation_contract = (JsEventLoopContract){
+        .magic = JsForeignMagic_JsEventLoopContract,
         .object = module->navigation,
         .object_type = JsEventLoopObjectTypeSemaphore,
         .event = FuriEventLoopEventIn,

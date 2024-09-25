@@ -47,6 +47,7 @@ static JsSubmenuCtx* ctx_make(struct mjs* mjs, Submenu* input, mjs_val_t view_ob
     JsSubmenuCtx* context = malloc(sizeof(JsSubmenuCtx));
     context->queue = furi_message_queue_alloc(QUEUE_LEN, sizeof(uint32_t));
     context->contract = (JsEventLoopContract){
+        .magic = JsForeignMagic_JsEventLoopContract,
         .object_type = JsEventLoopObjectTypeQueue,
         .object = context->queue,
         .event = FuriEventLoopEventIn,

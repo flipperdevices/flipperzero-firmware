@@ -74,6 +74,7 @@ static JsDialogCtx* ctx_make(struct mjs* mjs, DialogEx* dialog, mjs_val_t view_o
     JsDialogCtx* context = malloc(sizeof(JsDialogCtx));
     context->queue = furi_message_queue_alloc(QUEUE_LEN, sizeof(DialogExResult));
     context->contract = (JsEventLoopContract){
+        .magic = JsForeignMagic_JsEventLoopContract,
         .object_type = JsEventLoopObjectTypeQueue,
         .object = context->queue,
         .event = FuriEventLoopEventIn,

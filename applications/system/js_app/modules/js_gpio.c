@@ -198,6 +198,7 @@ static void js_gpio_interrupt(struct mjs* mjs) {
     // make contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
     manager_data->interrupt_contract = contract;
+    contract->magic = JsForeignMagic_JsEventLoopContract;
     contract->object_type = JsEventLoopObjectTypeSemaphore;
     contract->object = manager_data->interrupt_semaphore;
     contract->event = FuriEventLoopEventIn;

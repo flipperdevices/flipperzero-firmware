@@ -64,6 +64,7 @@ typedef mjs_val_t (
  * the object that it points to when the interpreter is torn down.
  */
 typedef struct {
+    JsForeignMagic magic; // <! `JsForeignMagic_JsEventLoopContract`
     JsEventLoopObjectType object_type;
     FuriEventLoopObject* object;
     union {
