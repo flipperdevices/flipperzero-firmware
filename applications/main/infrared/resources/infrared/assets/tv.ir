@@ -2126,4 +2126,3 @@ type: parsed
 protocol: NECext
 address: 00 7F 00 00
 command: 18 E7 00 00
-#
