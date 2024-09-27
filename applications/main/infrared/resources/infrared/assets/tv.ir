@@ -2019,39 +2019,7 @@ protocol: NECext
 address: 72 DD 00 00
 command: 49 B6 00 00
 #
-# Model: Unknown Device
-#
-name: Power
-type: parsed
-protocol: NECext
-address: 00 7F 00 00
-command: 1E E1 00 00
-#
-name: Vol_up
-type: parsed
-protocol: NECext
-address: 00 7F 00 00
-command: 0A F5 00 00
-#
-name: Vol_dn
-type: parsed
-protocol: NECext
-address: 00 7F 00 00
-command: 06 F9 00 00
-#
-name: Ch_next
-type: parsed
-protocol: NECext
-address: 00 7F 00 00
-command: 5B A4 00 00
-#
-name: Ch_prev
-type: parsed
-protocol: NECext
-address: 00 7F 00 00
-command: 18 E7 00 00
-#
-# Model: Unknown Device
+# Model: Hisense EN2B27
 #
 name: Power
 type: parsed
@@ -2126,4 +2094,36 @@ type: parsed
 protocol: NECext
 address: 00 BF 00 00
 command: 4B B4 00 00
+#
+# Model: Viano STV65UHD4K
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 1E E1 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 0A F5 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 06 F9 00 00
+#
+name: Ch_next
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 5B A4 00 00
+#
+name: Ch_prev
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 18 E7 00 00
 #
