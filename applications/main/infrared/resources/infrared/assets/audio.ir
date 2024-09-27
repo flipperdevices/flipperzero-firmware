@@ -506,3 +506,96 @@ type: parsed
 protocol: SIRC20
 address: 3A 07 00 00
 command: 39 00 00 00
+#
+# Model: Sony MHC_GSX75
+#
+name: Pause
+type: parsed
+protocol: SIRC20
+address: 3A 07 00 00
+command: 38 00 00 00
+#
+# Model: Elac EA101EQ-G
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 46 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 16 00 00 00
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 18 00 00 00
+#
+name: Mute
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 55 00 00 00
+#
+# Model: Philips FW750C
+#
+name: Vol_up
+type: parsed
+protocol: RC5
+address: 10 00 00 00
+command: 10 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: RC5
+address: 10 00 00 00
+command: 11 00 00 00
+#
+name: Play
+type: parsed
+protocol: RC5
+address: 14 00 00 00
+command: 35 00 00 00
+#
+name: Pause
+type: parsed
+protocol: RC5
+address: 14 00 00 00
+command: 36 00 00 00
+#
+name: Mute
+type: parsed
+protocol: RC5
+address: 10 00 00 00
+command: 0D 00 00 00
+#
+name: Power
+type: parsed
+protocol: RC5
+address: 14 00 00 00
+command: 0C 00 00 00
+#
+# Model: Pioneer VSX-D1-S
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 0A F5 00 00
+#
+name: Mute
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 5C A3 00 00
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 1E E1 00 00
+#
