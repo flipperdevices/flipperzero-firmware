@@ -598,4 +598,3 @@ type: parsed
 protocol: NECext
 address: 00 7F 00 00
 command: 1E E1 00 00
-#
