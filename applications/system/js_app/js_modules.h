@@ -19,6 +19,28 @@
 #define JS_GET_CONTEXT(mjs)   JS_GET_INST(mjs, mjs_get_this(mjs))
 
 /**
+ * @brief Syntax sugar for constructing an object
+ * 
+ * @example
+ * ```c
+ *  mjs_val_t my_obj = mjs_mk_object(mjs);
+ *  JS_ASSIGN_MULTI(mjs, my_obj) {
+ *      JS_FIELD("method1", MJS_MK_FN(js_storage_file_is_open));
+ *      JS_FIELD("method2", MJS_MK_FN(js_storage_file_is_open));
+ *  }
+ * ```
+ */
+#define JS_ASSIGN_MULTI(mjs, object)     \
+    for(struct {                         \
+            struct mjs* mjs;             \
+            mjs_val_t val;               \
+            int i;                       \
+        } _ass_multi = {mjs, object, 0}; \
+        _ass_multi.i == 0;               \
+        _ass_multi.i++)
+#define JS_FIELD(name, value) mjs_set(_ass_multi.mjs, _ass_multi.val, name, ~0, value)
+
+/**
  * @brief The first word of structures that foreign pointer JS values point to
  * 
  * This is used to detect situations where JS code mistakenly passes an opaque
@@ -56,36 +78,46 @@ typedef enum {
 #define JS_AT_LEAST >=
 
 typedef struct {
+    const char* name;
+    size_t value;
+} JsEnumMapping;
+
+typedef struct {
     void* out;
     int (*validator)(mjs_val_t);
-    void (*converter)(struct mjs*, mjs_val_t*, void*);
+    void (*converter)(struct mjs*, mjs_val_t*, void* out, const void* extra);
     const char* expected_type;
-    bool (*extended_validator)(struct mjs*, mjs_val_t, void*);
-    void* extra_data;
+    bool (*extended_validator)(struct mjs*, mjs_val_t, const void* extra);
+    const void* extra_data;
 } _js_arg_decl;
 
-static inline void _js_to_int32(struct mjs* mjs, mjs_val_t* in, void* out) {
+static inline void _js_to_int32(struct mjs* mjs, mjs_val_t* in, void* out, const void* extra) {
+    UNUSED(extra);
     *(int32_t*)out = mjs_get_int32(mjs, *in);
 }
 #define JS_ARG_INT32(out) ((_js_arg_decl){out, mjs_is_number, _js_to_int32, "number", NULL, NULL})
 
-static inline void _js_to_ptr(struct mjs* mjs, mjs_val_t* in, void* out) {
+static inline void _js_to_ptr(struct mjs* mjs, mjs_val_t* in, void* out, const void* extra) {
+    UNUSED(extra);
     *(void**)out = mjs_get_ptr(mjs, *in);
 }
 #define JS_ARG_PTR(out) \
     ((_js_arg_decl){out, mjs_is_foreign, _js_to_ptr, "opaque pointer", NULL, NULL})
 
-static inline void _js_to_string(struct mjs* mjs, mjs_val_t* in, void* out) {
+static inline void _js_to_string(struct mjs* mjs, mjs_val_t* in, void* out, const void* extra) {
+    UNUSED(extra);
     *(const char**)out = mjs_get_string(mjs, in, NULL);
 }
 #define JS_ARG_STR(out) ((_js_arg_decl){out, mjs_is_string, _js_to_string, "string", NULL, NULL})
 
-static inline void _js_to_bool(struct mjs* mjs, mjs_val_t* in, void* out) {
+static inline void _js_to_bool(struct mjs* mjs, mjs_val_t* in, void* out, const void* extra) {
+    UNUSED(extra);
     *(bool*)out = !!mjs_get_bool(mjs, *in);
 }
 #define JS_ARG_BOOL(out) ((_js_arg_decl){out, mjs_is_boolean, _js_to_bool, "boolean", NULL, NULL})
 
-static inline void _js_passthrough(struct mjs* mjs, mjs_val_t* in, void* out) {
+static inline void _js_passthrough(struct mjs* mjs, mjs_val_t* in, void* out, const void* extra) {
+    UNUSED(extra);
     UNUSED(mjs);
     *(mjs_val_t*)out = *in;
 }
@@ -95,7 +127,7 @@ static inline void _js_passthrough(struct mjs* mjs, mjs_val_t* in, void* out) {
     ((_js_arg_decl){out, mjs_is_function, _js_passthrough, "function", NULL, NULL})
 #define JS_ARG_ARR(out) ((_js_arg_decl){out, mjs_is_array, _js_passthrough, "array", NULL, NULL})
 
-static inline bool _js_validate_struct(struct mjs* mjs, mjs_val_t val, void* extra) {
+static inline bool _js_validate_struct(struct mjs* mjs, mjs_val_t val, const void* extra) {
     JsForeignMagic expected_magic = (JsForeignMagic)(size_t)extra;
     JsForeignMagic struct_magic = *(JsForeignMagic*)mjs_get_ptr(mjs, val);
     return struct_magic == expected_magic;
@@ -109,7 +141,7 @@ static inline bool _js_validate_struct(struct mjs* mjs, mjs_val_t val, void* ext
         _js_validate_struct,     \
         (void*)JsForeignMagic##_##type})
 
-static inline bool _js_validate_obj_w_struct(struct mjs* mjs, mjs_val_t val, void* extra) {
+static inline bool _js_validate_obj_w_struct(struct mjs* mjs, mjs_val_t val, const void* extra) {
     JsForeignMagic expected_magic = (JsForeignMagic)(size_t)extra;
     JsForeignMagic struct_magic = *(JsForeignMagic*)JS_GET_INST(mjs, val);
     return struct_magic == expected_magic;
@@ -122,6 +154,34 @@ static inline bool _js_validate_obj_w_struct(struct mjs* mjs, mjs_val_t val, voi
         #type,                            \
         _js_validate_obj_w_struct,        \
         (void*)JsForeignMagic##_##type})
+
+static inline bool _js_validate_enum(struct mjs* mjs, mjs_val_t val, const void* extra) {
+    for(const JsEnumMapping* mapping = (JsEnumMapping*)extra + 1; mapping->name; mapping++)
+        if(strcmp(mapping->name, mjs_get_string(mjs, &val, NULL)) == 0) return true;
+    return false;
+}
+static inline void
+    _js_convert_enum(struct mjs* mjs, mjs_val_t* val, void* out, const void* extra) {
+    const JsEnumMapping* mapping = (JsEnumMapping*)extra;
+    size_t size = mapping->value; // get enum size from first entry
+    for(mapping++; mapping->name; mapping++) {
+        if(strcmp(mapping->name, mjs_get_string(mjs, val, NULL)) == 0) {
+            if(size == 1)
+                *(uint8_t*)out = mapping->value;
+            else if(size == 2)
+                *(uint16_t*)out = mapping->value;
+            else if(size == 4)
+                *(uint32_t*)out = mapping->value;
+            else if(size == 8)
+                *(uint64_t*)out = mapping->value;
+            return;
+        }
+    }
+    // unreachable, thanks to _js_validate_enum
+}
+#define JS_ARG_ENUM(definition, name, out) \
+    ((_js_arg_decl){                       \
+        out, mjs_is_string, _js_convert_enum, name " enum", _js_validate_enum, definition})
 
 //-V:JS_FETCH_ARGS_OR_RETURN:1008
 /**
@@ -162,7 +222,8 @@ static inline bool _js_validate_obj_w_struct(struct mjs* mjs, mjs_val_t val, voi
                     "argument %d: expected %s",                                                  \
                     _i,                                                                          \
                     _js_args[_i].expected_type);                                                 \
-        _js_args[_i].converter(mjs, &_js_arg_vals[_i], _js_args[_i].out);                        \
+        _js_args[_i].converter(                                                                  \
+            mjs, &_js_arg_vals[_i], _js_args[_i].out, _js_args[_i].extra_data);                  \
     }
 
 /**

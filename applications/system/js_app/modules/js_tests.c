@@ -3,6 +3,8 @@
 #include <furi_hal_version.h>
 #include <power/power_service/power.h>
 
+#define TAG "JsTests"
+
 static void js_tests_fail(struct mjs* mjs) {
     furi_check(mjs_nargs(mjs) == 1);
     mjs_val_t message_arg = mjs_arg(mjs, 0);
@@ -21,20 +23,30 @@ static void js_tests_assert_eq(struct mjs* mjs) {
     if(mjs_is_number(expected_arg) && mjs_is_number(result_arg)) {
         int32_t expected = mjs_get_int32(mjs, expected_arg);
         int32_t result = mjs_get_int32(mjs, result_arg);
-        if(expected != result) {
+        if(expected == result) {
+            FURI_LOG_T(TAG, "eq passed (exp=%ld res=%ld)", expected, result);
+        } else {
             mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "expected %d, found %d", expected, result);
         }
     } else if(mjs_is_string(expected_arg) && mjs_is_string(result_arg)) {
         const char* expected = mjs_get_string(mjs, &expected_arg, NULL);
         const char* result = mjs_get_string(mjs, &result_arg, NULL);
-        if(strcmp(expected, result) != 0) {
+        if(strcmp(expected, result) == 0) {
+            FURI_LOG_T(TAG, "eq passed (exp=\"%s\" res=\"%s\")", expected, result);
+        } else {
             mjs_prepend_errorf(
                 mjs, MJS_INTERNAL_ERROR, "expected \"%s\", found \"%s\"", expected, result);
         }
     } else if(mjs_is_boolean(expected_arg) && mjs_is_boolean(result_arg)) {
         bool expected = mjs_get_bool(mjs, expected_arg);
         bool result = mjs_get_bool(mjs, result_arg);
-        if(expected != result) {
+        if(expected == result) {
+            FURI_LOG_T(
+                TAG,
+                "eq passed (exp=%s res=%s)",
+                expected ? "true" : "false",
+                result ? "true" : "false");
+        } else {
             mjs_prepend_errorf(
                 mjs,
                 MJS_INTERNAL_ERROR,
@@ -43,7 +55,12 @@ static void js_tests_assert_eq(struct mjs* mjs) {
                 result ? "true" : "false");
         }
     } else {
-        furi_crash();
+        JS_ERROR_AND_RETURN(
+            mjs,
+            MJS_INTERNAL_ERROR,
+            "type mismatch (expected %s, result %s)",
+            mjs_typeof(expected_arg),
+            mjs_typeof(result_arg));
     }
 
     mjs_return(mjs, MJS_UNDEFINED);
