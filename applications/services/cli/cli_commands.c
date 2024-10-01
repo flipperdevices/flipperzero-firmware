@@ -391,16 +391,18 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
     int interval = 1000;
     args_read_int_and_trim(args, &interval);
 
+    if(interval) printf("\e[2J\e[?25l"); // Clear display, hide cursor
+
     FuriThreadList* thread_list = furi_thread_list_alloc();
     while(!cli_cmd_interrupt_received(cli)) {
         uint32_t tick = furi_get_tick();
         furi_thread_enumerate(thread_list);
 
-        if(interval) printf("\e[2J\e[0;0f"); // Clear display and return to 0
+        if(interval) printf("\e[0;0f"); // Return to 0,0
 
         uint32_t uptime = tick / furi_kernel_get_tick_frequency();
         printf(
-            "Threads: %zu, ISR Time: %0.2f%%, Uptime: %luh%lum%lus\r\n",
+            "\rThreads: %zu, ISR Time: %0.2f%%, Uptime: %luh%lum%lus\e[0K\r\n",
             furi_thread_list_size(thread_list),
             (double)furi_thread_list_get_isr_time(thread_list),
             uptime / 60 / 60,
@@ -408,14 +410,14 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
             uptime % 60);
 
         printf(
-            "Heap: total %zu, free %zu, minimum %zu, max block %zu\r\n\r\n",
+            "\rHeap: total %zu, free %zu, minimum %zu, max block %zu\e[0K\r\n\r\n",
             memmgr_get_total_heap(),
             memmgr_get_free_heap(),
             memmgr_get_minimum_free_heap(),
             memmgr_heap_get_max_free_block());
 
         printf(
-            "%-17s %-20s %-10s %5s %12s %6s %10s %7s %5s\r\n",
+            "\r%-17s %-20s %-10s %5s %12s %6s %10s %7s %5s\e[0K\r\n",
             "AppID",
             "Name",
             "State",
@@ -429,7 +431,7 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
         for(size_t i = 0; i < furi_thread_list_size(thread_list); i++) {
             const FuriThreadListItem* item = furi_thread_list_get_at(thread_list, i);
             printf(
-                "%-17s %-20s %-10s %5d   0x%08lx %6lu %10lu %7zu %5.1f\r\n",
+                "\r%-17s %-20s %-10s %5d   0x%08lx %6lu %10lu %7zu %5.1f\e[0K\r\n",
                 item->app_id,
                 item->name,
                 item->state,
@@ -448,6 +450,8 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
         }
     }
     furi_thread_list_free(thread_list);
+
+    if(interval) printf("\e[?25h"); // Show cursor
 }
 
 void cli_command_free(Cli* cli, FuriString* args, void* context) {
