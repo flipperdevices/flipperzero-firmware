@@ -316,6 +316,10 @@ static void cli_handle_escape(Cli* cli, char c) {
             printf("%s", furi_string_get_cstr(cli->line));
         }
     } else if(c == 'B') {
+        // Clear input
+        furi_string_reset(cli->line);
+        cli->cursor_position = 0;
+        printf("\r>: \e[0K");
     } else if(c == 'C') {
         if(cli->cursor_position < furi_string_size(cli->line)) {
             cli->cursor_position++;
