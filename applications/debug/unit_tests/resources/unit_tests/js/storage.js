@@ -133,3 +133,4 @@ tests.assert_eq("helloworld", entries[0].path);
 tests.assert_eq("helloworld123", entries[1].path);
 
 tests.assert_eq(true, storage.rmrf(baseDir));
+tests.assert_eq(true, storage.makeDirectory(baseDir));
