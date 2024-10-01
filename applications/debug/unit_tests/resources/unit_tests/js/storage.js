@@ -125,9 +125,9 @@ tests.assert_eq(false, storage.isSubpathOf("/ext/test/sub", "/ext/test"));
 // dir
 let entries = storage.readDirectory(baseDir);
 tests.assert_eq(true, !!entries);
-// FIXME: this test suite assumes that files are listed by `readDirectory` in
-// the exact order that they were created, which is not something that is
-// actually guaranteed.
+// FIXME: (-nofl) this test suite assumes that files are listed by
+// `readDirectory` in the exact order that they were created, which is not
+// something that is actually guaranteed.
 // Possible solution: sort and compare the array.
 tests.assert_eq("helloworld", entries[0].path);
 tests.assert_eq("helloworld123", entries[1].path);
