@@ -1,4 +1,4 @@
-# Heatshrink-compressed Tarball Format
+# Heatshrink-compressed Tarball Format {#heatshrink_file_format}
 
 Flipper supports the use of Heatshrink compression library for .tar archives. This allows for smaller file sizes and faster OTA updates. 
 
