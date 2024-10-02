@@ -106,9 +106,9 @@ void bit_buffer_copy_bits(BitBuffer* buf, const uint8_t* data, size_t size_bits)
  * @param[in,out] buf        pointer to a BitBuffer instance to copy into
  * @param[in]     data       pointer to the byte array to be copied
  * @param[in]     size_bits  size of the data to be copied, in bits
- * @note          Parity bits are placed starting with the least significant bit
+ * @note          Parity bits are placed starting with the most significant bit
  *                of each byte and moving up.
- * @note          Example: PDDDDDDD DPDDDDDD DDPD...
+ * @note          Example: DDDDDDDD PDDDDDDD DPDDDDDD DDP...
  */
 void bit_buffer_copy_bytes_with_parity(BitBuffer* buf, const uint8_t* data, size_t size_bits);
 
@@ -135,9 +135,9 @@ void bit_buffer_write_bytes(const BitBuffer* buf, void* dest, size_t size_bytes)
  * @param[out] dest          pointer to the destination memory location
  * @param[in]  size_bytes    maximum destination data size, in bytes
  * @param[out] bits_written  actual number of bits written, in bits
- * @note       Parity bits are placed starting with the least significant bit of
+ * @note       Parity bits are placed starting with the most significant bit of
  *             each byte and moving up.
- * @note       Example: PDDDDDDD DPDDDDDD DDPD...
+ * @note       Example: DDDDDDDD PDDDDDDD DPDDDDDD DDP...
  */
 void bit_buffer_write_bytes_with_parity(
     const BitBuffer* buf,
