@@ -1,12 +1,15 @@
 #include "cli_i.h"
 #include "cli_commands.h"
 #include "cli_vcp.h"
+#include "cli_ansi.h"
 #include <furi_hal_version.h>
 #include <loader/loader.h>
 
 #define TAG "CliSrv"
 
 #define CLI_INPUT_LEN_LIMIT 256
+#define CLI_PROMPT          ">: " // qFlipper does not recognize us if we use escape sequences :(
+#define CLI_PROMPT_LENGTH   3 // printable characters
 
 Cli* cli_alloc(void) {
     Cli* cli = malloc(sizeof(Cli));
@@ -85,7 +88,7 @@ bool cli_cmd_interrupt_received(Cli* cli) {
     char c = '\0';
     if(cli_is_connected(cli)) {
         if(cli->session->rx((uint8_t*)&c, 1, 0) == 1) {
-            return c == CliSymbolAsciiETX;
+            return c == CliKeyETX;
         }
     } else {
         return true;
@@ -102,7 +105,8 @@ void cli_print_usage(const char* cmd, const char* usage, const char* arg) {
 }
 
 void cli_motd(void) {
-    printf("\r\n"
+    printf(ANSI_FLIPPER_BRAND_ORANGE
+           "\r\n"
            "              _.-------.._                    -,\r\n"
            "          .-\"```\"--..,,_/ /`-,               -,  \\ \r\n"
            "       .:\"          /:/  /'\\  \\     ,_...,  `. |  |\r\n"
@@ -116,12 +120,11 @@ void cli_motd(void) {
            " _L_  _     ___  ___  ___  ___  ____--\"`___  _     ___\r\n"
            "| __|| |   |_ _|| _ \\| _ \\| __|| _ \\   / __|| |   |_ _|\r\n"
            "| _| | |__  | | |  _/|  _/| _| |   /  | (__ | |__  | |\r\n"
-           "|_|  |____||___||_|  |_|  |___||_|_\\   \\___||____||___|\r\n"
-           "\r\n"
-           "Welcome to Flipper Zero Command Line Interface!\r\n"
+           "|_|  |____||___||_|  |_|  |___||_|_\\   \\___||____||___|\r\n" ANSI_RESET
+           "\r\n" ANSI_FG_BR_WHITE "Welcome to " ANSI_FLIPPER_BRAND_ORANGE
+           "Flipper Zero" ANSI_FG_BR_WHITE " Command Line Interface!\r\n"
            "Read the manual: https://docs.flipper.net/development/cli\r\n"
-           "Run `help` or `?` to list available commands\r\n"
-           "\r\n");
+           "Run `help` or `?` to list available commands\r\n" ANSI_RESET "\r\n");
 
     const Version* firmware_version = furi_hal_version_get_firmware_version();
     if(firmware_version) {
@@ -142,7 +145,7 @@ void cli_nl(Cli* cli) {
 
 void cli_prompt(Cli* cli) {
     UNUSED(cli);
-    printf("\r\n>: %s", furi_string_get_cstr(cli->line));
+    printf("\r\n" CLI_PROMPT "%s", furi_string_get_cstr(cli->line));
     fflush(stdout);
 }
 
@@ -165,7 +168,7 @@ static void cli_handle_backspace(Cli* cli) {
 
         cli->cursor_position--;
     } else {
-        cli_putc(cli, CliSymbolAsciiBell);
+        cli_putc(cli, CliKeyBell);
     }
 }
 
@@ -241,7 +244,7 @@ static void cli_handle_enter(Cli* cli) {
         printf(
             "`%s` command not found, use `help` or `?` to list all available commands",
             furi_string_get_cstr(command));
-        cli_putc(cli, CliSymbolAsciiBell);
+        cli_putc(cli, CliKeyBell);
     }
 
     cli_reset(cli);
@@ -305,8 +308,72 @@ static void cli_handle_autocomplete(Cli* cli) {
     cli_prompt(cli);
 }
 
-static void cli_handle_escape(Cli* cli, char c) {
-    if(c == 'A') {
+/**
+ * @brief Determines the class that a character belongs to
+ * 
+ * The return value of this function does not make sense on its own; it's only
+ * useful for comparing it with other values returned by this function. This
+ * function is used internally in `cli_skip_run`
+ */
+static uint8_t cli_char_class(char c) {
+    if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_') {
+        return 0;
+    } else if(c == ' ') {
+        return 1;
+    } else {
+        return 255;
+    }
+}
+
+/**
+ * @brief Skips a run of a class of characters
+ * 
+ * @param string Input string
+ * @param original_pos Position to start the search at
+ * @param direction Direction in which to perform the search:
+ *                  left (`-1`) or right (`1`)
+ * @returns The position at which the run ends
+ */
+static size_t cli_skip_run(FuriString* string, size_t original_pos, int8_t direction) {
+    if(furi_string_size(string) == 0) return original_pos;
+    if(direction == -1 && original_pos == 0) return original_pos;
+    if(direction == 1 && original_pos == furi_string_size(string)) return original_pos;
+
+    int8_t look_offset = direction == -1 ? -1 : 0;
+    int32_t position = original_pos;
+    uint8_t start_class = cli_char_class(furi_string_get_char(string, position + look_offset));
+
+    while(true) {
+        position += direction;
+        if(position < 0) break;
+        if(position >= (int32_t)furi_string_size(string)) break;
+        if(cli_char_class(furi_string_get_char(string, position + look_offset)) != start_class)
+            break;
+    }
+
+    return MAX(0, position);
+}
+
+void cli_process_input(Cli* cli) {
+    CliKeyCombo combo = cli_read_ansi_key_combo(cli);
+    FURI_LOG_T(TAG, "code=0x%02x, mod=0x%x\r\n", combo.key, combo.modifiers);
+
+    if(combo.key == CliKeyTab) {
+        cli_handle_autocomplete(cli);
+
+    } else if(combo.key == CliKeySOH) {
+        furi_delay_ms(33); // We are too fast, Minicom is not ready yet
+        cli_motd();
+        cli_prompt(cli);
+
+    } else if(combo.key == CliKeyETX) {
+        cli_reset(cli);
+        cli_prompt(cli);
+
+    } else if(combo.key == CliKeyEOT) {
+        cli_reset(cli);
+
+    } else if(combo.key == CliKeyUp && combo.modifiers == CliModKeyNo) {
         // Use previous command if line buffer is empty
         if(furi_string_size(cli->line) == 0 && furi_string_cmp(cli->line, cli->last_line) != 0) {
             // Set line buffer and cursor position
@@ -315,71 +382,84 @@ static void cli_handle_escape(Cli* cli, char c) {
             // Show new line to user
             printf("%s", furi_string_get_cstr(cli->line));
         }
-    } else if(c == 'B') {
-        // Clear input
+
+    } else if(combo.key == CliKeyDown && combo.modifiers == CliModKeyNo) {
+        // Clear input buffer
         furi_string_reset(cli->line);
         cli->cursor_position = 0;
-        printf("\r>: \e[0K");
-    } else if(c == 'C') {
+        printf("\r" CLI_PROMPT "\e[0K");
+
+    } else if(combo.key == CliKeyRight && combo.modifiers == CliModKeyNo) {
+        // Move right
         if(cli->cursor_position < furi_string_size(cli->line)) {
             cli->cursor_position++;
             printf("\e[C");
         }
-    } else if(c == 'D') {
+
+    } else if(combo.key == CliKeyLeft && combo.modifiers == CliModKeyNo) {
+        // Move left
         if(cli->cursor_position > 0) {
             cli->cursor_position--;
             printf("\e[D");
         }
-    }
-    fflush(stdout);
-}
 
-void cli_process_input(Cli* cli) {
-    char in_chr = cli_getc(cli);
-    size_t rx_len;
+    } else if(combo.key == CliKeyHome && combo.modifiers == CliModKeyNo) {
+        // Move to beginning of line
+        cli->cursor_position = 0;
+        printf("\e[%dG", CLI_PROMPT_LENGTH + 1); // columns start at 1 \(-_-)/
 
-    if(in_chr == CliSymbolAsciiTab) {
-        cli_handle_autocomplete(cli);
-    } else if(in_chr == CliSymbolAsciiSOH) {
-        furi_delay_ms(33); // We are too fast, Minicom is not ready yet
-        cli_motd();
-        cli_prompt(cli);
-    } else if(in_chr == CliSymbolAsciiETX) {
-        cli_reset(cli);
-        cli_prompt(cli);
-    } else if(in_chr == CliSymbolAsciiEOT) {
-        cli_reset(cli);
-    } else if(in_chr == CliSymbolAsciiEsc) {
-        rx_len = cli_read(cli, (uint8_t*)&in_chr, 1);
-        if((rx_len > 0) && (in_chr == '[')) {
-            cli_read(cli, (uint8_t*)&in_chr, 1);
-            cli_handle_escape(cli, in_chr);
-        } else {
-            cli_putc(cli, CliSymbolAsciiBell);
-        }
-    } else if(in_chr == CliSymbolAsciiBackspace || in_chr == CliSymbolAsciiDel) {
-        cli_handle_backspace(cli);
-    } else if(in_chr == CliSymbolAsciiCR) {
-        cli_handle_enter(cli);
+    } else if(combo.key == CliKeyEnd && combo.modifiers == CliModKeyNo) {
+        // Move to end of line
+        cli->cursor_position = furi_string_size(cli->line);
+        printf("\e[%dG", CLI_PROMPT_LENGTH + cli->cursor_position + 1);
+
     } else if(
-        (in_chr >= 0x20 && in_chr < 0x7F) && //-V560
+        combo.modifiers == CliModKeyCtrl &&
+        (combo.key == CliKeyLeft || combo.key == CliKeyRight)) {
+        // Skip run of similar chars to the left or right
+        int32_t direction = (combo.key == CliKeyLeft) ? -1 : 1;
+        cli->cursor_position = cli_skip_run(cli->line, cli->cursor_position, direction);
+        printf("\e[%dG", CLI_PROMPT_LENGTH + cli->cursor_position + 1);
+
+    } else if(combo.key == CliKeyBackspace || combo.key == CliKeyDEL) {
+        cli_handle_backspace(cli);
+
+    } else if(combo.key == CliKeyETB) { // Ctrl + Backspace
+        // Delete run of similar chars to the left
+        size_t run_start = cli_skip_run(cli->line, cli->cursor_position, -1);
+        furi_string_replace_at(cli->line, run_start, cli->cursor_position - run_start, "");
+        cli->cursor_position = run_start;
+        printf(
+            "\e[%dG%s\e[0K\e[%dG", // move cursor, print second half of line, erase remains, move cursor again
+            CLI_PROMPT_LENGTH + cli->cursor_position + 1,
+            furi_string_get_cstr(cli->line) + run_start,
+            CLI_PROMPT_LENGTH + run_start + 1);
+
+    } else if(combo.key == CliKeyCR) {
+        cli_handle_enter(cli);
+
+    } else if(
+        (combo.key >= 0x20 && combo.key < 0x7F) && //-V560
         (furi_string_size(cli->line) < CLI_INPUT_LEN_LIMIT)) {
         if(cli->cursor_position == furi_string_size(cli->line)) {
-            furi_string_push_back(cli->line, in_chr);
-            cli_putc(cli, in_chr);
+            furi_string_push_back(cli->line, combo.key);
+            cli_putc(cli, combo.key);
         } else {
             // Insert character to line buffer
-            const char in_str[2] = {in_chr, 0};
+            const char in_str[2] = {combo.key, 0};
             furi_string_replace_at(cli->line, cli->cursor_position, 0, in_str);
 
             // Print character in replace mode
-            printf("\e[4h%c\e[4l", in_chr);
+            printf("\e[4h%c\e[4l", combo.key);
             fflush(stdout);
         }
         cli->cursor_position++;
+
     } else {
-        cli_putc(cli, CliSymbolAsciiBell);
+        cli_putc(cli, CliKeyBell);
     }
+
+    fflush(stdout);
 }
 
 void cli_add_command(
