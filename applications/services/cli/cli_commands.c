@@ -123,11 +123,7 @@ void cli_command_neofetch(Cli* cli, FuriString* args, void* context) {
     // Print ASCII art with info
     const size_t info_height = 16;
     for(size_t i = 0; i < MAX(logo_height, info_height); i++) {
-        printf(
-            NEOFETCH_COLOR "%*.*s",
-            -logo_width,
-            logo_width,
-            (i < logo_height) ? neofetch_logo[i] : "");
+        printf(NEOFETCH_COLOR "%-*s", logo_width, (i < logo_height) ? neofetch_logo[i] : "");
         switch(i) {
         case 0: // you@<hostname>
             printf("you" ANSI_RESET "@" NEOFETCH_COLOR "%s", furi_hal_version_get_name_ptr());
