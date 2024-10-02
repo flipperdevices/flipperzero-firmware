@@ -1,4 +1,3 @@
-
 #include "bq27220.h"
 #include "bq27220_reg.h"
 #include "bq27220_data_memory.h"
@@ -146,7 +145,7 @@ static bool bq27220_data_memory_check(
         // Wait for enter CFG update mode
         uint32_t timeout = 100;
         Bq27220OperationStatus status = {0};
-        while((status.CFGUPDATE != true) && (timeout-- > 0)) {
+        while(status.CFGUPDATE != true && status.SEC != Bq27220OperationStatusSecFull && (timeout-- > 0)) {
             bq27220_get_operation_status(handle, &status);
         }
 
@@ -212,11 +211,13 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
 
     do {
         // Unseal device since we are going to read protected configuration
+        FURI_LOG_D(TAG, "Unsealing");
         if(!bq27220_unseal(handle)) {
             break;
         }
 
         // Request device number(chip PN)
+        FURI_LOG_D(TAG, "Checking device ID");
         if(!bq27220_control(handle, Control_DEVICE_NUMBER)) {
             FURI_LOG_E(TAG, "Device is not responding");
             break;
@@ -231,6 +232,7 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
         }
 
         // Get full access to read and modify parameters
+        FURI_LOG_D(TAG, "Acquiring Full Access");
         if(!bq27220_full_access(handle)) {
             break;
         }
@@ -254,13 +256,20 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
             }
         }
 
+        FURI_LOG_D(TAG, "Checking data memory");
         if(!bq27220_data_memory_check(handle, data_memory, false)) {
             FURI_LOG_W(TAG, "Updating data memory");
             bq27220_control(handle, Control_SET_PROFILE_1);
             bq27220_data_memory_check(handle, data_memory, true);
+            if(!bq27220_data_memory_check(handle, data_memory, false)){
+                FURI_LOG_E(TAG, "Data memory update failed");
+                break;
+            }
         }
 
+        FURI_LOG_D(TAG, "Sealing");
         if(!bq27220_seal(handle)) {
+            FURI_LOG_E(TAG, "Seal failed");
             break;
         }
 
@@ -366,7 +375,14 @@ bool bq27220_full_access(FuriHalI2cBusHandle* handle) {
             FURI_LOG_E(TAG, "status query failed");
             break;
         }
+        // Already full access
+        if(status.SEC == Bq27220OperationStatusSecFull) {
+            result = true;
+            break;
+        }
+        // Must be unsealed to get full access
         if(status.SEC != Bq27220OperationStatusSecUnsealed) {
+            FURI_LOG_E(TAG, "not in unsealed state");
             break;
         }
 
