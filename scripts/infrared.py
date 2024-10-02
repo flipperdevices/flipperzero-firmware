@@ -50,7 +50,7 @@ class Main(App):
                     unique[key] = d
                     data.append(d)
                 else:
-                    self.logger.warn(f"Duplicate key: {key}")
+                    self.logger.warning(f"Duplicate key: {key}")
             except EOFError:
                 break
         # Form new file
