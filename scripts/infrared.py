@@ -31,6 +31,10 @@ class Main(App):
         while True:
             try:
                 d = {}
+                d["comments"] = []
+                while (comment := f.readComment()) is not None:
+                    d["comments"].append(comment)
+                print(d["comments"])
                 d["name"] = f.readKey("name")
                 d["type"] = f.readKey("type")
                 key = None
@@ -57,7 +61,8 @@ class Main(App):
         f = FlipperFormatFile()
         f.setHeader(filetype, version)
         for i in data:
-            f.writeComment(None)
+            for comment in i["comments"]:
+                f.writeComment(comment)
             f.writeKey("name", i["name"])
             f.writeKey("type", i["type"])
             if i["type"] == "parsed":
