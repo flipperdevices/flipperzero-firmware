@@ -25,18 +25,6 @@ static uint16_t bq27220_read_word(FuriHalI2cBusHandle* handle, uint8_t address) 
     return buf;
 }
 
-static bool bq27220_control(FuriHalI2cBusHandle* handle, uint16_t control) {
-    bool ret = true;
-    ret &= furi_hal_i2c_write_reg_8(
-        handle, BQ27220_ADDRESS, CommandControl, (control >> 0) & 0xff, BQ27220_I2C_TIMEOUT);
-    furi_delay_us(BQ27220_CMD_DELAY_US);
-    ret &= furi_hal_i2c_write_reg_8(
-        handle, BQ27220_ADDRESS, CommandControl + 1, (control >> 8) & 0xff, BQ27220_I2C_TIMEOUT);
-    furi_delay_us(BQ27220_CMD_DELAY_US);
-
-    return ret;
-}
-
 static bool bq27220_write(
     FuriHalI2cBusHandle* handle,
     uint8_t address,
@@ -51,6 +39,10 @@ static bool bq27220_write(
     }
 
     return ret;
+}
+
+static bool bq27220_control(FuriHalI2cBusHandle* handle, uint16_t control) {
+    return bq27220_write(handle, CommandControl, (uint8_t*)&control, 2);
 }
 
 static bool bq27220_read(FuriHalI2cBusHandle* handle, uint8_t* buffer, size_t buffer_size) {
@@ -153,7 +145,7 @@ static bool bq27220_data_memory_check(
 
         // Wait for enter CFG update mode
         uint32_t timeout = 100;
-        OperationStatus status = {0};
+        Bq27220OperationStatus status = {0};
         while((status.CFGUPDATE != true) && (timeout-- > 0)) {
             bq27220_get_operation_status(handle, &status);
         }
@@ -215,7 +207,7 @@ static bool bq27220_data_memory_check(
 }
 
 bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory) {
-    OperationStatus status = {0};
+    Bq27220OperationStatus status = {0};
     bool result = false;
 
     do {
@@ -282,7 +274,7 @@ bool bq27220_reset(FuriHalI2cBusHandle* handle) {
     bool result = false;
     if(bq27220_control(handle, Control_RESET)) {
         uint32_t timeout = 100;
-        OperationStatus status = {0};
+        Bq27220OperationStatus status = {0};
         while((status.INITCOMP != true) && (timeout-- > 0)) {
             bq27220_get_operation_status(handle, &status);
         }
@@ -298,14 +290,14 @@ bool bq27220_reset(FuriHalI2cBusHandle* handle) {
 }
 
 bool bq27220_seal(FuriHalI2cBusHandle* handle) {
-    OperationStatus status = {0};
+    Bq27220OperationStatus status = {0};
     bool result = false;
     do {
         if(!bq27220_get_operation_status(handle, &status)) {
             FURI_LOG_E(TAG, "status query failed");
             break;
         }
-        if(status.SEC == 0b11) {
+        if(status.SEC == Bq27220OperationStatusSecSealed) {
             result = true;
             break;
         }
@@ -321,7 +313,7 @@ bool bq27220_seal(FuriHalI2cBusHandle* handle) {
             FURI_LOG_E(TAG, "status query failed");
             break;
         }
-        if(status.SEC != 0b11) {
+        if(status.SEC != Bq27220OperationStatusSecSealed) {
             FURI_LOG_E(TAG, "seal failed");
             break;
         }
@@ -333,29 +325,29 @@ bool bq27220_seal(FuriHalI2cBusHandle* handle) {
 }
 
 bool bq27220_unseal(FuriHalI2cBusHandle* handle) {
-    OperationStatus status = {0};
+    Bq27220OperationStatus status = {0};
     bool result = false;
     do {
         if(!bq27220_get_operation_status(handle, &status)) {
             FURI_LOG_E(TAG, "status query failed");
             break;
         }
-        if(status.SEC != 0b11) {
+        if(status.SEC != Bq27220OperationStatusSecSealed) {
             result = true;
             break;
         }
 
         // Hai, Kazuma desu
-        bq27220_control(handle, 0x0414);
+        bq27220_control(handle, UnsealKey1);
         furi_delay_us(5000);
-        bq27220_control(handle, 0x3672);
+        bq27220_control(handle, UnsealKey2);
         furi_delay_us(5000);
 
         if(!bq27220_get_operation_status(handle, &status)) {
             FURI_LOG_E(TAG, "status query failed");
             break;
         }
-        if(status.SEC != 0b10) {
+        if(status.SEC != Bq27220OperationStatusSecUnsealed) {
             FURI_LOG_E(TAG, "unseal failed %u", status.SEC);
             break;
         }
@@ -367,29 +359,28 @@ bool bq27220_unseal(FuriHalI2cBusHandle* handle) {
 }
 
 bool bq27220_full_access(FuriHalI2cBusHandle* handle) {
-    OperationStatus status = {0};
+    Bq27220OperationStatus status = {0};
     bool result = false;
     do {
         if(!bq27220_get_operation_status(handle, &status)) {
             FURI_LOG_E(TAG, "status query failed");
             break;
         }
-        if(status.SEC != 0b10) {
-            result = true;
+        if(status.SEC != Bq27220OperationStatusSecUnsealed) {
             break;
         }
 
         // Explosion!!!
-        bq27220_control(handle, 0xffff); //-V760
+        bq27220_control(handle, FullAccessKey); //-V760
         furi_delay_us(5000);
-        bq27220_control(handle, 0xffff);
+        bq27220_control(handle, FullAccessKey);
         furi_delay_us(5000);
 
         if(!bq27220_get_operation_status(handle, &status)) {
             FURI_LOG_E(TAG, "status query failed");
             break;
         }
-        if(status.SEC != 0b01) {
+        if(status.SEC != Bq27220OperationStatusSecFull) {
             FURI_LOG_E(TAG, "full access failed %u", status.SEC);
             break;
         }
@@ -408,7 +399,7 @@ int16_t bq27220_get_current(FuriHalI2cBusHandle* handle) {
     return bq27220_read_word(handle, CommandCurrent);
 }
 
-bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, BatteryStatus* battery_status) {
+bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, Bq27220BatteryStatus* battery_status) {
     uint16_t data = bq27220_read_word(handle, CommandBatteryStatus);
     if(data == BQ27220_ERROR) {
         return false;
@@ -418,7 +409,9 @@ bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, BatteryStatus* batt
     }
 }
 
-bool bq27220_get_operation_status(FuriHalI2cBusHandle* handle, OperationStatus* operation_status) {
+bool bq27220_get_operation_status(
+    FuriHalI2cBusHandle* handle,
+    Bq27220OperationStatus* operation_status) {
     uint16_t data = bq27220_read_word(handle, CommandOperationStatus);
     if(data == BQ27220_ERROR) {
         return false;

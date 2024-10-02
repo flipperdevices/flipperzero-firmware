@@ -26,9 +26,15 @@ typedef struct {
     bool OCVFAIL  : 1; // Status bit indicating that the OCV reading failed due to current
     bool OCVCOMP  : 1; // An OCV measurement update is complete
     bool FD       : 1; // Full-discharge is detected
-} BatteryStatus;
+} Bq27220BatteryStatus;
 
-_Static_assert(sizeof(BatteryStatus) == 2, "Incorrect structure size");
+_Static_assert(sizeof(Bq27220BatteryStatus) == 2, "Incorrect structure size");
+
+typedef enum {
+    Bq27220OperationStatusSecSealed = 0b11,
+    Bq27220OperationStatusSecUnsealed = 0b10,
+    Bq27220OperationStatusSecFull = 0b01,
+} Bq27220OperationStatusSec;
 
 typedef struct {
     // Low byte, Low bit first
@@ -43,9 +49,9 @@ typedef struct {
     uint8_t RSVD1  : 2;
     bool CFGUPDATE : 1; /**< Gauge is in CONFIG UPDATE mode */
     uint8_t RSVD0  : 5;
-} OperationStatus;
+} Bq27220OperationStatus;
 
-_Static_assert(sizeof(OperationStatus) == 2, "Incorrect structure size");
+_Static_assert(sizeof(Bq27220OperationStatus) == 2, "Incorrect structure size");
 
 typedef struct BQ27220DMData BQ27220DMData;
 
@@ -112,7 +118,7 @@ int16_t bq27220_get_current(FuriHalI2cBusHandle* handle);
  *
  * @return     true on success, false otherwise
  */
-bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, BatteryStatus* battery_status);
+bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, Bq27220BatteryStatus* battery_status);
 
 /** Get operation status
  *
@@ -121,7 +127,9 @@ bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, BatteryStatus* batt
  *
  * @return     true on success, false otherwise
  */
-bool bq27220_get_operation_status(FuriHalI2cBusHandle* handle, OperationStatus* operation_status);
+bool bq27220_get_operation_status(
+    FuriHalI2cBusHandle* handle,
+    Bq27220OperationStatus* operation_status);
 
 /** Get temperature
  *

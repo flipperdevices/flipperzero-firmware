@@ -107,8 +107,8 @@ void furi_hal_power_init(void) {
 bool furi_hal_power_gauge_is_ok(void) {
     bool ret = true;
 
-    BatteryStatus battery_status;
-    OperationStatus operation_status;
+    Bq27220BatteryStatus battery_status;
+    Bq27220OperationStatus operation_status;
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
 
@@ -129,7 +129,7 @@ bool furi_hal_power_gauge_is_ok(void) {
 bool furi_hal_power_is_shutdown_requested(void) {
     bool ret = false;
 
-    BatteryStatus battery_status;
+    Bq27220BatteryStatus battery_status;
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
 
@@ -590,8 +590,8 @@ void furi_hal_power_debug_get(PropertyValueCallback out, void* context) {
     PropertyValueContext property_context = {
         .key = key, .value = value, .out = out, .sep = '.', .last = false, .context = context};
 
-    BatteryStatus battery_status;
-    OperationStatus operation_status;
+    Bq27220BatteryStatus battery_status;
+    Bq27220OperationStatus operation_status;
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
 
