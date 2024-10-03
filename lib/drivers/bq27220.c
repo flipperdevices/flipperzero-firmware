@@ -150,7 +150,7 @@ static bool bq27220_data_memory_check(
         }
 
         if(timeout == 0) {
-            FURI_LOG_E(TAG, "CFGUPDATE mode failed");
+            FURI_LOG_E(TAG, "Enter CFGUPDATE mode failed");
             return false;
         }
     }
@@ -199,7 +199,15 @@ static bool bq27220_data_memory_check(
     // Finalize configuration update
     if(update) {
         bq27220_control(handle, Control_EXIT_CFG_UPDATE_REINIT);
-        furi_delay_us(10000);
+        uint32_t timeout = 100;
+        Bq27220OperationStatus status = {0};
+        while(status.CFGUPDATE == true && (timeout-- > 0)) {
+            bq27220_get_operation_status(handle, &status);
+        }
+        if(timeout == 0) {
+            FURI_LOG_E(TAG, "Exit CFGUPDATE mode failed");
+            return false;
+        }
     }
 
     return result;
