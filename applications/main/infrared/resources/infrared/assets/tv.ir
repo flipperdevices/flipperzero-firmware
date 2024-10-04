@@ -1871,7 +1871,114 @@ protocol: NECext
 address: EA C7 00 00
 command: 33 CC 00 00
 #
-# Model: FireTV Omni_Series_4K
+# Model: Soniq E32W13B
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 0E F1 00 00
+#
+name: Mute
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 1A E5 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 49 B6 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 43 BC 00 00
+#
+name: Ch_next
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 51 AE 00 00
+#
+name: Ch_prev
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 4D B2 00 00
+#
+# Model: Hisense EN2B27
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 00 BF 00 00
+command: 0D F2 00 00
+#
+name: Mute
+type: parsed
+protocol: NECext
+address: 00 BF 00 00
+command: 0E F1 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 00 BF 00 00
+command: 44 BB 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 00 BF 00 00
+command: 43 BC 00 00
+#
+name: Ch_next
+type: parsed
+protocol: NECext
+address: 00 BF 00 00
+command: 4A B5 00 00
+#
+name: Ch_prev
+type: parsed
+protocol: NECext
+address: 00 BF 00 00
+command: 4B B4 00 00
+#
+# Model: Viano STV65UHD4K
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 1E E1 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 0A F5 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 06 F9 00 00
+#
+name: Ch_next
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 5B A4 00 00
+#
+name: Ch_prev
+type: parsed
+protocol: NECext
+address: 00 7F 00 00
+command: 18 E7 00 00
+# # Model: FireTV Omni_Series_4K
 #
 name: Power
 type: parsed
@@ -2083,6 +2190,12 @@ command: 41 BE 00 00
 #
 # Model: Bose TV
 #
+name: Power
+type: parsed
+protocol: NECext
+address: BA A0 00 00
+command: 4C B3 00 00
+#
 name: Mute
 type: parsed
 protocol: NECext
@@ -2143,12 +2256,6 @@ command: 12 00 00 00
 #
 # Model: ContinentalEdison
 #
-name: Power
-type: parsed
-protocol: NECext
-address: 00 7F 00 00
-command: 1E E1 00 00
-#
 name: Mute
 type: parsed
 protocol: NECext
@@ -2167,18 +2274,6 @@ protocol: NECext
 address: 00 7F 00 00
 command: 44 BB 00 00
 #
-name: Vol_up
-type: parsed
-protocol: NECext
-address: 00 7F 00 00
-command: 0A F5 00 00
-#
-name: Vol_dn
-type: parsed
-protocol: NECext
-address: 00 7F 00 00
-command: 06 F9 00 00
-#
 # Model: ContinentalEdison CELED32JBL7
 #
 name: Vol_dn
@@ -2194,6 +2289,12 @@ address: 40 00 00 00
 command: 14 00 00 00
 #
 # Model: Crown 22111
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 20 00 00 00
+command: 52 00 00 00
 #
 name: Mute
 type: parsed
@@ -2262,32 +2363,6 @@ type: parsed
 protocol: NEC
 address: 80 00 00 00
 command: D0 00 00 00
-#
-# Model: Devant Unknown_Model
-#
-name: Power
-type: parsed
-protocol: NECext
-address: 00 BF 00 00
-command: 0D F2 00 00
-#
-name: Vol_up
-type: parsed
-protocol: NECext
-address: 00 BF 00 00
-command: 44 BB 00 00
-#
-name: Vol_dn
-type: parsed
-protocol: NECext
-address: 00 BF 00 00
-command: 43 BC 00 00
-#
-name: Mute
-type: parsed
-protocol: NECext
-address: 00 BF 00 00
-command: 0E F1 00 00
 #
 # Model: Dual DL-32HD-002
 #
@@ -2399,14 +2474,6 @@ protocol: RC5
 address: 01 00 00 00
 command: 14 00 00 00
 #
-# Model: Elements TV
-#
-name: Power
-type: parsed
-protocol: NEC
-address: 20 00 00 00
-command: 52 00 00 00
-#
 # Model: Elitelux L32HD1000
 #
 name: Power
@@ -2432,12 +2499,6 @@ type: parsed
 protocol: NECext
 address: 00 7F 00 00
 command: 19 E6 00 00
-#
-name: Ch_prev
-type: parsed
-protocol: NECext
-address: 00 7F 00 00
-command: 18 E7 00 00
 #
 # Model: Enseo
 #
@@ -2644,20 +2705,6 @@ type: parsed
 protocol: RC5
 address: 00 00 00 00
 command: 0D 00 00 00
-#
-# Model: Hisense 32A4HAU
-#
-name: Ch_next
-type: parsed
-protocol: NECext
-address: 00 BF 00 00
-command: 4A B5 00 00
-#
-name: Ch_prev
-type: parsed
-protocol: NECext
-address: 00 BF 00 00
-command: 4B B4 00 00
 #
 # Model: Hitachi 43140
 #
@@ -2887,6 +2934,12 @@ protocol: NECext
 address: 00 BF 00 00
 command: 48 B7 00 00
 #
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 00 BF 00 00
+command: 49 B6 00 00
+#
 name: Mute
 type: parsed
 protocol: NECext
@@ -2900,12 +2953,6 @@ type: parsed
 protocol: NECext
 address: 00 BF 00 00
 command: 00 FF 00 00
-#
-name: Vol_dn
-type: parsed
-protocol: NECext
-address: 00 BF 00 00
-command: 49 B6 00 00
 #
 # Model: Manta TV_2
 #
@@ -2946,6 +2993,12 @@ address: A0 00 00 00
 command: 1C 00 00 00
 #
 # Model: Matsui 1435b
+#
+name: Power
+type: parsed
+protocol: Samsung32
+address: 17 00 00 00
+command: 14 00 00 00
 #
 name: Ch_prev
 type: parsed
@@ -3099,7 +3152,7 @@ protocol: NECext
 address: 00 7F 00 00
 command: 16 E9 00 00
 #
-# Model: Panasonic N2QAYB000352
+# Model: Panasonic 58JX800_Series
 #
 name: Vol_up
 type: parsed
@@ -3107,13 +3160,13 @@ protocol: Kaseikyo
 address: 80 02 20 00
 command: 00 02 00 00
 #
-# Model: Panasonic N2QAYB000705
-#
 name: Vol_dn
 type: parsed
 protocol: Kaseikyo
 address: 80 02 20 00
 command: 10 02 00 00
+#
+# Model: Panasonic N2QAYA_152
 #
 name: Ch_next
 type: parsed
@@ -3121,17 +3174,33 @@ protocol: Kaseikyo
 address: 80 02 20 00
 command: 40 03 00 00
 #
+name: Mute
+type: parsed
+protocol: Kaseikyo
+address: 80 02 20 00
+command: 20 03 00 00
+#
+# Model: Panasonic N2QAYB000705
+#
 name: Ch_prev
 type: parsed
 protocol: Kaseikyo
 address: 80 02 20 00
 command: 50 03 00 00
 #
-name: Mute
+# Model: Panasonic N2QAYB000752_Full
+#
+name: Ch_prev
 type: parsed
 protocol: Kaseikyo
-address: 80 02 20 00
-command: 20 03 00 00
+address: B0 02 20 00
+command: 50 03 00 00
+#
+name: Ch_next
+type: parsed
+protocol: Kaseikyo
+address: B0 02 20 00
+command: 40 03 00 00
 #
 # Model: Panasonic TH-43HS550K
 #
@@ -3153,6 +3222,18 @@ protocol: Samsung32
 address: 3E 00 00 00
 command: 15 00 00 00
 #
+name: Ch_next
+type: parsed
+protocol: Samsung32
+address: 3E 00 00 00
+command: 12 00 00 00
+#
+name: Ch_prev
+type: parsed
+protocol: Samsung32
+address: 3E 00 00 00
+command: 13 00 00 00
+#
 name: Mute
 type: parsed
 protocol: Samsung32
@@ -3172,6 +3253,12 @@ type: parsed
 protocol: NECext
 address: 00 BD 00 00
 command: 0C F3 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 00 BD 00 00
+command: 10 EF 00 00
 #
 name: Ch_next
 type: parsed
@@ -3239,6 +3326,18 @@ protocol: Pioneer
 address: AA 00 00 00
 command: 1C 00 00 00
 #
+name: Vol_up
+type: parsed
+protocol: Pioneer
+address: AA 00 00 00
+command: 0A 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: Pioneer
+address: AA 00 00 00
+command: 0B 00 00 00
+#
 name: Mute
 type: parsed
 protocol: Pioneer
@@ -3260,6 +3359,14 @@ type: parsed
 protocol: Samsung32
 address: 07 00 00 00
 command: 12 00 00 00
+#
+# Model: Samsung BN59-01180A
+#
+name: Power
+type: parsed
+protocol: Samsung32
+address: 07 00 00 00
+command: 98 00 00 00
 #
 # Model: Samsung Broadband_Hospitality
 #
@@ -3373,49 +3480,17 @@ protocol: NECext
 address: 00 F7 00 00
 command: 10 EF 00 00
 #
-name: Mute
+name: Ch_next
 type: parsed
 protocol: NECext
 address: 00 F7 00 00
-command: 11 EE 00 00
-#
-# Model: Soniq E32W13B
-#
-name: Power
-type: parsed
-protocol: NECext
-address: 72 DD 00 00
 command: 0E F1 00 00
 #
 name: Mute
 type: parsed
 protocol: NECext
-address: 72 DD 00 00
-command: 1A E5 00 00
-#
-name: Vol_up
-type: parsed
-protocol: NECext
-address: 72 DD 00 00
-command: 49 B6 00 00
-#
-name: Vol_dn
-type: parsed
-protocol: NECext
-address: 72 DD 00 00
-command: 43 BC 00 00
-#
-name: Ch_next
-type: parsed
-protocol: NECext
-address: 72 DD 00 00
-command: 51 AE 00 00
-#
-name: Ch_prev
-type: parsed
-protocol: NECext
-address: 72 DD 00 00
-command: 4D B2 00 00
+address: 00 F7 00 00
+command: 11 EE 00 00
 #
 # Model: Soniq QSP500TV6
 #
@@ -3544,14 +3619,6 @@ type: parsed
 protocol: NECext
 address: EA C7 00 00
 command: 97 68 00 00
-#
-# Model: Viano STV65UHD4K
-#
-name: Ch_next
-type: parsed
-protocol: NECext
-address: 00 7F 00 00
-command: 5B A4 00 00
 #
 # Model: Vitec Exterity_IPTV
 #
