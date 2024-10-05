@@ -9,26 +9,35 @@
 
 typedef struct {
     // Low byte, Low bit first
-    bool DSG      : 1; // The device is in DISCHARGE
-    bool SYSDWN   : 1; // System down bit indicating the system should shut down
-    bool TDA      : 1; // Terminate Discharge Alarm
-    bool BATTPRES : 1; // Battery Present detected
-    bool AUTH_GD  : 1; // Detect inserted battery
-    bool OCVGD    : 1; // Good OCV measurement taken
-    bool TCA      : 1; // Terminate Charge Alarm
-    bool RSVD     : 1; // Reserved
+    uint8_t BATT_ID : 3; /**< Battery Identification */
+    bool SNOOZE     : 1; /**< SNOOZE mode is enabled */
+    bool BCA        : 1; /**< fuel gauge board calibration routine is active */
+    bool CCA        : 1; /**< Coulomb Counter Calibration routine is active */
+    uint8_t RSVD0   : 2; /**< Reserved */
     // High byte, Low bit first
-    bool CHGINH   : 1; // Charge inhibit
-    bool FC       : 1; // Full-charged is detected
-    bool OTD      : 1; // Overtemperature in discharge condition is detected
-    bool OTC      : 1; // Overtemperature in charge condition is detected
-    bool SLEEP    : 1; // Device is operating in SLEEP mode when set
-    bool OCVFAIL  : 1; // Status bit indicating that the OCV reading failed due to current
-    bool OCVCOMP  : 1; // An OCV measurement update is complete
-    bool FD       : 1; // Full-discharge is detected
-} Bq27220BatteryStatus;
+    uint8_t RSVD1; /**< Reserved */
+} Bq27220ControlStatus;
 
-_Static_assert(sizeof(Bq27220BatteryStatus) == 2, "Incorrect structure size");
+typedef struct {
+    // Low byte, Low bit first
+    bool DSG      : 1; /**< The device is in DISCHARGE */
+    bool SYSDWN   : 1; /**< System down bit indicating the system should shut down */
+    bool TDA      : 1; /**< Terminate Discharge Alarm */
+    bool BATTPRES : 1; /**< Battery Present detected */
+    bool AUTH_GD  : 1; /**< Detect inserted battery */
+    bool OCVGD    : 1; /**< Good OCV measurement taken */
+    bool TCA      : 1; /**< Terminate Charge Alarm */
+    bool RSVD     : 1; /**< Reserved */
+    // High byte, Low bit first
+    bool CHGINH   : 1; /**< Charge inhibit */
+    bool FC       : 1; /**< Full-charged is detected */
+    bool OTD      : 1; /**< Overtemperature in discharge condition is detected */
+    bool OTC      : 1; /**< Overtemperature in charge condition is detected */
+    bool SLEEP    : 1; /**< Device is operating in SLEEP mode when set */
+    bool OCVFAIL  : 1; /**< Status bit indicating that the OCV reading failed due to current */
+    bool OCVCOMP  : 1; /**< An OCV measurement update is complete */
+    bool FD       : 1; /**< Full-discharge is detected */
+} Bq27220BatteryStatus;
 
 typedef enum {
     Bq27220OperationStatusSecSealed = 0b11,
@@ -46,12 +55,31 @@ typedef struct {
     bool SMTH      : 1; /**< RemainingCapacity is scaled by smooth engine */
     bool BTPINT    : 1; /**< BTP threshold has been crossed */
     // High byte, Low bit first
-    uint8_t RSVD1  : 2;
+    uint8_t RSVD1  : 2; /**< Reserved */
     bool CFGUPDATE : 1; /**< Gauge is in CONFIG UPDATE mode */
-    uint8_t RSVD0  : 5;
+    uint8_t RSVD0  : 5; /**< Reserved */
 } Bq27220OperationStatus;
 
-_Static_assert(sizeof(Bq27220OperationStatus) == 2, "Incorrect structure size");
+typedef struct {
+    // Low byte, Low bit first
+    bool FD       : 1; /**< Full Discharge */
+    bool FC       : 1; /**< Full Charge */
+    bool TD       : 1; /**< Terminate Discharge */
+    bool TC       : 1; /**< Terminate Charge */
+    bool RSVD0    : 1; /**< Reserved */
+    bool EDV      : 1; /**< Cell voltage is above or below EDV0 threshold */
+    bool DSG      : 1; /**< DISCHARGE or RELAXATION */
+    bool CF       : 1; /**< Battery conditioning is needed */
+    // High byte, Low bit first
+    uint8_t RSVD1 : 2; /**< Reserved */
+    bool FCCX     : 1; /**< fcc1hz clock going into CC: 0 = 1 Hz, 1 = 16 Hz*/
+    uint8_t RSVD2 : 2; /**< Reserved */
+    bool EDV1     : 1; /**< Cell voltage is above or below EDV1 threshold */
+    bool EDV2     : 1; /**< Cell voltage is above or below EDV2 threshold */
+    bool VDQ      : 1; /**< Charge cycle FCC update qualification */
+} Bq27220GaugingStatus;
+
+_Static_assert(sizeof(Bq27220GaugingStatus) == 2, "Incorrect Bq27220GaugingStatus structure size");
 
 typedef struct BQ27220DMData BQ27220DMData;
 
@@ -89,6 +117,8 @@ bool bq27220_unseal(FuriHalI2cBusHandle* handle);
 
 /** Get full access
  *
+ * @warning    must be done in unsealed state
+ *
  * @param      handle  The I2C Bus handle
  *
  * @return     true on success, false otherwise
@@ -111,6 +141,15 @@ uint16_t bq27220_get_voltage(FuriHalI2cBusHandle* handle);
  */
 int16_t bq27220_get_current(FuriHalI2cBusHandle* handle);
 
+/** Get control status
+ *
+ * @param      handle          The handle
+ * @param      control_status  The control status
+ *
+ * @return     true on success, false otherwise
+ */
+bool bq27220_get_control_status(FuriHalI2cBusHandle* handle, Bq27220ControlStatus* control_status);
+
 /** Get battery status
  *
  * @param      handle          The handle
@@ -130,6 +169,15 @@ bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, Bq27220BatteryStatu
 bool bq27220_get_operation_status(
     FuriHalI2cBusHandle* handle,
     Bq27220OperationStatus* operation_status);
+
+/** Get gauging status
+ *
+ * @param      handle          The handle
+ * @param      gauging_status  The gauging status
+ *
+ * @return     true on success, false otherwise
+ */
+bool bq27220_get_gauging_status(FuriHalI2cBusHandle* handle, Bq27220GaugingStatus* gauging_status);
 
 /** Get temperature
  *

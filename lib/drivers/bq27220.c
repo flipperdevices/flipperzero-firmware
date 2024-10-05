@@ -2,6 +2,12 @@
 #include "bq27220_reg.h"
 #include "bq27220_data_memory.h"
 
+_Static_assert(sizeof(Bq27220ControlStatus) == 2, "Incorrect Bq27220ControlStatus structure size");
+_Static_assert(sizeof(Bq27220BatteryStatus) == 2, "Incorrect Bq27220BatteryStatus structure size");
+_Static_assert(
+    sizeof(Bq27220OperationStatus) == 2,
+    "Incorrect Bq27220OperationStatus structure size");
+
 _Static_assert(sizeof(BQ27220DMGaugingConfig) == 2, "Incorrect structure size");
 
 #include <furi.h>
@@ -9,43 +15,75 @@ _Static_assert(sizeof(BQ27220DMGaugingConfig) == 2, "Incorrect structure size");
 
 #define TAG "Gauge"
 
-// See 5.3 I2C Command Waiting Time
-// expected to be 66us, fails till we get to 125us
-#define BQ27220_CMD_DELAY_US (250u)
+#define BQ27220_ID (0x0220u)
 
-static uint16_t bq27220_read_word(FuriHalI2cBusHandle* handle, uint8_t address) {
-    uint16_t buf = 0;
+/* Couple things to keep in mind:
+ * 
+ * - Datasheet and technical reference manual are full of bullshit
+ * - bqstudio is ignoring them
+ * - bqstudio i2c exchange tracing gives some ideas on timings that works, but there is a catch
+ * - bqstudio timings contradicts to gm.fs file specification
+ * - it's impossible to reproduce all situations in bqstudio
+ * - experiments with blackbox can not cover all edge cases
+ * - final timings are kinda blend between all of those sources
+ * - device behavior differs depending on i2c clock speed
+ * - The Hero Himmel would not have used this gauge in the first place
+ */
 
-    furi_hal_i2c_read_mem(
-        handle, BQ27220_ADDRESS, address, (uint8_t*)&buf, 2, BQ27220_I2C_TIMEOUT);
+/** Delay between 2 writes into Subclass/MAC area. Fails at ~120us. */
+#define BQ27220_MAC_WRITE_DELAY_US (250u)
 
-    furi_delay_us(BQ27220_CMD_DELAY_US);
+/** Delay between we ask chip to load data to MAC and it become valid. Fails at ~500us. */
+#define BQ27220_SELECT_DELAY_US (1000u)
 
-    return buf;
+/** Delay between 2 control operations(like unseal or full access). Fails at ~2500us.*/
+#define BQ27220_MAGIC_DELAY_US (5000u)
+
+/** Delay before freshly written configuration can be read. Fails at ? */
+#define BQ27220_CONFIG_DELAY_US (10000u)
+
+/** Config apply delay. Must wait, or DM read returns garbage. */
+#define BQ27220_CONFIG_APPLY_US (2000000u)
+
+/** Battery profile change delay. Must wait, or DM read returns garbage. */
+#define BQ27220_PROFILE_CHANGE_US (2000000u)
+
+/** Timeout in cycles */
+#define BQ27220_TIMEOUT_CYCLE_COUNT (2000u)
+
+/** Timeout cycle interval  */
+#define BQ27220_TIMEOUT_CYCLE_INTERVAL_US (1000u)
+
+static inline bool bq27220_read_reg(
+    FuriHalI2cBusHandle* handle,
+    uint8_t address,
+    uint8_t* buffer,
+    size_t buffer_size) {
+    return furi_hal_i2c_trx(
+        handle, BQ27220_ADDRESS, &address, 1, buffer, buffer_size, BQ27220_I2C_TIMEOUT);
 }
 
-static bool bq27220_write(
+static inline bool bq27220_write(
     FuriHalI2cBusHandle* handle,
     uint8_t address,
     const uint8_t* buffer,
     size_t buffer_size) {
-    bool ret = true;
-
-    for(size_t i = 0; i < buffer_size && ret; i++) {
-        ret &= furi_hal_i2c_write_reg_8(
-            handle, BQ27220_ADDRESS, address + i, buffer[i], BQ27220_I2C_TIMEOUT);
-        furi_delay_us(BQ27220_CMD_DELAY_US);
-    }
-
-    return ret;
+    return furi_hal_i2c_write_mem(
+        handle, BQ27220_ADDRESS, address, buffer, buffer_size, BQ27220_I2C_TIMEOUT);
 }
 
-static bool bq27220_control(FuriHalI2cBusHandle* handle, uint16_t control) {
+static inline bool bq27220_control(FuriHalI2cBusHandle* handle, uint16_t control) {
     return bq27220_write(handle, CommandControl, (uint8_t*)&control, 2);
 }
 
-static bool bq27220_read(FuriHalI2cBusHandle* handle, uint8_t* buffer, size_t buffer_size) {
-    return furi_hal_i2c_rx(handle, BQ27220_ADDRESS, buffer, buffer_size, BQ27220_I2C_TIMEOUT);
+static uint16_t bq27220_read_word(FuriHalI2cBusHandle* handle, uint8_t address) {
+    uint16_t buf = BQ27220_ERROR;
+
+    if(!bq27220_read_reg(handle, address, (uint8_t*)&buf, 2)) {
+        FURI_LOG_E(TAG, "bq27220_read_word failed");
+    }
+
+    return buf;
 }
 
 static uint8_t bq27220_get_checksum(uint8_t* data, uint16_t len) {
@@ -78,42 +116,46 @@ static bool bq27220_parameter_check(
         if(update) {
             // Datasheet contains incorrect procedure for memory update, more info:
             // https://e2e.ti.com/support/power-management-group/power-management/f/power-management-forum/719878/bq27220-technical-reference-manual-sluubd4-is-missing-extended-data-commands-chapter
+            // Also see timings note at the beginning of this file
 
-            // 2. Write the address AND the parameter data to 0x3E+ (auto increment)
+            // Write the address AND the parameter data to 0x3E+ (auto increment)
             if(!bq27220_write(handle, CommandSelectSubclass, buffer, size + 2)) {
-                FURI_LOG_I(TAG, "DM write failed");
+                FURI_LOG_E(TAG, "DM write failed");
                 break;
             }
 
-            furi_delay_us(10000);
+            // We must wait, otherwise write will fail
+            furi_delay_us(BQ27220_MAC_WRITE_DELAY_US);
 
-            // 3. Calculate the check sum: 0xFF - (sum of address and data) OR 0xFF
+            // Calculate the check sum: 0xFF - (sum of address and data) OR 0xFF
             uint8_t checksum = bq27220_get_checksum(buffer, size + 2);
-            // 4. Write the check sum to 0x60 and the total length of (address + parameter data + check sum + length) to 0x61
+            // Write the check sum to 0x60 and the total length of (address + parameter data + check sum + length) to 0x61
             buffer[0] = checksum;
             // 2 bytes address, `size` bytes data, 1 byte check sum, 1 byte length
             buffer[1] = 2 + size + 1 + 1;
             if(!bq27220_write(handle, CommandMACDataSum, buffer, 2)) {
-                FURI_LOG_I(TAG, "CRC write failed");
+                FURI_LOG_E(TAG, "CRC write failed");
                 break;
             }
-
-            furi_delay_us(10000);
+            // Final wait as in gm.fs specification
+            furi_delay_us(BQ27220_CONFIG_DELAY_US);
             ret = true;
         } else {
             if(!bq27220_write(handle, CommandSelectSubclass, buffer, 2)) {
-                FURI_LOG_I(TAG, "DM SelectSubclass for read failed");
+                FURI_LOG_E(TAG, "DM SelectSubclass for read failed");
                 break;
             }
 
-            furi_delay_us(BQ27220_CMD_DELAY_US);
+            // bqstudio uses 15ms wait delay here
+            furi_delay_us(BQ27220_SELECT_DELAY_US);
 
-            if(!bq27220_read(handle, old_data, size)) {
-                FURI_LOG_I(TAG, "DM read failed");
+            if(!bq27220_read_reg(handle, CommandMACData, old_data, size)) {
+                FURI_LOG_E(TAG, "DM read failed");
                 break;
             }
 
-            furi_delay_us(BQ27220_CMD_DELAY_US);
+            // bqstudio uses burst reads with continue(CommandSelectSubclass without argument) and ~5ms between burst
+            furi_delay_us(BQ27220_SELECT_DELAY_US);
 
             if(*(uint32_t*)&(old_data[0]) != *(uint32_t*)&(buffer[2])) {
                 FURI_LOG_W( //-V641
@@ -137,20 +179,26 @@ static bool bq27220_data_memory_check(
     const BQ27220DMData* data_memory,
     bool update) {
     if(update) {
-        if(!bq27220_control(handle, Control_ENTER_CFG_UPDATE)) {
+        const uint16_t cfg_request = Control_ENTER_CFG_UPDATE;
+        if(!bq27220_write(
+               handle, CommandSelectSubclass, (uint8_t*)&cfg_request, sizeof(cfg_request))) {
             FURI_LOG_E(TAG, "ENTER_CFG_UPDATE command failed");
             return false;
         };
 
         // Wait for enter CFG update mode
-        uint32_t timeout = 100;
+        uint32_t timeout = BQ27220_TIMEOUT_CYCLE_COUNT;
         Bq27220OperationStatus status = {0};
-        while(status.CFGUPDATE != true && status.SEC != Bq27220OperationStatusSecFull && (timeout-- > 0)) {
-            bq27220_get_operation_status(handle, &status);
+        while(status.CFGUPDATE != true && (--timeout > 0)) {
+            if(!bq27220_get_operation_status(handle, &status)) {
+                FURI_LOG_W(TAG, "failed to query operation status");
+            };
+            furi_delay_us(BQ27220_TIMEOUT_CYCLE_INTERVAL_US);
         }
 
         if(timeout == 0) {
-            FURI_LOG_E(TAG, "Enter CFGUPDATE mode failed");
+            FURI_LOG_E(
+                TAG, "Enter CFGUPDATE mode failed, CFG %u, SEC %u", status.CFGUPDATE, status.SEC);
             return false;
         }
     }
@@ -197,13 +245,21 @@ static bool bq27220_data_memory_check(
     }
 
     // Finalize configuration update
-    if(update) {
+    if(update && result) {
         bq27220_control(handle, Control_EXIT_CFG_UPDATE_REINIT);
-        uint32_t timeout = 100;
+
+        // Wait for gauge to apply new configuration
+        furi_delay_us(BQ27220_CONFIG_APPLY_US);
+
+        // ensure that we exited config update mode
+        uint32_t timeout = BQ27220_TIMEOUT_CYCLE_COUNT;
         Bq27220OperationStatus status = {0};
-        while(status.CFGUPDATE == true && (timeout-- > 0)) {
+        while(status.CFGUPDATE == true && (--timeout > 0)) {
             bq27220_get_operation_status(handle, &status);
+            furi_delay_us(BQ27220_TIMEOUT_CYCLE_INTERVAL_US);
         }
+
+        // Check timeout
         if(timeout == 0) {
             FURI_LOG_E(TAG, "Exit CFGUPDATE mode failed");
             return false;
@@ -214,29 +270,60 @@ static bool bq27220_data_memory_check(
 }
 
 bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory) {
-    Bq27220OperationStatus status = {0};
     bool result = false;
 
     do {
+        // Request device number(chip PN)
+        FURI_LOG_D(TAG, "Checking device ID");
+        if(!bq27220_control(handle, Control_DEVICE_NUMBER)) {
+            FURI_LOG_E(TAG, "ID: Device is not responding");
+            break;
+        };
+        // Enterprise wait(MAC read fails if less than 500us)
+        // bqstudio uses ~15ms
+        furi_delay_us(BQ27220_SELECT_DELAY_US);
+        // Read id data from MAC scratch space
+        uint16_t data = bq27220_read_word(handle, CommandMACData);
+        if(data != BQ27220_ID) {
+            FURI_LOG_E(TAG, "Invalid Device Number %04x != 0x0220", data);
+            break;
+        }
+
         // Unseal device since we are going to read protected configuration
         FURI_LOG_D(TAG, "Unsealing");
         if(!bq27220_unseal(handle)) {
             break;
         }
 
-        // Request device number(chip PN)
-        FURI_LOG_D(TAG, "Checking device ID");
-        if(!bq27220_control(handle, Control_DEVICE_NUMBER)) {
-            FURI_LOG_E(TAG, "Device is not responding");
+        // Try to recover gauge from forever init
+        Bq27220OperationStatus operation_status;
+        if(!bq27220_get_operation_status(handle, &operation_status)) {
+            FURI_LOG_E(TAG, "Failed to get operation status");
             break;
-        };
-        // Enterprise wait(MAC read fails if less than 500us)
-        furi_delay_us(999);
-        // Read id data from MAC scratch space
-        uint16_t data = bq27220_read_word(handle, CommandMACData);
-        if(data != 0x0220) {
-            FURI_LOG_E(TAG, "Invalid Device Number %04x == 0x0220", data);
+        }
+        if(operation_status.INITCOMP != true) {
+            FURI_LOG_W(TAG, "Device initialization is incomplete, trying to reset");
+            if(!bq27220_reset(handle)) {
+                FURI_LOG_E(TAG, "Failed to reset incompletely initialized device");
+                break;
+            }
+        }
+
+        // Ensure correct profile is selected
+        FURI_LOG_D(TAG, "Checking chosen profile");
+        Bq27220ControlStatus control_status;
+        if(!bq27220_get_control_status(handle, &control_status)) {
+            FURI_LOG_E(TAG, "Failed to get control status");
             break;
+        }
+        if(control_status.BATT_ID != 0) {
+            FURI_LOG_W(TAG, "Switching to default profile");
+            if(!bq27220_reset(handle)) {
+                FURI_LOG_E(TAG, "Failed to reset device with incorrect profile");
+                break;
+            }
+            // Longest known
+            furi_delay_us(BQ27220_PROFILE_CHANGE_US);
         }
 
         // Get full access to read and modify parameters
@@ -245,31 +332,12 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
             break;
         }
 
-        if(!bq27220_get_operation_status(handle, &status)) {
-            FURI_LOG_E(TAG, "Failed to get operation status");
-            break;
-        }
-
-        // Once upon
-        if(status.INITCOMP != true) {
-            FURI_LOG_W(TAG, "Device initialization is incomplete, trying to reset");
-            if(!bq27220_reset(handle)) {
-                FURI_LOG_E(TAG, "Failed to reset incompletely initialized device");
-                break;
-            }
-
-            // Ensure full access after reset
-            if(!bq27220_full_access(handle)) {
-                break;
-            }
-        }
-
+        // Ensure correct configuration loaded into gauge DataMemory
         FURI_LOG_D(TAG, "Checking data memory");
         if(!bq27220_data_memory_check(handle, data_memory, false)) {
             FURI_LOG_W(TAG, "Updating data memory");
-            bq27220_control(handle, Control_SET_PROFILE_1);
             bq27220_data_memory_check(handle, data_memory, true);
-            if(!bq27220_data_memory_check(handle, data_memory, false)){
+            if(!bq27220_data_memory_check(handle, data_memory, false)) {
                 FURI_LOG_E(TAG, "Data memory update failed");
                 break;
             }
@@ -290,10 +358,11 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
 bool bq27220_reset(FuriHalI2cBusHandle* handle) {
     bool result = false;
     if(bq27220_control(handle, Control_RESET)) {
-        uint32_t timeout = 100;
+        uint32_t timeout = BQ27220_TIMEOUT_CYCLE_COUNT;
         Bq27220OperationStatus status = {0};
-        while((status.INITCOMP != true) && (timeout-- > 0)) {
+        while((status.INITCOMP != true) && (--timeout > 0)) {
             bq27220_get_operation_status(handle, &status);
+            furi_delay_us(BQ27220_TIMEOUT_CYCLE_INTERVAL_US);
         }
         if(!timeout) {
             FURI_LOG_E(TAG, "INITCOMP timeout after reset");
@@ -356,9 +425,9 @@ bool bq27220_unseal(FuriHalI2cBusHandle* handle) {
 
         // Hai, Kazuma desu
         bq27220_control(handle, UnsealKey1);
-        furi_delay_us(5000);
+        furi_delay_us(BQ27220_MAGIC_DELAY_US);
         bq27220_control(handle, UnsealKey2);
-        furi_delay_us(5000);
+        furi_delay_us(BQ27220_MAGIC_DELAY_US);
 
         if(!bq27220_get_operation_status(handle, &status)) {
             FURI_LOG_E(TAG, "status query failed");
@@ -396,9 +465,9 @@ bool bq27220_full_access(FuriHalI2cBusHandle* handle) {
 
         // Explosion!!!
         bq27220_control(handle, FullAccessKey); //-V760
-        furi_delay_us(5000);
+        furi_delay_us(BQ27220_MAGIC_DELAY_US);
         bq27220_control(handle, FullAccessKey);
-        furi_delay_us(5000);
+        furi_delay_us(BQ27220_MAGIC_DELAY_US);
 
         if(!bq27220_get_operation_status(handle, &status)) {
             FURI_LOG_E(TAG, "status query failed");
@@ -423,26 +492,30 @@ int16_t bq27220_get_current(FuriHalI2cBusHandle* handle) {
     return bq27220_read_word(handle, CommandCurrent);
 }
 
+bool bq27220_get_control_status(FuriHalI2cBusHandle* handle, Bq27220ControlStatus* control_status) {
+    return bq27220_read_reg(handle, CommandControl, (uint8_t*)control_status, 2);
+}
+
 bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, Bq27220BatteryStatus* battery_status) {
-    uint16_t data = bq27220_read_word(handle, CommandBatteryStatus);
-    if(data == BQ27220_ERROR) {
-        return false;
-    } else {
-        *(uint16_t*)battery_status = data;
-        return true;
-    }
+    return bq27220_read_reg(handle, CommandBatteryStatus, (uint8_t*)battery_status, 2);
 }
 
 bool bq27220_get_operation_status(
     FuriHalI2cBusHandle* handle,
     Bq27220OperationStatus* operation_status) {
-    uint16_t data = bq27220_read_word(handle, CommandOperationStatus);
-    if(data == BQ27220_ERROR) {
+    return bq27220_read_reg(handle, CommandOperationStatus, (uint8_t*)operation_status, 2);
+}
+
+bool bq27220_get_gauging_status(FuriHalI2cBusHandle* handle, Bq27220GaugingStatus* gauging_status) {
+    // Request gauging data to be loaded to MAC
+    if(!bq27220_control(handle, Control_GAUGING_STATUS)) {
+        FURI_LOG_E(TAG, "DM SelectSubclass for read failed");
         return false;
-    } else {
-        *(uint16_t*)operation_status = data;
-        return true;
     }
+    // Wait for data being loaded to MAC
+    furi_delay_us(BQ27220_SELECT_DELAY_US);
+    // Read id data from MAC scratch space
+    return bq27220_read_reg(handle, CommandMACData, (uint8_t*)gauging_status, 2);
 }
 
 uint16_t bq27220_get_temperature(FuriHalI2cBusHandle* handle) {
