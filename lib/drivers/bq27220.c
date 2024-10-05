@@ -45,9 +45,6 @@ _Static_assert(sizeof(BQ27220DMGaugingConfig) == 2, "Incorrect structure size");
 /** Config apply delay. Must wait, or DM read returns garbage. */
 #define BQ27220_CONFIG_APPLY_US (2000000u)
 
-/** Battery profile change delay. Must wait, or DM read returns garbage. */
-#define BQ27220_PROFILE_CHANGE_US (2000000u)
-
 /** Timeout in cycles */
 #define BQ27220_TIMEOUT_CYCLE_COUNT (2000u)
 
@@ -271,6 +268,7 @@ static bool bq27220_data_memory_check(
 
 bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory) {
     bool result = false;
+    bool reset_required = false;
 
     do {
         // Request device number(chip PN)
@@ -296,17 +294,15 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
         }
 
         // Try to recover gauge from forever init
+        FURI_LOG_D(TAG, "Checking initialization status");
         Bq27220OperationStatus operation_status;
         if(!bq27220_get_operation_status(handle, &operation_status)) {
             FURI_LOG_E(TAG, "Failed to get operation status");
             break;
         }
         if(operation_status.INITCOMP != true) {
-            FURI_LOG_W(TAG, "Device initialization is incomplete, trying to reset");
-            if(!bq27220_reset(handle)) {
-                FURI_LOG_E(TAG, "Failed to reset incompletely initialized device");
-                break;
-            }
+            FURI_LOG_W(TAG, "Incorrect state, reset needed");
+            reset_required = true;
         }
 
         // Ensure correct profile is selected
@@ -317,13 +313,17 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
             break;
         }
         if(control_status.BATT_ID != 0) {
-            FURI_LOG_W(TAG, "Switching to default profile");
+            FURI_LOG_W(TAG, "Incorrect profile, reset needed");
+            reset_required = true;
+        }
+
+        // Reset needed
+        if(reset_required) {
+            FURI_LOG_E(TAG, "Resetting device");
             if(!bq27220_reset(handle)) {
-                FURI_LOG_E(TAG, "Failed to reset device with incorrect profile");
+                FURI_LOG_E(TAG, "Failed to reset device");
                 break;
             }
-            // Longest known
-            furi_delay_us(BQ27220_PROFILE_CHANGE_US);
         }
 
         // Get full access to read and modify parameters
