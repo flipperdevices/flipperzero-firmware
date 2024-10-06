@@ -187,7 +187,7 @@ static bool bq27220_data_memory_check(
         Bq27220OperationStatus operation_status;
         while(--timeout > 0) {
             if(!bq27220_get_operation_status(handle, &operation_status)) {
-                FURI_LOG_E(TAG, "Failed to get operation status");
+                FURI_LOG_W(TAG, "Failed to get operation status, retries left %lu", timeout);
             } else if(operation_status.CFGUPDATE == true) {
                 break;
             };
@@ -258,7 +258,7 @@ static bool bq27220_data_memory_check(
         Bq27220OperationStatus operation_status;
         while(--timeout > 0) {
             if(!bq27220_get_operation_status(handle, &operation_status)) {
-                FURI_LOG_E(TAG, "Failed to get operation status");
+                FURI_LOG_W(TAG, "Failed to get operation status, retries left %lu", timeout);
             } else if(operation_status.CFGUPDATE != true) {
                 break;
             }
@@ -345,9 +345,6 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
                 break;
             }
 
-            // Looks like INITCOMP=1 alone is not enough
-            furi_delay_us(BQ27220_CONFIG_DELAY_US);
-
             // Get full access to read and modify parameters
             // Also it looks like this step is totally unnecessary
             BQ27220_DEBUG_LOG("Acquiring Full Access");
@@ -388,7 +385,7 @@ bool bq27220_reset(FuriHalI2cBusHandle* handle) {
         Bq27220OperationStatus operation_status;
         while(--timeout > 0) {
             if(!bq27220_get_operation_status(handle, &operation_status)) {
-                FURI_LOG_W(TAG, "Filed to get operation status");
+                FURI_LOG_W(TAG, "Failed to get operation status, retries left %lu", timeout);
             } else if(operation_status.INITCOMP == true) {
                 break;
             };
@@ -477,13 +474,26 @@ bool bq27220_unseal(FuriHalI2cBusHandle* handle) {
 }
 
 bool bq27220_full_access(FuriHalI2cBusHandle* handle) {
-    Bq27220OperationStatus operation_status = {0};
     bool result = false;
+
     do {
-        if(!bq27220_get_operation_status(handle, &operation_status)) {
-            FURI_LOG_E(TAG, "Status query failed");
+        uint32_t timeout = BQ27220_TIMEOUT(BQ27220_TIMEOUT_COMMON_US);
+        Bq27220OperationStatus operation_status;
+        while(--timeout > 0) {
+            if(!bq27220_get_operation_status(handle, &operation_status)) {
+                FURI_LOG_W(TAG, "Failed to get operation status, retries left %lu", timeout);
+            } else {
+                break;
+            };
+            furi_delay_us(BQ27220_TIMEOUT_CYCLE_INTERVAL_US);
+        }
+
+        if(timeout == 0) {
+            FURI_LOG_E(TAG, "Failed to get operation status");
             break;
         }
+        BQ27220_DEBUG_LOG("Cycles left: %lu", timeout);
+
         // Already full access
         if(operation_status.SEC == Bq27220OperationStatusSecFull) {
             result = true;
