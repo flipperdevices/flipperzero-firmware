@@ -406,12 +406,12 @@ void cli_process_input(Cli* cli) {
     } else if(combo.key == CliKeyHome && combo.modifiers == CliModKeyNo) {
         // Move to beginning of line
         cli->cursor_position = 0;
-        printf("\e[%dG", CLI_PROMPT_LENGTH + 1); // columns start at 1 \(-_-)/
+        printf("\e[%uG", CLI_PROMPT_LENGTH + 1); // columns start at 1 \(-_-)/
 
     } else if(combo.key == CliKeyEnd && combo.modifiers == CliModKeyNo) {
         // Move to end of line
         cli->cursor_position = furi_string_size(cli->line);
-        printf("\e[%dG", CLI_PROMPT_LENGTH + cli->cursor_position + 1);
+        printf("\e[%zuG", CLI_PROMPT_LENGTH + cli->cursor_position + 1);
 
     } else if(
         combo.modifiers == CliModKeyCtrl &&
@@ -419,7 +419,7 @@ void cli_process_input(Cli* cli) {
         // Skip run of similar chars to the left or right
         int32_t direction = (combo.key == CliKeyLeft) ? -1 : 1;
         cli->cursor_position = cli_skip_run(cli->line, cli->cursor_position, direction);
-        printf("\e[%dG", CLI_PROMPT_LENGTH + cli->cursor_position + 1);
+        printf("\e[%zuG", CLI_PROMPT_LENGTH + cli->cursor_position + 1);
 
     } else if(combo.key == CliKeyBackspace || combo.key == CliKeyDEL) {
         cli_handle_backspace(cli);
@@ -430,7 +430,7 @@ void cli_process_input(Cli* cli) {
         furi_string_replace_at(cli->line, run_start, cli->cursor_position - run_start, "");
         cli->cursor_position = run_start;
         printf(
-            "\e[%dG%s\e[0K\e[%dG", // move cursor, print second half of line, erase remains, move cursor again
+            "\e[%zuG%s\e[0K\e[%zuG", // move cursor, print second half of line, erase remains, move cursor again
             CLI_PROMPT_LENGTH + cli->cursor_position + 1,
             furi_string_get_cstr(cli->line) + run_start,
             CLI_PROMPT_LENGTH + run_start + 1);
