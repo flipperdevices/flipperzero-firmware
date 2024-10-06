@@ -46,6 +46,8 @@ typedef struct {
     uint8_t RSVD1; /**< Reserved */
 } Bq27220ControlStatus;
 
+_Static_assert(sizeof(Bq27220ControlStatus) == 2, "Incorrect Bq27220ControlStatus structure size");
+
 typedef struct {
     // Low byte, Low bit first
     bool DSG      : 1; /**< The device is in DISCHARGE */
@@ -67,6 +69,8 @@ typedef struct {
     bool FD       : 1; /**< Full-discharge is detected */
 } Bq27220BatteryStatus;
 
+_Static_assert(sizeof(Bq27220BatteryStatus) == 2, "Incorrect Bq27220BatteryStatus structure size");
+
 typedef enum {
     Bq27220OperationStatusSecSealed = 0b11,
     Bq27220OperationStatusSecUnsealed = 0b10,
@@ -87,6 +91,10 @@ typedef struct {
     bool CFGUPDATE : 1; /**< Gauge is in CONFIG UPDATE mode */
     uint8_t RSVD0  : 5; /**< Reserved */
 } Bq27220OperationStatus;
+
+_Static_assert(
+    sizeof(Bq27220OperationStatus) == 2,
+    "Incorrect Bq27220OperationStatus structure size");
 
 typedef struct {
     // Low byte, Low bit first

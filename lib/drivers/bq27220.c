@@ -2,14 +2,6 @@
 #include "bq27220_reg.h"
 #include "bq27220_data_memory.h"
 
-_Static_assert(sizeof(Bq27220ControlStatus) == 2, "Incorrect Bq27220ControlStatus structure size");
-_Static_assert(sizeof(Bq27220BatteryStatus) == 2, "Incorrect Bq27220BatteryStatus structure size");
-_Static_assert(
-    sizeof(Bq27220OperationStatus) == 2,
-    "Incorrect Bq27220OperationStatus structure size");
-
-_Static_assert(sizeof(BQ27220DMGaugingConfig) == 2, "Incorrect structure size");
-
 #include <furi.h>
 #include <stdbool.h>
 
