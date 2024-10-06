@@ -112,7 +112,7 @@ static bool bq27220_parameter_check(
         if(update) {
             // Datasheet contains incorrect procedure for memory update, more info:
             // https://e2e.ti.com/support/power-management-group/power-management/f/power-management-forum/719878/bq27220-technical-reference-manual-sluubd4-is-missing-extended-data-commands-chapter
-            // Also see timings note at the beginning of this file
+            // Also see note in the header
 
             // Write the address AND the parameter data to 0x3E+ (auto increment)
             if(!bq27220_write(handle, CommandSelectSubclass, buffer, size + 2)) {
@@ -311,7 +311,7 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
             break;
         }
         if(operation_status.INITCOMP != true || operation_status.CFGUPDATE == true) {
-            FURI_LOG_W(TAG, "Incorrect state, reset needed");
+            FURI_LOG_E(TAG, "Incorrect state, reset needed");
             reset_and_provisioning_required = true;
         }
 
@@ -323,7 +323,7 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
             break;
         }
         if(control_status.BATT_ID != 0) {
-            FURI_LOG_W(TAG, "Incorrect profile, reset needed");
+            FURI_LOG_E(TAG, "Incorrect profile, reset needed");
             reset_and_provisioning_required = true;
         }
 
