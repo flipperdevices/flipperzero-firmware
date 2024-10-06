@@ -1,3 +1,31 @@
+/** 
+ * @file bq27220.h
+ * 
+ * Quite problematic chip with quite bad documentation.
+ * 
+ * Couple things to keep in mind:
+ * 
+ * - Datasheet and technical reference manual are full of bullshit
+ * - bqstudio is ignoring them
+ * - bqstudio i2c exchange tracing gives some ideas on timings that works, but there is a catch
+ * - bqstudio timings contradicts to gm.fs file specification
+ * - it's impossible to reproduce all situations in bqstudio
+ * - experiments with blackbox can not cover all edge cases
+ * - final timings are kinda blend between all of those sources
+ * - device behavior differs depending on i2c clock speed
+ * - The Hero Himmel would not have used this gauge in the first place
+ * 
+ * Couple advises if you'll need to modify this driver:
+ * - Reset and wait for INITCOMP if something is not right.
+ * - Do not do partial config update, it takes unpredictable amount of time to apply.
+ * - Don't forget to reset chip before writing new config.
+ * - If something fails at config update stage, wait for 4 seconds before doing next cycle.
+ * - If you can program and lock chip at factory stage - do it. It will save you a lot of time.
+ * - Keep sealed or strange things may happen.
+ * - There is a condition when it may stuck at INITCOMP state, just "press reset button".
+ * 
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -84,8 +112,19 @@ _Static_assert(sizeof(Bq27220GaugingStatus) == 2, "Incorrect Bq27220GaugingStatu
 typedef struct BQ27220DMData BQ27220DMData;
 
 /** Initialize Driver
+ * 
+ * This routine performs a lot of things under the hood:
+ * - Verifies that gauge is present on i2c bus and got correct ID(0220)
+ * - Unseals gauge
+ * - Checks various internal statuses
+ * - Checks that current profile is 0
+ * - Checks configuration again provided data_memory
+ * - Reset gauge if something on previous stages was fishy
+ * - Updates configuration if needed
+ * - Sealing gauge to prevent configuration and state from accidental damage
  *
- * @param      handle  The I2C Bus handle
+ * @param      handle       The I2C Bus handle
+ * @param[in]  data_memory  The data memory to be uploaded into gauge
  *
  * @return     true on success, false otherwise
  */

@@ -78,10 +78,9 @@ void furi_hal_power_init(void) {
         if(furi_hal_power.gauge_ok) {
             break;
         } else {
-            // Normal startup time is 250ms
-            // But if we try to access gauge at that stage it will become unresponsive
-            // 2 seconds timeout needed to restart communication
-            furi_delay_us(2020202);
+            // Gauge need some time to think about it's behavior
+            // We must wait, otherwise next init cycle will fail at unseal stage
+            furi_delay_us(4000000);
         }
         retry--;
     }
