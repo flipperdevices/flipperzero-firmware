@@ -180,7 +180,7 @@ static bool bq27220_data_memory_check(
         while(--timeout > 0) {
             if(!bq27220_get_operation_status(handle, &operation_status)) {
                 FURI_LOG_W(TAG, "Failed to get operation status, retries left %lu", timeout);
-            } else if(operation_status.CFGUPDATE == true) {
+            } else if(operation_status.CFGUPDATE) {
                 break;
             };
             furi_delay_us(BQ27220_TIMEOUT_CYCLE_INTERVAL_US);
@@ -302,7 +302,7 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory)
             FURI_LOG_E(TAG, "Failed to get operation status");
             break;
         }
-        if(operation_status.INITCOMP != true || operation_status.CFGUPDATE == true) {
+        if(!operation_status.INITCOMP || operation_status.CFGUPDATE) {
             FURI_LOG_E(TAG, "Incorrect state, reset needed");
             reset_and_provisioning_required = true;
         }
