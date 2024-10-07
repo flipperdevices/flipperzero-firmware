@@ -308,43 +308,56 @@ static void cli_handle_autocomplete(Cli* cli) {
     cli_prompt(cli);
 }
 
+typedef enum {
+    CliCharClassWord,
+    CliCharClassSpace,
+    CliCharClassOther,
+} CliCharClass;
+
 /**
  * @brief Determines the class that a character belongs to
  * 
- * The return value of this function does not make sense on its own; it's only
- * useful for comparing it with other values returned by this function. This
- * function is used internally in `cli_skip_run`
+ * The return value of this function should not be used on its own; it should
+ * only be used for comparing it with other values returned by this function.
+ * This function is used internally in `cli_skip_run`.
  */
-static uint8_t cli_char_class(char c) {
+static CliCharClass cli_char_class(char c) {
     if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_') {
-        return 0;
+        return CliCharClassWord;
     } else if(c == ' ') {
-        return 1;
+        return CliCharClassSpace;
     } else {
-        return 255;
+        return CliCharClassOther;
     }
 }
+
+typedef enum {
+    CliSkipToTheLeft,
+    CliSkipToTheRight,
+} CliSkipDirection;
 
 /**
  * @brief Skips a run of a class of characters
  * 
  * @param string Input string
  * @param original_pos Position to start the search at
- * @param direction Direction in which to perform the search:
- *                  left (`-1`) or right (`1`)
+ * @param direction Direction in which to perform the search
  * @returns The position at which the run ends
  */
-static size_t cli_skip_run(FuriString* string, size_t original_pos, int8_t direction) {
+static size_t cli_skip_run(FuriString* string, size_t original_pos, CliSkipDirection direction) {
     if(furi_string_size(string) == 0) return original_pos;
-    if(direction == -1 && original_pos == 0) return original_pos;
-    if(direction == 1 && original_pos == furi_string_size(string)) return original_pos;
+    if(direction == CliSkipToTheLeft && original_pos == 0) return original_pos;
+    if(direction == CliSkipToTheRight && original_pos == furi_string_size(string))
+        return original_pos;
 
-    int8_t look_offset = direction == -1 ? -1 : 0;
+    int8_t look_offset = (direction == CliSkipToTheLeft) ? -1 : 0;
+    int8_t increment = (direction == CliSkipToTheLeft) ? -1 : 1;
     int32_t position = original_pos;
-    uint8_t start_class = cli_char_class(furi_string_get_char(string, position + look_offset));
+    CliCharClass start_class =
+        cli_char_class(furi_string_get_char(string, position + look_offset));
 
     while(true) {
-        position += direction;
+        position += increment;
         if(position < 0) break;
         if(position >= (int32_t)furi_string_size(string)) break;
         if(cli_char_class(furi_string_get_char(string, position + look_offset)) != start_class)
@@ -417,7 +430,8 @@ void cli_process_input(Cli* cli) {
         combo.modifiers == CliModKeyCtrl &&
         (combo.key == CliKeyLeft || combo.key == CliKeyRight)) {
         // Skip run of similar chars to the left or right
-        int32_t direction = (combo.key == CliKeyLeft) ? -1 : 1;
+        CliSkipDirection direction = (combo.key == CliKeyLeft) ? CliSkipToTheLeft :
+                                                                 CliSkipToTheRight;
         cli->cursor_position = cli_skip_run(cli->line, cli->cursor_position, direction);
         printf("\e[%zuG", CLI_PROMPT_LENGTH + cli->cursor_position + 1);
 
@@ -426,7 +440,7 @@ void cli_process_input(Cli* cli) {
 
     } else if(combo.key == CliKeyETB) { // Ctrl + Backspace
         // Delete run of similar chars to the left
-        size_t run_start = cli_skip_run(cli->line, cli->cursor_position, -1);
+        size_t run_start = cli_skip_run(cli->line, cli->cursor_position, CliSkipToTheLeft);
         furi_string_replace_at(cli->line, run_start, cli->cursor_position - run_start, "");
         cli->cursor_position = run_start;
         printf(
