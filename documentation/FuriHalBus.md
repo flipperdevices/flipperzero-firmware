@@ -5,7 +5,7 @@
 On system startup, most of the peripheral devices are under reset and not clocked by default. This is done to reduce power consumption and to guarantee that the device will always be in the same state before use.
 Some crucial peripherals are enabled right away by the system, others must be explicitly enabled by the user code.
 
-**NOTE:** Here and afterwards, the word *"system"* refers to any code belonging to the operating system, hardware drivers or built-in applications.
+**NOTE:** Here and afterwards, the word *"system"* refers to any code belonging to the operating system, hardware drivers or built-in apps.
 
 To **ENABLE** a peripheral, call `furi_hal_bus_enable()`. At the time of the call, the peripheral in question MUST be disabled, otherwise a crash will occur to indicate improper use. This means that any given peripheral cannot be enabled twice or more without disabling it first.
 

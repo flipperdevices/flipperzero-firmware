@@ -5,7 +5,7 @@
 Unit tests are special pieces of code that apply known inputs to the feature code and check the results to see if they are correct.
 They are crucial for writing robust, bug-free code.
 
-Flipper Zero firmware includes a separate application called [unit_tests](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests).
+Flipper Zero firmware includes a separate app called [unit_tests](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests).
 It is run directly on Flipper devices in order to employ their hardware features and rule out any platform-related differences.
 
 When contributing code to the Flipper Zero firmware, it is highly desirable to supply unit tests along with the proposed features.
@@ -28,13 +28,13 @@ See [test_index.c](https://github.com/flipperdevices/flipperzero-firmware/blob/d
 
 #### Entry point
 
-The common entry point for all tests is the [unit_tests](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests) application. Test-specific code is placed into an arbitrarily named subdirectory and is then called from the [test_index.c](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests/test_index.c) source file.
+The common entry point for all tests is the [unit_tests](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests) app. Test-specific code is placed into an arbitrarily named subdirectory and is then called from the [test_index.c](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests/test_index.c) source file.
 
 #### Test assets
 
 Some unit tests require external data in order to function. These files (commonly called assets) reside in the [unit_tests](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests/resources/unit_tests) directory in their respective subdirectories. Asset files can be of any type (plain text, FlipperFormat (FFF), binary, etc.).
 
-### Application-specific
+### App-specific
 
 #### Infrared
 

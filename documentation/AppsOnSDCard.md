@@ -45,13 +45,13 @@ To debug FAPs, do the following:
 2. Flash it with `./fbt flash`
 3. [Build your FAP](#fap-howto) and run it on Flipper
 
-After that, you can attach the debugger with `./fbt debug` or VS Code and use all debug features.
+After that, you can attach the debugger to the target MCU with `./fbt debug` or VS Code and use all debug features.
 
 It is **important** that firmware and app build type (debug/release) match and that the matching firmware folder is linked as `build/latest`. Otherwise, debugging will not work.
 
 ## How Flipper runs an app from an SD card
 
-Flipper's MCU cannot run code directly from external storage, so it needs to be copied to RAM first. That is done by the App Loader app responsible for loading the FAP from the SD card, verifying its integrity and compatibility, copying it to RAM, and adjusting it for its new location.
+Flipper's MCU cannot run code directly from external storage, so it needs to be copied to RAM first. That is done by the App Loader responsible for loading the FAP from the SD card, verifying its integrity and compatibility, copying it to RAM, and adjusting it for its new location.
 
 Since the FAP has to be loaded to RAM to be executed, the amount of RAM available for allocations from heap is reduced compared to running the same app from flash, as a part of the firmware. Note that the amount of occupied RAM is less than the total FAP file size since only code and data sections are allocated, while the FAP file includes extra information only used at app load time.
 

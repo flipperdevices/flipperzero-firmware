@@ -3,7 +3,7 @@
 FBT is the entry point for firmware-related commands and utilities.
 It is invoked by `./fbt` in the firmware project root directory. Internally, it is a wrapper around [scons](https://scons.org/) build system.
 
-If you don't need all features of `fbt` — like building the whole firmware — and only want to build and debug a single application, you can use [ufbt](https://pypi.org/project/ufbt/).
+If you don't need all features of `fbt` — like building the whole firmware — and only want to build and debug a single app, you can use [ufbt](https://pypi.org/project/ufbt/).
 
 ## Environment
 
@@ -77,7 +77,7 @@ To use language servers other than the default VS Code C/C++ language server, us
 - `get_blackmagic` — output the blackmagic address in the GDB remote format. Useful for IDE integration.
 - `get_stlink` — output serial numbers for attached STLink probes. Used for specifying an adapter with `SWD_TRANSPORT_SERIAL=...`.
 - `lint`, `format` — run clang-format on the C source code to check and reformat it according to the `.clang-format` specs. Supports `ARGS="..."` to pass extra arguments to clang-format.
-- `lint_py`, `format_py` — run [black](https://black.readthedocs.io/en/stable/index.html) on the Python source code, build system files & application manifests. Supports `ARGS="..."` to pass extra arguments to black.
+- `lint_py`, `format_py` — run [black](https://black.readthedocs.io/en/stable/index.html) on the Python source code, build system files & app manifests. Supports `ARGS="..."` to pass extra arguments to black.
 - `lint_img`, `format_img` — check the image assets for errors and format them. Enforces color depth and strips metadata.
 - `lint_all`, `format_all` — run all linters and formatters.
 - `firmware_pvs` — generate a PVS Studio report for the firmware. Requires PVS Studio to be available on your system's `PATH`.
@@ -88,8 +88,8 @@ To use language servers other than the default VS Code C/C++ language server, us
 
 - `faps` — build all external & plugin apps as [`.faps`](AppsOnSDCard.md).
 - `fbt` also defines per-app targets. For example, for an app with `appid=snake_game` target names are:
-  - `fap_snake_game`, etc. — build single app as `.fap` by its application ID.
-  - Check out [`--extra-ext-apps`](#command-line-parameters) for force adding extra apps to external build.
+  - `fap_snake_game`, etc. — build single app as `.fap` by its app ID.
+  - Check out [--extra-ext-apps](#command-line-parameters) for force adding extra apps to external build.
   - `fap_snake_game_list`, etc — generate source + assembler listing for app's `.fap`.
 - `flash`, `firmware_flash` — flash the current version to the attached device over SWD.
 - `jflash` — flash the current version to the attached device with JFlash using a J-Link probe. The JFlash executable must be on your `$PATH`.
@@ -125,7 +125,7 @@ You can find out available options with `./fbt -h`.
 
 ### Firmware application set
 
-You can create customized firmware builds by modifying the list of applications to be included in the build. Application presets are configured with the `FIRMWARE_APPS` option, which is a `map(configuration_name:str → application_list:tuple(str))`. To specify an application set to use in the build, set `FIRMWARE_APP_SET` to its name.
+You can create customized firmware builds by modifying the list of apps to be included in the build. App presets are configured with the `FIRMWARE_APPS` option, which is a `map(configuration_name:str → application_list:tuple(str))`. To specify an app set to use in the build, set `FIRMWARE_APP_SET` to its name.
 For example, to build a firmware image with unit tests, run `./fbt FIRMWARE_APP_SET=unit_tests`.
 
 Check out `fbt_options.py` for details.

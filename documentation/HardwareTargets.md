@@ -25,15 +25,15 @@ A target definition file, `target.json`, is a JSON file that can contain the fol
 * `excluded_modules`: list of strings specifying fbt library (module) names to exclude from being used to configure build environment.
 
 
-## Applications & Hardware
+## Apps & Hardware
 
-Not all applications are available on different hardware targets. 
+Not all apps are available on different hardware targets. 
 
-* For applications built into the firmware, you have to specify a compatible application set using `FIRMWARE_APP_SET=...` fbt option. See [fbt docs](./fbt.md) for details on build configurations.
+* For apps built into the firmware, you have to specify a compatible app set using `FIRMWARE_APP_SET=...` fbt option. See [fbt docs](./fbt.md) for details on build configurations.
 
-* For applications built as external FAPs, you have to explicitly specify compatible targets in the application's manifest, `application.fam`. For example, to limit the application to a single target, add `targets=["f7"],` to the manifest. It won't be built for other targets.
+* For apps built as external FAPs, you have to explicitly specify compatible targets in the app's manifest, `application.fam`. For example, to limit the app to a single target, add `targets=["f7"],` to the manifest. It won't be built for other targets.
 
-For details on application manifests, check out [their docs page](./AppManifests.md).
+For details on app manifests, check out [their docs page](./AppManifests.md).
 
 
 ## Building Firmware for a Specific Target
