@@ -106,7 +106,7 @@ Example for building an app with a private library:
 ```
 
 For that snippet, `fbt` will build 2 libraries: one from sources in `lib/mbedtls` folder and another from sources in the `lib/loclass` folder. For the `mbedtls` library, `fbt` will add `lib/mbedtls/include` to the list of include paths for the app and compile only the files specified in the `sources` list. Additionally, `fbt` will enable `MBEDTLS_ERROR_C` preprocessor definition for `mbedtls` sources.
-For the `loclass` library, `fbt` will add `lib/loclass` to the list of the include paths for the app and build all sources in that folder. Also, `fbt` will disable treating compiler warnings as errors for the `loclass` library, which can be useful when compiling large 3rd-party codebases.
+For the `loclass` library, `fbt` will add `lib/loclass` to the list of the included paths for the app and build all sources in that folder. Also, `fbt` will disable treating compiler warnings as errors for the `loclass` library, which can be useful when compiling large 3rd-party codebases.
 
 Both libraries will be linked with the app.
 

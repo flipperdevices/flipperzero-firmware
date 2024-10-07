@@ -10,7 +10,7 @@ FAPs do not depend on being run on a specific firmware version. Compatibility is
 
 FAPs are created and developed the same way as internal apps that are part of the firmware.
 
-To build your app as a FAP, create a folder with your app's source code in `applications_user`, then write its code the way you'd do when creating a regular built-in app. Then configure its `application.fam` manifest, and set its _apptype_ to FlipperAppType.EXTERNAL. See [Flipper App Manifests](AppManifests.md) for more details.
+To build your app as a FAP, create a folder with your app's source code in `applications_user`, then write its code the way you'd do when creating a regular built-in app. Then configure its `application.fam` manifest, and set its `apptype` to `FlipperAppType.EXTERNAL`. See [Flipper App Manifests](AppManifests.md) for more details.
 
 - To build your app, run `./fbt fap_{APPID}`, where APPID is your app's ID in its manifest.
 - To build your app and upload it over USB to run on Flipper, use `./fbt launch APPSRC=applications_user/path/to/app`. This command is configured in the default [VS Code profile](../.vscode/ReadMe.md) as a "Launch App on Flipper" build action (Ctrl+Shift+B menu).
@@ -33,7 +33,7 @@ Images and animated icons should follow the same [naming convention](../assets/R
 
 With it, you can debug FAPs as if they were a part of the main firmware — inspect variables, set breakpoints, step through the code, etc.
 
-If debugging session is active, firmware will trigger a breakpoint after loading a FAP it into memory, but before running any code from it. This allows you to set breakpoints in the FAP's code. Note that any breakpoints set before the FAP is loaded may need re-setting after the FAP is actually loaded, since before loading it debugger cannot know the exact address of the FAP's code.
+If debugging session is active, firmware will trigger a breakpoint after loading a FAP into memory, but before running any code from it. This allows you to set breakpoints in the FAP's code. Note that any breakpoints set before the FAP is loaded may need re-setting after the FAP is actually loaded, since the debugger cannot know the exact address of the FAP's code before loading the FAP.
 
 ### Setting up debugging environment
 
@@ -45,7 +45,7 @@ To debug FAPs, do the following:
 2. Flash it with `./fbt flash`
 3. [Build your FAP](#fap-howto) and run it on Flipper
 
-After that, you can attach with `./fbt debug` or VS Code and use all debug features.
+After that, you can attach the debugger with `./fbt debug` or VS Code and use all debug features.
 
 It is **important** that firmware and app build type (debug/release) match and that the matching firmware folder is linked as `build/latest`. Otherwise, debugging will not work.
 
@@ -53,7 +53,7 @@ It is **important** that firmware and app build type (debug/release) match and t
 
 Flipper's MCU cannot run code directly from external storage, so it needs to be copied to RAM first. That is done by the App Loader app responsible for loading the FAP from the SD card, verifying its integrity and compatibility, copying it to RAM, and adjusting it for its new location.
 
-Since FAP has to be loaded to RAM to be executed, the amount of RAM available for allocations from heap is reduced compared to running the same app from flash, as a part of the firmware. Note that the amount of occupied RAM is less than the total FAP file size since only code and data sections are allocated, while the FAP file includes extra information only used at app load time.
+Since the FAP has to be loaded to RAM to be executed, the amount of RAM available for allocations from heap is reduced compared to running the same app from flash, as a part of the firmware. Note that the amount of occupied RAM is less than the total FAP file size since only code and data sections are allocated, while the FAP file includes extra information only used at app load time.
 
 Apps are built for a specific API version. It is a part of the hardware target's definition and contains a major and minor version number. The App Loader checks if the app's major API version matches the firmware's major API version.
 
