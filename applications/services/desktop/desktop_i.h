@@ -73,7 +73,7 @@ struct Desktop {
     FuriPubSub* input_events_pubsub;
     FuriPubSubSubscription* input_events_subscription;
 
-    FuriSemaphore* auto_lock_inhibitors;
+    int32_t auto_lock_inhibitors;
     FuriTimer* auto_lock_timer;
     FuriTimer* update_clock_timer;
 

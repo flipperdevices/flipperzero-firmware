@@ -27,11 +27,11 @@ void desktop_api_set_settings(Desktop* instance, const DesktopSettings* settings
  * 
  * Autolocking will not get triggered while there's at least 1 inhibitor
  */
-void desktop_api_add_external_inhibitor(Desktop* instance);
+void desktop_api_auto_lock_inhibit_enter(Desktop* instance);
 
 /**
  * @brief Removes 1 from the count of active external autolock inhibitors
  * 
  * Autolocking will not get triggered while there's at least 1 inhibitor
  */
-void desktop_api_remove_external_inhibitor(Desktop* instance);
+void desktop_api_auto_lock_inhibit_exit(Desktop* instance);

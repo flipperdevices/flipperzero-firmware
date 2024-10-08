@@ -36,7 +36,7 @@ typedef enum {
     WorkerEvtLineCfgSet = (1 << 6),
     WorkerEvtCtrlLineSet = (1 << 7),
 
-} WorkerEvtFlags;
+} WorkerEvtFlag;
 
 #define WORKER_ALL_RX_EVENTS                                                      \
     (WorkerEvtStop | WorkerEvtRxDone | WorkerEvtCfgChange | WorkerEvtLineCfgSet | \

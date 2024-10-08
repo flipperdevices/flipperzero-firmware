@@ -45,7 +45,7 @@ typedef enum {
     WorkerEvtDisconnect = (1 << 3),
     WorkerEvtRequest = (1 << 4),
     WorkerEvtUnlock = (1 << 5),
-} WorkerEvtFlags;
+} WorkerEvtFlag;
 
 struct U2fHid_packet {
     uint32_t cid;

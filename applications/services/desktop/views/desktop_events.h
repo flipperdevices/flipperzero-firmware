@@ -57,6 +57,6 @@ typedef enum {
     DesktopGlobalApiUnlock,
     DesktopGlobalSaveSettings,
     DesktopGlobalReloadSettings,
-    DesktopGlobalAddExternalInhibitor,
-    DesktopGlobalRemoveExternalInhibitor,
+    DesktopGlobalInhibitEnter,
+    DesktopGlobalInhibitExit,
 } DesktopEvent;

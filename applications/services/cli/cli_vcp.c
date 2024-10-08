@@ -29,7 +29,7 @@ typedef enum {
     VcpEvtRx = (1 << 4),
     VcpEvtStreamTx = (1 << 5),
     VcpEvtTx = (1 << 6),
-} WorkerEvtFlags;
+} WorkerEvtFlag;
 
 #define VCP_THREAD_FLAG_ALL                                                                 \
     (VcpEvtStop | VcpEvtConnect | VcpEvtDisconnect | VcpEvtRx | VcpEvtTx | VcpEvtStreamRx | \
@@ -143,7 +143,7 @@ static int32_t vcp_worker(void* context) {
                 vcp->connected = true;
                 furi_stream_buffer_send(vcp->rx_stream, &ascii_soh, 1, FuriWaitForever);
                 gui_add_view_port(vcp->gui, vcp->view_port, GuiLayerStatusBarLeft);
-                desktop_api_add_external_inhibitor(vcp->desktop);
+                desktop_api_auto_lock_inhibit_enter(vcp->desktop);
             }
         }
 
@@ -156,7 +156,7 @@ static int32_t vcp_worker(void* context) {
                 furi_stream_buffer_receive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
                 furi_stream_buffer_send(vcp->rx_stream, &ascii_eot, 1, FuriWaitForever);
                 gui_remove_view_port(vcp->gui, vcp->view_port);
-                desktop_api_remove_external_inhibitor(vcp->desktop);
+                desktop_api_auto_lock_inhibit_exit(vcp->desktop);
             }
         }
 
@@ -223,7 +223,7 @@ static int32_t vcp_worker(void* context) {
         if(flags & VcpEvtStop) {
             if(vcp->connected) {
                 gui_remove_view_port(vcp->gui, vcp->view_port);
-                desktop_api_remove_external_inhibitor(vcp->desktop);
+                desktop_api_auto_lock_inhibit_exit(vcp->desktop);
             }
             vcp->connected = false;
             vcp->running = false;
@@ -260,14 +260,14 @@ static size_t cli_vcp_rx(uint8_t* buffer, size_t size, uint32_t timeout) {
     size_t rx_cnt = 0;
 
     while(size > 0) {
-        size_t batch_size = size;
-        if(batch_size > VCP_RX_BUF_SIZE) batch_size = VCP_RX_BUF_SIZE;
+        size_t batch_size = MIN(size, (size_t)VCP_RX_BUF_SIZE);
 
         size_t len = furi_stream_buffer_receive(vcp->rx_stream, buffer, batch_size, timeout);
-        VCP_DEBUG("rx %u ", batch_size);
+        VCP_DEBUG("rx %u %u", batch_size, len);
 
         if(len == 0) break;
         if(vcp->running == false) {
+            VCP_DEBUG("running == false");
             // EOT command is received after VCP session close
             rx_cnt += len;
             break;
@@ -278,7 +278,7 @@ static size_t cli_vcp_rx(uint8_t* buffer, size_t size, uint32_t timeout) {
         rx_cnt += len;
     }
 
-    VCP_DEBUG("rx %u end", size);
+    VCP_DEBUG("rx %u %u end", size, rx_cnt);
     return rx_cnt;
 }
 
@@ -293,8 +293,7 @@ static void cli_vcp_tx(const uint8_t* buffer, size_t size) {
     VCP_DEBUG("tx %u start", size);
 
     while(size > 0 && vcp->connected) {
-        size_t batch_size = size;
-        if(batch_size > USB_CDC_PKT_LEN) batch_size = USB_CDC_PKT_LEN;
+        size_t batch_size = MIN(size, (size_t)USB_CDC_PKT_LEN);
 
         furi_stream_buffer_send(vcp->tx_stream, buffer, batch_size, FuriWaitForever);
         furi_thread_flags_set(furi_thread_get_id(vcp->thread), VcpEvtStreamTx);

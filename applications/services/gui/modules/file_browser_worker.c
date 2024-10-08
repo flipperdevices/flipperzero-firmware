@@ -26,7 +26,7 @@ typedef enum {
     WorkerEvtFolderExit = (1 << 3),
     WorkerEvtFolderRefresh = (1 << 4),
     WorkerEvtConfigChange = (1 << 5),
-} WorkerEvtFlags;
+} WorkerEvtFlag;
 
 #define WORKER_FLAGS_ALL                                                          \
     (WorkerEvtStop | WorkerEvtLoad | WorkerEvtFolderEnter | WorkerEvtFolderExit | \

@@ -67,7 +67,7 @@ enum CCID_Features_ExchangeLevel_t {
 typedef enum {
     WorkerEvtStop = (1 << 0),
     WorkerEvtRequest = (1 << 1),
-} WorkerEvtFlags;
+} WorkerEvtFlag;
 
 typedef struct ccid_bulk_message_header {
     uint8_t bMessageType;

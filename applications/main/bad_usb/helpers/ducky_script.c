@@ -22,7 +22,7 @@ typedef enum {
     WorkerEvtEnd = (1 << 2),
     WorkerEvtConnect = (1 << 3),
     WorkerEvtDisconnect = (1 << 4),
-} WorkerEvtFlags;
+} WorkerEvtFlag;
 
 static const char ducky_cmd_id[] = {"ID"};
 
