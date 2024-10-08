@@ -123,6 +123,12 @@ static void desktop_stealth_mode_icon_draw_callback(Canvas* canvas, void* contex
     canvas_draw_icon(canvas, 0, 0, &I_Muted_8x8);
 }
 
+static void desktop_autolock_inhibit_icon_draw_callback(Canvas* canvas, void* context) {
+    UNUSED(context);
+    furi_assert(canvas);
+    canvas_draw_icon(canvas, 0, 0, &I_Lock_crossed_out_7x8);
+}
+
 static bool desktop_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Desktop* desktop = (Desktop*)context;
@@ -217,14 +223,18 @@ static void desktop_auto_lock_inhibit_enter(Desktop* desktop) {
     int32_t new_inhibitors = ++desktop->auto_lock_inhibitors;
     FURI_LOG_D(TAG, "%lu autolock inhibitors (+1)", new_inhibitors);
     desktop_auto_lock_inhibit(desktop);
+    if(desktop_pin_code_is_set()) {
+        view_port_enabled_set(desktop->autolock_inhibit_icon_viewport, true);
+    }
 }
 
 static void desktop_auto_lock_inhibit_exit(Desktop* desktop) {
     int32_t new_inhibitors = --desktop->auto_lock_inhibitors;
     furi_check(new_inhibitors >= 0);
     FURI_LOG_D(TAG, "%lu autolock inhibitors (-1)", new_inhibitors);
-    if(desktop->auto_lock_inhibitors == 0) {
+    if(new_inhibitors == 0) {
         desktop_auto_lock_arm(desktop);
+        view_port_enabled_set(desktop->autolock_inhibit_icon_viewport, false);
     }
 }
 
@@ -385,6 +395,18 @@ static Desktop* desktop_alloc(void) {
         view_port_enabled_set(desktop->stealth_mode_icon_viewport, false);
     }
     gui_add_view_port(desktop->gui, desktop->stealth_mode_icon_viewport, GuiLayerStatusBarLeft);
+
+    // "Autolock inhibited" icon
+    desktop->autolock_inhibit_icon_viewport = view_port_alloc();
+    view_port_set_width(
+        desktop->autolock_inhibit_icon_viewport, icon_get_width(&I_Lock_crossed_out_7x8));
+    view_port_draw_callback_set(
+        desktop->autolock_inhibit_icon_viewport,
+        desktop_autolock_inhibit_icon_draw_callback,
+        desktop);
+    view_port_enabled_set(desktop->autolock_inhibit_icon_viewport, false);
+    gui_add_view_port(
+        desktop->gui, desktop->autolock_inhibit_icon_viewport, GuiLayerStatusBarLeft);
 
     // Unload animations before starting an application
     desktop->loader = furi_record_open(RECORD_LOADER);

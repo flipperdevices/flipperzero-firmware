@@ -30,6 +30,8 @@ typedef enum {
     CliCommandFlagParallelSafe =
         (1 << 0), /**< Safe to run in parallel with other apps, loader lock is not used */
     CliCommandFlagInsomniaSafe = (1 << 1), /**< Safe to run with insomnia mode on */
+    CliCommandFlagHideCliIcon =
+        (1 << 2), /**< The CLI icon should be hidden while the command is running */
 } CliCommandFlag;
 
 #define RECORD_CLI "cli"

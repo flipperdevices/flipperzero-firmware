@@ -9,6 +9,9 @@
 #include <m-bptree.h>
 #include <m-array.h>
 
+#include <gui/gui.h>
+#include <desktop/desktop.h>
+
 #include "cli_vcp.h"
 
 #define CLI_LINE_SIZE_MAX
@@ -52,6 +55,14 @@ struct Cli {
     CliSession* session;
 
     size_t cursor_position;
+
+    // CLI icon
+    Gui* gui;
+    ViewPort* view_port;
+
+    // Autolocking inhibition
+    bool is_gui_inhibit_active;
+    Desktop* desktop;
 };
 
 Cli* cli_alloc(void);

@@ -361,12 +361,6 @@ static void rpc_session_thread_pending_callback(void* context, uint32_t arg) {
     RpcHandlerDict_clear(session->handlers);
     furi_stream_buffer_free(session->stream);
 
-    furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
-    if(session->terminated_callback) {
-        session->terminated_callback(session->context);
-    }
-    furi_mutex_release(session->callbacks_mutex);
-
     furi_mutex_free(session->callbacks_mutex);
     furi_thread_join(session->thread);
     furi_thread_free(session->thread);
@@ -375,7 +369,13 @@ static void rpc_session_thread_pending_callback(void* context, uint32_t arg) {
 
 static void rpc_session_thread_state_callback(FuriThreadState thread_state, void* context) {
     if(thread_state == FuriThreadStateStopped) {
-        furi_timer_pending_callback(rpc_session_thread_pending_callback, context, 0);
+        RpcSession* session = (RpcSession*)context;
+        furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
+        if(session->terminated_callback) {
+            session->terminated_callback(session->context);
+        }
+        furi_mutex_release(session->callbacks_mutex);
+        furi_timer_pending_callback(rpc_session_thread_pending_callback, session, 0);
     }
 }
 
@@ -435,7 +435,11 @@ void rpc_on_system_start(void* p) {
 
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_add_command(
-        cli, "start_rpc_session", CliCommandFlagParallelSafe, rpc_cli_command_start_session, rpc);
+        cli,
+        "start_rpc_session",
+        CliCommandFlagParallelSafe | CliCommandFlagHideCliIcon,
+        rpc_cli_command_start_session,
+        rpc);
 
     furi_record_create(RECORD_RPC, rpc);
 }

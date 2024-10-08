@@ -3,10 +3,21 @@
 #include "cli_vcp.h"
 #include <furi_hal_version.h>
 #include <loader/loader.h>
+#include <gui/gui.h>
+#include <gui/view_port.h>
+#include <assets_icons.h>
+#include <desktop/desktop.h>
 
 #define TAG "CliSrv"
 
 #define CLI_INPUT_LEN_LIMIT 256
+
+static void cli_icon_draw_callback(Canvas* canvas, void* context) {
+    furi_assert(canvas);
+    furi_assert(context);
+    const Icon* icon = context;
+    canvas_draw_icon(canvas, 0, 0, icon);
+}
 
 Cli* cli_alloc(void) {
     Cli* cli = malloc(sizeof(Cli));
@@ -21,6 +32,16 @@ Cli* cli_alloc(void) {
     cli->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     cli->idle_sem = furi_semaphore_alloc(1, 0);
+
+    // GUI icon
+    const Icon* icon = &I_Console_8x8;
+    cli->gui = furi_record_open(RECORD_GUI);
+    cli->view_port = view_port_alloc();
+    view_port_set_width(cli->view_port, icon_get_width(icon));
+    view_port_enabled_set(cli->view_port, false);
+    gui_add_view_port(cli->gui, cli->view_port, GuiLayerStatusBarLeft);
+    // casting const away. we know that we cast it right back in the callback
+    view_port_draw_callback_set(cli->view_port, cli_icon_draw_callback, (void*)icon);
 
     return cli;
 }
@@ -179,6 +200,10 @@ static void cli_execute_command(Cli* cli, CliCommand* command, FuriString* args)
         furi_hal_power_insomnia_enter();
     }
 
+    if(command->flags & CliCommandFlagHideCliIcon) {
+        view_port_enabled_set(cli->view_port, false);
+    }
+
     // Ensure that we running alone
     if(!(command->flags & CliCommandFlagParallelSafe)) {
         Loader* loader = furi_record_open(RECORD_LOADER);
@@ -194,6 +219,14 @@ static void cli_execute_command(Cli* cli, CliCommand* command, FuriString* args)
     } else {
         // Execute command
         command->callback(cli, args, command->context);
+    }
+
+    if(!cli_is_connected(cli) && cli->is_gui_inhibit_active) {
+        cli->is_gui_inhibit_active = false;
+        FURI_LOG_T(TAG, "inhibit_exit");
+        desktop_api_auto_lock_inhibit_exit(cli->desktop);
+    } else {
+        view_port_enabled_set(cli->view_port, true);
     }
 
     if(!(command->flags & CliCommandFlagInsomniaSafe)) {
@@ -337,6 +370,12 @@ void cli_process_input(Cli* cli) {
     if(in_chr == CliSymbolAsciiTab) {
         cli_handle_autocomplete(cli);
     } else if(in_chr == CliSymbolAsciiSOH) {
+        if(!cli->is_gui_inhibit_active) {
+            cli->is_gui_inhibit_active = true;
+            FURI_LOG_T(TAG, "inhibit_enter");
+            desktop_api_auto_lock_inhibit_enter(cli->desktop);
+            view_port_enabled_set(cli->view_port, true);
+        }
         furi_delay_ms(33); // We are too fast, Minicom is not ready yet
         cli_motd();
         cli_prompt(cli);
@@ -344,6 +383,12 @@ void cli_process_input(Cli* cli) {
         cli_reset(cli);
         cli_prompt(cli);
     } else if(in_chr == CliSymbolAsciiEOT) {
+        if(cli->is_gui_inhibit_active) {
+            cli->is_gui_inhibit_active = false;
+            FURI_LOG_T(TAG, "inhibit_exit");
+            desktop_api_auto_lock_inhibit_exit(cli->desktop);
+            view_port_enabled_set(cli->view_port, false);
+        }
         cli_reset(cli);
     } else if(in_chr == CliSymbolAsciiEsc) {
         rx_len = cli_read(cli, (uint8_t*)&in_chr, 1);
@@ -437,6 +482,8 @@ void cli_session_open(Cli* cli, void* session) {
     }
     furi_semaphore_release(cli->idle_sem);
     furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
+
+    if(!cli->desktop) cli->desktop = furi_record_open(RECORD_DESKTOP);
 }
 
 void cli_session_close(Cli* cli) {
