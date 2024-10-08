@@ -221,7 +221,7 @@ static void desktop_auto_lock_arm(Desktop* desktop) {
 
 static void desktop_auto_lock_inhibit_enter(Desktop* desktop) {
     int32_t new_inhibitors = ++desktop->auto_lock_inhibitors;
-    FURI_LOG_D(TAG, "%lu autolock inhibitors (+1)", new_inhibitors);
+    FURI_LOG_D(TAG, "%ld autolock inhibitors (+1)", new_inhibitors);
     desktop_auto_lock_inhibit(desktop);
     if(desktop_pin_code_is_set()) {
         view_port_enabled_set(desktop->autolock_inhibit_icon_viewport, true);
@@ -231,7 +231,7 @@ static void desktop_auto_lock_inhibit_enter(Desktop* desktop) {
 static void desktop_auto_lock_inhibit_exit(Desktop* desktop) {
     int32_t new_inhibitors = --desktop->auto_lock_inhibitors;
     furi_check(new_inhibitors >= 0);
-    FURI_LOG_D(TAG, "%lu autolock inhibitors (-1)", new_inhibitors);
+    FURI_LOG_D(TAG, "%ld autolock inhibitors (-1)", new_inhibitors);
     if(new_inhibitors == 0) {
         desktop_auto_lock_arm(desktop);
         view_port_enabled_set(desktop->autolock_inhibit_icon_viewport, false);
