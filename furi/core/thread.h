@@ -77,13 +77,15 @@ typedef int32_t (*FuriThreadCallback)(void* context);
 typedef void (*FuriThreadStdoutWriteCallback)(const char* data, size_t size);
 
 /**
- * @brief State change callback function pointer type.
+ * @brief         State change callback function pointer type.
  *
- * The function to be used as a state callback MUST follow this signature.
+ *                The function to be used as a state callback MUST follow this
+ *                signature.
  *
- * @param[in] pointer to the FuriThread instance that changed the state
- * @param[in] state identifier of the state the thread has transitioned to
- * @param[in,out] context pointer to a user-specified object
+ * @param[in]     thread   to the FuriThread instance that changed the state
+ * @param[in]     state    identifier of the state the thread has transitioned
+ *                         to
+ * @param[in,out] context  pointer to a user-specified object
  */
 typedef void (*FuriThreadStateCallback)(FuriThread* thread, FuriThreadState state, void* context);
 
