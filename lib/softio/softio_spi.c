@@ -78,6 +78,7 @@ static void softio_spi_timer_isr(void* param) {
 
     if(context->done) {
         furi_hal_gpio_write(context->config.sck, context->config.clk_polarity);
+        LL_TIM_DisableCounter(SOFTSPI_TIM);
         return;
     } else {
         furi_hal_gpio_write(context->config.sck, context->sck_level);
