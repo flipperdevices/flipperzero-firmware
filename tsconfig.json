@@ -4,7 +4,8 @@
         "module": "CommonJS",
         "typeRoots": [
             "./applications/system/js_app/types"
-        ]
+        ],
+        "noLib": true,
     },
     "include": [
         "./applications/system/js_app/examples/apps/Scripts",
