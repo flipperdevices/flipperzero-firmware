@@ -21,7 +21,8 @@ extern "C" {
  * Many of the FuriThread functions MUST ONLY be called when the thread is STOPPED.
  */
 typedef enum {
-    FuriThreadStateStopped, /**< Thread is stopped */
+    FuriThreadStateStopped, /**< Thread is stopped and is safe to release */
+    FuriThreadStateStopping, /**< Thread is stopping */
     FuriThreadStateStarting, /**< Thread is starting */
     FuriThreadStateRunning, /**< Thread is running */
 } FuriThreadState;
@@ -30,11 +31,10 @@ typedef enum {
  * @brief Enumeration of possible FuriThread priorities.
  */
 typedef enum {
-    FuriThreadPriorityNone = 0, /**< Uninitialized, choose system default */
-    FuriThreadPriorityIdle = 1, /**< Idle priority */
+    FuriThreadPriorityIdle = 0, /**< Idle priority */
     FuriThreadPriorityLowest = 14, /**< Lowest */
     FuriThreadPriorityLow = 15, /**< Low */
-    FuriThreadPriorityNormal = 16, /**< Normal */
+    FuriThreadPriorityNormal = 16, /**< Normal, system default */
     FuriThreadPriorityHigh = 17, /**< High */
     FuriThreadPriorityHighest = 18, /**< Highest */
     FuriThreadPriorityIsr =
@@ -81,10 +81,11 @@ typedef void (*FuriThreadStdoutWriteCallback)(const char* data, size_t size);
  *
  * The function to be used as a state callback MUST follow this signature.
  *
+ * @param[in] pointer to the FuriThread instance that changed the state
  * @param[in] state identifier of the state the thread has transitioned to
  * @param[in,out] context pointer to a user-specified object
  */
-typedef void (*FuriThreadStateCallback)(FuriThreadState state, void* context);
+typedef void (*FuriThreadStateCallback)(FuriThread* thread, FuriThreadState state, void* context);
 
 /**
  * @brief Signal handler callback function pointer type.
