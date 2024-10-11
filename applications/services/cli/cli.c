@@ -332,8 +332,8 @@ static CliCharClass cli_char_class(char c) {
 }
 
 typedef enum {
-    CliSkipToTheLeft,
-    CliSkipToTheRight,
+    CliSkipDirectionLeft,
+    CliSkipDirectionRight,
 } CliSkipDirection;
 
 /**
@@ -346,12 +346,12 @@ typedef enum {
  */
 static size_t cli_skip_run(FuriString* string, size_t original_pos, CliSkipDirection direction) {
     if(furi_string_size(string) == 0) return original_pos;
-    if(direction == CliSkipToTheLeft && original_pos == 0) return original_pos;
-    if(direction == CliSkipToTheRight && original_pos == furi_string_size(string))
+    if(direction == CliSkipDirectionLeft && original_pos == 0) return original_pos;
+    if(direction == CliSkipDirectionRight && original_pos == furi_string_size(string))
         return original_pos;
 
-    int8_t look_offset = (direction == CliSkipToTheLeft) ? -1 : 0;
-    int8_t increment = (direction == CliSkipToTheLeft) ? -1 : 1;
+    int8_t look_offset = (direction == CliSkipDirectionLeft) ? -1 : 0;
+    int8_t increment = (direction == CliSkipDirectionLeft) ? -1 : 1;
     int32_t position = original_pos;
     CliCharClass start_class =
         cli_char_class(furi_string_get_char(string, position + look_offset));
@@ -430,8 +430,8 @@ void cli_process_input(Cli* cli) {
         combo.modifiers == CliModKeyCtrl &&
         (combo.key == CliKeyLeft || combo.key == CliKeyRight)) {
         // Skip run of similar chars to the left or right
-        CliSkipDirection direction = (combo.key == CliKeyLeft) ? CliSkipToTheLeft :
-                                                                 CliSkipToTheRight;
+        CliSkipDirection direction = (combo.key == CliKeyLeft) ? CliSkipDirectionLeft :
+                                                                 CliSkipDirectionRight;
         cli->cursor_position = cli_skip_run(cli->line, cli->cursor_position, direction);
         printf("\e[%zuG", CLI_PROMPT_LENGTH + cli->cursor_position + 1);
 
@@ -440,7 +440,7 @@ void cli_process_input(Cli* cli) {
 
     } else if(combo.key == CliKeyETB) { // Ctrl + Backspace
         // Delete run of similar chars to the left
-        size_t run_start = cli_skip_run(cli->line, cli->cursor_position, CliSkipToTheLeft);
+        size_t run_start = cli_skip_run(cli->line, cli->cursor_position, CliSkipDirectionLeft);
         furi_string_replace_at(cli->line, run_start, cli->cursor_position - run_start, "");
         cli->cursor_position = run_start;
         printf(
