@@ -30,14 +30,13 @@
  *  }
  * ```
  */
-#define JS_ASSIGN_MULTI(mjs, object)     \
-    for(struct {                         \
-            struct mjs* mjs;             \
-            mjs_val_t val;               \
-            int i;                       \
-        } _ass_multi = {mjs, object, 0}; \
-        _ass_multi.i == 0;               \
-        _ass_multi.i++)
+#define JS_ASSIGN_MULTI(mjs, object)  \
+    for(struct {                      \
+            struct mjs* mjs;          \
+            mjs_val_t val;            \
+            int i;                    \
+        } _ass_multi = {mjs, object}; \
+        false;)
 #define JS_FIELD(name, value) mjs_set(_ass_multi.mjs, _ass_multi.val, name, ~0, value)
 
 /**
@@ -194,7 +193,7 @@ static inline void
  */
 #define JS_FETCH_ARGS_OR_RETURN(mjs, arg_operator, ...)                                          \
     _js_arg_decl _js_args[] = {__VA_ARGS__};                                                     \
-    int _js_arg_cnt = sizeof(_js_args) / sizeof(*_js_args);                                      \
+    int _js_arg_cnt = COUNT_OF(_js_args);                                                        \
     mjs_val_t _js_arg_vals[_js_arg_cnt];                                                         \
     if(!(mjs_nargs(mjs) arg_operator _js_arg_cnt))                                               \
         JS_ERROR_AND_RETURN(                                                                     \

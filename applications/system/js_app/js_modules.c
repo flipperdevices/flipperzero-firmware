@@ -55,24 +55,22 @@ JsModules* js_modules_create(struct mjs* mjs, CompositeApiResolver* resolver) {
 }
 
 void js_modules_destroy(JsModules* modules) {
-    JsModuleArray_it_t it;
-    for(JsModuleArray_it(it, modules->modules); !JsModuleArray_end_p(it); JsModuleArray_next(it)) {
-        const JsModuleData* module = JsModuleArray_cref(it);
-        FURI_LOG_T(TAG, "Tearing down %s", furi_string_get_cstr(module->name));
-        if(module->destroy) module->destroy(module->context);
-        furi_string_free(module->name);
-    }
+    for
+        M_EACH(module, modules->modules, JsModuleArray_t) {
+            FURI_LOG_T(TAG, "Tearing down %s", furi_string_get_cstr(module->name));
+            if(module->destroy) module->destroy(module->context);
+            furi_string_free(module->name);
+        }
     plugin_manager_free(modules->plugin_manager);
     JsModuleArray_clear(modules->modules);
     free(modules);
 }
 
 JsModuleData* js_find_loaded_module(JsModules* modules, const char* name) {
-    JsModuleArray_it_t it;
-    for(JsModuleArray_it(it, modules->modules); !JsModuleArray_end_p(it); JsModuleArray_next(it)) {
-        JsModuleData* module = JsModuleArray_ref(it);
-        if(furi_string_cmp_str(module->name, name) == 0) return module;
-    }
+    for
+        M_EACH(module, modules->modules, JsModuleArray_t) {
+            if(furi_string_cmp_str(module->name, name) == 0) return module;
+        }
     return NULL;
 }
 

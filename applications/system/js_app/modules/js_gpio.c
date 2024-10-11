@@ -35,6 +35,7 @@ typedef struct {
  * @brief Interrupt callback
  */
 static void js_gpio_int_cb(void* arg) {
+    furi_assert(arg);
     FuriSemaphore* semaphore = arg;
     furi_semaphore_release(semaphore);
 }
@@ -275,7 +276,7 @@ static void js_gpio_get(struct mjs* mjs) {
     manager_data->interrupt_semaphore = furi_semaphore_alloc(UINT32_MAX, 0);
     manager_data->adc_handle = module->adc_handle;
     manager_data->adc_channel = pin_record->channel;
-    mjs_own(mjs, &manager); // NOTE(extensibility): read `js_gpio_destroy`
+    mjs_own(mjs, &manager);
     mjs_set(mjs, manager, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, manager_data));
     mjs_set(mjs, manager, "init", ~0, MJS_MK_FN(js_gpio_init));
     mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
@@ -308,33 +309,29 @@ static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object, JsModules* modul
 }
 
 static void js_gpio_destroy(void* inst) {
-    if(inst) {
-        JsGpioInst* module = (JsGpioInst*)inst;
+    furi_assert(inst);
+    JsGpioInst* module = (JsGpioInst*)inst;
 
-        // reset pins
-        ManagedPinsArray_it_t iterator;
-        for(ManagedPinsArray_it(iterator, module->managed_pins); !ManagedPinsArray_end_p(iterator);
-            ManagedPinsArray_next(iterator)) {
-            JsGpioPinInst* manager_data = *ManagedPinsArray_cref(iterator);
-            if(manager_data->had_interrupt) {
-                furi_hal_gpio_disable_int_callback(manager_data->pin);
-                furi_hal_gpio_remove_int_callback(manager_data->pin);
-            }
-            furi_hal_gpio_init(manager_data->pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-            furi_event_loop_maybe_unsubscribe(module->loop, manager_data->interrupt_semaphore);
-            furi_semaphore_free(manager_data->interrupt_semaphore);
-            free(manager_data->interrupt_contract);
-            free(manager_data);
+    // reset pins
+    ManagedPinsArray_it_t iterator;
+    for(ManagedPinsArray_it(iterator, module->managed_pins); !ManagedPinsArray_end_p(iterator);
+        ManagedPinsArray_next(iterator)) {
+        JsGpioPinInst* manager_data = *ManagedPinsArray_cref(iterator);
+        if(manager_data->had_interrupt) {
+            furi_hal_gpio_disable_int_callback(manager_data->pin);
+            furi_hal_gpio_remove_int_callback(manager_data->pin);
         }
-
-        // free buffers
-        furi_hal_adc_release(module->adc_handle);
-        ManagedPinsArray_clear(module->managed_pins);
-        free(module);
+        furi_hal_gpio_init(manager_data->pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_event_loop_maybe_unsubscribe(module->loop, manager_data->interrupt_semaphore);
+        furi_semaphore_free(manager_data->interrupt_semaphore);
+        free(manager_data->interrupt_contract);
+        free(manager_data);
     }
 
-    expansion_enable(furi_record_open(RECORD_EXPANSION));
-    furi_record_close(RECORD_EXPANSION);
+    // free buffers
+    furi_hal_adc_release(module->adc_handle);
+    ManagedPinsArray_clear(module->managed_pins);
+    free(module);
 }
 
 static const JsModuleDescriptor js_gpio_desc = {
