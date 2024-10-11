@@ -65,8 +65,8 @@ enum CCID_Features_ExchangeLevel_t {
 };
 
 typedef enum {
-    WorkerEvtStop = (1 << 0),
-    WorkerEvtRequest = (1 << 1),
+    WorkerEvtFlagStop = (1 << 0),
+    WorkerEvtFlagRequest = (1 << 1),
 } WorkerEvtFlag;
 
 typedef struct ccid_bulk_message_header {
@@ -267,7 +267,7 @@ static void ccid_init(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx) {
 }
 
 static void ccid_deinit(usbd_device* dev) {
-    furi_thread_flags_set(furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtStop);
+    furi_thread_flags_set(furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtFlagStop);
     furi_thread_join(furi_hal_usb_ccid->ccid_thread);
     furi_thread_free(furi_hal_usb_ccid->ccid_thread);
 
@@ -505,7 +505,7 @@ static void ccid_tx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
                 furi_hal_usb_ccid->receive_buffer_data_index + bytes_read;
 
             furi_thread_flags_set(
-                furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtRequest);
+                furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtFlagRequest);
         }
     }
 }
@@ -516,9 +516,9 @@ static int32_t ccid_worker(void* context) {
     while(1) {
         furi_check(furi_hal_usb_ccid);
         uint32_t flags = furi_thread_flags_wait(
-            WorkerEvtStop | WorkerEvtRequest, FuriFlagWaitAny, FuriWaitForever);
+            WorkerEvtFlagStop | WorkerEvtFlagRequest, FuriFlagWaitAny, FuriWaitForever);
 
-        if(flags & WorkerEvtRequest) {
+        if(flags & WorkerEvtFlagRequest) {
             //read initial CCID message header
 
             ccid_bulk_message_header_t* message =
@@ -601,7 +601,7 @@ static int32_t ccid_worker(void* context) {
 
                 furi_hal_usb_ccid->receive_buffer_data_index = 0;
             }
-        } else if(flags & WorkerEvtStop) {
+        } else if(flags & WorkerEvtFlagStop) {
             break;
         }
     }

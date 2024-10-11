@@ -222,9 +222,11 @@ static void desktop_auto_lock_arm(Desktop* desktop) {
 static void desktop_auto_lock_inhibit_enter(Desktop* desktop) {
     int32_t new_inhibitors = ++desktop->auto_lock_inhibitors;
     FURI_LOG_D(TAG, "%ld autolock inhibitors (+1)", new_inhibitors);
-    desktop_auto_lock_inhibit(desktop);
-    if(desktop_pin_code_is_set()) {
-        view_port_enabled_set(desktop->autolock_inhibit_icon_viewport, true);
+    if(new_inhibitors == 1) {
+        desktop_auto_lock_inhibit(desktop);
+        if(desktop_pin_code_is_set()) {
+            view_port_enabled_set(desktop->autolock_inhibit_icon_viewport, true);
+        }
     }
 }
 

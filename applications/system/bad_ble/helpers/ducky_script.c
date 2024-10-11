@@ -17,11 +17,11 @@
     (((uint8_t)x < 128) ? (script->layout[(uint8_t)x]) : HID_KEYBOARD_NONE)
 
 typedef enum {
-    WorkerEvtStartStop = (1 << 0),
-    WorkerEvtPauseResume = (1 << 1),
-    WorkerEvtEnd = (1 << 2),
-    WorkerEvtConnect = (1 << 3),
-    WorkerEvtDisconnect = (1 << 4),
+    WorkerEvtFlagStartStop = (1 << 0),
+    WorkerEvtFlagPauseResume = (1 << 1),
+    WorkerEvtFlagEnd = (1 << 2),
+    WorkerEvtFlagConnect = (1 << 3),
+    WorkerEvtFlagDisconnect = (1 << 4),
 } WorkerEvtFlags;
 
 static const char ducky_cmd_id[] = {"ID"};
@@ -238,9 +238,9 @@ static void bad_ble_hid_state_callback(bool state, void* context) {
     BadBleScript* bad_ble = context;
 
     if(state == true) {
-        furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtConnect);
+        furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtFlagConnect);
     } else {
-        furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtDisconnect);
+        furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtFlagDisconnect);
     }
 }
 
@@ -409,25 +409,27 @@ static int32_t bad_ble_worker(void* context) {
 
         } else if(worker_state == BadBleStateNotConnected) { // State: USB not connected
             uint32_t flags = bad_ble_flags_get(
-                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtDisconnect | WorkerEvtStartStop,
+                WorkerEvtFlagEnd | WorkerEvtFlagConnect | WorkerEvtFlagDisconnect |
+                    WorkerEvtFlagStartStop,
                 FuriWaitForever);
 
-            if(flags & WorkerEvtEnd) {
+            if(flags & WorkerEvtFlagEnd) {
                 break;
-            } else if(flags & WorkerEvtConnect) {
+            } else if(flags & WorkerEvtFlagConnect) {
                 worker_state = BadBleStateIdle; // Ready to run
-            } else if(flags & WorkerEvtStartStop) {
+            } else if(flags & WorkerEvtFlagStartStop) {
                 worker_state = BadBleStateWillRun; // Will run when USB is connected
             }
             bad_ble->st.state = worker_state;
 
         } else if(worker_state == BadBleStateIdle) { // State: ready to start
             uint32_t flags = bad_ble_flags_get(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtDisconnect, FuriWaitForever);
+                WorkerEvtFlagEnd | WorkerEvtFlagStartStop | WorkerEvtFlagDisconnect,
+                FuriWaitForever);
 
-            if(flags & WorkerEvtEnd) {
+            if(flags & WorkerEvtFlagEnd) {
                 break;
-            } else if(flags & WorkerEvtStartStop) { // Start executing script
+            } else if(flags & WorkerEvtFlagStartStop) { // Start executing script
                 dolphin_deed(DolphinDeedBadUsbPlayScript);
                 delay_val = 0;
                 bad_ble->buf_len = 0;
@@ -440,18 +442,18 @@ static int32_t bad_ble_worker(void* context) {
                 bad_ble->file_end = false;
                 storage_file_seek(script_file, 0, true);
                 worker_state = BadBleStateRunning;
-            } else if(flags & WorkerEvtDisconnect) {
+            } else if(flags & WorkerEvtFlagDisconnect) {
                 worker_state = BadBleStateNotConnected; // USB disconnected
             }
             bad_ble->st.state = worker_state;
 
         } else if(worker_state == BadBleStateWillRun) { // State: start on connection
             uint32_t flags = bad_ble_flags_get(
-                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtStartStop, FuriWaitForever);
+                WorkerEvtFlagEnd | WorkerEvtFlagConnect | WorkerEvtFlagStartStop, FuriWaitForever);
 
-            if(flags & WorkerEvtEnd) {
+            if(flags & WorkerEvtFlagEnd) {
                 break;
-            } else if(flags & WorkerEvtConnect) { // Start executing script
+            } else if(flags & WorkerEvtFlagConnect) { // Start executing script
                 dolphin_deed(DolphinDeedBadUsbPlayScript);
                 delay_val = 0;
                 bad_ble->buf_len = 0;
@@ -464,17 +466,17 @@ static int32_t bad_ble_worker(void* context) {
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
                 flags = furi_thread_flags_wait(
-                    WorkerEvtEnd | WorkerEvtDisconnect | WorkerEvtStartStop,
+                    WorkerEvtFlagEnd | WorkerEvtFlagDisconnect | WorkerEvtFlagStartStop,
                     FuriFlagWaitAny | FuriFlagNoClear,
                     1500);
                 if(flags == (unsigned)FuriFlagErrorTimeout) {
                     // If nothing happened - start script execution
                     worker_state = BadBleStateRunning;
-                } else if(flags & WorkerEvtStartStop) {
+                } else if(flags & WorkerEvtFlagStartStop) {
                     worker_state = BadBleStateIdle;
-                    furi_thread_flags_clear(WorkerEvtStartStop);
+                    furi_thread_flags_clear(WorkerEvtFlagStartStop);
                 }
-            } else if(flags & WorkerEvtStartStop) { // Cancel scheduled execution
+            } else if(flags & WorkerEvtFlagStartStop) { // Cancel scheduled execution
                 worker_state = BadBleStateNotConnected;
             }
             bad_ble->st.state = worker_state;
@@ -482,21 +484,22 @@ static int32_t bad_ble_worker(void* context) {
         } else if(worker_state == BadBleStateRunning) { // State: running
             uint16_t delay_cur = (delay_val > 1000) ? (1000) : (delay_val);
             uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
+                WorkerEvtFlagEnd | WorkerEvtFlagStartStop | WorkerEvtFlagPauseResume |
+                    WorkerEvtFlagDisconnect,
                 FuriFlagWaitAny,
                 delay_cur);
 
             delay_val -= delay_cur;
             if(!(flags & FuriFlagError)) {
-                if(flags & WorkerEvtEnd) {
+                if(flags & WorkerEvtFlagEnd) {
                     break;
-                } else if(flags & WorkerEvtStartStop) {
+                } else if(flags & WorkerEvtFlagStartStop) {
                     worker_state = BadBleStateIdle; // Stop executing script
                     bad_ble->hid->release_all(bad_ble->hid_inst);
-                } else if(flags & WorkerEvtDisconnect) {
+                } else if(flags & WorkerEvtFlagDisconnect) {
                     worker_state = BadBleStateNotConnected; // USB disconnected
                     bad_ble->hid->release_all(bad_ble->hid_inst);
-                } else if(flags & WorkerEvtPauseResume) {
+                } else if(flags & WorkerEvtFlagPauseResume) {
                     pause_state = BadBleStateRunning;
                     worker_state = BadBleStatePaused; // Pause
                 }
@@ -538,15 +541,16 @@ static int32_t bad_ble_worker(void* context) {
             }
         } else if(worker_state == BadBleStateWaitForBtn) { // State: Wait for button Press
             uint32_t flags = bad_ble_flags_get(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
+                WorkerEvtFlagEnd | WorkerEvtFlagStartStop | WorkerEvtFlagPauseResume |
+                    WorkerEvtFlagDisconnect,
                 FuriWaitForever);
             if(!(flags & FuriFlagError)) {
-                if(flags & WorkerEvtEnd) {
+                if(flags & WorkerEvtFlagEnd) {
                     break;
-                } else if(flags & WorkerEvtStartStop) {
+                } else if(flags & WorkerEvtFlagStartStop) {
                     delay_val = 0;
                     worker_state = BadBleStateRunning;
-                } else if(flags & WorkerEvtDisconnect) {
+                } else if(flags & WorkerEvtFlagDisconnect) {
                     worker_state = BadBleStateNotConnected; // USB disconnected
                     bad_ble->hid->release_all(bad_ble->hid_inst);
                 }
@@ -555,20 +559,21 @@ static int32_t bad_ble_worker(void* context) {
             }
         } else if(worker_state == BadBleStatePaused) { // State: Paused
             uint32_t flags = bad_ble_flags_get(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
+                WorkerEvtFlagEnd | WorkerEvtFlagStartStop | WorkerEvtFlagPauseResume |
+                    WorkerEvtFlagDisconnect,
                 FuriWaitForever);
             if(!(flags & FuriFlagError)) {
-                if(flags & WorkerEvtEnd) {
+                if(flags & WorkerEvtFlagEnd) {
                     break;
-                } else if(flags & WorkerEvtStartStop) {
+                } else if(flags & WorkerEvtFlagStartStop) {
                     worker_state = BadBleStateIdle; // Stop executing script
                     bad_ble->st.state = worker_state;
                     bad_ble->hid->release_all(bad_ble->hid_inst);
-                } else if(flags & WorkerEvtDisconnect) {
+                } else if(flags & WorkerEvtFlagDisconnect) {
                     worker_state = BadBleStateNotConnected; // USB disconnected
                     bad_ble->st.state = worker_state;
                     bad_ble->hid->release_all(bad_ble->hid_inst);
-                } else if(flags & WorkerEvtPauseResume) {
+                } else if(flags & WorkerEvtFlagPauseResume) {
                     if(pause_state == BadBleStateRunning) {
                         if(delay_val > 0) {
                             bad_ble->st.state = BadBleStateDelay;
@@ -589,19 +594,20 @@ static int32_t bad_ble_worker(void* context) {
             uint32_t delay = (bad_ble->stringdelay == 0) ? bad_ble->defstringdelay :
                                                            bad_ble->stringdelay;
             uint32_t flags = bad_ble_flags_get(
-                WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
+                WorkerEvtFlagEnd | WorkerEvtFlagStartStop | WorkerEvtFlagPauseResume |
+                    WorkerEvtFlagDisconnect,
                 delay);
 
             if(!(flags & FuriFlagError)) {
-                if(flags & WorkerEvtEnd) {
+                if(flags & WorkerEvtFlagEnd) {
                     break;
-                } else if(flags & WorkerEvtStartStop) {
+                } else if(flags & WorkerEvtFlagStartStop) {
                     worker_state = BadBleStateIdle; // Stop executing script
                     bad_ble->hid->release_all(bad_ble->hid_inst);
-                } else if(flags & WorkerEvtDisconnect) {
+                } else if(flags & WorkerEvtFlagDisconnect) {
                     worker_state = BadBleStateNotConnected; // USB disconnected
                     bad_ble->hid->release_all(bad_ble->hid_inst);
-                } else if(flags & WorkerEvtPauseResume) {
+                } else if(flags & WorkerEvtFlagPauseResume) {
                     pause_state = BadBleStateStringDelay;
                     worker_state = BadBleStatePaused; // Pause
                 }
@@ -622,9 +628,9 @@ static int32_t bad_ble_worker(void* context) {
             (worker_state == BadBleStateFileError) ||
             (worker_state == BadBleStateScriptError)) { // State: error
             uint32_t flags =
-                bad_ble_flags_get(WorkerEvtEnd, FuriWaitForever); // Waiting for exit command
+                bad_ble_flags_get(WorkerEvtFlagEnd, FuriWaitForever); // Waiting for exit command
 
-            if(flags & WorkerEvtEnd) {
+            if(flags & WorkerEvtFlagEnd) {
                 break;
             }
         }
@@ -669,7 +675,7 @@ BadBleScript* bad_ble_script_open(FuriString* file_path, BadBleHidInterface inte
 
 void bad_ble_script_close(BadBleScript* bad_ble) {
     furi_assert(bad_ble);
-    furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtEnd);
+    furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtFlagEnd);
     furi_thread_join(bad_ble->thread);
     furi_thread_free(bad_ble->thread);
     furi_string_free(bad_ble->file_path);
@@ -702,12 +708,12 @@ void bad_ble_script_set_keyboard_layout(BadBleScript* bad_ble, FuriString* layou
 
 void bad_ble_script_start_stop(BadBleScript* bad_ble) {
     furi_assert(bad_ble);
-    furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtStartStop);
+    furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtFlagStartStop);
 }
 
 void bad_ble_script_pause_resume(BadBleScript* bad_ble) {
     furi_assert(bad_ble);
-    furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtPauseResume);
+    furi_thread_flags_set(furi_thread_get_id(bad_ble->thread), WorkerEvtFlagPauseResume);
 }
 
 BadBleState* bad_ble_script_get_state(BadBleScript* bad_ble) {

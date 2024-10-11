@@ -24,23 +24,22 @@ static const GpioPin* flow_pins[][2] = {
 };
 
 typedef enum {
-    WorkerEvtStop = (1 << 0),
-    WorkerEvtRxDone = (1 << 1),
+    WorkerEvtFlagStop = (1 << 0),
+    WorkerEvtFlagRxDone = (1 << 1),
 
-    WorkerEvtTxStop = (1 << 2),
-    WorkerEvtCdcRx = (1 << 3),
-    WorkerEvtCdcTxComplete = (1 << 4),
+    WorkerEvtFlagTxStop = (1 << 2),
+    WorkerEvtFlagCdcRx = (1 << 3),
+    WorkerEvtFlagCdcTxComplete = (1 << 4),
 
-    WorkerEvtCfgChange = (1 << 5),
+    WorkerEvtFlagCfgChange = (1 << 5),
 
-    WorkerEvtLineCfgSet = (1 << 6),
-    WorkerEvtCtrlLineSet = (1 << 7),
-
+    WorkerEvtFlagLineCfgSet = (1 << 6),
+    WorkerEvtFlagCtrlLineSet = (1 << 7),
 } WorkerEvtFlag;
 
-#define WORKER_ALL_RX_EVENTS                                                      \
-    (WorkerEvtStop | WorkerEvtRxDone | WorkerEvtCfgChange | WorkerEvtLineCfgSet | \
-     WorkerEvtCtrlLineSet | WorkerEvtCdcTxComplete)
+#define WORKER_ALL_RX_EVENTS                                                                      \
+    (WorkerEvtFlagStop | WorkerEvtFlagRxDone | WorkerEvtFlagCfgChange | WorkerEvtFlagLineCfgSet | \
+     WorkerEvtFlagCtrlLineSet | WorkerEvtFlagCdcTxComplete)
 #define WORKER_ALL_TX_EVENTS (WorkerEvtTxStop | WorkerEvtCdcRx)
 
 struct UsbUartBridge {
@@ -99,7 +98,7 @@ static void usb_uart_on_irq_rx_dma_cb(
             furi_stream_buffer_send(usb_uart->rx_stream, data, ret, 0);
             size -= ret;
         };
-        furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
+        furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtFlagRxDone);
     }
 }
 
@@ -197,7 +196,7 @@ static int32_t usb_uart_worker(void* context) {
         usb_uart_update_ctrl_lines(usb_uart);
     }
 
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtCdcRx);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtFlagCdcRx);
 
     furi_thread_start(usb_uart->tx_thread);
 
@@ -205,8 +204,8 @@ static int32_t usb_uart_worker(void* context) {
         uint32_t events =
             furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
         furi_check(!(events & FuriFlagError));
-        if(events & WorkerEvtStop) break;
-        if(events & (WorkerEvtRxDone | WorkerEvtCdcTxComplete)) {
+        if(events & WorkerEvtFlagStop) break;
+        if(events & (WorkerEvtFlagRxDone | WorkerEvtFlagCdcTxComplete)) {
             size_t len = furi_stream_buffer_receive(
                 usb_uart->rx_stream, usb_uart->rx_buf, USB_CDC_PKT_LEN, 0);
             if(len > 0) {
@@ -221,9 +220,10 @@ static int32_t usb_uart_worker(void* context) {
                 }
             }
         }
-        if(events & WorkerEvtCfgChange) {
+        if(events & WorkerEvtFlagCfgChange) {
             if(usb_uart->cfg.vcp_ch != usb_uart->cfg_new.vcp_ch) {
-                furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtTxStop);
+                furi_thread_flags_set(
+                    furi_thread_get_id(usb_uart->tx_thread), WorkerEvtFlagTxStop);
                 furi_thread_join(usb_uart->tx_thread);
 
                 usb_uart_vcp_deinit(usb_uart, usb_uart->cfg.vcp_ch);
@@ -231,11 +231,12 @@ static int32_t usb_uart_worker(void* context) {
 
                 usb_uart->cfg.vcp_ch = usb_uart->cfg_new.vcp_ch;
                 furi_thread_start(usb_uart->tx_thread);
-                events |= WorkerEvtCtrlLineSet;
-                events |= WorkerEvtLineCfgSet;
+                events |= WorkerEvtFlagCtrlLineSet;
+                events |= WorkerEvtFlagLineCfgSet;
             }
             if(usb_uart->cfg.uart_ch != usb_uart->cfg_new.uart_ch) {
-                furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtTxStop);
+                furi_thread_flags_set(
+                    furi_thread_get_id(usb_uart->tx_thread), WorkerEvtFlagTxStop);
                 furi_thread_join(usb_uart->tx_thread);
 
                 usb_uart_serial_deinit(usb_uart);
@@ -265,7 +266,7 @@ static int32_t usb_uart_worker(void* context) {
                         flow_pins[usb_uart->cfg_new.flow_pins - 1][1], GpioModeOutputPushPull);
                 }
                 usb_uart->cfg.flow_pins = usb_uart->cfg_new.flow_pins;
-                events |= WorkerEvtCtrlLineSet;
+                events |= WorkerEvtFlagCtrlLineSet;
             }
             if(usb_uart->cfg.software_de_re != usb_uart->cfg_new.software_de_re) {
                 usb_uart->cfg.software_de_re = usb_uart->cfg_new.software_de_re;
@@ -280,11 +281,11 @@ static int32_t usb_uart_worker(void* context) {
             }
             api_lock_unlock(usb_uart->cfg_lock);
         }
-        if(events & WorkerEvtLineCfgSet) {
+        if(events & WorkerEvtFlagLineCfgSet) {
             if(usb_uart->cfg.baudrate == 0)
                 usb_uart_set_baudrate(usb_uart, usb_uart->cfg.baudrate);
         }
-        if(events & WorkerEvtCtrlLineSet) {
+        if(events & WorkerEvtFlagCtrlLineSet) {
             usb_uart_update_ctrl_lines(usb_uart);
         }
     }
@@ -298,7 +299,7 @@ static int32_t usb_uart_worker(void* context) {
         furi_hal_gpio_init_simple(flow_pins[usb_uart->cfg.flow_pins - 1][1], GpioModeAnalog);
     }
 
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtTxStop);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtFlagTxStop);
     furi_thread_join(usb_uart->tx_thread);
     furi_thread_free(usb_uart->tx_thread);
 
@@ -323,8 +324,8 @@ static int32_t usb_uart_tx_thread(void* context) {
         uint32_t events =
             furi_thread_flags_wait(WORKER_ALL_TX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
         furi_check(!(events & FuriFlagError));
-        if(events & WorkerEvtTxStop) break;
-        if(events & WorkerEvtCdcRx) {
+        if(events & WorkerEvtFlagTxStop) break;
+        if(events & WorkerEvtFlagCdcRx) {
             furi_check(furi_mutex_acquire(usb_uart->usb_mutex, FuriWaitForever) == FuriStatusOk);
             size_t len = furi_hal_cdc_receive(usb_uart->cfg.vcp_ch, data, USB_CDC_PKT_LEN);
             furi_check(furi_mutex_release(usb_uart->usb_mutex) == FuriStatusOk);
@@ -352,12 +353,12 @@ static int32_t usb_uart_tx_thread(void* context) {
 static void vcp_on_cdc_tx_complete(void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
     furi_semaphore_release(usb_uart->tx_sem);
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtCdcTxComplete);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtFlagCdcTxComplete);
 }
 
 static void vcp_on_cdc_rx(void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtCdcRx);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtFlagCdcRx);
 }
 
 static void vcp_state_callback(void* context, uint8_t state) {
@@ -368,13 +369,13 @@ static void vcp_state_callback(void* context, uint8_t state) {
 static void vcp_on_cdc_control_line(void* context, uint8_t state) {
     UNUSED(state);
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtCtrlLineSet);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtFlagCtrlLineSet);
 }
 
 static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config) {
     UNUSED(config);
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtLineCfgSet);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtFlagLineCfgSet);
 }
 
 UsbUartBridge* usb_uart_enable(UsbUartConfig* cfg) {
@@ -390,7 +391,7 @@ UsbUartBridge* usb_uart_enable(UsbUartConfig* cfg) {
 
 void usb_uart_disable(UsbUartBridge* usb_uart) {
     furi_assert(usb_uart);
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtStop);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtFlagStop);
     furi_thread_join(usb_uart->thread);
     furi_thread_free(usb_uart->thread);
     free(usb_uart);
@@ -401,7 +402,7 @@ void usb_uart_set_config(UsbUartBridge* usb_uart, UsbUartConfig* cfg) {
     furi_assert(cfg);
     usb_uart->cfg_lock = api_lock_alloc_locked();
     memcpy(&(usb_uart->cfg_new), cfg, sizeof(UsbUartConfig));
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtCfgChange);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtFlagCfgChange);
     api_lock_wait_unlock_and_free(usb_uart->cfg_lock);
 }
 

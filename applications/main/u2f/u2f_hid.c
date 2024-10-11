@@ -39,12 +39,12 @@
 #define U2F_HID_BROADCAST_CID 0xFFFFFFFF
 
 typedef enum {
-    WorkerEvtReserved = (1 << 0),
-    WorkerEvtStop = (1 << 1),
-    WorkerEvtConnect = (1 << 2),
-    WorkerEvtDisconnect = (1 << 3),
-    WorkerEvtRequest = (1 << 4),
-    WorkerEvtUnlock = (1 << 5),
+    WorkerEvtFlagReserved = (1 << 0),
+    WorkerEvtFlagStop = (1 << 1),
+    WorkerEvtFlagConnect = (1 << 2),
+    WorkerEvtFlagDisconnect = (1 << 3),
+    WorkerEvtFlagRequest = (1 << 4),
+    WorkerEvtFlagUnlock = (1 << 5),
 } WorkerEvtFlag;
 
 struct U2fHid_packet {
@@ -71,18 +71,18 @@ static void u2f_hid_event_callback(HidU2fEvent ev, void* context) {
     U2fHid* u2f_hid = context;
 
     if(ev == HidU2fDisconnected)
-        furi_thread_flags_set(furi_thread_get_id(u2f_hid->thread), WorkerEvtDisconnect);
+        furi_thread_flags_set(furi_thread_get_id(u2f_hid->thread), WorkerEvtFlagDisconnect);
     else if(ev == HidU2fConnected)
-        furi_thread_flags_set(furi_thread_get_id(u2f_hid->thread), WorkerEvtConnect);
+        furi_thread_flags_set(furi_thread_get_id(u2f_hid->thread), WorkerEvtFlagConnect);
     else if(ev == HidU2fRequest)
-        furi_thread_flags_set(furi_thread_get_id(u2f_hid->thread), WorkerEvtRequest);
+        furi_thread_flags_set(furi_thread_get_id(u2f_hid->thread), WorkerEvtFlagRequest);
 }
 
 static void u2f_hid_lock_timeout_callback(void* context) {
     furi_assert(context);
     U2fHid* u2f_hid = context;
 
-    furi_thread_flags_set(furi_thread_get_id(u2f_hid->thread), WorkerEvtUnlock);
+    furi_thread_flags_set(furi_thread_get_id(u2f_hid->thread), WorkerEvtFlagUnlock);
 }
 
 static void u2f_hid_send_response(U2fHid* u2f_hid) {
@@ -199,20 +199,21 @@ static int32_t u2f_hid_worker(void* context) {
 
     while(1) {
         uint32_t flags = furi_thread_flags_wait(
-            WorkerEvtStop | WorkerEvtConnect | WorkerEvtDisconnect | WorkerEvtRequest,
+            WorkerEvtFlagStop | WorkerEvtFlagConnect | WorkerEvtFlagDisconnect |
+                WorkerEvtFlagRequest,
             FuriFlagWaitAny,
             FuriWaitForever);
         furi_check(!(flags & FuriFlagError));
-        if(flags & WorkerEvtStop) break;
-        if(flags & WorkerEvtConnect) {
+        if(flags & WorkerEvtFlagStop) break;
+        if(flags & WorkerEvtFlagConnect) {
             u2f_set_state(u2f_hid->u2f_instance, 1);
             FURI_LOG_D(WORKER_TAG, "Connect");
         }
-        if(flags & WorkerEvtDisconnect) {
+        if(flags & WorkerEvtFlagDisconnect) {
             u2f_set_state(u2f_hid->u2f_instance, 0);
             FURI_LOG_D(WORKER_TAG, "Disconnect");
         }
-        if(flags & WorkerEvtRequest) {
+        if(flags & WorkerEvtFlagRequest) {
             uint32_t len_cur = furi_hal_hid_u2f_get_request(packet_buf);
             do {
                 if(len_cur == 0) {
@@ -276,7 +277,7 @@ static int32_t u2f_hid_worker(void* context) {
                 }
             } while(0);
         }
-        if(flags & WorkerEvtUnlock) {
+        if(flags & WorkerEvtFlagUnlock) {
             u2f_hid->lock = false;
             u2f_hid->lock_cid = 0;
         }
@@ -303,7 +304,7 @@ U2fHid* u2f_hid_start(U2fData* u2f_inst) {
 
 void u2f_hid_stop(U2fHid* u2f_hid) {
     furi_assert(u2f_hid);
-    furi_thread_flags_set(furi_thread_get_id(u2f_hid->thread), WorkerEvtStop);
+    furi_thread_flags_set(furi_thread_get_id(u2f_hid->thread), WorkerEvtFlagStop);
     furi_thread_join(u2f_hid->thread);
     furi_thread_free(u2f_hid->thread);
     free(u2f_hid);
