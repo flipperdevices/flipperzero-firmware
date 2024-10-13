@@ -21,10 +21,10 @@ extern "C" {
  * Many of the FuriThread functions MUST ONLY be called when the thread is STOPPED.
  */
 typedef enum {
-    FuriThreadStateStopped, /**< Thread is stopped and is safe to release */
-    FuriThreadStateStopping, /**< Thread is stopping */
-    FuriThreadStateStarting, /**< Thread is starting */
-    FuriThreadStateRunning, /**< Thread is running */
+    FuriThreadStateStopped, /**< Thread is stopped and is safe to release. Event delivered from system init thread(TCB cleanup routine). It is safe to release thread instance. */
+    FuriThreadStateStopping, /**< Thread is stopping. Event delivered from child thread. */
+    FuriThreadStateStarting, /**< Thread is starting. Event delivered from parent(self) thread. */
+    FuriThreadStateRunning, /**< Thread is running. Event delivered from child thread. */
 } FuriThreadState;
 
 /**
@@ -32,6 +32,7 @@ typedef enum {
  */
 typedef enum {
     FuriThreadPriorityIdle = 0, /**< Idle priority */
+    FuriThreadPriorityInit = 4, /**< Init System Thread Priority */
     FuriThreadPriorityLowest = 14, /**< Lowest */
     FuriThreadPriorityLow = 15, /**< Low */
     FuriThreadPriorityNormal = 16, /**< Normal, system default */
