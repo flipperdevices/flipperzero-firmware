@@ -127,7 +127,7 @@ static bool hworld_read(Nfc* nfc, NfcDevice* device) {
 
         standard_error = mf_classic_poller_sync_read(nfc, &standard_keys, data);
         if(standard_error == MfClassicErrorNone) {
-            FURI_LOG_W(TAG, "Standard card successfully read");
+            FURI_LOG_I(TAG, "Standard card successfully read");
         } else {
             MfClassicDeviceKeys vip_keys = {};
             for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
@@ -142,7 +142,7 @@ static bool hworld_read(Nfc* nfc, NfcDevice* device) {
             vip_error = mf_classic_poller_sync_read(nfc, &vip_keys, data);
 
             if(vip_error == MfClassicErrorNone) {
-                FURI_LOG_W(TAG, "VIP card successfully read");
+                FURI_LOG_I(TAG, "VIP card successfully read");
             } else {
                 break;
             }
