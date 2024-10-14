@@ -88,8 +88,6 @@ FURI_NAKED void Reset_Handler(void) {
     // ST chip initialization routine
     SystemInit();
 
-    memset((void*)&__heap_end__, 0xAA, 0x20030000 - (uint32_t)&__heap_end__);
-
     // Copy data section from flash
     memcpy((void*)&_sdata, &_sidata, &_edata - &_sdata);
 
