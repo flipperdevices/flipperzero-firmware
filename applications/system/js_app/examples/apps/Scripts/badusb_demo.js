@@ -13,7 +13,7 @@ let views = {
     }),
 };
 
-badusb.setup({ vid: 0xAAAA, pid: 0xBBBB, mfr_name: "Flipper", prod_name: "Zero" });
+badusb.setup({ vid: 0xAAAA, pid: 0xBBBB, mfrName: "Flipper", prodName: "Zero" });
 
 eventLoop.subscribe(views.dialog.input, function (_sub, button, eventLoop, gui) {
     if (button !== "center")

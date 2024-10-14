@@ -72,8 +72,8 @@ static bool setup_parse_params(struct mjs* mjs, mjs_val_t arg, FuriHalUsbHidConf
     }
     mjs_val_t vid_obj = mjs_get(mjs, arg, "vid", ~0);
     mjs_val_t pid_obj = mjs_get(mjs, arg, "pid", ~0);
-    mjs_val_t mfr_obj = mjs_get(mjs, arg, "mfr_name", ~0);
-    mjs_val_t prod_obj = mjs_get(mjs, arg, "prod_name", ~0);
+    mjs_val_t mfr_obj = mjs_get(mjs, arg, "mfrName", ~0);
+    mjs_val_t prod_obj = mjs_get(mjs, arg, "prodName", ~0);
 
     if(mjs_is_number(vid_obj) && mjs_is_number(pid_obj)) {
         hid_cfg->vid = mjs_get_int32(mjs, vid_obj);
