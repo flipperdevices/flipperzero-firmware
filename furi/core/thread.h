@@ -81,7 +81,7 @@ typedef void (*FuriThreadStdoutWriteCallback)(const char* data, size_t size);
  *
  * The function to be used as a state callback MUST follow this signature.
  *
- * @param[in] pointer to the FuriThread instance that changed the state
+ * @param[in] thread to the FuriThread instance that changed the state
  * @param[in] state identifier of the state the thread has transitioned to
  * @param[in,out] context pointer to a user-specified object
  */
