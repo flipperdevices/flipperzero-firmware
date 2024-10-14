@@ -37,7 +37,7 @@ declare function load(path: string): any;
  * be they modified.
  */
 declare type RawPointer = symbol & { "__tag__": "raw_ptr" };
-// ^ this is a hack to introduce a nominal type; this property doesn't really exist.
+// introducing a nominal type in a hacky way; the `__tag__` property doesn't really exist.
 
 /**
  * @brief Holds raw bytes
