@@ -18,7 +18,7 @@ typedef struct {
     FuriMessageQueue* custom;
     JsEventLoopContract navigation_contract;
     FuriSemaphore*
-        navigation; // FIXME: convert into callback once FuriEventLoop starts supporting this
+        navigation; // FIXME: (-nofl) convert into callback once FuriEventLoop starts supporting this
 } JsGui;
 
 // Useful for factories
