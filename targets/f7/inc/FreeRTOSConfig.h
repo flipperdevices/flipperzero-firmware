@@ -2,6 +2,7 @@
 
 #if defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__)
 #include <stdint.h>
+#include <errno.h>
 #pragma GCC diagnostic ignored "-Wredundant-decls"
 #endif
 
@@ -26,6 +27,7 @@
 #define configUSE_16_BIT_TICKS           0
 #define configMAX_PRIORITIES             (32)
 #define configMINIMAL_STACK_SIZE         ((uint16_t)128)
+#define configUSE_POSIX_ERRNO            1
 
 /* Heap size determined automatically by linker */
 // #define configTOTAL_HEAP_SIZE                    ((size_t)0)
@@ -82,6 +84,7 @@ to exclude the API function. */
 #define INCLUDE_xTaskGetCurrentTaskHandle   1
 #define INCLUDE_xTaskGetSchedulerState      1
 #define INCLUDE_xTimerPendFunctionCall      1
+#define INCLUDE_xTaskGetIdleTaskHandle      1
 
 /* Workaround for various notification issues:
  * - First one used by system primitives
@@ -127,29 +130,28 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY \
     (configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS))
 
+/* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
+standard names. */
+#define vPortSVCHandler    SVC_Handler
+#define xPortPendSVHandler PendSV_Handler
+
+#define traceTASK_SWITCHED_IN()                                          \
+    extern void furi_hal_mpu_set_stack_protection(uint32_t* stack);      \
+    furi_hal_mpu_set_stack_protection((uint32_t*)pxCurrentTCB->pxStack); \
+    errno = pxCurrentTCB->iTaskErrno
+//  ^^^^^   acquire errno directly from TCB because FreeRTOS assigns its `FreeRTOS_errno' _after_ our hook is called
+
+// referencing `FreeRTOS_errno' here   vvvvv    because FreeRTOS calls our hook _before_ copying the value into the TCB, hence a manual write to the TCB would get overwritten
+#define traceTASK_SWITCHED_OUT() FreeRTOS_errno = errno
+
 /* Normal assert() semantics without relying on the provision of an assert.h
 header file. */
 #ifdef DEBUG
-#include <core/check.h>
 #define configASSERT(x)                \
     if((x) == 0) {                     \
         furi_crash("FreeRTOS Assert"); \
     }
 #endif
 
-/* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
-standard names. */
-#define vPortSVCHandler    SVC_Handler
-#define xPortPendSVHandler PendSV_Handler
-
-#define USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION 1
-#define configOVERRIDE_DEFAULT_TICK_CONFIGURATION \
-    1 /* required only for Keil but does not hurt otherwise */
-
-#define traceTASK_SWITCHED_IN()                                     \
-    extern void furi_hal_mpu_set_stack_protection(uint32_t* stack); \
-    furi_hal_mpu_set_stack_protection((uint32_t*)pxCurrentTCB->pxStack)
-
-#define portCLEAN_UP_TCB(pxTCB)                                   \
-    extern void furi_thread_cleanup_tcb_event(TaskHandle_t task); \
-    furi_thread_cleanup_tcb_event(pxTCB)
+// Must be last line of config because of recursion
+#include <core/check.h>
