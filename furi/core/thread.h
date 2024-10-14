@@ -21,9 +21,10 @@ extern "C" {
  * Many of the FuriThread functions MUST ONLY be called when the thread is STOPPED.
  */
 typedef enum {
-    FuriThreadStateStopped, /**< Thread is stopped */
-    FuriThreadStateStarting, /**< Thread is starting */
-    FuriThreadStateRunning, /**< Thread is running */
+    FuriThreadStateStopped, /**< Thread is stopped and is safe to release. Event delivered from system init thread(TCB cleanup routine). It is safe to release thread instance. */
+    FuriThreadStateStopping, /**< Thread is stopping. Event delivered from child thread. */
+    FuriThreadStateStarting, /**< Thread is starting. Event delivered from parent(self) thread. */
+    FuriThreadStateRunning, /**< Thread is running. Event delivered from child thread. */
 } FuriThreadState;
 
 /**
@@ -31,6 +32,7 @@ typedef enum {
  */
 typedef enum {
     FuriThreadPriorityIdle = 0, /**< Idle priority */
+    FuriThreadPriorityInit = 4, /**< Init System Thread Priority */
     FuriThreadPriorityLowest = 14, /**< Lowest */
     FuriThreadPriorityLow = 15, /**< Low */
     FuriThreadPriorityNormal = 16, /**< Normal, system default */
@@ -76,14 +78,17 @@ typedef int32_t (*FuriThreadCallback)(void* context);
 typedef void (*FuriThreadStdoutWriteCallback)(const char* data, size_t size);
 
 /**
- * @brief State change callback function pointer type.
+ * @brief         State change callback function pointer type.
  *
- * The function to be used as a state callback MUST follow this signature.
+ *                The function to be used as a state callback MUST follow this
+ *                signature.
  *
- * @param[in] state identifier of the state the thread has transitioned to
- * @param[in,out] context pointer to a user-specified object
+ * @param[in]     thread   to the FuriThread instance that changed the state
+ * @param[in]     state    identifier of the state the thread has transitioned
+ *                         to
+ * @param[in,out] context  pointer to a user-specified object
  */
-typedef void (*FuriThreadStateCallback)(FuriThreadState state, void* context);
+typedef void (*FuriThreadStateCallback)(FuriThread* thread, FuriThreadState state, void* context);
 
 /**
  * @brief Signal handler callback function pointer type.
