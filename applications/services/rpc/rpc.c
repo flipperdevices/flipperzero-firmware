@@ -367,7 +367,9 @@ static void rpc_session_thread_pending_callback(void* context, uint32_t arg) {
     free(session);
 }
 
-static void rpc_session_thread_state_callback(FuriThreadState thread_state, void* context) {
+static void
+    rpc_session_thread_state_callback(FuriThread* thread, FuriThreadState state, void* context) {
+    UNUSED(thread);
     if(thread_state == FuriThreadStateStopped) {
         RpcSession* session = (RpcSession*)context;
         furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
