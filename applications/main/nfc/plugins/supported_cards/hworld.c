@@ -166,25 +166,20 @@ bool hworld_parse(const NfcDevice* device, FuriString* parsed_data) {
     do {
         // Check card type
         if(data->type != MfClassicType1k) break;
-        FURI_LOG_D(TAG, "0");
+
         // Check static key for verificaiton
         const uint8_t* data_room_sec_key_a_ptr = &data->block[ROOM_SECTOR_KEY_BLOCK].data[0];
         const uint8_t* data_room_sec_key_b_ptr = &data->block[ROOM_SECTOR_KEY_BLOCK].data[10];
         uint64_t data_room_sec_key_a = bit_lib_get_bits_64(data_room_sec_key_a_ptr, 0, 48);
-        FURI_LOG_D(TAG, "data A %llX", data_room_sec_key_a);
         uint64_t data_room_sec_key_b = bit_lib_get_bits_64(data_room_sec_key_b_ptr, 0, 48);
-        FURI_LOG_D(TAG, "data B %llX", data_room_sec_key_b);
-        FURI_LOG_D(TAG, "static A %llX", hworld_standard_keys[ROOM_SECTOR].a);
-        FURI_LOG_D(TAG, "static B %llX", hworld_standard_keys[ROOM_SECTOR].b);
         if((data_room_sec_key_a != hworld_standard_keys[ROOM_SECTOR].a) |
            (data_room_sec_key_b != hworld_standard_keys[ROOM_SECTOR].b))
             break;
-        FURI_LOG_D(TAG, "1");
+
         // Check whether this card is VIP
         const uint8_t* data_vip_sec_key_b_ptr = &data->block[VIP_SECTOR_KEY_BLOCK].data[10];
         uint64_t data_vip_sec_key_b = bit_lib_get_bits_64(data_vip_sec_key_b_ptr, 0, 48);
         bool is_hworld_vip = (data_vip_sec_key_b == hworld_vip_keys[VIP_SECTOR].b);
-        FURI_LOG_D(TAG, "2");
         uint8_t room_floor = data->block[ACCESS_INFO_BLOCK].data[13];
         uint8_t room_num = data->block[ACCESS_INFO_BLOCK].data[14];
 
