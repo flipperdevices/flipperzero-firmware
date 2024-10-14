@@ -73,9 +73,12 @@ static JsKbdContext* ctx_make(struct mjs* mjs, TextInput* input, mjs_val_t view_
         .magic = JsForeignMagic_JsEventLoopContract,
         .object_type = JsEventLoopObjectTypeSemaphore,
         .object = context->input_semaphore,
-        .event = FuriEventLoopEventIn,
-        .transformer = (JsEventLoopTransformer)input_transformer,
-        .transformer_context = context,
+        .non_timer =
+            {
+                .event = FuriEventLoopEventIn,
+                .transformer = (JsEventLoopTransformer)input_transformer,
+                .transformer_context = context,
+            },
     };
     UNUSED(mjs);
     UNUSED(view_obj);

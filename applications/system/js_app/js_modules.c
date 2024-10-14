@@ -26,6 +26,7 @@ typedef struct {
 //     amount of modules in use (under 10 in the overwhelming majority of cases)
 //     i bet it's going to be slower than a plain array
 ARRAY_DEF(JsModuleArray, JsModuleData, M_POD_OPLIST);
+#define M_OPL_JsModuleArray_t() ARRAY_OPLIST(JsModuleArray)
 
 static const JsModuleDescriptor modules_builtin[] = {
     {"flipper", js_flipper_create, NULL, NULL},
@@ -54,21 +55,21 @@ JsModules* js_modules_create(struct mjs* mjs, CompositeApiResolver* resolver) {
     return modules;
 }
 
-void js_modules_destroy(JsModules* modules) {
+void js_modules_destroy(JsModules* instance) {
     for
-        M_EACH(module, modules->modules, JsModuleArray_t) {
+        M_EACH(module, instance->modules, JsModuleArray_t) {
             FURI_LOG_T(TAG, "Tearing down %s", furi_string_get_cstr(module->name));
             if(module->destroy) module->destroy(module->context);
             furi_string_free(module->name);
         }
-    plugin_manager_free(modules->plugin_manager);
-    JsModuleArray_clear(modules->modules);
-    free(modules);
+    plugin_manager_free(instance->plugin_manager);
+    JsModuleArray_clear(instance->modules);
+    free(instance);
 }
 
-JsModuleData* js_find_loaded_module(JsModules* modules, const char* name) {
+JsModuleData* js_find_loaded_module(JsModules* instance, const char* name) {
     for
-        M_EACH(module, modules->modules, JsModuleArray_t) {
+        M_EACH(module, instance->modules, JsModuleArray_t) {
             if(furi_string_cmp_str(module->name, name) == 0) return module;
         }
     return NULL;

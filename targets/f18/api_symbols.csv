@@ -1371,6 +1371,8 @@ Function,-,furi_hal_resources_deinit_early,void,
 Function,+,furi_hal_resources_get_ext_pin_number,int32_t,const GpioPin*
 Function,-,furi_hal_resources_init,void,
 Function,-,furi_hal_resources_init_early,void,
+Function,+,furi_hal_resources_pin_by_name,const GpioPinRecord*,const char*
+Function,+,furi_hal_resources_pin_by_number,const GpioPinRecord*,uint8_t
 Function,-,furi_hal_rtc_deinit_early,void,
 Function,+,furi_hal_rtc_get_boot_mode,FuriHalRtcBootMode,
 Function,+,furi_hal_rtc_get_datetime,void,DateTime*

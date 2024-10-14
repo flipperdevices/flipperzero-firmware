@@ -41,6 +41,17 @@ typedef enum {
 typedef mjs_val_t (
     *JsEventLoopTransformer)(struct mjs* mjs, FuriEventLoopObject* object, void* context);
 
+typedef struct {
+    FuriEventLoopEvent event;
+    JsEventLoopTransformer transformer;
+    void* transformer_context;
+} JsEventLoopNonTimerContract;
+
+typedef struct {
+    FuriEventLoopTimerType type;
+    uint32_t interval_ticks;
+} JsEventLoopTimerContract;
+
 /**
  * @brief Adapter for other JS modules that wish to integrate with the event
  * loop JS module
@@ -51,14 +62,16 @@ typedef mjs_val_t (
  * `subscribe` function.
  * 
  * There are two fundamental variants of this structure:
- *   - `object_type` is `JsEventLoopObjectTypeTimer`: the fields `timer_type`
- *     and `interval_ticks` specify timer parameters.
- *   - `object_type` is something else: the field `event` will be passed to
- *     `furi_event_loop_subscribe`. The specified `callback` will be called to
+ *   - `object_type` is `JsEventLoopObjectTypeTimer`: the `timer` field is
+ *     valid, and the `non_timer` field is invalid.
+ *   - `object_type` is something else: the `timer` field is invalid, and the
+ *     `non_timer` field is valid. `non_timer.event` will be passed to
+ *     `furi_event_loop_subscribe`. `non_timer.transformer` will be called to
  *     transform an object into a JS value (called an item) that's passed to the
  *     JS callback. This is useful for example to take an item out of a message
- *     queue and pass it to JS code in a convenient format. If `callback` is
- *     NULL, the event loop will take semaphores and mutexes on its own.
+ *     queue and pass it to JS code in a convenient format. If
+ *     `non_timer.transformer` is NULL, the event loop will take semaphores and
+ *     mutexes on its own.
  * 
  * The producer of the contract is responsible for freeing both the contract and
  * the object that it points to when the interpreter is torn down.
@@ -68,15 +81,8 @@ typedef struct {
     JsEventLoopObjectType object_type;
     FuriEventLoopObject* object;
     union {
-        struct {
-            FuriEventLoopEvent event; //<! Valid for all object types except timers
-            JsEventLoopTransformer transformer; //!< Valid for queues and streams
-            void* transformer_context; //<! Valid for queues and streams
-        };
-        struct {
-            FuriEventLoopTimerType timer_type; //<! Only valid for timers
-            uint32_t interval_ticks; //<! Only valid for timers
-        };
+        JsEventLoopNonTimerContract non_timer;
+        JsEventLoopTimerContract timer;
     };
 } JsEventLoopContract;
 

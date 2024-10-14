@@ -17,7 +17,8 @@ typedef struct {
     JsEventLoopContract custom_contract;
     FuriMessageQueue* custom;
     JsEventLoopContract navigation_contract;
-    FuriSemaphore* navigation;
+    FuriSemaphore*
+        navigation; // FIXME: convert into callback once FuriEventLoop starts supporting this
 } JsGui;
 
 // Useful for factories
@@ -109,14 +110,20 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
         .magic = JsForeignMagic_JsEventLoopContract,
         .object = module->custom,
         .object_type = JsEventLoopObjectTypeQueue,
-        .event = FuriEventLoopEventIn,
-        .transformer = js_gui_vd_custom_transformer,
+        .non_timer =
+            {
+                .event = FuriEventLoopEventIn,
+                .transformer = js_gui_vd_custom_transformer,
+            },
     };
     module->navigation_contract = (JsEventLoopContract){
         .magic = JsForeignMagic_JsEventLoopContract,
         .object = module->navigation,
         .object_type = JsEventLoopObjectTypeSemaphore,
-        .event = FuriEventLoopEventIn,
+        .non_timer =
+            {
+                .event = FuriEventLoopEventIn,
+            },
     };
 
     // create viewDispatcher object

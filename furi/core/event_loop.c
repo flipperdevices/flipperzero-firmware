@@ -423,9 +423,8 @@ bool furi_event_loop_is_subscribed(FuriEventLoop* instance, FuriEventLoopObject*
     furi_check(instance->thread_id == furi_thread_get_current_id());
     FURI_CRITICAL_ENTER();
 
-    FuriEventLoopItem** item = FuriEventLoopTree_safe_get(instance->tree, object);
-    furi_check(item);
-    bool result = *item != NULL;
+    FuriEventLoopItem* const* item = FuriEventLoopTree_cget(instance->tree, object);
+    bool result = !!item;
 
     FURI_CRITICAL_EXIT();
     return result;

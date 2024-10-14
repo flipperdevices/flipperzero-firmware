@@ -34,7 +34,6 @@
     for(struct {                      \
             struct mjs* mjs;          \
             mjs_val_t val;            \
-            int i;                    \
         } _ass_multi = {mjs, object}; \
         false;)
 #define JS_FIELD(name, value) mjs_set(_ass_multi.mjs, _ass_multi.val, name, ~0, value)

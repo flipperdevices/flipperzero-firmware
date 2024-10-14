@@ -77,8 +77,11 @@ static JsDialogCtx* ctx_make(struct mjs* mjs, DialogEx* dialog, mjs_val_t view_o
         .magic = JsForeignMagic_JsEventLoopContract,
         .object_type = JsEventLoopObjectTypeQueue,
         .object = context->queue,
-        .event = FuriEventLoopEventIn,
-        .transformer = (JsEventLoopTransformer)input_transformer,
+        .non_timer =
+            {
+                .event = FuriEventLoopEventIn,
+                .transformer = (JsEventLoopTransformer)input_transformer,
+            },
     };
     mjs_set(mjs, view_obj, "input", ~0, mjs_mk_foreign(mjs, &context->contract));
     dialog_ex_set_result_callback(dialog, (DialogExResultCallback)input_callback);

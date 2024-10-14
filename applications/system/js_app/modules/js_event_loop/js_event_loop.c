@@ -180,26 +180,34 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
     // the obvious default behavior to this module
     if(contract->object_type == JsEventLoopObjectTypeQueue ||
        contract->object_type == JsEventLoopObjectTypeStream) {
-        furi_check(contract->transformer);
+        furi_check(contract->non_timer.transformer);
     }
-    context->transformer = contract->transformer;
-    context->transformer_context = contract->transformer_context;
+    context->transformer = contract->non_timer.transformer;
+    context->transformer_context = contract->non_timer.transformer_context;
 
     // subscribe
     switch(contract->object_type) {
     case JsEventLoopObjectTypeTimer: {
         FuriEventLoopTimer* timer = furi_event_loop_timer_alloc(
-            module->loop, js_event_loop_callback_generic, contract->timer_type, context);
-        furi_event_loop_timer_start(timer, contract->interval_ticks);
+            module->loop, js_event_loop_callback_generic, contract->timer.type, context);
+        furi_event_loop_timer_start(timer, contract->timer.interval_ticks);
         contract->object = timer;
     } break;
     case JsEventLoopObjectTypeSemaphore:
         furi_event_loop_subscribe_semaphore(
-            module->loop, contract->object, contract->event, js_event_loop_callback, context);
+            module->loop,
+            contract->object,
+            contract->non_timer.event,
+            js_event_loop_callback,
+            context);
         break;
     case JsEventLoopObjectTypeQueue:
         furi_event_loop_subscribe_message_queue(
-            module->loop, contract->object, contract->event, js_event_loop_callback, context);
+            module->loop,
+            contract->object,
+            contract->non_timer.event,
+            js_event_loop_callback,
+            context);
         break;
     default:
         furi_crash("unimplemented");
@@ -248,11 +256,16 @@ static void js_event_loop_timer(struct mjs* mjs) {
 
     // make timer contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
-    contract->magic = JsForeignMagic_JsEventLoopContract;
-    contract->object_type = JsEventLoopObjectTypeTimer;
-    contract->object = NULL;
-    contract->interval_ticks = furi_ms_to_ticks((uint32_t)interval);
-    contract->timer_type = mode;
+    *contract = (JsEventLoopContract){
+        .magic = JsForeignMagic_JsEventLoopContract,
+        .object_type = JsEventLoopObjectTypeTimer,
+        .object = NULL,
+        .timer =
+            {
+                .interval_ticks = furi_ms_to_ticks((uint32_t)interval),
+                .type = mode,
+            },
+    };
     ContractArray_push_back(module->owned_contracts, contract);
     mjs_return(mjs, mjs_mk_foreign(mjs, contract));
 }
@@ -301,12 +314,17 @@ static void js_event_loop_queue(struct mjs* mjs) {
 
     // make queue contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
-    contract->magic = JsForeignMagic_JsEventLoopContract;
-    contract->object_type = JsEventLoopObjectTypeQueue;
-    // we could store `mjs_val_t`s in the queue directly if not for mJS' requirement to have consistent pointers to owned values
-    contract->object = furi_message_queue_alloc((size_t)length, sizeof(mjs_val_t*));
-    contract->event = FuriEventLoopEventIn;
-    contract->transformer = js_event_loop_queue_transformer;
+    *contract = (JsEventLoopContract){
+        .magic = JsForeignMagic_JsEventLoopContract,
+        .object_type = JsEventLoopObjectTypeQueue,
+        // we could store `mjs_val_t`s in the queue directly if not for mJS' requirement to have consistent pointers to owned values
+        .object = furi_message_queue_alloc((size_t)length, sizeof(mjs_val_t*)),
+        .non_timer =
+            {
+                .event = FuriEventLoopEventIn,
+                .transformer = js_event_loop_queue_transformer,
+            },
+    };
     ContractArray_push_back(module->owned_contracts, contract);
 
     // return object with control methods

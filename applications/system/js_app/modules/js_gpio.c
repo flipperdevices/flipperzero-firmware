@@ -198,11 +198,16 @@ static void js_gpio_interrupt(struct mjs* mjs) {
 
     // make contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
+    *contract = (JsEventLoopContract){
+        .magic = JsForeignMagic_JsEventLoopContract,
+        .object_type = JsEventLoopObjectTypeSemaphore,
+        .object = manager_data->interrupt_semaphore,
+        .non_timer =
+            {
+                .event = FuriEventLoopEventIn,
+            },
+    };
     manager_data->interrupt_contract = contract;
-    contract->magic = JsForeignMagic_JsEventLoopContract;
-    contract->object_type = JsEventLoopObjectTypeSemaphore;
-    contract->object = manager_data->interrupt_semaphore;
-    contract->event = FuriEventLoopEventIn;
     mjs_return(mjs, mjs_mk_foreign(mjs, contract));
 }
 
@@ -244,22 +249,10 @@ static void js_gpio_get(struct mjs* mjs) {
 
     // parse input argument to a pin pointer
     if(name_string) {
-        // find pin with matching name ignoring case
-        for(size_t i = 0; i < gpio_pins_count; i++) {
-            if(strcasecmp(name_string, gpio_pins[i].name) == 0) {
-                pin_record = &gpio_pins[i];
-                break;
-            }
-        }
+        pin_record = furi_hal_resources_pin_by_name(name_string);
     } else if(mjs_is_number(name_arg)) {
-        // find pin with matching number
         int name_int = mjs_get_int(mjs, name_arg);
-        for(size_t i = 0; i < gpio_pins_count; i++) {
-            if(name_int == gpio_pins[i].number) {
-                pin_record = &gpio_pins[i];
-                break;
-            }
-        }
+        pin_record = furi_hal_resources_pin_by_number(name_int);
     } else {
         JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "Must be either a string or a number");
     }

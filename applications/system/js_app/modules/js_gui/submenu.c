@@ -50,8 +50,11 @@ static JsSubmenuCtx* ctx_make(struct mjs* mjs, Submenu* input, mjs_val_t view_ob
         .magic = JsForeignMagic_JsEventLoopContract,
         .object_type = JsEventLoopObjectTypeQueue,
         .object = context->queue,
-        .event = FuriEventLoopEventIn,
-        .transformer = (JsEventLoopTransformer)choose_transformer,
+        .non_timer =
+            {
+                .event = FuriEventLoopEventIn,
+                .transformer = (JsEventLoopTransformer)choose_transformer,
+            },
     };
     mjs_set(mjs, view_obj, "chosen", ~0, mjs_mk_foreign(mjs, &context->contract));
     return context;
