@@ -86,6 +86,8 @@ typedef struct {
     };
 } JsEventLoopContract;
 
+static_assert(offsetof(JsEventLoopContract, magic) == 0);
+
 /**
  * @brief Gets the FuriEventLoop owned by a JsEventLoop
  * 

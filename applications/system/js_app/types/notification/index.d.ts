@@ -13,7 +13,7 @@ export declare function error(): void;
 export type Color = "red" | "green" | "blue" | "yellow" | "cyan" | "magenta";
 
 /**
- * @brief Displays a basic color on the color LED for
+ * @brief Displays a basic color on the color LED
  * @param color The color to display, see `Color`
  * @param duration The duration, either `"short"` (10ms) or `"long"` (100ms)
  */

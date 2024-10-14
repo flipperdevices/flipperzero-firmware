@@ -20,18 +20,10 @@ static void js_storage_file_read(struct mjs* mjs) {
         ReadModeAscii,
         ReadModeBinary,
     } read_mode;
-    static const JsEnumMapping read_mode_mapping[] = {
-        {NULL, sizeof(read_mode)},
-        {"ascii", ReadModeAscii},
-        {"binary", ReadModeBinary},
-        {NULL, 0},
-    };
+    JS_ENUM_MAP(read_mode, {"ascii", ReadModeAscii}, {"binary", ReadModeBinary});
     int32_t length;
     JS_FETCH_ARGS_OR_RETURN(
-        mjs,
-        JS_EXACTLY,
-        JS_ARG_ENUM(read_mode_mapping, "ReadMode", &read_mode),
-        JS_ARG_INT32(&length));
+        mjs, JS_EXACTLY, JS_ARG_ENUM(read_mode, "ReadMode"), JS_ARG_INT32(&length));
     File* file = JS_GET_CONTEXT(mjs);
     char buffer[length];
     size_t actually_read = storage_file_read(file, buffer, length);
@@ -114,31 +106,23 @@ static void js_storage_file_destructor(struct mjs* mjs, mjs_val_t obj) {
 }
 
 static void js_storage_open_file(struct mjs* mjs) {
-    static const JsEnumMapping access_mode_map[] = {
-        {NULL, sizeof(FS_AccessMode)},
-        {"r", FSAM_READ},
-        {"w", FSAM_WRITE},
-        {"rw", FSAM_READ_WRITE},
-        {NULL, 0},
-    };
-    static const JsEnumMapping open_mode_map[] = {
-        {NULL, sizeof(FS_OpenMode)},
+    const char* path;
+    FS_AccessMode access_mode;
+    FS_OpenMode open_mode;
+    JS_ENUM_MAP(access_mode, {"r", FSAM_READ}, {"w", FSAM_WRITE}, {"rw", FSAM_READ_WRITE});
+    JS_ENUM_MAP(
+        open_mode,
         {"open_existing", FSOM_OPEN_EXISTING},
         {"open_always", FSOM_OPEN_ALWAYS},
         {"open_append", FSOM_OPEN_APPEND},
         {"create_new", FSOM_CREATE_NEW},
-        {"create_always", FSOM_CREATE_ALWAYS},
-        {NULL, 0},
-    };
-    const char* path;
-    FS_AccessMode access_mode;
-    FS_OpenMode open_mode;
+        {"create_always", FSOM_CREATE_ALWAYS});
     JS_FETCH_ARGS_OR_RETURN(
         mjs,
         JS_EXACTLY,
         JS_ARG_STR(&path),
-        JS_ARG_ENUM(access_mode_map, "AccessMode", &access_mode),
-        JS_ARG_ENUM(open_mode_map, "OpenMode", &open_mode));
+        JS_ARG_ENUM(access_mode, "AccessMode"),
+        JS_ARG_ENUM(open_mode, "OpenMode"));
 
     Storage* storage = JS_GET_CONTEXT(mjs);
     File* file = storage_file_alloc(storage);

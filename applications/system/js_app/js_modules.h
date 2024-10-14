@@ -30,12 +30,14 @@
  *  }
  * ```
  */
-#define JS_ASSIGN_MULTI(mjs, object)  \
-    for(struct {                      \
-            struct mjs* mjs;          \
-            mjs_val_t val;            \
-        } _ass_multi = {mjs, object}; \
-        false;)
+#define JS_ASSIGN_MULTI(mjs, object)     \
+    for(struct {                         \
+            struct mjs* mjs;             \
+            mjs_val_t val;               \
+            int i;                       \
+        } _ass_multi = {mjs, object, 0}; \
+        _ass_multi.i == 0;               \
+        _ass_multi.i++)
 #define JS_FIELD(name, value) mjs_set(_ass_multi.mjs, _ass_multi.val, name, ~0, value)
 
 /**
@@ -74,6 +76,13 @@ typedef enum {
  * that the function requires at least as many arguments as were specified.
  */
 #define JS_AT_LEAST >=
+
+#define JS_ENUM_MAP(var_name, ...)                      \
+    static const JsEnumMapping var_name##_mapping[] = { \
+        {NULL, sizeof(var_name)},                       \
+        __VA_ARGS__,                                    \
+        {NULL, 0},                                      \
+    };
 
 typedef struct {
     const char* name;
@@ -177,9 +186,14 @@ static inline void
     }
     // unreachable, thanks to _js_validate_enum
 }
-#define JS_ARG_ENUM(definition, name, out) \
-    ((_js_arg_decl){                       \
-        out, mjs_is_string, _js_convert_enum, name " enum", _js_validate_enum, definition})
+#define JS_ARG_ENUM(var_name, name) \
+    ((_js_arg_decl){                \
+        &var_name,                  \
+        mjs_is_string,              \
+        _js_convert_enum,           \
+        name " enum",               \
+        _js_validate_enum,          \
+        var_name##_mapping})
 
 //-V:JS_FETCH_ARGS_OR_RETURN:1008
 /**

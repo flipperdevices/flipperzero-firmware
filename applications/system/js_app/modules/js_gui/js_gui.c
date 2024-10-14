@@ -76,6 +76,25 @@ static void js_gui_vd_send_custom(struct mjs* mjs) {
 }
 
 /**
+ * @brief `viewDispatcher.sendTo`
+ */
+static void js_gui_vd_send_to(struct mjs* mjs) {
+    enum {
+        SendDirToFront,
+        SendDirToBack,
+    } send_direction;
+    JS_ENUM_MAP(send_direction, {"front", SendDirToFront}, {"back", SendDirToBack});
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_ENUM(send_direction, "SendDirection"));
+
+    JsGui* module = JS_GET_CONTEXT(mjs);
+    if(send_direction == SendDirToBack) {
+        view_dispatcher_send_to_back(module->dispatcher);
+    } else {
+        view_dispatcher_send_to_front(module->dispatcher);
+    }
+}
+
+/**
  * @brief `viewDispatcher.switchTo`
  */
 static void js_gui_vd_switch_to(struct mjs* mjs) {
@@ -128,12 +147,14 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
 
     // create viewDispatcher object
     mjs_val_t view_dispatcher = mjs_mk_object(mjs);
-    mjs_set(mjs, view_dispatcher, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, module));
-    mjs_set(mjs, view_dispatcher, "sendCustom", ~0, MJS_MK_FN(js_gui_vd_send_custom));
-    mjs_set(mjs, view_dispatcher, "switchTo", ~0, MJS_MK_FN(js_gui_vd_switch_to));
-    mjs_set(mjs, view_dispatcher, "custom", ~0, mjs_mk_foreign(mjs, &module->custom_contract));
-    mjs_set(
-        mjs, view_dispatcher, "navigation", ~0, mjs_mk_foreign(mjs, &module->navigation_contract));
+    JS_ASSIGN_MULTI(mjs, view_dispatcher) {
+        JS_FIELD(INST_PROP_NAME, mjs_mk_foreign(mjs, module));
+        JS_FIELD("sendCustom", MJS_MK_FN(js_gui_vd_send_custom));
+        JS_FIELD("sendTo", MJS_MK_FN(js_gui_vd_send_to));
+        JS_FIELD("switchTo", MJS_MK_FN(js_gui_vd_switch_to));
+        JS_FIELD("custom", mjs_mk_foreign(mjs, &module->custom_contract));
+        JS_FIELD("navigation", mjs_mk_foreign(mjs, &module->navigation_contract));
+    }
 
     // create API object
     mjs_val_t api = mjs_mk_object(mjs);
@@ -145,7 +166,7 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
 }
 
 static void js_gui_destroy(void* inst) {
-    if(!inst) return;
+    furi_assert(inst);
     JsGui* module = inst;
 
     view_dispatcher_free(module->dispatcher);
