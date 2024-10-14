@@ -308,12 +308,14 @@ static void loader_applications_closed_callback(void* context) {
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
 }
 
-static void loader_thread_state_callback(FuriThreadState thread_state, void* context) {
+static void
+    loader_thread_state_callback(FuriThread* thread, FuriThreadState thread_state, void* context) {
+    UNUSED(thread);
     furi_assert(context);
 
-    Loader* loader = context;
-
     if(thread_state == FuriThreadStateStopped) {
+        Loader* loader = context;
+
         LoaderMessage message;
         message.type = LoaderMessageTypeAppClosed;
         furi_message_queue_put(loader->queue, &message, FuriWaitForever);
@@ -717,7 +719,7 @@ static bool loader_do_signal(Loader* loader, uint32_t signal, void* arg) {
 
 static bool loader_do_get_application_name(Loader* loader, FuriString* name) {
     if(loader_is_application_running(loader)) {
-        furi_string_set(name, furi_thread_get_name(loader->app.thread));
+        furi_string_set(name, furi_thread_get_name(furi_thread_get_id(loader->app.thread)));
         return true;
     }
 
