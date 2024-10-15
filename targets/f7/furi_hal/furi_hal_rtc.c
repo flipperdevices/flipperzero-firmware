@@ -478,6 +478,7 @@ bool furi_hal_rtc_get_alarm(DateTime* datetime) {
 
     datetime->hour = __LL_RTC_CONVERT_BCD2BIN(LL_RTC_ALMA_GetHour(RTC));
     datetime->minute = __LL_RTC_CONVERT_BCD2BIN(LL_RTC_ALMA_GetMinute(RTC));
+    datetime->second = __LL_RTC_CONVERT_BCD2BIN(LL_RTC_ALMA_GetSecond(RTC));
 
     return READ_BIT(RTC->CR, RTC_CR_ALRAE);
 }
