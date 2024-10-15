@@ -9,9 +9,9 @@ Frames order: 0 1 2 3 4 5 6 7
 Active cycles: 2
 Frame rate: 2
 Duration: 1200
-Active cooldown: 5
+Active cooldown: 2
 
-Bubble slots: 2
+Bubble slots: 6
 
 Slot: 0
 X: 1
@@ -30,3 +30,43 @@ AlignH: Right
 AlignV: Bottom
 StartFrame: 7
 EndFrame: 9
+
+# If I am going to keep this animation for the time being, I might as well have some fun...
+# Yes, it's going to be all modern cartoon references
+
+Slot: 2
+X: 1
+Y: 23
+Text: I don't know\nabout this, Kick
+AlignH: Right
+AlignV: Bottom
+StartFrame: 7
+EndFrame: 9
+
+Slot: 3
+X: 1
+Y: 23
+Text: Yay BMO
+AlignH: Right
+AlignV: Bottom
+StartFrame: 7
+EndFrame: 9
+
+Slot: 4
+X: 1
+Y: 23
+Text: Cool Dolphin Magisword
+AlignH: Right
+AlignV: Bottom
+StartFrame: 7
+EndFrame: 9
+
+Slot: 5
+X: 1
+Y: 23
+Text: Benson's going to\nbe so pissed
+AlignH: Right
+AlignV: Bottom
+StartFrame: 7
+EndFrame: 9
+
