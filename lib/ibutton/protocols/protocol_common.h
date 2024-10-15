@@ -10,6 +10,7 @@ enum {
 };
 
 typedef enum {
+    iButtonProtocolFeatureNone = 0,
     iButtonProtocolFeatureExtData = (1U << 0),
     iButtonProtocolFeatureWriteId = (1U << 1),
     iButtonProtocolFeatureWriteCopy = (1U << 2),
