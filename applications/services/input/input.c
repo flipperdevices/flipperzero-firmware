@@ -7,8 +7,8 @@
 #include <cli/cli.h>
 #include <furi_hal_gpio.h>
 
-#define INPUT_SRV_DEBOUNCE_TICKS 2
-#define INPUT_SRV_DEBOUNCE_COUNT 10
+#define INPUT_SRV_DEBOUNCE_TICKS 10
+#define INPUT_SRV_DEBOUNCE_COUNT 2
 
 #define INPUT_SRV_INPUT_LONG_PRESS_TICKS 150
 #define INPUT_SRV_LONG_PRESS_COUNTS      3
