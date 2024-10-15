@@ -41,6 +41,7 @@ struct BadUsbApp {
     BadUsb* bad_usb_view;
     BadUsbScript* bad_usb_script;
 
+    BadUsbHidInterface interface;
     FuriHalUsbInterface* usb_if_prev;
 };
 
