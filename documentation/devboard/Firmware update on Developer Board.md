@@ -41,7 +41,6 @@ To update the firmware, you need to switch your Developer Board to Bootloader mo
     - **Linux:** Run the `ls /dev/tty*` command in the Terminal.
 
     - **Windows:** Go to **Device Manager** and expand the **Ports (COM & LPT)** section.
-    
 
 2. Connect the Developer Board to your computer using a USB-C cable.
     \image html https://cdn.flipperzero.one/Flipper_Zero_Wi-Fi_devboard_update_wired_connection.jpg width=700
