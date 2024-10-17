@@ -328,6 +328,17 @@ static void furi_event_loop_object_subscribe(
  * Public specialized subscription API
  */
 
+void furi_event_loop_subscribe_event_flag(
+    FuriEventLoop* instance,
+    FuriEventFlag* event_flag,
+    FuriEventLoopEvent event,
+    FuriEventLoopEventCallback callback,
+    void* context) {
+    extern const FuriEventLoopContract furi_event_flag_event_loop_contract;
+    furi_event_loop_object_subscribe(
+        instance, event_flag, &furi_event_flag_event_loop_contract, event, callback, context);
+}
+
 void furi_event_loop_subscribe_message_queue(
     FuriEventLoop* instance,
     FuriMessageQueue* message_queue,
