@@ -9,6 +9,7 @@ typedef enum {
     JsViewPropTypeString,
     JsViewPropTypeNumber,
     JsViewPropTypeArr,
+    JsViewPropTypeTypedArr,
     JsViewPropTypeBool,
 } JsViewPropType;
 
