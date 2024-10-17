@@ -129,14 +129,23 @@ static EventLoopEventFlagsApp* event_loop_event_flags_app_alloc(void) {
 
 static void event_loop_event_flags_app_free(EventLoopEventFlagsApp* app) {
     gui_remove_view_port(app->gui, app->view_port);
+
     furi_record_close(RECORD_GUI);
+    app->gui = NULL;
+
+    // Delete all instances
+    view_port_free(app->view_port);
+    app->view_port = NULL;
+
     // IMPORTANT: The user code MUST unsubscribe from all events before deleting the event loop.
     // Failure to do so will result in a crash.
     furi_event_loop_unsubscribe(app->event_loop, app->event_flag);
-    // Delete all instances
-    view_port_free(app->view_port);
+
+    furi_event_flag_free(app->event_flag);
+    app->event_flag = NULL;
 
     furi_event_loop_free(app->event_loop);
+    app->event_loop = NULL;
 
     free(app);
 }

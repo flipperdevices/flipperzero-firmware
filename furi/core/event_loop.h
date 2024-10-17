@@ -222,7 +222,7 @@ void furi_event_loop_subscribe_event_flag(
     FuriEventLoopEvent event,
     FuriEventLoopEventCallback callback,
     void* context);
-    
+
 /** Opaque message queue type */
 typedef struct FuriMessageQueue FuriMessageQueue;
 
