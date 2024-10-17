@@ -88,3 +88,8 @@ export declare function readBytes(length: number, timeout?: number): ArrayBuffer
  *          patterns matched.
  */
 export declare function expect(patterns: string | number[] | string[] | number[][], timeout?: number): number | undefined;
+
+/**
+ * @brief Deinitializes the serial port, allowing multiple initializations per script run
+ */
+export declare function end(): void;

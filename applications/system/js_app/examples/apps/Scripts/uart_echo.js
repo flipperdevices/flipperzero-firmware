@@ -10,4 +10,5 @@ while (1) {
     }
 }
 
+// There's also serial.end(), so you can serial.setup() again in same script
 // You can also use serial.readAny(timeout), will avoid starving your loop with single byte reads
