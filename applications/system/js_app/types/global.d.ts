@@ -19,14 +19,52 @@ declare function print(...args: any[]): void;
 declare function toString(value: number, base?: number): string;
 
 /**
+ * @brief Converts a string to a number
+ * @param text The string to convert to a number
+ */
+declare function parseInt(text: string): number;
+
+/**
+ * @brief Transforms a string to upper case
+ * @param text The string to transforms to upper case
+ */
+declare function toUpperCase(text: string): string;
+
+/**
+ * @brief Transforms a string to lower case
+ * @param text The string to transforms to lower case
+ */
+declare function toLowerCase(text: string): string;
+
+/**
+ * @brief Path to the directory containing the current script
+ */
+declare const __dirpath: string;
+
+/**
+ * @brief Path to the current script file
+ */
+declare const __filepath: string;
+
+/**
  * @brief Reads a JS value from a file
  * 
  * Reads a file at the specified path, interprets it as a JS value and returns
- * said value.
+ * the last value pushed on the stack.
  * 
  * @param path The path to the file
+ * @param scope An object to use as global scope while running this file
  */
-declare function load(path: string): any;
+declare function load(path: string, scope?: object): any;
+
+/**
+ * @brief Return 1-byte string whose ASCII code is the integer `n`
+ * 
+ * If `n` is not numeric or outside of `0-255` range, `null` is returned
+ * 
+ * @param n The ASCII code to convert to string
+ */
+declare function chr(n: number): string | null;
 
 /**
  * @brief mJS Foreign Pointer type
@@ -161,6 +199,18 @@ declare class String {
      * See `charCodeAt`
      */
     at(index: number): number;
+    /**
+     * @brief Return index of first occurence of substr within the string or `-1` if not found
+     * @param substr The string to search for
+     * @param fromIndex The index to start searching from
+     */
+    indexOf(substr: string, fromIndex?: number): number;
+    /**
+     * @brief Return a substring between two indices
+     * @param start The index to start substring at
+     * @param end The index to end substring at
+     */
+    slice(start: number, end?: number): string;
 }
 
 declare class Boolean { }

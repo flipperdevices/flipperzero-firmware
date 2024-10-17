@@ -101,8 +101,10 @@ static void js_gui_vd_switch_to(struct mjs* mjs) {
     mjs_val_t view;
     JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_OBJ(&view));
     JsGuiViewData* view_data = JS_GET_INST(mjs, view);
-    JsGui* module = JS_GET_CONTEXT(mjs);
+    mjs_val_t vd_obj = mjs_get_this(mjs);
+    JsGui* module = JS_GET_INST(mjs, vd_obj);
     view_dispatcher_switch_to_view(module->dispatcher, (uint32_t)view_data->id);
+    mjs_set(mjs, vd_obj, "currentView", ~0, view);
 }
 
 static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
@@ -154,6 +156,7 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
         JS_FIELD("switchTo", MJS_MK_FN(js_gui_vd_switch_to));
         JS_FIELD("custom", mjs_mk_foreign(mjs, &module->custom_contract));
         JS_FIELD("navigation", mjs_mk_foreign(mjs, &module->navigation_contract));
+        JS_FIELD("currentView", MJS_NULL);
     }
 
     // create API object
@@ -215,6 +218,20 @@ static bool
             }
             c_value = (JsViewPropValue){.array = value};
         } break;
+        case JsViewPropTypeTypedArr: {
+            if(!mjs_is_typed_array(value)) {
+                expected_type = "typed_array";
+                break;
+            }
+            c_value = (JsViewPropValue){.array = value};
+        } break;
+        case JsViewPropTypeBool: {
+            if(!mjs_is_boolean(value)) {
+                expected_type = "bool";
+                break;
+            }
+            c_value = (JsViewPropValue){.boolean = mjs_get_bool(mjs, value)};
+        } break;
         }
 
         if(expected_type) {
@@ -244,6 +261,26 @@ static void js_gui_view_set(struct mjs* mjs) {
 }
 
 /**
+ * @brief `View.hasProperty`
+ */
+static void js_gui_view_has_property(struct mjs* mjs) {
+    const char* name;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&name));
+    JsGuiViewData* data = JS_GET_CONTEXT(mjs);
+    const JsViewDescriptor* descriptor = data->descriptor;
+
+    for(size_t i = 0; i < descriptor->prop_cnt; i++) {
+        JsViewPropDescriptor prop = descriptor->props[i];
+        if(strcmp(prop.name, name) != 0) continue;
+
+        mjs_return(mjs, mjs_mk_boolean(mjs, true));
+        return;
+    }
+
+    mjs_return(mjs, mjs_mk_boolean(mjs, false));
+}
+
+/**
  * @brief `View` destructor
  */
 static void js_gui_view_destructor(struct mjs* mjs, mjs_val_t obj) {
@@ -267,6 +304,7 @@ static mjs_val_t js_gui_make_view(struct mjs* mjs, const JsViewDescriptor* descr
     // generic view API
     mjs_val_t view_obj = mjs_mk_object(mjs);
     mjs_set(mjs, view_obj, "set", ~0, MJS_MK_FN(js_gui_view_set));
+    mjs_set(mjs, view_obj, "hasProperty", ~0, MJS_MK_FN(js_gui_view_has_property));
 
     // object data
     JsGuiViewData* data = malloc(sizeof(JsGuiViewData));
