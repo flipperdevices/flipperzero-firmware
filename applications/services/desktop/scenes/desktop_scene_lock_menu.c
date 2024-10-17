@@ -26,6 +26,8 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     desktop_lock_menu_set_stealth_mode_state(
         desktop->lock_menu, furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
     desktop_lock_menu_set_idx(desktop->lock_menu, 0);
+    desktop_lock_menu_set_notification_record(desktop->lock_menu, desktop->notification);
+    desktop_lock_menu_refresh_notification_values(desktop->lock_menu);
 
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdLockMenu);
 }
@@ -77,5 +79,9 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
 }
 
 void desktop_scene_lock_menu_on_exit(void* context) {
-    UNUSED(context);
+    Desktop* desktop = (Desktop*)context;
+
+    if(desktop_lock_menu_did_notification_settings_change(desktop->lock_menu)) {
+        notification_message_save_settings(desktop->notification);
+    }
 }
