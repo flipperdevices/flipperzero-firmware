@@ -1,4 +1,5 @@
 #include <core/common_defines.h>
+#include <expansion/expansion.h>
 #include <furi_hal.h>
 #include "../js_modules.h"
 #include <m-array.h>
@@ -89,6 +90,9 @@ static void js_serial_setup(struct mjs* mjs) {
         return;
     }
 
+    expansion_disable(furi_record_open(RECORD_EXPANSION));
+    furi_record_close(RECORD_EXPANSION);
+
     serial->serial_handle = furi_hal_serial_control_acquire(serial_id);
     if(serial->serial_handle) {
         serial->rx_stream = furi_stream_buffer_alloc(RX_BUF_LEN, 1);
@@ -96,6 +100,9 @@ static void js_serial_setup(struct mjs* mjs) {
         furi_hal_serial_async_rx_start(
             serial->serial_handle, js_serial_on_async_rx, serial, false);
         serial->setup_done = true;
+    } else {
+        expansion_enable(furi_record_open(RECORD_EXPANSION));
+        furi_record_close(RECORD_EXPANSION);
     }
 }
 

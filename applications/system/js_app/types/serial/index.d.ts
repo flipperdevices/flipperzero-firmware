@@ -1,5 +1,8 @@
 /**
  * @brief Initializes the serial port
+ * 
+ * Automatically disables Expansion module service to prevent interference.
+ * 
  * @param port The port to initialize (`"lpuart"` or `"start"`)
  * @param baudRate 
  */
