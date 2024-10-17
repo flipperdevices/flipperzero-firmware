@@ -64,6 +64,17 @@ static const struct {
     {"F22", HID_KEYBOARD_F22},
     {"F23", HID_KEYBOARD_F23},
     {"F24", HID_KEYBOARD_F24},
+
+    {"NUM0", HID_KEYPAD_0},
+    {"NUM1", HID_KEYPAD_1},
+    {"NUM2", HID_KEYPAD_2},
+    {"NUM3", HID_KEYPAD_3},
+    {"NUM4", HID_KEYPAD_4},
+    {"NUM5", HID_KEYPAD_5},
+    {"NUM6", HID_KEYPAD_6},
+    {"NUM7", HID_KEYPAD_7},
+    {"NUM8", HID_KEYPAD_8},
+    {"NUM9", HID_KEYPAD_9},
 };
 
 static bool setup_parse_params(struct mjs* mjs, mjs_val_t arg, FuriHalUsbHidConfig* hid_cfg) {
