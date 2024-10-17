@@ -105,9 +105,13 @@ eventLoop.subscribe(views.bytekb.input, function (_sub, data, gui, views) {
 }, gui, views);
 
 // go to the demo chooser screen when the back key is pressed
-eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, gui, views) {
+eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, gui, views, eventLoop) {
+    if (gui.viewDispatcher.currentView === views.demos) {
+        eventLoop.stop();
+        return;
+    }
     gui.viewDispatcher.switchTo(views.demos);
-}, gui, views);
+}, gui, views, eventLoop);
 
 // run UI
 gui.viewDispatcher.switchTo(views.demos);
