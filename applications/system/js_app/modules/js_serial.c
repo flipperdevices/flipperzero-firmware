@@ -346,6 +346,55 @@ static void js_serial_read_bytes(struct mjs* mjs) {
     free(read_buf);
 }
 
+static char* js_serial_receive_any(JsSerialInst* serial, size_t* len, uint32_t timeout) {
+    uint32_t flags = ThreadEventCustomDataRx;
+    if(furi_stream_buffer_is_empty(serial->rx_stream)) {
+        flags = js_flags_wait(serial->mjs, ThreadEventCustomDataRx, timeout);
+    }
+    if(flags & ThreadEventCustomDataRx) { // New data received
+        *len = furi_stream_buffer_bytes_available(serial->rx_stream);
+        if(!*len) return NULL;
+        char* buf = malloc(*len);
+        furi_stream_buffer_receive(serial->rx_stream, buf, *len, 0);
+        return buf;
+    }
+    return NULL;
+}
+
+static void js_serial_read_any(struct mjs* mjs) {
+    mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
+    JsSerialInst* serial = mjs_get_ptr(mjs, obj_inst);
+    furi_assert(serial);
+    if(!serial->setup_done) {
+        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Serial is not configured");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
+    uint32_t timeout = FuriWaitForever;
+
+    do {
+        size_t num_args = mjs_nargs(mjs);
+        if(num_args == 1) {
+            mjs_val_t timeout_arg = mjs_arg(mjs, 0);
+            if(!mjs_is_number(timeout_arg)) {
+                break;
+            }
+            timeout = mjs_get_int32(mjs, timeout_arg);
+        }
+    } while(0);
+
+    size_t bytes_read = 0;
+    char* read_buf = js_serial_receive_any(serial, &bytes_read, timeout);
+
+    mjs_val_t return_obj = MJS_UNDEFINED;
+    if(bytes_read > 0 && read_buf) {
+        return_obj = mjs_mk_string(mjs, read_buf, bytes_read, true);
+    }
+    mjs_return(mjs, return_obj);
+    free(read_buf);
+}
+
 static bool
     js_serial_expect_parse_string(struct mjs* mjs, mjs_val_t arg, PatternArray_t patterns) {
     size_t str_len = 0;
@@ -584,6 +633,7 @@ static void* js_serial_create(struct mjs* mjs, mjs_val_t* object, JsModules* mod
     mjs_set(mjs, serial_obj, "read", ~0, MJS_MK_FN(js_serial_read));
     mjs_set(mjs, serial_obj, "readln", ~0, MJS_MK_FN(js_serial_readln));
     mjs_set(mjs, serial_obj, "readBytes", ~0, MJS_MK_FN(js_serial_read_bytes));
+    mjs_set(mjs, serial_obj, "readAny", ~0, MJS_MK_FN(js_serial_read_any));
     mjs_set(mjs, serial_obj, "expect", ~0, MJS_MK_FN(js_serial_expect));
     *object = serial_obj;
 

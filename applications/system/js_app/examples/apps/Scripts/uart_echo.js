@@ -9,3 +9,5 @@ while (1) {
         print("0x" + toString(data_view[0], 16));
     }
 }
+
+// You can also use serial.readAny(timeout), will avoid starving your loop with single byte reads

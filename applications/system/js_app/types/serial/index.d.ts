@@ -43,6 +43,19 @@ export declare function read(length: number, timeout?: number): string | undefin
 export declare function readln(timeout?: number): string;
 
 /**
+ * @brief Read any available amount of data from the serial port
+ * 
+ * Can be useful to avoid starving your loop with small reads.
+ * 
+ * @param timeout The number of time, in milliseconds, after which this function
+ *                will give up and return nothing. If unset, the function will
+ *                wait forever.
+ * @returns The received data interpreted as ASCII, or `undefined` if 0 bytes
+ *          were read.
+ */
+export declare function readAny(timeout?: number): string | undefined;
+
+/**
  * @brief Reads data from the serial port
  * @param length The number of bytes to read
  * @param timeout The number of time, in milliseconds, after which this function
