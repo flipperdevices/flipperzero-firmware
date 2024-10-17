@@ -377,7 +377,7 @@ void storage_common_resolve_path_and_ensure_app_directory(Storage* storage, Furi
  * @param storage pointer to a storage API instance.
  * @param source pointer to a zero-terminated string containing the source path.
  * @param dest pointer to a zero-terminated string containing the destination path.
- * @return FSE_OK if the migration was successfull completed, any other error code on failure.
+ * @return FSE_OK if the migration was successfully completed, any other error code on failure.
  */
 FS_Error storage_common_migrate(Storage* storage, const char* source, const char* dest);
 
@@ -401,26 +401,31 @@ bool storage_common_exists(Storage* storage, const char* path);
  * - /int/Test and /int/test -> false (Case-sensitive storage),
  * - /ext/Test and /ext/test -> true (Case-insensitive storage).
  *
- * If the truncate parameter is set to true, the second path will be
- * truncated to be no longer than the first one. It is useful to determine
- * whether path2 is a subdirectory of path1.
- *
  * @param storage pointer to a storage API instance.
  * @param path1 pointer to a zero-terminated string containing the first path.
  * @param path2 pointer to a zero-terminated string containing the second path.
- * @param truncate whether to truncate path2 to be no longer than path1.
  * @return true if paths are equivalent, false otherwise.
  */
-bool storage_common_equivalent_path(
-    Storage* storage,
-    const char* path1,
-    const char* path2,
-    bool truncate);
+bool storage_common_equivalent_path(Storage* storage, const char* path1, const char* path2);
+
+/**
+ * @brief Check whether a path is a subpath of another path.
+ * 
+ * This function respects storage-defined equivalence rules
+ * (see `storage_common_equivalent_path`).
+ * 
+ * @param storage pointer to a storage API instance.
+ * @param parent pointer to a zero-terminated string containing the parent path.
+ * @param child pointer to a zero-terminated string containing the child path.
+ * @return true if `child` is a subpath of `parent`, or if `child` is equivalent
+ *         to `parent`; false otherwise.
+ */
+bool storage_common_is_subdir(Storage* storage, const char* parent, const char* child);
 
 /******************* Error Functions *******************/
 
 /**
- * @brief Get the textual description of a numeric error identifer.
+ * @brief Get the textual description of a numeric error identifier.
  *
  * @param error_id numeric identifier of the error in question.
  * @return pointer to a statically allocated zero-terminated string containing the respective error text.
