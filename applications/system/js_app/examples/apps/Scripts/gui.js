@@ -7,6 +7,7 @@ let emptyView = require("gui/empty_screen");
 let textInputView = require("gui/text_input");
 let textBoxView = require("gui/text_box");
 let dialogView = require("gui/dialog");
+let flipper = require("flipper");
 
 // declare view instances
 let views = {
@@ -14,6 +15,9 @@ let views = {
     empty: emptyView.make(),
     keyboard: textInputView.makeWith({
         header: "Enter your name",
+        defaultText: flipper.getName(),
+        defaultTextClear: true,
+        // Props for makeWith() are passed in reverse order, so maxLength must be after defaultText
         minLength: 0,
         maxLength: 32,
     }),
@@ -57,6 +61,7 @@ eventLoop.subscribe(views.demos.chosen, function (_sub, index, gui, eventLoop, v
 
 // say hi after keyboard input
 eventLoop.subscribe(views.keyboard.input, function (_sub, name, gui, views) {
+    views.keyboard.set("defaultText", name); // Remember for next usage
     views.helloDialog.set("text", "Hi " + name + "! :)");
     gui.viewDispatcher.switchTo(views.helloDialog);
 }, gui, views);
