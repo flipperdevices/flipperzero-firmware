@@ -13,7 +13,13 @@ let views = {
     }),
 };
 
-badusb.setup({ vid: 0xAAAA, pid: 0xBBBB, mfrName: "Flipper", prodName: "Zero" });
+badusb.setup({
+    vid: 0xAAAA,
+    pid: 0xBBBB,
+    mfrName: "Flipper",
+    prodName: "Zero",
+    layoutPath: "/ext/badusb/assets/layouts/en-US.kl"
+});
 
 eventLoop.subscribe(views.dialog.input, function (_sub, button, eventLoop, gui) {
     if (button !== "center")
