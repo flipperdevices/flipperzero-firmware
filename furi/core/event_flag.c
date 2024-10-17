@@ -48,9 +48,7 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
             portYIELD_FROM_ISR(yield);
         }
     } else {
-        vTaskSuspendAll();
         rflags = xEventGroupSetBits(hEventGroup, (EventBits_t)flags);
-        (void)xTaskResumeAll();
     }
 
     /* Return event flags after setting */
