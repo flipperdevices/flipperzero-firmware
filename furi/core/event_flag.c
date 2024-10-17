@@ -48,6 +48,8 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
     uint32_t rflags;
     BaseType_t yield;
 
+    FURI_CRITICAL_ENTER();
+
     if(FURI_IS_IRQ_MODE()) {
         yield = pdFALSE;
         if(xEventGroupSetBitsFromISR(hEventGroup, (EventBits_t)flags, &yield) == pdFAIL) {
@@ -63,6 +65,9 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
     if(rflags & flags) {
         furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventIn);
     }
+
+    FURI_CRITICAL_EXIT();
+
     /* Return event flags after setting */
     return rflags;
 }
@@ -74,6 +79,7 @@ uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
     EventGroupHandle_t hEventGroup = (EventGroupHandle_t)instance;
     uint32_t rflags;
 
+    FURI_CRITICAL_ENTER();
     if(FURI_IS_IRQ_MODE()) {
         rflags = xEventGroupGetBitsFromISR(hEventGroup);
 
@@ -92,6 +98,8 @@ uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
     if((rflags & flags) == 0) {
         furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
     }
+    FURI_CRITICAL_EXIT();
+
     /* Return event flags before clearing */
     return rflags;
 }
@@ -162,6 +170,7 @@ uint32_t furi_event_flag_wait(
     if(rflags != 0) {
         furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
     }
+
     /* Return event flags before clearing */
     return rflags;
 }
