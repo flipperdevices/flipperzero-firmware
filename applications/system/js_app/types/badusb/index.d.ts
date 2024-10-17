@@ -97,3 +97,8 @@ export declare function altPrint(string: string, delay?: number): void;
  * @param delay How many milliseconds to wait between key presses
  */
 export declare function altPrintln(string: string, delay?: number): void;
+
+/**
+ * @brief Releases usb, optional, but allows to switch usb profile
+ */
+export declare function quit(): void;
