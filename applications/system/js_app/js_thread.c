@@ -204,6 +204,42 @@ static void js_global_to_string(struct mjs* mjs) {
     mjs_return(mjs, ret);
 }
 
+static void js_parse_int(struct mjs* mjs) {
+    mjs_val_t arg = mjs_arg(mjs, 0);
+    if(!mjs_is_string(arg)) {
+        mjs_return(mjs, mjs_mk_number(mjs, 0));
+        return;
+    }
+    size_t str_len = 0;
+    const char* str = mjs_get_string(mjs, &arg, &str_len);
+    if((str_len == 0) || (str == NULL)) {
+        mjs_return(mjs, mjs_mk_number(mjs, 0));
+        return;
+    }
+
+    int32_t num = 0;
+    int32_t sign = 1;
+    size_t i = 0;
+
+    if(str[0] == '-') {
+        sign = -1;
+        i = 1;
+    } else if(str[0] == '+') {
+        i = 1;
+    }
+
+    for(; i < str_len; i++) {
+        if(str[i] >= '0' && str[i] <= '9') {
+            num = num * 10 + (str[i] - '0');
+        } else {
+            break;
+        }
+    }
+    num *= sign;
+
+    mjs_return(mjs, mjs_mk_number(mjs, num));
+}
+
 #ifdef JS_DEBUG
 static void js_dump_write_callback(void* ctx, const char* format, ...) {
     File* file = ctx;
@@ -236,6 +272,7 @@ static int32_t js_thread(void* arg) {
     mjs_set(mjs, global, "toString", ~0, MJS_MK_FN(js_global_to_string));
     mjs_set(mjs, global, "ffi_address", ~0, MJS_MK_FN(js_ffi_address));
     mjs_set(mjs, global, "require", ~0, MJS_MK_FN(js_require));
+    mjs_set(mjs, global, "parseInt", ~0, MJS_MK_FN(js_parse_int));
 
     mjs_val_t console_obj = mjs_mk_object(mjs);
     mjs_set(mjs, console_obj, "log", ~0, MJS_MK_FN(js_console_log));

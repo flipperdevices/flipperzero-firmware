@@ -19,6 +19,12 @@ declare function print(...args: any[]): void;
 declare function toString(value: number, base?: number): string;
 
 /**
+ * @brief Converts a string to a number
+ * @param text The string to convert to a number
+ */
+declare function parseInt(text: string): number;
+
+/**
  * @brief Reads a JS value from a file
  * 
  * Reads a file at the specified path, interprets it as a JS value and returns
