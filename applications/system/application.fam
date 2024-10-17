@@ -6,6 +6,7 @@ App(
         "updater_app",
         "js_app",
         "js_app_start",
+        "mfkey",
         # "archive",
     ],
 )
