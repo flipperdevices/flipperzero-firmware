@@ -37,6 +37,16 @@ declare function toUpperCase(text: string): string;
 declare function toLowerCase(text: string): string;
 
 /**
+ * @brief Path to the directory containing the current script
+ */
+declare const __dirpath: string;
+
+/**
+ * @brief Path to the current script file
+ */
+declare const __filepath: string;
+
+/**
  * @brief Reads a JS value from a file
  * 
  * Reads a file at the specified path, interprets it as a JS value and returns
