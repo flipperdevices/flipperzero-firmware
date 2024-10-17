@@ -50,11 +50,12 @@ declare const __filepath: string;
  * @brief Reads a JS value from a file
  * 
  * Reads a file at the specified path, interprets it as a JS value and returns
- * said value.
+ * the last value pushed on the stack.
  * 
  * @param path The path to the file
+ * @param scope An object to use as global scope while running this file
  */
-declare function load(path: string): any;
+declare function load(path: string, scope?: object): any;
 
 /**
  * @brief Return 1-byte string whose ASCII code is the integer `n`
