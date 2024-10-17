@@ -58,7 +58,7 @@ static int32_t music_worker_thread_callback(void* context) {
 
                 float note_from_a4 = (float)note_block->semitone - NOTE_C4_SEMITONE;
                 float frequency = NOTE_C4 * powf(TWO_POW_TWELTH_ROOT, note_from_a4);
-                float duration = 60.0 * furi_kernel_get_tick_frequency() * 4 / instance->bpm /
+                float duration = 60.0f * furi_kernel_get_tick_frequency() * 4 / instance->bpm /
                                  note_block->duration;
                 uint32_t dots = note_block->dots;
                 while(dots > 0) {
@@ -80,7 +80,7 @@ static int32_t music_worker_thread_callback(void* context) {
                 furi_hal_speaker_stop();
                 furi_hal_speaker_start(frequency, volume);
                 while(instance->should_work && furi_get_tick() < next_tick) {
-                    volume *= 0.9945679;
+                    volume *= 0.9945679f;
                     furi_hal_speaker_set_volume(volume);
                     furi_delay_ms(2);
                 }

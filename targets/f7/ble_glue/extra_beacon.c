@@ -6,7 +6,7 @@
 
 #define TAG "BleExtraBeacon"
 
-#define GAP_MS_TO_SCAN_INTERVAL(x) ((uint16_t)((x) / 0.625))
+#define GAP_MS_TO_SCAN_INTERVAL(x) ((uint16_t)((x) / 0.625f))
 
 // AN5289: 4.7, in order to use flash controller interval must be at least 25ms + advertisement, which is 30 ms
 // Since we don't use flash controller anymore interval can be lowered to 20ms
