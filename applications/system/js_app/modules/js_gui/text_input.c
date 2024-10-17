@@ -61,7 +61,6 @@ static bool max_len_assign(
 }
 
 static JsKbdContext* ctx_make(struct mjs* mjs, TextInput* input, mjs_val_t view_obj) {
-    UNUSED(input);
     JsKbdContext* context = malloc(sizeof(JsKbdContext));
     *context = (JsKbdContext){
         .buffer_size = DEFAULT_BUF_SZ,
@@ -80,8 +79,13 @@ static JsKbdContext* ctx_make(struct mjs* mjs, TextInput* input, mjs_val_t view_
                 .transformer_context = context,
             },
     };
-    UNUSED(mjs);
-    UNUSED(view_obj);
+    text_input_set_result_callback(
+        input,
+        (TextInputCallback)input_callback,
+        context,
+        context->buffer,
+        context->buffer_size,
+        context->default_text_clear);
     mjs_set(mjs, view_obj, "input", ~0, mjs_mk_foreign(mjs, &context->contract));
     return context;
 }
