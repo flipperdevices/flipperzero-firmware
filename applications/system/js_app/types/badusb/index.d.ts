@@ -82,3 +82,18 @@ export declare function print(string: string, delay?: number): void;
  * @param delay How many milliseconds to wait between key presses
  */
 export declare function println(string: string, delay?: number): void;
+
+/**
+ * @brief Prints a string by Alt+Numpad method - works only on Windows!
+ * @param string The string to print
+ * @param delay How many milliseconds to wait between key presses
+ */
+export declare function altPrint(string: string, delay?: number): void;
+
+/**
+ * @brief Prints a string by Alt+Numpad method - works only on Windows!
+ *        Presses "Enter" after printing the string
+ * @param string The string to print
+ * @param delay How many milliseconds to wait between key presses
+ */
+export declare function altPrintln(string: string, delay?: number): void;
