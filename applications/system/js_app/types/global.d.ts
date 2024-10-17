@@ -25,6 +25,18 @@ declare function toString(value: number, base?: number): string;
 declare function parseInt(text: string): number;
 
 /**
+ * @brief Transforms a string to upper case
+ * @param text The string to transforms to upper case
+ */
+declare function toUpperCase(text: string): string;
+
+/**
+ * @brief Transforms a string to lower case
+ * @param text The string to transforms to lower case
+ */
+declare function toLowerCase(text: string): string;
+
+/**
  * @brief Reads a JS value from a file
  * 
  * Reads a file at the specified path, interprets it as a JS value and returns

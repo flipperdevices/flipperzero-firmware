@@ -240,6 +240,52 @@ static void js_parse_int(struct mjs* mjs) {
     mjs_return(mjs, mjs_mk_number(mjs, num));
 }
 
+static void js_to_upper_case(struct mjs* mjs) {
+    mjs_val_t arg0 = mjs_arg(mjs, 0);
+
+    size_t str_len;
+    const char* str = NULL;
+    if(mjs_is_string(arg0)) {
+        str = mjs_get_string(mjs, &arg0, &str_len);
+    }
+    if(!str) {
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
+    char* upperStr = strdup(str);
+    for(size_t i = 0; i < str_len; i++) {
+        upperStr[i] = toupper(upperStr[i]);
+    }
+
+    mjs_val_t resultStr = mjs_mk_string(mjs, upperStr, ~0, true);
+    free(upperStr);
+    mjs_return(mjs, resultStr);
+}
+
+static void js_to_lower_case(struct mjs* mjs) {
+    mjs_val_t arg0 = mjs_arg(mjs, 0);
+
+    size_t str_len;
+    const char* str = NULL;
+    if(mjs_is_string(arg0)) {
+        str = mjs_get_string(mjs, &arg0, &str_len);
+    }
+    if(!str) {
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
+    char* lowerStr = strdup(str);
+    for(size_t i = 0; i < str_len; i++) {
+        lowerStr[i] = tolower(lowerStr[i]);
+    }
+
+    mjs_val_t resultStr = mjs_mk_string(mjs, lowerStr, ~0, true);
+    free(lowerStr);
+    mjs_return(mjs, resultStr);
+}
+
 #ifdef JS_DEBUG
 static void js_dump_write_callback(void* ctx, const char* format, ...) {
     File* file = ctx;
@@ -273,6 +319,8 @@ static int32_t js_thread(void* arg) {
     mjs_set(mjs, global, "ffi_address", ~0, MJS_MK_FN(js_ffi_address));
     mjs_set(mjs, global, "require", ~0, MJS_MK_FN(js_require));
     mjs_set(mjs, global, "parseInt", ~0, MJS_MK_FN(js_parse_int));
+    mjs_set(mjs, global, "toUpperCase", ~0, MJS_MK_FN(js_to_upper_case));
+    mjs_set(mjs, global, "toLowerCase", ~0, MJS_MK_FN(js_to_lower_case));
 
     mjs_val_t console_obj = mjs_mk_object(mjs);
     mjs_set(mjs, console_obj, "log", ~0, MJS_MK_FN(js_console_log));
