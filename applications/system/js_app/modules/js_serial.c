@@ -3,7 +3,8 @@
 #include "../js_modules.h"
 #include <m-array.h>
 
-#define TAG "js_serial"
+#define TAG "JsSerial"
+
 #define RX_BUF_LEN 2048
 
 typedef struct {
@@ -444,14 +445,14 @@ static int32_t js_serial_expect_check_pattern_start(
     int32_t pattern_last) {
     size_t array_len = PatternArray_size(patterns);
     if((pattern_last + 1) >= (int32_t)array_len) {
-        return (-1);
+        return -1;
     }
     for(size_t i = pattern_last + 1; i < array_len; i++) {
         if(PatternArray_get(patterns, i)->data[0] == value) {
             return i;
         }
     }
-    return (-1);
+    return -1;
 }
 
 static void js_serial_expect(struct mjs* mjs) {
@@ -572,7 +573,8 @@ static void js_serial_expect(struct mjs* mjs) {
     }
 }
 
-static void* js_serial_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_serial_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     JsSerialInst* js_serial = malloc(sizeof(JsSerialInst));
     js_serial->mjs = mjs;
     mjs_val_t serial_obj = mjs_mk_object(mjs);
@@ -605,6 +607,7 @@ static const JsModuleDescriptor js_serial_desc = {
     "serial",
     js_serial_create,
     js_serial_destroy,
+    NULL,
 };
 
 static const FlipperAppPluginDescriptor plugin_descriptor = {

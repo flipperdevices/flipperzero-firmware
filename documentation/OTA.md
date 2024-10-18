@@ -2,7 +2,7 @@
 
 ## Executing code from RAM
 
-In Flipper firmware, we have a special boot mode that loads a specially crafted system image into RAM and transfers control to it. System image executing in RAM has full write access to Flipper's entire flash memory — something that's not possible when running main code from the same flash.
+In Flipper firmware, we have a special boot mode that loads a specially crafted system image into RAM and transfers control to it. The system image executing in RAM has full write access to Flipper's entire flash memory — something that's not possible when running main code from the same flash.
 
 We leverage that boot mode to perform OTA firmware updates, including operations on a radio stack running on the second MCU core.
 
@@ -83,7 +83,7 @@ Even if something goes wrong, updater allows you to retry failed operations and 
 |                         |        | **50**     | Package has mismatching HW target          |
 |                         |        | **60**     | Missing DFU file                           |
 |                         |        | **80**     | Missing radio firmware file                |
-|     Backing up LFS      |  **2** | **0-100**  | FS read/write error                        |
+| Backing up configuration|  **2** | **0-100**  | FS read/write error                        |
 |    Checking radio FW    |  **3** | **0-99**   | Error reading radio firmware file          |
 |                         |        | **100**    | CRC mismatch                               |
 |  Uninstalling radio FW  |  **4** | **0**      | SHCI Delete command error                  |
@@ -101,8 +101,8 @@ Even if something goes wrong, updater allows you to retry failed operations and 
 |                         |        | **99-100** | Corrupted DFU file                         |
 |      Writing flash      | **10** | **0-100**  | Block read/write error                     |
 |    Validating flash     | **11** | **0-100**  | Block read/write error                     |
-|      Restoring LFS      | **12** | **0-100**  | FS read/write error                        |
-|   Updating resources    | **13** | **0-100**  | SD card read/write error                   |
+| Restoring configuration | **12** | **0-100**  | FS read/write error                        |
+|   Updating resources    | **13-15** | **0-100**  | SD card read/write error                   |
 
 ## Building update packages
 

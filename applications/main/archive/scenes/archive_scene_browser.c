@@ -1,6 +1,5 @@
 #include "../archive_i.h"
 #include "../helpers/archive_files.h"
-#include "../helpers/archive_apps.h"
 #include "../helpers/archive_favorites.h"
 #include "../helpers/archive_browser.h"
 #include "../views/archive_browser_view.h"
@@ -9,7 +8,7 @@
 
 #define TAG "ArchiveSceneBrowser"
 
-#define SCENE_STATE_DEFAULT (0)
+#define SCENE_STATE_DEFAULT      (0)
 #define SCENE_STATE_NEED_REFRESH (1)
 
 static const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {

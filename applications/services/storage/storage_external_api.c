@@ -1,14 +1,14 @@
 #include <core/log.h>
 #include <core/record.h>
 #include "storage.h"
-#include "storage_i.h"
+#include "storage_i.h" // IWYU pragma: keep
 #include "storage_message.h"
 #include <toolbox/stream/file_stream.h>
 #include <toolbox/dir_walk.h>
 #include "toolbox/path.h"
 
-#define MAX_NAME_LENGTH 256
-#define MAX_EXT_LEN 16
+#define MAX_NAME_LENGTH  256
+#define MAX_EXT_LEN      16
 #define FILE_BUFFER_SIZE 512
 
 #define TAG "StorageApi"
@@ -41,10 +41,10 @@
             .file = file, \
         }};
 
-#define S_RETURN_BOOL (return_data.bool_value);
-#define S_RETURN_UINT16 (return_data.uint16_value);
-#define S_RETURN_UINT64 (return_data.uint64_value);
-#define S_RETURN_ERROR (return_data.error_value);
+#define S_RETURN_BOOL    (return_data.bool_value);
+#define S_RETURN_UINT16  (return_data.uint16_value);
+#define S_RETURN_UINT64  (return_data.uint64_value);
+#define S_RETURN_ERROR   (return_data.error_value);
 #define S_RETURN_CSTRING (return_data.cstring_value);
 
 typedef enum {
@@ -493,13 +493,13 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
             }
 
             // Cannot rename a directory to itself or to a nested directory
-            if(storage_common_equivalent_path(storage, old_path, new_path, true)) {
+            if(storage_common_is_subdir(storage, old_path, new_path)) {
                 error = FSE_INVALID_NAME;
                 break;
             }
 
             // Renaming a regular file to itself does nothing and always succeeds
-        } else if(storage_common_equivalent_path(storage, old_path, new_path, false)) {
+        } else if(storage_common_equivalent_path(storage, old_path, new_path)) {
             error = FSE_OK;
             break;
         }
@@ -816,11 +816,11 @@ bool storage_common_exists(Storage* storage, const char* path) {
     return storage_common_stat(storage, path, &file_info) == FSE_OK;
 }
 
-bool storage_common_equivalent_path(
+static bool storage_internal_equivalent_path(
     Storage* storage,
     const char* path1,
     const char* path2,
-    bool truncate) {
+    bool check_subdir) {
     furi_check(storage);
 
     S_API_PROLOGUE;
@@ -829,7 +829,7 @@ bool storage_common_equivalent_path(
         .cequivpath = {
             .path1 = path1,
             .path2 = path2,
-            .truncate = truncate,
+            .check_subdir = check_subdir,
             .thread_id = furi_thread_get_current_id(),
         }};
 
@@ -837,6 +837,14 @@ bool storage_common_equivalent_path(
     S_API_EPILOGUE;
 
     return S_RETURN_BOOL;
+}
+
+bool storage_common_equivalent_path(Storage* storage, const char* path1, const char* path2) {
+    return storage_internal_equivalent_path(storage, path1, path2, false);
+}
+
+bool storage_common_is_subdir(Storage* storage, const char* parent, const char* child) {
+    return storage_internal_equivalent_path(storage, parent, child, true);
 }
 
 /****************** ERROR ******************/
@@ -929,12 +937,12 @@ File* storage_file_alloc(Storage* storage) {
 
 bool storage_file_is_open(File* file) {
     furi_check(file);
-    return (file->type != FileTypeClosed);
+    return file->type != FileTypeClosed;
 }
 
 bool storage_file_is_dir(File* file) {
     furi_check(file);
-    return (file->type == FileTypeOpenDir);
+    return file->type == FileTypeOpenDir;
 }
 
 void storage_file_free(File* file) {

@@ -8,8 +8,6 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-#include CMSIS_device_header
-
 bool furi_kernel_is_irq_or_masked(void) {
     bool irq = false;
     BaseType_t state;
@@ -31,11 +29,11 @@ bool furi_kernel_is_irq_or_masked(void) {
     }
 
     /* Return context, 0: thread context, 1: IRQ context */
-    return (irq);
+    return irq;
 }
 
 bool furi_kernel_is_running(void) {
-    return xTaskGetSchedulerState() != taskSCHEDULER_RUNNING;
+    return xTaskGetSchedulerState() == taskSCHEDULER_RUNNING;
 }
 
 int32_t furi_kernel_lock(void) {
@@ -60,7 +58,7 @@ int32_t furi_kernel_lock(void) {
     }
 
     /* Return previous lock state */
-    return (lock);
+    return lock;
 }
 
 int32_t furi_kernel_unlock(void) {
@@ -90,7 +88,7 @@ int32_t furi_kernel_unlock(void) {
     }
 
     /* Return previous lock state */
-    return (lock);
+    return lock;
 }
 
 int32_t furi_kernel_restore_lock(int32_t lock) {
@@ -121,16 +119,18 @@ int32_t furi_kernel_restore_lock(int32_t lock) {
     }
 
     /* Return new lock state */
-    return (lock);
+    return lock;
 }
 
 uint32_t furi_kernel_get_tick_frequency(void) {
     /* Return frequency in hertz */
-    return (configTICK_RATE_HZ_RAW);
+    return configTICK_RATE_HZ_RAW;
 }
 
 void furi_delay_tick(uint32_t ticks) {
     furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(furi_thread_get_current_id() != xTaskGetIdleTaskHandle());
+
     if(ticks == 0U) {
         taskYIELD();
     } else {
@@ -140,6 +140,7 @@ void furi_delay_tick(uint32_t ticks) {
 
 FuriStatus furi_delay_until_tick(uint32_t tick) {
     furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(furi_thread_get_current_id() != xTaskGetIdleTaskHandle());
 
     TickType_t tcnt, delay;
     FuriStatus stat;
@@ -162,7 +163,7 @@ FuriStatus furi_delay_until_tick(uint32_t tick) {
     }
 
     /* Return execution status */
-    return (stat);
+    return stat;
 }
 
 uint32_t furi_get_tick(void) {

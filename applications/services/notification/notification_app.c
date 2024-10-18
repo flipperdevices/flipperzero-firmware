@@ -39,7 +39,7 @@ void notification_message_save_settings(NotificationApp* app) {
     furi_event_flag_wait(
         m.back_event, NOTIFICATION_EVENT_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
     furi_event_flag_free(m.back_event);
-};
+}
 
 // internal layer
 static void
@@ -143,17 +143,16 @@ static void notification_apply_notification_leds(NotificationApp* app, const uin
 
 // settings
 uint8_t notification_settings_get_display_brightness(NotificationApp* app, uint8_t value) {
-    return (value * app->settings.display_brightness);
+    return value * app->settings.display_brightness;
 }
 
 static uint8_t notification_settings_get_rgb_led_brightness(NotificationApp* app, uint8_t value) {
-    return (value * app->settings.led_brightness);
+    return value * app->settings.led_brightness;
 }
 
 static uint32_t notification_settings_display_off_delay_ticks(NotificationApp* app) {
-    return (
-        (float)(app->settings.display_off_delay_ms) /
-        (1000.0f / furi_kernel_get_tick_frequency()));
+    return (float)(app->settings.display_off_delay_ms) /
+           (1000.0f / furi_kernel_get_tick_frequency());
 }
 
 // generics
@@ -439,7 +438,7 @@ static bool notification_load_settings(NotificationApp* app) {
     File* file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
     const size_t settings_size = sizeof(NotificationSettings);
 
-    FURI_LOG_I(TAG, "loading settings from \"%s\"", NOTIFICATION_SETTINGS_PATH);
+    FURI_LOG_I(TAG, "Loading \"%s\"", NOTIFICATION_SETTINGS_PATH);
     bool fs_result =
         storage_file_open(file, NOTIFICATION_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
@@ -452,8 +451,6 @@ static bool notification_load_settings(NotificationApp* app) {
     }
 
     if(fs_result) {
-        FURI_LOG_I(TAG, "load success");
-
         if(settings.version != NOTIFICATION_SETTINGS_VERSION) {
             FURI_LOG_E(
                 TAG, "version(%d != %d) mismatch", settings.version, NOTIFICATION_SETTINGS_VERSION);
@@ -463,7 +460,7 @@ static bool notification_load_settings(NotificationApp* app) {
             furi_kernel_unlock();
         }
     } else {
-        FURI_LOG_E(TAG, "load failed, %s", storage_file_get_error_desc(file));
+        FURI_LOG_E(TAG, "Load failed, %s", storage_file_get_error_desc(file));
     }
 
     storage_file_close(file);
@@ -471,14 +468,14 @@ static bool notification_load_settings(NotificationApp* app) {
     furi_record_close(RECORD_STORAGE);
 
     return fs_result;
-};
+}
 
 static bool notification_save_settings(NotificationApp* app) {
     NotificationSettings settings;
     File* file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
     const size_t settings_size = sizeof(NotificationSettings);
 
-    FURI_LOG_I(TAG, "saving settings to \"%s\"", NOTIFICATION_SETTINGS_PATH);
+    FURI_LOG_I(TAG, "Saving \"%s\"", NOTIFICATION_SETTINGS_PATH);
 
     furi_kernel_lock();
     memcpy(&settings, &app->settings, settings_size);
@@ -496,9 +493,8 @@ static bool notification_save_settings(NotificationApp* app) {
     }
 
     if(fs_result) {
-        FURI_LOG_I(TAG, "save success");
     } else {
-        FURI_LOG_E(TAG, "save failed, %s", storage_file_get_error_desc(file));
+        FURI_LOG_E(TAG, "Save failed, %s", storage_file_get_error_desc(file));
     }
 
     storage_file_close(file);
@@ -506,7 +502,7 @@ static bool notification_save_settings(NotificationApp* app) {
     furi_record_close(RECORD_STORAGE);
 
     return fs_result;
-};
+}
 
 static void input_event_callback(const void* value, void* context) {
     furi_assert(value);
@@ -555,16 +551,48 @@ static NotificationApp* notification_app_alloc(void) {
     notification_message(app, &sequence_display_backlight_on);
 
     return app;
-};
+}
+
+static void notification_storage_callback(const void* message, void* context) {
+    furi_assert(context);
+    NotificationApp* app = context;
+    const StorageEvent* event = message;
+
+    if(event->type == StorageEventTypeCardMount) {
+        NotificationAppMessage m = {
+            .type = LoadSettingsMessage,
+        };
+
+        furi_check(furi_message_queue_put(app->queue, &m, FuriWaitForever) == FuriStatusOk);
+    }
+}
+
+static void notification_apply_settings(NotificationApp* app) {
+    if(!notification_load_settings(app)) {
+        notification_save_settings(app);
+    }
+
+    notification_apply_lcd_contrast(app);
+}
+
+static void notification_init_settings(NotificationApp* app) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    furi_pubsub_subscribe(storage_get_pubsub(storage), notification_storage_callback, app);
+
+    if(storage_sd_status(storage) != FSE_OK) {
+        FURI_LOG_D(TAG, "SD Card not ready, skipping settings");
+        return;
+    }
+
+    notification_apply_settings(app);
+}
 
 // App
 int32_t notification_srv(void* p) {
     UNUSED(p);
     NotificationApp* app = notification_app_alloc();
 
-    if(!notification_load_settings(app)) {
-        notification_save_settings(app);
-    }
+    notification_init_settings(app);
 
     notification_vibro_off();
     notification_sound_off();
@@ -572,7 +600,6 @@ int32_t notification_srv(void* p) {
     notification_apply_internal_led_layer(&app->led[0], 0x00);
     notification_apply_internal_led_layer(&app->led[1], 0x00);
     notification_apply_internal_led_layer(&app->led[2], 0x00);
-    notification_apply_lcd_contrast(app);
 
     furi_record_create(RECORD_NOTIFICATION, app);
 
@@ -590,6 +617,9 @@ int32_t notification_srv(void* p) {
         case SaveSettingsMessage:
             notification_save_settings(app);
             break;
+        case LoadSettingsMessage:
+            notification_load_settings(app);
+            break;
         }
 
         if(message.back_event != NULL) {
@@ -598,4 +628,4 @@ int32_t notification_srv(void* p) {
     }
 
     return 0;
-};
+}

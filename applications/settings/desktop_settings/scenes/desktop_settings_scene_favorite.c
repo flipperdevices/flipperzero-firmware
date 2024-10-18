@@ -8,17 +8,17 @@
 
 #define APPS_COUNT (FLIPPER_APPS_COUNT + FLIPPER_EXTERNAL_APPS_COUNT)
 
-#define DEFAULT_INDEX (0)
-#define EXTERNAL_BROWSER_NAME ("(   ) Apps Menu (Default)")
+#define DEFAULT_INDEX                  (0)
+#define EXTERNAL_BROWSER_NAME          ("(   ) Apps Menu (Default)")
 #define EXTERNAL_BROWSER_NAME_SELECTED ("(*) Apps Menu (Default)")
-#define PASSPORT_NAME ("(   ) Passport (Default)")
-#define PASSPORT_NAME_SELECTED ("(*) Passport (Default)")
+#define PASSPORT_NAME                  ("(   ) Passport (Default)")
+#define PASSPORT_NAME_SELECTED         ("(*) Passport (Default)")
 
-#define SELECTED_PREFIX ("(*) ")
+#define SELECTED_PREFIX     ("(*) ")
 #define NOT_SELECTED_PREFIX ("(   ) ")
 
-#define EXTERNAL_APPLICATION_INDEX (1)
-#define EXTERNAL_APPLICATION_NAME ("(   ) [Select App]")
+#define EXTERNAL_APPLICATION_INDEX         (1)
+#define EXTERNAL_APPLICATION_NAME          ("(   ) [Select App]")
 #define EXTERNAL_APPLICATION_NAME_SELECTED ("(*) [Select App]")
 
 #define PRESELECTED_SPECIAL 0xffffffff
@@ -80,6 +80,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         furi_assert(favorite_id < DummyAppNumber);
         curr_favorite_app = &app->settings.dummy_apps[favorite_id];
         default_passport = true;
+        favorite_id |= SCENE_STATE_SET_DUMMY_APP;
     }
 
     // Special case: Application browser
@@ -141,28 +142,24 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
 
     switch(favorite_id) {
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppLeftShort:
-        submenu_set_header(submenu, "Left - Short");
+    case SCENE_STATE_SET_DUMMY_APP | DummyAppLeft:
+        submenu_set_header(submenu, "Left - Press");
         break;
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppLeftLong:
-        submenu_set_header(submenu, "Left - Long");
+        submenu_set_header(submenu, "Left - Hold");
         break;
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppRightShort:
-        submenu_set_header(submenu, "Right - Short");
+    case SCENE_STATE_SET_DUMMY_APP | DummyAppRight:
+        submenu_set_header(submenu, "Right - Press");
         break;
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppRightLong:
-        submenu_set_header(submenu, "Right - Long");
-        break;
-    case SCENE_STATE_SET_DUMMY_APP | DummyAppLeft:
-        submenu_set_header(submenu, "Left");
-        break;
-    case SCENE_STATE_SET_DUMMY_APP | DummyAppRight:
-        submenu_set_header(submenu, "Right");
+        submenu_set_header(submenu, "Right - Hold");
         break;
     case SCENE_STATE_SET_DUMMY_APP | DummyAppDown:
-        submenu_set_header(submenu, "Down");
+        submenu_set_header(submenu, "Down - Press");
         break;
     case SCENE_STATE_SET_DUMMY_APP | DummyAppOk:
-        submenu_set_header(submenu, "Middle");
+        submenu_set_header(submenu, "Middle - Press");
         break;
     default:
         break;
@@ -212,16 +209,20 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
 
             if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
                 submenu_reset(app->submenu); // Prevent menu from being shown when we exiting scene
-                strncpy(
+                strlcpy(
                     curr_favorite_app->name_or_path,
                     furi_string_get_cstr(temp_path),
-                    MAX_APP_LENGTH);
+                    sizeof(curr_favorite_app->name_or_path));
                 consumed = true;
             }
         } else {
             size_t app_index = event.event - 2;
             const char* name = favorite_fap_get_app_name(app_index);
-            if(name) strncpy(curr_favorite_app->name_or_path, name, MAX_APP_LENGTH);
+            if(name)
+                strlcpy(
+                    curr_favorite_app->name_or_path,
+                    name,
+                    sizeof(curr_favorite_app->name_or_path));
             consumed = true;
         }
         if(consumed) {
@@ -229,7 +230,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
         };
         consumed = true;
 
-        DESKTOP_SETTINGS_SAVE(&app->settings);
+        desktop_settings_save(&app->settings);
     }
 
     furi_string_free(temp_path);

@@ -7,7 +7,12 @@
 #include <gui/modules/submenu.h>
 #include <gui/gui.h>
 
-#include "iso7816_t0_apdu.h"
+#include "iso7816/iso7816_handler.h"
+#include "iso7816/iso7816_t0_apdu.h"
+#include "iso7816/iso7816_atr.h"
+#include "iso7816/iso7816_response.h"
+
+#include "ccid_test_app_commands.h"
 
 typedef enum {
     EventTypeInput,
@@ -18,6 +23,7 @@ typedef struct {
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
     FuriHalUsbCcidConfig ccid_cfg;
+    Iso7816Handler* iso7816_handler;
 } CcidTestApp;
 
 typedef struct {
@@ -32,38 +38,6 @@ typedef enum {
     CcidTestSubmenuIndexRemoveSmartcard,
     CcidTestSubmenuIndexInsertSmartcardReader
 } SubmenuIndex;
-
-void icc_power_on_callback(uint8_t* atrBuffer, uint32_t* atrlen, void* context) {
-    UNUSED(context);
-
-    iso7816_answer_to_reset(atrBuffer, atrlen);
-}
-
-//dataBlock points to the buffer
-//dataBlockLen tells reader how nany bytes should be read
-void xfr_datablock_callback(
-    const uint8_t* dataBlock,
-    uint32_t dataBlockLen,
-    uint8_t* responseDataBlock,
-    uint32_t* responseDataBlockLen,
-    void* context) {
-    UNUSED(context);
-
-    struct ISO7816_Command_APDU commandAPDU;
-    iso7816_read_command_apdu(&commandAPDU, dataBlock, dataBlockLen);
-
-    struct ISO7816_Response_APDU responseAPDU;
-    //class not supported
-    responseAPDU.SW1 = 0x6E;
-    responseAPDU.SW2 = 0x00;
-
-    iso7816_write_response_apdu(&responseAPDU, responseDataBlock, responseDataBlockLen);
-}
-
-static const CcidCallbacks ccid_cb = {
-    icc_power_on_callback,
-    xfr_datablock_callback,
-};
 
 static void ccid_test_app_render_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
@@ -93,6 +67,15 @@ uint32_t ccid_test_exit(void* context) {
 CcidTestApp* ccid_test_app_alloc(void) {
     CcidTestApp* app = malloc(sizeof(CcidTestApp));
 
+    //setup CCID USB
+    // On linux: set VID PID using: /usr/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Info.plist
+    app->ccid_cfg.vid = 0x076B;
+    app->ccid_cfg.pid = 0x3A21;
+
+    app->iso7816_handler = iso7816_handler_alloc();
+    app->iso7816_handler->iso7816_answer_to_reset = iso7816_answer_to_reset;
+    app->iso7816_handler->iso7816_process_command = iso7816_process_command;
+
     // Gui
     app->gui = furi_record_open(RECORD_GUI);
 
@@ -103,7 +86,6 @@ CcidTestApp* ccid_test_app_alloc(void) {
 
     //message queue
     app->event_queue = furi_message_queue_alloc(8, sizeof(CcidTestAppEvent));
-    furi_check(app->event_queue);
     view_port_input_callback_set(app->view_port, ccid_test_app_input_callback, app->event_queue);
 
     return app;
@@ -123,6 +105,8 @@ void ccid_test_app_free(CcidTestApp* app) {
     furi_record_close(RECORD_GUI);
     app->gui = NULL;
 
+    iso7816_handler_free(app->iso7816_handler);
+
     // Free rest
     free(app);
 }
@@ -133,15 +117,12 @@ int32_t ccid_test_app(void* p) {
     //setup view
     CcidTestApp* app = ccid_test_app_alloc();
 
-    //setup CCID USB
-    // On linux: set VID PID using: /usr/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Info.plist
-    app->ccid_cfg.vid = 0x1234;
-    app->ccid_cfg.pid = 0x5678;
-
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_unlock();
-    furi_hal_ccid_set_callbacks((CcidCallbacks*)&ccid_cb);
+
     furi_check(furi_hal_usb_set_config(&usb_ccid, &app->ccid_cfg) == true);
+    iso7816_handler_set_usb_ccid_callbacks();
+    furi_hal_usb_ccid_insert_smartcard();
 
     //handle button events
     CcidTestAppEvent event;
@@ -160,8 +141,8 @@ int32_t ccid_test_app(void* p) {
     }
 
     //tear down USB
+    iso7816_handler_reset_usb_ccid_callbacks();
     furi_hal_usb_set_config(usb_mode_prev, NULL);
-    furi_hal_ccid_set_callbacks(NULL);
 
     //teardown view
     ccid_test_app_free(app);

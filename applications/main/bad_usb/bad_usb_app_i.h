@@ -13,13 +13,14 @@
 #include <notification/notification_messages.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/popup.h>
 #include "views/bad_usb_view.h"
 #include <furi_hal_usb.h>
 
-#define BAD_USB_APP_BASE_FOLDER ANY_PATH("badusb")
+#define BAD_USB_APP_BASE_FOLDER        EXT_PATH("badusb")
 #define BAD_USB_APP_PATH_LAYOUT_FOLDER BAD_USB_APP_BASE_FOLDER "/assets/layouts"
-#define BAD_USB_APP_SCRIPT_EXTENSION ".txt"
-#define BAD_USB_APP_LAYOUT_EXTENSION ".kl"
+#define BAD_USB_APP_SCRIPT_EXTENSION   ".txt"
+#define BAD_USB_APP_LAYOUT_EXTENSION   ".kl"
 
 typedef enum {
     BadUsbAppErrorNoFiles,
@@ -33,6 +34,7 @@ struct BadUsbApp {
     NotificationApp* notifications;
     DialogsApp* dialogs;
     Widget* widget;
+    Popup* popup;
     VariableItemList* var_item_list;
 
     BadUsbAppError error;
@@ -46,7 +48,10 @@ struct BadUsbApp {
 };
 
 typedef enum {
-    BadUsbAppViewError,
+    BadUsbAppViewWidget,
+    BadUsbAppViewPopup,
     BadUsbAppViewWork,
     BadUsbAppViewConfig,
 } BadUsbAppView;
+
+void bad_usb_set_interface(BadUsbApp* app, BadUsbHidInterface interface);

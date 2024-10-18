@@ -93,6 +93,15 @@ App(
 )
 
 App(
+    appid="social_moscow_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="social_moscow_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/social_moscow.c"],
+)
+
+App(
     appid="washcity_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="washcity_plugin_ep",
@@ -189,6 +198,24 @@ App(
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/skylanders.c"],
+)
+
+App(
+    appid="hworld_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="hworld_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/hworld.c"],
+)
+
+App(
+    appid="trt_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="trt_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/trt.c"],
 )
 
 App(

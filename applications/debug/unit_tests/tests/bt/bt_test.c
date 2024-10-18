@@ -1,12 +1,12 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include "../test.h"
+#include "../test.h" // IWYU pragma: keep
 
 #include <bt/bt_service/bt_keys_storage.h>
 #include <storage/storage.h>
 
 #define BT_TEST_KEY_STORAGE_FILE_PATH EXT_PATH("unit_tests/bt_test.keys")
-#define BT_TEST_NVM_RAM_BUFF_SIZE (507 * 4) // The same as in ble NVM storage
+#define BT_TEST_NVM_RAM_BUFF_SIZE     (507 * 4) // The same as in ble NVM storage
 
 typedef struct {
     Storage* storage;

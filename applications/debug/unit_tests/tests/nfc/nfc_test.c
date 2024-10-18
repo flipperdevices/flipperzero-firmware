@@ -12,6 +12,8 @@
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
+#include <nfc/protocols/felica/felica.h>
+#include <nfc/protocols/felica/felica_poller_sync.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller.h>
 #include <nfc/protocols/iso15693_3/iso15693_3_poller.h>
 #include <nfc/protocols/slix/slix.h>
@@ -24,11 +26,11 @@
 #include <toolbox/keys_dict.h>
 #include <nfc/nfc.h>
 
-#include "../test.h"
+#include "../test.h" // IWYU pragma: keep
 
 #define TAG "NfcTest"
 
-#define NFC_TEST_NFC_DEV_PATH EXT_PATH("unit_tests/nfc/nfc_device_test.nfc")
+#define NFC_TEST_NFC_DEV_PATH                  EXT_PATH("unit_tests/nfc/nfc_device_test.nfc")
 #define NFC_APP_MF_CLASSIC_DICT_UNIT_TEST_PATH EXT_PATH("unit_tests/mf_dict.nfc")
 
 #define NFC_TEST_FLAG_WORKER_DONE (1)
@@ -282,6 +284,10 @@ MU_TEST(mf_ultralight_11_reader) {
 
 MU_TEST(mf_ultralight_21_reader) {
     mf_ultralight_reader_test(EXT_PATH("unit_tests/nfc/Ultralight_21.nfc"));
+}
+
+MU_TEST(mf_ultralight_c_reader) {
+    mf_ultralight_reader_test(EXT_PATH("unit_tests/nfc/Ultralight_C.nfc"));
 }
 
 MU_TEST(ntag_215_reader) {
@@ -646,6 +652,56 @@ MU_TEST(mf_classic_dict_test) {
         "Remove test dict failed");
 }
 
+static FelicaError
+    felica_do_request_response(FelicaData* felica_data, const FelicaCardKey* card_key) {
+    NfcDeviceData* nfc_device = nfc_device_alloc();
+
+    FelicaError error = FelicaErrorNone;
+    if(!nfc_device_load(nfc_device, EXT_PATH("unit_tests/nfc/Felica.nfc"))) {
+        error = FelicaErrorNotPresent;
+    } else {
+        Nfc* poller = nfc_alloc();
+        Nfc* listener = nfc_alloc();
+        NfcListener* felica_listener = nfc_listener_alloc(
+            listener, NfcProtocolFelica, nfc_device_get_data(nfc_device, NfcProtocolFelica));
+        nfc_listener_start(felica_listener, NULL, NULL);
+
+        error = felica_poller_sync_read(poller, felica_data, card_key);
+
+        nfc_listener_stop(felica_listener);
+        nfc_listener_free(felica_listener);
+
+        nfc_free(listener);
+        nfc_free(poller);
+    }
+
+    nfc_device_free(nfc_device);
+    return error;
+}
+
+MU_TEST(felica_read) {
+    FelicaData* felica_data = felica_alloc();
+    FelicaError error = felica_do_request_response(felica_data, NULL);
+    mu_assert(error == FelicaErrorNone, "felica_poller() failed");
+    mu_assert(felica_data->data.fs.spad[4].SF1 == 0x01, "block[4].SF1 != 0x01");
+    mu_assert(felica_data->data.fs.spad[4].SF2 == 0xB1, "block[4].SF2 != 0xB1");
+
+    felica_free(felica_data);
+}
+
+MU_TEST(felica_read_auth) {
+    FelicaData* felica_data = felica_alloc();
+    FelicaCardKey card_key;
+    memset(card_key.data, 0xFF, FELICA_DATA_BLOCK_SIZE);
+
+    FelicaError error = felica_do_request_response(felica_data, &card_key);
+    mu_assert(error == FelicaErrorNone, "felica_poller() failed");
+    mu_assert(felica_data->data.fs.spad[4].SF1 == 0x00, "block[4].SF1 != 0x00");
+    mu_assert(felica_data->data.fs.spad[4].SF2 == 0x00, "block[4].SF2 != 0x00");
+
+    felica_free(felica_data);
+}
+
 MU_TEST(slix_file_with_capabilities_test) {
     NfcDevice* nfc_device_missed_cap = nfc_device_alloc();
     mu_assert(
@@ -776,6 +832,7 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(ntag_215_reader);
     MU_RUN_TEST(ntag_216_reader);
     MU_RUN_TEST(ntag_213_locked_reader);
+    MU_RUN_TEST(mf_ultralight_c_reader);
 
     MU_RUN_TEST(mf_ultralight_write);
 
@@ -807,6 +864,8 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(mf_classic_value_block);
     MU_RUN_TEST(mf_classic_send_frame_test);
     MU_RUN_TEST(mf_classic_dict_test);
+    MU_RUN_TEST(felica_read);
+    MU_RUN_TEST(felica_read_auth);
 
     MU_RUN_TEST(slix_file_with_capabilities_test);
     MU_RUN_TEST(slix_set_password_default_cap_correct_pass);
