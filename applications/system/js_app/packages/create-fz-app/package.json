@@ -13,7 +13,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/flipperdevices/flipperzero-firmware.git",
-    "directory": "js/create-fz-app"
+    "directory": "applications/system/js_app/packages/create-fz-app"
   },
   "dependencies": {
     "prompts": "^2.4.2",
