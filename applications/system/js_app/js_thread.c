@@ -320,14 +320,14 @@ static int32_t js_thread(void* arg) {
         mjs_set(
             mjs,
             global,
-            "__filepath",
+            "__filename",
             ~0,
             mjs_mk_string(
                 mjs, furi_string_get_cstr(worker->path), furi_string_size(worker->path), true));
         mjs_set(
             mjs,
             global,
-            "__dirpath",
+            "__dirname",
             ~0,
             mjs_mk_string(mjs, furi_string_get_cstr(dirpath), furi_string_size(dirpath), true));
         furi_string_free(dirpath);

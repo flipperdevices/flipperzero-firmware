@@ -39,12 +39,12 @@ declare function toLowerCase(text: string): string;
 /**
  * @brief Path to the directory containing the current script
  */
-declare const __dirpath: string;
+declare const __dirname: string;
 
 /**
  * @brief Path to the current script file
  */
-declare const __filepath: string;
+declare const __filename: string;
 
 /**
  * @brief Reads a JS value from a file
