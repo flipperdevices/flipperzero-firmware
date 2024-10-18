@@ -236,6 +236,9 @@ static int32_t js_thread(void* arg) {
     mjs_set(mjs, global, "toString", ~0, MJS_MK_FN(js_global_to_string));
     mjs_set(mjs, global, "ffi_address", ~0, MJS_MK_FN(js_ffi_address));
     mjs_set(mjs, global, "require", ~0, MJS_MK_FN(js_require));
+    mjs_set(mjs, global, "sdkCompatibilityStatus", ~0, MJS_MK_FN(js_sdk_compatibility_status));
+    mjs_set(mjs, global, "isSdkCompatible", ~0, MJS_MK_FN(js_is_sdk_compatible));
+    mjs_set(mjs, global, "assertSdkCompatibility", ~0, MJS_MK_FN(js_assert_sdk_compatibility));
 
     mjs_val_t console_obj = mjs_mk_object(mjs);
     mjs_set(mjs, console_obj, "log", ~0, MJS_MK_FN(js_console_log));

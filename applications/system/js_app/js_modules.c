@@ -76,6 +76,12 @@ JsModuleData* js_find_loaded_module(JsModules* instance, const char* name) {
 }
 
 mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_len) {
+    // Ignore the initial part of the module name
+    const char* optional_module_prefix = "@" JS_SDK_VENDOR "/fz-sdk/";
+    if(strncmp(name, optional_module_prefix, strlen(optional_module_prefix)) == 0) {
+        name += strlen(optional_module_prefix);
+    }
+
     // Check if module is already installed
     JsModuleData* module_inst = js_find_loaded_module(modules, name);
     if(module_inst) { //-V547
@@ -174,4 +180,77 @@ void* js_module_get(JsModules* modules, const char* name) {
     JsModuleData* module_inst = js_find_loaded_module(modules, name);
     furi_string_free(module_name);
     return module_inst ? module_inst->context : NULL;
+}
+
+typedef enum {
+    JsSdkCompatStatusCompatible,
+    JsSdkCompatStatusIncompatibleVendor,
+    JsSdkCompatStatusFirmwareTooOld,
+    JsSdkCompatStatusFirmwareTooNew,
+} JsSdkCompatStatus;
+
+/**
+ * @brief Checks compatibility between the firmware and the JS SDK version
+ *        expected by the script
+ */
+static JsSdkCompatStatus js_internal_sdk_compatibility_status(
+    int32_t exp_major,
+    int32_t exp_minor,
+    const char* exp_vendor) {
+    if(exp_vendor) {
+        if(strcmp(exp_vendor, JS_SDK_VENDOR) != 0) return JsSdkCompatStatusIncompatibleVendor;
+    }
+    if(exp_major < JS_SDK_MAJOR) return JsSdkCompatStatusFirmwareTooNew;
+    if(exp_major > JS_SDK_MAJOR || exp_minor > JS_SDK_MINOR)
+        return JsSdkCompatStatusFirmwareTooOld;
+    return JsSdkCompatStatusCompatible;
+}
+
+#define JS_SDK_COMPAT_ARGS                                                                 \
+    int32_t major, minor;                                                                  \
+    const char* vendor = NULL;                                                             \
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_AT_LEAST, JS_ARG_INT32(&major), JS_ARG_INT32(&minor)); \
+    if(mjs_nargs(mjs) == 3) {                                                              \
+        mjs_val_t vendor_obj = mjs_arg(mjs, 2);                                            \
+        vendor = mjs_get_string(mjs, &vendor_obj, NULL);                                   \
+    }
+
+void js_sdk_compatibility_status(struct mjs* mjs) {
+    JS_SDK_COMPAT_ARGS;
+    JsSdkCompatStatus status = js_internal_sdk_compatibility_status(major, minor, vendor);
+    switch(status) {
+    case JsSdkCompatStatusCompatible:
+        mjs_return(mjs, mjs_mk_string(mjs, "compatible", ~0, 0));
+        return;
+    case JsSdkCompatStatusIncompatibleVendor:
+        mjs_return(mjs, mjs_mk_string(mjs, "incompatibleVendor", ~0, 0));
+        return;
+    case JsSdkCompatStatusFirmwareTooOld:
+        mjs_return(mjs, mjs_mk_string(mjs, "firmwareTooOld", ~0, 0));
+        return;
+    case JsSdkCompatStatusFirmwareTooNew:
+        mjs_return(mjs, mjs_mk_string(mjs, "firmwareTooNew", ~0, 0));
+        return;
+    }
+}
+
+void js_is_sdk_compatible(struct mjs* mjs) {
+    JS_SDK_COMPAT_ARGS;
+    JsSdkCompatStatus status = js_internal_sdk_compatibility_status(major, minor, vendor);
+    mjs_return(mjs, mjs_mk_boolean(mjs, status == JsSdkCompatStatusCompatible));
+}
+
+void js_assert_sdk_compatibility(struct mjs* mjs) {
+    JS_SDK_COMPAT_ARGS;
+    JsSdkCompatStatus status = js_internal_sdk_compatibility_status(major, minor, vendor);
+    if(status != JsSdkCompatStatusCompatible) {
+        mjs_prepend_errorf(
+            mjs,
+            MJS_NOT_IMPLEMENTED_ERROR,
+            "Incompatible firmware: script requests SDK %ld.%ld, firmware provides SDK %ld.%ld",
+            major,
+            minor,
+            JS_SDK_MAJOR,
+            JS_SDK_MINOR);
+    }
 }
