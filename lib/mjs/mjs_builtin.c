@@ -146,10 +146,17 @@ void mjs_init_builtin(struct mjs* mjs, mjs_val_t obj) {
     // mjs_set(mjs, obj, "JSON", ~0, v);
 
     /*
-    * Populate Object.create()
+    * Populate Object
     */
     v = mjs_mk_object(mjs);
     mjs_set(mjs, v, "create", ~0, mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_op_create_object));
+    mjs_set(
+        mjs,
+        v,
+        "defineProperty",
+        ~0,
+        mjs_mk_foreign_func(
+            mjs, (mjs_func_ptr_t)mjs_op_object_define_property)); // stub, do not use
     mjs_set(mjs, obj, "Object", ~0, v);
 
     /*
