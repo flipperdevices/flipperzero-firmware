@@ -14,15 +14,16 @@ declare function print(...args: any[]): void;
 /**
  * @brief Converts a number to a string
  * @param value The number to convert to a string
- * @param base Integer base (`2`...`16`), default: 16
+ * @param base Integer base (`2`...`16`), default: 10
  */
 declare function toString(value: number, base?: number): string;
 
 /**
  * @brief Converts a string to a number
  * @param text The string to convert to a number
+ * @param base Integer base (`2`...`16`), default: 10
  */
-declare function parseInt(text: string): number;
+declare function parseInt(text: string, base?: number): number;
 
 /**
  * @brief Path to the directory containing the current script
