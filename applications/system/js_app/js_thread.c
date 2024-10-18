@@ -1,6 +1,7 @@
 #include <common/cs_dbg.h>
 #include <toolbox/path.h>
 #include <toolbox/stream/file_stream.h>
+#include <toolbox/strint.h>
 #include <loader/firmware_api/firmware_api.h>
 #include <flipper_application/api_hashtable/api_hashtable.h>
 #include <flipper_application/plugins/composite_resolver.h>
@@ -206,38 +207,17 @@ static void js_global_to_string(struct mjs* mjs) {
 }
 
 static void js_parse_int(struct mjs* mjs) {
-    mjs_val_t arg = mjs_arg(mjs, 0);
-    if(!mjs_is_string(arg)) {
-        mjs_return(mjs, mjs_mk_number(mjs, 0));
-        return;
+    const char* str;
+    int32_t base = 10;
+    if(mjs_nargs(mjs) == 1) {
+        JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&str));
+    } else {
+        JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&str), JS_ARG_INT32(&base));
     }
-    size_t str_len = 0;
-    const char* str = mjs_get_string(mjs, &arg, &str_len);
-    if((str_len == 0) || (str == NULL)) {
-        mjs_return(mjs, mjs_mk_number(mjs, 0));
-        return;
+    int32_t num;
+    if(strint_to_int32(str, NULL, &num, base) != StrintParseNoError) {
+        num = 0;
     }
-
-    int32_t num = 0;
-    int32_t sign = 1;
-    size_t i = 0;
-
-    if(str[0] == '-') {
-        sign = -1;
-        i = 1;
-    } else if(str[0] == '+') {
-        i = 1;
-    }
-
-    for(; i < str_len; i++) {
-        if(str[i] >= '0' && str[i] <= '9') {
-            num = num * 10 + (str[i] - '0');
-        } else {
-            break;
-        }
-    }
-    num *= sign;
-
     mjs_return(mjs, mjs_mk_number(mjs, num));
 }
 
