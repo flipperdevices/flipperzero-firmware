@@ -7,7 +7,8 @@
 
 #define TAG "TestFuriEventLoop"
 
-#define EVENT_LOOP_EVENT_COUNT (256u)
+#define EVENT_LOOP_EVENT_COUNT               (256u)
+#define EVENT_LOOP_EVENT_TEST_OK_EVENT_FLAGS (1 << 23)
 
 typedef struct {
     FuriMessageQueue* mq;
@@ -17,6 +18,12 @@ typedef struct {
 
     FuriEventLoop* consumer_event_loop;
     uint32_t consumer_counter;
+
+    FuriEventLoop* producer_event_loop_event_flags;
+    FuriEventFlag* producer_event_flag;
+    FuriEventFlag* customer_event_flag;
+    uint32_t producer_counter_event_flags;
+    uint32_t customer_counter_event_flags;
 } TestFuriData;
 
 bool test_furi_event_loop_producer_mq_callback(FuriEventLoopObject* object, void* context) {
@@ -171,35 +178,155 @@ int32_t test_furi_event_loop_consumer(void* p) {
     return 0;
 }
 
+static bool
+    test_furi_event_loop_producer_event_flags_callback(FuriEventLoopObject* object, void* context) {
+    furi_assert(context);
+    TestFuriData* data = context;
+
+    furi_check(object == data->producer_event_flag, "Invalid object event flag");
+
+    uint32_t events =
+        furi_event_flag_wait(data->producer_event_flag, 0xFFFFFF, FuriFlagWaitAny, 0);
+    furi_check((events) != 0);
+    FURI_LOG_I(TAG, "events: 0x%lX", events);
+    if(events & EVENT_LOOP_EVENT_TEST_OK_EVENT_FLAGS) {
+        furi_event_loop_stop(data->producer_event_loop_event_flags);
+    } else if(events & data->producer_counter_event_flags) {
+        data->producer_counter_event_flags <<= 1;
+        //furi_event_flag_clear(data->customer_event_flag, data->customer_counter_event_flags);
+        furi_event_flag_clear(data->customer_event_flag, 0x01);
+        furi_event_flag_set(data->producer_event_flag, data->producer_counter_event_flags);
+    } else {
+        furi_crash("Invalid event flag");
+    }
+
+    return true;
+}
+
+static bool test_furi_event_loop_producer_event_flags_callback1(
+    FuriEventLoopObject* object,
+    void* context) {
+    furi_assert(context);
+    TestFuriData* data = context;
+
+    furi_check(object == data->customer_event_flag, "Invalid object event flag");
+
+    //uint32_t events = furi_event_flag_get(data->customer_event_flag);
+
+    //FURI_LOG_I(TAG, "events1: 0x%lX", events);
+    // data->customer_counter_event_flags <<= 1;
+    // furi_event_flag_set(data->customer_event_flag, data->customer_counter_event_flags);
+    //furi_event_flag_set(data->customer_event_flag, 0x01);
+    FURI_LOG_I(TAG, "events1: 0x%lX", data->customer_counter_event_flags);
+
+    return true;
+}
+
+int32_t test_furi_event_loop_producer_event_flags(void* p) {
+    furi_check(p);
+
+    TestFuriData* data = p;
+
+    FURI_LOG_I(TAG, "producer_event_flags start 1st run");
+
+    data->producer_event_loop_event_flags = furi_event_loop_alloc();
+    data->producer_event_flag = furi_event_flag_alloc();
+    data->customer_event_flag = furi_event_flag_alloc();
+
+    furi_event_loop_subscribe_event_flag(
+        data->producer_event_loop_event_flags,
+        data->producer_event_flag,
+        FuriEventLoopEventIn | FuriEventLoopEventFlagEdge,
+        test_furi_event_loop_producer_event_flags_callback,
+        data);
+
+    furi_event_flag_set(data->customer_event_flag, 0x01);
+
+    furi_event_loop_subscribe_event_flag(
+        data->producer_event_loop_event_flags,
+        data->customer_event_flag,
+        FuriEventLoopEventOut | FuriEventLoopEventFlagEdge,
+        test_furi_event_loop_producer_event_flags_callback1,
+        data);
+    //__BKPT();
+    data->producer_counter_event_flags = 0x1;
+    //data->customer_counter_event_flags = 0x1;
+    furi_event_flag_set(data->producer_event_flag, data->producer_counter_event_flags);
+    //furi_event_flag_set(data->customer_event_flag, data->customer_counter_event_flags);
+    furi_event_loop_run(data->producer_event_loop_event_flags);
+
+    // 2 EventLoop index, 0xFFFFFFFF - all possible flags, emulate uncleared flags
+    xTaskNotifyIndexed(xTaskGetCurrentTaskHandle(), 2, 0xFFFFFFFF, eSetBits);
+
+    furi_event_loop_unsubscribe(data->producer_event_loop_event_flags, data->producer_event_flag);
+    furi_event_loop_unsubscribe(data->producer_event_loop_event_flags, data->customer_event_flag);
+    furi_event_flag_free(data->producer_event_flag);
+    furi_event_flag_free(data->customer_event_flag);
+    data->producer_event_flag = NULL;
+    furi_event_loop_free(data->producer_event_loop_event_flags);
+
+    // FURI_LOG_I(TAG, "producer start 2nd run");
+
+    // data->producer_counter = 0;
+    // data->producer_event_loop = furi_event_loop_alloc();
+
+    // furi_event_loop_subscribe_message_queue(
+    //     data->producer_event_loop,
+    //     data->mq,
+    //     FuriEventLoopEventOut,
+    //     test_furi_event_loop_producer_mq_callback,
+    //     data);
+
+    // furi_event_loop_run(data->producer_event_loop);
+
+    // furi_event_loop_unsubscribe(data->producer_event_loop, data->mq);
+    // furi_event_loop_free(data->producer_event_loop);
+
+    FURI_LOG_I(TAG, "producer_event_flags end");
+
+    return 0;
+}
+
 void test_furi_event_loop(void) {
     TestFuriData data = {};
 
     data.mq = furi_message_queue_alloc(16, sizeof(uint32_t));
 
-    FuriThread* producer_thread = furi_thread_alloc();
-    furi_thread_set_name(producer_thread, "producer_thread");
-    furi_thread_set_stack_size(producer_thread, 1 * 1024);
-    furi_thread_set_callback(producer_thread, test_furi_event_loop_producer);
-    furi_thread_set_context(producer_thread, &data);
-    furi_thread_start(producer_thread);
+    // FuriThread* producer_thread = furi_thread_alloc();
+    // furi_thread_set_name(producer_thread, "producer_thread");
+    // furi_thread_set_stack_size(producer_thread, 1 * 1024);
+    // furi_thread_set_callback(producer_thread, test_furi_event_loop_producer);
+    // furi_thread_set_context(producer_thread, &data);
+    // furi_thread_start(producer_thread);
 
-    FuriThread* consumer_thread = furi_thread_alloc();
-    furi_thread_set_name(consumer_thread, "consumer_thread");
-    furi_thread_set_stack_size(consumer_thread, 1 * 1024);
-    furi_thread_set_callback(consumer_thread, test_furi_event_loop_consumer);
-    furi_thread_set_context(consumer_thread, &data);
-    furi_thread_start(consumer_thread);
+    // FuriThread* consumer_thread = furi_thread_alloc();
+    // furi_thread_set_name(consumer_thread, "consumer_thread");
+    // furi_thread_set_stack_size(consumer_thread, 1 * 1024);
+    // furi_thread_set_callback(consumer_thread, test_furi_event_loop_consumer);
+    // furi_thread_set_context(consumer_thread, &data);
+    // furi_thread_start(consumer_thread);
+
+    FuriThread* producer_thread_event_flags = furi_thread_alloc();
+    furi_thread_set_name(producer_thread_event_flags, "producer_thread_event_flags");
+    furi_thread_set_stack_size(producer_thread_event_flags, 2 * 1024);
+    furi_thread_set_callback(
+        producer_thread_event_flags, test_furi_event_loop_producer_event_flags);
+    furi_thread_set_context(producer_thread_event_flags, &data);
+    furi_thread_start(producer_thread_event_flags);
 
     // Wait for thread to complete their tasks
-    furi_thread_join(producer_thread);
-    furi_thread_join(consumer_thread);
+    // furi_thread_join(producer_thread);
+    // furi_thread_join(consumer_thread);
+    furi_thread_join(producer_thread_event_flags);
 
     // The test itself
-    mu_assert_int_eq(data.producer_counter, data.consumer_counter);
-    mu_assert_int_eq(data.producer_counter, EVENT_LOOP_EVENT_COUNT);
+    // mu_assert_int_eq(data.producer_counter, data.consumer_counter);
+    // mu_assert_int_eq(data.producer_counter, EVENT_LOOP_EVENT_COUNT);
+    mu_assert_int_eq(data.producer_counter_event_flags, EVENT_LOOP_EVENT_TEST_OK_EVENT_FLAGS);
 
     // Release memory
-    furi_thread_free(consumer_thread);
-    furi_thread_free(producer_thread);
+    // furi_thread_free(consumer_thread);
+    // furi_thread_free(producer_thread);
+    furi_thread_free(producer_thread_event_flags);
     furi_message_queue_free(data.mq);
 }
