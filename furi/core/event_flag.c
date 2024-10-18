@@ -95,7 +95,7 @@ uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
         rflags = xEventGroupClearBits(hEventGroup, (EventBits_t)flags);
     }
 
-    if((rflags & flags) == 0) {
+    if(rflags & flags) {
         furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
     }
     FURI_CRITICAL_EXIT();
@@ -189,7 +189,10 @@ static uint32_t
     if(event == FuriEventLoopEventIn) {
         return (furi_event_flag_get(instance) & FURI_EVENT_FLAG_VALID_BITS) ? 1U : 0U;
     } else if(event == FuriEventLoopEventOut) {
-        return (furi_event_flag_get(instance) & FURI_EVENT_FLAG_VALID_BITS) ? 0U : 1U;
+        return ((furi_event_flag_get(instance) & FURI_EVENT_FLAG_VALID_BITS) !=
+                FURI_EVENT_FLAG_VALID_BITS) ?
+                   1 :
+                   0;
     } else {
         furi_crash();
     }

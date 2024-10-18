@@ -193,8 +193,7 @@ static bool
         furi_event_loop_stop(data->producer_event_loop_event_flags);
     } else if(events & data->producer_counter_event_flags) {
         data->producer_counter_event_flags <<= 1;
-        //furi_event_flag_clear(data->customer_event_flag, data->customer_counter_event_flags);
-        furi_event_flag_clear(data->customer_event_flag, 0x01);
+        furi_event_flag_clear(data->customer_event_flag, data->customer_counter_event_flags);
         furi_event_flag_set(data->producer_event_flag, data->producer_counter_event_flags);
     } else {
         furi_crash("Invalid event flag");
@@ -211,11 +210,11 @@ static bool test_furi_event_loop_producer_event_flags_callback1(
 
     furi_check(object == data->customer_event_flag, "Invalid object event flag");
 
-    //uint32_t events = furi_event_flag_get(data->customer_event_flag);
+    // uint32_t events = furi_event_flag_get(data->customer_event_flag);
 
     //FURI_LOG_I(TAG, "events1: 0x%lX", events);
-    // data->customer_counter_event_flags <<= 1;
-    // furi_event_flag_set(data->customer_event_flag, data->customer_counter_event_flags);
+    data->customer_counter_event_flags <<= 1;
+    furi_event_flag_set(data->customer_event_flag, data->customer_counter_event_flags);
     //furi_event_flag_set(data->customer_event_flag, 0x01);
     FURI_LOG_I(TAG, "events1: 0x%lX", data->customer_counter_event_flags);
 
@@ -240,19 +239,17 @@ int32_t test_furi_event_loop_producer_event_flags(void* p) {
         test_furi_event_loop_producer_event_flags_callback,
         data);
 
-    furi_event_flag_set(data->customer_event_flag, 0x01);
-
     furi_event_loop_subscribe_event_flag(
         data->producer_event_loop_event_flags,
         data->customer_event_flag,
         FuriEventLoopEventOut | FuriEventLoopEventFlagEdge,
         test_furi_event_loop_producer_event_flags_callback1,
         data);
-    //__BKPT();
+
     data->producer_counter_event_flags = 0x1;
-    //data->customer_counter_event_flags = 0x1;
+    data->customer_counter_event_flags = 0x1;
     furi_event_flag_set(data->producer_event_flag, data->producer_counter_event_flags);
-    //furi_event_flag_set(data->customer_event_flag, data->customer_counter_event_flags);
+    furi_event_flag_set(data->customer_event_flag, data->customer_counter_event_flags);
     furi_event_loop_run(data->producer_event_loop_event_flags);
 
     // 2 EventLoop index, 0xFFFFFFFF - all possible flags, emulate uncleared flags

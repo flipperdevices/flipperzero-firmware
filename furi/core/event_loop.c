@@ -141,36 +141,38 @@ static inline FuriEventLoopProcessStatus
 }
 
 static void furi_event_loop_process_waiting_list(FuriEventLoop* instance) {
-    FuriEventLoopItem* item = NULL;
-
-    FURI_CRITICAL_ENTER();
-
-    if(!WaitingList_empty_p(instance->waiting_list)) {
-        item = WaitingList_pop_front(instance->waiting_list);
-        WaitingList_init_field(item);
-    }
-
-    FURI_CRITICAL_EXIT();
-
-    if(!item) return;
-
     while(true) {
-        FuriEventLoopProcessStatus ret = furi_event_loop_poll_process_event(instance, item);
+        FuriEventLoopItem* item = NULL;
 
-        if(ret == FuriEventLoopProcessStatusComplete) {
-            // Event processing complete, break from loop
-            break;
-        } else if(ret == FuriEventLoopProcessStatusIncomplete) {
-            // Event processing incomplete more processing needed
-        } else if(ret == FuriEventLoopProcessStatusAgain) { //-V547
-            furi_event_loop_item_notify(item);
-            break;
-            // Unsubscribed from inside the callback, delete item
-        } else if(ret == FuriEventLoopProcessStatusFreeLater) { //-V547
-            furi_event_loop_item_free(item);
-            break;
-        } else {
-            furi_crash();
+        FURI_CRITICAL_ENTER();
+
+        if(!WaitingList_empty_p(instance->waiting_list)) {
+            item = WaitingList_pop_front(instance->waiting_list);
+            WaitingList_init_field(item);
+        }
+
+        FURI_CRITICAL_EXIT();
+
+        if(!item) break;
+
+        while(true) {
+            FuriEventLoopProcessStatus ret = furi_event_loop_poll_process_event(instance, item);
+
+            if(ret == FuriEventLoopProcessStatusComplete) {
+                // Event processing complete, break from loop
+                break;
+            } else if(ret == FuriEventLoopProcessStatusIncomplete) {
+                // Event processing incomplete more processing needed
+            } else if(ret == FuriEventLoopProcessStatusAgain) { //-V547
+                furi_event_loop_item_notify(item);
+                break;
+                // Unsubscribed from inside the callback, delete item
+            } else if(ret == FuriEventLoopProcessStatusFreeLater) { //-V547
+                furi_event_loop_item_free(item);
+                break;
+            } else {
+                furi_crash();
+            }
         }
     }
 }
