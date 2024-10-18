@@ -25,18 +25,6 @@ declare function toString(value: number, base?: number): string;
 declare function parseInt(text: string): number;
 
 /**
- * @brief Transforms a string to upper case
- * @param text The string to transforms to upper case
- */
-declare function toUpperCase(text: string): string;
-
-/**
- * @brief Transforms a string to lower case
- * @param text The string to transforms to lower case
- */
-declare function toLowerCase(text: string): string;
-
-/**
  * @brief Path to the directory containing the current script
  */
 declare const __dirname: string;
@@ -211,6 +199,14 @@ declare class String {
      * @param end The index to end substring at
      */
     slice(start: number, end?: number): string;
+    /**
+     * @brief Return this string transformed to upper case
+     */
+    toUpperCase(): string;
+    /**
+     * @brief Return this string transformed to lower case
+     */
+    toLowerCase(): string;
 }
 
 declare class Boolean { }
