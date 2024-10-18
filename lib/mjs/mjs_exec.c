@@ -452,6 +452,12 @@ static int getprop_builtin_string(
     } else if(strcmp(name, "slice") == 0) {
         *res = mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_string_slice);
         return 1;
+    } else if(strcmp(name, "toUpperCase") == 0) {
+        *res = mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_string_to_upper_case);
+        return 1;
+    } else if(strcmp(name, "toLowerCase") == 0) {
+        *res = mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_string_to_lower_case);
+        return 1;
     } else if(isnum) {
         /*
      * string subscript: return a new one-byte string if the index
@@ -466,6 +472,22 @@ static int getprop_builtin_string(
         }
         return 1;
     }
+    return 0;
+}
+
+static int getprop_builtin_number(
+    struct mjs* mjs,
+    mjs_val_t val,
+    const char* name,
+    size_t name_len,
+    mjs_val_t* res) {
+    if(strcmp(name, "toString") == 0) {
+        *res = mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_number_to_string);
+        return 1;
+    }
+
+    (void)val;
+    (void)name_len;
     return 0;
 }
 
@@ -583,6 +605,8 @@ static int getprop_builtin(struct mjs* mjs, mjs_val_t val, mjs_val_t name, mjs_v
         } else if(s != NULL && n == 5 && strncmp(s, "apply", n) == 0) {
             *res = mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_apply_);
             handled = 1;
+        } else if(mjs_is_number(val)) {
+            handled = getprop_builtin_number(mjs, val, s, n, res);
         } else if(mjs_is_array(val)) {
             handled = getprop_builtin_array(mjs, val, s, n, res);
         } else if(mjs_is_foreign(val)) {
