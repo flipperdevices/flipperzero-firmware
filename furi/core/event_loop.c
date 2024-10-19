@@ -336,6 +336,7 @@ void furi_event_loop_subscribe_event_flag(
     FuriEventLoopEvent event,
     FuriEventLoopEventCallback callback,
     void* context) {
+    furi_check(event & FuriEventLoopEventFlagEdge, "Event must be edge triggered");
     extern const FuriEventLoopContract furi_event_flag_event_loop_contract;
     furi_event_loop_object_subscribe(
         instance, event_flag, &furi_event_flag_event_loop_contract, event, callback, context);

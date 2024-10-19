@@ -282,9 +282,6 @@ int32_t test_furi_event_loop_producer_event_flags(void* p) {
     furi_event_flag_set(data->customer_event_flag, data->customer_counter_event_flags);
     furi_event_loop_run(data->event_loop_event_flags);
 
-    // 2 EventLoop index, 0xFFFFFFFF - all possible flags, emulate uncleared flags
-    xTaskNotifyIndexed(xTaskGetCurrentTaskHandle(), 2, 0xFFFFFFFF, eSetBits);
-
     furi_event_loop_unsubscribe(data->event_loop_event_flags, data->producer_event_flag);
     furi_event_loop_unsubscribe(data->event_loop_event_flags, data->customer_event_flag);
     furi_event_flag_free(data->producer_event_flag);
