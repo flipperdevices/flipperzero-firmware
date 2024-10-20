@@ -445,7 +445,7 @@ void furi_hal_rtc_get_datetime(DateTime* datetime) {
     datetime->weekday = __LL_RTC_CONVERT_BCD2BIN((date >> 24) & 0xFF);
 }
 
-void furi_hal_rtc_set_alarm(const DateTime* datetime) {
+void furi_hal_rtc_set_alarm(const DateTime* datetime, bool enabled) {
     furi_check(!FURI_IS_IRQ_MODE());
 
     FURI_CRITICAL_ENTER();
@@ -459,7 +459,9 @@ void furi_hal_rtc_set_alarm(const DateTime* datetime) {
             __LL_RTC_CONVERT_BIN2BCD(datetime->minute),
             __LL_RTC_CONVERT_BIN2BCD(datetime->second));
         LL_RTC_ALMA_SetMask(RTC, LL_RTC_ALMA_MASK_DATEWEEKDAY);
+    }
 
+    if(enabled) {
         LL_RTC_ClearFlag_ALRA(RTC);
         LL_RTC_ALMA_Enable(RTC);
     } else {

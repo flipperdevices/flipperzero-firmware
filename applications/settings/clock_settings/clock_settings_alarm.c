@@ -9,6 +9,10 @@
 
 #include <assets_icons.h>
 
+typedef struct {
+    DateTime now;
+} ClockSettingsAlramModel;
+
 const NotificationSequence sequence_alarm = {
     &message_force_speaker_volume_setting_1f,
     &message_force_vibro_setting_on,
@@ -39,10 +43,25 @@ const NotificationSequence sequence_alarm = {
 static void clock_settings_alarm_stop(void* context, uint32_t arg);
 
 static void clock_settings_alarm_draw_callback(Canvas* canvas, void* ctx) {
-    UNUSED(ctx);
+    ClockSettingsAlramModel* model = ctx;
+    char buffer[64] = {};
 
-    canvas_draw_icon(canvas, 10, 10, &I_Warning_30x23);
-    canvas_draw_str(canvas, 40, 20, "Wakeup");
+    canvas_draw_icon(canvas, 10, 15, &I_Warning_30x23);
+
+    canvas_set_font(canvas, FontBigNumbers);
+    snprintf(buffer, sizeof(buffer), "%02u %02u", model->now.hour, model->now.minute);
+    canvas_draw_str(canvas, 58, 34, buffer);
+
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 10, 49, "Alarm");
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%02u.%02u.%04u",
+        model->now.day,
+        model->now.month,
+        model->now.year);
+    canvas_draw_str(canvas, 60, 49, buffer);
 }
 
 static void clock_settings_alarm_input_callback(InputEvent* input_event, void* ctx) {
@@ -54,12 +73,17 @@ static void clock_settings_alarm_input_callback(InputEvent* input_event, void* c
 int32_t clock_settings_alarm(void* p) {
     UNUSED(p);
 
+    // View Model
+    ClockSettingsAlramModel model;
+
+    furi_hal_rtc_get_datetime(&model.now);
+
     // Alloc message queue
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, clock_settings_alarm_draw_callback, NULL);
+    view_port_draw_callback_set(view_port, clock_settings_alarm_draw_callback, &model);
     view_port_input_callback_set(view_port, clock_settings_alarm_input_callback, event_queue);
 
     // Register view port in GUI
@@ -79,6 +103,8 @@ int32_t clock_settings_alarm(void* p) {
             }
         } else {
             notification_message(notification, &sequence_alarm);
+            furi_hal_rtc_get_datetime(&model.now);
+            view_port_update(view_port);
         }
     }
 

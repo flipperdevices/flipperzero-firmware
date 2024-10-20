@@ -10,7 +10,7 @@ typedef void (*ClockSettingsModuleViewCallback)(
     uint8_t duty,
     void* context);
 
-ClockSettingsModule* clock_settings_module_alloc(void);
+ClockSettingsModule* clock_settings_module_alloc(FuriEventLoop* event_loop);
 
 void clock_settings_module_free(ClockSettingsModule* instance);
 

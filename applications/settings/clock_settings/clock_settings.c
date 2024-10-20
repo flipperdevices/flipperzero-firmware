@@ -31,7 +31,8 @@ ClockSettings* clock_settings_alloc() {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    app->pwm_view = clock_settings_module_alloc();
+    app->pwm_view =
+        clock_settings_module_alloc(view_dispatcher_get_event_loop(app->view_dispatcher));
     view_dispatcher_add_view(
         app->view_dispatcher, ClockSettingsViewPwm, clock_settings_module_get_view(app->pwm_view));
 

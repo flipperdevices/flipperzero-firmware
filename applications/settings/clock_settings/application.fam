@@ -1,6 +1,6 @@
 App(
     appid="clock_settings",
-    name="Clock",
+    name="Clock & Alarm",
     apptype=FlipperAppType.SETTINGS,
     entry_point="clock_settings",
     requires=["gui"],

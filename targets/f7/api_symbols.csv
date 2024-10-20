@@ -1581,7 +1581,7 @@ Function,+,furi_hal_rtc_is_flag_set,_Bool,FuriHalRtcFlag
 Function,-,furi_hal_rtc_prepare_for_shutdown,void,
 Function,+,furi_hal_rtc_reset_flag,void,FuriHalRtcFlag
 Function,+,furi_hal_rtc_reset_registers,void,
-Function,+,furi_hal_rtc_set_alarm,void,const DateTime*
+Function,+,furi_hal_rtc_set_alarm,void,"const DateTime*, _Bool"
 Function,+,furi_hal_rtc_set_alarm_callback,void,"FuriHalRtcAlarmCallback, void*"
 Function,+,furi_hal_rtc_set_boot_mode,void,FuriHalRtcBootMode
 Function,+,furi_hal_rtc_set_datetime,void,DateTime*
