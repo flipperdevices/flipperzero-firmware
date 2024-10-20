@@ -48,22 +48,6 @@ const int32_t contrast_value[CONTRAST_COUNT] = {
     5,
 };
 
-#define BACKLIGHT_COUNT 5
-const char* const backlight_text[BACKLIGHT_COUNT] = {
-    "0%",
-    "25%",
-    "50%",
-    "75%",
-    "100%",
-};
-const float backlight_value[BACKLIGHT_COUNT] = {
-    0.0f,
-    0.25f,
-    0.5f,
-    0.75f,
-    1.0f,
-};
-
 #define VOLUME_COUNT 5
 const char* const volume_text[VOLUME_COUNT] = {
     "0%",
