@@ -49,7 +49,7 @@ static void clock_settings_alarm_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_icon(canvas, 10, 15, &I_Warning_30x23);
 
     canvas_set_font(canvas, FontBigNumbers);
-    snprintf(buffer, sizeof(buffer), "%02u %02u", model->now.hour, model->now.minute);
+    snprintf(buffer, sizeof(buffer), "%02u:%02u", model->now.hour, model->now.minute);
     canvas_draw_str(canvas, 58, 34, buffer);
 
     canvas_set_font(canvas, FontPrimary);

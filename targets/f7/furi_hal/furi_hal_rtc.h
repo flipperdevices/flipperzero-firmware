@@ -258,13 +258,13 @@ void furi_hal_rtc_get_datetime(DateTime* datetime);
 /** Set alarm
  *
  * @param[in]  datetime  The date time to set or NULL if time change is not needed
- * @param[in]  enabled   Indicates if must should be enabled or disabled
+ * @param[in]  enabled   Indicates if alarm must be enabled or disabled
  */
 void furi_hal_rtc_set_alarm(const DateTime* datetime, bool enabled);
 
 /** Get alarm
  *
- * @param      datetime  The date time to get
+ * @param      datetime  Pointer to DateTime object
  *
  * @return     true if alarm was set, false otherwise
  */
