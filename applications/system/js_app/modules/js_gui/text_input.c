@@ -9,6 +9,7 @@ typedef struct {
     char* buffer;
     size_t buffer_size;
     FuriString* header;
+    bool default_text_clear;
     FuriSemaphore* input_semaphore;
     JsEventLoopContract contract;
 } JsKbdContext;
@@ -56,17 +57,56 @@ static bool max_len_assign(
         context,
         context->buffer,
         context->buffer_size,
-        true);
+        context->default_text_clear);
+    return true;
+}
+
+static bool default_text_assign(
+    struct mjs* mjs,
+    TextInput* input,
+    JsViewPropValue value,
+    JsKbdContext* context) {
+    UNUSED(mjs);
+    UNUSED(input);
+
+    if(value.string) {
+        strlcpy(context->buffer, value.string, context->buffer_size);
+        text_input_set_result_callback(
+            input,
+            (TextInputCallback)input_callback,
+            context,
+            context->buffer,
+            context->buffer_size,
+            context->default_text_clear);
+    }
+    return true;
+}
+
+static bool default_text_clear_assign(
+    struct mjs* mjs,
+    TextInput* input,
+    JsViewPropValue value,
+    JsKbdContext* context) {
+    UNUSED(mjs);
+
+    context->default_text_clear = value.boolean;
+    text_input_set_result_callback(
+        input,
+        (TextInputCallback)input_callback,
+        context,
+        context->buffer,
+        context->buffer_size,
+        context->default_text_clear);
     return true;
 }
 
 static JsKbdContext* ctx_make(struct mjs* mjs, TextInput* input, mjs_val_t view_obj) {
-    UNUSED(input);
     JsKbdContext* context = malloc(sizeof(JsKbdContext));
     *context = (JsKbdContext){
         .buffer_size = DEFAULT_BUF_SZ,
         .buffer = malloc(DEFAULT_BUF_SZ),
         .header = furi_string_alloc(),
+        .default_text_clear = false,
         .input_semaphore = furi_semaphore_alloc(1, 0),
     };
     context->contract = (JsEventLoopContract){
@@ -80,8 +120,13 @@ static JsKbdContext* ctx_make(struct mjs* mjs, TextInput* input, mjs_val_t view_
                 .transformer_context = context,
             },
     };
-    UNUSED(mjs);
-    UNUSED(view_obj);
+    text_input_set_result_callback(
+        input,
+        (TextInputCallback)input_callback,
+        context,
+        context->buffer,
+        context->buffer_size,
+        context->default_text_clear);
     mjs_set(mjs, view_obj, "input", ~0, mjs_mk_foreign(mjs, &context->contract));
     return context;
 }
@@ -101,7 +146,7 @@ static const JsViewDescriptor view_descriptor = {
     .get_view = (JsViewGetView)text_input_get_view,
     .custom_make = (JsViewCustomMake)ctx_make,
     .custom_destroy = (JsViewCustomDestroy)ctx_destroy,
-    .prop_cnt = 3,
+    .prop_cnt = 5,
     .props = {
         (JsViewPropDescriptor){
             .name = "header",
@@ -115,6 +160,14 @@ static const JsViewDescriptor view_descriptor = {
             .name = "maxLength",
             .type = JsViewPropTypeNumber,
             .assign = (JsViewPropAssign)max_len_assign},
+        (JsViewPropDescriptor){
+            .name = "defaultText",
+            .type = JsViewPropTypeString,
+            .assign = (JsViewPropAssign)default_text_assign},
+        (JsViewPropDescriptor){
+            .name = "defaultTextClear",
+            .type = JsViewPropTypeBool,
+            .assign = (JsViewPropAssign)default_text_clear_assign},
     }};
 
 JS_GUI_VIEW_DEF(text_input, &view_descriptor);

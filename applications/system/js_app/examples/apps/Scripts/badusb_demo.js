@@ -13,7 +13,13 @@ let views = {
     }),
 };
 
-badusb.setup({ vid: 0xAAAA, pid: 0xBBBB, mfrName: "Flipper", prodName: "Zero" });
+badusb.setup({
+    vid: 0xAAAA,
+    pid: 0xBBBB,
+    mfrName: "Flipper",
+    prodName: "Zero",
+    layoutPath: "/ext/badusb/assets/layouts/en-US.kl"
+});
 
 eventLoop.subscribe(views.dialog.input, function (_sub, button, eventLoop, gui) {
     if (button !== "center")
@@ -39,13 +45,22 @@ eventLoop.subscribe(views.dialog.input, function (_sub, button, eventLoop, gui) 
 
         badusb.println("Flipper Model: " + flipper.getModel());
         badusb.println("Flipper Name: " + flipper.getName());
-        badusb.println("Battery level: " + toString(flipper.getBatteryCharge()) + "%");
+        badusb.println("Battery level: " + flipper.getBatteryCharge().toString() + "%");
+
+        // Alt+Numpad method works only on Windows!!!
+        badusb.altPrintln("This was printed with Alt+Numpad method!");
+
+        // There's also badusb.print() and badusb.altPrint()
+        // which don't add the return at the end
 
         notify.success();
     } else {
         print("USB not connected");
         notify.error();
     }
+
+    // Optional, but allows to unlock usb interface to switch profile
+    badusb.quit();
 
     eventLoop.stop();
 }, eventLoop, gui);
