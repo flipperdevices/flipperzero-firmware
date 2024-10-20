@@ -189,8 +189,10 @@ static bool
         furi_event_flag_wait(data->producer_event_flag, 0xFFFFFF, FuriFlagWaitAny, 0);
     furi_check((events) != 0);
     FURI_LOG_I(TAG, "producer_event_flag: 0x%lX", events);
+
     if(events & EVENT_LOOP_EVENT_TEST_OK_EVENT_FLAGS) {
         furi_event_loop_stop(data->event_loop_event_flags);
+        return false;
     } else if(events & data->producer_counter_event_flags) {
         data->producer_counter_event_flags <<= 1;
         furi_event_flag_clear(data->customer_event_flag, data->customer_counter_event_flags);
