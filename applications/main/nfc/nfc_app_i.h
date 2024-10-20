@@ -74,8 +74,12 @@
 #define NFC_APP_MFKEY32_LOGS_FILE_NAME ".mfkey32.log"
 #define NFC_APP_MFKEY32_LOGS_FILE_PATH (NFC_APP_FOLDER "/" NFC_APP_MFKEY32_LOGS_FILE_NAME)
 
-#define NFC_APP_MF_CLASSIC_DICT_USER_PATH   (NFC_APP_FOLDER "/assets/mf_classic_dict_user.nfc")
+#define NFC_APP_MF_CLASSIC_DICT_USER_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict_user.nfc")
+#define NFC_APP_MF_CLASSIC_DICT_USER_NESTED_PATH \
+    (NFC_APP_FOLDER "/assets/mf_classic_dict_user_nested.nfc")
 #define NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict.nfc")
+#define NFC_APP_MF_CLASSIC_DICT_SYSTEM_NESTED_PATH \
+    (NFC_APP_FOLDER "/assets/mf_classic_dict_nested.nfc")
 
 typedef enum {
     NfcRpcStateIdle,
@@ -93,6 +97,12 @@ typedef struct {
     bool is_key_attack;
     uint8_t key_attack_current_sector;
     bool is_card_present;
+    MfClassicNestedPhase nested_phase;
+    MfClassicPrngType prng_type;
+    MfClassicBackdoor backdoor;
+    uint16_t nested_target_key;
+    uint16_t msb_count;
+    bool enhanced_dict;
 } NfcMfClassicDictAttackContext;
 
 struct NfcApp {
