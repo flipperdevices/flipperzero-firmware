@@ -497,6 +497,24 @@ NfcError nfc_iso15693_listener_tx_sof(Nfc* instance) {
     return NfcErrorNone;
 }
 
+NfcError nfc_iso15693_detect_mode(Nfc* instance) {
+    UNUSED(instance);
+
+    return NfcErrorNone;
+}
+
+NfcError nfc_iso15693_force_1outof4(Nfc* instance) {
+    UNUSED(instance);
+
+    return NfcErrorNone;
+}
+
+NfcError nfc_iso15693_force_1outof256(Nfc* instance) {
+    UNUSED(instance);
+
+    return NfcErrorNone;
+}
+
 NfcError nfc_felica_listener_set_sensf_res_data(
     Nfc* instance,
     const uint8_t* idm,
