@@ -326,6 +326,7 @@ void furi_hal_power_shutdown(void) {
 
 void furi_hal_power_off(void) {
     // Crutch: shutting down with ext 3V3 off is causing LSE to stop
+    furi_hal_rtc_prepare_for_shutdown();
     furi_hal_power_enable_external_3_3v();
     furi_hal_vibro_on(true);
     furi_delay_us(50000);

@@ -68,6 +68,9 @@ const IRQn_Type furi_hal_interrupt_irqn[FuriHalInterruptIdMax] = {
     // COMP
     [FuriHalInterruptIdCOMP] = COMP_IRQn,
 
+    // RTC
+    [FuriHalInterruptIdRtcAlarm] = RTC_Alarm_IRQn,
+
     // HSEM
     [FuriHalInterruptIdHsem] = HSEM_IRQn,
 
@@ -254,6 +257,10 @@ void DMA2_Channel6_IRQHandler(void) {
 
 void DMA2_Channel7_IRQHandler(void) {
     furi_hal_interrupt_call(FuriHalInterruptIdDma2Ch7);
+}
+
+void RTC_Alarm_IRQHandler(void) {
+    furi_hal_interrupt_call(FuriHalInterruptIdRtcAlarm);
 }
 
 void HSEM_IRQHandler(void) {
