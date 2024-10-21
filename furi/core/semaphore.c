@@ -165,7 +165,7 @@ static FuriEventLoopLink* furi_semaphore_event_loop_get_link(FuriEventLoopObject
     return &instance->event_loop_link;
 }
 
-static uint32_t
+static bool
     furi_semaphore_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
     FuriSemaphore* instance = object;
     furi_assert(instance);

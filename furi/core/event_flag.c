@@ -181,18 +181,16 @@ static FuriEventLoopLink* furi_event_flag_event_loop_get_link(FuriEventLoopObjec
     return &instance->event_loop_link;
 }
 
-static uint32_t
+static bool
     furi_event_flag_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
     FuriEventFlag* instance = object;
     furi_assert(instance);
 
     if(event == FuriEventLoopEventIn) {
-        return (furi_event_flag_get(instance) & FURI_EVENT_FLAG_VALID_BITS) ? 1U : 0U;
+        return (furi_event_flag_get(instance) & FURI_EVENT_FLAG_VALID_BITS);
     } else if(event == FuriEventLoopEventOut) {
-        return ((furi_event_flag_get(instance) & FURI_EVENT_FLAG_VALID_BITS) !=
-                FURI_EVENT_FLAG_VALID_BITS) ?
-                   1 :
-                   0;
+        return (furi_event_flag_get(instance) & FURI_EVENT_FLAG_VALID_BITS) !=
+               FURI_EVENT_FLAG_VALID_BITS;
     } else {
         furi_crash();
     }
