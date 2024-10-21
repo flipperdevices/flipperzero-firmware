@@ -9,6 +9,8 @@
 
 #include <assets_icons.h>
 
+#define TAG "ClockSettingsAlarm"
+
 typedef struct {
     DateTime now;
 } ClockSettingsAlramModel;
@@ -39,8 +41,6 @@ const NotificationSequence sequence_alarm = {
     &message_vibro_off,
     NULL,
 };
-
-static void clock_settings_alarm_stop(void* context, uint32_t arg);
 
 static void clock_settings_alarm_draw_callback(Canvas* canvas, void* ctx) {
     ClockSettingsAlramModel* model = ctx;
@@ -117,32 +117,36 @@ int32_t clock_settings_alarm(void* p) {
     furi_message_queue_free(event_queue);
     furi_record_close(RECORD_GUI);
 
-    furi_timer_pending_callback(clock_settings_alarm_stop, NULL, 0);
-
     return 0;
 }
 
 FuriThread* clock_settings_alarm_thread = NULL;
 
-static void clock_settings_alarm_stop(void* context, uint32_t arg) {
+static void clock_settings_alarm_thread_state_callback(
+    FuriThread* thread,
+    FuriThreadState state,
+    void* context) {
+    furi_assert(clock_settings_alarm_thread == thread);
     UNUSED(context);
-    UNUSED(arg);
 
-    furi_thread_join(clock_settings_alarm_thread);
-    furi_thread_free(clock_settings_alarm_thread);
-    clock_settings_alarm_thread = NULL;
+    if(state == FuriThreadStateStopped) {
+        furi_thread_free(thread);
+        clock_settings_alarm_thread = NULL;
+    }
 }
 
 static void clock_settings_alarm_start(void* context, uint32_t arg) {
     UNUSED(context);
     UNUSED(arg);
 
-    FURI_LOG_I("ClockSettingsAlarm", "time");
+    FURI_LOG_I(TAG, "spawning alarm thread");
 
     if(clock_settings_alarm_thread) return;
 
     clock_settings_alarm_thread =
         furi_thread_alloc_ex("ClockAlarm", 1024, clock_settings_alarm, NULL);
+    furi_thread_set_state_callback(
+        clock_settings_alarm_thread, clock_settings_alarm_thread_state_callback);
     furi_thread_start(clock_settings_alarm_thread);
 }
 
