@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.SETTINGS,
     entry_point="clock_settings",
     requires=["gui"],
+    provides=["clock_settings_start"],
     stack_size=1 * 1024,
     order=90,
 )
