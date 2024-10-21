@@ -18,7 +18,6 @@ typedef struct {
     uint32_t stream_buffer_count;
     uint32_t event_flag_count;
     uint32_t semaphore_count;
-    uint32_t mutex_count;
     uint32_t primitives_tested;
 } TestFuriEventLoopThread;
 
@@ -27,7 +26,6 @@ typedef struct {
     FuriStreamBuffer* stream_buffer;
     FuriEventFlag* event_flag;
     FuriSemaphore* semaphore;
-    FuriMutex* mutex;
 
     TestFuriEventLoopThread producer;
     TestFuriEventLoopThread consumer;
@@ -95,7 +93,7 @@ static void test_furi_event_loop_producer_message_queue_callback(
         furi_message_queue_put(data->message_queue, &data->producer.message_queue_count, 0) ==
         FuriStatusOk);
 
-    furi_delay_us(furi_hal_random_get() % 1000);
+    furi_delay_us(furi_hal_random_get() % 100);
 }
 
 static void test_furi_event_loop_producer_stream_buffer_callback(
@@ -138,7 +136,7 @@ static void test_furi_event_loop_producer_stream_buffer_callback(
             data->stream_buffer, &producer->stream_buffer_count, sizeof(uint32_t), 0) ==
         sizeof(uint32_t));
 
-    furi_delay_us(furi_hal_random_get() % 1000);
+    furi_delay_us(furi_hal_random_get() % 100);
 }
 
 static void
@@ -173,7 +171,7 @@ static void
 
     data->producer.event_flag_count++;
 
-    furi_delay_us(furi_hal_random_get() % 1000);
+    furi_delay_us(furi_hal_random_get() % 100);
 }
 
 static void
@@ -208,7 +206,7 @@ static void
 
     data->producer.semaphore_count++;
 
-    furi_delay_us(furi_hal_random_get() % 1000);
+    furi_delay_us(furi_hal_random_get() % 100);
 }
 
 static int32_t test_furi_event_loop_producer(void* p) {
@@ -263,7 +261,7 @@ static void test_furi_event_loop_consumer_message_queue_callback(
     TestFuriEventLoopData* data = context;
     furi_check(data->message_queue == object);
 
-    furi_delay_us(furi_hal_random_get() % 1000);
+    furi_delay_us(furi_hal_random_get() % 100);
 
     furi_check(
         furi_message_queue_get(data->message_queue, &data->consumer.message_queue_count, 0) ==
@@ -302,7 +300,7 @@ static void test_furi_event_loop_consumer_stream_buffer_callback(
     TestFuriEventLoopThread* producer = &data->producer;
     TestFuriEventLoopThread* consumer = &data->consumer;
 
-    furi_delay_us(furi_hal_random_get() % 1000);
+    furi_delay_us(furi_hal_random_get() % 100);
 
     furi_check(
         furi_stream_buffer_receive(
@@ -338,7 +336,7 @@ static void
     TestFuriEventLoopData* data = context;
     furi_check(data->event_flag == object);
 
-    furi_delay_us(furi_hal_random_get() % 1000);
+    furi_delay_us(furi_hal_random_get() % 100);
 
     const uint32_t producer_flags = (1UL << data->producer.event_flag_count);
     const uint32_t consumer_flags = (1UL << data->consumer.event_flag_count);
@@ -375,7 +373,7 @@ static void
     TestFuriEventLoopData* data = context;
     furi_check(data->semaphore == object);
 
-    furi_delay_us(furi_hal_random_get() % 1000);
+    furi_delay_us(furi_hal_random_get() % 100);
 
     TestFuriEventLoopThread* producer = &data->producer;
     TestFuriEventLoopThread* consumer = &data->consumer;
@@ -455,7 +453,6 @@ void test_furi_event_loop(void) {
     data.stream_buffer = furi_stream_buffer_alloc(16, sizeof(uint32_t));
     data.event_flag = furi_event_flag_alloc();
     data.semaphore = furi_semaphore_alloc(8, 0);
-    data.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     FuriThread* producer_thread =
         furi_thread_alloc_ex("producer_thread", 1 * 1024, test_furi_event_loop_producer, &data);
@@ -490,5 +487,4 @@ void test_furi_event_loop(void) {
     furi_stream_buffer_free(data.stream_buffer);
     furi_event_flag_free(data.event_flag);
     furi_semaphore_free(data.semaphore);
-    furi_mutex_free(data.mutex);
 }
