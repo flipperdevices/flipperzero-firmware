@@ -9,19 +9,25 @@
 
 #define MESSAGE_COUNT    (256UL)
 #define EVENT_FLAG_COUNT (23UL)
-#define PRIMITIVE_COUNT  (2UL)
+#define PRIMITIVE_COUNT  (3UL)
 #define RUN_COUNT        (2UL)
 
 typedef struct {
     FuriEventLoop* event_loop;
-    uint32_t message_count;
+    uint32_t message_queue_count;
+    uint32_t stream_buffer_count;
     uint32_t event_flag_count;
+    uint32_t semaphore_count;
+    uint32_t mutex_count;
     uint32_t primitives_tested;
 } TestFuriEventLoopThread;
 
 typedef struct {
     FuriMessageQueue* message_queue;
+    FuriStreamBuffer* stream_buffer;
     FuriEventFlag* event_flag;
+    FuriSemaphore* semaphore;
+    FuriMutex* mutex;
 
     TestFuriEventLoopThread producer;
     TestFuriEventLoopThread consumer;
@@ -42,10 +48,8 @@ static void test_furi_event_loop_pending_callback(void* context) {
 }
 
 static void test_furi_event_loop_thread_init(TestFuriEventLoopThread* test_thread) {
+    memset(test_thread, 0, sizeof(TestFuriEventLoopThread));
     test_thread->event_loop = furi_event_loop_alloc();
-    test_thread->message_count = 0;
-    test_thread->event_flag_count = 0;
-    test_thread->primitives_tested = 0;
 }
 
 static void test_furi_event_loop_thread_run_and_cleanup(TestFuriEventLoopThread* test_thread) {
@@ -66,10 +70,10 @@ static void test_furi_event_loop_producer_message_queue_callback(
     FURI_LOG_I(
         TAG,
         "producer MessageQueue: %lu %lu",
-        data->producer.message_count,
-        data->consumer.message_count);
+        data->producer.message_queue_count,
+        data->consumer.message_queue_count);
 
-    if(data->producer.message_count == MESSAGE_COUNT / 2) {
+    if(data->producer.message_queue_count == MESSAGE_COUNT / 2) {
         furi_event_loop_unsubscribe(data->producer.event_loop, data->message_queue);
         furi_event_loop_subscribe_message_queue(
             data->producer.event_loop,
@@ -78,18 +82,61 @@ static void test_furi_event_loop_producer_message_queue_callback(
             test_furi_event_loop_producer_message_queue_callback,
             data);
 
-    } else if(data->producer.message_count == MESSAGE_COUNT) {
+    } else if(data->producer.message_queue_count == MESSAGE_COUNT) {
         furi_event_loop_unsubscribe(data->producer.event_loop, data->message_queue);
         furi_event_loop_pend_callback(
             data->producer.event_loop, test_furi_event_loop_pending_callback, &data->producer);
         return;
     }
 
-    data->producer.message_count++;
+    data->producer.message_queue_count++;
 
     furi_check(
-        furi_message_queue_put(data->message_queue, &data->producer.message_count, 0) ==
+        furi_message_queue_put(data->message_queue, &data->producer.message_queue_count, 0) ==
         FuriStatusOk);
+
+    furi_delay_us(furi_hal_random_get() % 1000);
+}
+
+static void test_furi_event_loop_producer_stream_buffer_callback(
+    FuriEventLoopObject* object,
+    void* context) {
+    furi_check(context);
+
+    TestFuriEventLoopData* data = context;
+    furi_check(data->stream_buffer == object);
+
+    TestFuriEventLoopThread* producer = &data->producer;
+    TestFuriEventLoopThread* consumer = &data->consumer;
+
+    FURI_LOG_I(
+        TAG,
+        "producer StreamBuffer: %lu %lu",
+        producer->stream_buffer_count,
+        consumer->stream_buffer_count);
+
+    if(producer->stream_buffer_count == MESSAGE_COUNT / 2) {
+        furi_event_loop_unsubscribe(producer->event_loop, data->stream_buffer);
+        furi_event_loop_subscribe_stream_buffer(
+            producer->event_loop,
+            data->stream_buffer,
+            FuriEventLoopEventOut,
+            test_furi_event_loop_producer_stream_buffer_callback,
+            data);
+
+    } else if(producer->stream_buffer_count == MESSAGE_COUNT) {
+        furi_event_loop_unsubscribe(producer->event_loop, data->stream_buffer);
+        furi_event_loop_pend_callback(
+            producer->event_loop, test_furi_event_loop_pending_callback, producer);
+        return;
+    }
+
+    producer->stream_buffer_count++;
+
+    furi_check(
+        furi_stream_buffer_send(
+            data->stream_buffer, &producer->stream_buffer_count, sizeof(uint32_t), 0) ==
+        sizeof(uint32_t));
 
     furi_delay_us(furi_hal_random_get() % 1000);
 }
@@ -146,6 +193,12 @@ static int32_t test_furi_event_loop_producer(void* p) {
             FuriEventLoopEventOut,
             test_furi_event_loop_producer_message_queue_callback,
             data);
+        furi_event_loop_subscribe_stream_buffer(
+            producer->event_loop,
+            data->stream_buffer,
+            FuriEventLoopEventOut,
+            test_furi_event_loop_producer_stream_buffer_callback,
+            data);
         furi_event_loop_subscribe_event_flag(
             producer->event_loop,
             data->event_flag,
@@ -172,16 +225,16 @@ static void test_furi_event_loop_consumer_message_queue_callback(
     furi_delay_us(furi_hal_random_get() % 1000);
 
     furi_check(
-        furi_message_queue_get(data->message_queue, &data->consumer.message_count, 0) ==
+        furi_message_queue_get(data->message_queue, &data->consumer.message_queue_count, 0) ==
         FuriStatusOk);
 
     FURI_LOG_I(
         TAG,
         "consumer MessageQueue: %lu %lu",
-        data->producer.message_count,
-        data->consumer.message_count);
+        data->producer.message_queue_count,
+        data->consumer.message_queue_count);
 
-    if(data->consumer.message_count == MESSAGE_COUNT / 2) {
+    if(data->consumer.message_queue_count == MESSAGE_COUNT / 2) {
         furi_event_loop_unsubscribe(data->consumer.event_loop, data->message_queue);
         furi_event_loop_subscribe_message_queue(
             data->consumer.event_loop,
@@ -190,10 +243,50 @@ static void test_furi_event_loop_consumer_message_queue_callback(
             test_furi_event_loop_consumer_message_queue_callback,
             data);
 
-    } else if(data->consumer.message_count == MESSAGE_COUNT) {
+    } else if(data->consumer.message_queue_count == MESSAGE_COUNT) {
         furi_event_loop_unsubscribe(data->consumer.event_loop, data->message_queue);
         furi_event_loop_pend_callback(
             data->consumer.event_loop, test_furi_event_loop_pending_callback, &data->consumer);
+    }
+}
+
+static void test_furi_event_loop_consumer_stream_buffer_callback(
+    FuriEventLoopObject* object,
+    void* context) {
+    furi_check(context);
+
+    TestFuriEventLoopData* data = context;
+    furi_check(data->stream_buffer == object);
+
+    TestFuriEventLoopThread* producer = &data->producer;
+    TestFuriEventLoopThread* consumer = &data->consumer;
+
+    furi_delay_us(furi_hal_random_get() % 1000);
+
+    furi_check(
+        furi_stream_buffer_receive(
+            data->stream_buffer, &consumer->stream_buffer_count, sizeof(uint32_t), 0) ==
+        sizeof(uint32_t));
+
+    FURI_LOG_I(
+        TAG,
+        "consumer StreamBuffer: %lu %lu",
+        producer->stream_buffer_count,
+        consumer->stream_buffer_count);
+
+    if(consumer->stream_buffer_count == MESSAGE_COUNT / 2) {
+        furi_event_loop_unsubscribe(consumer->event_loop, data->stream_buffer);
+        furi_event_loop_subscribe_stream_buffer(
+            consumer->event_loop,
+            data->stream_buffer,
+            FuriEventLoopEventIn,
+            test_furi_event_loop_consumer_stream_buffer_callback,
+            data);
+
+    } else if(consumer->stream_buffer_count == MESSAGE_COUNT) {
+        furi_event_loop_unsubscribe(data->consumer.event_loop, data->stream_buffer);
+        furi_event_loop_pend_callback(
+            consumer->event_loop, test_furi_event_loop_pending_callback, consumer);
     }
 }
 
@@ -251,6 +344,12 @@ static int32_t test_furi_event_loop_consumer(void* p) {
             FuriEventLoopEventIn,
             test_furi_event_loop_consumer_message_queue_callback,
             data);
+        furi_event_loop_subscribe_stream_buffer(
+            consumer->event_loop,
+            data->stream_buffer,
+            FuriEventLoopEventIn,
+            test_furi_event_loop_consumer_stream_buffer_callback,
+            data);
         furi_event_loop_subscribe_event_flag(
             consumer->event_loop,
             data->event_flag,
@@ -270,7 +369,10 @@ void test_furi_event_loop(void) {
     TestFuriEventLoopData data = {};
 
     data.message_queue = furi_message_queue_alloc(16, sizeof(uint32_t));
+    data.stream_buffer = furi_stream_buffer_alloc(16, sizeof(uint32_t));
     data.event_flag = furi_event_flag_alloc();
+    data.semaphore = furi_semaphore_alloc(8, 0);
+    data.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     FuriThread* producer_thread =
         furi_thread_alloc_ex("producer_thread", 1 * 1024, test_furi_event_loop_producer, &data);
@@ -284,15 +386,24 @@ void test_furi_event_loop(void) {
     furi_thread_join(producer_thread);
     furi_thread_join(consumer_thread);
 
+    TestFuriEventLoopThread* producer = &data.producer;
+    TestFuriEventLoopThread* consumer = &data.consumer;
+
     // The test itself
-    mu_assert_int_eq(data.producer.message_count, data.consumer.message_count);
-    mu_assert_int_eq(data.producer.message_count, MESSAGE_COUNT);
-    mu_assert_int_eq(data.producer.event_flag_count, data.consumer.event_flag_count);
-    mu_assert_int_eq(data.producer.event_flag_count, EVENT_FLAG_COUNT);
+    mu_assert_int_eq(producer->message_queue_count, consumer->message_queue_count);
+    mu_assert_int_eq(producer->message_queue_count, MESSAGE_COUNT);
+    mu_assert_int_eq(producer->stream_buffer_count, consumer->stream_buffer_count);
+    mu_assert_int_eq(producer->stream_buffer_count, MESSAGE_COUNT);
+    mu_assert_int_eq(producer->event_flag_count, consumer->event_flag_count);
+    mu_assert_int_eq(producer->event_flag_count, EVENT_FLAG_COUNT);
 
     // Release memory
     furi_thread_free(consumer_thread);
     furi_thread_free(producer_thread);
+
     furi_message_queue_free(data.message_queue);
+    furi_stream_buffer_free(data.stream_buffer);
     furi_event_flag_free(data.event_flag);
+    furi_semaphore_free(data.semaphore);
+    furi_mutex_free(data.mutex);
 }
