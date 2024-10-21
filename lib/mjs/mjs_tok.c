@@ -80,12 +80,13 @@ static int getnum(struct pstate* p) {
 }
 
 static int is_reserved_word_token(const char* s, int len) {
-    const char* reserved[] = {"break",     "case",   "catch", "continue",   "debugger", "default",
-                              "delete",    "do",     "else",  "false",      "finally",  "for",
-                              "function",  "if",     "in",    "instanceof", "new",      "null",
-                              "return",    "switch", "this",  "throw",      "true",     "try",
-                              "typeof",    "var",    "void",  "while",      "with",     "let",
-                              "undefined", NULL};
+    const char* reserved[] = {"break",      "case",      "catch",    "continue", "debugger",
+                              "default",    "delete",    "do",       "else",     "false",
+                              "finally",    "for",       "function", "if",       "in",
+                              "instanceof", "new",       "null",     "return",   "switch",
+                              "this",       "throw",     "true",     "try",      "typeof",
+                              "var",        "void",      "while",    "with",     "let",
+                              "const",      "undefined", NULL};
     int i;
     if(!mjs_is_alpha(s[0])) return 0;
     for(i = 0; reserved[i] != NULL; i++) {
@@ -95,7 +96,8 @@ static int is_reserved_word_token(const char* s, int len) {
 }
 
 static int getident(struct pstate* p) {
-    while(mjs_is_ident(p->pos[0]) || mjs_is_digit(p->pos[0])) p->pos++;
+    while(mjs_is_ident(p->pos[0]) || mjs_is_digit(p->pos[0]))
+        p->pos++;
     p->tok.len = p->pos - p->tok.ptr;
     p->pos--;
     return TOK_IDENT;
@@ -125,7 +127,8 @@ static void skip_spaces_and_comments(struct pstate* p) {
             p->pos++;
         }
         if(p->pos[0] == '/' && p->pos[1] == '/') {
-            while(p->pos[0] != '\0' && p->pos[0] != '\n') p->pos++;
+            while(p->pos[0] != '\0' && p->pos[0] != '\n')
+                p->pos++;
         }
         if(p->pos[0] == '/' && p->pos[1] == '*') {
             p->pos += 2;
@@ -142,8 +145,8 @@ static void skip_spaces_and_comments(struct pstate* p) {
 }
 
 static int ptranslate(int tok) {
-#define DT(a, b) ((a) << 8 | (b))
-#define TT(a, b, c) ((a) << 16 | (b) << 8 | (c))
+#define DT(a, b)       ((a) << 8 | (b))
+#define TT(a, b, c)    ((a) << 16 | (b) << 8 | (c))
 #define QT(a, b, c, d) ((a) << 24 | (b) << 16 | (c) << 8 | (d))
     /* Map token ID produced by mjs_tok.c to token ID produced by lemon */
     /* clang-format off */

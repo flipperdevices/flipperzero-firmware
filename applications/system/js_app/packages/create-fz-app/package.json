@@ -1,0 +1,22 @@
+{
+  "name": "@flipperdevices/create-fz-app",
+  "version": "0.1.0",
+  "description": "Template package for JS apps Flipper Zero",
+  "bin": "index.js",
+  "type": "module",
+  "keywords": [
+    "flipper",
+    "flipper zero"
+  ],
+  "author": "Flipper Devices",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flipperdevices/flipperzero-firmware.git",
+    "directory": "applications/system/js_app/packages/create-fz-app"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2",
+    "replace-in-file": "^8.2.0"
+  }
+}
