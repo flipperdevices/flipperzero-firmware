@@ -1,6 +1,7 @@
 /**
- * @file Module for accessing the serial port
+ * Module for accessing the serial port
  * @version Added in JS SDK 0.1
+ * @module
  */
 
 /**

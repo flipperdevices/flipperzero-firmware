@@ -1,6 +1,7 @@
 /**
- * @file Module for accessing the filesystem
+ * Module for accessing the filesystem
  * @version Added in JS SDK 0.1
+ * @module
  */
 
 /**

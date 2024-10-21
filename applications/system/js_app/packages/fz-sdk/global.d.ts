@@ -1,4 +1,12 @@
 /**
+ * Things from this module are automatically available to you without having to
+ * explicitly import anything.
+ * 
+ * @version Added in JS SDK 0.1
+ * @module
+ */
+
+/**
  * @brief Checks compatibility between the script and the JS SDK that the
  *        firmware provides
  * 

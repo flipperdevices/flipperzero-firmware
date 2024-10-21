@@ -1,6 +1,30 @@
 /**
- * @file Module for accessing the GPIO pins
+ * Module for accessing the GPIO (General Purpose Input/Output) ports
+ * 
+ * ```js
+ * let eventLoop = require("event_loop");
+ * let gpio = require("gpio");
+ * ```
+ * 
+ * This module depends on the `event_loop` module, so it _must_ only be imported
+ * after `event_loop` is imported.
+ * 
+ * # Example
+ * ```js
+ * let eventLoop = require("event_loop");
+ * let gpio = require("gpio");
+ * 
+ * let led = gpio.get("pc3");
+ * led.init({ direction: "out", outMode: "push_pull" });
+ * 
+ * led.write(true);
+ * delay(1000);
+ * led.write(false);
+ * delay(1000);
+ * ```
+ * 
  * @version Added in JS SDK 0.1
+ * @module
  */
 
 import type { Contract } from "../event_loop";

@@ -17,10 +17,15 @@
   "type": "module",
   "devDependencies": {
     "esbuild": "^0.24.0",
-    "esbuild-plugin-tsc": "^0.4.0"
+    "esbuild-plugin-tsc": "^0.4.0",
+    "typedoc": "^0.26.10",
+    "typedoc-material-theme": "^1.1.0"
   },
   "dependencies": {
     "prompts": "^2.4.2",
     "serialport": "^12.0.0"
+  },
+  "scripts": {
+    "build-docs": "pnpm typedoc"
   }
 }

@@ -1,6 +1,7 @@
 /**
- * @file Math operations
+ * Math operations
  * @version Added in JS SDK 0.1
+ * @module
  */
 
 /** @version Added in JS SDK 0.1 */

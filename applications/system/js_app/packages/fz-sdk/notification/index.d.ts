@@ -1,6 +1,7 @@
 /**
- * @file Module for using the color LED and vibration motor
+ * Module for using the color LED and vibration motor
  * @version Added in JS SDK 0.1
+ * @module
  */
 
 /**
