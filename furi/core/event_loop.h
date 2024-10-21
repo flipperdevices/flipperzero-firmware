@@ -197,10 +197,29 @@ typedef void FuriEventLoopObject;
  *
  * @param      object   The object that triggered the event
  * @param      context  The context that was provided upon subscription
- *
- * @return     true if event was processed, false if we need to delay processing
  */
-typedef bool (*FuriEventLoopEventCallback)(FuriEventLoopObject* object, void* context);
+typedef void (*FuriEventLoopEventCallback)(FuriEventLoopObject* object, void* context);
+
+/** Opaque event flag type */
+typedef struct FuriEventFlag FuriEventFlag;
+
+/** Subscribe to event flag events
+ *
+ * @warning you can only have one subscription for one event type.
+ *
+ * @param      instance       The Event Loop instance
+ * @param      event_flag     The event flag to add
+ * @param[in]  event          The Event Loop event to trigger on
+ * @param[in]  callback       The callback to call on event
+ * @param      context        The context for callback
+ */
+
+void furi_event_loop_subscribe_event_flag(
+    FuriEventLoop* instance,
+    FuriEventFlag* event_flag,
+    FuriEventLoopEvent event,
+    FuriEventLoopEventCallback callback,
+    void* context);
 
 /** Opaque message queue type */
 typedef struct FuriMessageQueue FuriMessageQueue;

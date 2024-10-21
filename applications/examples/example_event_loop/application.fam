@@ -1,4 +1,13 @@
 App(
+    appid="example_event_loop_event_flags",
+    name="Example: Event Loop Event Flags",
+    apptype=FlipperAppType.EXTERNAL,
+    sources=["example_event_loop_event_flags.c"],
+    entry_point="example_event_loop_event_flags_app",
+    fap_category="Examples",
+)
+
+App(
     appid="example_event_loop_timer",
     name="Example: Event Loop Timer",
     apptype=FlipperAppType.EXTERNAL,

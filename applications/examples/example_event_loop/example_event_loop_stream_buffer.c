@@ -54,7 +54,7 @@ static int32_t event_loop_stream_buffer_app_worker_thread(void* context) {
 }
 
 // This function is being run each time when the number of bytes in the buffer is above its trigger level.
-static bool
+static void
     event_loop_stream_buffer_app_event_callback(FuriEventLoopObject* object, void* context) {
     furi_assert(context);
     EventLoopStreamBufferApp* app = context;
@@ -76,8 +76,6 @@ static bool
 
     FURI_LOG_I(TAG, "Received data: %s", furi_string_get_cstr(tmp_str));
     furi_string_free(tmp_str);
-
-    return true;
 }
 
 static EventLoopStreamBufferApp* event_loop_stream_buffer_app_alloc(void) {

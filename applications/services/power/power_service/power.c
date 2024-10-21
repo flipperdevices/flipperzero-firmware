@@ -191,7 +191,7 @@ static void power_handle_reboot(PowerBootMode mode) {
     furi_hal_power_reset();
 }
 
-static bool power_message_callback(FuriEventLoopObject* object, void* context) {
+static void power_message_callback(FuriEventLoopObject* object, void* context) {
     furi_assert(context);
     Power* power = context;
 
@@ -223,8 +223,6 @@ static bool power_message_callback(FuriEventLoopObject* object, void* context) {
     if(msg.lock) {
         api_lock_unlock(msg.lock);
     }
-
-    return true;
 }
 
 static void power_tick_callback(void* context) {

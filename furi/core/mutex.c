@@ -144,13 +144,13 @@ static FuriEventLoopLink* furi_mutex_event_loop_get_link(FuriEventLoopObject* ob
     return &instance->event_loop_link;
 }
 
-static uint32_t
+static bool
     furi_mutex_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
     FuriMutex* instance = object;
     furi_assert(instance);
 
     if(event == FuriEventLoopEventIn || event == FuriEventLoopEventOut) {
-        return furi_mutex_get_owner(instance) ? 0 : 1;
+        return !furi_mutex_get_owner(instance);
     } else {
         furi_crash();
     }
