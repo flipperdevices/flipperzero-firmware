@@ -9,7 +9,7 @@
 
 #define MESSAGE_COUNT    (256UL)
 #define EVENT_FLAG_COUNT (23UL)
-#define PRIMITIVE_COUNT  (3UL)
+#define PRIMITIVE_COUNT  (4UL)
 #define RUN_COUNT        (2UL)
 
 typedef struct {
@@ -176,6 +176,41 @@ static void
     furi_delay_us(furi_hal_random_get() % 1000);
 }
 
+static void
+    test_furi_event_loop_producer_semaphore_callback(FuriEventLoopObject* object, void* context) {
+    furi_check(context);
+
+    TestFuriEventLoopData* data = context;
+    furi_check(data->semaphore == object);
+
+    TestFuriEventLoopThread* producer = &data->producer;
+    TestFuriEventLoopThread* consumer = &data->consumer;
+
+    FURI_LOG_I(
+        TAG, "producer Semaphore: %lu %lu", producer->semaphore_count, consumer->semaphore_count);
+    furi_check(furi_semaphore_release(data->semaphore) == FuriStatusOk);
+
+    if(producer->semaphore_count == MESSAGE_COUNT / 2) {
+        furi_event_loop_unsubscribe(producer->event_loop, data->semaphore);
+        furi_event_loop_subscribe_semaphore(
+            producer->event_loop,
+            data->semaphore,
+            FuriEventLoopEventOut,
+            test_furi_event_loop_producer_semaphore_callback,
+            data);
+
+    } else if(producer->semaphore_count == MESSAGE_COUNT) {
+        furi_event_loop_unsubscribe(producer->event_loop, data->semaphore);
+        furi_event_loop_pend_callback(
+            producer->event_loop, test_furi_event_loop_pending_callback, producer);
+        return;
+    }
+
+    data->producer.semaphore_count++;
+
+    furi_delay_us(furi_hal_random_get() % 1000);
+}
+
 static int32_t test_furi_event_loop_producer(void* p) {
     furi_check(p);
 
@@ -204,6 +239,12 @@ static int32_t test_furi_event_loop_producer(void* p) {
             data->event_flag,
             FuriEventLoopEventOut,
             test_furi_event_loop_producer_event_flag_callback,
+            data);
+        furi_event_loop_subscribe_semaphore(
+            producer->event_loop,
+            data->semaphore,
+            FuriEventLoopEventOut,
+            test_furi_event_loop_producer_semaphore_callback,
             data);
 
         test_furi_event_loop_thread_run_and_cleanup(producer);
@@ -327,6 +368,42 @@ static void
     data->consumer.event_flag_count++;
 }
 
+static void
+    test_furi_event_loop_consumer_semaphore_callback(FuriEventLoopObject* object, void* context) {
+    furi_check(context);
+
+    TestFuriEventLoopData* data = context;
+    furi_check(data->semaphore == object);
+
+    furi_delay_us(furi_hal_random_get() % 1000);
+
+    TestFuriEventLoopThread* producer = &data->producer;
+    TestFuriEventLoopThread* consumer = &data->consumer;
+
+    furi_check(furi_semaphore_acquire(data->semaphore, 0) == FuriStatusOk);
+
+    FURI_LOG_I(
+        TAG, "consumer Semaphore: %lu %lu", producer->semaphore_count, consumer->semaphore_count);
+
+    if(consumer->semaphore_count == MESSAGE_COUNT / 2) {
+        furi_event_loop_unsubscribe(consumer->event_loop, data->semaphore);
+        furi_event_loop_subscribe_semaphore(
+            consumer->event_loop,
+            data->semaphore,
+            FuriEventLoopEventIn,
+            test_furi_event_loop_consumer_semaphore_callback,
+            data);
+
+    } else if(consumer->semaphore_count == MESSAGE_COUNT) {
+        furi_event_loop_unsubscribe(consumer->event_loop, data->semaphore);
+        furi_event_loop_pend_callback(
+            consumer->event_loop, test_furi_event_loop_pending_callback, consumer);
+        return;
+    }
+
+    data->consumer.semaphore_count++;
+}
+
 static int32_t test_furi_event_loop_consumer(void* p) {
     furi_check(p);
 
@@ -355,6 +432,12 @@ static int32_t test_furi_event_loop_consumer(void* p) {
             data->event_flag,
             FuriEventLoopEventIn,
             test_furi_event_loop_consumer_event_flag_callback,
+            data);
+        furi_event_loop_subscribe_semaphore(
+            consumer->event_loop,
+            data->semaphore,
+            FuriEventLoopEventIn,
+            test_furi_event_loop_consumer_semaphore_callback,
             data);
 
         test_furi_event_loop_thread_run_and_cleanup(consumer);
@@ -396,6 +479,8 @@ void test_furi_event_loop(void) {
     mu_assert_int_eq(producer->stream_buffer_count, MESSAGE_COUNT);
     mu_assert_int_eq(producer->event_flag_count, consumer->event_flag_count);
     mu_assert_int_eq(producer->event_flag_count, EVENT_FLAG_COUNT);
+    mu_assert_int_eq(producer->semaphore_count, consumer->semaphore_count);
+    mu_assert_int_eq(producer->semaphore_count, MESSAGE_COUNT);
 
     // Release memory
     furi_thread_free(consumer_thread);
