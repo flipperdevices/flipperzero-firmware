@@ -80,7 +80,7 @@ static void js_event_loop_callback_generic(void* param) {
 /**
  * @brief Handles non-timer events
  */
-static bool js_event_loop_callback(void* object, void* param) {
+static void js_event_loop_callback(void* object, void* param) {
     JsEventLoopCallbackContext* context = param;
 
     if(context->transformer) {
@@ -102,8 +102,6 @@ static bool js_event_loop_callback(void* object, void* param) {
     }
 
     js_event_loop_callback_generic(param);
-
-    return true;
 }
 
 /**

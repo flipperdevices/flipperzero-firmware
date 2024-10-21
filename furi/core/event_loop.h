@@ -197,10 +197,8 @@ typedef void FuriEventLoopObject;
  *
  * @param      object   The object that triggered the event
  * @param      context  The context that was provided upon subscription
- *
- * @return     true if event was processed, false if we need to delay processing
  */
-typedef bool (*FuriEventLoopEventCallback)(FuriEventLoopObject* object, void* context);
+typedef void (*FuriEventLoopEventCallback)(FuriEventLoopObject* object, void* context);
 
 /** Opaque event flag type */
 typedef struct FuriEventFlag FuriEventFlag;

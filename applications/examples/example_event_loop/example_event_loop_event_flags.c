@@ -64,7 +64,7 @@ static void event_loop_event_flags_app_input_callback(InputEvent* event, void* c
 }
 
 // This function is executed each time a new event flag is inserted in the input event flag.
-static bool
+static void
     event_loop_event_flags_app_event_flags_callback(FuriEventLoopObject* object, void* context) {
     furi_assert(context);
     EventLoopEventFlagsApp* app = context;
@@ -97,8 +97,6 @@ static bool
         FURI_LOG_I(TAG, "Exit App");
         furi_event_loop_stop(app->event_loop);
     }
-
-    return true;
 }
 
 static EventLoopEventFlagsApp* event_loop_event_flags_app_alloc(void) {

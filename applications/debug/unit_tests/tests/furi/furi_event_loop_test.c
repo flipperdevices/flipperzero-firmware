@@ -55,7 +55,7 @@ static void test_furi_event_loop_thread_run_and_cleanup(TestFuriEventLoopThread*
     furi_event_loop_free(test_thread->event_loop);
 }
 
-static bool test_furi_event_loop_producer_message_queue_callback(
+static void test_furi_event_loop_producer_message_queue_callback(
     FuriEventLoopObject* object,
     void* context) {
     furi_check(context);
@@ -82,7 +82,7 @@ static bool test_furi_event_loop_producer_message_queue_callback(
         furi_event_loop_unsubscribe(data->producer.event_loop, data->message_queue);
         furi_event_loop_pend_callback(
             data->producer.event_loop, test_furi_event_loop_pending_callback, &data->producer);
-        return false;
+        return;
     }
 
     data->producer.message_count++;
@@ -92,11 +92,9 @@ static bool test_furi_event_loop_producer_message_queue_callback(
         FuriStatusOk);
 
     furi_delay_us(furi_hal_random_get() % 1000);
-
-    return false;
 }
 
-static bool
+static void
     test_furi_event_loop_producer_event_flag_callback(FuriEventLoopObject* object, void* context) {
     furi_check(context);
 
@@ -123,14 +121,12 @@ static bool
         furi_event_loop_unsubscribe(data->producer.event_loop, data->event_flag);
         furi_event_loop_pend_callback(
             data->producer.event_loop, test_furi_event_loop_pending_callback, &data->producer);
-        return false;
+        return;
     }
 
     data->producer.event_flag_count++;
 
     furi_delay_us(furi_hal_random_get() % 1000);
-
-    return false;
 }
 
 static int32_t test_furi_event_loop_producer(void* p) {
@@ -165,7 +161,7 @@ static int32_t test_furi_event_loop_producer(void* p) {
     return 0;
 }
 
-static bool test_furi_event_loop_consumer_message_queue_callback(
+static void test_furi_event_loop_consumer_message_queue_callback(
     FuriEventLoopObject* object,
     void* context) {
     furi_check(context);
@@ -199,11 +195,9 @@ static bool test_furi_event_loop_consumer_message_queue_callback(
         furi_event_loop_pend_callback(
             data->consumer.event_loop, test_furi_event_loop_pending_callback, &data->consumer);
     }
-
-    return false;
 }
 
-static bool
+static void
     test_furi_event_loop_consumer_event_flag_callback(FuriEventLoopObject* object, void* context) {
     furi_check(context);
 
@@ -234,12 +228,10 @@ static bool
         furi_event_loop_unsubscribe(data->consumer.event_loop, data->event_flag);
         furi_event_loop_pend_callback(
             data->consumer.event_loop, test_furi_event_loop_pending_callback, &data->consumer);
-        return false;
+        return;
     }
 
     data->consumer.event_flag_count++;
-
-    return false;
 }
 
 static int32_t test_furi_event_loop_consumer(void* p) {
