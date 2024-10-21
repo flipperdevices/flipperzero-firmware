@@ -167,7 +167,7 @@ uint32_t furi_event_flag_wait(
         }
     }
 
-    if(rflags != 0) {
+    if((rflags & FuriFlagError) == 0U) {
         furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
     }
 

@@ -212,8 +212,8 @@ static bool
 
     furi_delay_us(furi_hal_random_get() % 1000);
 
-    const uint32_t producer_flags = 1UL << data->producer.event_flag_count;
-    const uint32_t consumer_flags = 1UL << data->consumer.event_flag_count;
+    const uint32_t producer_flags = (1UL << data->producer.event_flag_count);
+    const uint32_t consumer_flags = (1UL << data->consumer.event_flag_count);
 
     furi_check(
         furi_event_flag_wait(data->event_flag, consumer_flags, FuriFlagWaitAny, 0) &

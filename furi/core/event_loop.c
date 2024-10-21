@@ -101,40 +101,22 @@ void furi_event_loop_free(FuriEventLoop* instance) {
 }
 
 static inline FuriEventLoopProcessStatus
-    furi_event_loop_poll_process_level_event(FuriEventLoopItem* item) {
-    if(!item->contract->get_level(item->object, item->event)) {
-        return FuriEventLoopProcessStatusComplete;
-    } else if(item->callback(item->object, item->callback_context)) {
-        return FuriEventLoopProcessStatusIncomplete;
-    } else {
-        return FuriEventLoopProcessStatusAgain;
-    }
-}
-
-static inline FuriEventLoopProcessStatus
-    furi_event_loop_poll_process_edge_event(FuriEventLoopItem* item) {
-    if(item->callback(item->object, item->callback_context)) {
-        return FuriEventLoopProcessStatusComplete;
-    } else {
-        return FuriEventLoopProcessStatusAgain;
-    }
-}
-
-static inline FuriEventLoopProcessStatus
     furi_event_loop_poll_process_event(FuriEventLoop* instance, FuriEventLoopItem* item) {
     FuriEventLoopProcessStatus status;
+
     if(item->event & FuriEventLoopEventFlagOnce) {
         furi_event_loop_unsubscribe(instance, item->object);
     }
 
-    if(item->event & FuriEventLoopEventFlagEdge) {
-        status = furi_event_loop_poll_process_edge_event(item);
-    } else {
-        status = furi_event_loop_poll_process_level_event(item);
-    }
+    item->callback(item->object, item->callback_context);
 
     if(item->owner == NULL) {
         status = FuriEventLoopProcessStatusFreeLater;
+    } else if(item->event & FuriEventLoopEventFlagEdge) {
+        status = FuriEventLoopProcessStatusComplete;
+    } else {
+        const bool level = item->contract->get_level(item->object, item->event);
+        status = level ? FuriEventLoopProcessStatusIncomplete : FuriEventLoopProcessStatusComplete;
     }
 
     return status;
@@ -171,27 +153,20 @@ static inline void furi_event_loop_sync_flags(FuriEventLoop* instance) {
 
 static void furi_event_loop_process_waiting_list(FuriEventLoop* instance) {
     FuriEventLoopItem* item = furi_event_loop_get_waiting_item(instance);
-
     if(!item) return;
 
-    while(true) {
-        FuriEventLoopProcessStatus status = furi_event_loop_poll_process_event(instance, item);
+    FuriEventLoopProcessStatus status = furi_event_loop_poll_process_event(instance, item);
 
-        if(status == FuriEventLoopProcessStatusComplete) {
-            // Event processing complete, break from loop
-            break;
-        } else if(status == FuriEventLoopProcessStatusIncomplete) {
-            // Event processing incomplete more processing needed
-        } else if(status == FuriEventLoopProcessStatusAgain) { //-V547
-            furi_event_loop_item_notify(item);
-            break;
-            // Unsubscribed from inside the callback, delete item
-        } else if(status == FuriEventLoopProcessStatusFreeLater) { //-V547
-            furi_event_loop_item_free(item);
-            break;
-        } else {
-            furi_crash();
-        }
+    if(status == FuriEventLoopProcessStatusComplete) {
+        // Event processing complete, do nothing
+    } else if(status == FuriEventLoopProcessStatusIncomplete) {
+        // Event processing incomplete, put item back in waiting list
+        furi_event_loop_item_notify(item);
+    } else if(status == FuriEventLoopProcessStatusFreeLater) { //-V547
+        // Unsubscribed from inside the callback, delete item
+        furi_event_loop_item_free(item);
+    } else {
+        furi_crash();
     }
 
     furi_event_loop_sync_flags(instance);
