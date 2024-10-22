@@ -12,21 +12,41 @@ declare function delay(ms: number): void;
 declare function print(...args: any[]): void;
 
 /**
- * @brief Converts a number to a string
- * @param value The number to convert to a string
- * @param base Integer base (`2`...`16`), default: 16
+ * @brief Converts a string to a number
+ * @param text The string to convert to a number
+ * @param base Integer base (`2`...`16`), default: 10
  */
-declare function toString(value: number, base?: number): string;
+declare function parseInt(text: string, base?: number): number;
+
+/**
+ * @brief Path to the directory containing the current script
+ */
+declare const __dirname: string;
+
+/**
+ * @brief Path to the current script file
+ */
+declare const __filename: string;
 
 /**
  * @brief Reads a JS value from a file
  * 
  * Reads a file at the specified path, interprets it as a JS value and returns
- * said value.
+ * the last value pushed on the stack.
  * 
  * @param path The path to the file
+ * @param scope An object to use as global scope while running this file
  */
-declare function load(path: string): any;
+declare function load(path: string, scope?: object): any;
+
+/**
+ * @brief Return 1-byte string whose ASCII code is the integer `n`
+ * 
+ * If `n` is not numeric or outside of `0-255` range, `null` is returned
+ * 
+ * @param n The ASCII code to convert to string
+ */
+declare function chr(n: number): string | null;
 
 /**
  * @brief mJS Foreign Pointer type
@@ -161,13 +181,39 @@ declare class String {
      * See `charCodeAt`
      */
     at(index: number): number;
+    /**
+     * @brief Return index of first occurence of substr within the string or `-1` if not found
+     * @param substr The string to search for
+     * @param fromIndex The index to start searching from
+     */
+    indexOf(substr: string, fromIndex?: number): number;
+    /**
+     * @brief Return a substring between two indices
+     * @param start The index to start substring at
+     * @param end The index to end substring at
+     */
+    slice(start: number, end?: number): string;
+    /**
+     * @brief Return this string transformed to upper case
+     */
+    toUpperCase(): string;
+    /**
+     * @brief Return this string transformed to lower case
+     */
+    toLowerCase(): string;
 }
 
 declare class Boolean { }
 
 declare class Function { }
 
-declare class Number { }
+declare class Number {
+    /**
+     * @brief Converts this number to a string
+     * @param base Integer base (`2`...`16`), default: 10
+     */
+    toString(base?: number): string;
+}
 
 declare class Object { }
 

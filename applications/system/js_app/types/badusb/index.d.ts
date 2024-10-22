@@ -14,6 +14,9 @@ export type MainKey =
     "F11" | "F12" | "F13" | "F14" | "F15" | "F16" | "F17" | "F18" | "F19" |
     "F20" | "F21" | "F22" | "F23" | "F24" |
 
+    "NUM0" | "NUM1" | "NUM2" | "NUM3" | "NUM4" | "NUM5" | "NUM6" | "NUM7" |
+    "NUM8" | "NUM9" |
+
     "\n" | " " | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" |
     "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | ">" | "=" | "?" | "@" | "[" |
     "]" | "\\" | "^" | "_" | "`" | "{" | "}" | "|" | "~" |
@@ -34,7 +37,7 @@ export type KeyCode = MainKey | ModifierKey | number;
  * @brief Initializes the module
  * @param settings USB device settings. Omit to select default parameters
  */
-export declare function setup(settings?: { vid: number, pid: number, mfrName?: string, prodName?: string }): void;
+export declare function setup(settings?: { vid: number, pid: number, mfrName?: string, prodName?: string, layoutPath?: string }): void;
 
 /**
  * @brief Tells whether the virtual USB HID device has successfully connected
@@ -79,3 +82,23 @@ export declare function print(string: string, delay?: number): void;
  * @param delay How many milliseconds to wait between key presses
  */
 export declare function println(string: string, delay?: number): void;
+
+/**
+ * @brief Prints a string by Alt+Numpad method - works only on Windows!
+ * @param string The string to print
+ * @param delay How many milliseconds to wait between key presses
+ */
+export declare function altPrint(string: string, delay?: number): void;
+
+/**
+ * @brief Prints a string by Alt+Numpad method - works only on Windows!
+ *        Presses "Enter" after printing the string
+ * @param string The string to print
+ * @param delay How many milliseconds to wait between key presses
+ */
+export declare function altPrintln(string: string, delay?: number): void;
+
+/**
+ * @brief Releases usb, optional, but allows to switch usb profile
+ */
+export declare function quit(): void;
