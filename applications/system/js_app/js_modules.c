@@ -274,7 +274,7 @@ static const char* extra_features[] = {
  * @brief Determines whether a feature is supported
  */
 static bool js_internal_supports(const char* feature) {
-    for(size_t i = 0; i < COUNT_OF(extra_features); i++) {
+    for(size_t i = 0; i < COUNT_OF(extra_features); i++) { // -V1008
         if(strcmp(feature, extra_features[i]) == 0) return true;
     }
     return false;
