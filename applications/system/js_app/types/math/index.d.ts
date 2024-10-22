@@ -1,3 +1,4 @@
+export function isEqual(a: number, b: number, tolerance: number): boolean;
 export function abs(n: number): number;
 export function acos(n: number): number;
 export function acosh(n: number): number;
@@ -12,6 +13,7 @@ export function clz32(n: number): number;
 export function cos(n: number): number;
 export function exp(n: number): number;
 export function floor(n: number): number;
+export function log(n: number): number;
 export function max(n: number, m: number): number;
 export function min(n: number, m: number): number;
 export function pow(n: number, m: number): number;
@@ -21,4 +23,5 @@ export function sin(n: number): number;
 export function sqrt(n: number): number;
 export function trunc(n: number): number;
 declare const PI: number;
+declare const E: number;
 declare const EPSILON: number;
