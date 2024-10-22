@@ -3,13 +3,13 @@
         "checkJs": true,
         "module": "CommonJS",
         "typeRoots": [
-            "./js/fz-sdk/"
+            "./applications/system/js_app/packages/fz-sdk/"
         ],
         "noLib": true,
     },
     "include": [
         "./applications/system/js_app/examples/apps/Scripts",
         "./applications/debug/unit_tests/resources/unit_tests/js",
-        "./js/fz-sdk/global.d.ts",
+        "./applications/system/js_app/packages/fz-sdk/global.d.ts",
     ]
 }

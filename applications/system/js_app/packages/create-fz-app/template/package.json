@@ -2,9 +2,8 @@
   "name": "<app_name>",
   "version": "1.0.0",
   "scripts": {
-    "ts": "tsc && sed -i '1s/^/let exports={};/' dist/index.js",
-    "build": "npm run ts && node node_modules/@flipperdevices/fz-sdk/esbuild.config.js",
-    "start": "npm run build && node node_modules/@flipperdevices/fz-sdk/launch.js dist/index.min.js /ext/apps/Scripts/<app_name>.js"
+    "build": "tsc && node node_modules/@flipperdevices/fz-sdk/sdk.js build",
+    "start": "npm run build && node node_modules/@flipperdevices/fz-sdk/sdk.js upload"
   },
   "devDependencies": {
     "@flipperdevices/fz-sdk": "^0.1",

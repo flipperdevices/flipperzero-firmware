@@ -291,6 +291,16 @@ void js_sdk_compatibility_status(struct mjs* mjs);
 void js_is_sdk_compatible(struct mjs* mjs);
 
 /**
- * @brief `assertSdkCompatibility` function
+ * @brief `checkSdkCompatibility` function
  */
-void js_assert_sdk_compatibility(struct mjs* mjs);
+void js_check_sdk_compatibility(struct mjs* mjs);
+
+/**
+ * @brief `doesSdkSupport` function
+ */
+void js_does_sdk_support(struct mjs* mjs);
+
+/**
+ * @brief `checkSdkFeatures` function
+ */
+void js_check_sdk_features(struct mjs* mjs);
