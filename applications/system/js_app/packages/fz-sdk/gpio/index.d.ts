@@ -68,7 +68,7 @@ export interface Pin {
      * with `direction: "in"` and `inMode: "analog"`
      * @version Added in JS SDK 0.1
      */
-    read_analog(): number;
+    readAnalog(): number;
     /**
      * Returns an `event_loop` event that can be used to listen to interrupts,
      * as configured by `init`

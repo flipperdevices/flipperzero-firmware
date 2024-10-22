@@ -19,7 +19,7 @@ eventLoop.subscribe(eventLoop.timer("periodic", 1000), function (_, _item, led, 
 // read potentiometer when button is pressed
 print("Press the button (PC1)");
 eventLoop.subscribe(button.interrupt(), function (_, _item, pot) {
-    print("PC0 is at", pot.read_analog(), "mV");
+    print("PC0 is at", pot.readAnalog(), "mV");
 }, pot);
 
 // the program will just exit unless this is here
