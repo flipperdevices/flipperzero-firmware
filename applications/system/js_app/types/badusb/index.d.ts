@@ -37,7 +37,7 @@ export type KeyCode = MainKey | ModifierKey | number;
  * @brief Initializes the module
  * @param settings USB device settings. Omit to select default parameters
  */
-export declare function setup(settings?: { vid: number, pid: number, mfrName?: string, prodName?: string, layoutPath: string }): void;
+export declare function setup(settings?: { vid: number, pid: number, mfrName?: string, prodName?: string, layoutPath?: string }): void;
 
 /**
  * @brief Tells whether the virtual USB HID device has successfully connected
