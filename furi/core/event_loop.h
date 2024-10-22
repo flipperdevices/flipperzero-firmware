@@ -11,6 +11,9 @@
  *             provide any compatibility with other event driven APIs. But
  *             programming concepts are the same, except some runtime
  *             limitations from our side.
+ *
+ * @warning Only ONE instance of FuriEventLoop per thread is possible. ALL FuriEventLoop
+ * funcitons MUST be called from the same thread that the instance was created in.
  */
 #pragma once
 
