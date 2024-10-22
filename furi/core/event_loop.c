@@ -101,22 +101,43 @@ void furi_event_loop_free(FuriEventLoop* instance) {
 }
 
 static inline FuriEventLoopProcessStatus
-    furi_event_loop_poll_process_event(FuriEventLoop* instance, FuriEventLoopItem* item) {
+    furi_event_loop_process_edge_event(FuriEventLoopItem* item) {
+    FuriEventLoopProcessStatus status = FuriEventLoopProcessStatusComplete;
+    item->callback(item->object, item->callback_context);
+
+    return status;
+}
+
+static inline FuriEventLoopProcessStatus
+    furi_event_loop_process_level_event(FuriEventLoopItem* item) {
+    FuriEventLoopProcessStatus status = FuriEventLoopProcessStatusComplete;
+    if(item->contract->get_level(item->object, item->event)) {
+        item->callback(item->object, item->callback_context);
+
+        if(item->contract->get_level(item->object, item->event)) {
+            status = FuriEventLoopProcessStatusIncomplete;
+        }
+    }
+
+    return status;
+}
+
+static inline FuriEventLoopProcessStatus
+    furi_event_loop_process_event(FuriEventLoop* instance, FuriEventLoopItem* item) {
     FuriEventLoopProcessStatus status;
 
     if(item->event & FuriEventLoopEventFlagOnce) {
         furi_event_loop_unsubscribe(instance, item->object);
     }
 
-    item->callback(item->object, item->callback_context);
+    if(item->event & FuriEventLoopEventFlagEdge) {
+        status = furi_event_loop_process_edge_event(item);
+    } else {
+        status = furi_event_loop_process_level_event(item);
+    }
 
     if(item->owner == NULL) {
         status = FuriEventLoopProcessStatusFreeLater;
-    } else if(item->event & FuriEventLoopEventFlagEdge) {
-        status = FuriEventLoopProcessStatusComplete;
-    } else {
-        const bool level = item->contract->get_level(item->object, item->event);
-        status = level ? FuriEventLoopProcessStatusIncomplete : FuriEventLoopProcessStatusComplete;
     }
 
     return status;
@@ -155,7 +176,7 @@ static void furi_event_loop_process_waiting_list(FuriEventLoop* instance) {
     FuriEventLoopItem* item = furi_event_loop_get_waiting_item(instance);
     if(!item) return;
 
-    FuriEventLoopProcessStatus status = furi_event_loop_poll_process_event(instance, item);
+    FuriEventLoopProcessStatus status = furi_event_loop_process_event(instance, item);
 
     if(status == FuriEventLoopProcessStatusComplete) {
         // Event processing complete, do nothing
