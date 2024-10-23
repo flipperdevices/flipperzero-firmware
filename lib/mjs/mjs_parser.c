@@ -76,7 +76,8 @@ static int s_assign_ops[] = {
 
 static int findtok(int* toks, int tok) {
     int i = 0;
-    while(tok != toks[i] && toks[i] != TOK_EOF) i++;
+    while(tok != toks[i] && toks[i] != TOK_EOF)
+        i++;
     return toks[i];
 }
 
@@ -87,7 +88,7 @@ static void emit_op(struct pstate* pstate, int tok) {
 }
 
 #define BINOP_STACK_FRAME_SIZE 16
-#define STACK_LIMIT 8192
+#define STACK_LIMIT            8192
 
 // Intentionally left as macro rather than a function, to let the
 // compiler to inline calls and mimimize runtime stack usage.
@@ -166,7 +167,8 @@ static mjs_err_t parse_statement_list(struct pstate* p, int et) {
         if(drop) emit_byte(p, OP_DROP);
         res = parse_statement(p);
         drop = 1;
-        while(p->tok.tok == TOK_SEMICOLON) pnext1(p);
+        while(p->tok.tok == TOK_SEMICOLON)
+            pnext1(p);
     }
 
     /*
@@ -523,7 +525,11 @@ static mjs_err_t parse_expr(struct pstate* p) {
 static mjs_err_t parse_let(struct pstate* p) {
     mjs_err_t res = MJS_OK;
     LOG(LL_VERBOSE_DEBUG, ("[%.*s]", 10, p->tok.ptr));
-    EXPECT(p, TOK_KEYWORD_LET);
+    if((p)->tok.tok != TOK_KEYWORD_VAR && (p)->tok.tok != TOK_KEYWORD_LET &&
+       (p)->tok.tok != TOK_KEYWORD_CONST)
+        SYNTAX_ERROR(p);
+    else
+        pnext1(p);
     for(;;) {
         struct tok tmp = p->tok;
         EXPECT(p, TOK_IDENT);
@@ -910,6 +916,8 @@ static mjs_err_t parse_statement(struct pstate* p) {
         pnext1(p);
         return MJS_OK;
     case TOK_KEYWORD_LET:
+    case TOK_KEYWORD_VAR:
+    case TOK_KEYWORD_CONST:
         return parse_let(p);
     case TOK_OPEN_CURLY:
         return parse_block(p, 1);
@@ -939,7 +947,6 @@ static mjs_err_t parse_statement(struct pstate* p) {
     case TOK_KEYWORD_SWITCH:
     case TOK_KEYWORD_THROW:
     case TOK_KEYWORD_TRY:
-    case TOK_KEYWORD_VAR:
     case TOK_KEYWORD_VOID:
     case TOK_KEYWORD_WITH:
         mjs_set_errorf(

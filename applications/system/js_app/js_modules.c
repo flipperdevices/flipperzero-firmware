@@ -1,6 +1,8 @@
 #include <core/common_defines.h>
 #include "js_modules.h"
 #include <m-array.h>
+#include <dialogs/dialogs.h>
+#include <assets_icons.h>
 
 #include "modules/js_flipper.h"
 #ifdef FW_CFG_unit_tests
@@ -76,6 +78,12 @@ JsModuleData* js_find_loaded_module(JsModules* instance, const char* name) {
 }
 
 mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_len) {
+    // Ignore the initial part of the module name
+    const char* optional_module_prefix = "@" JS_SDK_VENDOR "/fz-sdk/";
+    if(strncmp(name, optional_module_prefix, strlen(optional_module_prefix)) == 0) {
+        name += strlen(optional_module_prefix);
+    }
+
     // Check if module is already installed
     JsModuleData* module_inst = js_find_loaded_module(modules, name);
     if(module_inst) { //-V547
@@ -174,4 +182,134 @@ void* js_module_get(JsModules* modules, const char* name) {
     JsModuleData* module_inst = js_find_loaded_module(modules, name);
     furi_string_free(module_name);
     return module_inst ? module_inst->context : NULL;
+}
+
+typedef enum {
+    JsSdkCompatStatusCompatible,
+    JsSdkCompatStatusFirmwareTooOld,
+    JsSdkCompatStatusFirmwareTooNew,
+} JsSdkCompatStatus;
+
+/**
+ * @brief Checks compatibility between the firmware and the JS SDK version
+ *        expected by the script
+ */
+static JsSdkCompatStatus
+    js_internal_sdk_compatibility_status(int32_t exp_major, int32_t exp_minor) {
+    if(exp_major < JS_SDK_MAJOR) return JsSdkCompatStatusFirmwareTooNew;
+    if(exp_major > JS_SDK_MAJOR || exp_minor > JS_SDK_MINOR)
+        return JsSdkCompatStatusFirmwareTooOld;
+    return JsSdkCompatStatusCompatible;
+}
+
+#define JS_SDK_COMPAT_ARGS \
+    int32_t major, minor;  \
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_INT32(&major), JS_ARG_INT32(&minor));
+
+void js_sdk_compatibility_status(struct mjs* mjs) {
+    JS_SDK_COMPAT_ARGS;
+    JsSdkCompatStatus status = js_internal_sdk_compatibility_status(major, minor);
+    switch(status) {
+    case JsSdkCompatStatusCompatible:
+        mjs_return(mjs, mjs_mk_string(mjs, "compatible", ~0, 0));
+        return;
+    case JsSdkCompatStatusFirmwareTooOld:
+        mjs_return(mjs, mjs_mk_string(mjs, "firmwareTooOld", ~0, 0));
+        return;
+    case JsSdkCompatStatusFirmwareTooNew:
+        mjs_return(mjs, mjs_mk_string(mjs, "firmwareTooNew", ~0, 0));
+        return;
+    }
+}
+
+void js_is_sdk_compatible(struct mjs* mjs) {
+    JS_SDK_COMPAT_ARGS;
+    JsSdkCompatStatus status = js_internal_sdk_compatibility_status(major, minor);
+    mjs_return(mjs, mjs_mk_boolean(mjs, status == JsSdkCompatStatusCompatible));
+}
+
+/**
+ * @brief Asks the user whether to continue executing an incompatible script
+ */
+static bool js_internal_compat_ask_user(const char* message) {
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+    DialogMessage* dialog = dialog_message_alloc();
+    dialog_message_set_header(dialog, message, 64, 0, AlignCenter, AlignTop);
+    dialog_message_set_text(
+        dialog, "This script may not\nwork as expected", 79, 32, AlignCenter, AlignCenter);
+    dialog_message_set_icon(dialog, &I_Warning_30x23, 0, 18);
+    dialog_message_set_buttons(dialog, "Go back", NULL, "Run anyway");
+    DialogMessageButton choice = dialog_message_show(dialogs, dialog);
+    dialog_message_free(dialog);
+    furi_record_close(RECORD_DIALOGS);
+    return choice == DialogMessageButtonRight;
+}
+
+void js_check_sdk_compatibility(struct mjs* mjs) {
+    JS_SDK_COMPAT_ARGS;
+    JsSdkCompatStatus status = js_internal_sdk_compatibility_status(major, minor);
+    if(status != JsSdkCompatStatusCompatible) {
+        FURI_LOG_E(
+            TAG,
+            "Script requests JS SDK %ld.%ld, firmware provides JS SDK %d.%d",
+            major,
+            minor,
+            JS_SDK_MAJOR,
+            JS_SDK_MINOR);
+
+        const char* message = (status == JsSdkCompatStatusFirmwareTooOld) ? "Outdated Firmware" :
+                                                                            "Outdated Script";
+        if(!js_internal_compat_ask_user(message)) {
+            JS_ERROR_AND_RETURN(mjs, MJS_NOT_IMPLEMENTED_ERROR, "Incompatible script");
+        }
+    }
+}
+
+static const char* extra_features[] = {
+    "baseline", // dummy "feature"
+};
+
+/**
+ * @brief Determines whether a feature is supported
+ */
+static bool js_internal_supports(const char* feature) {
+    for(size_t i = 0; i < COUNT_OF(extra_features); i++) { // -V1008
+        if(strcmp(feature, extra_features[i]) == 0) return true;
+    }
+    return false;
+}
+
+/**
+ * @brief Determines whether all of the requested features are supported
+ */
+static bool js_internal_supports_all_of(struct mjs* mjs, mjs_val_t feature_arr) {
+    furi_assert(mjs_is_array(feature_arr));
+
+    for(size_t i = 0; i < mjs_array_length(mjs, feature_arr); i++) {
+        mjs_val_t feature = mjs_array_get(mjs, feature_arr, i);
+        const char* feature_str = mjs_get_string(mjs, &feature, NULL);
+        if(!feature_str) return false;
+
+        if(!js_internal_supports(feature_str)) return false;
+    }
+
+    return true;
+}
+
+void js_does_sdk_support(struct mjs* mjs) {
+    mjs_val_t features;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_ARR(&features));
+    mjs_return(mjs, mjs_mk_boolean(mjs, js_internal_supports_all_of(mjs, features)));
+}
+
+void js_check_sdk_features(struct mjs* mjs) {
+    mjs_val_t features;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_ARR(&features));
+    if(!js_internal_supports_all_of(mjs, features)) {
+        FURI_LOG_E(TAG, "Script requests unsupported features");
+
+        if(!js_internal_compat_ask_user("Unsupported Feature")) {
+            JS_ERROR_AND_RETURN(mjs, MJS_NOT_IMPLEMENTED_ERROR, "Incompatible script");
+        }
+    }
 }

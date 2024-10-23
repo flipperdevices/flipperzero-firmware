@@ -61,7 +61,7 @@ Reads a digital value from a pin configured with `direction: "in"` and any
 #### Returns
 Boolean logic level
 
-### `Pin.read_analog()`
+### `Pin.readAnalog()`
 Reads an analog voltage level in millivolts from a pin configured with
 `direction: "in"` and `inMode: "analog"`
 
