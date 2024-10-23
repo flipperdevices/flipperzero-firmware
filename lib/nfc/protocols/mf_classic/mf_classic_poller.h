@@ -44,8 +44,44 @@ typedef enum {
 typedef enum {
     MfClassicPollerModeRead, /**< Poller reading mode. */
     MfClassicPollerModeWrite, /**< Poller writing mode. */
-    MfClassicPollerModeDictAttack, /**< Poller dictionary attack mode. */
+    MfClassicPollerModeDictAttackStandard, /**< Poller dictionary attack mode. */
+    MfClassicPollerModeDictAttackEnhanced, /**< Poller enhanced dictionary attack mode. */
 } MfClassicPollerMode;
+
+/**
+ * @brief MfClassic poller nested attack phase.
+ */
+typedef enum {
+    MfClassicNestedPhaseNone,
+    MfClassicNestedPhaseAnalyzePRNG,
+    MfClassicNestedPhaseDictAttack,
+    MfClassicNestedPhaseDictAttackResume,
+    MfClassicNestedPhaseCalibrate,
+    MfClassicNestedPhaseRecalibrate,
+    MfClassicNestedPhaseCollectNtEnc,
+    MfClassicNestedPhaseFinished,
+} MfClassicNestedPhase;
+
+/**
+ * @brief MfClassic pseudorandom number generator (PRNG) type.
+ */
+typedef enum {
+    MfClassicPrngTypeUnknown, // Tag not yet tested
+    MfClassicPrngTypeNoTag, // No tag detected during test
+    MfClassicPrngTypeWeak, // Weak PRNG, standard Nested
+    MfClassicPrngTypeHard, // Hard PRNG, Hardnested
+} MfClassicPrngType;
+
+/**
+ * @brief MfClassic authentication backdoor type.
+ */
+typedef enum {
+    MfClassicBackdoorUnknown, // Tag not yet tested
+    MfClassicBackdoorNone, // No observed backdoor
+    MfClassicBackdoorAuth1, // Tag responds to v1 auth backdoor
+    MfClassicBackdoorAuth2, // Tag responds to v2 auth backdoor (sometimes static encrypted)
+    MfClassicBackdoorAuth3, // Tag responds to v3 auth backdoor (static encrypted nonce)
+} MfClassicBackdoor;
 
 /**
  * @brief MfClassic poller request mode event data.
@@ -77,6 +113,12 @@ typedef struct {
     uint8_t sectors_read; /**< Number of sectors read. */
     uint8_t keys_found; /**< Number of keys found. */
     uint8_t current_sector; /**< Current sector number. */
+    MfClassicNestedPhase nested_phase; /**< Nested attack phase. */
+    MfClassicPrngType prng_type; /**< PRNG (weak or hard). */
+    MfClassicBackdoor backdoor; /**< Backdoor type. */
+    uint16_t nested_target_key; /**< Target key for nested attack. */
+    uint16_t
+        msb_count; /**< Number of unique most significant bytes seen during Hardnested attack. */
 } MfClassicPollerEventDataUpdate;
 
 /**
@@ -170,13 +212,15 @@ typedef struct {
  * @param[in] block_num block number for authentication.
  * @param[in] key_type key type to be used for authentication.
  * @param[out] nt pointer to the MfClassicNt structure to be filled with nonce data.
+ * @param[in] backdoor_auth flag indicating if backdoor authentication is used.
  * @return MfClassicErrorNone on success, an error code on failure.
  */
 MfClassicError mf_classic_poller_get_nt(
     MfClassicPoller* instance,
     uint8_t block_num,
     MfClassicKeyType key_type,
-    MfClassicNt* nt);
+    MfClassicNt* nt,
+    bool backdoor_auth);
 
 /**
  * @brief Collect tag nonce during nested authentication.
@@ -189,13 +233,15 @@ MfClassicError mf_classic_poller_get_nt(
  * @param[in] block_num block number for authentication.
  * @param[in] key_type key type to be used for authentication.
  * @param[out] nt pointer to the MfClassicNt structure to be filled with nonce data.
+ * @param[in] backdoor_auth flag indicating if backdoor authentication is used.
  * @return MfClassicErrorNone on success, an error code on failure.
  */
 MfClassicError mf_classic_poller_get_nt_nested(
     MfClassicPoller* instance,
     uint8_t block_num,
     MfClassicKeyType key_type,
-    MfClassicNt* nt);
+    MfClassicNt* nt,
+    bool backdoor_auth);
 
 /**
  * @brief Perform authentication.
@@ -210,6 +256,7 @@ MfClassicError mf_classic_poller_get_nt_nested(
  * @param[in] key key to be used for authentication.
  * @param[in] key_type key type to be used for authentication.
  * @param[out] data pointer to MfClassicAuthContext structure to be filled with authentication data.
+ * @param[in] backdoor_auth flag indicating if backdoor authentication is used.
  * @return MfClassicErrorNone on success, an error code on failure.
  */
 MfClassicError mf_classic_poller_auth(
@@ -217,20 +264,23 @@ MfClassicError mf_classic_poller_auth(
     uint8_t block_num,
     MfClassicKey* key,
     MfClassicKeyType key_type,
-    MfClassicAuthContext* data);
+    MfClassicAuthContext* data,
+    bool backdoor_auth);
 
 /**
  * @brief Perform nested authentication.
  *
  * Must ONLY be used inside the callback function.
  *
- * Perform nested  authentication as specified in Mf Classic protocol.
+ * Perform nested authentication as specified in Mf Classic protocol.
  *
  * @param[in, out] instance pointer to the instance to be used in the transaction.
  * @param[in] block_num block number for authentication.
  * @param[in] key key to be used for authentication.
  * @param[in] key_type key type to be used for authentication.
  * @param[out] data pointer to MfClassicAuthContext structure to be filled with authentication data.
+ * @param[in] backdoor_auth flag indicating if backdoor authentication is used.
+ * @param[in] early_ret return immediately after receiving encrypted nonce.
  * @return MfClassicErrorNone on success, an error code on failure.
  */
 MfClassicError mf_classic_poller_auth_nested(
@@ -238,7 +288,9 @@ MfClassicError mf_classic_poller_auth_nested(
     uint8_t block_num,
     MfClassicKey* key,
     MfClassicKeyType key_type,
-    MfClassicAuthContext* data);
+    MfClassicAuthContext* data,
+    bool backdoor_auth,
+    bool early_ret);
 
 /**
  * @brief Halt the tag.
