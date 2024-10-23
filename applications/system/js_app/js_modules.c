@@ -234,8 +234,9 @@ void js_is_sdk_compatible(struct mjs* mjs) {
 static bool js_internal_compat_ask_user(const char* message) {
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     DialogMessage* dialog = dialog_message_alloc();
-    dialog_message_set_header(dialog, "Incompatible script", 64, 0, AlignCenter, AlignTop);
-    dialog_message_set_text(dialog, message, 79, 32, AlignCenter, AlignCenter);
+    dialog_message_set_header(dialog, message, 64, 0, AlignCenter, AlignTop);
+    dialog_message_set_text(
+        dialog, "This script may not\nwork as expected", 79, 32, AlignCenter, AlignCenter);
     dialog_message_set_icon(dialog, &I_Warning_30x23, 0, 18);
     dialog_message_set_buttons(dialog, "Go back", NULL, "Run anyway");
     DialogMessageButton choice = dialog_message_show(dialogs, dialog);
@@ -256,10 +257,8 @@ void js_check_sdk_compatibility(struct mjs* mjs) {
             JS_SDK_MAJOR,
             JS_SDK_MINOR);
 
-        const char* message =
-            (status == JsSdkCompatStatusFirmwareTooOld) ?
-                "Your firmware is\noutdated. This script\nmay work incorrectly." :
-                "This script is outdated.\nIt may not work\nas expected.";
+        const char* message = (status == JsSdkCompatStatusFirmwareTooOld) ? "Outdated Firmware" :
+                                                                            "Outdated Script";
         if(!js_internal_compat_ask_user(message)) {
             JS_ERROR_AND_RETURN(mjs, MJS_NOT_IMPLEMENTED_ERROR, "Incompatible script");
         }
@@ -309,8 +308,7 @@ void js_check_sdk_features(struct mjs* mjs) {
     if(!js_internal_supports_all_of(mjs, features)) {
         FURI_LOG_E(TAG, "Script requests unsupported features");
 
-        if(!js_internal_compat_ask_user(
-               "This script may work\nincorrectly because of\nan unsupported feature")) {
+        if(!js_internal_compat_ask_user("Unsupported Feature")) {
             JS_ERROR_AND_RETURN(mjs, MJS_NOT_IMPLEMENTED_ERROR, "Incompatible script");
         }
     }
