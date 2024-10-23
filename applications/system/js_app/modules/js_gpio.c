@@ -269,7 +269,6 @@ static void js_gpio_get(struct mjs* mjs) {
     manager_data->interrupt_semaphore = furi_semaphore_alloc(UINT32_MAX, 0);
     manager_data->adc_handle = module->adc_handle;
     manager_data->adc_channel = pin_record->channel;
-    mjs_own(mjs, &manager);
     mjs_set(mjs, manager, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, manager_data));
     mjs_set(mjs, manager, "init", ~0, MJS_MK_FN(js_gpio_init));
     mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
