@@ -257,14 +257,28 @@ void furi_event_loop_run(FuriEventLoop* instance) {
     }
 }
 
+static void furi_event_loop_notify(FuriEventLoop* instance, FuriEventLoopFlag flag) {
+    if(FURI_IS_IRQ_MODE()) {
+        BaseType_t yield = pdFALSE;
+
+        (void)xTaskNotifyIndexedFromISR(
+            (TaskHandle_t)instance->thread_id,
+            FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX,
+            flag,
+            eSetBits,
+            &yield);
+
+        portYIELD_FROM_ISR(yield);
+
+    } else {
+        (void)xTaskNotifyIndexed(
+            (TaskHandle_t)instance->thread_id, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, flag, eSetBits);
+    }
+}
+
 void furi_event_loop_stop(FuriEventLoop* instance) {
     furi_check(instance);
-
-    xTaskNotifyIndexed(
-        (TaskHandle_t)instance->thread_id,
-        FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX,
-        FuriEventLoopFlagStop,
-        eSetBits);
+    furi_event_loop_notify(instance, FuriEventLoopFlagStop);
 }
 
 /*
@@ -286,11 +300,7 @@ void furi_event_loop_pend_callback(
 
     PendingQueue_push_front(instance->pending_queue, item);
 
-    xTaskNotifyIndexed(
-        (TaskHandle_t)instance->thread_id,
-        FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX,
-        FuriEventLoopFlagPending,
-        eSetBits);
+    furi_event_loop_notify(instance, FuriEventLoopFlagPending);
 }
 
 /*
@@ -520,11 +530,7 @@ static void furi_event_loop_item_notify(FuriEventLoopItem* instance) {
 
     FURI_CRITICAL_EXIT();
 
-    xTaskNotifyIndexed(
-        (TaskHandle_t)owner->thread_id,
-        FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX,
-        FuriEventLoopFlagEvent,
-        eSetBits);
+    furi_event_loop_notify(owner, FuriEventLoopFlagEvent);
 }
 
 static bool furi_event_loop_item_is_waiting(FuriEventLoopItem* instance) {
