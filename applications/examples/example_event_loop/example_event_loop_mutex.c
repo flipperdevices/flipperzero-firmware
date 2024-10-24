@@ -59,7 +59,7 @@ static int32_t event_loop_mutex_app_worker_thread(void* context) {
 }
 
 // This function is being run each time when the mutex gets released
-static bool event_loop_mutex_app_event_callback(FuriEventLoopObject* object, void* context) {
+static void event_loop_mutex_app_event_callback(FuriEventLoopObject* object, void* context) {
     furi_assert(context);
 
     EventLoopMutexApp* app = context;
@@ -82,8 +82,6 @@ static bool event_loop_mutex_app_event_callback(FuriEventLoopObject* object, voi
         MUTEX_EVENT_AND_FLAGS,
         event_loop_mutex_app_event_callback,
         app);
-
-    return true;
 }
 
 static EventLoopMutexApp* event_loop_mutex_app_alloc(void) {

@@ -213,7 +213,7 @@ static FuriEventLoopLink* furi_message_queue_event_loop_get_link(FuriEventLoopOb
     return &instance->event_loop_link;
 }
 
-static uint32_t
+static bool
     furi_message_queue_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
     FuriMessageQueue* instance = object;
     furi_assert(instance);

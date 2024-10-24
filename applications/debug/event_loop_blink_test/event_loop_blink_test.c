@@ -82,7 +82,7 @@ static void view_port_input_callback(InputEvent* input_event, void* context) {
     furi_message_queue_put(app->input_queue, input_event, 0);
 }
 
-static bool input_queue_callback(FuriEventLoopObject* object, void* context) {
+static void input_queue_callback(FuriEventLoopObject* object, void* context) {
     FuriMessageQueue* queue = object;
     EventLoopBlinkTestApp* app = context;
 
@@ -107,8 +107,6 @@ static bool input_queue_callback(FuriEventLoopObject* object, void* context) {
             furi_event_loop_stop(app->event_loop);
         }
     }
-
-    return true;
 }
 
 static void blink_timer_callback(void* context) {
