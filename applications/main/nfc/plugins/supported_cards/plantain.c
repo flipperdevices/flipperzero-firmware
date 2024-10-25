@@ -201,9 +201,11 @@ static bool plantain_read(Nfc* nfc, NfcDevice* device) {
 
 static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
-
+    size_t uid_len = 0;
+        size_t uid_len4 = 4;
+        size_t uid_len7 = 7;
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
-
+    const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
     bool parsed = false;
 
     do {
@@ -220,16 +222,36 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
         if(key != cfg.keys[cfg.data_sector].a) break;
 
         furi_string_printf(parsed_data, "\e#Plantain card\n");
+        
+        
+        const uint8_t* temp_ptr = &uid[0];
+
+        // UID is read from last to first byte
+         uint8_t card_number_tmp[uid_len];
+        if (uid_len == uid_len4){
+            for(size_t i = 0; i < 4; i++) {
+            card_number_tmp[i] = temp_ptr[3 - i];
+
+        }
+        }
+        else if (uid_len == uid_len7) {
+           
+            for(size_t i = 0; i < 7; i++) {
+            card_number_tmp[i] = temp_ptr[6 - i];
+        }
+        }
+        else {break;}
+        //UID converted to a card number
         uint64_t card_number = 0;
-        for(size_t i = 0; i < 7; i++) {
-            card_number = (card_number << 8) | data->block[0].data[6 - i];
+        for(size_t i = 0; i < uid_len; i++) {
+            card_number = (card_number << 8) | card_number_tmp[i];
         }
 
         // Print card number with 4-digit groups
-        furi_string_cat_printf(parsed_data, "Number: ");
+        furi_string_cat_printf(parsed_data, "No: ");
         FuriString* card_number_s = furi_string_alloc();
         furi_string_cat_printf(card_number_s, "%llu", card_number);
-        FuriString* tmp_s = furi_string_alloc_set_str("9643 x078 ");
+        FuriString* tmp_s = furi_string_alloc_set_str("9643 X078 ");
         for(uint8_t i = 0; i < 24; i += 4) {
             for(uint8_t j = 0; j < 4; j++) {
                 furi_string_push_back(tmp_s, furi_string_get_char(card_number_s, i + j));
