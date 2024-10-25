@@ -198,12 +198,18 @@ static void js_require(struct mjs* mjs) {
 
 static void js_parse_int(struct mjs* mjs) {
     const char* str;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_AT_LEAST, JS_ARG_STR(&str));
+
     int32_t base = 10;
-    if(mjs_nargs(mjs) == 1) {
-        JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&str));
-    } else {
-        JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&str), JS_ARG_INT32(&base));
+    if(mjs_nargs(mjs) >= 2) {
+        mjs_val_t base_arg = mjs_arg(mjs, 1);
+        if(!mjs_is_number(base_arg)) {
+            mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Base must be a number");
+            mjs_return(mjs, MJS_UNDEFINED);
+        }
+        base = mjs_get_int(mjs, base_arg);
     }
+
     int32_t num;
     if(strint_to_int32(str, NULL, &num, base) != StrintParseNoError) {
         num = 0;
