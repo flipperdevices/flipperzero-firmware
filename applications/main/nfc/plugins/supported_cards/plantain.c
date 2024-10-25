@@ -202,10 +202,12 @@ static bool plantain_read(Nfc* nfc, NfcDevice* device) {
 static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
     size_t uid_len = 0;
-        size_t uid_len4 = 4;
-        size_t uid_len7 = 7;
+    size_t uid_len4 = 4;
+    size_t uid_len7 = 7;
+
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
     const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
+
     bool parsed = false;
 
     do {
@@ -227,7 +229,8 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
         const uint8_t* temp_ptr = &uid[0];
 
         // UID is read from last to first byte
-         uint8_t card_number_tmp[uid_len];
+        uint8_t card_number_tmp[uid_len];
+
         if (uid_len == uid_len4){
             for(size_t i = 0; i < 4; i++) {
             card_number_tmp[i] = temp_ptr[3 - i];
@@ -241,17 +244,17 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
         }
         }
         else {break;}
-        //UID converted to a card number
+        //UID is converted to a card number
         uint64_t card_number = 0;
         for(size_t i = 0; i < uid_len; i++) {
             card_number = (card_number << 8) | card_number_tmp[i];
         }
 
-        // Print card number with 4-digit groups
+        // Print card number with 4-digit groups. "3" in "3078" denotes a ticket type "3 - full ticket", will differ on discounted cards. 
         furi_string_cat_printf(parsed_data, "No: ");
         FuriString* card_number_s = furi_string_alloc();
         furi_string_cat_printf(card_number_s, "%llu", card_number);
-        FuriString* tmp_s = furi_string_alloc_set_str("9643 X078 ");
+        FuriString* tmp_s = furi_string_alloc_set_str("9643 3078 ");
         for(uint8_t i = 0; i < 24; i += 4) {
             for(uint8_t j = 0; j < 4; j++) {
                 furi_string_push_back(tmp_s, furi_string_get_char(card_number_s, i + j));
@@ -259,6 +262,7 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
             furi_string_push_back(tmp_s, ' ');
         }
         furi_string_cat_printf(parsed_data, "%s\n", furi_string_get_cstr(tmp_s));
+        // this works for 2K Plantain
         if(data->type == MfClassicType1k) {
             //balance
             uint32_t balance = 0;
@@ -312,11 +316,12 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
                 last_payment_date.year,
                 last_payment_date.hour,
                 last_payment_date.minute);
-            //payment summ
+            //payment amount. This needs to be investigated more, currently it shows incorrect amount on some cards.
             uint16_t last_payment = (data->block[18].data[9] << 8) | data->block[18].data[8];
             furi_string_cat_printf(parsed_data, "Amount: %d rub", last_payment / 100);
             furi_string_free(card_number_s);
             furi_string_free(tmp_s);
+            //This is for 4K Plantains. 
         } else if(data->type == MfClassicType4k) {
              //balance
             uint32_t balance = 0;
@@ -370,7 +375,7 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
                 last_payment_date.year,
                 last_payment_date.hour,
                 last_payment_date.minute);
-            //payment summ
+            //payment amount
             uint16_t last_payment = (data->block[18].data[9] << 8) | data->block[18].data[8];
             furi_string_cat_printf(parsed_data, "Amount: %d rub", last_payment / 100);
             furi_string_free(card_number_s);
