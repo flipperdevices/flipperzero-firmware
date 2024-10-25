@@ -216,14 +216,14 @@ static bool
                 expected_type = "array";
                 break;
             }
-            c_value = (JsViewPropValue){.array = value};
+            c_value = (JsViewPropValue){.term = value};
         } break;
         case JsViewPropTypeTypedArr: {
             if(!mjs_is_typed_array(value)) {
                 expected_type = "typed_array";
                 break;
             }
-            c_value = (JsViewPropValue){.array = value};
+            c_value = (JsViewPropValue){.term = value};
         } break;
         case JsViewPropTypeBool: {
             if(!mjs_is_boolean(value)) {

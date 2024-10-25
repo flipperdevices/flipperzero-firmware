@@ -16,8 +16,8 @@ typedef enum {
 typedef union {
     const char* string;
     int32_t number;
-    mjs_val_t array;
     bool boolean;
+    mjs_val_t term;
 } JsViewPropValue;
 
 /**

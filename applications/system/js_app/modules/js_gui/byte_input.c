@@ -57,7 +57,7 @@ static bool default_data_assign(
     JsByteKbContext* context) {
     UNUSED(mjs);
 
-    mjs_val_t array_buf = value.array;
+    mjs_val_t array_buf = value.term;
     if(mjs_is_data_view(array_buf)) {
         array_buf = mjs_dataview_get_buf(mjs, array_buf);
     }
