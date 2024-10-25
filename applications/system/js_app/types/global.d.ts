@@ -31,8 +31,10 @@ declare const __filename: string;
 /**
  * @brief Reads a JS value from a file
  * 
- * Reads a file at the specified path, interprets it as a JS value and returns
- * the last value pushed on the stack.
+ * Reads a file at the specified path and runs it as JS, returning the last evaluated value.
+ * 
+ * The result is cached and this filepath will not re-evaluated on future
+ * load() calls for this session.
  * 
  * @param path The path to the file
  * @param scope An object to use as global scope while running this file
