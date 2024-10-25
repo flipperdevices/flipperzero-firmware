@@ -70,6 +70,11 @@ static bool default_text_assign(
     UNUSED(input);
 
     if(value.string) {
+        size_t default_text_len = strlen(value.string) + 1;
+        if(context->buffer_size < default_text_len) {
+            context->buffer_size = default_text_len;
+            context->buffer = realloc(context->buffer, context->buffer_size); //-V701
+        }
         strlcpy(context->buffer, value.string, context->buffer_size);
         text_input_set_result_callback(
             input,

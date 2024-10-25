@@ -63,10 +63,14 @@ static bool default_data_assign(
     }
     size_t default_data_len = 0;
     char* default_data = mjs_array_buf_get_ptr(mjs, array_buf, &default_data_len);
-    memcpy(
-        context->buffer,
-        (uint8_t*)default_data,
-        MIN((size_t)context->buffer_size, default_data_len));
+    if(context->buffer_size < default_data_len) {
+        context->buffer_size = default_data_len;
+        context->buffer = realloc(context->buffer, context->buffer_size); //-V701
+    }
+    memcpy(context->buffer, (uint8_t*)default_data, default_data_len);
+    if(context->buffer_size > default_data_len) {
+        memset(context->buffer + default_data_len, 0x00, context->buffer_size - default_data_len);
+    }
 
     byte_input_set_result_callback(
         input,
