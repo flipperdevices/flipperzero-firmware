@@ -8,6 +8,7 @@
 typedef struct {
     uint8_t* buffer;
     size_t buffer_size;
+    size_t default_data_size;
     FuriString* header;
     FuriSemaphore* input_semaphore;
     JsEventLoopContract contract;
@@ -38,7 +39,14 @@ static bool
     len_assign(struct mjs* mjs, ByteInput* input, JsViewPropValue value, JsByteKbContext* context) {
     UNUSED(mjs);
     UNUSED(input);
-    context->buffer_size = (size_t)(value.number);
+    size_t new_buffer_size = value.number;
+    if(new_buffer_size < context->default_data_size) {
+        // Avoid confusing parameters from user
+        mjs_prepend_errorf(
+            mjs, MJS_BAD_ARGS_ERROR, "length must be larger than defaultData length");
+        return false;
+    }
+    context->buffer_size = new_buffer_size;
     context->buffer = realloc(context->buffer, context->buffer_size); //-V701
     byte_input_set_result_callback(
         input,
@@ -61,15 +69,19 @@ static bool default_data_assign(
     if(mjs_is_data_view(array_buf)) {
         array_buf = mjs_dataview_get_buf(mjs, array_buf);
     }
-    size_t default_data_len = 0;
-    char* default_data = mjs_array_buf_get_ptr(mjs, array_buf, &default_data_len);
-    if(context->buffer_size < default_data_len) {
-        context->buffer_size = default_data_len;
+    char* default_data = mjs_array_buf_get_ptr(mjs, array_buf, &context->default_data_size);
+    if(context->buffer_size < context->default_data_size) {
+        // Ensure buffer is large enough for defaultData
+        context->buffer_size = context->default_data_size;
         context->buffer = realloc(context->buffer, context->buffer_size); //-V701
     }
-    memcpy(context->buffer, (uint8_t*)default_data, default_data_len);
-    if(context->buffer_size > default_data_len) {
-        memset(context->buffer + default_data_len, 0x00, context->buffer_size - default_data_len);
+    memcpy(context->buffer, (uint8_t*)default_data, context->default_data_size);
+    if(context->buffer_size > context->default_data_size) {
+        // Reset previous data after defaultData
+        memset(
+            context->buffer + context->default_data_size,
+            0x00,
+            context->buffer_size - context->default_data_size);
     }
 
     byte_input_set_result_callback(

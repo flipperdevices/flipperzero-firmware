@@ -24,11 +24,10 @@ let views = {
     }),
     textInput: textInput.makeWith({
         header: "Type JavaScript Code:",
-        defaultText: "2+2",
-        defaultTextClear: true,
-        // Props for makeWith() are passed in reverse order, so maxLength must be after defaultText
         minLength: 0,
         maxLength: 256,
+        defaultText: "2+2",
+        defaultTextClear: true,
     }),
     loading: loading.make(),
 };
