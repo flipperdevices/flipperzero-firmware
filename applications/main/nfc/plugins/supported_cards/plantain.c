@@ -202,9 +202,6 @@ static bool plantain_read(Nfc* nfc, NfcDevice* device) {
 static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
     size_t uid_len = 0;
-    size_t uid_len4 = 4;
-    size_t uid_len7 = 7;
-
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
     const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
 
@@ -224,33 +221,30 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
         if(key != cfg.keys[cfg.data_sector].a) break;
 
         furi_string_printf(parsed_data, "\e#Plantain card\n");
-        
-        
+
         const uint8_t* temp_ptr = &uid[0];
 
         // UID is read from last to first byte
         uint8_t card_number_tmp[uid_len];
 
-        if (uid_len == uid_len4){
+        if(uid_len == 4) {
             for(size_t i = 0; i < 4; i++) {
-            card_number_tmp[i] = temp_ptr[3 - i];
-
-        }
-        }
-        else if (uid_len == uid_len7) {
-           
+                card_number_tmp[i] = temp_ptr[3 - i];
+            }
+        } else if(uid_len == 7) {
             for(size_t i = 0; i < 7; i++) {
-            card_number_tmp[i] = temp_ptr[6 - i];
+                card_number_tmp[i] = temp_ptr[6 - i];
+            }
+        } else {
+            break;
         }
-        }
-        else {break;}
         //UID is converted to a card number
         uint64_t card_number = 0;
         for(size_t i = 0; i < uid_len; i++) {
             card_number = (card_number << 8) | card_number_tmp[i];
         }
 
-        // Print card number with 4-digit groups. "3" in "3078" denotes a ticket type "3 - full ticket", will differ on discounted cards. 
+        // Print card number with 4-digit groups. "3" in "3078" denotes a ticket type "3 - full ticket", will differ on discounted cards.
         furi_string_cat_printf(parsed_data, "Number: ");
         FuriString* card_number_s = furi_string_alloc();
         furi_string_cat_printf(card_number_s, "%llu", card_number);
@@ -321,9 +315,9 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
             furi_string_cat_printf(parsed_data, "Amount: %d rub", last_payment / 100);
             furi_string_free(card_number_s);
             furi_string_free(tmp_s);
-            //This is for 4K Plantains. 
+            //This is for 4K Plantains.
         } else if(data->type == MfClassicType4k) {
-             //balance
+            //balance
             uint32_t balance = 0;
             for(uint8_t i = 0; i < 4; i++) {
                 balance = (balance << 8) | data->block[16].data[3 - i];
