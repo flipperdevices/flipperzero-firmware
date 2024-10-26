@@ -851,17 +851,17 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
         {64, 23},
     };
     for(uint8_t mad = 0; mad < COUNT_OF(mads); mad++) {
-        if(sector_count <= 16 && mad > 0) break; // Skip MAD2 if not present
+        const size_t block = mads[mad].block;
+        const size_t sector = mf_classic_get_sector_by_block(block);
+        if(sector_count <= sector) break; // Skip this MAD if not present
+        // Check MAD key
+        const MfClassicSectorTrailer* sector_trailer =
+            mf_classic_get_sector_trailer_by_sector(data, sector);
+        const uint64_t sector_key_a = bit_lib_bytes_to_num_be(
+            sector_trailer->key_a.data, COUNT_OF(sector_trailer->key_a.data));
+        if(sector_key_a != mad_key) return false;
+        // Find NDEF AIDs
         for(uint8_t aid_index = 0; aid_index < mads[mad].aid_count; aid_index++) {
-            const size_t block = mads[mad].block;
-            const size_t sector = mf_classic_get_sector_by_block(block);
-            // Check MAD key
-            const MfClassicSectorTrailer* sector_trailer =
-                mf_classic_get_sector_trailer_by_sector(data, sector);
-            const uint64_t sector_key_a = bit_lib_bytes_to_num_be(
-                sector_trailer->key_a.data, COUNT_OF(sector_trailer->key_a.data));
-            if(sector_key_a != mad_key) return false;
-            // Find NDEF AIDs
             const uint8_t* aid = &data->block[block].data[2 + aid_index * AID_SIZE];
             if(!memcmp(aid, ndef_aid, AID_SIZE)) {
                 sectors_with_ndef[aid_index + 1] = true;
