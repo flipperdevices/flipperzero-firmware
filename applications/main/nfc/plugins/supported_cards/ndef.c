@@ -392,33 +392,67 @@ static bool ndef_parse_bt(Ndef* ndef, size_t pos, size_t len) {
 }
 
 static bool ndef_parse_vcard(Ndef* ndef, size_t pos, size_t len) {
-    size_t end = pos + len;
+    // We hide redundant tags the user is probably not interested in.
+    // Would be easier with FuriString checks for start_with() and end_with()
+    // but to do that would waste lots of RAM on a cloned string buffer
+    // so instead we just look for these markers at start/end and shift
+    // pos and len then use ndef_dump() to output one char at a time.
+    // Results in miniml stack and no heap usage at all.
+    static const char* const begin_tag = "BEGIN:VCARD";
+    static const uint8_t begin_len = strlen(begin_tag);
+    static const char* const version_tag = "VERSION:";
+    static const uint8_t version_len = strlen(version_tag);
+    static const char* const end_tag = "END:VCARD";
+    static const uint8_t end_len = strlen(end_tag);
+    char tmp[13] = {0}; // Enough for BEGIN:VCARD\r\n
+    uint8_t skip = 0;
 
-    // Same concept as ndef_dump(), inefficient but has least drawbacks
-    FuriString* fmt = furi_string_alloc();
-    furi_string_reserve(fmt, len + 1);
-    while(pos < end) {
-        char c;
-        if(!ndef_get(ndef, pos++, 1, &c)) return false;
-        furi_string_push_back(fmt, c);
+    // Skip BEGIN tag
+    if(len >= sizeof(tmp)) {
+        if(!ndef_get(ndef, pos, sizeof(tmp), tmp)) return false;
+        if(strncmp(begin_tag, tmp, begin_len) == 0) {
+            skip = begin_len;
+            if(tmp[skip] == '\r') skip++;
+            if(tmp[skip] == '\n') skip++;
+            pos += skip;
+            len -= skip;
+        }
     }
 
-    furi_string_trim(fmt);
-    if(furi_string_start_with(fmt, "BEGIN:VCARD")) {
-        furi_string_right(fmt, furi_string_search_char(fmt, '\n'));
-        if(furi_string_end_with(fmt, "END:VCARD")) {
-            furi_string_left(fmt, furi_string_search_rchar(fmt, '\n'));
+    // Skip VERSION tag
+    if(len >= sizeof(tmp)) {
+        if(!ndef_get(ndef, pos, sizeof(tmp), tmp)) return false;
+        if(strncmp(version_tag, tmp, version_len) == 0) {
+            skip = version_len;
+            while(skip < len) {
+                if(!ndef_get(ndef, pos + skip, 1, &tmp[0])) return false;
+                skip++;
+                if(tmp[0] == '\n') break;
+            }
+            pos += skip;
+            len -= skip;
         }
-        furi_string_trim(fmt);
-        if(furi_string_start_with(fmt, "VERSION:")) {
-            furi_string_right(fmt, furi_string_search_char(fmt, '\n'));
-            furi_string_trim(fmt);
+    }
+
+    // Skip END tag
+    if(len >= sizeof(tmp)) {
+        if(!ndef_get(ndef, pos + len - sizeof(tmp), sizeof(tmp), tmp)) return false;
+        // Read more than length of END tag and check multiple offsets, might have some padding after
+        // Worst case: there is END:VCARD\r\n\r\n which is same length as tmp buffer (13)
+        // Not sure if this is in spec but might aswell check
+        static const uint8_t offsets = sizeof(tmp) - end_len + 1;
+        for(uint8_t offset = 0; offset < offsets; offset++) {
+            if(strncmp(end_tag, tmp + offset, end_len) == 0) {
+                skip = sizeof(tmp) - offset;
+                len -= skip;
+                break;
+            }
         }
     }
 
     furi_string_cat(ndef->output, "Contact\n");
-    ndef_print(ndef, NULL, furi_string_get_cstr(fmt), furi_string_size(fmt), false);
-    furi_string_free(fmt);
+    ndef_dump(ndef, NULL, pos, len, false);
+
     return true;
 }
 
@@ -863,7 +897,7 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
         // Find NDEF AIDs
         for(uint8_t aid_index = 0; aid_index < mads[mad].aid_count; aid_index++) {
             const uint8_t* aid = &data->block[block].data[2 + aid_index * AID_SIZE];
-            if(!memcmp(aid, ndef_aid, AID_SIZE)) {
+            if(memcmp(aid, ndef_aid, AID_SIZE) == 0) {
                 sectors_with_ndef[aid_index + 1] = true;
             }
         }
