@@ -397,7 +397,7 @@ static bool ndef_parse_vcard(Ndef* ndef, size_t pos, size_t len) {
     // but to do that would waste lots of RAM on a cloned string buffer
     // so instead we just look for these markers at start/end and shift
     // pos and len then use ndef_dump() to output one char at a time.
-    // Results in miniml stack and no heap usage at all.
+    // Results in minimal stack and no heap usage at all.
     static const char* const begin_tag = "BEGIN:VCARD";
     static const uint8_t begin_len = strlen(begin_tag);
     static const char* const version_tag = "VERSION:";
