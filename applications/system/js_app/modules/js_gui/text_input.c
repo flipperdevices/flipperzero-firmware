@@ -85,7 +85,7 @@ static bool default_text_assign(
             context->buffer = realloc(context->buffer, context->buffer_size); //-V701
         }
         // Also trim excess previous data with strlcpy()
-        strlcpy(context->buffer, value.string, context->buffer_size);
+        strlcpy(context->buffer, value.string, context->buffer_size); //-V575
         text_input_set_result_callback(
             input,
             (TextInputCallback)input_callback,
