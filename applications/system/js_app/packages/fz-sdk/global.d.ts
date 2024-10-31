@@ -150,14 +150,6 @@ declare function delay(ms: number): void;
 declare function print(...args: any[]): void;
 
 /**
- * @brief Converts a number to a string
- * @param value The number to convert to a string
- * @param base Integer base (`2`...`16`), default: 10
- * @version Added in JS SDK 0.1
- */
-declare function toString(value: number, base?: number): string;
-
-/**
  * @brief Reads a JS value from a file
  * 
  * Reads a file at the specified path, interprets it as a JS value and returns
