@@ -33,9 +33,9 @@ static bool
 static bool items_assign(struct mjs* mjs, Submenu* submenu, JsViewPropValue value, void* context) {
     UNUSED(mjs);
     submenu_reset(submenu);
-    size_t len = mjs_array_length(mjs, value.array);
+    size_t len = mjs_array_length(mjs, value.term);
     for(size_t i = 0; i < len; i++) {
-        mjs_val_t item = mjs_array_get(mjs, value.array, i);
+        mjs_val_t item = mjs_array_get(mjs, value.term, i);
         if(!mjs_is_string(item)) return false;
         submenu_add_item(submenu, mjs_get_string(mjs, &item, NULL), i, choose_callback, context);
     }

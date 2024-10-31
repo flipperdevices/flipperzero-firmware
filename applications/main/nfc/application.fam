@@ -219,6 +219,35 @@ App(
 )
 
 App(
+    appid="ndef_ul_parser",
+    apptype=FlipperAppType.PLUGIN,
+    cdefines=[("NDEF_PROTO", "NDEF_PROTO_UL")],
+    entry_point="ndef_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/ndef.c"],
+)
+App(
+    appid="ndef_mfc_parser",
+    apptype=FlipperAppType.PLUGIN,
+    cdefines=[("NDEF_PROTO", "NDEF_PROTO_MFC")],
+    entry_point="ndef_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/ndef.c"],
+)
+
+App(
+    appid="ndef_slix_parser",
+    apptype=FlipperAppType.PLUGIN,
+    cdefines=[("NDEF_PROTO", "NDEF_PROTO_SLIX")],
+    entry_point="ndef_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/ndef.c"],
+)
+
+App(
     appid="nfc_start",
     targets=["f7"],
     apptype=FlipperAppType.STARTUP,

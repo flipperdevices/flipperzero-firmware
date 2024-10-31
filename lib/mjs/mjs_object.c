@@ -294,6 +294,11 @@ clean:
     mjs_return(mjs, ret);
 }
 
+MJS_PRIVATE void mjs_op_object_define_property(struct mjs* mjs) {
+    // stub, do not use
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
 mjs_val_t
     mjs_struct_to_obj(struct mjs* mjs, const void* base, const struct mjs_c_struct_member* defs) {
     mjs_val_t obj;
