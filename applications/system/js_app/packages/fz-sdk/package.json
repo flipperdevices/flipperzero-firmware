@@ -1,6 +1,6 @@
 {
   "name": "@flipperdevices/fz-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Type declarations and documentation for native JS modules available on Flipper Zero",
   "keywords": [
     "flipper",
@@ -15,14 +15,12 @@
     "directory": "applications/system/js_app/packages/fz-sdk"
   },
   "type": "module",
-  "devDependencies": {
+  "dependencies": {
     "esbuild": "^0.24.0",
     "esbuild-plugin-tsc": "^0.4.0",
     "json5": "^2.2.3",
     "typedoc": "^0.26.10",
-    "typedoc-material-theme": "^1.1.0"
-  },
-  "dependencies": {
+    "typedoc-material-theme": "^1.1.0",
     "prompts": "^2.4.2",
     "serialport": "^12.0.0"
   }
