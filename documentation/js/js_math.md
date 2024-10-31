@@ -223,7 +223,7 @@ math.floor(45.05); // 45
 math.floor(45.95); // 45
 ```
 
-## is_equal
+## isEqual
 Return true if the difference between numbers `a` and `b` is less than the specified parameter `e`.
 
 ### Parameters
@@ -236,8 +236,8 @@ True if the difference between numbers `a` and `b` is less than the specified pa
 
 ### Example
 ```js
-math.is_equal(1.4, 1.6, 0.2);      // false
-math.is_equal(3.556, 3.555, 0.01); // true
+math.isEqual(1.4, 1.6, 0.2);      // false
+math.isEqual(3.556, 3.555, 0.01); // true
 ```
 
 ## max
