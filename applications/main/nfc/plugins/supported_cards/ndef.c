@@ -582,7 +582,7 @@ bool ndef_parse_record(
     NdefTnf tnf,
     const char* type,
     uint8_t type_len) {
-    FURI_LOG_D(TAG, "payload type: %.*s len: %d", type_len, type, len);
+    FURI_LOG_D(TAG, "payload type: %.*s len: %hu", type_len, type, len);
     if(!len) {
         furi_string_cat(ndef->output, "Empty\n");
         return true;
@@ -702,9 +702,9 @@ bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t message_num, 
         pos += id_len;
 
         if(smart_poster) {
-            furi_string_cat_printf(ndef->output, "\e*> SP-R%d: ", record_num);
+            furi_string_cat_printf(ndef->output, "\e*> SP-R%zu: ", record_num);
         } else {
-            furi_string_cat_printf(ndef->output, "\e*> M%d-R%d: ", message_num, record_num);
+            furi_string_cat_printf(ndef->output, "\e*> M%zu-R%zu: ", message_num, record_num);
         }
         if(!ndef_parse_record(ndef, pos, payload_len, flags_tnf.type_name_format, type, type_len)) {
             if(type_was_allocated) free(type);
@@ -721,7 +721,7 @@ bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t message_num, 
         if(smart_poster) {
             furi_string_cat(ndef->output, "\e*> SP: Empty\n\n");
         } else {
-            furi_string_cat_printf(ndef->output, "\e*> M%d: Empty\n\n", message_num);
+            furi_string_cat_printf(ndef->output, "\e*> M%zu: Empty\n\n", message_num);
         }
     }
 
@@ -949,7 +949,7 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
         } else {
             data_block = 93 + (sector - 32) * 15;
         }
-        FURI_LOG_D(TAG, "data_block: %d", data_block);
+        FURI_LOG_D(TAG, "data_block: %zu", data_block);
         size_t data_start = data_block * MF_CLASSIC_BLOCK_SIZE;
         size_t parsed = ndef_parse_tlv(&ndef, data_start, data_size - data_start, total_parsed);
 
