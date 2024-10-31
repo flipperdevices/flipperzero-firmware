@@ -27,11 +27,19 @@ static void js_flipper_get_battery(struct mjs* mjs) {
 
 void* js_flipper_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
     UNUSED(modules);
+    mjs_val_t sdk_vsn = mjs_mk_array(mjs);
+    mjs_array_push(mjs, sdk_vsn, mjs_mk_number(mjs, JS_SDK_MAJOR));
+    mjs_array_push(mjs, sdk_vsn, mjs_mk_number(mjs, JS_SDK_MINOR));
+
     mjs_val_t flipper_obj = mjs_mk_object(mjs);
-    mjs_set(mjs, flipper_obj, "getModel", ~0, MJS_MK_FN(js_flipper_get_model));
-    mjs_set(mjs, flipper_obj, "getName", ~0, MJS_MK_FN(js_flipper_get_name));
-    mjs_set(mjs, flipper_obj, "getBatteryCharge", ~0, MJS_MK_FN(js_flipper_get_battery));
     *object = flipper_obj;
+    JS_ASSIGN_MULTI(mjs, flipper_obj) {
+        JS_FIELD("getModel", MJS_MK_FN(js_flipper_get_model));
+        JS_FIELD("getName", MJS_MK_FN(js_flipper_get_name));
+        JS_FIELD("getBatteryCharge", MJS_MK_FN(js_flipper_get_battery));
+        JS_FIELD("firmwareVendor", mjs_mk_string(mjs, JS_SDK_VENDOR, ~0, false));
+        JS_FIELD("jsSdkVersion", sdk_vsn);
+    }
 
     return (void*)1;
 }

@@ -220,7 +220,7 @@ static void js_gpio_interrupt(struct mjs* mjs) {
  * let gpio = require("gpio");
  * let pot = gpio.get("pc0");
  * pot.init({ direction: "in", inMode: "analog" });
- * print("voltage:" pot.read_analog(), "mV");
+ * print("voltage:" pot.readAnalog(), "mV");
  * ```
  */
 static void js_gpio_read_analog(struct mjs* mjs) {
@@ -269,12 +269,11 @@ static void js_gpio_get(struct mjs* mjs) {
     manager_data->interrupt_semaphore = furi_semaphore_alloc(UINT32_MAX, 0);
     manager_data->adc_handle = module->adc_handle;
     manager_data->adc_channel = pin_record->channel;
-    mjs_own(mjs, &manager);
     mjs_set(mjs, manager, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, manager_data));
     mjs_set(mjs, manager, "init", ~0, MJS_MK_FN(js_gpio_init));
     mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
     mjs_set(mjs, manager, "read", ~0, MJS_MK_FN(js_gpio_read));
-    mjs_set(mjs, manager, "read_analog", ~0, MJS_MK_FN(js_gpio_read_analog));
+    mjs_set(mjs, manager, "readAnalog", ~0, MJS_MK_FN(js_gpio_read_analog));
     mjs_set(mjs, manager, "interrupt", ~0, MJS_MK_FN(js_gpio_interrupt));
     mjs_return(mjs, manager);
 

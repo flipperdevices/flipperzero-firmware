@@ -376,7 +376,7 @@ void view_dispatcher_update(View* view, void* context) {
     }
 }
 
-bool view_dispatcher_run_event_callback(FuriEventLoopObject* object, void* context) {
+void view_dispatcher_run_event_callback(FuriEventLoopObject* object, void* context) {
     furi_assert(context);
     ViewDispatcher* instance = context;
     furi_assert(instance->event_queue == object);
@@ -384,11 +384,9 @@ bool view_dispatcher_run_event_callback(FuriEventLoopObject* object, void* conte
     uint32_t event;
     furi_check(furi_message_queue_get(instance->event_queue, &event, 0) == FuriStatusOk);
     view_dispatcher_handle_custom_event(instance, event);
-
-    return true;
 }
 
-bool view_dispatcher_run_input_callback(FuriEventLoopObject* object, void* context) {
+void view_dispatcher_run_input_callback(FuriEventLoopObject* object, void* context) {
     furi_assert(context);
     ViewDispatcher* instance = context;
     furi_assert(instance->input_queue == object);
@@ -396,6 +394,4 @@ bool view_dispatcher_run_input_callback(FuriEventLoopObject* object, void* conte
     InputEvent input;
     furi_check(furi_message_queue_get(instance->input_queue, &input, 0) == FuriStatusOk);
     view_dispatcher_handle_input(instance, &input);
-
-    return true;
 }
