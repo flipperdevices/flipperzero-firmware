@@ -157,7 +157,7 @@ static FuriEventLoopLink* furi_stream_buffer_event_loop_get_link(FuriEventLoopOb
     return &stream_buffer->event_loop_link;
 }
 
-static uint32_t
+static bool
     furi_stream_buffer_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
     FuriStreamBuffer* stream_buffer = object;
     furi_assert(stream_buffer);
