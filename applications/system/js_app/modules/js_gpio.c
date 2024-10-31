@@ -220,7 +220,7 @@ static void js_gpio_interrupt(struct mjs* mjs) {
  * let gpio = require("gpio");
  * let pot = gpio.get("pc0");
  * pot.init({ direction: "in", inMode: "analog" });
- * print("voltage:" pot.read_analog(), "mV");
+ * print("voltage:" pot.readAnalog(), "mV");
  * ```
  */
 static void js_gpio_read_analog(struct mjs* mjs) {
@@ -273,7 +273,7 @@ static void js_gpio_get(struct mjs* mjs) {
     mjs_set(mjs, manager, "init", ~0, MJS_MK_FN(js_gpio_init));
     mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
     mjs_set(mjs, manager, "read", ~0, MJS_MK_FN(js_gpio_read));
-    mjs_set(mjs, manager, "read_analog", ~0, MJS_MK_FN(js_gpio_read_analog));
+    mjs_set(mjs, manager, "readAnalog", ~0, MJS_MK_FN(js_gpio_read_analog));
     mjs_set(mjs, manager, "interrupt", ~0, MJS_MK_FN(js_gpio_interrupt));
     mjs_return(mjs, manager);
 
