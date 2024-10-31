@@ -1,12 +1,12 @@
 /**
- * Displays a text input keyboard.
+ * Displays a byte input keyboard.
  * 
- * <img src="../images/text_input.png" width="200" alt="Sample screenshot of the view" />
+ * <img src="../images/byte_input.png" width="200" alt="Sample screenshot of the view" />
  * 
  * ```js
  * let eventLoop = require("event_loop");
  * let gui = require("gui");
- * let textInputView = require("gui/text_input");
+ * let byteInputView = require("gui/byte_input");
  * ```
  * 
  * This module depends on the `gui` module, which in turn depends on the
@@ -18,10 +18,8 @@
  * 
  * # View props
  *   - `header`: Text displayed at the top of the screen
- *   - `minLength`: Minimum allowed text length
- *   - `maxLength`: Maximum allowed text length
- *   - `defaultText`: Text to show by default
- *   - `defaultTextClear`: Whether to clear the default text on next character typed
+ *   - `length`: Length of data to edit
+ *   - `defaultData`: Data to show by default
  * 
  * @version Added in JS SDK 0.1
  * @module
@@ -32,14 +30,12 @@ import type { Contract } from "../event_loop";
 
 type Props = {
     header: string,
-    minLength: number,
-    maxLength: number,
-    defaultText: string,
-    defaultTextClear: boolean,
+    length: number,
+    defaultData: Uint8Array | ArrayBuffer,
 }
-declare class TextInput extends View<Props> {
+declare class ByteInput extends View<Props> {
     input: Contract<string>;
 }
-declare class TextInputFactory extends ViewFactory<Props, TextInput> { }
-declare const factory: TextInputFactory;
+declare class ByteInputFactory extends ViewFactory<Props, ByteInput> { }
+declare const factory: ByteInputFactory;
 export = factory;

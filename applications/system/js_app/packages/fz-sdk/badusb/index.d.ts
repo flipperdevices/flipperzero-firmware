@@ -97,6 +97,7 @@ export declare function println(string: string, delay?: number): void;
  * @brief Prints a string by Alt+Numpad method - works only on Windows!
  * @param string The string to print
  * @param delay How many milliseconds to wait between key presses
+ * @version Added in JS SDK 0.1
  */
 export declare function altPrint(string: string, delay?: number): void;
 
@@ -105,10 +106,12 @@ export declare function altPrint(string: string, delay?: number): void;
  *        Presses "Enter" after printing the string
  * @param string The string to print
  * @param delay How many milliseconds to wait between key presses
+ * @version Added in JS SDK 0.1
  */
 export declare function altPrintln(string: string, delay?: number): void;
 
 /**
  * @brief Releases usb, optional, but allows to switch usb profile
+ * @version Added in JS SDK 0.1
  */
 export declare function quit(): void;

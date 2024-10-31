@@ -65,6 +65,7 @@ export declare function readln(timeout?: number): string;
  *                wait forever.
  * @returns The received data interpreted as ASCII, or `undefined` if 0 bytes
  *          were read.
+ * @version Added in JS SDK 0.1
  */
 export declare function readAny(timeout?: number): string | undefined;
 
@@ -106,5 +107,6 @@ export declare function expect(patterns: string | number[] | string[] | number[]
 
 /**
  * @brief Deinitializes the serial port, allowing multiple initializations per script run
+ * @version Added in JS SDK 0.1
  */
 export declare function end(): void;
