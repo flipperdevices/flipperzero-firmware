@@ -982,7 +982,7 @@ static bool ndef_slix_parse(const NfcDevice* device, FuriString* parsed_data) {
     const uint16_t block_count = iso15693_3_get_block_count(data);
     const uint8_t* blocks = simple_array_cget_data(data->block_data);
 
-    // TODO: Find some way to check for other iso15693 NDEF cards and
+    // TODO(-nofl): Find some way to check for other iso15693 NDEF cards and
     // split this to also support non-slix iso15693 NDEF tags
     // Rest of the code works on iso15693 too, but uses SLIX layout assumptions
     if(block_size != SLIX_BLOCK_SIZE) {
