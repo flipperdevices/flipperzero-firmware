@@ -217,6 +217,16 @@ static void js_parse_int(struct mjs* mjs) {
     mjs_return(mjs, mjs_mk_number(mjs, num));
 }
 
+static void js_global_to_string(struct mjs* mjs) {
+    int base = 10;
+    if(mjs_nargs(mjs) > 1) base = mjs_get_int(mjs, mjs_arg(mjs, 1));
+    double num = mjs_get_int(mjs, mjs_arg(mjs, 0));
+    char tmp_str[] = "-2147483648";
+    itoa(num, tmp_str, base);
+    mjs_val_t ret = mjs_mk_string(mjs, tmp_str, ~0, true);
+    mjs_return(mjs, ret);
+}
+
 #ifdef JS_DEBUG
 static void js_dump_write_callback(void* ctx, const char* format, ...) {
     File* file = ctx;
@@ -244,6 +254,8 @@ static int32_t js_thread(void* arg) {
     struct mjs* mjs = mjs_create(worker);
     worker->modules = js_modules_create(mjs, worker->resolver);
     mjs_val_t global = mjs_get_global(mjs);
+    mjs_val_t console_obj = mjs_mk_object(mjs);
+
     if(worker->path) {
         FuriString* dirpath = furi_string_alloc();
         path_extract_dirname(furi_string_get_cstr(worker->path), dirpath);
@@ -262,18 +274,29 @@ static int32_t js_thread(void* arg) {
             mjs_mk_string(mjs, furi_string_get_cstr(dirpath), furi_string_size(dirpath), true));
         furi_string_free(dirpath);
     }
-    mjs_set(mjs, global, "print", ~0, MJS_MK_FN(js_print));
-    mjs_set(mjs, global, "delay", ~0, MJS_MK_FN(js_delay));
-    mjs_set(mjs, global, "ffi_address", ~0, MJS_MK_FN(js_ffi_address));
-    mjs_set(mjs, global, "require", ~0, MJS_MK_FN(js_require));
-    mjs_set(mjs, global, "parseInt", ~0, MJS_MK_FN(js_parse_int));
 
-    mjs_val_t console_obj = mjs_mk_object(mjs);
-    mjs_set(mjs, console_obj, "log", ~0, MJS_MK_FN(js_console_log));
-    mjs_set(mjs, console_obj, "warn", ~0, MJS_MK_FN(js_console_warn));
-    mjs_set(mjs, console_obj, "error", ~0, MJS_MK_FN(js_console_error));
-    mjs_set(mjs, console_obj, "debug", ~0, MJS_MK_FN(js_console_debug));
-    mjs_set(mjs, global, "console", ~0, console_obj);
+    JS_ASSIGN_MULTI(mjs, global) {
+        JS_FIELD("print", MJS_MK_FN(js_print));
+        JS_FIELD("delay", MJS_MK_FN(js_delay));
+        JS_FIELD("toString", MJS_MK_FN(js_global_to_string));
+        JS_FIELD("parseInt", MJS_MK_FN(js_parse_int));
+        JS_FIELD("ffi_address", MJS_MK_FN(js_ffi_address));
+        JS_FIELD("require", MJS_MK_FN(js_require));
+        JS_FIELD("console", console_obj);
+
+        JS_FIELD("sdkCompatibilityStatus", MJS_MK_FN(js_sdk_compatibility_status));
+        JS_FIELD("isSdkCompatible", MJS_MK_FN(js_is_sdk_compatible));
+        JS_FIELD("checkSdkCompatibility", MJS_MK_FN(js_check_sdk_compatibility));
+        JS_FIELD("doesSdkSupport", MJS_MK_FN(js_does_sdk_support));
+        JS_FIELD("checkSdkFeatures", MJS_MK_FN(js_check_sdk_features));
+    }
+
+    JS_ASSIGN_MULTI(mjs, console_obj) {
+        JS_FIELD("log", MJS_MK_FN(js_console_log));
+        JS_FIELD("warn", MJS_MK_FN(js_console_warn));
+        JS_FIELD("error", MJS_MK_FN(js_console_error));
+        JS_FIELD("debug", MJS_MK_FN(js_console_debug));
+    }
 
     mjs_set_ffi_resolver(mjs, js_dlsym, worker->resolver);
 

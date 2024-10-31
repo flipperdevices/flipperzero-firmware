@@ -6,6 +6,16 @@ App(
     stack_size=2 * 1024,
     resources="examples",
     order=0,
+    provides=["js_app_start"],
+    sources=[
+        "js_app.c",
+        "js_modules.c",
+        "js_thread.c",
+        "plugin_api/app_api_table.cpp",
+        "views/console_view.c",
+        "modules/js_flipper.c",
+        "modules/js_tests.c",
+    ],
 )
 
 App(
@@ -13,6 +23,7 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="js_app_on_system_start",
     order=160,
+    sources=["js_app.c"],
 )
 
 App(
