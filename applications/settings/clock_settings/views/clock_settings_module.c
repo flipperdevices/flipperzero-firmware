@@ -85,17 +85,23 @@ static void
     char buffer[64];
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 7, ROW_0_Y + 17, "Time:");
+    canvas_draw_str(canvas, 0, ROW_0_Y + 15, "Time");
 
     snprintf(buffer, sizeof(buffer), "%02u", model->current.hour);
     clock_settings_module_draw_block(
-        canvas, 38, ROW_0_Y, 28, ROW_0_H, FontBigNumbers, get_state(model, 0, 0), buffer);
+        canvas, 32, ROW_0_Y, 28, ROW_0_H, FontBigNumbers, get_state(model, 0, 0), buffer);
+    canvas_draw_box(canvas, 62, ROW_0_Y + ROW_0_H - 7, 2, 2);
+    canvas_draw_box(canvas, 62, ROW_0_Y + ROW_0_H - 7 - 6, 2, 2);
+
     snprintf(buffer, sizeof(buffer), "%02u", model->current.minute);
     clock_settings_module_draw_block(
-        canvas, 68, ROW_0_Y, 28, ROW_0_H, FontBigNumbers, get_state(model, 0, 1), buffer);
+        canvas, 66, ROW_0_Y, 28, ROW_0_H, FontBigNumbers, get_state(model, 0, 1), buffer);
+    canvas_draw_box(canvas, 96, ROW_0_Y + ROW_0_H - 7, 2, 2);
+    canvas_draw_box(canvas, 96, ROW_0_Y + ROW_0_H - 7 - 6, 2, 2);
+
     snprintf(buffer, sizeof(buffer), "%02u", model->current.second);
     clock_settings_module_draw_block(
-        canvas, 98, ROW_0_Y, 28, ROW_0_H, FontBigNumbers, get_state(model, 0, 2), buffer);
+        canvas, 100, ROW_0_Y, 28, ROW_0_H, FontBigNumbers, get_state(model, 0, 2), buffer);
 }
 
 static void
@@ -103,17 +109,21 @@ static void
     char buffer[64];
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 9, ROW_1_Y + 10, "Date:");
-
+    canvas_draw_str(canvas, 0, ROW_1_Y + 9, "Date");
+    // Day
     snprintf(buffer, sizeof(buffer), "%02u", model->current.day);
     clock_settings_module_draw_block(
-        canvas, 38, ROW_1_Y, 17, ROW_1_H, FontPrimary, get_state(model, 1, 0), buffer);
+        canvas, 44, ROW_1_Y, 17, ROW_1_H, FontPrimary, get_state(model, 1, 0), buffer);
+    canvas_draw_box(canvas, 71 - 6, ROW_1_Y + ROW_1_H - 4, 2, 2);
+    // Month
     snprintf(buffer, sizeof(buffer), "%02u", model->current.month);
     clock_settings_module_draw_block(
-        canvas, 57, ROW_1_Y, 17, ROW_1_H, FontPrimary, get_state(model, 1, 1), buffer);
+        canvas, 71, ROW_1_Y, 17, ROW_1_H, FontPrimary, get_state(model, 1, 1), buffer);
+    canvas_draw_box(canvas, 98 - 6, ROW_1_Y + ROW_1_H - 4, 2, 2);
+    // Year
     snprintf(buffer, sizeof(buffer), "%04u", model->current.year);
     clock_settings_module_draw_block(
-        canvas, 76, ROW_1_Y, 30, ROW_1_H, FontPrimary, get_state(model, 1, 2), buffer);
+        canvas, 98, ROW_1_Y, 30, ROW_1_H, FontPrimary, get_state(model, 1, 2), buffer);
 }
 
 static void
@@ -121,17 +131,21 @@ static void
     char buffer[64];
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, ROW_2_Y + 10, "Alarm:");
+    canvas_draw_str(canvas, 0, ROW_2_Y + 9, "Alarm");
 
     snprintf(buffer, sizeof(buffer), "%02u", model->alarm.hour);
     clock_settings_module_draw_block(
-        canvas, 38, ROW_2_Y, 17, ROW_2_H, FontPrimary, get_state(model, 2, 0), buffer);
+        canvas, 58, ROW_2_Y, 17, ROW_2_H, FontPrimary, get_state(model, 2, 0), buffer);
+    canvas_draw_box(canvas, 81 - 4, ROW_2_Y + ROW_2_H - 4, 2, 2);
+    canvas_draw_box(canvas, 81 - 4, ROW_2_Y + ROW_2_H - 4 - 4, 2, 2);
+
     snprintf(buffer, sizeof(buffer), "%02u", model->alarm.minute);
     clock_settings_module_draw_block(
-        canvas, 57, ROW_2_Y, 17, ROW_2_H, FontPrimary, get_state(model, 2, 1), buffer);
+        canvas, 81, ROW_2_Y, 17, ROW_2_H, FontPrimary, get_state(model, 2, 1), buffer);
+
     clock_settings_module_draw_block(
         canvas,
-        76,
+        106,
         ROW_2_Y,
         22,
         ROW_2_H,

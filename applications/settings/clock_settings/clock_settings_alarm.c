@@ -13,6 +13,7 @@
 
 typedef struct {
     DateTime now;
+    IconAnimation* icon;
 } ClockSettingsAlramModel;
 
 const NotificationSequence sequence_alarm = {
@@ -46,14 +47,13 @@ static void clock_settings_alarm_draw_callback(Canvas* canvas, void* ctx) {
     ClockSettingsAlramModel* model = ctx;
     char buffer[64] = {};
 
-    canvas_draw_icon(canvas, 10, 15, &I_Warning_30x23);
+    canvas_draw_icon_animation(canvas, 5, 6, model->icon);
 
     canvas_set_font(canvas, FontBigNumbers);
     snprintf(buffer, sizeof(buffer), "%02u:%02u", model->now.hour, model->now.minute);
-    canvas_draw_str(canvas, 58, 34, buffer);
+    canvas_draw_str(canvas, 58, 32, buffer);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 10, 49, "Alarm");
     snprintf(
         buffer,
         sizeof(buffer),
@@ -61,13 +61,19 @@ static void clock_settings_alarm_draw_callback(Canvas* canvas, void* ctx) {
         model->now.day,
         model->now.month,
         model->now.year);
-    canvas_draw_str(canvas, 60, 49, buffer);
+    canvas_draw_str(canvas, 60, 44, buffer);
 }
 
 static void clock_settings_alarm_input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
+}
+
+void clock_settings_alarm_animation_callback(IconAnimation* instance, void* context) {
+    UNUSED(instance);
+    ViewPort* view_port = context;
+    view_port_update(view_port);
 }
 
 int32_t clock_settings_alarm(void* p) {
@@ -77,6 +83,7 @@ int32_t clock_settings_alarm(void* p) {
     ClockSettingsAlramModel model;
 
     furi_hal_rtc_get_datetime(&model.now);
+    model.icon = icon_animation_alloc(&A_Alarm_47x39);
 
     // Alloc message queue
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
@@ -93,6 +100,10 @@ int32_t clock_settings_alarm(void* p) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(notification, &sequence_alarm);
 
+    icon_animation_set_update_callback(
+        model.icon, clock_settings_alarm_animation_callback, view_port);
+    icon_animation_start(model.icon);
+
     // Process events
     InputEvent event;
     bool running = true;
@@ -108,6 +119,8 @@ int32_t clock_settings_alarm(void* p) {
         }
     }
 
+    icon_animation_stop(model.icon);
+
     notification_message_block(notification, &sequence_empty);
     furi_record_close(RECORD_NOTIFICATION);
 
@@ -116,6 +129,8 @@ int32_t clock_settings_alarm(void* p) {
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     furi_record_close(RECORD_GUI);
+
+    icon_animation_free(model.icon);
 
     return 0;
 }
