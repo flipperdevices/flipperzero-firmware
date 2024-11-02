@@ -207,7 +207,7 @@ declare function require(module: string): any;
  * @param message The error message to show to user
  * @version Added in JS SDK 0.1
  */
-declare function die(message: string): void;
+declare function die(message: string): never;
 
 /**
  * @brief mJS Foreign Pointer type
