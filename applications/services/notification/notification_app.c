@@ -32,6 +32,21 @@ static uint8_t notification_settings_get_display_brightness(NotificationApp* app
 static uint8_t notification_settings_get_rgb_led_brightness(NotificationApp* app, uint8_t value);
 static uint32_t notification_settings_display_off_delay_ticks(NotificationApp* app);
 
+const char* backlight_text[BACKLIGHT_COUNT] = {
+    "0%",
+    "25%",
+    "50%",
+    "75%",
+    "100%",
+};
+const float backlight_value[BACKLIGHT_COUNT] = {
+    0.0f,
+    0.25f,
+    0.5f,
+    0.75f,
+    1.0f,
+};
+
 void notification_message_save_settings(NotificationApp* app) {
     NotificationAppMessage m = {
         .type = SaveSettingsMessage, .back_event = furi_event_flag_alloc()};
