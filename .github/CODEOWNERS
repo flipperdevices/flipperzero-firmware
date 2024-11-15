@@ -36,7 +36,7 @@
 /applications/services/power_settings_app/ @skotopes @DrZlo13 @hedger @gsurkov @gornekich
 
 /applications/system/storage_move_to_sd/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
-/applications/system/js_app/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
+/applications/system/js_app/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov @portasynthinca3
 
 /applications/debug/unit_tests/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov @gornekich @Astrrra @Skorpionm
 
@@ -49,8 +49,8 @@
 /applications/main/infrared/resources/ @skotopes @DrZlo13 @hedger @gsurkov
 
 # Documentation
-/documentation/ @skotopes @DrZlo13 @hedger @gsurkov @drunkbatya
-/scripts/toolchain/ @skotopes @DrZlo13 @hedger @gsurkov @drunkbatya
+/documentation/ @skotopes @DrZlo13 @hedger @gsurkov
+/scripts/toolchain/ @skotopes @DrZlo13 @hedger @gsurkov
 
 # Lib
 /lib/stm32wb_copro/ @skotopes @DrZlo13 @hedger @gsurkov @gornekich
@@ -59,11 +59,11 @@
 /lib/lfrfid/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
 /lib/libusb_stm32/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
 /lib/mbedtls/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
-/lib/mjs/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
+/lib/mjs/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov @portasynthinca3
 /lib/nanopb/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
 /lib/nfc/ @skotopes @DrZlo13 @hedger @gsurkov @gornekich @Astrrra
 /lib/one_wire/ @skotopes @DrZlo13 @hedger @gsurkov
 /lib/subghz/ @skotopes @DrZlo13 @hedger @gsurkov @Skorpionm
 
 # CI/CD
-/.github/workflows/ @skotopes @DrZlo13 @hedger @gsurkov @drunkbatya
+/.github/workflows/ @skotopes @DrZlo13 @hedger @gsurkov
