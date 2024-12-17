@@ -424,6 +424,26 @@ void infrared_tx_stop(InfraredApp* infrared) {
     infrared->app_state.last_transmit_time = furi_get_tick();
 }
 
+void infrared_tx_send_once(InfraredApp* infrared) {
+    if(infrared->app_state.is_transmitting) {
+        return;
+    }
+
+    dolphin_deed(DolphinDeedIrSend);
+    infrared_signal_transmit(infrared->current_signal);
+}
+
+InfraredErrorCode infrared_tx_send_once_button_index(InfraredApp* infrared, size_t button_index) {
+    furi_assert(button_index < infrared_remote_get_signal_count(infrared->remote));
+
+    InfraredErrorCode error = infrared_remote_load_signal(
+        infrared->remote, infrared->current_signal, infrared->app_state.current_button_index);
+    if(!INFRARED_ERROR_PRESENT(error)) {
+        infrared_tx_send_once(infrared);
+    }
+
+    return error;
+}
 void infrared_blocking_task_start(InfraredApp* infrared, FuriThreadCallback callback) {
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewLoading);
     furi_thread_set_callback(infrared->task_thread, callback);
