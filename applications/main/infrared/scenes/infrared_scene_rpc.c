@@ -144,9 +144,11 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                         TAG, "Sending signal with index \"%ld\"", app_state->current_button_index);
                 }
                 if(infrared->app_state.current_button_index != InfraredButtonIndexNone) {
-                    InfraredErrorCode error =
-                        infrared_tx_start_button_index(infrared, app_state->current_button_index);
+                    InfraredSignal* signal = infrared_signal_alloc();
+                    InfraredErrorCode error = infrared_remote_load_signal(
+                        infrared->remote, signal, app_state->current_button_index);
                     if(!INFRARED_ERROR_PRESENT(error)) {
+                        infrared_signal_transmit(signal);
                         const char* remote_name = infrared_remote_get_name(infrared->remote);
                         infrared_text_store_set(infrared, 0, "emulating\n%s", remote_name);
 
@@ -163,13 +165,10 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             }
 
             if(result) {
-                infrared_tx_stop(infrared);
                 scene_manager_set_scene_state(
                     infrared->scene_manager, InfraredSceneRpc, InfraredRpcStateLoaded);
-                scene_manager_stop(infrared->scene_manager);
-                view_dispatcher_stop(infrared->view_dispatcher);
             }
-
+            infrared_signal_free(infrared->current_signal);
             rpc_system_app_confirm(infrared->rpc_ctx, result);
         } else if(
             event.event == InfraredCustomEventTypeRpcExit ||
