@@ -4650,3 +4650,42 @@ type: parsed
 protocol: NECext
 address: 7F 01 00 00
 command: 69 96 00 00
+#
+# Model : NAD DR2 remote for NAD D7050 and D3020
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 87 7C 00 00
+command: 25 DA 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 87 7C 00 00
+command: 88 77 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 87 7C 00 00
+command: 8C 73 00 00
+#
+name: Mute
+type: parsed
+protocol: NECext
+address: 87 7C 00 00
+command: 94 6B 00 00
+#
+name: Next
+type: parsed
+protocol: NECext
+address: 87 7C 00 00
+command: 1A E5 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: 87 7C 00 00
+command: 1D E2 00 00
+#

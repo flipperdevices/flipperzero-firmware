@@ -203,6 +203,13 @@ declare function chr(n: number): string | null;
 declare function require(module: string): any;
 
 /**
+ * @brief Exit JavaScript with given message
+ * @param message The error message to show to user
+ * @version Added in JS SDK 0.1
+ */
+declare function die(message: string): never;
+
+/**
  * @brief mJS Foreign Pointer type
  * 
  * JavaScript code cannot do anything with values of `RawPointer` type except

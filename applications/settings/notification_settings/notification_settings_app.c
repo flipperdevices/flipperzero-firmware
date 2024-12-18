@@ -20,8 +20,11 @@ static const NotificationSequence sequence_note_c = {
     NULL,
 };
 
-#define CONTRAST_COUNT 11
+#define CONTRAST_COUNT 17
 const char* const contrast_text[CONTRAST_COUNT] = {
+    "-8",
+    "-7",
+    "-6",
     "-5",
     "-4",
     "-3",
@@ -33,8 +36,14 @@ const char* const contrast_text[CONTRAST_COUNT] = {
     "+3",
     "+4",
     "+5",
+    "+6",
+    "+7",
+    "+8",
 };
 const int32_t contrast_value[CONTRAST_COUNT] = {
+    -8,
+    -7,
+    -6,
     -5,
     -4,
     -3,
@@ -46,44 +55,47 @@ const int32_t contrast_value[CONTRAST_COUNT] = {
     3,
     4,
     5,
+    6,
+    7,
+    8,
 };
 
-#define BACKLIGHT_COUNT 5
+#define BACKLIGHT_COUNT 21
 const char* const backlight_text[BACKLIGHT_COUNT] = {
-    "0%",
-    "25%",
-    "50%",
-    "75%",
-    "100%",
+    "0%",  "5%",  "10%", "15%", "20%", "25%", "30%", "35%", "40%", "45%",  "50%",
+    "55%", "60%", "65%", "70%", "75%", "80%", "85%", "90%", "95%", "100%",
 };
 const float backlight_value[BACKLIGHT_COUNT] = {
-    0.0f,
-    0.25f,
-    0.5f,
-    0.75f,
-    1.0f,
+    0.00f, 0.05f, 0.10f, 0.15f, 0.20f, 0.25f, 0.30f, 0.35f, 0.40f, 0.45f, 0.50f,
+    0.55f, 0.60f, 0.65f, 0.70f, 0.75f, 0.80f, 0.85f, 0.90f, 0.95f, 1.00f,
 };
 
-#define VOLUME_COUNT 5
+#define VOLUME_COUNT 21
 const char* const volume_text[VOLUME_COUNT] = {
-    "0%",
-    "25%",
-    "50%",
-    "75%",
-    "100%",
+    "0%",  "5%",  "10%", "15%", "20%", "25%", "30%", "35%", "40%", "45%",  "50%",
+    "55%", "60%", "65%", "70%", "75%", "80%", "85%", "90%", "95%", "100%",
 };
-const float volume_value[VOLUME_COUNT] = {0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
+const float volume_value[VOLUME_COUNT] = {
+    0.00f, 0.05f, 0.10f, 0.15f, 0.20f, 0.25f, 0.30f, 0.35f, 0.40f, 0.45f, 0.50f,
+    0.55f, 0.60f, 0.65f, 0.70f, 0.75f, 0.80f, 0.85f, 0.90f, 0.95f, 1.00f,
+};
 
-#define DELAY_COUNT 6
+#define DELAY_COUNT 11
 const char* const delay_text[DELAY_COUNT] = {
     "1s",
     "5s",
+    "10s",
     "15s",
     "30s",
     "60s",
+    "90s",
     "120s",
+    "5min",
+    "10min",
+    "30min",
 };
-const uint32_t delay_value[DELAY_COUNT] = {1000, 5000, 15000, 30000, 60000, 120000};
+const uint32_t delay_value[DELAY_COUNT] =
+    {1000, 5000, 10000, 15000, 30000, 60000, 90000, 120000, 300000, 600000, 1800000};
 
 #define VIBRO_COUNT 2
 const char* const vibro_text[VIBRO_COUNT] = {
