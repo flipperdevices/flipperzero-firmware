@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,79.1,,
+Version,+,79.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1720,7 +1720,7 @@ Function,-,gap_init,_Bool,"GapConfig*, GapEventCallback, void*"
 Function,-,gap_start_advertising,void,
 Function,-,gap_stop_advertising,void,
 Function,-,gap_thread_stop,void,
-Function,-,gap_wait_for_tx_pool_acailable,void,FuriWait
+Function,-,gap_wait_for_tx_pool_available,void,FuriWait
 Function,-,getc,int,FILE*
 Function,-,getc_unlocked,int,FILE*
 Function,-,getchar,int,

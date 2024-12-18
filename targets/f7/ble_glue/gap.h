@@ -90,7 +90,7 @@ void gap_thread_stop(void);
 
 void gap_emit_ble_beacon_status_event(bool active);
 
-void gap_wait_for_tx_pool_acailable(FuriWait wait);
+void gap_wait_for_tx_pool_available(FuriWait wait);
 
 #ifdef __cplusplus
 }

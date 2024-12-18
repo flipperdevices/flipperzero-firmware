@@ -120,7 +120,7 @@ bool ble_gatt_characteristic_update(
     if(result) {
         if(result == BLE_STATUS_INSUFFICIENT_RESOURCES) {
             FURI_LOG_E(TAG, "Insufficient resources for %s characteristic", char_descriptor->name);
-            gap_wait_for_tx_pool_acailable(1000); // 1 second timeout
+            gap_wait_for_tx_pool_available(1000); // 1 second timeout
             result = aci_gatt_update_char_value(
                 svc_handle, char_instance->handle, 0, char_data_size, char_data);
         }

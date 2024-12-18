@@ -315,7 +315,7 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
     return BleEventFlowEnable;
 }
 
-void gap_wait_for_tx_pool_acailable(FuriWait wait) {
+void gap_wait_for_tx_pool_available(FuriWait wait) {
     furi_check(gap);
     furi_check(furi_semaphore_acquire(gap->tx_pool_busy, wait) == FuriStatusOk);
 }
