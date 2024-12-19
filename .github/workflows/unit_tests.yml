@@ -45,7 +45,7 @@ jobs:
         timeout-minutes: 7
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 scripts/testops.py -s /dev/tty_stlink run_units
+          python3 scripts/testops.py run_units
 
       - name: 'Upload test results'
         if: failure() && steps.flashing.outcome == 'success' && steps.run_units.outcome != 'skipped'
