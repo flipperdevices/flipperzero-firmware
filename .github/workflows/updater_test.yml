@@ -16,12 +16,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          submodules: false
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Flashing target firmware'
         id: first_full_flash
-        timeout-minutes: 10
+        timeout-minutes: 20
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testops.py -t=180 await_flipper
