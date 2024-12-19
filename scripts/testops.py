@@ -1,61 +1,12 @@
 #!/usr/bin/env python3
 import re
-import threading
 import time
 from datetime import datetime
-from queue import Queue
 from typing import Optional
 
-import serial
 from flipper.app import App
 from flipper.storage import FlipperStorage
 from flipper.utils.cdc import resolve_port
-
-
-class SerialMonitor:
-    def __init__(self, port, baudrate=230400):
-        self.port = port
-        self.baudrate = baudrate
-        self.output = []
-        self.running = False
-        self.serial = None
-        self.thread = None
-        self.queue = Queue()
-
-    def start(self):
-        try:
-            self.serial = serial.Serial(self.port, self.baudrate, timeout=1)
-            self.running = True
-            self.thread = threading.Thread(target=self._read_serial)
-            self.thread.daemon = True
-            self.thread.start()
-        except serial.SerialException as e:
-            raise RuntimeError(f"Failed to open serial port {self.port}: {e}")
-
-    def stop(self):
-        self.running = False
-        if self.thread:
-            self.thread.join(timeout=1)
-        if self.serial:
-            self.serial.close()
-
-    def _read_serial(self):
-        while self.running:
-            try:
-                if self.serial.in_waiting:
-                    line = self.serial.readline().decode("utf-8", errors="replace")
-                    if line:
-                        line = re.sub(r"[\x00-\x1F\x7F-\x9F]", "", line)
-                        datetime_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S,%f")
-                        line = f"{datetime_str} {line} \n"
-                        self.output.append(line)
-                        self.queue.put(line)
-            except Exception as e:
-                self.queue.put(f"Error reading serial: {e}")
-                break
-
-    def get_output(self):
-        return "".join(self.output)
 
 
 class Main(App):
@@ -67,9 +18,6 @@ class Main(App):
         self.parser.add_argument("-p", "--port", help="CDC Port", default="auto")
         self.parser.add_argument(
             "-t", "--timeout", help="Timeout in seconds", type=int, default=10
-        )
-        self.parser.add_argument(
-            "-s", "--stm-port", help="Additional STM32 Serial Port", default=None
         )
 
         self.subparsers = self.parser.add_subparsers(help="sub-command help")
@@ -117,17 +65,6 @@ class Main(App):
     def run_units(self):
         if not (flipper := self._get_flipper(retry_count=10)):
             return 1
-
-        stm_monitor = None
-        if self.args.stm_port:
-            try:
-                stm_monitor = SerialMonitor(self.args.stm_port)
-                stm_monitor.start()
-                self.logger.info(f"Started monitoring STM32 port: {self.args.stm_port}")
-            except Exception as e:
-                self.logger.error(f"Failed to start STM32 monitoring: {e}")
-                flipper.stop()
-                return 1
 
         self.logger.info("Running unit tests")
         flipper.send("unit_tests" + "\r")
@@ -215,12 +152,6 @@ class Main(App):
             with open(output_file, "w") as f:
                 f.write(test_results["full_output"])
 
-            if stm_monitor:
-                test_results["stm_output"] = stm_monitor.get_output()
-                stm_output_file = "unit_tests_stm_output.txt"
-                with open(stm_output_file, "w") as f:
-                    f.write(test_results["stm_output"])
-
             print(
                 f"::notice:: Total tests: {total} Failed tests: {tests} Status: {status} Elapsed time: {elapsed_time / 1000} s Memory leak: {leak} bytes"
             )
@@ -239,8 +170,6 @@ class Main(App):
             return 0
 
         finally:
-            if stm_monitor:
-                stm_monitor.stop()
             flipper.stop()
 
 
