@@ -1720,7 +1720,6 @@ Function,-,gap_init,_Bool,"GapConfig*, GapEventCallback, void*"
 Function,-,gap_start_advertising,void,
 Function,-,gap_stop_advertising,void,
 Function,-,gap_thread_stop,void,
-Function,-,gap_wait_for_tx_pool_available,void,FuriWait
 Function,-,getc,int,FILE*
 Function,-,getc_unlocked,int,FILE*
 Function,-,getchar,int,

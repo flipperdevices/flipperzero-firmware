@@ -40,7 +40,6 @@ typedef struct {
     bool enable_adv;
     bool is_secure;
     uint8_t negotiation_round;
-    FuriSemaphore* tx_pool_busy;
 } Gap;
 
 typedef enum {
@@ -300,11 +299,6 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
             }
             break;
         }
-
-        case ACI_GATT_TX_POOL_AVAILABLE_VSEVT_CODE:
-            FURI_LOG_D(TAG, "TX pool available event");
-            furi_semaphore_release(gap->tx_pool_busy);
-            break;
         }
     default:
         break;
@@ -313,11 +307,6 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
     furi_check(furi_mutex_release(gap->state_mutex) == FuriStatusOk);
 
     return BleEventFlowEnable;
-}
-
-void gap_wait_for_tx_pool_available(FuriWait wait) {
-    furi_check(gap);
-    furi_check(furi_semaphore_acquire(gap->tx_pool_busy, wait) == FuriStatusOk);
 }
 
 static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
@@ -538,7 +527,6 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
 
     gap = malloc(sizeof(Gap));
     gap->config = config;
-    gap->tx_pool_busy = furi_semaphore_alloc(1, 0);
     // Create advertising timer
     gap->advertise_timer = furi_timer_alloc(gap_advetise_timer_callback, FuriTimerTypeOnce, NULL);
     // Initialization of GATT & GAP layer
@@ -604,8 +592,6 @@ void gap_thread_stop(void) {
         gap->command_queue = NULL;
         furi_timer_free(gap->advertise_timer);
         gap->advertise_timer = NULL;
-        furi_semaphore_free(gap->tx_pool_busy);
-        gap->tx_pool_busy = NULL;
 
         ble_event_dispatcher_reset();
         free(gap);
