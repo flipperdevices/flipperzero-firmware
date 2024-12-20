@@ -5,54 +5,39 @@ on:
 env:
   TARGETS: f7
   DEFAULT_TARGET: f7
-  FBT_TOOLCHAIN_PATH: /opt
+  FBT_TOOLCHAIN_PATH: /opt/
   FBT_GIT_SUBMODULE_SHALLOW: 1
 
 jobs:
   run_units_on_bench:
-    runs-on: [self-hosted, FlipperZeroUnitTest]
+    runs-on: [ self-hosted, FlipperZeroTest ]
     steps:
-      - name: 'Wipe workspace'
-        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Get flipper from device manager (mock)'
-        id: device
-        run: |
-          echo "flipper=auto" >> $GITHUB_OUTPUT
-
       - name: 'Flash unit tests firmware'
         id: flashing
         if: success()
-        timeout-minutes: 10
-        run: |
-          ./fbt resources firmware_latest flash SWD_TRANSPORT_SERIAL=2A0906016415303030303032 LIB_DEBUG=1 FIRMWARE_APP_SET=unit_tests FORCE=1
-
-      - name: 'Wait for flipper and format ext'
-        id: format_ext
-        if: steps.flashing.outcome == 'success'
-        timeout-minutes: 5
+        timeout-minutes: 20
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 scripts/testops.py -p=${{steps.device.outputs.flipper}} -t=120 await_flipper 
-          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
+          ./fbt resources firmware_latest flash LIB_DEBUG=1 FIRMWARE_APP_SET=unit_tests FORCE=1
+
 
       - name: 'Copy assets and unit data, reboot and wait for flipper'
         id: copy
-        if: steps.format_ext.outcome == 'success'
+        if: steps.flashing.outcome == 'success'
         timeout-minutes: 7
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 scripts/testops.py -p=${{steps.device.outputs.flipper}} -t=15 await_flipper 
-          rm -rf build/latest/resources/dolphin
-          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send build/latest/resources /ext
-          python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
-          python3 scripts/testops.py -p=${{steps.device.outputs.flipper}} -t=15 await_flipper 
+          python3 scripts/testops.py -t=15 await_flipper
+          python3 scripts/storage.py -f send build/latest/resources /ext
+          python3 scripts/storage.py -f send /region_data /ext/.int/.region_data
+          python3 scripts/power.py reboot
+          python3 scripts/testops.py -t=30 await_flipper
 
       - name: 'Run units and validate results'
         id: run_units
@@ -60,9 +45,16 @@ jobs:
         timeout-minutes: 7
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 scripts/testops.py run_units -p ${{steps.device.outputs.flipper}}
+          python3 scripts/testops.py run_units
+
+      - name: 'Upload test results'
+        if: failure() && steps.flashing.outcome == 'success' && steps.run_units.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-tests_output
+          path: unit_tests*.txt
 
       - name: 'Check GDB output'
         if: failure() && steps.flashing.outcome == 'success'
         run: |
-          ./fbt gdb_trace_all SWD_TRANSPORT_SERIAL=2A0906016415303030303032 LIB_DEBUG=1 FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt gdb_trace_all LIB_DEBUG=1 FIRMWARE_APP_SET=unit_tests FORCE=1
