@@ -322,33 +322,26 @@ static void furi_event_loop_object_subscribe(
 
     FURI_CRITICAL_ENTER();
 
-    // Get or create item pair
-    FuriEventLoopItemPair* item_pair_ptr = FuriEventLoopTree_get(instance->tree, object);
-    FuriEventLoopItemPair item_pair = item_pair_ptr ? *item_pair_ptr :
-                                                      (FuriEventLoopItemPair){NULL, NULL};
+    furi_check(FuriEventLoopTree_get(instance->tree, object) == NULL);
 
     // Allocate and setup item
     FuriEventLoopItem* item = furi_event_loop_item_alloc(instance, contract, object, event);
     furi_event_loop_item_set_callback(item, callback, context);
+
+    FuriEventLoopTree_set_at(instance->tree, object, item);
 
     FuriEventLoopLink* link = item->contract->get_link(object);
     FuriEventLoopEvent event_noflags = item->event & FuriEventLoopEventMask;
 
     if(event_noflags == FuriEventLoopEventIn) {
         furi_check(link->item_in == NULL);
-        furi_check(item_pair.in == NULL);
         link->item_in = item;
-        item_pair.in = item;
     } else if(event_noflags == FuriEventLoopEventOut) {
         furi_check(link->item_out == NULL);
-        furi_check(item_pair.out == NULL);
         link->item_out = item;
-        item_pair.out = item;
     } else {
         furi_crash();
     }
-
-    FuriEventLoopTree_set_at(instance->tree, object, item_pair);
 
     if(!(item->event & FuriEventLoopEventFlagEdge)) {
         if(item->contract->get_level(item->object, event_noflags)) {
@@ -422,26 +415,19 @@ void furi_event_loop_subscribe_mutex(
         instance, mutex, &furi_mutex_event_loop_contract, event, callback, context);
 }
 
-void furi_event_loop_subscribe_pipe(
-    FuriEventLoop* instance,
-    FuriPipeSide* pipe,
-    FuriEventLoopEvent event,
-    FuriEventLoopEventCallback callback,
-    void* context) {
-    extern const FuriEventLoopContract furi_pipe_event_loop_contract;
-
-    furi_event_loop_object_subscribe(
-        instance, pipe, &furi_pipe_event_loop_contract, event, callback, context);
-}
-
 /**
  * Public generic unsubscription API
  */
 
-static void furi_event_loop_unsubscribe_item(
-    FuriEventLoop* instance,
-    FuriEventLoopObject* object,
-    FuriEventLoopItem* item) {
+void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
+    furi_check(instance);
+    furi_check(instance->thread_id == furi_thread_get_current_id());
+
+    FURI_CRITICAL_ENTER();
+
+    FuriEventLoopItem* item = NULL;
+    furi_check(FuriEventLoopTree_pop_at(&item, instance->tree, object));
+
     furi_check(item);
     furi_check(item->owner == instance);
 
@@ -467,20 +453,6 @@ static void furi_event_loop_unsubscribe_item(
     } else {
         furi_event_loop_item_free(item);
     }
-}
-
-void furi_event_loop_unsubscribe(FuriEventLoop* instance, FuriEventLoopObject* object) {
-    furi_check(instance);
-    furi_check(instance->thread_id == furi_thread_get_current_id());
-
-    FURI_CRITICAL_ENTER();
-
-    FuriEventLoopItemPair item_pair;
-    furi_check(FuriEventLoopTree_pop_at(&item_pair, instance->tree, object));
-    furi_check(item_pair.in || item_pair.out);
-
-    if(item_pair.in) furi_event_loop_unsubscribe_item(instance, object, item_pair.in);
-    if(item_pair.out) furi_event_loop_unsubscribe_item(instance, object, item_pair.out);
 
     FURI_CRITICAL_EXIT();
 }
@@ -490,8 +462,8 @@ bool furi_event_loop_is_subscribed(FuriEventLoop* instance, FuriEventLoopObject*
     furi_check(instance->thread_id == furi_thread_get_current_id());
     FURI_CRITICAL_ENTER();
 
-    const FuriEventLoopItemPair* item_pair = FuriEventLoopTree_cget(instance->tree, object);
-    bool result = !!item_pair;
+    FuriEventLoopItem* const* item = FuriEventLoopTree_cget(instance->tree, object);
+    bool result = !!item;
 
     FURI_CRITICAL_EXIT();
     return result;

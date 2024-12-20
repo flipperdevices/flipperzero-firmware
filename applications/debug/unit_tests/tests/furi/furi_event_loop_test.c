@@ -9,7 +9,7 @@
 
 #define MESSAGE_COUNT    (256UL)
 #define EVENT_FLAG_COUNT (23UL)
-#define PRIMITIVE_COUNT  (5UL)
+#define PRIMITIVE_COUNT  (4UL)
 #define RUN_COUNT        (2UL)
 
 typedef struct {
@@ -18,7 +18,6 @@ typedef struct {
     uint32_t stream_buffer_count;
     uint32_t event_flag_count;
     uint32_t semaphore_count;
-    uint32_t pipe_count;
     uint32_t primitives_tested;
 } TestFuriEventLoopThread;
 
@@ -27,7 +26,6 @@ typedef struct {
     FuriStreamBuffer* stream_buffer;
     FuriEventFlag* event_flag;
     FuriSemaphore* semaphore;
-    FuriPipe pipe;
 
     TestFuriEventLoopThread producer;
     TestFuriEventLoopThread consumer;
@@ -211,43 +209,6 @@ static void
     furi_delay_us(furi_hal_random_get() % 100);
 }
 
-static void
-    test_furi_event_loop_producer_pipe_callback(FuriEventLoopObject* object, void* context) {
-    furi_check(context);
-
-    TestFuriEventLoopData* data = context;
-    furi_check(data->pipe.alices_side == object);
-
-    TestFuriEventLoopThread* producer = &data->producer;
-    TestFuriEventLoopThread* consumer = &data->consumer;
-
-    FURI_LOG_I(TAG, "producer Pipe: %lu %lu", producer->pipe_count, consumer->pipe_count);
-
-    if(producer->pipe_count == MESSAGE_COUNT / 2) {
-        furi_event_loop_unsubscribe(producer->event_loop, data->pipe.alices_side);
-        furi_event_loop_subscribe_pipe(
-            producer->event_loop,
-            data->pipe.alices_side,
-            FuriEventLoopEventOut,
-            test_furi_event_loop_producer_pipe_callback,
-            data);
-
-    } else if(producer->pipe_count == MESSAGE_COUNT) {
-        furi_event_loop_unsubscribe(producer->event_loop, data->pipe.alices_side);
-        furi_event_loop_pend_callback(
-            producer->event_loop, test_furi_event_loop_pending_callback, producer);
-        return;
-    }
-
-    producer->pipe_count++;
-
-    furi_check(
-        furi_pipe_send(data->pipe.alices_side, &producer->pipe_count, sizeof(uint32_t), 0) ==
-        sizeof(uint32_t));
-
-    furi_delay_us(furi_hal_random_get() % 100);
-}
-
 static int32_t test_furi_event_loop_producer(void* p) {
     furi_check(p);
 
@@ -282,12 +243,6 @@ static int32_t test_furi_event_loop_producer(void* p) {
             data->semaphore,
             FuriEventLoopEventOut,
             test_furi_event_loop_producer_semaphore_callback,
-            data);
-        furi_event_loop_subscribe_pipe(
-            producer->event_loop,
-            data->pipe.alices_side,
-            FuriEventLoopEventOut,
-            test_furi_event_loop_producer_pipe_callback,
             data);
 
         test_furi_event_loop_thread_run_and_cleanup(producer);
@@ -447,40 +402,6 @@ static void
     data->consumer.semaphore_count++;
 }
 
-static void
-    test_furi_event_loop_consumer_pipe_callback(FuriEventLoopObject* object, void* context) {
-    furi_check(context);
-
-    TestFuriEventLoopData* data = context;
-    furi_check(data->pipe.bobs_side == object);
-
-    TestFuriEventLoopThread* producer = &data->producer;
-    TestFuriEventLoopThread* consumer = &data->consumer;
-
-    furi_delay_us(furi_hal_random_get() % 100);
-
-    furi_check(
-        furi_pipe_receive(data->pipe.bobs_side, &consumer->pipe_count, sizeof(uint32_t), 0) ==
-        sizeof(uint32_t));
-
-    FURI_LOG_I(TAG, "consumer Pipe: %lu %lu", producer->pipe_count, consumer->pipe_count);
-
-    if(consumer->pipe_count == MESSAGE_COUNT / 2) {
-        furi_event_loop_unsubscribe(consumer->event_loop, data->pipe.bobs_side);
-        furi_event_loop_subscribe_pipe(
-            consumer->event_loop,
-            data->pipe.bobs_side,
-            FuriEventLoopEventIn,
-            test_furi_event_loop_consumer_pipe_callback,
-            data);
-
-    } else if(consumer->pipe_count == MESSAGE_COUNT) {
-        furi_event_loop_unsubscribe(data->consumer.event_loop, data->pipe.bobs_side);
-        furi_event_loop_pend_callback(
-            consumer->event_loop, test_furi_event_loop_pending_callback, consumer);
-    }
-}
-
 static int32_t test_furi_event_loop_consumer(void* p) {
     furi_check(p);
 
@@ -516,12 +437,6 @@ static int32_t test_furi_event_loop_consumer(void* p) {
             FuriEventLoopEventIn,
             test_furi_event_loop_consumer_semaphore_callback,
             data);
-        furi_event_loop_subscribe_pipe(
-            consumer->event_loop,
-            data->pipe.bobs_side,
-            FuriEventLoopEventIn,
-            test_furi_event_loop_consumer_pipe_callback,
-            data);
 
         test_furi_event_loop_thread_run_and_cleanup(consumer);
     }
@@ -538,7 +453,6 @@ void test_furi_event_loop(void) {
     data.stream_buffer = furi_stream_buffer_alloc(16, sizeof(uint32_t));
     data.event_flag = furi_event_flag_alloc();
     data.semaphore = furi_semaphore_alloc(8, 0);
-    data.pipe = furi_pipe_alloc(16, sizeof(uint32_t));
 
     FuriThread* producer_thread =
         furi_thread_alloc_ex("producer_thread", 1 * 1024, test_furi_event_loop_producer, &data);
@@ -573,6 +487,4 @@ void test_furi_event_loop(void) {
     furi_stream_buffer_free(data.stream_buffer);
     furi_event_flag_free(data.event_flag);
     furi_semaphore_free(data.semaphore);
-    furi_pipe_free(data.pipe.alices_side);
-    furi_pipe_free(data.pipe.bobs_side);
 }

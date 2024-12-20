@@ -7,13 +7,9 @@
 #define STREAM_BUFFER_SIZE      (32U)
 #define STREAM_BUFFER_TRG_LEVEL (STREAM_BUFFER_SIZE / 2U)
 
-#define PIPE_SIZE      (128U)
-#define PIPE_TRG_LEVEL (1U)
-
 typedef struct {
     FuriMessageQueue* message_queue;
     FuriStreamBuffer* stream_buffer;
-    FuriPipe pipe;
 } TestFuriPrimitivesData;
 
 static void test_furi_message_queue(TestFuriPrimitivesData* data) {
@@ -91,67 +87,17 @@ static void test_furi_stream_buffer(TestFuriPrimitivesData* data) {
     }
 }
 
-static void test_furi_pipe(TestFuriPrimitivesData* data) {
-    FuriPipeSide* alice = data->pipe.alices_side;
-    FuriPipeSide* bob = data->pipe.bobs_side;
-
-    mu_assert_int_eq(FuriPipeRoleAlice, furi_pipe_role(alice));
-    mu_assert_int_eq(FuriPipeRoleBob, furi_pipe_role(bob));
-    mu_assert_int_eq(FuriPipeStateOpen, furi_pipe_state(alice));
-    mu_assert_int_eq(FuriPipeStateOpen, furi_pipe_state(bob));
-
-    mu_assert_int_eq(PIPE_SIZE, furi_pipe_spaces_available(alice));
-    mu_assert_int_eq(PIPE_SIZE, furi_pipe_spaces_available(bob));
-    mu_assert_int_eq(0, furi_pipe_bytes_available(alice));
-    mu_assert_int_eq(0, furi_pipe_bytes_available(bob));
-
-    for(uint8_t i = 0;; ++i) {
-        mu_assert_int_eq(PIPE_SIZE - i, furi_pipe_spaces_available(alice));
-        mu_assert_int_eq(i, furi_pipe_bytes_available(bob));
-
-        if(furi_pipe_send(alice, &i, sizeof(uint8_t), 0) != sizeof(uint8_t)) {
-            break;
-        }
-
-        mu_assert_int_eq(PIPE_SIZE - i, furi_pipe_spaces_available(bob));
-        mu_assert_int_eq(i, furi_pipe_bytes_available(alice));
-
-        if(furi_pipe_send(bob, &i, sizeof(uint8_t), 0) != sizeof(uint8_t)) {
-            break;
-        }
-    }
-
-    furi_pipe_free(alice);
-    mu_assert_int_eq(FuriPipeStateBroken, furi_pipe_state(bob));
-
-    for(uint8_t i = 0;; ++i) {
-        mu_assert_int_eq(PIPE_SIZE - i, furi_pipe_bytes_available(bob));
-
-        uint8_t value;
-        if(furi_pipe_receive(bob, &value, sizeof(uint8_t), 0) != sizeof(uint8_t)) {
-            break;
-        }
-
-        mu_assert_int_eq(i, value);
-    }
-
-    furi_pipe_free(bob);
-}
-
 // This is a stub that needs expanding
 void test_furi_primitives(void) {
     TestFuriPrimitivesData data = {
         .message_queue =
             furi_message_queue_alloc(MESSAGE_QUEUE_CAPACITY, MESSAGE_QUEUE_ELEMENT_SIZE),
         .stream_buffer = furi_stream_buffer_alloc(STREAM_BUFFER_SIZE, STREAM_BUFFER_TRG_LEVEL),
-        .pipe = furi_pipe_alloc(PIPE_SIZE, PIPE_TRG_LEVEL),
     };
 
     test_furi_message_queue(&data);
     test_furi_stream_buffer(&data);
-    test_furi_pipe(&data);
 
     furi_message_queue_free(data.message_queue);
     furi_stream_buffer_free(data.stream_buffer);
-    // the pipe is freed by the test
 }

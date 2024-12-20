@@ -33,18 +33,13 @@ ILIST_DEF(WaitingList, FuriEventLoopItem, M_POD_OPLIST)
 /* Event Loop RB tree */
 #define FURI_EVENT_LOOP_TREE_RANK (4)
 
-typedef struct {
-    FuriEventLoopItem* in;
-    FuriEventLoopItem* out;
-} FuriEventLoopItemPair;
-
 BPTREE_DEF2( // NOLINT
     FuriEventLoopTree,
     FURI_EVENT_LOOP_TREE_RANK,
     FuriEventLoopObject*, /* pointer to object we track */
     M_PTR_OPLIST,
-    FuriEventLoopItemPair, /* pointers to the two FuriEventLoopItem */
-    M_POD_OPLIST)
+    FuriEventLoopItem*, /* pointer to the FuriEventLoopItem */
+    M_PTR_OPLIST)
 
 #define M_OPL_FuriEventLoopTree_t() BPTREE_OPLIST(FuriEventLoopTree, M_POD_OPLIST)
 

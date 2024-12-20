@@ -40,8 +40,7 @@ typedef enum {
      * - One or more items were inserted into a FuriMessageQueue,
      * - Enough data has been written to a FuriStreamBuffer,
      * - A FuriSemaphore has been released at least once,
-     * - A FuriMutex has been released,
-     * - Enough data is available to be read out from a FuriPipeSide.
+     * - A FuriMutex has been released.
      */
     FuriEventLoopEventIn = 0x00000001U,
     /**
@@ -51,8 +50,7 @@ typedef enum {
      * - One or more items were removed from a FuriMessageQueue,
      * - Any amount of data has been read out of a FuriStreamBuffer,
      * - A FuriSemaphore has been acquired at least once,
-     * - A FuriMutex has been acquired,
-     * - Any amount of data has been read out of a FuriPipeSide.
+     * - A FuriMutex has been acquired.
      */
     FuriEventLoopEventOut = 0x00000002U,
     /**
@@ -302,27 +300,6 @@ typedef struct FuriMutex FuriMutex;
 void furi_event_loop_subscribe_mutex(
     FuriEventLoop* instance,
     FuriMutex* mutex,
-    FuriEventLoopEvent event,
-    FuriEventLoopEventCallback callback,
-    void* context);
-
-/** Opaque pipe side type */
-typedef struct FuriPipeSide FuriPipeSide;
-
-/**
- * Subscribe to pipe events
- * 
- * @warning you can only have one subscription for one event type.
- *
- * @param      instance       The Event Loop instance
- * @param      pipe           The Pipe to add
- * @param[in]  event          The Event Loop event to trigger on
- * @param[in]  callback       The callback to call on event
- * @param      context        The context for callback
- */
-void furi_event_loop_subscribe_pipe(
-    FuriEventLoop* instance,
-    FuriPipeSide* pipe,
     FuriEventLoopEvent event,
     FuriEventLoopEventCallback callback,
     void* context);
