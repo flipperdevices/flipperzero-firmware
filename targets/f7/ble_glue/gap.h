@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <furi/core/base.h>
 
 #include <furi_hal_version.h>
 
