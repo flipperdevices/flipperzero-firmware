@@ -114,18 +114,17 @@ bool ble_gatt_characteristic_update(
         release_data = char_descriptor->data.callback.fn(context, &char_data, &char_data_size);
     }
 
-    tBleStatus result = aci_gatt_update_char_value(
-        svc_handle, char_instance->handle, 0, char_data_size, char_data);
-    if(result) {
+    tBleStatus result;
+    size_t retries_left = 1000;
+    do {
+        retries_left--;
+        result = aci_gatt_update_char_value(
+            svc_handle, char_instance->handle, 0, char_data_size, char_data);
         if(result == BLE_STATUS_INSUFFICIENT_RESOURCES) {
-            FURI_LOG_E(TAG, "Insufficient resources for %s characteristic", char_descriptor->name);
-            do {
-                furi_delay_ms(1);
-                result = aci_gatt_update_char_value(
-                    svc_handle, char_instance->handle, 0, char_data_size, char_data);
-            } while(result == BLE_STATUS_INSUFFICIENT_RESOURCES);
+            FURI_LOG_W(TAG, "Insufficient resources for %s characteristic", char_descriptor->name);
+            furi_delay_ms(1);
         }
-    }
+    } while(result == BLE_STATUS_INSUFFICIENT_RESOURCES && retries_left);
 
     if(release_data) {
         free((void*)char_data);
