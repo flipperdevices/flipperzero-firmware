@@ -9,6 +9,7 @@ on:
 env:
   TARGETS: f7
   DEFAULT_TARGET: f7
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   check-secret:
