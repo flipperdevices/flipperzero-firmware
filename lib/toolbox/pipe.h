@@ -284,7 +284,7 @@ void pipe_set_space_freed_callback(
  * @warning Attach the pipe side to an event loop first using
  * `pipe_attach_to_event_loop`.
  */
-void pipe_set_pipe_broken_callback(
+void pipe_set_broken_callback(
     PipeSide* pipe,
     PipeSideBrokenCallback callback,
     FuriEventLoopEvent event);

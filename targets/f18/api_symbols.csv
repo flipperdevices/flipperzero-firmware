@@ -2303,7 +2303,7 @@ Function,+,pipe_role,PipeRole,PipeSide*
 Function,+,pipe_send,size_t,"PipeSide*, const void*, size_t, FuriWait"
 Function,+,pipe_set_callback_context,void,"PipeSide*, void*"
 Function,+,pipe_set_data_arrived_callback,void,"PipeSide*, PipeSideDataArrivedCallback, FuriEventLoopEvent"
-Function,+,pipe_set_pipe_broken_callback,void,"PipeSide*, PipeSideBrokenCallback, FuriEventLoopEvent"
+Function,+,pipe_set_broken_callback,void,"PipeSide*, PipeSideBrokenCallback, FuriEventLoopEvent"
 Function,+,pipe_set_space_freed_callback,void,"PipeSide*, PipeSideSpaceFreedCallback, FuriEventLoopEvent"
 Function,+,pipe_spaces_available,size_t,PipeSide*
 Function,+,pipe_state,PipeState,PipeSide*

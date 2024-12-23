@@ -98,7 +98,7 @@ static int32_t ancillary_thread(void* context) {
     pipe_set_callback_context(pipe, &thread_ctx);
     pipe_set_data_arrived_callback(pipe, on_data_arrived, 0);
     pipe_set_space_freed_callback(pipe, on_space_freed, FuriEventLoopEventFlagEdge);
-    pipe_set_pipe_broken_callback(pipe, on_became_broken, 0);
+    pipe_set_broken_callback(pipe, on_became_broken, 0);
 
     furi_event_loop_run(thread_ctx.event_loop);
 
