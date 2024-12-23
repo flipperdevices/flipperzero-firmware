@@ -403,7 +403,6 @@ bool flipper_format_write_comment_cstr(FlipperFormat* flipper_format, const char
     return flipper_format_stream_write_comment_cstr(flipper_format->stream, data);
 }
 
-
 bool flipper_format_write_empty_line(FlipperFormat* flipper_format) {
     furi_check(flipper_format);
     return flipper_format_stream_write_eol(flipper_format->stream);
