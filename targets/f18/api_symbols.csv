@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,79.1,,
+Version,+,79.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -161,6 +161,7 @@ Header,+,lib/toolbox/manchester_encoder.h,,
 Header,+,lib/toolbox/md5_calc.h,,
 Header,+,lib/toolbox/name_generator.h,,
 Header,+,lib/toolbox/path.h,,
+Header,+,lib/toolbox/pipe.h,,
 Header,+,lib/toolbox/pretty_format.h,,
 Header,+,lib/toolbox/protocols/protocol_dict.h,,
 Header,+,lib/toolbox/pulse_protocols/pulse_glue.h,,
@@ -1580,6 +1581,7 @@ Function,+,furi_stream_buffer_receive,size_t,"FuriStreamBuffer*, void*, size_t, 
 Function,+,furi_stream_buffer_reset,FuriStatus,FuriStreamBuffer*
 Function,+,furi_stream_buffer_send,size_t,"FuriStreamBuffer*, const void*, size_t, uint32_t"
 Function,+,furi_stream_buffer_spaces_available,size_t,FuriStreamBuffer*
+Function,+,furi_stream_get_trigger_level,size_t,FuriStreamBuffer*
 Function,+,furi_stream_set_trigger_level,_Bool,"FuriStreamBuffer*, size_t"
 Function,+,furi_string_alloc,FuriString*,
 Function,+,furi_string_alloc_move,FuriString*,FuriString*
@@ -2290,6 +2292,22 @@ Function,+,pb_skip_field,_Bool,"pb_istream_t*, pb_wire_type_t"
 Function,+,pb_write,_Bool,"pb_ostream_t*, const pb_byte_t*, size_t"
 Function,-,pclose,int,FILE*
 Function,-,perror,void,const char*
+Function,+,pipe_alloc,PipeSideBundle,"size_t, size_t"
+Function,+,pipe_alloc_ex,PipeSideBundle,"PipeSideReceiveSettings, PipeSideReceiveSettings"
+Function,+,pipe_attach_to_event_loop,void,"PipeSide*, FuriEventLoop*"
+Function,+,pipe_bytes_available,size_t,PipeSide*
+Function,+,pipe_detach_from_event_loop,void,PipeSide*
+Function,+,pipe_free,void,PipeSide*
+Function,+,pipe_install_as_stdio,void,PipeSide*
+Function,+,pipe_receive,size_t,"PipeSide*, void*, size_t, FuriWait"
+Function,+,pipe_role,PipeRole,PipeSide*
+Function,+,pipe_send,size_t,"PipeSide*, const void*, size_t, FuriWait"
+Function,+,pipe_set_callback_context,void,"PipeSide*, void*"
+Function,+,pipe_set_data_arrived_callback,void,"PipeSide*, PipeSideDataArrivedCallback, FuriEventLoopEvent"
+Function,+,pipe_set_broken_callback,void,"PipeSide*, PipeSideBrokenCallback, FuriEventLoopEvent"
+Function,+,pipe_set_space_freed_callback,void,"PipeSide*, PipeSideSpaceFreedCallback, FuriEventLoopEvent"
+Function,+,pipe_spaces_available,size_t,PipeSide*
+Function,+,pipe_state,PipeState,PipeSide*
 Function,+,plugin_manager_alloc,PluginManager*,"const char*, uint32_t, const ElfApiInterface*"
 Function,+,plugin_manager_free,void,PluginManager*
 Function,+,plugin_manager_get,const FlipperAppPluginDescriptor*,"PluginManager*, uint32_t"
