@@ -8,6 +8,7 @@
  * 
  * It is also possible to use both sides of the pipe within one thread.
  */
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
