@@ -4,6 +4,34 @@
 
 #define MF_DESFIRE_PROTOCOL_NAME "Mifare DESFire"
 
+typedef struct {
+    uint8_t minor;
+    uint8_t major;
+    uint8_t storage;
+    const char* full_name;
+    const char* type_name;
+} MfDesfireNames;
+
+static const MfDesfireNames mf_desfire_names[] = {
+    {0x02, 0x00, 0xFF, "Mifare DESFire 4K (MF3ICD40)", "4K (MF3ICD40)"},
+    {0x00, 0x01, 0x16, "Mifare DESFire EV1 2K", "EV1 2K"},
+    {0x00, 0x01, 0x18, "Mifare DESFire EV1 4K", "EV1 4K"},
+    {0x00, 0x01, 0x1A, "Mifare DESFire EV1 8K", "EV1 8K"},
+    {0x00, 0x01, 0xFF, "Mifare DESFire EV1", "EV1"},
+    {0x00, 0x12, 0x16, "Mifare DESFire EV2 2K", "EV2 2K"},
+    {0x00, 0x12, 0x18, "Mifare DESFire EV2 4K", "EV2 4K"},
+    {0x00, 0x12, 0x1A, "Mifare DESFire EV2 8K", "EV2 8K"},
+    {0x00, 0x12, 0xFF, "Mifare DESFire EV2", "EV2"},
+    {0x00, 0x22, 0x1C, "Mifare DESFire EV2 XL 16K", "EV2 XL 16K"},
+    {0x00, 0x22, 0x1E, "Mifare DESFire EV2 XL 32K", "EV2 XL 32K"},
+    {0x00, 0x22, 0xFF, "Mifare DESFire EV2 XL", "EV2 XL"},
+    {0x00, 0x33, 0x16, "Mifare DESFire EV3 2K", "EV3 2K"},
+    {0x00, 0x33, 0x18, "Mifare DESFire EV3 4K", "EV3 4K"},
+    {0x00, 0x33, 0x1A, "Mifare DESFire EV3 8K", "EV3 8K"},
+    {0x00, 0x33, 0xFF, "Mifare DESFire EV3", "EV3"},
+    {0xFF, 0xFF, 0xFF, "Unknown Mifare DESFire", "UNK"},
+};
+
 const NfcDeviceBase nfc_device_mf_desfire = {
     .protocol_name = MF_DESFIRE_PROTOCOL_NAME,
     .alloc = (NfcDeviceAlloc)mf_desfire_alloc,
@@ -229,9 +257,24 @@ bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other) 
 }
 
 const char* mf_desfire_get_device_name(const MfDesfireData* data, NfcDeviceNameType name_type) {
-    UNUSED(data);
-    UNUSED(name_type);
-    return MF_DESFIRE_PROTOCOL_NAME;
+    furi_check(data);
+
+    for(size_t i = 0; i < COUNT_OF(mf_desfire_names); i++) {
+        if((mf_desfire_names[i].minor == data->version.hw_minor ||
+            mf_desfire_names[i].minor == 0xFF) &&
+           (mf_desfire_names[i].major == data->version.hw_major ||
+            mf_desfire_names[i].major == 0xFF) &&
+           (mf_desfire_names[i].storage == data->version.hw_storage ||
+            mf_desfire_names[i].storage == 0xFF)) {
+            if(name_type == NfcDeviceNameTypeFull) {
+                return mf_desfire_names[i].full_name;
+            } else {
+                return mf_desfire_names[i].type_name;
+            }
+        }
+    }
+
+    return "Unknown Mifare DESFire";
 }
 
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len) {

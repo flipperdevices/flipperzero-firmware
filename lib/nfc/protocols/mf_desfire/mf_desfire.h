@@ -131,6 +131,7 @@ typedef enum {
     MfDesfireErrorProtocol,
     MfDesfireErrorTimeout,
     MfDesfireErrorAuthentication,
+    MfDesfireErrorCommandNotSupported,
 } MfDesfireError;
 
 typedef struct {
