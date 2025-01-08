@@ -2,10 +2,12 @@
 
 #include <dolphin/dolphin.h>
 
-void infrared_scene_universal_common_item_callback(void* context, uint32_t index) {
-    InfraredApp* infrared = context;
-    uint32_t event = infrared_custom_event_pack(InfraredCustomEventTypeButtonSelected, index);
-    view_dispatcher_send_custom_event(infrared->view_dispatcher, event);
+void infrared_scene_universal_common_item_callback(void* context, uint32_t index, InputType type) {
+    if(type == InputTypeShort) {
+        InfraredApp* infrared = context;
+        uint32_t event = infrared_custom_event_pack(InfraredCustomEventTypeButtonSelected, index);
+        view_dispatcher_send_custom_event(infrared->view_dispatcher, event);
+    }
 }
 
 static void infrared_scene_universal_common_progress_back_callback(void* context) {
