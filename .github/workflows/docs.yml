@@ -61,7 +61,7 @@ jobs:
           version: "1.12.0"
 
       - name: 'Generate documentation'
-        run: DOXY_CONFIG_DIR=documentation/doxygen doxygen documentation/doxygen/Doxyfile-awesome.cfg
+        run: ./fbt doxygen
 
       - name: 'Upload documentation'
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' && needs.check-secret.outputs.s3-valid-config == 'true' }}
