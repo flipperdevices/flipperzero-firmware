@@ -58,7 +58,8 @@ struct InfraredWorker {
     InfraredEncoderHandler* infrared_encoder;
     InfraredDecoderHandler* infrared_decoder;
     NotificationApp* notification;
-    bool blink_enable;
+    bool rx_blink_enable;
+    bool tx_blink_enable;
     bool decode_enable;
 
     union {
@@ -172,7 +173,7 @@ static int32_t infrared_worker_rx_thread(void* thread_context) {
         furi_check(events & INFRARED_WORKER_ALL_RX_EVENTS); /* at least one caught */
 
         if(events & INFRARED_WORKER_RX_RECEIVED) {
-            if(!instance->rx.overrun && instance->blink_enable &&
+            if(!instance->rx.overrun && instance->rx_blink_enable &&
                ((furi_get_tick() - last_blink_time) > 80)) {
                 last_blink_time = furi_get_tick();
                 notification_message(instance->notification, &sequence_blink_blue_10);
@@ -193,14 +194,14 @@ static int32_t infrared_worker_rx_thread(void* thread_context) {
             printf("#");
             infrared_reset_decoder(instance->infrared_decoder);
             instance->signal.timings_cnt = 0;
-            if(instance->blink_enable)
+            if(instance->rx_blink_enable)
                 notification_message(instance->notification, &sequence_set_red_255);
         }
         if(events & INFRARED_WORKER_RX_TIMEOUT_RECEIVED) {
             if(instance->rx.overrun) {
                 printf("\nOVERRUN, max samples: %d\n", MAX_TIMINGS_AMOUNT);
                 instance->rx.overrun = false;
-                if(instance->blink_enable)
+                if(instance->rx_blink_enable)
                     notification_message(instance->notification, &sequence_reset_red);
             } else {
                 infrared_worker_process_timeout(instance);
@@ -234,7 +235,8 @@ InfraredWorker* infrared_worker_alloc(void) {
     instance->stream = furi_stream_buffer_alloc(buffer_size, sizeof(InfraredWorkerTiming));
     instance->infrared_decoder = infrared_alloc_decoder();
     instance->infrared_encoder = infrared_alloc_encoder();
-    instance->blink_enable = false;
+    instance->rx_blink_enable = false;
+    instance->tx_blink_enable = false;
     instance->decode_enable = true;
     instance->notification = furi_record_open(RECORD_NOTIFICATION);
     instance->state = InfraredWorkerStateIdle;
@@ -317,7 +319,13 @@ const InfraredMessage* infrared_worker_get_decoded_signal(const InfraredWorkerSi
 void infrared_worker_rx_enable_blink_on_receiving(InfraredWorker* instance, bool enable) {
     furi_check(instance);
 
-    instance->blink_enable = enable;
+    instance->rx_blink_enable = enable;
+}
+
+void infrared_worker_tx_enable_blink_on_sending(InfraredWorker* instance, bool enable) {
+    furi_check(instance);
+
+    instance->tx_blink_enable = enable;
 }
 
 void infrared_worker_rx_enable_signal_decoding(InfraredWorker* instance, bool enable) {
@@ -344,6 +352,11 @@ void infrared_worker_tx_start(InfraredWorker* instance) {
         infrared_worker_furi_hal_message_sent_isr_callback, instance);
 
     instance->state = InfraredWorkerStateStartTx;
+
+    if(instance->tx_blink_enable) {
+        notification_message(instance->notification, &sequence_blink_start_magenta);
+    }
+
     furi_thread_start(instance->thread);
 }
 
@@ -587,6 +600,10 @@ void infrared_worker_tx_stop(InfraredWorker* instance) {
     furi_thread_join(instance->thread);
     furi_hal_infrared_async_tx_set_data_isr_callback(NULL, NULL);
     furi_hal_infrared_async_tx_set_signal_sent_isr_callback(NULL, NULL);
+
+    if(instance->tx_blink_enable) {
+        notification_message(instance->notification, &message_blink_stop);
+    }
 
     instance->signal.timings_cnt = 0;
     furi_check(furi_stream_buffer_reset(instance->stream) == FuriStatusOk);

@@ -76,6 +76,13 @@ void infrared_worker_rx_set_received_signal_callback(
  */
 void infrared_worker_rx_enable_blink_on_receiving(InfraredWorker* instance, bool enable);
 
+/** Enable blinking while sending any signal on IR port
+ * 
+ * @param[in]   instance - instance of InfraredWorker
+ * @param[in]   enable - true if you want to enable blinking /false otherwise
+ */
+void infrared_worker_tx_enable_blink_on_sending(InfraredWorker* instance, bool enable);
+
 /** Enable decoding of received infrared signals.
  *
  * @param[in]   instance - instance of InfraredWorker

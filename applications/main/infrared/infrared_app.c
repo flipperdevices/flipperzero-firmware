@@ -391,7 +391,7 @@ void infrared_tx_start(InfraredApp* infrared) {
     dolphin_deed(DolphinDeedIrSend);
     infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStartSend);
 
-    infrared_worker_tx_set_get_signal_callback(
+    infrared_worker_tx_ infrared_worker_tx_set_get_signal_callback(
         infrared->worker, infrared_worker_tx_get_signal_steady_callback, infrared);
     infrared_worker_tx_start(infrared->worker);
 
