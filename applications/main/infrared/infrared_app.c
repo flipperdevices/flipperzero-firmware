@@ -389,7 +389,8 @@ void infrared_tx_start(InfraredApp* infrared) {
     }
 
     dolphin_deed(DolphinDeedIrSend);
-    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStartSend);
+
+    infrared_worker_tx_enable_blink_on_sending(infrared->worker, true);
 
     infrared_worker_tx_set_get_signal_callback(
         infrared->worker, infrared_worker_tx_get_signal_steady_callback, infrared);
@@ -417,8 +418,6 @@ void infrared_tx_stop(InfraredApp* infrared) {
 
     infrared_worker_tx_stop(infrared->worker);
     infrared_worker_tx_set_get_signal_callback(infrared->worker, NULL, NULL);
-
-    infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStop);
 
     infrared->app_state.is_transmitting = false;
     infrared->app_state.last_transmit_time = furi_get_tick();
@@ -466,13 +465,6 @@ void infrared_text_store_set(InfraredApp* infrared, uint32_t bank, const char* f
 
 void infrared_text_store_clear(InfraredApp* infrared, uint32_t bank) {
     memset(infrared->text_store[bank], 0, INFRARED_TEXT_STORE_SIZE + 1);
-}
-
-void infrared_play_notification_message(
-    const InfraredApp* infrared,
-    InfraredNotificationMessage message) {
-    furi_assert(message < InfraredNotificationMessageCount);
-    notification_message(infrared->notifications, infrared_notification_sequences[message]);
 }
 
 void infrared_show_error_message(const InfraredApp* infrared, const char* fmt, ...) {
