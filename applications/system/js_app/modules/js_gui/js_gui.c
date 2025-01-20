@@ -248,6 +248,22 @@ static bool
 }
 
 /**
+ * @brief Sets the list of children. Not available from JS.
+ */
+static bool
+    js_gui_view_internal_set_children(struct mjs* mjs, mjs_val_t children, JsGuiViewData* data) {
+    data->descriptor->reset_children(data->specific_view, data->custom_data);
+
+    for(size_t i = 0; i < mjs_array_length(mjs, children); i++) {
+        mjs_val_t child = mjs_array_get(mjs, children, i);
+        if(!data->descriptor->add_child(mjs, data->specific_view, data->custom_data, child))
+            return false;
+    }
+
+    return true;
+}
+
+/**
  * @brief `View.set`
  */
 static void js_gui_view_set(struct mjs* mjs) {
@@ -258,6 +274,46 @@ static void js_gui_view_set(struct mjs* mjs) {
     bool success = js_gui_view_assign(mjs, name, value, data);
     UNUSED(success);
     mjs_return(mjs, MJS_UNDEFINED);
+}
+
+/**
+ * @brief `View.addChild`
+ */
+static void js_gui_view_add_child(struct mjs* mjs) {
+    JsGuiViewData* data = JS_GET_CONTEXT(mjs);
+    if(!data->descriptor->add_child || !data->descriptor->reset_children)
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "this View can't have children");
+
+    mjs_val_t child;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_ANY(&child));
+    bool success = data->descriptor->add_child(mjs, data->specific_view, data->custom_data, child);
+    UNUSED(success);
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
+/**
+ * @brief `View.resetChildren`
+ */
+static void js_gui_view_reset_children(struct mjs* mjs) {
+    JsGuiViewData* data = JS_GET_CONTEXT(mjs);
+    if(!data->descriptor->add_child || !data->descriptor->reset_children)
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "this View can't have children");
+
+    data->descriptor->reset_children(data->specific_view, data->custom_data);
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
+/**
+ * @brief `View.setChildren`
+ */
+static void js_gui_view_set_children(struct mjs* mjs) {
+    JsGuiViewData* data = JS_GET_CONTEXT(mjs);
+    if(!data->descriptor->add_child || !data->descriptor->reset_children)
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "this View can't have children");
+
+    mjs_val_t children;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_ARR(&children));
+    js_gui_view_internal_set_children(mjs, children, data);
 }
 
 /**
@@ -283,7 +339,12 @@ static mjs_val_t js_gui_make_view(struct mjs* mjs, const JsViewDescriptor* descr
 
     // generic view API
     mjs_val_t view_obj = mjs_mk_object(mjs);
-    mjs_set(mjs, view_obj, "set", ~0, MJS_MK_FN(js_gui_view_set));
+    JS_ASSIGN_MULTI(mjs, view_obj) {
+        JS_FIELD("set", MJS_MK_FN(js_gui_view_set));
+        JS_FIELD("addChild", MJS_MK_FN(js_gui_view_add_child));
+        JS_FIELD("resetChildren", MJS_MK_FN(js_gui_view_reset_children));
+        JS_FIELD("setChildren", MJS_MK_FN(js_gui_view_set_children));
+    }
 
     // object data
     JsGuiViewData* data = malloc(sizeof(JsGuiViewData));
@@ -314,7 +375,7 @@ static void js_gui_vf_make(struct mjs* mjs) {
  */
 static void js_gui_vf_make_with(struct mjs* mjs) {
     mjs_val_t props;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_OBJ(&props));
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_AT_LEAST, JS_ARG_OBJ(&props));
     const JsViewDescriptor* descriptor = JS_GET_CONTEXT(mjs);
 
     // make the object like normal
@@ -332,6 +393,18 @@ static void js_gui_vf_make_with(struct mjs* mjs) {
             mjs_return(mjs, MJS_UNDEFINED);
             return;
         }
+    }
+
+    // assign children
+    if(mjs_nargs(mjs) >= 2) {
+        if(!data->descriptor->add_child || !data->descriptor->reset_children)
+            JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "this View can't have children");
+
+        mjs_val_t children = mjs_arg(mjs, 1);
+        if(!mjs_is_array(children))
+            JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "argument 1: expected array");
+
+        if(!js_gui_view_internal_set_children(mjs, children, data)) return;
     }
 
     mjs_return(mjs, view_obj);
