@@ -20,7 +20,7 @@
  * This view does not have any props.
  * 
  * # Children
- * TODO:
+ * This view has the elements as its children.
  * 
  * @version Added in JS SDK 0.2, extra feature `"widget-view"`
  * @module
