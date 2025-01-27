@@ -6,6 +6,6 @@ export type IconData = symbol & { "__tag__": "icon" };
 /**
  * Gets a built-in firmware icon for use in GUI
  * @param icon Name of the icon
- * @version Added in JS SDK 0.2, extra feature `"widget-view"`
+ * @version Added in JS SDK 0.2, extra feature `"gui-widget"`
  */
 export declare function getBuiltin(icon: BuiltinIcon): IconData;

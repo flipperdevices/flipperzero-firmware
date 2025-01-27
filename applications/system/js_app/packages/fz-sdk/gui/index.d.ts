@@ -132,18 +132,18 @@ export declare class View<Props extends Properties, Child> {
     /**
      * Adds a child to the View
      * @param child Child to add
-     * @version Added in JS SDK 0.2, extra feature `"widget-view"`
+     * @version Added in JS SDK 0.2, extra feature `"gui-widget"`
      */
     addChild<C extends Child>(child: C): void;
     /**
      * Removes all children from the View
-     * @version Added in JS SDK 0.2, extra feature `"widget-view"`
+     * @version Added in JS SDK 0.2, extra feature `"gui-widget"`
      */
     resetChildren(): void;
     /**
      * Removes all previous children from the View and assigns new children
      * @param children The list of children to assign
-     * @version Added in JS SDK 0.2, extra feature `"widget-view"`
+     * @version Added in JS SDK 0.2, extra feature `"gui-widget"`
      */
     setChildren(children: Child[]): void;
 }
@@ -158,7 +158,7 @@ export declare class ViewFactory<Props extends Properties, Child, V extends View
      * Create view instance with custom values, can be changed later with set()
      * @param initial Dictionary of property names to values
      * @param children Optional list of children to add to the view
-     * @version Added in JS SDK 0.1; amended in JS SDK 0.2, extra feature `"widget-view"`
+     * @version Added in JS SDK 0.1; amended in JS SDK 0.2, extra feature `"gui-widget"`
      */
     makeWith(initial: Partial<Props>, children?: Child[]): V;
 }

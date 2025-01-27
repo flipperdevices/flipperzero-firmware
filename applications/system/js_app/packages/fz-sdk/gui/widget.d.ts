@@ -22,7 +22,7 @@
  * # Children
  * This view has the elements as its children.
  * 
- * @version Added in JS SDK 0.2, extra feature `"widget-view"`
+ * @version Added in JS SDK 0.2, extra feature `"gui-widget"`
  * @module
  */
 
