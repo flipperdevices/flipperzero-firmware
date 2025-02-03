@@ -124,3 +124,14 @@ Also, see `ReadMe.md` files inside those directories for further details.
 ## SAST Tools
 
 - [PVS-Studio](https://pvs-studio.com/pvs-studio/?utm_source=website&utm_medium=github&utm_campaign=open_source) - static analyzer for C, C++, C#, and Java code.
+## AI-generated ProductMaps
+
+
+
+| Github file | ProductMap |
+|-------------|------------|
+| [nfc_app.c](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/nfc/nfc_app.c) | [Link to Map](https://product-map.ai/app/public?url=https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/nfc/nfc_app.c) |
+
+Contact ProductMap if you have any questions at [juan@product-map.ai](juan@product-map.ai).
+
+Last updated on Mon Feb 03 22:55:58 UTC 2025.
