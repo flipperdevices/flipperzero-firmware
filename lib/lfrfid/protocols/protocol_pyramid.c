@@ -36,7 +36,10 @@ typedef struct {
 } ProtocolPyramid;
 
 ProtocolPyramid* protocol_pyramid_alloc(void) {
-    ProtocolPyramid* protocol = malloc(sizeof(ProtocolPyramid));
+    ProtocolPyramid* protocol = (ProtocolPyramid*)malloc(sizeof(ProtocolPyramid));
+    if (!protocol) {
+        return NULL; // Handle memory allocation failure
+    }
     protocol->decoder.fsk_demod = fsk_demod_alloc(MIN_TIME, 6, MAX_TIME, 5);
     protocol->encoder.fsk_osc = fsk_osc_alloc(8, 10, 50);
 
@@ -44,9 +47,11 @@ ProtocolPyramid* protocol_pyramid_alloc(void) {
 }
 
 void protocol_pyramid_free(ProtocolPyramid* protocol) {
-    fsk_demod_free(protocol->decoder.fsk_demod);
-    fsk_osc_free(protocol->encoder.fsk_osc);
-    free(protocol);
+    if (protocol) {
+        fsk_demod_free(protocol->decoder.fsk_demod);
+        fsk_osc_free(protocol->encoder.fsk_osc);
+        free(protocol);
+    }
 }
 
 uint8_t* protocol_pyramid_get_data(ProtocolPyramid* protocol) {
