@@ -216,6 +216,14 @@ static void power_message_callback(FuriEventLoopObject* object, void* context) {
     case PowerMessageTypeShowBatteryLowWarning:
         power->show_battery_low_warning = *msg.bool_param;
         break;
+    case PowerMessageTypeSwitchOTG:
+        power->is_otg_requested = *msg.bool_param;
+        if(*msg.bool_param) {
+            furi_hal_power_enable_otg();
+        } else {
+            furi_hal_power_disable_otg();
+        }
+        break;
     default:
         furi_crash();
     }
@@ -241,9 +249,20 @@ static void power_tick_callback(void* context) {
     if(need_refresh) {
         view_port_update(power->battery_view_port);
     }
-    // Check OTG status and disable it in case of fault
-    if(furi_hal_power_is_otg_enabled()) {
-        furi_hal_power_check_otg_status();
+    // Check OTG status, disable in case of a fault
+    if(furi_hal_power_check_otg_fault()) {
+        FURI_LOG_E(TAG, "OTG fault detected, disabling OTG");
+        furi_hal_power_disable_otg();
+        power->is_otg_requested = false;
+    }
+
+    // Change OTG state if needed (i.e. after disconnecting USB power)
+    if(power->is_otg_requested && !furi_hal_power_is_otg_enabled()) {
+        FURI_LOG_D(TAG, "OTG requested but not enabled, enabling OTG");
+        furi_hal_power_enable_otg();
+    } else if(!power->is_otg_requested && furi_hal_power_is_otg_enabled()) {
+        FURI_LOG_D(TAG, "OTG not requested but enabled, disabling OTG");
+        furi_hal_power_disable_otg();
     }
 }
 

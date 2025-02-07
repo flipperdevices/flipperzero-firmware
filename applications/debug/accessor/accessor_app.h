@@ -53,4 +53,5 @@ private:
 
     NotificationApp* notification;
     Expansion* expansion;
+    Power* power;
 };

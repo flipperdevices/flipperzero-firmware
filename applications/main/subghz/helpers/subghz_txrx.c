@@ -4,13 +4,18 @@
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
+#include <power/power_service/power.h>
+
 #define TAG "SubGhz"
 
 static void subghz_txrx_radio_device_power_on(SubGhzTxRx* instance) {
     UNUSED(instance);
+    Power* power = furi_record_open(RECORD_POWER);
+
     uint8_t attempts = 5;
     while(--attempts > 0) {
-        if(furi_hal_power_enable_otg()) break;
+        power_switch_otg(power, true);
+        if(furi_hal_power_is_otg_enabled()) break;
     }
     if(attempts == 0) {
         if(furi_hal_power_get_usb_voltage() < 4.5f) {
@@ -20,11 +25,15 @@ static void subghz_txrx_radio_device_power_on(SubGhzTxRx* instance) {
                 furi_hal_power_check_otg_fault() ? 1 : 0);
         }
     }
+
+    furi_record_close(RECORD_POWER);
 }
 
 static void subghz_txrx_radio_device_power_off(SubGhzTxRx* instance) {
     UNUSED(instance);
-    if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
+    Power* power = furi_record_open(RECORD_POWER);
+    if(power_is_otg_requested(power)) power_switch_otg(power, false);
+    furi_record_close(RECORD_POWER);
 }
 
 SubGhzTxRx* subghz_txrx_alloc(void) {

@@ -28,9 +28,12 @@
 #define TAG "SubGhzCli"
 
 static void subghz_cli_radio_device_power_on(void) {
+    Power* power = furi_record_open(RECORD_POWER);
+
     uint8_t attempts = 5;
     while(--attempts > 0) {
-        if(furi_hal_power_enable_otg()) break;
+        power_switch_otg(power, true);
+        if(furi_hal_power_is_otg_enabled()) break;
     }
     if(attempts == 0) {
         if(furi_hal_power_get_usb_voltage() < 4.5f) {
@@ -40,10 +43,14 @@ static void subghz_cli_radio_device_power_on(void) {
                 furi_hal_power_check_otg_fault() ? 1 : 0);
         }
     }
+
+    furi_record_close(RECORD_POWER);
 }
 
 static void subghz_cli_radio_device_power_off(void) {
-    if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
+    Power* power = furi_record_open(RECORD_POWER);
+    if(power_is_otg_requested(power)) power_switch_otg(power, false);
+    furi_record_close(RECORD_POWER);
 }
 
 static SubGhzEnvironment* subghz_cli_environment_init(void) {
