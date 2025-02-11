@@ -84,6 +84,7 @@ Header,+,lib/libusb_stm32/inc/usb_hid.h,,
 Header,+,lib/libusb_stm32/inc/usb_std.h,,
 Header,+,lib/libusb_stm32/inc/usb_tmc.h,,
 Header,+,lib/libusb_stm32/inc/usbd_core.h,,
+Header,+,lib/mbedtls/include/mbedtls/aes.h,,
 Header,+,lib/mbedtls/include/mbedtls/des.h,,
 Header,+,lib/mbedtls/include/mbedtls/ecdh.h,,
 Header,+,lib/mbedtls/include/mbedtls/ecdsa.h,,
@@ -1891,6 +1892,21 @@ Function,+,manchester_encoder_advance,_Bool,"ManchesterEncoderState*, const _Boo
 Function,+,manchester_encoder_finish,ManchesterEncoderResult,ManchesterEncoderState*
 Function,+,manchester_encoder_reset,void,ManchesterEncoderState*
 Function,+,maxim_crc8,uint8_t,"const uint8_t*, const uint8_t, const uint8_t"
+Function,-,mbedtls_aes_crypt_cbc,int,"mbedtls_aes_context*, int, size_t, unsigned char[16], const unsigned char*, unsigned char*"
+Function,-,mbedtls_aes_crypt_cfb128,int,"mbedtls_aes_context*, int, size_t, size_t*, unsigned char[16], const unsigned char*, unsigned char*"
+Function,-,mbedtls_aes_crypt_cfb8,int,"mbedtls_aes_context*, int, size_t, unsigned char[16], const unsigned char*, unsigned char*"
+Function,-,mbedtls_aes_crypt_ctr,int,"mbedtls_aes_context*, size_t, size_t*, unsigned char[16], unsigned char[16], const unsigned char*, unsigned char*"
+Function,-,mbedtls_aes_crypt_ecb,int,"mbedtls_aes_context*, int, const unsigned char[16], unsigned char[16]"
+Function,-,mbedtls_aes_crypt_ofb,int,"mbedtls_aes_context*, size_t, size_t*, unsigned char[16], const unsigned char*, unsigned char*"
+Function,-,mbedtls_aes_crypt_xts,int,"mbedtls_aes_xts_context*, int, size_t, const unsigned char[16], const unsigned char*, unsigned char*"
+Function,-,mbedtls_aes_free,void,mbedtls_aes_context*
+Function,-,mbedtls_aes_init,void,mbedtls_aes_context*
+Function,-,mbedtls_aes_setkey_dec,int,"mbedtls_aes_context*, const unsigned char*, unsigned int"
+Function,-,mbedtls_aes_setkey_enc,int,"mbedtls_aes_context*, const unsigned char*, unsigned int"
+Function,-,mbedtls_aes_xts_free,void,mbedtls_aes_xts_context*
+Function,-,mbedtls_aes_xts_init,void,mbedtls_aes_xts_context*
+Function,-,mbedtls_aes_xts_setkey_dec,int,"mbedtls_aes_xts_context*, const unsigned char*, unsigned int"
+Function,-,mbedtls_aes_xts_setkey_enc,int,"mbedtls_aes_xts_context*, const unsigned char*, unsigned int"
 Function,-,mbedtls_des3_crypt_cbc,int,"mbedtls_des3_context*, int, size_t, unsigned char[8], const unsigned char*, unsigned char*"
 Function,-,mbedtls_des3_crypt_ecb,int,"mbedtls_des3_context*, const unsigned char[8], unsigned char[8]"
 Function,-,mbedtls_des3_free,void,mbedtls_des3_context*
@@ -1914,6 +1930,7 @@ Function,-,mbedtls_ecdh_can_do,int,mbedtls_ecp_group_id
 Function,-,mbedtls_ecdh_compute_shared,int,"mbedtls_ecp_group*, mbedtls_mpi*, const mbedtls_ecp_point*, const mbedtls_mpi*, int (*)(void*, unsigned char*, size_t), void*"
 Function,-,mbedtls_ecdh_free,void,mbedtls_ecdh_context*
 Function,-,mbedtls_ecdh_gen_public,int,"mbedtls_ecp_group*, mbedtls_mpi*, mbedtls_ecp_point*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecdh_get_grp_id,mbedtls_ecp_group_id,mbedtls_ecdh_context*
 Function,-,mbedtls_ecdh_get_params,int,"mbedtls_ecdh_context*, const mbedtls_ecp_keypair*, mbedtls_ecdh_side"
 Function,-,mbedtls_ecdh_init,void,mbedtls_ecdh_context*
 Function,-,mbedtls_ecdh_make_params,int,"mbedtls_ecdh_context*, size_t*, unsigned char*, size_t, int (*)(void*, unsigned char*, size_t), void*"
@@ -1954,7 +1971,9 @@ Function,-,mbedtls_ecp_group_init,void,mbedtls_ecp_group*
 Function,-,mbedtls_ecp_group_load,int,"mbedtls_ecp_group*, mbedtls_ecp_group_id"
 Function,-,mbedtls_ecp_grp_id_list,const mbedtls_ecp_group_id*,
 Function,-,mbedtls_ecp_is_zero,int,mbedtls_ecp_point*
+Function,-,mbedtls_ecp_keypair_calc_public,int,"mbedtls_ecp_keypair*, int (*)(void*, unsigned char*, size_t), void*"
 Function,-,mbedtls_ecp_keypair_free,void,mbedtls_ecp_keypair*
+Function,-,mbedtls_ecp_keypair_get_group_id,mbedtls_ecp_group_id,const mbedtls_ecp_keypair*
 Function,-,mbedtls_ecp_keypair_init,void,mbedtls_ecp_keypair*
 Function,-,mbedtls_ecp_mul,int,"mbedtls_ecp_group*, mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_ecp_point*, int (*)(void*, unsigned char*, size_t), void*"
 Function,-,mbedtls_ecp_mul_restartable,int,"mbedtls_ecp_group*, mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_ecp_point*, int (*)(void*, unsigned char*, size_t), void*, mbedtls_ecp_restart_ctx*"
@@ -1967,6 +1986,7 @@ Function,-,mbedtls_ecp_point_read_binary,int,"const mbedtls_ecp_group*, mbedtls_
 Function,-,mbedtls_ecp_point_read_string,int,"mbedtls_ecp_point*, int, const char*, const char*"
 Function,-,mbedtls_ecp_point_write_binary,int,"const mbedtls_ecp_group*, const mbedtls_ecp_point*, int, size_t*, unsigned char*, size_t"
 Function,-,mbedtls_ecp_read_key,int,"mbedtls_ecp_group_id, mbedtls_ecp_keypair*, const unsigned char*, size_t"
+Function,-,mbedtls_ecp_set_public_key,int,"mbedtls_ecp_group_id, mbedtls_ecp_keypair*, const mbedtls_ecp_point*"
 Function,-,mbedtls_ecp_set_zero,int,mbedtls_ecp_point*
 Function,-,mbedtls_ecp_tls_read_group,int,"mbedtls_ecp_group*, const unsigned char**, size_t"
 Function,-,mbedtls_ecp_tls_read_group_id,int,"mbedtls_ecp_group_id*, const unsigned char**, size_t"
@@ -1974,6 +1994,10 @@ Function,-,mbedtls_ecp_tls_read_point,int,"const mbedtls_ecp_group*, mbedtls_ecp
 Function,-,mbedtls_ecp_tls_write_group,int,"const mbedtls_ecp_group*, size_t*, unsigned char*, size_t"
 Function,-,mbedtls_ecp_tls_write_point,int,"const mbedtls_ecp_group*, const mbedtls_ecp_point*, int, size_t*, unsigned char*, size_t"
 Function,-,mbedtls_ecp_write_key,int,"mbedtls_ecp_keypair*, unsigned char*, size_t"
+Function,-,mbedtls_ecp_write_key_ext,int,"const mbedtls_ecp_keypair*, size_t*, unsigned char*, size_t"
+Function,-,mbedtls_ecp_write_public_key,int,"const mbedtls_ecp_keypair*, int, size_t*, unsigned char*, size_t"
+Function,-,mbedtls_internal_aes_decrypt,int,"mbedtls_aes_context*, const unsigned char[16], unsigned char[16]"
+Function,-,mbedtls_internal_aes_encrypt,int,"mbedtls_aes_context*, const unsigned char[16], unsigned char[16]"
 Function,-,mbedtls_internal_md5_process,int,"mbedtls_md5_context*, const unsigned char[64]"
 Function,-,mbedtls_internal_sha1_process,int,"mbedtls_sha1_context*, const unsigned char[64]"
 Function,-,mbedtls_internal_sha256_process,int,"mbedtls_sha256_context*, const unsigned char[64]"
@@ -2302,9 +2326,9 @@ Function,+,pipe_install_as_stdio,void,PipeSide*
 Function,+,pipe_receive,size_t,"PipeSide*, void*, size_t, FuriWait"
 Function,+,pipe_role,PipeRole,PipeSide*
 Function,+,pipe_send,size_t,"PipeSide*, const void*, size_t, FuriWait"
+Function,+,pipe_set_broken_callback,void,"PipeSide*, PipeSideBrokenCallback, FuriEventLoopEvent"
 Function,+,pipe_set_callback_context,void,"PipeSide*, void*"
 Function,+,pipe_set_data_arrived_callback,void,"PipeSide*, PipeSideDataArrivedCallback, FuriEventLoopEvent"
-Function,+,pipe_set_broken_callback,void,"PipeSide*, PipeSideBrokenCallback, FuriEventLoopEvent"
 Function,+,pipe_set_space_freed_callback,void,"PipeSide*, PipeSideSpaceFreedCallback, FuriEventLoopEvent"
 Function,+,pipe_spaces_available,size_t,PipeSide*
 Function,+,pipe_state,PipeState,PipeSide*
