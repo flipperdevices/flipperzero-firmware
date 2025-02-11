@@ -3652,13 +3652,13 @@ protocol: NECext
 address: AD ED 00 00
 command: B1 4E 00 00
 #
-# Model: AKAI ATE_22Y604W
-#
 name: Mute
 type: parsed
 protocol: NECext
 address: AD ED 00 00
 command: C5 3A 00 00
+#
+# Model: AKAI ATE_22Y604W
 #
 name: Power
 type: raw
@@ -4833,4 +4833,3 @@ type: raw
 frequency: 38000
 duty_cycle: 0.330000
 data: 590 412 592 4026 593 5030 593 412 592 4025 594 5029 594 412 616 4002 618 5003 593 439 564 4027 592 439 564 4029 590 5033 590 5035 588 440 563
-#
