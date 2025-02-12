@@ -539,7 +539,7 @@ static void lfrfid_worker_mode_write_process(LFRFIDWorker* worker) {
             if(request->write_type == LFRFIDWriteTypeT5577) {
                 t5577_write(&request->t5577);
             } else if(request->write_type == LFRFIDWriteTypeEM4305) {
-                em4305_write_with_mask(&request->em4305);
+                em4305_write(&request->em4305);
             } else {
                 furi_crash("Unknown write type");
             }

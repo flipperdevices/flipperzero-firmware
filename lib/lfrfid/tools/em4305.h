@@ -46,21 +46,15 @@ extern "C" {
 #define EM4x05_OPCODE_DISABLE (0b101)
 
 typedef struct {
-    uint32_t word[EM4x05_WORD_COUNT];
-    uint16_t mask;
+    uint32_t word[EM4x05_WORD_COUNT]; /**< Word data to write */
+    uint16_t mask; /**< Word mask */
 } LFRFIDEM4305;
-
-/** Write EM4305 tag data to tag
- *
- * @param      data  The data to write
- */
-void em4305_write(LFRFIDEM4305* data);
 
 /** Write EM4305 tag data to tag
  *
  * @param      data  The data to write (mask is taken from that data)
  */
-void em4305_write_with_mask(LFRFIDEM4305* data);
+void em4305_write(LFRFIDEM4305* data);
 
 #ifdef __cplusplus
 }

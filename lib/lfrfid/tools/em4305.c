@@ -142,20 +142,6 @@ void em4305_write(LFRFIDEM4305* data) {
     FURI_CRITICAL_ENTER();
 
     for(uint8_t i = 0; i < EM4x05_WORD_COUNT; i++) {
-        em4305_write_word(i, data->word[i]);
-    }
-
-    FURI_CRITICAL_EXIT();
-    em4305_stop();
-}
-
-void em4305_write_with_mask(LFRFIDEM4305* data) {
-    furi_check(data);
-
-    em4305_start();
-    FURI_CRITICAL_ENTER();
-
-    for(uint8_t i = 0; i < EM4x05_WORD_COUNT; i++) {
         if(data->mask & (1 << i)) {
             em4305_write_word(i, data->word[i]);
         }
