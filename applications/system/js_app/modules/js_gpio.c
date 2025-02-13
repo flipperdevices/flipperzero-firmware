@@ -1,6 +1,7 @@
 #include "../js_modules.h" // IWYU pragma: keep
 #include "./js_event_loop/js_event_loop.h"
 #include <furi_hal_gpio.h>
+#include <furi_hal_pwm.h>
 #include <furi_hal_resources.h>
 #include <expansion/expansion.h>
 #include <limits.h>
@@ -17,6 +18,7 @@ typedef struct {
     FuriSemaphore* interrupt_semaphore;
     JsEventLoopContract* interrupt_contract;
     FuriHalAdcChannel adc_channel;
+    FuriHalPwmOutputId pwm_output;
     FuriHalAdcHandle* adc_handle;
 } JsGpioPinInst;
 
@@ -232,6 +234,88 @@ static void js_gpio_read_analog(struct mjs* mjs) {
 }
 
 /**
+ * @brief Determines whether this pin supports PWM
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * assert_eq(true, gpio.get("pa4").isPwmSupported());
+ * assert_eq(false, gpio.get("pa5").isPwmSupported());
+ * ```
+ */
+static void js_gpio_is_pwm_supported(struct mjs* mjs) {
+    JsGpioPinInst* manager_data = JS_GET_CONTEXT(mjs);
+    mjs_return(mjs, mjs_mk_boolean(mjs, manager_data->pwm_output != FuriHalPwmOutputIdNone));
+}
+
+/**
+ * @brief Sets PWM parameters and starts the PWM
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let pa4 = gpio.get("pa4");
+ * pa4.pwmWrite(10000, 50);
+ * ```
+ */
+static void js_gpio_pwm_write(struct mjs* mjs) {
+    JsGpioPinInst* manager_data = JS_GET_CONTEXT(mjs);
+    int32_t frequency, duty;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_INT32(&frequency), JS_ARG_INT32(&duty));
+    if(manager_data->pwm_output == FuriHalPwmOutputIdNone) {
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "PWM is not supported on this pin");
+    }
+
+    if(furi_hal_pwm_is_running(manager_data->pwm_output)) {
+        furi_hal_pwm_set_params(manager_data->pwm_output, frequency, duty);
+    } else {
+        furi_hal_pwm_start(manager_data->pwm_output, frequency, duty);
+    }
+}
+
+/**
+ * @brief Determines whether PWM is running
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * assert_eq(false, gpio.get("pa4").isPwmRunning());
+ * ```
+ */
+static void js_gpio_is_pwm_running(struct mjs* mjs) {
+    JsGpioPinInst* manager_data = JS_GET_CONTEXT(mjs);
+    if(manager_data->pwm_output == FuriHalPwmOutputIdNone) {
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "PWM is not supported on this pin");
+    }
+
+    mjs_return(mjs, mjs_mk_boolean(mjs, furi_hal_pwm_is_running(manager_data->pwm_output)));
+}
+
+/**
+ * @brief Stops PWM
+ * 
+ * Example usage:
+ * 
+ * ```js
+ * let gpio = require("gpio");
+ * let pa4 = gpio.get("pa4");
+ * pa4.pwmWrite(10000, 50);
+ * pa4.pwmStop();
+ * ```
+ */
+static void js_gpio_pwm_stop(struct mjs* mjs) {
+    JsGpioPinInst* manager_data = JS_GET_CONTEXT(mjs);
+    if(manager_data->pwm_output != FuriHalPwmOutputIdNone) {
+        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "PWM is not supported on this pin");
+    }
+
+    furi_hal_pwm_stop(manager_data->pwm_output);
+}
+
+/**
  * @brief Returns an object that manages a specified pin.
  * 
  * Example usage:
@@ -269,12 +353,19 @@ static void js_gpio_get(struct mjs* mjs) {
     manager_data->interrupt_semaphore = furi_semaphore_alloc(UINT32_MAX, 0);
     manager_data->adc_handle = module->adc_handle;
     manager_data->adc_channel = pin_record->channel;
-    mjs_set(mjs, manager, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, manager_data));
-    mjs_set(mjs, manager, "init", ~0, MJS_MK_FN(js_gpio_init));
-    mjs_set(mjs, manager, "write", ~0, MJS_MK_FN(js_gpio_write));
-    mjs_set(mjs, manager, "read", ~0, MJS_MK_FN(js_gpio_read));
-    mjs_set(mjs, manager, "readAnalog", ~0, MJS_MK_FN(js_gpio_read_analog));
-    mjs_set(mjs, manager, "interrupt", ~0, MJS_MK_FN(js_gpio_interrupt));
+    manager_data->pwm_output = pin_record->pwm_output;
+    JS_ASSIGN_MULTI(mjs, manager) {
+        JS_FIELD(INST_PROP_NAME, mjs_mk_foreign(mjs, manager_data));
+        JS_FIELD("init", MJS_MK_FN(js_gpio_init));
+        JS_FIELD("write", MJS_MK_FN(js_gpio_write));
+        JS_FIELD("read", MJS_MK_FN(js_gpio_read));
+        JS_FIELD("readAnalog", MJS_MK_FN(js_gpio_read_analog));
+        JS_FIELD("interrupt", MJS_MK_FN(js_gpio_interrupt));
+        JS_FIELD("isPwmSupported", MJS_MK_FN(js_gpio_is_pwm_supported));
+        JS_FIELD("pwmWrite", MJS_MK_FN(js_gpio_pwm_write));
+        JS_FIELD("isPwmRunning", MJS_MK_FN(js_gpio_is_pwm_running));
+        JS_FIELD("pwmStop", MJS_MK_FN(js_gpio_pwm_stop));
+    }
     mjs_return(mjs, manager);
 
     // remember pin
