@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,79.3,,
+Version,+,80.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
@@ -2681,7 +2681,7 @@ Function,+,mf_ultralight_poller_read_page_from_sector,MfUltralightError,"MfUltra
 Function,+,mf_ultralight_poller_read_signature,MfUltralightError,"MfUltralightPoller*, MfUltralightSignature*"
 Function,+,mf_ultralight_poller_read_tearing_flag,MfUltralightError,"MfUltralightPoller*, uint8_t, MfUltralightTearingFlag*"
 Function,+,mf_ultralight_poller_read_version,MfUltralightError,"MfUltralightPoller*, MfUltralightVersion*"
-Function,+,mf_ultralight_poller_sync_read_card,MfUltralightError,"Nfc*, MfUltralightData*"
+Function,+,mf_ultralight_poller_sync_read_card,MfUltralightError,"Nfc*, MfUltralightData*, const MfUltralightPollerAuthContext*"
 Function,+,mf_ultralight_poller_sync_read_counter,MfUltralightError,"Nfc*, uint8_t, MfUltralightCounter*"
 Function,+,mf_ultralight_poller_sync_read_page,MfUltralightError,"Nfc*, uint16_t, MfUltralightPage*"
 Function,+,mf_ultralight_poller_sync_read_signature,MfUltralightError,"Nfc*, MfUltralightSignature*"
