@@ -25,6 +25,8 @@ MfDesfireError mf_desfire_process_status_code(uint8_t status_code) {
         return MfDesfireErrorNone;
     case MF_DESFIRE_STATUS_AUTHENTICATION_ERROR:
         return MfDesfireErrorAuthentication;
+    case MF_DESFIRE_STATUS_ILLEGAL_COMMAND_CODE:
+        return MfDesfireErrorCommandNotSupported;
     default:
         return MfDesfireErrorProtocol;
     }

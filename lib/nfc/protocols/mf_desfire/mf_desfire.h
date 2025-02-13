@@ -29,6 +29,28 @@ extern "C" {
 #define MF_DESFIRE_APP_ID_SIZE (3)
 #define MF_DESFIRE_VALUE_SIZE  (4)
 
+typedef enum {
+    MfDesfireTypeMF3ICD40,
+    MfDesfireTypeEV1,
+    MfDesfireTypeEV2,
+    MfDesfireTypeEV2XL,
+    MfDesfireTypeEV3,
+
+    MfDesfireTypeUnknown,
+    MfDesfireTypeNum,
+} MfDesfireType;
+
+typedef enum {
+    MfDesfireSize2k,
+    MfDesfireSize4k,
+    MfDesfireSize8k,
+    MfDesfireSize16k,
+    MfDesfireSize32k,
+
+    MfDesfireSizeUnknown,
+    MfDesfireSizeNum,
+} MfDesfireSize;
+
 typedef struct {
     uint8_t hw_vendor;
     uint8_t hw_type;
@@ -131,6 +153,7 @@ typedef enum {
     MfDesfireErrorProtocol,
     MfDesfireErrorTimeout,
     MfDesfireErrorAuthentication,
+    MfDesfireErrorCommandNotSupported,
 } MfDesfireError;
 
 typedef struct {
@@ -141,6 +164,7 @@ typedef struct {
     SimpleArray* master_key_versions;
     SimpleArray* application_ids;
     SimpleArray* applications;
+    FuriString* device_name;
 } MfDesfireData;
 
 extern const NfcDeviceBase nfc_device_mf_desfire;
