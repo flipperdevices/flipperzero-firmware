@@ -216,11 +216,18 @@ Min butthurt: 0
 Max butthurt: 14
 Min level: 1
 Max level: 3
-Weight: 4
+Weight: 3
 
 Name: L1_Sleigh_ride_128x64
 Min butthurt: 0
 Max butthurt: 14
+Min level: 1
+Max level: 3
+Weight: 4
+
+Name: L1_Showtime_128x64
+Min butthurt: 0
+Max butthurt: 10
 Min level: 1
 Max level: 3
 Weight: 4
