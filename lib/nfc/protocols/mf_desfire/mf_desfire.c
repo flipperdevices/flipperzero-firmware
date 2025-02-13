@@ -4,32 +4,44 @@
 
 #define MF_DESFIRE_PROTOCOL_NAME "Mifare DESFire"
 
-typedef struct {
-    uint8_t minor;
-    uint8_t major;
-    uint8_t storage;
-    const char* full_name;
-    const char* type_name;
-} MfDesfireNames;
+#define MF_DESFIRE_HW_MINOR_TYPE          (0x00)
+#define MF_DESFIRE_HW_MINOR_TYPE_MF3ICD40 (0x02)
 
-static const MfDesfireNames mf_desfire_names[] = {
-    {0x02, 0x00, 0xFF, "Mifare DESFire 4K (MF3ICD40)", "4K (MF3ICD40)"},
-    {0x00, 0x01, 0x16, "Mifare DESFire EV1 2K", "EV1 2K"},
-    {0x00, 0x01, 0x18, "Mifare DESFire EV1 4K", "EV1 4K"},
-    {0x00, 0x01, 0x1A, "Mifare DESFire EV1 8K", "EV1 8K"},
-    {0x00, 0x01, 0xFF, "Mifare DESFire EV1", "EV1"},
-    {0x00, 0x12, 0x16, "Mifare DESFire EV2 2K", "EV2 2K"},
-    {0x00, 0x12, 0x18, "Mifare DESFire EV2 4K", "EV2 4K"},
-    {0x00, 0x12, 0x1A, "Mifare DESFire EV2 8K", "EV2 8K"},
-    {0x00, 0x12, 0xFF, "Mifare DESFire EV2", "EV2"},
-    {0x00, 0x22, 0x1C, "Mifare DESFire EV2 XL 16K", "EV2 XL 16K"},
-    {0x00, 0x22, 0x1E, "Mifare DESFire EV2 XL 32K", "EV2 XL 32K"},
-    {0x00, 0x22, 0xFF, "Mifare DESFire EV2 XL", "EV2 XL"},
-    {0x00, 0x33, 0x16, "Mifare DESFire EV3 2K", "EV3 2K"},
-    {0x00, 0x33, 0x18, "Mifare DESFire EV3 4K", "EV3 4K"},
-    {0x00, 0x33, 0x1A, "Mifare DESFire EV3 8K", "EV3 8K"},
-    {0x00, 0x33, 0xFF, "Mifare DESFire EV3", "EV3"},
-    {0xFF, 0xFF, 0xFF, "Unknown Mifare DESFire", "UNK"},
+#define MF_DESFIRE_HW_MAJOR_TYPE_EV1      (0x01)
+#define MF_DESFIRE_HW_MAJOR_TYPE_EV2      (0x12)
+#define MF_DESFIRE_HW_MAJOR_TYPE_EV2_XL   (0x22)
+#define MF_DESFIRE_HW_MAJOR_TYPE_EV3      (0x33)
+#define MF_DESFIRE_HW_MAJOR_TYPE_MF3ICD40 (0x00)
+
+#define MF_DESFIRE_STORAGE_SIZE_2K       (0x16)
+#define MF_DESFIRE_STORAGE_SIZE_4K       (0x18)
+#define MF_DESFIRE_STORAGE_SIZE_8K       (0x1A)
+#define MF_DESFIRE_STORAGE_SIZE_16K      (0x1C)
+#define MF_DESFIRE_STORAGE_SIZE_32K      (0x1E)
+#define MF_DESFIRE_STORAGE_SIZE_MF3ICD40 (0xFF)
+#define MF_DESFIRE_STORAGE_SIZE_UNKNOWN  (0xFF)
+
+#define MF_DESFIRE_TEST_TYPE_MF3ICD40(major, minor, storage) \
+    (((major) == MF_DESFIRE_HW_MAJOR_TYPE_MF3ICD40) &&       \
+     ((minor) == MF_DESFIRE_HW_MINOR_TYPE_MF3ICD40) &&       \
+     ((storage) == MF_DESFIRE_STORAGE_SIZE_MF3ICD40))
+
+static const char* mf_desfire_type_strings[] = {
+    [MfDesfireTypeMF3ICD40] = "(MF3ICD40)",
+    [MfDesfireTypeEV1] = "EV1",
+    [MfDesfireTypeEV2] = "EV2",
+    [MfDesfireTypeEV2XL] = "EV2 XL",
+    [MfDesfireTypeEV3] = "EV3",
+    [MfDesfireTypeUnknown] = "UNK",
+};
+
+static const char* mf_desfire_size_strings[] = {
+    [MfDesfireSize2k] = "2K",
+    [MfDesfireSize4k] = "4K",
+    [MfDesfireSize8k] = "8K",
+    [MfDesfireSize16k] = "16K",
+    [MfDesfireSize32k] = "32K",
+    [MfDesfireSizeUnknown] = "",
 };
 
 const NfcDeviceBase nfc_device_mf_desfire = {
@@ -54,7 +66,7 @@ MfDesfireData* mf_desfire_alloc(void) {
     data->master_key_versions = simple_array_alloc(&mf_desfire_key_version_array_config);
     data->application_ids = simple_array_alloc(&mf_desfire_app_id_array_config);
     data->applications = simple_array_alloc(&mf_desfire_application_array_config);
-
+    data->device_name = furi_string_alloc();
     return data;
 }
 
@@ -66,6 +78,7 @@ void mf_desfire_free(MfDesfireData* data) {
     simple_array_free(data->application_ids);
     simple_array_free(data->master_key_versions);
     iso14443_4a_free(data->iso14443_4a_data);
+    furi_string_free(data->device_name);
     free(data);
 }
 
@@ -256,25 +269,83 @@ bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other) 
            simple_array_is_equal(data->applications, other->applications);
 }
 
+static MfDesfireType mf_desfire_get_type_from_version(const MfDesfireVersion* const version) {
+    MfDesfireType type = MfDesfireTypeUnknown;
+
+    switch(version->hw_major) {
+    case MF_DESFIRE_HW_MAJOR_TYPE_EV1:
+        type = MfDesfireTypeEV1;
+        break;
+    case MF_DESFIRE_HW_MAJOR_TYPE_EV2:
+        type = MfDesfireTypeEV2;
+        break;
+    case MF_DESFIRE_HW_MAJOR_TYPE_EV2_XL:
+        type = MfDesfireTypeEV2XL;
+        break;
+    case MF_DESFIRE_HW_MAJOR_TYPE_EV3:
+        type = MfDesfireTypeEV3;
+        break;
+    default:
+        if(MF_DESFIRE_TEST_TYPE_MF3ICD40(version->hw_major, version->hw_minor, version->hw_storage))
+            type = MfDesfireTypeMF3ICD40;
+        break;
+    }
+
+    return type;
+}
+
+static MfDesfireSize mf_desfire_get_size_from_version(const MfDesfireVersion* const version) {
+    MfDesfireSize size = MfDesfireSizeUnknown;
+
+    switch(version->hw_storage) {
+    case MF_DESFIRE_STORAGE_SIZE_2K:
+        size = MfDesfireSize2k;
+        break;
+    case MF_DESFIRE_STORAGE_SIZE_4K:
+        size = MfDesfireSize4k;
+        break;
+    case MF_DESFIRE_STORAGE_SIZE_8K:
+        size = MfDesfireSize8k;
+        break;
+    case MF_DESFIRE_STORAGE_SIZE_16K:
+        size = MfDesfireSize16k;
+        break;
+    case MF_DESFIRE_STORAGE_SIZE_32K:
+        size = MfDesfireSize32k;
+        break;
+    default:
+        if(MF_DESFIRE_TEST_TYPE_MF3ICD40(version->hw_major, version->hw_minor, version->hw_storage))
+            size = MfDesfireSize4k;
+        break;
+    }
+
+    return size;
+}
+
 const char* mf_desfire_get_device_name(const MfDesfireData* data, NfcDeviceNameType name_type) {
     furi_check(data);
 
-    for(size_t i = 0; i < COUNT_OF(mf_desfire_names); i++) {
-        if((mf_desfire_names[i].minor == data->version.hw_minor ||
-            mf_desfire_names[i].minor == 0xFF) &&
-           (mf_desfire_names[i].major == data->version.hw_major ||
-            mf_desfire_names[i].major == 0xFF) &&
-           (mf_desfire_names[i].storage == data->version.hw_storage ||
-            mf_desfire_names[i].storage == 0xFF)) {
-            if(name_type == NfcDeviceNameTypeFull) {
-                return mf_desfire_names[i].full_name;
-            } else {
-                return mf_desfire_names[i].type_name;
-            }
-        }
+    const MfDesfireType type = mf_desfire_get_type_from_version(&data->version);
+    const MfDesfireSize size = mf_desfire_get_size_from_version(&data->version);
+
+    if(type == MfDesfireTypeUnknown) {
+        furi_string_printf(data->device_name, "Unknown %s", MF_DESFIRE_PROTOCOL_NAME);
+    } else if(name_type == NfcDeviceNameTypeFull) {
+        furi_string_printf(
+            data->device_name,
+            "%s %s %s",
+            MF_DESFIRE_PROTOCOL_NAME,
+            mf_desfire_type_strings[type],
+            mf_desfire_size_strings[size]);
+    } else {
+        furi_string_printf(
+            data->device_name,
+            "%s %s",
+            mf_desfire_type_strings[type],
+            mf_desfire_size_strings[size]);
     }
 
-    return "Unknown Mifare DESFire";
+    return furi_string_get_cstr(data->device_name);
 }
 
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len) {
