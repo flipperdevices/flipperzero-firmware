@@ -36,6 +36,8 @@
 #include "helpers/felica_auth.h"
 #include "helpers/slix_unlock.h"
 
+#include "plugins/logger/nfc_logger_config_data_type.h"
+
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
 #include <toolbox/path.h>
@@ -67,6 +69,7 @@
 #define NFC_BYTE_INPUT_STORE_SIZE 10
 #define NFC_LOG_SIZE_MAX          (1024)
 #define NFC_APP_FOLDER            EXT_PATH("nfc")
+#define NFC_LOG_FOLDER            (NFC_APP_FOLDER "/log")
 #define NFC_APP_EXTENSION         ".nfc"
 #define NFC_APP_SHADOW_EXTENSION  ".shd"
 #define NFC_APP_FILENAME_PREFIX   "NFC"
@@ -116,6 +119,8 @@ struct NfcApp {
     char text_store[NFC_TEXT_STORE_SIZE + 1];
     FuriString* text_box_store;
     uint8_t byte_input_store[NFC_BYTE_INPUT_STORE_SIZE];
+    bool logger_enabled;
+    NfcLoggerFormatterConfig logger_config;
 
     NfcDetectedProtocols* detected_protocols;
 

@@ -38,6 +38,9 @@ MfPlusPoller* mf_plus_poller_alloc(Iso14443_4aPoller* iso14443_4a_poller) {
 
     instance->mfp_event.data = &instance->mfp_event_data;
 
+    instance->history.base.protocol = NfcProtocolMfPlus;
+    instance->history.base.data_block_size = sizeof(MfPlusPollerHistoryData);
+    instance->history.data = &instance->history_data;
     return instance;
 }
 
@@ -136,12 +139,14 @@ static const MfPlusPollerReadHandler mf_plus_poller_read_handler[MfPlusPollerSta
 static void mf_plus_poller_set_callback(
     MfPlusPoller* instance,
     NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 static NfcCommand mf_plus_poller_run(NfcGenericEvent event, void* context) {
@@ -161,6 +166,11 @@ static NfcCommand mf_plus_poller_run(NfcGenericEvent event, void* context) {
         command = instance->callback(instance->general_event, instance->context);
     }
 
+    instance->history_data.error = instance->error;
+    instance->history_data.state = instance->state;
+    instance->history_data.event = iso14443_4a_event->type;
+    instance->history_data.command = command;
+    instance->history.base.modified = true;
     return command;
 }
 
@@ -200,6 +210,15 @@ static bool mf_plus_poller_detect(NfcGenericEvent event, void* context) {
     return error == MfPlusErrorNone;
 }
 
+static void mf_plus_poller_log_history(NfcLogger* logger, void* context) {
+    MfPlusPoller* instance = context;
+    nfc_logger_append_history(logger, &instance->history);
+
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
+}
+
 const NfcPollerBase mf_plus_poller = {
     .alloc = (NfcPollerAlloc)mf_plus_poller_alloc,
     .free = (NfcPollerFree)mf_plus_poller_free,
@@ -207,4 +226,5 @@ const NfcPollerBase mf_plus_poller = {
     .run = (NfcPollerRun)mf_plus_poller_run,
     .detect = (NfcPollerDetect)mf_plus_poller_detect,
     .get_data = (NfcPollerGetData)mf_plus_poller_get_data,
+    .log_history = (NfcPollerLogHistory)mf_plus_poller_log_history,
 };

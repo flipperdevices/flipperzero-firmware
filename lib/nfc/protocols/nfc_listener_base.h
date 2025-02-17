@@ -53,11 +53,13 @@ typedef void (*NfcListenerFree)(NfcGenericInstance* instance);
  *
  * @param[in,out] listener
  * @param[in] callback pointer to the user-defined callback function which will receive events.
+ * @param[in] log_callback pointer to the user-defined callback function which will log listener history.
  * @param[in] context pointer to the user-specific context (will be passed to the callback).
  */
 typedef void (*NfcListenerSetCallback)(
     NfcGenericInstance* listener,
     NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
     void* context);
 
 /**
@@ -78,6 +80,15 @@ typedef NfcCommand (*NfcListenerRun)(NfcGenericEvent event, void* context);
 typedef const NfcDeviceData* (*NfcListenerGetData)(const NfcGenericInstance* instance);
 
 /**
+ * @brief Saves pre-defined structure with listener state to logger's ongoing transaction
+ *
+ * @param[in] instance pointer to the logger instance.
+ * @returns pointer to the listener history data.
+ */
+typedef void (*NfcListenerLogHistory)(NfcLogger* logger, void* context);
+/* const NfcGenericInstance* instance, */
+
+/**
  * @brief Generic NFC listener interface.
  *
  * Each protocol must fill this structure with its own function implementations.
@@ -91,6 +102,7 @@ typedef struct {
     NfcListenerSetCallback set_callback; /**< Pointer to the set_callback() function. */
     NfcListenerRun run; /**< Pointer to the run() function. */
     NfcListenerGetData get_data; /**< Pointer to the get_data() function. */
+    NfcListenerLogHistory log_history;
 } NfcListenerBase;
 
 #ifdef __cplusplus

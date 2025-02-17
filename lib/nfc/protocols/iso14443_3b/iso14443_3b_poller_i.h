@@ -1,22 +1,15 @@
 #pragma once
 
 #include "iso14443_3b_poller.h"
+#include "iso14443_3b_poller_history_data.h"
 #include "iso14443_3b_i.h"
+#include <helpers/logger/nfc_logger_i.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define ISO14443_3B_POLLER_MAX_BUFFER_SIZE (256U)
-
-typedef enum {
-    Iso14443_3bPollerStateIdle,
-    Iso14443_3bPollerStateColResInProgress,
-    Iso14443_3bPollerStateColResFailed,
-    Iso14443_3bPollerStateActivationInProgress,
-    Iso14443_3bPollerStateActivationFailed,
-    Iso14443_3bPollerStateActivated,
-} Iso14443_3bPollerState;
 
 struct Iso14443_3bPoller {
     Nfc* nfc;
@@ -29,6 +22,9 @@ struct Iso14443_3bPoller {
     Iso14443_3bPollerEvent iso14443_3b_event;
     Iso14443_3bPollerEventData iso14443_3b_event_data;
     NfcGenericCallback callback;
+    NfcGenericLogHistoryCallback log_callback;
+    NfcHistoryItem history;
+    Iso14443_3bPollerHistoryData history_data;
     void* context;
 };
 

@@ -53,8 +53,20 @@ Iso15693_3Error iso15693_3_poller_send_frame(
         bit_buffer_copy(instance->tx_buffer, tx_buffer);
         iso13239_crc_append(Iso13239CrcTypeDefault, instance->tx_buffer);
 
+        NfcLogger* logger = nfc_get_logger(instance->nfc);
+        nfc_logger_append_request_data(
+            logger,
+            bit_buffer_get_data(instance->tx_buffer),
+            bit_buffer_get_size_bytes(instance->tx_buffer));
+
         NfcError error =
             nfc_poller_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
+
+        nfc_logger_append_response_data(
+            logger,
+            bit_buffer_get_data(instance->rx_buffer),
+            bit_buffer_get_size_bytes(instance->rx_buffer));
+
         if(error != NfcErrorNone) {
             ret = iso15693_3_poller_process_nfc_error(error);
             break;
@@ -68,8 +80,19 @@ Iso15693_3Error iso15693_3_poller_send_frame(
         iso13239_crc_trim(instance->rx_buffer);
         bit_buffer_copy(rx_buffer, instance->rx_buffer);
     } while(false);
-
+    instance->history.base.modified = true;
     return ret;
+}
+
+static void iso15693_3_poller_save_activation_history(
+    Iso15693_3Poller* instance,
+    Iso15693_3Error error,
+    bool end_transaction) {
+    UNUSED(end_transaction);
+    instance->history_data.state = instance->state;
+    instance->history_data.command = NfcCommandContinue;
+    instance->history_data.error = error;
+    instance->history.base.modified = true;
 }
 
 Iso15693_3Error iso15693_3_poller_activate(Iso15693_3Poller* instance, Iso15693_3Data* data) {
@@ -155,6 +178,7 @@ Iso15693_3Error iso15693_3_poller_inventory(Iso15693_3Poller* instance, uint8_t*
         ret = iso15693_3_inventory_response_parse(uid, instance->rx_buffer);
     } while(false);
 
+    iso15693_3_poller_save_activation_history(instance, ret, false);
     return ret;
 }
 
@@ -182,6 +206,7 @@ Iso15693_3Error
         ret = iso15693_3_system_info_response_parse(data, instance->rx_buffer);
     } while(false);
 
+    iso15693_3_poller_save_activation_history(instance, ret, false);
     return ret;
 }
 
@@ -211,6 +236,7 @@ Iso15693_3Error iso15693_3_poller_read_block(
         ret = iso15693_3_read_block_response_parse(data, block_size, instance->rx_buffer);
     } while(false);
 
+    iso15693_3_poller_save_activation_history(instance, ret, false);
     return ret;
 }
 
@@ -267,6 +293,8 @@ Iso15693_3Error iso15693_3_poller_get_blocks_security(
 
         ret = iso15693_3_poller_send_frame(
             instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
+        iso15693_3_poller_save_activation_history(instance, ret, (i == num_queries - 1));
+
         if(ret != Iso15693_3ErrorNone) break;
 
         ret = iso15693_3_get_block_security_response_parse(

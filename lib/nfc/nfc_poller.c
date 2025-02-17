@@ -1,5 +1,6 @@
 #include "nfc_poller.h"
 
+#include <helpers/logger/nfc_logger_i.h>
 #include <nfc/protocols/nfc_poller_defs.h>
 
 #include <furi.h>
@@ -58,7 +59,10 @@ static void nfc_poller_list_alloc(NfcPoller* instance) {
         if(iter->child == NULL) break;
         iter->child->poller = iter->child->poller_api->alloc(iter->poller);
         iter->poller_api->set_callback(
-            iter->poller, iter->child->poller_api->run, iter->child->poller);
+            iter->poller,
+            iter->child->poller_api->run,
+            iter->child->poller_api->log_history,
+            iter->child->poller);
 
         iter = iter->child;
     } while(true);
@@ -84,6 +88,11 @@ NfcPoller* nfc_poller_alloc(Nfc* nfc, NfcProtocol protocol) {
     instance->protocol = protocol;
     nfc_poller_list_alloc(instance);
 
+    ///TODO: Simplify this
+    nfc_logger_set_protocol(nfc_get_logger(nfc), instance->protocol);
+    NfcPollerListElement* head_poller = instance->list.head;
+    nfc_logger_set_poller_log_callback(
+        nfc_get_logger(nfc), head_poller->poller, instance->list.head->poller_api->log_history);
     return instance;
 }
 
@@ -124,7 +133,7 @@ void nfc_poller_start(NfcPoller* instance, NfcGenericCallback callback, void* co
     furi_check(instance->session_state == NfcPollerSessionStateIdle);
 
     NfcPollerListElement* tail_poller = instance->list.tail;
-    tail_poller->poller_api->set_callback(tail_poller->poller, callback, context);
+    tail_poller->poller_api->set_callback(tail_poller->poller, callback, NULL, context);
 
     instance->session_state = NfcPollerSessionStateActive;
     nfc_start(instance->nfc, nfc_poller_start_callback, instance);
@@ -193,7 +202,8 @@ void nfc_poller_start_ex(NfcPoller* instance, NfcGenericCallbackEx callback, voi
         while(iter->protocol != parent_protocol)
             iter = iter->child;
 
-        iter->poller_api->set_callback(iter->poller, nfc_poller_start_ex_tail_callback, instance);
+        iter->poller_api->set_callback(
+            iter->poller, nfc_poller_start_ex_tail_callback, NULL, instance);
     }
 
     instance->session_state = NfcPollerSessionStateActive;
@@ -257,7 +267,8 @@ bool nfc_poller_detect(NfcPoller* instance) {
     if(tail_poller != instance->list.head) {
         while(iter->child != tail_poller)
             iter = iter->child;
-        iter->poller_api->set_callback(iter->poller, nfc_poller_detect_tail_callback, instance);
+        iter->poller_api->set_callback(
+            iter->poller, nfc_poller_detect_tail_callback, NULL, instance);
     }
 
     nfc_start(instance->nfc, nfc_poller_detect_head_callback, instance);
@@ -265,7 +276,7 @@ bool nfc_poller_detect(NfcPoller* instance) {
 
     if(tail_poller != instance->list.head) {
         iter->poller_api->set_callback(
-            iter->poller, tail_poller->poller_api->run, tail_poller->poller);
+            iter->poller, tail_poller->poller_api->run, NULL, tail_poller->poller);
     }
 
     return instance->protocol_detected;

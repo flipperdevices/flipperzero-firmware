@@ -37,6 +37,10 @@ static FelicaPoller* felica_poller_alloc(Nfc* nfc) {
     instance->general_event.event_data = &instance->felica_event;
     instance->general_event.instance = instance;
 
+    instance->history.base.protocol = NfcProtocolFelica;
+    instance->history.base.data_block_size = sizeof(FelicaPollerHistoryData);
+    instance->history.data = &instance->history_data;
+
     return instance;
 }
 
@@ -54,13 +58,17 @@ static void felica_poller_free(FelicaPoller* instance) {
     free(instance);
 }
 
-static void
-    felica_poller_set_callback(FelicaPoller* instance, NfcGenericCallback callback, void* context) {
+static void felica_poller_set_callback(
+    FelicaPoller* instance,
+    NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
+    void* context) {
     furi_assert(instance);
     furi_assert(callback);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 NfcCommand felica_poller_state_handler_idle(FelicaPoller* instance) {
@@ -277,11 +285,15 @@ static NfcCommand felica_poller_run(NfcGenericEvent event, void* context) {
     FelicaPoller* instance = context;
     NfcEvent* nfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
+    instance->history_data.state = instance->state;
 
     if(nfc_event->type == NfcEventTypePollerReady) {
         command = felica_poller_handler[instance->state](instance);
     }
 
+    instance->history_data.command = command;
+    instance->history_data.event = nfc_event->type;
+    instance->history.base.modified = true;
     return command;
 }
 
@@ -304,6 +316,11 @@ static bool felica_poller_detect(NfcGenericEvent event, void* context) {
     return protocol_detected;
 }
 
+static void felica_poller_log_history(NfcLogger* logger, void* context) {
+    FelicaPoller* instance = context;
+    nfc_logger_append_history(logger, &instance->history);
+}
+
 const NfcPollerBase nfc_poller_felica = {
     .alloc = (NfcPollerAlloc)felica_poller_alloc,
     .free = (NfcPollerFree)felica_poller_free,
@@ -311,4 +328,5 @@ const NfcPollerBase nfc_poller_felica = {
     .run = (NfcPollerRun)felica_poller_run,
     .detect = (NfcPollerDetect)felica_poller_detect,
     .get_data = (NfcPollerGetData)felica_poller_get_data,
+    .log_history = (NfcPollerLogHistory)felica_poller_log_history,
 };

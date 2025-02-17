@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mf_ultralight_listener.h"
-#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h>
+#include "mf_ultralight_listener_history_data.h"
 #include <nfc/protocols/nfc_generic_event.h>
 
 #ifdef __cplusplus
@@ -17,16 +17,6 @@ typedef enum {
     MfUltralightListenerAccessTypeRead,
     MfUltralightListenerAccessTypeWrite,
 } MfUltralightListenerAccessType;
-
-typedef enum {
-    MfUltralightCommandNotFound,
-    MfUltralightCommandProcessed,
-    MfUltralightCommandProcessedACK,
-    MfUltralightCommandProcessedSilent,
-    MfUltralightCommandNotProcessedNAK,
-    MfUltralightCommandNotProcessedSilent,
-    MfUltralightCommandNotProcessedAuthNAK,
-} MfUltralightCommand;
 
 typedef MfUltralightCommand (
     *MfUltralightListenerCommandCallback)(MfUltralightListener* instance, BitBuffer* buf);
@@ -64,11 +54,14 @@ struct MfUltralightListener {
     MfUltralightListenerEvent mfu_event;
     MfUltralightListenerEventData mfu_event_data;
     NfcGenericCallback callback;
+    NfcGenericLogHistoryCallback log_callback;
     uint8_t sector;
     bool single_counter_increased;
     MfUltralightMirrorMode mirror;
     MfUltralightListenerCompositeCommandContext composite_cmd;
     mbedtls_des3_context des_context;
+    NfcHistoryItem history;
+    MfUltralightListenerHistoryData history_data;
     uint8_t rndB[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE];
     uint8_t encB[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE];
     void* context;

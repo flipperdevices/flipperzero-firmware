@@ -80,10 +80,14 @@ Iso14443_4aError iso14443_4a_poller_send_block(
             break;
         }
 
+        instance->history_data.error = error;
+
         if(bit_buffer_starts_with_byte(instance->rx_buffer, ISO14443_4A_SWTX)) {
             do {
                 uint8_t wtxm = bit_buffer_get_byte(instance->rx_buffer, 1) & ISO14443_4A_WTXM_MASK;
                 if(wtxm > ISO14443_4A_WTXM_MAX) {
+                    instance->history_data.error = Iso14443_4aErrorProtocol;
+                    instance->history.base.modified = true;
                     return Iso14443_4aErrorProtocol;
                 }
 
@@ -99,6 +103,8 @@ Iso14443_4aError iso14443_4a_poller_send_block(
 
                 if(iso14443_3a_error != Iso14443_3aErrorNone) {
                     error = iso14443_4a_process_error(iso14443_3a_error);
+                    instance->history_data.error = error;
+                    instance->history.base.modified = true;
                     return error;
                 }
 
@@ -111,6 +117,9 @@ Iso14443_4aError iso14443_4a_poller_send_block(
             break;
         }
     } while(false);
+
+    instance->history_data.error = error;
+    instance->history.base.modified = true;
 
     return error;
 }

@@ -46,6 +46,11 @@ MfClassicPoller* mf_classic_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller) 
     instance->general_event.event_data = &instance->mfc_event;
     instance->general_event.instance = instance;
 
+    instance->logger = nfc_get_logger(iso14443_3a_poller->nfc);
+    instance->history.base.protocol = NfcProtocolMfClassic;
+    instance->history.base.data_block_size = sizeof(MfClassicPollerHistoryData);
+    instance->history.data = &instance->history_data;
+
     return instance;
 }
 
@@ -163,6 +168,7 @@ NfcCommand mf_classic_poller_handler_start(MfClassicPoller* instance) {
     instance->mfc_event.type = MfClassicPollerEventTypeRequestMode;
     command = instance->callback(instance->general_event, instance->context);
 
+    //instance->history_data.mode = instance->mfc_event_data.poller_mode.mode;
     if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeDictAttackStandard) {
         mf_classic_copy(instance->data, instance->mfc_event_data.poller_mode.data);
         instance->state = MfClassicPollerStateRequestKey;
@@ -502,11 +508,15 @@ NfcCommand mf_classic_poller_handler_request_read_sector_blocks(MfClassicPoller*
     NfcCommand command = NfcCommandContinue;
 
     MfClassicPollerReadContext* sec_read_ctx = &instance->mode_ctx.read_ctx;
+    MfClassicPollerReadContext* history_read_ctx = &instance->history_data.mode_ctx.read_ctx;
+    memcpy(history_read_ctx, sec_read_ctx, sizeof(MfClassicPollerReadContext));
 
     do {
         MfClassicError error = MfClassicErrorNone;
 
         if(!sec_read_ctx->auth_passed) {
+            //instance->history_data.mode_ctx.read_ctx.auth_passed = false;
+
             uint64_t key = bit_lib_bytes_to_num_be(sec_read_ctx->key.data, sizeof(MfClassicKey));
             FURI_LOG_D(
                 TAG,
@@ -514,6 +524,7 @@ NfcCommand mf_classic_poller_handler_request_read_sector_blocks(MfClassicPoller*
                 sec_read_ctx->current_block,
                 sec_read_ctx->key_type == MfClassicKeyTypeA ? 'A' : 'B',
                 key);
+            instance->history.base.modified = true;
             error = mf_classic_poller_auth(
                 instance,
                 sec_read_ctx->current_block,
@@ -521,9 +532,13 @@ NfcCommand mf_classic_poller_handler_request_read_sector_blocks(MfClassicPoller*
                 sec_read_ctx->key_type,
                 NULL,
                 false);
+            nfc_logger_transaction_end(instance->logger);
             if(error != MfClassicErrorNone) break;
 
             sec_read_ctx->auth_passed = true;
+            history_read_ctx->auth_passed = true;
+            instance->history.base.modified = true;
+
             if(!mf_classic_is_key_found(
                    instance->data, sec_read_ctx->current_sector, sec_read_ctx->key_type)) {
                 mf_classic_set_key_found(
@@ -542,14 +557,16 @@ NfcCommand mf_classic_poller_handler_request_read_sector_blocks(MfClassicPoller*
                     instance, sec_read_ctx->current_block, &read_block);
             }
         } else {
-            mf_classic_poller_halt(instance);
             sec_read_ctx->auth_passed = false;
+            history_read_ctx->auth_passed = false;
+            mf_classic_poller_halt(instance);
         }
     } while(false);
 
     uint8_t sec_tr_num = mf_classic_get_sector_trailer_num_by_sector(sec_read_ctx->current_sector);
     sec_read_ctx->current_block++;
     if(sec_read_ctx->current_block > sec_tr_num) {
+        history_read_ctx->current_block = sec_read_ctx->current_block;
         mf_classic_poller_halt(instance);
         instance->state = MfClassicPollerStateRequestReadSector;
     }
@@ -710,6 +727,7 @@ NfcCommand mf_classic_poller_handler_auth_a(MfClassicPoller* instance) {
 
         MfClassicError error = mf_classic_poller_auth(
             instance, block, &dict_attack_ctx->current_key, MfClassicKeyTypeA, NULL, false);
+
         if(error == MfClassicErrorNone) {
             FURI_LOG_I(TAG, "Key A found");
             mf_classic_set_key_found(
@@ -720,6 +738,7 @@ NfcCommand mf_classic_poller_handler_auth_a(MfClassicPoller* instance) {
             dict_attack_ctx->current_block = block;
             dict_attack_ctx->auth_passed = true;
             instance->state = MfClassicPollerStateReadSector;
+            //instance->history.base.modified = true;
         } else {
             mf_classic_poller_halt(instance);
             instance->state = MfClassicPollerStateAuthKeyB;
@@ -2189,6 +2208,8 @@ NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {
     Iso14443_3aPollerEvent* iso14443_3a_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
+    instance->history_data.state = instance->state;
+
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         if(instance->card_state == MfClassicCardStateLost) {
             instance->card_state = MfClassicCardStateDetected;
@@ -2203,6 +2224,9 @@ NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {
             command = instance->callback(instance->general_event, instance->context);
         }
     }
+
+    instance->history_data.event = iso14443_3a_event->type;
+    instance->history_data.command = command;
 
     return command;
 }
@@ -2239,12 +2263,14 @@ bool mf_classic_poller_detect(NfcGenericEvent event, void* context) {
 void mf_classic_poller_set_callback(
     MfClassicPoller* instance,
     NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 const MfClassicData* mf_classic_poller_get_data(const MfClassicPoller* instance) {
@@ -2254,6 +2280,15 @@ const MfClassicData* mf_classic_poller_get_data(const MfClassicPoller* instance)
     return instance->data;
 }
 
+static void mf_classic_poller_log_history(NfcLogger* logger, void* context) {
+    MfClassicPoller* instance = context;
+    nfc_logger_append_history(logger, &instance->history);
+
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
+}
+
 const NfcPollerBase mf_classic_poller = {
     .alloc = (NfcPollerAlloc)mf_classic_poller_alloc,
     .free = (NfcPollerFree)mf_classic_poller_free,
@@ -2261,4 +2296,5 @@ const NfcPollerBase mf_classic_poller = {
     .run = (NfcPollerRun)mf_classic_poller_run,
     .detect = (NfcPollerDetect)mf_classic_poller_detect,
     .get_data = (NfcPollerGetData)mf_classic_poller_get_data,
+    .log_history = (NfcPollerLogHistory)mf_classic_poller_log_history,
 };

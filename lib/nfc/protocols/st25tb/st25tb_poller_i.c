@@ -31,11 +31,22 @@ St25tbError st25tb_poller_send_frame(
     bit_buffer_copy(instance->tx_buffer, tx_buffer);
     iso14443_crc_append(Iso14443CrcTypeB, instance->tx_buffer);
 
-    St25tbError ret = St25tbErrorNone;
+    NfcLogger* logger = nfc_get_logger(instance->nfc);
+    nfc_logger_append_request_data(
+        logger,
+        bit_buffer_get_data(instance->tx_buffer),
+        bit_buffer_get_size_bytes(instance->tx_buffer));
 
+    St25tbError ret = St25tbErrorNone;
     do {
         NfcError error =
             nfc_poller_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
+
+        nfc_logger_append_response_data(
+            logger,
+            bit_buffer_get_data(instance->rx_buffer),
+            bit_buffer_get_size_bytes(instance->rx_buffer));
+
         if(error != NfcErrorNone) {
             FURI_LOG_T(TAG, "error during trx: %d", error);
             ret = st25tb_poller_process_error(error);
@@ -52,6 +63,18 @@ St25tbError st25tb_poller_send_frame(
     } while(false);
 
     return ret;
+}
+
+static void
+    st25tb_poller_save_history(St25tbPoller* instance, St25tbError error, bool end_transaction) {
+    instance->history_data.state = instance->state;
+    instance->history_data.command = NfcCommandContinue;
+    instance->history_data.error = error;
+    NfcLogger* logger = nfc_get_logger(instance->nfc);
+    nfc_logger_append_history(logger, &instance->history);
+    if(end_transaction) {
+        nfc_logger_transaction_end(logger);
+    }
 }
 
 St25tbError st25tb_poller_initiate(St25tbPoller* instance, uint8_t* chip_id_ptr) {
@@ -83,6 +106,7 @@ St25tbError st25tb_poller_initiate(St25tbPoller* instance, uint8_t* chip_id_ptr)
             *chip_id_ptr = bit_buffer_get_byte(instance->rx_buffer, 0);
         }
     } while(false);
+    st25tb_poller_save_history(instance, ret, true);
 
     return ret;
 }
@@ -137,7 +161,7 @@ St25tbError st25tb_poller_select(St25tbPoller* instance, uint8_t* chip_id_ptr) {
 
         instance->data->type = st25tb_get_type_from_uid(instance->data->uid);
     } while(false);
-
+    st25tb_poller_save_history(instance, ret, true);
     return ret;
 }
 
@@ -245,7 +269,7 @@ St25tbError
         bit_buffer_write_bytes(instance->rx_buffer, block, ST25TB_BLOCK_SIZE);
         FURI_LOG_D(TAG, "Read_block(%d) result: %08lX", block_number, *block);
     } while(false);
-
+    st25tb_poller_save_history(instance, ret, true);
     return ret;
 }
 
@@ -290,7 +314,7 @@ St25tbError
         }
         FURI_LOG_D(TAG, "wrote %08lX to block %d", block, block_number);
     } while(false);
-
+    st25tb_poller_save_history(instance, ret, true);
     return ret;
 }
 
@@ -314,6 +338,6 @@ St25tbError st25tb_poller_halt(St25tbPoller* instance) {
 
         instance->state = St25tbPollerStateSelect;
     } while(false);
-
+    st25tb_poller_save_history(instance, ret, true);
     return ret;
 }

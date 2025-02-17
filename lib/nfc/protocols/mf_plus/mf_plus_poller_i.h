@@ -1,8 +1,10 @@
 #pragma once
 
 #include "mf_plus_poller.h"
+#include "mf_plus_poller_history_data.h"
 
 #include <lib/nfc/protocols/iso14443_4a/iso14443_4a_poller_i.h>
+#include <helpers/logger/nfc_logger_i.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,17 +16,6 @@ typedef enum {
     MfPlusCardStateDetected,
     MfPlusCardStateLost,
 } MfPlusCardState;
-
-typedef enum {
-    MfPlusPollerStateIdle,
-    MfPlusPollerStateReadVersion,
-    MfPlusPollerStateParseVersion,
-    MfPlusPollerStateParseIso4,
-    MfPlusPollerStateReadFailed,
-    MfPlusPollerStateReadSuccess,
-
-    MfPlusPollerStateNum,
-} MfPlusPollerState;
 
 struct MfPlusPoller {
     Iso14443_4aPoller* iso14443_4a_poller;
@@ -42,6 +33,9 @@ struct MfPlusPoller {
     MfPlusPollerEvent mfp_event;
     MfPlusPollerEventData mfp_event_data;
     NfcGenericCallback callback;
+    NfcGenericLogHistoryCallback log_callback;
+    NfcHistoryItem history;
+    MfPlusPollerHistoryData history_data;
     void* context;
 };
 

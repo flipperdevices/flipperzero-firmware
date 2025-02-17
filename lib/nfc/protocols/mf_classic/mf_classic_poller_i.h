@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mf_classic_poller.h"
+#include "mf_classic_poller_history_data.h"
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_i.h>
 #include <bit_lib/bit_lib.h>
 #include <nfc/helpers/iso14443_crc.h>
@@ -70,49 +71,6 @@ typedef struct {
     size_t count;
 } MfClassicNestedNonceArray;
 
-typedef enum {
-    MfClassicPollerStateDetectType,
-    MfClassicPollerStateStart,
-
-    // Write states
-    MfClassicPollerStateRequestSectorTrailer,
-    MfClassicPollerStateCheckWriteConditions,
-    MfClassicPollerStateReadBlock,
-    MfClassicPollerStateWriteBlock,
-    MfClassicPollerStateWriteValueBlock,
-
-    // Read states
-    MfClassicPollerStateRequestReadSector,
-    MfClassicPollerStateReadSectorBlocks,
-
-    // Dict attack states
-    MfClassicPollerStateNextSector,
-    MfClassicPollerStateAnalyzeBackdoor,
-    MfClassicPollerStateBackdoorReadSector,
-    MfClassicPollerStateRequestKey,
-    MfClassicPollerStateReadSector,
-    MfClassicPollerStateAuthKeyA,
-    MfClassicPollerStateAuthKeyB,
-    MfClassicPollerStateKeyReuseStart,
-    MfClassicPollerStateKeyReuseStartNoOffset,
-    MfClassicPollerStateKeyReuseAuthKeyA,
-    MfClassicPollerStateKeyReuseAuthKeyB,
-    MfClassicPollerStateKeyReuseReadSector,
-    MfClassicPollerStateSuccess,
-    MfClassicPollerStateFail,
-
-    // Enhanced dictionary attack states
-    MfClassicPollerStateNestedAnalyzePRNG,
-    MfClassicPollerStateNestedCalibrate,
-    MfClassicPollerStateNestedCollectNt,
-    MfClassicPollerStateNestedController,
-    MfClassicPollerStateNestedCollectNtEnc,
-    MfClassicPollerStateNestedDictAttack,
-    MfClassicPollerStateNestedLog,
-
-    MfClassicPollerStateNum,
-} MfClassicPollerState;
-
 typedef struct {
     uint8_t current_sector;
     MfClassicSectorTrailer sec_tr;
@@ -157,14 +115,6 @@ typedef struct {
     uint16_t msb_count; // Number of unique most significant bytes seen
 } MfClassicPollerDictAttackContext;
 
-typedef struct {
-    uint8_t current_sector;
-    uint16_t current_block;
-    MfClassicKeyType key_type;
-    MfClassicKey key;
-    bool auth_passed;
-} MfClassicPollerReadContext;
-
 typedef union {
     MfClassicPollerWriteContext write_ctx;
     MfClassicPollerDictAttackContext dict_attack_ctx;
@@ -194,6 +144,11 @@ struct MfClassicPoller {
     MfClassicPollerEvent mfc_event;
     MfClassicPollerEventData mfc_event_data;
     NfcGenericCallback callback;
+    NfcGenericLogHistoryCallback log_callback;
+    NfcLogger* logger;
+    NfcHistoryItem history;
+    MfClassicPollerHistoryData history_data;
+
     void* context;
 };
 

@@ -757,6 +757,9 @@ MfUltralightListener* mf_ultralight_listener_alloc(
     instance->generic_event.event_data = &instance->mfu_event;
     mbedtls_des3_init(&instance->des_context);
 
+    instance->history.base.protocol = NfcProtocolMfUltralight;
+    instance->history.base.data_block_size = sizeof(MfUltralightListenerHistoryData);
+    instance->history.data = &instance->history_data;
     return instance;
 }
 
@@ -781,11 +784,13 @@ const MfUltralightData* mf_ultralight_listener_get_data(MfUltralightListener* in
 void mf_ultralight_listener_set_callback(
     MfUltralightListener* instance,
     NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
     void* context) {
     furi_assert(instance);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
@@ -814,6 +819,7 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
                 if(mfu_command != MfUltralightCommandNotFound) break;
             }
         }
+        instance->history_data.mfu_command = mfu_command;
         command = mf_ultralight_command_postprocess(mfu_command, instance);
     } else if(
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedData ||
@@ -822,7 +828,21 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
         command = mf_ultralight_reset_listener_state(instance, iso14443_3a_event->type);
     }
 
+    instance->history_data.command = command;
+    instance->history_data.event = iso14443_3a_event->type;
+    instance->history.base.modified = true;
+
     return command;
+}
+
+void mf_ultralight_log_history(NfcLogger* logger, void* context) {
+    MfUltralightListener* instance = context;
+    nfc_logger_append_history(logger, &instance->history);
+    instance->history_data.mfu_command = MfUltralightCommandNotFound;
+
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
 }
 
 const NfcListenerBase mf_ultralight_listener = {
@@ -831,4 +851,5 @@ const NfcListenerBase mf_ultralight_listener = {
     .get_data = (NfcListenerGetData)mf_ultralight_listener_get_data,
     .set_callback = (NfcListenerSetCallback)mf_ultralight_listener_set_callback,
     .run = (NfcListenerRun)mf_ultralight_listener_run,
+    .log_history = (NfcListenerLogHistory)mf_ultralight_log_history,
 };

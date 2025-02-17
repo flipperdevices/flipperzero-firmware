@@ -69,6 +69,7 @@ static MfClassicError mf_classic_poller_get_nt_common(
                 break;
             }
         } else {
+            instance->history_data.encrypted = false;
             error = iso14443_3a_poller_send_standard_frame(
                 instance->iso14443_3a_poller,
                 instance->tx_plain_buffer,
@@ -76,6 +77,7 @@ static MfClassicError mf_classic_poller_get_nt_common(
                 MF_CLASSIC_FWT_FC);
             if(error != Iso14443_3aErrorWrongCrc) {
                 ret = mf_classic_process_error(error);
+                instance->history_data.crc_ok = false;
                 break;
             }
         }
@@ -137,6 +139,7 @@ MfClassicError mf_classic_poller_auth_common(
             ret =
                 mf_classic_poller_get_nt_nested(instance, block_num, key_type, &nt, backdoor_auth);
         } else {
+            instance->history_data.encrypted = false;
             ret = mf_classic_poller_get_nt(instance, block_num, key_type, &nt, backdoor_auth);
         }
         if(ret != MfClassicErrorNone) break;
@@ -229,9 +232,14 @@ MfClassicError mf_classic_poller_halt(MfClassicPoller* instance) {
         bit_buffer_copy_bytes(instance->tx_plain_buffer, halt_cmd, sizeof(halt_cmd));
         iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
 
+        memcpy(&instance->history_data.crypto, instance->crypto, sizeof(Crypto1));
+        instance->history_data.encrypted = true;
+        instance->history.base.modified = true;
+
         crypto1_encrypt(
             instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
 
+        bit_buffer_reset(instance->rx_encrypted_buffer);
         error = iso14443_3a_poller_txrx_custom_parity(
             instance->iso14443_3a_poller,
             instance->tx_encrypted_buffer,
@@ -241,9 +249,14 @@ MfClassicError mf_classic_poller_halt(MfClassicPoller* instance) {
             ret = mf_classic_process_error(error);
             break;
         }
+
         instance->auth_state = MfClassicAuthStateIdle;
         instance->iso14443_3a_poller->state = Iso14443_3aPollerStateIdle;
+        instance->iso14443_3a_poller->history.base.modified = true;
     } while(false);
+
+    nfc_logger_transaction_end(instance->logger);
+    //instance->iso14443_3a_poller->history_data.state = instance->iso14443_3a_poller->state;
 
     return ret;
 }
@@ -262,6 +275,10 @@ MfClassicError mf_classic_poller_read_block(
         uint8_t read_block_cmd[2] = {MF_CLASSIC_CMD_READ_BLOCK, block_num};
         bit_buffer_copy_bytes(instance->tx_plain_buffer, read_block_cmd, sizeof(read_block_cmd));
         iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
+
+        memcpy(&instance->history_data.crypto, instance->crypto, sizeof(Crypto1));
+        instance->history_data.encrypted = true;
+        instance->history.base.modified = true;
 
         crypto1_encrypt(
             instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
@@ -286,6 +303,7 @@ MfClassicError mf_classic_poller_read_block(
 
         if(!iso14443_crc_check(Iso14443CrcTypeA, instance->rx_plain_buffer)) {
             FURI_LOG_D(TAG, "CRC error");
+            instance->history_data.crc_ok = false;
             ret = MfClassicErrorProtocol;
             break;
         }
@@ -294,6 +312,7 @@ MfClassicError mf_classic_poller_read_block(
         bit_buffer_write_bytes(instance->rx_plain_buffer, data->data, sizeof(MfClassicBlock));
     } while(false);
 
+    nfc_logger_transaction_end(instance->logger);
     return ret;
 }
 
@@ -494,6 +513,7 @@ MfClassicError mf_classic_poller_send_standard_frame(
     furi_check(tx_buffer);
     furi_check(rx_buffer);
 
+    instance->history_data.encrypted = false;
     Iso14443_3aError error = iso14443_3a_poller_send_standard_frame(
         instance->iso14443_3a_poller, tx_buffer, rx_buffer, fwt_fc);
 
@@ -509,6 +529,7 @@ MfClassicError mf_classic_poller_send_frame(
     furi_check(tx_buffer);
     furi_check(rx_buffer);
 
+    instance->history_data.encrypted = false;
     Iso14443_3aError error =
         iso14443_3a_poller_txrx(instance->iso14443_3a_poller, tx_buffer, rx_buffer, fwt_fc);
 
@@ -524,6 +545,7 @@ MfClassicError mf_classic_poller_send_custom_parity_frame(
     furi_check(tx_buffer);
     furi_check(rx_buffer);
 
+    instance->history_data.encrypted = false;
     Iso14443_3aError error = iso14443_3a_poller_txrx_custom_parity(
         instance->iso14443_3a_poller, tx_buffer, rx_buffer, fwt_fc);
 
@@ -541,6 +563,9 @@ MfClassicError mf_classic_poller_send_encrypted_frame(
 
     MfClassicError ret = MfClassicErrorNone;
     do {
+        memcpy(&instance->history_data.crypto, instance->crypto, sizeof(Crypto1));
+        instance->history_data.encrypted = true;
+        instance->history.base.modified = true;
         crypto1_encrypt(instance->crypto, NULL, tx_buffer, instance->tx_encrypted_buffer);
 
         Iso14443_3aError error = iso14443_3a_poller_txrx_custom_parity(

@@ -36,24 +36,51 @@ extern "C" {
 #define FURI_HAL_NFC_EVENT_WAIT_FOREVER (0xFFFFFFFFU)
 
 /**
+ * @brief Bit masks for NFC HAL events
+ */
+typedef enum {
+    FuriHalNfcBitMaskOscOn = 0,
+    FuriHalNfcBitMaskFieldOn = 1,
+    FuriHalNfcBitMaskFieldOff = 2,
+    FuriHalNfcBitMaskListenerActive = 3,
+    FuriHalNfcBitMaskTxStart = 4,
+    FuriHalNfcBitMaskTxEnd = 5,
+    FuriHalNfcBitMaskRxStart = 6,
+    FuriHalNfcBitMaskRxEnd = 7,
+    FuriHalNfcBitMaskCollision = 8,
+    FuriHalNfcBitMaskTimerFwtExpired = 9,
+    FuriHalNfcBitMaskTimerBlockTxExpired = 10,
+    FuriHalNfcBitMaskTimeout = 11,
+    FuriHalNfcBitMaskAbortRequest = 12,
+} FuriHalNfcBitMask;
+
+/**
  * @brief Enumeration of possible NFC HAL events.
  */
 typedef enum {
-    FuriHalNfcEventOscOn = (1U << 0), /**< Oscillator has been started. */
-    FuriHalNfcEventFieldOn = (1U << 1), /**< External field (carrier) has been detected. */
-    FuriHalNfcEventFieldOff = (1U << 2), /**< External field (carrier) has been lost. */
-    FuriHalNfcEventListenerActive = (1U << 3), /**< Reader has issued a wake-up command. */
-    FuriHalNfcEventTxStart = (1U << 4), /**< Transmission has started. */
-    FuriHalNfcEventTxEnd = (1U << 5), /**< Transmission has ended. */
-    FuriHalNfcEventRxStart = (1U << 6), /**< Reception has started. */
-    FuriHalNfcEventRxEnd = (1U << 7), /**< Reception has ended. */
-    FuriHalNfcEventCollision = (1U << 8), /**< A collision has occurred. */
-    FuriHalNfcEventTimerFwtExpired = (1U << 9), /**< Frame wait timer has expired. */
-    FuriHalNfcEventTimerBlockTxExpired = (1U << 10), /**< Transmission block timer has expired. */
+    FuriHalNfcEventOscOn = (1U << FuriHalNfcBitMaskOscOn), /**< Oscillator has been started. */
+    FuriHalNfcEventFieldOn =
+        (1U << FuriHalNfcBitMaskFieldOn), /**< External field (carrier) has been detected. */
+    FuriHalNfcEventFieldOff =
+        (1U << FuriHalNfcBitMaskFieldOff), /**< External field (carrier) has been lost. */
+    FuriHalNfcEventListenerActive =
+        (1U << FuriHalNfcBitMaskListenerActive), /**< Reader has issued a wake-up command. */
+    FuriHalNfcEventTxStart = (1U << FuriHalNfcBitMaskTxStart), /**< Transmission has started. */
+    FuriHalNfcEventTxEnd = (1U << FuriHalNfcBitMaskTxEnd), /**< Transmission has ended. */
+    FuriHalNfcEventRxStart = (1U << FuriHalNfcBitMaskRxStart), /**< Reception has started. */
+    FuriHalNfcEventRxEnd = (1U << FuriHalNfcBitMaskRxEnd), /**< Reception has ended. */
+    FuriHalNfcEventCollision =
+        (1U << FuriHalNfcBitMaskCollision), /**< A collision has occurred. */
+    FuriHalNfcEventTimerFwtExpired =
+        (1U << FuriHalNfcBitMaskTimerFwtExpired), /**< Frame wait timer has expired. */
+    FuriHalNfcEventTimerBlockTxExpired =
+        (1U << FuriHalNfcBitMaskTimerBlockTxExpired), /**< Transmission block timer has expired. */
     FuriHalNfcEventTimeout =
-        (1U << 11), /**< No events have occurred in a specified time period. */
+        (1U
+         << FuriHalNfcBitMaskTimeout), /**< No events have occurred in a specified time period. */
     FuriHalNfcEventAbortRequest =
-        (1U << 12), /**< User has requested to abort current operation. */
+        (1U
+         << FuriHalNfcBitMaskAbortRequest), /**< User has requested to abort current operation. */
 } FuriHalNfcEvent;
 
 /**

@@ -23,6 +23,9 @@ static SlixListener* slix_listener_alloc(Iso15693_3Listener* iso15693_3_listener
 
     slix_listener_init_iso15693_3_extensions(instance);
 
+    instance->history.base.protocol = NfcProtocolSlix;
+    instance->history.base.data_block_size = sizeof(SlixListenerHistoryData);
+    instance->history.data = &instance->history_data;
     return instance;
 }
 
@@ -35,12 +38,16 @@ static void slix_listener_free(SlixListener* instance) {
     free(instance);
 }
 
-static void
-    slix_listener_set_callback(SlixListener* instance, NfcGenericCallback callback, void* context) {
+static void slix_listener_set_callback(
+    SlixListener* instance,
+    NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
+    void* context) {
     furi_assert(instance);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 static const SlixData* slix_listener_get_data(SlixListener* instance) {
@@ -62,12 +69,26 @@ static NfcCommand slix_listener_run(NfcGenericEvent event, void* context) {
 
     if(iso15693_3_event->type == Iso15693_3ListenerEventTypeCustomCommand) {
         const SlixError error = slix_listener_process_request(instance, rx_buffer);
+        instance->history_data.error = error;
         if(error == SlixErrorWrongPassword) {
             command = NfcCommandSleep;
         }
     }
 
+    instance->history_data.command = command;
+    instance->history_data.event = iso15693_3_event->type;
+    instance->history_data.session_state = instance->session_state;
+    instance->history.base.modified = true;
     return command;
+}
+
+void slix_log_history(NfcLogger* logger, void* context) {
+    SlixListener* instance = context;
+    nfc_logger_append_history(logger, &instance->history);
+
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
 }
 
 const NfcListenerBase nfc_listener_slix = {
@@ -76,4 +97,5 @@ const NfcListenerBase nfc_listener_slix = {
     .set_callback = (NfcListenerSetCallback)slix_listener_set_callback,
     .get_data = (NfcListenerGetData)slix_listener_get_data,
     .run = (NfcListenerRun)slix_listener_run,
+    .log_history = (NfcListenerLogHistory)slix_log_history,
 };

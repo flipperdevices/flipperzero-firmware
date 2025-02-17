@@ -26,6 +26,7 @@ void nfc_scene_detect_on_enter(void* context) {
 
     nfc_detected_protocols_reset(instance->detected_protocols);
 
+    nfc_logger_config(nfc_get_logger(instance->nfc), false, NFC_LOG_FOLDER);
     instance->scanner = nfc_scanner_alloc(instance->nfc);
     nfc_scanner_start(instance->scanner, nfc_scene_detect_scan_callback, instance);
 

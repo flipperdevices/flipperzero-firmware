@@ -181,6 +181,11 @@ MfUltralightPoller* mf_ultralight_poller_alloc(Iso14443_3aPoller* iso14443_3a_po
     instance->general_event.protocol = NfcProtocolMfUltralight;
     instance->general_event.event_data = &instance->mfu_event;
     instance->general_event.instance = instance;
+
+    instance->history.base.protocol = NfcProtocolMfUltralight;
+    instance->history.base.data_block_size = sizeof(MfUltralightPollerHistoryData);
+    instance->history.data = &instance->history_data;
+
     mbedtls_des3_init(&instance->des_context);
     return instance;
 }
@@ -201,12 +206,14 @@ void mf_ultralight_poller_free(MfUltralightPoller* instance) {
 static void mf_ultralight_poller_set_callback(
     MfUltralightPoller* instance,
     NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 const MfUltralightData* mf_ultralight_poller_get_data(MfUltralightPoller* instance) {
@@ -251,6 +258,11 @@ static NfcCommand mf_ultralight_poller_handler_read_version(MfUltralightPoller* 
         instance->data->type = mf_ultralight_get_type_by_version(&instance->data->version);
         instance->state = MfUltralightPollerStateGetFeatureSet;
     } else {
+        instance->history_data.state = instance->state;
+        instance->history_data.command = NfcCommandContinue;
+        instance->history_data.error = instance->error;
+        instance->history.base.modified = true;
+
         FURI_LOG_D(TAG, "Didn't response. Check Ultralight C");
         iso14443_3a_poller_halt(instance->iso14443_3a_poller);
         instance->state = MfUltralightPollerStateDetectMfulC;
@@ -281,6 +293,11 @@ static NfcCommand mf_ultralight_poller_handler_check_ntag_203(MfUltralightPoller
         FURI_LOG_D(TAG, "NTAG203 detected");
         instance->data->type = MfUltralightTypeNTAG203;
     } else {
+        instance->history_data.state = instance->state;
+        instance->history_data.command = NfcCommandContinue;
+        instance->history_data.error = instance->error;
+        instance->history.base.modified = true;
+
         FURI_LOG_D(TAG, "Original Ultralight detected");
         iso14443_3a_poller_halt(instance->iso14443_3a_poller);
         instance->data->type = MfUltralightTypeOrigin;
@@ -767,6 +784,7 @@ static NfcCommand mf_ultralight_poller_run(NfcGenericEvent event, void* context)
     const Iso14443_3aPollerEvent* iso14443_3a_event = event.event_data;
 
     NfcCommand command = NfcCommandContinue;
+    instance->history_data.state = instance->state;
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         command = mf_ultralight_poller_read_handler[instance->state](instance);
@@ -775,6 +793,9 @@ static NfcCommand mf_ultralight_poller_run(NfcGenericEvent event, void* context)
         command = instance->callback(instance->general_event, instance->context);
     }
 
+    instance->history_data.event = iso14443_3a_event->type;
+    instance->history_data.command = command;
+    instance->history.base.modified = true;
     return command;
 }
 
@@ -797,6 +818,15 @@ static bool mf_ultralight_poller_detect(NfcGenericEvent event, void* context) {
     return protocol_detected;
 }
 
+static void mf_ultralight_poller_log_history(NfcLogger* logger, void* context) {
+    MfUltralightPoller* instance = context;
+    nfc_logger_append_history(logger, &instance->history);
+
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
+}
+
 const NfcPollerBase mf_ultralight_poller = {
     .alloc = (NfcPollerAlloc)mf_ultralight_poller_alloc,
     .free = (NfcPollerFree)mf_ultralight_poller_free,
@@ -804,4 +834,5 @@ const NfcPollerBase mf_ultralight_poller = {
     .run = (NfcPollerRun)mf_ultralight_poller_run,
     .detect = (NfcPollerDetect)mf_ultralight_poller_detect,
     .get_data = (NfcPollerGetData)mf_ultralight_poller_get_data,
+    .log_history = (NfcPollerLogHistory)mf_ultralight_poller_log_history,
 };

@@ -30,6 +30,9 @@ static Iso14443_4bPoller* iso14443_4b_poller_alloc(Iso14443_3bPoller* iso14443_3
     instance->general_event.event_data = &instance->iso14443_4b_event;
     instance->general_event.instance = instance;
 
+    instance->history.base.protocol = NfcProtocolIso14443_4b;
+    instance->history.base.data_block_size = sizeof(Iso14443_4bPollerHistoryData);
+    instance->history.data = &instance->history_data;
     return instance;
 }
 
@@ -77,12 +80,14 @@ static const Iso14443_4bPollerStateHandler
 static void iso14443_4b_poller_set_callback(
     Iso14443_4bPoller* instance,
     NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 static NfcCommand iso14443_4b_poller_run(NfcGenericEvent event, void* context) {
@@ -104,6 +109,11 @@ static NfcCommand iso14443_4b_poller_run(NfcGenericEvent event, void* context) {
         command = instance->callback(instance->general_event, instance->context);
     }
 
+    instance->history_data.error = instance->error;
+    instance->history_data.state = instance->poller_state;
+    instance->history_data.event = iso14443_3b_event->type;
+    instance->history_data.command = command;
+    instance->history.base.modified = true;
     return command;
 }
 
@@ -128,6 +138,15 @@ static bool iso14443_4b_poller_detect(NfcGenericEvent event, void* context) {
     return protocol_detected;
 }
 
+static void iso14443_4b_poller_log_history(NfcLogger* logger, void* context) {
+    Iso14443_4bPoller* instance = context;
+    nfc_logger_append_history(logger, &instance->history);
+
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
+}
+
 const NfcPollerBase nfc_poller_iso14443_4b = {
     .alloc = (NfcPollerAlloc)iso14443_4b_poller_alloc,
     .free = (NfcPollerFree)iso14443_4b_poller_free,
@@ -135,4 +154,5 @@ const NfcPollerBase nfc_poller_iso14443_4b = {
     .run = (NfcPollerRun)iso14443_4b_poller_run,
     .detect = (NfcPollerDetect)iso14443_4b_poller_detect,
     .get_data = (NfcPollerGetData)iso14443_4b_poller_get_data,
+    .log_history = (NfcPollerLogHistory)iso14443_4b_poller_log_history,
 };

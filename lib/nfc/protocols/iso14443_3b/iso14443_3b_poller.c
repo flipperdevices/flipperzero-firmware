@@ -32,6 +32,9 @@ static Iso14443_3bPoller* iso14443_3b_poller_alloc(Nfc* nfc) {
     instance->general_event.event_data = &instance->iso14443_3b_event;
     instance->general_event.instance = instance;
 
+    instance->history.base.protocol = NfcProtocolIso14443_3b;
+    instance->history.base.data_block_size = sizeof(Iso14443_3bPollerHistoryData);
+    instance->history.data = &instance->history_data;
     return instance;
 }
 
@@ -51,12 +54,14 @@ static void iso14443_3b_poller_free(Iso14443_3bPoller* instance) {
 static void iso14443_3b_poller_set_callback(
     Iso14443_3bPoller* instance,
     NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 static NfcCommand iso14443_3b_poller_run(NfcGenericEvent event, void* context) {
@@ -68,16 +73,22 @@ static NfcCommand iso14443_3b_poller_run(NfcGenericEvent event, void* context) {
     NfcEvent* nfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
+    instance->history_data.state = instance->state;
+    instance->history_data.event = nfc_event->type;
+
     if(nfc_event->type == NfcEventTypePollerReady) {
         if(instance->state != Iso14443_3bPollerStateActivated) {
             Iso14443_3bError error = iso14443_3b_poller_activate(instance, instance->data);
             if(error == Iso14443_3bErrorNone) {
                 instance->iso14443_3b_event.type = Iso14443_3bPollerEventTypeReady;
                 instance->iso14443_3b_event_data.error = error;
+                instance->history_data.error = error;
                 command = instance->callback(instance->general_event, instance->context);
             } else {
                 instance->iso14443_3b_event.type = Iso14443_3bPollerEventTypeError;
                 instance->iso14443_3b_event_data.error = error;
+                instance->history_data.error = error;
+                instance->history.base.modified = true;
                 command = instance->callback(instance->general_event, instance->context);
                 // Add delay to switch context
                 furi_delay_ms(100);
@@ -85,10 +96,12 @@ static NfcCommand iso14443_3b_poller_run(NfcGenericEvent event, void* context) {
         } else {
             instance->iso14443_3b_event.type = Iso14443_3bPollerEventTypeReady;
             instance->iso14443_3b_event_data.error = Iso14443_3bErrorNone;
+            instance->history.base.modified = true;
             command = instance->callback(instance->general_event, instance->context);
         }
     }
 
+    instance->history_data.command = command;
     return command;
 }
 
@@ -111,6 +124,15 @@ static bool iso14443_3b_poller_detect(NfcGenericEvent event, void* context) {
     return protocol_detected;
 }
 
+static void iso14443_3b_poller_log_history(NfcLogger* logger, void* context) {
+    Iso14443_3bPoller* instance = context;
+    nfc_logger_append_history(logger, &instance->history);
+
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
+}
+
 const NfcPollerBase nfc_poller_iso14443_3b = {
     .alloc = (NfcPollerAlloc)iso14443_3b_poller_alloc,
     .free = (NfcPollerFree)iso14443_3b_poller_free,
@@ -118,4 +140,5 @@ const NfcPollerBase nfc_poller_iso14443_3b = {
     .run = (NfcPollerRun)iso14443_3b_poller_run,
     .detect = (NfcPollerDetect)iso14443_3b_poller_detect,
     .get_data = (NfcPollerGetData)iso14443_3b_poller_get_data,
+    .log_history = (NfcPollerLogHistory)iso14443_3b_poller_log_history,
 };

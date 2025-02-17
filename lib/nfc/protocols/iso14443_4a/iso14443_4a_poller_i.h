@@ -3,6 +3,7 @@
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller_i.h>
 #include <nfc/helpers/iso14443_4_layer.h>
 
+#include "iso14443_4a_poller_history_data.h"
 #include "iso14443_4a_poller.h"
 #include "iso14443_4a_i.h"
 
@@ -11,21 +12,6 @@ extern "C" {
 #endif
 
 #define ISO14443_4A_POLLER_ATS_FWT_FC (40000)
-
-typedef enum {
-    Iso14443_4aPollerStateIdle,
-    Iso14443_4aPollerStateReadAts,
-    Iso14443_4aPollerStateError,
-    Iso14443_4aPollerStateReady,
-
-    Iso14443_4aPollerStateNum,
-} Iso14443_4aPollerState;
-
-typedef enum {
-    Iso14443_4aPollerSessionStateIdle,
-    Iso14443_4aPollerSessionStateActive,
-    Iso14443_4aPollerSessionStateStopRequest,
-} Iso14443_4aPollerSessionState;
 
 struct Iso14443_4aPoller {
     Iso14443_3aPoller* iso14443_3a_poller;
@@ -40,6 +26,9 @@ struct Iso14443_4aPoller {
     Iso14443_4aPollerEvent iso14443_4a_event;
     NfcGenericEvent general_event;
     NfcGenericCallback callback;
+    NfcGenericLogHistoryCallback log_callback;
+    NfcHistoryItem history;
+    Iso14443_4aPollerHistoryData history_data;
     void* context;
 };
 

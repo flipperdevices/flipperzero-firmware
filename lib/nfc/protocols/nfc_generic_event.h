@@ -74,6 +74,14 @@ typedef struct {
  */
 typedef NfcCommand (*NfcGenericCallback)(NfcGenericEvent event, void* context);
 
+/**
+ * @brief Generic Nfc logging history callback type.
+ * 
+ * @param [in] logger Nfc logger instance
+ * @param [in,out] context pointer to the user-specific context (set when starting a poller/listener instance).
+ */
+typedef void (*NfcGenericLogHistoryCallback)(NfcLogger* logger, void* context);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iso15693_3.h"
-
+#include "iso15693_3_poller_history_data.h"
 #include <nfc/nfc_poller.h>
 
 #ifdef __cplusplus
@@ -12,14 +12,6 @@ extern "C" {
  * @brief Iso15693_3Poller opaque type definition.
  */
 typedef struct Iso15693_3Poller Iso15693_3Poller;
-
-/**
- * @brief Enumeration of possible Iso15693_3 poller event types.
- */
-typedef enum {
-    Iso15693_3PollerEventTypeError, /**< An error occured during activation procedure. */
-    Iso15693_3PollerEventTypeReady, /**< The card was activated by the poller. */
-} Iso15693_3PollerEventType;
 
 /**
  * @brief Iso15693_3 poller event data.

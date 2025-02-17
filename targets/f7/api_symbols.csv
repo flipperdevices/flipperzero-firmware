@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,80.1,,
+Version,+,80.2,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
@@ -130,6 +130,12 @@ Header,+,lib/nanopb/pb_encode.h,,
 Header,+,lib/nfc/helpers/crypto1.h,,
 Header,+,lib/nfc/helpers/iso13239_crc.h,,
 Header,+,lib/nfc/helpers/iso14443_crc.h,,
+Header,+,lib/nfc/helpers/logger/history/nfc_history_chain_data_type.h,,
+Header,+,lib/nfc/helpers/logger/history/nfc_history_data_type.h,,
+Header,+,lib/nfc/helpers/logger/nfc_trace_data_type.h,,
+Header,+,lib/nfc/helpers/logger/transaction/nfc_packet_data_type.h,,
+Header,+,lib/nfc/helpers/logger/transaction/nfc_transaction.h,,
+Header,+,lib/nfc/helpers/logger/transaction/nfc_transaction_data_type.h,,
 Header,+,lib/nfc/helpers/nfc_data_generator.h,,
 Header,+,lib/nfc/helpers/nfc_util.h,,
 Header,+,lib/nfc/nfc.h,,
@@ -139,35 +145,53 @@ Header,+,lib/nfc/nfc_poller.h,,
 Header,+,lib/nfc/nfc_scanner.h,,
 Header,+,lib/nfc/protocols/felica/felica.h,,
 Header,+,lib/nfc/protocols/felica/felica_listener.h,,
+Header,+,lib/nfc/protocols/felica/felica_listener_history_data.h,,
 Header,+,lib/nfc/protocols/felica/felica_poller.h,,
+Header,+,lib/nfc/protocols/felica/felica_poller_history_data.h,,
 Header,+,lib/nfc/protocols/felica/felica_poller_sync.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h,,
+Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_listener_history_data.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h,,
+Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_history_data.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_sync.h,,
 Header,+,lib/nfc/protocols/iso14443_3b/iso14443_3b.h,,
 Header,+,lib/nfc/protocols/iso14443_3b/iso14443_3b_poller.h,,
+Header,+,lib/nfc/protocols/iso14443_3b/iso14443_3b_poller_history_data.h,,
 Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a.h,,
 Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a_listener.h,,
+Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a_listener_history_data.h,,
 Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a_poller.h,,
+Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a_poller_history_data.h,,
 Header,+,lib/nfc/protocols/iso14443_4b/iso14443_4b.h,,
 Header,+,lib/nfc/protocols/iso14443_4b/iso14443_4b_poller.h,,
+Header,+,lib/nfc/protocols/iso14443_4b/iso14443_4b_poller_history_data.h,,
+Header,+,lib/nfc/protocols/iso15693_3/iso15693_3_listener_history_data.h,,
+Header,+,lib/nfc/protocols/iso15693_3/iso15693_3_poller_history_data.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic_listener.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic_poller.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic_poller_sync.h,,
 Header,+,lib/nfc/protocols/mf_desfire/mf_desfire.h,,
 Header,+,lib/nfc/protocols/mf_desfire/mf_desfire_poller.h,,
+Header,+,lib/nfc/protocols/mf_desfire/mf_desfire_poller_history_data.h,,
 Header,+,lib/nfc/protocols/mf_plus/mf_plus.h,,
 Header,+,lib/nfc/protocols/mf_plus/mf_plus_poller.h,,
+Header,+,lib/nfc/protocols/mf_plus/mf_plus_poller_history_data.h,,
 Header,+,lib/nfc/protocols/mf_ultralight/mf_ultralight.h,,
 Header,+,lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h,,
+Header,+,lib/nfc/protocols/mf_ultralight/mf_ultralight_listener_history_data.h,,
 Header,+,lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h,,
+Header,+,lib/nfc/protocols/mf_ultralight/mf_ultralight_poller_history_data.h,,
 Header,+,lib/nfc/protocols/mf_ultralight/mf_ultralight_poller_sync.h,,
+Header,+,lib/nfc/protocols/nfc_protocol.h,,
 Header,+,lib/nfc/protocols/slix/slix.h,,
+Header,+,lib/nfc/protocols/slix/slix_listener_history_data.h,,
 Header,+,lib/nfc/protocols/slix/slix_poller.h,,
+Header,+,lib/nfc/protocols/slix/slix_poller_history_data.h,,
 Header,+,lib/nfc/protocols/st25tb/st25tb.h,,
 Header,+,lib/nfc/protocols/st25tb/st25tb_poller.h,,
+Header,+,lib/nfc/protocols/st25tb/st25tb_poller_history_data.h,,
 Header,+,lib/nfc/protocols/st25tb/st25tb_poller_sync.h,,
 Header,+,lib/one_wire/maxim_crc.h,,
 Header,+,lib/one_wire/one_wire_host.h,,
@@ -2836,6 +2860,7 @@ Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback,
 Function,+,nfc_device_set_uid,_Bool,"NfcDevice*, const uint8_t*, size_t"
 Function,+,nfc_felica_listener_set_sensf_res_data,NfcError,"Nfc*, const uint8_t*, const uint8_t, const uint8_t*, const uint8_t, const uint16_t"
 Function,+,nfc_free,void,Nfc*
+Function,+,nfc_get_logger,NfcLogger*,Nfc*
 Function,+,nfc_iso14443a_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
 Function,+,nfc_iso14443a_listener_tx_custom_parity,NfcError,"Nfc*, const BitBuffer*"
 Function,+,nfc_iso14443a_poller_trx_custom_parity,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
@@ -2849,6 +2874,8 @@ Function,+,nfc_listener_get_protocol,NfcProtocol,const NfcListener*
 Function,+,nfc_listener_start,void,"NfcListener*, NfcGenericCallback, void*"
 Function,+,nfc_listener_stop,void,NfcListener*
 Function,+,nfc_listener_tx,NfcError,"Nfc*, const BitBuffer*"
+Function,+,nfc_logger_config,void,"NfcLogger*, _Bool, const char*"
+Function,+,nfc_logger_raw_log_file_present,_Bool,"NfcLogger*, FuriString*"
 Function,+,nfc_poller_alloc,NfcPoller*,"Nfc*, NfcProtocol"
 Function,+,nfc_poller_detect,_Bool,NfcPoller*
 Function,+,nfc_poller_free,void,NfcPoller*
@@ -2860,6 +2887,9 @@ Function,+,nfc_poller_stop,void,NfcPoller*
 Function,+,nfc_poller_trx,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,nfc_protocol_get_parent,NfcProtocol,NfcProtocol
 Function,+,nfc_protocol_has_parent,_Bool,"NfcProtocol, NfcProtocol"
+Function,+,nfc_protocol_layer_list_alloc,NfcProtocol*,"NfcProtocol, uint8_t*"
+Function,+,nfc_protocol_layer_list_free,void,NfcProtocol*
+Function,+,nfc_protocol_layers_get_count,uint8_t,NfcProtocol
 Function,+,nfc_scanner_alloc,NfcScanner*,Nfc*
 Function,+,nfc_scanner_free,void,NfcScanner*
 Function,+,nfc_scanner_start,void,"NfcScanner*, NfcScannerCallback, void*"
@@ -2871,6 +2901,8 @@ Function,+,nfc_set_guard_time_us,void,"Nfc*, uint32_t"
 Function,+,nfc_set_mask_receive_time_fc,void,"Nfc*, uint32_t"
 Function,+,nfc_start,void,"Nfc*, NfcEventCallback, void*"
 Function,+,nfc_stop,void,Nfc*
+Function,+,nfc_transaction_free,void,NfcTransaction*
+Function,+,nfc_transaction_read,_Bool,"Stream*, NfcTransaction**"
 Function,+,nfc_util_even_parity32,uint8_t,uint32_t
 Function,+,nfc_util_even_parity8,uint8_t,uint8_t
 Function,+,nfc_util_odd_parity,void,"const uint8_t*, uint8_t*, uint8_t"

@@ -22,6 +22,24 @@ typedef struct {
     MfClassicListenerEventData* data;
 } MfClassicListenerEvent;
 
+typedef enum {
+    MfClassicListenerStateIdle,
+    MfClassicListenerStateAuthComplete,
+} MfClassicListenerState;
+
+typedef enum {
+    MfClassicListenerCommandProcessed,
+    MfClassicListenerCommandAck,
+    MfClassicListenerCommandNack,
+    MfClassicListenerCommandSilent,
+    MfClassicListenerCommandSleep,
+} MfClassicListenerCommand;
+
+typedef enum {
+    MfClassicListenerCommStatePlain,
+    MfClassicListenerCommStateEncrypted,
+} MfClassicListenerCommState;
+
 #ifdef __cplusplus
 }
 #endif

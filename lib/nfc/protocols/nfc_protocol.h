@@ -164,6 +164,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -214,6 +215,29 @@ NfcProtocol nfc_protocol_get_parent(NfcProtocol protocol);
  * @returns true if the parent of given type exists, false otherwise.
  */
 bool nfc_protocol_has_parent(NfcProtocol protocol, NfcProtocol parent_protocol);
+
+/**
+ * @brief Determine the amount of protocols in chain before target protocol.
+ *
+ * @param[in] protocol identifier of the top protocol in chain
+ * @returns amount of protocols used target protocol.
+ */
+uint8_t nfc_protocol_layers_get_count(NfcProtocol protocol);
+
+/**
+ * @brief Allocates and returns list of protocols used by target protocol. Also 
+ * returns list size through pointer
+ *
+ * @param[in] protocol identifier of the top protocol in chain
+ * @param[in] size returns size of the protocol list
+ * @returns list of protocols involved in handling target protocol needs.
+ */
+NfcProtocol* nfc_protocol_layer_list_alloc(NfcProtocol protocol, uint8_t* size);
+
+/**
+ * @brief Free protocol list
+ */
+void nfc_protocol_layer_list_free(NfcProtocol* list);
 
 #ifdef __cplusplus
 }

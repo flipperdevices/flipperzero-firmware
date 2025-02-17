@@ -2,19 +2,13 @@
 
 #include <nfc/nfc_listener.h>
 
-#include "iso15693_3.h"
+#include "iso15693_3_listener_history_data.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct Iso15693_3Listener Iso15693_3Listener;
-
-typedef enum {
-    Iso15693_3ListenerEventTypeFieldOff,
-    Iso15693_3ListenerEventTypeCustomCommand,
-    Iso15693_3ListenerEventTypeSingleEof,
-} Iso15693_3ListenerEventType;
 
 typedef struct {
     BitBuffer* buffer;

@@ -27,6 +27,17 @@ static Iso14443_3bError iso14443_3b_poller_prepare_trx(Iso14443_3bPoller* instan
     return Iso14443_3bErrorNone;
 }
 
+static void iso14443_3b_poller_save_history(
+    Iso14443_3bPoller* instance,
+    Iso14443_3bError error,
+    bool end_transaction) {
+    UNUSED(end_transaction);
+    instance->history_data.state = instance->state;
+    instance->history_data.command = NfcCommandContinue;
+    instance->history_data.error = error;
+    instance->history.base.modified = true;
+}
+
 static Iso14443_3bError iso14443_3b_poller_frame_exchange(
     Iso14443_3bPoller* instance,
     const BitBuffer* tx_buffer,
@@ -41,11 +52,23 @@ static Iso14443_3bError iso14443_3b_poller_frame_exchange(
     bit_buffer_copy(instance->tx_buffer, tx_buffer);
     iso14443_crc_append(Iso14443CrcTypeB, instance->tx_buffer);
 
+    NfcLogger* logger = nfc_get_logger(instance->nfc);
+    nfc_logger_append_request_data(
+        logger,
+        bit_buffer_get_data(instance->tx_buffer),
+        bit_buffer_get_size_bytes(instance->tx_buffer));
+
     Iso14443_3bError ret = Iso14443_3bErrorNone;
 
     do {
         NfcError error =
             nfc_poller_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
+
+        nfc_logger_append_response_data(
+            logger,
+            bit_buffer_get_data(instance->rx_buffer),
+            bit_buffer_get_size_bytes(instance->rx_buffer));
+
         if(error != NfcErrorNone) {
             ret = iso14443_3b_poller_process_error(error);
             break;
@@ -105,6 +128,7 @@ Iso14443_3bError iso14443_3b_poller_activate(Iso14443_3bPoller* instance, Iso144
         }
 
         instance->state = Iso14443_3bPollerStateActivationInProgress;
+        iso14443_3b_poller_save_history(instance, ret, true);
 
         const Iso14443_3bAtqBLayout* atqb =
             (const Iso14443_3bAtqBLayout*)bit_buffer_get_data(instance->rx_buffer);
@@ -151,6 +175,7 @@ Iso14443_3bError iso14443_3b_poller_activate(Iso14443_3bPoller* instance, Iso144
 
         instance->state = Iso14443_3bPollerStateActivated;
     } while(false);
+    iso14443_3b_poller_save_history(instance, ret, true);
 
     return ret;
 }
@@ -181,7 +206,7 @@ Iso14443_3bError iso14443_3b_poller_halt(Iso14443_3bPoller* instance) {
 
         instance->state = Iso14443_3bPollerStateIdle;
     } while(false);
-
+    iso14443_3b_poller_save_history(instance, ret, true);
     return ret;
 }
 

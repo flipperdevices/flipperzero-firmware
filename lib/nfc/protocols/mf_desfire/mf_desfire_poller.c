@@ -32,6 +32,9 @@ static MfDesfirePoller* mf_desfire_poller_alloc(Iso14443_4aPoller* iso14443_4a_p
     instance->general_event.event_data = &instance->mf_desfire_event;
     instance->general_event.instance = instance;
 
+    instance->history.base.protocol = NfcProtocolMfDesfire;
+    instance->history.base.data_block_size = sizeof(MfDesfirePollerHistoryData);
+    instance->history.data = &instance->history_data;
     return instance;
 }
 
@@ -204,12 +207,14 @@ static const MfDesfirePollerReadHandler mf_desfire_poller_read_handler[MfDesfire
 static void mf_desfire_poller_set_callback(
     MfDesfirePoller* instance,
     NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 static NfcCommand mf_desfire_poller_run(NfcGenericEvent event, void* context) {
@@ -231,6 +236,10 @@ static NfcCommand mf_desfire_poller_run(NfcGenericEvent event, void* context) {
         command = instance->callback(instance->general_event, instance->context);
     }
 
+    instance->history_data.error = instance->error;
+    instance->history_data.state = instance->state;
+    instance->history_data.event = iso14443_4a_event->type;
+    instance->history_data.command = command;
     return command;
 }
 
@@ -262,6 +271,18 @@ static bool mf_desfire_poller_detect(NfcGenericEvent event, void* context) {
     return protocol_detected;
 }
 
+static void mf_desfire_poller_log_history(NfcLogger* logger, void* context) {
+    MfDesfirePoller* instance = context;
+    //if(instance->history_modified) {
+    nfc_logger_append_history(logger, &instance->history);
+    //instance->history_modified = false;
+    //}
+
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
+}
+
 const NfcPollerBase mf_desfire_poller = {
     .alloc = (NfcPollerAlloc)mf_desfire_poller_alloc,
     .free = (NfcPollerFree)mf_desfire_poller_free,
@@ -269,4 +290,5 @@ const NfcPollerBase mf_desfire_poller = {
     .run = (NfcPollerRun)mf_desfire_poller_run,
     .detect = (NfcPollerDetect)mf_desfire_poller_detect,
     .get_data = (NfcPollerGetData)mf_desfire_poller_get_data,
+    .log_history = (NfcPollerLogHistory)mf_desfire_poller_log_history,
 };

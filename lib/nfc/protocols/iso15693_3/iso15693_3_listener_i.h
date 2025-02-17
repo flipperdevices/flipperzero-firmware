@@ -5,16 +5,11 @@
 #include "iso15693_3_listener.h"
 
 #include "iso15693_3_i.h"
+#include <helpers/logger/nfc_logger_i.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    Iso15693_3ListenerStateReady,
-    Iso15693_3ListenerStateSelected,
-    Iso15693_3ListenerStateQuiet,
-} Iso15693_3ListenerState;
 
 typedef struct {
     bool selected;
@@ -40,6 +35,10 @@ struct Iso15693_3Listener {
     Iso15693_3ListenerEvent iso15693_3_event;
     Iso15693_3ListenerEventData iso15693_3_event_data;
     NfcGenericCallback callback;
+    NfcGenericLogHistoryCallback log_callback;
+    NfcHistoryItem history;
+    Iso15693_3ListenerHistoryData history_data;
+
     void* context;
 
     const Iso15693_3ExtensionHandlerTable* extension_table;

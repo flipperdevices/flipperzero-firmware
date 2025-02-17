@@ -1,26 +1,14 @@
 #pragma once
 
 #include "mf_desfire_poller.h"
+#include "mf_desfire_poller_history_data.h"
 
 #include <lib/nfc/protocols/iso14443_4a/iso14443_4a_poller_i.h>
+#include <helpers/logger/nfc_logger_i.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    MfDesfirePollerStateIdle,
-    MfDesfirePollerStateReadVersion,
-    MfDesfirePollerStateReadFreeMemory,
-    MfDesfirePollerStateReadMasterKeySettings,
-    MfDesfirePollerStateReadMasterKeyVersion,
-    MfDesfirePollerStateReadApplicationIds,
-    MfDesfirePollerStateReadApplications,
-    MfDesfirePollerStateReadFailed,
-    MfDesfirePollerStateReadSuccess,
-
-    MfDesfirePollerStateNum,
-} MfDesfirePollerState;
 
 typedef enum {
     MfDesfirePollerSessionStateIdle,
@@ -42,6 +30,9 @@ struct MfDesfirePoller {
     MfDesfirePollerEvent mf_desfire_event;
     NfcGenericEvent general_event;
     NfcGenericCallback callback;
+    NfcGenericLogHistoryCallback log_callback;
+    NfcHistoryItem history;
+    MfDesfirePollerHistoryData history_data;
     void* context;
 };
 

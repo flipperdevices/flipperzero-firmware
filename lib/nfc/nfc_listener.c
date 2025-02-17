@@ -1,5 +1,6 @@
 #include "nfc_listener.h"
 
+#include <helpers/logger/nfc_logger_i.h>
 #include <nfc/protocols/nfc_listener_defs.h>
 #include <nfc/nfc_device_i.h>
 
@@ -55,7 +56,10 @@ static void nfc_listener_list_alloc(NfcListener* instance) {
         data_tmp = nfc_device_get_data_ptr(instance->nfc_dev, iter->child->protocol);
         iter->child->listener = iter->child->listener_api->alloc(iter->listener, data_tmp);
         iter->listener_api->set_callback(
-            iter->listener, iter->child->listener_api->run, iter->child->listener);
+            iter->listener,
+            iter->child->listener_api->run,
+            iter->child->listener_api->log_history,
+            iter->child->listener);
 
         iter = iter->child;
     } while(true);
@@ -83,7 +87,9 @@ NfcListener* nfc_listener_alloc(Nfc* nfc, NfcProtocol protocol, const NfcDeviceD
     instance->protocol = protocol;
     instance->nfc_dev = nfc_device_alloc();
     nfc_device_set_data(instance->nfc_dev, protocol, data);
+
     nfc_listener_list_alloc(instance);
+    nfc_logger_set_protocol(nfc_get_logger(nfc), instance->protocol);
 
     return instance;
 }
@@ -112,6 +118,11 @@ NfcCommand nfc_listener_start_callback(NfcEvent event, void* context) {
     NfcListenerListElement* head_listener = instance->list.head;
     command = head_listener->listener_api->run(generic_event, head_listener->listener);
 
+    NfcLogger* logger = nfc_get_logger(instance->nfc);
+    if(nfc_logger_enabled(logger)) {
+        head_listener->listener_api->log_history(logger, head_listener->listener);
+    }
+
     return command;
 }
 
@@ -119,7 +130,7 @@ void nfc_listener_start(NfcListener* instance, NfcGenericCallback callback, void
     furi_check(instance);
 
     NfcListenerListElement* tail_element = instance->list.tail;
-    tail_element->listener_api->set_callback(tail_element->listener, callback, context);
+    tail_element->listener_api->set_callback(tail_element->listener, callback, NULL, context);
     nfc_start(instance->nfc, nfc_listener_start_callback, instance);
 }
 

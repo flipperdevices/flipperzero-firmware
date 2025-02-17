@@ -1,8 +1,10 @@
 #pragma once
 
 #include "iso14443_3a_poller.h"
+#include "iso14443_3a_poller_history_data.h"
 
 #include <toolbox/bit_buffer.h>
+#include <helpers/logger/nfc_logger_i.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,13 +34,6 @@ typedef struct {
     uint8_t cascade_level;
 } Iso14443_3aPollerColRes;
 
-typedef enum {
-    Iso14443_3aPollerStateIdle,
-    Iso14443_3aPollerStateColResInProgress,
-    Iso14443_3aPollerStateColResFailed,
-    Iso14443_3aPollerStateActivated,
-} Iso14443_3aPollerState;
-
 struct Iso14443_3aPoller {
     Nfc* nfc;
     Iso14443_3aPollerState state;
@@ -51,6 +46,9 @@ struct Iso14443_3aPoller {
     Iso14443_3aPollerEvent iso14443_3a_event;
     Iso14443_3aPollerEventData iso14443_3a_event_data;
     NfcGenericCallback callback;
+    NfcGenericLogHistoryCallback log_callback;
+    NfcHistoryItem history;
+    Iso14443_3aPollerHistoryData history_data;
     void* context;
 };
 

@@ -27,6 +27,9 @@ Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, Iso15693_3Data* data) {
     nfc_set_fdt_listen_fc(instance->nfc, ISO15693_3_FDT_LISTEN_FC);
     nfc_config(instance->nfc, NfcModeListener, NfcTechIso15693);
 
+    instance->history.base.protocol = NfcProtocolIso15693_3;
+    instance->history.base.data_block_size = sizeof(Iso15693_3ListenerHistoryData);
+    instance->history.data = &instance->history_data;
     return instance;
 }
 
@@ -41,11 +44,13 @@ void iso15693_3_listener_free(Iso15693_3Listener* instance) {
 void iso15693_3_listener_set_callback(
     Iso15693_3Listener* instance,
     NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
     void* context) {
     furi_assert(instance);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 const Iso15693_3Data* iso15693_3_listener_get_data(Iso15693_3Listener* instance) {
@@ -83,7 +88,7 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
             } else if(error == Iso15693_3ErrorUidMismatch) {
                 iso15693_3_listener_process_uid_mismatch(instance, rx_buffer);
             }
-
+            instance->history_data.error = error;
         } else if(bit_buffer_get_size(rx_buffer) == 0) {
             // Special case: Single EOF
             const Iso15693_3Error error = iso15693_3_listener_process_single_eof(instance);
@@ -93,13 +98,27 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
                     command = instance->callback(instance->generic_event, instance->context);
                 }
             }
+            instance->history_data.error = error;
         } else {
             FURI_LOG_D(
                 TAG, "Wrong CRC, buffer size: %zu", bit_buffer_get_size(nfc_event->data.buffer));
         }
     }
 
+    instance->history_data.command = command;
+    instance->history_data.event = nfc_event->type;
+    instance->history_data.state = instance->state;
+    instance->history.base.modified = true;
     return command;
+}
+
+void iso15693_3_log_history(NfcLogger* logger, void* context) {
+    Iso15693_3Listener* instance = context;
+
+    nfc_logger_append_history(logger, &instance->history);
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
 }
 
 const NfcListenerBase nfc_listener_iso15693_3 = {
@@ -108,4 +127,5 @@ const NfcListenerBase nfc_listener_iso15693_3 = {
     .set_callback = (NfcListenerSetCallback)iso15693_3_listener_set_callback,
     .get_data = (NfcListenerGetData)iso15693_3_listener_get_data,
     .run = (NfcListenerRun)iso15693_3_listener_run,
+    .log_history = (NfcListenerLogHistory)iso15693_3_log_history,
 };

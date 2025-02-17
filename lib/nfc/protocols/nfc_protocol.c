@@ -179,3 +179,37 @@ bool nfc_protocol_has_parent(NfcProtocol protocol, NfcProtocol parent_protocol) 
 
     return parent_found;
 }
+
+uint8_t nfc_protocol_layers_get_count(NfcProtocol protocol) {
+    furi_check(protocol < NfcProtocolNum);
+
+    const NfcProtocolTreeNode* iter = &nfc_protocol_nodes[protocol];
+    uint8_t layers_cnt = 1;
+    while(iter->parent_protocol != NfcProtocolInvalid) {
+        iter = &nfc_protocol_nodes[iter->parent_protocol];
+        layers_cnt++;
+    }
+    return layers_cnt;
+}
+
+NfcProtocol* nfc_protocol_layer_list_alloc(NfcProtocol protocol, uint8_t* size) {
+    furi_check(protocol < NfcProtocolNum);
+
+    uint8_t count = nfc_protocol_layers_get_count(protocol);
+
+    NfcProtocol* protocols = malloc(sizeof(NfcProtocol) * count);
+
+    NfcProtocol iter = protocol;
+    for(int8_t i = count; i > 0; i--) {
+        protocols[i - 1] = iter;
+        iter = nfc_protocol_get_parent(iter);
+    }
+
+    *size = count;
+    return protocols;
+}
+
+void nfc_protocol_layer_list_free(NfcProtocol* list) {
+    furi_check(list);
+    free(list);
+}

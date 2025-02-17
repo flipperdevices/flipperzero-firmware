@@ -237,7 +237,8 @@ void nfc_scene_mf_classic_dict_attack_on_enter(void* context) {
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewDictAttack);
     nfc_blink_read_start(instance);
     notification_message(instance->notifications, &sequence_display_backlight_enforce_on);
-
+    ///TODO: For now logger is disabled during dict attack
+    nfc_logger_config(nfc_get_logger(instance->nfc), false, NFC_LOG_FOLDER);
     instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfClassic);
     nfc_poller_start(instance->poller, nfc_dict_attack_worker_callback, instance);
 }

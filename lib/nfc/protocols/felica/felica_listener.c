@@ -30,6 +30,10 @@ FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
     nfc_felica_listener_set_sensf_res_data(
         nfc, data->idm.data, sizeof(data->idm), data->pmm.data, sizeof(data->pmm), system_code);
 
+    instance->history.base.protocol = NfcProtocolFelica;
+    instance->history.base.data_block_size = sizeof(FelicaListenerHistoryData);
+    instance->history.data = &instance->history_data;
+
     return instance;
 }
 
@@ -45,10 +49,12 @@ void felica_listener_free(FelicaListener* instance) {
 void felica_listener_set_callback(
     FelicaListener* listener,
     NfcGenericCallback callback,
+    NfcListenerLogHistory log_callback,
     void* context) {
     UNUSED(listener);
     UNUSED(callback);
     UNUSED(context);
+    listener->log_callback = log_callback;
 }
 
 const FelicaData* felica_listener_get_data(const FelicaListener* instance) {
@@ -159,6 +165,7 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
     FelicaListener* instance = context;
     NfcEvent* nfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
+    FelicaError error = FelicaErrorNone;
 
     if(nfc_event->type == NfcEventTypeFieldOn) {
         FURI_LOG_D(TAG, "Field On");
@@ -173,6 +180,7 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
         FURI_LOG_D(TAG, "Rx Done");
         do {
             if(!felica_crc_check(nfc_event->data.buffer)) {
+                error = FelicaErrorWrongCrc;
                 FURI_LOG_E(TAG, "Wrong CRC");
                 break;
             }
@@ -192,14 +200,29 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
                 break;
             }
 
-            FelicaError error = felica_listener_process_request(instance, request);
+            error = felica_listener_process_request(instance, request);
             if(error != FelicaErrorNone) {
                 FURI_LOG_E(TAG, "Processing error: %2X", error);
             }
         } while(false);
         bit_buffer_reset(nfc_event->data.buffer);
     }
+
+    instance->history_data.error = error;
+    instance->history_data.state = instance->state;
+    instance->history_data.event = nfc_event->type;
+    instance->history_data.command = command;
+    instance->history.base.modified = true;
     return command;
+}
+
+void felica_listener_log_history(NfcLogger* logger, void* context) {
+    FelicaListener* instance = context;
+    nfc_logger_append_history(logger, &instance->history);
+
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
 }
 
 const NfcListenerBase nfc_listener_felica = {
@@ -208,4 +231,5 @@ const NfcListenerBase nfc_listener_felica = {
     .set_callback = (NfcListenerSetCallback)felica_listener_set_callback,
     .get_data = (NfcListenerGetData)felica_listener_get_data,
     .run = (NfcListenerRun)felica_listener_run,
+    .log_history = (NfcListenerLogHistory)felica_listener_log_history,
 };

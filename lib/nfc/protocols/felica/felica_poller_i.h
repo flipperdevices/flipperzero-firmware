@@ -1,7 +1,9 @@
 #pragma once
 
 #include "felica_poller.h"
+#include "felica_poller_history_data.h"
 #include <toolbox/bit_buffer.h>
+#include <helpers/logger/nfc_logger_i.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,18 +15,6 @@ extern "C" {
 
 #define FELICA_POLLER_CMD_POLLING_REQ_CODE  (0x00U)
 #define FELICA_POLLER_CMD_POLLING_RESP_CODE (0x01U)
-
-typedef enum {
-    FelicaPollerStateIdle,
-    FelicaPollerStateActivated,
-    FelicaPollerStateAuthenticateInternal,
-    FelicaPollerStateAuthenticateExternal,
-    FelicaPollerStateReadBlocks,
-    FelicaPollerStateReadSuccess,
-    FelicaPollerStateReadFailed,
-
-    FelicaPollerStateNum
-} FelicaPollerState;
 
 struct FelicaPoller {
     Nfc* nfc;
@@ -39,7 +29,10 @@ struct FelicaPoller {
     FelicaPollerEvent felica_event;
     FelicaPollerEventData felica_event_data;
     NfcGenericCallback callback;
+    NfcGenericLogHistoryCallback log_callback;
     uint8_t block_index;
+    NfcHistoryItem history;
+    FelicaPollerHistoryData history_data;
     void* context;
 };
 
@@ -96,7 +89,7 @@ FelicaError felica_poller_read_blocks(
  * @return FelicaErrorNone on success, an error code on failure.
 */
 FelicaError felica_poller_write_blocks(
-    const FelicaPoller* instance,
+    FelicaPoller* instance,
     const uint8_t block_count,
     const uint8_t* const block_numbers,
     const uint8_t* data,
@@ -115,7 +108,7 @@ FelicaError felica_poller_write_blocks(
  * @return FelicaErrorNone on success, an error code on failure.
  */
 FelicaError felica_poller_frame_exchange(
-    const FelicaPoller* instance,
+    FelicaPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt);

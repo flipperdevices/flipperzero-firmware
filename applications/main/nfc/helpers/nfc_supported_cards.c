@@ -160,7 +160,7 @@ static const NfcSupportedCardsPlugin* nfc_supported_cards_get_next_plugin(
                &instance->file_name[suffix_start_pos],
                NFC_SUPPORTED_CARDS_PLUGIN_SUFFIX,
                suffix_len) != 0) //-V1051
-            break;
+            continue; //Continue scanning plugin forlder because now there can be not only '_parser.fal' plugins
 
         // Trim suffix from file_name to save memory. The suffix will be concatenated on plugin load.
         instance->file_name[suffix_start_pos] = '\0';

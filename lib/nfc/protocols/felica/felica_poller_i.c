@@ -16,7 +16,7 @@ static FelicaError felica_poller_process_error(NfcError error) {
 }
 
 FelicaError felica_poller_frame_exchange(
-    const FelicaPoller* instance,
+    FelicaPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
@@ -27,11 +27,22 @@ FelicaError felica_poller_frame_exchange(
 
     felica_crc_append(instance->tx_buffer);
 
-    FelicaError ret = FelicaErrorNone;
+    NfcLogger* logger = nfc_get_logger(instance->nfc);
+    nfc_logger_append_request_data(
+        logger,
+        bit_buffer_get_data(instance->tx_buffer),
+        bit_buffer_get_size_bytes(instance->tx_buffer));
 
+    FelicaError ret = FelicaErrorNone;
     do {
         NfcError error =
             nfc_poller_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
+
+        nfc_logger_append_response_data(
+            logger,
+            bit_buffer_get_data(instance->rx_buffer),
+            bit_buffer_get_size_bytes(instance->rx_buffer));
+
         if(error != NfcErrorNone) {
             ret = felica_poller_process_error(error);
             break;
@@ -46,6 +57,7 @@ FelicaError felica_poller_frame_exchange(
         felica_crc_trim(rx_buffer);
     } while(false);
 
+    instance->history_data.error = ret;
     return ret;
 }
 
@@ -159,7 +171,7 @@ FelicaError felica_poller_read_blocks(
 }
 
 FelicaError felica_poller_write_blocks(
-    const FelicaPoller* instance,
+    FelicaPoller* instance,
     const uint8_t block_count,
     const uint8_t* const block_numbers,
     const uint8_t* data,

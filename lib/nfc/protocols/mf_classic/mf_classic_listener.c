@@ -74,6 +74,9 @@ static MfClassicListenerCommand mf_classic_listener_auth_first_part_handler(
         instance->auth_context.key_type = key_type;
         instance->auth_context.block_num = block_num;
 
+        instance->history_data.key = *key;
+        instance->history_data.cuid = cuid;
+
         furi_hal_random_fill_buf(instance->auth_context.nt.data, sizeof(MfClassicNt));
         uint32_t nt_num =
             bit_lib_bytes_to_num_be(instance->auth_context.nt.data, sizeof(MfClassicNt));
@@ -179,6 +182,13 @@ static MfClassicListenerCommand
         instance->state = MfClassicListenerStateAuthComplete;
         instance->comm_state = MfClassicListenerCommStateEncrypted;
         command = MfClassicListenerCommandProcessed;
+        instance->history_data.comms_state = instance->comm_state;
+
+        memcpy(
+            &instance->history_data.auth_context,
+            &instance->auth_context,
+            sizeof(MfClassicAuthContext));
+        memcpy(&instance->history_data.crypto, instance->crypto, sizeof(Crypto1));
 
         if(instance->callback) {
             instance->mfc_event.type = MfClassicListenerEventTypeAuthContextFullCollected,
@@ -564,6 +574,10 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
     Iso14443_3aListenerEvent* iso3_event = event.event_data;
     BitBuffer* rx_buffer_plain;
 
+    instance->history_data.event = iso3_event->type;
+    instance->history_data.state = instance->state;
+    instance->history_data.comms_state = instance->comm_state;
+
     if(iso3_event->type == Iso14443_3aListenerEventTypeFieldOff) {
         mf_classic_listener_reset_state(instance);
         command = NfcCommandSleep;
@@ -572,10 +586,13 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
         (iso3_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame)) {
         if(instance->comm_state == MfClassicListenerCommStateEncrypted) {
             if(instance->state == MfClassicListenerStateAuthComplete) {
+                memcpy(&instance->history_data.crypto, instance->crypto, sizeof(Crypto1));
                 crypto1_decrypt(
                     instance->crypto, iso3_event->data->buffer, instance->rx_plain_buffer);
                 rx_buffer_plain = instance->rx_plain_buffer;
-                if(iso14443_crc_check(Iso14443CrcTypeA, rx_buffer_plain)) {
+                const bool crc_ok = iso14443_crc_check(Iso14443CrcTypeA, rx_buffer_plain);
+                instance->history_data.crc_ok = crc_ok;
+                if(crc_ok) {
                     iso14443_crc_trim(rx_buffer_plain);
                 }
             } else {
@@ -583,6 +600,8 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
             }
         } else {
             rx_buffer_plain = iso3_event->data->buffer;
+            instance->history_data.crc_ok = iso3_event->type ==
+                                            Iso14443_3aListenerEventTypeReceivedStandardFrame;
         }
 
         MfClassicListenerCommand mfc_command = MfClassicListenerCommandNack;
@@ -607,6 +626,7 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
                 break;
             }
         }
+        instance->history_data.mfc_command = mfc_command;
 
         if(mfc_command == MfClassicListenerCommandAck) {
             mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_ACK);
@@ -630,6 +650,8 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
         mf_classic_listener_reset_state(instance);
     }
 
+    instance->history_data.command = command;
+    instance->history.base.modified = true;
     return command;
 }
 
@@ -649,6 +671,10 @@ MfClassicListener*
     instance->generic_event.protocol = NfcProtocolMfClassic;
     instance->generic_event.event_data = &instance->mfc_event;
     instance->generic_event.instance = instance;
+
+    instance->history.base.protocol = NfcProtocolMfClassic;
+    instance->history.base.data_block_size = sizeof(MfClassicListenerHistoryData);
+    instance->history.data = &instance->history_data;
 
     return instance;
 }
@@ -672,11 +698,13 @@ void mf_classic_listener_free(MfClassicListener* instance) {
 void mf_classic_listener_set_callback(
     MfClassicListener* instance,
     NfcGenericCallback callback,
+    NfcGenericLogHistoryCallback log_callback,
     void* context) {
     furi_assert(instance);
 
     instance->callback = callback;
     instance->context = context;
+    instance->log_callback = log_callback;
 }
 
 const MfClassicData* mf_classic_listener_get_data(const MfClassicListener* instance) {
@@ -686,10 +714,22 @@ const MfClassicData* mf_classic_listener_get_data(const MfClassicListener* insta
     return instance->data;
 }
 
+void mf_classic_log_history(NfcLogger* logger, void* context) {
+    MfClassicListener* instance = context;
+    nfc_logger_append_history(logger, &instance->history);
+
+    instance->history_data.crc_ok = false;
+
+    if(instance->log_callback) {
+        instance->log_callback(logger, instance->context);
+    }
+}
+
 const NfcListenerBase mf_classic_listener = {
     .alloc = (NfcListenerAlloc)mf_classic_listener_alloc,
     .free = (NfcListenerFree)mf_classic_listener_free,
     .set_callback = (NfcListenerSetCallback)mf_classic_listener_set_callback,
     .get_data = (NfcListenerGetData)mf_classic_listener_get_data,
     .run = (NfcListenerRun)mf_classic_listener_run,
+    .log_history = (NfcGenericLogHistoryCallback)mf_classic_log_history,
 };

@@ -2,6 +2,7 @@
 
 #include "nfc.h"
 
+#include "helpers/logger/nfc_logger_i.h"
 #include <furi_hal_nfc.h>
 #include <furi/furi.h>
 
@@ -59,6 +60,7 @@ struct Nfc {
     size_t rx_bits;
 
     FuriThread* worker_thread;
+    NfcLogger* logger;
 };
 
 typedef bool (*NfcWorkerPollerStateHandler)(Nfc* instance);
@@ -119,6 +121,7 @@ static int32_t nfc_worker_listener(void* context) {
 
     while(true) {
         FuriHalNfcEvent event = furi_hal_nfc_listener_wait_event(FURI_HAL_NFC_EVENT_WAIT_FOREVER);
+        nfc_logger_transaction_begin(instance->logger, event);
         if(event & FuriHalNfcEventAbortRequest) {
             nfc_event.type = NfcEventTypeUserAbort;
             instance->callback(nfc_event, instance->context);
@@ -144,6 +147,12 @@ static int32_t nfc_worker_listener(void* context) {
             furi_hal_nfc_listener_rx(
                 instance->rx_buffer, sizeof(instance->rx_buffer), &instance->rx_bits);
             bit_buffer_copy_bits(event_data.buffer, instance->rx_buffer, instance->rx_bits);
+
+            nfc_logger_append_request_data(
+                instance->logger,
+                bit_buffer_get_data(event_data.buffer),
+                bit_buffer_get_size_bytes(event_data.buffer));
+
             command = instance->callback(nfc_event, instance->context);
             if(command == NfcCommandStop) {
                 break;
@@ -153,6 +162,7 @@ static int32_t nfc_worker_listener(void* context) {
                 furi_hal_nfc_listener_idle();
             }
         }
+        nfc_logger_transaction_end(instance->logger);
     }
 
     furi_hal_nfc_reset_mode();
@@ -179,6 +189,7 @@ bool nfc_worker_poller_ready_handler(Nfc* instance) {
     NfcCommand command = NfcCommandContinue;
 
     NfcEvent event = {.type = NfcEventTypePollerReady};
+    nfc_logger_transaction_begin(instance->logger, FuriHalNfcEventTxStart);
     command = instance->callback(event, instance->context);
     if(command == NfcCommandReset) {
         instance->poller_state = NfcPollerStateReset;
@@ -186,6 +197,7 @@ bool nfc_worker_poller_ready_handler(Nfc* instance) {
         instance->poller_state = NfcPollerStateStop;
     }
 
+    nfc_logger_transaction_end(instance->logger);
     return false;
 }
 
@@ -249,6 +261,7 @@ Nfc* nfc_alloc(void) {
     furi_thread_set_priority(instance->worker_thread, FuriThreadPriorityHighest);
     furi_thread_set_stack_size(instance->worker_thread, 8 * 1024);
 
+    instance->logger = nfc_logger_alloc();
     return instance;
 }
 
@@ -256,6 +269,7 @@ void nfc_free(Nfc* instance) {
     furi_check(instance);
     furi_check(instance->state == NfcStateIdle);
 
+    nfc_logger_free(instance->logger);
     furi_thread_free(instance->worker_thread);
     free(instance);
 
@@ -320,6 +334,7 @@ void nfc_start(Nfc* instance, NfcEventCallback callback, void* context) {
         furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
     }
     instance->comm_state = NfcCommStateIdle;
+    nfc_logger_start(instance->logger, instance->mode);
     furi_thread_start(instance->worker_thread);
 }
 
@@ -333,6 +348,8 @@ void nfc_stop(Nfc* instance) {
     furi_thread_join(instance->worker_thread);
 
     instance->state = NfcStateIdle;
+
+    nfc_logger_stop(instance->logger);
 }
 
 NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
@@ -344,8 +361,11 @@ NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
     while(furi_hal_nfc_timer_block_tx_is_running()) {
     }
 
-    FuriHalNfcError error =
-        furi_hal_nfc_listener_tx(bit_buffer_get_data(tx_buffer), bit_buffer_get_size(tx_buffer));
+    const uint8_t* data = bit_buffer_get_data(tx_buffer);
+
+    FuriHalNfcError error = furi_hal_nfc_listener_tx(data, bit_buffer_get_size(tx_buffer));
+    nfc_logger_append_response_data(instance->logger, data, bit_buffer_get_size_bytes(tx_buffer));
+
     if(error != FuriHalNfcErrorNone) {
         FURI_LOG_D(TAG, "Failed in listener TX");
         ret = nfc_process_hal_error(error);
@@ -505,6 +525,11 @@ NfcError
     return ret;
 }
 
+NfcLogger* nfc_get_logger(Nfc* instance) {
+    furi_assert(instance);
+    return instance->logger;
+}
+
 NfcError nfc_iso14443a_listener_set_col_res_data(
     Nfc* instance,
     uint8_t* uid,
@@ -629,6 +654,10 @@ NfcError nfc_iso14443a_listener_tx_custom_parity(Nfc* instance, const BitBuffer*
     size_t tx_bits = bit_buffer_get_size(tx_buffer);
 
     error = furi_hal_nfc_iso14443a_listener_tx_custom_parity(tx_data, tx_parity, tx_bits);
+
+    size_t tx_size = bit_buffer_get_size_bytes(tx_buffer);
+    nfc_logger_append_response_data(instance->logger, tx_data, tx_size);
+
     ret = nfc_process_hal_error(error);
 
     return ret;

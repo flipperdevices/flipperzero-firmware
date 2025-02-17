@@ -15,6 +15,7 @@ env.Append(
         File("nfc_poller.h"),
         File("nfc_scanner.h"),
         # Protocols
+        File("protocols/nfc_protocol.h"),
         File("protocols/iso14443_3a/iso14443_3a.h"),
         File("protocols/iso14443_3b/iso14443_3b.h"),
         File("protocols/iso14443_4a/iso14443_4a.h"),
@@ -28,22 +29,39 @@ env.Append(
         File("protocols/felica/felica.h"),
         # Pollers
         File("protocols/iso14443_3a/iso14443_3a_poller.h"),
+        File("protocols/iso14443_3a/iso14443_3a_poller_history_data.h"),
         File("protocols/iso14443_3b/iso14443_3b_poller.h"),
+        File("protocols/iso14443_3b/iso14443_3b_poller_history_data.h"),
         File("protocols/iso14443_4a/iso14443_4a_poller.h"),
+        File("protocols/iso14443_4a/iso14443_4a_poller_history_data.h"),
         File("protocols/iso14443_4b/iso14443_4b_poller.h"),
+        File("protocols/iso14443_4b/iso14443_4b_poller_history_data.h"),
         File("protocols/mf_ultralight/mf_ultralight_poller.h"),
+        File("protocols/mf_ultralight/mf_ultralight_poller_history_data.h"),
         File("protocols/mf_classic/mf_classic_poller.h"),
         File("protocols/mf_plus/mf_plus_poller.h"),
+        File("protocols/mf_plus/mf_plus_poller_history_data.h"),
         File("protocols/mf_desfire/mf_desfire_poller.h"),
+        File("protocols/mf_desfire/mf_desfire_poller_history_data.h"),
+        File("protocols/iso15693_3/iso15693_3_poller_history_data.h"),
         File("protocols/slix/slix_poller.h"),
+        File("protocols/slix/slix_poller_history_data.h"),
         File("protocols/st25tb/st25tb_poller.h"),
+        File("protocols/st25tb/st25tb_poller_history_data.h"),
         File("protocols/felica/felica_poller.h"),
+        File("protocols/felica/felica_poller_history_data.h"),
         # Listeners
         File("protocols/iso14443_3a/iso14443_3a_listener.h"),
+        File("protocols/iso14443_3a/iso14443_3a_listener_history_data.h"),
         File("protocols/iso14443_4a/iso14443_4a_listener.h"),
+        File("protocols/iso14443_4a/iso14443_4a_listener_history_data.h"),
         File("protocols/mf_ultralight/mf_ultralight_listener.h"),
+        File("protocols/mf_ultralight/mf_ultralight_listener_history_data.h"),
         File("protocols/mf_classic/mf_classic_listener.h"),
         File("protocols/felica/felica_listener.h"),
+        File("protocols/felica/felica_listener_history_data.h"),
+        File("protocols/iso15693_3/iso15693_3_listener_history_data.h"),
+        File("protocols/slix/slix_listener_history_data.h"),
         # Sync API
         File("protocols/iso14443_3a/iso14443_3a_poller_sync.h"),
         File("protocols/mf_ultralight/mf_ultralight_poller_sync.h"),
@@ -56,6 +74,12 @@ env.Append(
         File("helpers/iso13239_crc.h"),
         File("helpers/nfc_data_generator.h"),
         File("helpers/crypto1.h"),
+        File("helpers/logger/transaction/nfc_transaction.h"),
+        File("helpers/logger/nfc_trace_data_type.h"),
+        File("helpers/logger/transaction/nfc_transaction_data_type.h"),
+        File("helpers/logger/transaction/nfc_packet_data_type.h"),
+        File("helpers/logger/history/nfc_history_data_type.h"),
+        File("helpers/logger/history/nfc_history_chain_data_type.h"),
     ],
 )
 
@@ -63,6 +87,7 @@ libenv = env.Clone(FW_LIB_NAME="nfc")
 libenv.ApplyLibFlags()
 
 sources = libenv.GlobRecursive("*.c*")
+
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

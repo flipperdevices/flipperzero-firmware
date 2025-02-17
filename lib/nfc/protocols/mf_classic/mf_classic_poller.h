@@ -84,6 +84,58 @@ typedef enum {
     MfClassicBackdoorAuth3, // Tag responds to v3 auth backdoor (static encrypted nonce)
 } MfClassicBackdoor;
 
+/// @brief MfClassic poller states
+typedef enum {
+    MfClassicPollerStateDetectType,
+    MfClassicPollerStateStart,
+
+    // Write states
+    MfClassicPollerStateRequestSectorTrailer,
+    MfClassicPollerStateCheckWriteConditions,
+    MfClassicPollerStateReadBlock,
+    MfClassicPollerStateWriteBlock,
+    MfClassicPollerStateWriteValueBlock,
+
+    // Read states
+    MfClassicPollerStateRequestReadSector,
+    MfClassicPollerStateReadSectorBlocks,
+
+    // Dict attack states
+    MfClassicPollerStateNextSector,
+    MfClassicPollerStateAnalyzeBackdoor,
+    MfClassicPollerStateBackdoorReadSector,
+    MfClassicPollerStateRequestKey,
+    MfClassicPollerStateReadSector,
+    MfClassicPollerStateAuthKeyA,
+    MfClassicPollerStateAuthKeyB,
+    MfClassicPollerStateKeyReuseStart,
+    MfClassicPollerStateKeyReuseStartNoOffset,
+    MfClassicPollerStateKeyReuseAuthKeyA,
+    MfClassicPollerStateKeyReuseAuthKeyB,
+    MfClassicPollerStateKeyReuseReadSector,
+    MfClassicPollerStateSuccess,
+    MfClassicPollerStateFail,
+
+    // Enhanced dictionary attack states
+    MfClassicPollerStateNestedAnalyzePRNG,
+    MfClassicPollerStateNestedCalibrate,
+    MfClassicPollerStateNestedCollectNt,
+    MfClassicPollerStateNestedController,
+    MfClassicPollerStateNestedCollectNtEnc,
+    MfClassicPollerStateNestedDictAttack,
+    MfClassicPollerStateNestedLog,
+
+    MfClassicPollerStateNum,
+} MfClassicPollerState;
+
+typedef struct {
+    uint8_t current_sector;
+    uint16_t current_block;
+    MfClassicKeyType key_type;
+    MfClassicKey key;
+    bool auth_passed;
+} MfClassicPollerReadContext;
+
 /**
  * @brief MfClassic poller request mode event data.
  *

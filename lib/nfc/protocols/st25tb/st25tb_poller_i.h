@@ -1,25 +1,16 @@
 #pragma once
 
 #include "st25tb_poller.h"
+#include "st25tb_poller_history_data.h"
 
 #include <nfc/nfc_poller.h>
+#include <helpers/logger/nfc_logger_i.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define ST25TB_POLLER_MAX_BUFFER_SIZE (16U)
-
-typedef enum {
-    St25tbPollerStateSelect,
-    St25tbPollerStateRequestMode,
-    St25tbPollerStateRead,
-    St25tbPollerStateWrite,
-    St25tbPollerStateSuccess,
-    St25tbPollerStateFailure,
-
-    St25tbPollerStateNum,
-} St25tbPollerState;
 
 typedef struct {
     uint8_t current_block;
@@ -48,6 +39,9 @@ struct St25tbPoller {
     St25tbPollerEvent st25tb_event;
     St25tbPollerEventData st25tb_event_data;
     NfcGenericCallback callback;
+    NfcGenericLogHistoryCallback log_callback;
+    NfcHistoryItem history;
+    St25tbPollerHistoryData history_data;
     void* context;
 };
 
