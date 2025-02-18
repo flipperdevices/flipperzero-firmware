@@ -82,6 +82,8 @@
 #define NFC_APP_MF_CLASSIC_DICT_SYSTEM_NESTED_PATH \
     (NFC_APP_FOLDER "/assets/mf_classic_dict_nested.nfc")
 
+#define NFC_MFKEY32_APP_PATH (EXT_PATH("apps/NFC/mfkey.fap"))
+
 typedef enum {
     NfcRpcStateIdle,
     NfcRpcStateEmulating,
