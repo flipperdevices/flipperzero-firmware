@@ -213,3 +213,9 @@ void widget_add_circle_element(Widget* widget, uint8_t x, uint8_t y, uint8_t rad
     WidgetElement* circle_element = widget_element_circle_create(x, y, radius, fill);
     widget_add_element(widget, circle_element);
 }
+
+void widget_add_line_element(Widget* widget, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+    furi_check(widget);
+    WidgetElement* frame_element = widget_element_line_create(x1, y1, x2, y2);
+    widget_add_element(widget, frame_element);
+}

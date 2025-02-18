@@ -44,6 +44,7 @@ type ButtonElement = { element: "button", button: "left" | "center" | "right" } 
 type IconElement = { element: "icon", iconData: IconData } & Position;
 type FrameElement = { element: "frame", radius: number, fill: boolean } & Position & Size;
 type CircleElement = { element: "circle", radius: number, fill: boolean } & Position;
+type LineElement = { element: "line", x1: number, y1: number, x2: number, y2: number };
 
 type Element = StringMultilineElement
     | StringElement
@@ -52,7 +53,8 @@ type Element = StringMultilineElement
     | ButtonElement
     | IconElement
     | FrameElement
-    | CircleElement;
+    | CircleElement
+    | LineElement;
 
 type Props = {};
 type Child = Element;

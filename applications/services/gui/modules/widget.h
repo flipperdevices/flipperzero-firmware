@@ -180,6 +180,16 @@ void widget_add_frame_element(
  */
 void widget_add_circle_element(Widget* widget, uint8_t x, uint8_t y, uint8_t radius, bool fill);
 
+/** Add Line Element
+ *
+ * @param      widget  Widget instance
+ * @param      x1      first x coordinate
+ * @param      y1      first y coordinate
+ * @param      x2      second x coordinate
+ * @param      y2      second y coordinate
+ */
+void widget_add_line_element(Widget* widget, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
+
 #ifdef __cplusplus
 }
 #endif

@@ -232,6 +232,22 @@ static bool js_widget_add_child(
                 mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element fill");
         int32_t fill = mjs_get_bool(mjs, fill_in);
         widget_add_circle_element(widget, x, y, radius, fill);
+
+    } else if(strcmp(element_type, "line") == 0) {
+        int32_t x1, y1, x2, y2;
+        mjs_val_t x1_in = mjs_get(mjs, child_obj, "x1", ~0);
+        mjs_val_t y1_in = mjs_get(mjs, child_obj, "y1", ~0);
+        mjs_val_t x2_in = mjs_get(mjs, child_obj, "x2", ~0);
+        mjs_val_t y2_in = mjs_get(mjs, child_obj, "y2", ~0);
+        if(!mjs_is_number(x1_in) || !mjs_is_number(y1_in) || !mjs_is_number(x2_in) ||
+           !mjs_is_number(y2_in))
+            JS_ERROR_AND_RETURN_VAL(
+                mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element positions");
+        x1 = mjs_get_int32(mjs, x1_in);
+        y1 = mjs_get_int32(mjs, y1_in);
+        x2 = mjs_get_int32(mjs, x2_in);
+        y2 = mjs_get_int32(mjs, y2_in);
+        widget_add_line_element(widget, x1, y1, x2, y2);
     }
 
     return true;
