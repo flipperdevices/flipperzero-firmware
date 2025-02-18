@@ -79,7 +79,8 @@ WidgetElement* widget_element_frame_create(
     uint8_t y,
     uint8_t width,
     uint8_t height,
-    uint8_t radius);
+    uint8_t radius,
+    bool fill);
 
 WidgetElement* widget_element_text_scroll_create(
     uint8_t x,

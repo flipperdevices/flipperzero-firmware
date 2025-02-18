@@ -201,8 +201,9 @@ void widget_add_frame_element(
     uint8_t y,
     uint8_t width,
     uint8_t height,
-    uint8_t radius) {
+    uint8_t radius,
+    bool fill) {
     furi_check(widget);
-    WidgetElement* frame_element = widget_element_frame_create(x, y, width, height, radius);
+    WidgetElement* frame_element = widget_element_frame_create(x, y, width, height, radius, fill);
     widget_add_element(widget, frame_element);
 }

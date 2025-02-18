@@ -159,6 +159,7 @@ void widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* i
  * @param      width   frame width
  * @param      height  frame height
  * @param      radius  frame radius
+ * @param      fill    whether to fill the box or not
  */
 void widget_add_frame_element(
     Widget* widget,
@@ -166,7 +167,8 @@ void widget_add_frame_element(
     uint8_t y,
     uint8_t width,
     uint8_t height,
-    uint8_t radius);
+    uint8_t radius,
+    bool fill);
 
 #ifdef __cplusplus
 }
