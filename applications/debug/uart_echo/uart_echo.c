@@ -341,6 +341,9 @@ static void uart_echo_app_free(UartEchoApp* app) {
     free(app);
 }
 
+// silences "same-assignment" false positives in the arg parser below
+// -V::1048
+
 int32_t uart_echo_app(void* p) {
     uint32_t baudrate = DEFAULT_BAUD_RATE;
     FuriHalSerialDataBits data_bits = DEFAULT_DATA_BITS;
