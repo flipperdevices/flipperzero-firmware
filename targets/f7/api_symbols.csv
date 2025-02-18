@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,80.1,,
+Version,+,81.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
@@ -3744,8 +3744,10 @@ Function,-,vsscanf,int,"const char*, const char*, __gnuc_va_list"
 Function,-,wcstombs,size_t,"char*, const wchar_t*, size_t"
 Function,-,wctomb,int,"char*, wchar_t"
 Function,+,widget_add_button_element,void,"Widget*, GuiButtonType, const char*, ButtonCallback, void*"
-Function,+,widget_add_frame_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t"
+Function,+,widget_add_circle_element,void,"Widget*, uint8_t, uint8_t, uint8_t, _Bool"
+Function,+,widget_add_frame_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, _Bool"
 Function,+,widget_add_icon_element,void,"Widget*, uint8_t, uint8_t, const Icon*"
+Function,+,widget_add_line_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,widget_add_string_element,void,"Widget*, uint8_t, uint8_t, Align, Align, Font, const char*"
 Function,+,widget_add_string_multiline_element,void,"Widget*, uint8_t, uint8_t, Align, Align, Font, const char*"
 Function,+,widget_add_text_box_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, Align, Align, const char*, _Bool"
