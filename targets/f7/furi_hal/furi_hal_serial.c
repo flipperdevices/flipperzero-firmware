@@ -120,7 +120,7 @@ static void furi_hal_serial_usart_irq_callback(void* context) {
     }
     if(USART1->ISR & USART_ISR_PE) {
         USART1->ICR = USART_ICR_PECF;
-        event |= FuriHalSerialRxEventFrameError;
+        event |= FuriHalSerialRxEventParityError;
     }
 
     if(furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr == NULL) {
@@ -195,7 +195,7 @@ static void furi_hal_serial_usart_init_dma_rx(void) {
     LL_DMA_SetPeriphAddress(
         FURI_HAL_SERIAL_USART_DMA_INSTANCE,
         FURI_HAL_SERIAL_USART_DMA_CHANNEL,
-        (uint32_t) & (USART1->RDR));
+        (uint32_t)&(USART1->RDR));
 
     LL_DMA_ConfigTransfer(
         FURI_HAL_SERIAL_USART_DMA_INSTANCE,
@@ -321,7 +321,7 @@ static void furi_hal_serial_lpuart_irq_callback(void* context) {
     }
     if(LPUART1->ISR & USART_ISR_PE) {
         LPUART1->ICR = USART_ICR_PECF;
-        event |= FuriHalSerialRxEventFrameError;
+        event |= FuriHalSerialRxEventParityError;
     }
 
     if(furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr == NULL) {
@@ -396,7 +396,7 @@ static void furi_hal_serial_lpuart_init_dma_rx(void) {
     LL_DMA_SetPeriphAddress(
         FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
         FURI_HAL_SERIAL_LPUART_DMA_CHANNEL,
-        (uint32_t) & (LPUART1->RDR));
+        (uint32_t)&(LPUART1->RDR));
 
     LL_DMA_ConfigTransfer(
         FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
@@ -600,6 +600,130 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
             uint32_t uartclk = LL_RCC_GetLPUARTClockFreq(LL_RCC_LPUART1_CLKSOURCE);
             LL_LPUART_SetPrescaler(LPUART1, prescaler);
             LL_LPUART_SetBaudRate(LPUART1, uartclk, prescaler, baud);
+            LL_LPUART_Enable(LPUART1);
+        }
+    }
+}
+
+static void furi_hal_serial_usart_configure_framing(
+    FuriHalSerialDataBits data_bits,
+    FuriHalSerialParity parity,
+    FuriHalSerialStopBits stop_bits) {
+    uint32_t st_hal_data_bits;
+    if(data_bits == FuriHalSerialDataBits7) {
+        st_hal_data_bits = LL_USART_DATAWIDTH_7B;
+    } else if(data_bits == FuriHalSerialDataBits8) {
+        st_hal_data_bits = LL_USART_DATAWIDTH_8B;
+    } else if(data_bits == FuriHalSerialDataBits9) {
+        st_hal_data_bits = LL_USART_DATAWIDTH_9B;
+    } else {
+        furi_crash();
+    }
+    LL_USART_SetDataWidth(USART1, st_hal_data_bits);
+
+    uint32_t st_hal_parity;
+    if(parity == FuriHalSerialParityNone) {
+        st_hal_parity = LL_USART_PARITY_NONE;
+    } else if(parity == FuriHalSerialParityEven) {
+        st_hal_parity = LL_USART_PARITY_EVEN;
+    } else if(parity == FuriHalSerialParityOdd) {
+        st_hal_parity = LL_USART_PARITY_ODD;
+    } else {
+        furi_crash();
+    }
+    LL_USART_SetParity(USART1, st_hal_parity);
+
+    uint32_t st_hal_stop_bits;
+    if(stop_bits == FuriHalSerialStopBits0_5) {
+        st_hal_stop_bits = LL_USART_STOPBITS_0_5;
+    } else if(stop_bits == FuriHalSerialStopBits1) {
+        st_hal_stop_bits = LL_USART_STOPBITS_1;
+    } else if(stop_bits == FuriHalSerialStopBits1_5) {
+        st_hal_stop_bits = LL_USART_STOPBITS_1_5;
+    } else if(stop_bits == FuriHalSerialStopBits2) {
+        st_hal_stop_bits = LL_USART_STOPBITS_2;
+    } else {
+        furi_crash();
+    }
+    LL_USART_SetStopBitsLength(USART1, st_hal_stop_bits);
+}
+
+static void furi_hal_serial_lpuart_configure_framing(
+    FuriHalSerialDataBits data_bits,
+    FuriHalSerialParity parity,
+    FuriHalSerialStopBits stop_bits) {
+    uint32_t st_hal_data_bits;
+    if(data_bits == FuriHalSerialDataBits7)
+        st_hal_data_bits = LL_LPUART_DATAWIDTH_7B;
+    else if(data_bits == FuriHalSerialDataBits8)
+        st_hal_data_bits = LL_LPUART_DATAWIDTH_8B;
+    else if(data_bits == FuriHalSerialDataBits9)
+        st_hal_data_bits = LL_LPUART_DATAWIDTH_9B;
+    else
+        furi_crash();
+    LL_LPUART_SetDataWidth(LPUART1, st_hal_data_bits);
+
+    uint32_t st_hal_parity;
+    if(parity == FuriHalSerialParityNone)
+        st_hal_parity = LL_LPUART_PARITY_NONE;
+    else if(parity == FuriHalSerialParityEven)
+        st_hal_parity = LL_LPUART_PARITY_EVEN;
+    else if(parity == FuriHalSerialParityOdd)
+        st_hal_parity = LL_LPUART_PARITY_ODD;
+    else
+        furi_crash();
+    LL_LPUART_SetParity(LPUART1, st_hal_parity);
+
+    uint32_t st_hal_stop_bits;
+    if(stop_bits == FuriHalSerialStopBits1)
+        st_hal_stop_bits = LL_LPUART_STOPBITS_1;
+    else if(stop_bits == FuriHalSerialStopBits2)
+        st_hal_stop_bits = LL_LPUART_STOPBITS_2;
+    else
+        furi_crash();
+    LL_LPUART_SetStopBitsLength(LPUART1, st_hal_stop_bits);
+}
+
+void furi_hal_serial_configure_framing(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialDataBits data_bits,
+    FuriHalSerialParity parity,
+    FuriHalSerialStopBits stop_bits) {
+    furi_check(handle);
+
+    // Unsupported combinations
+    if(data_bits == FuriHalSerialDataBits9) furi_check(parity == FuriHalSerialParityNone);
+    if(data_bits == FuriHalSerialDataBits6) furi_check(parity != FuriHalSerialParityNone);
+
+    // Extend data word to account for parity bit
+    if(parity != FuriHalSerialParityNone) {
+        if(data_bits == FuriHalSerialDataBits6)
+            data_bits = FuriHalSerialDataBits7;
+        else if(data_bits == FuriHalSerialDataBits7)
+            data_bits = FuriHalSerialDataBits8;
+        else if(data_bits == FuriHalSerialDataBits8)
+            data_bits = FuriHalSerialDataBits9;
+    }
+
+    if(handle->id == FuriHalSerialIdUsart) {
+        if(LL_USART_IsEnabled(USART1)) {
+            // Wait for transfer complete flag
+            while(!LL_USART_IsActiveFlag_TC(USART1))
+                ;
+            LL_USART_Disable(USART1);
+            furi_hal_serial_usart_configure_framing(data_bits, parity, stop_bits);
+            LL_USART_Enable(USART1);
+        }
+    } else if(handle->id == FuriHalSerialIdLpuart) {
+        // Unsupported configurations
+        furi_check(stop_bits == FuriHalSerialStopBits1 || stop_bits == FuriHalSerialStopBits2);
+
+        if(LL_LPUART_IsEnabled(LPUART1)) {
+            // Wait for transfer complete flag
+            while(!LL_LPUART_IsActiveFlag_TC(LPUART1))
+                ;
+            LL_LPUART_Disable(LPUART1);
+            furi_hal_serial_lpuart_configure_framing(data_bits, parity, stop_bits);
             LL_LPUART_Enable(LPUART1);
         }
     }
