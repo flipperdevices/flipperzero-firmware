@@ -609,7 +609,6 @@ static void furi_hal_serial_usart_configure_framing(
     FuriHalSerialDataBits data_bits,
     FuriHalSerialParity parity,
     FuriHalSerialStopBits stop_bits) {
-    uint32_t st_hal_data_bits;
     LL_USART_SetDataWidth(USART1, data_bits);
     LL_USART_SetParity(USART1, parity);
     LL_USART_SetStopBitsLength(USART1, stop_bits);
@@ -619,7 +618,6 @@ static void furi_hal_serial_lpuart_configure_framing(
     FuriHalSerialDataBits data_bits,
     FuriHalSerialParity parity,
     FuriHalSerialStopBits stop_bits) {
-    uint32_t st_hal_data_bits;
     LL_LPUART_SetDataWidth(LPUART1, data_bits);
     LL_LPUART_SetParity(LPUART1, parity);
     LL_LPUART_SetStopBitsLength(LPUART1, stop_bits);
