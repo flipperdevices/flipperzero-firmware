@@ -171,6 +171,11 @@ typedef enum {
     NfcViewDetectReader,
 } NfcView;
 
+typedef enum {
+    NfcSceneSaveConfirmStateDetectReader,
+    NfcSceneSaveConfirmStateCrackNonces,
+} NfcSceneSaveConfirmState;
+
 int32_t nfc_task(void* p);
 
 void nfc_text_store_set(NfcApp* nfc, const char* text, ...);
