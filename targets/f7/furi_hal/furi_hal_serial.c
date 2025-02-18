@@ -195,7 +195,7 @@ static void furi_hal_serial_usart_init_dma_rx(void) {
     LL_DMA_SetPeriphAddress(
         FURI_HAL_SERIAL_USART_DMA_INSTANCE,
         FURI_HAL_SERIAL_USART_DMA_CHANNEL,
-        (uint32_t) & (USART1->RDR));
+        (uint32_t)&(USART1->RDR));
 
     LL_DMA_ConfigTransfer(
         FURI_HAL_SERIAL_USART_DMA_INSTANCE,
@@ -396,7 +396,7 @@ static void furi_hal_serial_lpuart_init_dma_rx(void) {
     LL_DMA_SetPeriphAddress(
         FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
         FURI_HAL_SERIAL_LPUART_DMA_CHANNEL,
-        (uint32_t) & (LPUART1->RDR));
+        (uint32_t)&(LPUART1->RDR));
 
     LL_DMA_ConfigTransfer(
         FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
@@ -610,42 +610,9 @@ static void furi_hal_serial_usart_configure_framing(
     FuriHalSerialParity parity,
     FuriHalSerialStopBits stop_bits) {
     uint32_t st_hal_data_bits;
-    if(data_bits == FuriHalSerialDataBits7) {
-        st_hal_data_bits = LL_USART_DATAWIDTH_7B;
-    } else if(data_bits == FuriHalSerialDataBits8) {
-        st_hal_data_bits = LL_USART_DATAWIDTH_8B;
-    } else if(data_bits == FuriHalSerialDataBits9) {
-        st_hal_data_bits = LL_USART_DATAWIDTH_9B;
-    } else {
-        furi_crash();
-    }
-    LL_USART_SetDataWidth(USART1, st_hal_data_bits);
-
-    uint32_t st_hal_parity;
-    if(parity == FuriHalSerialParityNone) {
-        st_hal_parity = LL_USART_PARITY_NONE;
-    } else if(parity == FuriHalSerialParityEven) {
-        st_hal_parity = LL_USART_PARITY_EVEN;
-    } else if(parity == FuriHalSerialParityOdd) {
-        st_hal_parity = LL_USART_PARITY_ODD;
-    } else {
-        furi_crash();
-    }
-    LL_USART_SetParity(USART1, st_hal_parity);
-
-    uint32_t st_hal_stop_bits;
-    if(stop_bits == FuriHalSerialStopBits0_5) {
-        st_hal_stop_bits = LL_USART_STOPBITS_0_5;
-    } else if(stop_bits == FuriHalSerialStopBits1) {
-        st_hal_stop_bits = LL_USART_STOPBITS_1;
-    } else if(stop_bits == FuriHalSerialStopBits1_5) {
-        st_hal_stop_bits = LL_USART_STOPBITS_1_5;
-    } else if(stop_bits == FuriHalSerialStopBits2) {
-        st_hal_stop_bits = LL_USART_STOPBITS_2;
-    } else {
-        furi_crash();
-    }
-    LL_USART_SetStopBitsLength(USART1, st_hal_stop_bits);
+    LL_USART_SetDataWidth(USART1, data_bits);
+    LL_USART_SetParity(USART1, parity);
+    LL_USART_SetStopBitsLength(USART1, stop_bits);
 }
 
 static void furi_hal_serial_lpuart_configure_framing(
@@ -653,35 +620,9 @@ static void furi_hal_serial_lpuart_configure_framing(
     FuriHalSerialParity parity,
     FuriHalSerialStopBits stop_bits) {
     uint32_t st_hal_data_bits;
-    if(data_bits == FuriHalSerialDataBits7)
-        st_hal_data_bits = LL_LPUART_DATAWIDTH_7B;
-    else if(data_bits == FuriHalSerialDataBits8)
-        st_hal_data_bits = LL_LPUART_DATAWIDTH_8B;
-    else if(data_bits == FuriHalSerialDataBits9)
-        st_hal_data_bits = LL_LPUART_DATAWIDTH_9B;
-    else
-        furi_crash();
-    LL_LPUART_SetDataWidth(LPUART1, st_hal_data_bits);
-
-    uint32_t st_hal_parity;
-    if(parity == FuriHalSerialParityNone)
-        st_hal_parity = LL_LPUART_PARITY_NONE;
-    else if(parity == FuriHalSerialParityEven)
-        st_hal_parity = LL_LPUART_PARITY_EVEN;
-    else if(parity == FuriHalSerialParityOdd)
-        st_hal_parity = LL_LPUART_PARITY_ODD;
-    else
-        furi_crash();
-    LL_LPUART_SetParity(LPUART1, st_hal_parity);
-
-    uint32_t st_hal_stop_bits;
-    if(stop_bits == FuriHalSerialStopBits1)
-        st_hal_stop_bits = LL_LPUART_STOPBITS_1;
-    else if(stop_bits == FuriHalSerialStopBits2)
-        st_hal_stop_bits = LL_LPUART_STOPBITS_2;
-    else
-        furi_crash();
-    LL_LPUART_SetStopBitsLength(LPUART1, st_hal_stop_bits);
+    LL_LPUART_SetDataWidth(LPUART1, data_bits);
+    LL_LPUART_SetParity(LPUART1, parity);
+    LL_LPUART_SetStopBitsLength(LPUART1, stop_bits);
 }
 
 void furi_hal_serial_configure_framing(
