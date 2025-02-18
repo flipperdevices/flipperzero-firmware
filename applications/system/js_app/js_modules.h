@@ -154,26 +154,28 @@ static inline bool _js_validate_struct(struct mjs* mjs, mjs_val_t val, const voi
     JsForeignMagic struct_magic = *(JsForeignMagic*)mjs_get_ptr(mjs, val);
     return struct_magic == expected_magic;
 }
-#define JS_ARG_STRUCT(type, out)         \
-    ((_js_arg_decl){out,                 \
-                    mjs_is_foreign,      \
-                    _js_to_ptr,          \
-                    #type,               \
-                    _js_validate_struct, \
-                    (void*)JsForeignMagic##_##type})
+#define JS_ARG_STRUCT(type, out) \
+    ((_js_arg_decl){             \
+        out,                     \
+        mjs_is_foreign,          \
+        _js_to_ptr,              \
+        #type,                   \
+        _js_validate_struct,     \
+        (void*)JsForeignMagic##_##type})
 
 static inline bool _js_validate_obj_w_struct(struct mjs* mjs, mjs_val_t val, const void* extra) {
     JsForeignMagic expected_magic = (JsForeignMagic)(size_t)extra;
     JsForeignMagic struct_magic = *(JsForeignMagic*)JS_GET_INST(mjs, val);
     return struct_magic == expected_magic;
 }
-#define JS_ARG_OBJ_WITH_STRUCT(type, out)      \
-    ((_js_arg_decl){out,                       \
-                    mjs_is_object,             \
-                    _js_passthrough,           \
-                    #type,                     \
-                    _js_validate_obj_w_struct, \
-                    (void*)JsForeignMagic##_##type})
+#define JS_ARG_OBJ_WITH_STRUCT(type, out) \
+    ((_js_arg_decl){                      \
+        out,                              \
+        mjs_is_object,                    \
+        _js_passthrough,                  \
+        #type,                            \
+        _js_validate_obj_w_struct,        \
+        (void*)JsForeignMagic##_##type})
 
 static inline bool _js_validate_enum(struct mjs* mjs, mjs_val_t val, const void* extra) {
     for(const JsEnumMapping* mapping = (JsEnumMapping*)extra + 1; mapping->name; mapping++)
@@ -199,13 +201,14 @@ static inline void
     }
     // unreachable, thanks to _js_validate_enum
 }
-#define JS_ARG_ENUM(var_name, name)    \
-    ((_js_arg_decl){&var_name,         \
-                    mjs_is_string,     \
-                    _js_convert_enum,  \
-                    name " enum",      \
-                    _js_validate_enum, \
-                    var_name##_mapping})
+#define JS_ARG_ENUM(var_name, name) \
+    ((_js_arg_decl){                \
+        &var_name,                  \
+        mjs_is_string,              \
+        _js_convert_enum,           \
+        name " enum",               \
+        _js_validate_enum,          \
+        var_name##_mapping})
 
 static inline bool _js_validate_object(struct mjs* mjs, mjs_val_t val, const void* extra) {
     for(const JsObjectMapping* mapping = (JsObjectMapping*)extra; mapping->name; mapping++)
@@ -220,13 +223,14 @@ static inline void
         *(mjs_val_t*)((uint8_t*)out + mapping->offset) = field_val;
     }
 }
-#define JS_ARG_OBJECT(var_name, name)    \
-    ((_js_arg_decl){&var_name,           \
-                    mjs_is_object,       \
-                    _js_convert_object,  \
-                    name " object",      \
-                    _js_validate_object, \
-                    var_name##_mapping})
+#define JS_ARG_OBJECT(var_name, name) \
+    ((_js_arg_decl){                  \
+        &var_name,                    \
+        mjs_is_object,                \
+        _js_convert_object,           \
+        name " object",               \
+        _js_validate_object,          \
+        var_name##_mapping})
 
 /**
  * @brief Validates and converts a JS value with a declarative interface

@@ -195,7 +195,7 @@ static void furi_hal_serial_usart_init_dma_rx(void) {
     LL_DMA_SetPeriphAddress(
         FURI_HAL_SERIAL_USART_DMA_INSTANCE,
         FURI_HAL_SERIAL_USART_DMA_CHANNEL,
-        (uint32_t)&(USART1->RDR));
+        (uint32_t) & (USART1->RDR));
 
     LL_DMA_ConfigTransfer(
         FURI_HAL_SERIAL_USART_DMA_INSTANCE,
@@ -396,7 +396,7 @@ static void furi_hal_serial_lpuart_init_dma_rx(void) {
     LL_DMA_SetPeriphAddress(
         FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
         FURI_HAL_SERIAL_LPUART_DMA_CHANNEL,
-        (uint32_t)&(LPUART1->RDR));
+        (uint32_t) & (LPUART1->RDR));
 
     LL_DMA_ConfigTransfer(
         FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
