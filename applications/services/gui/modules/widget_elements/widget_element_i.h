@@ -89,6 +89,9 @@ WidgetElement* widget_element_text_scroll_create(
     uint8_t height,
     const char* text);
 
+/** Create circle element */
+WidgetElement* widget_element_circle_create(uint8_t x, uint8_t y, uint8_t radius, bool fill);
+
 #ifdef __cplusplus
 }
 #endif

@@ -217,6 +217,21 @@ static bool js_widget_add_child(
                 mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element fill");
         int32_t fill = mjs_get_bool(mjs, fill_in);
         widget_add_frame_element(widget, x, y, w, h, radius, fill);
+
+    } else if(strcmp(element_type, "circle") == 0) {
+        int32_t x, y;
+        DESTRUCTURE_OR_RETURN(mjs, child_obj, position, &x, &y);
+        mjs_val_t radius_in = mjs_get(mjs, child_obj, "radius", ~0);
+        if(!mjs_is_number(radius_in))
+            JS_ERROR_AND_RETURN_VAL(
+                mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element radius");
+        int32_t radius = mjs_get_int32(mjs, radius_in);
+        mjs_val_t fill_in = mjs_get(mjs, child_obj, "fill", ~0);
+        if(!mjs_is_boolean(radius_in))
+            JS_ERROR_AND_RETURN_VAL(
+                mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element fill");
+        int32_t fill = mjs_get_bool(mjs, fill_in);
+        widget_add_circle_element(widget, x, y, radius, fill);
     }
 
     return true;

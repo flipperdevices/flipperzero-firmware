@@ -43,6 +43,7 @@ type TextScrollElement = { element: "text_scroll" } & Position & Size & Text;
 type ButtonElement = { element: "button", button: "left" | "center" | "right" } & Text;
 type IconElement = { element: "icon", iconData: IconData } & Position;
 type FrameElement = { element: "frame", radius: number, fill: boolean } & Position & Size;
+type CircleElement = { element: "circle", radius: number, fill: boolean } & Position;
 
 type Element = StringMultilineElement
     | StringElement
@@ -50,7 +51,8 @@ type Element = StringMultilineElement
     | TextScrollElement
     | ButtonElement
     | IconElement
-    | FrameElement;
+    | FrameElement
+    | CircleElement;
 
 type Props = {};
 type Child = Element;

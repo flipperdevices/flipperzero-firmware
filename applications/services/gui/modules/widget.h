@@ -170,6 +170,16 @@ void widget_add_frame_element(
     uint8_t radius,
     bool fill);
 
+/** Add Circle Element
+ *
+ * @param      widget  Widget instance
+ * @param      x       center x coordinate
+ * @param      y       center y coordinate
+ * @param      radius  circle radius
+ * @param      fill    whether to fill the circle or not
+ */
+void widget_add_circle_element(Widget* widget, uint8_t x, uint8_t y, uint8_t radius, bool fill);
+
 #ifdef __cplusplus
 }
 #endif
