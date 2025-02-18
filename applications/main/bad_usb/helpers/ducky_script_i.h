@@ -19,7 +19,7 @@ extern "C" {
 #define FILE_BUFFER_LEN 16
 
 #define HID_MOUSE_INVALID 0
-#define HID_MOUSE_NONE 0
+#define HID_MOUSE_NONE    0
 
 struct BadUsbScript {
     FuriHalUsbHidConfig hid_cfg;

@@ -133,7 +133,7 @@ static int32_t ducky_fnc_hold(BadUsbScript* bad_usb, const char* line, int32_t p
 
     // Handle Mouse Keys here
     uint16_t key = ducky_get_mouse_keycode_by_name(line);
-    if (key != HID_MOUSE_NONE) {
+    if(key != HID_MOUSE_NONE) {
         bad_usb->key_hold_nb++;
         bad_usb->hid->mouse_press(bad_usb->hid_inst, key);
         return 0;
@@ -141,7 +141,7 @@ static int32_t ducky_fnc_hold(BadUsbScript* bad_usb, const char* line, int32_t p
 
     // Handle Keyboard keys here
     key = ducky_get_keycode(bad_usb, line, true);
-    if (key != HID_KEYBOARD_NONE) {
+    if(key != HID_KEYBOARD_NONE) {
         bad_usb->key_hold_nb++;
         bad_usb->hid->kb_press(bad_usb->hid_inst, key);
         return 0;
@@ -161,7 +161,7 @@ static int32_t ducky_fnc_release(BadUsbScript* bad_usb, const char* line, int32_
 
     // Handle Mouse Keys here
     uint16_t key = ducky_get_mouse_keycode_by_name(line);
-    if (key != HID_MOUSE_NONE) {
+    if(key != HID_MOUSE_NONE) {
         bad_usb->key_hold_nb--;
         bad_usb->hid->mouse_release(bad_usb->hid_inst, key);
         return 0;
