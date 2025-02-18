@@ -19,6 +19,11 @@ typedef enum {
     FuriHalSerialDirectionMax,
 } FuriHalSerialDirection;
 
+// For an explanation of these magic numbers see furi_hal_serial.c, static
+// asserts right before `furi_hal_serial_usart_configure_framing`. Not including
+// the ST peripheral LL header here to pull these magic numbers from to avoid
+// exposing it to users of our HAL.
+
 /**
  * @brief Actual data bits, i.e. not including start/stop and parity bits
  * @note 6 data bits are only permitted when parity is enabled

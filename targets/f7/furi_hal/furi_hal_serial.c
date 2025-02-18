@@ -195,7 +195,7 @@ static void furi_hal_serial_usart_init_dma_rx(void) {
     LL_DMA_SetPeriphAddress(
         FURI_HAL_SERIAL_USART_DMA_INSTANCE,
         FURI_HAL_SERIAL_USART_DMA_CHANNEL,
-        (uint32_t)&(USART1->RDR));
+        (uint32_t) & (USART1->RDR));
 
     LL_DMA_ConfigTransfer(
         FURI_HAL_SERIAL_USART_DMA_INSTANCE,
@@ -396,7 +396,7 @@ static void furi_hal_serial_lpuart_init_dma_rx(void) {
     LL_DMA_SetPeriphAddress(
         FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
         FURI_HAL_SERIAL_LPUART_DMA_CHANNEL,
-        (uint32_t)&(LPUART1->RDR));
+        (uint32_t) & (LPUART1->RDR));
 
     LL_DMA_ConfigTransfer(
         FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
@@ -605,6 +605,21 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
     }
 }
 
+// Flash usage optimization: by checking that our enum members are equal to the
+// corresponding ST LL values, we can avoid having to convert between our
+// representation and the ST LL representation, thus shaving off about 120 bytes
+// (about half the size of this feature)
+static_assert(FuriHalSerialDataBits7 == LL_USART_DATAWIDTH_7B);
+static_assert(FuriHalSerialDataBits8 == LL_USART_DATAWIDTH_8B);
+static_assert(FuriHalSerialDataBits9 == LL_USART_DATAWIDTH_9B);
+static_assert(FuriHalSerialParityNone == LL_USART_PARITY_NONE);
+static_assert(FuriHalSerialParityEven == LL_USART_PARITY_EVEN);
+static_assert(FuriHalSerialParityOdd == LL_USART_PARITY_ODD);
+static_assert(FuriHalSerialStopBits0_5 == LL_USART_STOPBITS_0_5);
+static_assert(FuriHalSerialStopBits1 == LL_USART_STOPBITS_1);
+static_assert(FuriHalSerialStopBits1_5 == LL_USART_STOPBITS_1_5);
+static_assert(FuriHalSerialStopBits2 == LL_USART_STOPBITS_2);
+
 static void furi_hal_serial_usart_configure_framing(
     FuriHalSerialDataBits data_bits,
     FuriHalSerialParity parity,
@@ -613,6 +628,15 @@ static void furi_hal_serial_usart_configure_framing(
     LL_USART_SetParity(USART1, parity);
     LL_USART_SetStopBitsLength(USART1, stop_bits);
 }
+
+static_assert(FuriHalSerialDataBits7 == LL_LPUART_DATAWIDTH_7B);
+static_assert(FuriHalSerialDataBits8 == LL_LPUART_DATAWIDTH_8B);
+static_assert(FuriHalSerialDataBits9 == LL_LPUART_DATAWIDTH_9B);
+static_assert(FuriHalSerialParityNone == LL_LPUART_PARITY_NONE);
+static_assert(FuriHalSerialParityEven == LL_LPUART_PARITY_EVEN);
+static_assert(FuriHalSerialParityOdd == LL_LPUART_PARITY_ODD);
+static_assert(FuriHalSerialStopBits1 == LL_LPUART_STOPBITS_1);
+static_assert(FuriHalSerialStopBits2 == LL_LPUART_STOPBITS_2);
 
 static void furi_hal_serial_lpuart_configure_framing(
     FuriHalSerialDataBits data_bits,
