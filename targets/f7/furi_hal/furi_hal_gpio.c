@@ -250,93 +250,93 @@ void furi_hal_gpio_remove_int_callback(const GpioPin* gpio) {
 }
 
 FURI_ALWAYS_INLINE static void furi_hal_gpio_int_call(uint16_t pin_num) {
-    if(gpio_interrupt[pin_num].callback) {
+    if (gpio_interrupt[pin_num].callback) {
         gpio_interrupt[pin_num].callback(gpio_interrupt[pin_num].context);
     }
 }
 
 /* Interrupt handlers */
 void EXTI0_IRQHandler(void) {
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_0)) {
-        furi_hal_gpio_int_call(0);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_0)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_0);
+        furi_hal_gpio_int_call(0);
     }
 }
 
 void EXTI1_IRQHandler(void) {
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_1)) {
-        furi_hal_gpio_int_call(1);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_1)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_1);
+        furi_hal_gpio_int_call(1);
     }
 }
 
 void EXTI2_IRQHandler(void) {
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_2)) {
-        furi_hal_gpio_int_call(2);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_2)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_2);
+        furi_hal_gpio_int_call(2);
     }
 }
 
 void EXTI3_IRQHandler(void) {
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_3)) {
-        furi_hal_gpio_int_call(3);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_3)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_3);
+        furi_hal_gpio_int_call(3);
     }
 }
 
 void EXTI4_IRQHandler(void) {
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_4)) {
-        furi_hal_gpio_int_call(4);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_4)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_4);
+        furi_hal_gpio_int_call(4);
     }
 }
 
 void EXTI9_5_IRQHandler(void) {
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_5)) {
-        furi_hal_gpio_int_call(5);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_5)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_5);
+        furi_hal_gpio_int_call(5);
     }
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_6)) {
-        furi_hal_gpio_int_call(6);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_6)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_6);
+        furi_hal_gpio_int_call(6);
     }
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_7)) {
-        furi_hal_gpio_int_call(7);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_7)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_7);
+        furi_hal_gpio_int_call(7);
     }
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_8)) {
-        furi_hal_gpio_int_call(8);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_8)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_8);
+        furi_hal_gpio_int_call(8);
     }
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_9)) {
-        furi_hal_gpio_int_call(9);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_9)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_9);
+        furi_hal_gpio_int_call(9);
     }
 }
 
 void EXTI15_10_IRQHandler(void) {
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_10)) {
-        furi_hal_gpio_int_call(10);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_10)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_10);
+        furi_hal_gpio_int_call(10);
     }
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_11)) {
-        furi_hal_gpio_int_call(11);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_11)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_11);
+        furi_hal_gpio_int_call(11);
     }
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_12)) {
-        furi_hal_gpio_int_call(12);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_12)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_12);
+        furi_hal_gpio_int_call(12);
     }
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13)) {
-        furi_hal_gpio_int_call(13);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
+        furi_hal_gpio_int_call(13);
     }
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_14)) {
-        furi_hal_gpio_int_call(14);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_14)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_14);
+        furi_hal_gpio_int_call(14);
     }
-    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15)) {
-        furi_hal_gpio_int_call(15);
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
+        furi_hal_gpio_int_call(15);
     }
 }
