@@ -36,6 +36,7 @@
 #include "helpers/felica_auth.h"
 #include "helpers/slix_unlock.h"
 
+#include <loader/loader.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
 #include <toolbox/path.h>
@@ -203,3 +204,5 @@ bool nfc_save_file(NfcApp* instance, FuriString* path);
 void nfc_make_app_folder(NfcApp* instance);
 
 void nfc_append_filename_string_when_present(NfcApp* instance, FuriString* string);
+
+void nfc_app_run_external(NfcApp* nfc, const char* app_path);
