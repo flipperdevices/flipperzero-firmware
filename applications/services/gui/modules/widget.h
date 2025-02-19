@@ -158,7 +158,7 @@ void widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* i
  * @param      y       top left y coordinate
  * @param      width   frame width
  * @param      height  frame height
- * @param      radius  frame radius
+ * @param      radius  corner radius
  * @param      fill    whether to fill the box or not
  */
 void widget_add_frame_element(

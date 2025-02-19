@@ -22,7 +22,7 @@ static const IconDefinition builtin_icons[] = {
 // Firmware's Icon struct needs a frames array, and uses a small CompressHeader
 // Here we use a variable size allocation to add the uncompressed data in same allocation
 // Also use a one-long array pointing to later in the same struct as the frames array
-// CompressHeader includes a first is_compressed byteso we don't need to compress (.fxbm is uncompressed)
+// CompressHeader includes a first is_compressed byte so we don't need to compress (.fxbm is uncompressed)
 typedef struct FURI_PACKED {
     Icon icon;
     uint8_t* frames[1];
@@ -67,7 +67,7 @@ static void js_gui_icon_load_fxbm(struct mjs* mjs) {
         }
 
         struct {
-            uint32_t size; // Total size including width and height values
+            uint32_t size; // Total following size including width and height values
             uint32_t width;
             uint32_t height;
         } fxbm_header;
