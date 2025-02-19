@@ -149,7 +149,7 @@ standard names. */
 
 /* Normal assert() semantics without relying on the provision of an assert.h
 header file. */
-#ifdef DEBUG
+#ifdef FURI_DEBUG
 #define configASSERT(x)                \
     if((x) == 0) {                     \
         furi_crash("FreeRTOS Assert"); \
