@@ -212,7 +212,7 @@ static bool js_widget_add_child(
                 mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element radius");
         int32_t radius = mjs_get_int32(mjs, radius_in);
         mjs_val_t fill_in = mjs_get(mjs, child_obj, "fill", ~0);
-        if(!mjs_is_boolean(radius_in))
+        if(!mjs_is_boolean(fill_in))
             JS_ERROR_AND_RETURN_VAL(
                 mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element fill");
         int32_t fill = mjs_get_bool(mjs, fill_in);
@@ -227,7 +227,7 @@ static bool js_widget_add_child(
                 mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element radius");
         int32_t radius = mjs_get_int32(mjs, radius_in);
         mjs_val_t fill_in = mjs_get(mjs, child_obj, "fill", ~0);
-        if(!mjs_is_boolean(radius_in))
+        if(!mjs_is_boolean(fill_in))
             JS_ERROR_AND_RETURN_VAL(
                 mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element fill");
         int32_t fill = mjs_get_bool(mjs, fill_in);
