@@ -11,7 +11,7 @@
 
 #define JS_SDK_VENDOR "flipperdevices"
 #define JS_SDK_MAJOR  0
-#define JS_SDK_MINOR  1
+#define JS_SDK_MINOR  2
 
 /**
  * @brief Returns the foreign pointer in `obj["_"]`
@@ -252,6 +252,18 @@ static inline void
         mjs_prepend_errorf(mjs, error_code, __VA_ARGS__); \
         mjs_return(mjs, MJS_UNDEFINED);                   \
         return;                                           \
+    } while(0)
+
+/**
+ * @brief Prepends an error, sets the JS return value to `undefined` and returns
+ * a value C function
+ * @warning This macro executes `return;` by design
+ */
+#define JS_ERROR_AND_RETURN_VAL(mjs, error_code, ret_val, ...) \
+    do {                                                       \
+        mjs_prepend_errorf(mjs, error_code, __VA_ARGS__);      \
+        mjs_return(mjs, MJS_UNDEFINED);                        \
+        return ret_val;                                        \
     } while(0)
 
 typedef struct JsModules JsModules;
