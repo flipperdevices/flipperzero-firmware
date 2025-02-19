@@ -35,7 +35,7 @@ static void crash_test_corrupt_heap_underflow(void) {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-overflow" // that's what we want!
-    memset(block - underflow_size, 0xDD, underflow_size);
+    memset(block - underflow_size, 0xDD, underflow_size); // -V769
 #pragma GCC diagnostic pop
 
     free(block); // should crash here (if compiled with DEBUG=1)
@@ -49,15 +49,15 @@ static void crash_test_corrupt_heap_overflow(void) {
     const size_t overflow_size = 123;
     uint8_t* block1 = malloc(block_size);
     uint8_t* block2 = malloc(block_size);
-    memset(block2, 12, 34); // simulate use to avoid optimization
+    memset(block2, 12, 34); // simulate use to avoid optimization // -V597 // -V1086
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-overflow" // that's what we want!
-    memset(block1 + block_size, 0xDD, overflow_size);
+    memset(block1 + block_size, 0xDD, overflow_size); // -V769 // -V512
 #pragma GCC diagnostic pop
 
     uint8_t* block3 = malloc(block_size);
-    memset(block3, 12, 34); // simulate use to avoid optimization
+    memset(block3, 12, 34); // simulate use to avoid optimization // -V597 // -V1086
 
     free(block3); // should crash here (if compiled with DEBUG=1)
     free(block2);
