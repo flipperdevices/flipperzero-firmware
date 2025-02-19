@@ -121,7 +121,7 @@ static void js_gui_icon_destroy(void* inst) {
     JsGuiIconInst* js_icon = inst;
     for
         M_EACH(fxbm, js_icon->fxbm_list, FxbmIconWrapperList_t) {
-            free(fxbm);
+            free(*fxbm);
         }
     FxbmIconWrapperList_clear(js_icon->fxbm_list);
     free(js_icon);
