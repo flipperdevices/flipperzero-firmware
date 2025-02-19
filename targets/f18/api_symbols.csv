@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,80.1,,
+Version,+,80.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1038,6 +1038,7 @@ Function,+,flipper_format_read_int32,_Bool,"FlipperFormat*, const char*, int32_t
 Function,+,flipper_format_read_string,_Bool,"FlipperFormat*, const char*, FuriString*"
 Function,+,flipper_format_read_uint32,_Bool,"FlipperFormat*, const char*, uint32_t*, const uint16_t"
 Function,+,flipper_format_rewind,_Bool,FlipperFormat*
+Function,+,flipper_format_seek,_Bool,"FlipperFormat*, int32_t, FlipperFormatOffset"
 Function,+,flipper_format_seek_to_end,_Bool,FlipperFormat*
 Function,+,flipper_format_set_strict_mode,void,"FlipperFormat*, _Bool"
 Function,+,flipper_format_stream_delete_key_and_write,_Bool,"Stream*, FlipperStreamWriteData*, _Bool"
@@ -1046,6 +1047,7 @@ Function,+,flipper_format_stream_read_value_line,_Bool,"Stream*, const char*, Fl
 Function,+,flipper_format_stream_write_comment_cstr,_Bool,"Stream*, const char*"
 Function,+,flipper_format_stream_write_value_line,_Bool,"Stream*, FlipperStreamWriteData*"
 Function,+,flipper_format_string_alloc,FlipperFormat*,
+Function,+,flipper_format_tell,size_t,FlipperFormat*
 Function,+,flipper_format_update_bool,_Bool,"FlipperFormat*, const char*, const _Bool*, const uint16_t"
 Function,+,flipper_format_update_float,_Bool,"FlipperFormat*, const char*, const float*, const uint16_t"
 Function,+,flipper_format_update_hex,_Bool,"FlipperFormat*, const char*, const uint8_t*, const uint16_t"
@@ -2468,6 +2470,7 @@ Function,-,scalbnl,long double,"long double, int"
 Function,-,scanf,int,"const char*, ..."
 Function,+,scene_manager_alloc,SceneManager*,"const SceneManagerHandlers*, void*"
 Function,+,scene_manager_free,void,SceneManager*
+Function,+,scene_manager_get_current_scene,uint32_t,SceneManager*
 Function,+,scene_manager_get_scene_state,uint32_t,"const SceneManager*, uint32_t"
 Function,+,scene_manager_handle_back_event,_Bool,SceneManager*
 Function,+,scene_manager_handle_custom_event,_Bool,"SceneManager*, uint32_t"
