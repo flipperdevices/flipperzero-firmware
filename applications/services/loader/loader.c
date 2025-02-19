@@ -728,6 +728,18 @@ static void loader_do_unlock(Loader* loader) {
     loader->app.thread = NULL;
 }
 
+static bool loader_do_deferred_launch(Loader* loader, LoaderDeferredLaunchRecord* record);
+
+static void loader_do_next_deferred_launch_if_available(Loader* loader) {
+    if(LoaderDeferredLaunchRecordArray_size(loader->launch_queue)) {
+        LoaderDeferredLaunchRecord record;
+        LOADER_DL_RECORD_INIT(record);
+        LoaderDeferredLaunchRecordArray_pop_at(&record, loader->launch_queue, 0);
+        loader_do_deferred_launch(loader, &record);
+        LOADER_DL_RECORD_CLEAR(record);
+    }
+}
+
 static bool loader_do_deferred_launch(Loader* loader, LoaderDeferredLaunchRecord* record) {
     furi_assert(loader);
     furi_assert(record);
@@ -751,6 +763,8 @@ static bool loader_do_deferred_launch(Loader* loader, LoaderDeferredLaunchRecord
 
         if(record->flags & LoaderDeferredLaunchFlagGui)
             loader_show_gui_error(result, app_name_str, error_message);
+
+        loader_do_next_deferred_launch_if_available(loader);
     } while(false);
 
     view_holder_set_view(loader->view_holder, NULL);
@@ -790,11 +804,7 @@ static void loader_do_app_closed(Loader* loader) {
     event.type = LoaderEventTypeApplicationStopped;
     furi_pubsub_publish(loader->pubsub, &event);
 
-    if(LoaderDeferredLaunchRecordArray_size(loader->launch_queue)) {
-        loader_do_deferred_launch(
-            loader, LoaderDeferredLaunchRecordArray_front(loader->launch_queue));
-        LoaderDeferredLaunchRecordArray_pop_at(NULL, loader->launch_queue, 0);
-    }
+    loader_do_next_deferred_launch_if_available(loader);
 }
 
 static bool loader_is_application_running(Loader* loader) {
@@ -831,13 +841,16 @@ static bool loader_do_get_application_launch_path(Loader* loader, FuriString* pa
 static void loader_do_enqueue_launch(Loader* loader, LoaderMessageDeferStart* data) {
     furi_check(LoaderDeferredLaunchRecordArray_size(loader->launch_queue) < LAUNCH_QUEUE_MAX_SIZE);
 
-    LoaderDeferredLaunchRecordArray_push_back(
-        loader->launch_queue,
-        (LoaderDeferredLaunchRecord){
-            .name_or_path = furi_string_alloc_set_str(data->name),
-            .args = data->args ? furi_string_alloc_set_str(data->args) : furi_string_alloc(),
-            .flags = data->flags,
-        });
+    LoaderDeferredLaunchRecord record;
+    LOADER_DL_RECORD_INIT(record);
+
+    furi_string_set(record.name_or_path, data->name);
+    if(data->args) furi_string_set(record.args, data->args);
+    record.flags = data->flags;
+
+    LoaderDeferredLaunchRecordArray_push_back(loader->launch_queue, record);
+
+    LOADER_DL_RECORD_CLEAR(record);
 }
 
 // app

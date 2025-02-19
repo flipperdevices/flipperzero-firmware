@@ -24,10 +24,14 @@ typedef enum {
     LoaderChainingASubmenuLaunchBThenA,
     LoaderChainingASubmenuLaunchNonexistentSilent,
     LoaderChainingASubmenuLaunchNonexistentGui,
+    LoaderChainingASubmenuLaunchNonexistentGuiThenA,
 } LoaderChainingASubmenu;
 
 static void loader_chaining_a_submenu_callback(void* context, uint32_t index) {
     LoaderChainingA* app = context;
+
+    FuriString* self_path = furi_string_alloc();
+    furi_check(loader_get_application_launch_path(app->loader, self_path));
 
     switch(index) {
     case LoaderChainingASubmenuLaunchB:
@@ -37,29 +41,34 @@ static void loader_chaining_a_submenu_callback(void* context, uint32_t index) {
 
     case LoaderChainingASubmenuLaunchBThenA:
         loader_enqueue_launch(app->loader, CHAINING_TEST_B, "Hello", LoaderDeferredLaunchFlagGui);
-
-        FuriString* self_path = furi_string_alloc();
-        furi_check(loader_get_application_launch_path(app->loader, self_path));
         loader_enqueue_launch(
             app->loader,
             furi_string_get_cstr(self_path),
             "Hello to you from the future",
             LoaderDeferredLaunchFlagGui);
-        furi_string_free(self_path);
 
-        view_dispatcher_stop(app->view_dispatcher);
         break;
 
     case LoaderChainingASubmenuLaunchNonexistentSilent:
         loader_enqueue_launch(app->loader, NONEXISTENT_APP, NULL, LoaderDeferredLaunchFlagNone);
-        view_dispatcher_stop(app->view_dispatcher);
         break;
 
     case LoaderChainingASubmenuLaunchNonexistentGui:
         loader_enqueue_launch(app->loader, NONEXISTENT_APP, NULL, LoaderDeferredLaunchFlagGui);
-        view_dispatcher_stop(app->view_dispatcher);
+        break;
+
+    case LoaderChainingASubmenuLaunchNonexistentGuiThenA:
+        loader_enqueue_launch(app->loader, NONEXISTENT_APP, NULL, LoaderDeferredLaunchFlagGui);
+        loader_enqueue_launch(
+            app->loader,
+            furi_string_get_cstr(self_path),
+            "Hello to you from the future",
+            LoaderDeferredLaunchFlagGui);
         break;
     }
+
+    furi_string_free(self_path);
+    view_dispatcher_stop(app->view_dispatcher);
 }
 
 static bool loader_chaining_a_nav_callback(void* context) {
@@ -98,6 +107,12 @@ LoaderChainingA* loader_chaining_a_alloc(void) {
         app->submenu,
         "Trigger error: GUI",
         LoaderChainingASubmenuLaunchNonexistentGui,
+        loader_chaining_a_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Error, then launch A",
+        LoaderChainingASubmenuLaunchNonexistentGuiThenA,
         loader_chaining_a_submenu_callback,
         app);
 
