@@ -269,6 +269,7 @@ static const char* extra_features[] = {
     "baseline", // dummy "feature"
     "gpio-pwm",
     "gui-widget",
+    "gui-widget-extras",
 };
 
 /**
