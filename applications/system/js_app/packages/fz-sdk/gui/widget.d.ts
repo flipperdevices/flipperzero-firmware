@@ -42,7 +42,7 @@ type TextBoxElement = { element: "text_box", stripToDots: boolean } & Position &
 type TextScrollElement = { element: "text_scroll" } & Position & Size & Text;
 type ButtonElement = { element: "button", button: "left" | "center" | "right" } & Text;
 type IconElement = { element: "icon", iconData: IconData } & Position;
-type FrameElement = { element: "frame", radius: number, fill: boolean } & Position & Size; /** @version Amended in JS SDK 0.3, extra feature `"gui-widget-extras"` */
+type RectElement = { element: "rect", radius: number, fill: boolean } & Position & Size; /** @version Amended in JS SDK 0.3, extra feature `"gui-widget-extras"` */
 type CircleElement = { element: "circle", radius: number, fill: boolean } & Position; /** @version Added in JS SDK 0.3, extra feature `"gui-widget-extras"` */
 type LineElement = { element: "line", x1: number, y1: number, x2: number, y2: number }; /** @version Added in JS SDK 0.3, extra feature `"gui-widget-extras"` */
 
@@ -52,7 +52,7 @@ type Element = StringMultilineElement
     | TextScrollElement
     | ButtonElement
     | IconElement
-    | FrameElement
+    | RectElement
     | CircleElement
     | LineElement;
 

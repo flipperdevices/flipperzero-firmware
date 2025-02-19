@@ -7,12 +7,12 @@ typedef struct {
     uint8_t height;
     uint8_t radius;
     bool fill;
-} GuiFrameModel;
+} GuiRectModel;
 
-static void gui_frame_draw(Canvas* canvas, WidgetElement* element) {
+static void gui_rect_draw(Canvas* canvas, WidgetElement* element) {
     furi_assert(canvas);
     furi_assert(element);
-    GuiFrameModel* model = element->model;
+    GuiRectModel* model = element->model;
     if(model->fill) {
         canvas_draw_rbox(canvas, model->x, model->y, model->width, model->height, model->radius);
     } else {
@@ -20,14 +20,14 @@ static void gui_frame_draw(Canvas* canvas, WidgetElement* element) {
     }
 }
 
-static void gui_frame_free(WidgetElement* gui_frame) {
-    furi_assert(gui_frame);
+static void gui_rect_free(WidgetElement* gui_rect) {
+    furi_assert(gui_rect);
 
-    free(gui_frame->model);
-    free(gui_frame);
+    free(gui_rect->model);
+    free(gui_rect);
 }
 
-WidgetElement* widget_element_frame_create(
+WidgetElement* widget_element_rect_create(
     uint8_t x,
     uint8_t y,
     uint8_t width,
@@ -35,7 +35,7 @@ WidgetElement* widget_element_frame_create(
     uint8_t radius,
     bool fill) {
     // Allocate and init model
-    GuiFrameModel* model = malloc(sizeof(GuiFrameModel));
+    GuiRectModel* model = malloc(sizeof(GuiRectModel));
     model->x = x;
     model->y = y;
     model->width = width;
@@ -44,12 +44,12 @@ WidgetElement* widget_element_frame_create(
     model->fill = fill;
 
     // Allocate and init Element
-    WidgetElement* gui_frame = malloc(sizeof(WidgetElement));
-    gui_frame->parent = NULL;
-    gui_frame->input = NULL;
-    gui_frame->draw = gui_frame_draw;
-    gui_frame->free = gui_frame_free;
-    gui_frame->model = model;
+    WidgetElement* gui_rect = malloc(sizeof(WidgetElement));
+    gui_rect->parent = NULL;
+    gui_rect->input = NULL;
+    gui_rect->draw = gui_rect_draw;
+    gui_rect->free = gui_rect_free;
+    gui_rect->model = model;
 
-    return gui_frame;
+    return gui_rect;
 }

@@ -195,7 +195,7 @@ void widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* i
     widget_add_element(widget, icon_element);
 }
 
-void widget_add_frame_element(
+void widget_add_rect_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -204,8 +204,8 @@ void widget_add_frame_element(
     uint8_t radius,
     bool fill) {
     furi_check(widget);
-    WidgetElement* frame_element = widget_element_frame_create(x, y, width, height, radius, fill);
-    widget_add_element(widget, frame_element);
+    WidgetElement* rect_element = widget_element_rect_create(x, y, width, height, radius, fill);
+    widget_add_element(widget, rect_element);
 }
 
 void widget_add_circle_element(Widget* widget, uint8_t x, uint8_t y, uint8_t radius, bool fill) {

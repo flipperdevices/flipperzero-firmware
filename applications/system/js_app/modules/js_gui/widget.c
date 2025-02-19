@@ -202,7 +202,7 @@ static bool js_widget_add_child(
         const Icon* icon = mjs_get_ptr(mjs, icon_data_in);
         widget_add_icon_element(widget, x, y, icon);
 
-    } else if(strcmp(element_type, "frame") == 0) {
+    } else if(strcmp(element_type, "rect") == 0) {
         int32_t x, y, w, h;
         DESTRUCTURE_OR_RETURN(mjs, child_obj, position, &x, &y);
         DESTRUCTURE_OR_RETURN(mjs, child_obj, size, &w, &h);
@@ -216,7 +216,7 @@ static bool js_widget_add_child(
             JS_ERROR_AND_RETURN_VAL(
                 mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element fill");
         int32_t fill = mjs_get_bool(mjs, fill_in);
-        widget_add_frame_element(widget, x, y, w, h, radius, fill);
+        widget_add_rect_element(widget, x, y, w, h, radius, fill);
 
     } else if(strcmp(element_type, "circle") == 0) {
         int32_t x, y;

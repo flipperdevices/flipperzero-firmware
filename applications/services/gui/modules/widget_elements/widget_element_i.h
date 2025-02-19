@@ -73,8 +73,8 @@ WidgetElement* widget_element_button_create(
 /** Create icon element */
 WidgetElement* widget_element_icon_create(uint8_t x, uint8_t y, const Icon* icon);
 
-/** Create frame element */
-WidgetElement* widget_element_frame_create(
+/** Create rect element */
+WidgetElement* widget_element_rect_create(
     uint8_t x,
     uint8_t y,
     uint8_t width,
