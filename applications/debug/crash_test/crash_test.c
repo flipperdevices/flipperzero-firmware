@@ -142,9 +142,17 @@ CrashTest* crash_test_alloc(void) {
     submenu_add_item(
         instance->submenu, "Halt", CrashTestSubmenuHalt, crash_test_submenu_callback, instance);
     submenu_add_item(
-        instance->submenu, "Heap underflow", CrashTestSubmenuHeapUnderflow, crash_test_submenu_callback, instance);
+        instance->submenu,
+        "Heap underflow",
+        CrashTestSubmenuHeapUnderflow,
+        crash_test_submenu_callback,
+        instance);
     submenu_add_item(
-        instance->submenu, "Heap overflow", CrashTestSubmenuHeapOverflow, crash_test_submenu_callback, instance);
+        instance->submenu,
+        "Heap overflow",
+        CrashTestSubmenuHeapOverflow,
+        crash_test_submenu_callback,
+        instance);
 
     return instance;
 }
