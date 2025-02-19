@@ -19,27 +19,26 @@ typedef enum {
     FuriHalSerialDirectionMax,
 } FuriHalSerialDirection;
 
-// For an explanation of these magic numbers see furi_hal_serial.c, static
-// asserts right before `furi_hal_serial_usart_configure_framing`. Not including
-// the ST peripheral LL header here to pull these magic numbers from to avoid
-// exposing it to users of our HAL.
-
 /**
  * @brief Actual data bits, i.e. not including start/stop and parity bits
  * @note 6 data bits are only permitted when parity is enabled
  * @note 9 data bits are only permitted when parity is disabled
  */
 typedef enum {
-    FuriHalSerialDataBits6 = 1,
-    FuriHalSerialDataBits7 = 1 << 28,
-    FuriHalSerialDataBits8 = 0,
-    FuriHalSerialDataBits9 = 1 << 12,
+    FuriHalSerialDataBits6,
+    FuriHalSerialDataBits7,
+    FuriHalSerialDataBits8,
+    FuriHalSerialDataBits9,
+
+    FuriHalSerialDataBitsMax,
 } FuriHalSerialDataBits;
 
 typedef enum {
-    FuriHalSerialParityNone = 0,
-    FuriHalSerialParityEven = 1 << 10,
-    FuriHalSerialParityOdd = ((1 << 10) | (1 << 9)),
+    FuriHalSerialParityNone,
+    FuriHalSerialParityEven,
+    FuriHalSerialParityOdd,
+
+    FuriHalSerialParityMax,
 } FuriHalSerialParity;
 
 /**
@@ -47,10 +46,12 @@ typedef enum {
  * @note LPUART only supports whole stop bit lengths (i.e. 1 and 2, but not 0.5 and 1.5)
  */
 typedef enum {
-    FuriHalSerialStopBits0_5 = 1 << 12,
-    FuriHalSerialStopBits1 = 0,
-    FuriHalSerialStopBits1_5 = 3 << 12,
-    FuriHalSerialStopBits2 = 2 << 12,
+    FuriHalSerialStopBits0_5,
+    FuriHalSerialStopBits1,
+    FuriHalSerialStopBits1_5,
+    FuriHalSerialStopBits2,
+
+    FuriHalSerialStopBits2Max,
 } FuriHalSerialStopBits;
 
 typedef struct FuriHalSerialHandle FuriHalSerialHandle;

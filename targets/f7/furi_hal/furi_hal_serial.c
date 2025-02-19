@@ -605,46 +605,52 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
     }
 }
 
-// Flash usage optimization: by checking that our enum members are equal to the
-// corresponding ST LL values, we can avoid having to convert between our
-// representation and the ST LL representation, thus shaving off about 120 bytes
-// (about half the size of this feature)
-static_assert(FuriHalSerialDataBits7 == LL_USART_DATAWIDTH_7B);
-static_assert(FuriHalSerialDataBits8 == LL_USART_DATAWIDTH_8B);
-static_assert(FuriHalSerialDataBits9 == LL_USART_DATAWIDTH_9B);
-static_assert(FuriHalSerialParityNone == LL_USART_PARITY_NONE);
-static_assert(FuriHalSerialParityEven == LL_USART_PARITY_EVEN);
-static_assert(FuriHalSerialParityOdd == LL_USART_PARITY_ODD);
-static_assert(FuriHalSerialStopBits0_5 == LL_USART_STOPBITS_0_5);
-static_assert(FuriHalSerialStopBits1 == LL_USART_STOPBITS_1);
-static_assert(FuriHalSerialStopBits1_5 == LL_USART_STOPBITS_1_5);
-static_assert(FuriHalSerialStopBits2 == LL_USART_STOPBITS_2);
+// Avoid duplicating look-up tables between USART and LPUART
+static_assert(LL_LPUART_DATAWIDTH_7B == LL_USART_DATAWIDTH_7B);
+static_assert(LL_LPUART_DATAWIDTH_8B == LL_USART_DATAWIDTH_8B);
+static_assert(LL_LPUART_DATAWIDTH_9B == LL_USART_DATAWIDTH_9B);
+static_assert(LL_LPUART_PARITY_NONE == LL_USART_PARITY_NONE);
+static_assert(LL_LPUART_PARITY_EVEN == LL_USART_PARITY_EVEN);
+static_assert(LL_LPUART_PARITY_ODD == LL_USART_PARITY_ODD);
+static_assert(LL_LPUART_STOPBITS_1 == LL_USART_STOPBITS_1);
+static_assert(LL_LPUART_STOPBITS_2 == LL_USART_STOPBITS_2);
+
+static const uint32_t serial_data_bits_lut[] = {
+    [FuriHalSerialDataBits7] = LL_USART_DATAWIDTH_7B,
+    [FuriHalSerialDataBits8] = LL_USART_DATAWIDTH_8B,
+    [FuriHalSerialDataBits9] = LL_USART_DATAWIDTH_9B,
+};
+
+static const uint32_t serial_parity_lut[] = {
+    [FuriHalSerialParityNone] = LL_USART_PARITY_NONE,
+    [FuriHalSerialParityEven] = LL_USART_PARITY_EVEN,
+    [FuriHalSerialParityOdd] = LL_USART_PARITY_ODD,
+};
+
+static const uint32_t serial_stop_bits_lut[] = {
+    [FuriHalSerialStopBits0_5] = LL_USART_STOPBITS_0_5,
+    [FuriHalSerialStopBits1] = LL_USART_STOPBITS_1,
+    [FuriHalSerialStopBits1_5] = LL_USART_STOPBITS_1_5,
+    [FuriHalSerialStopBits2] = LL_USART_STOPBITS_2,
+};
 
 static void furi_hal_serial_usart_configure_framing(
     FuriHalSerialDataBits data_bits,
     FuriHalSerialParity parity,
     FuriHalSerialStopBits stop_bits) {
-    LL_USART_SetDataWidth(USART1, data_bits);
-    LL_USART_SetParity(USART1, parity);
-    LL_USART_SetStopBitsLength(USART1, stop_bits);
+    LL_USART_SetDataWidth(USART1, serial_data_bits_lut[data_bits]);
+    LL_USART_SetParity(USART1, serial_parity_lut[parity]);
+    LL_USART_SetStopBitsLength(USART1, serial_stop_bits_lut[stop_bits]);
 }
-
-static_assert(FuriHalSerialDataBits7 == LL_LPUART_DATAWIDTH_7B);
-static_assert(FuriHalSerialDataBits8 == LL_LPUART_DATAWIDTH_8B);
-static_assert(FuriHalSerialDataBits9 == LL_LPUART_DATAWIDTH_9B);
-static_assert(FuriHalSerialParityNone == LL_LPUART_PARITY_NONE);
-static_assert(FuriHalSerialParityEven == LL_LPUART_PARITY_EVEN);
-static_assert(FuriHalSerialParityOdd == LL_LPUART_PARITY_ODD);
-static_assert(FuriHalSerialStopBits1 == LL_LPUART_STOPBITS_1);
-static_assert(FuriHalSerialStopBits2 == LL_LPUART_STOPBITS_2);
 
 static void furi_hal_serial_lpuart_configure_framing(
     FuriHalSerialDataBits data_bits,
     FuriHalSerialParity parity,
     FuriHalSerialStopBits stop_bits) {
-    LL_LPUART_SetDataWidth(LPUART1, data_bits);
-    LL_LPUART_SetParity(LPUART1, parity);
-    LL_LPUART_SetStopBitsLength(LPUART1, stop_bits);
+    LL_LPUART_SetDataWidth(LPUART1, serial_data_bits_lut[data_bits]);
+    LL_LPUART_SetParity(LPUART1, serial_parity_lut[parity]);
+    // Unsupported non-whole stop bit numbers have been furi_check'ed away
+    LL_LPUART_SetStopBitsLength(LPUART1, serial_stop_bits_lut[stop_bits]);
 }
 
 void furi_hal_serial_configure_framing(
@@ -659,14 +665,7 @@ void furi_hal_serial_configure_framing(
     if(data_bits == FuriHalSerialDataBits6) furi_check(parity != FuriHalSerialParityNone);
 
     // Extend data word to account for parity bit
-    if(parity != FuriHalSerialParityNone) {
-        if(data_bits == FuriHalSerialDataBits6)
-            data_bits = FuriHalSerialDataBits7;
-        else if(data_bits == FuriHalSerialDataBits7)
-            data_bits = FuriHalSerialDataBits8;
-        else if(data_bits == FuriHalSerialDataBits8)
-            data_bits = FuriHalSerialDataBits9;
-    }
+    if(parity != FuriHalSerialParityNone) data_bits++;
 
     if(handle->id == FuriHalSerialIdUsart) {
         if(LL_USART_IsEnabled(USART1)) {
