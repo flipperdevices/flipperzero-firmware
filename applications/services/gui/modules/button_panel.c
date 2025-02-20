@@ -372,13 +372,10 @@ static bool button_panel_view_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
     if(event->key == InputKeyOk) {
         if((event->type == InputTypeRelease) || (event->type == InputTypePress)) {
-            consumed = true;
             button_panel->freeze_input = (event->type == InputTypePress);
-            button_panel_process_ok(button_panel, event->type);
-        } else if(event->type == InputTypeShort) {
-            consumed = true;
-            button_panel_process_ok(button_panel, event->type);
         }
+        consumed = true;
+        button_panel_process_ok(button_panel, event->type);
     }
     if(!button_panel->freeze_input &&
        ((event->type == InputTypeRepeat) || (event->type == InputTypeShort))) {
