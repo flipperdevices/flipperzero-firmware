@@ -64,6 +64,7 @@ static bool power_update_info(Power* power) {
         .is_charging = furi_hal_power_is_charging(),
         .gauge_is_ok = furi_hal_power_gauge_is_ok(),
         .is_shutdown_requested = furi_hal_power_is_shutdown_requested(),
+        .is_otg_enabled = furi_hal_power_is_otg_enabled(),
         .charge = furi_hal_power_get_pct(),
         .health = furi_hal_power_get_bat_health_pct(),
         .capacity_remaining = furi_hal_power_get_battery_remaining_capacity(),
@@ -257,10 +258,11 @@ static void power_tick_callback(void* context) {
     }
 
     // Change OTG state if needed (i.e. after disconnecting USB power)
-    if(power->is_otg_requested && !furi_hal_power_is_otg_enabled()) {
+    if(power->is_otg_requested &&
+       (!power->info.is_otg_enabled && power->info.voltage_vbus < 4.5f)) {
         FURI_LOG_D(TAG, "OTG requested but not enabled, enabling OTG");
         furi_hal_power_enable_otg();
-    } else if(!power->is_otg_requested && furi_hal_power_is_otg_enabled()) {
+    } else if(!power->is_otg_requested && power->info.is_otg_enabled) {
         FURI_LOG_D(TAG, "OTG not requested but enabled, disabling OTG");
         furi_hal_power_disable_otg();
     }
