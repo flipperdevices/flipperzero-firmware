@@ -104,6 +104,8 @@ FuriStatus furi_semaphore_release(FuriSemaphore* instance) {
 
     stat = FuriStatusOk;
 
+    FURI_CRITICAL_ENTER();
+
     if(FURI_IS_IRQ_MODE()) {
         yield = pdFALSE;
 
@@ -122,6 +124,8 @@ FuriStatus furi_semaphore_release(FuriSemaphore* instance) {
     if(stat == FuriStatusOk) {
         furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventIn);
     }
+
+    FURI_CRITICAL_EXIT();
 
     return stat;
 }

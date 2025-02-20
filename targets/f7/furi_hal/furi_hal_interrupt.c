@@ -314,7 +314,52 @@ void MemManage_Handler(void) {
 }
 
 void BusFault_Handler(void) {
-    furi_crash("BusFault");
+    const char* crash_msg = "BusFault";
+
+    furi_log_puts("\r\n" _FURI_LOG_CLR_E "Bus fault:\r\n");
+    if(FURI_BIT(SCB->CFSR, SCB_CFSR_LSPERR_Pos)) {
+        furi_log_puts(" - lazy stacking for exception entry\r\n");
+    }
+
+    if(FURI_BIT(SCB->CFSR, SCB_CFSR_STKERR_Pos)) {
+        furi_log_puts(" - stacking for exception entry\r\n");
+    }
+
+    if(FURI_BIT(SCB->CFSR, SCB_CFSR_UNSTKERR_Pos)) {
+        furi_log_puts(" - unstacking for exception return\r\n");
+    }
+
+    if(FURI_BIT(SCB->CFSR, SCB_CFSR_IMPRECISERR_Pos)) {
+        furi_log_puts(" - imprecise data access\r\n");
+    }
+
+    if(FURI_BIT(SCB->CFSR, SCB_CFSR_PRECISERR_Pos)) {
+        furi_log_puts(" - precise data access\r\n");
+    }
+
+    if(FURI_BIT(SCB->CFSR, SCB_CFSR_IBUSERR_Pos)) {
+        furi_log_puts(" - instruction\r\n");
+    }
+
+    if(FURI_BIT(SCB->CFSR, SCB_CFSR_BFARVALID_Pos)) {
+        uint32_t busfault_address = SCB->BFAR;
+        furi_log_puts(" -- at 0x");
+
+        char tmp_str[] = "0xFFFFFFFF";
+        itoa(busfault_address, tmp_str, 16);
+        furi_log_puts(tmp_str);
+
+        furi_log_puts("\r\n");
+
+        if(busfault_address == (uint32_t)NULL) {
+            furi_log_puts(" -- NULL pointer dereference\r\n");
+        } else if(busfault_address >= 0xDDDDDDDD && busfault_address <= 0xDDDEDDDD) {
+            crash_msg = "Possible use-after-free";
+        }
+    }
+    furi_log_puts(_FURI_LOG_CLR_RESET);
+
+    furi_crash(crash_msg);
 }
 
 void UsageFault_Handler(void) {
