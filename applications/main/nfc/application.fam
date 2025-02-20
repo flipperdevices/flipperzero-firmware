@@ -248,6 +248,16 @@ App(
 )
 
 App(
+    appid="disney_infinity_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="disney_infinity_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    fap_libs=["mbedtls"],
+    sources=["plugins/supported_cards/disney_infinity.c"],
+)
+
+App(
     appid="nfc_start",
     targets=["f7"],
     apptype=FlipperAppType.STARTUP,
