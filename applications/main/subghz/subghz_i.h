@@ -28,6 +28,8 @@
 
 #include "rpc/rpc_app.h"
 
+#include <power/power_service/power.h>
+
 #include "helpers/subghz_threshold_rssi.h"
 
 #include "helpers/subghz_txrx.h"
