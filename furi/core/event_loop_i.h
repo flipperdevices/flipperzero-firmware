@@ -64,8 +64,7 @@ typedef enum {
 
 typedef enum {
     FuriEventLoopStateStopped,
-    FuriEventLoopStateIdle,
-    FuriEventLoopStateProcessing,
+    FuriEventLoopStateRunning,
 } FuriEventLoopState;
 
 typedef struct {
@@ -81,6 +80,7 @@ struct FuriEventLoop {
 
     // Poller state
     volatile FuriEventLoopState state;
+    volatile FuriEventLoopItem* current_item;
 
     // Event handling
     FuriEventLoopTree_t tree;
