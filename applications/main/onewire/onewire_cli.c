@@ -1,6 +1,8 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+#include <power/power_service/power.h>
+
 #include <cli/cli.h>
 #include <toolbox/args.h>
 
@@ -26,13 +28,14 @@ static void onewire_cli_print_usage(void) {
 static void onewire_cli_search(Cli* cli) {
     UNUSED(cli);
     OneWireHost* onewire = onewire_host_alloc(&gpio_ibutton);
+    Power* power = furi_record_open(RECORD_POWER);
     uint8_t address[8];
     bool done = false;
 
     printf("Search started\r\n");
 
     onewire_host_start(onewire);
-    furi_hal_power_enable_otg();
+    power_enable_otg(power, true);
 
     while(!done) {
         if(onewire_host_search(onewire, address, OneWireHostSearchModeNormal) != 1) {
@@ -49,8 +52,10 @@ static void onewire_cli_search(Cli* cli) {
         furi_delay_ms(100);
     }
 
-    furi_hal_power_disable_otg();
+    power_enable_otg(power, false);
+
     onewire_host_free(onewire);
+    furi_record_close(RECORD_POWER);
 }
 
 void onewire_cli(Cli* cli, FuriString* args, void* context) {

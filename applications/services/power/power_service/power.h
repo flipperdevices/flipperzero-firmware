@@ -39,6 +39,7 @@ typedef struct {
     bool gauge_is_ok;
     bool is_charging;
     bool is_shutdown_requested;
+    bool is_otg_enabled;
 
     float current_charger;
     float current_gauge;
@@ -95,6 +96,19 @@ bool power_is_battery_healthy(Power* power);
  * @param enable    true - enable, false - disable
  */
 void power_enable_low_battery_level_notification(Power* power, bool enable);
+
+/** Enable or disable OTG
+ *
+ * @param power     Power instance
+ * @param enable    true - enable, false - disable
+ */
+void power_enable_otg(Power* power, bool enable);
+
+/** Check OTG status
+ * 
+ * @return          true if OTG  is requested
+ */
+bool power_is_otg_enabled(Power* power);
 
 #ifdef __cplusplus
 }
