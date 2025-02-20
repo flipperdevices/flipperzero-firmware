@@ -371,14 +371,14 @@ static bool button_panel_view_input_callback(InputEvent* event, void* context) {
     furi_assert(button_panel);
     bool consumed = false;
     if(event->key == InputKeyOk) {
-        if((event->type == InputTypeRelease) || (event->type == InputTypePress)) {
+        if((event->type == InputTypePress) || (event->type == InputTypeRelease)) {
             button_panel->freeze_input = (event->type == InputTypePress);
         }
         consumed = true;
         button_panel_process_ok(button_panel, event->type);
     }
     if(!button_panel->freeze_input &&
-       ((event->type == InputTypeRepeat) || (event->type == InputTypeShort))) {
+       (!(event->type == InputTypePress) && !(event->type == InputTypeRelease))) {
         switch(event->key) {
         case InputKeyUp:
             consumed = true;
