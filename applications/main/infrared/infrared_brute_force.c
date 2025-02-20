@@ -213,6 +213,5 @@ void infrared_brute_force_add_record(
 }
 
 void infrared_brute_force_reset(InfraredBruteForce* brute_force) {
-    furi_assert(!brute_force->is_started);
     InfraredBruteForceRecordDict_reset(brute_force->records);
 }
