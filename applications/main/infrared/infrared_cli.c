@@ -475,25 +475,24 @@ static void
             break;
         }
 
-        uint32_t record_count;
+        uint32_t signal_count, current_signal = 0;
         bool running = infrared_brute_force_start(
-            brute_force, INFRARED_BRUTE_FORCE_DUMMY_INDEX, &record_count);
+            brute_force, INFRARED_BRUTE_FORCE_DUMMY_INDEX, &signal_count);
 
-        if(record_count <= 0) {
+        if(signal_count <= 0) {
             printf("Invalid signal name.\r\n");
             break;
         }
 
-        printf("Sending %lu signal(s)...\r\n", record_count);
+        printf("Sending %lu signal(s)...\r\n", signal_count);
         printf("Press Ctrl-C to stop.\r\n");
 
-        int records_sent = 0;
         while(running) {
-            running = infrared_brute_force_send_next(brute_force);
+            running = infrared_brute_force_send(brute_force, current_signal);
 
             if(cli_cmd_interrupt_received(cli)) break;
 
-            printf("\r%d%% complete.", (int)((float)records_sent++ / (float)record_count * 100));
+            printf("\r%d%% complete.", (int)((float)current_signal++ / (float)signal_count * 100));
             fflush(stdout);
         }
 

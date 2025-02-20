@@ -193,8 +193,16 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, FuriString* line) {
         return cmd_result;
     }
 
+    // Mouse Keys
+    uint16_t key = ducky_get_mouse_keycode_by_name(line_tmp);
+    if(key != HID_MOUSE_INVALID) {
+        bad_usb->hid->mouse_press(bad_usb->hid_inst, key);
+        bad_usb->hid->mouse_release(bad_usb->hid_inst, key);
+        return 0;
+    }
+
     // Special keys + modifiers
-    uint16_t key = ducky_get_keycode(bad_usb, line_tmp, false);
+    key = ducky_get_keycode(bad_usb, line_tmp, false);
     if(key == HID_KEYBOARD_NONE) {
         return ducky_error(bad_usb, "No keycode defined for %s", line_tmp);
     }

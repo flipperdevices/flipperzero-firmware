@@ -20,14 +20,6 @@ typedef struct {
     char* data;
 } PatternArrayItem;
 
-static const struct {
-    const char* name;
-    const FuriHalSerialId value;
-} serial_channels[] = {
-    {"usart", FuriHalSerialIdUsart},
-    {"lpuart", FuriHalSerialIdLpuart},
-};
-
 ARRAY_DEF(PatternArray, PatternArrayItem, M_POD_OPLIST);
 
 static void
@@ -43,49 +35,57 @@ static void
 }
 
 static void js_serial_setup(struct mjs* mjs) {
-    mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
-    JsSerialInst* serial = mjs_get_ptr(mjs, obj_inst);
-    furi_assert(serial);
+    FuriHalSerialId serial_id;
+    int32_t baudrate;
+    JS_ENUM_MAP(serial_id, {"lpuart", FuriHalSerialIdLpuart}, {"usart", FuriHalSerialIdUsart});
+    JS_FETCH_ARGS_OR_RETURN(
+        mjs, JS_AT_LEAST, JS_ARG_ENUM(serial_id, "SerialId"), JS_ARG_INT32(&baudrate));
+
+    FuriHalSerialDataBits data_bits = FuriHalSerialDataBits8;
+    FuriHalSerialParity parity = FuriHalSerialParityNone;
+    FuriHalSerialStopBits stop_bits = FuriHalSerialStopBits1;
+    if(mjs_nargs(mjs) > 2) {
+        struct framing {
+            mjs_val_t data_bits;
+            mjs_val_t parity;
+            mjs_val_t stop_bits;
+        } framing;
+        JS_OBJ_MAP(
+            framing,
+            {"dataBits", offsetof(struct framing, data_bits)},
+            {"parity", offsetof(struct framing, parity)},
+            {"stopBits", offsetof(struct framing, stop_bits)});
+        JS_ENUM_MAP(
+            data_bits,
+            {"6", FuriHalSerialDataBits6},
+            {"7", FuriHalSerialDataBits7},
+            {"8", FuriHalSerialDataBits8},
+            {"9", FuriHalSerialDataBits9});
+        JS_ENUM_MAP(
+            parity,
+            {"none", FuriHalSerialParityNone},
+            {"even", FuriHalSerialParityEven},
+            {"odd", FuriHalSerialParityOdd});
+        JS_ENUM_MAP(
+            stop_bits,
+            {"0.5", FuriHalSerialStopBits0_5},
+            {"1", FuriHalSerialStopBits1},
+            {"1.5", FuriHalSerialStopBits1_5},
+            {"2", FuriHalSerialStopBits2});
+        mjs_val_t framing_obj = mjs_arg(mjs, 2);
+        JS_CONVERT_OR_RETURN(mjs, &framing_obj, JS_ARG_OBJECT(framing, "Framing"), "argument 2");
+        JS_CONVERT_OR_RETURN(
+            mjs, &framing.data_bits, JS_ARG_ENUM(data_bits, "DataBits"), "argument 2: dataBits");
+        JS_CONVERT_OR_RETURN(
+            mjs, &framing.parity, JS_ARG_ENUM(parity, "Parity"), "argument 2: parity");
+        JS_CONVERT_OR_RETURN(
+            mjs, &framing.stop_bits, JS_ARG_ENUM(stop_bits, "StopBits"), "argument 2: stopBits");
+    }
+
+    JsSerialInst* serial = JS_GET_CONTEXT(mjs);
 
     if(serial->setup_done) {
         mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Serial is already configured");
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    bool args_correct = false;
-    FuriHalSerialId serial_id = FuriHalSerialIdMax;
-    uint32_t baudrate = 0;
-
-    do {
-        if(mjs_nargs(mjs) != 2) break;
-
-        mjs_val_t arg = mjs_arg(mjs, 0);
-        if(!mjs_is_string(arg)) break;
-
-        size_t str_len = 0;
-        const char* arg_str = mjs_get_string(mjs, &arg, &str_len);
-        for(size_t i = 0; i < COUNT_OF(serial_channels); i++) {
-            size_t name_len = strlen(serial_channels[i].name);
-            if(str_len != name_len) continue;
-            if(strncmp(arg_str, serial_channels[i].name, str_len) == 0) {
-                serial_id = serial_channels[i].value;
-                break;
-            }
-        }
-        if(serial_id == FuriHalSerialIdMax) {
-            break;
-        }
-
-        arg = mjs_arg(mjs, 1);
-        if(!mjs_is_number(arg)) break;
-        baudrate = mjs_get_int32(mjs, arg);
-
-        args_correct = true;
-    } while(0);
-
-    if(!args_correct) {
-        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
@@ -97,6 +97,7 @@ static void js_serial_setup(struct mjs* mjs) {
     if(serial->serial_handle) {
         serial->rx_stream = furi_stream_buffer_alloc(RX_BUF_LEN, 1);
         furi_hal_serial_init(serial->serial_handle, baudrate);
+        furi_hal_serial_configure_framing(serial->serial_handle, data_bits, parity, stop_bits);
         furi_hal_serial_async_rx_start(
             serial->serial_handle, js_serial_on_async_rx, serial, false);
         serial->setup_done = true;
