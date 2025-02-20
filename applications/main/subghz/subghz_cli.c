@@ -615,7 +615,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
         if(furi_string_size(args)) {
             char* args_cstr = (char*)furi_string_get_cstr(args);
             StrintParseError parse_err = StrintParseNoError;
-            parse_err |= strint_to_uint32(args_cstr, &args_cstr, &frequency, 10);
+            parse_err |= strint_to_uint32(args_cstr, &args_cstr, &repeat, 10);
             parse_err |= strint_to_uint32(args_cstr, &args_cstr, &device_ind, 10);
             if(parse_err) {
                 cli_print_usage(
