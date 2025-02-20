@@ -262,9 +262,6 @@ static void power_tick_callback(void* context) {
        (!power->info.is_otg_enabled && power->info.voltage_vbus < 4.5f)) {
         FURI_LOG_D(TAG, "OTG requested but not enabled, enabling OTG");
         furi_hal_power_enable_otg();
-    } else if(!power->is_otg_requested && power->info.is_otg_enabled) {
-        FURI_LOG_D(TAG, "OTG not requested but enabled, disabling OTG");
-        furi_hal_power_disable_otg();
     }
 }
 
