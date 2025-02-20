@@ -92,7 +92,7 @@ static void js_console_debug(struct mjs* mjs) {
 }
 
 static void js_exit_flag_poll(struct mjs* mjs) {
-    uint32_t flags = furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny, 0);
+    uint32_t flags = furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny | FuriFlagNoClear, 0);
     if(flags & FuriFlagError) {
         return;
     }
@@ -102,7 +102,8 @@ static void js_exit_flag_poll(struct mjs* mjs) {
 }
 
 bool js_delay_with_flags(struct mjs* mjs, uint32_t time) {
-    uint32_t flags = furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny, time);
+    uint32_t flags =
+        furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny | FuriFlagNoClear, time);
     if(flags & FuriFlagError) {
         return false;
     }
@@ -124,7 +125,7 @@ uint32_t js_flags_wait(struct mjs* mjs, uint32_t flags_mask, uint32_t timeout) {
     uint32_t flags = furi_thread_flags_get();
     furi_check((flags & FuriFlagError) == 0);
     if(flags == 0) {
-        flags = furi_thread_flags_wait(flags_mask, FuriFlagWaitAny, timeout);
+        flags = furi_thread_flags_wait(flags_mask, FuriFlagWaitAny | FuriFlagNoClear, timeout);
     } else {
         uint32_t state = furi_thread_flags_clear(flags & flags_mask);
         furi_check((state & FuriFlagError) == 0);
