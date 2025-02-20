@@ -503,11 +503,7 @@ void infrared_set_tx_pin(InfraredApp* infrared, FuriHalInfraredTxPin tx_pin) {
 void infrared_enable_otg(InfraredApp* infrared, bool enable) {
     Power* power = furi_record_open(RECORD_POWER);
 
-    if(enable) {
-        power_enable_otg(power, true);
-    } else {
-        power_enable_otg(power, false);
-    }
+    power_enable_otg(power, enable);
     infrared->app_state.is_otg_enabled = enable;
 
     furi_record_close(RECORD_POWER);

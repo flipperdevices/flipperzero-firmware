@@ -219,8 +219,24 @@ static void power_message_callback(FuriEventLoopObject* object, void* context) {
         break;
     case PowerMessageTypeSwitchOTG:
         power->is_otg_requested = *msg.bool_param;
-        if(*msg.bool_param) {
-            furi_hal_power_enable_otg();
+        if(power->is_otg_requested) {
+            // Only try to enable if VBUS voltage is low, otherwise charger will refuse
+            if(power->info.voltage_vbus < 4.5f) {
+                size_t retries = 5;
+                while(retries-- > 0) {
+                    if(furi_hal_power_enable_otg()) {
+                        break;
+                    }
+                }
+                if(!retries) {
+                    FURI_LOG_W(TAG, "Failed to enable OTG, will try later");
+                }
+            } else {
+                FURI_LOG_W(
+                    TAG,
+                    "Postponing OTG enable: VBUS(%0.1f) >= 4.5v",
+                    (double)power->info.voltage_vbus);
+            }
         } else {
             furi_hal_power_disable_otg();
         }
