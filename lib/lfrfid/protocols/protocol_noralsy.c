@@ -168,10 +168,7 @@ bool protocol_noralsy_write_data(ProtocolNoralsy* protocol, void* data) {
     return result;
 }
 
-static void protocol_noralsy_render_data_internal(
-    ProtocolNoralsy* protocol,
-    FuriString* result,
-    bool brief) {
+static void protocol_noralsy_render_data_internal(ProtocolNoralsy* protocol, FuriString* result) {
     UNUSED(protocol);
     uint32_t raw2 = bit_lib_get_bits_32(protocol->data, 32, 32);
     uint32_t raw3 = bit_lib_get_bits_32(protocol->data, 64, 32);
@@ -181,31 +178,21 @@ static void protocol_noralsy_render_data_internal(
 
     uint8_t year = (raw2 & 0x000ff000) >> 12;
     bool tag_is_gen_z = (year > 0x60);
-    if(brief) {
-        furi_string_printf(
-            result,
-            "Card ID: %07lx\n"
-            "Year: %s%02x",
-            cardid,
-            tag_is_gen_z ? "19" : "20",
-            year);
-    } else {
-        furi_string_printf(
-            result,
-            "Card ID: %07lx\n"
-            "Year: %s%02x",
-            cardid,
-            tag_is_gen_z ? "19" : "20",
-            year);
-    }
+    furi_string_printf(
+        result,
+        "Card ID: %07lx\n"
+        "Year: %s%02x",
+        cardid,
+        tag_is_gen_z ? "19" : "20",
+        year);
 }
 
 void protocol_noralsy_render_data(ProtocolNoralsy* protocol, FuriString* result) {
-    protocol_noralsy_render_data_internal(protocol, result, false);
+    protocol_noralsy_render_data_internal(protocol, result);
 }
 
 void protocol_noralsy_render_brief_data(ProtocolNoralsy* protocol, FuriString* result) {
-    protocol_noralsy_render_data_internal(protocol, result, true);
+    protocol_noralsy_render_data_internal(protocol, result);
 }
 
 const ProtocolBase protocol_noralsy = {
