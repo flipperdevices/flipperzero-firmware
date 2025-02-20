@@ -11,28 +11,14 @@
 static void subghz_txrx_radio_device_power_on(SubGhzTxRx* instance) {
     UNUSED(instance);
     Power* power = furi_record_open(RECORD_POWER);
-
-    uint8_t attempts = 5;
-    while(--attempts > 0) {
-        power_enable_otg(power, true);
-        if(furi_hal_power_is_otg_enabled()) break;
-    }
-    if(attempts == 0) {
-        if(furi_hal_power_get_usb_voltage() < 4.5f) {
-            FURI_LOG_E(
-                TAG,
-                "Error power otg enable. BQ2589 check otg fault = %d",
-                furi_hal_power_check_otg_fault() ? 1 : 0);
-        }
-    }
-
+    power_enable_otg(power, true);
     furi_record_close(RECORD_POWER);
 }
 
 static void subghz_txrx_radio_device_power_off(SubGhzTxRx* instance) {
     UNUSED(instance);
     Power* power = furi_record_open(RECORD_POWER);
-    if(power_is_otg_enabled(power)) power_enable_otg(power, false);
+    power_enable_otg(power, false);
     furi_record_close(RECORD_POWER);
 }
 
