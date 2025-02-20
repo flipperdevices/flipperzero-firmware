@@ -60,7 +60,7 @@ void gpio_scene_start_on_enter(void* context) {
         GpioOtgSettingsNum,
         gpio_scene_start_var_list_change_callback,
         app);
-    if(power_is_otg_requested(app->power)) {
+    if(power_is_otg_enabled(app->power)) {
         variable_item_set_current_value_index(item, GpioOtgOn);
         variable_item_set_current_value_text(item, gpio_otg_text[GpioOtgOn]);
     } else {
@@ -80,9 +80,9 @@ bool gpio_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GpioStartEventOtgOn) {
-            power_switch_otg(app->power, true);
+            power_enable_otg(app->power, true);
         } else if(event.event == GpioStartEventOtgOff) {
-            power_switch_otg(app->power, false);
+            power_enable_otg(app->power, false);
         } else if(event.event == GpioStartEventManualControl) {
             scene_manager_set_scene_state(app->scene_manager, GpioSceneStart, GpioItemTest);
             scene_manager_next_scene(app->scene_manager, GpioSceneTest);

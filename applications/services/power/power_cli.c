@@ -32,9 +32,9 @@ void power_cli_5v(Cli* cli, FuriString* args) {
     UNUSED(cli);
     Power* power = furi_record_open(RECORD_POWER);
     if(!furi_string_cmp(args, "0")) {
-        power_switch_otg(power, false);
+        power_enable_otg(power, false);
     } else if(!furi_string_cmp(args, "1")) {
-        power_switch_otg(power, true);
+        power_enable_otg(power, true);
     } else {
         cli_print_usage("power_otg", "<1|0>", furi_string_get_cstr(args));
     }

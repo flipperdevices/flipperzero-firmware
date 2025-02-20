@@ -274,7 +274,7 @@ static void example_thermo_input_callback(InputEvent* event, void* ctx) {
 /* Starts the reader thread and handles the input */
 static void example_thermo_run(ExampleThermoContext* context) {
     /* Enable power on external pins */
-    power_switch_otg(context->power, true);
+    power_enable_otg(context->power, true);
 
     /* Configure the hardware in host mode */
     onewire_host_start(context->onewire);
@@ -310,7 +310,7 @@ static void example_thermo_run(ExampleThermoContext* context) {
     onewire_host_stop(context->onewire);
 
     /* Disable power on external pins */
-    power_switch_otg(context->power, false);
+    power_enable_otg(context->power, false);
 }
 
 /******************** Initialisation & startup *****************************/

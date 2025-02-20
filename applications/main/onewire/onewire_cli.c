@@ -35,7 +35,7 @@ static void onewire_cli_search(Cli* cli) {
     printf("Search started\r\n");
 
     onewire_host_start(onewire);
-    power_switch_otg(power, true);
+    power_enable_otg(power, true);
 
     while(!done) {
         if(onewire_host_search(onewire, address, OneWireHostSearchModeNormal) != 1) {
@@ -52,7 +52,7 @@ static void onewire_cli_search(Cli* cli) {
         furi_delay_ms(100);
     }
 
-    power_switch_otg(power, false);
+    power_enable_otg(power, false);
 
     onewire_host_free(onewire);
     furi_record_close(RECORD_POWER);

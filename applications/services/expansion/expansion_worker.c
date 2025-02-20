@@ -253,11 +253,11 @@ static bool expansion_worker_handle_state_connected(
                 instance->state = ExpansionWorkerStateRpcActive;
             } else if(command == ExpansionFrameControlCommandEnableOtg) {
                 Power* power = furi_record_open(RECORD_POWER);
-                power_switch_otg(power, true);
+                power_enable_otg(power, true);
                 furi_record_close(RECORD_POWER);
             } else if(command == ExpansionFrameControlCommandDisableOtg) {
                 Power* power = furi_record_open(RECORD_POWER);
-                power_switch_otg(power, false);
+                power_enable_otg(power, false);
                 furi_record_close(RECORD_POWER);
             } else {
                 break;

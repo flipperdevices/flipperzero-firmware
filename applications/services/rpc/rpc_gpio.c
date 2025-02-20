@@ -222,9 +222,9 @@ void rpc_system_gpio_set_otg_mode(const PB_Main* request, void* context) {
     Power* power = furi_record_open(RECORD_POWER);
 
     if(mode == PB_Gpio_GpioOtgMode_OFF) {
-        power_switch_otg(power, false);
+        power_enable_otg(power, false);
     } else {
-        power_switch_otg(power, true);
+        power_enable_otg(power, true);
     }
 
     furi_record_close(RECORD_POWER);

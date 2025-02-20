@@ -102,13 +102,13 @@ void power_enable_low_battery_level_notification(Power* power, bool enable);
  * @param power     Power instance
  * @param enable    true - enable, false - disable
  */
-void power_switch_otg(Power* power, bool enable);
+void power_enable_otg(Power* power, bool enable);
 
 /** Check OTG status
  * 
  * @return          true if OTG  is requested
  */
-bool power_is_otg_requested(Power* power);
+bool power_is_otg_enabled(Power* power);
 
 #ifdef __cplusplus
 }

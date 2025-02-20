@@ -14,7 +14,7 @@ static void subghz_txrx_radio_device_power_on(SubGhzTxRx* instance) {
 
     uint8_t attempts = 5;
     while(--attempts > 0) {
-        power_switch_otg(power, true);
+        power_enable_otg(power, true);
         if(furi_hal_power_is_otg_enabled()) break;
     }
     if(attempts == 0) {
@@ -32,7 +32,7 @@ static void subghz_txrx_radio_device_power_on(SubGhzTxRx* instance) {
 static void subghz_txrx_radio_device_power_off(SubGhzTxRx* instance) {
     UNUSED(instance);
     Power* power = furi_record_open(RECORD_POWER);
-    if(power_is_otg_requested(power)) power_switch_otg(power, false);
+    if(power_is_otg_enabled(power)) power_enable_otg(power, false);
     furi_record_close(RECORD_POWER);
 }
 

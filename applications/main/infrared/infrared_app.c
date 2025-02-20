@@ -504,9 +504,9 @@ void infrared_enable_otg(InfraredApp* infrared, bool enable) {
     Power* power = furi_record_open(RECORD_POWER);
 
     if(enable) {
-        power_switch_otg(power, true);
+        power_enable_otg(power, true);
     } else {
-        power_switch_otg(power, false);
+        power_enable_otg(power, false);
     }
     infrared->app_state.is_otg_enabled = enable;
 

@@ -77,7 +77,7 @@ void ibutton_worker_mode_idle_stop(iButtonWorker* worker) {
 void ibutton_worker_mode_read_start(iButtonWorker* worker) {
     UNUSED(worker);
     Power* power = furi_record_open(RECORD_POWER);
-    power_switch_otg(power, true);
+    power_enable_otg(power, true);
     furi_record_close(RECORD_POWER);
 }
 
@@ -94,7 +94,7 @@ void ibutton_worker_mode_read_tick(iButtonWorker* worker) {
 void ibutton_worker_mode_read_stop(iButtonWorker* worker) {
     UNUSED(worker);
     Power* power = furi_record_open(RECORD_POWER);
-    power_switch_otg(power, false);
+    power_enable_otg(power, false);
     furi_record_close(RECORD_POWER);
 }
 
@@ -126,7 +126,7 @@ void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
 void ibutton_worker_mode_write_common_start(iButtonWorker* worker) { //-V524
     UNUSED(worker);
     Power* power = furi_record_open(RECORD_POWER);
-    power_switch_otg(power, true);
+    power_enable_otg(power, true);
     furi_record_close(RECORD_POWER);
 }
 
@@ -157,6 +157,6 @@ void ibutton_worker_mode_write_copy_tick(iButtonWorker* worker) {
 void ibutton_worker_mode_write_common_stop(iButtonWorker* worker) { //-V524
     UNUSED(worker);
     Power* power = furi_record_open(RECORD_POWER);
-    power_switch_otg(power, false);
+    power_enable_otg(power, false);
     furi_record_close(RECORD_POWER);
 }

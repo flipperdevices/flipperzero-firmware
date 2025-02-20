@@ -71,7 +71,7 @@ void power_enable_low_battery_level_notification(Power* power, bool enable) {
         furi_message_queue_put(power->message_queue, &msg, FuriWaitForever) == FuriStatusOk);
 }
 
-void power_switch_otg(Power* power, bool enable) {
+void power_enable_otg(Power* power, bool enable) {
     furi_check(power);
 
     PowerMessage msg = {
@@ -83,7 +83,7 @@ void power_switch_otg(Power* power, bool enable) {
         furi_message_queue_put(power->message_queue, &msg, FuriWaitForever) == FuriStatusOk);
 }
 
-bool power_is_otg_requested(Power* power) {
+bool power_is_otg_enabled(Power* power) {
     furi_check(power);
     return power->is_otg_requested;
 }

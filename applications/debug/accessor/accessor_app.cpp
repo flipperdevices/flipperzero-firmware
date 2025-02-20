@@ -39,11 +39,11 @@ AccessorApp::AccessorApp()
     power = static_cast<Power*>(furi_record_open(RECORD_POWER));
     onewire_host = onewire_host_alloc(&gpio_ibutton);
     expansion_disable(expansion);
-    power_switch_otg(power, true);
+    power_enable_otg(power, true);
 }
 
 AccessorApp::~AccessorApp() {
-    power_switch_otg(power, false);
+    power_enable_otg(power, false);
     expansion_enable(expansion);
     furi_record_close(RECORD_EXPANSION);
     furi_record_close(RECORD_NOTIFICATION);
