@@ -6,7 +6,7 @@
     "start": "npm run build && node node_modules/@flipperdevices/fz-sdk/sdk.js upload"
   },
   "devDependencies": {
-    "@flipperdevices/fz-sdk": "^0.1",
+    "@flipperdevices/fz-sdk": "^0.3",
     "typescript": "^5.6.3"
   }
 }
