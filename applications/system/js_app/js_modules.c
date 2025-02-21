@@ -270,6 +270,7 @@ static const char* extra_features[] = {
     "gpio-pwm",
     "gui-widget",
     "serial-framing",
+    "gui-widget-extras",
 };
 
 /**
