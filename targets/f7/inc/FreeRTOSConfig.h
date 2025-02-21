@@ -33,7 +33,7 @@
 #define configUSE_POSIX_ERRNO            1
 
 /* Heap size determined automatically by linker */
-#define configTOTAL_HEAP_SIZE   ((uint8_t*)&__heap_end__ - (uint8_t*)&__heap_start__)
+#define configTOTAL_HEAP_SIZE   ((uint32_t)&__heap_end__ - (uint32_t)&__heap_start__)
 #define configMAX_TASK_NAME_LEN (32)
 
 #define configGENERATE_RUN_TIME_STATS    1
