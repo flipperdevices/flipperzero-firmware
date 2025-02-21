@@ -151,6 +151,20 @@ void widget_add_button_element(
  */
 void widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* icon);
 
+/** Add Frame Element
+  *
+  * @param      widget  Widget instance
+  * @param      x       top left x coordinate
+  * @param      y       top left y coordinate
+  * @param      width   frame width
+  * @param      height  frame height
+  * @param      radius  frame radius
+  * 
+  * @warning deprecated, use widget_add_rect_element instead
+  */
+#define widget_add_frame_element(widget, x, y, width, height, radius) \
+    widget_add_rect_element((widget), (x), (y), (width), (height), (radius), false)
+
 /** Add Rect Element
  *
  * @param      widget  Widget instance
