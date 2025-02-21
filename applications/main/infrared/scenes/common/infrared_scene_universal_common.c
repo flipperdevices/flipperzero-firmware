@@ -13,10 +13,12 @@ typedef union {
 } InfraredSceneState;
 #pragma pack(pop)
 
-void infrared_scene_universal_common_item_callback(void* context, uint32_t index) {
+void infrared_scene_universal_common_item_callback(void* context, uint32_t index, InputType type) {
     InfraredApp* infrared = context;
-    uint32_t event = infrared_custom_event_pack(InfraredCustomEventTypeButtonSelected, index);
-    view_dispatcher_send_custom_event(infrared->view_dispatcher, event);
+    if(type == InputTypeShort) {
+        uint32_t event = infrared_custom_event_pack(InfraredCustomEventTypeButtonSelected, index);
+        view_dispatcher_send_custom_event(infrared->view_dispatcher, event);
+    }
 }
 
 static void infrared_scene_universal_common_progress_input_callback(
