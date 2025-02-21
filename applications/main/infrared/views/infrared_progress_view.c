@@ -107,7 +107,11 @@ void infrared_progress_view_set_paused(InfraredProgressView* instance, bool is_p
 
 bool infrared_progress_view_input_callback(InputEvent* event, void* context) {
     InfraredProgressView* instance = context;
-    if(event->type != InputTypeShort && event->type != InputTypeRepeat) return false;
+
+    if(event->type == InputTypePress || event->type == InputTypeRelease) {
+        return false;
+    }
+
     if(!instance->input_callback) return false;
 
     with_view_model(
