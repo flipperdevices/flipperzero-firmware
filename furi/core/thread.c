@@ -23,6 +23,8 @@
 
 #define THREAD_MAX_STACK_SIZE (UINT16_MAX * sizeof(StackType_t))
 
+#define THREAD_STACK_WATERMARK_MIN (256u)
+
 typedef struct {
     FuriThreadStdoutWriteCallback write_callback;
     FuriString* buffer;
@@ -114,6 +116,18 @@ static void furi_thread_body(void* context) {
     thread->ret = thread->callback(thread->context);
 
     furi_check(!thread->is_service, "Service threads MUST NOT return");
+
+    size_t stack_watermark = furi_thread_get_stack_space(thread);
+    if(stack_watermark < THREAD_STACK_WATERMARK_MIN) {
+#ifdef FURI_DEBUG
+        furi_crash("Stack watermark is dangerously low");
+#endif
+        FURI_LOG_E( //-V779
+            thread->name ? thread->name : "Thread",
+            "Stack watermark is too low %zu < " STRINGIFY(
+                THREAD_STACK_WATERMARK_MIN) ". Increase stack size.",
+            stack_watermark);
+    }
 
     if(thread->heap_trace_enabled == true) {
         furi_delay_ms(33);

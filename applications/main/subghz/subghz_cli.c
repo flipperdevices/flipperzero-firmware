@@ -28,22 +28,15 @@
 #define TAG "SubGhzCli"
 
 static void subghz_cli_radio_device_power_on(void) {
-    uint8_t attempts = 5;
-    while(--attempts > 0) {
-        if(furi_hal_power_enable_otg()) break;
-    }
-    if(attempts == 0) {
-        if(furi_hal_power_get_usb_voltage() < 4.5f) {
-            FURI_LOG_E(
-                "TAG",
-                "Error power otg enable. BQ2589 check otg fault = %d",
-                furi_hal_power_check_otg_fault() ? 1 : 0);
-        }
-    }
+    Power* power = furi_record_open(RECORD_POWER);
+    power_enable_otg(power, true);
+    furi_record_close(RECORD_POWER);
 }
 
 static void subghz_cli_radio_device_power_off(void) {
-    if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
+    Power* power = furi_record_open(RECORD_POWER);
+    power_enable_otg(power, false);
+    furi_record_close(RECORD_POWER);
 }
 
 static SubGhzEnvironment* subghz_cli_environment_init(void) {
@@ -615,7 +608,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
         if(furi_string_size(args)) {
             char* args_cstr = (char*)furi_string_get_cstr(args);
             StrintParseError parse_err = StrintParseNoError;
-            parse_err |= strint_to_uint32(args_cstr, &args_cstr, &frequency, 10);
+            parse_err |= strint_to_uint32(args_cstr, &args_cstr, &repeat, 10);
             parse_err |= strint_to_uint32(args_cstr, &args_cstr, &device_ind, 10);
             if(parse_err) {
                 cli_print_usage(
