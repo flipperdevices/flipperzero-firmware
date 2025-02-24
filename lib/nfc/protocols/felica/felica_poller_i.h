@@ -70,7 +70,6 @@ FelicaError felica_poller_polling(
     const FelicaPollerPollingCommand* cmd,
     FelicaPollerPollingResponse* resp);
 
-
 /**
  * @brief Performs felica write operation with data provided as parameters
  * 

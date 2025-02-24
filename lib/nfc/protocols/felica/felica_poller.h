@@ -73,7 +73,6 @@ FelicaError felica_poller_read_blocks(
     uint16_t service_code,
     FelicaPollerReadCommandResponse** const response_ptr);
 
-
 #ifdef __cplusplus
 }
 #endif
