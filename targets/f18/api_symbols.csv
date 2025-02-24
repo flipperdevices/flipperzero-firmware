@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,81.1,,
+Version,+,82.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1666,8 +1666,8 @@ Function,+,furi_thread_get_return_code,int32_t,FuriThread*
 Function,+,furi_thread_get_signal_callback,FuriThreadSignalCallback,const FuriThread*
 Function,+,furi_thread_get_stack_space,uint32_t,FuriThreadId
 Function,+,furi_thread_get_state,FuriThreadState,FuriThread*
-Function,+,furi_thread_get_stdin_callback,FuriThreadStdinReadCallback,
-Function,+,furi_thread_get_stdout_callback,FuriThreadStdoutWriteCallback,
+Function,+,furi_thread_get_stdin_callback,void,"FuriThreadStdinReadCallback*, void**"
+Function,+,furi_thread_get_stdout_callback,void,"FuriThreadStdoutWriteCallback*, void**"
 Function,+,furi_thread_is_suspended,_Bool,FuriThreadId
 Function,+,furi_thread_join,_Bool,FuriThread*
 Function,+,furi_thread_list_alloc,FuriThreadList*,
@@ -2333,6 +2333,7 @@ Function,+,pipe_set_broken_callback,void,"PipeSide*, PipeSideBrokenCallback, Fur
 Function,+,pipe_set_callback_context,void,"PipeSide*, void*"
 Function,+,pipe_set_data_arrived_callback,void,"PipeSide*, PipeSideDataArrivedCallback, FuriEventLoopEvent"
 Function,+,pipe_set_space_freed_callback,void,"PipeSide*, PipeSideSpaceFreedCallback, FuriEventLoopEvent"
+Function,+,pipe_set_stdout_timeout,void,"PipeSide*, FuriWait"
 Function,+,pipe_spaces_available,size_t,PipeSide*
 Function,+,pipe_state,PipeState,PipeSide*
 Function,+,plugin_manager_alloc,PluginManager*,"const char*, uint32_t, const ElfApiInterface*"

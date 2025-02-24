@@ -758,16 +758,22 @@ static int32_t __furi_thread_stdout_flush(FuriThread* thread) {
     return 0;
 }
 
-FuriThreadStdoutWriteCallback furi_thread_get_stdout_callback(void) {
+void furi_thread_get_stdout_callback(FuriThreadStdoutWriteCallback* callback, void** context) {
     FuriThread* thread = furi_thread_get_current();
     furi_check(thread);
-    return thread->output.write_callback;
+    furi_check(callback);
+    furi_check(context);
+    *callback = thread->output.write_callback;
+    *context = thread->output.context;
 }
 
-FuriThreadStdinReadCallback furi_thread_get_stdin_callback(void) {
+void furi_thread_get_stdin_callback(FuriThreadStdinReadCallback* callback, void** context) {
     FuriThread* thread = furi_thread_get_current();
     furi_check(thread);
-    return thread->input.read_callback;
+    furi_check(callback);
+    furi_check(context);
+    *callback = thread->input.read_callback;
+    *context = thread->input.context;
 }
 
 void furi_thread_set_stdout_callback(FuriThreadStdoutWriteCallback callback, void* context) {
