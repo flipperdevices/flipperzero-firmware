@@ -20,7 +20,7 @@ jobs:
 
       - name: 'Flashing target firmware'
         id: first_full_flash
-        timeout-minutes: 20
+        timeout-minutes: 10
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testops.py -t=180 await_flipper
