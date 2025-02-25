@@ -115,6 +115,11 @@ bool loader_get_application_name(Loader* instance, FuriString* name);
 
 /**
  * @brief Get the launch path or name of the currently running application
+ * 
+ * This is the string that was supplied to `loader_start` such that the current
+ * app is running now. It might be a name (in the case of internal apps) or a
+ * path (in the case of external apps). This value can be used to launch the
+ * same app again.
  *
  * @param[in] instance pointer to the loader instance
  * @param[inout] name pointer to the string to contain the path or name
