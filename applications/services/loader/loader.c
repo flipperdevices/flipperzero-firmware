@@ -728,6 +728,13 @@ static void loader_do_unlock(Loader* loader) {
     loader->app.thread = NULL;
 }
 
+static void loader_do_emit_queue_empty_event(Loader* loader) {
+    FURI_LOG_I(TAG, "Launch queue empty");
+    LoaderEvent event;
+    event.type = LoaderEventTypeNoMoreAppsInQueue;
+    furi_pubsub_publish(loader->pubsub, &event);
+}
+
 static bool loader_do_deferred_launch(Loader* loader, LoaderDeferredLaunchRecord* record);
 
 static void loader_do_next_deferred_launch_if_available(Loader* loader) {
@@ -737,6 +744,8 @@ static void loader_do_next_deferred_launch_if_available(Loader* loader) {
         LoaderDeferredLaunchRecordArray_pop_at(&record, loader->launch_queue, 0);
         loader_do_deferred_launch(loader, &record);
         LOADER_DL_RECORD_CLEAR(record);
+    } else {
+        loader_do_emit_queue_empty_event(loader);
     }
 }
 
@@ -875,16 +884,20 @@ int32_t loader_srv(void* p) {
     while(true) {
         if(furi_message_queue_get(loader->queue, &message, FuriWaitForever) == FuriStatusOk) {
             switch(message.type) {
-            case LoaderMessageTypeStartByName:
-                *(message.status_value) = loader_do_start_by_name(
+            case LoaderMessageTypeStartByName: {
+                LoaderMessageLoaderStatusResult status = loader_do_start_by_name(
                     loader, message.start.name, message.start.args, message.start.error_message);
+                *(message.status_value) = status;
+                if(status.value != LoaderStatusOk) loader_do_emit_queue_empty_event(loader);
                 api_lock_unlock(message.api_lock);
                 break;
+            }
             case LoaderMessageTypeStartByNameDetachedWithGuiError: {
                 FuriString* error_message = furi_string_alloc();
                 LoaderMessageLoaderStatusResult status = loader_do_start_by_name(
                     loader, message.start.name, message.start.args, error_message);
                 loader_show_gui_error(status, message.start.name, error_message);
+                if(status.value != LoaderStatusOk) loader_do_emit_queue_empty_event(loader);
                 if(message.start.name) free((void*)message.start.name);
                 if(message.start.args) free((void*)message.start.args);
                 furi_string_free(error_message);

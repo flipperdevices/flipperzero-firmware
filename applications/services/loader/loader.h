@@ -20,7 +20,8 @@ typedef enum {
 typedef enum {
     LoaderEventTypeApplicationBeforeLoad,
     LoaderEventTypeApplicationLoadFailed,
-    LoaderEventTypeApplicationStopped
+    LoaderEventTypeApplicationStopped,
+    LoaderEventTypeNoMoreAppsInQueue, //<! The normal `Stopped` event still fires before this one
 } LoaderEventType;
 
 typedef struct {
