@@ -297,8 +297,8 @@ void loader_enqueue_launch(
         .type = LoaderMessageTypeEnqueueLaunch,
         .defer_start =
             {
-                .name = name,
-                .args = args,
+                .name_or_path = strdup(name),
+                .args = args ? strdup(args) : NULL,
                 .flags = flags,
             },
     };
@@ -724,8 +724,8 @@ static bool loader_do_deferred_launch(Loader* loader, LoaderDeferredLaunchRecord
     view_holder_send_to_front(loader->view_holder);
 
     do {
-        const char* app_name_str = furi_string_get_cstr(record->name_or_path);
-        const char* app_args = furi_string_get_cstr(record->args);
+        const char* app_name_str = record->name_or_path;
+        const char* app_args = record->args;
         FURI_LOG_I(TAG, "Deferred launch: %s", app_name_str);
 
         LoaderMessageLoaderStatusResult result =
@@ -812,16 +812,6 @@ static bool loader_do_get_application_launch_path(Loader* loader, FuriString* pa
     return false;
 }
 
-static void loader_do_enqueue_launch(Loader* loader, LoaderMessageDeferStart* data) {
-    LoaderDeferredLaunchRecord record = {
-        .args = data->args ? furi_string_alloc_set(data->args) : furi_string_alloc(),
-        .name_or_path = furi_string_alloc_set(data->name),
-        .flags = data->flags,
-    };
-
-    furi_check(loader_queue_push(&loader->launch_queue, &record));
-}
-
 // app
 
 int32_t loader_srv(void* p) {
@@ -902,7 +892,7 @@ int32_t loader_srv(void* p) {
                 api_lock_unlock(message.api_lock);
                 break;
             case LoaderMessageTypeEnqueueLaunch:
-                loader_do_enqueue_launch(loader, &message.defer_start);
+                furi_check(loader_queue_push(&loader->launch_queue, &message.defer_start));
                 api_lock_unlock(message.api_lock);
                 break;
             case LoaderMessageTypeClearLaunchQueue:

@@ -7,8 +7,8 @@
 #define LOADER_QUEUE_MAX_SIZE 4
 
 typedef struct {
-    FuriString* name_or_path;
-    FuriString* args;
+    char* name_or_path;
+    char* args;
     LoaderDeferredLaunchFlag flags;
 } LoaderDeferredLaunchRecord;
 

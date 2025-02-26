@@ -60,12 +60,6 @@ typedef struct {
 } LoaderMessageStartByName;
 
 typedef struct {
-    const char* name;
-    const char* args;
-    LoaderDeferredLaunchFlag flags;
-} LoaderMessageDeferStart;
-
-typedef struct {
     uint32_t signal;
     void* arg;
 } LoaderMessageSignal;
@@ -96,7 +90,7 @@ typedef struct {
 
     union {
         LoaderMessageStartByName start;
-        LoaderMessageDeferStart defer_start;
+        LoaderDeferredLaunchRecord defer_start;
         LoaderMessageSignal signal;
         FuriString* application_name;
     };

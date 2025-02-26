@@ -1,8 +1,8 @@
 #include "loader_queue.h"
 
 void loader_queue_item_clear(LoaderDeferredLaunchRecord* item) {
-    furi_string_free(item->args);
-    furi_string_free(item->name_or_path);
+    free(item->args);
+    free(item->name_or_path);
 }
 
 bool loader_queue_pop(LoaderLaunchQueue* queue, LoaderDeferredLaunchRecord* item) {
