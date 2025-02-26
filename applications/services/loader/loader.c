@@ -167,6 +167,13 @@ static void loader_show_gui_error(
     furi_record_close(RECORD_DIALOGS);
 }
 
+static void loader_generic_synchronous_request(Loader* loader, LoaderMessage* message) {
+    furi_check(loader);
+    message->api_lock = api_lock_alloc_locked();
+    furi_message_queue_put(loader->queue, message, FuriWaitForever);
+    api_lock_wait_unlock_and_free(message->api_lock);
+}
+
 LoaderStatus
     loader_start(Loader* loader, const char* name, const char* args, FuriString* error_message) {
     furi_check(loader);
@@ -202,16 +209,12 @@ void loader_start_detached_with_gui_error(Loader* loader, const char* name, cons
 }
 
 bool loader_lock(Loader* loader) {
-    furi_check(loader);
-
-    LoaderMessage message;
     LoaderMessageBoolResult result;
-    message.type = LoaderMessageTypeLock;
-    message.api_lock = api_lock_alloc_locked();
-    message.bool_value = &result;
-    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
-    api_lock_wait_unlock_and_free(message.api_lock);
-
+    LoaderMessage message = {
+        .type = LoaderMessageTypeLock,
+        .bool_value = &result,
+    };
+    loader_generic_synchronous_request(loader, &message);
     return result.value;
 }
 
@@ -225,16 +228,12 @@ void loader_unlock(Loader* loader) {
 }
 
 bool loader_is_locked(Loader* loader) {
-    furi_check(loader);
-
-    LoaderMessage message;
     LoaderMessageBoolResult result;
-    message.type = LoaderMessageTypeIsLocked;
-    message.api_lock = api_lock_alloc_locked();
-    message.bool_value = &result;
-    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
-    api_lock_wait_unlock_and_free(message.api_lock);
-
+    LoaderMessage message = {
+        .type = LoaderMessageTypeIsLocked,
+        .bool_value = &result,
+    };
+    loader_generic_synchronous_request(loader, &message);
     return result.value;
 }
 
@@ -256,57 +255,36 @@ FuriPubSub* loader_get_pubsub(Loader* loader) {
 }
 
 bool loader_signal(Loader* loader, uint32_t signal, void* arg) {
-    furi_check(loader);
-
     LoaderMessageBoolResult result;
-
     LoaderMessage message = {
         .type = LoaderMessageTypeSignal,
-        .api_lock = api_lock_alloc_locked(),
         .signal.signal = signal,
         .signal.arg = arg,
         .bool_value = &result,
     };
-
-    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
-    api_lock_wait_unlock_and_free(message.api_lock);
-
+    loader_generic_synchronous_request(loader, &message);
     return result.value;
 }
 
 bool loader_get_application_name(Loader* loader, FuriString* name) {
-    furi_check(loader);
-
     LoaderMessageBoolResult result;
-
     LoaderMessage message = {
         .type = LoaderMessageTypeGetApplicationName,
-        .api_lock = api_lock_alloc_locked(),
         .application_name = name,
         .bool_value = &result,
     };
-
-    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
-    api_lock_wait_unlock_and_free(message.api_lock);
-
+    loader_generic_synchronous_request(loader, &message);
     return result.value;
 }
 
 bool loader_get_application_launch_path(Loader* loader, FuriString* name) {
-    furi_check(loader);
-
     LoaderMessageBoolResult result;
-
     LoaderMessage message = {
         .type = LoaderMessageTypeGetApplicationLaunchPath,
-        .api_lock = api_lock_alloc_locked(),
         .application_name = name,
         .bool_value = &result,
     };
-
-    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
-    api_lock_wait_unlock_and_free(message.api_lock);
-
+    loader_generic_synchronous_request(loader, &message);
     return result.value;
 }
 
@@ -315,11 +293,8 @@ void loader_enqueue_launch(
     const char* name,
     const char* args,
     LoaderDeferredLaunchFlag flags) {
-    furi_check(loader);
-
     LoaderMessage message = {
         .type = LoaderMessageTypeEnqueueLaunch,
-        .api_lock = api_lock_alloc_locked(),
         .defer_start =
             {
                 .name = name,
@@ -327,21 +302,14 @@ void loader_enqueue_launch(
                 .flags = flags,
             },
     };
-
-    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
-    api_lock_wait_unlock_and_free(message.api_lock);
+    loader_generic_synchronous_request(loader, &message);
 }
 
 void loader_clear_launch_queue(Loader* loader) {
-    furi_check(loader);
-
     LoaderMessage message = {
         .type = LoaderMessageTypeClearLaunchQueue,
-        .api_lock = api_lock_alloc_locked(),
     };
-
-    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
-    api_lock_wait_unlock_and_free(message.api_lock);
+    loader_generic_synchronous_request(loader, &message);
 }
 
 // callbacks
