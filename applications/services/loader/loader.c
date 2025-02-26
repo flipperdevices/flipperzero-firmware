@@ -383,7 +383,6 @@ static Loader* loader_alloc(void) {
     loader->gui = furi_record_open(RECORD_GUI);
     loader->view_holder = view_holder_alloc();
     loader->loading = loading_alloc();
-    LoaderDeferredLaunchRecordArray_init(loader->launch_queue);
     view_holder_attach_to_gui(loader->view_holder, loader->gui);
     return loader;
 }
@@ -738,12 +737,10 @@ static void loader_do_emit_queue_empty_event(Loader* loader) {
 static bool loader_do_deferred_launch(Loader* loader, LoaderDeferredLaunchRecord* record);
 
 static void loader_do_next_deferred_launch_if_available(Loader* loader) {
-    if(LoaderDeferredLaunchRecordArray_size(loader->launch_queue)) {
-        LoaderDeferredLaunchRecord record;
-        LOADER_DL_RECORD_INIT(record);
-        LoaderDeferredLaunchRecordArray_pop_at(&record, loader->launch_queue, 0);
+    LoaderDeferredLaunchRecord record;
+    if(loader_queue_pop(&loader->launch_queue, &record)) {
         loader_do_deferred_launch(loader, &record);
-        LOADER_DL_RECORD_CLEAR(record);
+        loader_queue_item_clear(&record);
     } else {
         loader_do_emit_queue_empty_event(loader);
     }
@@ -848,18 +845,13 @@ static bool loader_do_get_application_launch_path(Loader* loader, FuriString* pa
 }
 
 static void loader_do_enqueue_launch(Loader* loader, LoaderMessageDeferStart* data) {
-    furi_check(LoaderDeferredLaunchRecordArray_size(loader->launch_queue) < LAUNCH_QUEUE_MAX_SIZE);
+    LoaderDeferredLaunchRecord record = {
+        .args = data->args ? furi_string_alloc_set(data->args) : furi_string_alloc(),
+        .name_or_path = furi_string_alloc_set(data->name),
+        .flags = data->flags,
+    };
 
-    LoaderDeferredLaunchRecord record;
-    LOADER_DL_RECORD_INIT(record);
-
-    furi_string_set(record.name_or_path, data->name);
-    if(data->args) furi_string_set(record.args, data->args);
-    record.flags = data->flags;
-
-    LoaderDeferredLaunchRecordArray_push_back(loader->launch_queue, record);
-
-    LOADER_DL_RECORD_CLEAR(record);
+    furi_check(loader_queue_push(&loader->launch_queue, &record));
 }
 
 // app
@@ -946,7 +938,7 @@ int32_t loader_srv(void* p) {
                 api_lock_unlock(message.api_lock);
                 break;
             case LoaderMessageTypeClearLaunchQueue:
-                LoaderDeferredLaunchRecordArray_reset(loader->launch_queue);
+                loader_queue_clear(&loader->launch_queue);
                 api_lock_unlock(message.api_lock);
                 break;
             }
