@@ -108,6 +108,8 @@ bool cli_app_should_stop(PipeSide* side);
  */
 void cli_print_usage(const char* cmd, const char* usage, const char* arg);
 
+Cli* cli_alloc(void);
+void cli_free(Cli* cli);
 #ifdef __cplusplus
 }
 #endif
