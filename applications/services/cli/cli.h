@@ -22,6 +22,9 @@ typedef enum {
     CliCommandFlagDontAttachStdio = (1 << 2), /**< Do no attach I/O pipe to thread stdio */
 } CliCommandFlag;
 
+/** Cli shell custom motd callback */
+typedef void (*CliShellCustomMotd)(void);
+
 /** Cli type anonymous structure */
 typedef struct Cli Cli;
 
