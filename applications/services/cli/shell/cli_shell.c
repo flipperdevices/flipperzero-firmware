@@ -23,6 +23,12 @@ typedef enum {
     CliShellComponentMAX, //<! do not use
 } CliShellComponent;
 
+typedef struct {
+    PipeSide* pipe;
+    Cli* custom_cli;
+    CliShellCustomMotd custom_motd;
+} ShellStartBundle;
+
 CliShellKeyComboSet* component_key_combo_sets[] = {
     [CliShellComponentCompletions] = &cli_shell_completions_key_combo_set,
     [CliShellComponentLine] = &cli_shell_line_key_combo_set,
@@ -214,10 +220,11 @@ static void cli_shell_timer_expired(void* context) {
 // Helpers
 // =======
 
-static CliShell* cli_shell_alloc(PipeSide* pipe) {
+static CliShell* cli_shell_alloc(PipeSide* pipe, Cli* custom_cmd) {
     CliShell* cli_shell = malloc(sizeof(CliShell));
 
-    cli_shell->cli = furi_record_open(RECORD_CLI);
+    cli_shell->cli = custom_cmd == NULL ? furi_record_open(RECORD_CLI) : custom_cmd;
+
     cli_shell->ansi_parser = cli_ansi_parser_alloc();
     cli_shell->pipe = pipe;
     pipe_install_as_stdio(cli_shell->pipe);
@@ -287,17 +294,24 @@ static void cli_shell_motd(void) {
 }
 
 static int32_t cli_shell_thread(void* context) {
-    PipeSide* pipe = context;
+    ShellStartBundle* bundle = context;
 
     // Sometimes, the other side closes the pipe even before our thread is started. Although the
     // rest of the code will eventually find this out if this check is removed, there's no point in
     // wasting time.
-    if(pipe_state(pipe) == PipeStateBroken) return 0;
+    if(pipe_state(bundle->pipe) == PipeStateBroken) {
+        free(bundle);
+        return 0;
+    }
 
-    CliShell* cli_shell = cli_shell_alloc(pipe);
+    CliShell* cli_shell = cli_shell_alloc(bundle->pipe, bundle->custom_cli);
 
     FURI_LOG_D(TAG, "Started");
-    cli_shell_motd();
+    if(bundle->custom_motd)
+        bundle->custom_motd();
+    else
+        cli_shell_motd();
+
     cli_shell_line_prompt(cli_shell->components[CliShellComponentLine]);
 
     furi_event_loop_run(cli_shell->event_loop);
@@ -305,16 +319,25 @@ static int32_t cli_shell_thread(void* context) {
     FURI_LOG_D(TAG, "Stopped");
 
     cli_shell_free(cli_shell);
+    free(bundle);
     return 0;
 }
 
 // ==========
 // Public API
 // ==========
+FuriThread* cli_shell_start_custom(PipeSide* pipe, Cli* cmd_set, CliShellCustomMotd motd) {
+    ShellStartBundle* bundle = malloc(sizeof(ShellStartBundle));
+    bundle->pipe = pipe;
+    bundle->custom_cli = cmd_set;
+    bundle->custom_motd = motd;
 
-FuriThread* cli_shell_start(PipeSide* pipe) {
     FuriThread* thread =
-        furi_thread_alloc_ex("CliShell", CLI_SHELL_STACK_SIZE, cli_shell_thread, pipe);
+        furi_thread_alloc_ex("CliShell", CLI_SHELL_STACK_SIZE, cli_shell_thread, bundle);
     furi_thread_start(thread);
     return thread;
+}
+
+FuriThread* cli_shell_start(PipeSide* pipe) {
+    return cli_shell_start_custom(pipe, NULL, NULL);
 }

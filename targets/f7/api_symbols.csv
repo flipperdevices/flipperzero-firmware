@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,82.0,,
+Version,+,83.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
@@ -855,6 +855,7 @@ Function,-,clearerr,void,FILE*
 Function,-,clearerr_unlocked,void,FILE*
 Function,+,cli_add_command,void,"Cli*, const char*, CliCommandFlag, CliExecuteCallback, void*"
 Function,+,cli_add_command_ex,void,"Cli*, const char*, CliCommandFlag, CliExecuteCallback, void*, size_t"
+Function,+,cli_alloc,Cli*,
 Function,+,cli_ansi_parser_alloc,CliAnsiParser*,
 Function,+,cli_ansi_parser_feed,CliAnsiParserResult,"CliAnsiParser*, char"
 Function,+,cli_ansi_parser_feed_timeout,CliAnsiParserResult,CliAnsiParser*
@@ -862,9 +863,12 @@ Function,+,cli_ansi_parser_free,void,CliAnsiParser*
 Function,+,cli_app_should_stop,_Bool,PipeSide*
 Function,+,cli_delete_command,void,"Cli*, const char*"
 Function,+,cli_enumerate_external_commands,void,Cli*
+Function,+,cli_free,void,Cli*
 Function,+,cli_print_usage,void,"const char*, const char*, const char*"
+Function,+,cli_vcp_define_custom_shell,void,"CliVcp*, Cli*, CliShellCustomMotd"
 Function,+,cli_vcp_disable,void,CliVcp*
 Function,+,cli_vcp_enable,void,CliVcp*
+Function,+,cli_vcp_restore_default_shell,void,CliVcp*
 Function,+,composite_api_resolver_add,void,"CompositeApiResolver*, const ElfApiInterface*"
 Function,+,composite_api_resolver_alloc,CompositeApiResolver*,
 Function,+,composite_api_resolver_free,void,CompositeApiResolver*

@@ -18,6 +18,12 @@ Cli* cli_alloc(void) {
     return cli;
 }
 
+void cli_free(Cli* cli) {
+    furi_assert(cli);
+    CliCommandTree_clear(cli->commands);
+    furi_mutex_free(cli->mutex);
+}
+
 void cli_add_command(
     Cli* cli,
     const char* name,

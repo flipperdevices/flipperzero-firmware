@@ -59,11 +59,19 @@ void cli_command_info(PipeSide* pipe, FuriString* args, void* context) {
 void cli_command_help(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(pipe);
     UNUSED(args);
-    UNUSED(context);
+
     printf("Available commands:" ANSI_FG_GREEN);
 
     // count non-hidden commands
-    Cli* cli = furi_record_open(RECORD_CLI);
+    Cli* cli;
+    bool close_record = false;
+    if(context != NULL)
+        cli = context;
+    else {
+        cli = furi_record_open(RECORD_CLI);
+        close_record = true;
+    }
+
     cli_lock_commands(cli);
     CliCommandTree_t* commands = cli_get_commands(cli);
     size_t commands_count = CliCommandTree_size(*commands);
@@ -96,7 +104,8 @@ void cli_command_help(PipeSide* pipe, FuriString* args, void* context) {
     printf(ANSI_RESET "\r\nFind out more: https://docs.flipper.net/development/cli");
 
     cli_unlock_commands(cli);
-    furi_record_close(RECORD_CLI);
+
+    if(close_record) furi_record_close(RECORD_CLI);
 }
 
 void cli_command_uptime(PipeSide* pipe, FuriString* args, void* context) {

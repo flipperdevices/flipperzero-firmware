@@ -30,6 +30,7 @@ typedef struct {
 typedef enum {
     CliVcpInternalMessageConnected,
     CliVcpInternalMessageDisconnected,
+    CliVcpInternalMessageRestart,
     CliVcpInternalMessageTxDone,
     CliVcpInternalMessageRx,
 } CliVcpInternalMessage;
@@ -47,6 +48,8 @@ struct CliVcp {
     size_t previous_tx_length;
 
     FuriThread* shell;
+    Cli* custom_cmd_set;
+    CliShellCustomMotd custom_motd;
 };
 
 // ============
@@ -208,6 +211,12 @@ static void cli_vcp_internal_message_received(FuriEventLoopObject* object, void*
         pipe_detach_from_event_loop(cli_vcp->own_pipe);
         pipe_free(cli_vcp->own_pipe);
         cli_vcp->own_pipe = NULL;
+        if(cli_vcp->custom_cmd_set != NULL) {
+            FURI_LOG_D(TAG, "Reset to default");
+            cli_free(cli_vcp->custom_cmd_set);
+            cli_vcp->custom_motd = NULL;
+            cli_vcp->custom_cmd_set = NULL;
+        }
         break;
 
     case CliVcpInternalMessageConnected:
@@ -233,6 +242,32 @@ static void cli_vcp_internal_message_received(FuriEventLoopObject* object, void*
             cli_vcp->own_pipe, cli_vcp_shell_ready, FuriEventLoopEventFlagEdge);
         furi_delay_ms(33); // we are too fast, minicom isn't ready yet
         cli_vcp->shell = cli_shell_start(bundle.bobs_side);
+        break;
+    case CliVcpInternalMessageRestart:
+        ///TODO: Simplify this
+        FURI_LOG_D(TAG, "Restart");
+
+        if(!cli_vcp->is_connected) return;
+        pipe_detach_from_event_loop(cli_vcp->own_pipe);
+        pipe_free(cli_vcp->own_pipe);
+
+        furi_thread_join(cli_vcp->shell);
+        // cli_vcp->own_pipe_buf = cli_vcp->own_pipe;
+
+        PipeSideBundle bundle1 = pipe_alloc(VCP_BUF_SIZE, 1);
+
+        cli_vcp->own_pipe = bundle1.alices_side;
+        pipe_attach_to_event_loop(cli_vcp->own_pipe, cli_vcp->event_loop);
+        pipe_set_callback_context(cli_vcp->own_pipe, cli_vcp);
+        pipe_set_data_arrived_callback(
+            cli_vcp->own_pipe, cli_vcp_data_from_shell, FuriEventLoopEventFlagEdge);
+        pipe_set_space_freed_callback(
+            cli_vcp->own_pipe, cli_vcp_shell_ready, FuriEventLoopEventFlagEdge);
+        furi_delay_ms(33); // we are too fast, minicom isn't ready yet
+        cli_vcp->shell = //cli_shell_start(bundle.bobs_side);
+            cli_shell_start_custom(
+                bundle1.bobs_side, cli_vcp->custom_cmd_set, cli_vcp->custom_motd);
+
         break;
     }
 }
@@ -298,4 +333,25 @@ void cli_vcp_disable(CliVcp* cli_vcp) {
         .type = CliVcpMessageTypeDisable,
     };
     furi_message_queue_put(cli_vcp->message_queue, &message, FuriWaitForever);
+}
+
+void cli_vcp_restore_default_shell(CliVcp* cli_vcp) {
+    furi_assert(cli_vcp);
+    if(cli_vcp->custom_cmd_set != NULL) {
+        cli_free(cli_vcp->custom_cmd_set);
+        cli_vcp->custom_cmd_set = NULL;
+    }
+    cli_vcp->custom_motd = NULL;
+    cli_vcp_send_internal_message(cli_vcp, CliVcpInternalMessageRestart);
+}
+
+void cli_vcp_define_custom_shell(CliVcp* cli_vcp, Cli* cli_cmd_set, CliShellCustomMotd custom_motd) {
+    furi_assert(cli_vcp);
+    furi_assert(cli_cmd_set);
+
+    cli_vcp->custom_cmd_set = cli_cmd_set;
+    cli_vcp->custom_motd = custom_motd;
+
+    FURI_LOG_D(TAG, "Spawning new shell");
+    cli_vcp_send_internal_message(cli_vcp, CliVcpInternalMessageRestart);
 }
