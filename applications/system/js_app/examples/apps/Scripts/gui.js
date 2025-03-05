@@ -19,8 +19,8 @@ let jsLogo = icon.getBuiltin("js_script_10px");
 let stopwatchWidgetElements = [
     { element: "string", x: 67, y: 44, align: "bl", font: "big_numbers", text: "00 00" },
     { element: "string", x: 77, y: 22, align: "bl", font: "primary", text: "Stopwatch" },
-    { element: "frame", x: 64, y: 27, w: 28, h: 20, radius: 3, fill: false },
-    { element: "frame", x: 100, y: 27, w: 28, h: 20, radius: 3, fill: false },
+    { element: "rect", x: 64, y: 27, w: 28, h: 20, radius: 3, fill: false },
+    { element: "rect", x: 100, y: 27, w: 28, h: 20, radius: 3, fill: false },
     { element: "icon", x: 0, y: 5, iconData: cuteDolphinWithWatch },
     { element: "icon", x: 64, y: 13, iconData: jsLogo },
     { element: "button", button: "right", text: "Back" },
