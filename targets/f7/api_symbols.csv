@@ -1,11 +1,12 @@
 entry,status,name,type,params
-Version,+,83.1,,
+Version,+,87.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_ansi.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
+Header,+,applications/services/cli/shell/cli_shell.h,,
 Header,+,applications/services/dialogs/dialogs.h,,
 Header,+,applications/services/dolphin/dolphin.h,,
 Header,+,applications/services/expansion/expansion.h,,
@@ -865,10 +866,11 @@ Function,+,cli_delete_command,void,"Cli*, const char*"
 Function,+,cli_enumerate_external_commands,void,Cli*
 Function,+,cli_free,void,Cli*
 Function,+,cli_print_usage,void,"const char*, const char*, const char*"
-Function,+,cli_vcp_define_custom_shell,void,"CliVcp*, Cli*, CliShellCustomMotd"
+Function,-,cli_shell_start,FuriThread*,PipeSide*
+Function,+,cli_shell_start_custom,FuriThread*,"PipeSide*, const char*, Cli*, CliShellMotd"
+Function,+,cli_shell_stop_custom,void,FuriThread*
 Function,+,cli_vcp_disable,void,CliVcp*
 Function,+,cli_vcp_enable,void,CliVcp*
-Function,+,cli_vcp_restore_default_shell,void,CliVcp*
 Function,+,composite_api_resolver_add,void,"CompositeApiResolver*, const ElfApiInterface*"
 Function,+,composite_api_resolver_alloc,CompositeApiResolver*,
 Function,+,composite_api_resolver_free,void,CompositeApiResolver*

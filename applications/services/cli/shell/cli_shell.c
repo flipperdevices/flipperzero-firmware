@@ -25,9 +25,12 @@ typedef enum {
 
 typedef struct {
     PipeSide* pipe;
-    Cli* custom_cli;
-    CliShellCustomMotd custom_motd;
-} ShellStartBundle;
+    Cli* cli;
+    CliShellMotd motd;
+} CliShellStartBundle;
+
+#define CLI_SHELL_DEFAULT_THREAD_NAME "CliShell"
+#define CLI_SHELL_THREAD_APP_ID       "CliShellId"
 
 CliShellKeyComboSet* component_key_combo_sets[] = {
     [CliShellComponentCompletions] = &cli_shell_completions_key_combo_set,
@@ -37,12 +40,13 @@ static_assert(CliShellComponentMAX == COUNT_OF(component_key_combo_sets));
 
 struct CliShell {
     Cli* cli;
+    CliShellMotd motd;
     FuriEventLoop* event_loop;
     PipeSide* pipe;
 
     CliAnsiParser* ansi_parser;
     FuriEventLoopTimer* ansi_parsing_timer;
-
+    bool custom_shell;
     void* components[CliShellComponentMAX];
 };
 
@@ -52,6 +56,9 @@ typedef struct {
     FuriString* args;
 } CliCommandThreadData;
 
+static void cli_shell_data_available(PipeSide* pipe, void* context);
+static void cli_shell_pipe_broken(PipeSide* pipe, void* context);
+static void cli_shell_motd(void);
 // =========
 // Execution
 // =========
@@ -66,6 +73,14 @@ static int32_t cli_command_thread(void* context) {
 
     fflush(stdout);
     return 0;
+}
+
+static void cli_shell_attach_pipe(CliShell* cli_shell) {
+    pipe_attach_to_event_loop(cli_shell->pipe, cli_shell->event_loop);
+    pipe_set_callback_context(cli_shell->pipe, cli_shell);
+    pipe_set_data_arrived_callback(cli_shell->pipe, cli_shell_data_available, 0);
+    pipe_set_broken_callback(cli_shell->pipe, cli_shell_pipe_broken, 0);
+    pipe_set_stdout_timeout(cli_shell->pipe, furi_ms_to_ticks(50));
 }
 
 void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
@@ -133,6 +148,8 @@ void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
             // run command in this thread
             command_data.execute_callback(cli_shell->pipe, args, command_data.context);
         } else {
+            pipe_detach_from_event_loop(cli_shell->pipe);
+
             // run command in separate thread
             CliCommandThreadData thread_data = {
                 .command = &command_data,
@@ -147,6 +164,8 @@ void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
             furi_thread_start(thread);
             furi_thread_join(thread);
             furi_thread_free(thread);
+
+            cli_shell_attach_pipe(cli_shell);
         }
     } while(0);
 
@@ -220,10 +239,12 @@ static void cli_shell_timer_expired(void* context) {
 // Helpers
 // =======
 
-static CliShell* cli_shell_alloc(PipeSide* pipe, Cli* custom_cmd) {
+static CliShell* cli_shell_alloc(PipeSide* pipe, Cli* custom_cmd, CliShellMotd motd) {
     CliShell* cli_shell = malloc(sizeof(CliShell));
 
+    cli_shell->custom_shell = ((custom_cmd != NULL) || (motd != NULL));
     cli_shell->cli = custom_cmd == NULL ? furi_record_open(RECORD_CLI) : custom_cmd;
+    cli_shell->motd = motd == NULL ? cli_shell_motd : motd;
 
     cli_shell->ansi_parser = cli_ansi_parser_alloc();
     cli_shell->pipe = pipe;
@@ -236,12 +257,7 @@ static CliShell* cli_shell_alloc(PipeSide* pipe, Cli* custom_cmd) {
     cli_shell->event_loop = furi_event_loop_alloc();
     cli_shell->ansi_parsing_timer = furi_event_loop_timer_alloc(
         cli_shell->event_loop, cli_shell_timer_expired, FuriEventLoopTimerTypeOnce, cli_shell);
-    pipe_attach_to_event_loop(cli_shell->pipe, cli_shell->event_loop);
-
-    pipe_set_callback_context(cli_shell->pipe, cli_shell);
-    pipe_set_data_arrived_callback(cli_shell->pipe, cli_shell_data_available, 0);
-    pipe_set_broken_callback(cli_shell->pipe, cli_shell_pipe_broken, 0);
-    pipe_set_stdout_timeout(cli_shell->pipe, furi_ms_to_ticks(50));
+    cli_shell_attach_pipe(cli_shell);
 
     return cli_shell;
 }
@@ -253,9 +269,14 @@ static void cli_shell_free(CliShell* cli_shell) {
     pipe_detach_from_event_loop(cli_shell->pipe);
     furi_event_loop_timer_free(cli_shell->ansi_parsing_timer);
     furi_event_loop_free(cli_shell->event_loop);
-    pipe_free(cli_shell->pipe);
+
+    if(!cli_shell->custom_shell) {
+        pipe_free(cli_shell->pipe);
+    }
+
     cli_ansi_parser_free(cli_shell->ansi_parser);
     furi_record_close(RECORD_CLI);
+
     free(cli_shell);
 }
 
@@ -293,8 +314,16 @@ static void cli_shell_motd(void) {
     }
 }
 
+static bool cli_shell_signal_callback(uint32_t signal, void* arg, void* context) {
+    UNUSED(signal);
+    UNUSED(arg);
+    CliShell* cli_shell = context;
+    furi_event_loop_stop(cli_shell->event_loop);
+    return true;
+}
+
 static int32_t cli_shell_thread(void* context) {
-    ShellStartBundle* bundle = context;
+    CliShellStartBundle* bundle = context;
 
     // Sometimes, the other side closes the pipe even before our thread is started. Although the
     // rest of the code will eventually find this out if this check is removed, there's no point in
@@ -304,40 +333,49 @@ static int32_t cli_shell_thread(void* context) {
         return 0;
     }
 
-    CliShell* cli_shell = cli_shell_alloc(bundle->pipe, bundle->custom_cli);
+    CliShell* cli_shell = cli_shell_alloc(bundle->pipe, bundle->cli, bundle->motd);
+    free(bundle);
+    furi_thread_set_signal_callback(
+        furi_thread_get_current(), cli_shell_signal_callback, cli_shell);
 
     FURI_LOG_D(TAG, "Started");
-    if(bundle->custom_motd)
-        bundle->custom_motd();
-    else
-        cli_shell_motd();
-
+    cli_shell->motd();
     cli_shell_line_prompt(cli_shell->components[CliShellComponentLine]);
-
     furi_event_loop_run(cli_shell->event_loop);
 
     FURI_LOG_D(TAG, "Stopped");
 
     cli_shell_free(cli_shell);
-    free(bundle);
     return 0;
 }
 
 // ==========
 // Public API
 // ==========
-FuriThread* cli_shell_start_custom(PipeSide* pipe, Cli* cmd_set, CliShellCustomMotd motd) {
-    ShellStartBundle* bundle = malloc(sizeof(ShellStartBundle));
+void cli_shell_stop_custom(FuriThread* thread) {
+    furi_assert(thread);
+    FuriString* str = furi_string_alloc_set(furi_thread_get_appid(thread));
+    furi_check(furi_string_equal_str(str, CLI_SHELL_THREAD_APP_ID));
+
+    furi_thread_signal(thread, 1, NULL);
+    furi_string_free(str);
+}
+
+FuriThread*
+    cli_shell_start_custom(PipeSide* pipe, const char* name, Cli* cmd_set, CliShellMotd motd) {
+    CliShellStartBundle* bundle = malloc(sizeof(CliShellStartBundle));
     bundle->pipe = pipe;
-    bundle->custom_cli = cmd_set;
-    bundle->custom_motd = motd;
+    bundle->cli = cmd_set;
+    bundle->motd = motd;
 
     FuriThread* thread =
-        furi_thread_alloc_ex("CliShell", CLI_SHELL_STACK_SIZE, cli_shell_thread, bundle);
+        furi_thread_alloc_ex(name, CLI_SHELL_STACK_SIZE, cli_shell_thread, bundle);
+    furi_thread_set_appid(thread, CLI_SHELL_THREAD_APP_ID);
+
     furi_thread_start(thread);
     return thread;
 }
 
 FuriThread* cli_shell_start(PipeSide* pipe) {
-    return cli_shell_start_custom(pipe, NULL, NULL);
+    return cli_shell_start_custom(pipe, CLI_SHELL_DEFAULT_THREAD_NAME, NULL, NULL);
 }

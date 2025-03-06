@@ -47,8 +47,6 @@ struct CliVcp {
     size_t previous_tx_length;
 
     FuriThread* shell;
-    Cli* custom_cmd_set;
-    CliShellCustomMotd custom_motd;
 };
 
 // ============
