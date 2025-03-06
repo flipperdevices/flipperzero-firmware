@@ -17,8 +17,6 @@ typedef struct CliVcp CliVcp;
 
 void cli_vcp_enable(CliVcp* cli_vcp);
 void cli_vcp_disable(CliVcp* cli_vcp);
-void cli_vcp_restore_default_shell(CliVcp* cli_vcp);
-void cli_vcp_define_custom_shell(CliVcp* cli_vcp, Cli* cli_cmd_set, CliShellCustomMotd custom_motd);
 #ifdef __cplusplus
 }
 #endif
