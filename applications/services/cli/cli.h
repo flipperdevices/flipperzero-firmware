@@ -29,9 +29,6 @@ typedef enum {
     CliCommandFlagExternal = (1 << 4), /**< The command comes from a .fal file */
 } CliCommandFlag;
 
-/** Cli shell custom motd callback */
-typedef void (*CliShellCustomMotd)(void);
-
 /** Cli type anonymous structure */
 typedef struct Cli Cli;
 
