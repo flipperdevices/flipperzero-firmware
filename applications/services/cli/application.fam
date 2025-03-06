@@ -10,11 +10,12 @@ App(
         "shell/cli_shell_line.c",
         "cli_commands.c",
         "cli_command_gpio.c",
-        "cli_ansi.c",
+        "cli_ansi.c",       
     ],
     sdk_headers=[
         "cli.h",
         "cli_ansi.h",
+        "shell/cli_shell.h",
     ],
     order=0,
 )

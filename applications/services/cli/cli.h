@@ -118,6 +118,7 @@ bool cli_app_should_stop(PipeSide* side);
  * @param      arg    arg passed by user
  */
 void cli_print_usage(const char* cmd, const char* usage, const char* arg);
+void cli_enumerate(Cli* cli);
 
 Cli* cli_alloc(void);
 void cli_free(Cli* cli);

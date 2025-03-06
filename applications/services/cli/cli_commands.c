@@ -59,53 +59,10 @@ void cli_command_info(PipeSide* pipe, FuriString* args, void* context) {
 void cli_command_help(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(pipe);
     UNUSED(args);
-
-    printf("Available commands:" ANSI_FG_GREEN);
-
-    // count non-hidden commands
-    Cli* cli;
-    bool close_record = false;
-    if(context != NULL)
-        cli = context;
-    else {
-        cli = furi_record_open(RECORD_CLI);
-        close_record = true;
-    }
-
-    cli_lock_commands(cli);
-    CliCommandTree_t* commands = cli_get_commands(cli);
-    size_t commands_count = CliCommandTree_size(*commands);
-
-    // create iterators starting at different positions
-    const size_t columns = 3;
-    const size_t commands_per_column = (commands_count / columns) + (commands_count % columns);
-    CliCommandTree_it_t iterators[columns];
-    for(size_t c = 0; c < columns; c++) {
-        CliCommandTree_it(iterators[c], *commands);
-        for(size_t i = 0; i < c * commands_per_column; i++)
-            CliCommandTree_next(iterators[c]);
-    }
-
-    // print commands
-    for(size_t r = 0; r < commands_per_column; r++) {
-        printf("\r\n");
-
-        for(size_t c = 0; c < columns; c++) {
-            if(!CliCommandTree_end_p(iterators[c])) {
-                const CliCommandTree_itref_t* item = CliCommandTree_cref(iterators[c]);
-                printf("%-30s", furi_string_get_cstr(*item->key_ptr));
-                CliCommandTree_next(iterators[c]);
-            }
-        }
-    }
-
-    printf(ANSI_RESET
-           "\r\nIf you just added a new command and can't see it above, run `reload_ext_cmds`");
-    printf(ANSI_RESET "\r\nFind out more: https://docs.flipper.net/development/cli");
-
-    cli_unlock_commands(cli);
-
-    if(close_record) furi_record_close(RECORD_CLI);
+    UNUSED(context);
+    Cli* cli = furi_record_open(RECORD_CLI);
+    cli_enumerate(cli);
+    furi_record_close(RECORD_CLI);
 }
 
 void cli_command_uptime(PipeSide* pipe, FuriString* args, void* context) {
