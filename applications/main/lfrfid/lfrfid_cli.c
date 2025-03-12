@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <stdarg.h>
-#include <cli/cli_commands.h>
+#include <cli/cli_master_commands.h>
 #include <lib/toolbox/args.h>
 #include <lib/lfrfid/lfrfid_worker.h>
 #include <storage/storage.h>
@@ -566,4 +566,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-CLI_COMMAND_INTERFACE(rfid, execute, CliCommandFlagDefault, 2048);
+CLI_COMMAND_INTERFACE(rfid, execute, CliCommandFlagDefault, 2048, CLI_MASTER_APPID);

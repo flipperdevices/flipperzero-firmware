@@ -33,6 +33,8 @@ void cli_shell_line_set_line_position(CliShellLine* line, size_t position);
  */
 void cli_shell_line_ensure_not_overwriting_history(CliShellLine* line);
 
+void cli_shell_line_set_about_to_exit(CliShellLine* line);
+
 extern CliShellKeyComboSet cli_shell_line_key_combo_set;
 
 #ifdef __cplusplus

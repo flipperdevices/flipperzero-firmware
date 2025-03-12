@@ -1,7 +1,9 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
+#include <toolbox/cli/cli_ansi.h>
+#include <cli/cli_master_commands.h>
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/dir_walk.h>
 #include <lib/toolbox/md5_calc.h>
@@ -695,17 +697,11 @@ static void storage_cli_factory_reset(PipeSide* pipe, FuriString* args, void* co
 
 void storage_on_system_start(void) {
 #ifdef SRV_CLI
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command_ex(
-        cli,
-        "storage",
-        CliCommandFlagParallelSafe | CliCommandFlagUseShellThread,
-        storage_cli,
-        NULL,
-        512);
-    cli_add_command(
-        cli, "factory_reset", CliCommandFlagParallelSafe, storage_cli_factory_reset, NULL);
-    furi_record_close(RECORD_CLI);
+    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    cli_registry_add_command(registry, "storage", CliCommandFlagParallelSafe | CliCommandFlagUseShellThread, storage_cli, NULL);
+    cli_registry_add_command(
+        registry, "factory_reset", CliCommandFlagDefault, storage_cli_factory_reset, NULL);
+    furi_record_close(RECORD_CLI_MASTER);
 #else
     UNUSED(storage_cli_factory_reset);
 #endif

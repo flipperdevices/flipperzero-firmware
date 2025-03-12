@@ -21,6 +21,6 @@ App(
     name="On start hooks",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "cli",
+        "cli_master",
     ],
 )

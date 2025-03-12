@@ -262,6 +262,6 @@ App(
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
     entry_point="cli_nfc_ep",
-    requires=["cli"],
+    requires=["cli_master"],
     sources=["nfc_cli.c"],
 )

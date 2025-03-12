@@ -17,6 +17,6 @@ App(
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
     entry_point="cli_rfid_ep",
-    requires=["cli"],
+    requires=["cli_master"],
     sources=["lfrfid_cli.c"],
 )

@@ -1,7 +1,7 @@
 #include "input.h"
 
 #include <furi.h>
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
 #include <toolbox/args.h>
 #include <toolbox/pipe.h>
 

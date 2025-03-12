@@ -5,7 +5,7 @@ App(
     entry_point="bt_srv",
     cdefines=["SRV_BT"],
     requires=[
-        "cli",
+        "cli_master",
         "dialogs",
     ],
     provides=[
