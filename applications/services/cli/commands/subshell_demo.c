@@ -29,7 +29,7 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(args);
     UNUSED(context);
     CliRegistry* registry = cli_registry_alloc();
-    cli_registry_add_command(registry, "subcommand", CliCommandFlagDefault, subcommand, NULL);
+    cli_registry_add_command(registry, "subcommand", CliCommandFlagParallelSafe, subcommand, NULL);
 
     CliShell* shell = cli_shell_alloc(motd, NULL, pipe, registry, NULL);
     cli_shell_set_prompt(shell, "subshell");
@@ -40,4 +40,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     cli_registry_free(registry);
 }
 
-CLI_COMMAND_INTERFACE(subshell_demo, execute, CliCommandFlagDefault, 2048, CLI_MASTER_APPID);
+CLI_COMMAND_INTERFACE(subshell_demo, execute, CliCommandFlagParallelSafe, 2048, CLI_MASTER_APPID);

@@ -157,4 +157,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
 #undef NEOFETCH_COLOR
 }
 
-CLI_COMMAND_INTERFACE(neofetch, execute, CliCommandFlagDefault, 2048, CLI_MASTER_APPID);
+CLI_COMMAND_INTERFACE(neofetch, execute, CliCommandFlagParallelSafe, 2048, CLI_MASTER_APPID);

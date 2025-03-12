@@ -352,11 +352,11 @@ static void cli_shell_timer_expired(void* context) {
 
 static void cli_shell_init(CliShell* shell) {
     cli_registry_add_command(
-        shell->registry, "help", CliCommandFlagUseShellThread, cli_command_help, shell);
+        shell->registry, "help", CliCommandFlagUseShellThread | CliCommandFlagParallelSafe, cli_command_help, shell);
     cli_registry_add_command(
-        shell->registry, "?", CliCommandFlagUseShellThread, cli_command_help, shell);
+        shell->registry, "?", CliCommandFlagUseShellThread | CliCommandFlagParallelSafe, cli_command_help, shell);
     cli_registry_add_command(
-        shell->registry, "exit", CliCommandFlagUseShellThread, cli_command_exit, shell);
+        shell->registry, "exit", CliCommandFlagUseShellThread | CliCommandFlagParallelSafe, cli_command_exit, shell);
 
     if(shell->ext_config) {
         cli_registry_add_command(
