@@ -37,14 +37,12 @@ class Main(App):
         self.logger.info(f"Attempting to find flipper with {retry_count} attempts.")
 
         for i in range(retry_count):
+            time.sleep(1)
             self.logger.info(f"Attempt to find flipper #{i}.")
 
             if port := resolve_port(self.logger, self.args.port):
                 self.logger.info(f"Found flipper at {port}")
-                time.sleep(1)
                 break
-
-            time.sleep(1)
 
         if not port:
             self.logger.info(f"Failed to find flipper {port}")
