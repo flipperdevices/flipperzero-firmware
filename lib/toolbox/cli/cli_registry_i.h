@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-#define CLI_BUILTIN_COMMAND_STACK_SIZE (3 * 1024U)
+#define CLI_BUILTIN_COMMAND_STACK_SIZE (4 * 1024U)
 
 typedef struct {
     void* context; //<! Context passed to callbacks
