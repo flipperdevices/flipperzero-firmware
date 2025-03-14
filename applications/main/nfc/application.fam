@@ -12,6 +12,7 @@ App(
         "*.c*",
         "!plugins",
         "!nfc_cli.c",
+        "!cli"
     ],
     fap_libs=["assets", "mbedtls"],
     fap_icon="icon.png",
@@ -253,5 +254,13 @@ App(
     apptype=FlipperAppType.PLUGIN,
     entry_point="cli_nfc_ep",
     requires=["cli"],
-    sources=["nfc_cli.c"],
+    sources=["cli/nfc_cli.c",             
+             "cli/nfc_cli_commands.c",
+             "cli/nfc_cli_command_processor.c",
+             "cli/commands/nfc_cli_command_raw.c",
+             "cli/commands/nfc_cli_command_apdu.c",
+             "cli/commands/nfc_cli_command_emulate.c",  
+             "cli/commands/nfc_cli_command_mfu.c",
+             "cli/commands/nfc_cli_command_scanner.c" 
+             ],
 )
