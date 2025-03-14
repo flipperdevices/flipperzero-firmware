@@ -36,11 +36,14 @@ struct NfcCliArgumentDescriptor {
 
 struct NfcCliActionDescriptor {
     const char* name;
-    NfcCliCommandHandlerCallback execute;
     size_t argument_count;
     const NfcCliArgumentDescriptor* arguments;
     size_t key_count;
     const NfcCliKeyDescriptor* keys;
+
+    NfcCliCommandHandlerCallback execute;
+    NfcCliActionContextAlloc alloc;
+    NfcCliActionContextFree free;
 };
 
 struct NfcCliCommandDescriptor {
