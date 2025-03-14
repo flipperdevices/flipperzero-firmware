@@ -8,6 +8,7 @@ typedef enum {
     NfcCliCommandDescriptorApdu,
     NfcCliCommandDescriptorEmulate,
     NfcCliCommandDescriptorMfu,
+    NfcCliCommandDescriptorScanner,
     /* Add new protocols here */
 
     NfcCliCommandDescriptorNum, /**< Special value representing the number of available commands. */

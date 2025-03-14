@@ -4,12 +4,16 @@
 #include "commands/nfc_cli_command_apdu.h"
 #include "commands/nfc_cli_command_emulate.h"
 #include "commands/nfc_cli_command_mfu.h"
+#include "commands/nfc_cli_command_scanner.h"
+
+#define TAG "NfcCliCommands"
 
 static const NfcCliCommandDescriptor* nfc_cli_commands[NfcCliCommandDescriptorNum] = {
     [NfcCliCommandDescriptorApdu] = &apdu_cmd,
     [NfcCliCommandDescriptorRaw] = &raw_cmd,
     [NfcCliCommandDescriptorEmulate] = &emulate_cmd,
     [NfcCliCommandDescriptorMfu] = &mfu_cmd,
+    [NfcCliCommandDescriptorScanner] = &scanner_cmd,
 };
 
 size_t nfc_cli_command_get_count() {
