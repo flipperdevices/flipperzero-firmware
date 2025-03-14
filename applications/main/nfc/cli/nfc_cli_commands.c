@@ -1,5 +1,6 @@
 #include "nfc_cli_commands.h"
 #include "nfc_cli_command_base_i.h"
+
 #include "commands/nfc_cli_command_raw.h"
 #include "commands/nfc_cli_command_apdu.h"
 #include "commands/nfc_cli_command_emulate.h"
@@ -66,6 +67,52 @@ CliExecuteCallback nfc_cli_command_get_execute(const NfcCliCommandDescriptor* cm
     furi_assert(cmd);
     return cmd->callback;
 }
-/* size_t nfc_cli_command_get_count() {
-    return COUNT_OF(nfc_cli_commands);
+
+static const NfcCliKeyDescriptor* nfc_cli_action_get_key_by_n(
+    const NfcCliActionDescriptor* action,
+    const FuriString* name,
+    bool long_name) {
+    for(size_t i = 0; i < action->key_count; i++) {
+        const NfcCliKeyDescriptor* key = &action->keys[i];
+        const char* buf = long_name ? key->long_name : key->short_name;
+        if((buf != NULL) && furi_string_equal_str(name, buf)) return key;
+    }
+    return NULL;
+}
+
+const NfcCliKeyDescriptor*
+    nfc_cli_action_get_key_descriptor(const NfcCliActionDescriptor* action, FuriString* argument) {
+    furi_assert(action);
+    furi_assert(argument);
+
+    return nfc_cli_action_get_key_by_n(action, argument, furi_string_size(argument) > 1);
+}
+
+size_t nfc_cli_action_get_required_keys_count(const NfcCliActionDescriptor* action) {
+    furi_assert(action);
+
+    size_t required_key_count = 0;
+    for(size_t i = 0; i < action->key_count; i++) {
+        const NfcCliKeyDescriptor* key = &action->keys[i];
+        if(!key->features.required) continue;
+        required_key_count++;
+    }
+    return required_key_count;
+}
+
+/* static void nfc_cli_subscribe_commands(NfcCliContext* instance) {
+    size_t cnt = nfc_cli_command_get_count();
+    for(size_t i = 0; i < cnt; i++) {
+        const NfcCliCommandDescriptor* cmd = nfc_cli_command_get_by_index(i);
+        CliExecuteCallback callback = nfc_cli_command_get_execute(cmd);
+        if(callback != NULL) {
+            const char* name = nfc_cli_command_get_name(cmd);
+            cli_add_command(
+                instance->nfc_cli,
+                name,
+                CliCommandFlagParallelUnsafe,
+                callback,
+                instance->processor_context);
+        }
+    }
 } */

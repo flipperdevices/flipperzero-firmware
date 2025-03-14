@@ -25,3 +25,7 @@ const NfcCliActionDescriptor*
 
 const char* nfc_cli_command_get_name(const NfcCliCommandDescriptor* cmd);
 CliExecuteCallback nfc_cli_command_get_execute(const NfcCliCommandDescriptor* cmd);
+
+size_t nfc_cli_action_get_required_keys_count(const NfcCliActionDescriptor* action);
+const NfcCliKeyDescriptor*
+    nfc_cli_action_get_key_descriptor(const NfcCliActionDescriptor* action, FuriString* argument);
