@@ -47,26 +47,13 @@ const NfcCliKeyDescriptor raw_action_keys[] = {
     }, */
 };
 
-const NfcCliArgumentDescriptor raw_arguments[] = {
-    {
-        .name = "protocol",
-        /* .parse = raw_parse_protocol */
-    },
-    {
-        .name = "data",
-        /* .parse = raw_parse_data */
-    },
-};
-
 const NfcCliActionDescriptor raw_action = {
     .name = "raw",
-    //.alloc = nfc_cli_raw_alloc_ctx,
-    //.free = nfc_cli_raw_free_ctx,
-    //.execute = nfc_cli_raw_command,
-    .argument_count = COUNT_OF(raw_arguments),
-    .arguments = raw_arguments,
     .key_count = COUNT_OF(raw_action_keys),
     .keys = raw_action_keys,
+    .execute = nfc_cli_raw_execute,
+    .alloc = nfc_cli_raw_alloc_ctx,
+    .free = nfc_cli_raw_free_ctx,
 };
 
 const NfcCliActionDescriptor* raw_actions_collection[] = {&raw_action};

@@ -6,8 +6,7 @@
 #include "nfc_cli_command_processor.h"
 
 struct FURI_PACKED NfcCliKeyFeatureSupport {
-    bool mandatory : 1;
-    bool ommitable : 1;
+    bool required  : 1;
     bool parameter : 1;
 };
 
@@ -15,8 +14,6 @@ struct NfcCliKeyDescriptor {
     NfcCliKeyFeatureSupport features;
     const char* long_name;
     const char* short_name;
-    //bool no_delimeter
-    //KeyType = Simple (without argument)/Parametric (requires args)/Mandatory (without this key command cannot be processed)
     const char* description;
 
     NfcCliArgParseCallback parse;
@@ -24,15 +21,13 @@ struct NfcCliKeyDescriptor {
     // const char** valid_values;
 };
 
-struct NfcCliArgumentDescriptor {
+/* struct NfcCliArgumentDescriptor {
     const char* name;
     NfcCliArgParseCallback parse;
-};
+}; */
 
 struct NfcCliActionDescriptor {
     const char* name;
-    size_t argument_count;
-    const NfcCliArgumentDescriptor* arguments;
     size_t key_count;
     const NfcCliKeyDescriptor* keys;
 

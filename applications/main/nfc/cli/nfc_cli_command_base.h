@@ -12,7 +12,7 @@ typedef void (*NfcCliActionContextFree)(NfcCliActionContext* action_ctx);
 
 typedef void (*NfcCliCommandHandlerCallback)(PipeSide* pipe, void* ctx);
 
-typedef bool (*NfcCliArgParseCallback)(FuriString* argument, FuriString* args, void* output);
+typedef bool (*NfcCliArgParseCallback)(FuriString* value, void* output);
 
 typedef struct NfcCliKeyFeatureSupport NfcCliKeyFeatureSupport;
 

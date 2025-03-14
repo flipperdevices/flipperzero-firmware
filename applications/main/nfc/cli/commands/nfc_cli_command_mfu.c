@@ -6,8 +6,6 @@ const NfcCliActionDescriptor info_action = {
     //.alloc = nfc_cli_raw_alloc_ctx,
     //.free = nfc_cli_raw_free_ctx,
     //.execute = nfc_cli_raw_command,
-    .argument_count = 0,
-    .arguments = NULL,
     .key_count = 0,
     .keys = NULL,
 };
@@ -16,7 +14,7 @@ const NfcCliKeyDescriptor rdbl_action_keys[] = {
     {
         .short_name = "b",
         .long_name = "block",
-        .features = {.mandatory = true, .ommitable = false, .parameter = true},
+        .features = {.required = true, .parameter = true},
         .description = "desired block number",
         //.parse = parse_block_key,
     },
@@ -36,8 +34,6 @@ const NfcCliActionDescriptor rdbl_action = {
     //.alloc = nfc_cli_raw_alloc_ctx,
     //.free = nfc_cli_raw_free_ctx,
     //.execute = nfc_cli_raw_command,
-    .argument_count = 0,
-    .arguments = NULL,
     .key_count = COUNT_OF(rdbl_action_keys),
     .keys = rdbl_action_keys,
 };

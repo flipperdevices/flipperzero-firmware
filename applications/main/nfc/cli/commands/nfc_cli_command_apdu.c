@@ -1,13 +1,15 @@
 #include "nfc_cli_command_apdu.h"
 #include "../nfc_cli_command_processor.h"
 
-const NfcCliArgumentDescriptor apdu_arguments[] = {
+const NfcCliKeyDescriptor apdu_keys[] = {
     {
-        .name = "protocol",
+        .long_name = "protocol",
+        .short_name = "p",
         /* .parse = apdu_parse_protocol */
     },
     {
-        .name = "data",
+        .long_name = "data",
+        .short_name = "d"
         /* .parse = apdu_parse_data */
     },
 };
@@ -17,10 +19,8 @@ const NfcCliActionDescriptor apdu_action = {
     //.alloc = nfc_cli_apdu_alloc_ctx,
     //.free = nfc_cli_apdu_free_ctx,
     //.execute = nfc_cli_apdu_command,
-    .argument_count = COUNT_OF(apdu_arguments),
-    .arguments = apdu_arguments,
-    .key_count = 0,
-    .keys = NULL,
+    .key_count = COUNT_OF(apdu_keys),
+    .keys = apdu_keys,
 };
 
 const NfcCliActionDescriptor* apdu_actions_collection[] = {&apdu_action};

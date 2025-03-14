@@ -3,7 +3,7 @@
 
 const NfcCliKeyDescriptor emulate_keys[] = {
     {
-        .features = {.mandatory = true, .parameter = true, .ommitable = true},
+        .features = {.required = true, .parameter = true},
         .long_name = "file",
         .short_name = "f",
         .description = "path to .nfc file",
@@ -16,8 +16,6 @@ const NfcCliActionDescriptor emulate_action = {
     //.alloc = nfc_cli_raw_alloc_ctx,
     //.free = nfc_cli_raw_free_ctx,
     //.execute = nfc_cli_raw_command,
-    .argument_count = 0,
-    .arguments = 0,
     .key_count = COUNT_OF(emulate_keys),
     .keys = emulate_keys,
 };

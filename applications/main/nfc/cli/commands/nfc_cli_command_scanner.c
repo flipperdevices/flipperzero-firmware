@@ -88,8 +88,6 @@ const NfcCliActionDescriptor scanner_action = {
     //.alloc = nfc_cli_raw_alloc_ctx,
     //.free = nfc_cli_raw_free_ctx,
 
-    .argument_count = 0,
-    .arguments = NULL,
     .key_count = 0,
     .keys = NULL,
     .execute = nfc_cli_scanner_execute,
