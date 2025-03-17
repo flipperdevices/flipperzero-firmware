@@ -1,6 +1,5 @@
-# js_gui__text_box {#js_gui__text_box}
+# Text box GUI view {#js_gui__text_box}
 
-# Text box GUI view
 Displays a scrollable read-only text field.
 
 <img src="text_box.png" width="200" alt="Sample screenshot of the view" />
@@ -16,7 +15,7 @@ This module depends on the `gui` module, which in turn depends on the
 recommended to conceptualize these modules first before using this one.
 
 # Example
-For an example refer to the `gui.js` example script.
+For an example, refer to the `gui.js` example script.
 
 # View props
 ## `text`

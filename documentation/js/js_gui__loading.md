@@ -1,8 +1,6 @@
-# js_gui__loading {#js_gui__loading}
+# Loading GUI view {#js_gui__loading}
 
-# Loading GUI View
-Displays an animated hourglass icon. Suppresses all `navigation` events, making
-it impossible for the user to exit the view by pressing the back key.
+Displays an animated hourglass icon. Suppresses all `navigation` events, making it impossible for the user to exit the view by pressing the BACK key.
 
 <img src="loading.png" width="200" alt="Sample screenshot of the view" />
 

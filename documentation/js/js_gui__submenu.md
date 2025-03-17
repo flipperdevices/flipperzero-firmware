@@ -1,6 +1,5 @@
-# js_gui__submenu {#js_gui__submenu}
+# Submenu GUI view {#js_gui__submenu}
 
-# Submenu GUI view
 Displays a scrollable list of clickable textual entries.
 
 <img src="submenu.png" width="200" alt="Sample screenshot of the view" />
@@ -16,16 +15,16 @@ This module depends on the `gui` module, which in turn depends on the
 recommended to conceptualize these modules first before using this one.
 
 # Example
-For an example refer to the GUI example.
+For an example, refer to the GUI example.
 
 # View props
 ## `header`
-Single line of text that appears above the list
+A single line of text that appears above the list.
 
 Type: `string`
 
 ## `items`
-The list of options
+The list of options.
 
 Type: `string[]`
 

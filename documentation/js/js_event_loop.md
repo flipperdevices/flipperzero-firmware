@@ -1,6 +1,5 @@
-# js_event_loop {#js_event_loop}
+# Event Loop module {#js_event_loop}
 
-# Event Loop module
 ```js
 let eventLoop = require("event_loop");
 ```
@@ -84,7 +83,7 @@ Because we have two extra arguments, if we return anything other than an array
 of length 2, the arguments will be kept as-is for the next call.
 
 The first two arguments that get passed to our callback are:
-  - The subscription manager that lets us `.cancel()` our subscription
+  - The subscription manager that lets us `.cancel()` our subscription.
   - The event item, used for events that have extra data. Timer events do not,
     they just produce `undefined`.
 
