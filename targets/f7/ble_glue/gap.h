@@ -68,7 +68,11 @@ typedef struct {
 } GapConnectionParamsRequest;
 
 typedef struct {
-    uint16_t adv_service_uuid;
+    struct {
+        uint8_t UUID_Type;
+        uint16_t Service_UUID_16;
+        uint8_t Service_UUID_128[16];
+    } adv_service;
     uint16_t appearance_char;
     bool bonding_mode;
     GapPairing pairing_method;

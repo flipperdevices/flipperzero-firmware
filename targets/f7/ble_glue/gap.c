@@ -550,11 +550,18 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     gap->is_secure = false;
     gap->negotiation_round = 0;
 
-    uint8_t adv_service_uid[2];
-    gap->service.adv_svc_uuid_len = 1;
-    adv_service_uid[0] = gap->config->adv_service_uuid & 0xff;
-    adv_service_uid[1] = gap->config->adv_service_uuid >> 8;
-    set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
+    if(gap->config->adv_service.UUID_Type == UUID_TYPE_16) {
+        uint8_t adv_service_uid[2];
+        gap->service.adv_svc_uuid_len = 1;
+        adv_service_uid[0] = gap->config->adv_service.Service_UUID_16 & 0xff;
+        adv_service_uid[1] = gap->config->adv_service.Service_UUID_16 >> 8;
+        set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
+    } else if(gap->config->adv_service.UUID_Type == UUID_TYPE_128) {
+        gap->service.adv_svc_uuid_len = 1;
+        set_advertisment_service_uid(
+            gap->config->adv_service.Service_UUID_128,
+            sizeof(gap->config->adv_service.Service_UUID_128));
+    }
 
     // Set callback
     gap->on_event_cb = on_event_cb;
