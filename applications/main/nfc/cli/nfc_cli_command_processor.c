@@ -94,13 +94,24 @@ static NfcCliArgumentType nfc_cli_get_argument_type(FuriString* argument) {
     return type;
 }
 
+static bool
+    nfc_cli_check_duplicate_keys(NfcCliProcessorContext* instance, const NfcCliKeyDescriptor* key) {
+    bool result = false;
+    for(size_t i = 0; i < instance->total_keys_found; i++) {
+        const NfcCliKeyDescriptor* buf = instance->keys_found[i];
+        if(buf != key) continue;
+        result = true;
+        break;
+    }
+
+    return result;
+}
+
 static bool nfc_cli_parse_single(
     NfcCliProcessorContext* instance,
     FuriString* argument,
     FuriString* args,
     bool from_group) {
-    UNUSED(args);
-
     bool result = false;
     FuriString* value_str = furi_string_alloc();
 
@@ -109,9 +120,9 @@ static bool nfc_cli_parse_single(
             nfc_cli_action_get_key_descriptor(instance->action, argument);
         if(key == NULL) break;
 
-        ///TODO: Search for duplicate keys here
-
         if(key->features.parameter && from_group) break;
+
+        if(nfc_cli_check_duplicate_keys(instance, key)) break;
 
         if(key->features.parameter && !args_read_string_and_trim(args, value_str)) break;
 
