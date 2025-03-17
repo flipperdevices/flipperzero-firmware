@@ -9,3 +9,10 @@ export type IconData = symbol & { "__tag__": "icon" };
  * @version Added in JS SDK 0.2, extra feature `"gui-widget"`
  */
 export declare function getBuiltin(icon: BuiltinIcon): IconData;
+
+/**
+ * Loads a .fxbm icon (XBM Flipper sprite, from flipperzero-game-engine) for use in GUI
+ * @param path Path to the .fxbm file
+ * @version Added in JS SDK 0.3, extra feature `"gui-widget-extras"`
+ */
+export declare function loadFxbm(path: string): IconData;

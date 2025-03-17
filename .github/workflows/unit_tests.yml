@@ -21,7 +21,7 @@ jobs:
       - name: 'Flash unit tests firmware'
         id: flashing
         if: success()
-        timeout-minutes: 20
+        timeout-minutes: 10
         run: |
           source scripts/toolchain/fbtenv.sh
           ./fbt resources firmware_latest flash LIB_DEBUG=1 FIRMWARE_APP_SET=unit_tests FORCE=1

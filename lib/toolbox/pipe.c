@@ -23,6 +23,7 @@ struct PipeSide {
     PipeSideDataArrivedCallback on_data_arrived;
     PipeSideSpaceFreedCallback on_space_freed;
     PipeSideBrokenCallback on_pipe_broken;
+    FuriWait stdout_timeout;
 };
 
 PipeSideBundle pipe_alloc(size_t capacity, size_t trigger_level) {
@@ -52,12 +53,14 @@ PipeSideBundle pipe_alloc_ex(PipeSideReceiveSettings alice, PipeSideReceiveSetti
         .shared = shared,
         .sending = alice_to_bob,
         .receiving = bob_to_alice,
+        .stdout_timeout = FuriWaitForever,
     };
     *bobs_side = (PipeSide){
         .role = PipeRoleBob,
         .shared = shared,
         .sending = bob_to_alice,
         .receiving = alice_to_bob,
+        .stdout_timeout = FuriWaitForever,
     };
 
     return (PipeSideBundle){.alices_side = alices_side, .bobs_side = bobs_side};
@@ -100,7 +103,8 @@ static void _pipe_stdout_cb(const char* data, size_t size, void* context) {
     furi_assert(context);
     PipeSide* pipe = context;
     while(size) {
-        size_t sent = pipe_send(pipe, data, size, FuriWaitForever);
+        size_t sent = pipe_send(pipe, data, size, pipe->stdout_timeout);
+        if(!sent) break;
         data += sent;
         size -= sent;
     }
@@ -116,6 +120,11 @@ void pipe_install_as_stdio(PipeSide* pipe) {
     furi_check(pipe);
     furi_thread_set_stdout_callback(_pipe_stdout_cb, pipe);
     furi_thread_set_stdin_callback(_pipe_stdin_cb, pipe);
+}
+
+void pipe_set_stdout_timeout(PipeSide* pipe, FuriWait timeout) {
+    furi_check(pipe);
+    pipe->stdout_timeout = timeout;
 }
 
 size_t pipe_receive(PipeSide* pipe, void* data, size_t length, FuriWait timeout) {

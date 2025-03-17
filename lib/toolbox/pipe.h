@@ -148,6 +148,16 @@ void pipe_free(PipeSide* pipe);
 void pipe_install_as_stdio(PipeSide* pipe);
 
 /**
+ * @brief Sets the timeout for `stdout` write operations
+ * 
+ * @note This value is set to `FuriWaitForever` when the pipe is created
+ * 
+ * @param [in] pipe Pipe side to set the timeout of
+ * @param [in] timeout Timeout value in ticks
+ */
+void pipe_set_stdout_timeout(PipeSide* pipe, FuriWait timeout);
+
+/**
  * @brief Receives data from the pipe.
  * 
  * @param [in] pipe The pipe side to read data out of
