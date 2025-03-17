@@ -107,7 +107,7 @@ static bool
     return result;
 }
 
-static bool nfc_cli_parse_single(
+static bool nfc_cli_parse_single_key(
     NfcCliProcessorContext* instance,
     FuriString* argument,
     FuriString* args,
@@ -140,14 +140,14 @@ static bool nfc_cli_parse_single(
     return result;
 }
 
-static bool nfc_cli_parse_group(NfcCliProcessorContext* instance, FuriString* argument) {
+static bool nfc_cli_parse_group_key(NfcCliProcessorContext* instance, FuriString* argument) {
     bool result = false;
     FURI_LOG_D(TAG, "Parsing key group\"%s\"", furi_string_get_cstr(argument));
 
     FuriString* arg_buf = furi_string_alloc();
     for(size_t i = 0; i < furi_string_size(argument); i++) {
         furi_string_set_n(arg_buf, argument, i, 1);
-        result = nfc_cli_parse_single(instance, arg_buf, NULL, true);
+        result = nfc_cli_parse_single_key(instance, arg_buf, NULL, true);
         if(!result) break;
     }
     furi_string_free(arg_buf);
@@ -159,9 +159,6 @@ static bool nfc_cli_parse_argument(
     NfcCliProcessorContext* instance,
     FuriString* argument,
     FuriString* args) {
-    UNUSED(argument);
-    UNUSED(instance);
-
     NfcCliArgumentType type = nfc_cli_get_argument_type(argument);
 
     furi_string_trim(argument, "-");
@@ -169,9 +166,9 @@ static bool nfc_cli_parse_argument(
     bool result = false;
 
     if(type == NfcCliArgumentTypeShortNameKeyGroup)
-        result = nfc_cli_parse_group(instance, argument);
+        result = nfc_cli_parse_group_key(instance, argument);
     else if((type == NfcCliArgumentTypeShortNameKey) || (type == NfcCliArgumentTypeLongNameKey)) {
-        result = nfc_cli_parse_single(instance, argument, args, false);
+        result = nfc_cli_parse_single_key(instance, argument, args, false);
     }
 
     return result;
