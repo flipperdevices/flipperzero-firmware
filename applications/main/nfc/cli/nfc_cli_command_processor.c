@@ -174,6 +174,28 @@ static bool nfc_cli_parse_argument(
     return result;
 }
 
+static bool nfc_cli_process_arguments(NfcCliProcessorContext* instance, FuriString* args) {
+    bool result = false;
+    do {
+        FuriString* argument = furi_string_alloc();
+        while(args_read_string_and_trim(args, argument)) {
+            result = nfc_cli_parse_argument(instance, argument, args);
+            if(!result) break;
+        }
+        furi_string_free(argument);
+
+        if(!result) break;
+        if(instance->required_keys_expected != instance->required_keys_found) {
+            FURI_LOG_W(TAG, "Some required keys missing");
+            result = false;
+            break;
+            //print usage
+        }
+        result = true;
+    } while(false);
+    return result;
+}
+
 void nfc_cli_command_process(
     const NfcCliCommandDescriptor* cmd,
     PipeSide* pipe,
@@ -188,25 +210,7 @@ void nfc_cli_command_process(
     do {
         if(!nfc_cli_action_alloc(instance, args)) break;
 
-        FuriString* argument = furi_string_alloc();
-        while(args_read_string_and_trim(args, argument)) {
-            ///TODO: this result should be moved outside and used as one of the criteria can we execute command or not.
-            bool result = nfc_cli_parse_argument(instance, argument, args);
-            if(!result) {
-                ///TODO: maybe print error message
-                ///and usage then
-                break;
-            }
-
-            // printf("%s\r\n", furi_string_get_cstr(arg_str));
-        }
-        furi_string_free(argument);
-
-        if(instance->required_keys_expected != instance->required_keys_found) {
-            FURI_LOG_W(TAG, "Some required keys missing");
-            //print usage
-            break;
-        }
+        if(!nfc_cli_process_arguments(instance, args)) break;
 
         if(instance->action && instance->action->execute) {
             instance->action->execute(pipe, instance->action_context);
