@@ -34,6 +34,7 @@ struct NfcCliActionDescriptor {
     NfcCliCommandHandlerCallback execute;
     NfcCliActionContextAlloc alloc;
     NfcCliActionContextFree free;
+    NfcCliActionContextCanReuse can_reuse;
 };
 
 struct NfcCliCommandDescriptor {

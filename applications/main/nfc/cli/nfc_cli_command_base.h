@@ -9,6 +9,7 @@ typedef void NfcCliActionContext;
 typedef NfcCliActionContext* (*NfcCliActionContextAlloc)(Nfc* nfc);
 
 typedef void (*NfcCliActionContextFree)(NfcCliActionContext* action_ctx);
+typedef bool (*NfcCliActionContextCanReuse)(NfcCliActionContext* ctx);
 
 typedef void (*NfcCliCommandHandlerCallback)(PipeSide* pipe, void* ctx);
 
