@@ -1,6 +1,5 @@
-# js_badusb {#js_badusb}
+# BadUSB module {#js_badusb}
 
-# BadUSB module
 ```js
 let badusb = require("badusb");
 ```
@@ -58,7 +57,7 @@ badusb.press(0x47); // Press key with HID code (hex) 0x47 (Scroll lock)
 Hold a key. Up to 5 keys (excluding modifiers) can be held simultaneously.
 
 ### Parameters
-Same as `press`
+Same as `press`.
 
 ### Examples:
 ```js
@@ -70,9 +69,9 @@ badusb.hold("CTRL", "v"); // Press and hold CTRL + "v" combo
 Release a previously held key.
 
 ### Parameters
-Same as `press`
+Same as `press`.
 
-Release all keys if called without parameters
+Release all keys if called without parameters.
 
 ### Examples:
 ```js
@@ -85,7 +84,7 @@ Print a string.
 
 ### Parameters
 - A string to print
-- (optional) delay between key presses
+- *(optional)* Delay between key presses
 
 ### Examples:
 ```js
@@ -98,7 +97,7 @@ Same as `print` but ended with "ENTER" press.
 
 ### Parameters
 - A string to print
-- (optional) delay between key presses
+- *(optional)* Delay between key presses
 
 ### Examples:
 ```js

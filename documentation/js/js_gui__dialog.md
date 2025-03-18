@@ -1,6 +1,5 @@
-# js_gui__dialog {#js_gui__dialog}
+# Dialog GUI view {#js_gui__dialog}
 
-# Dialog GUI view
 Displays a dialog with up to three options.
 
 <img src="dialog.png" width="200" alt="Sample screenshot of the view" />
@@ -16,16 +15,16 @@ This module depends on the `gui` module, which in turn depends on the
 recommended to conceptualize these modules first before using this one.
 
 # Example
-For an example refer to the `gui.js` example script.
+For an example, refer to the `gui.js` example script.
 
 # View props
 ## `header`
-Text that appears in bold at the top of the screen
+Text that appears in bold at the top of the screen.
 
 Type: `string`
 
 ## `text`
-Text that appears in the middle of the screen
+Text that appears in the middle of the screen.
 
 Type: `string`
 
