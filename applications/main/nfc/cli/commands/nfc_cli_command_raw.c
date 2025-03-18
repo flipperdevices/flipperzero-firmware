@@ -50,10 +50,10 @@ typedef struct {
     bool keep_field;
     bool append_crc;
     NfcProtocol protocol;
-    uint8_t* data;
-    size_t data_length;
 
     BitBuffer* rx_buffer;
+    BitBuffer* tx_buffer;
+
     NfcPoller* poller;
     NfcPollerState poller_state;
 
@@ -85,7 +85,8 @@ static NfcCliActionContext* nfc_cli_raw_alloc_ctx(Nfc* nfc) {
     // instance->user_queue = furi_message_queue_alloc(8, sizeof(NfcCliUserMessage));
     // instance->worker_queue = furi_message_queue_alloc(8, sizeof(NfcCliWorkerMessage));
     instance->rx_buffer = bit_buffer_alloc(NFC_CLI_PROTOCOL_SUPPORT_MAX_BUFFER_SIZE);
-    ///TODO: maybe put instance->tx_data here
+    instance->tx_buffer = bit_buffer_alloc(NFC_CLI_PROTOCOL_SUPPORT_MAX_BUFFER_SIZE);
+
     instance->input_queue = furi_message_queue_alloc(5, sizeof(NfcCliProtocolRequestType));
     instance->sem_done = furi_semaphore_alloc(1, 0);
     instance->result_str = furi_string_alloc();
@@ -114,6 +115,7 @@ static void nfc_cli_raw_free_ctx(NfcCliActionContext* ctx) {
 
     furi_string_free(instance->result_str);
     bit_buffer_free(instance->rx_buffer);
+    bit_buffer_free(instance->tx_buffer);
     instance->nfc = NULL;
     free(instance);
 }
@@ -125,7 +127,6 @@ static bool nfc_cli_raw_can_reuse_ctx(NfcCliActionContext* ctx) {
     instance->keep_field = false;
     instance->append_crc = false;
     instance->select = false;
-    bit_buffer_reset(instance->rx_buffer);
     return result;
 }
 
@@ -166,28 +167,26 @@ static NfcCommand nfc_cli_raw_poller_callback(NfcGenericEventEx event, void* con
                 }
             }
 
-            if(instance->data_length > 0) {
-                FURI_LOG_D("RAW", "Tx");
-
-                BitBuffer* tx_buffer = bit_buffer_alloc(NFC_CLI_PROTOCOL_SUPPORT_MAX_BUFFER_SIZE);
-                bit_buffer_append_bytes(tx_buffer, instance->data, instance->data_length);
+            if(bit_buffer_get_size_bytes(instance->tx_buffer) > 0) {
+                FURI_LOG_D(TAG, "Tx");
                 if(instance->append_crc) {
                     FURI_LOG_D("RAW", "Tx CRC");
-                    iso14443_crc_append(Iso14443CrcTypeA, tx_buffer);
+                    iso14443_crc_append(Iso14443CrcTypeA, instance->tx_buffer);
                 }
 
                 bit_buffer_reset(instance->rx_buffer);
 
                 NfcError error = nfc_poller_trx(
-                    instance->nfc, tx_buffer, instance->rx_buffer, ISO14443_3A_FDT_LISTEN_FC);
+                    instance->nfc,
+                    instance->tx_buffer,
+                    instance->rx_buffer,
+                    ISO14443_3A_FDT_LISTEN_FC);
 
                 if(error == NfcErrorNone) {
                     FURI_LOG_D("RAW", "Tx OK");
                 } else {
                     FURI_LOG_D("RAW", "Tx Error");
                 }
-
-                bit_buffer_free(tx_buffer);
             }
             command = instance->keep_field ? NfcCommandContinue : NfcCommandStop;
         }
@@ -212,9 +211,10 @@ static void nfc_cli_raw_execute(PipeSide* pipe, void* context) {
         instance->append_crc,
         instance->select);
     printf("Protocol: %d\r\n", instance->protocol);
-    printf("Data length: %d\r\nData:", instance->data_length);
-    for(size_t i = 0; i < instance->data_length; i++)
-        printf("%02X ", instance->data[i]);
+    size_t data_length = bit_buffer_get_size_bytes(instance->tx_buffer);
+    printf("Data length: %d\r\nData:", data_length);
+    for(size_t i = 0; i < data_length; i++)
+        printf("%02X ", bit_buffer_get_byte(instance->tx_buffer, i));
 
     furi_string_reset(instance->result_str);
 
@@ -234,8 +234,9 @@ static void nfc_cli_raw_execute(PipeSide* pipe, void* context) {
     size_t rx_size = bit_buffer_get_size_bytes(instance->rx_buffer);
     if(rx_size > 0) {
         printf("\r\nTx:");
-        for(size_t i = 0; i < instance->data_length; i++) {
-            printf(" %02X", instance->data[i]);
+        const uint8_t* tx_data = bit_buffer_get_data(instance->rx_buffer);
+        for(size_t i = 0; i < data_length; i++) {
+            printf(" %02X", tx_data[i]);
         }
 
         printf("\r\nRx:");
@@ -279,16 +280,20 @@ static bool nfc_cli_raw_parse_data(FuriString* value, void* output) {
     NfcCliRawCmdContext* ctx = output;
 
     bool result = false;
-
     do {
         size_t len = furi_string_size(value);
         if(len % 2 != 0) break;
 
-        ctx->data_length = len / 2;
-        ctx->data = malloc(ctx->data_length);
-        if(!args_read_hex_bytes(value, ctx->data, ctx->data_length)) break;
+        size_t data_length = len / 2;
+        uint8_t* data = malloc(data_length);
 
-        result = true;
+        if(args_read_hex_bytes(value, data, data_length)) {
+            bit_buffer_reset(ctx->tx_buffer);
+            bit_buffer_copy_bytes(ctx->tx_buffer, data, data_length);
+            result = true;
+        }
+
+        free(data);
     } while(false);
 
     return result;
