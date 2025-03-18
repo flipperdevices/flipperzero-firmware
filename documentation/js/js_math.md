@@ -1,6 +1,7 @@
-# js_math {#js_math}
+# Math module {#js_math}
 
-# Math module
+The module contains mathematical methods and constants. Call the `require` function to load the module before first using its methods:
+
 ```js
 let math = require("math");
 ```
