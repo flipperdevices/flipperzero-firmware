@@ -206,7 +206,7 @@ static bool nfc_cli_parse_argument(
 }
 
 static bool nfc_cli_process_arguments(NfcCliProcessorContext* instance, FuriString* args) {
-    bool result = false;
+    bool result = true;
     do {
         FuriString* argument = furi_string_alloc();
         while(args_read_string_and_trim(args, argument)) {
@@ -222,7 +222,6 @@ static bool nfc_cli_process_arguments(NfcCliProcessorContext* instance, FuriStri
             break;
             //print usage
         }
-        result = true;
     } while(false);
     return result;
 }
