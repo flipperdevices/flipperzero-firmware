@@ -171,6 +171,7 @@ NfcCliContext* nfc_cli_alloc() {
 void nfc_cli_free(NfcCliContext* instance) {
     furi_assert(instance);
     furi_thread_free(instance->shell);
+    nfc_cli_command_processor_free(instance->processor_context);
     cli_free(instance->nfc_cli);
     nfc_free(instance->nfc);
     free(instance);
