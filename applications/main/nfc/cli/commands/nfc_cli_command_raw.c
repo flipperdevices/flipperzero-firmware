@@ -15,6 +15,8 @@
 
 #define ISO14443_3A_FDT_LISTEN_FC (1172)
 
+#define TAG "RAW"
+
 typedef enum {
     NfcCliProtocolRequestTypeNormalExecute,
     //NfcCliProtocolRequestTypeFrameExchange,
@@ -140,7 +142,7 @@ static NfcCommand nfc_cli_raw_poller_callback(NfcGenericEventEx event, void* con
     NfcCliProtocolRequestType request_type = NfcCliProtocolRequestTypeAbort;
 
     if(nfc_event->type == NfcEventTypePollerReady) {
-        FURI_LOG_D("RAW", "Poller callback");
+        FURI_LOG_D(TAG, "Poller callback");
         furi_message_queue_get(instance->input_queue, &request_type, FuriWaitForever);
 
         if(request_type == NfcCliProtocolRequestTypeAbort) {
@@ -148,11 +150,11 @@ static NfcCommand nfc_cli_raw_poller_callback(NfcGenericEventEx event, void* con
         } else {
             if(instance->select) {
                 Iso14443_3aData iso3_data = {};
-                FURI_LOG_D("RAW", "Activating...");
+                FURI_LOG_D(TAG, "Activating...");
 
                 Iso14443_3aError error = iso14443_3a_poller_activate(poller, &iso3_data);
                 if(error == Iso14443_3aErrorNone) {
-                    FURI_LOG_D("RAW", "Activate OK");
+                    FURI_LOG_D(TAG, "Activate OK");
 
                     furi_string_printf(instance->result_str, "UID:");
                     for(size_t i = 0; i < iso3_data.uid_len; i++) {
@@ -170,7 +172,7 @@ static NfcCommand nfc_cli_raw_poller_callback(NfcGenericEventEx event, void* con
             if(bit_buffer_get_size_bytes(instance->tx_buffer) > 0) {
                 FURI_LOG_D(TAG, "Tx");
                 if(instance->append_crc) {
-                    FURI_LOG_D("RAW", "Tx CRC");
+                    FURI_LOG_D(TAG, "Tx CRC");
                     iso14443_crc_append(Iso14443CrcTypeA, instance->tx_buffer);
                 }
 
@@ -183,9 +185,9 @@ static NfcCommand nfc_cli_raw_poller_callback(NfcGenericEventEx event, void* con
                     ISO14443_3A_FDT_LISTEN_FC);
 
                 if(error == NfcErrorNone) {
-                    FURI_LOG_D("RAW", "Tx OK");
+                    FURI_LOG_D(TAG, "Tx OK");
                 } else {
-                    FURI_LOG_D("RAW", "Tx Error");
+                    FURI_LOG_D(TAG, "Tx Error");
                 }
             }
             command = instance->keep_field ? NfcCommandContinue : NfcCommandStop;
@@ -193,7 +195,7 @@ static NfcCommand nfc_cli_raw_poller_callback(NfcGenericEventEx event, void* con
     }
     furi_semaphore_release(instance->sem_done);
     if(command == NfcCommandStop) {
-        FURI_LOG_D("RAW", "Aborting poller callback");
+        FURI_LOG_D(TAG, "Aborting poller callback");
         instance->poller_state = NfcPollerStateStopped;
     }
     return command;
