@@ -200,8 +200,10 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
             gap->service.connection_handle = event->Connection_Handle;
 
             gap_verify_connection_parameters(gap);
-            // Start pairing by sending security request
-            aci_gap_slave_security_req(event->Connection_Handle);
+            if(gap->config->pairing_method != GapPairingNone) {
+                // Start pairing by sending security request
+                aci_gap_slave_security_req(event->Connection_Handle);
+            }
         } break;
 
         default:
