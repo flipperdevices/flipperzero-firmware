@@ -31,6 +31,7 @@ env.Append(
         File("protocols/iso14443_3b/iso14443_3b_poller.h"),
         File("protocols/iso14443_4a/iso14443_4a_poller.h"),
         File("protocols/iso14443_4b/iso14443_4b_poller.h"),
+        File("protocols/iso15693_3/iso15693_3_poller.h"),
         File("protocols/mf_ultralight/mf_ultralight_poller.h"),
         File("protocols/mf_classic/mf_classic_poller.h"),
         File("protocols/mf_plus/mf_plus_poller.h"),
