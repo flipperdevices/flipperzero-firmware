@@ -6,6 +6,9 @@
 
 #define TAG "FELICA"
 
+#define BIT_BUFFER_EMPTY(buffer) ((bit_buffer_get_size_bytes(buffer) == 0))
+
+///TODO: This can be moved to some common helpers and used within all protocols
 static void felica_format_array(
     const uint8_t* data,
     size_t data_size,
@@ -21,39 +24,85 @@ static inline void felica_format_activation_data(const FelicaData* data, FuriStr
     felica_format_array(data->pmm.data, FELICA_PMM_SIZE, " PMm: ", output);
 }
 
+static NfcCliRawError nfc_cli_raw_felica_process_error(FelicaError error) {
+    switch(error) {
+    case FelicaErrorNone:
+        return NfcCliRawErrorNone;
+    case FelicaErrorTimeout:
+        return NfcCliRawErrorTimeout;
+    case FelicaErrorWrongCrc:
+        return NfcCliRawErrorWrongCrc;
+    default:
+        return NfcCliRawErrorProtocol;
+    }
+}
+
+static FelicaError nfc_cli_raw_felica_poller_process_error(NfcError error) {
+    switch(error) {
+    case NfcErrorNone:
+        return FelicaErrorNone;
+    case NfcErrorTimeout:
+        return FelicaErrorTimeout;
+    default:
+        return FelicaErrorNotPresent;
+    }
+}
+
+static inline NfcCliRawError
+    nfc_cli_raw_felica_activate(NfcGenericInstance* poller, FuriString* activation_string) {
+    FelicaData felica_data = {};
+    FelicaPoller* felica_poller = poller;
+    FURI_LOG_D(TAG, "Activating...");
+
+    FelicaError error = felica_poller_activate(felica_poller, &felica_data);
+    if(error == FelicaErrorNone) {
+        felica_format_activation_data(&felica_data, activation_string);
+    }
+
+    return nfc_cli_raw_felica_process_error(error);
+}
+
+static inline NfcCliRawError nfc_cli_raw_felica_txrx(
+    NfcGenericInstance* poller,
+    BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t timeout) {
+    FURI_LOG_D(TAG, "TxRx");
+    FelicaPoller* felica_poller = poller;
+
+    bit_buffer_reset(rx_buffer);
+
+    FelicaError error = FelicaErrorNone;
+
+    NfcError nfc_error = nfc_poller_trx(felica_poller->nfc, tx_buffer, rx_buffer, timeout);
+    if(nfc_error != NfcErrorNone) {
+        error = nfc_cli_raw_felica_poller_process_error(nfc_error);
+    } else if(!felica_crc_check(rx_buffer)) {
+        error = FelicaErrorWrongCrc;
+    }
+
+    return nfc_cli_raw_felica_process_error(error);
+}
+
 NfcCommand nfc_cli_raw_felica_handler(
     NfcGenericInstance* poller,
     const NfcCliRawRequest* request,
     NfcCliRawResponse* const response) {
-    FelicaPoller* felica_poller = poller;
-
-    if(request->select) {
-        FelicaData felica_data = {};
-        FURI_LOG_D(TAG, "Activating...");
-
-        FelicaError error = felica_poller_activate(felica_poller, &felica_data);
-        if(error == FelicaErrorNone) {
-            FURI_LOG_D(TAG, "Activate OK");
-            felica_format_activation_data(&felica_data, response->activation_string);
+    do {
+        if(request->select) {
+            response->result = nfc_cli_raw_felica_activate(poller, response->activation_string);
         }
-    }
 
-    if(bit_buffer_get_size_bytes(request->tx_buffer) > 0) {
-        FURI_LOG_D(TAG, "Tx");
+        if(response->result != NfcCliRawErrorNone) break;
+        if(BIT_BUFFER_EMPTY(request->tx_buffer)) break;
+
         if(request->append_crc) {
-            FURI_LOG_D(TAG, "Tx CRC");
+            FURI_LOG_D(TAG, "Add CRC");
             felica_crc_append(request->tx_buffer);
         }
 
-        bit_buffer_reset(response->rx_buffer);
-        NfcError error = nfc_poller_trx(
-            felica_poller->nfc, request->tx_buffer, response->rx_buffer, FELICA_FDT_POLL_FC);
-
-        if(error == NfcErrorNone) {
-            FURI_LOG_D(TAG, "Tx OK");
-        } else {
-            FURI_LOG_D(TAG, "Tx Error");
-        }
-    }
+        response->result = nfc_cli_raw_felica_txrx(
+            poller, request->tx_buffer, response->rx_buffer, FELICA_FDT_POLL_FC);
+    } while(false);
     return request->keep_field ? NfcCommandContinue : NfcCommandStop;
 }

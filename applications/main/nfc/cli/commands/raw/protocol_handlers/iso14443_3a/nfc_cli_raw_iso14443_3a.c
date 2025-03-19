@@ -6,48 +6,75 @@
 
 #define TAG "ISO14A"
 
+#define BIT_BUFFER_EMPTY(buffer) ((bit_buffer_get_size_bytes(buffer) == 0))
+
+static NfcCliRawError nfc_cli_raw_iso14443_3a_process_error(Iso14443_3aError error) {
+    switch(error) {
+    case Iso14443_3aErrorNone:
+        return NfcCliRawErrorNone;
+    case Iso14443_3aErrorTimeout:
+        return NfcCliRawErrorTimeout;
+    case Iso14443_3aErrorWrongCrc:
+        return NfcCliRawErrorWrongCrc;
+    default:
+        return NfcCliRawErrorProtocol;
+    }
+}
+
+static void iso14443_3a_format_activation_data(const Iso14443_3aData* data, FuriString* output) {
+    furi_string_printf(output, "UID:");
+    for(size_t i = 0; i < data->uid_len; i++) {
+        furi_string_cat_printf(output, " %02X", data->uid[i]);
+    }
+    furi_string_cat_printf(
+        output, " ATQA: %02X%02X SAK: %02X", data->atqa[0], data->atqa[1], data->sak);
+}
+
+static inline NfcCliRawError
+    nfc_cli_raw_iso14443_3a_activate(NfcGenericInstance* poller, FuriString* activation_string) {
+    Iso14443_3aData iso3_data = {};
+    FURI_LOG_D(TAG, "Activating...");
+
+    Iso14443_3aError error = iso14443_3a_poller_activate(poller, &iso3_data);
+    if(error == Iso14443_3aErrorNone)
+        iso14443_3a_format_activation_data(&iso3_data, activation_string);
+
+    return nfc_cli_raw_iso14443_3a_process_error(error);
+}
+
+static inline NfcCliRawError nfc_cli_raw_iso14443_3a_txrx(
+    NfcGenericInstance* poller,
+    BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t timeout) {
+    FURI_LOG_D(TAG, "TxRx");
+    bit_buffer_reset(rx_buffer);
+    Iso14443_3aError error = iso14443_3a_poller_txrx(poller, tx_buffer, rx_buffer, timeout);
+    return nfc_cli_raw_iso14443_3a_process_error(error);
+}
+
 NfcCommand nfc_cli_raw_iso14443_3a_handler(
     NfcGenericInstance* poller,
     const NfcCliRawRequest* request,
     NfcCliRawResponse* const response) {
-    if(request->select) {
-        Iso14443_3aData iso3_data = {};
-        FURI_LOG_D(TAG, "Activating...");
-
-        Iso14443_3aError error = iso14443_3a_poller_activate(poller, &iso3_data);
-        if(error == Iso14443_3aErrorNone) {
-            FURI_LOG_D(TAG, "Activate OK");
-
-            furi_string_printf(response->activation_string, "UID:");
-            for(size_t i = 0; i < iso3_data.uid_len; i++) {
-                furi_string_cat_printf(response->activation_string, " %02X", iso3_data.uid[i]);
-            }
-            furi_string_cat_printf(
-                response->activation_string,
-                " ATQA: %02X%02X SAK: %02X",
-                iso3_data.atqa[0],
-                iso3_data.atqa[1],
-                iso3_data.sak);
+    do {
+        response->result = NfcCliRawErrorNone;
+        if(request->select) {
+            response->result =
+                nfc_cli_raw_iso14443_3a_activate(poller, response->activation_string);
         }
-    }
 
-    if(bit_buffer_get_size_bytes(request->tx_buffer) > 0) {
-        FURI_LOG_D(TAG, "Tx");
+        if(response->result != NfcCliRawErrorNone) break;
+        if(BIT_BUFFER_EMPTY(request->tx_buffer)) break;
+
         if(request->append_crc) {
-            FURI_LOG_D(TAG, "Tx CRC");
+            FURI_LOG_D(TAG, "Add CRC");
             iso14443_crc_append(Iso14443CrcTypeA, request->tx_buffer);
         }
 
-        bit_buffer_reset(response->rx_buffer);
-
-        Iso14443_3aError error = iso14443_3a_poller_txrx(
+        response->result = nfc_cli_raw_iso14443_3a_txrx(
             poller, request->tx_buffer, response->rx_buffer, ISO14443_3A_FDT_LISTEN_FC);
+    } while(false);
 
-        if(error == Iso14443_3aErrorNone) {
-            FURI_LOG_D(TAG, "Tx OK");
-        } else {
-            FURI_LOG_D(TAG, "Tx Error");
-        }
-    }
     return request->keep_field ? NfcCommandContinue : NfcCommandStop;
 }
