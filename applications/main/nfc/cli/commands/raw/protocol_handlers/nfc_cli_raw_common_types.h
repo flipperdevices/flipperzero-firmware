@@ -4,6 +4,13 @@
 #include <nfc/nfc.h>
 #include <nfc/nfc_poller.h>
 
+typedef enum {
+    NfcCliRawErrorNone,
+    NfcCliRawErrorTimeout,
+    NfcCliRawErrorProtocol,
+    NfcCliRawErrorWrongCrc,
+} NfcCliRawError;
+
 typedef struct {
     bool select;
     bool keep_field;
@@ -13,6 +20,7 @@ typedef struct {
 } NfcCliRawRequest;
 
 typedef struct {
+    NfcCliRawError result;
     BitBuffer* rx_buffer;
     FuriString* activation_string;
 } NfcCliRawResponse;
