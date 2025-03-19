@@ -1,7 +1,8 @@
 #include "nfc_cli_command_raw.h"
 #include "../../nfc_cli_command_processor.h"
-#include "protocol_handlers/nfc_cli_raw_common_types.h"
+#include "../helpers/nfc_cli_format.h"
 
+#include "protocol_handlers/nfc_cli_raw_common_types.h"
 #include "protocol_handlers/iso14443_3a/nfc_cli_raw_iso14443_3a.h"
 #include "protocol_handlers/iso14443_3b/nfc_cli_raw_iso14443_3b.h"
 #include "protocol_handlers/iso15693_3/nfc_cli_raw_iso15693_3.h"
@@ -16,8 +17,6 @@
     {"14a", "14b", "15", "felica", "iso14a", "iso14b", "iso15"}; */
 
 #define NFC_CLI_PROTOCOL_SUPPORT_MAX_BUFFER_SIZE (256)
-
-#define ISO14443_3A_FDT_LISTEN_FC (1172)
 
 #define TAG "RAW"
 
@@ -49,6 +48,13 @@ typedef struct {
     FuriSemaphore* sem_done;
 
 } NfcCliRawCmdContext;
+
+static const char* raw_error_names[] = {
+    [NfcCliRawErrorNone] = "None",
+    [NfcCliRawErrorTimeout] = "Timeout",
+    [NfcCliRawErrorProtocol] = "Internal protocol",
+    [NfcCliRawErrorWrongCrc] = "Wrong CRC",
+};
 
 static NfcCliActionContext* nfc_cli_raw_alloc_ctx(Nfc* nfc) {
     furi_assert(nfc);
@@ -146,6 +152,27 @@ static NfcCommand nfc_cli_raw_poller_callback(NfcGenericEventEx event, void* con
     return command;
 }
 
+static inline void nfc_cli_raw_print_result(const NfcCliRawCmdContext* instance) {
+    if(!furi_string_empty(instance->response.activation_string))
+        printf("%s\r\n", furi_string_get_cstr(instance->response.activation_string));
+
+    nfc_cli_printf_array(
+        bit_buffer_get_data(instance->request.tx_buffer),
+        bit_buffer_get_size_bytes(instance->request.tx_buffer),
+        "Tx: ");
+
+    if(instance->response.result != NfcCliRawErrorNone)
+        printf("Error: \"%s\"\r\n", raw_error_names[instance->response.result]);
+
+    size_t rx_size = bit_buffer_get_size_bytes(instance->response.rx_buffer);
+    if(rx_size > 0) {
+        nfc_cli_printf_array(
+            bit_buffer_get_data(instance->response.rx_buffer),
+            bit_buffer_get_size_bytes(instance->response.rx_buffer),
+            "\r\nRx: ");
+    }
+}
+
 static void nfc_cli_raw_execute(PipeSide* pipe, void* context) {
     UNUSED(pipe);
     furi_assert(context);
@@ -165,22 +192,7 @@ static void nfc_cli_raw_execute(PipeSide* pipe, void* context) {
     furi_message_queue_put(instance->input_queue, &instance->request_type, FuriWaitForever);
     furi_semaphore_acquire(instance->sem_done, FuriWaitForever);
 
-    printf("%s\r\n", furi_string_get_cstr(instance->response.activation_string));
-    size_t rx_size = bit_buffer_get_size_bytes(instance->response.rx_buffer);
-    if(rx_size > 0) {
-        printf("Tx:");
-        const uint8_t* tx_data = bit_buffer_get_data(instance->request.tx_buffer);
-        size_t size = bit_buffer_get_size_bytes(instance->request.tx_buffer);
-        for(size_t i = 0; i < size; i++) {
-            printf(" %02X", tx_data[i]);
-        }
-
-        printf("\r\nRx:");
-        const uint8_t* rx_data = bit_buffer_get_data(instance->response.rx_buffer);
-        for(size_t i = 0; i < rx_size; i++) {
-            printf(" %02X", rx_data[i]);
-        }
-    }
+    nfc_cli_raw_print_result(instance);
 }
 
 static bool nfc_cli_raw_parse_protocol(FuriString* value, void* output) {
@@ -301,22 +313,8 @@ const NfcCliActionDescriptor raw_action = {
 };
 
 const NfcCliActionDescriptor* raw_actions_collection[] = {&raw_action};
-//Command descriptor
 
 ADD_NFC_CLI_COMMAND(raw, raw_actions_collection);
-
-/* const NfcCliCommandDescriptor raw_cmd = {
-    .name = "raw",
-    .action_count = COUNT_OF(raw_actions_collection),
-    .actions = raw_actions_collection,
-    .callback = nfc_cli_command_raw_callback,
-} */
-;
-/* 
-static void nfc_cli_command_raw_callback(PipeSide* pipe, FuriString* args, void* context) {
-    UNUSED(pipe);
-    nfc_cli_command_process(&raw_cmd, args, context);
-} */
 
 //Command usage: raw <protocol> [keys] <data>
 //Command examples:
