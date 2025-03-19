@@ -3,19 +3,12 @@
 #include "protocol_handlers/nfc_cli_raw_common_types.h"
 
 #include "protocol_handlers/iso14443_3a/nfc_cli_raw_iso14443_3a.h"
+#include "protocol_handlers/iso14443_3b/nfc_cli_raw_iso14443_3b.h"
 #include "protocol_handlers/felica/nfc_cli_raw_felica.h"
 
 #include <toolbox/args.h>
 
-// #include <nfc/helpers/felica_crc.h>
-// #include <nfc/protocols/felica/felica.h>
-// #include <nfc/protocols/felica/felica_poller.h>
-
-#include <nfc/helpers/iso14443_crc.h>
-#include <nfc/protocols/iso14443_3b/iso14443_3b_i.h>
-#include <nfc/protocols/iso14443_3b/iso14443_3b_poller.h>
-
-#include <furi_hal_nfc.h>
+//#include <furi_hal_nfc.h>
 
 ///TODO: use this in parsing of arg_protocol
 /* const char* protocol_key_valid_values[] =
@@ -113,7 +106,7 @@ static bool nfc_cli_raw_can_reuse_ctx(NfcCliActionContext* ctx) {
 
 const NfcCliRawProtocolSpecificHandler nfc_cli_raw_protocol_handlers[] = {
     [NfcProtocolIso14443_3a] = nfc_cli_raw_iso14443_3a_handler,
-    [NfcProtocolIso14443_3b] = NULL /* &nfc_cli_protocol_support_base_iso14443_3b */,
+    [NfcProtocolIso14443_3b] = nfc_cli_raw_iso14443_3b_handler,
     [NfcProtocolIso14443_4a] = NULL,
     [NfcProtocolIso14443_4b] = NULL,
     [NfcProtocolIso15693_3] = NULL /* &nfc_cli_protocol_support_base_iso15693_3 */,
