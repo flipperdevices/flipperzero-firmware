@@ -1,7 +1,7 @@
 #include "nfc_cli_commands.h"
 #include "nfc_cli_command_base_i.h"
 
-#include "commands/nfc_cli_command_raw.h"
+#include "commands/raw/nfc_cli_command_raw.h"
 #include "commands/nfc_cli_command_apdu.h"
 #include "commands/nfc_cli_command_emulate.h"
 #include "commands/nfc_cli_command_mfu.h"

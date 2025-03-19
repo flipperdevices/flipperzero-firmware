@@ -257,7 +257,7 @@ App(
     sources=["cli/nfc_cli.c",             
              "cli/nfc_cli_commands.c",
              "cli/nfc_cli_command_processor.c",
-             "cli/commands/nfc_cli_command_raw.c",
+             "cli/commands/raw/nfc_cli_command_raw.c",
              "cli/commands/nfc_cli_command_apdu.c",
              "cli/commands/nfc_cli_command_emulate.c",  
              "cli/commands/nfc_cli_command_mfu.c",

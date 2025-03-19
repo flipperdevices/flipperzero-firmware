@@ -1,10 +1,20 @@
 #include "nfc_cli_command_raw.h"
-#include "../nfc_cli_command_processor.h"
+#include "../../nfc_cli_command_processor.h"
+#include "protocol_handlers/nfc_cli_raw_common_types.h"
+
+#include "protocol_handlers/iso14443_3a/nfc_cli_raw_iso14443_3a.h"
+#include "protocol_handlers/felica/nfc_cli_raw_felica.h"
+
 #include <toolbox/args.h>
-#include <nfc/nfc_poller.h>
+
+// #include <nfc/helpers/felica_crc.h>
+// #include <nfc/protocols/felica/felica.h>
+// #include <nfc/protocols/felica/felica_poller.h>
+
 #include <nfc/helpers/iso14443_crc.h>
-#include <nfc/protocols/iso14443_3a/iso14443_3a.h>
-#include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
+#include <nfc/protocols/iso14443_3b/iso14443_3b_i.h>
+#include <nfc/protocols/iso14443_3b/iso14443_3b_poller.h>
+
 #include <furi_hal_nfc.h>
 
 ///TODO: use this in parsing of arg_protocol
@@ -19,46 +29,18 @@
 
 typedef enum {
     NfcCliProtocolRequestTypeNormalExecute,
-    //NfcCliProtocolRequestTypeFrameExchange,
     NfcCliProtocolRequestTypeAbort,
 } NfcCliProtocolRequestType;
-
-/* typedef struct {
-    Nfc* nfc;
-    NfcGenericInstance* poller;
-    NfcCliPollerError error;
-    union {
-        NfcCliProtocolRequestFrameExchangeData frame_exchange;
-        FuriString* activation_info;
-    };
-} NfcCliProtocolRequestData; */
-
-/* typedef struct {
-    bool select;
-    bool keep_field;
-    bool append_crc;
-    const uint8_t* data;
-    size_t data_length;
-} NfcCliProtocolRequestData; */
 
 typedef enum {
     NfcPollerStateStopped,
     NfcPollerStateStarted,
 } NfcPollerState;
 
-typedef struct {
-    bool select;
-    bool keep_field;
-    bool append_crc;
-    NfcProtocol protocol;
-    BitBuffer* tx_buffer;
-} NfcCliRawRequest;
-
-typedef struct {
-    BitBuffer* rx_buffer;
-    //BitBuffer* tx_buffer;
-    FuriString* activation_string;
-} NfcCliRawResponse;
+typedef NfcCommand (*NfcCliRawProtocolSpecificHandler)(
+    NfcGenericInstance* poller,
+    const NfcCliRawRequest* request,
+    NfcCliRawResponse* const response);
 
 typedef struct {
     Nfc* nfc;
@@ -74,16 +56,6 @@ typedef struct {
 
 } NfcCliRawCmdContext;
 
-/* static void nfc_cli_poller_context_free(NfcCliPollerContext* instance) {
-    furi_assert(instance);
-
-    furi_string_free(instance->formatted_data);
-    bit_buffer_free(instance->rx_buffer);
-    furi_message_queue_free(instance->worker_queue);
-    furi_message_queue_free(instance->user_queue);
-    nfc_poller_free(instance->poller);
-}
- */
 static NfcCliActionContext* nfc_cli_raw_alloc_ctx(Nfc* nfc) {
     furi_assert(nfc);
     NfcCliRawCmdContext* instance = malloc(sizeof(NfcCliRawCmdContext));
@@ -139,53 +111,19 @@ static bool nfc_cli_raw_can_reuse_ctx(NfcCliActionContext* ctx) {
     return result;
 }
 
-static void nfc_cli_raw_iso14443_3a_handler(NfcGenericEventEx event, void* context) {
-    NfcCliRawCmdContext* ctx = context;
-    Iso14443_3aPoller* poller = event.poller;
-
-    const NfcCliRawRequest* request = &ctx->request;
-    NfcCliRawResponse* response = &ctx->response;
-
-    if(request->select) {
-        Iso14443_3aData iso3_data = {};
-        FURI_LOG_D(TAG, "Activating...");
-
-        Iso14443_3aError error = iso14443_3a_poller_activate(poller, &iso3_data);
-        if(error == Iso14443_3aErrorNone) {
-            FURI_LOG_D(TAG, "Activate OK");
-
-            furi_string_printf(response->activation_string, "UID:");
-            for(size_t i = 0; i < iso3_data.uid_len; i++) {
-                furi_string_cat_printf(response->activation_string, " %02X", iso3_data.uid[i]);
-            }
-            furi_string_cat_printf(
-                response->activation_string,
-                " ATQA: %02X%02X SAK: %02X",
-                iso3_data.atqa[0],
-                iso3_data.atqa[1],
-                iso3_data.sak);
-        }
-    }
-
-    if(bit_buffer_get_size_bytes(request->tx_buffer) > 0) {
-        FURI_LOG_D(TAG, "Tx");
-        if(request->append_crc) {
-            FURI_LOG_D(TAG, "Tx CRC");
-            iso14443_crc_append(Iso14443CrcTypeA, request->tx_buffer);
-        }
-
-        bit_buffer_reset(response->rx_buffer);
-
-        Iso14443_3aError error = iso14443_3a_poller_txrx(
-            poller, request->tx_buffer, response->rx_buffer, ISO14443_3A_FDT_LISTEN_FC);
-
-        if(error == Iso14443_3aErrorNone) {
-            FURI_LOG_D(TAG, "Tx OK");
-        } else {
-            FURI_LOG_D(TAG, "Tx Error");
-        }
-    }
-}
+const NfcCliRawProtocolSpecificHandler nfc_cli_raw_protocol_handlers[] = {
+    [NfcProtocolIso14443_3a] = nfc_cli_raw_iso14443_3a_handler,
+    [NfcProtocolIso14443_3b] = NULL /* &nfc_cli_protocol_support_base_iso14443_3b */,
+    [NfcProtocolIso14443_4a] = NULL,
+    [NfcProtocolIso14443_4b] = NULL,
+    [NfcProtocolIso15693_3] = NULL /* &nfc_cli_protocol_support_base_iso15693_3 */,
+    [NfcProtocolFelica] = nfc_cli_raw_felica_handler,
+    [NfcProtocolMfUltralight] = NULL,
+    [NfcProtocolMfClassic] = NULL,
+    [NfcProtocolMfDesfire] = NULL,
+    [NfcProtocolSlix] = NULL,
+    [NfcProtocolSt25tb] = NULL,
+};
 
 static NfcCommand nfc_cli_raw_poller_callback(NfcGenericEventEx event, void* context) {
     NfcEvent* nfc_event = event.parent_event_data;
@@ -201,51 +139,9 @@ static NfcCommand nfc_cli_raw_poller_callback(NfcGenericEventEx event, void* con
         if(request_type == NfcCliProtocolRequestTypeAbort) {
             command = NfcCommandStop;
         } else {
-            nfc_cli_raw_iso14443_3a_handler(event, context);
-            // Iso14443_3aPoller* poller = event.poller;
-            // if(instance->select) {
-            //     Iso14443_3aData iso3_data = {};
-            //     FURI_LOG_D(TAG, "Activating...");
-
-            //     Iso14443_3aError error = iso14443_3a_poller_activate(poller, &iso3_data);
-            //     if(error == Iso14443_3aErrorNone) {
-            //         FURI_LOG_D(TAG, "Activate OK");
-
-            //         furi_string_printf(instance->result_str, "UID:");
-            //         for(size_t i = 0; i < iso3_data.uid_len; i++) {
-            //             furi_string_cat_printf(instance->result_str, " %02X", iso3_data.uid[i]);
-            //         }
-            //         furi_string_cat_printf(
-            //             instance->result_str,
-            //             " ATQA: %02X%02X SAK: %02X",
-            //             iso3_data.atqa[0],
-            //             iso3_data.atqa[1],
-            //             iso3_data.sak);
-            //     }
-            // }
-
-            // if(bit_buffer_get_size_bytes(instance->tx_buffer) > 0) {
-            //     FURI_LOG_D(TAG, "Tx");
-            //     if(instance->append_crc) {
-            //         FURI_LOG_D(TAG, "Tx CRC");
-            //         iso14443_crc_append(Iso14443CrcTypeA, instance->tx_buffer);
-            //     }
-
-            //     bit_buffer_reset(instance->rx_buffer);
-
-            //     NfcError error = nfc_poller_trx(
-            //         instance->nfc,
-            //         instance->tx_buffer,
-            //         instance->rx_buffer,
-            //         ISO14443_3A_FDT_LISTEN_FC);
-
-            //     if(error == NfcErrorNone) {
-            //         FURI_LOG_D(TAG, "Tx OK");
-            //     } else {
-            //         FURI_LOG_D(TAG, "Tx Error");
-            //     }
-            // }
-            command = instance->request.keep_field ? NfcCommandContinue : NfcCommandStop;
+            const NfcCliRawProtocolSpecificHandler handler =
+                nfc_cli_raw_protocol_handlers[instance->request.protocol];
+            if(handler) handler(event.poller, &instance->request, &instance->response);
         }
     }
     furi_semaphore_release(instance->sem_done);
@@ -275,10 +171,10 @@ static void nfc_cli_raw_execute(PipeSide* pipe, void* context) {
     furi_message_queue_put(instance->input_queue, &instance->request_type, FuriWaitForever);
     furi_semaphore_acquire(instance->sem_done, FuriWaitForever);
 
-    printf("%s", furi_string_get_cstr(instance->response.activation_string));
+    printf("%s\r\n", furi_string_get_cstr(instance->response.activation_string));
     size_t rx_size = bit_buffer_get_size_bytes(instance->response.rx_buffer);
     if(rx_size > 0) {
-        printf("\r\nTx:");
+        printf("Tx:");
         const uint8_t* tx_data = bit_buffer_get_data(instance->request.tx_buffer);
         size_t size = bit_buffer_get_size_bytes(instance->request.tx_buffer);
         for(size_t i = 0; i < size; i++) {
