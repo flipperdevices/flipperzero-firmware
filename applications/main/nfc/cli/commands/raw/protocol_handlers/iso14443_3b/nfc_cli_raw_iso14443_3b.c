@@ -1,4 +1,5 @@
 #include "nfc_cli_raw_iso14443_3b.h"
+#include "../../../helpers/nfc_cli_format.h"
 
 #include <nfc/helpers/iso14443_crc.h>
 #include <nfc/protocols/iso14443_3b/iso14443_3b_i.h>
@@ -33,10 +34,7 @@ static Iso14443_3bError nfc_cli_raw_iso14443_3b_poller_process_error(NfcError er
 }
 
 static void iso14443_3b_format_activation_data(const Iso14443_3bData* data, FuriString* output) {
-    furi_string_printf(output, "UID:");
-    for(size_t i = 0; i < ISO14443_3B_UID_SIZE; i++) {
-        furi_string_cat_printf(output, " %02X", data->uid[i]);
-    }
+    nfc_cli_format_array(data->uid, ISO14443_3B_UID_SIZE, "UID: ", output);
 
     const Iso14443_3bProtocolInfo* info = &data->protocol_info;
     furi_string_cat_printf(

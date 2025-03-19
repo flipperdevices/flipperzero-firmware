@@ -1,4 +1,5 @@
 #include "nfc_cli_raw_iso15693_3.h"
+#include "../../../helpers/nfc_cli_format.h"
 
 #include <nfc/helpers/iso13239_crc.h>
 #include <nfc/protocols/iso15693_3/iso15693_3.h>
@@ -32,11 +33,8 @@ static Iso15693_3Error nfc_cli_raw_iso15693_3_poller_process_nfc_error(NfcError 
     }
 }
 
-static void iso15693_3_format_activation_data(const uint8_t* data, FuriString* output) {
-    furi_string_printf(output, "UID:");
-    for(size_t i = 0; i < ISO15693_3_UID_SIZE; i++) {
-        furi_string_cat_printf(output, " %02X", data[i]);
-    }
+static inline void iso15693_3_format_activation_data(const uint8_t* data, FuriString* output) {
+    nfc_cli_format_array(data, ISO15693_3_UID_SIZE, "UID: ", output);
 }
 
 static inline NfcCliRawError

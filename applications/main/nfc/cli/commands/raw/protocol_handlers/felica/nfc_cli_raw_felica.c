@@ -1,4 +1,5 @@
 #include "nfc_cli_raw_felica.h"
+#include "../../../helpers/nfc_cli_format.h"
 
 #include <nfc/helpers/felica_crc.h>
 #include <nfc/protocols/felica/felica.h>
@@ -8,20 +9,9 @@
 
 #define BIT_BUFFER_EMPTY(buffer) ((bit_buffer_get_size_bytes(buffer) == 0))
 
-///TODO: This can be moved to some common helpers and used within all protocols
-static void felica_format_array(
-    const uint8_t* data,
-    size_t data_size,
-    const char* header,
-    FuriString* output) {
-    furi_string_cat_printf(output, "%s", header);
-    for(size_t i = 0; i < data_size; i++)
-        furi_string_cat_printf(output, "%02X ", data[i]);
-}
-
 static inline void felica_format_activation_data(const FelicaData* data, FuriString* output) {
-    felica_format_array(data->idm.data, FELICA_IDM_SIZE, "IDm: ", output);
-    felica_format_array(data->pmm.data, FELICA_PMM_SIZE, " PMm: ", output);
+    nfc_cli_format_array(data->idm.data, FELICA_IDM_SIZE, "IDm: ", output);
+    nfc_cli_format_array(data->pmm.data, FELICA_PMM_SIZE, " PMm: ", output);
 }
 
 static NfcCliRawError nfc_cli_raw_felica_process_error(FelicaError error) {

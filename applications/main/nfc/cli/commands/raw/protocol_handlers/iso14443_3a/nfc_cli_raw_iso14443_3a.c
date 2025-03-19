@@ -1,4 +1,5 @@
 #include "nfc_cli_raw_iso14443_3a.h"
+#include "../../../helpers/nfc_cli_format.h"
 
 #include <nfc/helpers/iso14443_crc.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
@@ -22,10 +23,7 @@ static NfcCliRawError nfc_cli_raw_iso14443_3a_process_error(Iso14443_3aError err
 }
 
 static void iso14443_3a_format_activation_data(const Iso14443_3aData* data, FuriString* output) {
-    furi_string_printf(output, "UID:");
-    for(size_t i = 0; i < data->uid_len; i++) {
-        furi_string_cat_printf(output, " %02X", data->uid[i]);
-    }
+    nfc_cli_format_array(data->uid, data->uid_len, "UID: ", output);
     furi_string_cat_printf(
         output, " ATQA: %02X%02X SAK: %02X", data->atqa[0], data->atqa[1], data->sak);
 }
