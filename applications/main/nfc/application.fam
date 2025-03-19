@@ -260,6 +260,7 @@ App(
              "cli/commands/raw/nfc_cli_command_raw.c",
              "cli/commands/raw/protocol_handlers/iso14443_3a/nfc_cli_raw_iso14443_3a.c",
              "cli/commands/raw/protocol_handlers/iso14443_3b/nfc_cli_raw_iso14443_3b.c",
+             "cli/commands/raw/protocol_handlers/iso15693_3/nfc_cli_raw_iso15693_3.c",
              "cli/commands/raw/protocol_handlers/felica/nfc_cli_raw_felica.c",
              "cli/commands/nfc_cli_command_apdu.c",
              "cli/commands/nfc_cli_command_emulate.c",  
