@@ -3,6 +3,8 @@
 #include "nfc_cli_command_base_i.h"
 #include "nfc_cli.h"
 
+#include <m-string.h>
+
 #define TAG "NfcCliProcessor"
 
 #define NFC_CLI_KEYS_FOUND_SIZE_BYTES (10 * sizeof(NfcCliKeyDescriptor*))
@@ -138,6 +140,17 @@ static bool
     return result;
 }
 
+static void nfc_cli_trim_multivalue_arg(FuriString* args, FuriString* value) {
+    furi_string_set(value, args);
+    size_t index = furi_string_search_char(value, '-', 0);
+    if(index != STRING_FAILURE) {
+        furi_string_left(value, index);
+        furi_string_right(args, index);
+    } else {
+        furi_string_reset(args);
+    }
+}
+
 static bool nfc_cli_parse_single_key(
     NfcCliProcessorContext* instance,
     FuriString* argument,
@@ -155,7 +168,12 @@ static bool nfc_cli_parse_single_key(
 
         if(nfc_cli_check_duplicate_keys(instance, key)) break;
 
-        if(key->features.parameter && !args_read_string_and_trim(args, value_str)) break;
+        if(key->features.multivalue && !key->features.parameter) break;
+        if(key->features.multivalue) {
+            nfc_cli_trim_multivalue_arg(args, value_str);
+            FURI_LOG_D(TAG, "Multivalue: %s", furi_string_get_cstr(value_str));
+        } else if(key->features.parameter && !args_read_string_and_trim(args, value_str))
+            break;
 
         FURI_LOG_D(TAG, "Parsing key \"%s\"", furi_string_get_cstr(argument));
         if(!key->parse(value_str, instance->action_context)) break;

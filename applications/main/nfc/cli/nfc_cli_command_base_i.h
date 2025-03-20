@@ -6,8 +6,9 @@
 #include "nfc_cli_command_processor.h"
 
 struct FURI_PACKED NfcCliKeyFeatureSupport {
-    bool required  : 1;
-    bool parameter : 1;
+    bool required   : 1;
+    bool parameter  : 1;
+    bool multivalue : 1;
 };
 
 struct NfcCliKeyDescriptor {
