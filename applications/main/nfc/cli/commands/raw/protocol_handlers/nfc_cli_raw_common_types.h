@@ -18,6 +18,7 @@ typedef struct {
     bool append_crc;
     NfcProtocol protocol;
     BitBuffer* tx_buffer;
+    uint32_t timeout;
 } NfcCliRawRequest;
 
 typedef struct {

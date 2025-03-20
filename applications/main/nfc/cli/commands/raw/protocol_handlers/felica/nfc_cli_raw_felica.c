@@ -93,8 +93,9 @@ NfcCommand nfc_cli_raw_felica_handler(
             felica_crc_append(request->tx_buffer);
         }
 
-        response->result = nfc_cli_raw_felica_txrx(
-            poller, request->tx_buffer, response->rx_buffer, FELICA_FDT_POLL_FC);
+        uint32_t timeout = request->timeout > 0 ? request->timeout : FELICA_FDT_POLL_FC;
+        response->result =
+            nfc_cli_raw_felica_txrx(poller, request->tx_buffer, response->rx_buffer, timeout);
     } while(false);
     return request->keep_field ? NfcCommandContinue : NfcCommandStop;
 }

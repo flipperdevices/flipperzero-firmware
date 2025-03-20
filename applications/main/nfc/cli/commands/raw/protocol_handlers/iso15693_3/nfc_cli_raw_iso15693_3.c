@@ -86,18 +86,15 @@ NfcCommand nfc_cli_raw_iso15693_3_handler(
                 nfc_cli_raw_iso15693_3_activate(poller, response->activation_string);
         }
 
-        uint32_t timeout = ISO15693_3_FDT_POLL_FC;
-
         if(response->result != NfcCliRawErrorNone) break;
         if(BIT_BUFFER_EMPTY(request->tx_buffer)) break;
-        //if(request->timeout > 0)
-        //{ timeout = request->timeout; }
 
         if(request->append_crc) {
             FURI_LOG_D(TAG, "Add CRC");
             iso13239_crc_append(Iso13239CrcTypeDefault, request->tx_buffer);
         }
 
+        uint32_t timeout = request->timeout > 0 ? request->timeout : ISO15693_3_FDT_POLL_FC;
         response->result =
             nfc_cli_raw_iso15693_3_txrx(poller, request->tx_buffer, response->rx_buffer, timeout);
     } while(false);

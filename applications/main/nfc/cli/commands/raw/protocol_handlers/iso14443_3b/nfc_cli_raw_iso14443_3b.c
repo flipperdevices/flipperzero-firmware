@@ -50,14 +50,15 @@ static void iso14443_3b_format_activation_data(const Iso14443_3bData* data, Furi
         info->fwi);
 }
 
-static inline NfcCliRawError
-    nfc_cli_raw_iso14443_3b_activate(NfcGenericInstance* poller, FuriString* activation_string) {
-    Iso14443_3bData iso3b_data = {0};
+static inline NfcCliRawError nfc_cli_raw_iso14443_3b_activate(
+    NfcGenericInstance* poller,
+    Iso14443_3bData* iso3b_data,
+    FuriString* activation_string) {
     FURI_LOG_D(TAG, "Activating...");
 
-    Iso14443_3bError error = iso14443_3b_poller_activate(poller, &iso3b_data);
+    Iso14443_3bError error = iso14443_3b_poller_activate(poller, iso3b_data);
     if(error == Iso14443_3bErrorNone)
-        iso14443_3b_format_activation_data(&iso3b_data, activation_string);
+        iso14443_3b_format_activation_data(iso3b_data, activation_string);
 
     return nfc_cli_raw_iso14443_3b_process_error(error);
 }
@@ -88,23 +89,25 @@ NfcCommand nfc_cli_raw_iso14443_3b_handler(
     NfcGenericInstance* poller,
     const NfcCliRawRequest* request,
     NfcCliRawResponse* const response) {
+    Iso14443_3bData iso3b_data = {0};
+    bool activated = false;
     do {
         response->result = NfcCliRawErrorNone;
         if(request->select) {
             response->result =
-                nfc_cli_raw_iso14443_3b_activate(poller, response->activation_string);
+                nfc_cli_raw_iso14443_3b_activate(poller, &iso3b_data, response->activation_string);
+            activated = response->result == NfcCliRawErrorNone;
         }
 
         if(response->result != NfcCliRawErrorNone) break;
         if(BIT_BUFFER_EMPTY(request->tx_buffer)) break;
 
         uint32_t timeout = ISO14443_3B_FDT_POLL_FC;
-        //if(request->timeout > 0)
-        //{ timeout = request->timeout; }
-        //else
-        // if(activated) {
-        //     timeout = iso14443_3b_get_fwt_fc_max(&iso3b_data);
-        // }
+        if(request->timeout > 0) {
+            timeout = request->timeout;
+        } else if(activated) {
+            timeout = iso14443_3b_get_fwt_fc_max(&iso3b_data);
+        }
 
         if(request->append_crc) {
             FURI_LOG_D(TAG, "Add CRC");

@@ -10,8 +10,6 @@
 
 #include <toolbox/args.h>
 
-//#include <furi_hal_nfc.h>
-
 ///TODO: use this in parsing of arg_protocol
 /* const char* protocol_key_valid_values[] =
     {"14a", "14b", "15", "felica", "iso14a", "iso14b", "iso15"}; */
@@ -70,6 +68,7 @@ static NfcCliActionContext* nfc_cli_raw_alloc_ctx(Nfc* nfc) {
     instance->input_queue = furi_message_queue_alloc(5, sizeof(NfcCliProtocolRequestType));
     instance->sem_done = furi_semaphore_alloc(1, 0);
     instance->response.activation_string = furi_string_alloc();
+    instance->request.timeout = 0;
     return instance;
 }
 
@@ -109,6 +108,7 @@ static bool nfc_cli_raw_can_reuse_ctx(NfcCliActionContext* ctx) {
     request->keep_field = false;
     request->append_crc = false;
     request->select = false;
+    instance->request.timeout = 0;
     return result;
 }
 
@@ -249,6 +249,21 @@ static bool nfc_cli_raw_parse_data(FuriString* value, void* output) {
     return result;
 }
 
+static bool nfc_cli_raw_parse_timeout(FuriString* value, void* output) {
+    furi_assert(value);
+    furi_assert(output);
+    NfcCliRawCmdContext* ctx = output;
+
+    bool result = false;
+
+    int timeout = 0;
+    if(args_read_int_and_trim(value, &timeout)) {
+        ctx->request.timeout = timeout;
+        result = true;
+    }
+    return result;
+}
+
 static bool nfc_cli_raw_parse_select(FuriString* value, void* output) {
     UNUSED(value);
     NfcCliRawCmdContext* ctx = output;
@@ -271,6 +286,13 @@ static bool nfc_cli_raw_parse_keep(FuriString* value, void* output) {
 }
 
 const NfcCliKeyDescriptor raw_action_keys[] = {
+    {
+        .long_name = NULL,
+        .short_name = "t",
+        .features = {.parameter = true, .required = false},
+        .description = "Timeout in fc",
+        .parse = nfc_cli_raw_parse_timeout,
+    },
     {
         .long_name = NULL,
         .short_name = "k",

@@ -72,8 +72,9 @@ NfcCommand nfc_cli_raw_iso14443_3a_handler(
             iso14443_crc_append(Iso14443CrcTypeA, request->tx_buffer);
         }
 
-        response->result = nfc_cli_raw_iso14443_3a_txrx(
-            poller, request->tx_buffer, response->rx_buffer, ISO14443_3A_FDT_LISTEN_FC);
+        uint32_t timeout = request->timeout > 0 ? request->timeout : ISO14443_3A_FDT_LISTEN_FC;
+        response->result =
+            nfc_cli_raw_iso14443_3a_txrx(poller, request->tx_buffer, response->rx_buffer, timeout);
     } while(false);
 
     return request->keep_field ? NfcCommandContinue : NfcCommandStop;
