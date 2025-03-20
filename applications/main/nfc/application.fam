@@ -263,7 +263,10 @@ App(
              "cli/commands/raw/protocol_handlers/iso14443_3b/nfc_cli_raw_iso14443_3b.c",
              "cli/commands/raw/protocol_handlers/iso15693_3/nfc_cli_raw_iso15693_3.c",
              "cli/commands/raw/protocol_handlers/felica/nfc_cli_raw_felica.c",
-             "cli/commands/nfc_cli_command_apdu.c",
+             "cli/commands/apdu/nfc_cli_command_apdu.c",
+             "cli/commands/apdu/protocol_handlers/iso14443_4a/nfc_cli_apdu_iso14443_4a.c",
+             "cli/commands/apdu/protocol_handlers/iso14443_4b/nfc_cli_apdu_iso14443_4b.c",
+             "cli/commands/apdu/protocol_handlers/iso15693_3/nfc_cli_apdu_iso15693_3.c",
              "cli/commands/nfc_cli_command_emulate.c",  
              "cli/commands/nfc_cli_command_mfu.c",
              "cli/commands/nfc_cli_command_scanner.c" 
