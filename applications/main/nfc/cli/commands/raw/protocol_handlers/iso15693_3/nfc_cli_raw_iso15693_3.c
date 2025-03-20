@@ -17,6 +17,8 @@ static NfcCliRawError nfc_cli_raw_iso15693_3_process_error(Iso15693_3Error error
         return NfcCliRawErrorTimeout;
     case Iso15693_3ErrorWrongCrc:
         return NfcCliRawErrorWrongCrc;
+    case Iso15693_3ErrorNotPresent:
+        return NfcCliRawErrorNotPresent;
     default:
         return NfcCliRawErrorProtocol;
     }

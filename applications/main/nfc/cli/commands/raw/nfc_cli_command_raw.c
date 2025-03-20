@@ -54,6 +54,7 @@ static const char* raw_error_names[] = {
     [NfcCliRawErrorTimeout] = "Timeout",
     [NfcCliRawErrorProtocol] = "Internal protocol",
     [NfcCliRawErrorWrongCrc] = "Wrong CRC",
+    [NfcCliRawErrorNotPresent] = "No card",
 };
 
 static NfcCliActionContext* nfc_cli_raw_alloc_ctx(Nfc* nfc) {
@@ -162,7 +163,7 @@ static inline void nfc_cli_raw_print_result(const NfcCliRawCmdContext* instance)
         "Tx: ");
 
     if(instance->response.result != NfcCliRawErrorNone)
-        printf("Error: \"%s\"\r\n", raw_error_names[instance->response.result]);
+        printf("\r\nError: \"%s\"\r\n", raw_error_names[instance->response.result]);
 
     size_t rx_size = bit_buffer_get_size_bytes(instance->response.rx_buffer);
     if(rx_size > 0) {

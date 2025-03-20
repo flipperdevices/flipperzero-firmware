@@ -17,6 +17,8 @@ static NfcCliRawError nfc_cli_raw_iso14443_3a_process_error(Iso14443_3aError err
         return NfcCliRawErrorTimeout;
     case Iso14443_3aErrorWrongCrc:
         return NfcCliRawErrorWrongCrc;
+    case Iso14443_3aErrorNotPresent:
+        return NfcCliRawErrorNotPresent;
     default:
         return NfcCliRawErrorProtocol;
     }

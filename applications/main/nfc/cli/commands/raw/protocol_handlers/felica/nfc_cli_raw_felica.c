@@ -22,6 +22,8 @@ static NfcCliRawError nfc_cli_raw_felica_process_error(FelicaError error) {
         return NfcCliRawErrorTimeout;
     case FelicaErrorWrongCrc:
         return NfcCliRawErrorWrongCrc;
+    case FelicaErrorNotPresent:
+        return NfcCliRawErrorNotPresent;
     default:
         return NfcCliRawErrorProtocol;
     }

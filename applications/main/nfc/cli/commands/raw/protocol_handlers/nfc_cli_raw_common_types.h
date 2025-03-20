@@ -7,8 +7,9 @@
 typedef enum {
     NfcCliRawErrorNone,
     NfcCliRawErrorTimeout,
-    NfcCliRawErrorProtocol,
+    NfcCliRawErrorNotPresent,
     NfcCliRawErrorWrongCrc,
+    NfcCliRawErrorProtocol,
 } NfcCliRawError;
 
 typedef struct {
