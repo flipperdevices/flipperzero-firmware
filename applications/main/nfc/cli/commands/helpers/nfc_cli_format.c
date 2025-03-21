@@ -1,5 +1,25 @@
 #include "nfc_cli_format.h"
 
+static const char* protocol_names[NfcProtocolNum] = {
+    [NfcProtocolIso14443_3a] = "Iso14443-3a",
+    [NfcProtocolIso14443_3b] = "Iso14443-3b",
+    [NfcProtocolIso14443_4a] = "Iso14443-4a",
+    [NfcProtocolIso14443_4b] = "Iso14443-4b",
+    [NfcProtocolIso15693_3] = "Iso15693-3",
+    [NfcProtocolFelica] = "FeliCa",
+    [NfcProtocolMfUltralight] = "Mifare Ultralight",
+    [NfcProtocolMfClassic] = "Mifare Classic",
+    [NfcProtocolMfDesfire] = "Mifare DESFire",
+    [NfcProtocolMfPlus] = "Mifare Plus",
+    [NfcProtocolSlix] = "Slix",
+    [NfcProtocolSt25tb] = "St25tb",
+};
+
+const char* nfc_cli_get_protocol_name(NfcProtocol protocol) {
+    furi_assert(protocol < NfcProtocolNum);
+    return protocol_names[protocol];
+}
+
 void nfc_cli_format_array(
     const uint8_t* data,
     const size_t data_size,
