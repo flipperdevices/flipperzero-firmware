@@ -29,7 +29,7 @@
 
 #define TAG "DUMP"
 
-static NfcCliActionContext* nfc_cli_raw_alloc_ctx(Nfc* nfc) {
+static NfcCliActionContext* nfc_cli_dump_alloc_ctx(Nfc* nfc) {
     furi_assert(nfc);
     NfcCliDumpContext* instance = malloc(sizeof(NfcCliDumpContext));
     instance->nfc = nfc;
@@ -46,7 +46,7 @@ static NfcCliActionContext* nfc_cli_raw_alloc_ctx(Nfc* nfc) {
     return instance;
 }
 
-static void nfc_cli_raw_free_ctx(NfcCliActionContext* ctx) {
+static void nfc_cli_dump_free_ctx(NfcCliActionContext* ctx) {
     furi_assert(ctx);
     NfcCliDumpContext* instance = ctx;
     instance->desired_protocol = NfcProtocolInvalid;
@@ -271,8 +271,8 @@ const NfcCliKeyDescriptor dump_keys[] = {
 
 const NfcCliActionDescriptor dump_action = {
     .name = "dump",
-    .alloc = nfc_cli_raw_alloc_ctx,
-    .free = nfc_cli_raw_free_ctx,
+    .alloc = nfc_cli_dump_alloc_ctx,
+    .free = nfc_cli_dump_free_ctx,
     .execute = nfc_cli_dump_execute,
     .key_count = COUNT_OF(dump_keys),
     .keys = dump_keys,
