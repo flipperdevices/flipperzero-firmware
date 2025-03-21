@@ -1,9 +1,9 @@
 #include "nfc_cli_command_dump.h"
 #include "../../nfc_cli_command_processor.h"
-#include "nfc_cli_dump_common_types.h"
+#include "protocols/nfc_cli_dump_common_types.h"
 #include "../helpers/nfc_cli_format.h"
-
-#include <nfc/nfc_scanner.h>
+#include "../helpers/nfc_cli_protocol_parser.h"
+#include "../helpers/nfc_cli_scanner.h"
 
 #include "protocols/iso14443_3a/nfc_cli_dump_iso14443_3a.h"
 #include "protocols/iso14443_3b/nfc_cli_dump_iso14443_3b.h"
@@ -38,6 +38,8 @@ static NfcCliActionContext* nfc_cli_raw_alloc_ctx(Nfc* nfc) {
     instance->sem_done = furi_semaphore_alloc(1, 0);
     instance->nfc_device = nfc_device_alloc();
     instance->desired_protocol = NfcProtocolInvalid;
+    instance->auth_ctx.skip_auth = true;
+    instance->auth_ctx.key_size = 0;
     //instance->result_string = furi_string_alloc();
 
     instance->mfc_key_cache = mf_classic_key_cache_alloc();
@@ -185,11 +187,81 @@ static void nfc_cli_dump_execute(PipeSide* pipe, NfcCliActionContext* context) {
             if(nfc_device_save(instance->nfc_device, path)) {
                 printf("Dump saved to \'%s\'\r\n", path);
             }
+        } else {
+            printf(ANSI_FG_RED "Dump failed\r\n" ANSI_RESET);
         }
     } while(false);
 }
 
+static const NfcProtocolNameValuePair supported_protocols[] = {
+    {.name = "14_3a", .value = NfcProtocolIso14443_3a},
+    {.name = "14_3b", .value = NfcProtocolIso14443_3b},
+    {.name = "14_4a", .value = NfcProtocolIso14443_4a},
+    {.name = "14_4b", .value = NfcProtocolIso14443_4b},
+    {.name = "15", .value = NfcProtocolIso15693_3},
+    {.name = "felica", .value = NfcProtocolFelica},
+    {.name = "mfu", .value = NfcProtocolMfUltralight},
+    {.name = "mfc", .value = NfcProtocolMfClassic},
+    {.name = "mfp", .value = NfcProtocolMfPlus},
+    {.name = "des", .value = NfcProtocolMfDesfire},
+    {.name = "slix", .value = NfcProtocolSlix},
+    {.name = "st25", .value = NfcProtocolSt25tb},
+};
+
+static bool nfc_cli_dump_parse_protocol(FuriString* value, void* output) {
+    furi_assert(value);
+    furi_assert(output);
+    NfcCliDumpContext* ctx = output;
+
+    NfcCliProtocolParser* parser =
+        nfc_cli_protocol_parser_alloc(supported_protocols, COUNT_OF(supported_protocols));
+
+    bool result = nfc_cli_protocol_parser_get(parser, value, &ctx->desired_protocol);
+
+    nfc_cli_protocol_parser_free(parser);
+    return result;
+}
+
+static bool nfc_cli_dump_parse_key(FuriString* value, void* output) {
+    furi_assert(value);
+    furi_assert(output);
+    NfcCliDumpContext* ctx = output;
+    NfcCliDumpAuthContext* auth_ctx = &ctx->auth_ctx;
+
+    bool result = false;
+    do {
+        size_t len = furi_string_size(value);
+        if(len % 2 != 0) break;
+        size_t data_length = len / 2;
+
+        if(data_length != MF_ULTRALIGHT_AUTH_PASSWORD_SIZE &&
+           data_length != MF_ULTRALIGHT_C_AUTH_DES_KEY_SIZE) {
+            printf(ANSI_FG_RED "Error: Wrong key size" ANSI_RESET);
+            break;
+        }
+
+        if(!args_read_hex_bytes(value, auth_ctx->key.key, data_length)) break;
+        auth_ctx->key_size = data_length;
+        auth_ctx->skip_auth = false;
+        result = true;
+    } while(false);
+
+    return result;
+}
+
 const NfcCliKeyDescriptor dump_keys[] = {
+    {
+        .long_name = "key",
+        .short_name = "k",
+        .features = {.required = false, .parameter = true},
+        .parse = nfc_cli_dump_parse_key,
+    },
+    {
+        .long_name = "protocol",
+        .short_name = "p",
+        .features = {.required = false, .parameter = true},
+        .parse = nfc_cli_dump_parse_protocol,
+    },
     {
         .features = {.required = false, .parameter = true},
         .long_name = "file",
