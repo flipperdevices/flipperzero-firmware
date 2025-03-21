@@ -254,7 +254,9 @@ App(
     apptype=FlipperAppType.PLUGIN,
     entry_point="cli_nfc_ep",
     requires=["cli"],
-    sources=["cli/nfc_cli.c",             
+    sources=[
+             "helpers/mf_classic_key_cache.c",
+             "cli/nfc_cli.c",             
              "cli/nfc_cli_commands.c",
              "cli/nfc_cli_command_processor.c",
              "cli/commands/helpers/nfc_cli_format.c",
@@ -265,10 +267,26 @@ App(
              "cli/commands/raw/protocol_handlers/iso14443_3b/nfc_cli_raw_iso14443_3b.c",
              "cli/commands/raw/protocol_handlers/iso15693_3/nfc_cli_raw_iso15693_3.c",
              "cli/commands/raw/protocol_handlers/felica/nfc_cli_raw_felica.c",
+
              "cli/commands/apdu/nfc_cli_command_apdu.c",
              "cli/commands/apdu/protocol_handlers/iso14443_4a/nfc_cli_apdu_iso14443_4a.c",
              "cli/commands/apdu/protocol_handlers/iso14443_4b/nfc_cli_apdu_iso14443_4b.c",
              "cli/commands/apdu/protocol_handlers/iso15693_3/nfc_cli_apdu_iso15693_3.c",
+
+             "cli/commands/dump/nfc_cli_command_dump.c",
+             "cli/commands/dump/iso14443_3a/nfc_cli_dump_iso14443_3a.c",
+             "cli/commands/dump/iso14443_3b/nfc_cli_dump_iso14443_3b.c",
+             "cli/commands/dump/iso14443_4a/nfc_cli_dump_iso14443_4a.c",
+             "cli/commands/dump/iso14443_4b/nfc_cli_dump_iso14443_4b.c",
+             "cli/commands/dump/iso15693_3/nfc_cli_dump_iso15693_3.c",
+             "cli/commands/dump/mf_ultralight/nfc_cli_dump_mf_ultralight.c",
+             "cli/commands/dump/mf_classic/nfc_cli_dump_mf_classic.c",
+             "cli/commands/dump/mf_plus/nfc_cli_dump_mf_plus.c",
+             "cli/commands/dump/mf_desfire/nfc_cli_dump_mf_desfire.c",
+             "cli/commands/dump/slix/nfc_cli_dump_slix.c",
+             "cli/commands/dump/st25tb/nfc_cli_dump_st25tb.c",
+             "cli/commands/dump/felica/nfc_cli_dump_felica.c",
+
              "cli/commands/nfc_cli_command_emulate.c",  
              "cli/commands/nfc_cli_command_mfu.c",
              "cli/commands/nfc_cli_command_scanner.c" 

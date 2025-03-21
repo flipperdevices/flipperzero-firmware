@@ -1,9 +1,21 @@
 #include "nfc_cli_command_mfu.h"
 #include "../nfc_cli_command_processor.h"
 
+typedef struct {
+    Nfc* nfc;
+    NfcProtocol protocol;
+} NfcMfuInfoCtx;
+
+static NfcCliActionContext* nfc_cli_info_alloc_ctx(Nfc* nfc) {
+    NfcMfuInfoCtx* instance = malloc(sizeof(NfcMfuInfoCtx));
+    instance->protocol = NfcProtocolMfUltralight;
+    instance->nfc = nfc;
+    return instance;
+}
+
 const NfcCliActionDescriptor info_action = {
     .name = "info",
-    //.alloc = nfc_cli_raw_alloc_ctx,
+    .alloc = nfc_cli_info_alloc_ctx,
     //.free = nfc_cli_raw_free_ctx,
     //.execute = nfc_cli_raw_command,
     .key_count = 0,
