@@ -1,6 +1,7 @@
 #include "nfc_cli_command_apdu.h"
 #include "../../nfc_cli_command_processor.h"
 #include "../helpers/nfc_cli_format.h"
+#include "../helpers/nfc_cli_protocol_parser.h"
 
 #include "protocol_handlers/iso14443_4a/nfc_cli_apdu_iso14443_4a.h"
 #include "protocol_handlers/iso14443_4b/nfc_cli_apdu_iso14443_4b.h"
@@ -40,7 +41,7 @@ typedef struct {
     size_t size;
 } NfcCliApduData;
 
-static void SubmenuItem_init(NfcCliApduData* item) {
+static void ApduItem_init(NfcCliApduData* item) {
     item->size = 0;
     item->data = NULL;
 }
@@ -217,28 +218,22 @@ static void nfc_cli_apdu_execute(PipeSide* pipe, void* context) {
     }
 }
 
+static const NfcProtocolNameValuePair supported_protocols[] = {
+    {.name = "4a", .value = NfcProtocolIso14443_4a},
+    {.name = "4b", .value = NfcProtocolIso14443_4b},
+    {.name = "15", .value = NfcProtocolIso15693_3},
+};
+
 static bool nfc_cli_apdu_parse_protocol(FuriString* value, void* output) {
     NfcCliApduContext* ctx = output;
     ctx->auto_detect = false;
-    NfcProtocol new_protocol = NfcProtocolInvalid;
 
-    ///TODO: Move parse protocol to separate helper function and reuse it here and in raw command
-    ///An array of valid protocols must be provided for this function as an input parameter
-    bool result = true;
-    if(furi_string_equal_str(value, "4a")) {
-        new_protocol = NfcProtocolIso14443_4a;
-    } else if(furi_string_equal_str(value, "4b")) {
-        new_protocol = NfcProtocolIso14443_4b;
-    } else if(furi_string_equal_str(value, "15")) {
-        new_protocol = NfcProtocolIso15693_3;
-    } else {
-        result = false;
-        new_protocol = NfcProtocolInvalid;
-    }
+    NfcCliProtocolParser* parser =
+        nfc_cli_protocol_parser_alloc(supported_protocols, COUNT_OF(supported_protocols));
 
-    if(result) {
-        ctx->data.protocol = new_protocol;
-    }
+    bool result = nfc_cli_protocol_parser_get(parser, value, &ctx->data.protocol);
+
+    nfc_cli_protocol_parser_free(parser);
     return result;
 }
 
