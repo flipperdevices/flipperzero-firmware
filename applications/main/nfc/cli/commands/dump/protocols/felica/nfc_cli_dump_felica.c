@@ -23,8 +23,9 @@ NfcCommand nfc_cli_dump_poller_callback_felica(NfcGenericEvent event, void* cont
         command = NfcCommandStop;
     } else if(felica_event->type == FelicaPollerEventTypeRequestAuthContext) {
         FelicaAuthenticationContext* ctx = felica_event->data->auth_context;
-        ctx->skip_auth = true; //instance->felica_auth->skip_auth;
-        //memcpy(ctx->card_key.data, instance->felica_auth->card_key.data, FELICA_DATA_BLOCK_SIZE);
+        const NfcCliDumpAuthContext* dump_auth_ctx = &instance->auth_ctx;
+        ctx->skip_auth = dump_auth_ctx->skip_auth;
+        ctx->card_key = dump_auth_ctx->key.felica_key;
     }
 
     if(command == NfcCommandStop) {

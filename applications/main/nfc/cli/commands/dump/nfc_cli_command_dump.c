@@ -5,22 +5,23 @@
 
 #include <nfc/nfc_scanner.h>
 
-#include "iso14443_3a/nfc_cli_dump_iso14443_3a.h"
-#include "iso14443_3b/nfc_cli_dump_iso14443_3b.h"
-#include "iso14443_4a/nfc_cli_dump_iso14443_4a.h"
-#include "iso14443_4b/nfc_cli_dump_iso14443_4b.h"
-#include "iso15693_3/nfc_cli_dump_iso15693_3.h"
-#include "mf_classic/nfc_cli_dump_mf_classic.h"
-#include "mf_desfire/nfc_cli_dump_mf_desfire.h"
-#include "mf_plus/nfc_cli_dump_mf_plus.h"
-#include "mf_ultralight/nfc_cli_dump_mf_ultralight.h"
-#include "slix/nfc_cli_dump_slix.h"
-#include "st25tb/nfc_cli_dump_st25tb.h"
-#include "felica/nfc_cli_dump_felica.h"
+#include "protocols/iso14443_3a/nfc_cli_dump_iso14443_3a.h"
+#include "protocols/iso14443_3b/nfc_cli_dump_iso14443_3b.h"
+#include "protocols/iso14443_4a/nfc_cli_dump_iso14443_4a.h"
+#include "protocols/iso14443_4b/nfc_cli_dump_iso14443_4b.h"
+#include "protocols/iso15693_3/nfc_cli_dump_iso15693_3.h"
+#include "protocols/mf_classic/nfc_cli_dump_mf_classic.h"
+#include "protocols/mf_desfire/nfc_cli_dump_mf_desfire.h"
+#include "protocols/mf_plus/nfc_cli_dump_mf_plus.h"
+#include "protocols/mf_ultralight/nfc_cli_dump_mf_ultralight.h"
+#include "protocols/slix/nfc_cli_dump_slix.h"
+#include "protocols/st25tb/nfc_cli_dump_st25tb.h"
+#include "protocols/felica/nfc_cli_dump_felica.h"
 
+#include <datetime.h>
 #include <furi_hal_rtc.h>
 #include <toolbox/path.h>
-#include <datetime.h>
+#include <toolbox/args.h>
 
 #define NFC_DEFAULT_FOLDER              EXT_PATH("nfc")
 #define NFC_FILE_EXTENSION              ".nfc"

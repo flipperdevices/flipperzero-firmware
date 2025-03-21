@@ -2,9 +2,8 @@
 
 #include <furi.h>
 
-//#include "../../../helpers/nfc_detected_protocols.h"
-#include "../../../helpers/mf_classic_key_cache.h"
-#include "../helpers/nfc_cli_scanner.h"
+#include "../../../../helpers/mf_classic_key_cache.h"
+#include "../../helpers/nfc_cli_scanner.h"
 
 #include <nfc/nfc.h>
 #include <nfc/protocols/nfc_protocol.h>
@@ -25,6 +24,12 @@ typedef union {
     uint8_t key[NFC_CLI_DUMP_KEY_MAX_SIZE];
 } NfcCliDumpKeyUnion;
 
+typedef struct {
+    NfcCliDumpKeyUnion key;
+    uint8_t key_size;
+    bool skip_auth;
+} NfcCliDumpAuthContext;
+
 typedef enum {
     NfcCliDumpErrorNone,
     NfcCliDumpErrorTimeout,
@@ -37,14 +42,14 @@ typedef struct {
     FuriString* file_path;
     Storage* storage;
     NfcCliScanner* scanner;
-    //NfcDetectedProtocols* detected_protocols;
+    NfcProtocol desired_protocol;
 
     FuriSemaphore* sem_done;
 
     NfcCliDumpError result;
-    FuriString* result_string;
+    //FuriString* result_string;
 
-    NfcCliDumpKeyUnion key;
+    NfcCliDumpAuthContext auth_ctx;
     MfClassicKeyCache* mfc_key_cache;
 
     NfcPoller* poller;
