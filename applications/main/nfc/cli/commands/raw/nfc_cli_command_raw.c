@@ -1,6 +1,7 @@
 #include "nfc_cli_command_raw.h"
 #include "../../nfc_cli_command_processor.h"
 #include "../helpers/nfc_cli_format.h"
+#include "../helpers/nfc_cli_protocol_parser.h"
 
 #include "protocol_handlers/nfc_cli_raw_common_types.h"
 #include "protocol_handlers/iso14443_3a/nfc_cli_raw_iso14443_3a.h"
@@ -9,10 +10,6 @@
 #include "protocol_handlers/felica/nfc_cli_raw_felica.h"
 
 #include <toolbox/args.h>
-
-///TODO: use this in parsing of arg_protocol
-/* const char* protocol_key_valid_values[] =
-    {"14a", "14b", "15", "felica", "iso14a", "iso14b", "iso15"}; */
 
 #define NFC_CLI_PROTOCOL_SUPPORT_MAX_BUFFER_SIZE (256)
 
@@ -196,27 +193,34 @@ static void nfc_cli_raw_execute(PipeSide* pipe, void* context) {
     nfc_cli_raw_print_result(instance);
 }
 
+static const NfcProtocolNameValuePair supported_protocols[] = {
+    {.name = "14a", .value = NfcProtocolIso14443_3a},
+    {.name = "iso14a", .value = NfcProtocolIso14443_3a},
+
+    {.name = "14b", .value = NfcProtocolIso14443_3b},
+    {.name = "iso14b", .value = NfcProtocolIso14443_3b},
+
+    {.name = "15", .value = NfcProtocolIso15693_3},
+    {.name = "felica", .value = NfcProtocolFelica},
+};
+
 static bool nfc_cli_raw_parse_protocol(FuriString* value, void* output) {
     NfcCliRawCmdContext* ctx = output;
     NfcProtocol new_protocol = NfcProtocolInvalid;
 
-    bool result = true;
-    if(furi_string_equal_str(value, "14a") || furi_string_equal_str(value, "iso14a")) {
-        new_protocol = NfcProtocolIso14443_3a;
-    } else if(furi_string_equal_str(value, "14b") || furi_string_equal_str(value, "iso14b")) {
-        new_protocol = NfcProtocolIso14443_3b;
-    } else if(furi_string_equal_str(value, "15")) {
-        new_protocol = NfcProtocolIso15693_3;
-    } else if(furi_string_equal_str(value, "felica")) {
-        new_protocol = NfcProtocolFelica;
-    } else {
-        result = false;
-        new_protocol = NfcProtocolInvalid;
-    }
+    NfcCliProtocolParser* parser =
+        nfc_cli_protocol_parser_alloc(supported_protocols, COUNT_OF(supported_protocols));
+
+    bool result = nfc_cli_protocol_parser_get(parser, value, &new_protocol);
+
+    nfc_cli_protocol_parser_free(parser);
 
     if(result && ctx->request.protocol != NfcProtocolInvalid &&
        ctx->request.protocol != new_protocol) {
-        printf("Unable to reuse");
+        printf(
+            ANSI_FG_RED "Error: previous %s != new %s. Unable to continue." ANSI_RESET,
+            nfc_cli_get_protocol_name(ctx->request.protocol),
+            nfc_cli_get_protocol_name(new_protocol));
         result = false;
     }
 

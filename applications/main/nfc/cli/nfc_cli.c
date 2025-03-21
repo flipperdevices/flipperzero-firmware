@@ -160,9 +160,6 @@ NfcCliContext* nfc_cli_alloc() {
         instance->nfc_cli, "help", CliCommandFlagDefault, nfc_cli_command_help, instance->nfc_cli);
     cli_add_command(instance->nfc_cli, "exit", CliCommandFlagDefault, nfc_cli_exit, instance);
     cli_add_command(instance->nfc_cli, "field", CliCommandFlagParallelUnsafe, nfc_cli_field, NULL);
-    /*   cli_add_command(
-        instance->nfc_cli, "scanner", CliCommandFlagParallelUnsafe, nfc_cli_scanner, instance); */
-
     nfc_cli_subscribe_commands(instance);
 
     return instance;

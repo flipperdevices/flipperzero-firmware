@@ -18,14 +18,7 @@ struct NfcCliKeyDescriptor {
     const char* description;
 
     NfcCliArgParseCallback parse;
-    // size_t valid_values_count;
-    // const char** valid_values;
 };
-
-/* struct NfcCliArgumentDescriptor {
-    const char* name;
-    NfcCliArgParseCallback parse;
-}; */
 
 struct NfcCliActionDescriptor {
     const char* name;
@@ -40,7 +33,7 @@ struct NfcCliActionDescriptor {
 
 struct NfcCliCommandDescriptor {
     const char* name;
-    const char* description; // optional
+    const char* description;
     size_t action_count; //optional
     const NfcCliActionDescriptor** actions;
     CliExecuteCallback callback;
