@@ -70,6 +70,27 @@ void nfc_cli_scanner_list_detected_protocols(NfcCliScanner* instance) {
     size_t n = instance->protocols_detected_num;
     for(size_t i = 0; i < n; i++) {
         const char* name = nfc_cli_get_protocol_name(instance->protocols_detected[i]);
-        printf((i == (n - 1)) ? "%s" : "%s, ", name);
+        printf((i == (n - 1)) ? "%s\r\n" : "%s, ", name);
     }
+}
+
+bool nfc_cli_scanner_protocol_was_detected(NfcCliScanner* instance, NfcProtocol protocol) {
+    furi_assert(instance);
+    furi_assert(protocol < NfcProtocolNum);
+
+    for(size_t i = 0; i < instance->protocols_detected_num; i++) {
+        if(instance->protocols_detected[i] == protocol) return true;
+    }
+    return false;
+}
+
+NfcProtocol nfc_cli_scanner_get_protocol(NfcCliScanner* instance, size_t idx) {
+    furi_assert(instance);
+    furi_assert(idx < instance->protocols_detected_num);
+    return instance->protocols_detected[idx];
+}
+
+size_t nfc_cli_scanner_detected_protocol_num(NfcCliScanner* instance) {
+    furi_assert(instance);
+    return instance->protocols_detected_num;
 }
