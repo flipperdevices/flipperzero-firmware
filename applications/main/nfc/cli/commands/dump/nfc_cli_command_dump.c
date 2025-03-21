@@ -40,7 +40,6 @@ static NfcCliActionContext* nfc_cli_raw_alloc_ctx(Nfc* nfc) {
     instance->desired_protocol = NfcProtocolInvalid;
     instance->auth_ctx.skip_auth = true;
     instance->auth_ctx.key_size = 0;
-    //instance->result_string = furi_string_alloc();
 
     instance->mfc_key_cache = mf_classic_key_cache_alloc();
     instance->scanner = nfc_cli_scanner_alloc(nfc);
@@ -56,7 +55,6 @@ static void nfc_cli_raw_free_ctx(NfcCliActionContext* ctx) {
     furi_record_close(RECORD_STORAGE);
     furi_semaphore_free(instance->sem_done);
     nfc_device_free(instance->nfc_device);
-    //furi_string_free(instance->result_string);
 
     mf_classic_key_cache_free(instance->mfc_key_cache);
     nfc_cli_scanner_free(instance->scanner);
@@ -285,12 +283,6 @@ const NfcCliActionDescriptor* dump_actions_collection[] = {&dump_action};
 //Command descriptor
 ADD_NFC_CLI_COMMAND(dump, dump_actions_collection);
 
-/* const NfcCliCommandDescriptor dump_cmd = {
-    .name = "dump",
-    .action_count = 1,
-    .actions = dump_actions_collection,
-};
- */
 //Command usage: dump [-f <file>]
 //Command examples:
 //dump -f ext/nfc/test.nfc

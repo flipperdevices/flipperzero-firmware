@@ -45,19 +45,19 @@ static void SubmenuItem_init(NfcCliApduData* item) {
     item->data = NULL;
 }
 
-static void SubmenuItem_init_set(NfcCliApduData* item, const NfcCliApduData* src) {
+static void ApduItem_init_set(NfcCliApduData* item, const NfcCliApduData* src) {
     item->data = malloc(src->size);
     item->size = src->size;
     memcpy(item->data, src->data, src->size);
 }
 
-static void SubmenuItem_set(NfcCliApduData* item, const NfcCliApduData* src) {
+static void ApduItem_set(NfcCliApduData* item, const NfcCliApduData* src) {
     if(item->data && item->size != src->size) realloc(item->data, src->size);
     item->size = src->size;
     memcpy(item->data, src->data, src->size);
 }
 
-static void SubmenuItem_clear(NfcCliApduData* item) {
+static void ApduItem_clear(NfcCliApduData* item) {
     if(item->data) free(item->data);
     item->data = NULL;
     item->size = 0;
@@ -66,17 +66,16 @@ static void SubmenuItem_clear(NfcCliApduData* item) {
 ARRAY_DEF(
     NfcCliApduItemArray,
     NfcCliApduData,
-    (INIT(API_2(SubmenuItem_init)),
-     SET(API_6(SubmenuItem_set)),
-     INIT_SET(API_6(SubmenuItem_init_set)),
-     CLEAR(API_2(SubmenuItem_clear))))
+    (INIT(API_2(ApduItem_init)),
+     SET(API_6(ApduItem_set)),
+     INIT_SET(API_6(ApduItem_init_set)),
+     CLEAR(API_2(ApduItem_clear))))
 
 typedef struct {
     Nfc* nfc;
     bool auto_detect;
     NfcCliApduItemArray_t apdu;
     NfcCliApduRequestResponse data;
-    FuriMutex* wait_mutex;
     FuriSemaphore* sem_done;
     FuriMessageQueue* input_queue;
 } NfcCliApduContext;
@@ -243,7 +242,7 @@ static bool nfc_cli_apdu_parse_protocol(FuriString* value, void* output) {
     return result;
 }
 
-static bool nfc_cli_raw_parse_data(FuriString* value, void* output) {
+static bool nfc_cli_apdu_parse_data(FuriString* value, void* output) {
     NfcCliApduContext* ctx = output;
 
     bool result = false;
@@ -276,7 +275,7 @@ const NfcCliKeyDescriptor apdu_keys[] = {
         .long_name = "data",
         .short_name = "d",
         .features = {.parameter = true, .multivalue = true, .required = true},
-        .parse = nfc_cli_raw_parse_data,
+        .parse = nfc_cli_apdu_parse_data,
     },
 };
 
@@ -293,15 +292,10 @@ const NfcCliActionDescriptor* apdu_actions_collection[] = {&apdu_action};
 
 //Command descriptor
 ADD_NFC_CLI_COMMAND(apdu, apdu_actions_collection);
-/* const NfcCliCommandDescriptor apdu_cmd = {
-    .name = "apdu",
-    .action_count = 1,
-    .actions = apdu_actions_collection,
-}; */
 
 //Command usage: apdu <protocol> <data>
 //Command examples:
-//apdu 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
-//apdu 4a 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
-//apdu 4b 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
-//apdu 15 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
+//apdu -d 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
+//apdu -p 4a -d 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
+//apdu -p 4b -d 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
+//apdu -p 15 -d 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
