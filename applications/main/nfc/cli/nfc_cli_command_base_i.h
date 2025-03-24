@@ -22,6 +22,7 @@ struct NfcCliKeyDescriptor {
 
 struct NfcCliActionDescriptor {
     const char* name;
+    const char* description;
     size_t key_count;
     const NfcCliKeyDescriptor* keys;
 
@@ -39,13 +40,13 @@ struct NfcCliCommandDescriptor {
     CliExecuteCallback callback;
 };
 
-#define ADD_NFC_CLI_COMMAND(name, actions)                         \
+#define ADD_NFC_CLI_COMMAND(name, description, actions)            \
     static void nfc_cli_command_##name##_callback(                 \
         PipeSide* pipe, FuriString* args, void* context);          \
                                                                    \
     const NfcCliCommandDescriptor name##_cmd = {                   \
         #name,                                                     \
-        "tempo",                                                   \
+        #description,                                              \
         COUNT_OF(actions),                                         \
         actions,                                                   \
         nfc_cli_command_##name##_callback,                         \
