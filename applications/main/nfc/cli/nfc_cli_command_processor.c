@@ -17,17 +17,35 @@ typedef enum {
     NfcCliArgumentTypeUnknown
 } NfcCliArgumentType;
 
+/**
+ * @brief Error codes for different processing states
+ */
+typedef enum {
+    NfcCliProcessorErrorNone, /**< Command was parsed successfully and execute callback will be invoked*/
+    NfcCliProcessorErrorNoneButHelp, /**< There was no error, but help needs to be printed. Command wil not be executed */
+    NfcCliProcessorErrorActionNotFound, /**< Wrong action was passed as first command parameter */
+    NfcCliProcessorErrorKeyNotSupported, /**< Unsupported key was passed in arguments. Details will be printed in erro_message*/
+    NfcCliProcessorErrorKeyParameterInGroup, /**< Parameter which requires value was passed in group. Example: -sckd */
+    NfcCliProcessorErrorKeyParameterValueMissing, /**< Value is missing for the parameter which requires it */
+    NfcCliProcessorErrorKeyDuplication, /**< Some argument key was duplicated in input parameters */
+    NfcCliProcessorErrorKeyParseError, /**< Error happened during argument value parsing */
+    NfcCliProcessorErrorKeyRequiredMissing, /**< Some keys required for command execution is missing*/
+
+    NfcCliProcessorErrorNum
+} NfcCliProcessorError;
+
 struct NfcCliProcessorContext {
     const NfcCliCommandDescriptor* cmd;
     const NfcCliActionDescriptor* action;
     const NfcCliKeyDescriptor** keys_found;
-
     uint8_t total_keys_found;
     uint8_t required_keys_expected;
     uint8_t required_keys_found;
 
     Nfc* nfc;
     void* action_context;
+
+    FuriString* error_message;
 };
 
 static const NfcCliActionDescriptor*
@@ -67,13 +85,18 @@ static void nfc_cli_action_free(NfcCliProcessorContext* instance) {
     instance->action = NULL;
 }
 
-static bool nfc_cli_action_alloc(NfcCliProcessorContext* instance, FuriString* args) {
+static NfcCliProcessorError
+    nfc_cli_action_alloc(NfcCliProcessorContext* instance, FuriString* args) {
     const NfcCliCommandDescriptor* cmd = instance->cmd;
 
-    bool result = false;
+    NfcCliProcessorError result = NfcCliProcessorErrorNone;
     do {
         const NfcCliActionDescriptor* action = nfc_cli_get_action_from_args(cmd, args);
-        if(action == NULL) break;
+        if(action == NULL) {
+            result = NfcCliProcessorErrorActionNotFound;
+            furi_string_printf(instance->error_message, "Action not found");
+            break;
+        }
 
         if(!nfc_cli_action_can_reuse_context(instance, action)) {
             nfc_cli_action_free(instance);
@@ -99,7 +122,6 @@ static bool nfc_cli_action_alloc(NfcCliProcessorContext* instance, FuriString* a
         instance->required_keys_expected = nfc_cli_action_get_required_keys_count(action);
         instance->required_keys_found = 0;
         instance->total_keys_found = 0;
-        result = true;
     } while(false);
 
     return result;
@@ -151,60 +173,96 @@ static void nfc_cli_trim_multivalue_arg(FuriString* args, FuriString* value) {
     }
 }
 
-static bool nfc_cli_parse_single_key(
+static NfcCliProcessorError nfc_cli_parse_single_key(
     NfcCliProcessorContext* instance,
     FuriString* argument,
     FuriString* args,
     bool from_group) {
-    bool result = false;
     FuriString* value_str = furi_string_alloc();
 
+    NfcCliProcessorError result = NfcCliProcessorErrorNone;
     do {
         const NfcCliKeyDescriptor* key =
             nfc_cli_action_get_key_descriptor(instance->action, argument);
-        if(key == NULL) break;
+        if(key == NULL) {
+            if(furi_string_equal_str(argument, "h"))
+                result = NfcCliProcessorErrorNoneButHelp;
+            else {
+                furi_string_printf(
+                    instance->error_message,
+                    "Key \'%s\' is not supported",
+                    furi_string_get_cstr(argument));
+                result = NfcCliProcessorErrorKeyNotSupported;
+            }
+            break;
+        }
 
-        if(key->features.parameter && from_group) break;
+        if(key->features.parameter && from_group) {
+            furi_string_printf(
+                instance->error_message,
+                "Parameter key \'%s\' can\'t be grouped",
+                furi_string_get_cstr(argument));
+            result = NfcCliProcessorErrorKeyParameterInGroup;
+            break;
+        }
 
-        if(nfc_cli_check_duplicate_keys(instance, key)) break;
+        if(nfc_cli_check_duplicate_keys(instance, key)) {
+            furi_string_printf(
+                instance->error_message, "Duplicated key \'%s\'", furi_string_get_cstr(argument));
+            result = NfcCliProcessorErrorKeyDuplication;
+            break;
+        }
 
         if(key->features.multivalue && !key->features.parameter) break;
         if(key->features.multivalue) {
             nfc_cli_trim_multivalue_arg(args, value_str);
             FURI_LOG_D(TAG, "Multivalue: %s", furi_string_get_cstr(value_str));
-        } else if(key->features.parameter && !args_read_string_and_trim(args, value_str))
+        } else if(key->features.parameter && !args_read_string_and_trim(args, value_str)) {
+            result = NfcCliProcessorErrorKeyParameterValueMissing;
+            furi_string_printf(
+                instance->error_message,
+                "Missing value for \'%s\'",
+                furi_string_get_cstr(argument));
             break;
+        }
 
         FURI_LOG_D(TAG, "Parsing key \"%s\"", furi_string_get_cstr(argument));
-        if(!key->parse(value_str, instance->action_context)) break;
+        if(!key->parse(value_str, instance->action_context)) {
+            furi_string_printf(
+                instance->error_message,
+                "Unable to parse value \'%s\' for key \'%s\'",
+                furi_string_get_cstr(value_str),
+                furi_string_get_cstr(argument));
+            result = NfcCliProcessorErrorKeyParseError;
+            break;
+        }
 
         instance->keys_found[instance->total_keys_found] = key;
         instance->total_keys_found++;
         if(key->features.required) instance->required_keys_found++;
-
-        result = true;
     } while(false);
     furi_string_free(value_str);
 
     return result;
 }
 
-static bool nfc_cli_parse_group_key(NfcCliProcessorContext* instance, FuriString* argument) {
-    bool result = false;
+static NfcCliProcessorError
+    nfc_cli_parse_group_key(NfcCliProcessorContext* instance, FuriString* argument) {
+    NfcCliProcessorError result = NfcCliProcessorErrorNone;
     FURI_LOG_D(TAG, "Parsing key group\"%s\"", furi_string_get_cstr(argument));
 
     FuriString* arg_buf = furi_string_alloc();
     for(size_t i = 0; i < furi_string_size(argument); i++) {
         furi_string_set_n(arg_buf, argument, i, 1);
         result = nfc_cli_parse_single_key(instance, arg_buf, NULL, true);
-        if(!result) break;
+        if(result != NfcCliProcessorErrorNone) break;
     }
     furi_string_free(arg_buf);
 
     return result;
 }
 
-static bool nfc_cli_parse_argument(
+static NfcCliProcessorError nfc_cli_parse_argument(
     NfcCliProcessorContext* instance,
     FuriString* argument,
     FuriString* args) {
@@ -212,7 +270,7 @@ static bool nfc_cli_parse_argument(
 
     furi_string_trim(argument, "-");
 
-    bool result = false;
+    NfcCliProcessorError result = NfcCliProcessorErrorNone;
 
     if(type == NfcCliArgumentTypeShortNameKeyGroup)
         result = nfc_cli_parse_group_key(instance, argument);
@@ -223,25 +281,44 @@ static bool nfc_cli_parse_argument(
     return result;
 }
 
-static bool nfc_cli_process_arguments(NfcCliProcessorContext* instance, FuriString* args) {
-    bool result = true;
-    do {
-        FuriString* argument = furi_string_alloc();
-        while(args_read_string_and_trim(args, argument)) {
-            result = nfc_cli_parse_argument(instance, argument, args);
-            if(!result) break;
-        }
-        furi_string_free(argument);
+static NfcCliProcessorError
+    nfc_cli_process_arguments(NfcCliProcessorContext* instance, FuriString* args) {
+    NfcCliProcessorError result = NfcCliProcessorErrorNone;
 
-        if(!result) break;
-        if(instance->required_keys_expected != instance->required_keys_found) {
-            FURI_LOG_W(TAG, "Some required keys missing");
-            result = false;
-            break;
-            //print usage
-        }
-    } while(false);
+    FuriString* argument = furi_string_alloc();
+    while(args_read_string_and_trim(args, argument)) {
+        result = nfc_cli_parse_argument(instance, argument, args);
+        if(result != NfcCliProcessorErrorNone) break;
+    }
+    furi_string_free(argument);
+
+    if((result == NfcCliProcessorErrorNone) &&
+       (instance->required_keys_expected != instance->required_keys_found)) {
+        furi_string_printf(instance->error_message, "Some required keys missing");
+        result = NfcCliProcessorErrorKeyRequiredMissing;
+    }
+
     return result;
+}
+
+static inline void nfc_cli_command_process_error(
+    const NfcCliProcessorContext* instance,
+    NfcCliProcessorError error) {
+    do {
+        if(error == NfcCliProcessorErrorNone) break;
+
+        if(error != NfcCliProcessorErrorNoneButHelp)
+            printf(
+                ANSI_FG_RED "Error: %s\r\n" ANSI_RESET,
+                furi_string_get_cstr(instance->error_message));
+
+        if(error == NfcCliProcessorErrorActionNotFound)
+            nfc_cli_command_format_info(instance->cmd, instance->error_message);
+        else
+            nfc_cli_action_format_info(instance->action, instance->error_message);
+
+        printf("\n%s", furi_string_get_cstr(instance->error_message));
+    } while(false);
 }
 
 void nfc_cli_command_process(
@@ -253,19 +330,25 @@ void nfc_cli_command_process(
     furi_assert(cmd);
     furi_assert(args);
     NfcCliProcessorContext* instance = context;
+    furi_string_reset(instance->error_message);
 
+    NfcCliProcessorError error = NfcCliProcessorErrorNone;
     instance->cmd = cmd;
     do {
-        if(!nfc_cli_action_alloc(instance, args)) break;
+        error = nfc_cli_action_alloc(instance, args);
+        if(error != NfcCliProcessorErrorNone) break;
 
-        if(!nfc_cli_process_arguments(instance, args)) break;
+        error = nfc_cli_process_arguments(instance, args);
+        if(error != NfcCliProcessorErrorNone) break;
 
         if(instance->action && instance->action->execute) {
             instance->action->execute(pipe, instance->action_context);
         } else {
-            FURI_LOG_D(TAG, "Action or execute callback missing");
+            FURI_LOG_W(TAG, "Action execute callback missing");
         }
     } while(false);
+
+    nfc_cli_command_process_error(instance, error);
 }
 
 NfcCliProcessorContext* nfc_cli_command_processor_alloc(Nfc* nfc) {
@@ -278,6 +361,7 @@ NfcCliProcessorContext* nfc_cli_command_processor_alloc(Nfc* nfc) {
     instance->required_keys_found = 0;
     instance->required_keys_expected = 0;
 
+    instance->error_message = furi_string_alloc();
     return instance;
 }
 
@@ -285,6 +369,7 @@ void nfc_cli_command_processor_free(NfcCliProcessorContext* instance) {
     furi_assert(instance);
     nfc_cli_action_free(instance);
     free(instance->keys_found);
+    furi_string_free(instance->error_message);
 
     instance->nfc = NULL;
     free(instance);
