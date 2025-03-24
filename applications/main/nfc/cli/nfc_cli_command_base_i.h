@@ -35,7 +35,7 @@ struct NfcCliActionDescriptor {
 struct NfcCliCommandDescriptor {
     const char* name;
     const char* description;
-    size_t action_count; //optional
+    size_t action_count;
     const NfcCliActionDescriptor** actions;
     CliExecuteCallback callback;
 };

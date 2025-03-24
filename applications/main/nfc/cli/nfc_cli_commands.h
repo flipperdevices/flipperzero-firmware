@@ -3,19 +3,6 @@
 #include "nfc_cli_command_base.h"
 #include <cli/cli.h>
 
-typedef enum {
-    NfcCliCommandDescriptorRaw,
-    NfcCliCommandDescriptorApdu,
-    NfcCliCommandDescriptorEmulate,
-    NfcCliCommandDescriptorMfu,
-    NfcCliCommandDescriptorScanner,
-    NfcCliCommandDescriptorDump,
-    /* Add new protocols here */
-
-    NfcCliCommandDescriptorNum, /**< Special value representing the number of available commands. */
-    NfcCliCommandDescriptorInvalid, /**< Special value representing an invalid state. */
-} NfcCliCommandDescriptorIndex;
-
 size_t nfc_cli_command_get_count();
 const NfcCliCommandDescriptor* nfc_cli_command_get_by_index(size_t index);
 const NfcCliCommandDescriptor* nfc_cli_command_get_by_name(FuriString* name);

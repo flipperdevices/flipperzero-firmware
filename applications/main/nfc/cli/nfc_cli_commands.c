@@ -10,13 +10,13 @@
 
 #define TAG "NfcCliCommands"
 
-static const NfcCliCommandDescriptor* nfc_cli_commands[NfcCliCommandDescriptorNum] = {
-    [NfcCliCommandDescriptorApdu] = &apdu_cmd,
-    [NfcCliCommandDescriptorRaw] = &raw_cmd,
-    [NfcCliCommandDescriptorEmulate] = &emulate_cmd,
-    [NfcCliCommandDescriptorMfu] = &mfu_cmd,
-    [NfcCliCommandDescriptorScanner] = &scanner_cmd,
-    [NfcCliCommandDescriptorDump] = &dump_cmd,
+static const NfcCliCommandDescriptor* nfc_cli_commands[] = {
+    &apdu_cmd,
+    &raw_cmd,
+    &emulate_cmd,
+    &mfu_cmd,
+    &scanner_cmd,
+    &dump_cmd,
 };
 
 size_t nfc_cli_command_get_count() {
@@ -50,7 +50,7 @@ const NfcCliActionDescriptor*
 //static void* nfc_cli_get_item_by_name(const FuriString* name, const )
 
 const NfcCliCommandDescriptor* nfc_cli_command_get_by_index(size_t index) {
-    furi_assert(index < NfcCliCommandDescriptorNum);
+    furi_assert(index < COUNT_OF(nfc_cli_commands));
     return nfc_cli_commands[index];
 }
 
