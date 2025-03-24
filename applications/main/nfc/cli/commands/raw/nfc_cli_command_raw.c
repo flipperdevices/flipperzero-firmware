@@ -318,12 +318,14 @@ const NfcCliKeyDescriptor raw_action_keys[] = {
     {
         .long_name = "protocol",
         .short_name = "p",
+        .description = "Desired protocol. Possible values: 14a, iso14a, 14b, iso14b, 15, felica",
         .features = {.parameter = true, .required = true},
         .parse = nfc_cli_raw_parse_protocol,
     },
     {
         .long_name = "data",
         .short_name = "d",
+        .description = "Raw bytes to send in HEX format",
         .features = {.parameter = true, .required = true},
         .parse = nfc_cli_raw_parse_data,
     },
@@ -331,6 +333,7 @@ const NfcCliKeyDescriptor raw_action_keys[] = {
 
 const NfcCliActionDescriptor raw_action = {
     .name = "raw",
+    .description = "Sends raw bytes using different protocols",
     .key_count = COUNT_OF(raw_action_keys),
     .keys = raw_action_keys,
     .execute = nfc_cli_raw_execute,
@@ -341,7 +344,7 @@ const NfcCliActionDescriptor raw_action = {
 
 const NfcCliActionDescriptor* raw_actions_collection[] = {&raw_action};
 
-ADD_NFC_CLI_COMMAND(raw, raw_actions_collection);
+ADD_NFC_CLI_COMMAND(raw, "", raw_actions_collection);
 
 //Command usage: raw <protocol> [keys] <data>
 //Command examples:

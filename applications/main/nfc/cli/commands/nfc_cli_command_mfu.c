@@ -15,6 +15,7 @@ static NfcCliActionContext* nfc_cli_info_alloc_ctx(Nfc* nfc) {
 
 const NfcCliActionDescriptor info_action = {
     .name = "info",
+    .description = "Get basic information about the card",
     .alloc = nfc_cli_info_alloc_ctx,
     //.free = nfc_cli_raw_free_ctx,
     //.execute = nfc_cli_raw_command,
@@ -43,6 +44,7 @@ const NfcCliKeyDescriptor rdbl_action_keys[] = {
 //mfu rdbl -b 0 -k DEADBEAF
 const NfcCliActionDescriptor rdbl_action = {
     .name = "rdbl",
+    .description = "Read block from ultralight card",
     //.alloc = nfc_cli_raw_alloc_ctx,
     //.free = nfc_cli_raw_free_ctx,
     //.execute = nfc_cli_raw_command,
@@ -56,7 +58,7 @@ const NfcCliActionDescriptor* mfu_actions[] = {
 };
 
 //Command descriptor
-ADD_NFC_CLI_COMMAND(mfu, mfu_actions);
+ADD_NFC_CLI_COMMAND(mfu, "Mifare Ultralight specific commands", mfu_actions);
 /* const NfcCliCommandDescriptor mfu_cmd = {
     .name = "mfu",
     .action_count = COUNT_OF(mfu_actions),

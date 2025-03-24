@@ -110,6 +110,7 @@ const NfcCliKeyDescriptor emulate_keys[] = {
 
 const NfcCliActionDescriptor emulate_action = {
     .name = "emulate",
+    .description = "Emulate .nfc file content",
     .alloc = nfc_cli_emulate_alloc_ctx,
     .free = nfc_cli_emulate_free_ctx,
     .execute = nfc_cli_emulate_execute,
@@ -120,7 +121,7 @@ const NfcCliActionDescriptor emulate_action = {
 const NfcCliActionDescriptor* emulate_actions_collection[] = {&emulate_action};
 
 //Command descriptor
-ADD_NFC_CLI_COMMAND(emulate, emulate_actions_collection);
+ADD_NFC_CLI_COMMAND(emulate, "", emulate_actions_collection);
 
 //Command usage: emulate [-f <file>]
 //Command examples:

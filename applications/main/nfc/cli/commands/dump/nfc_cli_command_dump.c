@@ -271,6 +271,7 @@ const NfcCliKeyDescriptor dump_keys[] = {
 
 const NfcCliActionDescriptor dump_action = {
     .name = "dump",
+    .description = "Dump tag to .nfc file",
     .alloc = nfc_cli_dump_alloc_ctx,
     .free = nfc_cli_dump_free_ctx,
     .execute = nfc_cli_dump_execute,
@@ -281,7 +282,7 @@ const NfcCliActionDescriptor dump_action = {
 const NfcCliActionDescriptor* dump_actions_collection[] = {&dump_action};
 
 //Command descriptor
-ADD_NFC_CLI_COMMAND(dump, dump_actions_collection);
+ADD_NFC_CLI_COMMAND(dump, "", dump_actions_collection);
 
 //Command usage: dump [-f <file>]
 //Command examples:

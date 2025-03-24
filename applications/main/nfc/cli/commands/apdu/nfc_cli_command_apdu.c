@@ -276,6 +276,7 @@ const NfcCliKeyDescriptor apdu_keys[] = {
 
 const NfcCliActionDescriptor apdu_action = {
     .name = "apdu",
+    .description = "Send APDU data to iso14443_4a, iso14443_4b or iso15693_3",
     .alloc = nfc_cli_apdu_alloc_ctx,
     .free = nfc_cli_apdu_free_ctx,
     .execute = nfc_cli_apdu_execute,
@@ -286,7 +287,7 @@ const NfcCliActionDescriptor apdu_action = {
 const NfcCliActionDescriptor* apdu_actions_collection[] = {&apdu_action};
 
 //Command descriptor
-ADD_NFC_CLI_COMMAND(apdu, apdu_actions_collection);
+ADD_NFC_CLI_COMMAND(apdu, "", apdu_actions_collection);
 
 //Command usage: apdu <protocol> <data>
 //Command examples:

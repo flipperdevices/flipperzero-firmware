@@ -30,6 +30,7 @@ static void nfc_cli_command_scanner_execute(PipeSide* pipe, void* context) {
 
 const NfcCliActionDescriptor scanner_action = {
     .name = "scanner",
+    .description = "Detect tag type",
     .key_count = 0,
     .keys = NULL,
     .execute = nfc_cli_command_scanner_execute,
@@ -39,4 +40,4 @@ const NfcCliActionDescriptor scanner_action = {
 
 const NfcCliActionDescriptor* scanner_actions_collection[] = {&scanner_action};
 
-ADD_NFC_CLI_COMMAND(scanner, scanner_actions_collection);
+ADD_NFC_CLI_COMMAND(scanner, "", scanner_actions_collection);
