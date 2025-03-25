@@ -185,6 +185,7 @@ bool iso15693_3_load(Iso15693_3Data* data, FlipperFormat* ff, uint32_t version) 
 
             simple_array_init(
                 data->block_data, data->system_info.block_size * data->system_info.block_count);
+            simple_array_init(data->block_security, data->system_info.block_count);
 
             if(!flipper_format_read_hex(
                    ff,
@@ -194,8 +195,6 @@ bool iso15693_3_load(Iso15693_3Data* data, FlipperFormat* ff, uint32_t version) 
                 break;
 
             if(flipper_format_key_exist(ff, ISO15693_3_SECURITY_STATUS_KEY)) {
-                simple_array_init(data->block_security, data->system_info.block_count);
-
                 const bool security_loaded = has_lock_bits ?
                                                  iso15693_3_load_security(data, ff) :
                                                  iso15693_3_load_security_legacy(data, ff);
