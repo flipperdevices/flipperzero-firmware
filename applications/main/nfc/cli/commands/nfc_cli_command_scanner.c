@@ -14,7 +14,6 @@ static void nfc_cli_command_scanner_free_ctx(NfcCliActionContext* ctx) {
     furi_assert(ctx);
     NfcCliScanner* instance = ctx;
     nfc_cli_scanner_free(instance);
-    free(instance);
 }
 
 static void nfc_cli_command_scanner_execute(PipeSide* pipe, void* context) {
@@ -22,7 +21,8 @@ static void nfc_cli_command_scanner_execute(PipeSide* pipe, void* context) {
 
     printf("Press Ctrl+C to abort\r\n\n");
     nfc_cli_scanner_begin_scan(instance);
-    while(!cli_app_should_stop(pipe) && !nfc_cli_scanner_wait_scan(instance, 50))
+    while(!cli_is_pipe_broken_or_is_etx_next_char(pipe) &&
+          !nfc_cli_scanner_wait_scan(instance, 50))
         ;
     nfc_cli_scanner_end_scan(instance);
     nfc_cli_scanner_list_detected_protocols(instance);

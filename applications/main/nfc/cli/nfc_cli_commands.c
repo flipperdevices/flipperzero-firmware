@@ -67,7 +67,7 @@ const char* nfc_cli_command_get_name(const NfcCliCommandDescriptor* cmd) {
     return cmd->name;
 }
 
-CliExecuteCallback nfc_cli_command_get_execute(const NfcCliCommandDescriptor* cmd) {
+CliCommandExecuteCallback nfc_cli_command_get_execute(const NfcCliCommandDescriptor* cmd) {
     furi_assert(cmd);
     return cmd->callback;
 }

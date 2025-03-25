@@ -6,7 +6,6 @@
 #include <nfc_listener.h>
 #include <nfc_device.h>
 
-#include <cli/cli.h>
 #include <storage/storage.h>
 
 typedef struct {
@@ -82,7 +81,7 @@ static void nfc_cli_emulate_execute(PipeSide* pipe, NfcCliActionContext* context
 
         nfc_listener_start(listener, NULL, NULL);
         printf("\r\nEmulating. Press Ctrl+C to abort\r\n");
-        while(!cli_app_should_stop(pipe)) {
+        while(!cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
             furi_delay_ms(100);
         }
         nfc_listener_stop(listener);

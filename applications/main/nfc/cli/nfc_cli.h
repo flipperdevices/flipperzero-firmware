@@ -3,9 +3,9 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <cli/shell/cli_shell.h>
-#include <cli/cli.h>
+#include <toolbox/cli/shell/cli_shell.h>
 #include <cli/cli_vcp.h>
-#include <cli/cli_commands.h>
+#include <toolbox/cli/cli_command.h>
 #include <args.h>
 #include <hex.h>
 #include <toolbox/pipe.h>
@@ -16,7 +16,7 @@
 
 typedef struct {
     Nfc* nfc;
-    Cli* nfc_cli;
-    FuriThread* shell;
+    CliRegistry* registry;
+    CliShell* shell;
     NfcCliProcessorContext* processor_context;
 } NfcCliContext;

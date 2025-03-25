@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nfc_cli_command_base.h"
+#include <toolbox/cli/cli_ansi.h>
 #include <nfc/nfc.h>
 #include <nfc/protocols/nfc_protocol.h>
 #include "nfc_cli_command_processor.h"
@@ -37,7 +38,7 @@ struct NfcCliCommandDescriptor {
     const char* description;
     size_t action_count;
     const NfcCliActionDescriptor** actions;
-    CliExecuteCallback callback;
+    CliCommandExecuteCallback callback;
 };
 
 #define ADD_NFC_CLI_COMMAND(name, description, actions)                  \

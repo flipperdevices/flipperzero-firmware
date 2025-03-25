@@ -1,7 +1,7 @@
 #pragma once
 
 #include <furi.h>
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
 #include <nfc/nfc.h>
 
 typedef void NfcCliActionContext;

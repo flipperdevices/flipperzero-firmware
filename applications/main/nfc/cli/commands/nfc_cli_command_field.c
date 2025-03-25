@@ -12,7 +12,7 @@ static void nfc_cli_field(PipeSide* pipe, FuriString* args, void* context) {
     printf("Field is on. Don't leave device in this mode for too long.\r\n");
     printf("Press Ctrl+C to abort\r\n");
 
-    while(!cli_app_should_stop(pipe)) {
+    while(!cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
         furi_delay_ms(50);
     }
 
