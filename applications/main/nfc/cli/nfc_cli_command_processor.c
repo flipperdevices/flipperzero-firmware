@@ -276,6 +276,12 @@ static NfcCliProcessorError nfc_cli_parse_argument(
         result = nfc_cli_parse_group_key(instance, argument);
     else if((type == NfcCliArgumentTypeShortNameKey) || (type == NfcCliArgumentTypeLongNameKey)) {
         result = nfc_cli_parse_single_key(instance, argument, args, false);
+    } else if(type == NfcCliArgumentTypeUnknown) {
+        result = NfcCliProcessorErrorKeyNotSupported;
+        furi_string_printf(
+            instance->error_message,
+            "Key \'%s\' is not supported",
+            furi_string_get_cstr(argument));
     }
 
     return result;
