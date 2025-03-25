@@ -4,8 +4,8 @@
 #include <m-array.h>
 #include "cli_shell_i.h"
 #include "cli_shell_line.h"
-#include "../cli.h"
-#include "../cli_i.h"
+#include "../cli_registry.h"
+#include "../cli_registry_i.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,7 +13,8 @@ extern "C" {
 
 typedef struct CliShellCompletions CliShellCompletions;
 
-CliShellCompletions* cli_shell_completions_alloc(Cli* cli, CliShell* shell, CliShellLine* line);
+CliShellCompletions*
+    cli_shell_completions_alloc(CliRegistry* registry, CliShell* shell, CliShellLine* line);
 
 void cli_shell_completions_free(CliShellCompletions* completions);
 

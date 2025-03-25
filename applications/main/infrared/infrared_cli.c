@@ -1,4 +1,4 @@
-#include <cli/cli_commands.h>
+#include <cli/cli_master_commands.h>
 #include <infrared.h>
 #include <infrared_worker.h>
 #include <furi_hal_infrared.h>
@@ -143,7 +143,7 @@ static void infrared_cli_start_ir_rx(PipeSide* pipe, FuriString* args) {
     infrared_worker_rx_set_received_signal_callback(worker, signal_received_callback, pipe);
 
     printf("Receiving %s INFRARED...\r\nPress Ctrl+C to abort\r\n", enable_decoding ? "" : "RAW");
-    while(!cli_app_should_stop(pipe)) {
+    while(!cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
         furi_delay_ms(50);
     }
 
@@ -475,25 +475,24 @@ static void infrared_cli_brute_force_signals(
             break;
         }
 
-        uint32_t record_count;
+        uint32_t signal_count, current_signal = 0;
         bool running = infrared_brute_force_start(
-            brute_force, INFRARED_BRUTE_FORCE_DUMMY_INDEX, &record_count);
+            brute_force, INFRARED_BRUTE_FORCE_DUMMY_INDEX, &signal_count);
 
-        if(record_count <= 0) {
+        if(signal_count <= 0) {
             printf("Invalid signal name.\r\n");
             break;
         }
 
-        printf("Sending %lu signal(s)...\r\n", record_count);
+        printf("Sending %lu signal(s)...\r\n", signal_count);
         printf("Press Ctrl-C to stop.\r\n");
 
-        int records_sent = 0;
         while(running) {
-            running = infrared_brute_force_send_next(brute_force);
+            running = infrared_brute_force_send(brute_force, current_signal);
 
-            if(cli_app_should_stop(pipe)) break;
+            if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) break;
 
-            printf("\r%d%% complete.", (int)((float)records_sent++ / (float)record_count * 100));
+            printf("\r%d%% complete.", (int)((float)current_signal++ / (float)signal_count * 100));
             fflush(stdout);
         }
 
@@ -555,4 +554,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     furi_string_free(command);
 }
 
-CLI_COMMAND_INTERFACE(ir, execute, CliCommandFlagDefault, 2048);
+CLI_COMMAND_INTERFACE(ir, execute, CliCommandFlagDefault, 2048, CLI_MASTER_APPID);

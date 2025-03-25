@@ -202,7 +202,7 @@ static bool js_widget_add_child(
         const Icon* icon = mjs_get_ptr(mjs, icon_data_in);
         widget_add_icon_element(widget, x, y, icon);
 
-    } else if(strcmp(element_type, "frame") == 0) {
+    } else if(strcmp(element_type, "rect") == 0) {
         int32_t x, y, w, h;
         DESTRUCTURE_OR_RETURN(mjs, child_obj, position, &x, &y);
         DESTRUCTURE_OR_RETURN(mjs, child_obj, size, &w, &h);
@@ -211,7 +211,43 @@ static bool js_widget_add_child(
             JS_ERROR_AND_RETURN_VAL(
                 mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element radius");
         int32_t radius = mjs_get_int32(mjs, radius_in);
-        widget_add_frame_element(widget, x, y, w, h, radius);
+        mjs_val_t fill_in = mjs_get(mjs, child_obj, "fill", ~0);
+        if(!mjs_is_boolean(fill_in))
+            JS_ERROR_AND_RETURN_VAL(
+                mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element fill");
+        int32_t fill = mjs_get_bool(mjs, fill_in);
+        widget_add_rect_element(widget, x, y, w, h, radius, fill);
+
+    } else if(strcmp(element_type, "circle") == 0) {
+        int32_t x, y;
+        DESTRUCTURE_OR_RETURN(mjs, child_obj, position, &x, &y);
+        mjs_val_t radius_in = mjs_get(mjs, child_obj, "radius", ~0);
+        if(!mjs_is_number(radius_in))
+            JS_ERROR_AND_RETURN_VAL(
+                mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element radius");
+        int32_t radius = mjs_get_int32(mjs, radius_in);
+        mjs_val_t fill_in = mjs_get(mjs, child_obj, "fill", ~0);
+        if(!mjs_is_boolean(fill_in))
+            JS_ERROR_AND_RETURN_VAL(
+                mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element fill");
+        int32_t fill = mjs_get_bool(mjs, fill_in);
+        widget_add_circle_element(widget, x, y, radius, fill);
+
+    } else if(strcmp(element_type, "line") == 0) {
+        int32_t x1, y1, x2, y2;
+        mjs_val_t x1_in = mjs_get(mjs, child_obj, "x1", ~0);
+        mjs_val_t y1_in = mjs_get(mjs, child_obj, "y1", ~0);
+        mjs_val_t x2_in = mjs_get(mjs, child_obj, "x2", ~0);
+        mjs_val_t y2_in = mjs_get(mjs, child_obj, "y2", ~0);
+        if(!mjs_is_number(x1_in) || !mjs_is_number(y1_in) || !mjs_is_number(x2_in) ||
+           !mjs_is_number(y2_in))
+            JS_ERROR_AND_RETURN_VAL(
+                mjs, MJS_BAD_ARGS_ERROR, false, "failed to fetch element positions");
+        x1 = mjs_get_int32(mjs, x1_in);
+        y1 = mjs_get_int32(mjs, y1_in);
+        x2 = mjs_get_int32(mjs, x2_in);
+        y2 = mjs_get_int32(mjs, y2_in);
+        widget_add_line_element(widget, x1, y1, x2, y2);
     }
 
     return true;

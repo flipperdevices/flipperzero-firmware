@@ -1,6 +1,5 @@
 #include "desktop_i.h"
 
-#include <cli/cli.h>
 #include <cli/cli_vcp.h>
 
 #include <gui/gui_i.h>
@@ -398,7 +397,7 @@ void desktop_lock(Desktop* desktop) {
     if(desktop_pin_code_is_set()) {
         CliVcp* cli_vcp = furi_record_open(RECORD_CLI_VCP);
         cli_vcp_disable(cli_vcp);
-        furi_record_close(RECORD_CLI);
+        furi_record_close(RECORD_CLI_VCP);
     }
 
     desktop_auto_lock_inhibit(desktop);
@@ -428,7 +427,7 @@ void desktop_unlock(Desktop* desktop) {
     if(desktop_pin_code_is_set()) {
         CliVcp* cli_vcp = furi_record_open(RECORD_CLI_VCP);
         cli_vcp_enable(cli_vcp);
-        furi_record_close(RECORD_CLI);
+        furi_record_close(RECORD_CLI_VCP);
     }
 
     DesktopStatus status = {.locked = false};
@@ -528,7 +527,7 @@ int32_t desktop_srv(void* p) {
     } else {
         CliVcp* cli_vcp = furi_record_open(RECORD_CLI_VCP);
         cli_vcp_enable(cli_vcp);
-        furi_record_close(RECORD_CLI);
+        furi_record_close(RECORD_CLI_VCP);
     }
 
     if(storage_file_exists(desktop->storage, SLIDESHOW_FS_PATH)) {

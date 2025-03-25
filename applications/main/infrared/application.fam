@@ -19,7 +19,7 @@ App(
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
     entry_point="cli_ir_ep",
-    requires=["cli"],
+    requires=["cli_master"],
     sources=[
         "infrared_cli.c",
         "infrared_brute_force.c",

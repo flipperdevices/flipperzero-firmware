@@ -27,6 +27,8 @@ typedef struct {
 
 void cli_shell_execute_command(CliShell* cli_shell, FuriString* command);
 
+const char* cli_shell_get_prompt(CliShell* cli_shell);
+
 #ifdef __cplusplus
 }
 #endif

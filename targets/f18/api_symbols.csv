@@ -1,9 +1,7 @@
 entry,status,name,type,params
-Version,+,82.0,,
+Version,+,83.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
-Header,+,applications/services/cli/cli.h,,
-Header,+,applications/services/cli/cli_ansi.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
 Header,+,applications/services/dialogs/dialogs.h,,
 Header,+,applications/services/dolphin/dolphin.h,,
@@ -152,6 +150,10 @@ Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_wwdg.h,,
 Header,+,lib/toolbox/api_lock.h,,
 Header,+,lib/toolbox/args.h,,
 Header,+,lib/toolbox/bit_buffer.h,,
+Header,+,lib/toolbox/cli/cli_ansi.h,,
+Header,+,lib/toolbox/cli/cli_command.h,,
+Header,+,lib/toolbox/cli/cli_registry.h,,
+Header,+,lib/toolbox/cli/shell/cli_shell.h,,
 Header,+,lib/toolbox/compress.h,,
 Header,+,lib/toolbox/crc32_calc.h,,
 Header,+,lib/toolbox/dir_walk.h,,
@@ -776,16 +778,23 @@ Function,-,ceill,long double,long double
 Function,-,cfree,void,void*
 Function,-,clearerr,void,FILE*
 Function,-,clearerr_unlocked,void,FILE*
-Function,+,cli_add_command,void,"Cli*, const char*, CliCommandFlag, CliExecuteCallback, void*"
-Function,+,cli_add_command_ex,void,"Cli*, const char*, CliCommandFlag, CliExecuteCallback, void*, size_t"
 Function,+,cli_ansi_parser_alloc,CliAnsiParser*,
 Function,+,cli_ansi_parser_feed,CliAnsiParserResult,"CliAnsiParser*, char"
 Function,+,cli_ansi_parser_feed_timeout,CliAnsiParserResult,CliAnsiParser*
 Function,+,cli_ansi_parser_free,void,CliAnsiParser*
-Function,+,cli_app_should_stop,_Bool,PipeSide*
-Function,+,cli_delete_command,void,"Cli*, const char*"
-Function,+,cli_enumerate_external_commands,void,Cli*
+Function,+,cli_is_pipe_broken_or_is_etx_next_char,_Bool,PipeSide*
 Function,+,cli_print_usage,void,"const char*, const char*, const char*"
+Function,+,cli_registry_add_command,void,"CliRegistry*, const char*, CliCommandFlag, CliCommandExecuteCallback, void*"
+Function,+,cli_registry_add_command_ex,void,"CliRegistry*, const char*, CliCommandFlag, CliCommandExecuteCallback, void*, size_t"
+Function,+,cli_registry_alloc,CliRegistry*,
+Function,+,cli_registry_delete_command,void,"CliRegistry*, const char*"
+Function,+,cli_registry_free,void,CliRegistry*
+Function,+,cli_registry_reload_external_commands,void,"CliRegistry*, const CliCommandExternalConfig*"
+Function,+,cli_shell_alloc,CliShell*,"CliShellMotd, void*, PipeSide*, CliRegistry*, const CliCommandExternalConfig*"
+Function,+,cli_shell_free,void,CliShell*
+Function,+,cli_shell_join,void,CliShell*
+Function,+,cli_shell_set_prompt,void,"CliShell*, const char*"
+Function,+,cli_shell_start,void,CliShell*
 Function,+,cli_vcp_disable,void,CliVcp*
 Function,+,cli_vcp_enable,void,CliVcp*
 Function,+,composite_api_resolver_add,void,"CompositeApiResolver*, const ElfApiInterface*"
@@ -1039,6 +1048,7 @@ Function,+,flipper_format_read_int32,_Bool,"FlipperFormat*, const char*, int32_t
 Function,+,flipper_format_read_string,_Bool,"FlipperFormat*, const char*, FuriString*"
 Function,+,flipper_format_read_uint32,_Bool,"FlipperFormat*, const char*, uint32_t*, const uint16_t"
 Function,+,flipper_format_rewind,_Bool,FlipperFormat*
+Function,+,flipper_format_seek,_Bool,"FlipperFormat*, int32_t, FlipperFormatOffset"
 Function,+,flipper_format_seek_to_end,_Bool,FlipperFormat*
 Function,+,flipper_format_set_strict_mode,void,"FlipperFormat*, _Bool"
 Function,+,flipper_format_stream_delete_key_and_write,_Bool,"Stream*, FlipperStreamWriteData*, _Bool"
@@ -1047,6 +1057,7 @@ Function,+,flipper_format_stream_read_value_line,_Bool,"Stream*, const char*, Fl
 Function,+,flipper_format_stream_write_comment_cstr,_Bool,"Stream*, const char*"
 Function,+,flipper_format_stream_write_value_line,_Bool,"Stream*, FlipperStreamWriteData*"
 Function,+,flipper_format_string_alloc,FlipperFormat*,
+Function,+,flipper_format_tell,size_t,FlipperFormat*
 Function,+,flipper_format_update_bool,_Bool,"FlipperFormat*, const char*, const _Bool*, const uint16_t"
 Function,+,flipper_format_update_float,_Bool,"FlipperFormat*, const char*, const float*, const uint16_t"
 Function,+,flipper_format_update_hex,_Bool,"FlipperFormat*, const char*, const uint8_t*, const uint16_t"
@@ -1134,6 +1145,7 @@ Function,+,furi_event_loop_subscribe_message_queue,void,"FuriEventLoop*, FuriMes
 Function,+,furi_event_loop_subscribe_mutex,void,"FuriEventLoop*, FuriMutex*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
 Function,+,furi_event_loop_subscribe_semaphore,void,"FuriEventLoop*, FuriSemaphore*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
 Function,+,furi_event_loop_subscribe_stream_buffer,void,"FuriEventLoop*, FuriStreamBuffer*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
+Function,+,furi_event_loop_subscribe_thread_flags,void,"FuriEventLoop*, FuriEventLoopThreadFlagsCallback, void*"
 Function,+,furi_event_loop_tick_set,void,"FuriEventLoop*, uint32_t, FuriEventLoopTickCallback, void*"
 Function,+,furi_event_loop_timer_alloc,FuriEventLoopTimer*,"FuriEventLoop*, FuriEventLoopTimerCallback, FuriEventLoopTimerType, void*"
 Function,+,furi_event_loop_timer_free,void,FuriEventLoopTimer*
@@ -1144,6 +1156,7 @@ Function,+,furi_event_loop_timer_restart,void,FuriEventLoopTimer*
 Function,+,furi_event_loop_timer_start,void,"FuriEventLoopTimer*, uint32_t"
 Function,+,furi_event_loop_timer_stop,void,FuriEventLoopTimer*
 Function,+,furi_event_loop_unsubscribe,void,"FuriEventLoop*, FuriEventLoopObject*"
+Function,+,furi_event_loop_unsubscribe_thread_flags,void,FuriEventLoop*
 Function,+,furi_get_tick,uint32_t,
 Function,+,furi_hal_adc_acquire,FuriHalAdcHandle*,
 Function,+,furi_hal_adc_configure,void,FuriHalAdcHandle*
@@ -1436,6 +1449,7 @@ Function,+,furi_hal_serial_async_rx,uint8_t,FuriHalSerialHandle*
 Function,+,furi_hal_serial_async_rx_available,_Bool,FuriHalSerialHandle*
 Function,+,furi_hal_serial_async_rx_start,void,"FuriHalSerialHandle*, FuriHalSerialAsyncRxCallback, void*, _Bool"
 Function,+,furi_hal_serial_async_rx_stop,void,FuriHalSerialHandle*
+Function,+,furi_hal_serial_configure_framing,void,"FuriHalSerialHandle*, FuriHalSerialDataBits, FuriHalSerialParity, FuriHalSerialStopBits"
 Function,+,furi_hal_serial_control_acquire,FuriHalSerialHandle*,FuriHalSerialId
 Function,+,furi_hal_serial_control_deinit,void,
 Function,+,furi_hal_serial_control_init,void,
@@ -2359,9 +2373,11 @@ Function,-,pow,double,"double, double"
 Function,-,pow10,double,double
 Function,-,pow10f,float,float
 Function,+,power_enable_low_battery_level_notification,void,"Power*, _Bool"
+Function,+,power_enable_otg,void,"Power*, _Bool"
 Function,+,power_get_info,void,"Power*, PowerInfo*"
 Function,+,power_get_pubsub,FuriPubSub*,Power*
 Function,+,power_is_battery_healthy,_Bool,Power*
+Function,+,power_is_otg_enabled,_Bool,Power*
 Function,+,power_off,void,Power*
 Function,+,power_reboot,void,"Power*, PowerBootMode"
 Function,+,powf,float,"float, float"
@@ -2470,6 +2486,7 @@ Function,-,scalbnl,long double,"long double, int"
 Function,-,scanf,int,"const char*, ..."
 Function,+,scene_manager_alloc,SceneManager*,"const SceneManagerHandlers*, void*"
 Function,+,scene_manager_free,void,SceneManager*
+Function,+,scene_manager_get_current_scene,uint32_t,SceneManager*
 Function,+,scene_manager_get_scene_state,uint32_t,"const SceneManager*, uint32_t"
 Function,+,scene_manager_handle_back_event,_Bool,SceneManager*
 Function,+,scene_manager_handle_custom_event,_Bool,"SceneManager*, uint32_t"
@@ -2895,8 +2912,10 @@ Function,-,vsscanf,int,"const char*, const char*, __gnuc_va_list"
 Function,-,wcstombs,size_t,"char*, const wchar_t*, size_t"
 Function,-,wctomb,int,"char*, wchar_t"
 Function,+,widget_add_button_element,void,"Widget*, GuiButtonType, const char*, ButtonCallback, void*"
-Function,+,widget_add_frame_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t"
+Function,+,widget_add_circle_element,void,"Widget*, uint8_t, uint8_t, uint8_t, _Bool"
 Function,+,widget_add_icon_element,void,"Widget*, uint8_t, uint8_t, const Icon*"
+Function,+,widget_add_line_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t"
+Function,+,widget_add_rect_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, _Bool"
 Function,+,widget_add_string_element,void,"Widget*, uint8_t, uint8_t, Align, Align, Font, const char*"
 Function,+,widget_add_string_multiline_element,void,"Widget*, uint8_t, uint8_t, Align, Align, Font, const char*"
 Function,+,widget_add_text_box_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, Align, Align, const char*, _Bool"

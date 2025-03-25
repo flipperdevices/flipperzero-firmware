@@ -314,7 +314,7 @@ else:
 # cli handler
 
 appenv.PhonyTarget(
-    "cli",
+    "cli_master",
     [
         [
             "${PYTHON3}",

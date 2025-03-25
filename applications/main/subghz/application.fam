@@ -24,6 +24,6 @@ App(
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
     entry_point="cli_subghz_ep",
-    requires=["cli"],
+    requires=["cli_master"],
     sources=["subghz_cli.c", "helpers/subghz_chat.c"],
 )

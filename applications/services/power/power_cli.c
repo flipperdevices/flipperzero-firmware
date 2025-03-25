@@ -1,7 +1,8 @@
 #include "power_cli.h"
 
 #include <furi_hal.h>
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
+#include <cli/cli_master_commands.h>
 #include <lib/toolbox/args.h>
 #include <power/power_service/power.h>
 #include <toolbox/pipe.h>
@@ -31,13 +32,16 @@ void power_cli_reboot2dfu(PipeSide* pipe, FuriString* args) {
 
 void power_cli_5v(PipeSide* pipe, FuriString* args) {
     UNUSED(pipe);
+    Power* power = furi_record_open(RECORD_POWER);
     if(!furi_string_cmp(args, "0")) {
-        furi_hal_power_disable_otg();
+        power_enable_otg(power, false);
     } else if(!furi_string_cmp(args, "1")) {
-        furi_hal_power_enable_otg();
+        power_enable_otg(power, true);
     } else {
         cli_print_usage("power_otg", "<1|0>", furi_string_get_cstr(args));
     }
+
+    furi_record_close(RECORD_POWER);
 }
 
 void power_cli_3v3(PipeSide* pipe, FuriString* args) {
@@ -111,11 +115,9 @@ void power_cli(PipeSide* pipe, FuriString* args, void* context) {
 
 void power_on_system_start(void) {
 #ifdef SRV_CLI
-    Cli* cli = furi_record_open(RECORD_CLI);
-
-    cli_add_command(cli, "power", CliCommandFlagDefault, power_cli, NULL);
-
-    furi_record_close(RECORD_CLI);
+    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    cli_registry_add_command(registry, "power", CliCommandFlagParallelSafe, power_cli, NULL);
+    furi_record_close(RECORD_CLI_MASTER);
 #else
     UNUSED(power_cli);
 #endif

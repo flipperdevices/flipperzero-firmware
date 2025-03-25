@@ -3,6 +3,6 @@ App(
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
     entry_point="cli_onewire_ep",
-    requires=["cli"],
+    requires=["cli_master"],
     sources=["onewire_cli.c"],
 )

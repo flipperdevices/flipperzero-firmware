@@ -2,7 +2,7 @@
 
 #include "tests/test_api.h"
 
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
 #include <toolbox/path.h>
 #include <toolbox/pipe.h>
 #include <loader/loader.h>
@@ -148,7 +148,7 @@ static void test_runner_run_internal(TestRunner* instance) {
         }
 
         while(true) {
-            if(cli_app_should_stop(instance->pipe)) {
+            if(cli_is_pipe_broken_or_is_etx_next_char(instance->pipe)) {
                 break;
             }
 

@@ -17,6 +17,6 @@ App(
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
     entry_point="cli_ikey_ep",
-    requires=["cli"],
+    requires=["cli_master"],
     sources=["ibutton_cli.c"],
 )

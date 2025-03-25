@@ -6,7 +6,7 @@ App(
     cdefines=["SRV_POWER"],
     requires=[
         "gui",
-        "cli",
+        "cli_master",
     ],
     provides=[
         "power_settings",

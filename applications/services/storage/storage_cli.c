@@ -1,7 +1,9 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
+#include <toolbox/cli/cli_ansi.h>
+#include <cli/cli_master_commands.h>
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/dir_walk.h>
 #include <lib/toolbox/md5_calc.h>
@@ -317,11 +319,12 @@ static void storage_cli_write_chunk(PipeSide* pipe, FuriString* path, FuriString
     } else {
         if(storage_file_open(file, furi_string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
             printf("Ready\r\n");
-            char buffer[256];
+            const size_t buffer_size = 1024;
+            uint8_t* buffer = malloc(buffer_size);
 
             while(need_to_read) {
                 size_t read_this_time =
-                    pipe_receive(pipe, buffer, MIN(sizeof(buffer), need_to_read), FuriWaitForever);
+                    pipe_receive(pipe, buffer, MIN(buffer_size, need_to_read), FuriWaitForever);
                 size_t wrote_this_time = storage_file_write(file, buffer, read_this_time);
 
                 if(wrote_this_time != read_this_time) {
@@ -330,6 +333,8 @@ static void storage_cli_write_chunk(PipeSide* pipe, FuriString* path, FuriString
                 }
                 need_to_read -= read_this_time;
             }
+
+            free(buffer);
         } else {
             storage_cli_print_error(storage_file_get_error(file));
         }
@@ -691,10 +696,16 @@ static void storage_cli_factory_reset(PipeSide* pipe, FuriString* args, void* co
 
 void storage_on_system_start(void) {
 #ifdef SRV_CLI
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command_ex(cli, "storage", CliCommandFlagUseShellThread, storage_cli, NULL, 512);
-    cli_add_command(cli, "factory_reset", CliCommandFlagDefault, storage_cli_factory_reset, NULL);
-    furi_record_close(RECORD_CLI);
+    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    cli_registry_add_command(
+        registry,
+        "storage",
+        CliCommandFlagParallelSafe | CliCommandFlagUseShellThread,
+        storage_cli,
+        NULL);
+    cli_registry_add_command(
+        registry, "factory_reset", CliCommandFlagParallelSafe, storage_cli_factory_reset, NULL);
+    furi_record_close(RECORD_CLI_MASTER);
 #else
     UNUSED(storage_cli_factory_reset);
 #endif

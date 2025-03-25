@@ -5,7 +5,6 @@
 #include <pb_decode.h>
 #include <pb_encode.h>
 #include <flipper.pb.h>
-#include <cli/cli.h>
 #include <toolbox/pipe.h>
 
 #ifdef __cplusplus

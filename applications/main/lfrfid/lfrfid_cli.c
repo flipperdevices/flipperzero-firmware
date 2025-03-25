@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <stdarg.h>
-#include <cli/cli_commands.h>
+#include <cli/cli_master_commands.h>
 #include <lib/toolbox/args.h>
 #include <lib/lfrfid/lfrfid_worker.h>
 #include <storage/storage.h>
@@ -88,7 +88,7 @@ static void lfrfid_cli_read(PipeSide* pipe, FuriString* args) {
             }
         }
 
-        if(cli_app_should_stop(pipe)) break;
+        if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) break;
     }
 
     lfrfid_worker_stop(worker);
@@ -204,7 +204,7 @@ static void lfrfid_cli_write(PipeSide* pipe, FuriString* args) {
                                      (1 << LFRFIDWorkerWriteProtocolCannotBeWritten) |
                                      (1 << LFRFIDWorkerWriteFobCannotBeWritten);
 
-    while(!cli_app_should_stop(pipe)) {
+    while(!cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
         uint32_t flags = furi_event_flag_wait(event, available_flags, FuriFlagWaitAny, 100);
         if(flags != (unsigned)FuriFlagErrorTimeout) {
             if(FURI_BIT(flags, LFRFIDWorkerWriteOK)) {
@@ -246,7 +246,7 @@ static void lfrfid_cli_emulate(PipeSide* pipe, FuriString* args) {
     lfrfid_worker_emulate_start(worker, protocol);
 
     printf("Emulating RFID...\r\nPress Ctrl+C to abort\r\n");
-    while(!cli_app_should_stop(pipe)) {
+    while(!cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
         furi_delay_ms(100);
     }
     printf("Emulation stopped\r\n");
@@ -442,7 +442,7 @@ static void lfrfid_cli_raw_read(PipeSide* pipe, FuriString* args) {
                 }
             }
 
-            if(cli_app_should_stop(pipe)) break;
+            if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) break;
         }
 
         if(overrun) {
@@ -515,7 +515,7 @@ static void lfrfid_cli_raw_emulate(PipeSide* pipe, FuriString* args) {
                 }
             }
 
-            if(cli_app_should_stop(pipe)) break;
+            if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) break;
         }
 
         if(overrun) {
@@ -566,4 +566,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-CLI_COMMAND_INTERFACE(rfid, execute, CliCommandFlagDefault, 2048);
+CLI_COMMAND_INTERFACE(rfid, execute, CliCommandFlagDefault, 2048, CLI_MASTER_APPID);

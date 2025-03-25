@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <cli/cli_commands.h>
+#include <cli/cli_master_commands.h>
 #include <toolbox/args.h>
 #include <toolbox/pipe.h>
 
@@ -101,7 +101,7 @@ static void ibutton_cli_read(PipeSide* pipe) {
             break;
         }
 
-        if(cli_app_should_stop(pipe)) break;
+        if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) break;
     }
 
     ibutton_worker_stop(worker);
@@ -169,7 +169,7 @@ void ibutton_cli_write(PipeSide* pipe, FuriString* args) {
                 }
             }
 
-            if(cli_app_should_stop(pipe)) break;
+            if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) break;
         }
     } while(false);
 
@@ -202,7 +202,7 @@ void ibutton_cli_emulate(PipeSide* pipe, FuriString* args) {
 
         ibutton_worker_emulate_start(worker, key);
 
-        while(!cli_app_should_stop(pipe)) {
+        while(!cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
             furi_delay_ms(100);
         };
 
@@ -240,4 +240,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-CLI_COMMAND_INTERFACE(ikey, execute, CliCommandFlagDefault, 1024);
+CLI_COMMAND_INTERFACE(ikey, execute, CliCommandFlagDefault, 1024, CLI_MASTER_APPID);

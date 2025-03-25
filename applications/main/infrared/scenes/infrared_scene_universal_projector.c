@@ -63,7 +63,7 @@ void infrared_scene_universal_projector_on_enter(void* context) {
         context);
     infrared_brute_force_add_record(brute_force, i++, "Vol_dn");
 
-    button_panel_add_label(button_panel, 3, 11, FontPrimary, "Proj. remote");
+    button_panel_add_label(button_panel, 10, 11, FontPrimary, "Projector");
     button_panel_add_icon(button_panel, 17, 72, &I_vol_ac_text_30x30);
 
     infrared_scene_universal_common_on_enter(context);

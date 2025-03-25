@@ -2,14 +2,13 @@
 
 #define HISTORY_DEPTH 10
 
-ARRAY_DEF(ShellHistory, FuriString*, FURI_STRING_OPLIST); // -V524
-#define M_OPL_ShellHistory_t() ARRAY_OPLIST(ShellHistory)
-
 struct CliShellLine {
     size_t history_position;
     size_t line_position;
-    ShellHistory_t history;
+    FuriString* history[HISTORY_DEPTH];
+    size_t history_entries;
     CliShell* shell;
+    bool about_to_exit;
 };
 
 // ==========
@@ -20,39 +19,41 @@ CliShellLine* cli_shell_line_alloc(CliShell* shell) {
     CliShellLine* line = malloc(sizeof(CliShellLine));
     line->shell = shell;
 
-    ShellHistory_init(line->history);
-    FuriString* new_command = furi_string_alloc();
-    ShellHistory_push_at(line->history, 0, new_command);
-    furi_string_free(new_command);
+    line->history[0] = furi_string_alloc();
+    line->history_entries = 1;
 
     return line;
 }
 
 void cli_shell_line_free(CliShellLine* line) {
-    ShellHistory_clear(line->history);
+    for(size_t i = 0; i < line->history_entries; i++)
+        furi_string_free(line->history[i]);
+
     free(line);
 }
 
 FuriString* cli_shell_line_get_selected(CliShellLine* line) {
-    return *ShellHistory_cget(line->history, line->history_position);
+    return line->history[line->history_position];
 }
 
 FuriString* cli_shell_line_get_editing(CliShellLine* line) {
-    return *ShellHistory_front(line->history);
-}
-
-size_t cli_shell_line_prompt_length(CliShellLine* line) {
-    UNUSED(line);
-    return strlen(">: ");
+    return line->history[0];
 }
 
 void cli_shell_line_format_prompt(CliShellLine* line, char* buf, size_t length) {
     UNUSED(line);
-    snprintf(buf, length - 1, ">: ");
+    const char* prompt = cli_shell_get_prompt(line->shell);
+    snprintf(buf, length - 1, "%s>: ", prompt ? prompt : "");
+}
+
+size_t cli_shell_line_prompt_length(CliShellLine* line) {
+    char buffer[128];
+    cli_shell_line_format_prompt(line, buffer, sizeof(buffer));
+    return strlen(buffer);
 }
 
 void cli_shell_line_prompt(CliShellLine* line) {
-    char buffer[128];
+    char buffer[32];
     cli_shell_line_format_prompt(line, buffer, sizeof(buffer));
     printf("\r\n%s", buffer);
     fflush(stdout);
@@ -65,6 +66,10 @@ void cli_shell_line_ensure_not_overwriting_history(CliShellLine* line) {
         furi_string_set(destination, source);
         line->history_position = 0;
     }
+}
+
+void cli_shell_line_set_about_to_exit(CliShellLine* line) {
+    line->about_to_exit = true;
 }
 
 size_t cli_shell_line_get_line_position(CliShellLine* line) {
@@ -129,7 +134,7 @@ size_t
 // Input handlers
 // ==============
 
-static bool key_combo_ctrl_c(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_ctrl_c(CliKeyCombo combo, void* context) {
     UNUSED(combo);
     CliShellLine* line = context;
     // reset input
@@ -141,45 +146,56 @@ static bool key_combo_ctrl_c(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool key_combo_cr(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_cr(CliKeyCombo combo, void* context) {
     UNUSED(combo);
     CliShellLine* line = context;
-    // get command and update history
-    FuriString* command = furi_string_alloc();
-    ShellHistory_pop_at(&command, line->history, line->history_position);
+
+    FuriString* command = cli_shell_line_get_selected(line);
     furi_string_trim(command);
-    if(line->history_position > 0) ShellHistory_pop_at(NULL, line->history, 0);
-    if(!furi_string_empty(command)) ShellHistory_push_at(line->history, 0, command);
-    FuriString* new_command = furi_string_alloc();
-    ShellHistory_push_at(line->history, 0, new_command);
-    furi_string_free(new_command);
-    if(ShellHistory_size(line->history) > HISTORY_DEPTH) {
-        ShellHistory_pop_back(NULL, line->history);
+    FuriString* command_copy = furi_string_alloc_set(command);
+
+    if(line->history_position > 0) {
+        // move selected command to the front
+        memmove(
+            &line->history[1], &line->history[0], line->history_position * sizeof(FuriString*));
+        line->history[0] = command;
     }
 
-    // execute command
+    // insert empty command
+    if(line->history_entries == HISTORY_DEPTH) {
+        furi_string_free(line->history[HISTORY_DEPTH - 1]);
+        line->history_entries--;
+    }
+    memmove(&line->history[1], &line->history[0], line->history_entries * sizeof(FuriString*));
+    line->history[0] = furi_string_alloc();
+    line->history_entries++;
     line->line_position = 0;
     line->history_position = 0;
+
+    // execute command
     printf("\r\n");
-    if(!furi_string_empty(command)) cli_shell_execute_command(line->shell, command);
-    furi_string_free(command);
-    cli_shell_line_prompt(line);
+    if(!furi_string_empty(command_copy)) cli_shell_execute_command(line->shell, command_copy);
+    furi_string_free(command_copy);
+    if(!line->about_to_exit) cli_shell_line_prompt(line);
     return true;
 }
 
-static bool key_combo_up_down(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_up_down(CliKeyCombo combo, void* context) {
     CliShellLine* line = context;
     // go up and down in history
     int increment = (combo.key == CliKeyUp) ? 1 : -1;
-    size_t new_pos = CLAMP(
-        (int)line->history_position + increment, (int)ShellHistory_size(line->history) - 1, 0);
+    size_t new_pos =
+        CLAMP((int)line->history_position + increment, (int)line->history_entries - 1, 0);
 
     // print prompt with selected command
     if(new_pos != line->history_position) {
+        char prompt[64];
+        cli_shell_line_format_prompt(line, prompt, sizeof(prompt));
         line->history_position = new_pos;
         FuriString* command = cli_shell_line_get_selected(line);
         printf(
-            ANSI_CURSOR_HOR_POS("1") ">: %s" ANSI_ERASE_LINE(ANSI_ERASE_FROM_CURSOR_TO_END),
+            ANSI_CURSOR_HOR_POS("1") "%s%s" ANSI_ERASE_LINE(ANSI_ERASE_FROM_CURSOR_TO_END),
+            prompt,
             furi_string_get_cstr(command));
         fflush(stdout);
         line->line_position = furi_string_size(command);
@@ -187,7 +203,7 @@ static bool key_combo_up_down(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool key_combo_left_right(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_left_right(CliKeyCombo combo, void* context) {
     CliShellLine* line = context;
     // go left and right in the current line
     FuriString* command = cli_shell_line_get_selected(line);
@@ -204,7 +220,7 @@ static bool key_combo_left_right(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool key_combo_home(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_home(CliKeyCombo combo, void* context) {
     UNUSED(combo);
     CliShellLine* line = context;
     // go to the start
@@ -214,7 +230,7 @@ static bool key_combo_home(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool key_combo_end(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_end(CliKeyCombo combo, void* context) {
     UNUSED(combo);
     CliShellLine* line = context;
     // go to the end
@@ -225,7 +241,7 @@ static bool key_combo_end(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool key_combo_bksp(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_bksp(CliKeyCombo combo, void* context) {
     UNUSED(combo);
     CliShellLine* line = context;
     // erase one character
@@ -250,7 +266,7 @@ static bool key_combo_bksp(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool key_combo_ctrl_l(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_ctrl_l(CliKeyCombo combo, void* context) {
     UNUSED(combo);
     CliShellLine* line = context;
     // clear screen
@@ -267,7 +283,7 @@ static bool key_combo_ctrl_l(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool key_combo_ctrl_left_right(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_ctrl_left_right(CliKeyCombo combo, void* context) {
     CliShellLine* line = context;
     // skip run of similar chars to the left or right
     FuriString* selected_line = cli_shell_line_get_selected(line);
@@ -280,7 +296,7 @@ static bool key_combo_ctrl_left_right(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool key_combo_ctrl_bksp(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_ctrl_bksp(CliKeyCombo combo, void* context) {
     UNUSED(combo);
     CliShellLine* line = context;
     // delete run of similar chars to the left
@@ -300,7 +316,7 @@ static bool key_combo_ctrl_bksp(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool normal_input(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_normal_input(CliKeyCombo combo, void* context) {
     CliShellLine* line = context;
     if(combo.modifiers != CliModKeyNo) return false;
     if(combo.key < CliKeySpace || combo.key >= CliKeyDEL) return false;
@@ -321,23 +337,23 @@ static bool normal_input(CliKeyCombo combo, void* context) {
 }
 
 CliShellKeyComboSet cli_shell_line_key_combo_set = {
-    .fallback = normal_input,
+    .fallback = cli_shell_line_input_normal_input,
     .count = 14,
     .records =
         {
-            {{CliModKeyNo, CliKeyETX}, key_combo_ctrl_c},
-            {{CliModKeyNo, CliKeyCR}, key_combo_cr},
-            {{CliModKeyNo, CliKeyUp}, key_combo_up_down},
-            {{CliModKeyNo, CliKeyDown}, key_combo_up_down},
-            {{CliModKeyNo, CliKeyLeft}, key_combo_left_right},
-            {{CliModKeyNo, CliKeyRight}, key_combo_left_right},
-            {{CliModKeyNo, CliKeyHome}, key_combo_home},
-            {{CliModKeyNo, CliKeyEnd}, key_combo_end},
-            {{CliModKeyNo, CliKeyBackspace}, key_combo_bksp},
-            {{CliModKeyNo, CliKeyDEL}, key_combo_bksp},
-            {{CliModKeyNo, CliKeyFF}, key_combo_ctrl_l},
-            {{CliModKeyCtrl, CliKeyLeft}, key_combo_ctrl_left_right},
-            {{CliModKeyCtrl, CliKeyRight}, key_combo_ctrl_left_right},
-            {{CliModKeyNo, CliKeyETB}, key_combo_ctrl_bksp},
+            {{CliModKeyNo, CliKeyETX}, cli_shell_line_input_ctrl_c},
+            {{CliModKeyNo, CliKeyCR}, cli_shell_line_input_cr},
+            {{CliModKeyNo, CliKeyUp}, cli_shell_line_input_up_down},
+            {{CliModKeyNo, CliKeyDown}, cli_shell_line_input_up_down},
+            {{CliModKeyNo, CliKeyLeft}, cli_shell_line_input_left_right},
+            {{CliModKeyNo, CliKeyRight}, cli_shell_line_input_left_right},
+            {{CliModKeyNo, CliKeyHome}, cli_shell_line_input_home},
+            {{CliModKeyNo, CliKeyEnd}, cli_shell_line_input_end},
+            {{CliModKeyNo, CliKeyBackspace}, cli_shell_line_input_bksp},
+            {{CliModKeyNo, CliKeyDEL}, cli_shell_line_input_bksp},
+            {{CliModKeyNo, CliKeyFF}, cli_shell_line_input_ctrl_l},
+            {{CliModKeyCtrl, CliKeyLeft}, cli_shell_line_input_ctrl_left_right},
+            {{CliModKeyCtrl, CliKeyRight}, cli_shell_line_input_ctrl_left_right},
+            {{CliModKeyNo, CliKeyETB}, cli_shell_line_input_ctrl_bksp},
         },
 };
