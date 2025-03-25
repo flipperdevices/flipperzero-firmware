@@ -327,7 +327,7 @@ static inline void nfc_cli_command_process_error(
     } while(false);
 }
 
-void nfc_cli_command_process(
+void nfc_cli_command_processor_run(
     const NfcCliCommandDescriptor* cmd,
     PipeSide* pipe,
     FuriString* args,

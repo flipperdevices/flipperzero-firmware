@@ -40,19 +40,19 @@ struct NfcCliCommandDescriptor {
     CliExecuteCallback callback;
 };
 
-#define ADD_NFC_CLI_COMMAND(name, description, actions)            \
-    static void nfc_cli_command_##name##_callback(                 \
-        PipeSide* pipe, FuriString* args, void* context);          \
-                                                                   \
-    const NfcCliCommandDescriptor name##_cmd = {                   \
-        #name,                                                     \
-        #description,                                              \
-        COUNT_OF(actions),                                         \
-        actions,                                                   \
-        nfc_cli_command_##name##_callback,                         \
-    };                                                             \
-                                                                   \
-    static void nfc_cli_command_##name##_callback(                 \
-        PipeSide* pipe, FuriString* args, void* context) {         \
-        nfc_cli_command_process(&name##_cmd, pipe, args, context); \
+#define ADD_NFC_CLI_COMMAND(name, description, actions)                  \
+    static void nfc_cli_command_##name##_callback(                       \
+        PipeSide* pipe, FuriString* args, void* context);                \
+                                                                         \
+    const NfcCliCommandDescriptor name##_cmd = {                         \
+        #name,                                                           \
+        #description,                                                    \
+        COUNT_OF(actions),                                               \
+        actions,                                                         \
+        nfc_cli_command_##name##_callback,                               \
+    };                                                                   \
+                                                                         \
+    static void nfc_cli_command_##name##_callback(                       \
+        PipeSide* pipe, FuriString* args, void* context) {               \
+        nfc_cli_command_processor_run(&name##_cmd, pipe, args, context); \
     }
