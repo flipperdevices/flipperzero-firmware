@@ -290,6 +290,7 @@ App(
 
              "cli/commands/nfc_cli_command_emulate.c",  
              "cli/commands/nfc_cli_command_mfu.c",
-             "cli/commands/nfc_cli_command_scanner.c" 
+             "cli/commands/nfc_cli_command_scanner.c",
+             "cli/commands/nfc_cli_command_field.c",
              ],
 )

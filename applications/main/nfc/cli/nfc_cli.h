@@ -11,7 +11,6 @@
 #include <toolbox/pipe.h>
 #include <nfc/nfc.h>
 
-#include <furi_hal_nfc.h>
 #include "nfc_cli_command_base.h"
 #include "nfc_cli_command_processor.h"
 

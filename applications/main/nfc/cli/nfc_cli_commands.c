@@ -7,6 +7,7 @@
 #include "commands/nfc_cli_command_emulate.h"
 #include "commands/nfc_cli_command_mfu.h"
 #include "commands/nfc_cli_command_scanner.h"
+#include "commands/nfc_cli_command_field.h"
 
 #define TAG "NfcCliCommands"
 
@@ -17,6 +18,7 @@ static const NfcCliCommandDescriptor* nfc_cli_commands[] = {
     &mfu_cmd,
     &scanner_cmd,
     &dump_cmd,
+    &field_cmd,
 };
 
 size_t nfc_cli_command_get_count() {
@@ -169,20 +171,3 @@ void nfc_cli_command_format_info(const NfcCliCommandDescriptor* cmd, FuriString*
         }
     }
 }
-
-/* static void nfc_cli_subscribe_commands(NfcCliContext* instance) {
-    size_t cnt = nfc_cli_command_get_count();
-    for(size_t i = 0; i < cnt; i++) {
-        const NfcCliCommandDescriptor* cmd = nfc_cli_command_get_by_index(i);
-        CliExecuteCallback callback = nfc_cli_command_get_execute(cmd);
-        if(callback != NULL) {
-            const char* name = nfc_cli_command_get_name(cmd);
-            cli_add_command(
-                instance->nfc_cli,
-                name,
-                CliCommandFlagParallelUnsafe,
-                callback,
-                instance->processor_context);
-        }
-    }
-} */
