@@ -17,7 +17,6 @@
 
 #define TAG "APDU"
 
-///TODO: Move this define into some common place
 #define NFC_CLI_PROTOCOL_SUPPORT_MAX_BUFFER_SIZE (256)
 
 typedef NfcCommand (

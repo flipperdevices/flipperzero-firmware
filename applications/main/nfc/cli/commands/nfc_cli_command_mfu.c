@@ -13,12 +13,24 @@ static NfcCliActionContext* nfc_cli_info_alloc_ctx(Nfc* nfc) {
     return instance;
 }
 
+static void nfc_cli_info_free_ctx(NfcCliActionContext* ctx) {
+    NfcMfuInfoCtx* instance = ctx;
+    free(instance);
+}
+
+static void nfc_cli_mfu_not_implemented_dummy_execute(PipeSide* pipe, NfcCliActionContext* ctx) {
+    UNUSED(pipe);
+    UNUSED(ctx);
+    printf("Not implemented");
+}
+
+//mfu info
 const NfcCliActionDescriptor info_action = {
     .name = "info",
     .description = "Get basic information about the card",
     .alloc = nfc_cli_info_alloc_ctx,
-    //.free = nfc_cli_raw_free_ctx,
-    //.execute = nfc_cli_raw_command,
+    .free = nfc_cli_info_free_ctx,
+    .execute = nfc_cli_mfu_not_implemented_dummy_execute,
     .key_count = 0,
     .keys = NULL,
 };
@@ -29,13 +41,11 @@ const NfcCliKeyDescriptor rdbl_action_keys[] = {
         .long_name = "block",
         .features = {.required = true, .parameter = true},
         .description = "desired block number",
-        //.parse = parse_block_key,
     },
     {
         .short_name = "k",
         .long_name = "key",
         .features = {.parameter = true},
-        //.parse = parse_key_
     },
 };
 
@@ -45,9 +55,9 @@ const NfcCliKeyDescriptor rdbl_action_keys[] = {
 const NfcCliActionDescriptor rdbl_action = {
     .name = "rdbl",
     .description = "Read block from ultralight card",
-    //.alloc = nfc_cli_raw_alloc_ctx,
-    //.free = nfc_cli_raw_free_ctx,
-    //.execute = nfc_cli_raw_command,
+    .alloc = NULL,
+    .free = NULL,
+    .execute = nfc_cli_mfu_not_implemented_dummy_execute,
     .key_count = COUNT_OF(rdbl_action_keys),
     .keys = rdbl_action_keys,
 };
@@ -59,8 +69,3 @@ const NfcCliActionDescriptor* mfu_actions[] = {
 
 //Command descriptor
 ADD_NFC_CLI_COMMAND(mfu, "Mifare Ultralight specific commands", mfu_actions);
-/* const NfcCliCommandDescriptor mfu_cmd = {
-    .name = "mfu",
-    .action_count = COUNT_OF(mfu_actions),
-    .actions = mfu_actions,
-}; */

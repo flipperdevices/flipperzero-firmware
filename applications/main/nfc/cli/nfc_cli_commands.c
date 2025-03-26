@@ -39,9 +39,6 @@ const NfcCliActionDescriptor*
     return NULL;
 }
 
-///TODO: we need to modify all cmd description structs in order to be able to search on them with one iterator
-//static void* nfc_cli_get_item_by_name(const FuriString* name, const )
-
 const NfcCliCommandDescriptor* nfc_cli_command_get_by_index(size_t index) {
     furi_assert(index < COUNT_OF(nfc_cli_commands));
     return nfc_cli_commands[index];

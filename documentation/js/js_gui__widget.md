@@ -1,7 +1,6 @@
-# js_gui__widget {#js_gui__widget}
+# Widget GUI view {#js_gui__widget}
 
-# Widget GUI view
-Displays a combination of custom elements on one screen
+Displays a combination of custom elements on one screen.
 
 <img src="widget.png" width="200" alt="Sample screenshot of the view" />
 
@@ -16,7 +15,7 @@ This module depends on the `gui` module, which in turn depends on the
 recommended to conceptualize these modules first before using this one.
 
 # Example
-For an example refer to the `gui.js` example script.
+For an example, refer to the `gui.js` example script.
 
 # View props
 This view does not have any props.
