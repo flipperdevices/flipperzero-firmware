@@ -20,7 +20,7 @@ NfcCommand nfc_cli_dump_poller_callback_mf_classic(NfcGenericEvent event, void* 
             mfc_event->data->poller_mode.mode = MfClassicPollerModeRead;
         } else {
             FURI_LOG_D(TAG, "Key cache not found");
-            ///TODO: put error hadling here
+            instance->result = NfcCliDumpErrorFailedToRead;
             command = NfcCommandStop;
         }
     } else if(mfc_event->type == MfClassicPollerEventTypeRequestReadSector) {

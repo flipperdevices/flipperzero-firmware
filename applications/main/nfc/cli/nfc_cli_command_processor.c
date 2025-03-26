@@ -362,7 +362,6 @@ NfcCliProcessorContext* nfc_cli_command_processor_alloc(Nfc* nfc) {
     furi_assert(nfc);
     NfcCliProcessorContext* instance = malloc(sizeof(NfcCliProcessorContext));
     instance->nfc = nfc;
-    ///TODO: think of using MLIB instead of handling on your own
     instance->keys_found = malloc(NFC_CLI_KEYS_FOUND_SIZE_BYTES);
     instance->total_keys_found = 0;
     instance->required_keys_found = 0;
