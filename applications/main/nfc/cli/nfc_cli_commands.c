@@ -25,17 +25,6 @@ size_t nfc_cli_command_get_count() {
     return COUNT_OF(nfc_cli_commands);
 }
 
-const NfcCliCommandDescriptor* nfc_cli_command_get_by_name(FuriString* name) {
-    furi_assert(name);
-    const NfcCliCommandDescriptor* cmd = NULL;
-    for(size_t i = 0; i < COUNT_OF(nfc_cli_commands); i++) {
-        if(!furi_string_equal_str(name, nfc_cli_commands[i]->name)) continue;
-        cmd = nfc_cli_commands[i];
-        break;
-    }
-    return cmd;
-}
-
 const NfcCliActionDescriptor*
     nfc_cli_command_get_action_by_name(const NfcCliCommandDescriptor* cmd, const FuriString* name) {
     furi_assert(cmd);
@@ -72,7 +61,7 @@ CliCommandExecuteCallback nfc_cli_command_get_execute(const NfcCliCommandDescrip
     return cmd->callback;
 }
 
-static const NfcCliKeyDescriptor* nfc_cli_action_get_key_by_n(
+static inline const NfcCliKeyDescriptor* nfc_cli_action_get_key_by_name(
     const NfcCliActionDescriptor* action,
     const FuriString* name,
     bool long_name) {
@@ -89,7 +78,7 @@ const NfcCliKeyDescriptor*
     furi_assert(action);
     furi_assert(argument);
 
-    return nfc_cli_action_get_key_by_n(action, argument, furi_string_size(argument) > 1);
+    return nfc_cli_action_get_key_by_name(action, argument, furi_string_size(argument) > 1);
 }
 
 size_t nfc_cli_action_get_required_keys_count(const NfcCliActionDescriptor* action) {

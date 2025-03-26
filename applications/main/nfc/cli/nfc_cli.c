@@ -86,7 +86,7 @@ void nfc_cli_free(NfcCliContext* instance) {
 }
 
 void nfc_cli_execute(PipeSide* pipe, FuriString* args, void* context) {
-    UNUSED(pipe);
+    furi_assert(pipe);
     UNUSED(args);
     UNUSED(context);
 
