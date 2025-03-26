@@ -1,6 +1,7 @@
 #include "nfc_cli_commands.h"
 #include "nfc_cli_command_base_i.h"
 
+/** Include new commands here */
 #include "commands/raw/nfc_cli_command_raw.h"
 #include "commands/apdu/nfc_cli_command_apdu.h"
 #include "commands/dump/nfc_cli_command_dump.h"
@@ -11,6 +12,7 @@
 
 #define TAG "NfcCliCommands"
 
+/** Add new commands here */
 static const NfcCliCommandDescriptor* nfc_cli_commands[] = {
     &apdu_cmd,
     &raw_cmd,
