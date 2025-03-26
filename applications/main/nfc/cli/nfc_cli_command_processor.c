@@ -227,6 +227,15 @@ static NfcCliProcessorError nfc_cli_parse_single_key(
             break;
         }
 
+        if(key->parse == NULL) {
+            furi_string_printf(
+                instance->error_message,
+                "Parse callback for key \'%s\' not defined",
+                furi_string_get_cstr(argument));
+            result = NfcCliProcessorErrorKeyParseError;
+            break;
+        }
+
         FURI_LOG_D(TAG, "Parsing key \"%s\"", furi_string_get_cstr(argument));
         if(!key->parse(value_str, instance->action_context)) {
             furi_string_printf(
