@@ -1,13 +1,20 @@
-#include "nfc_cli.h"
 #include "nfc_cli_commands.h"
 #include "nfc_cli_command_processor.h"
 
-#include <cli/cli_master_commands.h>
+#include <toolbox/cli/shell/cli_shell.h>
 #include <toolbox/cli/cli_registry.h>
 
-#define TAG "NfcCli"
+#define TAG           "NfcCli"
+#define NFC_CLI_APPID "cli_nfc"
 
 #define NFC_PROMPT "[" ANSI_FG_GREEN "nfc" ANSI_RESET "]"
+
+typedef struct {
+    Nfc* nfc;
+    CliRegistry* registry;
+    CliShell* shell;
+    NfcCliProcessorContext* processor_context;
+} NfcCliContext;
 
 static void nfc_cli_shell_motd(void* context) {
     UNUSED(context);
@@ -91,4 +98,4 @@ void nfc_cli_execute(PipeSide* pipe, FuriString* args, void* context) {
     nfc_cli_free(instance);
 }
 
-CLI_COMMAND_INTERFACE(nfc, nfc_cli_execute, CliCommandFlagDefault, 1024, CLI_MASTER_APPID);
+CLI_COMMAND_INTERFACE(nfc, nfc_cli_execute, CliCommandFlagDefault, 1024, NFC_CLI_APPID);

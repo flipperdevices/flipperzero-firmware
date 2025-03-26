@@ -1,6 +1,5 @@
 
 #include "nfc_cli_command_scanner.h"
-#include "../nfc_cli.h"
 #include "helpers/nfc_cli_scanner.h"
 
 static NfcCliActionContext* nfc_cli_command_scanner_alloc_ctx(Nfc* nfc) {

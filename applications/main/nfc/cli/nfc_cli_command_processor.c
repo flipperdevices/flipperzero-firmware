@@ -1,9 +1,10 @@
 #include "nfc_cli_command_processor.h"
 #include "nfc_cli_commands.h"
 #include "nfc_cli_command_base_i.h"
-#include "nfc_cli.h"
 
 #include <m-string.h>
+#include <args.h>
+#include <hex.h>
 
 #define TAG "NfcCliProcessor"
 
