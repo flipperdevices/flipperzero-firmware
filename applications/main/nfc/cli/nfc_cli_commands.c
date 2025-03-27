@@ -100,7 +100,7 @@ static size_t nfc_cli_action_format_key_name(const NfcCliKeyDescriptor* key, Fur
     } else if(key->short_name && (key->long_name == NULL)) {
         len = furi_string_printf(name, "-%s", key->short_name);
     } else if((key->short_name == NULL) && key->long_name) {
-        len = furi_string_printf(name, "--%s", key->short_name);
+        len = furi_string_printf(name, "--%s", key->long_name);
     }
 
     const char* color = key->features.required ? ANSI_FLIPPER_BRAND_ORANGE : ANSI_RESET;
