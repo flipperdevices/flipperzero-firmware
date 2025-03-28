@@ -249,7 +249,9 @@ static inline bool is_printable(char c) {
 
 static bool is_text(const uint8_t* buf, size_t len) {
     for(size_t i = 0; i < len; i++) {
-        if(!is_printable(buf[i])) return false;
+        if(!is_printable(buf[i]) && !(buf[i] == '\0' && i == len - 1)) {
+            return false;
+        }
     }
     return true;
 }
@@ -265,7 +267,7 @@ static bool ndef_dump(Ndef* ndef, const char* prefix, size_t pos, size_t len, bo
         for(size_t i = 0; i < len; i++) {
             char c;
             if(!ndef_get(ndef, pos + i, 1, &c)) return false;
-            if(!is_printable(c)) {
+            if(!is_printable(c) && !(c == '\0' && i == len - 1)) {
                 furi_string_left(ndef->output, string_prev);
                 force_hex = true;
                 break;
