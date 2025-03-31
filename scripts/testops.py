@@ -56,9 +56,9 @@ class Main(App):
                 flipper.start()
                 self.logger.info("Flipper successfully started.")
                 return flipper
-            except SerialException as e:
+            except IOError as e:
                 self.logger.info(
-                    f"Failed to start flipper (Attempt {i + 1}/{retry_count})"
+                    f"Failed to start flipper (Attempt {i + 1}/{retry_count}): {e}"
                 )
                 time.sleep(1)
 

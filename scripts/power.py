@@ -52,15 +52,13 @@ class Main(App):
         for i in range(retry_count):
             try:
                 flipper.start()
-                break
-            except SerialException as e:
+                self.logger.info("Flipper successfully started.")
+                return flipper
+            except IOError as e:
                 self.logger.info(
-                    f"Failed to start flipper (Attempt {i + 1}/{retry_count})"
+                    f"Failed to start flipper (Attempt {i + 1}/{retry_count}): {e}"
                 )
                 time.sleep(1)
-
-        self.logger.error("Flipper failed to start after all retries.")
-        return None
 
     def power_off(self):
         if not (flipper := self._get_flipper(retry_count=10)):
