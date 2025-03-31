@@ -1,6 +1,8 @@
 #include "../subghz_i.h"
 #include <lib/toolbox/value_index.h>
 
+typedef struct SubGhz SubGhz;
+
 enum SubGhzSettingIndex {
     SubGhzSettingIndexFrequency,
     SubGhzSettingIndexHopping,
