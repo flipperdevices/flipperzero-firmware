@@ -5,6 +5,7 @@
 #include "../helpers/subghz_custom_event.h"
 
 typedef struct SubGhzViewReceiver SubGhzViewReceiver;
+typedef struct SubGhz SubGhz;
 
 typedef void (*SubGhzViewReceiverCallback)(SubGhzCustomEvent event, void* context);
 
@@ -43,3 +44,9 @@ uint16_t subghz_view_receiver_get_idx_menu(SubGhzViewReceiver* subghz_receiver);
 void subghz_view_receiver_set_idx_menu(SubGhzViewReceiver* subghz_receiver, uint16_t idx);
 
 void subghz_view_receiver_exit(void* context);
+
+
+// Helper functions for subghz modulation shortcut
+void increase_modulation_preset(SubGhz* subghz);
+
+void decrease_modulation_preset(SubGhz* subghz);
