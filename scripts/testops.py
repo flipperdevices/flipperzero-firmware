@@ -36,11 +36,11 @@ class Main(App):
 
     def _get_flipper(self, retry_count: Optional[int] = 1):
         port = None
-        self.logger.info(f"Attempting to find flipper with {retry_count} attempts.")
-
         for i in range(retry_count):
             time.sleep(1)
-            self.logger.info(f"Attempting to find flipper #{i}.")
+            self.logger.info(
+                f"Attempting to find flipper (Attempt {i + 1}/{retry_count})."
+            )
 
             if port := resolve_port(self.logger, self.args.port):
                 self.logger.info(f"Found flipper at {port}")
@@ -54,11 +54,16 @@ class Main(App):
         for i in range(retry_count):
             try:
                 flipper.start()
-                break
+                self.logger.info("Flipper successfully started.")
+                return flipper
             except SerialException as e:
-                self.logger.error(f"Failed to start flipper: {e}")
+                self.logger.info(
+                    f"Failed to start flipper (Attempt {i + 1}/{retry_count})"
+                )
                 time.sleep(1)
-        return flipper
+
+        self.logger.error("Flipper failed to start after all retries.")
+        return None
 
     def await_flipper(self):
         if not (flipper := self._get_flipper(retry_count=self.args.timeout)):
