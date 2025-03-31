@@ -366,3 +366,123 @@ void subghz_scene_receiver_config_on_exit(void* context) {
     scene_manager_set_scene_state(
         subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerNoSet);
 }
+
+
+// Function to cycle modulation forwards
+void increase_modulation_preset(SubGhz* subghz) {
+    // Retrieve the current settings structure
+    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
+    uint8_t preset_count = subghz_setting_get_preset_count(setting);
+    
+    // Get the current preset from the radio
+    SubGhzRadioPreset current = subghz_txrx_get_preset(subghz->txrx);
+    const char* current_preset = furi_string_get_cstr(current.name);
+
+    uint8_t current_index = 0;
+    
+    // Find the current index by iterating through the available presets
+    for(uint8_t i = 0; i < preset_count; i++) {
+        if(strcmp(subghz_setting_get_preset_name(setting, i), current_preset) == 0) {
+            current_index = i;
+            break;
+        }
+    }
+    
+    // Cycle to the next preset (wrap-around)
+    uint8_t new_index = (current_index + 1) % preset_count;
+    const char* new_preset_name = subghz_setting_get_preset_name(setting, new_index);
+    
+    // Update the radio preset with the new modulation preset
+    subghz_txrx_set_preset(
+        subghz->txrx,
+        new_preset_name,
+        current.frequency,
+        subghz_setting_get_preset_data(setting, new_index),
+        subghz_setting_get_preset_data_size(setting, new_index)
+    );
+
+    // --- Update the receiver view's status bar --- //
+    FuriString* frequency_str = furi_string_alloc();
+    FuriString* modulation_str = furi_string_alloc();
+    FuriString* history_stat_str = furi_string_alloc();
+
+    // Retrieve updated frequency and modulation strings
+    subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str);
+    
+    // Update the history text (samples /50)
+    subghz_history_get_text_space_left(subghz->history, history_stat_str);
+    
+    // Update the receiver view status bar with the new values
+    subghz_view_receiver_add_data_statusbar(
+        subghz->subghz_receiver,
+        furi_string_get_cstr(frequency_str),
+        furi_string_get_cstr(modulation_str),
+        furi_string_get_cstr(history_stat_str)
+    );
+    
+    furi_string_free(frequency_str);
+    furi_string_free(modulation_str);
+    furi_string_free(history_stat_str);
+
+}
+
+
+// Function to cycle modulation backwards
+void decrease_modulation_preset(SubGhz* subghz) {
+    // Retrieve the current settings structure
+    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
+    uint8_t preset_count = subghz_setting_get_preset_count(setting);
+    
+    // Get the current preset from the radio
+    SubGhzRadioPreset current = subghz_txrx_get_preset(subghz->txrx);
+    const char* current_preset = furi_string_get_cstr(current.name);
+
+    uint8_t current_index = 0;
+    
+    // Find the current index by iterating through the available presets
+    for(uint8_t i = 0; i < preset_count; i++) {
+        if(strcmp(subghz_setting_get_preset_name(setting, i), current_preset) == 0) {
+            current_index = i;
+            break;
+        }
+    }
+    
+    // Cycle to the previous preset (wrap-around using modulo arithmetic)
+    uint8_t new_index = (current_index + preset_count - 1) % preset_count;
+    const char* new_preset_name = subghz_setting_get_preset_name(setting, new_index);
+    
+    // Update the radio preset with the new modulation preset
+    subghz_txrx_set_preset(
+        subghz->txrx,
+        new_preset_name,
+        current.frequency,
+        subghz_setting_get_preset_data(setting, new_index),
+        subghz_setting_get_preset_data_size(setting, new_index)
+    );
+
+    // --- Update the receiver view's status bar --- //
+    FuriString* frequency_str = furi_string_alloc();
+    FuriString* modulation_str = furi_string_alloc();
+    FuriString* history_stat_str = furi_string_alloc();
+
+    // Retrieve updated frequency and modulation strings
+    subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str);
+    
+    // Update the history text (samples /50)
+    subghz_history_get_text_space_left(subghz->history, history_stat_str);
+    
+    // Update the receiver view status bar with the new values
+    subghz_view_receiver_add_data_statusbar(
+        subghz->subghz_receiver,
+        furi_string_get_cstr(frequency_str),
+        furi_string_get_cstr(modulation_str),
+        furi_string_get_cstr(history_stat_str)
+    );
+    
+    furi_string_free(frequency_str);
+    furi_string_free(modulation_str);
+    furi_string_free(history_stat_str);
+
+    
+}
+
