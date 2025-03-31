@@ -11,7 +11,7 @@ extern "C" {
 
 typedef struct CliSession CliSession;
 
-extern CliSession cli_vcp;
+extern const CliSession cli_vcp;
 
 #ifdef __cplusplus
 }
