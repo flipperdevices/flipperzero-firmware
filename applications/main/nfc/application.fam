@@ -301,6 +301,7 @@ App(
              "cli/commands/dump/protocols/felica/nfc_cli_dump_felica.c",
 
              "cli/commands/mfu/nfc_cli_command_mfu.c",
+             "cli/commands/mfu/nfc_cli_action_info.c",
 
              "cli/commands/nfc_cli_command_emulate.c",  
              "cli/commands/nfc_cli_command_scanner.c",
