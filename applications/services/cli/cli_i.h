@@ -50,7 +50,7 @@ struct Cli {
     FuriSemaphore* idle_sem;
     FuriString* last_line;
     FuriString* line;
-    CliSession* session;
+    const CliSession* session;
 
     size_t cursor_position;
 };
