@@ -379,7 +379,7 @@ float furi_hal_bt_get_rssi(void) {
     } else {
         val = agc * 6.0f - 127.0f;
         while(rssi > 30) {
-            val += 6.0;
+            val += 6.0f;
             rssi >>= 1;
         }
         val += (float)((417 * rssi + 18080) >> 10);
