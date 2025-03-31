@@ -354,6 +354,11 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
             SubGhzViewReceiverModel * model,
             {
                 if(model->idx != 0) model->idx--;
+                else {
+                	// Call helper function to cycle modulation
+                    increase_modulation_preset(subghz_receiver->context);
+                
+                }
             },
             true);
     } else if(
@@ -365,6 +370,11 @@ bool subghz_view_receiver_input(InputEvent* event, void* context) {
             {
                 if((model->history_item != 0) && (model->idx != model->history_item - 1))
                     model->idx++;
+
+                else {
+                	// Call helper function to cycle modulation
+                    decrease_modulation_preset(subghz_receiver->context);
+                }
             },
             true);
     } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
