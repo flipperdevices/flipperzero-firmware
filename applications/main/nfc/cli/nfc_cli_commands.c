@@ -5,8 +5,8 @@
 #include "commands/raw/nfc_cli_command_raw.h"
 #include "commands/apdu/nfc_cli_command_apdu.h"
 #include "commands/dump/nfc_cli_command_dump.h"
+#include "commands/mfu/nfc_cli_command_mfu.h"
 #include "commands/nfc_cli_command_emulate.h"
-#include "commands/nfc_cli_command_mfu.h"
 #include "commands/nfc_cli_command_scanner.h"
 #include "commands/nfc_cli_command_field.h"
 
