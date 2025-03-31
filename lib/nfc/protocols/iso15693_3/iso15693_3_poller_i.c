@@ -100,10 +100,11 @@ Iso15693_3Error iso15693_3_poller_activate(Iso15693_3Poller* instance, Iso15693_
             break;
         }
 
-        if(system_info->block_count > 0) {
+        if(system_info->block_count > 0 && system_info->block_size > 0) {
             simple_array_init(
                 data->block_data, system_info->block_count * system_info->block_size);
             simple_array_init(data->block_security, system_info->block_count);
+
             // Read blocks: Optional command
             ret = iso15693_3_poller_read_blocks(
                 instance,
