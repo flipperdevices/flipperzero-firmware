@@ -18,6 +18,8 @@ GUI module has several submodules:
 - @subpage js_gui__dialog — Dialog with up to 3 options
 - @subpage js_gui__widget — Displays a combination of custom elements on one screen
 
+---
+
 ## Conceptualizing GUI
 ### Event loop
 It is highly recommended to familiarize yourself with the event loop first
@@ -78,7 +80,9 @@ a GUI application:
 | ViewDispatcher | Common UI elements that fit with the overall look of the system              | ✅                |
 | SceneManager   | Additional navigation flow management for complex applications               | ❌                |
 
-# Example
+---
+
+## Example
 An example with three different views using the ViewDispatcher approach:
 ```js
 let eventLoop = require("event_loop");
@@ -123,48 +127,64 @@ gui.viewDispatcher.switchTo(views.demos);
 eventLoop.run();
 ```
 
+---
+
 # API reference
-## `viewDispatcher`
+## viewDispatcher
 The `viewDispatcher` constant holds the `ViewDispatcher` singleton.
 
-### `viewDispatcher.switchTo(view)`
+<br>
+
+### viewDispatcher.switchTo(view)
 Switches to a view, giving it control over the display and input.
 
-#### Parameters
+**Parameters**
   - `view`: the `View` to switch to
 
-### `viewDispatcher.sendTo(direction)`
+<br>
+
+### viewDispatcher.sendTo(direction)
 Sends the viewport that the dispatcher manages to the front of the stackup
 (effectively making it visible), or to the back (effectively making it
 invisible).
 
-#### Parameters
+**Parameters**
   - `direction`: either `"front"` or `"back"`
 
-### `viewDispatcher.sendCustom(event)`
+<br>
+
+### viewDispatcher.sendCustom(event)
 Sends a custom number to the `custom` event handler.
 
-#### Parameters
+**Parameters**
   - `event`: number to send
 
-### `viewDispatcher.custom`
+<br>
+
+### viewDispatcher.custom
 An event loop `Contract` object that identifies the custom event source,
 triggered by `ViewDispatcher.sendCustom(event)`.
 
-### `viewDispatcher.navigation`
+<br>
+
+### viewDispatcher.navigation
 An event loop `Contract` object that identifies the navigation event source,
 triggered when the back key is pressed.
 
-## `ViewFactory`
-When you import a module implementing a view, a `ViewFactory` is instantiated.
-For example, in the example above, `loadingView`, `submenuView` and `emptyView`
-are view factories.
+<br>
 
-### `ViewFactory.make()`
+## ViewFactory
+When you import a module implementing a view, a `ViewFactory` is instantiated. For example, in the example above, `loadingView`, `submenuView` and `emptyView` are view factories.
+
+<br>
+
+### ViewFactory.make()
 Creates an instance of a `View`.
 
-### `ViewFactory.make(props)`
+<br>
+
+### ViewFactory.make(props)
 Creates an instance of a `View` and assigns initial properties from `props`.
 
-#### Parameters
+**Parameters**
   - `props`: simple key-value object, e.g. `{ header: "Header" }`
