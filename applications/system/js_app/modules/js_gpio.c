@@ -308,7 +308,7 @@ static void js_gpio_is_pwm_running(struct mjs* mjs) {
  */
 static void js_gpio_pwm_stop(struct mjs* mjs) {
     JsGpioPinInst* manager_data = JS_GET_CONTEXT(mjs);
-    if(manager_data->pwm_output != FuriHalPwmOutputIdNone) {
+    if(manager_data->pwm_output == FuriHalPwmOutputIdNone) {
         JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "PWM is not supported on this pin");
     }
 

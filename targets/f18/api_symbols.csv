@@ -57,6 +57,7 @@ Header,+,lib/flipper_application/plugins/plugin_manager.h,,
 Header,+,lib/flipper_format/flipper_format.h,,
 Header,+,lib/flipper_format/flipper_format_i.h,,
 Header,+,lib/flipper_format/flipper_format_stream.h,,
+Header,+,lib/ieee754_parse_wrap/wrappers.h,,
 Header,+,lib/libusb_stm32/inc/hid_usage_button.h,,
 Header,+,lib/libusb_stm32/inc/hid_usage_consumer.h,,
 Header,+,lib/libusb_stm32/inc/hid_usage_desktop.h,,
@@ -382,6 +383,8 @@ Function,+,__wrap_putc,int,"int, FILE*"
 Function,+,__wrap_putchar,int,int
 Function,+,__wrap_puts,int,const char*
 Function,+,__wrap_snprintf,int,"char*, size_t, const char*, ..."
+Function,+,__wrap_strtod,double,"const char*, char**"
+Function,+,__wrap_strtof,float,"const char*, char**"
 Function,+,__wrap_ungetc,int,"int, FILE*"
 Function,+,__wrap_vsnprintf,int,"char*, size_t, const char*, va_list"
 Function,-,_asiprintf_r,int,"_reent*, char**, const char*, ..."
