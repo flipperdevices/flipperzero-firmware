@@ -18,6 +18,8 @@ typedef struct {
     uint8_t type;
 } SubGhzReceiverMenuItem;
 
+typedef struct SubGhz SubGhz;
+
 ARRAY_DEF(SubGhzReceiverMenuItemArray, SubGhzReceiverMenuItem, M_POD_OPLIST)
 
 #define M_OPL_SubGhzReceiverMenuItemArray_t() \
