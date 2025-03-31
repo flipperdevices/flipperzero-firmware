@@ -48,5 +48,4 @@ void subghz_view_receiver_exit(void* context);
 
 // Helper functions for subghz modulation shortcut
 void increase_modulation_preset(SubGhz* subghz);
-
 void decrease_modulation_preset(SubGhz* subghz);
