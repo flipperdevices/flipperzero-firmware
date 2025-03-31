@@ -123,7 +123,7 @@ char cli_getc(Cli* cli);
  */
 void cli_nl(Cli* cli);
 
-void cli_session_open(Cli* cli, void* session);
+void cli_session_open(Cli* cli, const void* session);
 
 void cli_session_close(Cli* cli);
 

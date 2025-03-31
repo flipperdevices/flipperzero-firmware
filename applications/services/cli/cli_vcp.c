@@ -312,7 +312,7 @@ static bool cli_vcp_is_connected(void) {
     return vcp->connected;
 }
 
-CliSession cli_vcp = {
+const CliSession cli_vcp = {
     cli_vcp_init,
     cli_vcp_deinit,
     cli_vcp_rx,

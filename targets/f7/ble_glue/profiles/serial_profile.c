@@ -47,7 +47,7 @@ static void ble_profile_serial_stop(FuriHalBleProfileBase* profile) {
 // Up to 45 ms
 #define CONNECTION_INTERVAL_MAX (0x24)
 
-static GapConfig serial_template_config = {
+static const GapConfig serial_template_config = {
     .adv_service =
         {
             .UUID_Type = UUID_TYPE_16,
@@ -86,7 +86,7 @@ static const FuriHalBleProfileTemplate profile_callbacks = {
     .get_gap_config = ble_profile_serial_get_config,
 };
 
-const FuriHalBleProfileTemplate* ble_profile_serial = &profile_callbacks;
+const FuriHalBleProfileTemplate* const ble_profile_serial = &profile_callbacks;
 
 void ble_profile_serial_set_event_callback(
     FuriHalBleProfileBase* profile,

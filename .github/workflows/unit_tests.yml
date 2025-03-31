@@ -21,7 +21,7 @@ jobs:
       - name: 'Flash unit tests firmware'
         id: flashing
         if: success()
-        timeout-minutes: 10
+        timeout-minutes: 5
         run: |
           source scripts/toolchain/fbtenv.sh
           ./fbt resources firmware_latest flash LIB_DEBUG=1 FIRMWARE_APP_SET=unit_tests FORCE=1
@@ -30,7 +30,7 @@ jobs:
       - name: 'Copy assets and unit data, reboot and wait for flipper'
         id: copy
         if: steps.flashing.outcome == 'success'
-        timeout-minutes: 7
+        timeout-minutes: 5
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testops.py -t=15 await_flipper
@@ -42,7 +42,7 @@ jobs:
       - name: 'Run units and validate results'
         id: run_units
         if: steps.copy.outcome == 'success'
-        timeout-minutes: 7
+        timeout-minutes: 5
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testops.py run_units
