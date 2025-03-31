@@ -246,7 +246,14 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
         canvas_draw_icon(canvas, 0, 0, &I_Scanning_short_96x52);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 63, 44, "Scanning...");
+        // Up/down icon to indicate modulation change shortcut
+        canvas_draw_icon(canvas, 120, 16, &I_ButtonUp_7x4);
+		canvas_draw_icon(canvas, 120, 32, &I_ButtonDown_7x4);
+		
         canvas_set_font(canvas, FontSecondary);
+        // Draw preset name eg. AM
+        canvas_draw_str(canvas, 110, 29, furi_string_get_cstr(model->preset_str));
+
     }
 
     if(model->device_type == SubGhzRadioDeviceTypeInternal) {
