@@ -424,7 +424,7 @@ void cli_delete_command(Cli* cli, const char* name) {
     furi_string_free(name_str);
 }
 
-void cli_session_open(Cli* cli, void* session) {
+void cli_session_open(Cli* cli, const void* session) {
     furi_check(cli);
 
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);

@@ -14,4 +14,4 @@ typedef enum {
     iButtonProtocolDSMax,
 } iButtonProtocolDallas;
 
-extern const iButtonProtocolDallasBase* ibutton_protocols_dallas[];
+extern const iButtonProtocolDallasBase* const ibutton_protocols_dallas[];
