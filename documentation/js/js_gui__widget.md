@@ -11,14 +11,14 @@ let widgetView = require("gui/widget");
 ```
 
 This module depends on the `gui` module, which in turn depends on the
-`event_loop` module, so they _must_ be imported in this order. It is also
+`event_loop` module, so they **must** be imported in this order. It is also
 recommended to conceptualize these modules first before using this one.
 
-# Example
+## Example
 For an example, refer to the `gui.js` example script.
 
-# View props
+## View props
 This view does not have any props.
 
-# Children
+## Children
 This view has the elements as its children.

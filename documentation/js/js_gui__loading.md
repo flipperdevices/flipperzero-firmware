@@ -11,7 +11,7 @@ let loadingView = require("gui/loading");
 ```
 
 This module depends on the `gui` module, which in turn depends on the
-`event_loop` module, so they _must_ be imported in this order. It is also
+`event_loop` module, so they **must** be imported in this order. It is also
 recommended to conceptualize these modules first before using this one.
 
 # Example
