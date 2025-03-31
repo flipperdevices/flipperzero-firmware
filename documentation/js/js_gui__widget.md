@@ -1,7 +1,6 @@
-# js_gui__widget {#js_gui__widget}
+# Widget GUI view {#js_gui__widget}
 
-# Widget GUI view
-Displays a combination of custom elements on one screen
+Displays a combination of custom elements on one screen.
 
 <img src="widget.png" width="200" alt="Sample screenshot of the view" />
 
@@ -12,14 +11,14 @@ let widgetView = require("gui/widget");
 ```
 
 This module depends on the `gui` module, which in turn depends on the
-`event_loop` module, so they _must_ be imported in this order. It is also
+`event_loop` module, so they **must** be imported in this order. It is also
 recommended to conceptualize these modules first before using this one.
 
-# Example
-For an example refer to the `gui.js` example script.
+## Example
+For an example, refer to the `gui.js` example script.
 
-# View props
+## View props
 This view does not have any props.
 
-# Children
+## Children
 This view has the elements as its children.

@@ -1,13 +1,24 @@
-# js_gui {#js_gui}
+# GUI module {#js_gui}
 
-# GUI module
+The module allows you to use GUI (graphical user interface) in concepts off the Flipper Zero firmware. Call the `require` function to load the module before first using its methods. This module depends on the `event_loop` module, so it **must** be imported after the `event_loop` import:
+
 ```js
 let eventLoop = require("event_loop");
 let gui = require("gui");
 ```
+## Submodules
 
-This module depends on the `event_loop` module, so it _must_ only be imported
-after `event_loop` is imported.
+GUI module has several submodules:
+
+- @subpage js_gui__submenu — Displays a scrollable list of clickable textual entries
+- @subpage js_gui__loading — Displays an animated hourglass icon
+- @subpage js_gui__empty_screen — Just empty screen
+- @subpage js_gui__text_input — Keyboard-like text input
+- @subpage js_gui__text_box — Simple multiline text box
+- @subpage js_gui__dialog — Dialog with up to 3 options
+- @subpage js_gui__widget — Displays a combination of custom elements on one screen
+
+---
 
 ## Conceptualizing GUI
 ### Event loop
@@ -27,23 +38,23 @@ always access the canvas through a viewport.
 In Flipper's terminology, a "View" is a fullscreen design element that assumes
 control over the entire viewport and all input events. Different types of views
 are available (not all of which are unfortunately currently implemented in JS):
-| View                 | Has JS adapter?       |
-|----------------------|-----------------------|
-| `button_menu`        | ❌                    |
-| `button_panel`       | ❌                    |
-| `byte_input`         | ✅                    |
-| `dialog_ex`          | ✅ (as `dialog`)      |
-| `empty_screen`       | ✅                    |
-| `file_browser`       | ✅ (as `file_picker`) |
-| `loading`            | ✅                    |
-| `menu`               | ❌                    |
-| `number_input`       | ❌                    |
-| `popup`              | ❌                    |
-| `submenu`            | ✅                    |
-| `text_box`           | ✅                    |
-| `text_input`         | ✅                    |
-| `variable_item_list` | ❌                    |
-| `widget`             | ✅                    |
+| View                 | Has JS adapter?  |
+|----------------------|------------------|
+| `button_menu`        | ❌               |
+| `button_panel`       | ❌               |
+| `byte_input`         | ❌               |
+| `dialog_ex`          | ✅ (as `dialog`) |
+| `empty_screen`       | ✅               |
+| `file_browser`       | ❌               |
+| `loading`            | ✅               |
+| `menu`               | ❌               |
+| `number_input`       | ❌               |
+| `popup`              | ❌               |
+| `submenu`            | ✅               |
+| `text_box`           | ✅               |
+| `text_input`         | ✅               |
+| `variable_item_list` | ❌               |
+| `widget`             | ❌               |
 
 In JS, each view has its own set of properties (or just "props"). The programmer
 can manipulate these properties in two ways:
@@ -69,7 +80,9 @@ a GUI application:
 | ViewDispatcher | Common UI elements that fit with the overall look of the system              | ✅                |
 | SceneManager   | Additional navigation flow management for complex applications               | ❌                |
 
-# Example
+---
+
+## Example
 An example with three different views using the ViewDispatcher approach:
 ```js
 let eventLoop = require("event_loop");
@@ -114,48 +127,64 @@ gui.viewDispatcher.switchTo(views.demos);
 eventLoop.run();
 ```
 
+---
+
 # API reference
-## `viewDispatcher`
+## viewDispatcher
 The `viewDispatcher` constant holds the `ViewDispatcher` singleton.
 
-### `viewDispatcher.switchTo(view)`
-Switches to a view, giving it control over the display and input
+<br>
 
-#### Parameters
+### viewDispatcher.switchTo(view)
+Switches to a view, giving it control over the display and input.
+
+**Parameters**
   - `view`: the `View` to switch to
 
-### `viewDispatcher.sendTo(direction)`
+<br>
+
+### viewDispatcher.sendTo(direction)
 Sends the viewport that the dispatcher manages to the front of the stackup
 (effectively making it visible), or to the back (effectively making it
-invisible)
+invisible).
 
-#### Parameters
+**Parameters**
   - `direction`: either `"front"` or `"back"`
 
-### `viewDispatcher.sendCustom(event)`
-Sends a custom number to the `custom` event handler
+<br>
 
-#### Parameters
+### viewDispatcher.sendCustom(event)
+Sends a custom number to the `custom` event handler.
+
+**Parameters**
   - `event`: number to send
 
-### `viewDispatcher.custom`
+<br>
+
+### viewDispatcher.custom
 An event loop `Contract` object that identifies the custom event source,
-triggered by `ViewDispatcher.sendCustom(event)`
+triggered by `ViewDispatcher.sendCustom(event)`.
 
-### `viewDispatcher.navigation`
+<br>
+
+### viewDispatcher.navigation
 An event loop `Contract` object that identifies the navigation event source,
-triggered when the back key is pressed
+triggered when the back key is pressed.
 
-## `ViewFactory`
-When you import a module implementing a view, a `ViewFactory` is instantiated.
-For example, in the example above, `loadingView`, `submenuView` and `emptyView`
-are view factories.
+<br>
 
-### `ViewFactory.make()`
-Creates an instance of a `View`
+## ViewFactory
+When you import a module implementing a view, a `ViewFactory` is instantiated. For example, in the example above, `loadingView`, `submenuView` and `emptyView` are view factories.
 
-### `ViewFactory.make(props)`
-Creates an instance of a `View` and assigns initial properties from `props`
+<br>
 
-#### Parameters
+### ViewFactory.make()
+Creates an instance of a `View`.
+
+<br>
+
+### ViewFactory.make(props)
+Creates an instance of a `View` and assigns initial properties from `props`.
+
+**Parameters**
   - `props`: simple key-value object, e.g. `{ header: "Header" }`
