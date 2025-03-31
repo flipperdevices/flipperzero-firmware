@@ -1,5 +1,4 @@
 #include "nfc_cli_command_dump.h"
-#include "../../nfc_cli_command_processor.h"
 #include "protocols/nfc_cli_dump_common_types.h"
 #include "../helpers/nfc_cli_format.h"
 #include "../helpers/nfc_cli_protocol_parser.h"
