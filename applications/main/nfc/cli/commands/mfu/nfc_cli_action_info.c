@@ -71,7 +71,7 @@ const char*
         description = "access fully granted";
     else if(value >= 0x08 && value <= 0x0E)
         description = "proprietary";
-    else if(0x0F && !read)
+    else if(value == 0x0F && !read)
         description = "no access granted at all";
 
     return description;
@@ -98,7 +98,7 @@ static void nfc_cli_mfu_info_print_common(const MfUltralightData* data) {
 
 static void nfc_cli_mfu_info_print_ndef(const MfUltralightData* data) {
     const MfUltralightCapabilityContainer* cc =
-        (const MfUltralightCapabilityContainer*)&data->page[3];
+        (const MfUltralightCapabilityContainer*)data->page[3].data;
     if(cc->magic == 0xE1) {
         printf(ANSI_FG_GREEN "\r\n\tNDEF Message\r\n" ANSI_RESET);
         nfc_cli_printf_array(data->page[3].data, 4, "Capability container: ");
@@ -131,7 +131,7 @@ static void nfc_cli_mfu_info_print_counter(const MfUltralightData* data) {
     for(; i < MF_ULTRALIGHT_COUNTER_NUM; i++) {
         printf("Counter [%d]: ", i);
         nfc_cli_printf_array(data->counter[i].data, MF_ULTRALIGHT_COUNTER_SIZE, "");
-        printf(" Value: %ld\r\n", data->counter[i].counter);
+        printf(" Value: %lu\r\n", data->counter[i].counter);
 
         const uint8_t tf = data->tearing_flag[i].data;
         printf(

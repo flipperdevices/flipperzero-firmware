@@ -51,7 +51,14 @@ static void ApduItem_init_set(NfcCliApduData* item, const NfcCliApduData* src) {
 }
 
 static void ApduItem_set(NfcCliApduData* item, const NfcCliApduData* src) {
-    if(item->data && item->size != src->size) realloc(item->data, src->size);
+    if(item->data == NULL) {
+        item->data = malloc(src->size);
+    } else if(item->size != src->size) {
+        uint8_t* buf = realloc(item->data, src->size);
+        furi_check(buf);
+        item->data = buf;
+    }
+
     item->size = src->size;
     memcpy(item->data, src->data, src->size);
 }
@@ -171,7 +178,6 @@ static NfcCommand nfc_cli_apdu_poller_callback(NfcGenericEvent event, void* cont
     NfcCommand command = NfcCommandStop;
     if(request_type == NfcCliProtocolRequestTypeAbort) {
         FURI_LOG_D(TAG, "Aborting poller callback");
-        command = NfcCommandStop;
     } else {
         NfcCliApduProtocolHandler handler =
             nfc_cli_apdu_poller_get_handler(instance->data.protocol);

@@ -143,7 +143,6 @@ static size_t nfc_cli_dump_set_protocol(NfcCliDumpContext* instance) {
     } else {
         if(!nfc_cli_scanner_detect_protocol(instance->scanner, 2000)) {
             printf(ANSI_FG_RED "Error: Timeout\r\n" ANSI_RESET);
-            instance->desired_protocol = NfcProtocolInvalid;
         } else {
             nfc_cli_scanner_list_detected_protocols(instance->scanner);
             protocol_count = nfc_cli_scanner_detected_protocol_num(instance->scanner);
