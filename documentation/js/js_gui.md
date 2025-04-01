@@ -10,12 +10,15 @@ let gui = require("gui");
 
 GUI module has several submodules:
 
-- @subpage js_gui__submenu — Displays a scrollable list of clickable textual entries
-- @subpage js_gui__loading — Displays an animated hourglass icon
-- @subpage js_gui__empty_screen — Just empty screen
-- @subpage js_gui__text_input — Keyboard-like text input
-- @subpage js_gui__text_box — Simple multiline text box
+- @subpage js_gui__byte_input — Keyboard-like hex input
 - @subpage js_gui__dialog — Dialog with up to 3 options
+- @subpage js_gui__empty_screen — Just empty screen
+- @subpage js_gui__file_picker — Displays a file selection prompt
+- @subpage js_gui__icon — Retrieves and loads icons for use in GUI
+- @subpage js_gui__loading — Displays an animated hourglass icon
+- @subpage js_gui__submenu — Displays a scrollable list of clickable textual entries
+- @subpage js_gui__text_box — Simple multiline text box
+- @subpage js_gui__text_input — Keyboard-like text input
 - @subpage js_gui__widget — Displays a combination of custom elements on one screen
 
 ---
@@ -38,23 +41,23 @@ always access the canvas through a viewport.
 In Flipper's terminology, a "View" is a fullscreen design element that assumes
 control over the entire viewport and all input events. Different types of views
 are available (not all of which are unfortunately currently implemented in JS):
-| View                 | Has JS adapter?  |
-|----------------------|------------------|
-| `button_menu`        | ❌               |
-| `button_panel`       | ❌               |
-| `byte_input`         | ❌               |
-| `dialog_ex`          | ✅ (as `dialog`) |
-| `empty_screen`       | ✅               |
-| `file_browser`       | ❌               |
-| `loading`            | ✅               |
-| `menu`               | ❌               |
-| `number_input`       | ❌               |
-| `popup`              | ❌               |
-| `submenu`            | ✅               |
-| `text_box`           | ✅               |
-| `text_input`         | ✅               |
-| `variable_item_list` | ❌               |
-| `widget`             | ❌               |
+| View                 | Has JS adapter?       |
+|----------------------|-----------------------|
+| `button_menu`        | ❌                    |
+| `button_panel`       | ❌                    |
+| `byte_input`         | ✅                    |
+| `dialog_ex`          | ✅ (as `dialog`)      |
+| `empty_screen`       | ✅                    |
+| `file_browser`       | ✅ (as `file_picker`) |
+| `loading`            | ✅                    |
+| `menu`               | ❌                    |
+| `number_input`       | ❌                    |
+| `popup`              | ❌                    |
+| `submenu`            | ✅                    |
+| `text_box`           | ✅                    |
+| `text_input`         | ✅                    |
+| `variable_item_list` | ❌                    |
+| `widget`             | ✅                    |
 
 In JS, each view has its own set of properties (or just "props"). The programmer
 can manipulate these properties in two ways:
