@@ -326,6 +326,7 @@ static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
 }
 
 static void set_manufacturer_data(uint8_t* mfg_data, uint8_t mfg_data_len) {
+    furi_check(mfg_data_len < sizeof(gap->service.mfg_data) - 2);
     gap->service.mfg_data[0] = mfg_data_len + 1;
     gap->service.mfg_data[1] = AD_TYPE_MANUFACTURER_SPECIFIC_DATA;
     memcpy(&gap->service.mfg_data[gap->service.mfg_data_len], mfg_data, mfg_data_len);
@@ -583,6 +584,8 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
         set_advertisment_service_uid(
             gap->config->adv_service.Service_UUID_128,
             sizeof(gap->config->adv_service.Service_UUID_128));
+    } else {
+        furi_crash("Invalid UUID type");
     }
 
     // Set callback
