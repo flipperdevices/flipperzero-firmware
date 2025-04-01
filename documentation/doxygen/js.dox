@@ -1,30 +1,38 @@
 /**
 @page js JavaScript
 
-This page contains some information on the Flipper Zero scripting engine, which is based on a modified mJS library.
+Flipper Zero's built-in JavaScript engine enables you to run lightweight scripts, similar to full-fledged C/C++ apps. Scripts can be shared, copied to a microSD card, and launched directly from the Flipper Zero menu — no precompilation needed.
 
-- [Brief mJS description](https://github.com/cesanta/mjs/blob/master/README.md)
-- @subpage js_data_types
-- @subpage js_builtin
+## Get started with JavaScript
 
-## JavaScript modules
+- @subpage js_about_js_engine — Learn about the implementation, advantages and limitations of our JavaScript engine
 
-JS modules use the Flipper app plugin system. Each module is compiled into a `.fal` library file and is located on a microSD card. Here is a list of implemented modules:
+- @subpage js_your_first_js_app — Create a simple app and run it using the Flipper Zero UI or CLI
 
-- @subpage js_badusb - BadUSB module
-- @subpage js_serial - Serial module
-- @subpage js_math - Math module
-- @subpage js_notification - Notifications module
-- @subpage js_event_loop - Event Loop module
-- @subpage js_gpio - GPIO module
-- @subpage js_gui - GUI module and its submodules:
-  - @subpage js_gui__submenu - Submenu view
-  - @subpage js_gui__loading - Hourglass (Loading) view
-  - @subpage js_gui__empty_screen - Empty view
-  - @subpage js_gui__text_input - Keyboard-like text input
-  - @subpage js_gui__text_box - Simple multiline text box
-  - @subpage js_gui__dialog - Dialog with up to 3 options
+- @subpage js_developing_apps_using_js_sdk — Learn how to install and use the JavaScript SDK for fast app debugging
 
-All modules have corresponding TypeScript declaration files, so you can set up your IDE to show suggestions when writing JS scripts.
+- @subpage js_using_js_modules — Learn how you can use JS modules in your apps
+
+## JavaScript modules {#js_modules}
+
+- @subpage js_badusb — This module allows you to emulate a standard USB keyboard
+- @subpage js_event_loop — The module for easy event-based developing
+- @subpage js_gpio — This module allows you to control GPIO pins
+- @subpage js_gui — This module allows you to use GUI (graphical user interface)
+- @subpage js_math — This module contains mathematical methods and constants
+- @subpage js_notification — This module allows you to use LED, speaker and vibro for notifications
+- @subpage js_serial — The module for interaction with external devices via UART
+- @subpage js_storage — The module for accessing the filesystem
+
+## Examples {#js_examples}
+
+- [Our examples (GitHub)](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/system/js_app/examples/apps/Scripts) — Pre-installed with the firmware, so you can run them directly from the Flipper Zero menu (**Apps → Scripts**)
+- [Featured: Derek Jamison's examples (GitHub)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/js) — Come with detailed video guides for most scripts on [his YouTube channel](https://www.youtube.com/@MrDerekJamison)
+- Just google "flipper zero javascript examples"
+
+## Other resources
+
+- @subpage js_data_types — A list of data types you can use in your JS scripts
+- @subpage js_builtin — A list of functions you can use without including any JS modules
 
 */

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,82.1,,
+Version,+,83.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -57,6 +57,7 @@ Header,+,lib/flipper_application/plugins/plugin_manager.h,,
 Header,+,lib/flipper_format/flipper_format.h,,
 Header,+,lib/flipper_format/flipper_format_i.h,,
 Header,+,lib/flipper_format/flipper_format_stream.h,,
+Header,+,lib/ieee754_parse_wrap/wrappers.h,,
 Header,+,lib/libusb_stm32/inc/hid_usage_button.h,,
 Header,+,lib/libusb_stm32/inc/hid_usage_consumer.h,,
 Header,+,lib/libusb_stm32/inc/hid_usage_desktop.h,,
@@ -382,6 +383,8 @@ Function,+,__wrap_putc,int,"int, FILE*"
 Function,+,__wrap_putchar,int,int
 Function,+,__wrap_puts,int,const char*
 Function,+,__wrap_snprintf,int,"char*, size_t, const char*, ..."
+Function,+,__wrap_strtod,double,"const char*, char**"
+Function,+,__wrap_strtof,float,"const char*, char**"
 Function,+,__wrap_ungetc,int,"int, FILE*"
 Function,+,__wrap_vsnprintf,int,"char*, size_t, const char*, va_list"
 Function,-,_asiprintf_r,int,"_reent*, char**, const char*, ..."
@@ -785,7 +788,7 @@ Function,+,cli_print_usage,void,"const char*, const char*, const char*"
 Function,+,cli_read,size_t,"Cli*, uint8_t*, size_t"
 Function,+,cli_read_timeout,size_t,"Cli*, uint8_t*, size_t, uint32_t"
 Function,+,cli_session_close,void,Cli*
-Function,+,cli_session_open,void,"Cli*, void*"
+Function,+,cli_session_open,void,"Cli*, const void*"
 Function,+,cli_write,void,"Cli*, const uint8_t*, size_t"
 Function,+,composite_api_resolver_add,void,"CompositeApiResolver*, const ElfApiInterface*"
 Function,+,composite_api_resolver_alloc,CompositeApiResolver*,
@@ -1287,23 +1290,23 @@ Function,+,furi_hal_hid_u2f_get_request,uint32_t,uint8_t*
 Function,+,furi_hal_hid_u2f_is_connected,_Bool,
 Function,+,furi_hal_hid_u2f_send_response,void,"uint8_t*, uint8_t"
 Function,+,furi_hal_hid_u2f_set_callback,void,"HidU2fCallback, void*"
-Function,+,furi_hal_i2c_acquire,void,FuriHalI2cBusHandle*
+Function,+,furi_hal_i2c_acquire,void,const FuriHalI2cBusHandle*
 Function,-,furi_hal_i2c_deinit_early,void,
 Function,-,furi_hal_i2c_init,void,
 Function,-,furi_hal_i2c_init_early,void,
-Function,+,furi_hal_i2c_is_device_ready,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint32_t"
-Function,+,furi_hal_i2c_read_mem,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_i2c_read_reg_16,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint16_t*, uint32_t"
-Function,+,furi_hal_i2c_read_reg_8,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint8_t*, uint32_t"
-Function,+,furi_hal_i2c_release,void,FuriHalI2cBusHandle*
-Function,+,furi_hal_i2c_rx,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_i2c_rx_ext,_Bool,"FuriHalI2cBusHandle*, uint16_t, _Bool, uint8_t*, size_t, FuriHalI2cBegin, FuriHalI2cEnd, uint32_t"
-Function,+,furi_hal_i2c_trx,_Bool,"FuriHalI2cBusHandle*, uint8_t, const uint8_t*, size_t, uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_i2c_tx,_Bool,"FuriHalI2cBusHandle*, uint8_t, const uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_i2c_tx_ext,_Bool,"FuriHalI2cBusHandle*, uint16_t, _Bool, const uint8_t*, size_t, FuriHalI2cBegin, FuriHalI2cEnd, uint32_t"
-Function,+,furi_hal_i2c_write_mem,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, const uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_i2c_write_reg_16,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint16_t, uint32_t"
-Function,+,furi_hal_i2c_write_reg_8,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint8_t, uint32_t"
+Function,+,furi_hal_i2c_is_device_ready,_Bool,"const FuriHalI2cBusHandle*, uint8_t, uint32_t"
+Function,+,furi_hal_i2c_read_mem,_Bool,"const FuriHalI2cBusHandle*, uint8_t, uint8_t, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_i2c_read_reg_16,_Bool,"const FuriHalI2cBusHandle*, uint8_t, uint8_t, uint16_t*, uint32_t"
+Function,+,furi_hal_i2c_read_reg_8,_Bool,"const FuriHalI2cBusHandle*, uint8_t, uint8_t, uint8_t*, uint32_t"
+Function,+,furi_hal_i2c_release,void,const FuriHalI2cBusHandle*
+Function,+,furi_hal_i2c_rx,_Bool,"const FuriHalI2cBusHandle*, uint8_t, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_i2c_rx_ext,_Bool,"const FuriHalI2cBusHandle*, uint16_t, _Bool, uint8_t*, size_t, FuriHalI2cBegin, FuriHalI2cEnd, uint32_t"
+Function,+,furi_hal_i2c_trx,_Bool,"const FuriHalI2cBusHandle*, uint8_t, const uint8_t*, size_t, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_i2c_tx,_Bool,"const FuriHalI2cBusHandle*, uint8_t, const uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_i2c_tx_ext,_Bool,"const FuriHalI2cBusHandle*, uint16_t, _Bool, const uint8_t*, size_t, FuriHalI2cBegin, FuriHalI2cEnd, uint32_t"
+Function,+,furi_hal_i2c_write_mem,_Bool,"const FuriHalI2cBusHandle*, uint8_t, uint8_t, const uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_i2c_write_reg_16,_Bool,"const FuriHalI2cBusHandle*, uint8_t, uint8_t, uint16_t, uint32_t"
+Function,+,furi_hal_i2c_write_reg_8,_Bool,"const FuriHalI2cBusHandle*, uint8_t, uint8_t, uint8_t, uint32_t"
 Function,+,furi_hal_info_get,void,"PropertyValueCallback, char, void*"
 Function,+,furi_hal_info_get_api_version,void,"uint16_t*, uint16_t*"
 Function,-,furi_hal_init,void,
@@ -1469,20 +1472,20 @@ Function,+,furi_hal_speaker_release,void,
 Function,+,furi_hal_speaker_set_volume,void,float
 Function,+,furi_hal_speaker_start,void,"float, float"
 Function,+,furi_hal_speaker_stop,void,
-Function,+,furi_hal_spi_acquire,void,FuriHalSpiBusHandle*
+Function,+,furi_hal_spi_acquire,void,const FuriHalSpiBusHandle*
 Function,+,furi_hal_spi_bus_deinit,void,FuriHalSpiBus*
-Function,+,furi_hal_spi_bus_handle_deinit,void,FuriHalSpiBusHandle*
-Function,+,furi_hal_spi_bus_handle_init,void,FuriHalSpiBusHandle*
+Function,+,furi_hal_spi_bus_handle_deinit,void,const FuriHalSpiBusHandle*
+Function,+,furi_hal_spi_bus_handle_init,void,const FuriHalSpiBusHandle*
 Function,+,furi_hal_spi_bus_init,void,FuriHalSpiBus*
-Function,+,furi_hal_spi_bus_rx,_Bool,"FuriHalSpiBusHandle*, uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_spi_bus_trx,_Bool,"FuriHalSpiBusHandle*, const uint8_t*, uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_spi_bus_trx_dma,_Bool,"FuriHalSpiBusHandle*, uint8_t*, uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_spi_bus_tx,_Bool,"FuriHalSpiBusHandle*, const uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_spi_bus_rx,_Bool,"const FuriHalSpiBusHandle*, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_spi_bus_trx,_Bool,"const FuriHalSpiBusHandle*, const uint8_t*, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_spi_bus_trx_dma,_Bool,"const FuriHalSpiBusHandle*, uint8_t*, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_spi_bus_tx,_Bool,"const FuriHalSpiBusHandle*, const uint8_t*, size_t, uint32_t"
 Function,-,furi_hal_spi_config_deinit_early,void,
 Function,-,furi_hal_spi_config_init,void,
 Function,-,furi_hal_spi_config_init_early,void,
 Function,-,furi_hal_spi_dma_init,void,
-Function,+,furi_hal_spi_release,void,FuriHalSpiBusHandle*
+Function,+,furi_hal_spi_release,void,const FuriHalSpiBusHandle*
 Function,+,furi_hal_switch,void,void*
 Function,+,furi_hal_usb_ccid_insert_smartcard,void,
 Function,+,furi_hal_usb_ccid_remove_smartcard,void,
@@ -1495,7 +1498,7 @@ Function,+,furi_hal_usb_is_locked,_Bool,
 Function,+,furi_hal_usb_lock,void,
 Function,+,furi_hal_usb_reinit,void,
 Function,+,furi_hal_usb_set_config,_Bool,"FuriHalUsbInterface*, void*"
-Function,-,furi_hal_usb_set_state_callback,void,"FuriHalUsbStateCallback, void*"
+Function,+,furi_hal_usb_set_state_callback,void,"FuriHalUsbStateCallback, void*"
 Function,+,furi_hal_usb_unlock,void,
 Function,+,furi_hal_version_do_i_belong_here,_Bool,
 Function,+,furi_hal_version_get_ble_local_device_name_ptr,const char*,
@@ -1733,7 +1736,7 @@ Function,-,getchar,int,
 Function,-,getchar_unlocked,int,
 Function,-,getenv,char*,const char*
 Function,-,gets,char*,char*
-Function,-,getsubopt,int,"char**, char**, char**"
+Function,-,getsubopt,int,"char**, char* const*, char**"
 Function,-,getw,int,FILE*
 Function,+,gui_add_framebuffer_callback,void,"Gui*, GuiCanvasCommitCallback, void*"
 Function,+,gui_add_view_port,void,"Gui*, ViewPort*, GuiLayer"
@@ -2361,19 +2364,19 @@ Function,-,pow,double,"double, double"
 Function,-,pow10,double,double
 Function,-,pow10f,float,float
 Function,+,power_enable_low_battery_level_notification,void,"Power*, _Bool"
+Function,+,power_enable_otg,void,"Power*, _Bool"
 Function,+,power_get_info,void,"Power*, PowerInfo*"
 Function,+,power_get_pubsub,FuriPubSub*,Power*
 Function,+,power_is_battery_healthy,_Bool,Power*
 Function,+,power_is_otg_enabled,_Bool,Power*
 Function,+,power_off,void,Power*
 Function,+,power_reboot,void,"Power*, PowerBootMode"
-Function,+,power_enable_otg,void,"Power*, _Bool"
 Function,+,powf,float,"float, float"
 Function,-,powl,long double,"long double, long double"
 Function,+,pretty_format_bytes_hex_canonical,void,"FuriString*, size_t, const char*, const uint8_t*, size_t"
 Function,-,printf,int,"const char*, ..."
 Function,+,property_value_out,void,"PropertyValueContext*, const char*, unsigned int, ..."
-Function,+,protocol_dict_alloc,ProtocolDict*,"const ProtocolBase**, size_t"
+Function,+,protocol_dict_alloc,ProtocolDict*,"const ProtocolBase* const*, size_t"
 Function,+,protocol_dict_decoders_feed,ProtocolId,"ProtocolDict*, _Bool, uint32_t"
 Function,+,protocol_dict_decoders_feed_by_feature,ProtocolId,"ProtocolDict*, uint32_t, _Bool, uint32_t"
 Function,+,protocol_dict_decoders_feed_by_id,ProtocolId,"ProtocolDict*, size_t, _Bool, uint32_t"
@@ -2536,29 +2539,29 @@ Function,+,srand,void,unsigned
 Function,-,srand48,void,long
 Function,-,srandom,void,unsigned
 Function,+,sscanf,int,"const char*, const char*, ..."
-Function,+,st25r3916_change_reg_bits,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t, uint8_t"
-Function,+,st25r3916_change_test_reg_bits,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t, uint8_t"
-Function,+,st25r3916_check_reg,_Bool,"FuriHalSpiBusHandle*, uint8_t, uint8_t, uint8_t"
-Function,+,st25r3916_clear_reg_bits,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t"
-Function,+,st25r3916_direct_cmd,void,"FuriHalSpiBusHandle*, uint8_t"
-Function,+,st25r3916_get_irq,uint32_t,FuriHalSpiBusHandle*
-Function,+,st25r3916_mask_irq,void,"FuriHalSpiBusHandle*, uint32_t"
-Function,+,st25r3916_modify_reg,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t, uint8_t"
-Function,+,st25r3916_read_burst_regs,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t*, uint8_t"
-Function,+,st25r3916_read_fifo,_Bool,"FuriHalSpiBusHandle*, uint8_t*, size_t, size_t*"
-Function,+,st25r3916_read_pta_mem,void,"FuriHalSpiBusHandle*, uint8_t*, size_t"
-Function,+,st25r3916_read_reg,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t*"
-Function,+,st25r3916_read_test_reg,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t*"
-Function,+,st25r3916_reg_read_fifo,void,"FuriHalSpiBusHandle*, uint8_t*, size_t"
-Function,+,st25r3916_reg_write_fifo,void,"FuriHalSpiBusHandle*, const uint8_t*, size_t"
-Function,+,st25r3916_set_reg_bits,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t"
-Function,+,st25r3916_write_burst_regs,void,"FuriHalSpiBusHandle*, uint8_t, const uint8_t*, uint8_t"
-Function,+,st25r3916_write_fifo,void,"FuriHalSpiBusHandle*, const uint8_t*, size_t"
-Function,+,st25r3916_write_pta_mem,void,"FuriHalSpiBusHandle*, const uint8_t*, size_t"
-Function,+,st25r3916_write_ptf_mem,void,"FuriHalSpiBusHandle*, const uint8_t*, size_t"
-Function,+,st25r3916_write_pttsn_mem,void,"FuriHalSpiBusHandle*, uint8_t*, size_t"
-Function,+,st25r3916_write_reg,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t"
-Function,+,st25r3916_write_test_reg,void,"FuriHalSpiBusHandle*, uint8_t, uint8_t"
+Function,+,st25r3916_change_reg_bits,void,"const FuriHalSpiBusHandle*, uint8_t, uint8_t, uint8_t"
+Function,+,st25r3916_change_test_reg_bits,void,"const FuriHalSpiBusHandle*, uint8_t, uint8_t, uint8_t"
+Function,+,st25r3916_check_reg,_Bool,"const FuriHalSpiBusHandle*, uint8_t, uint8_t, uint8_t"
+Function,+,st25r3916_clear_reg_bits,void,"const FuriHalSpiBusHandle*, uint8_t, uint8_t"
+Function,+,st25r3916_direct_cmd,void,"const FuriHalSpiBusHandle*, uint8_t"
+Function,+,st25r3916_get_irq,uint32_t,const FuriHalSpiBusHandle*
+Function,+,st25r3916_mask_irq,void,"const FuriHalSpiBusHandle*, uint32_t"
+Function,+,st25r3916_modify_reg,void,"const FuriHalSpiBusHandle*, uint8_t, uint8_t, uint8_t"
+Function,+,st25r3916_read_burst_regs,void,"const FuriHalSpiBusHandle*, uint8_t, uint8_t*, uint8_t"
+Function,+,st25r3916_read_fifo,_Bool,"const FuriHalSpiBusHandle*, uint8_t*, size_t, size_t*"
+Function,+,st25r3916_read_pta_mem,void,"const FuriHalSpiBusHandle*, uint8_t*, size_t"
+Function,+,st25r3916_read_reg,void,"const FuriHalSpiBusHandle*, uint8_t, uint8_t*"
+Function,+,st25r3916_read_test_reg,void,"const FuriHalSpiBusHandle*, uint8_t, uint8_t*"
+Function,+,st25r3916_reg_read_fifo,void,"const FuriHalSpiBusHandle*, uint8_t*, size_t"
+Function,+,st25r3916_reg_write_fifo,void,"const FuriHalSpiBusHandle*, const uint8_t*, size_t"
+Function,+,st25r3916_set_reg_bits,void,"const FuriHalSpiBusHandle*, uint8_t, uint8_t"
+Function,+,st25r3916_write_burst_regs,void,"const FuriHalSpiBusHandle*, uint8_t, const uint8_t*, uint8_t"
+Function,+,st25r3916_write_fifo,void,"const FuriHalSpiBusHandle*, const uint8_t*, size_t"
+Function,+,st25r3916_write_pta_mem,void,"const FuriHalSpiBusHandle*, const uint8_t*, size_t"
+Function,+,st25r3916_write_ptf_mem,void,"const FuriHalSpiBusHandle*, const uint8_t*, size_t"
+Function,+,st25r3916_write_pttsn_mem,void,"const FuriHalSpiBusHandle*, uint8_t*, size_t"
+Function,+,st25r3916_write_reg,void,"const FuriHalSpiBusHandle*, uint8_t, uint8_t"
+Function,+,st25r3916_write_test_reg,void,"const FuriHalSpiBusHandle*, uint8_t, uint8_t"
 Function,+,storage_common_copy,FS_Error,"Storage*, const char*, const char*"
 Function,+,storage_common_equivalent_path,_Bool,"Storage*, const char*, const char*"
 Function,+,storage_common_exists,_Bool,"Storage*, const char*"
@@ -2932,22 +2935,22 @@ Variable,-,__stdio_exit_handler,void (*)(),
 Variable,+,_ctype_,const char[],
 Variable,+,_impure_data,_reent,
 Variable,+,_impure_ptr,_reent*,
-Variable,-,_sys_errlist,const char*[],
+Variable,-,_sys_errlist,const char* const[],
 Variable,-,_sys_nerr,int,
 Variable,-,ble_profile_hid,const FuriHalBleProfileTemplate*,
-Variable,-,ble_profile_serial,const FuriHalBleProfileTemplate*,
-Variable,+,cli_vcp,CliSession,
+Variable,+,ble_profile_serial,const FuriHalBleProfileTemplate* const,
+Variable,+,cli_vcp,const CliSession,
 Variable,+,compress_config_heatshrink_default,const CompressConfigHeatshrink,
-Variable,+,firmware_api_interface,const ElfApiInterface*,
+Variable,+,firmware_api_interface,const ElfApiInterface* const,
 Variable,+,furi_hal_i2c_bus_external,FuriHalI2cBus,
 Variable,+,furi_hal_i2c_bus_power,FuriHalI2cBus,
-Variable,+,furi_hal_i2c_handle_external,FuriHalI2cBusHandle,
-Variable,+,furi_hal_i2c_handle_power,FuriHalI2cBusHandle,
+Variable,+,furi_hal_i2c_handle_external,const FuriHalI2cBusHandle,
+Variable,+,furi_hal_i2c_handle_power,const FuriHalI2cBusHandle,
 Variable,+,furi_hal_spi_bus_d,FuriHalSpiBus,
-Variable,+,furi_hal_spi_bus_handle_display,FuriHalSpiBusHandle,
-Variable,+,furi_hal_spi_bus_handle_external,FuriHalSpiBusHandle,
-Variable,+,furi_hal_spi_bus_handle_sd_fast,FuriHalSpiBusHandle,
-Variable,+,furi_hal_spi_bus_handle_sd_slow,FuriHalSpiBusHandle,
+Variable,+,furi_hal_spi_bus_handle_display,const FuriHalSpiBusHandle,
+Variable,+,furi_hal_spi_bus_handle_external,const FuriHalSpiBusHandle,
+Variable,+,furi_hal_spi_bus_handle_sd_fast,const FuriHalSpiBusHandle,
+Variable,+,furi_hal_spi_bus_handle_sd_slow,const FuriHalSpiBusHandle,
 Variable,+,furi_hal_spi_bus_r,FuriHalSpiBus,
 Variable,+,furi_hal_spi_preset_1edge_low_16m,const LL_SPI_InitTypeDef,
 Variable,+,furi_hal_spi_preset_1edge_low_2m,const LL_SPI_InitTypeDef,

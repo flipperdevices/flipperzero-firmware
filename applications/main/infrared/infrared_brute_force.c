@@ -104,9 +104,9 @@ InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* br
             break;
         }
 
-        size_t signal_start = flipper_format_tell(ff);
         bool signal_valid = false;
         while(infrared_signal_read_name(ff, signal_name) == InfraredErrorCodeNone) {
+            size_t signal_start = flipper_format_tell(ff);
             error = infrared_signal_read_body(signal, ff);
             signal_valid = (!INFRARED_ERROR_PRESENT(error)) && infrared_signal_is_valid(signal);
             if(!signal_valid) break;
