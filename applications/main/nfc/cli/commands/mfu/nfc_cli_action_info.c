@@ -7,11 +7,7 @@
 #include <furi.h>
 #include <flipper_format/flipper_format.h>
 #include <storage/storage.h>
-#include <nfc/nfc.h>
-#include <nfc/nfc_device.h>
-#include <nfc/nfc_poller.h>
-#include <nfc/protocols/mf_ultralight/mf_ultralight.h>
-#include <nfc/protocols/mf_ultralight/mf_ultralight_poller_i.h>
+#include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync.h>
 
 #define TAG "INFO"
 
@@ -37,60 +33,9 @@ typedef struct {
 } FURI_PACKED MfUltralightCapabilityContainer;
 
 typedef struct {
-    MfUltralightAuthPassword password;
-    uint8_t key_size;
-    bool skip_auth;
-} NfcCliMfuAuthContext;
-
-typedef struct {
     Nfc* nfc;
-    NfcPoller* poller;
-    NfcDevice* nfc_device;
-    NfcCliMfuAuthContext auth_context;
-    FuriSemaphore* sem_done;
-
+    MfUltralightData* data;
 } NfcCliMfuContext;
-
-NfcCommand nfc_cli_mfu_poller_callback_mf_ultralight(NfcGenericEvent event, void* context) {
-    furi_assert(event.protocol == NfcProtocolMfUltralight);
-    NfcCliMfuContext* instance = context;
-    const MfUltralightPollerEvent* mf_ultralight_event = event.event_data;
-
-    if(mf_ultralight_event->type == MfUltralightPollerEventTypeReadSuccess) {
-        nfc_device_set_data(
-            instance->nfc_device, NfcProtocolMfUltralight, nfc_poller_get_data(instance->poller));
-
-        // const MfUltralightData* data =
-        //     nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
-        furi_semaphore_release(instance->sem_done);
-        return NfcCommandStop;
-    } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeAuthRequest) {
-        nfc_device_set_data(
-            instance->nfc_device, NfcProtocolMfUltralight, nfc_poller_get_data(instance->poller));
-        // const MfUltralightData* data =
-        //     nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
-        const NfcCliMfuAuthContext* auth_ctx = &instance->auth_context;
-        mf_ultralight_event->data->auth_context.skip_auth = auth_ctx->skip_auth;
-        mf_ultralight_event->data->auth_context.password = auth_ctx->password;
-        //mf_ultralight_event->data->auth_context.tdes_key = auth_ctx->key.tdes_key;
-    } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeAuthSuccess) {
-        FURI_LOG_D(TAG, "Auth success");
-    }
-    return NfcCommandContinue;
-}
-
-static bool nfc_cli_mfu_dump_card(NfcCliMfuContext* instance) {
-    instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfUltralight);
-    //NfcGenericCallback callback = protocol_poller_callbacks[instance->desired_protocol];
-    FuriStatus status = FuriStatusError;
-
-    nfc_poller_start(instance->poller, nfc_cli_mfu_poller_callback_mf_ultralight, instance);
-    status = furi_semaphore_acquire(instance->sem_done, 10000);
-    nfc_poller_stop(instance->poller);
-
-    nfc_poller_free(instance->poller);
-    return status == FuriStatusOk;
-}
 
 static void nfc_cli_mfu_info_get_vendor(const uint8_t vendor_key, FuriString* output) {
     furi_assert(output);
@@ -248,18 +193,16 @@ static void nfc_cli_mfu_info_print_version(const MfUltralightData* data) {
     nfc_cli_mfu_info_print_version_storage_size(version->storage_size);
 }
 
-NfcCliActionContext* nfc_cli_info_alloc_ctx(Nfc* nfc) {
+NfcCliActionContext* nfc_cli_mfu_info_alloc_ctx(Nfc* nfc) {
     NfcCliMfuContext* instance = malloc(sizeof(NfcCliMfuContext));
     instance->nfc = nfc;
-    instance->nfc_device = nfc_device_alloc();
-    instance->sem_done = furi_semaphore_alloc(1, 0);
+    instance->data = mf_ultralight_alloc();
     return instance;
 }
 
-void nfc_cli_info_free_ctx(NfcCliActionContext* ctx) {
+void nfc_cli_mfu_info_free_ctx(NfcCliActionContext* ctx) {
     NfcCliMfuContext* instance = ctx;
-    nfc_device_free(instance->nfc_device);
-    furi_semaphore_free(instance->sem_done);
+    mf_ultralight_free(instance->data);
     free(instance);
 }
 
@@ -269,10 +212,10 @@ void nfc_cli_mfu_info_execute(PipeSide* pipe, NfcCliActionContext* ctx) {
 
     NfcCliMfuContext* instance = ctx;
 
-    if(nfc_cli_mfu_dump_card(instance)) {
-        const MfUltralightData* data =
-            nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
-
+    MfUltralightError error =
+        mf_ultralight_poller_sync_read_card(instance->nfc, instance->data, NULL);
+    if(error == MfUltralightErrorNone) {
+        const MfUltralightData* data = instance->data;
         nfc_cli_mfu_info_print_common(data);
         nfc_cli_mfu_info_print_ndef(data);
         nfc_cli_mfu_info_print_counter(data);
