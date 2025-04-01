@@ -221,6 +221,7 @@ void nfc_cli_mfu_info_execute(PipeSide* pipe, NfcCliActionContext* ctx) {
         nfc_cli_mfu_info_print_counter(data);
         nfc_cli_mfu_info_print_signature(data);
         nfc_cli_mfu_info_print_version(data);
-    } else
-        printf("error\r\n");
+    } else {
+        printf(ANSI_FG_RED "Error: %s" ANSI_RESET, nfc_cli_mf_ultralight_get_error(error));
+    }
 }

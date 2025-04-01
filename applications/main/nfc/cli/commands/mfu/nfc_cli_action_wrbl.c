@@ -15,14 +15,6 @@ typedef struct {
     MfUltralightPage page;
 } NfcCliMfuWrblContext;
 
-static const char* mf_ultralight_error_names[] = {
-    [MfUltralightErrorNone] = "OK",
-    [MfUltralightErrorNotPresent] = "Card not present",
-    [MfUltralightErrorProtocol] = "Protocol failure",
-    [MfUltralightErrorAuth] = "Auth failed",
-    [MfUltralightErrorTimeout] = "Timeout",
-};
-
 NfcCliActionContext* nfc_cli_mfu_wrbl_alloc_ctx(Nfc* nfc) {
     furi_assert(nfc);
     NfcCliMfuWrblContext* instance = malloc(sizeof(NfcCliMfuWrblContext));
@@ -50,7 +42,7 @@ void nfc_cli_mfu_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx) {
         nfc_cli_printf_array(instance->page.data, sizeof(MfUltralightPage), "Data: ");
         printf("\r\n");
     } else {
-        printf(ANSI_FG_RED "Error: %s" ANSI_RESET, mf_ultralight_error_names[error]);
+        printf(ANSI_FG_RED "Error: %s" ANSI_RESET, nfc_cli_mf_ultralight_get_error(error));
     }
 }
 
