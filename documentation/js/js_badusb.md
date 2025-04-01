@@ -11,8 +11,9 @@ Start USB HID with optional parameters. Should be called before all other method
 
 Configuration object *(optional)*:
 - vid, pid (number): VID and PID values, both are mandatory
-- mfr_name (string): Manufacturer name (32  ASCII characters max), optional
-- prod_name (string): Product name (32  ASCII characters max), optional
+- mfrName (string): Manufacturer name (32  ASCII characters max), optional
+- prodName (string): Product name (32  ASCII characters max), optional
+- layoutPath (string): Path to keyboard layout file, optional
 
 **Examples**
 ```js
@@ -21,7 +22,7 @@ badusb.setup();
 // Start USB HID with custom vid:pid = AAAA:BBBB, manufacturer and product strings not defined
 badusb.setup({ vid: 0xAAAA, pid: 0xBBBB }); 
 // Start USB HID with custom vid:pid = AAAA:BBBB, manufacturer string = "Flipper Devices", product string = "Flipper Zero"
-badusb.setup({ vid: 0xAAAA, pid: 0xBBBB, mfr_name: "Flipper Devices", prod_name: "Flipper Zero" });
+badusb.setup({ vid: 0xAAAA, pid: 0xBBBB, mfrName: "Flipper Devices", prodName: "Flipper Zero" });
 ```
 
 <br>
@@ -122,6 +123,45 @@ badusb.println("Hello, world!");  // print "Hello, world!" and press "ENTER"
 ```
 <br>
 
+## altPrint()
+Prints a string by Alt+Numpad method - works only on Windows!
+
+**Parameters**
+
+- A string to print
+- *(optional)* delay between key presses
+
+**Examples**
+```js
+badusb.altPrint("Hello, world!"); // print "Hello, world!"
+badusb.altPrint("Hello, world!", 100); // Add 100ms delay between key presses
+```
+<br>
+
+## altPrintln()
+Same as `altPrint` but ended with "ENTER" press.
+
+**Parameters**
+
+- A string to print
+- *(optional)* delay between key presses
+
+**Examples**
+```js
+badusb.altPrintln("Hello, world!");  // print "Hello, world!" and press "ENTER"
+```
+<br>
+
+## quit()
+Releases usb, optional, but allows to interchange with usbdisk.
+
+**Examples**
+```js
+badusb.quit();
+usbdisk.start(...)
+```
+<br>
+
 # Key names list {#js_badusb_keynames}
 
 ## Modifier keys
@@ -159,3 +199,4 @@ badusb.println("Hello, world!");  // print "Hello, world!" and press "ENTER"
 | TAB                |                  |
 | MENU               | Context menu key |
 | Fx                 | F1-F24 keys      |
+| NUMx               | NUM0-NUM9 keys   |

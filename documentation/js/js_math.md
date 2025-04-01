@@ -271,13 +271,29 @@ math.floor(45.95); // 45
 
 <br>
 
+## log()
+Return the natural logarithm of x.
+
+**Parameters**
+- x: A number
+
+**Returns**
+
+The natural logarithm of `x`, as in `ln(x)` where `e` is the base of the natural logarithm.
+
+**Example**
+```js
+math.log(1); // 0
+math.log(3); // 1.0986122886681098
+```
+
 ## isEqual()
-Return true if the difference between numbers `a` and `b` is less than the specified parameter `e`.
+Return true if the difference between numbers `a` and `b` is less than the specified `tolerance`.
 
 **Parameters**
 - a: A number a
 - b: A number b
-- e: An epsilon parameter
+- tolerance: How much difference is allowed between the numbers to be considered equal
 
 **Returns**
 

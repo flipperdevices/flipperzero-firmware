@@ -52,7 +52,7 @@ File information structure.
 
 ## File
 
-This class implements methods for working with file. To get an object of the File class, use the `OpenFile` method.
+This class implements methods for working with file. To get an object of the File class, use the `openFile` method.
 
 <br>
 
@@ -185,6 +185,36 @@ Copies bytes from the R/W pointer in the current file to the R/W pointer in anot
 ---
 
 # Methods
+
+## openFile()
+
+Opens a file.
+
+**Parameters**
+
+- path: The path to the file
+- accessMode: How to access the file (`"r"`, `"w"` or `"rw"`)
+- openMode: How to open the file (`"open_existing"`, `"open_always"`, `"open_append"`, `"create_new"` or `"create_always"`)
+
+**Returns**
+
+A `File` object on success, `undefined` otherwise.
+
+<br>
+
+## fileExists()
+
+Detects whether a file exists.
+
+**Parameters**
+
+- path: The path to the file
+
+**Returns**
+
+`true` if file exists, `false` otherwise.
+
+<br>
 
 ## arePathsEqual()
 

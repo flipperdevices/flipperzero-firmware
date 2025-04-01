@@ -70,6 +70,27 @@ The JS minifier reduces the size of JavaScript files by removing unnecessary cha
 However, it has a drawback — it can make debugging harder, as error messages in minified files are harder to read in larger applications. For this reason, it's recommended to disable the JS minifier during debugging and it's disabled by default. To enable it, set the `minify` parameter to `true` in the `fz-sdk.config.json5` file in your app folder. This will minify your JavaScript app before loading it onto Flipper Zero.
 
 
+## Differences with normal Flipper JavaScript
+
+With the Flipper JavaScript SDK, you will be developing in **TypeScript**. This means that you get a better development experience, with more accurate code completion and warnings when variable types are incompatible, but it also means your code will be different from basic Flipper JS.
+
+Some things to look out for:
+- Importing modules:
+  - Instead of `let module = require("module");`
+  - You will use `import * as module from "@flipperdevices/fz-sdk/module";`
+- Multiple source code files:
+  - The Flipper JavaScript SDK does not yet support having multiple `.ts` files and importing them
+  - You can use `load()`, but this will not benefit from TypeScript type checking
+- Casting values:
+  - Some Flipper JavaScript functions will return generic types
+  - For example `eventLoop.subscribe()` will run your callback with a generic `Item` type
+  - In some cases you might need to cast these values before using them, you can do this by:
+  - Inline casting: `<string>item`
+  - Declare with new type: `let text = item as string;`
+
+When you upload the script to Flipper with `npm start`, it gets transpiled to normal JavaScript and optionally minified (see below). If you're looking to share your script with others, this is what you should give them to run.
+
+
 ## What's next?
 
 You've learned how to run and debug simple JavaScript apps. But how can you access Flipper Zero's hardware from your JS code? For that, you'll need to use JS modules — which we'll cover in the next guide.

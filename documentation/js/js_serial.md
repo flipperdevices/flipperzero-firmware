@@ -10,8 +10,15 @@ Configure serial port. Should be called before all other methods.
 
 **Parameters**
 
-- Serial port name (usart, lpuart)
+- Serial port name (`"usart"`, `"lpuart"`)
 - Baudrate
+- Optional framing configuration object (e.g. `{ dataBits: "8", parity: "even", stopBits: "1" }`):
+  - `dataBits`: `"6"`, `"7"`, `"8"`, `"9"`
+    - 6 data bits can only be selected when parity is enabled (even or odd)
+    - 9 data bits can only be selected when parity is disabled (none)
+  - `parity`: `"none"`, `"even"`, `"odd"`
+  - `stopBits`: `"0.5"`, `"1"`, `"1.5"`, `"2"`
+    - LPUART only supports whole stop bit lengths (i.e. 1 and 2 but not 0.5 and 1.5)
 
 **Example**
 
@@ -69,7 +76,7 @@ Read from serial port until line break character.
 
 **Parameters**
 
-*(optional)* Timeout value in ms.
+- *(optional)* Timeout value in ms.
 
 **Returns**
 
@@ -80,6 +87,26 @@ A sting of received characters or undefined if nothing was received before timeo
 ```js
 serial.readln(); // Read without timeout
 serial.readln(5000); // Read with 5s timeout
+```
+
+<br>
+
+## readAny()
+Read any available amount of data from serial port, can help avoid starving your loop with small reads.
+
+**Parameters**
+
+- *(optional)* Timeout value in ms
+
+**Returns**
+
+A sting of received characters or undefined if nothing was received before timeout.
+
+**Example**
+
+```js
+serial.readAny(); // Read without timeout
+serial.readAny(5000); // Read with 5s timeout
 ```
 
 <br>
@@ -125,8 +152,21 @@ Index of matched pattern in input patterns list, undefined if nothing was found.
 
 ```js
 // Wait for root shell prompt with 1s timeout, returns 0 if it was received before timeout, undefined if not
-serial.expect("# ", 1000); 
+serial.expect("# ", 1000);
 
 // Infinitely wait for one of two strings, should return 0 if the first string got matched, 1 if the second one
 serial.expect([": not found", "Usage: "]);
+```
+
+<br>
+
+## end()
+Deinitializes serial port, allowing multiple initializations per script run.
+
+**Example**
+
+```js
+serial.end();
+// Configure LPUART port with baudrate = 115200
+serial.setup("lpuart", 115200);
 ```
