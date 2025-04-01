@@ -18,7 +18,7 @@
 /applications/main/gpio/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
 /applications/main/ibutton/ @skotopes @DrZlo13 @hedger @gsurkov
 /applications/main/infrared/ @skotopes @DrZlo13 @hedger @gsurkov
-/applications/main/nfc/ @skotopes @DrZlo13 @hedger @gsurkov @gornekich @Astrrra
+/applications/main/nfc/ @skotopes @DrZlo13 @hedger @gsurkov @gornekich
 /applications/main/subghz/ @skotopes @DrZlo13 @hedger @gsurkov @Skorpionm
 /applications/main/u2f/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
 
@@ -38,7 +38,7 @@
 /applications/system/storage_move_to_sd/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
 /applications/system/js_app/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov @portasynthinca3
 
-/applications/debug/unit_tests/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov @gornekich @Astrrra @Skorpionm
+/applications/debug/unit_tests/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov @gornekich @Skorpionm
 
 /applications/examples/example_thermo/ @skotopes @DrZlo13 @hedger @gsurkov
 
@@ -49,7 +49,7 @@
 /applications/main/infrared/resources/ @skotopes @DrZlo13 @hedger @gsurkov
 
 # Documentation
-/documentation/ @skotopes @DrZlo13 @hedger @gsurkov
+/documentation/ @skotopes @DrZlo13 @hedger @gsurkov @portasynthinca3
 /scripts/toolchain/ @skotopes @DrZlo13 @hedger @gsurkov
 
 # Lib
@@ -61,7 +61,7 @@
 /lib/mbedtls/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
 /lib/mjs/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov @portasynthinca3
 /lib/nanopb/ @skotopes @DrZlo13 @hedger @gsurkov @nminaylov
-/lib/nfc/ @skotopes @DrZlo13 @hedger @gsurkov @gornekich @Astrrra
+/lib/nfc/ @skotopes @DrZlo13 @hedger @gsurkov @gornekich
 /lib/one_wire/ @skotopes @DrZlo13 @hedger @gsurkov
 /lib/subghz/ @skotopes @DrZlo13 @hedger @gsurkov @Skorpionm
 

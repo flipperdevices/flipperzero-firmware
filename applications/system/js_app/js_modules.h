@@ -26,14 +26,13 @@
 /**
  * @brief Syntax sugar for constructing an object
  * 
- * @example
- * ```c
+ * Example:
+ *
  *  mjs_val_t my_obj = mjs_mk_object(mjs);
  *  JS_ASSIGN_MULTI(mjs, my_obj) {
  *      JS_FIELD("method1", MJS_MK_FN(js_storage_file_is_open));
  *      JS_FIELD("method2", MJS_MK_FN(js_storage_file_is_open));
  *  }
- * ```
  */
 #define JS_ASSIGN_MULTI(mjs, object)     \
     for(struct {                         \
