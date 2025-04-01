@@ -44,8 +44,9 @@ void nfc_cli_mfu_rdbl_execute(PipeSide* pipe, NfcCliActionContext* ctx) {
         mf_ultralight_poller_sync_read_page(instance->nfc, instance->block, &page);
 
     if(error == MfUltralightErrorNone) {
-        printf("Block: %d ", instance->block);
+        printf("\r\nBlock: %d ", instance->block);
         nfc_cli_printf_array(page.data, sizeof(MfUltralightPage), "Data: ");
+        printf("\r\n");
     } else {
         printf(ANSI_FG_RED "Error: %s" ANSI_RESET, mf_ultralight_error_names[error]);
     }

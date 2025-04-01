@@ -27,7 +27,7 @@ const NfcCliKeyDescriptor rdbl_action_keys[] = {
 };
 
 //mfu rdbl -b 0
-//mfu rdbl -block 0
+//mfu rdbl --block 0
 const NfcCliActionDescriptor rdbl_action = {
     .name = "rdbl",
     .description = "Read block from ultralight card",
