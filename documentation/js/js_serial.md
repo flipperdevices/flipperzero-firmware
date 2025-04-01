@@ -76,7 +76,7 @@ Read from serial port until line break character.
 
 **Parameters**
 
-*(optional)* Timeout value in ms.
+- *(optional)* Timeout value in ms.
 
 **Returns**
 
@@ -96,7 +96,7 @@ Read any available amount of data from serial port, can help avoid starving your
 
 **Parameters**
 
-*(optional)* Timeout value in ms
+- *(optional)* Timeout value in ms
 
 **Returns**
 
