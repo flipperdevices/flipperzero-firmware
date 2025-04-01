@@ -20,6 +20,19 @@ const char* nfc_cli_get_protocol_name(NfcProtocol protocol) {
     return protocol_names[protocol];
 }
 
+static const char* mf_ultralight_error_names[] = {
+    [MfUltralightErrorNone] = "OK",
+    [MfUltralightErrorNotPresent] = "Card not present",
+    [MfUltralightErrorProtocol] = "Protocol failure",
+    [MfUltralightErrorAuth] = "Auth failed",
+    [MfUltralightErrorTimeout] = "Timeout",
+};
+
+const char* nfc_cli_mf_ultralight_get_error(MfUltralightError error) {
+    furi_assert(error < COUNT_OF(mf_ultralight_error_names));
+    return mf_ultralight_error_names[error];
+}
+
 void nfc_cli_format_array(
     const uint8_t* data,
     const size_t data_size,
