@@ -6,7 +6,7 @@ typedef struct {
     uint16_t keycode;
 } DuckyKey;
 
-static const DuckyKey ducky_modifier_keys[] = {
+static const DuckyKey const ducky_modifier_keys[] = {
     {"CTRL", KEY_MOD_LEFT_CTRL},
     {"CONTROL", KEY_MOD_LEFT_CTRL},
     {"SHIFT", KEY_MOD_LEFT_SHIFT},
@@ -15,7 +15,7 @@ static const DuckyKey ducky_modifier_keys[] = {
     {"WINDOWS", KEY_MOD_LEFT_GUI},
 };
 
-static const DuckyKey ducky_keys[] = {
+static const DuckyKey const ducky_keys[] = {
     {"DOWNARROW", HID_KEYBOARD_DOWN_ARROW},
     {"DOWN", HID_KEYBOARD_DOWN_ARROW},
     {"LEFTARROW", HID_KEYBOARD_LEFT_ARROW},
