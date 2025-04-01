@@ -21,9 +21,11 @@ For an example, refer to the `gui.js` example script.
 
 | Prop        | Type   | Description                                      |
 |-------------|--------|--------------------------------------------------|
-| `minLength` | `number` | The shortest allowed text length.               |
-| `maxLength` | `number` | The longest allowed text length. <br> Default: `32`                  |
-| `header`    | `string` | A single line of text that appears above the keyboard. |
+| `minLength`        | `number`  | The shortest allowed text length.                          |
+| `maxLength`        | `number`  | The longest allowed text length. <br> Default: `32`        |
+| `header`           | `string`  | A single line of text that appears above the keyboard.     |
+| `defaultText`      | `string`  | Text to show by default.                                   |
+| `defaultTextClear` | `boolean` | Whether to clear the default text on next character typed. |
 
 ## View events
 

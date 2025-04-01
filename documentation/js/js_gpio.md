@@ -24,7 +24,7 @@ delay(1000);
 ---
 
 # API reference
-## get
+## get()
 Gets a `Pin` object that can be used to manage a pin.
 
 **Parameters**
@@ -89,3 +89,33 @@ Attaches an interrupt to a pin configured with `direction: "in"` and
 
 An event loop `Contract` object that identifies the interrupt event source. The
 event does not produce any extra data.
+
+### Pin.isPwmSupported()
+Determines whether this pin supports PWM.
+If `false`, all other PWM-related methods on this pin will throw an error when called.
+
+**Returns**
+
+Boolean value.
+
+### Pin.pwmWrite()
+Sets PWM parameters and starts the PWM.
+Configures the pin with `{ direction: "out", outMode: "push_pull" }`.
+Throws an error if PWM is not supported on this pin.
+
+**Parameters**
+  - `freq`: Frequency in Hz
+  - `duty`: Duty cycle in %
+
+### Pin.isPwmRunning()
+Determines whether PWM is running.
+Throws an error if PWM is not supported on this pin.
+
+**Returns**
+
+Boolean value.
+
+### Pin.pwmStop()
+Stops PWM.
+Does not restore previous pin configuration.
+Throws an error if PWM is not supported on this pin.

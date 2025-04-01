@@ -173,6 +173,11 @@ triggered when the back key is pressed.
 
 <br>
 
+### viewDispatcher.currentView
+The `View` object currently being shown.
+
+<br>
+
 ## ViewFactory
 When you import a module implementing a view, a `ViewFactory` is instantiated. For example, in the example above, `loadingView`, `submenuView` and `emptyView` are view factories.
 
@@ -183,8 +188,38 @@ Creates an instance of a `View`.
 
 <br>
 
-### ViewFactory.make(props)
-Creates an instance of a `View` and assigns initial properties from `props`.
+### ViewFactory.makeWith(props, children)
+Creates an instance of a `View` and assigns initial properties from `props` and optionally a list of children.
 
 **Parameters**
   - `props`: simple key-value object, e.g. `{ header: "Header" }`
+  - `children`: optional array of children, e.g. `[ { element: "button", button: "right", text: "Back" } ]`
+
+## View
+When you call `ViewFactory.make()` or `ViewFactory.makeWith()`, a `View` is instantiated. For example, in the example above, `views.loading`, `views.demos` and `views.empty` are views.
+
+<br>
+
+### View.set(property, value)
+Assign value to property by name.
+
+**Parameters**
+  - `property`: name of the property to change
+  - `value`: value to assign to the property
+
+<br>
+
+### View.addChild(child)
+Adds a child to the `View`.
+
+**Parameters**
+  - `child`: the child to add, e.g. `{ element: "button", button: "right", text: "Back" }`
+
+### View.resetChildren()
+Removes all children from the `View`.
+
+### View.setChildren(children)
+Removes all previous children from the `View` and assigns new children.
+
+**Parameters**
+  - `children`: the array of new children, e.g. `[ { element: "button", button: "right", text: "Back" } ]`
