@@ -302,6 +302,7 @@ App(
 
              "cli/commands/mfu/nfc_cli_command_mfu.c",
              "cli/commands/mfu/nfc_cli_action_info.c",
+             "cli/commands/mfu/nfc_cli_action_rdbl.c",             
 
              "cli/commands/nfc_cli_command_emulate.c",  
              "cli/commands/nfc_cli_command_scanner.c",
