@@ -215,6 +215,8 @@ Adds a child to the `View`.
 **Parameters**
   - `child`: the child to add, e.g. `{ element: "button", button: "right", text: "Back" }`
 
+The format of the `child` parameter depends on the type of View that you're working with. Look in the View documentation.
+
 ### View.resetChildren()
 Removes all children from the `View`.
 
