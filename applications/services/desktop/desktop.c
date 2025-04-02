@@ -394,8 +394,8 @@ void desktop_lock(Desktop* desktop) {
     furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
 
     if(desktop_pin_code_is_set()) {
-        Cli* cli = furi_record_open(RECORD_CLI);
-        cli_session_close(cli);
+        CliVcp* cli_vcp = furi_record_open(RECORD_CLI_VCP);
+        cli_vcp_disable(cli_vcp);
         furi_record_close(RECORD_CLI);
     }
 
@@ -424,8 +424,8 @@ void desktop_unlock(Desktop* desktop) {
     furi_hal_rtc_set_pin_fails(0);
 
     if(desktop_pin_code_is_set()) {
-        Cli* cli = furi_record_open(RECORD_CLI);
-        cli_session_open(cli, &cli_vcp);
+        CliVcp* cli_vcp = furi_record_open(RECORD_CLI_VCP);
+        cli_vcp_enable(cli_vcp);
         furi_record_close(RECORD_CLI);
     }
 
@@ -523,6 +523,10 @@ int32_t desktop_srv(void* p) {
 
     if(desktop_pin_code_is_set()) {
         desktop_lock(desktop);
+    } else {
+        CliVcp* cli_vcp = furi_record_open(RECORD_CLI_VCP);
+        cli_vcp_enable(cli_vcp);
+        furi_record_close(RECORD_CLI);
     }
 
     if(storage_file_exists(desktop->storage, SLIDESHOW_FS_PATH)) {
