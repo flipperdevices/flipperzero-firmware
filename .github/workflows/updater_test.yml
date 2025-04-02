@@ -20,7 +20,7 @@ jobs:
 
       - name: 'Flashing target firmware'
         id: first_full_flash
-        timeout-minutes: 10
+        timeout-minutes: 5
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testops.py -t=180 await_flipper
@@ -29,7 +29,7 @@ jobs:
 
       - name: 'Validating updater'
         id: second_full_flash
-        timeout-minutes: 10
+        timeout-minutes: 5
         if: success()
         run: |
           source scripts/toolchain/fbtenv.sh
