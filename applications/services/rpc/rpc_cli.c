@@ -13,6 +13,7 @@ typedef struct {
 } CliRpc;
 
 #define CLI_READ_BUFFER_SIZE 64
+#define RPC_SEND_TIMEOUT_MS  100
 
 static void rpc_cli_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
     furi_assert(context);
@@ -21,7 +22,12 @@ static void rpc_cli_send_bytes_callback(void* context, uint8_t* bytes, size_t by
     CliRpc* cli_rpc = context;
 
     while(bytes_len) {
-        size_t sent = pipe_send(cli_rpc->pipe, bytes, bytes_len, FuriWaitForever);
+        size_t sent =
+            pipe_send(cli_rpc->pipe, bytes, bytes_len, furi_ms_to_ticks(RPC_SEND_TIMEOUT_MS));
+
+        // session was terminated
+        if(!sent && pipe_state(cli_rpc->pipe) == PipeStateBroken) break;
+
         bytes += sent;
         bytes_len -= sent;
     }
