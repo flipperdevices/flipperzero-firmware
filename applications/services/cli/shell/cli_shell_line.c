@@ -154,9 +154,12 @@ static bool cli_shell_line_input_cr(CliKeyCombo combo, void* context) {
 
     if(line->history_position > 0) {
         // move selected command to the front
+        size_t pos = line->history_position;
+        size_t len = line->history_entries;
         memmove(
-            &line->history[1], &line->history[0], line->history_position * sizeof(FuriString*));
+            &line->history[pos], &line->history[pos + 1], (len - pos - 1) * sizeof(FuriString*));
         line->history[0] = command;
+        line->history_entries--;
     }
 
     // insert empty command
