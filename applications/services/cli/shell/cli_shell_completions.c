@@ -197,7 +197,7 @@ void cli_shell_completions_render(
         size_t completions_size = CommandCompletions_size(completions->variants);
         size_t old_selection = completions->selected;
         int n_columns = (completions_size >= COMPLETION_COLUMNS) ? COMPLETION_COLUMNS :
-                                                                      completions_size;
+                                                                   completions_size;
         int selection_unclamped = old_selection;
         if(action == CliShellCompletionsActionLeft) {
             selection_unclamped--;
