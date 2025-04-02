@@ -156,6 +156,8 @@ static bool cli_shell_line_input_cr(CliKeyCombo combo, void* context) {
         for(size_t i = 1; i < line->history_entries; i++) {
             if(furi_string_cmp(line->history[i], command) == 0) {
                 line->history_position = i;
+                command = cli_shell_line_get_selected(line);
+                furi_string_trim(command);
                 break;
             }
         }
@@ -168,6 +170,7 @@ static bool cli_shell_line_input_cr(CliKeyCombo combo, void* context) {
         memmove(
             &line->history[pos], &line->history[pos + 1], (len - pos - 1) * sizeof(FuriString*));
         furi_string_set(line->history[0], command);
+        furi_string_free(command);
         line->history_entries--;
     }
 
