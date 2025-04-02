@@ -152,13 +152,22 @@ static bool cli_shell_line_input_cr(CliKeyCombo combo, void* context) {
 
     FuriString* command_copy = furi_string_alloc_set(command);
 
+    if(line->history_position == 0) {
+        for(size_t i = 1; i < line->history_entries; i++) {
+            if(furi_string_cmp(line->history[i], command) == 0) {
+                line->history_position = i;
+                break;
+            }
+        }
+    }
+
+    // move selected command to the front
     if(line->history_position > 0) {
-        // move selected command to the front
         size_t pos = line->history_position;
         size_t len = line->history_entries;
         memmove(
             &line->history[pos], &line->history[pos + 1], (len - pos - 1) * sizeof(FuriString*));
-        line->history[0] = command;
+        furi_string_set(line->history[0], command);
         line->history_entries--;
     }
 
