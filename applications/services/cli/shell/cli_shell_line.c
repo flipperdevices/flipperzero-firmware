@@ -307,7 +307,7 @@ static bool cli_shell_line_input_ctrl_bksp(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool cli_shell_line_input_normal_input(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_normal(CliKeyCombo combo, void* context) {
     CliShellLine* line = context;
     if(combo.modifiers != CliModKeyNo) return false;
     if(combo.key < CliKeySpace || combo.key >= CliKeyDEL) return false;
@@ -328,7 +328,7 @@ static bool cli_shell_line_input_normal_input(CliKeyCombo combo, void* context) 
 }
 
 CliShellKeyComboSet cli_shell_line_key_combo_set = {
-    .fallback = cli_shell_line_input_normal_input,
+    .fallback = cli_shell_line_input_normal,
     .count = 14,
     .records =
         {

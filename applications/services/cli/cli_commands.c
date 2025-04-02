@@ -179,7 +179,7 @@ void cli_command_date(PipeSide* pipe, FuriString* args, void* context) {
 
 void cli_command_log_tx_callback(const uint8_t* buffer, size_t size, void* context) {
     PipeSide* pipe = context;
-    pipe_send(pipe, buffer, size, FuriWaitForever);
+    pipe_send(pipe, buffer, size);
 }
 
 bool cli_command_log_level_set_from_string(FuriString* level) {
@@ -518,7 +518,6 @@ void cli_command_i2c(PipeSide* pipe, FuriString* args, void* context) {
 void cli_command_echo(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(args);
     UNUSED(context);
-    const FuriWait timeout = furi_ms_to_ticks(500);
 
     uint8_t buffer[256];
 

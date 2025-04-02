@@ -54,6 +54,8 @@ uint32_t ducky_get_command_len(const char* line);
 
 bool ducky_is_line_end(const char chr);
 
+uint16_t ducky_get_next_modifier_keycode_by_name(const char** param);
+
 uint16_t ducky_get_keycode_by_name(const char* param);
 
 uint16_t ducky_get_media_keycode_by_name(const char* param);
