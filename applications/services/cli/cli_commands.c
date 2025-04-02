@@ -522,16 +522,14 @@ void cli_command_echo(PipeSide* pipe, FuriString* args, void* context) {
     uint8_t buffer[256];
 
     while(true) {
-        size_t read = pipe_receive(pipe, buffer, sizeof(buffer), timeout);
-        if(!read) continue;
+        size_t to_read = CLAMP(pipe_bytes_available(pipe), sizeof(buffer), 1UL);
+        size_t read = pipe_receive(pipe, buffer, to_read);
+        if(read < to_read) break;
 
-        if(pipe_state(pipe) == PipeStateBroken) break;
         if(memchr(buffer, CliKeyETX, read)) break;
 
-        size_t written = pipe_send(pipe, buffer, read, timeout);
-        if(written != read) {
-            FURI_LOG_E("CliEcho", "read=%zu written=%zu", read, written);
-        }
+        size_t written = pipe_send(pipe, buffer, read);
+        if(written < read) break;
     }
 }
 
