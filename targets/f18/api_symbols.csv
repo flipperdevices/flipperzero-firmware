@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,82.1,,
+Version,+,83.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -782,8 +782,8 @@ Function,+,cli_ansi_parser_alloc,CliAnsiParser*,
 Function,+,cli_ansi_parser_feed,CliAnsiParserResult,"CliAnsiParser*, char"
 Function,+,cli_ansi_parser_feed_timeout,CliAnsiParserResult,CliAnsiParser*
 Function,+,cli_ansi_parser_free,void,CliAnsiParser*
-Function,+,cli_is_pipe_broken_or_is_etx_next_char,_Bool,PipeSide*
 Function,+,cli_delete_command,void,"Cli*, const char*"
+Function,+,cli_is_pipe_broken_or_is_etx_next_char,_Bool,PipeSide*
 Function,+,cli_print_usage,void,"const char*, const char*, const char*"
 Function,+,cli_vcp_disable,void,CliVcp*
 Function,+,cli_vcp_enable,void,CliVcp*
@@ -2328,14 +2328,14 @@ Function,+,pipe_bytes_available,size_t,PipeSide*
 Function,+,pipe_detach_from_event_loop,void,PipeSide*
 Function,+,pipe_free,void,PipeSide*
 Function,+,pipe_install_as_stdio,void,PipeSide*
-Function,+,pipe_receive,size_t,"PipeSide*, void*, size_t, FuriWait"
+Function,+,pipe_receive,size_t,"PipeSide*, void*, size_t"
 Function,+,pipe_role,PipeRole,PipeSide*
-Function,+,pipe_send,size_t,"PipeSide*, const void*, size_t, FuriWait"
+Function,+,pipe_send,size_t,"PipeSide*, const void*, size_t"
 Function,+,pipe_set_broken_callback,void,"PipeSide*, PipeSideBrokenCallback, FuriEventLoopEvent"
 Function,+,pipe_set_callback_context,void,"PipeSide*, void*"
 Function,+,pipe_set_data_arrived_callback,void,"PipeSide*, PipeSideDataArrivedCallback, FuriEventLoopEvent"
 Function,+,pipe_set_space_freed_callback,void,"PipeSide*, PipeSideSpaceFreedCallback, FuriEventLoopEvent"
-Function,+,pipe_set_stdout_timeout,void,"PipeSide*, FuriWait"
+Function,+,pipe_set_state_check_period,void,"PipeSide*, FuriWait"
 Function,+,pipe_spaces_available,size_t,PipeSide*
 Function,+,pipe_state,PipeState,PipeSide*
 Function,+,plugin_manager_alloc,PluginManager*,"const char*, uint32_t, const ElfApiInterface*"
