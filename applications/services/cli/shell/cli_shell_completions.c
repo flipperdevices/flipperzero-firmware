@@ -27,6 +27,7 @@ typedef enum {
     CliShellCompletionsActionLeft,
     CliShellCompletionsActionRight,
     CliShellCompletionsActionSelect,
+    CliShellCompletionsActionSelectNoClose,
 } CliShellCompletionsAction;
 
 typedef enum {
@@ -134,10 +135,15 @@ void cli_shell_completions_render(
     cli_shell_line_format_prompt(completions->line, prompt, sizeof(prompt));
 
     if(action == CliShellCompletionsActionOpen) {
-        // show completions menu (full re-render)
         cli_shell_completions_fill_variants(completions);
         completions->selected = 0;
 
+        if(CommandCompletions_size(completions->variants) == 1) {
+            cli_shell_completions_render(completions, CliShellCompletionsActionSelectNoClose);
+            return;
+        }
+
+        // show completions menu (full re-render)
         printf("\n\r");
         size_t position = 0;
         for
@@ -180,14 +186,25 @@ void cli_shell_completions_render(
         if(CommandCompletions_empty_p(completions->variants)) return;
 
         // move selection
+        size_t completions_size = CommandCompletions_size(completions->variants);
         size_t old_selection = completions->selected;
-        int new_selection_unclamped = completions->selected;
-        if(action == CliShellCompletionsActionUp) new_selection_unclamped -= COMPLETION_COLUMNS;
-        if(action == CliShellCompletionsActionDown) new_selection_unclamped += COMPLETION_COLUMNS;
-        if(action == CliShellCompletionsActionLeft) new_selection_unclamped--;
-        if(action == CliShellCompletionsActionRight) new_selection_unclamped++;
-        size_t new_selection = CLAMP_WRAPAROUND(
-            new_selection_unclamped, (int)CommandCompletions_size(completions->variants) - 1, 0);
+        int selection_unclamped = old_selection;
+        if(action == CliShellCompletionsActionLeft) {
+            selection_unclamped--;
+        } else if(action == CliShellCompletionsActionRight) {
+            selection_unclamped++;
+        } else {
+            size_t selection_x = old_selection % COMPLETION_COLUMNS;
+            int selection_y_unclamped = old_selection / COMPLETION_COLUMNS;
+            if(action == CliShellCompletionsActionUp) selection_y_unclamped--;
+            if(action == CliShellCompletionsActionDown) selection_y_unclamped++;
+            size_t n_full_rows = completions_size / COMPLETION_COLUMNS;
+            size_t n_cols_in_last_row = completions_size % COMPLETION_COLUMNS;
+            size_t n_rows_at_x = n_full_rows + ((selection_x >= n_cols_in_last_row) ? 0 : 1);
+            size_t selection_y = CLAMP_WRAPAROUND(selection_y_unclamped, (int)n_rows_at_x - 1, 0);
+            selection_unclamped = (selection_y * COMPLETION_COLUMNS) + selection_x;
+        }
+        size_t new_selection = CLAMP_WRAPAROUND(selection_unclamped, (int)completions_size - 1, 0);
         completions->selected = new_selection;
 
         if(new_selection != old_selection) {
@@ -222,12 +239,9 @@ void cli_shell_completions_render(
                 ANSI_CURSOR_HOR_POS("%zu"),
                 strlen(prompt) + furi_string_size(cli_shell_line_get_selected(completions->line)) +
                     1);
-        } else {
-            // there's only one option
-            cli_shell_completions_render(completions, CliShellCompletionsActionSelect);
         }
 
-    } else if(action == CliShellCompletionsActionSelect) {
+    } else if(action == CliShellCompletionsActionSelectNoClose) {
         // insert selection into prompt
         CliShellCompletionSegment segment = cli_shell_completions_segment(completions);
         FuriString* input = cli_shell_line_get_selected(completions->line);
@@ -245,6 +259,8 @@ void cli_shell_completions_render(
             completions->line,
             MAX(0, (int)cli_shell_line_get_line_position(completions->line) + position_change));
 
+    } else if(action == CliShellCompletionsActionSelect) {
+        cli_shell_completions_render(completions, CliShellCompletionsActionSelectNoClose);
         cli_shell_completions_render(completions, CliShellCompletionsActionClose);
 
     } else {
