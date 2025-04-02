@@ -145,6 +145,11 @@ static bool cli_shell_line_input_cr(CliKeyCombo combo, void* context) {
 
     FuriString* command = cli_shell_line_get_selected(line);
     furi_string_trim(command);
+    if(furi_string_empty(command)) {
+        cli_shell_line_prompt(line);
+        return true;
+    }
+
     FuriString* command_copy = furi_string_alloc_set(command);
 
     if(line->history_position > 0) {
@@ -167,7 +172,7 @@ static bool cli_shell_line_input_cr(CliKeyCombo combo, void* context) {
 
     // execute command
     printf("\r\n");
-    if(!furi_string_empty(command_copy)) cli_shell_execute_command(line->shell, command_copy);
+    cli_shell_execute_command(line->shell, command_copy);
     furi_string_free(command_copy);
 
     cli_shell_line_prompt(line);
