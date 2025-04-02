@@ -167,7 +167,6 @@ static CliShell* cli_shell_alloc(PipeSide* pipe) {
     pipe_set_callback_context(cli_shell->pipe, cli_shell);
     pipe_set_data_arrived_callback(cli_shell->pipe, cli_shell_data_available, 0);
     pipe_set_broken_callback(cli_shell->pipe, cli_shell_pipe_broken, 0);
-    pipe_set_stdout_timeout(cli_shell->pipe, furi_ms_to_ticks(50));
 
     return cli_shell;
 }
