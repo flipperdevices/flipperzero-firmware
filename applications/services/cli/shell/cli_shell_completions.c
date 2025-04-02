@@ -124,6 +124,14 @@ void cli_shell_completions_fill_variants(CliShellCompletions* completions) {
     furi_string_free(input);
 }
 
+static size_t cli_shell_completions_rows_at_column(CliShellCompletions* completions, size_t x) {
+    size_t completions_size = CommandCompletions_size(completions->variants);
+    size_t n_full_rows = completions_size / COMPLETION_COLUMNS;
+    size_t n_cols_in_last_row = completions_size % COMPLETION_COLUMNS;
+    size_t n_rows_at_x = n_full_rows + ((x >= n_cols_in_last_row) ? 0 : 1);
+    return n_rows_at_x;
+}
+
 void cli_shell_completions_render(
     CliShellCompletions* completions,
     CliShellCompletionsAction action) {
@@ -188,20 +196,30 @@ void cli_shell_completions_render(
         // move selection
         size_t completions_size = CommandCompletions_size(completions->variants);
         size_t old_selection = completions->selected;
+        int n_columns = (completions_size >= COMPLETION_COLUMNS) ? COMPLETION_COLUMNS :
+                                                                      completions_size;
         int selection_unclamped = old_selection;
         if(action == CliShellCompletionsActionLeft) {
             selection_unclamped--;
         } else if(action == CliShellCompletionsActionRight) {
             selection_unclamped++;
         } else {
-            size_t selection_x = old_selection % COMPLETION_COLUMNS;
+            int selection_x = old_selection % COMPLETION_COLUMNS;
             int selection_y_unclamped = old_selection / COMPLETION_COLUMNS;
             if(action == CliShellCompletionsActionUp) selection_y_unclamped--;
             if(action == CliShellCompletionsActionDown) selection_y_unclamped++;
-            size_t n_full_rows = completions_size / COMPLETION_COLUMNS;
-            size_t n_cols_in_last_row = completions_size % COMPLETION_COLUMNS;
-            size_t n_rows_at_x = n_full_rows + ((selection_x >= n_cols_in_last_row) ? 0 : 1);
-            size_t selection_y = CLAMP_WRAPAROUND(selection_y_unclamped, (int)n_rows_at_x - 1, 0);
+            size_t selection_y = 0;
+            if(selection_y_unclamped < 0) {
+                selection_x = CLAMP_WRAPAROUND(selection_x - 1, n_columns - 1, 0);
+                selection_y = cli_shell_completions_rows_at_column(completions, selection_x) - 1;
+            } else if(
+                (size_t)selection_y_unclamped >
+                cli_shell_completions_rows_at_column(completions, selection_x) - 1) {
+                selection_x = CLAMP_WRAPAROUND(selection_x + 1, n_columns - 1, 0);
+                selection_y = 0;
+            } else {
+                selection_y = selection_y_unclamped;
+            }
             selection_unclamped = (selection_y * COMPLETION_COLUMNS) + selection_x;
         }
         size_t new_selection = CLAMP_WRAPAROUND(selection_unclamped, (int)completions_size - 1, 0);
