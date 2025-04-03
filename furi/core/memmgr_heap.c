@@ -295,10 +295,12 @@ void memmgr_heap_printf_free_blocks(void) {
     //can be enabled once we can do printf with a locked scheduler
     //vTaskSuspendAll();
 
-    pxBlock = xStart.pxNextFreeBlock;
-    while(pxBlock->pxNextFreeBlock != NULL) {
+    pxBlock = heapPROTECT_BLOCK_POINTER(xStart.pxNextFreeBlock);
+    heapVALIDATE_BLOCK_POINTER(pxBlock);
+    while(pxBlock->pxNextFreeBlock != heapPROTECT_BLOCK_POINTER(NULL)) {
         printf("A %p S %lu\r\n", (void*)pxBlock, (uint32_t)pxBlock->xBlockSize);
-        pxBlock = pxBlock->pxNextFreeBlock;
+        pxBlock = heapPROTECT_BLOCK_POINTER(pxBlock->pxNextFreeBlock);
+        heapVALIDATE_BLOCK_POINTER(pxBlock);
     }
 
     //xTaskResumeAll();
