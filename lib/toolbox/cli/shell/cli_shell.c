@@ -172,7 +172,8 @@ void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
     furi_string_right(args, space + 1);
 
     PluginManager* plugin_manager = NULL;
-    Loader* loader = NULL;
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    bool loader_locked = false;
     CliRegistryCommand command_data;
 
     do {
@@ -218,9 +219,8 @@ void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
 
         // lock loader
         if(!(command_data.flags & CliCommandFlagParallelSafe)) {
-            loader = furi_record_open(RECORD_LOADER);
-            bool success = loader_lock(loader);
-            if(!success) {
+            loader_locked = loader_lock(loader);
+            if(!loader_locked) {
                 printf(ANSI_FG_RED
                        "this command cannot be run while an application is open" ANSI_RESET);
                 break;
@@ -254,7 +254,7 @@ void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
     furi_string_free(args);
 
     // unlock loader
-    if(loader) loader_unlock(loader);
+    if(loader_locked) loader_unlock(loader);
     furi_record_close(RECORD_LOADER);
 
     // unload external command
