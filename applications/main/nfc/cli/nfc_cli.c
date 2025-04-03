@@ -1,9 +1,12 @@
 #include "nfc_cli_commands.h"
 #include "nfc_cli_command_processor.h"
 
+#include "applications/services/loader/loader.h"
 #include "applications/services/cli/cli_master_commands.h"
 #include <toolbox/cli/shell/cli_shell.h>
 #include <toolbox/cli/cli_registry.h>
+
+#define NFC_DESKTOP_APP_NAME "NFC"
 
 #define TAG "NfcCli"
 
@@ -58,6 +61,20 @@ static void nfc_cli_subscribe_commands(NfcCliContext* instance) {
     }
 }
 
+static bool nfc_cli_desktop_app_is_running() {
+    FuriString* app_name = furi_string_alloc();
+    Loader* ldr = furi_record_open(RECORD_LOADER);
+    bool result = false;
+
+    if(loader_get_application_name(ldr, app_name)) {
+        result = furi_string_equal_str(app_name, NFC_DESKTOP_APP_NAME);
+    }
+
+    furi_record_close(RECORD_LOADER);
+    furi_string_free(app_name);
+    return result;
+}
+
 static NfcCliContext* nfc_cli_alloc(PipeSide* pipe) {
     NfcCliContext* instance = malloc(sizeof(NfcCliContext));
     instance->nfc = nfc_alloc();
@@ -90,6 +107,12 @@ void nfc_cli_execute(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(args);
     UNUSED(context);
 
+    if(nfc_cli_desktop_app_is_running()) {
+        printf(ANSI_FG_YELLOW
+               "NFC app is running, unable to run NFC CLI at the same time!\r\n" ANSI_RESET);
+        return;
+    }
+
     NfcCliContext* instance = nfc_cli_alloc(pipe);
 
     cli_shell_start(instance->shell);
@@ -98,4 +121,4 @@ void nfc_cli_execute(PipeSide* pipe, FuriString* args, void* context) {
     nfc_cli_free(instance);
 }
 
-CLI_COMMAND_INTERFACE(nfc, nfc_cli_execute, CliCommandFlagDefault, 1024, CLI_MASTER_APPID);
+CLI_COMMAND_INTERFACE(nfc, nfc_cli_execute, CliCommandFlagParallelSafe, 1024, CLI_MASTER_APPID);
