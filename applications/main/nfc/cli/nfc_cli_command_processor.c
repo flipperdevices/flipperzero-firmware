@@ -138,9 +138,6 @@ static NfcCliArgumentType nfc_cli_get_argument_type(FuriString* argument) {
         if(ch1 == '-') {
             type = (ch2 == '-') ? NfcCliArgumentTypeLongNameKey :
                                   NfcCliArgumentTypeShortNameKeyGroup;
-
-        } else {
-            type = NfcCliArgumentTypeUnknown;
         }
     } else if(arg_len == 2) {
         char ch1 = furi_string_get_char(argument, 0);
@@ -286,7 +283,7 @@ static NfcCliProcessorError nfc_cli_parse_argument(
         result = nfc_cli_parse_group_key(instance, argument);
     else if((type == NfcCliArgumentTypeShortNameKey) || (type == NfcCliArgumentTypeLongNameKey)) {
         result = nfc_cli_parse_single_key(instance, argument, args, false);
-    } else if(type == NfcCliArgumentTypeUnknown) {
+    } else if(type == NfcCliArgumentTypeUnknown) { //-V547
         result = NfcCliProcessorErrorKeyNotSupported;
         furi_string_printf(
             instance->error_message,

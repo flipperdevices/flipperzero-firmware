@@ -266,6 +266,8 @@ App(
     requires=["cli_master"],
     sources=[
              "helpers/mf_classic_key_cache.c",
+             "helpers/protocol_support/iso14443_3a/iso14443_3a_render.c",
+             "helpers/protocol_support/mf_ultralight/mf_ultralight_render.c",
              "cli/nfc_cli.c",             
              "cli/nfc_cli_commands.c",
              "cli/nfc_cli_command_processor.c",
@@ -298,8 +300,12 @@ App(
              "cli/commands/dump/protocols/st25tb/nfc_cli_dump_st25tb.c",
              "cli/commands/dump/protocols/felica/nfc_cli_dump_felica.c",
 
+             "cli/commands/mfu/nfc_cli_command_mfu.c",
+             "cli/commands/mfu/nfc_cli_action_info.c",
+             "cli/commands/mfu/nfc_cli_action_rdbl.c",
+             "cli/commands/mfu/nfc_cli_action_wrbl.c",    
+
              "cli/commands/nfc_cli_command_emulate.c",  
-             "cli/commands/nfc_cli_command_mfu.c",
              "cli/commands/nfc_cli_command_scanner.c",
              "cli/commands/nfc_cli_command_field.c",
              ],

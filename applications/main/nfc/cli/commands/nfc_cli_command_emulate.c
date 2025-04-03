@@ -1,5 +1,4 @@
 #include "nfc_cli_command_emulate.h"
-#include "../nfc_cli_command_processor.h"
 #include "helpers/nfc_cli_format.h"
 
 #include <nfc.h>

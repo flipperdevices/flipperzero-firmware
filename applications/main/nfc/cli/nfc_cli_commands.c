@@ -5,8 +5,8 @@
 #include "commands/raw/nfc_cli_command_raw.h"
 #include "commands/apdu/nfc_cli_command_apdu.h"
 #include "commands/dump/nfc_cli_command_dump.h"
+#include "commands/mfu/nfc_cli_command_mfu.h"
 #include "commands/nfc_cli_command_emulate.h"
-#include "commands/nfc_cli_command_mfu.h"
 #include "commands/nfc_cli_command_scanner.h"
 #include "commands/nfc_cli_command_field.h"
 
@@ -92,8 +92,8 @@ size_t nfc_cli_action_get_required_keys_count(const NfcCliActionDescriptor* acti
     return required_key_count;
 }
 
-static size_t nfc_cli_action_format_key_name(const NfcCliKeyDescriptor* key, FuriString* output) {
-    size_t len = 0;
+static int nfc_cli_action_format_key_name(const NfcCliKeyDescriptor* key, FuriString* output) {
+    int len = 0;
     FuriString* name = furi_string_alloc();
     if(key->short_name && key->long_name) {
         len = furi_string_printf(name, "-%s, --%s", key->short_name, key->long_name);
@@ -129,11 +129,11 @@ void nfc_cli_action_format_info(const NfcCliActionDescriptor* action, FuriString
     for(size_t i = 0; i < action->key_count; i++) {
         const NfcCliKeyDescriptor* key = &action->keys[i];
 
-        size_t len = nfc_cli_action_format_key_name(key, buf);
+        int len = nfc_cli_action_format_key_name(key, buf);
         furi_string_cat_printf(output, "%s", furi_string_get_cstr(buf));
 
         if(key->description) {
-            const size_t offset = 20;
+            const int offset = 20;
             furi_string_cat_printf(
                 output, ANSI_CURSOR_RIGHT_BY("%d") "%s", offset - len, key->description);
         }
