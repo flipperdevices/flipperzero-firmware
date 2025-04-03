@@ -95,6 +95,13 @@ void cli_add_command_ex(
 void cli_delete_command(Cli* cli, const char* name);
 
 /**
+ * @brief Unregisters all external commands
+ * 
+ * @param [in] cli pointer to the cli instance
+ */
+void cli_remove_external_commands(Cli* cli);
+
+/**
  * @brief Reloads the list of externally available commands
  * 
  * @param [in] cli pointer to cli instance

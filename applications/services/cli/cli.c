@@ -89,12 +89,10 @@ bool cli_get_command(Cli* cli, FuriString* command, CliCommand* result) {
     return !!data;
 }
 
-void cli_enumerate_external_commands(Cli* cli) {
+void cli_remove_external_commands(Cli* cli) {
     furi_check(cli);
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
-    FURI_LOG_D(TAG, "Enumerating external commands");
 
-    // remove external commands
     CliCommandTree_t internal_cmds;
     CliCommandTree_init(internal_cmds);
     for
@@ -104,15 +102,25 @@ void cli_enumerate_external_commands(Cli* cli) {
         }
     CliCommandTree_move(cli->commands, internal_cmds);
 
+    furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
+}
+
+void cli_enumerate_external_commands(Cli* cli) {
+    cli_remove_external_commands(cli);
+
+    furi_check(cli);
+    furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
+    FURI_LOG_D(TAG, "Enumerating external commands");
+
     // iterate over files in plugin directory
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    File* plogin_dir = storage_file_alloc(storage);
+    File* plugin_dir = storage_file_alloc(storage);
 
-    if(storage_dir_open(plogin_dir, CLI_COMMANDS_PATH)) {
+    if(storage_dir_open(plugin_dir, CLI_COMMANDS_PATH)) {
         char plugin_filename[64];
         FuriString* plugin_name = furi_string_alloc();
 
-        while(storage_dir_read(plogin_dir, NULL, plugin_filename, sizeof(plugin_filename))) {
+        while(storage_dir_read(plugin_dir, NULL, plugin_filename, sizeof(plugin_filename))) {
             FURI_LOG_T(TAG, "Plugin: %s", plugin_filename);
             furi_string_set_str(plugin_name, plugin_filename);
             furi_string_replace_all_str(plugin_name, ".fal", "");
@@ -128,8 +136,8 @@ void cli_enumerate_external_commands(Cli* cli) {
         furi_string_free(plugin_name);
     }
 
-    storage_dir_close(plogin_dir);
-    storage_file_free(plogin_dir);
+    storage_dir_close(plugin_dir);
+    storage_file_free(plugin_dir);
     furi_record_close(RECORD_STORAGE);
 
     FURI_LOG_D(TAG, "Finished enumerating external commands");
@@ -137,17 +145,18 @@ void cli_enumerate_external_commands(Cli* cli) {
 }
 
 void cli_lock_commands(Cli* cli) {
-    furi_assert(cli);
+    furi_check(cli);
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
 }
 
 void cli_unlock_commands(Cli* cli) {
-    furi_assert(cli);
-    furi_mutex_release(cli->mutex);
+    furi_check(cli);
+    furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
 }
 
 CliCommandTree_t* cli_get_commands(Cli* cli) {
-    furi_assert(cli);
+    furi_check(cli);
+    furi_check(furi_mutex_get_owner(cli->mutex) == furi_thread_get_current_id());
     return &cli->commands;
 }
 

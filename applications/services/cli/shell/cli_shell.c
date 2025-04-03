@@ -12,6 +12,7 @@
 #include <toolbox/pipe.h>
 #include <flipper_application/plugins/plugin_manager.h>
 #include <loader/firmware_api/firmware_api.h>
+#include <storage/storage.h>
 
 #define TAG "CliShell"
 
@@ -29,6 +30,11 @@ CliShellKeyComboSet* component_key_combo_sets[] = {
 };
 static_assert(CliShellComponentMAX == COUNT_OF(component_key_combo_sets));
 
+typedef enum {
+    CliShellStorageEventMount,
+    CliShellStorageEventUnmount,
+} CliShellStorageEvent;
+
 struct CliShell {
     Cli* cli;
     FuriEventLoop* event_loop;
@@ -36,6 +42,10 @@ struct CliShell {
 
     CliAnsiParser* ansi_parser;
     FuriEventLoopTimer* ansi_parsing_timer;
+
+    Storage* storage;
+    FuriPubSubSubscription* storage_subscription;
+    FuriMessageQueue* storage_event_queue;
 
     void* components[CliShellComponentMAX];
 };
@@ -178,6 +188,34 @@ void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
 // Event handlers
 // ==============
 
+static void cli_shell_storage_event(const void* message, void* context) {
+    CliShell* cli_shell = context;
+    const StorageEvent* event = message;
+
+    if(event->type == StorageEventTypeCardMount) {
+        CliShellStorageEvent cli_event = CliShellStorageEventMount;
+        furi_check(furi_message_queue_put(cli_shell->storage_event_queue, &cli_event, 0) == FuriStatusOk);
+    } else if(event->type == StorageEventTypeCardUnmount) {
+        CliShellStorageEvent cli_event = CliShellStorageEventUnmount;
+        furi_check(furi_message_queue_put(cli_shell->storage_event_queue, &cli_event, 0) == FuriStatusOk);
+    }
+}
+
+static void cli_shell_storage_internal_event(FuriEventLoopObject* object, void* context) {
+    CliShell* cli_shell = context;
+    FuriMessageQueue* queue = object;
+    CliShellStorageEvent event;
+    furi_check(furi_message_queue_get(queue, &event, 0) == FuriStatusOk);
+
+    if(event == CliShellStorageEventMount) {
+        cli_enumerate_external_commands(cli_shell->cli);
+    } else if(event == CliShellStorageEventUnmount) {
+        cli_remove_external_commands(cli_shell->cli);
+    } else {
+        furi_crash();
+    }
+}
+
 static void
     cli_shell_process_parser_result(CliShell* cli_shell, CliAnsiParserResult parse_result) {
     if(!parse_result.is_done) return;
@@ -246,10 +284,22 @@ static CliShell* cli_shell_alloc(PipeSide* pipe) {
 
     cli_shell_install_pipe(cli_shell);
 
+    cli_shell->storage_event_queue = furi_message_queue_alloc(1, sizeof(CliShellStorageEvent));
+    furi_event_loop_subscribe_message_queue(cli_shell->event_loop, cli_shell->storage_event_queue, FuriEventLoopEventIn, cli_shell_storage_internal_event, cli_shell);
+    cli_shell->storage = furi_record_open(RECORD_STORAGE);
+    cli_shell->storage_subscription = furi_pubsub_subscribe(
+        storage_get_pubsub(cli_shell->storage), cli_shell_storage_event, cli_shell);
+
     return cli_shell;
 }
 
 static void cli_shell_free(CliShell* cli_shell) {
+    furi_pubsub_unsubscribe(
+        storage_get_pubsub(cli_shell->storage), cli_shell->storage_subscription);
+    furi_record_close(RECORD_STORAGE);
+    furi_event_loop_unsubscribe(cli_shell->event_loop, cli_shell->storage_event_queue);
+    furi_message_queue_free(cli_shell->storage_event_queue);
+
     cli_shell_completions_free(cli_shell->components[CliShellComponentCompletions]);
     cli_shell_line_free(cli_shell->components[CliShellComponentLine]);
 
