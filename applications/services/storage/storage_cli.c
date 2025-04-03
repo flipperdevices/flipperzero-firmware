@@ -321,9 +321,11 @@ static void storage_cli_write_chunk(PipeSide* pipe, FuriString* path, FuriString
             uint8_t* buffer = malloc(buffer_size);
 
             while(need_to_read) {
-                size_t read_this_time = pipe_receive(pipe, buffer, MIN(buffer_size, need_to_read));
-                size_t wrote_this_time = storage_file_write(file, buffer, read_this_time);
+                size_t to_read_this_time = MIN(buffer_size, need_to_read);
+                size_t read_this_time = pipe_receive(pipe, buffer, to_read_this_time);
+                if(read_this_time != to_read_this_time) break;
 
+                size_t wrote_this_time = storage_file_write(file, buffer, read_this_time);
                 if(wrote_this_time != read_this_time) {
                     storage_cli_print_error(storage_file_get_error(file));
                     break;
