@@ -266,13 +266,14 @@ const NfcCliKeyDescriptor apdu_keys[] = {
     {
         .long_name = "protocol",
         .short_name = "p",
-        .description = "Set protocol (4a, 4b, 15) directly, otherwise autodetected",
+        .description = "set protocol (4a, 4b, 15) directly, otherwise autodetected",
         .features = {.parameter = true, .required = false},
         .parse = nfc_cli_apdu_parse_protocol,
     },
     {
         .long_name = "data",
         .short_name = "d",
+        .description = "apdu payloads in format p1 p2 p3",
         .features = {.parameter = true, .multivalue = true, .required = true},
         .parse = nfc_cli_apdu_parse_data,
     },

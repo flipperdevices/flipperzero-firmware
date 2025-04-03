@@ -293,7 +293,7 @@ const NfcCliKeyDescriptor raw_action_keys[] = {
         .long_name = NULL,
         .short_name = "t",
         .features = {.parameter = true, .required = false},
-        .description = "Timeout in fc",
+        .description = "timeout in fc",
         .parse = nfc_cli_raw_parse_timeout,
     },
     {
@@ -317,7 +317,7 @@ const NfcCliKeyDescriptor raw_action_keys[] = {
     {
         .long_name = "protocol",
         .short_name = "p",
-        .description = "Desired protocol. Possible values: 14a, iso14a, 14b, iso14b, 15, felica",
+        .description = "desired protocol. Possible values: 14a, iso14a, 14b, iso14b, 15, felica",
         .features = {.parameter = true, .required = true},
         .parse = nfc_cli_raw_parse_protocol,
     },

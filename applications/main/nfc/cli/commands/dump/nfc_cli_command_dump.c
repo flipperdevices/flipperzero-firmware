@@ -249,12 +249,14 @@ const NfcCliKeyDescriptor dump_keys[] = {
     {
         .long_name = "key",
         .short_name = "k",
+        .description = "key to path auth in protocols which requires it",
         .features = {.required = false, .parameter = true},
         .parse = nfc_cli_dump_parse_key,
     },
     {
         .long_name = "protocol",
         .short_name = "p",
+        .description = "desired protocol",
         .features = {.required = false, .parameter = true},
         .parse = nfc_cli_dump_parse_protocol,
     },
@@ -282,6 +284,5 @@ const NfcCliActionDescriptor* dump_actions_collection[] = {&dump_action};
 //Command descriptor
 ADD_NFC_CLI_COMMAND(dump, "", dump_actions_collection);
 
-//Command usage: dump [-f <file>]
 //Command examples:
 //dump -f ext/nfc/test.nfc

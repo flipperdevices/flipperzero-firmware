@@ -44,13 +44,13 @@ const NfcCliKeyDescriptor wrbl_action_keys[] = {
         .long_name = "block",
         .features = {.required = true, .parameter = true},
         .description = "desired block number",
-        .parse = nfc_cli_mfu_wrbl_parse_block, ///TODO: make this common
+        .parse = nfc_cli_mfu_wrbl_parse_block,
     },
     {
         .short_name = "d",
         .long_name = "data",
         .features = {.required = true, .parameter = true},
-        .description = "new data for page",
+        .description = "new data for block",
         .parse = nfc_cli_mfu_wrbl_parse_data,
     },
 };
