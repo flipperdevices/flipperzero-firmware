@@ -492,28 +492,25 @@ void cli_command_echo(PipeSide* pipe, FuriString* args, void* context) {
 }
 
 void cli_commands_init(CliRegistry* registry) {
-    cli_registry_add_command(registry, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
+    cli_registry_add_command(
+        registry, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
     cli_registry_add_command(registry, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
     cli_registry_add_command(
         registry, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
 
-    cli_registry_add_command(
-        registry, "uptime", CliCommandFlagDefault, cli_command_uptime, NULL);
+    cli_registry_add_command(registry, "uptime", CliCommandFlagDefault, cli_command_uptime, NULL);
     cli_registry_add_command(registry, "date", CliCommandFlagParallelSafe, cli_command_date, NULL);
     cli_registry_add_command(registry, "log", CliCommandFlagParallelSafe, cli_command_log, NULL);
-    cli_registry_add_command(
-        registry, "sysctl", CliCommandFlagDefault, cli_command_sysctl, NULL);
+    cli_registry_add_command(registry, "sysctl", CliCommandFlagDefault, cli_command_sysctl, NULL);
     cli_registry_add_command(registry, "top", CliCommandFlagParallelSafe, cli_command_top, NULL);
     cli_registry_add_command(registry, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
     cli_registry_add_command(
         registry, "free_blocks", CliCommandFlagDefault, cli_command_free_blocks, NULL);
     cli_registry_add_command(registry, "echo", CliCommandFlagParallelSafe, cli_command_echo, NULL);
 
-    cli_registry_add_command(
-        registry, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
+    cli_registry_add_command(registry, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
     cli_registry_add_command(registry, "led", CliCommandFlagDefault, cli_command_led, NULL);
-    cli_registry_add_command(
-        registry, "gpio", CliCommandFlagDefault, cli_command_gpio, NULL);
+    cli_registry_add_command(registry, "gpio", CliCommandFlagDefault, cli_command_gpio, NULL);
     cli_registry_add_command(registry, "i2c", CliCommandFlagDefault, cli_command_i2c, NULL);
 }
 

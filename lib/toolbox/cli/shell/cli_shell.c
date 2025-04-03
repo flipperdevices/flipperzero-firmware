@@ -352,11 +352,23 @@ static void cli_shell_timer_expired(void* context) {
 
 static void cli_shell_init(CliShell* shell) {
     cli_registry_add_command(
-        shell->registry, "help", CliCommandFlagUseShellThread | CliCommandFlagParallelSafe, cli_command_help, shell);
+        shell->registry,
+        "help",
+        CliCommandFlagUseShellThread | CliCommandFlagParallelSafe,
+        cli_command_help,
+        shell);
     cli_registry_add_command(
-        shell->registry, "?", CliCommandFlagUseShellThread | CliCommandFlagParallelSafe, cli_command_help, shell);
+        shell->registry,
+        "?",
+        CliCommandFlagUseShellThread | CliCommandFlagParallelSafe,
+        cli_command_help,
+        shell);
     cli_registry_add_command(
-        shell->registry, "exit", CliCommandFlagUseShellThread | CliCommandFlagParallelSafe, cli_command_exit, shell);
+        shell->registry,
+        "exit",
+        CliCommandFlagUseShellThread | CliCommandFlagParallelSafe,
+        cli_command_exit,
+        shell);
 
     if(shell->ext_config) {
         cli_registry_add_command(
@@ -386,15 +398,14 @@ static void cli_shell_init(CliShell* shell) {
         cli_shell_storage_internal_event,
         shell);
     shell->storage = furi_record_open(RECORD_STORAGE);
-    shell->storage_subscription = furi_pubsub_subscribe(
-        storage_get_pubsub(shell->storage), cli_shell_storage_event, shell);
+    shell->storage_subscription =
+        furi_pubsub_subscribe(storage_get_pubsub(shell->storage), cli_shell_storage_event, shell);
 
     cli_shell_install_pipe(shell);
 }
 
 static void cli_shell_deinit(CliShell* shell) {
-    furi_pubsub_unsubscribe(
-        storage_get_pubsub(shell->storage), shell->storage_subscription);
+    furi_pubsub_unsubscribe(storage_get_pubsub(shell->storage), shell->storage_subscription);
     furi_record_close(RECORD_STORAGE);
     furi_event_loop_unsubscribe(shell->event_loop, shell->storage_event_queue);
     furi_message_queue_free(shell->storage_event_queue);
