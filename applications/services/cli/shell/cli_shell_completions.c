@@ -211,7 +211,8 @@ void cli_shell_completions_render(
             size_t selection_y = 0;
             if(selection_y_unclamped < 0) {
                 selection_x = CLAMP_WRAPAROUND(selection_x - 1, n_columns - 1, 0);
-                selection_y = cli_shell_completions_rows_at_column(completions, selection_x) - 1;
+                selection_y =
+                    cli_shell_completions_rows_at_column(completions, selection_x) - 1; // -V537
             } else if(
                 (size_t)selection_y_unclamped >
                 cli_shell_completions_rows_at_column(completions, selection_x) - 1) {

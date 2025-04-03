@@ -169,8 +169,7 @@ static bool cli_shell_line_input_cr(CliKeyCombo combo, void* context) {
         size_t len = line->history_entries;
         memmove(
             &line->history[pos], &line->history[pos + 1], (len - pos - 1) * sizeof(FuriString*));
-        furi_string_set(line->history[0], command);
-        furi_string_free(command);
+        furi_string_move(line->history[0], command);
         line->history_entries--;
     }
 
