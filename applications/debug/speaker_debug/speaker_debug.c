@@ -113,7 +113,7 @@ static void speaker_app_run(SpeakerDebugApp* app, const char* arg) {
         }
     }
 
-    cli_delete_command(app->cli, CLI_COMMAND);
+    cli_registry_delete_command(app->cli_registry, CLI_COMMAND);
 }
 
 int32_t speaker_debug_app(void* arg) {
