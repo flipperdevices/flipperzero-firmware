@@ -73,7 +73,7 @@ void cli_registry_delete_command(CliRegistry* registry, const char* name);
 /**
  * @brief Unregisters all external commands
  * 
- * @param [in] cli pointer to the cli instance
+ * @param [in] registry Pointer to registry instance
  */
 void cli_registry_remove_external_commands(CliRegistry* registry);
 
