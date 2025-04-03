@@ -145,13 +145,32 @@ static bool cli_shell_line_input_cr(CliKeyCombo combo, void* context) {
 
     FuriString* command = cli_shell_line_get_selected(line);
     furi_string_trim(command);
+    if(furi_string_empty(command)) {
+        cli_shell_line_prompt(line);
+        return true;
+    }
+
     FuriString* command_copy = furi_string_alloc_set(command);
 
+    if(line->history_position == 0) {
+        for(size_t i = 1; i < line->history_entries; i++) {
+            if(furi_string_cmp(line->history[i], command) == 0) {
+                line->history_position = i;
+                command = cli_shell_line_get_selected(line);
+                furi_string_trim(command);
+                break;
+            }
+        }
+    }
+
+    // move selected command to the front
     if(line->history_position > 0) {
-        // move selected command to the front
+        size_t pos = line->history_position;
+        size_t len = line->history_entries;
         memmove(
-            &line->history[1], &line->history[0], line->history_position * sizeof(FuriString*));
-        line->history[0] = command;
+            &line->history[pos], &line->history[pos + 1], (len - pos - 1) * sizeof(FuriString*));
+        furi_string_move(line->history[0], command);
+        line->history_entries--;
     }
 
     // insert empty command
@@ -167,7 +186,7 @@ static bool cli_shell_line_input_cr(CliKeyCombo combo, void* context) {
 
     // execute command
     printf("\r\n");
-    if(!furi_string_empty(command_copy)) cli_shell_execute_command(line->shell, command_copy);
+    cli_shell_execute_command(line->shell, command_copy);
     furi_string_free(command_copy);
 
     cli_shell_line_prompt(line);
@@ -307,7 +326,7 @@ static bool cli_shell_line_input_ctrl_bksp(CliKeyCombo combo, void* context) {
     return true;
 }
 
-static bool cli_shell_line_input_normal_input(CliKeyCombo combo, void* context) {
+static bool cli_shell_line_input_normal(CliKeyCombo combo, void* context) {
     CliShellLine* line = context;
     if(combo.modifiers != CliModKeyNo) return false;
     if(combo.key < CliKeySpace || combo.key >= CliKeyDEL) return false;
@@ -328,7 +347,7 @@ static bool cli_shell_line_input_normal_input(CliKeyCombo combo, void* context) 
 }
 
 CliShellKeyComboSet cli_shell_line_key_combo_set = {
-    .fallback = cli_shell_line_input_normal_input,
+    .fallback = cli_shell_line_input_normal,
     .count = 14,
     .records =
         {

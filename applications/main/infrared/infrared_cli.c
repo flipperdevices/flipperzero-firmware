@@ -52,20 +52,20 @@ static void signal_received_callback(void* context, InfraredWorkerSignal* receiv
             ROUND_UP_TO(infrared_get_protocol_command_length(message->protocol), 4),
             message->command,
             message->repeat ? " R" : "");
-        pipe_send(pipe, buf, buf_cnt, FuriWaitForever);
+        pipe_send(pipe, buf, buf_cnt);
     } else {
         const uint32_t* timings;
         size_t timings_cnt;
         infrared_worker_get_raw_signal(received_signal, &timings, &timings_cnt);
 
         buf_cnt = snprintf(buf, sizeof(buf), "RAW, %zu samples:\r\n", timings_cnt);
-        pipe_send(pipe, buf, buf_cnt, FuriWaitForever);
+        pipe_send(pipe, buf, buf_cnt);
         for(size_t i = 0; i < timings_cnt; ++i) {
             buf_cnt = snprintf(buf, sizeof(buf), "%lu ", timings[i]);
-            pipe_send(pipe, buf, buf_cnt, FuriWaitForever);
+            pipe_send(pipe, buf, buf_cnt);
         }
         buf_cnt = snprintf(buf, sizeof(buf), "\r\n");
-        pipe_send(pipe, buf, buf_cnt, FuriWaitForever);
+        pipe_send(pipe, buf, buf_cnt);
     }
 }
 

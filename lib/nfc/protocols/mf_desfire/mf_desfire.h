@@ -97,6 +97,7 @@ typedef enum {
     MfDesfireFileTypeValue = 2,
     MfDesfireFileTypeLinearRecord = 3,
     MfDesfireFileTypeCyclicRecord = 4,
+    MfDesfireFileTypeTransactionMac = 5,
 } MfDesfireFileType;
 
 typedef enum {
@@ -128,6 +129,11 @@ typedef struct {
             uint32_t max;
             uint32_t cur;
         } record;
+        struct {
+            uint8_t key_option;
+            uint8_t key_version;
+            uint32_t counter_limit;
+        } transaction_mac;
     };
 } MfDesfireFileSettings;
 

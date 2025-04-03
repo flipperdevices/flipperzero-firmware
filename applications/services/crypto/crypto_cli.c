@@ -45,7 +45,7 @@ void crypto_cli_encrypt(PipeSide* pipe, FuriString* args) {
         FuriString* input;
         input = furi_string_alloc();
         char c;
-        while(pipe_receive(pipe, (uint8_t*)&c, 1, FuriWaitForever) == 1) {
+        while(pipe_receive(pipe, (uint8_t*)&c, 1) == 1) {
             if(c == CliKeyETX) {
                 printf("\r\n");
                 break;
@@ -120,7 +120,7 @@ void crypto_cli_decrypt(PipeSide* pipe, FuriString* args) {
         FuriString* hex_input;
         hex_input = furi_string_alloc();
         char c;
-        while(pipe_receive(pipe, (uint8_t*)&c, 1, FuriWaitForever) == 1) {
+        while(pipe_receive(pipe, (uint8_t*)&c, 1) == 1) {
             if(c == CliKeyETX) {
                 printf("\r\n");
                 break;

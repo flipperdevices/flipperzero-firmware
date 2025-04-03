@@ -139,7 +139,7 @@ typedef struct {
 static void js_cli_print(JsCliContext* ctx, const char* msg) {
     UNUSED(ctx);
     UNUSED(msg);
-    pipe_send(ctx->pipe, msg, strlen(msg), FuriWaitForever);
+    pipe_send(ctx->pipe, msg, strlen(msg));
 }
 
 static void js_cli_exit(JsCliContext* ctx) {

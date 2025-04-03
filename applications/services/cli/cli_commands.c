@@ -181,7 +181,7 @@ void cli_command_date(PipeSide* pipe, FuriString* args, void* context) {
 
 void cli_command_log_tx_callback(const uint8_t* buffer, size_t size, void* context) {
     PipeSide* pipe = context;
-    pipe_send(pipe, buffer, size, FuriWaitForever);
+    pipe_send(pipe, buffer, size);
 }
 
 bool cli_command_log_level_set_from_string(FuriString* level) {
@@ -530,21 +530,18 @@ void cli_command_reload_external(PipeSide* pipe, FuriString* args, void* context
 void cli_command_echo(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(args);
     UNUSED(context);
-    const FuriWait timeout = furi_ms_to_ticks(500);
 
     uint8_t buffer[256];
 
     while(true) {
-        size_t read = pipe_receive(pipe, buffer, sizeof(buffer), timeout);
-        if(!read) continue;
+        size_t to_read = CLAMP(pipe_bytes_available(pipe), sizeof(buffer), 1UL);
+        size_t read = pipe_receive(pipe, buffer, to_read);
+        if(read < to_read) break;
 
-        if(pipe_state(pipe) == PipeStateBroken) break;
         if(memchr(buffer, CliKeyETX, read)) break;
 
-        size_t written = pipe_send(pipe, buffer, read, timeout);
-        if(written != read) {
-            FURI_LOG_E("CliEcho", "read=%zu written=%zu", read, written);
-        }
+        size_t written = pipe_send(pipe, buffer, read);
+        if(written < read) break;
     }
 }
 

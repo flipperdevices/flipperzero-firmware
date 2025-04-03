@@ -3,6 +3,7 @@
 
 #include <cli/cli_commands.h>
 #include <power/power_service/power.h>
+#include <cli/cli_commands.h>
 #include <toolbox/args.h>
 
 #include <one_wire/one_wire_host.h>
