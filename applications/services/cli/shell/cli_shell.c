@@ -4,6 +4,7 @@
 #include "../cli_i.h"
 #include "../cli_commands.h"
 #include "cli_shell_line.h"
+#include "cli_shell_completions.h"
 #include <stdio.h>
 #include <furi_hal_version.h>
 #include <m-array.h>
@@ -17,11 +18,13 @@
 #define ANSI_TIMEOUT_MS 10
 
 typedef enum {
+    CliShellComponentCompletions,
     CliShellComponentLine,
     CliShellComponentMAX, //<! do not use
 } CliShellComponent;
 
 CliShellKeyComboSet* component_key_combo_sets[] = {
+    [CliShellComponentCompletions] = &cli_shell_completions_key_combo_set,
     [CliShellComponentLine] = &cli_shell_line_key_combo_set,
 };
 static_assert(CliShellComponentMAX == COUNT_OF(component_key_combo_sets));
@@ -158,6 +161,8 @@ static CliShell* cli_shell_alloc(PipeSide* pipe) {
     pipe_install_as_stdio(cli_shell->pipe);
 
     cli_shell->components[CliShellComponentLine] = cli_shell_line_alloc(cli_shell);
+    cli_shell->components[CliShellComponentCompletions] = cli_shell_completions_alloc(
+        cli_shell->cli, cli_shell, cli_shell->components[CliShellComponentLine]);
 
     cli_shell->event_loop = furi_event_loop_alloc();
     cli_shell->ansi_parsing_timer = furi_event_loop_timer_alloc(
@@ -172,6 +177,7 @@ static CliShell* cli_shell_alloc(PipeSide* pipe) {
 }
 
 static void cli_shell_free(CliShell* cli_shell) {
+    cli_shell_completions_free(cli_shell->components[CliShellComponentCompletions]);
     cli_shell_line_free(cli_shell->components[CliShellComponentLine]);
 
     pipe_detach_from_event_loop(cli_shell->pipe);

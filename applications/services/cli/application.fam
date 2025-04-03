@@ -6,6 +6,7 @@ App(
     sources=[
         "cli.c",
         "shell/cli_shell.c",
+        "shell/cli_shell_completions.c",
         "shell/cli_shell_line.c",
         "cli_commands.c",
         "cli_command_gpio.c",
