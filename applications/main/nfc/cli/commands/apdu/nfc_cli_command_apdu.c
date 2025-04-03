@@ -252,6 +252,15 @@ static bool nfc_cli_apdu_parse_data(FuriString* value, void* output) {
         if(len % 2 != 0) break;
 
         size_t data_length = len / 2;
+
+        const size_t max_len = UINT16_MAX;
+        if(data_length > max_len) {
+            printf(
+                ANSI_FG_RED "\r\nData payload is too long, max length = %d bytes\r\n" ANSI_RESET,
+                max_len);
+            break;
+        }
+
         NfcCliApduData* item = NfcCliApduItemArray_push_new(ctx->apdu);
         item->size = data_length;
         item->data = malloc(data_length);
