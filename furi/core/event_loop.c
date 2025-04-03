@@ -78,6 +78,7 @@ void furi_event_loop_free(FuriEventLoop* instance) {
     furi_event_loop_process_timer_queue(instance);
     furi_check(TimerList_empty_p(instance->timer_list));
     furi_check(WaitingList_empty_p(instance->waiting_list));
+    furi_check(!instance->are_thread_flags_subscribed);
 
     FuriEventLoopTree_clear(instance->tree);
     PendingQueue_clear(instance->pending_queue);
@@ -242,6 +243,10 @@ void furi_event_loop_run(FuriEventLoop* instance) {
 
             } else if(flags & FuriEventLoopFlagPending) {
                 furi_event_loop_process_pending_callbacks(instance);
+
+            } else if(flags & FuriEventLoopFlagThreadFlag) {
+                if(instance->are_thread_flags_subscribed)
+                    instance->thread_flags_callback(instance->thread_flags_callback_context);
 
             } else {
                 furi_crash();
@@ -416,6 +421,24 @@ void furi_event_loop_subscribe_mutex(
         instance, mutex, &furi_mutex_event_loop_contract, event, callback, context);
 }
 
+void furi_event_loop_subscribe_thread_flags(
+    FuriEventLoop* instance,
+    FuriEventLoopThreadFlagsCallback callback,
+    void* context) {
+    furi_check(instance);
+    furi_check(callback);
+    furi_check(!instance->are_thread_flags_subscribed);
+    instance->are_thread_flags_subscribed = true;
+    instance->thread_flags_callback = callback;
+    instance->thread_flags_callback_context = context;
+}
+
+void furi_event_loop_unsubscribe_thread_flags(FuriEventLoop* instance) {
+    furi_check(instance);
+    furi_check(instance->are_thread_flags_subscribed);
+    instance->are_thread_flags_subscribed = false;
+}
+
 /**
  * Public generic unsubscription API
  */
@@ -536,6 +559,25 @@ static void furi_event_loop_item_notify(FuriEventLoopItem* instance) {
 
 static bool furi_event_loop_item_is_waiting(FuriEventLoopItem* instance) {
     return instance->WaitingList.prev || instance->WaitingList.next;
+}
+
+void furi_event_loop_thread_flag_callback(FuriThreadId thread_id) {
+    TaskHandle_t hTask = (TaskHandle_t)thread_id;
+    BaseType_t yield;
+
+    if(FURI_IS_IRQ_MODE()) {
+        yield = pdFALSE;
+        (void)xTaskNotifyIndexedFromISR(
+            hTask,
+            FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX,
+            FuriEventLoopFlagThreadFlag,
+            eSetBits,
+            &yield);
+        portYIELD_FROM_ISR(yield);
+    } else {
+        (void)xTaskNotifyIndexed(
+            hTask, FURI_EVENT_LOOP_FLAG_NOTIFY_INDEX, FuriEventLoopFlagThreadFlag, eSetBits);
+    }
 }
 
 /*

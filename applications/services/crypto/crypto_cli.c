@@ -2,6 +2,7 @@
 #include <furi.h>
 
 #include <lib/toolbox/args.h>
+#include <toolbox/pipe.h>
 #include <cli/cli.h>
 
 void crypto_cli_print_usage(void) {
@@ -17,7 +18,7 @@ void crypto_cli_print_usage(void) {
         "\tstore_key <key_slot:int> <key_type:str> <key_size:int> <key_data:hex>\t - Store key in secure enclave. !!! NON-REVERSABLE OPERATION - READ MANUAL FIRST !!!\r\n");
 }
 
-void crypto_cli_encrypt(Cli* cli, FuriString* args) {
+void crypto_cli_encrypt(PipeSide* pipe, FuriString* args) {
     int key_slot = 0;
     bool key_loaded = false;
     uint8_t iv[16];
@@ -44,15 +45,15 @@ void crypto_cli_encrypt(Cli* cli, FuriString* args) {
         FuriString* input;
         input = furi_string_alloc();
         char c;
-        while(cli_read(cli, (uint8_t*)&c, 1) == 1) {
-            if(c == CliSymbolAsciiETX) {
+        while(pipe_receive(pipe, (uint8_t*)&c, 1) == 1) {
+            if(c == CliKeyETX) {
                 printf("\r\n");
                 break;
             } else if(c >= 0x20 && c < 0x7F) {
                 putc(c, stdout);
                 fflush(stdout);
                 furi_string_push_back(input, c);
-            } else if(c == CliSymbolAsciiCR) {
+            } else if(c == CliKeyCR) {
                 printf("\r\n");
                 furi_string_cat(input, "\r\n");
             }
@@ -92,7 +93,7 @@ void crypto_cli_encrypt(Cli* cli, FuriString* args) {
     }
 }
 
-void crypto_cli_decrypt(Cli* cli, FuriString* args) {
+void crypto_cli_decrypt(PipeSide* pipe, FuriString* args) {
     int key_slot = 0;
     bool key_loaded = false;
     uint8_t iv[16];
@@ -119,15 +120,15 @@ void crypto_cli_decrypt(Cli* cli, FuriString* args) {
         FuriString* hex_input;
         hex_input = furi_string_alloc();
         char c;
-        while(cli_read(cli, (uint8_t*)&c, 1) == 1) {
-            if(c == CliSymbolAsciiETX) {
+        while(pipe_receive(pipe, (uint8_t*)&c, 1) == 1) {
+            if(c == CliKeyETX) {
                 printf("\r\n");
                 break;
             } else if(c >= 0x20 && c < 0x7F) {
                 putc(c, stdout);
                 fflush(stdout);
                 furi_string_push_back(hex_input, c);
-            } else if(c == CliSymbolAsciiCR) {
+            } else if(c == CliKeyCR) {
                 printf("\r\n");
             }
         }
@@ -164,8 +165,8 @@ void crypto_cli_decrypt(Cli* cli, FuriString* args) {
     }
 }
 
-void crypto_cli_has_key(Cli* cli, FuriString* args) {
-    UNUSED(cli);
+void crypto_cli_has_key(PipeSide* pipe, FuriString* args) {
+    UNUSED(pipe);
     int key_slot = 0;
     uint8_t iv[16] = {0};
 
@@ -186,8 +187,8 @@ void crypto_cli_has_key(Cli* cli, FuriString* args) {
     } while(0);
 }
 
-void crypto_cli_store_key(Cli* cli, FuriString* args) {
-    UNUSED(cli);
+void crypto_cli_store_key(PipeSide* pipe, FuriString* args) {
+    UNUSED(pipe);
     int key_slot = 0;
     int key_size = 0;
     FuriString* key_type;
@@ -279,7 +280,7 @@ void crypto_cli_store_key(Cli* cli, FuriString* args) {
     furi_string_free(key_type);
 }
 
-static void crypto_cli(Cli* cli, FuriString* args, void* context) {
+static void crypto_cli(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(context);
     FuriString* cmd;
     cmd = furi_string_alloc();
@@ -291,22 +292,22 @@ static void crypto_cli(Cli* cli, FuriString* args, void* context) {
         }
 
         if(furi_string_cmp_str(cmd, "encrypt") == 0) {
-            crypto_cli_encrypt(cli, args);
+            crypto_cli_encrypt(pipe, args);
             break;
         }
 
         if(furi_string_cmp_str(cmd, "decrypt") == 0) {
-            crypto_cli_decrypt(cli, args);
+            crypto_cli_decrypt(pipe, args);
             break;
         }
 
         if(furi_string_cmp_str(cmd, "has_key") == 0) {
-            crypto_cli_has_key(cli, args);
+            crypto_cli_has_key(pipe, args);
             break;
         }
 
         if(furi_string_cmp_str(cmd, "store_key") == 0) {
-            crypto_cli_store_key(cli, args);
+            crypto_cli_store_key(pipe, args);
             break;
         }
 

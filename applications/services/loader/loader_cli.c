@@ -6,6 +6,7 @@
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/strint.h>
 #include <notification/notification_messages.h>
+#include <toolbox/pipe.h>
 
 static void loader_cli_print_usage(void) {
     printf("Usage:\r\n");
@@ -110,8 +111,8 @@ static void loader_cli_signal(FuriString* args, Loader* loader) {
     }
 }
 
-static void loader_cli(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+static void loader_cli(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
     UNUSED(context);
     Loader* loader = furi_record_open(RECORD_LOADER);
 

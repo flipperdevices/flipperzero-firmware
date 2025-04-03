@@ -3,6 +3,7 @@
 #include <music_worker/music_worker.h>
 #include <cli/cli.h>
 #include <toolbox/args.h>
+#include <toolbox/pipe.h>
 
 #define TAG "SpeakerDebug"
 
@@ -37,8 +38,8 @@ static void speaker_app_free(SpeakerDebugApp* app) {
     free(app);
 }
 
-static void speaker_app_cli(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+static void speaker_app_cli(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
 
     SpeakerDebugApp* app = (SpeakerDebugApp*)context;
     SpeakerDebugAppMessage message;

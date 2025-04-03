@@ -4,9 +4,10 @@
 #include <cli/cli.h>
 #include <lib/toolbox/args.h>
 #include <power/power_service/power.h>
+#include <toolbox/pipe.h>
 
-void power_cli_off(Cli* cli, FuriString* args) {
-    UNUSED(cli);
+void power_cli_off(PipeSide* pipe, FuriString* args) {
+    UNUSED(pipe);
     UNUSED(args);
     Power* power = furi_record_open(RECORD_POWER);
     printf("It's now safe to disconnect USB from your flipper\r\n");
@@ -14,22 +15,22 @@ void power_cli_off(Cli* cli, FuriString* args) {
     power_off(power);
 }
 
-void power_cli_reboot(Cli* cli, FuriString* args) {
-    UNUSED(cli);
+void power_cli_reboot(PipeSide* pipe, FuriString* args) {
+    UNUSED(pipe);
     UNUSED(args);
     Power* power = furi_record_open(RECORD_POWER);
     power_reboot(power, PowerBootModeNormal);
 }
 
-void power_cli_reboot2dfu(Cli* cli, FuriString* args) {
-    UNUSED(cli);
+void power_cli_reboot2dfu(PipeSide* pipe, FuriString* args) {
+    UNUSED(pipe);
     UNUSED(args);
     Power* power = furi_record_open(RECORD_POWER);
     power_reboot(power, PowerBootModeDfu);
 }
 
-void power_cli_5v(Cli* cli, FuriString* args) {
-    UNUSED(cli);
+void power_cli_5v(PipeSide* pipe, FuriString* args) {
+    UNUSED(pipe);
     Power* power = furi_record_open(RECORD_POWER);
     if(!furi_string_cmp(args, "0")) {
         power_enable_otg(power, false);
@@ -42,8 +43,8 @@ void power_cli_5v(Cli* cli, FuriString* args) {
     furi_record_close(RECORD_POWER);
 }
 
-void power_cli_3v3(Cli* cli, FuriString* args) {
-    UNUSED(cli);
+void power_cli_3v3(PipeSide* pipe, FuriString* args) {
+    UNUSED(pipe);
     if(!furi_string_cmp(args, "0")) {
         furi_hal_power_disable_external_3_3v();
     } else if(!furi_string_cmp(args, "1")) {
@@ -67,7 +68,7 @@ static void power_cli_command_print_usage(void) {
     }
 }
 
-void power_cli(Cli* cli, FuriString* args, void* context) {
+void power_cli(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(context);
     FuriString* cmd;
     cmd = furi_string_alloc();
@@ -79,28 +80,28 @@ void power_cli(Cli* cli, FuriString* args, void* context) {
         }
 
         if(furi_string_cmp_str(cmd, "off") == 0) {
-            power_cli_off(cli, args);
+            power_cli_off(pipe, args);
             break;
         }
 
         if(furi_string_cmp_str(cmd, "reboot") == 0) {
-            power_cli_reboot(cli, args);
+            power_cli_reboot(pipe, args);
             break;
         }
 
         if(furi_string_cmp_str(cmd, "reboot2dfu") == 0) {
-            power_cli_reboot2dfu(cli, args);
+            power_cli_reboot2dfu(pipe, args);
             break;
         }
 
         if(furi_string_cmp_str(cmd, "5v") == 0) {
-            power_cli_5v(cli, args);
+            power_cli_5v(pipe, args);
             break;
         }
 
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
             if(furi_string_cmp_str(cmd, "3v3") == 0) {
-                power_cli_3v3(cli, args);
+                power_cli_3v3(pipe, args);
                 break;
             }
         }
