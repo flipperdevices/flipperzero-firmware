@@ -93,6 +93,8 @@ void cli_remove_external_commands(Cli* cli) {
     furi_check(cli);
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
 
+    // FIXME FL-3977: memory leak somewhere within this function
+
     CliCommandTree_t internal_cmds;
     CliCommandTree_init(internal_cmds);
     for
