@@ -17,7 +17,8 @@ void unit_tests_cli(PipeSide* pipe, FuriString* args, void* context) {
 void unit_tests_on_system_start(void) {
 #ifdef SRV_CLI
     CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
-    cli_registry_add_command(registry, "unit_tests", CliCommandFlagDefault, unit_tests_cli, NULL);
+    cli_registry_add_command(
+        registry, "unit_tests", CliCommandFlagParallelSafe, unit_tests_cli, NULL);
     furi_record_close(RECORD_CLI_MASTER);
 #endif
 }

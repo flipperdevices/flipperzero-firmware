@@ -498,7 +498,8 @@ void cli_commands_init(CliRegistry* registry) {
     cli_registry_add_command(
         registry, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
 
-    cli_registry_add_command(registry, "uptime", CliCommandFlagDefault, cli_command_uptime, NULL);
+    cli_registry_add_command(
+        registry, "uptime", CliCommandFlagParallelSafe, cli_command_uptime, NULL);
     cli_registry_add_command(registry, "date", CliCommandFlagParallelSafe, cli_command_date, NULL);
     cli_registry_add_command(registry, "log", CliCommandFlagParallelSafe, cli_command_log, NULL);
     cli_registry_add_command(registry, "sysctl", CliCommandFlagDefault, cli_command_sysctl, NULL);

@@ -95,7 +95,8 @@ int32_t input_srv(void* p) {
 
 #ifdef SRV_CLI
     CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
-    cli_registry_add_command(registry, "input", CliCommandFlagDefault, input_cli, event_pubsub);
+    cli_registry_add_command(
+        registry, "input", CliCommandFlagParallelSafe, input_cli, event_pubsub);
     furi_record_close(RECORD_CLI_MASTER);
 #endif
 

@@ -438,7 +438,11 @@ void rpc_on_system_start(void* p) {
 
     CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
     cli_registry_add_command(
-        registry, "start_rpc_session", CliCommandFlagDefault, rpc_cli_command_start_session, rpc);
+        registry,
+        "start_rpc_session",
+        CliCommandFlagParallelSafe,
+        rpc_cli_command_start_session,
+        rpc);
     furi_record_close(RECORD_CLI_MASTER);
 
     furi_record_create(RECORD_RPC, rpc);

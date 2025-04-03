@@ -705,7 +705,7 @@ void storage_on_system_start(void) {
         storage_cli,
         NULL);
     cli_registry_add_command(
-        registry, "factory_reset", CliCommandFlagDefault, storage_cli_factory_reset, NULL);
+        registry, "factory_reset", CliCommandFlagParallelSafe, storage_cli_factory_reset, NULL);
     furi_record_close(RECORD_CLI_MASTER);
 #else
     UNUSED(storage_cli_factory_reset);
