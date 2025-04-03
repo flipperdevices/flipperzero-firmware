@@ -24,6 +24,10 @@ void cli_shell_line_format_prompt(CliShellLine* line, char* buf, size_t length);
 
 void cli_shell_line_prompt(CliShellLine* line);
 
+size_t cli_shell_line_get_line_position(CliShellLine* line);
+
+void cli_shell_line_set_line_position(CliShellLine* line, size_t position);
+
 /**
  * @brief If a line from history has been selected, moves it into the active line
  */

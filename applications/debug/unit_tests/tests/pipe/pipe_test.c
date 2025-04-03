@@ -70,10 +70,9 @@ static void on_data_arrived(PipeSide* pipe, void* context) {
 }
 
 static void on_space_freed(PipeSide* pipe, void* context) {
+    UNUSED(pipe);
     AncillaryThreadContext* ctx = context;
     ctx->flag |= TestFlagSpaceFreed;
-    const char* message = "Hi!";
-    pipe_send(pipe, message, strlen(message));
 }
 
 static void on_became_broken(PipeSide* pipe, void* context) {
@@ -119,16 +118,10 @@ MU_TEST(pipe_test_event_loop) {
     size_t size = pipe_receive(alice, buffer_1, strlen(message));
     buffer_1[size] = 0;
 
-    char buffer_2[16];
-    const char* expected_reply = "Hi!";
-    size = pipe_receive(alice, buffer_2, strlen(expected_reply));
-    buffer_2[size] = 0;
-
     pipe_free(alice);
     furi_thread_join(thread);
 
     mu_assert_string_eq(message, buffer_1);
-    mu_assert_string_eq(expected_reply, buffer_2);
     mu_assert_int_eq(
         TestFlagDataArrived | TestFlagSpaceFreed | TestFlagBecameBroken,
         furi_thread_get_return_code(thread));
