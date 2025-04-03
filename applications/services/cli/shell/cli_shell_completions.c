@@ -108,6 +108,7 @@ void cli_shell_completions_fill_variants(CliShellCompletions* completions) {
     furi_string_left(input, segment.length);
 
     if(segment.type == CliShellCompletionSegmentTypeCommand) {
+        cli_lock_commands(completions->cli);
         CliCommandTree_t* commands = cli_get_commands(completions->cli);
         for
             M_EACH(registered_command, *commands, CliCommandTree_t) {
@@ -116,6 +117,7 @@ void cli_shell_completions_fill_variants(CliShellCompletions* completions) {
                     CommandCompletions_push_back(completions->variants, command_name);
                 }
             }
+        cli_unlock_commands(completions->cli);
 
     } else {
         // support removed, might reimplement in the future

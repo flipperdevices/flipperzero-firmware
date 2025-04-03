@@ -14,7 +14,7 @@ struct Cli {
 Cli* cli_alloc(void) {
     Cli* cli = malloc(sizeof(Cli));
     CliCommandTree_init(cli->commands);
-    cli->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    cli->mutex = furi_mutex_alloc(FuriMutexTypeRecursive);
     return cli;
 }
 
@@ -106,11 +106,11 @@ void cli_remove_external_commands(Cli* cli) {
 }
 
 void cli_enumerate_external_commands(Cli* cli) {
-    cli_remove_external_commands(cli);
-
     furi_check(cli);
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     FURI_LOG_D(TAG, "Enumerating external commands");
+
+    cli_remove_external_commands(cli);
 
     // iterate over files in plugin directory
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -136,7 +136,6 @@ void cli_enumerate_external_commands(Cli* cli) {
         furi_string_free(plugin_name);
     }
 
-    storage_dir_close(plugin_dir);
     storage_file_free(plugin_dir);
     furi_record_close(RECORD_STORAGE);
 

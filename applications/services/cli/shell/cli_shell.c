@@ -194,10 +194,12 @@ static void cli_shell_storage_event(const void* message, void* context) {
 
     if(event->type == StorageEventTypeCardMount) {
         CliShellStorageEvent cli_event = CliShellStorageEventMount;
-        furi_check(furi_message_queue_put(cli_shell->storage_event_queue, &cli_event, 0) == FuriStatusOk);
+        furi_check(
+            furi_message_queue_put(cli_shell->storage_event_queue, &cli_event, 0) == FuriStatusOk);
     } else if(event->type == StorageEventTypeCardUnmount) {
         CliShellStorageEvent cli_event = CliShellStorageEventUnmount;
-        furi_check(furi_message_queue_put(cli_shell->storage_event_queue, &cli_event, 0) == FuriStatusOk);
+        furi_check(
+            furi_message_queue_put(cli_shell->storage_event_queue, &cli_event, 0) == FuriStatusOk);
     }
 }
 
@@ -285,7 +287,12 @@ static CliShell* cli_shell_alloc(PipeSide* pipe) {
     cli_shell_install_pipe(cli_shell);
 
     cli_shell->storage_event_queue = furi_message_queue_alloc(1, sizeof(CliShellStorageEvent));
-    furi_event_loop_subscribe_message_queue(cli_shell->event_loop, cli_shell->storage_event_queue, FuriEventLoopEventIn, cli_shell_storage_internal_event, cli_shell);
+    furi_event_loop_subscribe_message_queue(
+        cli_shell->event_loop,
+        cli_shell->storage_event_queue,
+        FuriEventLoopEventIn,
+        cli_shell_storage_internal_event,
+        cli_shell);
     cli_shell->storage = furi_record_open(RECORD_STORAGE);
     cli_shell->storage_subscription = furi_pubsub_subscribe(
         storage_get_pubsub(cli_shell->storage), cli_shell_storage_event, cli_shell);
