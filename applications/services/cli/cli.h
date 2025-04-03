@@ -20,6 +20,13 @@ typedef enum {
     CliCommandFlagParallelSafe = (1 << 0), /**< Safe to run in parallel with other apps */
     CliCommandFlagInsomniaSafe = (1 << 1), /**< Safe to run with insomnia mode on */
     CliCommandFlagDontAttachStdio = (1 << 2), /**< Do no attach I/O pipe to thread stdio */
+    CliCommandFlagUseShellThread =
+        (1
+         << 3), /**< Don't start a separate thread to run the command in. Incompatible with DontAttachStdio */
+
+    // internal flags (do not set them yourselves!)
+
+    CliCommandFlagExternal = (1 << 4), /**< The command comes from a .fal file */
 } CliCommandFlag;
 
 /** Cli type anonymous structure */
@@ -86,6 +93,20 @@ void cli_add_command_ex(
  * @param [in] name  command name
  */
 void cli_delete_command(Cli* cli, const char* name);
+
+/**
+ * @brief Unregisters all external commands
+ * 
+ * @param [in] cli pointer to the cli instance
+ */
+void cli_remove_external_commands(Cli* cli);
+
+/**
+ * @brief Reloads the list of externally available commands
+ * 
+ * @param [in] cli pointer to cli instance
+ */
+void cli_enumerate_external_commands(Cli* cli);
 
 /**
  * @brief Detects if Ctrl+C has been pressed or session has been terminated

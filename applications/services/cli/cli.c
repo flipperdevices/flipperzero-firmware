@@ -14,7 +14,7 @@ struct Cli {
 Cli* cli_alloc(void) {
     Cli* cli = malloc(sizeof(Cli));
     CliCommandTree_init(cli->commands);
-    cli->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    cli->mutex = furi_mutex_alloc(FuriMutexTypeRecursive);
     return cli;
 }
 
@@ -37,6 +37,9 @@ void cli_add_command_ex(
     furi_check(cli);
     furi_check(name);
     furi_check(callback);
+
+    // the shell always attaches the pipe to the stdio, thus both flags can't be used at once
+    if(flags & CliCommandFlagUseShellThread) furi_check(!(flags & CliCommandFlagDontAttachStdio));
 
     FuriString* name_str;
     name_str = furi_string_alloc_set(name);
@@ -86,18 +89,75 @@ bool cli_get_command(Cli* cli, FuriString* command, CliCommand* result) {
     return !!data;
 }
 
+void cli_remove_external_commands(Cli* cli) {
+    furi_check(cli);
+    furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
+
+    // FIXME FL-3977: memory leak somewhere within this function
+
+    CliCommandTree_t internal_cmds;
+    CliCommandTree_init(internal_cmds);
+    for
+        M_EACH(item, cli->commands, CliCommandTree_t) {
+            if(!(item->value_ptr->flags & CliCommandFlagExternal))
+                CliCommandTree_set_at(internal_cmds, *item->key_ptr, *item->value_ptr);
+        }
+    CliCommandTree_move(cli->commands, internal_cmds);
+
+    furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
+}
+
+void cli_enumerate_external_commands(Cli* cli) {
+    furi_check(cli);
+    furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
+    FURI_LOG_D(TAG, "Enumerating external commands");
+
+    cli_remove_external_commands(cli);
+
+    // iterate over files in plugin directory
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* plugin_dir = storage_file_alloc(storage);
+
+    if(storage_dir_open(plugin_dir, CLI_COMMANDS_PATH)) {
+        char plugin_filename[64];
+        FuriString* plugin_name = furi_string_alloc();
+
+        while(storage_dir_read(plugin_dir, NULL, plugin_filename, sizeof(plugin_filename))) {
+            FURI_LOG_T(TAG, "Plugin: %s", plugin_filename);
+            furi_string_set_str(plugin_name, plugin_filename);
+            furi_string_replace_all_str(plugin_name, ".fal", "");
+            furi_string_replace_at(plugin_name, 0, 4, ""); // remove "cli_" in the beginning
+            CliCommand command = {
+                .context = NULL,
+                .execute_callback = NULL,
+                .flags = CliCommandFlagExternal,
+            };
+            CliCommandTree_set_at(cli->commands, plugin_name, command);
+        }
+
+        furi_string_free(plugin_name);
+    }
+
+    storage_file_free(plugin_dir);
+    furi_record_close(RECORD_STORAGE);
+
+    FURI_LOG_D(TAG, "Finished enumerating external commands");
+    furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
+}
+
 void cli_lock_commands(Cli* cli) {
-    furi_assert(cli);
+    furi_check(cli);
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
 }
 
 void cli_unlock_commands(Cli* cli) {
-    furi_assert(cli);
-    furi_mutex_release(cli->mutex);
+    furi_check(cli);
+    furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
 }
 
 CliCommandTree_t* cli_get_commands(Cli* cli) {
-    furi_assert(cli);
+    furi_check(cli);
+    furi_check(furi_mutex_get_owner(cli->mutex) == furi_thread_get_current_id());
     return &cli->commands;
 }
 
@@ -119,5 +179,6 @@ void cli_print_usage(const char* cmd, const char* usage, const char* arg) {
 void cli_on_system_start(void) {
     Cli* cli = cli_alloc();
     cli_commands_init(cli);
+    cli_enumerate_external_commands(cli);
     furi_record_create(RECORD_CLI, cli);
 }

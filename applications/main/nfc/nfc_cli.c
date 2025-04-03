@@ -42,7 +42,7 @@ static void nfc_cli_field(PipeSide* pipe, FuriString* args) {
     furi_hal_nfc_release();
 }
 
-static void nfc_cli(PipeSide* pipe, FuriString* args, void* context) {
+static void execute(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(context);
     FuriString* cmd;
     cmd = furi_string_alloc();
@@ -65,12 +65,4 @@ static void nfc_cli(PipeSide* pipe, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-void nfc_on_system_start(void) {
-#ifdef SRV_CLI
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command(cli, "nfc", CliCommandFlagDefault, nfc_cli, NULL);
-    furi_record_close(RECORD_CLI);
-#else
-    UNUSED(nfc_cli);
-#endif
-}
+CLI_COMMAND_INTERFACE(nfc, execute, CliCommandFlagDefault, 1024);

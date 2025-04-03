@@ -33,3 +33,19 @@ App(
     sdk_headers=["cli_vcp.h"],
     sources=["cli_vcp.c"],
 )
+
+App(
+    appid="cli_hello_world",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_hello_world_ep",
+    requires=["cli"],
+    sources=["commands/hello_world.c"],
+)
+
+App(
+    appid="cli_neofetch",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_neofetch_ep",
+    requires=["cli"],
+    sources=["commands/neofetch.c"],
+)
