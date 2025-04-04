@@ -99,34 +99,22 @@ void cli_command_help(PipeSide* pipe, FuriString* args, void* context) {
     CliShell* shell = context;
     CliRegistry* registry = shell->registry;
 
-    printf("Available commands:" ANSI_FG_GREEN);
+    const size_t columns = 3;
 
-    // count non-hidden commands
+    printf("Available commands:\r\n" ANSI_FG_GREEN);
     cli_registry_lock(registry);
     CliCommandTree_t* commands = cli_registry_get_commands(registry);
     size_t commands_count = CliCommandTree_size(*commands);
 
-    // create iterators starting at different positions
-    const size_t columns = 3;
-    const size_t commands_per_column = (commands_count / columns) + (commands_count % columns);
-    CliCommandTree_it_t iterators[columns];
-    for(size_t c = 0; c < columns; c++) {
-        CliCommandTree_it(iterators[c], *commands);
-        for(size_t i = 0; i < c * commands_per_column; i++)
-            CliCommandTree_next(iterators[c]);
-    }
+    CliCommandTree_it_t iterator;
+    CliCommandTree_it(iterator, *commands);
+    for(size_t i = 0; i < commands_count; i++) {
+        const CliCommandTree_itref_t* item = CliCommandTree_cref(iterator);
+        printf("%-30s", furi_string_get_cstr(*item->key_ptr));
+        CliCommandTree_next(iterator);
 
-    // print commands
-    for(size_t r = 0; r < commands_per_column; r++) {
-        printf("\r\n");
-
-        for(size_t c = 0; c < columns; c++) {
-            if(!CliCommandTree_end_p(iterators[c])) {
-                const CliCommandTree_itref_t* item = CliCommandTree_cref(iterators[c]);
-                printf("%-30s", furi_string_get_cstr(*item->key_ptr));
-                CliCommandTree_next(iterators[c]);
-            }
-        }
+        if(i % columns == columns - 1)
+            printf("\r\n");
     }
 
     if(shell->ext_config)
