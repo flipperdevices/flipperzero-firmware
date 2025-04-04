@@ -40,7 +40,7 @@ void cli_master_motd(void* context) {
 }
 
 const CliCommandExternalConfig cli_master_ext_config = {
-    .search_directory = "/ext/apps_data/cli_master/plugins",
+    .search_directory = "/ext/apps_data/cli/plugins",
     .fal_prefix = "cli_",
     .appid = CLI_APPID,
 };
