@@ -1,7 +1,8 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
+#include <cli/cli_main_commands.h>
 #include <storage/storage.h>
 #include <loader/loader.h>
 #include <toolbox/path.h>
@@ -106,8 +107,8 @@ static void updater_start_app(void* context, uint32_t arg) {
 
 void updater_on_system_start(void) {
 #ifdef SRV_CLI
-    Cli* cli = (Cli*)furi_record_open(RECORD_CLI);
-    cli_add_command(cli, "update", CliCommandFlagDefault, updater_cli_ep, NULL);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
+    cli_registry_add_command(registry, "update", CliCommandFlagDefault, updater_cli_ep, NULL);
     furi_record_close(RECORD_CLI);
 #else
     UNUSED(updater_cli_ep);

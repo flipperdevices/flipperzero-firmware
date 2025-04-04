@@ -4,8 +4,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <furi.h>
-#include <cli/cli.h>
 #include <furi_hal_gpio.h>
+#include <toolbox/cli/cli_command.h>
+#include <cli/cli_main_commands.h>
 #include <toolbox/pipe.h>
 
 #define INPUT_DEBOUNCE_TICKS_HALF (INPUT_DEBOUNCE_TICKS / 2)
@@ -93,8 +94,10 @@ int32_t input_srv(void* p) {
 #endif
 
 #ifdef SRV_CLI
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command(cli, "input", CliCommandFlagParallelSafe, input_cli, event_pubsub);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
+    cli_registry_add_command(
+        registry, "input", CliCommandFlagParallelSafe, input_cli, event_pubsub);
+    furi_record_close(RECORD_CLI);
 #endif
 
     InputPinState pin_states[input_pins_count];

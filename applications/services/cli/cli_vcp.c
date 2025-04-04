@@ -1,10 +1,12 @@
 #include "cli_vcp.h"
-#include "shell/cli_shell.h"
 #include <furi_hal_usb_cdc.h>
 #include <furi_hal.h>
 #include <furi.h>
 #include <stdint.h>
 #include <toolbox/pipe.h>
+#include <toolbox/cli/shell/cli_shell.h>
+#include "cli_main_shell.h"
+#include "cli_main_commands.h"
 
 #define TAG "CliVcp"
 
@@ -47,10 +49,12 @@ struct CliVcp {
     FuriHalUsbInterface* previous_interface;
 
     PipeSide* own_pipe;
+    PipeSide* shell_pipe;
     bool is_currently_transmitting;
     size_t previous_tx_length;
 
-    FuriThread* shell;
+    CliRegistry* main_registry;
+    CliShell* shell;
 };
 
 // ============
@@ -210,13 +214,15 @@ static void cli_vcp_internal_event_happened(void* context) {
         // wait for previous shell to stop
         furi_check(!cli_vcp->own_pipe);
         if(cli_vcp->shell) {
-            furi_thread_join(cli_vcp->shell);
-            furi_thread_free(cli_vcp->shell);
+            cli_shell_join(cli_vcp->shell);
+            cli_shell_free(cli_vcp->shell);
+            pipe_free(cli_vcp->shell_pipe);
         }
 
         // start shell thread
         PipeSideBundle bundle = pipe_alloc(VCP_BUF_SIZE, 1);
         cli_vcp->own_pipe = bundle.alices_side;
+        cli_vcp->shell_pipe = bundle.bobs_side;
         pipe_attach_to_event_loop(cli_vcp->own_pipe, cli_vcp->event_loop);
         pipe_set_callback_context(cli_vcp->own_pipe, cli_vcp);
         pipe_set_data_arrived_callback(
@@ -224,7 +230,9 @@ static void cli_vcp_internal_event_happened(void* context) {
         pipe_set_space_freed_callback(
             cli_vcp->own_pipe, cli_vcp_shell_ready, FuriEventLoopEventFlagEdge);
         furi_delay_ms(33); // we are too fast, minicom isn't ready yet
-        cli_vcp->shell = cli_shell_start(bundle.bobs_side);
+        cli_vcp->shell = cli_shell_alloc(
+            cli_main_motd, NULL, cli_vcp->shell_pipe, cli_vcp->main_registry, &cli_main_ext_config);
+        cli_shell_start(cli_vcp->shell);
     }
 
     if(event & CliVcpInternalEventRx) {
@@ -259,6 +267,8 @@ static CliVcp* cli_vcp_alloc(void) {
 
     furi_event_loop_subscribe_thread_flags(
         cli_vcp->event_loop, cli_vcp_internal_event_happened, cli_vcp);
+
+    cli_vcp->main_registry = furi_record_open(RECORD_CLI);
 
     return cli_vcp;
 }

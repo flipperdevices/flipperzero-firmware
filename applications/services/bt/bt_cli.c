@@ -1,8 +1,9 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include <cli/cli.h>
 #include <lib/toolbox/args.h>
 #include <toolbox/pipe.h>
+#include <cli/cli_main_commands.h>
+#include <toolbox/cli/cli_registry.h>
 
 #include <ble/ble.h>
 #include "bt_settings.h"
@@ -230,8 +231,8 @@ static void bt_cli(PipeSide* pipe, FuriString* args, void* context) {
 
 void bt_on_system_start(void) {
 #ifdef SRV_CLI
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command(cli, RECORD_BT, CliCommandFlagDefault, bt_cli, NULL);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
+    cli_registry_add_command(registry, "bt", CliCommandFlagDefault, bt_cli, NULL);
     furi_record_close(RECORD_CLI);
 #else
     UNUSED(bt_cli);

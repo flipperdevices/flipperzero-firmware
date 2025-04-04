@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cli.h"
+#include <furi.h>
 
 #ifdef __cplusplus
 extern "C" {

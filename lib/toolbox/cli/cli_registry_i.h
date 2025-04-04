@@ -1,5 +1,5 @@
 /**
- * @file cli_i.h
+ * @file cli_registry_i.h
  * Internal API for getting commands registered with the CLI
  */
 
@@ -7,21 +7,20 @@
 
 #include <furi.h>
 #include <m-bptree.h>
-#include "cli.h"
+#include "cli_registry.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define CLI_BUILTIN_COMMAND_STACK_SIZE (3 * 1024U)
-#define CLI_COMMANDS_PATH              "/ext/apps_data/cli/plugins"
+#define CLI_BUILTIN_COMMAND_STACK_SIZE (4 * 1024U)
 
 typedef struct {
     void* context; //<! Context passed to callbacks
-    CliExecuteCallback execute_callback; //<! Callback for command execution
+    CliCommandExecuteCallback execute_callback; //<! Callback for command execution
     CliCommandFlag flags;
     size_t stack_depth;
-} CliCommand;
+} CliRegistryCommand;
 
 #define CLI_COMMANDS_TREE_RANK 4
 
@@ -32,21 +31,24 @@ BPTREE_DEF2(
     CLI_COMMANDS_TREE_RANK,
     FuriString*,
     FURI_STRING_OPLIST,
-    CliCommand,
+    CliRegistryCommand,
     M_POD_OPLIST);
 
 #define M_OPL_CliCommandTree_t() BPTREE_OPLIST2(CliCommandTree, FURI_STRING_OPLIST, M_POD_OPLIST)
 
-bool cli_get_command(Cli* cli, FuriString* command, CliCommand* result);
+bool cli_registry_get_command(
+    CliRegistry* registry,
+    FuriString* command,
+    CliRegistryCommand* result);
 
-void cli_lock_commands(Cli* cli);
+void cli_registry_lock(CliRegistry* registry);
 
-void cli_unlock_commands(Cli* cli);
+void cli_registry_unlock(CliRegistry* registry);
 
 /**
- * @warning Surround calls to this function with `cli_[un]lock_commands`
+ * @warning Surround calls to this function with `cli_registry_[un]lock`
  */
-CliCommandTree_t* cli_get_commands(Cli* cli);
+CliCommandTree_t* cli_registry_get_commands(CliRegistry* registry);
 
 #ifdef __cplusplus
 }

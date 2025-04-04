@@ -1,4 +1,5 @@
-#include "../cli_commands.h"
+#include "../cli_main_commands.h"
+#include <toolbox/cli/cli_ansi.h>
 #include <toolbox/version.h>
 #include <furi_hal.h>
 #include <furi_hal_info.h>
@@ -156,4 +157,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
 #undef NEOFETCH_COLOR
 }
 
-CLI_COMMAND_INTERFACE(neofetch, execute, CliCommandFlagDefault, 2048);
+CLI_COMMAND_INTERFACE(neofetch, execute, CliCommandFlagParallelSafe, 2048, CLI_APPID);

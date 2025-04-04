@@ -4,17 +4,9 @@ App(
     entry_point="cli_on_system_start",
     cdefines=["SRV_CLI"],
     sources=[
-        "cli.c",
-        "shell/cli_shell.c",
-        "shell/cli_shell_completions.c",
-        "shell/cli_shell_line.c",
-        "cli_commands.c",
         "cli_command_gpio.c",
-        "cli_ansi.c",
-    ],
-    sdk_headers=[
-        "cli.h",
-        "cli_ansi.h",
+        "cli_main_commands.c",
+        "cli_main_shell.c",
     ],
     # This STARTUP has to be processed before those that depend on the "cli" record.
     # "cli" used to be a SERVICE, but it's been converted into a STARTUP in order to
@@ -48,4 +40,12 @@ App(
     entry_point="cli_neofetch_ep",
     requires=["cli"],
     sources=["commands/neofetch.c"],
+)
+
+App(
+    appid="cli_subshell_demo",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_subshell_demo_ep",
+    requires=["cli"],
+    sources=["commands/subshell_demo.c"],
 )

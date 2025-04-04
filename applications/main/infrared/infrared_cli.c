@@ -1,4 +1,4 @@
-#include <cli/cli_commands.h>
+#include <cli/cli_main_commands.h>
 #include <infrared.h>
 #include <infrared_worker.h>
 #include <furi_hal_infrared.h>
@@ -554,4 +554,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     furi_string_free(command);
 }
 
-CLI_COMMAND_INTERFACE(ir, execute, CliCommandFlagDefault, 2048);
+CLI_COMMAND_INTERFACE(ir, execute, CliCommandFlagDefault, 2048, CLI_APPID);

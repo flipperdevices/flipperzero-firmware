@@ -1,4 +1,5 @@
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
+#include <cli/cli_main_commands.h>
 #include <furi.h>
 #include <rpc/rpc.h>
 #include <furi_hal.h>

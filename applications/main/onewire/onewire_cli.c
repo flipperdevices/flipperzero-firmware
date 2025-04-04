@@ -1,9 +1,9 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <cli/cli_commands.h>
+#include <cli/cli_main_commands.h>
 #include <power/power_service/power.h>
-#include <cli/cli_commands.h>
+#include <toolbox/cli/cli_command.h>
 #include <toolbox/args.h>
 
 #include <one_wire/one_wire_host.h>
@@ -64,4 +64,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-CLI_COMMAND_INTERFACE(onewire, execute, CliCommandFlagDefault, 1024);
+CLI_COMMAND_INTERFACE(onewire, execute, CliCommandFlagDefault, 1024, CLI_APPID);

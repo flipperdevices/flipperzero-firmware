@@ -4,7 +4,8 @@
 #include <furi_hal.h>
 
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
-#include <cli/cli_commands.h>
+#include <cli/cli_main_commands.h>
+#include <toolbox/cli/cli_ansi.h>
 
 #include <lib/subghz/subghz_keystore.h>
 #include <lib/subghz/receiver.h>
@@ -1184,4 +1185,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-CLI_COMMAND_INTERFACE(subghz, execute, CliCommandFlagDefault, 2048);
+CLI_COMMAND_INTERFACE(subghz, execute, CliCommandFlagDefault, 2048, CLI_APPID);

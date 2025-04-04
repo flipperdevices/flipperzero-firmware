@@ -1,6 +1,8 @@
 #include <furi.h>
-#include <cli/cli.h>
 #include <toolbox/pipe.h>
+#include <toolbox/cli/cli_command.h>
+#include <toolbox/cli/cli_registry.h>
+#include <cli/cli_main_commands.h>
 
 #include "test_runner.h"
 
@@ -14,8 +16,9 @@ void unit_tests_cli(PipeSide* pipe, FuriString* args, void* context) {
 
 void unit_tests_on_system_start(void) {
 #ifdef SRV_CLI
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command(cli, "unit_tests", CliCommandFlagParallelSafe, unit_tests_cli, NULL);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
+    cli_registry_add_command(
+        registry, "unit_tests", CliCommandFlagParallelSafe, unit_tests_cli, NULL);
     furi_record_close(RECORD_CLI);
 #endif
 }

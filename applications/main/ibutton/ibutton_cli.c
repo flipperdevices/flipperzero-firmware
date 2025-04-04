@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <cli/cli_commands.h>
+#include <cli/cli_main_commands.h>
 #include <toolbox/args.h>
 #include <toolbox/pipe.h>
 
@@ -240,4 +240,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-CLI_COMMAND_INTERFACE(ikey, execute, CliCommandFlagDefault, 1024);
+CLI_COMMAND_INTERFACE(ikey, execute, CliCommandFlagDefault, 1024, CLI_APPID);
