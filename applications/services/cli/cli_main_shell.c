@@ -1,10 +1,10 @@
-#include "cli_master_shell.h"
-#include "cli_master_commands.h"
+#include "cli_main_shell.h"
+#include "cli_main_commands.h"
 #include <toolbox/cli/cli_ansi.h>
 #include <toolbox/cli/shell/cli_shell.h>
 #include <furi_hal_version.h>
 
-void cli_master_motd(void* context) {
+void cli_main_motd(void* context) {
     UNUSED(context);
     printf(ANSI_FLIPPER_BRAND_ORANGE
            "\r\n"
@@ -39,7 +39,7 @@ void cli_master_motd(void* context) {
     }
 }
 
-const CliCommandExternalConfig cli_master_ext_config = {
+const CliCommandExternalConfig cli_main_ext_config = {
     .search_directory = "/ext/apps_data/cli/plugins",
     .fal_prefix = "cli_",
     .appid = CLI_APPID,

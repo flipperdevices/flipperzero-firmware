@@ -3,7 +3,7 @@
 
 #include <toolbox/cli/cli_command.h>
 #include <toolbox/cli/cli_ansi.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/dir_walk.h>
 #include <lib/toolbox/md5_calc.h>

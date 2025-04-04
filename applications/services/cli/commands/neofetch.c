@@ -1,4 +1,4 @@
-#include "../cli_master_commands.h"
+#include "../cli_main_commands.h"
 #include <toolbox/cli/cli_ansi.h>
 #include <toolbox/version.h>
 #include <furi_hal.h>

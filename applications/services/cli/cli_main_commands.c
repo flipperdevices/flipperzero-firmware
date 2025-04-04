@@ -1,4 +1,4 @@
-#include "cli_master_commands.h"
+#include "cli_main_commands.h"
 #include "cli_command_gpio.h"
 #include <toolbox/cli/cli_ansi.h>
 
@@ -491,7 +491,7 @@ void cli_command_echo(PipeSide* pipe, FuriString* args, void* context) {
     }
 }
 
-void cli_commands_init(CliRegistry* registry) {
+void cli_main_commands_init(CliRegistry* registry) {
     cli_registry_add_command(
         registry, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
     cli_registry_add_command(registry, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
@@ -517,6 +517,6 @@ void cli_commands_init(CliRegistry* registry) {
 
 void cli_on_system_start(void) {
     CliRegistry* registry = cli_registry_alloc();
-    cli_commands_init(registry);
+    cli_main_commands_init(registry);
     furi_record_create(RECORD_CLI, registry);
 }

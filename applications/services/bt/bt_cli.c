@@ -2,7 +2,7 @@
 #include <furi_hal.h>
 #include <lib/toolbox/args.h>
 #include <toolbox/pipe.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <toolbox/cli/cli_registry.h>
 
 #include <ble/ble.h>

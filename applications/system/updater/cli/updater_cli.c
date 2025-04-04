@@ -2,7 +2,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <toolbox/cli/cli_command.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <storage/storage.h>
 #include <loader/loader.h>
 #include <toolbox/path.h>

@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <power/power_service/power.h>
 #include <toolbox/cli/cli_command.h>
 #include <toolbox/args.h>

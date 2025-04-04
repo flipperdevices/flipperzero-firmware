@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <stdarg.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <lib/toolbox/args.h>
 #include <lib/lfrfid/lfrfid_worker.h>
 #include <storage/storage.h>

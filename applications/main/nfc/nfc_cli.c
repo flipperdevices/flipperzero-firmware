@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/hex.h>
 #include <toolbox/pipe.h>

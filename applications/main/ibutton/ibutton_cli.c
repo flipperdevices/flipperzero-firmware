@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <toolbox/args.h>
 #include <toolbox/pipe.h>
 

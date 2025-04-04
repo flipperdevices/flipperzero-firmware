@@ -2,7 +2,7 @@
 
 #include <furi.h>
 #include <toolbox/cli/cli_command.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <applications.h>
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/strint.h>

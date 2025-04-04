@@ -5,7 +5,7 @@
 #include <toolbox/path.h>
 #include <assets_icons.h>
 #include <toolbox/cli/cli_command.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <toolbox/pipe.h>
 
 #define TAG "JS app"

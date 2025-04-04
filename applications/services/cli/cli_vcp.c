@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <toolbox/pipe.h>
 #include <toolbox/cli/shell/cli_shell.h>
-#include "cli_master_shell.h"
-#include "cli_master_commands.h"
+#include "cli_main_shell.h"
+#include "cli_main_commands.h"
 
 #define TAG "CliVcp"
 
@@ -53,7 +53,7 @@ struct CliVcp {
     bool is_currently_transmitting;
     size_t previous_tx_length;
 
-    CliRegistry* master_registry;
+    CliRegistry* main_registry;
     CliShell* shell;
 };
 
@@ -231,11 +231,11 @@ static void cli_vcp_internal_event_happened(void* context) {
             cli_vcp->own_pipe, cli_vcp_shell_ready, FuriEventLoopEventFlagEdge);
         furi_delay_ms(33); // we are too fast, minicom isn't ready yet
         cli_vcp->shell = cli_shell_alloc(
-            cli_master_motd,
+            cli_main_motd,
             NULL,
             cli_vcp->shell_pipe,
-            cli_vcp->master_registry,
-            &cli_master_ext_config);
+            cli_vcp->main_registry,
+            &cli_main_ext_config);
         cli_shell_start(cli_vcp->shell);
     }
 
@@ -272,7 +272,7 @@ static CliVcp* cli_vcp_alloc(void) {
     furi_event_loop_subscribe_thread_flags(
         cli_vcp->event_loop, cli_vcp_internal_event_happened, cli_vcp);
 
-    cli_vcp->master_registry = furi_record_open(RECORD_CLI);
+    cli_vcp->main_registry = furi_record_open(RECORD_CLI);
 
     return cli_vcp;
 }

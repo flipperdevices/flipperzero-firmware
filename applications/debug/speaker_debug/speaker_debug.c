@@ -4,7 +4,7 @@
 #include <toolbox/args.h>
 #include <toolbox/pipe.h>
 #include <toolbox/cli/cli_registry.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 
 #define TAG "SpeakerDebug"
 

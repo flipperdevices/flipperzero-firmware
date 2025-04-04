@@ -1,4 +1,4 @@
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <infrared.h>
 #include <infrared_worker.h>
 #include <furi_hal_infrared.h>

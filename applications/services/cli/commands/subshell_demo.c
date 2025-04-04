@@ -1,4 +1,4 @@
-#include "../cli_master_commands.h"
+#include "../cli_main_commands.h"
 #include <toolbox/cli/cli_registry.h>
 #include <toolbox/cli/shell/cli_shell.h>
 #include <toolbox/cli/cli_ansi.h>
