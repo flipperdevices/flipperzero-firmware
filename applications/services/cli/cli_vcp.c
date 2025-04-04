@@ -231,11 +231,7 @@ static void cli_vcp_internal_event_happened(void* context) {
             cli_vcp->own_pipe, cli_vcp_shell_ready, FuriEventLoopEventFlagEdge);
         furi_delay_ms(33); // we are too fast, minicom isn't ready yet
         cli_vcp->shell = cli_shell_alloc(
-            cli_main_motd,
-            NULL,
-            cli_vcp->shell_pipe,
-            cli_vcp->main_registry,
-            &cli_main_ext_config);
+            cli_main_motd, NULL, cli_vcp->shell_pipe, cli_vcp->main_registry, &cli_main_ext_config);
         cli_shell_start(cli_vcp->shell);
     }
 
