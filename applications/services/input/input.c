@@ -94,10 +94,10 @@ int32_t input_srv(void* p) {
 #endif
 
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(
         registry, "input", CliCommandFlagParallelSafe, input_cli, event_pubsub);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #endif
 
     InputPinState pin_states[input_pins_count];

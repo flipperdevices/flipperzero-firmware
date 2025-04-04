@@ -321,9 +321,9 @@ static void crypto_cli(PipeSide* pipe, FuriString* args, void* context) {
 
 void crypto_on_system_start(void) {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(registry, "crypto", CliCommandFlagDefault, crypto_cli, NULL);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(crypto_cli);
 #endif

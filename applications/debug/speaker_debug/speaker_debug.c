@@ -28,14 +28,14 @@ static SpeakerDebugApp* speaker_app_alloc(void) {
     SpeakerDebugApp* app = (SpeakerDebugApp*)malloc(sizeof(SpeakerDebugApp));
     app->music_worker = music_worker_alloc();
     app->message_queue = furi_message_queue_alloc(8, sizeof(SpeakerDebugAppMessage));
-    app->cli_registry = furi_record_open(RECORD_CLI_MASTER);
+    app->cli_registry = furi_record_open(RECORD_CLI);
     return app;
 }
 
 static void speaker_app_free(SpeakerDebugApp* app) {
     music_worker_free(app->music_worker);
     furi_message_queue_free(app->message_queue);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
     free(app);
 }
 

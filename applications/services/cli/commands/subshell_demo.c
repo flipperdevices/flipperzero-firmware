@@ -40,4 +40,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     cli_registry_free(registry);
 }
 
-CLI_COMMAND_INTERFACE(subshell_demo, execute, CliCommandFlagParallelSafe, 2048, CLI_MASTER_APPID);
+CLI_COMMAND_INTERFACE(subshell_demo, execute, CliCommandFlagParallelSafe, 2048, CLI_APPID);

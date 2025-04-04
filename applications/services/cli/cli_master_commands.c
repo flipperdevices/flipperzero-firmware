@@ -518,5 +518,5 @@ void cli_commands_init(CliRegistry* registry) {
 void cli_on_system_start(void) {
     CliRegistry* registry = cli_registry_alloc();
     cli_commands_init(registry);
-    furi_record_create(RECORD_CLI_MASTER, registry);
+    furi_record_create(RECORD_CLI, registry);
 }

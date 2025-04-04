@@ -107,9 +107,9 @@ static void updater_start_app(void* context, uint32_t arg) {
 
 void updater_on_system_start(void) {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(registry, "update", CliCommandFlagDefault, updater_cli_ep, NULL);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(updater_cli_ep);
 #endif

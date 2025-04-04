@@ -64,4 +64,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-CLI_COMMAND_INTERFACE(nfc, execute, CliCommandFlagDefault, 1024, CLI_MASTER_APPID);
+CLI_COMMAND_INTERFACE(nfc, execute, CliCommandFlagDefault, 1024, CLI_APPID);

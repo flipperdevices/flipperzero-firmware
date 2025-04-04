@@ -272,7 +272,7 @@ static CliVcp* cli_vcp_alloc(void) {
     furi_event_loop_subscribe_thread_flags(
         cli_vcp->event_loop, cli_vcp_internal_event_happened, cli_vcp);
 
-    cli_vcp->master_registry = furi_record_open(RECORD_CLI_MASTER);
+    cli_vcp->master_registry = furi_record_open(RECORD_CLI);
 
     return cli_vcp;
 }

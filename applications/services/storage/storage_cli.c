@@ -697,7 +697,7 @@ static void storage_cli_factory_reset(PipeSide* pipe, FuriString* args, void* co
 
 void storage_on_system_start(void) {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(
         registry,
         "storage",
@@ -706,7 +706,7 @@ void storage_on_system_start(void) {
         NULL);
     cli_registry_add_command(
         registry, "factory_reset", CliCommandFlagParallelSafe, storage_cli_factory_reset, NULL);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(storage_cli_factory_reset);
 #endif
