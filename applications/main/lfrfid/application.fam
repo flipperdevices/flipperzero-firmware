@@ -13,10 +13,10 @@ App(
 )
 
 App(
-    appid="lfrfid_start",
+    appid="cli_rfid",
     targets=["f7"],
-    apptype=FlipperAppType.STARTUP,
-    entry_point="lfrfid_on_system_start",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_rfid_ep",
+    requires=["cli"],
     sources=["lfrfid_cli.c"],
-    order=50,
 )

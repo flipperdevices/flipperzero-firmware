@@ -258,10 +258,10 @@ App(
 )
 
 App(
-    appid="nfc_start",
+    appid="cli_nfc",
     targets=["f7"],
-    apptype=FlipperAppType.STARTUP,
-    entry_point="nfc_on_system_start",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_nfc_ep",
+    requires=["cli"],
     sources=["nfc_cli.c"],
-    order=30,
 )

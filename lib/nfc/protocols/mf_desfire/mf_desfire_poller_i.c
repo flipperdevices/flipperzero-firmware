@@ -468,7 +468,7 @@ MfDesfireError mf_desfire_poller_read_file_data_multi(
             file_type == MfDesfireFileTypeLinearRecord ||
             file_type == MfDesfireFileTypeCyclicRecord) {
             error = mf_desfire_poller_read_file_records(
-                instance, file_id, 0, file_settings_cur->data.size, file_data);
+                instance, file_id, 0, file_settings_cur->record.size, file_data);
         }
     }
 
