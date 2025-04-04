@@ -1,9 +1,8 @@
 entry,status,name,type,params
-Version,+,83.0,,
+Version,+,85.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
-Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
 Header,+,applications/services/dialogs/dialogs.h,,
 Header,+,applications/services/dolphin/dolphin.h,,
@@ -224,6 +223,10 @@ Header,+,lib/subghz/transmitter.h,,
 Header,+,lib/toolbox/api_lock.h,,
 Header,+,lib/toolbox/args.h,,
 Header,+,lib/toolbox/bit_buffer.h,,
+Header,+,lib/toolbox/cli/cli_ansi.h,,
+Header,+,lib/toolbox/cli/cli_command.h,,
+Header,+,lib/toolbox/cli/cli_registry.h,,
+Header,+,lib/toolbox/cli/shell/cli_shell.h,,
 Header,+,lib/toolbox/compress.h,,
 Header,+,lib/toolbox/crc32_calc.h,,
 Header,+,lib/toolbox/dir_walk.h,,
@@ -855,18 +858,26 @@ Function,-,ceill,long double,long double
 Function,-,cfree,void,void*
 Function,-,clearerr,void,FILE*
 Function,-,clearerr_unlocked,void,FILE*
-Function,+,cli_add_command,void,"Cli*, const char*, CliCommandFlag, CliCallback, void*"
-Function,+,cli_cmd_interrupt_received,_Bool,Cli*
-Function,+,cli_delete_command,void,"Cli*, const char*"
-Function,+,cli_getc,char,Cli*
-Function,+,cli_is_connected,_Bool,Cli*
-Function,+,cli_nl,void,Cli*
+Function,+,cli_ansi_parser_alloc,CliAnsiParser*,
+Function,+,cli_ansi_parser_feed,CliAnsiParserResult,"CliAnsiParser*, char"
+Function,+,cli_ansi_parser_feed_timeout,CliAnsiParserResult,CliAnsiParser*
+Function,+,cli_ansi_parser_free,void,CliAnsiParser*
+Function,+,cli_is_pipe_broken_or_is_etx_next_char,_Bool,PipeSide*
 Function,+,cli_print_usage,void,"const char*, const char*, const char*"
-Function,+,cli_read,size_t,"Cli*, uint8_t*, size_t"
-Function,+,cli_read_timeout,size_t,"Cli*, uint8_t*, size_t, uint32_t"
-Function,+,cli_session_close,void,Cli*
-Function,+,cli_session_open,void,"Cli*, const void*"
-Function,+,cli_write,void,"Cli*, const uint8_t*, size_t"
+Function,+,cli_registry_add_command,void,"CliRegistry*, const char*, CliCommandFlag, CliCommandExecuteCallback, void*"
+Function,+,cli_registry_add_command_ex,void,"CliRegistry*, const char*, CliCommandFlag, CliCommandExecuteCallback, void*, size_t"
+Function,+,cli_registry_alloc,CliRegistry*,
+Function,+,cli_registry_delete_command,void,"CliRegistry*, const char*"
+Function,+,cli_registry_free,void,CliRegistry*
+Function,+,cli_registry_reload_external_commands,void,"CliRegistry*, const CliCommandExternalConfig*"
+Function,+,cli_registry_remove_external_commands,void,CliRegistry*
+Function,+,cli_shell_alloc,CliShell*,"CliShellMotd, void*, PipeSide*, CliRegistry*, const CliCommandExternalConfig*"
+Function,+,cli_shell_free,void,CliShell*
+Function,+,cli_shell_join,void,CliShell*
+Function,+,cli_shell_set_prompt,void,"CliShell*, const char*"
+Function,+,cli_shell_start,void,CliShell*
+Function,+,cli_vcp_disable,void,CliVcp*
+Function,+,cli_vcp_enable,void,CliVcp*
 Function,+,composite_api_resolver_add,void,"CompositeApiResolver*, const ElfApiInterface*"
 Function,+,composite_api_resolver_alloc,CompositeApiResolver*,
 Function,+,composite_api_resolver_free,void,CompositeApiResolver*
@@ -1250,6 +1261,7 @@ Function,+,furi_event_loop_subscribe_message_queue,void,"FuriEventLoop*, FuriMes
 Function,+,furi_event_loop_subscribe_mutex,void,"FuriEventLoop*, FuriMutex*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
 Function,+,furi_event_loop_subscribe_semaphore,void,"FuriEventLoop*, FuriSemaphore*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
 Function,+,furi_event_loop_subscribe_stream_buffer,void,"FuriEventLoop*, FuriStreamBuffer*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
+Function,+,furi_event_loop_subscribe_thread_flags,void,"FuriEventLoop*, FuriEventLoopThreadFlagsCallback, void*"
 Function,+,furi_event_loop_tick_set,void,"FuriEventLoop*, uint32_t, FuriEventLoopTickCallback, void*"
 Function,+,furi_event_loop_timer_alloc,FuriEventLoopTimer*,"FuriEventLoop*, FuriEventLoopTimerCallback, FuriEventLoopTimerType, void*"
 Function,+,furi_event_loop_timer_free,void,FuriEventLoopTimer*
@@ -1260,6 +1272,7 @@ Function,+,furi_event_loop_timer_restart,void,FuriEventLoopTimer*
 Function,+,furi_event_loop_timer_start,void,"FuriEventLoopTimer*, uint32_t"
 Function,+,furi_event_loop_timer_stop,void,FuriEventLoopTimer*
 Function,+,furi_event_loop_unsubscribe,void,"FuriEventLoop*, FuriEventLoopObject*"
+Function,+,furi_event_loop_unsubscribe_thread_flags,void,FuriEventLoop*
 Function,+,furi_get_tick,uint32_t,
 Function,+,furi_hal_adc_acquire,FuriHalAdcHandle*,
 Function,+,furi_hal_adc_configure,void,FuriHalAdcHandle*
@@ -2967,14 +2980,14 @@ Function,+,pipe_bytes_available,size_t,PipeSide*
 Function,+,pipe_detach_from_event_loop,void,PipeSide*
 Function,+,pipe_free,void,PipeSide*
 Function,+,pipe_install_as_stdio,void,PipeSide*
-Function,+,pipe_receive,size_t,"PipeSide*, void*, size_t, FuriWait"
+Function,+,pipe_receive,size_t,"PipeSide*, void*, size_t"
 Function,+,pipe_role,PipeRole,PipeSide*
-Function,+,pipe_send,size_t,"PipeSide*, const void*, size_t, FuriWait"
+Function,+,pipe_send,size_t,"PipeSide*, const void*, size_t"
 Function,+,pipe_set_broken_callback,void,"PipeSide*, PipeSideBrokenCallback, FuriEventLoopEvent"
 Function,+,pipe_set_callback_context,void,"PipeSide*, void*"
 Function,+,pipe_set_data_arrived_callback,void,"PipeSide*, PipeSideDataArrivedCallback, FuriEventLoopEvent"
 Function,+,pipe_set_space_freed_callback,void,"PipeSide*, PipeSideSpaceFreedCallback, FuriEventLoopEvent"
-Function,+,pipe_set_stdout_timeout,void,"PipeSide*, FuriWait"
+Function,+,pipe_set_state_check_period,void,"PipeSide*, FuriWait"
 Function,+,pipe_spaces_available,size_t,PipeSide*
 Function,+,pipe_state,PipeState,PipeSide*
 Function,+,plugin_manager_alloc,PluginManager*,"const char*, uint32_t, const ElfApiInterface*"
@@ -3452,13 +3465,13 @@ Function,+,subghz_file_encoder_worker_get_level_duration,LevelDuration,void*
 Function,+,subghz_file_encoder_worker_is_running,_Bool,SubGhzFileEncoderWorker*
 Function,+,subghz_file_encoder_worker_start,_Bool,"SubGhzFileEncoderWorker*, const char*, const char*"
 Function,+,subghz_file_encoder_worker_stop,void,SubGhzFileEncoderWorker*
-Function,-,subghz_keystore_alloc,SubGhzKeystore*,
-Function,-,subghz_keystore_free,void,SubGhzKeystore*
-Function,-,subghz_keystore_get_data,SubGhzKeyArray_t*,SubGhzKeystore*
-Function,-,subghz_keystore_load,_Bool,"SubGhzKeystore*, const char*"
-Function,-,subghz_keystore_raw_encrypted_save,_Bool,"const char*, const char*, uint8_t*"
-Function,-,subghz_keystore_raw_get_data,_Bool,"const char*, size_t, uint8_t*, size_t"
-Function,-,subghz_keystore_save,_Bool,"SubGhzKeystore*, const char*, uint8_t*"
+Function,+,subghz_keystore_alloc,SubGhzKeystore*,
+Function,+,subghz_keystore_free,void,SubGhzKeystore*
+Function,+,subghz_keystore_get_data,SubGhzKeyArray_t*,SubGhzKeystore*
+Function,+,subghz_keystore_load,_Bool,"SubGhzKeystore*, const char*"
+Function,+,subghz_keystore_raw_encrypted_save,_Bool,"const char*, const char*, uint8_t*"
+Function,+,subghz_keystore_raw_get_data,_Bool,"const char*, size_t, uint8_t*, size_t"
+Function,+,subghz_keystore_save,_Bool,"SubGhzKeystore*, const char*, uint8_t*"
 Function,+,subghz_protocol_blocks_add_bit,void,"SubGhzBlockDecoder*, uint8_t"
 Function,+,subghz_protocol_blocks_add_bytes,uint8_t,"const uint8_t[], size_t"
 Function,+,subghz_protocol_blocks_add_to_128_bit,void,"SubGhzBlockDecoder*, uint8_t, uint64_t*"
@@ -3791,7 +3804,6 @@ Variable,-,_sys_errlist,const char* const[],
 Variable,-,_sys_nerr,int,
 Variable,-,ble_profile_hid,const FuriHalBleProfileTemplate*,
 Variable,+,ble_profile_serial,const FuriHalBleProfileTemplate* const,
-Variable,+,cli_vcp,const CliSession,
 Variable,+,compress_config_heatshrink_default,const CompressConfigHeatshrink,
 Variable,+,firmware_api_interface,const ElfApiInterface* const,
 Variable,+,furi_hal_i2c_bus_external,FuriHalI2cBus,

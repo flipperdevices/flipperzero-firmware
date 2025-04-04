@@ -1,5 +1,6 @@
-#include "cli_commands.h"
+#include "cli_main_commands.h"
 #include "cli_command_gpio.h"
+#include <toolbox/cli/cli_ansi.h>
 
 #include <core/thread.h>
 #include <furi_hal.h>
@@ -11,6 +12,7 @@
 #include <loader/loader.h>
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/strint.h>
+#include <toolbox/pipe.h>
 
 // Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
 #define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
@@ -34,8 +36,8 @@ void cli_command_info_callback(const char* key, const char* value, bool last, vo
  * @param      args     The arguments
  * @param      context  The context
  */
-void cli_command_info(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+void cli_command_info(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
 
     if(context) {
         furi_hal_info_get(cli_command_info_callback, '_', NULL);
@@ -53,56 +55,16 @@ void cli_command_info(Cli* cli, FuriString* args, void* context) {
     }
 }
 
-void cli_command_help(Cli* cli, FuriString* args, void* context) {
-    UNUSED(args);
-    UNUSED(context);
-    printf("Commands available:");
-
-    // Command count
-    const size_t commands_count = CliCommandTree_size(cli->commands);
-    const size_t commands_count_mid = commands_count / 2 + commands_count % 2;
-
-    // Use 2 iterators from start and middle to show 2 columns
-    CliCommandTree_it_t it_left;
-    CliCommandTree_it(it_left, cli->commands);
-    CliCommandTree_it_t it_right;
-    CliCommandTree_it(it_right, cli->commands);
-    for(size_t i = 0; i < commands_count_mid; i++)
-        CliCommandTree_next(it_right);
-
-    // Iterate throw tree
-    for(size_t i = 0; i < commands_count_mid; i++) {
-        printf("\r\n");
-        // Left Column
-        if(!CliCommandTree_end_p(it_left)) {
-            printf("%-30s", furi_string_get_cstr(*CliCommandTree_ref(it_left)->key_ptr));
-            CliCommandTree_next(it_left);
-        }
-        // Right Column
-        if(!CliCommandTree_end_p(it_right)) {
-            printf("%s", furi_string_get_cstr(*CliCommandTree_ref(it_right)->key_ptr));
-            CliCommandTree_next(it_right);
-        }
-    };
-
-    if(furi_string_size(args) > 0) {
-        cli_nl(cli);
-        printf("`");
-        printf("%s", furi_string_get_cstr(args));
-        printf("` command not found");
-    }
-}
-
-void cli_command_uptime(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+void cli_command_uptime(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
     UNUSED(args);
     UNUSED(context);
     uint32_t uptime = furi_get_tick() / furi_kernel_get_tick_frequency();
     printf("Uptime: %luh%lum%lus", uptime / 60 / 60, uptime / 60 % 60, uptime % 60);
 }
 
-void cli_command_date(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+void cli_command_date(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
     UNUSED(context);
 
     DateTime datetime = {0};
@@ -174,7 +136,8 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
 #define CLI_COMMAND_LOG_BUFFER_SIZE 64
 
 void cli_command_log_tx_callback(const uint8_t* buffer, size_t size, void* context) {
-    furi_stream_buffer_send(context, buffer, size, 0);
+    PipeSide* pipe = context;
+    pipe_send(pipe, buffer, size);
 }
 
 bool cli_command_log_level_set_from_string(FuriString* level) {
@@ -196,16 +159,13 @@ bool cli_command_log_level_set_from_string(FuriString* level) {
     return false;
 }
 
-void cli_command_log(Cli* cli, FuriString* args, void* context) {
+void cli_command_log(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(context);
-    FuriStreamBuffer* ring = furi_stream_buffer_alloc(CLI_COMMAND_LOG_RING_SIZE, 1);
-    uint8_t buffer[CLI_COMMAND_LOG_BUFFER_SIZE];
     FuriLogLevel previous_level = furi_log_get_level();
     bool restore_log_level = false;
 
     if(furi_string_size(args) > 0) {
         if(!cli_command_log_level_set_from_string(args)) {
-            furi_stream_buffer_free(ring);
             return;
         }
         restore_log_level = true;
@@ -217,16 +177,15 @@ void cli_command_log(Cli* cli, FuriString* args, void* context) {
 
     FuriLogHandler log_handler = {
         .callback = cli_command_log_tx_callback,
-        .context = ring,
+        .context = pipe,
     };
 
     furi_log_add_handler(log_handler);
 
     printf("Use <log ?> to list available log levels\r\n");
     printf("Press CTRL+C to stop...\r\n");
-    while(!cli_cmd_interrupt_received(cli)) {
-        size_t ret = furi_stream_buffer_receive(ring, buffer, CLI_COMMAND_LOG_BUFFER_SIZE, 50);
-        cli_write(cli, buffer, ret);
+    while(!cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
+        furi_delay_ms(100);
     }
 
     furi_log_remove_handler(log_handler);
@@ -235,12 +194,10 @@ void cli_command_log(Cli* cli, FuriString* args, void* context) {
         // There will be strange behaviour if log level is set from settings while log command is running
         furi_log_set_level(previous_level);
     }
-
-    furi_stream_buffer_free(ring);
 }
 
-void cli_command_sysctl_debug(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+void cli_command_sysctl_debug(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
     UNUSED(context);
     if(!furi_string_cmp(args, "0")) {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
@@ -253,8 +210,8 @@ void cli_command_sysctl_debug(Cli* cli, FuriString* args, void* context) {
     }
 }
 
-void cli_command_sysctl_heap_track(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+void cli_command_sysctl_heap_track(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
     UNUSED(context);
     if(!furi_string_cmp(args, "none")) {
         furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeNone);
@@ -288,7 +245,7 @@ void cli_command_sysctl_print_usage(void) {
 #endif
 }
 
-void cli_command_sysctl(Cli* cli, FuriString* args, void* context) {
+void cli_command_sysctl(PipeSide* pipe, FuriString* args, void* context) {
     FuriString* cmd;
     cmd = furi_string_alloc();
 
@@ -299,12 +256,12 @@ void cli_command_sysctl(Cli* cli, FuriString* args, void* context) {
         }
 
         if(furi_string_cmp_str(cmd, "debug") == 0) {
-            cli_command_sysctl_debug(cli, args, context);
+            cli_command_sysctl_debug(pipe, args, context);
             break;
         }
 
         if(furi_string_cmp_str(cmd, "heap_track") == 0) {
-            cli_command_sysctl_heap_track(cli, args, context);
+            cli_command_sysctl_heap_track(pipe, args, context);
             break;
         }
 
@@ -314,8 +271,8 @@ void cli_command_sysctl(Cli* cli, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-void cli_command_vibro(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+void cli_command_vibro(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
     UNUSED(context);
 
     if(!furi_string_cmp(args, "0")) {
@@ -341,8 +298,8 @@ void cli_command_vibro(Cli* cli, FuriString* args, void* context) {
     }
 }
 
-void cli_command_led(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+void cli_command_led(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
     UNUSED(context);
     // Get first word as light name
     NotificationMessage notification_led_message;
@@ -396,23 +353,23 @@ void cli_command_led(Cli* cli, FuriString* args, void* context) {
     furi_record_close(RECORD_NOTIFICATION);
 }
 
-static void cli_command_top(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+static void cli_command_top(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(context);
 
     int interval = 1000;
     args_read_int_and_trim(args, &interval);
 
     FuriThreadList* thread_list = furi_thread_list_alloc();
-    while(!cli_cmd_interrupt_received(cli)) {
+    while(!cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
         uint32_t tick = furi_get_tick();
         furi_thread_enumerate(thread_list);
 
-        if(interval) printf("\e[2J\e[0;0f"); // Clear display and return to 0
+        if(interval) printf(ANSI_CURSOR_POS("1", "1"));
 
         uint32_t uptime = tick / furi_kernel_get_tick_frequency();
         printf(
-            "Threads: %zu, ISR Time: %0.2f%%, Uptime: %luh%lum%lus\r\n",
+            "Threads: %zu, ISR Time: %0.2f%%, Uptime: %luh%lum%lus" ANSI_ERASE_LINE(
+                ANSI_ERASE_FROM_CURSOR_TO_END) "\r\n",
             furi_thread_list_size(thread_list),
             (double)furi_thread_list_get_isr_time(thread_list),
             uptime / 60 / 60,
@@ -420,14 +377,16 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
             uptime % 60);
 
         printf(
-            "Heap: total %zu, free %zu, minimum %zu, max block %zu\r\n\r\n",
+            "Heap: total %zu, free %zu, minimum %zu, max block %zu" ANSI_ERASE_LINE(
+                ANSI_ERASE_FROM_CURSOR_TO_END) "\r\n" ANSI_ERASE_LINE(ANSI_ERASE_FROM_CURSOR_TO_END) "\r\n",
             memmgr_get_total_heap(),
             memmgr_get_free_heap(),
             memmgr_get_minimum_free_heap(),
             memmgr_heap_get_max_free_block());
 
         printf(
-            "%-17s %-20s %-10s %5s %12s %6s %10s %7s %5s\r\n",
+            "%-17s %-20s %-10s %5s %12s %6s %10s %7s %5s" ANSI_ERASE_LINE(
+                ANSI_ERASE_FROM_CURSOR_TO_END) "\r\n",
             "AppID",
             "Name",
             "State",
@@ -436,12 +395,13 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
             "Stack",
             "Stack Min",
             "Heap",
-            "CPU");
+            "%CPU");
 
         for(size_t i = 0; i < furi_thread_list_size(thread_list); i++) {
             const FuriThreadListItem* item = furi_thread_list_get_at(thread_list, i);
             printf(
-                "%-17s %-20s %-10s %5d   0x%08lx %6lu %10lu %7zu %5.1f\r\n",
+                "%-17s %-20s %-10s %5d   0x%08lx %6lu %10lu %7zu %5.1f" ANSI_ERASE_LINE(
+                    ANSI_ERASE_FROM_CURSOR_TO_END) "\r\n",
                 item->app_id,
                 item->name,
                 item->state,
@@ -453,6 +413,9 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
                 (double)item->cpu);
         }
 
+        printf(ANSI_ERASE_DISPLAY(ANSI_ERASE_FROM_CURSOR_TO_END));
+        fflush(stdout);
+
         if(interval > 0) {
             furi_delay_ms(interval);
         } else {
@@ -462,8 +425,8 @@ static void cli_command_top(Cli* cli, FuriString* args, void* context) {
     furi_thread_list_free(thread_list);
 }
 
-void cli_command_free(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+void cli_command_free(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
     UNUSED(args);
     UNUSED(context);
 
@@ -476,16 +439,16 @@ void cli_command_free(Cli* cli, FuriString* args, void* context) {
     printf("Maximum pool block: %zu\r\n", memmgr_pool_get_max_block());
 }
 
-void cli_command_free_blocks(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+void cli_command_free_blocks(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
     UNUSED(args);
     UNUSED(context);
 
     memmgr_heap_printf_free_blocks();
 }
 
-void cli_command_i2c(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
+void cli_command_i2c(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(pipe);
     UNUSED(args);
     UNUSED(context);
 
@@ -507,24 +470,53 @@ void cli_command_i2c(Cli* cli, FuriString* args, void* context) {
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
-void cli_commands_init(Cli* cli) {
-    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
-    cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
-    cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
+/**
+ * Echoes any bytes it receives except ASCII ETX (0x03, Ctrl+C)
+ */
+void cli_command_echo(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(args);
+    UNUSED(context);
 
-    cli_add_command(cli, "?", CliCommandFlagParallelSafe, cli_command_help, NULL);
-    cli_add_command(cli, "help", CliCommandFlagParallelSafe, cli_command_help, NULL);
+    uint8_t buffer[256];
 
-    cli_add_command(cli, "uptime", CliCommandFlagDefault, cli_command_uptime, NULL);
-    cli_add_command(cli, "date", CliCommandFlagParallelSafe, cli_command_date, NULL);
-    cli_add_command(cli, "log", CliCommandFlagParallelSafe, cli_command_log, NULL);
-    cli_add_command(cli, "sysctl", CliCommandFlagDefault, cli_command_sysctl, NULL);
-    cli_add_command(cli, "top", CliCommandFlagParallelSafe, cli_command_top, NULL);
-    cli_add_command(cli, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
-    cli_add_command(cli, "free_blocks", CliCommandFlagParallelSafe, cli_command_free_blocks, NULL);
+    while(true) {
+        size_t to_read = CLAMP(pipe_bytes_available(pipe), sizeof(buffer), 1UL);
+        size_t read = pipe_receive(pipe, buffer, to_read);
+        if(read < to_read) break;
 
-    cli_add_command(cli, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
-    cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led, NULL);
-    cli_add_command(cli, "gpio", CliCommandFlagDefault, cli_command_gpio, NULL);
-    cli_add_command(cli, "i2c", CliCommandFlagDefault, cli_command_i2c, NULL);
+        if(memchr(buffer, CliKeyETX, read)) break;
+
+        size_t written = pipe_send(pipe, buffer, read);
+        if(written < read) break;
+    }
+}
+
+void cli_main_commands_init(CliRegistry* registry) {
+    cli_registry_add_command(
+        registry, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
+    cli_registry_add_command(registry, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
+    cli_registry_add_command(
+        registry, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
+
+    cli_registry_add_command(
+        registry, "uptime", CliCommandFlagParallelSafe, cli_command_uptime, NULL);
+    cli_registry_add_command(registry, "date", CliCommandFlagParallelSafe, cli_command_date, NULL);
+    cli_registry_add_command(registry, "log", CliCommandFlagParallelSafe, cli_command_log, NULL);
+    cli_registry_add_command(registry, "sysctl", CliCommandFlagDefault, cli_command_sysctl, NULL);
+    cli_registry_add_command(registry, "top", CliCommandFlagParallelSafe, cli_command_top, NULL);
+    cli_registry_add_command(registry, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
+    cli_registry_add_command(
+        registry, "free_blocks", CliCommandFlagDefault, cli_command_free_blocks, NULL);
+    cli_registry_add_command(registry, "echo", CliCommandFlagParallelSafe, cli_command_echo, NULL);
+
+    cli_registry_add_command(registry, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
+    cli_registry_add_command(registry, "led", CliCommandFlagDefault, cli_command_led, NULL);
+    cli_registry_add_command(registry, "gpio", CliCommandFlagDefault, cli_command_gpio, NULL);
+    cli_registry_add_command(registry, "i2c", CliCommandFlagDefault, cli_command_i2c, NULL);
+}
+
+void cli_on_system_start(void) {
+    CliRegistry* registry = cli_registry_alloc();
+    cli_main_commands_init(registry);
+    furi_record_create(RECORD_CLI, registry);
 }

@@ -23,6 +23,8 @@ typedef struct {
     uint16_t connection_handle;
     uint8_t adv_svc_uuid_len;
     uint8_t adv_svc_uuid[20];
+    uint8_t mfg_data_len;
+    uint8_t mfg_data[20];
     char* adv_name;
 } GapSvc;
 
@@ -198,8 +200,10 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
             gap->service.connection_handle = event->Connection_Handle;
 
             gap_verify_connection_parameters(gap);
-            // Start pairing by sending security request
-            aci_gap_slave_security_req(event->Connection_Handle);
+            if(gap->config->pairing_method != GapPairingNone) {
+                // Start pairing by sending security request
+                aci_gap_slave_security_req(event->Connection_Handle);
+            }
         } break;
 
         default:
@@ -321,6 +325,14 @@ static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
     gap->service.adv_svc_uuid_len += uid_len;
 }
 
+static void set_manufacturer_data(uint8_t* mfg_data, uint8_t mfg_data_len) {
+    furi_check(mfg_data_len < sizeof(gap->service.mfg_data) - 2);
+    gap->service.mfg_data[0] = mfg_data_len + 1;
+    gap->service.mfg_data[1] = AD_TYPE_MANUFACTURER_SPECIFIC_DATA;
+    memcpy(&gap->service.mfg_data[gap->service.mfg_data_len], mfg_data, mfg_data_len);
+    gap->service.mfg_data_len += mfg_data_len;
+}
+
 static void gap_init_svc(Gap* gap) {
     tBleStatus status;
     uint32_t srd_bd_addr[2];
@@ -440,6 +452,11 @@ static void gap_advertise_start(GapState new_state) {
             FURI_LOG_D(TAG, "set_non_discoverable success");
         }
     }
+
+    if(gap->service.mfg_data_len > 0) {
+        hci_le_set_scan_response_data(gap->service.mfg_data_len, gap->service.mfg_data);
+    }
+
     // Configure advertising
     status = aci_gap_set_discoverable(
         ADV_IND,
@@ -550,11 +567,26 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     gap->is_secure = false;
     gap->negotiation_round = 0;
 
-    uint8_t adv_service_uid[2];
-    gap->service.adv_svc_uuid_len = 1;
-    adv_service_uid[0] = gap->config->adv_service_uuid & 0xff;
-    adv_service_uid[1] = gap->config->adv_service_uuid >> 8;
-    set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
+    if(gap->config->mfg_data_len > 0) {
+        // Offset by 2 for length + AD_TYPE_MANUFACTURER_SPECIFIC_DATA
+        gap->service.mfg_data_len = 2;
+        set_manufacturer_data(gap->config->mfg_data, gap->config->mfg_data_len);
+    }
+
+    if(gap->config->adv_service.UUID_Type == UUID_TYPE_16) {
+        uint8_t adv_service_uid[2];
+        gap->service.adv_svc_uuid_len = 1;
+        adv_service_uid[0] = gap->config->adv_service.Service_UUID_16 & 0xff;
+        adv_service_uid[1] = gap->config->adv_service.Service_UUID_16 >> 8;
+        set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
+    } else if(gap->config->adv_service.UUID_Type == UUID_TYPE_128) {
+        gap->service.adv_svc_uuid_len = 1;
+        set_advertisment_service_uid(
+            gap->config->adv_service.Service_UUID_128,
+            sizeof(gap->config->adv_service.Service_UUID_128));
+    } else {
+        furi_crash("Invalid UUID type");
+    }
 
     // Set callback
     gap->on_event_cb = on_event_cb;

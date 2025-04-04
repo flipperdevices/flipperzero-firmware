@@ -57,19 +57,17 @@ Pause script execution by a defined time.
 
 ### Modifier keys
 
-Can be combined with a special key command or a single character.
-| Command        | Notes      |
-| -------------- | ---------- |
-| CONTROL / CTRL |            |
-| SHIFT          |            |
-| ALT            |            |
-| WINDOWS / GUI  |            |
-| CTRL-ALT       | CTRL+ALT   |
-| CTRL-SHIFT     | CTRL+SHIFT |
-| ALT-SHIFT      | ALT+SHIFT  |
-| ALT-GUI        | ALT+WIN    |
-| GUI-SHIFT      | WIN+SHIFT  |
-| GUI-CTRL       | WIN+CTRL   |
+The following modifier keys are recognized:
+| Command | Notes        |
+| ------- | ------------ |
+| CTRL    |              |
+| CONTROL | Same as CTRL |
+| SHIFT   |              |
+| ALT     |              |
+| GUI     |              |
+| WINDOWS | Same as GUI  |
+
+You can chain multiple modifier keys together using hyphens (`-`) or spaces.
 
 ## Key hold and release
 

@@ -2474,7 +2474,7 @@ protocol: RC5
 address: 01 00 00 00
 command: 14 00 00 00
 #
-# Model: Elitelux L32HD1000
+# Model: Elitelux L32HD1000 / Vivax TV-32LE114T2S2SM / Sansui
 #
 name: Power
 type: parsed

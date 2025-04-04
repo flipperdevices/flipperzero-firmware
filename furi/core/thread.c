@@ -7,6 +7,7 @@
 #include "check.h"
 #include "common_defines.h"
 #include "string.h"
+#include "event_loop_thread_flag_interface.h"
 
 #include "log.h"
 #include <furi_hal_rtc.h>
@@ -501,6 +502,9 @@ uint32_t furi_thread_flags_set(FuriThreadId thread_id, uint32_t flags) {
             (void)xTaskNotifyAndQueryIndexed(hTask, THREAD_NOTIFY_INDEX, 0, eNoAction, &rflags);
         }
     }
+
+    furi_event_loop_thread_flag_callback(thread_id);
+
     /* Return flags after setting */
     return rflags;
 }
