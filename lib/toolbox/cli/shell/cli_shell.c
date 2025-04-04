@@ -113,8 +113,7 @@ void cli_command_help(PipeSide* pipe, FuriString* args, void* context) {
         printf("%-30s", furi_string_get_cstr(*item->key_ptr));
         CliCommandTree_next(iterator);
 
-        if(i % columns == columns - 1)
-            printf("\r\n");
+        if(i % columns == columns - 1) printf("\r\n");
     }
 
     if(shell->ext_config)
