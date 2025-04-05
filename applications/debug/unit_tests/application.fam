@@ -7,7 +7,6 @@ App(
     requires=["system_settings", "cli_subghz"],
     provides=["delay_test"],
     resources="resources",
-    order=100,
 )
 
 App(
