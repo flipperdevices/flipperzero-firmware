@@ -1,6 +1,6 @@
 #include "power_settings_app.h"
 
-SubmenuSettingsHelperDescriptor settings_helper_descriptor = {
+const SubmenuSettingsHelperDescriptor settings_helper_descriptor = {
     .app_name = "Power",
     .options_cnt = 3,
     .options =

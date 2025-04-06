@@ -1,7 +1,7 @@
 #include "archive_apps.h"
 #include "archive_browser.h"
 
-static const char* known_apps[] = {
+static const char* const known_apps[] = {
     [ArchiveAppTypeU2f] = "u2f",
     [ArchiveAppTypeSetting] = "setting",
 };
