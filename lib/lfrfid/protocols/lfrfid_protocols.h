@@ -32,11 +32,12 @@ typedef enum {
     LFRFIDProtocolNexwatch,
     LFRFIDProtocolSecurakey,
     LFRFIDProtocolGProxII,
+    LFRFIDProtocolNoralsy,
 
     LFRFIDProtocolMax,
 } LFRFIDProtocol;
 
-extern const ProtocolBase* lfrfid_protocols[];
+extern const ProtocolBase* const lfrfid_protocols[];
 
 typedef enum {
     LFRFIDWriteTypeT5577,

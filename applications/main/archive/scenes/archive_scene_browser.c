@@ -42,7 +42,7 @@ static void archive_loader_callback(const void* message, void* context) {
     const LoaderEvent* event = message;
     ArchiveApp* archive = (ArchiveApp*)context;
 
-    if(event->type == LoaderEventTypeApplicationStopped) {
+    if(event->type == LoaderEventTypeNoMoreAppsInQueue) {
         view_dispatcher_send_custom_event(
             archive->view_dispatcher, ArchiveBrowserEventListRefresh);
     }
