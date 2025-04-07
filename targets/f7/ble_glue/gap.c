@@ -24,7 +24,7 @@ typedef struct {
     uint8_t adv_svc_uuid_len;
     uint8_t adv_svc_uuid[20];
     uint8_t mfg_data_len;
-    uint8_t mfg_data[20];
+    uint8_t mfg_data[23];
     char* adv_name;
 } GapSvc;
 
@@ -326,7 +326,7 @@ static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
 }
 
 static void set_manufacturer_data(uint8_t* mfg_data, uint8_t mfg_data_len) {
-    furi_check(mfg_data_len < sizeof(gap->service.mfg_data) - 2);
+    furi_check(mfg_data_len <= sizeof(gap->service.mfg_data) - 2);
     gap->service.mfg_data[0] = mfg_data_len + 1;
     gap->service.mfg_data[1] = AD_TYPE_MANUFACTURER_SPECIFIC_DATA;
     memcpy(&gap->service.mfg_data[gap->service.mfg_data_len], mfg_data, mfg_data_len);

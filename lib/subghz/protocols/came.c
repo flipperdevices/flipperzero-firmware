@@ -14,13 +14,13 @@
 
 #define TAG "SubGhzProtocolCame"
 
-#define CAME_12_COUNT_BIT  12
-#define CAME_24_COUNT_BIT  24
-#define PRASTEL_25_COUNT_BIT  25
-#define PRASTEL_42_COUNT_BIT  42
-#define PRASTEL_NAME       "Prastel"
-#define AIRFORCE_COUNT_BIT 18
-#define AIRFORCE_NAME      "Airforce"
+#define CAME_12_COUNT_BIT    12
+#define CAME_24_COUNT_BIT    24
+#define PRASTEL_25_COUNT_BIT 25
+#define PRASTEL_42_COUNT_BIT 42
+#define PRASTEL_NAME         "Prastel"
+#define AIRFORCE_COUNT_BIT   18
+#define AIRFORCE_NAME        "Airforce"
 
 static const SubGhzBlockConst subghz_protocol_came_const = {
     .te_short = 320,
@@ -360,7 +360,7 @@ void subghz_protocol_decoder_came_get_string(void* context, FuriString* output) 
 
     uint32_t code_found_reverse_lo = code_found_reverse & 0x000003ffffffffff;
 
-    const char *name = instance->generic.protocol_name;
+    const char* name = instance->generic.protocol_name;
     switch(instance->generic.data_count_bit) {
     case PRASTEL_25_COUNT_BIT:
     case PRASTEL_42_COUNT_BIT:
