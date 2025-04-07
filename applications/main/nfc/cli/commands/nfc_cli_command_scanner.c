@@ -46,7 +46,7 @@ static void nfc_cli_command_scanner_format_detected_protocols(NfcCliScanner* ins
         furi_string_reset(str);
         NfcProtocol protocol = nfc_cli_scanner_get_protocol(instance, i);
         nfc_cli_command_scanner_format_protocol_tree(protocol, str);
-        printf("Protocol [%d]: %s\r\n", i + 1, furi_string_get_cstr(str));
+        printf("Protocol [%zu]: %s\r\n", i + 1, furi_string_get_cstr(str));
     }
     furi_string_free(str);
 }
