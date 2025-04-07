@@ -46,7 +46,7 @@ typedef struct {
     Storage* storage;
     NfcCliScanner* scanner;
     NfcProtocol desired_protocol;
-
+    uint32_t timeout;
     FuriSemaphore* sem_done;
 
     NfcCliDumpError result;
