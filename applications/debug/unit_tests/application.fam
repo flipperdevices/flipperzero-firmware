@@ -18,7 +18,7 @@ App(
     entry_point="delay_test_app",
     stack_size=1 * 1024,
     requires=["unit_tests"],
-    order=110,
+    order=30,
 )
 
 App(
