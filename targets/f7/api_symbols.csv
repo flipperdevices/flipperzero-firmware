@@ -3575,6 +3575,7 @@ Function,+,subghz_worker_set_pair_callback,void,"SubGhzWorker*, SubGhzWorkerPair
 Function,+,subghz_worker_start,void,SubGhzWorker*
 Function,+,subghz_worker_stop,void,SubGhzWorker*
 Function,+,submenu_add_item,void,"Submenu*, const char*, uint32_t, SubmenuItemCallback, void*"
+Function,+,submenu_add_item_ex,void,"Submenu*, const char*, uint32_t, SubmenuItemCallbackEx, void*"
 Function,+,submenu_alloc,Submenu*,
 Function,+,submenu_change_item_label,void,"Submenu*, uint32_t, const char*"
 Function,+,submenu_free,void,Submenu*

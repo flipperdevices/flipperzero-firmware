@@ -2726,6 +2726,7 @@ Function,-,strverscmp,int,"const char*, const char*"
 Function,-,strxfrm,size_t,"char*, const char*, size_t"
 Function,-,strxfrm_l,size_t,"char*, const char*, size_t, locale_t"
 Function,+,submenu_add_item,void,"Submenu*, const char*, uint32_t, SubmenuItemCallback, void*"
+Function,+,submenu_add_item_ex,void,"Submenu*, const char*, uint32_t, SubmenuItemCallbackEx, void*"
 Function,+,submenu_alloc,Submenu*,
 Function,+,submenu_change_item_label,void,"Submenu*, uint32_t, const char*"
 Function,+,submenu_free,void,Submenu*
