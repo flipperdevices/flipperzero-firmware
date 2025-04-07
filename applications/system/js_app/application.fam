@@ -23,7 +23,7 @@ App(
     appid="js_app_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="js_app_on_system_start",
-    order=160,
+    order=110,
     sources=["js_app.c"],
 )
 
