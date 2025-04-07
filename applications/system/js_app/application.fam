@@ -5,7 +5,7 @@ App(
     entry_point="js_app",
     stack_size=2 * 1024,
     resources="examples",
-    order=0,
+    order=10,
     provides=["js_app_start"],
     sources=[
         "js_app.c",
