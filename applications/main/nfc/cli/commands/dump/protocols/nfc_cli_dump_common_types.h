@@ -35,6 +35,9 @@ typedef enum {
     NfcCliDumpErrorTimeout,
     NfcCliDumpErrorNotPresent,
     NfcCliDumpErrorFailedToRead,
+    NfcCliDumpErrorAuthFailed,
+
+    NfcCliDumpErrorNum,
 } NfcCliDumpError;
 
 typedef struct {
@@ -47,7 +50,6 @@ typedef struct {
     FuriSemaphore* sem_done;
 
     NfcCliDumpError result;
-    //FuriString* result_string;
 
     NfcCliDumpAuthContext auth_ctx;
     MfClassicKeyCache* mfc_key_cache;

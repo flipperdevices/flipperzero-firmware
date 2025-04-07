@@ -28,6 +28,14 @@
 
 #define TAG "DUMP"
 
+static const char* nfc_cli_dump_error_names[NfcCliDumpErrorNum] = {
+    [NfcCliDumpErrorNone] = "",
+    [NfcCliDumpErrorNotPresent] = "card not present",
+    [NfcCliDumpErrorAuthFailed] = "authentication failed",
+    [NfcCliDumpErrorTimeout] = "timeout",
+    [NfcCliDumpErrorFailedToRead] = "failed to read",
+};
+
 static NfcCliActionContext* nfc_cli_dump_alloc_ctx(Nfc* nfc) {
     furi_assert(nfc);
     NfcCliDumpContext* instance = malloc(sizeof(NfcCliDumpContext));
@@ -142,7 +150,8 @@ static size_t nfc_cli_dump_set_protocol(NfcCliDumpContext* instance) {
         protocol_count = 1;
     } else {
         if(!nfc_cli_scanner_detect_protocol(instance->scanner, 2000)) {
-            printf(ANSI_FG_RED "Error: Timeout\r\n" ANSI_RESET);
+            NfcCliDumpError error = NfcCliDumpErrorTimeout;
+            printf(ANSI_FG_RED "Error: %s\r\n" ANSI_RESET, nfc_cli_dump_error_names[error]);
         } else {
             nfc_cli_scanner_list_detected_protocols(instance->scanner);
             protocol_count = nfc_cli_scanner_detected_protocol_num(instance->scanner);
@@ -155,14 +164,16 @@ static size_t nfc_cli_dump_set_protocol(NfcCliDumpContext* instance) {
 static bool nfc_cli_dump_card(NfcCliDumpContext* instance) {
     instance->poller = nfc_poller_alloc(instance->nfc, instance->desired_protocol);
     NfcGenericCallback callback = protocol_poller_callbacks[instance->desired_protocol];
-    FuriStatus status = FuriStatusError;
     if(callback) {
         nfc_poller_start(instance->poller, callback, instance);
-        status = furi_semaphore_acquire(instance->sem_done, 10000);
+        FuriStatus status = furi_semaphore_acquire(instance->sem_done, 10000);
+
+        if(status == FuriStatusErrorTimeout) instance->result = NfcCliDumpErrorTimeout;
         nfc_poller_stop(instance->poller);
     }
     nfc_poller_free(instance->poller);
-    return status == FuriStatusOk;
+
+    return instance->result == NfcCliDumpErrorNone;
 }
 
 static void nfc_cli_dump_execute(PipeSide* pipe, NfcCliActionContext* context) {
@@ -184,7 +195,9 @@ static void nfc_cli_dump_execute(PipeSide* pipe, NfcCliActionContext* context) {
                 printf("Dump saved to \'%s\'\r\n", path);
             }
         } else {
-            printf(ANSI_FG_RED "Dump failed\r\n" ANSI_RESET);
+            printf(
+                ANSI_FG_RED "Error: %s\r\n" ANSI_RESET,
+                nfc_cli_dump_error_names[instance->result]);
         }
     } while(false);
 }

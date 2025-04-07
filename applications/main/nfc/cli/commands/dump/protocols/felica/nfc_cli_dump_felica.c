@@ -8,19 +8,15 @@ NfcCommand nfc_cli_dump_poller_callback_felica(NfcGenericEvent event, void* cont
     const FelicaPollerEvent* felica_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
-    if(felica_event->type == FelicaPollerEventTypeReady) {
+    if(felica_event->type == FelicaPollerEventTypeReady ||
+       felica_event->type == FelicaPollerEventTypeIncomplete) {
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolFelica, nfc_poller_get_data(instance->poller));
-        //view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         command = NfcCommandStop;
-    } else if(
-        felica_event->type == FelicaPollerEventTypeError ||
-        felica_event->type == FelicaPollerEventTypeIncomplete) {
-        nfc_device_set_data(
-            instance->nfc_device, NfcProtocolFelica, nfc_poller_get_data(instance->poller));
-        // view_dispatcher_send_custom_event(
-        //     instance->view_dispatcher, NfcCustomEventPollerIncomplete);
+        instance->result = NfcCliDumpErrorNone;
+    } else if(felica_event->type == FelicaPollerEventTypeError) {
         command = NfcCommandStop;
+        instance->result = NfcCliDumpErrorFailedToRead;
     } else if(felica_event->type == FelicaPollerEventTypeRequestAuthContext) {
         FelicaAuthenticationContext* ctx = felica_event->data->auth_context;
         const NfcCliDumpAuthContext* dump_auth_ctx = &instance->auth_ctx;

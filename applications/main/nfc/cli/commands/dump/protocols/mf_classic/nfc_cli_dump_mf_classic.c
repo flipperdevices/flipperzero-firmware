@@ -39,13 +39,10 @@ NfcCommand nfc_cli_dump_poller_callback_mf_classic(NfcGenericEvent event, void* 
     } else if(mfc_event->type == MfClassicPollerEventTypeSuccess) {
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolMfClassic, nfc_poller_get_data(instance->poller));
-        // const MfClassicData* mfc_data =
-        //     nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
-
-        // NfcCustomEvent custom_event = mf_classic_is_card_read(mfc_data) ?
-        //                                   NfcCustomEventPollerSuccess :
-        //                                   NfcCustomEventPollerIncomplete;
-
+        instance->result = NfcCliDumpErrorNone;
+        command = NfcCommandStop;
+    } else if(mfc_event->type == MfClassicPollerEventTypeFail) {
+        instance->result = NfcCliDumpErrorFailedToRead;
         command = NfcCommandStop;
     }
 
