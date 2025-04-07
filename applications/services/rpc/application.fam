@@ -3,7 +3,7 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="rpc_on_system_start",
     cdefines=["SRV_RPC"],
-    requires=["cli_master"],
+    requires=["cli"],
     order=10,
     sdk_headers=["rpc_app.h"],
 )

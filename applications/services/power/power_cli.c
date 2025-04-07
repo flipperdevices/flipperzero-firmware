@@ -2,7 +2,7 @@
 
 #include <furi_hal.h>
 #include <toolbox/cli/cli_command.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <lib/toolbox/args.h>
 #include <power/power_service/power.h>
 #include <toolbox/pipe.h>
@@ -115,9 +115,9 @@ void power_cli(PipeSide* pipe, FuriString* args, void* context) {
 
 void power_on_system_start(void) {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(registry, "power", CliCommandFlagParallelSafe, power_cli, NULL);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(power_cli);
 #endif

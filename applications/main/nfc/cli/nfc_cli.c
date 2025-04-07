@@ -2,7 +2,7 @@
 #include "nfc_cli_command_processor.h"
 
 #include "applications/services/loader/loader.h"
-#include "applications/services/cli/cli_master_commands.h"
+#include "applications/services/cli/cli_main_commands.h"
 #include <toolbox/cli/shell/cli_shell.h>
 #include <toolbox/cli/cli_registry.h>
 
@@ -21,28 +21,29 @@ typedef struct {
 
 static void nfc_cli_shell_motd(void* context) {
     UNUSED(context);
-    printf(ANSI_FG_BR_BLUE "\r\n"
-                           "                                     0000      \r\n"
-                           "                                     0000      \r\n"
-                           "                             000      0000     \r\n"
-                           "                             0000     00000    \r\n"
-                           "                    000      00000     0000    \r\n"
-                           "     0              0000      0000     00000   \r\n"
-                           "   000000           0000      00000     0000   \r\n"
-                           "   00000000          0000      0000     0000   \r\n"
-                           "   0000000000        0000      00000    0000   \r\n"
-                           "   0000 00000000     00000     00000    0000   \r\n"
-                           "   0000    0000000   00000     00000    0000   \r\n"
-                           "   0000      000000000000      0000     0000   \r\n"
-                           "   00000        000000000     00000     0000   \r\n"
-                           "     00           000000      0000     00000   \r\n"
-                           "                     00      00000     0000    \r\n"
-                           "                             0000     00000    \r\n"
-                           "                             000      0000     \r\n"
-                           "                                     0000      \r\n"
-                           "                                     0005      \r\n"
-                           "\r\n" ANSI_FG_BR_WHITE "Welcome to NFC Command Line Interface!\r\n"
-                           "Run `help` or `?` to list available commands\r\n" ANSI_RESET);
+    printf(
+        ANSI_FG_BR_BLUE "\r\n"
+                        "                                     0000      \r\n"
+                        "                                     0000      \r\n"
+                        "                             000      0000     \r\n"
+                        "                             0000     00000    \r\n"
+                        "                    000      00000     0000    \r\n"
+                        "     0              0000      0000     00000   \r\n"
+                        "   000000           0000      00000     0000   \r\n"
+                        "   00000000          0000      0000     0000   \r\n"
+                        "   0000000000        0000      00000    0000   \r\n"
+                        "   0000 00000000     00000     00000    0000   \r\n"
+                        "   0000    0000000   00000     00000    0000   \r\n"
+                        "   0000      000000000000      0000     0000   \r\n"
+                        "   00000        000000000     00000     0000   \r\n"
+                        "     00           000000      0000     00000   \r\n"
+                        "                     00      00000     0000    \r\n"
+                        "                             0000     00000    \r\n"
+                        "                             000      0000     \r\n"
+                        "                                     0000      \r\n"
+                        "                                     0005      \r\n"
+                        "\r\n" ANSI_FG_BR_WHITE "Welcome to NFC Command Line Interface!\r\n"
+                        "Run `help` or `?` to list available commands\r\n" ANSI_RESET);
 }
 
 static void nfc_cli_subscribe_commands(NfcCliContext* instance) {
@@ -108,8 +109,9 @@ void nfc_cli_execute(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(context);
 
     if(nfc_cli_desktop_app_is_running()) {
-        printf(ANSI_FG_YELLOW
-               "NFC app is running, unable to run NFC CLI at the same time!\r\n" ANSI_RESET);
+        printf(
+            ANSI_FG_YELLOW
+            "NFC app is running, unable to run NFC CLI at the same time!\r\n" ANSI_RESET);
         return;
     }
 
@@ -121,4 +123,4 @@ void nfc_cli_execute(PipeSide* pipe, FuriString* args, void* context) {
     nfc_cli_free(instance);
 }
 
-CLI_COMMAND_INTERFACE(nfc, nfc_cli_execute, CliCommandFlagParallelSafe, 1024, CLI_MASTER_APPID);
+CLI_COMMAND_INTERFACE(nfc, nfc_cli_execute, CliCommandFlagParallelSafe, 1024, CLI_APPID);

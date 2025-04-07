@@ -33,7 +33,8 @@ BPTREE_DEF2(
     FURI_STRING_OPLIST,
     CliRegistryCommand,
     M_POD_OPLIST);
-#define M_OPL_CliCommandTree_t() BPTREE_OPLIST(CliCommandTree, M_POD_OPLIST)
+
+#define M_OPL_CliCommandTree_t() BPTREE_OPLIST2(CliCommandTree, FURI_STRING_OPLIST, M_POD_OPLIST)
 
 bool cli_registry_get_command(
     CliRegistry* registry,

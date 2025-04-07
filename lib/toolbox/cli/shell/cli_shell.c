@@ -12,6 +12,7 @@
 #include <toolbox/pipe.h>
 #include <flipper_application/plugins/plugin_manager.h>
 #include <loader/firmware_api/firmware_api.h>
+#include <storage/storage.h>
 
 #define TAG "CliShell"
 
@@ -23,14 +24,16 @@ typedef enum {
     CliShellComponentMAX, //<! do not use
 } CliShellComponent;
 
-#define CLI_SHELL_DEFAULT_THREAD_NAME "CliShell"
-#define CLI_SHELL_THREAD_APP_ID       "CliShellId"
-
 CliShellKeyComboSet* component_key_combo_sets[] = {
     [CliShellComponentCompletions] = &cli_shell_completions_key_combo_set,
     [CliShellComponentLine] = &cli_shell_line_key_combo_set,
 };
 static_assert(CliShellComponentMAX == COUNT_OF(component_key_combo_sets));
+
+typedef enum {
+    CliShellStorageEventMount,
+    CliShellStorageEventUnmount,
+} CliShellStorageEvent;
 
 struct CliShell {
     // Set and freed by external thread
@@ -46,7 +49,11 @@ struct CliShell {
     FuriEventLoop* event_loop;
     CliAnsiParser* ansi_parser;
     FuriEventLoopTimer* ansi_parsing_timer;
-    bool custom_shell;
+
+    Storage* storage;
+    FuriPubSubSubscription* storage_subscription;
+    FuriMessageQueue* storage_event_queue;
+
     void* components[CliShellComponentMAX];
 };
 
@@ -65,7 +72,6 @@ static void cli_shell_install_pipe(CliShell* cli_shell) {
     pipe_set_callback_context(cli_shell->pipe, cli_shell);
     pipe_set_data_arrived_callback(cli_shell->pipe, cli_shell_data_available, 0);
     pipe_set_broken_callback(cli_shell->pipe, cli_shell_pipe_broken, 0);
-    pipe_set_stdout_timeout(cli_shell->pipe, furi_ms_to_ticks(50));
 }
 
 static void cli_shell_detach_pipe(CliShell* cli_shell) {
@@ -93,34 +99,21 @@ void cli_command_help(PipeSide* pipe, FuriString* args, void* context) {
     CliShell* shell = context;
     CliRegistry* registry = shell->registry;
 
-    printf("Available commands:" ANSI_FG_GREEN);
+    const size_t columns = 3;
 
-    // count non-hidden commands
+    printf("Available commands:\r\n" ANSI_FG_GREEN);
     cli_registry_lock(registry);
     CliCommandTree_t* commands = cli_registry_get_commands(registry);
     size_t commands_count = CliCommandTree_size(*commands);
 
-    // create iterators starting at different positions
-    const size_t columns = 3;
-    const size_t commands_per_column = (commands_count / columns) + (commands_count % columns);
-    CliCommandTree_it_t iterators[columns];
-    for(size_t c = 0; c < columns; c++) {
-        CliCommandTree_it(iterators[c], *commands);
-        for(size_t i = 0; i < c * commands_per_column; i++)
-            CliCommandTree_next(iterators[c]);
-    }
+    CliCommandTree_it_t iterator;
+    CliCommandTree_it(iterator, *commands);
+    for(size_t i = 0; i < commands_count; i++) {
+        const CliCommandTree_itref_t* item = CliCommandTree_cref(iterator);
+        printf("%-30s", furi_string_get_cstr(*item->key_ptr));
+        CliCommandTree_next(iterator);
 
-    // print commands
-    for(size_t r = 0; r < commands_per_column; r++) {
-        printf("\r\n");
-
-        for(size_t c = 0; c < columns; c++) {
-            if(!CliCommandTree_end_p(iterators[c])) {
-                const CliCommandTree_itref_t* item = CliCommandTree_cref(iterators[c]);
-                printf("%-30s", furi_string_get_cstr(*item->key_ptr));
-                CliCommandTree_next(iterators[c]);
-            }
-        }
+        if(i % columns == columns - 1) printf("\r\n");
     }
 
     if(shell->ext_config)
@@ -166,7 +159,8 @@ void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
     furi_string_right(args, space + 1);
 
     PluginManager* plugin_manager = NULL;
-    Loader* loader = NULL;
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    bool loader_locked = false;
     CliRegistryCommand command_data;
 
     do {
@@ -212,11 +206,11 @@ void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
 
         // lock loader
         if(!(command_data.flags & CliCommandFlagParallelSafe)) {
-            loader = furi_record_open(RECORD_LOADER);
-            bool success = loader_lock(loader);
-            if(!success) {
-                printf(ANSI_FG_RED
-                       "this command cannot be run while an application is open" ANSI_RESET);
+            loader_locked = loader_lock(loader);
+            if(!loader_locked) {
+                printf(
+                    ANSI_FG_RED
+                    "this command cannot be run while an application is open" ANSI_RESET);
                 break;
             }
         }
@@ -248,7 +242,7 @@ void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
     furi_string_free(args);
 
     // unlock loader
-    if(loader) loader_unlock(loader);
+    if(loader_locked) loader_unlock(loader);
     furi_record_close(RECORD_LOADER);
 
     // unload external command
@@ -262,6 +256,36 @@ const char* cli_shell_get_prompt(CliShell* cli_shell) {
 // ==============
 // Event handlers
 // ==============
+
+static void cli_shell_storage_event(const void* message, void* context) {
+    CliShell* cli_shell = context;
+    const StorageEvent* event = message;
+
+    if(event->type == StorageEventTypeCardMount) {
+        CliShellStorageEvent cli_event = CliShellStorageEventMount;
+        furi_check(
+            furi_message_queue_put(cli_shell->storage_event_queue, &cli_event, 0) == FuriStatusOk);
+    } else if(event->type == StorageEventTypeCardUnmount) {
+        CliShellStorageEvent cli_event = CliShellStorageEventUnmount;
+        furi_check(
+            furi_message_queue_put(cli_shell->storage_event_queue, &cli_event, 0) == FuriStatusOk);
+    }
+}
+
+static void cli_shell_storage_internal_event(FuriEventLoopObject* object, void* context) {
+    CliShell* cli_shell = context;
+    FuriMessageQueue* queue = object;
+    CliShellStorageEvent event;
+    furi_check(furi_message_queue_get(queue, &event, 0) == FuriStatusOk);
+
+    if(event == CliShellStorageEventMount) {
+        cli_registry_reload_external_commands(cli_shell->registry, cli_shell->ext_config);
+    } else if(event == CliShellStorageEventUnmount) {
+        cli_registry_remove_external_commands(cli_shell->registry);
+    } else {
+        furi_crash();
+    }
+}
 
 static void
     cli_shell_process_parser_result(CliShell* cli_shell, CliAnsiParserResult parse_result) {
@@ -354,18 +378,33 @@ static void cli_shell_init(CliShell* shell) {
     shell->ansi_parsing_timer = furi_event_loop_timer_alloc(
         shell->event_loop, cli_shell_timer_expired, FuriEventLoopTimerTypeOnce, shell);
 
+    shell->storage_event_queue = furi_message_queue_alloc(1, sizeof(CliShellStorageEvent));
+    furi_event_loop_subscribe_message_queue(
+        shell->event_loop,
+        shell->storage_event_queue,
+        FuriEventLoopEventIn,
+        cli_shell_storage_internal_event,
+        shell);
+    shell->storage = furi_record_open(RECORD_STORAGE);
+    shell->storage_subscription =
+        furi_pubsub_subscribe(storage_get_pubsub(shell->storage), cli_shell_storage_event, shell);
+
     cli_shell_install_pipe(shell);
 }
 
-static void cli_shell_deinit(CliShell* cli_shell) {
-    cli_shell_detach_pipe(cli_shell);
+static void cli_shell_deinit(CliShell* shell) {
+    furi_pubsub_unsubscribe(storage_get_pubsub(shell->storage), shell->storage_subscription);
+    furi_record_close(RECORD_STORAGE);
+    furi_event_loop_unsubscribe(shell->event_loop, shell->storage_event_queue);
+    furi_message_queue_free(shell->storage_event_queue);
 
-    cli_shell_completions_free(cli_shell->components[CliShellComponentCompletions]);
-    cli_shell_line_free(cli_shell->components[CliShellComponentLine]);
+    cli_shell_completions_free(shell->components[CliShellComponentCompletions]);
+    cli_shell_line_free(shell->components[CliShellComponentLine]);
 
-    furi_event_loop_timer_free(cli_shell->ansi_parsing_timer);
-    furi_event_loop_free(cli_shell->event_loop);
-    cli_ansi_parser_free(cli_shell->ansi_parser);
+    cli_shell_detach_pipe(shell);
+    furi_event_loop_timer_free(shell->ansi_parsing_timer);
+    furi_event_loop_free(shell->event_loop);
+    cli_ansi_parser_free(shell->ansi_parser);
 }
 
 static int32_t cli_shell_thread(void* context) {

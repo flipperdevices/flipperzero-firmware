@@ -2,7 +2,7 @@
 #include <furi_hal.h>
 #include <lib/toolbox/args.h>
 #include <toolbox/pipe.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <toolbox/cli/cli_registry.h>
 
 #include <ble/ble.h>
@@ -231,9 +231,9 @@ static void bt_cli(PipeSide* pipe, FuriString* args, void* context) {
 
 void bt_on_system_start(void) {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(registry, "bt", CliCommandFlagDefault, bt_cli, NULL);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(bt_cli);
 #endif

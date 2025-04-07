@@ -3,7 +3,7 @@
 
 #include <lib/toolbox/args.h>
 #include <toolbox/pipe.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <toolbox/cli/cli_registry.h>
 #include <toolbox/cli/cli_ansi.h>
 
@@ -47,7 +47,7 @@ void crypto_cli_encrypt(PipeSide* pipe, FuriString* args) {
         FuriString* input;
         input = furi_string_alloc();
         char c;
-        while(pipe_receive(pipe, (uint8_t*)&c, 1, FuriWaitForever) == 1) {
+        while(pipe_receive(pipe, (uint8_t*)&c, 1) == 1) {
             if(c == CliKeyETX) {
                 printf("\r\n");
                 break;
@@ -122,7 +122,7 @@ void crypto_cli_decrypt(PipeSide* pipe, FuriString* args) {
         FuriString* hex_input;
         hex_input = furi_string_alloc();
         char c;
-        while(pipe_receive(pipe, (uint8_t*)&c, 1, FuriWaitForever) == 1) {
+        while(pipe_receive(pipe, (uint8_t*)&c, 1) == 1) {
             if(c == CliKeyETX) {
                 printf("\r\n");
                 break;
@@ -321,9 +321,9 @@ static void crypto_cli(PipeSide* pipe, FuriString* args, void* context) {
 
 void crypto_on_system_start(void) {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(registry, "crypto", CliCommandFlagDefault, crypto_cli, NULL);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(crypto_cli);
 #endif

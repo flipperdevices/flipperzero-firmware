@@ -1,5 +1,5 @@
 #include <toolbox/cli/cli_command.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <furi.h>
 #include <rpc/rpc.h>
 #include <furi_hal.h>
@@ -13,19 +13,14 @@ typedef struct {
     FuriSemaphore* terminate_semaphore;
 } CliRpc;
 
-#define CLI_READ_BUFFER_SIZE 64
+#define CLI_READ_BUFFER_SIZE 64UL
 
 static void rpc_cli_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
     furi_assert(context);
     furi_assert(bytes);
     furi_assert(bytes_len > 0);
     CliRpc* cli_rpc = context;
-
-    while(bytes_len) {
-        size_t sent = pipe_send(cli_rpc->pipe, bytes, bytes_len, FuriWaitForever);
-        bytes += sent;
-        bytes_len -= sent;
-    }
+    pipe_send(cli_rpc->pipe, bytes, bytes_len);
 }
 
 static void rpc_cli_session_close_callback(void* context) {
@@ -70,9 +65,9 @@ void rpc_cli_command_start_session(PipeSide* pipe, FuriString* args, void* conte
     size_t size_received = 0;
 
     while(1) {
-        size_received =
-            pipe_receive(cli_rpc.pipe, buffer, CLI_READ_BUFFER_SIZE, furi_ms_to_ticks(50));
-        if((pipe_state(cli_rpc.pipe) == PipeStateBroken) || cli_rpc.session_close_request) {
+        size_t to_receive = CLAMP(pipe_bytes_available(cli_rpc.pipe), CLI_READ_BUFFER_SIZE, 1UL);
+        size_received = pipe_receive(cli_rpc.pipe, buffer, to_receive);
+        if(size_received < to_receive || cli_rpc.session_close_request) {
             break;
         }
 

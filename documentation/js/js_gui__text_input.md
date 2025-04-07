@@ -11,33 +11,24 @@ let textInputView = require("gui/text_input");
 ```
 
 This module depends on the `gui` module, which in turn depends on the
-`event_loop` module, so they _must_ be imported in this order. It is also
+`event_loop` module, so they **must** be imported in this order. It is also
 recommended to conceptualize these modules first before using this one.
 
-# Example
+## Example
 For an example, refer to the `gui.js` example script.
 
-# View props
-## `minLength`
-The shortest allowed text length.
+## View props
 
-Type: `number`
+| Prop        | Type   | Description                                      |
+|-------------|--------|--------------------------------------------------|
+| `minLength`        | `number`  | The shortest allowed text length.                          |
+| `maxLength`        | `number`  | The longest allowed text length. <br> Default: `32`        |
+| `header`           | `string`  | A single line of text that appears above the keyboard.     |
+| `defaultText`      | `string`  | Text to show by default.                                   |
+| `defaultTextClear` | `boolean` | Whether to clear the default text on next character typed. |
 
-## `maxLength`
-The longest allowed text length.
+## View events
 
-Type: `number`
-
-Default: `32`
-
-## `header`
-A single line of text that appears above the keyboard.
-
-Type: `string`
-
-# View events
-## `input`
-Fires when the user selects the "Save" button and the text matches the length
-constrained by `minLength` and `maxLength`.
-
-Item type: `string`
+| Item        | Type   | Description                                      |
+|-------------|--------|--------------------------------------------------|
+| `input`     | `string` | Fires when the user selects the "Save" button and the text matches the length constrained by `minLength` and `maxLength`. |

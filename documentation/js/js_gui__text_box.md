@@ -11,14 +11,16 @@ let textBoxView = require("gui/text_box");
 ```
 
 This module depends on the `gui` module, which in turn depends on the
-`event_loop` module, so they _must_ be imported in this order. It is also
+`event_loop` module, so they **must** be imported in this order. It is also
 recommended to conceptualize these modules first before using this one.
 
-# Example
+## Example
 For an example, refer to the `gui.js` example script.
 
-# View props
-## `text`
-Text to show in the text box.
+## View props
 
-Type: `string`
+| Prop     | Type    | Description                        |
+|----------|---------|------------------------------------|
+| `text`   | `string`| Text to show in the text box.                             |
+| `font`   | `string`| The font to display the text in (`"text"` or `"hex"`).    |
+| `focus`  | `string`| The initial focus of the text box (`"start"` or `"end"`). |

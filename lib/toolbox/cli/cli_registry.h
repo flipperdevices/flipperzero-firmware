@@ -71,6 +71,13 @@ void cli_registry_add_command_ex(
 void cli_registry_delete_command(CliRegistry* registry, const char* name);
 
 /**
+ * @brief Unregisters all external commands
+ * 
+ * @param [in] registry Pointer to registry instance
+ */
+void cli_registry_remove_external_commands(CliRegistry* registry);
+
+/**
  * @brief Reloads the list of externally available commands
  * 
  * @param [in] registry Pointer to registry instance

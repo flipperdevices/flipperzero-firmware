@@ -5,7 +5,7 @@
 #include <toolbox/path.h>
 #include <assets_icons.h>
 #include <toolbox/cli/cli_command.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <toolbox/pipe.h>
 
 #define TAG "JS app"
@@ -140,7 +140,7 @@ typedef struct {
 static void js_cli_print(JsCliContext* ctx, const char* msg) {
     UNUSED(ctx);
     UNUSED(msg);
-    pipe_send(ctx->pipe, msg, strlen(msg), FuriWaitForever);
+    pipe_send(ctx->pipe, msg, strlen(msg));
 }
 
 static void js_cli_exit(JsCliContext* ctx) {
@@ -210,8 +210,8 @@ void js_cli_execute(PipeSide* pipe, FuriString* args, void* context) {
 
 void js_app_on_system_start(void) {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(registry, "js", CliCommandFlagDefault, js_cli_execute, NULL);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #endif
 }

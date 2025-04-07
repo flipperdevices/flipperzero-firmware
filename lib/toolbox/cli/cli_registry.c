@@ -13,7 +13,7 @@ struct CliRegistry {
 CliRegistry* cli_registry_alloc(void) {
     CliRegistry* registry = malloc(sizeof(CliRegistry));
     CliCommandTree_init(registry->commands);
-    registry->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    registry->mutex = furi_mutex_alloc(FuriMutexTypeRecursive);
     return registry;
 }
 
@@ -99,14 +99,12 @@ bool cli_registry_get_command(
     return !!data;
 }
 
-void cli_registry_reload_external_commands(
-    CliRegistry* registry,
-    const CliCommandExternalConfig* config) {
+void cli_registry_remove_external_commands(CliRegistry* registry) {
     furi_check(registry);
     furi_check(furi_mutex_acquire(registry->mutex, FuriWaitForever) == FuriStatusOk);
-    FURI_LOG_D(TAG, "Reloading ext commands");
 
-    // remove external commands
+    // FIXME FL-3977: memory leak somewhere within this function
+
     CliCommandTree_t internal_cmds;
     CliCommandTree_init(internal_cmds);
     for
@@ -115,6 +113,18 @@ void cli_registry_reload_external_commands(
                 CliCommandTree_set_at(internal_cmds, *item->key_ptr, *item->value_ptr);
         }
     CliCommandTree_move(registry->commands, internal_cmds);
+
+    furi_check(furi_mutex_release(registry->mutex) == FuriStatusOk);
+}
+
+void cli_registry_reload_external_commands(
+    CliRegistry* registry,
+    const CliCommandExternalConfig* config) {
+    furi_check(registry);
+    furi_check(furi_mutex_acquire(registry->mutex, FuriWaitForever) == FuriStatusOk);
+    FURI_LOG_D(TAG, "Reloading ext commands");
+
+    cli_registry_remove_external_commands(registry);
 
     // iterate over files in plugin directory
     Storage* storage = furi_record_open(RECORD_STORAGE);

@@ -2,7 +2,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <toolbox/cli/cli_command.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <storage/storage.h>
 #include <loader/loader.h>
 #include <toolbox/path.h>
@@ -52,10 +52,11 @@ static void updater_cli_restore(FuriString* args) {
 
 static void updater_cli_help(FuriString* args) {
     UNUSED(args);
-    printf("Commands:\r\n"
-           "\tinstall /ext/path/to/update.fuf - verify & apply update package\r\n"
-           "\tbackup /ext/path/to/backup.tar - create internal storage backup\r\n"
-           "\trestore /ext/path/to/backup.tar - restore internal storage backup\r\n");
+    printf(
+        "Commands:\r\n"
+        "\tinstall /ext/path/to/update.fuf - verify & apply update package\r\n"
+        "\tbackup /ext/path/to/backup.tar - create internal storage backup\r\n"
+        "\trestore /ext/path/to/backup.tar - restore internal storage backup\r\n");
 }
 
 static const CliSubcommand update_cli_subcommands[] = {
@@ -107,9 +108,9 @@ static void updater_start_app(void* context, uint32_t arg) {
 
 void updater_on_system_start(void) {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(registry, "update", CliCommandFlagDefault, updater_cli_ep, NULL);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(updater_cli_ep);
 #endif

@@ -2,7 +2,7 @@
 
 #include <furi.h>
 #include <toolbox/cli/cli_command.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <applications.h>
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/strint.h>
@@ -142,10 +142,10 @@ static void loader_cli(PipeSide* pipe, FuriString* args, void* context) {
 
 void loader_on_system_start(void) {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(
         registry, RECORD_LOADER, CliCommandFlagParallelSafe, loader_cli, NULL);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(loader_cli);
 #endif

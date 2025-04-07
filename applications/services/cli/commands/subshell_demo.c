@@ -1,4 +1,4 @@
-#include "../cli_master_commands.h"
+#include "../cli_main_commands.h"
 #include <toolbox/cli/cli_registry.h>
 #include <toolbox/cli/shell/cli_shell.h>
 #include <toolbox/cli/cli_ansi.h>
@@ -20,8 +20,9 @@ static void motd(void* context) {
     printf("\r\n");
     printf("+------------------------------------+\r\n");
     printf("|            Hello world!            |\r\n");
-    printf("| This is the " ANSI_FG_GREEN "MOTD" ANSI_RESET " for our " ANSI_FG_BLUE
-           "subshell" ANSI_RESET "! |\r\n");
+    printf(
+        "| This is the " ANSI_FG_GREEN "MOTD" ANSI_RESET " for our " ANSI_FG_BLUE
+        "subshell" ANSI_RESET "! |\r\n");
     printf("+------------------------------------+\r\n");
 }
 
@@ -40,4 +41,4 @@ static void execute(PipeSide* pipe, FuriString* args, void* context) {
     cli_registry_free(registry);
 }
 
-CLI_COMMAND_INTERFACE(subshell_demo, execute, CliCommandFlagParallelSafe, 2048, CLI_MASTER_APPID);
+CLI_COMMAND_INTERFACE(subshell_demo, execute, CliCommandFlagParallelSafe, 2048, CLI_APPID);

@@ -16,12 +16,14 @@ Flipper Zero's built-in JavaScript engine enables you to run lightweight scripts
 ## JavaScript modules {#js_modules}
 
 - @subpage js_badusb — This module allows you to emulate a standard USB keyboard
-- @subpage js_serial — The module for interaction with external devices via UART
-- @subpage js_math — This module contains mathematical methods and constants
-- @subpage js_notification — This module allows you to use LED, speaker and vibro for notifications
 - @subpage js_event_loop — The module for easy event-based developing
+- @subpage js_flipper — This module allows to query device information
 - @subpage js_gpio — This module allows you to control GPIO pins
 - @subpage js_gui — This module allows you to use GUI (graphical user interface)
+- @subpage js_math — This module contains mathematical methods and constants
+- @subpage js_notification — This module allows you to use LED, speaker and vibro for notifications
+- @subpage js_serial — The module for interaction with external devices via UART
+- @subpage js_storage — The module for accessing the filesystem
 
 ## Examples {#js_examples}
 

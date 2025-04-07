@@ -3,7 +3,7 @@
 
 #include <toolbox/cli/cli_command.h>
 #include <toolbox/cli/cli_ansi.h>
-#include <cli/cli_master_commands.h>
+#include <cli/cli_main_commands.h>
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/dir_walk.h>
 #include <lib/toolbox/md5_calc.h>
@@ -323,10 +323,11 @@ static void storage_cli_write_chunk(PipeSide* pipe, FuriString* path, FuriString
             uint8_t* buffer = malloc(buffer_size);
 
             while(need_to_read) {
-                size_t read_this_time =
-                    pipe_receive(pipe, buffer, MIN(buffer_size, need_to_read), FuriWaitForever);
-                size_t wrote_this_time = storage_file_write(file, buffer, read_this_time);
+                size_t to_read_this_time = MIN(buffer_size, need_to_read);
+                size_t read_this_time = pipe_receive(pipe, buffer, to_read_this_time);
+                if(read_this_time != to_read_this_time) break;
 
+                size_t wrote_this_time = storage_file_write(file, buffer, read_this_time);
                 if(wrote_this_time != read_this_time) {
                     storage_cli_print_error(storage_file_get_error(file));
                     break;
@@ -696,7 +697,7 @@ static void storage_cli_factory_reset(PipeSide* pipe, FuriString* args, void* co
 
 void storage_on_system_start(void) {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI_MASTER);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
     cli_registry_add_command(
         registry,
         "storage",
@@ -705,7 +706,7 @@ void storage_on_system_start(void) {
         NULL);
     cli_registry_add_command(
         registry, "factory_reset", CliCommandFlagParallelSafe, storage_cli_factory_reset, NULL);
-    furi_record_close(RECORD_CLI_MASTER);
+    furi_record_close(RECORD_CLI);
 #else
     UNUSED(storage_cli_factory_reset);
 #endif
