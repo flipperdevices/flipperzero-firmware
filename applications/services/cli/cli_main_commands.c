@@ -506,7 +506,7 @@ void cli_main_commands_init(CliRegistry* registry) {
     cli_registry_add_command(registry, "top", CliCommandFlagParallelSafe, cli_command_top, NULL);
     cli_registry_add_command(registry, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
     cli_registry_add_command(
-        registry, "free_blocks", CliCommandFlagDefault, cli_command_free_blocks, NULL);
+        registry, "free_blocks", CliCommandFlagParallelSafe, cli_command_free_blocks, NULL);
     cli_registry_add_command(registry, "echo", CliCommandFlagParallelSafe, cli_command_echo, NULL);
 
     cli_registry_add_command(registry, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
