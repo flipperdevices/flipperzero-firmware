@@ -10,6 +10,8 @@
 #include <toolbox/pipe.h>
 #include "cli_command.h"
 
+#define RECORD_CLI "cli"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

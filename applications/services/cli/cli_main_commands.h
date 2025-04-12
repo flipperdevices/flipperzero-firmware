@@ -3,7 +3,6 @@
 #include <toolbox/cli/cli_command.h>
 #include <toolbox/cli/cli_registry.h>
 
-#define RECORD_CLI "cli"
-#define CLI_APPID  "cli"
+#define CLI_APPID "cli"
 
 void cli_main_commands_init(CliRegistry* registry);
