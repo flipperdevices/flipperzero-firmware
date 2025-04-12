@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cli.h"
 #include <toolbox/cli/cli_command.h>
 #include <toolbox/cli/cli_registry.h>
 
