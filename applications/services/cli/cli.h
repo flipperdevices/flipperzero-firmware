@@ -3,8 +3,9 @@
 /* 
  * Compatibility header for ease of porting existing apps.
  *  In short: 
- *   cli_add_command() is replaced with cli_registry_add_command(),
- *   Cli* - with CliRegistry*
+ *   Cli* is replaced with with CliRegistry*
+ *   cli_* functions are replaced with cli_registry_* functions
+ *   (i.e., cli_add_command() is now cli_registry_add_command())
 */
 
 #include <toolbox/cli/cli_registry.h>
