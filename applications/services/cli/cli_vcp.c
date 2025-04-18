@@ -164,7 +164,7 @@ static void cli_vcp_message_received(FuriEventLoopObject* object, void* context)
 
     switch(message.type) {
     case CliVcpMessageTypeEnable:
-        if(cli_vcp->is_enabled) return;
+        if(cli_vcp->is_enabled) break;
         FURI_LOG_D(TAG, "Enabling");
         cli_vcp->is_enabled = true;
 
@@ -175,7 +175,7 @@ static void cli_vcp_message_received(FuriEventLoopObject* object, void* context)
         break;
 
     case CliVcpMessageTypeDisable:
-        if(!cli_vcp->is_enabled) return;
+        if(!cli_vcp->is_enabled) break;
         FURI_LOG_D(TAG, "Disabling");
         cli_vcp->is_enabled = false;
 
