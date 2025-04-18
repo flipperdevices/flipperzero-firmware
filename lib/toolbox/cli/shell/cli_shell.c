@@ -278,7 +278,8 @@ static void cli_shell_storage_event(const void* message, void* context) {
 static void cli_shell_storage_internal_event(FuriEventLoopObject* object, void* context) {
     CliShell* cli_shell = context;
     FuriEventFlag* event_flag = object;
-    CliShellStorageEvent event = furi_event_flag_wait(event_flag, FuriFlagWaitAll, FuriFlagWaitAny, 0);
+    CliShellStorageEvent event =
+        furi_event_flag_wait(event_flag, FuriFlagWaitAll, FuriFlagWaitAny, 0);
     furi_check(!(event & FuriFlagError));
 
     if(event & CliShellStorageEventUnmount) {
@@ -389,14 +390,15 @@ static void cli_shell_init(CliShell* shell) {
         cli_shell_storage_internal_event,
         shell);
     shell->storage.storage = furi_record_open(RECORD_STORAGE);
-    shell->storage.subscription =
-        furi_pubsub_subscribe(storage_get_pubsub(shell->storage.storage), cli_shell_storage_event, shell);
+    shell->storage.subscription = furi_pubsub_subscribe(
+        storage_get_pubsub(shell->storage.storage), cli_shell_storage_event, shell);
 
     cli_shell_install_pipe(shell);
 }
 
 static void cli_shell_deinit(CliShell* shell) {
-    furi_pubsub_unsubscribe(storage_get_pubsub(shell->storage.storage), shell->storage.subscription);
+    furi_pubsub_unsubscribe(
+        storage_get_pubsub(shell->storage.storage), shell->storage.subscription);
     furi_record_close(RECORD_STORAGE);
     furi_event_loop_unsubscribe(shell->event_loop, shell->storage.event_flag);
     furi_event_flag_free(shell->storage.event_flag);
