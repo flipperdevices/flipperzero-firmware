@@ -694,6 +694,7 @@ static void loader_do_unlock(Loader* loader) {
 }
 
 static void loader_do_emit_queue_empty_event(Loader* loader) {
+    if(loader_do_is_locked(loader)) return;
     FURI_LOG_I(TAG, "Launch queue empty");
     LoaderEvent event;
     event.type = LoaderEventTypeNoMoreAppsInQueue;
