@@ -1,0 +1,34 @@
+Filetype: IR signals file
+Version: 1
+# 
+# Swiatlo w pokoju
+#
+name: On
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 45 00 00 00
+# 
+name: Off
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 47 00 00 00
+#
+name: Dim-
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 15 00 00 00
+#
+name: Dim+
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 40 00 00 00
+#
+name: Timer
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 19 00 00 00
