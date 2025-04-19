@@ -21,9 +21,9 @@
 #define CCID_DATABLOCK_SIZE \
     (4 + 1 + CCID_SHORT_APDU_SIZE + 1) //APDU Header + Lc + Short APDU size + Le
 
-#define ENDPOINT_DIR_IN         (0x80)
-#define ENDPOINT_DIR_OUT        (0x00)
-#define ENDPOINT_DIR_INTERRUPT  (0x40)
+#define ENDPOINT_DIR_IN        (0x80)
+#define ENDPOINT_DIR_OUT       (0x00)
+#define ENDPOINT_DIR_INTERRUPT (0x40)
 
 #define INTERFACE_ID_CCID (0)
 
@@ -69,8 +69,8 @@ enum CCID_Features_ExchangeLevel_t {
 };
 
 typedef enum {
-    WorkerEvtStop           = (1 << 0),
-    WorkerEvtRequest        = (1 << 1),
+    WorkerEvtStop = (1 << 0),
+    WorkerEvtRequest = (1 << 1),
     WorkerEvtInsertSmartcard = (1 << 2),
     WorkerEvtRemoveSmartcard = (1 << 3),
 } WorkerEvtFlags;
@@ -81,7 +81,6 @@ typedef struct ccid_bulk_message_header {
     uint8_t bSlot;
     uint8_t bSeq;
 } FURI_PACKED ccid_bulk_message_header_t;
-
 
 /* Device descriptor */
 static struct usb_device_descriptor ccid_device_desc = {
@@ -451,9 +450,12 @@ void CALLBACK_CCID_XfrBlock(
     }
 }
 
-void CCID_NotifySlotChange(struct rdr_to_pc_notify_slot_change* message, uint8_t slot, bool inserted) {
+void CCID_NotifySlotChange(
+    struct rdr_to_pc_notify_slot_change* message,
+    uint8_t slot,
+    bool inserted) {
     if(slot == CCID_SLOT_INDEX && inserted != furi_hal_usb_ccid->smartcard_inserted) {
-        message->bMessageType =  RDR_TO_PC_NOTIFYSLOTCHANGE;
+        message->bMessageType = RDR_TO_PC_NOTIFYSLOTCHANGE;
         if(inserted) {
             message->bmSlotICCState[0] = 0x40; //ICC inserted for slot 0
         } else {
@@ -465,13 +467,15 @@ void CCID_NotifySlotChange(struct rdr_to_pc_notify_slot_change* message, uint8_t
 void furi_hal_usb_ccid_insert_smartcard(void) {
     furi_check(furi_hal_usb_ccid);
     furi_hal_usb_ccid->smartcard_inserted = true;
-    furi_thread_flags_set(furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtInsertSmartcard);
+    furi_thread_flags_set(
+        furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtInsertSmartcard);
 }
 
 void furi_hal_usb_ccid_remove_smartcard(void) {
     furi_check(furi_hal_usb_ccid);
     furi_hal_usb_ccid->smartcard_inserted = false;
-    furi_thread_flags_set(furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtRemoveSmartcard);
+    furi_thread_flags_set(
+        furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtRemoveSmartcard);
 }
 
 void furi_hal_usb_ccid_set_callbacks(CcidCallbacks* cb, void* context) {
@@ -532,7 +536,7 @@ static void ccid_tx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
             furi_thread_flags_set(
                 furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtRequest);
         }
-    } 
+    }
 }
 
 static int32_t ccid_worker(void* context) {
@@ -629,23 +633,29 @@ static int32_t ccid_worker(void* context) {
         } else if(flags & WorkerEvtStop) {
             break;
         } else if(flags & WorkerEvtInsertSmartcard) {
-            if (!furi_hal_usb_ccid->smartcard_inserted)
-            {
+            if(!furi_hal_usb_ccid->smartcard_inserted) {
                 struct rdr_to_pc_notify_slot_change* responseNotifySlotChange =
                     (struct rdr_to_pc_notify_slot_change*)&furi_hal_usb_ccid->send_buffer;
 
                 CCID_NotifySlotChange(responseNotifySlotChange, CCID_SLOT_INDEX, true);
 
-                usbd_ep_write(furi_hal_usb_ccid->usb_dev, CCID_INTERRUPT_EPADDR, furi_hal_usb_ccid->send_buffer, sizeof(struct rdr_to_pc_notify_slot_change) + sizeof(uint8_t));
+                usbd_ep_write(
+                    furi_hal_usb_ccid->usb_dev,
+                    CCID_INTERRUPT_EPADDR,
+                    furi_hal_usb_ccid->send_buffer,
+                    sizeof(struct rdr_to_pc_notify_slot_change) + sizeof(uint8_t));
             }
         } else if(flags & WorkerEvtRemoveSmartcard) {
-            if (furi_hal_usb_ccid->smartcard_inserted)
-            {
+            if(furi_hal_usb_ccid->smartcard_inserted) {
                 struct rdr_to_pc_notify_slot_change* responseNotifySlotChange =
                     (struct rdr_to_pc_notify_slot_change*)&furi_hal_usb_ccid->send_buffer;
-                    
+
                 CCID_NotifySlotChange(responseNotifySlotChange, CCID_SLOT_INDEX, false);
-                usbd_ep_write(furi_hal_usb_ccid->usb_dev, CCID_INTERRUPT_EPADDR, furi_hal_usb_ccid->send_buffer, sizeof(struct rdr_to_pc_notify_slot_change) + sizeof(uint8_t));
+                usbd_ep_write(
+                    furi_hal_usb_ccid->usb_dev,
+                    CCID_INTERRUPT_EPADDR,
+                    furi_hal_usb_ccid->send_buffer,
+                    sizeof(struct rdr_to_pc_notify_slot_change) + sizeof(uint8_t));
             }
         }
     }

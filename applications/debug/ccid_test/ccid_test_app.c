@@ -43,7 +43,6 @@ typedef enum {
     CcidTestSubmenuIndexInsertSmartcardReader
 } SubmenuIndex;
 
-
 static void ccid_test_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
     if(index == CcidTestSubmenuIndexInsertSmartcard) {
@@ -94,8 +93,6 @@ CcidTestApp* ccid_test_app_alloc(void) {
     view_set_previous_callback(submenu_get_view(app->submenu), ccid_test_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, CcidTestAppViewSubmenu, submenu_get_view(app->submenu));
-
-
 
     // Switch to menu
     view_dispatcher_switch_to_view(app->view_dispatcher, CcidTestAppViewSubmenu);
