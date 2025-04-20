@@ -11,11 +11,20 @@ extern "C" {
 /** Extract int value and trim arguments string
  * 
  * @param args - arguments string 
- * @param word first argument, output
+ * @param value first argument, output
  * @return true - success
  * @return false - arguments string does not contain int
  */
 bool args_read_int_and_trim(FuriString* args, int* value);
+
+/** Extract float value and trim arguments string
+ *
+ * @param [in, out] args arguments string
+ * @param [out] value first argument
+ * @return true - success
+ * @return false - arguments string does not contain float
+ */
+bool args_read_float_and_trim(FuriString* args, float* value);
 
 /**
  * @brief Extract first argument from arguments string and trim arguments string

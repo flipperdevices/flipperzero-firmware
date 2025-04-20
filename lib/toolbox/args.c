@@ -34,6 +34,24 @@ bool args_read_int_and_trim(FuriString* args, int* value) {
     return false;
 }
 
+bool args_read_float_and_trim(FuriString* args, float* value) {
+    size_t cmd_length = args_get_first_word_length(args);
+    if(cmd_length == 0) {
+        return false;
+    }
+
+    char* end_ptr;
+    float temp = strtof(furi_string_get_cstr(args), &end_ptr);
+    if(end_ptr == furi_string_get_cstr(args)) {
+        return false;
+    }
+
+    *value = temp;
+    furi_string_right(args, cmd_length);
+    furi_string_trim(args);
+    return true;
+}
+
 bool args_read_string_and_trim(FuriString* args, FuriString* word) {
     size_t cmd_length = args_get_first_word_length(args);
 
