@@ -115,3 +115,73 @@ bool args_read_hex_bytes(FuriString* args, uint8_t* bytes, size_t bytes_count) {
 
     return result;
 }
+
+bool args_read_duration(FuriString* args, uint32_t* value, const char* default_unit) {
+    FuriString* unit_string = args;
+
+    // Determine the last character in the string to identify the unit
+    size_t last_symbol_index = furi_string_size(unit_string) - 1;
+    char last_symbol = furi_string_get_char(unit_string, last_symbol_index);
+    if(last_symbol != 's' && last_symbol != 'm' && last_symbol != 'h') {
+        if(last_symbol < '0' || '9' < last_symbol) {
+            return false;
+        }
+
+        if(default_unit == NULL) {
+            // Use default value (milliseconds)
+            last_symbol = '\0';
+        } else {
+            // Extract from default unit
+            unit_string = furi_string_alloc_set_str(default_unit);
+            last_symbol_index = furi_string_size(unit_string) - 1;
+            last_symbol = furi_string_get_char(unit_string, last_symbol_index);
+        }
+    }
+
+    uint32_t multiplier = 1;
+    size_t suffix_length = 1;
+
+    // Determine the multiplier based on the unit
+    switch(last_symbol) {
+    case '\0':
+        suffix_length = 0;
+        break;
+    case 's':
+        if(last_symbol_index > 0 &&
+           furi_string_get_char(unit_string, last_symbol_index - 1) == 'm') {
+            // If it's milliseconds ("ms") rather than seconds
+            multiplier = 1;
+            suffix_length = 2;
+        } else {
+            multiplier = 1000; // Seconds to milliseconds
+        }
+        break;
+    case 'm':
+        multiplier = 60000; // Minutes to milliseconds
+        break;
+    case 'h':
+        multiplier = 3600000; // Hours to milliseconds
+        break;
+    }
+
+    size_t value_end_index = furi_string_size(args);
+
+    if(unit_string == args) {
+        value_end_index -= suffix_length;
+    } else {
+        furi_string_free(unit_string);
+    }
+
+    // Extract value
+    const char* start_ptr = furi_string_get_cstr(args);
+    char* end_ptr = NULL;
+    double temp_value = strtod(start_ptr, &end_ptr);
+
+    const uint32_t max_value = UINT32_MAX / multiplier;
+    bool is_success = start_ptr + value_end_index == end_ptr && start_ptr != end_ptr &&
+                      0 <= temp_value && temp_value <= max_value;
+
+    *value = is_success ? round(temp_value * multiplier) : 0;
+
+    return is_success;
+}
