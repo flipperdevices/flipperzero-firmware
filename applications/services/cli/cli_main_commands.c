@@ -356,11 +356,13 @@ void cli_command_led(PipeSide* pipe, FuriString* args, void* context) {
 static void cli_command_top(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(context);
 
-    int interval = 1000;
-    args_read_int_and_trim(args, &interval);
+    uint32_t interval;
+    if(!args_read_duration(args, &interval, NULL)) {
+        interval = 1000;
+    }
 
     FuriThreadList* thread_list = furi_thread_list_alloc();
-    while(!cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
+    do {
         uint32_t tick = furi_get_tick();
         furi_thread_enumerate(thread_list);
 
@@ -416,12 +418,8 @@ static void cli_command_top(PipeSide* pipe, FuriString* args, void* context) {
         printf(ANSI_ERASE_DISPLAY(ANSI_ERASE_FROM_CURSOR_TO_END));
         fflush(stdout);
 
-        if(interval > 0) {
-            furi_delay_ms(interval);
-        } else {
-            break;
-        }
-    }
+    } while(interval > 0 && cli_sleep(pipe, interval));
+
     furi_thread_list_free(thread_list);
 }
 
