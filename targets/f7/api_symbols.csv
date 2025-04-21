@@ -879,6 +879,7 @@ Function,+,cli_shell_free,void,CliShell*
 Function,+,cli_shell_join,void,CliShell*
 Function,+,cli_shell_set_prompt,void,"CliShell*, const char*"
 Function,+,cli_shell_start,void,CliShell*
+Function,+,cli_sleep,_Bool,"PipeSide*, uint32_t"
 Function,+,cli_vcp_disable,void,CliVcp*
 Function,+,cli_vcp_enable,void,CliVcp*
 Function,+,composite_api_resolver_add,void,"CompositeApiResolver*, const ElfApiInterface*"

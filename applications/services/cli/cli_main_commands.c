@@ -491,6 +491,37 @@ void cli_command_echo(PipeSide* pipe, FuriString* args, void* context) {
     }
 }
 
+/**
+ * @brief Pause for a specified duration or until Ctrl+C is pressed or the
+ * session is terminated.
+ *
+ * The duration can be specified in various units such as milliseconds (ms),
+ * seconds (s), minutes (m), or hours (h). If the unit is not specified, the
+ * second is used by default.
+ *
+ * Example:
+ *   sleep 5s
+ */
+void cli_command_sleep(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(context);
+    FuriString* duration_string;
+    duration_string = furi_string_alloc();
+
+    do {
+        uint32_t duration_in_ms = 0;
+        if(!args_read_string_and_trim(args, duration_string) ||
+           !args_read_duration(duration_string, &duration_in_ms, "s")) {
+            cli_print_usage("sleep", "[<0-...>[<ms|s|m|h>]]", furi_string_get_cstr(args));
+            break;
+        }
+
+        cli_sleep(pipe, duration_in_ms);
+
+    } while(false);
+
+    furi_string_free(duration_string);
+}
+
 void cli_main_commands_init(CliRegistry* registry) {
     cli_registry_add_command(
         registry, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
@@ -508,6 +539,8 @@ void cli_main_commands_init(CliRegistry* registry) {
     cli_registry_add_command(
         registry, "free_blocks", CliCommandFlagParallelSafe, cli_command_free_blocks, NULL);
     cli_registry_add_command(registry, "echo", CliCommandFlagParallelSafe, cli_command_echo, NULL);
+    cli_registry_add_command(
+        registry, "sleep", CliCommandFlagParallelSafe, cli_command_sleep, NULL);
 
     cli_registry_add_command(registry, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
     cli_registry_add_command(registry, "led", CliCommandFlagDefault, cli_command_led, NULL);
