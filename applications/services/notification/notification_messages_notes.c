@@ -571,3 +571,67 @@ const NotificationMessage message_note_b8 = {
     .data.sound.frequency = 7902.13f,
     .data.sound.volume = 1.0f,
 };
+
+float notification_messages_notes_frequency_from_name(const char* note_name) {
+    const float base_note = 16.3515979f;
+
+    const char* note_names[] = {"c", "cs", "d", "ds", "e", "f", "fs", "g", "gs", "a", "as", "b"};
+    const int notes_count = 12;
+
+    // Note and octave buffers
+    char note[3] = "\0\0\0";
+    int octave = 0;
+
+    // String iterators
+    int i = 0;
+    int j = 0;
+
+    // Extracting note
+    while(j < 2 && (('A' <= note_name[i] && note_name[i] <= 'Z') ||
+                    ('a' <= note_name[i] && note_name[i] <= 'z'))) {
+        note[j] = note_name[i];
+        if('A' <= note_name[i] && note_name[i] <= 'Z') {
+            note[j] += 'a' - 'A';
+        }
+
+        i++;
+        j++;
+    }
+    if(note[0] == '\0') {
+        // Note name is not found
+        return 0.0;
+    }
+
+    // Finding note index
+    int note_index = -1;
+    for(int k = 0; k < notes_count; k++) {
+        if(strcmp(note, note_names[k]) == 0) {
+            note_index = k;
+            break;
+        }
+    }
+    if(note_index == -1) {
+        // Unknown note name
+        return 0.0;
+    }
+
+    // Extracting octave
+    if(note_name[i] < '0' || note_name[i] >= '9') {
+        // Octave is not found
+        return 0.0;
+    }
+    octave = note_name[i] - '0';
+    i++;
+
+    // Check bigger octave
+    if('0' <= note_name[i] && note_name[i] <= '9') {
+        // Octave is unsupported
+        return 0.0;
+    }
+
+    // Calculating frequency
+    int semitone_index = octave * notes_count + note_index;
+    float frequency = base_note * powf(2.0f, semitone_index / 12.0f);
+
+    return roundf(frequency * 100) / 100.0f;
+}
