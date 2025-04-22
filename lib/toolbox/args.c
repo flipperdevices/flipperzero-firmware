@@ -119,7 +119,7 @@ bool args_read_hex_bytes(FuriString* args, uint8_t* bytes, size_t bytes_count) {
 
 bool args_read_duration(FuriString* args, uint32_t* value, const char* default_unit) {
     const char* args_cstr = furi_string_get_cstr(args);
-    
+
     const char* unit;
     errno = 0;
     double duration_ms = strtod(args_cstr, (char**)&unit);

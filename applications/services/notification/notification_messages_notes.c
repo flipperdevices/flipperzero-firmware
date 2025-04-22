@@ -590,8 +590,7 @@ float notification_messages_notes_frequency_from_name(const char* note_name) {
 
     int note_index = -1;
     for(size_t i = 0; i < notes_count; i++) {
-        if(strcasecmp(note_wo_octave, note_names[i]) == 0)
-            note_index = i;
+        if(strcasecmp(note_wo_octave, note_names[i]) == 0) note_index = i;
     }
     if(note_index < 0) return 0.0;
 
