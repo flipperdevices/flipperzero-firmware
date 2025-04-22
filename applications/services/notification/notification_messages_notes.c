@@ -1,4 +1,5 @@
 #include "notification.h"
+#include <toolbox/strint.h>
 
 /*
 Python script for note messages generation
@@ -573,63 +574,32 @@ const NotificationMessage message_note_b8 = {
 };
 
 float notification_messages_notes_frequency_from_name(const char* note_name) {
-    const float base_note = 16.3515979f;
+    const float base_note = 16.3515979f; // C0
 
     const char* note_names[] = {"c", "cs", "d", "ds", "e", "f", "fs", "g", "gs", "a", "as", "b"};
-    const int notes_count = 12;
+    const size_t notes_count = COUNT_OF(note_names);
 
-    // Note and octave buffers
-    char note[3] = "\0\0\0";
-    int octave = 0;
-
-    // String iterators
-    int i = 0;
-    int j = 0;
-
-    // Extracting note
-    while(j < 2 && (('A' <= note_name[i] && note_name[i] <= 'Z') ||
-                    ('a' <= note_name[i] && note_name[i] <= 'z'))) {
-        note[j] = note_name[i];
-        if('A' <= note_name[i] && note_name[i] <= 'Z') {
-            note[j] += 'a' - 'A';
-        }
-
-        i++;
-        j++;
-    }
-    if(note[0] == '\0') {
-        // Note name is not found
-        return 0.0;
+    char note_wo_octave[3] = {0};
+    for(size_t i = 0; i < sizeof(note_wo_octave) - 1; i++) {
+        char in = *note_name;
+        if(!in) break;
+        if(!isalpha(in)) break;
+        note_wo_octave[i] = in;
+        note_name++;
     }
 
-    // Finding note index
     int note_index = -1;
-    for(int k = 0; k < notes_count; k++) {
-        if(strcmp(note, note_names[k]) == 0) {
-            note_index = k;
-            break;
-        }
+    for(size_t i = 0; i < notes_count; i++) {
+        if(strcasecmp(note_wo_octave, note_names[i]) == 0)
+            note_index = i;
     }
-    if(note_index == -1) {
-        // Unknown note name
-        return 0.0;
-    }
+    if(note_index < 0) return 0.0;
 
-    // Extracting octave
-    if(note_name[i] < '0' || note_name[i] >= '9') {
-        // Octave is not found
-        return 0.0;
-    }
-    octave = note_name[i] - '0';
-    i++;
+    uint16_t octave;
+    StrintParseError error = strint_to_uint16(note_name, NULL, &octave, 10);
+    if(error != StrintParseNoError) return 0.0;
+    if(octave > 8) return 0.0;
 
-    // Check bigger octave
-    if('0' <= note_name[i] && note_name[i] <= '9') {
-        // Octave is unsupported
-        return 0.0;
-    }
-
-    // Calculating frequency
     int semitone_index = octave * notes_count + note_index;
     float frequency = base_note * powf(2.0f, semitone_index / 12.0f);
 
