@@ -191,9 +191,8 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
             if(request->header.code == FELICA_LISTENER_CMD_POLLING) {
                 if(request->polling.system_code != FELICA_SYSTEM_CODE_CODE) {
                     // This is currerntly a stub.
-                    // Some cards do respond to 12FC system code and we need to respond to it appropriately here if
-                    // the cloned card supports it. This would require a poller change to determine whether or not the
-                    // source card supports 12FC system code and, if so, make a note in the .nfc file accordingly.
+                    // Some cards do respond to 12FC system code and we need to respond to the reader appropriately
+                    // here if the cloned card claims that it supports it.
                     command = NfcCommandReset;
                     break;
                 } else {
