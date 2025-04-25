@@ -45,7 +45,7 @@ typedef struct {
 typedef struct {
     FelicaListenerPollingResponse base;
     uint16_t request_data;
-} FelicaPollingResponseWithRequest;
+} FelicaListenerPollingResponseWithRequest;
 #pragma pack(pop)
 
 /** Generic Felica request same for both read and write operations. */

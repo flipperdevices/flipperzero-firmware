@@ -10,7 +10,14 @@
 #define FELICA_LISTENER_RESPONSE_CODE_READ  (0x07)
 #define FELICA_LISTENER_RESPONSE_CODE_WRITE (0x09)
 
-#define FELICA_LISTENER_SYSTEM_CODE_NDEF (0xFC12U)
+#define FELICA_LISTENER_REQUEST_NONE        (0x00U)
+#define FELICA_LISTENER_REQUEST_SYSTEM_CODE (0x01U)
+#define FELICA_LISTENER_REQUEST_PERFORMANCE (0x02U)
+
+#define FELICA_LISTENER_SYSTEM_CODE_NDEF  (__builtin_bswap16(0x12FCU))
+#define FELICA_LISTENER_SYSTEM_CODE_LITES (__builtin_bswap16(0x88B4U))
+
+#define FELICA_LISTENER_PERFORMANCE_VALUE (__builtin_bswap16(0x0083U))
 
 #define TAG "FelicaListener"
 
@@ -155,22 +162,77 @@ static FelicaError felica_listener_process_request(
     }
 }
 
+static void felica_listener_populate_polling_response_header(
+    FelicaListener* instance,
+    FelicaListenerPollingResponse* resp) {
+    resp->idm = instance->data->idm;
+    resp->pmm = instance->data->pmm;
+    resp->response_code = FELICA_LISTENER_RESPONSE_POLLING;
+}
+
+static bool felica_listener_check_system_code(
+    const FelicaListenerGenericRequest* const generic_request,
+    uint16_t code) {
+    return (
+        generic_request->polling.system_code == code ||
+        generic_request->polling.system_code == (code | 0x00FFU) ||
+        generic_request->polling.system_code == (code | 0xFF00U));
+}
+
 static FelicaError felica_listener_process_system_code(
     FelicaListener* instance,
-    const FelicaListenerGenericRequest* generic_request) {
-    if(generic_request->polling.system_code == FELICA_LISTENER_SYSTEM_CODE_NDEF &&
+    const FelicaListenerGenericRequest* const generic_request) {
+    // It should respond to 12FC, 12FF, FFFC, 88B4, 88FF and FFB4 according to the Lite-S manual.
+    uint16_t resp_system_code = FELICA_SYSTEM_CODE_CODE;
+    if(felica_listener_check_system_code(generic_request, FELICA_LISTENER_SYSTEM_CODE_NDEF) &&
        instance->data->data.fs.mc.data[FELICA_MC_SYS_OP] == 1) {
-        FelicaListenerPollingResponse* resp = malloc(sizeof(FelicaListenerPollingResponse));
-        resp->length = sizeof(FelicaListenerPollingResponse);
-        resp->idm = instance->data->idm;
-        resp->pmm = instance->data->pmm;
-        resp->response_code = FELICA_LISTENER_RESPONSE_POLLING;
+        // NDEF
+        resp_system_code = FELICA_LISTENER_SYSTEM_CODE_NDEF;
+    } else if(felica_listener_check_system_code(
+                  generic_request, FELICA_LISTENER_SYSTEM_CODE_LITES)) {
+        // Lite-S
+        resp_system_code = FELICA_LISTENER_SYSTEM_CODE_LITES;
+    }
 
-        bit_buffer_reset(instance->tx_buffer);
-        bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)resp, resp->length);
+    if(resp_system_code != FELICA_SYSTEM_CODE_CODE) {
+        switch(generic_request->polling.request_code) {
+        case FELICA_LISTENER_REQUEST_SYSTEM_CODE:
+        case FELICA_LISTENER_REQUEST_PERFORMANCE: {
+            FelicaListenerPollingResponseWithRequest* resp =
+                malloc(sizeof(FelicaListenerPollingResponseWithRequest));
+            resp->base.length = sizeof(FelicaListenerPollingResponseWithRequest);
+            felica_listener_populate_polling_response_header(instance, &resp->base);
 
+            if(generic_request->polling.request_code == FELICA_LISTENER_REQUEST_SYSTEM_CODE) {
+                resp->request_data = resp_system_code;
+            } else {
+                resp->request_data = FELICA_LISTENER_PERFORMANCE_VALUE;
+            }
+
+            bit_buffer_reset(instance->tx_buffer);
+            bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)resp, resp->base.length);
+            free(resp);
+            break;
+        }
+        case FELICA_LISTENER_REQUEST_NONE:
+        default: {
+            FelicaListenerPollingResponse* resp = malloc(sizeof(FelicaListenerPollingResponse));
+            resp->length = sizeof(FelicaListenerPollingResponse);
+            felica_listener_populate_polling_response_header(instance, resp);
+
+            bit_buffer_reset(instance->tx_buffer);
+            bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)resp, resp->length);
+            free(resp);
+            break;
+        }
+        }
+        // HACK: Manually place ourselves in the anticollision window
+        // (2.417-3.625ms after TX of Polling command from the reader).
+        // There's gotta be a better way of doing this, right?
+        furi_delay_us(2000);
         return felica_listener_frame_exchange(instance, instance->tx_buffer);
     }
+
     // Card does not support this System Code
     return FelicaErrorFeatureUnsupported;
 }
