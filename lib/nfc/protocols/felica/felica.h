@@ -58,6 +58,7 @@ typedef enum {
     FelicaErrorWrongCrc,
     FelicaErrorProtocol,
     FelicaErrorTimeout,
+    FelicaErrorFeatureUnsupported,
 } FelicaError;
 
 typedef struct {

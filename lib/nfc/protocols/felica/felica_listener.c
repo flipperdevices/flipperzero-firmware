@@ -6,8 +6,11 @@
 
 #define FELICA_LISTENER_MAX_BUFFER_SIZE     (128)
 #define FELICA_LISTENER_CMD_POLLING         (0x00U)
+#define FELICA_LISTENER_RESPONSE_POLLING    (0x01U)
 #define FELICA_LISTENER_RESPONSE_CODE_READ  (0x07)
 #define FELICA_LISTENER_RESPONSE_CODE_WRITE (0x09)
+
+#define FELICA_LISTENER_SYSTEM_CODE_NDEF (0xFC12U)
 
 #define TAG "FelicaListener"
 
@@ -152,6 +155,26 @@ static FelicaError felica_listener_process_request(
     }
 }
 
+static FelicaError felica_listener_process_system_code(
+    FelicaListener* instance,
+    const FelicaListenerGenericRequest* generic_request) {
+    if(generic_request->polling.system_code == FELICA_LISTENER_SYSTEM_CODE_NDEF &&
+       instance->data->data.fs.mc.data[FELICA_MC_SYS_OP] == 1) {
+        FelicaListenerPollingResponse* resp = malloc(sizeof(FelicaListenerPollingResponse));
+        resp->length = sizeof(FelicaListenerPollingResponse);
+        resp->idm = instance->data->idm;
+        resp->pmm = instance->data->pmm;
+        resp->response_code = FELICA_LISTENER_RESPONSE_POLLING;
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)resp, resp->length);
+
+        return felica_listener_frame_exchange(instance, instance->tx_buffer);
+    }
+    // Card does not support this System Code
+    return FelicaErrorFeatureUnsupported;
+}
+
 NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolInvalid);
@@ -190,10 +213,13 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
 
             if(request->header.code == FELICA_LISTENER_CMD_POLLING) {
                 if(request->polling.system_code != FELICA_SYSTEM_CODE_CODE) {
-                    // This is currerntly a stub.
-                    // Some cards do respond to 12FC system code and we need to respond to the reader appropriately
-                    // here if the cloned card claims that it supports it.
-                    command = NfcCommandReset;
+                    FelicaError error = felica_listener_process_system_code(instance, request);
+                    if(error == FelicaErrorFeatureUnsupported) {
+                        command = NfcCommandReset;
+                    } else if(error != FelicaErrorNone) {
+                        FURI_LOG_E(
+                            TAG, "Error when handling Polling with System Code: %2X", error);
+                    }
                     break;
                 } else {
                     FURI_LOG_E(TAG, "Hardware Polling command leaking through");
