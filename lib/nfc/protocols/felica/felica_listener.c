@@ -226,10 +226,6 @@ static FelicaError felica_listener_process_system_code(
             break;
         }
         }
-        // HACK: Manually place ourselves in the anticollision window
-        // (2.417-3.625ms after TX of Polling command from the reader).
-        // There's gotta be a better way of doing this, right?
-        furi_delay_us(2000);
         return felica_listener_frame_exchange(instance, instance->tx_buffer);
     }
 
@@ -274,6 +270,8 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
             }
 
             if(request->header.code == FELICA_LISTENER_CMD_POLLING) {
+                // Will always respond at Time Slot 0 for now.
+                nfc_felica_listener_timer_anticol_start(instance->nfc, 0);
                 if(request->polling.system_code != FELICA_SYSTEM_CODE_CODE) {
                     FelicaError error = felica_listener_process_system_code(instance, request);
                     if(error == FelicaErrorFeatureUnsupported) {
