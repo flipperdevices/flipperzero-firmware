@@ -387,7 +387,7 @@ NfcError nfc_iso15693_listener_tx_sof(Nfc* instance);
  * determines that a collision resolution needs to be handled manually.
  *
  * @param[in, out] instance instance pointer to the instance to be configured.
- * @param[in] target_time_slot 
+ * @param[in] target_time_slot Target Time Slot number. Should be a value within the range of 0-15 (double-inclusive).
  */
 void nfc_felica_listener_timer_anticol_start(Nfc* instance, uint8_t target_time_slot);
 
