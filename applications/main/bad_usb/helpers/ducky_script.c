@@ -211,9 +211,7 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, FuriString* line) {
 
     // Main key
     char next_char = *line_cstr;
-    uint16_t main_key = ducky_get_keycode_by_name(line_cstr);
-    if(!main_key && next_char) main_key = BADUSB_ASCII_TO_KEY(bad_usb, next_char);
-    key = modifiers | main_key;
+    key = modifiers | ducky_get_keycode(bad_usb, line_cstr, true);
 
     if(key == 0 && next_char) ducky_error(bad_usb, "No keycode defined for %s", line_cstr);
 
