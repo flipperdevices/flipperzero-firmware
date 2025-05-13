@@ -164,7 +164,7 @@ static FelicaError felica_listener_process_request(
 
 static void felica_listener_populate_polling_response_header(
     FelicaListener* instance,
-    FelicaListenerPollingResponse* resp) {
+    FelicaListenerPollingResponseHeader* resp) {
     resp->idm = instance->data->idm;
     resp->pmm = instance->data->pmm;
     resp->response_code = FELICA_LISTENER_RESPONSE_POLLING;
@@ -179,10 +179,9 @@ static bool felica_listener_check_system_code(
         generic_request->polling.system_code == (code | 0xFF00U));
 }
 
-static FelicaError felica_listener_process_system_code(
+static uint16_t felica_listener_get_response_system_code(
     FelicaListener* instance,
     const FelicaListenerGenericRequest* const generic_request) {
-    // It should respond to 12FC, 12FF, FFFC, 88B4, 88FF and FFB4 according to the Lite-S manual.
     uint16_t resp_system_code = FELICA_SYSTEM_CODE_CODE;
     if(felica_listener_check_system_code(generic_request, FELICA_LISTENER_SYSTEM_CODE_NDEF) &&
        instance->data->data.fs.mc.data[FELICA_MC_SYS_OP] == 1) {
@@ -193,44 +192,38 @@ static FelicaError felica_listener_process_system_code(
         // Lite-S
         resp_system_code = FELICA_LISTENER_SYSTEM_CODE_LITES;
     }
+    return resp_system_code;
+}
 
-    if(resp_system_code != FELICA_SYSTEM_CODE_CODE) {
-        switch(generic_request->polling.request_code) {
-        case FELICA_LISTENER_REQUEST_SYSTEM_CODE:
-        case FELICA_LISTENER_REQUEST_PERFORMANCE: {
-            FelicaListenerPollingResponseWithRequest* resp =
-                malloc(sizeof(FelicaListenerPollingResponseWithRequest));
-            resp->base.length = sizeof(FelicaListenerPollingResponseWithRequest);
-            felica_listener_populate_polling_response_header(instance, &resp->base);
+static FelicaError felica_listener_process_system_code(
+    FelicaListener* instance,
+    const FelicaListenerGenericRequest* const generic_request) {
+    FelicaError result = FelicaErrorFeatureUnsupported;
+    do {
+        uint16_t resp_system_code =
+            felica_listener_get_response_system_code(instance, generic_request);
+        if(resp_system_code == FELICA_SYSTEM_CODE_CODE) break;
 
-            if(generic_request->polling.request_code == FELICA_LISTENER_REQUEST_SYSTEM_CODE) {
-                resp->request_data = resp_system_code;
-            } else {
-                resp->request_data = FELICA_LISTENER_PERFORMANCE_VALUE;
-            }
+        FelicaListenerPollingResponse* resp = malloc(sizeof(FelicaListenerPollingResponse));
+        felica_listener_populate_polling_response_header(instance, &resp->header);
 
-            bit_buffer_reset(instance->tx_buffer);
-            bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)resp, resp->base.length);
-            free(resp);
-            break;
+        resp->header.length = sizeof(FelicaListenerPollingResponse);
+        if(generic_request->polling.request_code == FELICA_LISTENER_REQUEST_SYSTEM_CODE) {
+            resp->optional_request_data = resp_system_code;
+        } else if(generic_request->polling.request_code == FELICA_LISTENER_REQUEST_PERFORMANCE) {
+            resp->optional_request_data = FELICA_LISTENER_PERFORMANCE_VALUE;
+        } else {
+            resp->header.length = sizeof(FelicaListenerPollingResponseHeader);
         }
-        case FELICA_LISTENER_REQUEST_NONE:
-        default: {
-            FelicaListenerPollingResponse* resp = malloc(sizeof(FelicaListenerPollingResponse));
-            resp->length = sizeof(FelicaListenerPollingResponse);
-            felica_listener_populate_polling_response_header(instance, resp);
 
-            bit_buffer_reset(instance->tx_buffer);
-            bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)resp, resp->length);
-            free(resp);
-            break;
-        }
-        }
-        return felica_listener_frame_exchange(instance, instance->tx_buffer);
-    }
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)resp, resp->header.length);
+        free(resp);
 
-    // Card does not support this System Code
-    return FelicaErrorFeatureUnsupported;
+        result = felica_listener_frame_exchange(instance, instance->tx_buffer);
+    } while(false);
+
+    return result;
 }
 
 NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {

@@ -25,28 +25,24 @@ typedef enum {
     Felica_ListenerStateActivated,
 } FelicaListenerState;
 
-#pragma pack(push, 1)
-typedef struct {
+typedef struct FURI_PACKED {
     uint8_t code;
     uint16_t system_code;
     uint8_t request_code;
     uint8_t time_slot;
 } FelicaListenerPollingHeader;
-#pragma pack(pop)
 
 typedef struct {
     uint8_t length;
     uint8_t response_code;
     FelicaIDm idm;
     FelicaPMm pmm;
-} FelicaListenerPollingResponse;
+} FelicaListenerPollingResponseHeader;
 
-#pragma pack(push, 1)
-typedef struct {
-    FelicaListenerPollingResponse base;
-    uint16_t request_data;
-} FelicaListenerPollingResponseWithRequest;
-#pragma pack(pop)
+typedef struct FURI_PACKED {
+    FelicaListenerPollingResponseHeader header;
+    uint16_t optional_request_data;
+} FelicaListenerPollingResponse;
 
 /** Generic Felica request same for both read and write operations. */
 typedef struct {
