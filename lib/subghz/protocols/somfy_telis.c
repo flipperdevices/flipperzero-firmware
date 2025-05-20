@@ -1,5 +1,5 @@
 #include "somfy_telis.h"
-#include <lib/toolbox/manchester_decoder.h>
+#include <signal_common/manchester_decoder.h>
 
 #include "../blocks/const.h"
 #include "../blocks/decoder.h"

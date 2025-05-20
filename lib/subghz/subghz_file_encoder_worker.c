@@ -1,10 +1,10 @@
 #include "subghz_file_encoder_worker.h"
 
-#include <toolbox/stream/stream.h>
+#include <stream/stream.h>
 #include <flipper_format/flipper_format.h>
 #include <flipper_format/flipper_format_i.h>
 #include <lib/subghz/devices/devices.h>
-#include <lib/toolbox/strint.h>
+#include <pure/strint.h>
 
 #define TAG "SubGhzFileEncoderWorker"
 

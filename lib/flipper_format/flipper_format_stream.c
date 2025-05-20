@@ -1,6 +1,6 @@
 #include <inttypes.h>
-#include <toolbox/hex.h>
-#include <toolbox/strint.h>
+#include <hex.h>
+#include <strint.h>
 #include <core/check.h>
 #include "flipper_format_stream.h"
 #include "flipper_format_stream_i.h"

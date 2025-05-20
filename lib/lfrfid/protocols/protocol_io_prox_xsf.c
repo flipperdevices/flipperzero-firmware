@@ -1,8 +1,8 @@
 #include <furi.h>
-#include <toolbox/protocols/protocol.h>
+#include <protocols/protocol.h>
 #include <lfrfid/tools/fsk_demod.h>
 #include <lfrfid/tools/fsk_osc.h>
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 #include "lfrfid_protocols.h"
 
 #define JITTER_TIME (20)

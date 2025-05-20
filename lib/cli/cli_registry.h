@@ -7,7 +7,7 @@
 
 #include <furi.h>
 #include <m-array.h>
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 #include "cli_command.h"
 
 #ifdef __cplusplus

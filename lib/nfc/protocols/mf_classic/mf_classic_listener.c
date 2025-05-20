@@ -3,7 +3,7 @@
 #include <nfc/protocols/nfc_listener_base.h>
 
 #include <nfc/helpers/iso14443_crc.h>
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 
 #include <furi.h>
 #include <furi_hal_random.h>

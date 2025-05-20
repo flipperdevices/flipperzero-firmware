@@ -2,7 +2,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
-#include <lib/toolbox/path.h>
+#include <lib/storage_util/path.h>
 #include <flipper_format/flipper_format.h>
 
 #define BAD_USB_SETTINGS_PATH           BAD_USB_APP_BASE_FOLDER "/.badusb.settings"

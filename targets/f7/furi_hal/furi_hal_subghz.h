@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-#include <toolbox/level_duration.h>
+#include <level_duration.h>
 #include <furi_hal_gpio.h>
 
 #ifdef __cplusplus

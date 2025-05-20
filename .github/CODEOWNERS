@@ -64,8 +64,16 @@
 /lib/nfc/ @DrZlo13 @hedger @gsurkov @gornekich
 /lib/one_wire/ @DrZlo13 @hedger @gsurkov
 /lib/subghz/ @DrZlo13 @hedger @gsurkov @Skorpionm
-/lib/toolbox/ @DrZlo13 @hedger @gsurkov
-/lib/toolbox/cli @DrZlo13 @hedger @gsurkov @portasynthinca3
+/lib/cli/ @DrZlo13 @hedger @gsurkov @portasynthinca3
+/lib/compress/ @DrZlo13 @hedger @gsurkov
+/lib/containers/ @DrZlo13 @hedger @gsurkov
+/lib/debug/ @DrZlo13 @hedger @gsurkov
+/lib/flipper_metadata/ @DrZlo13 @hedger @gsurkov
+/lib/pure/ @DrZlo13 @hedger @gsurkov
+/lib/settings_helpers/ @DrZlo13 @hedger @gsurkov
+/lib/signal_common/ @DrZlo13 @hedger @gsurkov
+/lib/srv_util/ @DrZlo13 @hedger @gsurkov
+/lib/storage_util/ @DrZlo13 @hedger @gsurkov
 
 # CI/CD
 /.github/workflows/ @DrZlo13 @hedger @gsurkov

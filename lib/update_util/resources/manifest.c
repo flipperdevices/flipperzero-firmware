@@ -1,8 +1,8 @@
 #include "manifest.h"
 
-#include <toolbox/stream/buffered_file_stream.h>
-#include <toolbox/strint.h>
-#include <toolbox/hex.h>
+#include <stream/buffered_file_stream.h>
+#include <strint.h>
+#include <hex.h>
 
 struct ResourceManifestReader {
     Storage* storage;

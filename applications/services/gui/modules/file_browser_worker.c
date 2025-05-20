@@ -3,7 +3,7 @@
 #include <storage/filesystem_api_defines.h>
 #include <storage/storage.h>
 
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 #include <core/check.h>
 #include <core/common_defines.h>
 #include <furi.h>

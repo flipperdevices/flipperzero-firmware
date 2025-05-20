@@ -1,7 +1,7 @@
 #pragma once
 #include <furi.h>
 #include "lfrfid_worker.h"
-#include <toolbox/protocols/protocol_dict.h>
+#include <protocols/protocol_dict.h>
 #include "protocols/lfrfid_protocols.h"
 
 #ifdef __cplusplus

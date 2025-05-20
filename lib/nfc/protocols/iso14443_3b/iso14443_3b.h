@@ -3,7 +3,7 @@
 #include <nfc/protocols/nfc_device_base.h>
 
 #include <core/string.h>
-#include <toolbox/bit_buffer.h>
+#include <bit_buffer.h>
 #include <flipper_format/flipper_format.h>
 
 #ifdef __cplusplus

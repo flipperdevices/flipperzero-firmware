@@ -6,7 +6,7 @@
 #pragma once
 
 #include <furi.h>
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 #include <lib/flipper_application/flipper_application.h>
 
 #ifdef __cplusplus

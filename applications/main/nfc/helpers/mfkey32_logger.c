@@ -2,7 +2,7 @@
 
 #include <m-array.h>
 
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 #include <stream/stream.h>
 #include <stream/buffered_file_stream.h>
 

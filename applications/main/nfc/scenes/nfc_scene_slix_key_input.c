@@ -1,6 +1,6 @@
 #include "../nfc_app_i.h"
 
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 
 void nfc_scene_slix_key_input_byte_input_callback(void* context) {
     NfcApp* instance = context;

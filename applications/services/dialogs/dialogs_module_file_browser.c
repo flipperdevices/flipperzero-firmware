@@ -1,6 +1,6 @@
 #include "dialogs_message.h"
 #include <gui/modules/file_browser.h>
-#include <toolbox/api_lock.h>
+#include <api_lock.h>
 
 typedef struct {
     FuriApiLock lock;

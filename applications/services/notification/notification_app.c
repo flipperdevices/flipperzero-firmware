@@ -5,7 +5,7 @@
 #include <input/input.h>
 #include <gui/gui_i.h>
 #include <u8g2_glue.h>
-#include <lib/toolbox/float_tools.h>
+#include <lib/pure/float_tools.h>
 #include "notification.h"
 #include "notification_messages.h"
 #include "notification_app.h"

@@ -1,6 +1,6 @@
 #include "mf_user_dict.h"
 
-#include <toolbox/keys_dict.h>
+#include <lib/nfc/helpers/keys_dict.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include <furi/furi.h>
 

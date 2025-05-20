@@ -1,5 +1,5 @@
 #include "dialogs_message.h"
-#include <toolbox/api_lock.h>
+#include <api_lock.h>
 #include <assets_icons.h>
 #include <storage/storage.h>
 

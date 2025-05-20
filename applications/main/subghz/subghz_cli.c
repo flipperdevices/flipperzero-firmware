@@ -5,7 +5,7 @@
 
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
 #include <cli/cli_main_commands.h>
-#include <toolbox/cli/cli_ansi.h>
+#include <cli/cli_ansi.h>
 
 #include <lib/subghz/subghz_keystore.h>
 #include <lib/subghz/receiver.h>
@@ -16,9 +16,8 @@
 #include <lib/subghz/devices/devices.h>
 #include <lib/subghz/devices/cc1101_configs.h>
 
-#include <lib/toolbox/args.h>
-#include <lib/toolbox/strint.h>
-#include <toolbox/pipe.h>
+#include <lib/cli/args.h>
+#include <pure/strint.h>
 
 #include "helpers/subghz_chat.h"
 

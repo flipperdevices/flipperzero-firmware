@@ -1,7 +1,7 @@
 #pragma once
 #include <stdlib.h>
 #include <stdbool.h>
-#include <toolbox/stream/stream.h>
+#include <stream/stream.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -3,7 +3,7 @@
 
 #include "../test.h" // IWYU pragma: keep
 
-#include <toolbox/strint.h>
+#include <strint.h>
 
 MU_TEST(strint_test_basic) {
     uint32_t result = 0;

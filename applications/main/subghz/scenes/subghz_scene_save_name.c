@@ -4,7 +4,7 @@
 #include <lib/subghz/protocols/raw.h>
 #include <gui/modules/validators.h>
 #include <dolphin/dolphin.h>
-#include <toolbox/name_generator.h>
+#include <name_generator.h>
 
 #define MAX_TEXT_INPUT_LEN 23
 

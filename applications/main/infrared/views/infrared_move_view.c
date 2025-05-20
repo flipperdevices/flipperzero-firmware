@@ -5,7 +5,7 @@
 #include <gui/canvas.h>
 #include <gui/elements.h>
 
-#include <toolbox/m_cstr_dup.h>
+#include <m_cstr_dup.h>
 
 #define LIST_ITEMS    4U
 #define LIST_LINE_H   13U

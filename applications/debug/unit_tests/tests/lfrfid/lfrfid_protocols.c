@@ -1,8 +1,8 @@
 #include <furi.h>
 #include "../test.h" // IWYU pragma: keep
-#include <toolbox/protocols/protocol_dict.h>
+#include <protocols/protocol_dict.h>
 #include <lfrfid/protocols/lfrfid_protocols.h>
-#include <toolbox/pulse_protocols/pulse_glue.h>
+#include <pulse_protocols/pulse_glue.h>
 
 #define LF_RFID_READ_TIMING_MULTIPLIER 8
 

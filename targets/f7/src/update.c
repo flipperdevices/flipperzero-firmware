@@ -8,8 +8,8 @@
 
 #include <update_util/update_manifest.h>
 #include <update_util/update_operation.h>
-#include <toolbox/path.h>
-#include <toolbox/crc32_calc.h>
+#include <storage_util/path.h>
+#include <crc32_calc.h>
 
 #define UPDATE_POINTER_FILE_PATH "/" UPDATE_MANIFEST_POINTER_FILE_NAME
 

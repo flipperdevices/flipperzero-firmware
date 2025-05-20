@@ -1,7 +1,7 @@
 #pragma once
 
 #include "felica_poller.h"
-#include <toolbox/bit_buffer.h>
+#include <bit_buffer.h>
 
 #ifdef __cplusplus
 extern "C" {

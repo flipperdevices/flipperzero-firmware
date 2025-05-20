@@ -3,8 +3,8 @@
 #include <power/power_service/power.h>
 
 #include <string.h>
-#include <toolbox/path.h>
-#include <toolbox/saved_struct.h>
+#include <storage_util/path.h>
+#include <saved_struct.h>
 #include <dolphin/dolphin.h>
 
 #define TAG "InfraredApp"

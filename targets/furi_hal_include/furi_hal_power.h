@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <core/string.h>
 #include <core/common_defines.h>
-#include <toolbox/property.h>
+#include <property.h>
 
 #ifdef __cplusplus
 extern "C" {

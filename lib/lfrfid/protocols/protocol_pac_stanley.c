@@ -1,8 +1,8 @@
 #include <furi.h>
 #include <math.h>
-#include <toolbox/protocols/protocol.h>
-#include <toolbox/hex.h>
-#include <bit_lib/bit_lib.h>
+#include <protocols/protocol.h>
+#include <hex.h>
+#include <pure/bit_lib.h>
 #include "lfrfid_protocols.h"
 
 #define PAC_STANLEY_ENCODED_BIT_SIZE   (128)

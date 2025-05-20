@@ -3,9 +3,9 @@
 #include <furi_hal.h>
 #include <furi.h>
 #include <stdint.h>
-#include <toolbox/pipe.h>
-#include <toolbox/cli/shell/cli_shell.h>
-#include <toolbox/api_lock.h>
+#include <containers/pipe.h>
+#include <cli/shell/cli_shell.h>
+#include <srv_util/api_lock.h>
 #include "cli_main_shell.h"
 #include "cli_main_commands.h"
 

@@ -2,7 +2,7 @@
 #include <furi_hal.h>
 #include <gui/elements.h>
 #include <gui/canvas.h>
-#include <toolbox/version.h>
+#include <version.h>
 #include <assets_icons.h>
 #include <dolphin/helpers/dolphin_state.h>
 #include <dolphin/dolphin.h>

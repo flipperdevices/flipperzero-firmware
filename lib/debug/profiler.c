@@ -50,10 +50,12 @@ void profiler_start(Profiler* profiler, const char* key) {
 }
 
 void profiler_stop(Profiler* profiler, const char* key) {
+    uint32_t cycle_cnt = DWT->CYCCNT;
+
     ProfilerRecord* record = ProfilerRecordDict_get(profiler->records, key);
     furi_check(record != NULL);
 
-    record->length += DWT->CYCCNT - record->start;
+    record->length += cycle_cnt - record->start;
     record->start = 0;
     record->count++;
 }

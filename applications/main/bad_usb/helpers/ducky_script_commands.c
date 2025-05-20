@@ -1,5 +1,5 @@
 #include <furi_hal.h>
-#include <lib/toolbox/strint.h>
+#include <pure/strint.h>
 #include "ducky_script.h"
 #include "ducky_script_i.h"
 

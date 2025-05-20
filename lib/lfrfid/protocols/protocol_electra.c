@@ -50,11 +50,11 @@
  * 1010 // and no correct column parity 
  */
 
-#include "bit_lib/bit_lib.h"
+#include "pure/bit_lib.h"
 #include <furi.h>
 #include <stdlib.h>
-#include <toolbox/protocols/protocol.h>
-#include <toolbox/manchester_decoder.h>
+#include <protocols/protocol.h>
+#include <manchester_decoder.h>
 #include "lfrfid_protocols.h"
 
 #define TAG "ELECTRA"

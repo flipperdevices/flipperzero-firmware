@@ -2,7 +2,7 @@
 
 #include <nfc/protocols/nfc_device_base.h>
 #include <flipper_format/flipper_format.h>
-#include <toolbox/simple_array.h>
+#include <simple_array.h>
 
 #ifdef __cplusplus
 extern "C" {

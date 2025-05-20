@@ -2,8 +2,8 @@
 
 #include <m-array.h>
 
-#include <toolbox/m_cstr_dup.h>
-#include <toolbox/path.h>
+#include <m_cstr_dup.h>
+#include <storage_util/path.h>
 #include <storage/storage.h>
 
 #define TAG "InfraredRemote"

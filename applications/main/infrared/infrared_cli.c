@@ -3,9 +3,8 @@
 #include <infrared_worker.h>
 #include <furi_hal_infrared.h>
 #include <flipper_format.h>
-#include <toolbox/args.h>
-#include <toolbox/strint.h>
-#include <toolbox/pipe.h>
+#include <cli/args.h>
+#include <strint.h>
 #include <m-dict.h>
 
 #include "infrared_signal.h"

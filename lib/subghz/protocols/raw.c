@@ -6,7 +6,7 @@
 #include "../blocks/generic.h"
 
 #include <flipper_format/flipper_format_i.h>
-#include <lib/toolbox/stream/stream.h>
+#include <storage_util/stream/stream.h>
 
 #define TAG "SubGhzProtocolRaw"
 

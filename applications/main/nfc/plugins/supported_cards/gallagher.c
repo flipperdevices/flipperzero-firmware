@@ -10,7 +10,7 @@
 #include <flipper_application/flipper_application.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 
 static bool gallagher_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);

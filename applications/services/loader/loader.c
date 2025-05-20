@@ -6,7 +6,7 @@
 #include <assets_icons.h>
 
 #include <dialogs/dialogs.h>
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 #include <flipper_application/flipper_application.h>
 #include <loader/firmware_api/firmware_api.h>
 

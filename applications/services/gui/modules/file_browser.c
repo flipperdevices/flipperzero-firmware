@@ -3,7 +3,7 @@
 
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 
 #include <furi.h>
 #include <furi_hal_resources.h>

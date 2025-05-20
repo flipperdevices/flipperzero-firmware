@@ -9,7 +9,7 @@
 
 #include <furi.h>
 
-#include <toolbox/cli/cli_command.h>
+#include <cli/cli_command.h>
 #include <cli/cli_main_commands.h>
 #include <stdint.h>
 #include <stdio.h>

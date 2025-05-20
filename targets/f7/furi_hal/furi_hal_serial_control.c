@@ -3,7 +3,7 @@
 #include "furi_hal_serial.h"
 
 #include <furi.h>
-#include <toolbox/api_lock.h>
+#include <api_lock.h>
 
 #define TAG "FuriHalSerialControl"
 

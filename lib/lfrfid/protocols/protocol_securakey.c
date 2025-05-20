@@ -4,11 +4,11 @@
 // PM3's repo has mentioned the existence of non-26-or-32-bit formats.
 // Those are not supported here for preventing false positives.
 #include <furi.h>
-#include <toolbox/protocols/protocol.h>
-#include <toolbox/hex.h>
-#include <bit_lib/bit_lib.h>
+#include <protocols/protocol.h>
+#include <hex.h>
+#include <pure/bit_lib.h>
 #include "lfrfid_protocols.h"
-#include <toolbox/manchester_decoder.h>
+#include <manchester_decoder.h>
 
 #define TAG "SECURAKEY"
 

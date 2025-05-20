@@ -2,9 +2,8 @@
 
 #include "tests/test_api.h"
 
-#include <toolbox/cli/cli_command.h>
-#include <toolbox/path.h>
-#include <toolbox/pipe.h>
+#include <cli/cli.h>
+#include <storage_util/path.h>
 #include <loader/loader.h>
 #include <storage/storage.h>
 #include <notification/notification_messages.h>

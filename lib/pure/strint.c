@@ -6,7 +6,7 @@
 // monomorphized `strint_to_*`s are just wrappers around this generic
 // implementation.
 /**
- * @brief Converts a string to a `uint64_t` and an auxillary sign bit, checking
+ * @brief Converts a string to a `uint64_t` and an auxiliary sign bit, checking
  * the bounds of the integer.
  * @param [in] str Input string
  * @param [out] end Pointer to first character after the number in input string

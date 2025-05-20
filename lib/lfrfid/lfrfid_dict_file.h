@@ -1,5 +1,5 @@
 #pragma once
-#include <toolbox/protocols/protocol_dict.h>
+#include <protocols/protocol_dict.h>
 #include "protocols/lfrfid_protocols.h"
 
 #ifdef __cplusplus

@@ -4,7 +4,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 #include <update_util/dfu_file.h>
 #include <update_util/update_operation.h>
 

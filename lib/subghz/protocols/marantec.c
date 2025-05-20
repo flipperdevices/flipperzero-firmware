@@ -1,6 +1,6 @@
 #include "marantec.h"
-#include <lib/toolbox/manchester_decoder.h>
-#include <lib/toolbox/manchester_encoder.h>
+#include <signal_common/manchester_decoder.h>
+#include <signal_common/manchester_encoder.h>
 #include "../blocks/const.h"
 #include "../blocks/decoder.h"
 #include "../blocks/encoder.h"

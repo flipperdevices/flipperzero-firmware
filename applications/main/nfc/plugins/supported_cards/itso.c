@@ -3,7 +3,7 @@
 
 #include <flipper_application/flipper_application.h>
 #include <lib/nfc/protocols/mf_desfire/mf_desfire.h>
-#include <lib/toolbox/strint.h>
+#include <pure/strint.h>
 
 #include <applications/services/locale/locale.h>
 #include <datetime/datetime.h>

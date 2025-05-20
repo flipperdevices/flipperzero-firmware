@@ -4,8 +4,8 @@
  */
 #include <furi.h>
 #include <storage/storage.h>
-#include <toolbox/stream/stream.h>
-#include <toolbox/stream/file_stream.h>
+#include <stream/stream.h>
+#include <stream/file_stream.h>
 
 // Define log tag
 #define TAG "ExampleAppsAssets"

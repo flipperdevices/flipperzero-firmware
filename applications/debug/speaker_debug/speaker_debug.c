@@ -1,10 +1,8 @@
 #include <furi.h>
 #include <notification/notification.h>
 #include <music_worker/music_worker.h>
-#include <toolbox/args.h>
-#include <toolbox/pipe.h>
-#include <toolbox/cli/cli_registry.h>
-#include <cli/cli_main_commands.h>
+#include <cli/cli.h>
+#include <cli/args.h>
 
 #define TAG "SpeakerDebug"
 

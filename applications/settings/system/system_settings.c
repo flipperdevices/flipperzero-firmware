@@ -1,6 +1,6 @@
 #include "system_settings.h"
 #include <loader/loader.h>
-#include <lib/toolbox/value_index.h>
+#include <pure/value_index.h>
 #include <locale/locale.h>
 
 const char* const log_level_text[] = {

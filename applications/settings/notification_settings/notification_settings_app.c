@@ -2,7 +2,7 @@
 #include <notification/notification_app.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/view_dispatcher.h>
-#include <lib/toolbox/value_index.h>
+#include <pure/value_index.h>
 
 #define MAX_NOTIFICATION_SETTINGS 4
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <toolbox/protocols/protocol.h>
+#include <protocols/protocol.h>
 #include "../tools/t5577.h"
 #include "../tools/em4305.h"
 

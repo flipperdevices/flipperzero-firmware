@@ -1,6 +1,6 @@
 #include "../lfrfid_i.h"
 #include <dolphin/dolphin.h>
-#include <toolbox/name_generator.h>
+#include <name_generator.h>
 
 void lfrfid_scene_save_name_on_enter(void* context) {
     LfRfid* app = context;

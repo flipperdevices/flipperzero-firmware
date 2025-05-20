@@ -7,7 +7,7 @@
 
 #include "canvas.h"
 #include <u8g2.h>
-#include <toolbox/compress.h>
+#include <compress/compress.h>
 #include <m-array.h>
 #include <m-algo.h>
 #include <furi.h>

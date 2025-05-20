@@ -1,7 +1,7 @@
 #include <furi_hal_rfid.h>
-#include <toolbox/stream/file_stream.h>
-#include <toolbox/buffer_stream.h>
-#include <toolbox/varint.h>
+#include <stream/file_stream.h>
+#include <buffer_stream.h>
+#include <varint.h>
 #include "lfrfid_raw_worker.h"
 #include "lfrfid_raw_file.h"
 #include "tools/varint_pair.h"

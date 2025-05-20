@@ -1,6 +1,6 @@
 #include "../cli_main_commands.h"
-#include <toolbox/cli/cli_ansi.h>
-#include <toolbox/version.h>
+#include <cli/cli_ansi.h>
+#include <flipper_metadata/version.h>
 #include <furi_hal.h>
 #include <furi_hal_info.h>
 #include <FreeRTOS.h>

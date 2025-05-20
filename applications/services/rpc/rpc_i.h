@@ -5,7 +5,7 @@
 #include <pb_decode.h>
 #include <pb_encode.h>
 #include <flipper.pb.h>
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -3,7 +3,7 @@
 #include <furi_hal_rfid.h>
 #include <furi_hal_ibutton.h>
 
-#include <toolbox/protocols/protocol_dict.h>
+#include <protocols/protocol_dict.h>
 
 #include "protocol_group_misc_defs.h"
 

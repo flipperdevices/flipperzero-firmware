@@ -1,6 +1,6 @@
 #pragma once
 #include <furi.h>
-#include <toolbox/api_lock.h>
+#include <api_lock.h>
 #include <flipper_application/flipper_application.h>
 
 #include <gui/gui.h>

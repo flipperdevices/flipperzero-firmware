@@ -8,9 +8,9 @@
 #include <furi.h>
 
 const char* const name_generator_left[] = {
-    "ancient",  "hollow", "strange",   "disappeared", "unknown",    "unthinkable", "unnameable",
-    "nameless", "my",     "concealed", "forgotten",   "hidden",     "mysterious",  "obscure",
-    "random",   "remote", "uncharted", "undefined",   "untraveled", "untold",
+    "Ancient",  "Hollow", "Strange",   "Disappeared", "Unknown",    "Unthinkable", "Unnameable",
+    "Nameless", "My",     "Concealed", "Forgotten",   "Hidden",     "Mysterious",  "Obscure",
+    "Random",   "Remote", "Uncharted", "Undefined",   "Untraveled", "Untold",
 };
 
 const char* const name_generator_right[] = {
@@ -49,9 +49,6 @@ void name_generator_make_random(char* name, size_t max_name_size) {
         "%s_%s",
         name_generator_left[name_generator_left_i],
         name_generator_right[name_generator_right_i]);
-
-    // Set first symbol to upper case
-    name[0] = name[0] - 0x20;
 }
 
 void name_generator_make_detailed(char* name, size_t max_name_size, const char* prefix) {

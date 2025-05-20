@@ -5,10 +5,10 @@
 #include <rpc/rpc_i.h>
 #include <storage/filesystem_api_defines.h>
 #include <storage/storage.h>
-#include <lib/toolbox/md5_calc.h>
-#include <lib/toolbox/path.h>
+#include <storage_util/md5_calc.h>
+#include <lib/storage_util/path.h>
 #include <update_util/int_backup.h>
-#include <toolbox/tar/tar_archive.h>
+#include <tar/tar_archive.h>
 
 #include <pb_decode.h>
 #include <storage.pb.h>

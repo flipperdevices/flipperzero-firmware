@@ -6,7 +6,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
 
-#include <lib/toolbox/strint.h>
+#include <pure/strint.h>
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>

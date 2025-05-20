@@ -1,7 +1,7 @@
 #include <common/cs_dbg.h>
-#include <toolbox/path.h>
-#include <toolbox/stream/file_stream.h>
-#include <toolbox/strint.h>
+#include <storage_util/path.h>
+#include <stream/file_stream.h>
+#include <strint.h>
 #include <loader/firmware_api/firmware_api.h>
 #include <flipper_application/api_hashtable/api_hashtable.h>
 #include <flipper_application/plugins/composite_resolver.h>

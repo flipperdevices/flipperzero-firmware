@@ -1,7 +1,7 @@
 #include "../infrared_app_i.h"
 
 #include <string.h>
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 
 static int32_t infrared_scene_edit_rename_task_callback(void* context) {
     InfraredApp* infrared = context;

@@ -1,7 +1,7 @@
 #pragma once
 #include "../subghz_i.h"
 #include <lib/subghz/devices/devices.h>
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 
 typedef struct SubGhzChatWorker SubGhzChatWorker;
 

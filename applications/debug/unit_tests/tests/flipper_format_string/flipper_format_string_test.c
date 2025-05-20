@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <flipper_format/flipper_format.h>
 #include <flipper_format/flipper_format_i.h>
-#include <toolbox/stream/stream.h>
+#include <stream/stream.h>
 #include <storage/storage.h>
 #include "../test.h" // IWYU pragma: keep
 

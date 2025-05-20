@@ -1,7 +1,7 @@
 #include "lfrfid_raw_file.h"
 #include "tools/varint_pair.h"
-#include <toolbox/stream/file_stream.h>
-#include <toolbox/varint.h>
+#include <stream/file_stream.h>
+#include <varint.h>
 
 #define LFRFID_RAW_FILE_MAGIC   0x4C464952
 #define LFRFID_RAW_FILE_VERSION 1

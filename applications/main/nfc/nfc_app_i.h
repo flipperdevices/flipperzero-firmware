@@ -38,7 +38,7 @@
 #include <loader/loader.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 
 #include "rpc/rpc_app.h"
 
@@ -55,11 +55,11 @@
 
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_data_generator.h>
-#include <toolbox/keys_dict.h>
+#include <lib/nfc/helpers/keys_dict.h>
 
 #include <gui/modules/validators.h>
-#include <toolbox/path.h>
-#include <toolbox/name_generator.h>
+#include <storage_util/path.h>
+#include <name_generator.h>
 #include <dolphin/dolphin.h>
 
 #define NFC_NAME_SIZE             22

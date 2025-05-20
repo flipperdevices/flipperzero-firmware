@@ -5,7 +5,7 @@
 #include <gui/gui.h>
 #include <gui/view_holder.h>
 
-#include <toolbox/api_lock.h>
+#include <api_lock.h>
 #include <assets_icons.h>
 
 #include "views/power_off.h"

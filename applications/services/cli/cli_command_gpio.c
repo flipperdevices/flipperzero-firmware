@@ -2,9 +2,8 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <lib/toolbox/args.h>
-#include <toolbox/pipe.h>
-#include <toolbox/cli/cli_command.h>
+#include <lib/cli/args.h>
+#include <cli/cli_command.h>
 
 void cli_command_gpio_print_usage(void) {
     printf("Usage:\r\n");

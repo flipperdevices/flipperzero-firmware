@@ -155,7 +155,7 @@ class Main(App):
                 print("new: ", new_version_info_fmt)
             with open(version_header_name, "w", newline="\n") as file:
                 file.write(new_version_info_fmt)
-            # os.utime("../lib/toolbox/version.c", None)
+            # os.utime("../lib/version.c", None)
             print("Version information updated")
         else:
             if self.args.debug:

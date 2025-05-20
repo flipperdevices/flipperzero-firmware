@@ -1,5 +1,5 @@
 #include <furi.h>
-#include <toolbox/stream/file_stream.h>
+#include <stream/file_stream.h>
 #include "../cs_dbg.h"
 #include "../frozen/frozen.h"
 

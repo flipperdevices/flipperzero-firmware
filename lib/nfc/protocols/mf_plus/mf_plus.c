@@ -1,6 +1,6 @@
 #include "mf_plus_i.h"
 
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 #include <furi.h>
 
 #define MF_PLUS_PROTOCOL_NAME "Mifare Plus"

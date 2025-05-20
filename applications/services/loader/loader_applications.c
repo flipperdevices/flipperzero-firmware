@@ -7,7 +7,7 @@
 #include <gui/view_holder.h>
 #include <gui/modules/loading.h>
 #include <dolphin/dolphin.h>
-#include <lib/toolbox/path.h>
+#include <lib/storage_util/path.h>
 
 #define TAG "LoaderApplications"
 

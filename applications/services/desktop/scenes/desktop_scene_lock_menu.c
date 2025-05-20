@@ -1,7 +1,7 @@
 #include <gui/scene_manager.h>
 #include <applications.h>
 #include <furi_hal.h>
-#include <toolbox/saved_struct.h>
+#include <saved_struct.h>
 #include <stdbool.h>
 #include <loader/loader.h>
 

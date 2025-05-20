@@ -5,7 +5,7 @@
 #include <furi_hal.h>
 
 #include <storage/storage.h>
-#include <toolbox/saved_struct.h>
+#include <saved_struct.h>
 
 #define TAG "DolphinState"
 

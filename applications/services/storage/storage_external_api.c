@@ -3,9 +3,9 @@
 #include "storage.h"
 #include "storage_i.h" // IWYU pragma: keep
 #include "storage_message.h"
-#include <toolbox/stream/file_stream.h>
-#include <toolbox/dir_walk.h>
-#include "toolbox/path.h"
+#include <stream/file_stream.h>
+#include <dir_walk.h>
+#include "storage_util/path.h"
 
 #define MAX_NAME_LENGTH  256
 #define MAX_EXT_LEN      16

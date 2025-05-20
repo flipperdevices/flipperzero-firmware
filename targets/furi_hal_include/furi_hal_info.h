@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <core/string.h>
-#include <toolbox/property.h>
+#include <property.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -9,7 +9,7 @@
 #include <furi_hal_version.h>
 #include <m-array.h>
 #include <loader/loader.h>
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 #include <flipper_application/plugins/plugin_manager.h>
 #include <loader/firmware_api/firmware_api.h>
 #include <storage/storage.h>

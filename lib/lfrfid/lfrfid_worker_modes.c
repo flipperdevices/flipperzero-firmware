@@ -2,10 +2,10 @@
 #include <furi_hal.h>
 #include "lfrfid_worker_i.h"
 #include "tools/t5577.h"
-#include <toolbox/pulse_protocols/pulse_glue.h>
-#include <toolbox/buffer_stream.h>
+#include <pulse_protocols/pulse_glue.h>
+#include <buffer_stream.h>
 #include "tools/varint_pair.h"
-#include <lib/bit_lib/bit_lib.h>
+#include <lib/pure/bit_lib.h>
 
 #define TAG "LfRfidWorker"
 

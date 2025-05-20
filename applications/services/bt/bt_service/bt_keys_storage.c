@@ -2,7 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal_bt.h>
-#include <lib/toolbox/saved_struct.h>
+#include <storage_util/saved_struct.h>
 #include <storage/storage.h>
 
 #define BT_KEYS_STORAGE_VERSION (0)

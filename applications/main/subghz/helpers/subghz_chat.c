@@ -1,6 +1,6 @@
 #include "subghz_chat.h"
 #include <lib/subghz/subghz_tx_rx_worker.h>
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 
 #define TAG "SubGhzChat"
 

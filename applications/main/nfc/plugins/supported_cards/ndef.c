@@ -22,7 +22,7 @@
 #include <nfc/protocols/slix/slix.h>
 
 #include <bit_lib.h>
-#include <toolbox/pretty_format.h>
+#include <debug/pretty_format.h>
 
 #define TAG "NDEF"
 

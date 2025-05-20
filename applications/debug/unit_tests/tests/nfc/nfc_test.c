@@ -23,7 +23,7 @@
 
 #include <nfc/nfc_poller.h>
 
-#include <toolbox/keys_dict.h>
+#include <lib/nfc/helpers/keys_dict.h>
 #include <nfc/nfc.h>
 
 #include "../test.h" // IWYU pragma: keep

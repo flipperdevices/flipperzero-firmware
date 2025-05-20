@@ -1,7 +1,7 @@
 #include "../ibutton_i.h"
 
-#include <toolbox/name_generator.h>
-#include <toolbox/path.h>
+#include <name_generator.h>
+#include <storage_util/path.h>
 
 #include <dolphin/dolphin.h>
 

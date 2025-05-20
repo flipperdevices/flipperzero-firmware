@@ -26,8 +26,8 @@
 
 #include <rpc/rpc_app.h>
 
-#include <toolbox/protocols/protocol_dict.h>
-#include <toolbox/path.h>
+#include <protocols/protocol_dict.h>
+#include <storage_util/path.h>
 #include <lfrfid/lfrfid_dict_file.h>
 #include <lfrfid/protocols/lfrfid_protocols.h>
 #include <lfrfid/lfrfid_worker.h>

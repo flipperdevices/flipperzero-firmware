@@ -6,7 +6,7 @@
 #include <stm32wbxx_ll_pwr.h>
 #include <stm32wbxx_ll_rcc.h>
 #include <furi.h>
-#include <toolbox/api_lock.h>
+#include <api_lock.h>
 
 #include "usb.h"
 

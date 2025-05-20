@@ -1,8 +1,8 @@
 #include <furi.h>
-#include "toolbox/level_duration.h"
+#include "level_duration.h"
 #include "protocol_jablotron.h"
-#include <toolbox/manchester_decoder.h>
-#include <bit_lib/bit_lib.h>
+#include <manchester_decoder.h>
+#include <pure/bit_lib.h>
 #include "lfrfid_protocols.h"
 
 #define JABLOTRON_ENCODED_BIT_SIZE   (64)

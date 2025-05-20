@@ -2,7 +2,7 @@
 
 #include <loader/firmware_api/firmware_api.h>
 #include <storage/storage.h>
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 
 #include <m-array.h>
 #include <m-algo.h>

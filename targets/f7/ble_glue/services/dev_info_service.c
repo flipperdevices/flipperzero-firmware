@@ -5,7 +5,7 @@
 
 #include <furi.h>
 #include <protobuf_version.h>
-#include <lib/toolbox/version.h>
+#include <flipper_metadata/version.h>
 
 #include "dev_info_service_uuid.inc"
 

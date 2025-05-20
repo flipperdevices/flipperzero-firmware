@@ -2,12 +2,12 @@
 
 #include "mf_classic_poller.h"
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_i.h>
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 #include <nfc/helpers/iso14443_crc.h>
 #include <nfc/helpers/crypto1.h>
 #include <stream/stream.h>
 #include <stream/buffered_file_stream.h>
-#include <toolbox/keys_dict.h>
+#include <lib/nfc/helpers/keys_dict.h>
 #include <helpers/nfc_util.h>
 
 #ifdef __cplusplus

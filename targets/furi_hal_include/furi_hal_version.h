@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <lib/toolbox/version.h>
+#include <lib/flipper_metadata/version.h>
 
 #ifdef __cplusplus
 extern "C" {

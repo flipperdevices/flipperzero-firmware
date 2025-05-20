@@ -1,7 +1,7 @@
 #include "../test.h" // IWYU pragma: keep
 #include <furi.h>
 #include <m-dict.h>
-#include <toolbox/dir_walk.h>
+#include <dir_walk.h>
 
 static const char* const storage_test_dirwalk_paths[] = {
     "1",

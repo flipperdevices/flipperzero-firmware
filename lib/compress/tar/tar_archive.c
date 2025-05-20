@@ -3,8 +3,8 @@
 #include <microtar.h>
 #include <storage/storage.h>
 #include <furi.h>
-#include <toolbox/path.h>
-#include <toolbox/compress.h>
+#include <storage_util/path.h>
+#include <compress/compress.h>
 
 #define TAG "TarArch"
 

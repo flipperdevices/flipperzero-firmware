@@ -3,7 +3,7 @@
 #include <gui/elements.h>
 #include <furi.h>
 #include <assets_icons.h>
-#include <lib/toolbox/strint.h>
+#include <pure/strint.h>
 
 struct NumberInput {
     View* view;

@@ -1,8 +1,8 @@
 #include <furi.h>
-#include <toolbox/stream/stream.h>
-#include <toolbox/stream/string_stream.h>
-#include <toolbox/stream/file_stream.h>
-#include <toolbox/stream/buffered_file_stream.h>
+#include <stream/stream.h>
+#include <stream/string_stream.h>
+#include <stream/file_stream.h>
+#include <stream/buffered_file_stream.h>
 #include <storage/storage.h>
 #include "../test.h" // IWYU pragma: keep
 

@@ -1,7 +1,7 @@
 #include "protocol_ds1992.h"
 
 #include <core/core_defines.h>
-#include <toolbox/pretty_format.h>
+#include <pretty_format.h>
 
 #include "dallas_common.h"
 

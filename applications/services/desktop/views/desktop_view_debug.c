@@ -1,4 +1,4 @@
-#include <toolbox/version.h>
+#include <version.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <dolphin/helpers/dolphin_state.h>

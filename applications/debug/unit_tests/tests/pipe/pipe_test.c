@@ -1,7 +1,7 @@
 #include "../test.h" // IWYU pragma: keep
 
 #include <furi.h>
-#include <lib/toolbox/pipe.h>
+#include <lib/containers/pipe.h>
 
 #define PIPE_SIZE      128U
 #define PIPE_TRG_LEVEL 1U

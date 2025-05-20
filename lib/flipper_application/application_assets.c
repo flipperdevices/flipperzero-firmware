@@ -1,5 +1,5 @@
 #include "application_assets.h"
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 #include <storage/storage_i.h>
 
 // #define ELF_ASSETS_DEBUG_LOG 1

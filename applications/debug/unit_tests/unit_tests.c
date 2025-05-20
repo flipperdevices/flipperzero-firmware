@@ -1,7 +1,7 @@
 #include <furi.h>
-#include <toolbox/pipe.h>
-#include <toolbox/cli/cli_command.h>
-#include <toolbox/cli/cli_registry.h>
+#include <containers/pipe.h>
+#include <cli/cli_command.h>
+#include <cli/cli_registry.h>
 #include <cli/cli_main_commands.h>
 
 #include "test_runner.h"

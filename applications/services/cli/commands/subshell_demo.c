@@ -1,7 +1,7 @@
 #include "../cli_main_commands.h"
-#include <toolbox/cli/cli_registry.h>
-#include <toolbox/cli/shell/cli_shell.h>
-#include <toolbox/cli/cli_ansi.h>
+#include <cli/cli_registry.h>
+#include <cli/shell/cli_shell.h>
+#include <cli/cli_ansi.h>
 
 #define RAINBOW_SUBCOMMAND                                                                \
     ANSI_FG_RED "s" ANSI_FG_YELLOW "u" ANSI_FG_BLUE "b" ANSI_FG_GREEN "c" ANSI_FG_MAGENTA \

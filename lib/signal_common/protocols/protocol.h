@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include <lib/toolbox/level_duration.h>
+#include <signal_common/level_duration.h>
 #include <furi.h>
 
 typedef void* (*ProtocolAlloc)(void);

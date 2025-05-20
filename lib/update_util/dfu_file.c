@@ -1,7 +1,7 @@
 #include "dfu_file.h"
 
 #include <furi_hal.h>
-#include <toolbox/crc32_calc.h>
+#include <crc32_calc.h>
 
 #define VALID_WHOLE_FILE_CRC 0xFFFFFFFF
 #define DFU_SUFFIX_VERSION   0x011A

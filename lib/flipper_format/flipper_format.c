@@ -1,8 +1,8 @@
 #include <core/check.h>
-#include <toolbox/stream/stream.h>
-#include <toolbox/stream/string_stream.h>
-#include <toolbox/stream/file_stream.h>
-#include <toolbox/stream/buffered_file_stream.h>
+#include <stream/stream.h>
+#include <stream/string_stream.h>
+#include <stream/file_stream.h>
+#include <stream/buffered_file_stream.h>
 #include "flipper_format.h"
 #include "flipper_format_i.h"
 #include "flipper_format_stream.h"

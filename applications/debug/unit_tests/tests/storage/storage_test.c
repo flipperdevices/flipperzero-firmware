@@ -691,7 +691,7 @@ MU_TEST(test_storage_common_migrate) {
 }
 
 #define MD5_HASH_SIZE (16)
-#include <lib/toolbox/md5_calc.h>
+#include <storage_util/md5_calc.h>
 
 MU_TEST(test_md5_calc) {
     Storage* storage = furi_record_open(RECORD_STORAGE);

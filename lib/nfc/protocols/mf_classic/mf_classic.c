@@ -1,9 +1,9 @@
 #include "mf_classic.h"
 
 #include <furi/furi.h>
-#include <toolbox/hex.h>
+#include <hex.h>
 
-#include <lib/bit_lib/bit_lib.h>
+#include <lib/pure/bit_lib.h>
 
 #define MF_CLASSIC_PROTOCOL_NAME "Mifare Classic"
 

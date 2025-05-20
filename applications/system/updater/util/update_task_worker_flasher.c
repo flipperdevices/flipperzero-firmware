@@ -4,11 +4,11 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 #include <update_util/dfu_file.h>
 #include <update_util/update_operation.h>
-#include <toolbox/tar/tar_archive.h>
-#include <toolbox/crc32_calc.h>
+#include <tar/tar_archive.h>
+#include <crc32_calc.h>
 
 #define TAG "UpdWorkerRam"
 

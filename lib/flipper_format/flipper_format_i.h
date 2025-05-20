@@ -1,5 +1,5 @@
 #pragma once
-#include <toolbox/stream/stream.h>
+#include <stream/stream.h>
 #include "flipper_format.h"
 
 #ifdef __cplusplus

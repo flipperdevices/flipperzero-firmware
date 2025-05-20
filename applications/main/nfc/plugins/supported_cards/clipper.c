@@ -22,7 +22,7 @@
 
 #include <flipper_application/flipper_application.h>
 #include <lib/nfc/protocols/mf_desfire/mf_desfire.h>
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 #include <applications/services/locale/locale.h>
 #include <datetime/datetime.h>
 #include <inttypes.h>

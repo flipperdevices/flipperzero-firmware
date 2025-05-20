@@ -1,10 +1,10 @@
-#include "keys_dict.h"
+#include "lib/nfc/helpers/keys_dict.h"
 
 #include <storage/storage.h>
 #include <flipper_format/flipper_format.h>
-#include <toolbox/stream/file_stream.h>
-#include <toolbox/stream/buffered_file_stream.h>
-#include <toolbox/args.h>
+#include <stream/file_stream.h>
+#include <stream/buffered_file_stream.h>
+#include <cli/args.h>
 
 #define TAG "KeysDict"
 

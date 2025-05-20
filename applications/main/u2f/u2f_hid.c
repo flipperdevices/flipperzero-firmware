@@ -4,7 +4,7 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <lib/toolbox/args.h>
+#include <lib/cli/args.h>
 #include <furi_hal_usb_hid_u2f.h>
 #include <storage/storage.h>
 

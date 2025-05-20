@@ -1,9 +1,8 @@
 #include "input.h"
 
 #include <furi.h>
-#include <toolbox/cli/cli_command.h>
-#include <toolbox/args.h>
-#include <toolbox/pipe.h>
+#include <cli/cli.h>
+#include <cli/args.h>
 
 static void input_cli_usage(void) {
     printf("Usage:\r\n");

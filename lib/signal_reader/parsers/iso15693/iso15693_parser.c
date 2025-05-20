@@ -1,6 +1,6 @@
 #include "iso15693_parser.h"
 
-#include <toolbox/bit_buffer.h>
+#include <bit_buffer.h>
 
 #include <furi/furi.h>
 

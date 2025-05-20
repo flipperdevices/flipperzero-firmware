@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toolbox/protocols/protocol.h>
+#include <protocols/protocol.h>
 
 typedef enum {
     iButtonProtocolMiscCyfral,

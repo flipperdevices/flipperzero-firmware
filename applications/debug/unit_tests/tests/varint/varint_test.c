@@ -3,8 +3,8 @@
 
 #include "../test.h" // IWYU pragma: keep
 
-#include <toolbox/varint.h>
-#include <toolbox/profiler.h>
+#include <varint.h>
+#include <profiler.h>
 
 MU_TEST(test_varint_basic_u) {
     mu_assert_int_eq(1, varint_uint32_length(0));

@@ -1,6 +1,6 @@
 #include "bad_usb_view.h"
 #include "../helpers/ducky_script.h"
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
 

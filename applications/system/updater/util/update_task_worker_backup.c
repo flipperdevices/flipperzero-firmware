@@ -5,13 +5,13 @@
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <desktop/helpers/slideshow_filename.h>
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 #include <update_util/dfu_file.h>
 #include <update_util/int_backup.h>
 #include <update_util/update_operation.h>
 #include <update_util/resources/manifest.h>
-#include <toolbox/tar/tar_archive.h>
-#include <toolbox/crc32_calc.h>
+#include <tar/tar_archive.h>
+#include <crc32_calc.h>
 
 #define TAG "UpdWorkerBackup"
 

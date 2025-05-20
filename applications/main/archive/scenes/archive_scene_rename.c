@@ -3,7 +3,7 @@
 #include "../helpers/archive_files.h"
 #include "../helpers/archive_browser.h"
 #include "archive/views/archive_browser_view.h"
-#include "toolbox/path.h"
+#include "storage_util/path.h"
 
 #define SCENE_RENAME_CUSTOM_EVENT (0UL)
 #define MAX_TEXT_INPUT_LEN        22

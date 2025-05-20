@@ -2,11 +2,11 @@
 #include "js_thread.h"
 #include <storage/storage.h>
 #include "js_app_i.h"
-#include <toolbox/path.h>
+#include <storage_util/path.h>
 #include <assets_icons.h>
-#include <toolbox/cli/cli_command.h>
+#include <cli/cli_command.h>
 #include <cli/cli_main_commands.h>
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 
 #define TAG "JS app"
 

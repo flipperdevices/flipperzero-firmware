@@ -1,7 +1,7 @@
 #include "expansion_settings.h"
 
 #include <storage/storage.h>
-#include <toolbox/saved_struct.h>
+#include <saved_struct.h>
 
 #include "expansion_settings_filename.h"
 

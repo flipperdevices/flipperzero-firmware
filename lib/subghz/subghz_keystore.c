@@ -4,8 +4,8 @@
 #include <furi_hal.h>
 
 #include <storage/storage.h>
-#include <toolbox/hex.h>
-#include <toolbox/stream/stream.h>
+#include <hex.h>
+#include <stream/stream.h>
 #include <flipper_format/flipper_format.h>
 #include <flipper_format/flipper_format_i.h>
 

@@ -1,6 +1,6 @@
 #include <core/record.h>
 #include "storage.h"
-#include <toolbox/tar/tar_archive.h>
+#include <tar/tar_archive.h>
 
 FS_Error storage_int_backup(Storage* storage, const char* dstname) {
     furi_check(storage);

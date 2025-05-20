@@ -1,6 +1,6 @@
 #include "../rpc_debug_app.h"
 
-#include <lib/toolbox/strint.h>
+#include <pure/strint.h>
 
 static bool rpc_debug_app_scene_input_error_code_validator_callback(
     const char* text,

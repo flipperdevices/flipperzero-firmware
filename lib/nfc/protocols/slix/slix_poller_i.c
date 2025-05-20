@@ -1,5 +1,5 @@
 #include "slix_poller_i.h"
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 
 #include <furi.h>
 

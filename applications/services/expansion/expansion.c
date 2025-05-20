@@ -4,7 +4,7 @@
 
 #include <furi.h>
 #include <storage/storage.h>
-#include <toolbox/api_lock.h>
+#include <api_lock.h>
 
 #include "expansion_worker.h"
 #include "expansion_settings.h"

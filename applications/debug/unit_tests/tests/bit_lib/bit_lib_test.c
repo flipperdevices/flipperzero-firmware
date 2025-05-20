@@ -1,6 +1,6 @@
 #include <furi.h>
 #include "../test.h" // IWYU pragma: keep
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 
 MU_TEST(test_bit_lib_increment_index) {
     uint32_t index = 0;

@@ -1,7 +1,7 @@
 #include "cli_main_shell.h"
 #include "cli_main_commands.h"
-#include <toolbox/cli/cli_ansi.h>
-#include <toolbox/cli/shell/cli_shell.h>
+#include <cli/cli_ansi.h>
+#include <cli/shell/cli_shell.h>
 #include <furi_hal_version.h>
 
 void cli_main_motd(void* context) {

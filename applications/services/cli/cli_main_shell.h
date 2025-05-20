@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toolbox/cli/cli_command.h>
+#include <cli/cli_command.h>
 
 void cli_main_motd(void* context);
 

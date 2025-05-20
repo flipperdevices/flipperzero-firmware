@@ -5,8 +5,8 @@
 #include "../blocks/encoder.h"
 #include "../blocks/generic.h"
 #include "../blocks/math.h"
-#include <lib/toolbox/float_tools.h>
-#include <lib/toolbox/stream/stream.h>
+#include <lib/pure/float_tools.h>
+#include <storage_util/stream/stream.h>
 #include <lib/flipper_format/flipper_format_i.h>
 
 #include <math.h>

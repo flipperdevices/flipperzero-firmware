@@ -5,7 +5,7 @@
 #include <stddef.h>
 
 #include <lib/flipper_format/flipper_format.h>
-#include <lib/toolbox/level_duration.h>
+#include <signal_common/level_duration.h>
 
 #include "environment.h"
 #include <furi.h>

@@ -1,18 +1,17 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <toolbox/cli/cli_command.h>
-#include <toolbox/cli/cli_ansi.h>
-#include <cli/cli_main_commands.h>
-#include <lib/toolbox/args.h>
-#include <lib/toolbox/dir_walk.h>
-#include <lib/toolbox/md5_calc.h>
-#include <lib/toolbox/strint.h>
-#include <lib/toolbox/tar/tar_archive.h>
+#include <cli/cli.h>
+#include <cli/args.h>
+#include <cli/cli_ansi.h>
+#include <storage_util/dir_walk.h>
+#include <storage_util/md5_calc.h>
+#include <pure/strint.h>
+#include <compress/tar/tar_archive.h>
 #include <storage/storage.h>
 #include <storage/storage_sd_api.h>
 #include <power/power_service/power.h>
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 
 #define MAX_NAME_LENGTH 255
 

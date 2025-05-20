@@ -1,9 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include <lib/toolbox/args.h>
-#include <toolbox/pipe.h>
-#include <cli/cli_main_commands.h>
-#include <toolbox/cli/cli_registry.h>
+#include <cli/cli.h>
+#include <lib/cli/args.h>
 
 #include <ble/ble.h>
 #include "bt_settings.h"

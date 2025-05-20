@@ -1,9 +1,9 @@
 #include <furi.h>
-#include <toolbox/protocols/protocol.h>
+#include <protocols/protocol.h>
 #include <lfrfid/tools/fsk_demod.h>
 #include <lfrfid/tools/fsk_osc.h>
 #include "lfrfid_protocols.h"
-#include <bit_lib/bit_lib.h>
+#include <pure/bit_lib.h>
 
 #define JITTER_TIME (20)
 #define MIN_TIME    (64 - JITTER_TIME)

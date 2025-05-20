@@ -1,6 +1,6 @@
 #include "cli_registry.h"
 #include "cli_registry_i.h"
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 #include <storage/storage.h>
 
 #define TAG "CliRegistry"

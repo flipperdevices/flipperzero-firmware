@@ -3,7 +3,7 @@
 #include "slix.h"
 
 #include <nfc/protocols/iso15693_3/iso15693_3_i.h>
-#include <toolbox/bit_buffer.h>
+#include <bit_buffer.h>
 
 #ifdef __cplusplus
 extern "C" {

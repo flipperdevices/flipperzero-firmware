@@ -3,7 +3,7 @@
 #include <flipper.h>
 #include <alt_boot.h>
 #include <assets_icons.h>
-#include <toolbox/compress.h>
+#include <compress/compress.h>
 #include <gui/canvas.h>
 #include <gui/canvas_i.h>
 

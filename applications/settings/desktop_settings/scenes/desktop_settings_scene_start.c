@@ -1,5 +1,5 @@
 #include <applications.h>
-#include <lib/toolbox/value_index.h>
+#include <pure/value_index.h>
 
 #include "../desktop_settings_app.h"
 #include "desktop_settings_scene.h"

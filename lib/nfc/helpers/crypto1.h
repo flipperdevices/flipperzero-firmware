@@ -1,7 +1,7 @@
 #pragma once
 
 #include <protocols/mf_classic/mf_classic.h>
-#include <toolbox/bit_buffer.h>
+#include <bit_buffer.h>
 
 #ifdef __cplusplus
 extern "C" {

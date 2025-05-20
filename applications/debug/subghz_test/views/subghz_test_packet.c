@@ -6,7 +6,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
-#include <toolbox/level_duration.h>
+#include <level_duration.h>
 #include "../protocol/princeton_for_testing.h"
 
 #define SUBGHZ_TEST_PACKET_COUNT 500

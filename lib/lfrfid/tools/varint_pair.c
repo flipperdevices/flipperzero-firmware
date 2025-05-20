@@ -1,5 +1,5 @@
 #include "varint_pair.h"
-#include <toolbox/varint.h>
+#include <varint.h>
 
 #define VARINT_PAIR_SIZE 10
 

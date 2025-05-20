@@ -1,7 +1,7 @@
 #pragma once
 
 #include <furi.h>
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 #include "../cli_registry.h"
 
 #ifdef __cplusplus

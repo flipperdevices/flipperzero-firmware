@@ -23,7 +23,6 @@ typedef struct {
 } CliRegistryCommand;
 
 DICT_DEF2(CliCommandDict, FuriString*, FURI_STRING_OPLIST, CliRegistryCommand, M_POD_OPLIST);
-
 #define M_OPL_CliCommandDict_t() DICT_OPLIST(CliCommandDict, FURI_STRING_OPLIST, M_POD_OPLIST)
 
 bool cli_registry_get_command(

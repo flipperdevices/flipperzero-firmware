@@ -4,7 +4,7 @@
 #include "event_flag.h"
 
 #include <m-dict.h>
-#include <toolbox/m_cstr_dup.h>
+#include <m_cstr_dup.h>
 
 #define FURI_RECORD_FLAG_READY (0x1)
 

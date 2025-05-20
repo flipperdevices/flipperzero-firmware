@@ -1,8 +1,8 @@
 #pragma once
 
 #include "cli.h"
-#include <toolbox/cli/cli_command.h>
-#include <toolbox/cli/cli_registry.h>
+#include <cli/cli_command.h>
+#include <cli/cli_registry.h>
 
 #define CLI_APPID "cli"
 

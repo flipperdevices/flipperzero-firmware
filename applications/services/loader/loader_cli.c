@@ -1,13 +1,13 @@
 #include "loader.h"
 
 #include <furi.h>
-#include <toolbox/cli/cli_command.h>
+#include <cli/cli_command.h>
 #include <cli/cli_main_commands.h>
 #include <applications.h>
-#include <lib/toolbox/args.h>
-#include <lib/toolbox/strint.h>
+#include <lib/cli/args.h>
+#include <pure/strint.h>
 #include <notification/notification_messages.h>
-#include <toolbox/pipe.h>
+#include <containers/pipe.h>
 
 static void loader_cli_print_usage(void) {
     printf("Usage:\r\n");
