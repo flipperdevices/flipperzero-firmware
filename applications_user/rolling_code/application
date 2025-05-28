@@ -1,0 +1,8 @@
+App(
+    name="RollingCode",
+    appid="rolling_code",
+    entry_point="rolling_code_app",
+    stack_size=1K,
+    icon="NULL",  # 可选图标
+    sources=["rolling_code.c"]
+)
