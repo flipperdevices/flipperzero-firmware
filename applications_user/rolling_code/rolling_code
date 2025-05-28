@@ -1,0 +1,320 @@
+/**
+ * Flipper Zero 滚动码系统 - 终极优化版
+ * 功能：多协议支持、法律合规检查、持久化存储、用户友好界面
+ * 版本：1.2.0
+ */
+
+#include <furi.h>
+#include <furi_hal.h>
+#include <gui/gui.h>
+#include <storage/storage.h>
+#include <toolbox/stream/file_stream.h>
+
+/* --------------------- 硬件配置常量 -------------------- */
+#define CAPTURE_BUF_SIZE 1024       // 信号捕获缓冲区
+#define MAX_RETRY_ATTEMPTS 3        // 最大重试次数
+#define DEBOUNCE_DELAY_MS 200       // 按键消抖时间
+#define VIBRO_FEEDBACK_MS 50        // 振动反馈时长
+#define COUNTER_FILE "/ext/counter.bin" // 计数器存储路径
+
+/* --------------------- 协议类型定义 -------------------- */
+typedef enum {
+    PROTOCOL_KEELOQ,
+    PROTOCOL_HCS301,
+    PROTOCOL_CUSTOM
+} ProtocolType;
+
+typedef struct {
+    ProtocolType type;
+    uint32_t frequency;
+    uint8_t sync_word[2];
+    uint32_t crypto_key;
+    const char* display_name;
+    uint32_t counter_mask;
+} ProtocolConfig;
+
+/* --------------------- 全局协议配置 -------------------- */
+static const ProtocolConfig PROTOCOLS[] = {
+    {   // Keeloq 典型配置
+        .type = PROTOCOL_KEELOQ,
+        .frequency = 433920000,
+        .sync_word = {0x2D, 0xD4},
+        .crypto_key = 0x12345678,
+        .display_name = "Keeloq 433MHz",
+        .counter_mask = 0xFFFFFFFF
+    },
+    {   // HCS301 典型配置
+        .type = PROTOCOL_HCS301,
+        .frequency = 315000000,
+        .sync_word = {0x55, 0xAA},
+        .crypto_key = 0x9ABCDEF0,
+        .display_name = "HCS301 315MHz",
+        .counter_mask = 0x00FFFFFF
+    }
+};
+
+/* --------------------- 应用状态结构 -------------------- */
+typedef struct {
+    // 协议状态
+    uint8_t selected_proto;
+    ProtocolConfig current_proto;
+    
+    // 设备状态
+    uint32_t counter;
+    bool counter_dirty;
+    
+    // 射频状态
+    struct {
+        bool initialized;
+        bool transmission_success;
+    } radio;
+    
+    // 用户界面
+    enum {
+        UI_STATE_LEGAL,
+        UI_STATE_MAIN_MENU,
+        UI_STATE_TRANSMITTING,
+        UI_STATE_ERROR
+    } ui_state;
+} AppState;
+
+/* ===================== 模块：法律合规 ===================== */
+static bool check_frequency_compliance(uint32_t freq) {
+    const static uint32_t BANNED_FREQS[] = {868000000, 915000000};
+    const static uint32_t TOLERANCE = 1000000; // 1MHz 容差
+    
+    for(size_t i = 0; i < COUNT_OF(BANNED_FREQS); i++) {
+        if(abs((int32_t)freq - (int32_t)BANNED_FREQS[i]) < TOLERANCE) {
+            FURI_LOG_E("Compliance", "禁止频率: %luHz", freq);
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool check_tx_power() {
+    const static float MAX_POWER_DBM = 10.0f;
+    float current_power = furi_hal_subghz_get_tx_power();
+    
+    if(current_power > MAX_POWER_DBM) {
+        FURI_LOG_W("Compliance", "功率超标: %.1fdBm", (double)current_power);
+        return false;
+    }
+    return true;
+}
+
+/* ===================== 模块：加密算法 ===================== */
+static uint32_t crypto_keeloq(uint32_t data, uint32_t key) {
+    for(int i = 0; i < 528; ++i) {
+        data = (data >> 1) ^ ((data & 1) ? key : 0);
+    }
+    return data;
+}
+
+static uint32_t crypto_process(ProtocolType type, uint32_t data, uint32_t key) {
+    switch(type) {
+    case PROTOCOL_KEELOQ:
+        return crypto_keeloq(data, key);
+    case PROTOCOL_HCS301:
+        return (data ^ key) + 0x00ABCDEF;
+    default:
+        return data;
+    }
+}
+
+/* ===================== 模块：射频控制 ===================== */
+static bool rf_hw_init(uint32_t freq, const uint8_t* sync_word) {
+    if(!furi_hal_subghz_check_radio()) {
+        FURI_LOG_E("RF", "射频硬件异常");
+        return false;
+    }
+    
+    furi_hal_subghz_reset();
+    
+    if(!check_frequency_compliance(freq) || !check_tx_power()) {
+        return false;
+    }
+    
+    if(!furi_hal_subghz_set_frequency_and_path(freq)) {
+        FURI_LOG_E("RF", "频率设置失败: %luHz", freq);
+        return false;
+    }
+    
+    if(!furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async)) {
+        FURI_LOG_E("RF", "预设加载失败");
+        return false;
+    }
+    
+    furi_hal_subghz_set_sync_word(sync_word[0], sync_word[1]);
+    return true;
+}
+
+static bool rf_transmit_data(const uint8_t* data, size_t len) {
+    for(uint8_t attempt = 0; attempt < MAX_RETRY_ATTEMPTS; ++attempt) {
+        if(furi_hal_subghz_start_async_tx(subghz_worker_encoder_start)) {
+            if(furi_hal_subghz_send(data, len, 1000)) {
+                FURI_LOG_I("RF", "发送成功 (尝试 %d)", attempt+1);
+                return true;
+            }
+            furi_hal_subghz_stop_async_tx();
+        }
+        furi_delay_ms(100);
+    }
+    FURI_LOG_E("RF", "发送失败");
+    return false;
+}
+
+/* ===================== 模块：数据存储 ===================== */
+static bool save_counter(uint32_t counter) {
+    bool success = false;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Stream* stream = file_stream_alloc(storage);
+    
+    do {
+        if(!file_stream_open(stream, COUNTER_FILE, FSAM_WRITE, FSOM_CREATE_ALWAYS)) break;
+        if(stream_write(stream, (uint8_t*)&counter, sizeof(counter)) != sizeof(counter)) break;
+        success = true;
+    } while(false);
+    
+    file_stream_close(stream);
+    stream_free(stream);
+    furi_record_close(RECORD_STORAGE);
+    
+    if(!success) FURI_LOG_E("Storage", "计数器保存失败");
+    return success;
+}
+
+static uint32_t load_counter() {
+    uint32_t counter = 0;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Stream* stream = file_stream_alloc(storage);
+    
+    if(file_stream_open(stream, COUNTER_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        stream_read(stream, (uint8_t*)&counter, sizeof(counter));
+    }
+    
+    file_stream_close(stream);
+    stream_free(stream);
+    furi_record_close(RECORD_STORAGE);
+    return counter;
+}
+
+/* ===================== 模块：用户界面 ===================== */
+static void ui_show_legal_warning() {
+    ViewPort* view = view_port_alloc();
+    Gui* gui = furi_record_open(RECORD_GUI);
+    
+    view_port_draw_callback_set(view, [](Canvas* canvas, void* _) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignTop, "法律声明");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignTop, "仅限授权使用");
+        canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignTop, "遵守当地法规");
+    }, NULL);
+    
+    gui_add_view_port(gui, view, GuiLayerFullscreen);
+    furi_delay_ms(2000);
+    gui_remove_view_port(gui, view);
+    view_port_free(view);
+    furi_record_close(RECORD_GUI);
+}
+
+static void ui_render_main_menu(Canvas* canvas, const AppState* state) {
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 4, 12, "选择协议:");
+    
+    for(size_t i = 0; i < COUNT_OF(PROTOCOLS); ++i) {
+        const ProtocolConfig* proto = &PROTOCOLS[i];
+        char line[32];
+        snprintf(line, sizeof(line), "%c %s",
+                (i == state->selected_proto) ? '>' : ' ',
+                proto->display_name);
+        canvas_draw_str(canvas, 4, 24 + i*12, line);
+    }
+}
+
+/* ===================== 主程序逻辑 ===================== */
+int32_t rolling_code_app() {
+    // 初始化应用状态
+    AppState state = {
+        .selected_proto = 0,
+        .current_proto = PROTOCOLS[0],
+        .counter = load_counter(),
+        .counter_dirty = false,
+        .ui_state = UI_STATE_LEGAL
+    };
+    
+    // 设置用户界面
+    ViewPort* view_port = view_port_alloc();
+    Gui* gui = furi_record_open(RECORD_GUI);
+    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+    
+    // 主事件循环
+    while(true) {
+        switch(state.ui_state) {
+        case UI_STATE_LEGAL:
+            ui_show_legal_warning();
+            state.ui_state = UI_STATE_MAIN_MENU;
+            break;
+            
+        case UI_STATE_MAIN_MENU:
+            ui_render_main_menu(canvas, &state);
+            break;
+            
+        case UI_STATE_TRANSMITTING: {
+            // 生成加密滚动码
+            uint32_t encrypted = crypto_process(
+                state.current_proto.type,
+                state.counter,
+                state.current_proto.crypto_key
+            );
+            
+            // 准备数据包
+            uint8_t packet[4] = {
+                (encrypted >> 24) & 0xFF,
+                (encrypted >> 16) & 0xFF,
+                (encrypted >> 8) & 0xFF,
+                encrypted & 0xFF
+            };
+            
+            // 射频传输
+            if(rf_hw_init(state.current_proto.frequency, 
+                         state.current_proto.sync_word)) 
+            {
+                if(rf_transmit_data(packet, sizeof(packet))) {
+                    state.counter++;
+                    state.counter &= state.current_proto.counter_mask;
+                    state.counter_dirty = true;
+                    furi_hal_vibro_on(true);
+                    furi_delay_ms(VIBRO_FEEDBACK_MS);
+                    furi_hal_vibro_on(false);
+                }
+            }
+            
+            // 返回主界面
+            state.ui_state = UI_STATE_MAIN_MENU;
+            break;
+        }
+        
+        default:
+            break;
+        }
+        
+        // 处理计数器存储
+        if(state.counter_dirty) {
+            if(save_counter(state.counter)) {
+                state.counter_dirty = false;
+            }
+        }
+        
+        view_port_update(view_port);
+        furi_delay_ms(DEBOUNCE_DELAY_MS);
+    }
+    
+    // 清理资源（实际不会执行到此处）
+    gui_remove_view_port(gui, view_port);
+    view_port_free(view_port);
+    furi_record_close(RECORD_GUI);
+    return 0;
+}
