@@ -30,17 +30,10 @@ void bad_usb_scene_error_on_enter(void* context) {
         widget_add_button_element(
             app->widget, GuiButtonTypeLeft, "Back", bad_usb_scene_error_event_callback, app);
     } else if(app->error == BadUsbAppErrorCloseRpc) {
-        widget_add_icon_element(app->widget, 78, 0, &I_ActiveConnection_50x64);
-        widget_add_string_multiline_element(
-            app->widget, 3, 2, AlignLeft, AlignTop, FontPrimary, "Connection\nIs Active!");
-        widget_add_string_multiline_element(
-            app->widget,
-            3,
-            30,
-            AlignLeft,
-            AlignTop,
-            FontSecondary,
-            "Disconnect from\nPC or phone to\nuse this function.");
+        // Pomijamy komunikat o aktywnym połączeniu i przechodzimy bezpośrednio do funkcji
+        view_dispatcher_stop(app->view_dispatcher);
+        bad_usb_scene_start_on_enter(app);
+        scene_manager_next_scene(app->scene_manager, BadUsbSceneStart);
     }
 
     view_dispatcher_switch_to_view(app->view_dispatcher, BadUsbAppViewWidget);

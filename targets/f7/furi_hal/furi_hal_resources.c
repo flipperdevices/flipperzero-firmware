@@ -2,8 +2,7 @@
 #include <furi_hal_bus.h>
 #include <furi.h>
 
-#include <stm32wbxx_ll_rcc.h>
-#include <stm32wbxx_ll_pwr.h>
+
 
 #define TAG "FuriHalResources"
 
@@ -24,12 +23,18 @@ const GpioPin gpio_sdcard_cs = {.port = SD_CS_GPIO_Port, .pin = SD_CS_Pin};
 const GpioPin gpio_sdcard_cd = {.port = SD_CD_GPIO_Port, .pin = SD_CD_Pin};
 const GpioPin gpio_nfc_cs = {.port = NFC_CS_GPIO_Port, .pin = NFC_CS_Pin};
 
-const GpioPin gpio_button_up = {.port = GPIOB, .pin = LL_GPIO_PIN_10};
-const GpioPin gpio_button_down = {.port = GPIOC, .pin = LL_GPIO_PIN_6};
-const GpioPin gpio_button_right = {.port = GPIOB, .pin = LL_GPIO_PIN_12};
-const GpioPin gpio_button_left = {.port = GPIOB, .pin = LL_GPIO_PIN_11};
+const GpioPin gpio_lcd_cs_sw  = {.port = GPIOB, .pin = LL_GPIO_PIN_10}; // Example: PB10
+const GpioPin gpio_lcd_sck_sw = {.port = GPIOB, .pin = LL_GPIO_PIN_11}; // Example: PB11
+const GpioPin gpio_lcd_mosi_sw= {.port = GPIOB, .pin = LL_GPIO_PIN_12}; // Example: PB12
+const GpioPin gpio_lcd_rs_sw  = {.port = GPIOC, .pin = LL_GPIO_PIN_6 }; // Example: PC6
+
+const GpioPin gpio_button_up = {.port = GPIOB, .pin = LL_GPIO_PIN_8};
+const GpioPin gpio_button_down = {.port = GPIOB, .pin = LL_GPIO_PIN_4};
+const GpioPin gpio_button_right = {.port = GPIOB, .pin = LL_GPIO_PIN_6};
+const GpioPin gpio_button_left = {.port = GPIOB, .pin = LL_GPIO_PIN_5};
 const GpioPin gpio_button_ok = {.port = GPIOH, .pin = LL_GPIO_PIN_3};
-const GpioPin gpio_button_back = {.port = GPIOC, .pin = LL_GPIO_PIN_13};
+const GpioPin gpio_button_back = {.port = GPIOB, .pin = LL_GPIO_PIN_9};
+
 
 const GpioPin gpio_spi_d_miso = {.port = SPI_D_MISO_GPIO_Port, .pin = SPI_D_MISO_Pin};
 const GpioPin gpio_spi_d_mosi = {.port = SPI_D_MOSI_GPIO_Port, .pin = SPI_D_MOSI_Pin};
@@ -39,11 +44,11 @@ const GpioPin gpio_spi_r_mosi = {.port = SPI_R_MOSI_GPIO_Port, .pin = SPI_R_MOSI
 const GpioPin gpio_spi_r_sck = {.port = SPI_R_SCK_GPIO_Port, .pin = SPI_R_SCK_Pin};
 
 const GpioPin gpio_ext_pc0 = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
-const GpioPin gpio_ext_pc1 = {.port = GPIOC, .pin = LL_GPIO_PIN_1};
-const GpioPin gpio_ext_pc3 = {.port = GPIOC, .pin = LL_GPIO_PIN_3};
-const GpioPin gpio_ext_pb2 = {.port = GPIOB, .pin = LL_GPIO_PIN_2};
-const GpioPin gpio_ext_pb3 = {.port = GPIOB, .pin = LL_GPIO_PIN_3};
-const GpioPin gpio_ext_pa4 = {.port = GPIOA, .pin = LL_GPIO_PIN_4};
+const GpioPin gpio_ext_pc1 = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
+const GpioPin gpio_ext_pc3 = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
+const GpioPin gpio_ext_pb2 = {.port = GPIOA, .pin = LL_GPIO_PIN_9};
+const GpioPin gpio_ext_pb3 = {.port = GPIOA, .pin = LL_GPIO_PIN_5};
+const GpioPin gpio_ext_pa4 = {.port = GPIOB, .pin = LL_GPIO_PIN_2};
 const GpioPin gpio_ext_pa6 = {.port = GPIOA, .pin = LL_GPIO_PIN_6};
 const GpioPin gpio_ext_pa7 = {.port = GPIOA, .pin = LL_GPIO_PIN_7};
 
@@ -58,12 +63,12 @@ const GpioPin gpio_infrared_tx = {.port = IR_TX_GPIO_Port, .pin = IR_TX_Pin};
 const GpioPin gpio_usart_tx = {.port = USART1_TX_Port, .pin = USART1_TX_Pin};
 const GpioPin gpio_usart_rx = {.port = USART1_RX_Port, .pin = USART1_RX_Pin};
 
-const GpioPin gpio_i2c_power_sda = {.port = GPIOA, .pin = LL_GPIO_PIN_10};
-const GpioPin gpio_i2c_power_scl = {.port = GPIOA, .pin = LL_GPIO_PIN_9};
+const GpioPin gpio_i2c_power_sda = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
+const GpioPin gpio_i2c_power_scl = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
 
-const GpioPin gpio_speaker = {.port = GPIOB, .pin = LL_GPIO_PIN_8};
+const GpioPin gpio_speaker = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
 
-const GpioPin gpio_periph_power = {.port = GPIOA, .pin = LL_GPIO_PIN_3};
+const GpioPin gpio_periph_power = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
 
 const GpioPin gpio_usb_dm = {.port = GPIOA, .pin = LL_GPIO_PIN_11};
 const GpioPin gpio_usb_dp = {.port = GPIOA, .pin = LL_GPIO_PIN_12};
@@ -150,7 +155,7 @@ const GpioPinRecord gpio_pins[] = {
      .number = 0,
      .debug = true},
     {.pin = &gpio_infrared_tx,
-     .name = "PB9",
+     .name = "PA9",
      .channel = FuriHalAdcChannelNone,
      .number = 0,
      .debug = true},
@@ -164,7 +169,7 @@ const InputPin input_pins[] = {
     {.gpio = &gpio_button_right, .key = InputKeyRight, .inverted = true, .name = "Right"},
     {.gpio = &gpio_button_left, .key = InputKeyLeft, .inverted = true, .name = "Left"},
     {.gpio = &gpio_button_ok, .key = InputKeyOk, .inverted = false, .name = "OK"},
-    {.gpio = &gpio_button_back, .key = InputKeyBack, .inverted = true, .name = "Back"},
+    {.gpio = &gpio_button_back, .key = InputKeyBack, .inverted = false, .name = "Back"},
 };
 
 const size_t input_pins_count = COUNT_OF(input_pins);
@@ -197,11 +202,6 @@ void furi_hal_resources_init_early(void) {
 
     furi_hal_resources_init_input_pins(GpioModeInput);
 
-    // Explicit, surviving reset, pulls
-    LL_PWR_EnablePUPDCfg();
-    LL_PWR_EnableGPIOPullDown(LL_PWR_GPIO_A, LL_PWR_GPIO_BIT_8); // gpio_vibro
-    LL_PWR_EnableGPIOPullDown(LL_PWR_GPIO_B, LL_PWR_GPIO_BIT_8); // gpio_speaker
-    LL_PWR_EnableGPIOPullDown(LL_PWR_GPIO_B, LL_PWR_GPIO_BIT_9); // gpio_infrared_tx
 
     // SD Card stepdown control
     furi_hal_gpio_write(&gpio_periph_power, 1);
@@ -210,10 +210,9 @@ void furi_hal_resources_init_early(void) {
     // Display pins
     furi_hal_gpio_write(&gpio_display_rst_n, 0);
     furi_hal_gpio_init_simple(&gpio_display_rst_n, GpioModeOutputPushPull);
-    LL_PWR_EnableGPIOPullUp(LL_PWR_GPIO_B, LL_PWR_GPIO_BIT_0); // gpio_display_rst_n
     furi_hal_gpio_write(&gpio_display_di, 0);
     furi_hal_gpio_init_simple(&gpio_display_di, GpioModeOutputPushPull);
-    LL_PWR_EnableGPIOPullDown(LL_PWR_GPIO_B, LL_PWR_GPIO_BIT_1); // gpio_display_di
+
 
     // Hard reset USB
     furi_hal_gpio_write(&gpio_usb_dm, 1);

@@ -13,7 +13,7 @@ extern const LL_SPI_InitTypeDef furi_hal_spi_preset_2edge_low_8m;
 extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_8m;
 
 /** Preset for ST7567 (Display) */
-extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_4m;
+//extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_4m;
 
 /** Preset for SdCard in fast mode */
 extern const LL_SPI_InitTypeDef furi_hal_spi_preset_1edge_low_16m;
@@ -40,7 +40,7 @@ extern const FuriHalSpiBusHandle furi_hal_spi_bus_handle_nfc;
  * mosi: pa7
  * sck: pb3
  * cs:  pa4 (software controlled)
- * 
+ * fi
  * @warning not initialized by default, call `furi_hal_spi_bus_handle_init` to initialize
  * Bus pins are floating on inactive state, CS high after initialization
  * 

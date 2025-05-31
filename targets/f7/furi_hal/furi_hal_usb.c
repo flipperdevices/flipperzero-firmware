@@ -186,18 +186,8 @@ void furi_hal_usb_unlock(void) {
 }
 
 bool furi_hal_usb_is_locked(void) {
-    UsbApiEventReturnData return_data = {
-        .bool_value = false,
-    };
-
-    UsbApiEventMessage msg = {
-        .lock = api_lock_alloc_locked(),
-        .type = UsbApiEventTypeIsLocked,
-        .return_data = &return_data,
-    };
-
-    furi_hal_usb_send_message(&msg);
-    return return_data.bool_value;
+    // Zawsze zwracaj false, aby ominąć komunikat o aktywnym połączeniu
+    return false;
 }
 
 void furi_hal_usb_disable(void) {

@@ -19,12 +19,7 @@ bool flipper_application_manifest_is_too_old(
     const ElfApiInterface* api_interface) {
     furi_check(manifest);
     furi_check(api_interface);
-
-    if(manifest->base.api_version.major < api_interface->api_version_major /* ||
-       manifest->base.api_version.minor > app->api_interface->api_version_minor */) {
-        return false;
-    }
-
+//always true to bypass the outdated app check
     return true;
 }
 

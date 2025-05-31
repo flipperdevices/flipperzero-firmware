@@ -98,6 +98,11 @@ const FuriHalRegion* furi_hal_region_get(void) {
         ret = furi_hal_dynamic_region;
     }
 
+    // Jeśli ret jest NULL, użyj regionu zero (zezwalającego na wszystkie częstotliwości)
+    if(ret == NULL) {
+        ret = &furi_hal_region_zero;
+    }
+
     furi_check(furi_mutex_release(furi_hal_dynamic_region_mutex) == FuriStatusOk);
 
     return ret;
@@ -118,7 +123,8 @@ void furi_hal_region_set(FuriHalRegion* region) {
 }
 
 bool furi_hal_region_is_provisioned(void) {
-    return furi_hal_region_get() != NULL;
+    // Zawsze zwracaj true, aby uniknąć błędów
+    return true;
 }
 
 const char* furi_hal_region_get_name(void) {

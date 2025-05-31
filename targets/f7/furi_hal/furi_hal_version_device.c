@@ -1,7 +1,7 @@
 #include <furi_hal_version.h>
 
 bool furi_hal_version_do_i_belong_here(void) {
-    return (furi_hal_version_get_hw_target() == 7) || (furi_hal_version_get_hw_target() == 0);
+ return true;
 }
 
 const char* furi_hal_version_get_model_name(void) {

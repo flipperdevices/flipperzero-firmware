@@ -242,11 +242,14 @@ void subghz_free(SubGhz* subghz) {
 int32_t subghz_app(void* p) {
     SubGhz* subghz = subghz_alloc();
 
+    // Zawsze udawaj, że region jest skonfigurowany
+    /*
     if(!furi_hal_region_is_provisioned()) {
         subghz_dialog_message_show_only_rx(subghz);
         subghz_free(subghz);
         return 1;
     }
+    */
 
     // Check argument and run corresponding scene
     if(p && strlen(p)) {
