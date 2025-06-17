@@ -1,0 +1,25 @@
+ID 1d50:614e Flipper Devices Inc.:Keyboard
+REM Author: 47LeCoste
+REM Version: 1.0 (Flipper Ducky)
+REM Target: Linux (Debian/Ubuntu based)
+
+REM ⚠️ Ensure you've 'screen' installed before running this script
+REM Otherwise install it manually typing:
+REM   sudo apt install screen -y          (Debian/Ubuntu)
+REM   sudo pacman -S --noconfirm screen   (Arch Linux)
+REM   sudo dnf install -y screen          (Fedora)
+
+REM To exit the screen session press: "CTRL + a", then "k", and finally "y"
+
+DELAY 1000
+CTRL ALT T
+DELAY 1000
+
+STRING pgrep -af qFlipper | awk '{print $1}' | xargs -r kill -9
+DELAY 500
+ENTER
+DELAY 3000
+
+STRING sudo screen "$(find /dev/serial/by-id/ -name 'usb-Flipper_Devices*' -print -quit | xargs readlink -f)"
+DELAY 500
+ENTER
