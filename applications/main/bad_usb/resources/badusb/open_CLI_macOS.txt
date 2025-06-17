@@ -1,0 +1,26 @@
+ID 05ac:021e Apple:Keyboards
+REM Author: 47LeCoste
+REM Version: 1.0 (Flipper Ducky)
+REM Target: macOS
+
+REM ⚠️ Ensure that 'screen' is installed (usually macOS does by default)
+
+REM To exit the screen session, press: "CTRL + a", then "k", and finally "y"
+
+DELAY 3000
+F4
+DELAY 1000
+STRING Terminal
+DELAY 500
+ENTER
+DELAY 1000
+
+STRING pkill qFlipper
+DELAY 1500
+ENTER
+DELAY 3000
+
+STRING screen "$(find /dev/serial/by-id/ -name 'usb-Flipper_Devices*' -print -quit | xargs readlink -f)"
+DELAY 500
+ENTER
+DELAY 500
