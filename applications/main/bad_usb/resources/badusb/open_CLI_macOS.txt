@@ -1,4 +1,7 @@
 ID 05ac:021e Apple:Keyboards
+REM Keep these 3 lines only if it's the first time you are performing a badKB attack against a specific macOS target.
+REM In fact, it helps Flipper Zero bypass the macOS keyboard setup assistant. Otherwise the attack will not start.
+
 REM Author: 47LeCoste
 REM Version: 1.0 (Flipper Ducky)
 REM Target: macOS
