@@ -58,12 +58,16 @@ type Element = StringMultilineElement
 
 type Props = {};
 type Child = Element;
+declare class ButtonEvent {
+    key: "left" | "center" | "right";
+    type: "press" | "release" | "short" | "long" | "repeat";
+}
 declare class Widget extends View<Props, Child> {
     /**
      * Event source for buttons. Only gets fired if there's a corresponding
      * button element.
      */
-    button: Contract<"left" | "center" | "right">;
+    button: Contract<ButtonEvent>;
 }
 declare class WidgetFactory extends ViewFactory<Props, Child, Widget> { }
 declare const factory: WidgetFactory;

@@ -131,8 +131,8 @@ eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, gui, views
 }, gui, views, eventLoop);
 
 // go to the demo chooser screen when the right key is pressed on the widget screen
-eventLoop.subscribe(views.stopwatchWidget.button, function (_sub, buttonId, gui, views) {
-    if (buttonId === "right")
+eventLoop.subscribe(views.stopwatchWidget.button, function (_sub, buttonEvent, gui, views) {
+    if (buttonEvent.key === "right" && buttonEvent.type === "short")
         gui.viewDispatcher.switchTo(views.demos);
 }, gui, views);
 
