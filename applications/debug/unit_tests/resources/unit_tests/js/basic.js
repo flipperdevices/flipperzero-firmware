@@ -11,5 +11,5 @@ tests.assert_eq(true, doesSdkSupport(["baseline"]));
 tests.assert_eq(false, doesSdkSupport(["abobus", "other-nonexistent-feature"]));
 
 tests.assert_eq("flipperdevices", flipper.firmwareVendor);
-tests.assert_eq(0, flipper.jsSdkVersion[0]);
-tests.assert_eq(3, flipper.jsSdkVersion[1]);
+tests.assert_eq(1, flipper.jsSdkVersion[0]);
+tests.assert_eq(0, flipper.jsSdkVersion[1]);

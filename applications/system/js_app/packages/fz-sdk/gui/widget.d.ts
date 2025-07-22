@@ -23,6 +23,7 @@
  * This view has the elements as its children.
  * 
  * @version Added in JS SDK 0.2, extra feature `"gui-widget"`
+ * @version Baseline since JS SDK 1.0
  * @module
  */
 
@@ -42,9 +43,21 @@ type TextBoxElement = { element: "text_box", stripToDots: boolean } & Position &
 type TextScrollElement = { element: "text_scroll" } & Position & Size & Text;
 type ButtonElement = { element: "button", button: "left" | "center" | "right" } & Text;
 type IconElement = { element: "icon", iconData: IconData } & Position;
-type RectElement = { element: "rect", radius: number, fill: boolean } & Position & Size; /** @version Amended in JS SDK 0.3, extra feature `"gui-widget-extras"` */
-type CircleElement = { element: "circle", radius: number, fill: boolean } & Position; /** @version Added in JS SDK 0.3, extra feature `"gui-widget-extras"` */
-type LineElement = { element: "line", x1: number, y1: number, x2: number, y2: number }; /** @version Added in JS SDK 0.3, extra feature `"gui-widget-extras"` */
+/**
+ * @version Amended in JS SDK 0.3, extra feature `"gui-widget-extras"`
+ * @version Baseline since JS SDK 1.0
+ * */
+type RectElement = { element: "rect", radius: number, fill: boolean } & Position & Size;
+/**
+ * @version Added in JS SDK 0.3, extra feature `"gui-widget-extras"`
+ * @version Baseline since JS SDK 1.0
+ * */
+type CircleElement = { element: "circle", radius: number, fill: boolean } & Position;
+/**
+ * @version Added in JS SDK 0.3, extra feature `"gui-widget-extras"`
+ * @version Baseline since JS SDK 1.0
+ * */
+type LineElement = { element: "line", x1: number, y1: number, x2: number, y2: number };
 
 type Element = StringMultilineElement
     | StringElement
