@@ -4,7 +4,7 @@ let flipper = require("flipper");
 tests.assert_eq(1337, 1337);
 tests.assert_eq("hello", "hello");
 
-tests.assert_eq("compatible", sdkCompatibilityStatus(0, 1));
+tests.assert_eq("compatible", sdkCompatibilityStatus(1, 0));
 tests.assert_eq("firmwareTooOld", sdkCompatibilityStatus(100500, 0));
 tests.assert_eq("firmwareTooNew", sdkCompatibilityStatus(-100500, 0));
 tests.assert_eq(true, doesSdkSupport(["baseline"]));
