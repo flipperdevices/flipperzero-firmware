@@ -12,6 +12,7 @@ let filePicker = require("gui/file_picker");
 let widget = require("gui/widget");
 let icon = require("gui/icon");
 let flipper = require("flipper");
+let math = require("math");
 
 // declare clock widget children
 let cuteDolphinWithWatch = icon.getBuiltin("DolphinWait_59x54");
@@ -138,7 +139,7 @@ eventLoop.subscribe(views.stopwatchWidget.button, function (_sub, buttonEvent, g
 
 // count time
 eventLoop.subscribe(eventLoop.timer("periodic", 500), function (_sub, _item, views, stopwatchWidgetElements, halfSeconds) {
-    let text = (halfSeconds / 2 / 60).toString();
+    let text = math.floor(halfSeconds / 2 / 60).toString();
     if (halfSeconds < 10 * 60 * 2)
         text = "0" + text;
 
@@ -146,7 +147,7 @@ eventLoop.subscribe(eventLoop.timer("periodic", 500), function (_sub, _item, vie
 
     if (((halfSeconds / 2) % 60) < 10)
         text += "0";
-    text += ((halfSeconds / 2) % 60).toString();
+    text += (math.floor(halfSeconds / 2) % 60).toString();
 
     stopwatchWidgetElements[0].text = text;
     views.stopwatchWidget.setChildren(stopwatchWidgetElements);
