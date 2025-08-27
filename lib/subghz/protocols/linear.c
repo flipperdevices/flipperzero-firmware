@@ -10,10 +10,10 @@
 
 #define DIP_PATTERN "%c%c%c%c%c%c%c%c%c%c"
 #define DATA_TO_DIP(dip)                                                                    \
-    (dip & 0x0200 ? '1' : '0'), (dip & 0x0100 ? '1' : '0'), (dip & 0x0080 ? '1' : '0'),     \
-        (dip & 0x0040 ? '1' : '0'), (dip & 0x0020 ? '1' : '0'), (dip & 0x0010 ? '1' : '0'), \
-        (dip & 0x0008 ? '1' : '0'), (dip & 0x0004 ? '1' : '0'), (dip & 0x0002 ? '1' : '0'), \
-        (dip & 0x0001 ? '1' : '0')
+    (dip & 0x0200 ? '0' : '1'), (dip & 0x0100 ? '0' : '1'), (dip & 0x0080 ? '0' : '1'),     \
+        (dip & 0x0040 ? '0' : '1'), (dip & 0x0020 ? '0' : '1'), (dip & 0x0010 ? '0' : '1'), \
+        (dip & 0x0008 ? '0' : '1'), (dip & 0x0004 ? '0' : '1'), (dip & 0x0002 ? '0' : '1'), \
+        (dip & 0x0001 ? '0' : '1')
 
 static const SubGhzBlockConst subghz_protocol_linear_const = {
     .te_short = 500,
@@ -341,5 +341,5 @@ void subghz_protocol_decoder_linear_get_string(void* context, FuriString* output
         instance->generic.data_count_bit,
         code_found_lo,
         code_found_reverse_lo,
-        DATA_TO_DIP(code_found_lo));
+        DATA_TO_DIP(code_found_reverse_lo));
 }
