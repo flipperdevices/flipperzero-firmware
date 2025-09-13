@@ -1755,6 +1755,7 @@ Function,+,furi_hal_usb_printer_get_error,PrinterError,
 Function,+,furi_hal_usb_printer_get_status,PrinterStatus,
 Function,+,furi_hal_usb_printer_is_connected,_Bool,
 Function,+,furi_hal_usb_printer_receive,int32_t,"uint8_t*, uint16_t"
+Function,+,furi_hal_usb_printer_set_callbacks,void,"PrinterCallbacks*, void*"
 Function,+,furi_hal_usb_printer_set_rx_callback,void,"void (*)(uint8_t*, size_t, void*), void*"
 Function,+,furi_hal_usb_printer_set_status,void,"_Bool, _Bool, _Bool"
 Function,+,furi_hal_usb_reinit,void,

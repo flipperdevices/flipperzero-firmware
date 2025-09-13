@@ -26,6 +26,12 @@ typedef enum {
     PrinterErrorGeneral,
 } PrinterError;
 
+/** Printer callbacks structure */
+typedef struct {
+    void (*data_rx_callback)(const uint8_t* data, size_t len, void* context);
+    void (*status_callback)(bool connected, void* context);
+} PrinterCallbacks;
+
 /**
  * @brief Receive data from the host
  * @param buffer Pointer to the buffer to store received data
@@ -61,7 +67,14 @@ PrinterStatus furi_hal_usb_printer_get_status(void);
 PrinterError furi_hal_usb_printer_get_error(void);
 
 /**
- * @brief Set callback for receiving data from host
+ * @brief Set structured callbacks for printer events
+ * @param callbacks Pointer to PrinterCallbacks structure
+ * @param context Context pointer passed to callbacks
+ */
+void furi_hal_usb_printer_set_callbacks(PrinterCallbacks* callbacks, void* context);
+
+/**
+ * @brief Set callback for receiving data from host (legacy function)
  * @param callback Function pointer to callback
  * @param context Context pointer passed to callback
  */

@@ -107,6 +107,8 @@ static PrinterStatus printer_status = PrinterStatusIdle;
 static PrinterError printer_error = PrinterErrorNone;
 static FuriMessageQueue* printer_queue = NULL;
 static uint8_t* printer_rx_buffer = NULL;
+static PrinterCallbacks* printer_callbacks = NULL;
+static void* printer_callback_context = NULL;
 static void (*printer_rx_user_callback)(uint8_t* data, size_t len, void* context) = NULL;
 static void* printer_rx_context = NULL;
 
@@ -188,11 +190,21 @@ static void printer_deinit(usbd_device* dev) {
 static void printer_on_wakeup(usbd_device* dev) {
     UNUSED(dev);
     printer_connected = true;
+    
+    // Call status callback
+    if(printer_callbacks && printer_callbacks->status_callback) {
+        printer_callbacks->status_callback(true, printer_callback_context);
+    }
 }
 
 static void printer_on_suspend(usbd_device* dev) {
     UNUSED(dev);
     printer_connected = false;
+    
+    // Call status callback
+    if(printer_callbacks && printer_callbacks->status_callback) {
+        printer_callbacks->status_callback(false, printer_callback_context);
+    }
 }
 
 // Handle printer class-specific requests
@@ -254,7 +266,9 @@ static void printer_rx_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
     if(len > 0) {
         printer_status = PrinterStatusBusy;
         
-        if(printer_rx_user_callback) {
+        if(printer_callbacks && printer_callbacks->data_rx_callback) {
+            printer_callbacks->data_rx_callback(printer_rx_buffer, len, printer_callback_context);
+        } else if(printer_rx_user_callback) {
             printer_rx_user_callback(printer_rx_buffer, len, printer_rx_context);
         } else {
             // Store in queue if no callback is registered
@@ -323,6 +337,25 @@ PrinterStatus furi_hal_usb_printer_get_status(void) {
 
 PrinterError furi_hal_usb_printer_get_error(void) {
     return printer_error;
+}
+
+void furi_hal_usb_printer_set_callbacks(PrinterCallbacks* callbacks, void* context) {
+    printer_callbacks = callbacks;
+    printer_callback_context = context;
+    
+    // Process any queued data if callback is being set
+    if(callbacks && callbacks->data_rx_callback && printer_queue) {
+        PrinterQueueItem item;
+        while(furi_message_queue_get(printer_queue, &item, 0) == FuriStatusOk) {
+            callbacks->data_rx_callback(item.data, item.len, context);
+            free(item.data);
+        }
+    }
+    
+    // Send current connection status
+    if(callbacks && callbacks->status_callback) {
+        callbacks->status_callback(printer_connected, context);
+    }
 }
 
 void furi_hal_usb_printer_set_rx_callback(

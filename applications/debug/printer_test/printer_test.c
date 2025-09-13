@@ -12,19 +12,59 @@ typedef struct {
     size_t bytes_received;
     size_t total_bytes;
     bool job_active;
+    bool usb_connected;
     char last_data[64];  // Store last chunk of printable data for preview
     FuriTimer* poll_timer;
+    PrinterCallbacks* printer_callbacks;
 } PrinterTest;
 
 typedef enum {
     EventTypeKey,
     EventTypeTick,
+    EventTypeDataReceived,
+    EventTypeStatusChanged,
 } EventType;
 
 typedef struct {
     EventType type;
     InputEvent input;
+    size_t data_len;
+    bool connected;
 } PrinterTestEvent;
+
+// Callback for receiving print data
+static void printer_data_callback(const uint8_t* data, size_t len, void* context) {
+    PrinterTest* app = context;
+    
+    // Extract printable characters for preview
+    size_t preview_len = 0;
+    for(size_t i = 0; i < len && preview_len < sizeof(app->last_data) - 1; i++) {
+        if(data[i] >= 32 && data[i] <= 126) {
+            app->last_data[preview_len++] = data[i];
+        } else if(data[i] == '\n' && preview_len < sizeof(app->last_data) - 3) {
+            app->last_data[preview_len++] = '\\';
+            app->last_data[preview_len++] = 'n';
+        }
+    }
+    app->last_data[preview_len] = '\0';
+    
+    PrinterTestEvent event = {
+        .type = EventTypeDataReceived,
+        .data_len = len,
+    };
+    furi_message_queue_put(app->event_queue, &event, 0);
+}
+
+// Callback for USB connection status
+static void printer_status_callback(bool connected, void* context) {
+    PrinterTest* app = context;
+    
+    PrinterTestEvent event = {
+        .type = EventTypeStatusChanged,
+        .connected = connected,
+    };
+    furi_message_queue_put(app->event_queue, &event, 0);
+}
 
 // Timer callback to poll for received data
 static void printer_test_timer_callback(void* context) {
@@ -46,7 +86,7 @@ static void printer_test_draw_callback(Canvas* canvas, void* context) {
     canvas_set_font(canvas, FontSecondary);
 
     // Draw connection status
-    if(furi_hal_usb_printer_is_connected()) {
+    if(app->usb_connected) {
         canvas_draw_str(canvas, 2, 24, "Status: Connected");
     } else {
         canvas_draw_str(canvas, 2, 24, "Status: Disconnected");
@@ -87,7 +127,13 @@ int32_t printer_test_app(void* p) {
     app->bytes_received = 0;
     app->total_bytes = 0;
     app->job_active = false;
+    app->usb_connected = false;
     app->last_data[0] = '\0';
+
+    // Allocate printer callbacks
+    app->printer_callbacks = malloc(sizeof(PrinterCallbacks));
+    app->printer_callbacks->data_rx_callback = printer_data_callback;
+    app->printer_callbacks->status_callback = printer_status_callback;
 
     // Create GUI
     app->gui = furi_record_open(RECORD_GUI);
@@ -107,9 +153,11 @@ int32_t printer_test_app(void* p) {
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_printer, NULL) == true);
 
+    // Set up structured printer callbacks
+    furi_hal_usb_printer_set_callbacks(app->printer_callbacks, app);
+
     PrinterTestEvent event;
     bool running = true;
-    uint8_t buffer[256];
 
     while(running) {
         FuriStatus event_status = furi_message_queue_get(app->event_queue, &event, FuriWaitForever);
@@ -132,32 +180,21 @@ int32_t printer_test_app(void* p) {
                         break;
                     }
                 }
-            } else if(event.type == EventTypeTick) {
-                // Poll for received data
-                int32_t len = furi_hal_usb_printer_receive(buffer, sizeof(buffer));
-                if(len > 0) {
-                    app->job_active = true;
-                    app->total_bytes += len;
-                    
-                    // Extract printable characters for preview
-                    size_t preview_len = 0;
-                    for(int32_t i = 0; i < len && preview_len < sizeof(app->last_data) - 1; i++) {
-                        if(buffer[i] >= 32 && buffer[i] <= 126) {
-                            app->last_data[preview_len++] = buffer[i];
-                        } else if(buffer[i] == '\n' && preview_len < sizeof(app->last_data) - 3) {
-                            app->last_data[preview_len++] = '\\';
-                            app->last_data[preview_len++] = 'n';
-                        }
-                    }
-                    app->last_data[preview_len] = '\0';
-                    
-                    view_port_update(app->view_port);
-                }
+            } else if(event.type == EventTypeDataReceived) {
+                // Handle incoming print data via callback
+                app->job_active = true;
+                app->total_bytes += event.data_len;
+                view_port_update(app->view_port);
+            } else if(event.type == EventTypeStatusChanged) {
+                // Handle USB connection status change
+                app->usb_connected = event.connected;
+                view_port_update(app->view_port);
             }
         }
     }
 
     // Cleanup
+    furi_hal_usb_printer_set_callbacks(NULL, NULL);
     furi_timer_stop(app->poll_timer);
     furi_timer_free(app->poll_timer);
     furi_hal_usb_set_config(usb_mode_prev, NULL);
@@ -167,6 +204,7 @@ int32_t printer_test_app(void* p) {
     view_port_free(app->view_port);
     furi_record_close(RECORD_GUI);
     furi_message_queue_free(app->event_queue);
+    free(app->printer_callbacks);
     free(app);
 
     return 0;
