@@ -291,6 +291,7 @@ Header,+,targets/f7/furi_hal/furi_hal_spi_types.h,,
 Header,+,targets/f7/furi_hal/furi_hal_subghz.h,,
 Header,+,targets/f7/furi_hal/furi_hal_target_hw.h,,
 Header,+,targets/f7/furi_hal/furi_hal_usb_cdc.h,,
+Header,+,targets/f7/furi_hal/furi_hal_usb_printer.h,,
 Header,+,targets/f7/platform_specific/cxx_virtual_stub.h,,
 Header,+,targets/f7/platform_specific/intrinsic_export.h,,
 Header,+,targets/f7/platform_specific/math_wrapper.h,,
@@ -1750,6 +1751,12 @@ Function,+,furi_hal_usb_get_config,FuriHalUsbInterface*,
 Function,-,furi_hal_usb_init,void,
 Function,+,furi_hal_usb_is_locked,_Bool,
 Function,+,furi_hal_usb_lock,void,
+Function,+,furi_hal_usb_printer_get_error,PrinterError,
+Function,+,furi_hal_usb_printer_get_status,PrinterStatus,
+Function,+,furi_hal_usb_printer_is_connected,_Bool,
+Function,+,furi_hal_usb_printer_receive,int32_t,"uint8_t*, uint16_t"
+Function,+,furi_hal_usb_printer_set_rx_callback,void,"void (*)(uint8_t*, size_t, void*), void*"
+Function,+,furi_hal_usb_printer_set_status,void,"_Bool, _Bool, _Bool"
 Function,+,furi_hal_usb_reinit,void,
 Function,+,furi_hal_usb_set_config,_Bool,"FuriHalUsbInterface*, void*"
 Function,+,furi_hal_usb_set_state_callback,void,"FuriHalUsbStateCallback, void*"
@@ -4160,4 +4167,5 @@ Variable,+,usb_cdc_dual,FuriHalUsbInterface,
 Variable,+,usb_cdc_single,FuriHalUsbInterface,
 Variable,+,usb_hid,FuriHalUsbInterface,
 Variable,+,usb_hid_u2f,FuriHalUsbInterface,
+Variable,+,usb_printer,FuriHalUsbInterface,
 Variable,+,usbd_devfs,const usbd_driver,
