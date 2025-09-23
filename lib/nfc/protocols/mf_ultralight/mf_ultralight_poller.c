@@ -465,7 +465,8 @@ static NfcCommand mf_ultralight_poller_handler_auth_ultralight_c(MfUltralightPol
                     instance->state = MfUltralightPollerStateReadPages;
                     return command;
                 } else {
-                    instance->auth_context.tdes_key = instance->mfu_event.data->key_request_data.key;
+                    instance->auth_context.tdes_key =
+                        instance->mfu_event.data->key_request_data.key;
                 }
             } else {
                 FURI_LOG_D(TAG, "No key provided, skipping auth");

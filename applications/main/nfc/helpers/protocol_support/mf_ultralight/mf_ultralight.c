@@ -151,9 +151,9 @@ static NfcCommand
         }
         if(!mf_ultralight_event->data->auth_context.skip_auth) {
             mf_ultralight_event->data->auth_context.password = instance->mf_ul_auth->password;
-            
+
             // Only set tdes_key for Manual/Reader auth types, not for dictionary attacks
-            if(instance->mf_ul_auth->type == MfUltralightAuthTypeManual || 
+            if(instance->mf_ul_auth->type == MfUltralightAuthTypeManual ||
                instance->mf_ul_auth->type == MfUltralightAuthTypeReader) {
                 mf_ultralight_event->data->key_request_data.key = instance->mf_ul_auth->tdes_key;
                 mf_ultralight_event->data->key_request_data.key_provided = true;
@@ -183,7 +183,7 @@ bool nfc_scene_read_on_event_mf_ultralight(NfcApp* instance, SceneManagerEvent e
         } else if(event.event == NfcCustomEventPollerIncomplete) {
             const MfUltralightData* data =
                 nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
-            if(data->type == MfUltralightTypeMfulC && 
+            if(data->type == MfUltralightTypeMfulC &&
                instance->mf_ul_auth->type == MfUltralightAuthTypeNone) {
                 // Start dict attack for MFUL C cards only if no specific auth was attempted
                 scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightCDictAttack);
