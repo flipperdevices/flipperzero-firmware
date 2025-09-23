@@ -267,6 +267,15 @@ App(
 )
 
 App(
+    appid="banapass_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="banapass_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/banapass.c"],
+)
+
+App(
     appid="aic_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="aic_plugin_ep",
@@ -274,3 +283,4 @@ App(
     requires=["nfc"],
     sources=["plugins/supported_cards/aic.c"],
 )
+
