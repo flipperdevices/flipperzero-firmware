@@ -232,7 +232,8 @@ static bool banapass_parse(const NfcDevice* device, FuriString* parsed_data) {
                 if((access_code[0] >> 4) != 3) {
                     furi_string_cat_printf(
                         parsed_data,
-                        "Potential clone:\nAccess Code preamble\nexpected 3, got %d\n", (access_code[0] >> 4));
+                        "Potential clone:\nAccess Code preamble\nexpected 3, got %d\n",
+                        (access_code[0] >> 4));
                 }
                 furi_string_cat_str(
                     parsed_data, "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
