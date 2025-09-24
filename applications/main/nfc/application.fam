@@ -265,3 +265,12 @@ App(
     requires=["cli"],
     sources=["nfc_cli.c"],
 )
+
+App(
+    appid="banapass_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="banapass_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/banapass.c"],
+)
