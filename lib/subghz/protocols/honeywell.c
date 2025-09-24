@@ -91,7 +91,7 @@ void subghz_protocol_decoder_honeywell_addbit(void* context, bool data) {
             instance->generic.data = instance->decoder.decode_data;
             instance->generic.data_count_bit =
                 instance->decoder
-                    .decode_count_bit; //maybe set it to 64, and hack the first 2 bits to 1! will see if replay needs it
+                    .decode_count_bit; //maybe set it to 64, and hack the first 2 bits to 1! will see if replay needs it (-nofl)
             if(instance->base.callback)
                 instance->base.callback(&instance->base, instance->base.context);
             instance->decoder.decode_data = 0;
