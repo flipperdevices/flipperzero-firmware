@@ -479,7 +479,6 @@ static void decrypt_spad_0(const uint8_t* spad, uint8_t* decrypted) {
     }
 }
 
-
 static uint16_t crc16(uint64_t data, int bits, uint16_t init, uint16_t poly) {
     uint16_t v = init;
     for(int i = 0; i < bits; ++i) {
@@ -489,7 +488,8 @@ static uint16_t crc16(uint64_t data, int bits, uint16_t init, uint16_t poly) {
     return v;
 }
 
-static bool check_access_code_crc(const uint8_t ac[3], const uint8_t body[6], const uint8_t crc[5]) {
+static bool
+    check_access_code_crc(const uint8_t ac[3], const uint8_t body[6], const uint8_t crc[5]) {
     uint64_t msg = 0;
     for(int i = 0; i < 3; ++i) {
         if(ac[i] > 0xF) return false;

@@ -283,4 +283,3 @@ App(
     requires=["nfc"],
     sources=["plugins/supported_cards/aic.c"],
 )
-
