@@ -106,6 +106,10 @@ static void subghz_protocol_encoder_gangqi_get_upload(SubGhzProtocolEncoderGangQ
 
     size_t index = 0;
 
+    // Add initial GAP
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)subghz_protocol_gangqi_const.te_long * 2);
+
     // Send key and GAP between parcels
     for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
         if(bit_read(instance->generic.data, i - 1)) {
@@ -113,11 +117,9 @@ static void subghz_protocol_encoder_gangqi_get_upload(SubGhzProtocolEncoderGangQ
             instance->encoder.upload[index++] =
                 level_duration_make(true, (uint32_t)subghz_protocol_gangqi_const.te_long);
             if(i == 1) {
-                //Send gap if bit was last
+                // Send final gap after last bit
                 instance->encoder.upload[index++] = level_duration_make(
-                    false,
-                    (uint32_t)subghz_protocol_gangqi_const.te_short * 4 +
-                        subghz_protocol_gangqi_const.te_delta);
+                    false, (uint32_t)subghz_protocol_gangqi_const.te_short * 4);
             } else {
                 instance->encoder.upload[index++] =
                     level_duration_make(false, (uint32_t)subghz_protocol_gangqi_const.te_short);
@@ -127,11 +129,9 @@ static void subghz_protocol_encoder_gangqi_get_upload(SubGhzProtocolEncoderGangQ
             instance->encoder.upload[index++] =
                 level_duration_make(true, (uint32_t)subghz_protocol_gangqi_const.te_short);
             if(i == 1) {
-                //Send gap if bit was last
+                // Send final gap after last bit
                 instance->encoder.upload[index++] = level_duration_make(
-                    false,
-                    (uint32_t)subghz_protocol_gangqi_const.te_short * 4 +
-                        subghz_protocol_gangqi_const.te_delta);
+                    false, (uint32_t)subghz_protocol_gangqi_const.te_short * 4);
             } else {
                 instance->encoder.upload[index++] =
                     level_duration_make(false, (uint32_t)subghz_protocol_gangqi_const.te_long);

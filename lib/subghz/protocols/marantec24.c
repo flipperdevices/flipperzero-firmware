@@ -96,6 +96,10 @@ static void
     furi_assert(instance);
     size_t index = 0;
 
+    // Send initial GAP to trigger decoder
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)subghz_protocol_marantec24_const.te_long * 9);
+
     // Send key and GAP
     for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
         if(bit_read(instance->generic.data, i - 1)) {
@@ -105,9 +109,7 @@ static void
             if(i == 1) {
                 //Send gap if bit was last
                 instance->encoder.upload[index++] = level_duration_make(
-                    false,
-                    (uint32_t)subghz_protocol_marantec24_const.te_long * 9 +
-                        subghz_protocol_marantec24_const.te_short);
+                    false, (uint32_t)subghz_protocol_marantec24_const.te_long * 9);
             } else {
                 instance->encoder.upload[index++] = level_duration_make(
                     false, (uint32_t)subghz_protocol_marantec24_const.te_long * 2);
@@ -119,9 +121,7 @@ static void
             if(i == 1) {
                 //Send gap if bit was last
                 instance->encoder.upload[index++] = level_duration_make(
-                    false,
-                    (uint32_t)subghz_protocol_marantec24_const.te_long * 9 +
-                        subghz_protocol_marantec24_const.te_short);
+                    false, (uint32_t)subghz_protocol_marantec24_const.te_long * 9);
             } else {
                 instance->encoder.upload[index++] = level_duration_make(
                     false, (uint32_t)subghz_protocol_marantec24_const.te_short * 3);
