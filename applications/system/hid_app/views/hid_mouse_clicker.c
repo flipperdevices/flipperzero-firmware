@@ -77,7 +77,7 @@ static void hid_mouse_clicker_draw_callback(Canvas* canvas, void* context) {
         btn_label = "Right";
         break;
     default:
-        furi_assert(false);
+        furi_crash();
     }
 
     elements_multiline_text_aligned(canvas, 89, 57, AlignCenter, AlignBottom, btn_label);
