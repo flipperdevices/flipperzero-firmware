@@ -272,10 +272,6 @@ void js_check_sdk_compatibility(struct mjs* mjs) {
 
 static const char* extra_features[] = {
     "baseline", // dummy "feature"
-    "gpio-pwm",
-    "gui-widget",
-    "serial-framing",
-    "gui-widget-extras",
 };
 
 /**
