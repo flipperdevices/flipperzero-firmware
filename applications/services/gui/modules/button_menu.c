@@ -50,13 +50,13 @@ static void button_menu_draw_text(
     FuriString* disp_str;
     disp_str = furi_string_alloc_set(text);
     bool draw_static = true;
-    
+
     if(selected) {
         size_t text_width = canvas_string_width(canvas, furi_string_get_cstr(disp_str));
-        if (text_width >= ITEM_WIDTH - 8) {
+        if(text_width >= ITEM_WIDTH - 8) {
             elements_scrollable_text_line(
                 canvas,
-                item_x + 4, 
+                item_x + 4,
                 item_y + ITEM_HEIGHT - 4,
                 ITEM_WIDTH - 8,
                 disp_str,
@@ -66,7 +66,7 @@ static void button_menu_draw_text(
         }
     }
 
-    if (draw_static) {
+    if(draw_static) {
         elements_string_fit_width(canvas, disp_str, ITEM_WIDTH - 6);
         canvas_draw_str_aligned(
             canvas,
@@ -122,7 +122,7 @@ static void button_menu_draw_common_button(
     } else {
         canvas_draw_rframe(canvas, item_x, item_y, ITEM_WIDTH, ITEM_HEIGHT, 5);
     }
-    
+
     button_menu_draw_text(canvas, item_x, item_y, text, selected, model);
 }
 
@@ -144,13 +144,13 @@ static void button_menu_view_draw_callback(Canvas* canvas, void* _model) {
     if(max_screen > active_screen) {
         canvas_draw_icon(canvas, 28, 123, &I_InfraredArrowDown_4x8);
     }
-    
+
     if(model->header) {
         FuriString* disp_str;
         disp_str = furi_string_alloc_set(model->header);
         size_t header_width = canvas_string_width(canvas, furi_string_get_cstr(disp_str));
 
-        if (header_width >= ITEM_WIDTH - 8) {
+        if(header_width >= ITEM_WIDTH - 8) {
             elements_scrollable_text_line(
                 canvas, 3, 13, ITEM_WIDTH - 8, disp_str, model->scroll_counter, false);
         } else {
@@ -400,12 +400,7 @@ ButtonMenuItem* button_menu_add_item(
 static void button_menu_process_timer_callback(void* context) {
     ButtonMenu* button_menu = context;
     with_view_model(
-        button_menu->view,
-        ButtonMenuModel * model,
-        {
-            model->scroll_counter++;
-        },
-        true);
+        button_menu->view, ButtonMenuModel * model, { model->scroll_counter++; }, true);
 }
 
 ButtonMenu* button_menu_alloc(void) {
@@ -441,7 +436,7 @@ void button_menu_free(ButtonMenu* button_menu) {
     with_view_model(
         button_menu->view,
         ButtonMenuModel * model,
-        { 
+        {
             ButtonMenuItemArray_clear(model->items);
             furi_timer_stop(model->scroll_timer);
             furi_timer_free(model->scroll_timer);
