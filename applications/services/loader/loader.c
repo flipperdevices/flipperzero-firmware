@@ -88,6 +88,7 @@ static void loader_show_gui_error(
     LoaderMessageLoaderStatusResult status,
     const char* name,
     FuriString* error_message) {
+    furi_check(name);
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     DialogMessage* message = dialog_message_alloc();
 

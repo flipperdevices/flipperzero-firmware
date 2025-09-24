@@ -93,7 +93,8 @@ static const FrameBubble*
     bubble_animation_pick_bubble(BubbleAnimationViewModel* model, bool active) {
     const FrameBubble* bubble = NULL;
 
-    if((model->active_bubbles == 0) && (model->passive_bubbles == 0)) {
+    // Check for division by zero based on the active parameter
+    if((active && model->active_bubbles == 0) || (!active && model->passive_bubbles == 0)) {
         return NULL;
     }
 
