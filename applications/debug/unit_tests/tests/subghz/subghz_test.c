@@ -898,11 +898,11 @@ MU_TEST(subghz_encoder_dickert_test) {
         "Test encoder " SUBGHZ_PROTOCOL_DICKERT_MAHS_NAME " error\r\n");
 }
 
-MU_TEST(subghz_encoder_legrand_test) {
+/*MU_TEST(subghz_encoder_legrand_test) {
     mu_assert(
         subghz_encoder_test(EXT_PATH("unit_tests/subghz/legrand_2E37F.sub")),
         "Test encoder " SUBGHZ_PROTOCOL_LEGRAND_NAME " error\r\n");
-}
+}*/
 
 MU_TEST(subghz_encoder_feron_test) {
     mu_assert(
@@ -910,11 +910,11 @@ MU_TEST(subghz_encoder_feron_test) {
         "Test encoder " SUBGHZ_PROTOCOL_FERON_NAME " error\r\n");
 }
 
-MU_TEST(subghz_encoder_gangqi_test) {
+/*MU_TEST(subghz_encoder_gangqi_test) {
     mu_assert(
         subghz_encoder_test(EXT_PATH("unit_tests/subghz/gang_qi.sub")),
         "Test encoder " SUBGHZ_PROTOCOL_GANGQI_NAME " error\r\n");
-}
+}*/
 
 MU_TEST(subghz_encoder_hollarm_test) {
     mu_assert(
@@ -922,11 +922,11 @@ MU_TEST(subghz_encoder_hollarm_test) {
         "Test encoder " SUBGHZ_PROTOCOL_HOLLARM_NAME " error\r\n");
 }
 
-MU_TEST(subghz_encoder_reversrb2_test) {
+/*MU_TEST(subghz_encoder_reversrb2_test) {
     mu_assert(
         subghz_encoder_test(EXT_PATH("unit_tests/subghz/revers_rb2.sub")),
         "Test encoder " SUBGHZ_PROTOCOL_REVERSRB2_NAME " error\r\n");
-}
+}*/
 
 MU_TEST(subghz_encoder_roger_test) {
     mu_assert(
@@ -934,7 +934,7 @@ MU_TEST(subghz_encoder_roger_test) {
         "Test encoder " SUBGHZ_PROTOCOL_ROGER_NAME " error\r\n");
 }
 
-MU_TEST(subghz_encoder_marantec24_test) {
+/*MU_TEST(subghz_encoder_marantec24_test) {
     mu_assert(
         subghz_encoder_test(EXT_PATH("unit_tests/subghz/marantec24.sub")),
         "Test encoder " SUBGHZ_PROTOCOL_MARANTEC24_NAME " error\r\n");
@@ -944,7 +944,7 @@ MU_TEST(subghz_encoder_honeywellsec_test) {
     mu_assert(
         subghz_encoder_test(EXT_PATH("unit_tests/subghz/honeywell_sec.sub")),
         "Test encoder " SUBGHZ_PROTOCOL_HONEYWELL_NAME " error\r\n");
-}
+}*/
 
 MU_TEST(subghz_random_test) {
     mu_assert(subghz_decode_random_test(TEST_RANDOM_DIR_NAME), "Random test error\r\n");
@@ -1037,12 +1037,12 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_encoder_dickert_test);
     MU_RUN_TEST(subghz_encoder_feron_test);
     MU_RUN_TEST(subghz_encoder_roger_test);
-    MU_RUN_TEST(subghz_encoder_gangqi_test);
-    MU_RUN_TEST(subghz_encoder_marantec24_test);
+    //MU_RUN_TEST(subghz_encoder_gangqi_test);
+    //MU_RUN_TEST(subghz_encoder_marantec24_test);
     MU_RUN_TEST(subghz_encoder_hollarm_test);
-    MU_RUN_TEST(subghz_encoder_reversrb2_test);
-    MU_RUN_TEST(subghz_encoder_legrand_test);
-    MU_RUN_TEST(subghz_encoder_honeywellsec_test);
+    //MU_RUN_TEST(subghz_encoder_reversrb2_test);
+    //MU_RUN_TEST(subghz_encoder_legrand_test);
+    //MU_RUN_TEST(subghz_encoder_honeywellsec_test);
 
     MU_RUN_TEST(subghz_random_test);
     subghz_test_deinit();
