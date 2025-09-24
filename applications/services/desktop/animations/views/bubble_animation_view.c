@@ -97,8 +97,12 @@ static const FrameBubble*
         return NULL;
     }
 
-    uint8_t index =
-        furi_hal_random_get() % (active ? model->active_bubbles : model->passive_bubbles);
+    uint8_t random_value = furi_hal_random_get();
+    // In case random generator return zero lets set it to 3
+    if(random_value == 0) {
+        random_value = 3;
+    }
+    uint8_t index = random_value % (active ? model->active_bubbles : model->passive_bubbles);
     const BubbleAnimation* animation = model->current;
 
     for(int i = 0; i < animation->frame_bubble_sequences_count; ++i) {
