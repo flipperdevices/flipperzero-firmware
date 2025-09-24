@@ -17,7 +17,7 @@
 #define NICE_FLOR_S_DIR_NAME    EXT_PATH("subghz/assets/nice_flor_s")
 #define ALUTECH_AT_4N_DIR_NAME  EXT_PATH("subghz/assets/alutech_at_4n")
 #define TEST_RANDOM_DIR_NAME    EXT_PATH("unit_tests/subghz/test_random_raw.sub")
-#define TEST_RANDOM_COUNT_PARSE 329
+#define TEST_RANDOM_COUNT_PARSE 331
 #define TEST_TIMEOUT            10000
 
 static SubGhzEnvironment* environment_handler;
