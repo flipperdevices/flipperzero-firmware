@@ -109,7 +109,7 @@ static void
             if(i == 1) {
                 //Send gap if bit was last
                 instance->encoder.upload[index++] = level_duration_make(
-                    false, (uint32_t)subghz_protocol_marantec24_const.te_long * 9);
+                    false, (uint32_t)subghz_protocol_marantec24_const.te_short);
             } else {
                 instance->encoder.upload[index++] = level_duration_make(
                     false, (uint32_t)subghz_protocol_marantec24_const.te_long * 2);
@@ -121,7 +121,7 @@ static void
             if(i == 1) {
                 //Send gap if bit was last
                 instance->encoder.upload[index++] = level_duration_make(
-                    false, (uint32_t)subghz_protocol_marantec24_const.te_long * 9);
+                    false, (uint32_t)subghz_protocol_marantec24_const.te_short);
             } else {
                 instance->encoder.upload[index++] = level_duration_make(
                     false, (uint32_t)subghz_protocol_marantec24_const.te_short * 3);
