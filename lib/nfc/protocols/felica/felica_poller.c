@@ -348,7 +348,8 @@ NfcCommand felica_poller_state_handler_read_standard_blocks(FelicaPoller* instan
             }
 
             if(response->SF1 == 0 && response->SF2 == 0) {
-                FelicaPublicBlock* public_block = felica_public_block_array_push_raw(public_block_buffer);
+                FelicaPublicBlock* public_block =
+                    felica_public_block_array_push_raw(public_block_buffer);
                 memset(public_block, 0, sizeof *public_block);
                 memcpy(public_block->block.data, response->data, FELICA_DATA_BLOCK_SIZE);
 
