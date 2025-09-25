@@ -24,24 +24,23 @@
  * ### View
  * In Flipper's terminology, a "View" is a fullscreen design element that
  * assumes control over the entire viewport and all input events. Different
- * types of views are available (not all of which are unfortunately currently
- * implemented in JS):
+ * types of views are available:
  * | View                 | Has JS adapter?       |
  * |----------------------|-----------------------|
- * | `button_menu`        | ❌                    |
- * | `button_panel`       | ❌                    |
+ * | `button_menu`        | ✅                    |
+ * | `button_panel`       | ✅                    |
  * | `byte_input`         | ✅                    |
  * | `dialog_ex`          | ✅ (as `dialog`)      |
  * | `empty_screen`       | ✅                    |
  * | `file_browser`       | ✅ (as `file_picker`) |
  * | `loading`            | ✅                    |
- * | `menu`               | ❌                    |
- * | `number_input`       | ❌                    |
- * | `popup`              | ❌                    |
+ * | `menu`               | ✅                    |
+ * | `number_input`       | ✅                    |
+ * | `popup`              | ✅                    |
  * | `submenu`            | ✅                    |
  * | `text_box`           | ✅                    |
  * | `text_input`         | ✅                    |
- * | `variable_item_list` | ❌                    |
+ * | `variable_item_list` | ✅ (as `vi_list`)     |
  * | `widget`             | ✅                    |
  * 
  * In JS, each view has its own set of properties (or just "props"). The
@@ -118,6 +117,9 @@
  */
 
 import type { Contract } from "../event_loop";
+
+export type Font = "primary" | "secondary" | "keyboard" | "big_numbers";
+export type InputType = "press" | "release" | "short" | "long" | "repeat";
 
 type Properties = { [K: string]: any };
 
