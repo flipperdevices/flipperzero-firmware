@@ -1,5 +1,9 @@
 #include "iso_3166.h"
 
+#include <flipper_format.h>
+
+#define RESOURCE_FILE_PATH (EXT_PATH("lfrfid/assets/iso3166.lfrfid"))
+
 static bool lfrfid_search_data(Storage* storage, uint16_t country_code, FuriString* out_line) {
     static const char* lfrfid_resources_header = "Flipper LFRFID resources";
     static const uint32_t lfrfid_resources_file_version = 1;
@@ -12,8 +16,7 @@ static bool lfrfid_search_data(Storage* storage, uint16_t country_code, FuriStri
 
     do {
         // Open file
-        if(!flipper_format_file_open_existing(file, EXT_PATH("lfrfid/assets/iso3166.lfrfid")))
-            break;
+        if(!flipper_format_file_open_existing(file, RESOURCE_FILE_PATH)) break;
         // Read file header and version
         uint32_t version = 0;
         if(!flipper_format_read_header(file, temp_str, &version)) break;

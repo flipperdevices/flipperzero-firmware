@@ -1,12 +1,8 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 #include <storage/storage.h>
 #include <furi.h>
-#include <flipper_format.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
