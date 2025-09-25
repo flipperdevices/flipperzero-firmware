@@ -1,5 +1,6 @@
 #include "felica_poller_i.h"
-#include <lib/toolbox/dynamic_vector.h>
+#include <mlib/m-array.h>
+#include <mlib/m-core.h>
 
 #include <nfc/protocols/nfc_poller_base.h>
 
@@ -7,6 +8,10 @@
 #include <furi_hal.h>
 
 #define TAG "FelicaPoller"
+
+ARRAY_DEF(felica_service_array, FelicaService, M_POD_OPLIST)
+ARRAY_DEF(felica_area_array, FelicaArea, M_POD_OPLIST)
+ARRAY_DEF(felica_public_block_array, FelicaPublicBlock, M_POD_OPLIST)
 
 typedef NfcCommand (*FelicaPollerReadHandler)(FelicaPoller* instance);
 
@@ -231,10 +236,10 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
 
     FelicaListServiceCommandResponse* response;
 
-    DynamicVector service_buffer;
-    DynamicVector area_buffer;
-    dynamic_vector_init(&service_buffer, sizeof(FelicaService));
-    dynamic_vector_init(&area_buffer, sizeof(FelicaArea));
+    felica_service_array_t service_buffer;
+    felica_service_array_init(service_buffer);
+    felica_area_array_t area_buffer;
+    felica_area_array_init(area_buffer);
 
     for(uint16_t cursor = 0; cursor < 0xFFFF; cursor++) {
         FelicaError error = felica_poller_list_service_by_cursor(instance, cursor, &response);
@@ -245,7 +250,7 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
 
         uint8_t len = response->header.length;
         const uint8_t* list_service_payload = response->data;
-        uint16_t code_begin = list_service_payload[0] | (list_service_payload[1] << 8);
+        uint16_t code_begin = (uint16_t)(list_service_payload[0] | (list_service_payload[1] << 8));
 
         if(len != 0x0C && len != 0x0E) {
             FURI_LOG_E(TAG, "Bad command resp length 0x%02X at cursor 0x%04X", len, cursor);
@@ -258,37 +263,48 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
         }
 
         if(len == 0x0E) {
-            FelicaArea* area = dynamic_vector_push_back(&area_buffer);
+            FelicaArea* area = felica_area_array_push_raw(area_buffer);
             if(!area) break;
+            memset(area, 0, sizeof *area);
             area->code = code_begin;
-            area->first_idx = dynamic_vector_size(&service_buffer);
+            area->first_idx = (uint16_t)felica_service_array_size(service_buffer);
             area->last_idx = 0;
-
         } else {
-            FelicaService* svc = dynamic_vector_push_back(&service_buffer);
+            FelicaService* svc = felica_service_array_push_raw(service_buffer);
             if(!svc) break;
+            memset(svc, 0, sizeof *svc);
             svc->code = code_begin;
-            svc->attr = code_begin & 0x3F;
+            svc->attr = (uint8_t)(code_begin & 0x3F);
 
-            if(dynamic_vector_size(&area_buffer)) {
-                FelicaArea* current_area =
-                    dynamic_vector_get(&area_buffer, dynamic_vector_size(&area_buffer) - 1);
-                current_area->last_idx = dynamic_vector_size(&service_buffer) - 1;
+            if(felica_area_array_size(area_buffer)) {
+                FelicaArea* current_area = felica_area_array_back(area_buffer);
+                current_area->last_idx = (uint16_t)(felica_service_array_size(service_buffer) - 1);
             }
         }
     }
 
-    simple_array_init(instance->data->services, dynamic_vector_size(&service_buffer));
-    memcpy(
-        simple_array_get(instance->data->services, 0),
-        service_buffer.data,
-        service_buffer.count * sizeof(FelicaService));
+    const size_t service_num = felica_service_array_size(service_buffer);
+    const size_t area_num = felica_area_array_size(area_buffer);
 
-    simple_array_init(instance->data->areas, dynamic_vector_size(&area_buffer));
-    memcpy(
-        simple_array_get(instance->data->areas, 0),
-        area_buffer.data,
-        area_buffer.count * sizeof(FelicaArea));
+    if(service_num) {
+        simple_array_init(instance->data->services, (uint32_t)service_num);
+        memcpy(
+            simple_array_get(instance->data->services, 0),
+            service_buffer->ptr,
+            service_num * sizeof(FelicaService));
+    } else {
+        simple_array_reset(instance->data->services);
+    }
+
+    if(area_num) {
+        simple_array_init(instance->data->areas, (uint32_t)area_num);
+        memcpy(
+            simple_array_get(instance->data->areas, 0),
+            area_buffer->ptr,
+            area_num * sizeof(FelicaArea));
+    } else {
+        simple_array_reset(instance->data->areas);
+    }
 
     FURI_LOG_I(
         TAG,
@@ -296,8 +312,8 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
         simple_array_get_count(instance->data->services),
         simple_array_get_count(instance->data->areas));
 
-    dynamic_vector_free(&service_buffer);
-    dynamic_vector_free(&area_buffer);
+    felica_service_array_clear(service_buffer);
+    felica_area_array_clear(area_buffer);
 
     instance->state = FelicaPollerStateReadStandardBlocks;
     return NfcCommandContinue;
@@ -308,8 +324,8 @@ NfcCommand felica_poller_state_handler_read_standard_blocks(FelicaPoller* instan
 
     const uint32_t service_count = simple_array_get_count(instance->data->services);
 
-    DynamicVector public_block_buffer;
-    dynamic_vector_init(&public_block_buffer, sizeof(FelicaPublicBlock));
+    felica_public_block_array_t public_block_buffer;
+    felica_public_block_array_init(public_block_buffer);
 
     instance->state = FelicaPollerStateReadSuccess;
     bool have_read_anything = false;
@@ -332,8 +348,10 @@ NfcCommand felica_poller_state_handler_read_standard_blocks(FelicaPoller* instan
             }
 
             if(response->SF1 == 0 && response->SF2 == 0) {
-                FelicaPublicBlock* public_block = dynamic_vector_push_back(&public_block_buffer);
-                memcpy(&public_block->block.data, response->data, sizeof(FelicaBlock));
+                FelicaPublicBlock* public_block = felica_public_block_array_push_raw(public_block_buffer);
+                memset(public_block, 0, sizeof *public_block);
+                memcpy(public_block->block.data, response->data, FELICA_DATA_BLOCK_SIZE);
+
                 public_block->service_code = service->code;
                 public_block->block_idx = block_list[0];
 
@@ -353,15 +371,15 @@ NfcCommand felica_poller_state_handler_read_standard_blocks(FelicaPoller* instan
     }
 
     if(have_read_anything) {
-        simple_array_init(
-            instance->data->public_blocks, dynamic_vector_size(&public_block_buffer));
+        const size_t n = felica_public_block_array_size(public_block_buffer);
+        simple_array_init(instance->data->public_blocks, (uint32_t)n);
         memcpy(
             simple_array_get(instance->data->public_blocks, 0),
-            public_block_buffer.data,
-            public_block_buffer.count * sizeof(FelicaPublicBlock));
+            public_block_buffer->ptr,
+            n * sizeof(FelicaPublicBlock));
     }
 
-    dynamic_vector_free(&public_block_buffer);
+    felica_public_block_array_clear(public_block_buffer);
 
     return NfcCommandContinue;
 }
