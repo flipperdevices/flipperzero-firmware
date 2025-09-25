@@ -270,11 +270,11 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
             area->first_idx = (uint16_t)felica_service_array_size(service_buffer);
             area->last_idx = 0;
         } else {
-            FelicaService* svc = felica_service_array_push_raw(service_buffer);
-            if(!svc) break;
-            memset(svc, 0, sizeof *svc);
-            svc->code = code_begin;
-            svc->attr = (uint8_t)(code_begin & 0x3F);
+            FelicaService* service = felica_service_array_push_raw(service_buffer);
+            if(!service) break;
+            memset(service, 0, sizeof *service);
+            service->code = code_begin;
+            service->attr = (uint8_t)(code_begin & 0x3F);
 
             if(felica_area_array_size(area_buffer)) {
                 FelicaArea* current_area = felica_area_array_back(area_buffer);
