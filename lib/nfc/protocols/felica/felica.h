@@ -38,7 +38,7 @@ extern "C" {
 #define FELICA_FDT_POLL_FC      (10000U)
 #define FELICA_POLL_POLL_MIN_US (1280U)
 
-#define FELICA_FDT_LISTEN_FC (1172)
+#define FELICA_FDT_LISTEN_FC (0)
 
 #define FELICA_SYSTEM_CODE_CODE (0xFFFFU)
 #define FELICA_TIME_SLOT_1      (0x00U)
@@ -58,6 +58,7 @@ typedef enum {
     FelicaErrorWrongCrc,
     FelicaErrorProtocol,
     FelicaErrorTimeout,
+    FelicaErrorFeatureUnsupported,
 } FelicaError;
 
 typedef struct {
