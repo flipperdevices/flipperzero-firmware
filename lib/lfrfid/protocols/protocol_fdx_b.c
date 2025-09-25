@@ -5,6 +5,7 @@
 #include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 #include <furi_hal_rtc.h>
+#include <tools/iso_3166.h>
 
 #define FDX_B_ENCODED_BIT_SIZE       (128)
 #define FDX_B_ENCODED_BYTE_SIZE      (((FDX_B_ENCODED_BIT_SIZE) / 8))
@@ -287,15 +288,21 @@ void protocol_fdx_b_render_data(ProtocolFDXB* protocol, FuriString* result) {
     uint8_t user_info = bit_lib_get_bits(protocol->data, 55, 5);
     uint8_t replacement_number = bit_lib_get_bits(protocol->data, 60, 3);
     bool animal_flag = bit_lib_get_bit(protocol->data, 63);
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FuriString* country_full_name = furi_string_alloc();
+    bool country_found = iso_3166_get_full_name(storage, country_code, country_full_name);
+    furi_record_close(RECORD_STORAGE);
 
     furi_string_printf(
         result,
         "ID: %03hu-%012llu\n"
         "Country Code: %hu\n"
+        "Country: %s\n"
         "Temperature: ",
         country_code,
         national_code,
-        country_code);
+        country_code,
+        (country_found) ? furi_string_get_cstr(country_full_name) : "Unknown");
 
     float temperature;
     if(protocol_fdx_b_get_temp(protocol->data, &temperature)) {
@@ -320,6 +327,8 @@ void protocol_fdx_b_render_data(ProtocolFDXB* protocol, FuriString* result) {
         reserved,
         user_info,
         replacement_number);
+
+    furi_string_free(country_full_name);
 }
 
 void protocol_fdx_b_render_brief_data(ProtocolFDXB* protocol, FuriString* result) {
@@ -328,14 +337,18 @@ void protocol_fdx_b_render_brief_data(ProtocolFDXB* protocol, FuriString* result
 
     // 10 bit of country code
     uint16_t country_code = protocol_fdx_b_get_country_code(protocol->data);
-
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FuriString* country_two_letter = furi_string_alloc();
+    bool country_found = iso_3166_get_two_letter(storage, country_code, country_two_letter);
+    furi_record_close(RECORD_STORAGE);
     furi_string_printf(
         result,
         "ID: %03hu-%012llu\n"
-        "Country: %hu; Temp.: ",
+        "Country: %hu %s; Temp.: ",
         country_code,
         national_code,
-        country_code);
+        country_code,
+        (country_found) ? furi_string_get_cstr(country_two_letter) : "Unknown");
 
     float temperature;
     if(protocol_fdx_b_get_temp(protocol->data, &temperature)) {
@@ -348,6 +361,8 @@ void protocol_fdx_b_render_brief_data(ProtocolFDXB* protocol, FuriString* result
     } else {
         furi_string_cat(result, "---");
     }
+
+    furi_string_free(country_two_letter);
 }
 
 bool protocol_fdx_b_write_data(ProtocolFDXB* protocol, void* data) {
