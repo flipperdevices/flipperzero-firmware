@@ -20,9 +20,8 @@ static void motd(void* context) {
     printf("\r\n");
     printf("+------------------------------------+\r\n");
     printf("|            Hello world!            |\r\n");
-    printf(
-        "| This is the " ANSI_FG_GREEN "MOTD" ANSI_RESET " for our " ANSI_FG_BLUE
-        "subshell" ANSI_RESET "! |\r\n");
+    printf("| This is the " ANSI_FG_GREEN "MOTD" ANSI_RESET " for our " ANSI_FG_BLUE
+           "subshell" ANSI_RESET "! |\r\n");
     printf("+------------------------------------+\r\n");
 }
 
