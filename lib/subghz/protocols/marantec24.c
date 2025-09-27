@@ -95,36 +95,40 @@ static void
     subghz_protocol_encoder_marantec24_get_upload(SubGhzProtocolEncoderMarantec24* instance) {
     furi_assert(instance);
     size_t index = 0;
-
     // Send initial GAP to trigger decoder
     instance->encoder.upload[index++] =
         level_duration_make(false, (uint32_t)subghz_protocol_marantec24_const.te_long * 9);
-
-    // Send key and GAP
-    for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
-        if(bit_read(instance->generic.data, i - 1)) {
-            // Send bit 1
-            instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_marantec24_const.te_short);
-            if(i == 1) {
-                //Send gap if bit was last
-                instance->encoder.upload[index++] = level_duration_make(
-                    false, (uint32_t)subghz_protocol_marantec24_const.te_short);
+    for(size_t r = 0; r < 4; r++) {
+        // Send key and GAP
+        for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
+            if(bit_read(instance->generic.data, i - 1)) {
+                // Send bit 1
+                instance->encoder.upload[index++] =
+                    level_duration_make(true, (uint32_t)subghz_protocol_marantec24_const.te_short);
+                if(i == 1) {
+                    //Send gap if bit was last
+                    instance->encoder.upload[index++] = level_duration_make(
+                        false,
+                        (uint32_t)subghz_protocol_marantec24_const.te_long * 9 +
+                            subghz_protocol_marantec24_const.te_short);
+                } else {
+                    instance->encoder.upload[index++] = level_duration_make(
+                        false, (uint32_t)subghz_protocol_marantec24_const.te_long * 2);
+                }
             } else {
-                instance->encoder.upload[index++] = level_duration_make(
-                    false, (uint32_t)subghz_protocol_marantec24_const.te_long * 2);
-            }
-        } else {
-            // Send bit 0
-            instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_marantec24_const.te_long);
-            if(i == 1) {
-                //Send gap if bit was last
-                instance->encoder.upload[index++] = level_duration_make(
-                    false, (uint32_t)subghz_protocol_marantec24_const.te_short);
-            } else {
-                instance->encoder.upload[index++] = level_duration_make(
-                    false, (uint32_t)subghz_protocol_marantec24_const.te_short * 3);
+                // Send bit 0
+                instance->encoder.upload[index++] =
+                    level_duration_make(true, (uint32_t)subghz_protocol_marantec24_const.te_long);
+                if(i == 1) {
+                    //Send gap if bit was last
+                    instance->encoder.upload[index++] = level_duration_make(
+                        false,
+                        (uint32_t)subghz_protocol_marantec24_const.te_long * 9 +
+                            subghz_protocol_marantec24_const.te_short); // 15200
+                } else {
+                    instance->encoder.upload[index++] = level_duration_make(
+                        false, (uint32_t)subghz_protocol_marantec24_const.te_short * 3);
+                }
             }
         }
     }
@@ -231,7 +235,7 @@ void subghz_protocol_decoder_marantec24_feed(void* context, bool level, volatile
     switch(instance->decoder.parser_step) {
     case Marantec24DecoderStepReset:
         if((!level) && (DURATION_DIFF(duration, subghz_protocol_marantec24_const.te_long * 9) <
-                        subghz_protocol_marantec24_const.te_delta * 4)) {
+                        subghz_protocol_marantec24_const.te_delta * 6)) {
             //Found GAP
             instance->decoder.decode_data = 0;
             instance->decoder.decode_count_bit = 0;
@@ -267,7 +271,7 @@ void subghz_protocol_decoder_marantec24_feed(void* context, bool level, volatile
             } else if(
                 // End of the key
                 DURATION_DIFF(duration, subghz_protocol_marantec24_const.te_long * 9) <
-                subghz_protocol_marantec24_const.te_delta * 4) {
+                subghz_protocol_marantec24_const.te_delta * 6) {
                 //Found next GAP and add bit 0 or 1 (only bit 0 was found on the remotes)
                 if((DURATION_DIFF(
                         instance->decoder.te_last, subghz_protocol_marantec24_const.te_long) <

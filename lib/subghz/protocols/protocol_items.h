@@ -45,7 +45,6 @@
 #include "kinggates_stylo_4k.h"
 #include "bin_raw.h"
 #include "mastercode.h"
-#include "honeywell.h"
 #include "legrand.h"
 #include "dickert_mahs.h"
 #include "gangqi.h"

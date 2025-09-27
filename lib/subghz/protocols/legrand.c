@@ -81,7 +81,7 @@ void* subghz_protocol_encoder_legrand_alloc(SubGhzEnvironment* environment) {
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
-    instance->encoder.size_upload = subghz_protocol_legrand_const.min_count_bit_for_found * 2 + 1;
+    instance->encoder.size_upload = subghz_protocol_legrand_const.min_count_bit_for_found * 5 + 2;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_running = false;
     return instance;
@@ -102,31 +102,50 @@ void subghz_protocol_encoder_legrand_free(void* context) {
 static bool subghz_protocol_encoder_legrand_get_upload(SubGhzProtocolEncoderLegrand* instance) {
     furi_assert(instance);
 
-    size_t size_upload = (instance->generic.data_count_bit * 2) + 1;
-    if(size_upload != instance->encoder.size_upload) {
-        FURI_LOG_E(TAG, "Invalid data bit count");
-        return false;
-    }
+    //size_t size_upload = (instance->generic.data_count_bit * 2) + 1;
+    //if(size_upload != instance->encoder.size_upload) {
+    //    FURI_LOG_E(TAG, "Invalid data bit count");
+    //    return false;
+    //}
 
     size_t index = 0;
 
-    // Send sync
-    instance->encoder.upload[index++] = level_duration_make(false, (uint32_t)instance->te * 16);
-
-    // Send key data
-    for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
-        if(bit_read(instance->generic.data, i - 1)) {
-            // send bit 1
-            instance->encoder.upload[index++] = level_duration_make(false, (uint32_t)instance->te);
-            instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)instance->te * 3);
-        } else {
-            // send bit 0
-            instance->encoder.upload[index++] =
-                level_duration_make(false, (uint32_t)instance->te * 3);
-            instance->encoder.upload[index++] = level_duration_make(true, (uint32_t)instance->te);
+    for(size_t r = 0; r < 5; r++) {
+        // Send sync
+        instance->encoder.upload[index++] =
+            level_duration_make(false, (uint32_t)instance->te * 16); // 5728
+        // Send key data
+        for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
+            if(bit_read(instance->generic.data, i - 1)) {
+                // send bit 1
+                if(i == instance->generic.data_count_bit) {
+                    //Send first bit
+                    instance->encoder.upload[index++] =
+                        level_duration_make(true, (uint32_t)instance->te * 3);
+                } else {
+                    // send bit 1 regular
+                    instance->encoder.upload[index++] =
+                        level_duration_make(false, (uint32_t)instance->te);
+                    instance->encoder.upload[index++] =
+                        level_duration_make(true, (uint32_t)instance->te * 3);
+                }
+            } else {
+                // send bit 0
+                if(i == instance->generic.data_count_bit) {
+                    //Send first bit
+                    instance->encoder.upload[index++] =
+                        level_duration_make(true, (uint32_t)instance->te);
+                } else {
+                    // send bit 0 regular
+                    instance->encoder.upload[index++] =
+                        level_duration_make(false, (uint32_t)instance->te * 3);
+                    instance->encoder.upload[index++] =
+                        level_duration_make(true, (uint32_t)instance->te);
+                }
+            }
         }
     }
+    instance->encoder.size_upload = index;
 
     return true;
 }
@@ -219,7 +238,7 @@ void subghz_protocol_decoder_legrand_feed(void* context, bool level, uint32_t du
     switch(instance->decoder.parser_step) {
     case LegrandDecoderStepReset:
         if(!level && DURATION_DIFF(duration, subghz_protocol_legrand_const.te_short * 16) <
-                         subghz_protocol_legrand_const.te_delta * 8) {
+                         subghz_protocol_legrand_const.te_delta * 8) { // 6000 +- 1200
             instance->decoder.parser_step = LegrandDecoderStepFirstBit;
             instance->decoder.decode_data = 0;
             instance->decoder.decode_count_bit = 0;
