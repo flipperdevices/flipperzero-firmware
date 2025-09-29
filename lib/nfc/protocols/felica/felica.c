@@ -104,6 +104,7 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                 break;
             }
         }
+        furi_string_free(temp_str);
     } while(false);
 
     return parsed;
