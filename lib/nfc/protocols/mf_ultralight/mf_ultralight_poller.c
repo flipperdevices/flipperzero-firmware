@@ -456,7 +456,8 @@ static NfcCommand mf_ultralight_poller_handler_auth_ultralight_c(MfUltralightPol
             if(instance->mfu_event.data->key_request_data.key_provided) {
                 instance->auth_context.tdes_key = instance->mfu_event.data->key_request_data.key;
             } else if(instance->mode == MfUltralightPollerModeDictAttack) {
-                // TODO: Can logic be rearranged to request this key before reaching mf_ultralight_poller_handler_auth_ultralight_c in poller?
+                // TODO:  -nofl Can logic be rearranged to request this key
+                // before reaching mf_ultralight_poller_handler_auth_ultralight_c in poller?
                 FURI_LOG_D(TAG, "No initial key provided, requesting key from dictionary");
                 // Trigger dictionary key request
                 instance->mfu_event.type = MfUltralightPollerEventTypeRequestKey;

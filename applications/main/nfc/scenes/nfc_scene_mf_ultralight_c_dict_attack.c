@@ -3,7 +3,7 @@
 
 #define TAG "NfcMfUlCDictAttack"
 
-// TODO: Support card_detected properly
+// TODO: Support card_detected properly -nofl
 
 enum {
     DictAttackStateUserDictInProgress,
