@@ -81,7 +81,8 @@ void* subghz_protocol_encoder_legrand_alloc(SubGhzEnvironment* environment) {
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
-    instance->encoder.size_upload = subghz_protocol_legrand_const.min_count_bit_for_found * 5 + 2;
+    instance->encoder.size_upload =
+        (subghz_protocol_legrand_const.min_count_bit_for_found * 6) * 2 + 2;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_running = false;
     return instance;
