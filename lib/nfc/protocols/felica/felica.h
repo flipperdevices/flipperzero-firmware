@@ -155,15 +155,13 @@ typedef struct {
     FelicaFSUnion data;
 } FelicaData;
 
-#pragma pack(push, 1)
-typedef struct {
+typedef struct FURI_PACKED {
     uint8_t code;
     FelicaIDm idm;
     uint8_t service_num;
     uint16_t service_code;
     uint8_t block_count;
 } FelicaCommandHeader;
-#pragma pack(pop)
 
 typedef struct {
     uint8_t length;
