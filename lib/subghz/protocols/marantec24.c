@@ -165,6 +165,7 @@ SubGhzProtocolStatus
 
         subghz_protocol_marantec24_check_remote_controller(&instance->generic);
         subghz_protocol_encoder_marantec24_get_upload(instance);
+        instance->encoder.front = 0; // reset before start
         instance->encoder.is_running = true;
     } while(false);
 
@@ -174,6 +175,7 @@ SubGhzProtocolStatus
 void subghz_protocol_encoder_marantec24_stop(void* context) {
     SubGhzProtocolEncoderMarantec24* instance = context;
     instance->encoder.is_running = false;
+    instance->encoder.front = 0; // reset position
 }
 
 LevelDuration subghz_protocol_encoder_marantec24_yield(void* context) {
