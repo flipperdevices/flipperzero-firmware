@@ -181,6 +181,7 @@ SubGhzProtocolStatus
 
         subghz_protocol_hollarm_remote_controller(&instance->generic);
         subghz_protocol_encoder_hollarm_get_upload(instance);
+        instance->encoder.front = 0;
 
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
@@ -204,6 +205,7 @@ SubGhzProtocolStatus
 void subghz_protocol_encoder_hollarm_stop(void* context) {
     SubGhzProtocolEncoderHollarm* instance = context;
     instance->encoder.is_running = false;
+    instance->encoder.front = 0;
 }
 
 LevelDuration subghz_protocol_encoder_hollarm_yield(void* context) {

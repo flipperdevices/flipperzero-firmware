@@ -165,6 +165,7 @@ SubGhzProtocolStatus
 
         subghz_protocol_feron_check_remote_controller(&instance->generic);
         subghz_protocol_encoder_feron_get_upload(instance);
+        instance->encoder.front = 0;
         instance->encoder.is_running = true;
     } while(false);
 
@@ -174,6 +175,7 @@ SubGhzProtocolStatus
 void subghz_protocol_encoder_feron_stop(void* context) {
     SubGhzProtocolEncoderFeron* instance = context;
     instance->encoder.is_running = false;
+    instance->encoder.front = 0;
 }
 
 LevelDuration subghz_protocol_encoder_feron_yield(void* context) {

@@ -184,6 +184,7 @@ SubGhzProtocolStatus
 
         subghz_protocol_gangqi_remote_controller(&instance->generic);
         subghz_protocol_encoder_gangqi_get_upload(instance);
+        instance->encoder.front = 0;
 
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
@@ -207,6 +208,7 @@ SubGhzProtocolStatus
 void subghz_protocol_encoder_gangqi_stop(void* context) {
     SubGhzProtocolEncoderGangQi* instance = context;
     instance->encoder.is_running = false;
+    instance->encoder.front = 0;
 }
 
 LevelDuration subghz_protocol_encoder_gangqi_yield(void* context) {

@@ -184,6 +184,7 @@ SubGhzProtocolStatus
 
         subghz_protocol_revers_rb2_remote_controller(&instance->generic);
         subghz_protocol_encoder_revers_rb2_get_upload(instance);
+        instance->encoder.front = 0;
         instance->encoder.is_running = true;
     } while(false);
 
@@ -193,6 +194,7 @@ SubGhzProtocolStatus
 void subghz_protocol_encoder_revers_rb2_stop(void* context) {
     SubGhzProtocolEncoderRevers_RB2* instance = context;
     instance->encoder.is_running = false;
+    instance->encoder.front = 0;
 }
 
 LevelDuration subghz_protocol_encoder_revers_rb2_yield(void* context) {
