@@ -265,6 +265,7 @@ void subghz_protocol_decoder_marantec_free(void* context) {
 void subghz_protocol_decoder_marantec_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderMarantec* instance = context;
+    instance->decoder.parser_step = MarantecDecoderStepReset;
     manchester_advance(
         instance->manchester_saved_state,
         ManchesterEventReset,
