@@ -1,5 +1,6 @@
 #include "../cli_main_commands.h"
 #include <notification/notification_app.h>
+#include <math.h>
 #include <toolbox/args.h>
 #include <toolbox/cli/cli_command.h>
 
@@ -12,6 +13,9 @@ void cli_command_buzzer_print_usage(bool is_freq_subcommand, FuriString* args) {
         cli_print_usage("buzzer note", "<note> [<0-...>[<ms|s|m|h>]]", furi_string_get_cstr(args));
     }
 }
+
+// Consider volume effectively zero if below this threshold
+#define BUZZER_VOLUME_EPSILON (1e-3f)
 
 float cli_command_buzzer_read_frequency(bool is_freq_subcommand, FuriString* args) {
     float frequency = 0.0f;
@@ -111,7 +115,7 @@ void execute(PipeSide* pipe, FuriString* args, void* context) {
             printf("Flipper is in stealth mode. Unmute the device to control buzzer.");
             break;
         }
-        if(notification->settings.speaker_volume == 0.0f) {
+        if(fabsf(notification->settings.speaker_volume) < BUZZER_VOLUME_EPSILON) {
             printf("Sound is disabled in settings. Increase volume to control buzzer.");
             break;
         }
