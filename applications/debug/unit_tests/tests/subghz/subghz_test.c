@@ -675,7 +675,7 @@ MU_TEST(subghz_decoder_dickert_test) {
 MU_TEST(subghz_decoder_legrand_test) {
     mu_assert(
         subghz_decoder_test(
-            EXT_PATH("unit_tests/subghz/legrand_2E37F_raw.sub"), SUBGHZ_PROTOCOL_LEGRAND_NAME),
+            EXT_PATH("unit_tests/subghz/legrand_raw.sub"), SUBGHZ_PROTOCOL_LEGRAND_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_LEGRAND_NAME " error\r\n");
 }
 
@@ -893,7 +893,7 @@ MU_TEST(subghz_encoder_dickert_test) {
 
 MU_TEST(subghz_encoder_legrand_test) {
     mu_assert(
-        subghz_encoder_test(EXT_PATH("unit_tests/subghz/legrand_2E37F.sub")),
+        subghz_encoder_test(EXT_PATH("unit_tests/subghz/legrand.sub")),
         "Test encoder " SUBGHZ_PROTOCOL_LEGRAND_NAME " error\r\n");
 }
 
