@@ -106,9 +106,9 @@ NfcCommand felica_poller_state_handler_activate(FelicaPoller* instance) {
         }
 
         bool skip_auth = instance->auth.context.skip_auth;
-        if(skip_auth) {
+        if(!skip_auth) {
             instance->state = FelicaPollerStateAuthenticateInternal;
-        };
+        }
     } else if(error != FelicaErrorTimeout) {
         instance->felica_event.type = FelicaPollerEventTypeError;
         instance->felica_event_data.error = error;
