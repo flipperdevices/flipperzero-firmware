@@ -437,7 +437,9 @@ NfcCommand felica_poller_state_handler_read_success(FelicaPoller* instance) {
     if((!instance->auth.context.auth_status.internal ||
         !instance->auth.context.auth_status.external) &&
        instance->data->workflow_type == FelicaLite) {
-        instance->data->blocks_read--;
+        if(instance->data->blocks_read != 0) {
+            instance->data->blocks_read--;
+        }
         instance->felica_event.type = FelicaPollerEventTypeIncomplete;
     } else {
         memcpy(
