@@ -696,17 +696,14 @@ void felica_get_workflow_type(FelicaData* data) {
         case 0xF2: // 0xF2 => FeliCa Link RC-S967 in Lite-S Mode or Lite-S HT Mode
             data->workflow_type = FelicaLite;
             break;
-
-        case 0xE1:
-            data->workflow_type = FelicaUnknown; // Felica Link
+        case 0xE1: // Felica Link
+        case 0xE0: // Felica Plug
+            data->workflow_type = FelicaUnknown;
             break;
         case 0xFF:
             if(rom_type == 0xFF) {
                 data->workflow_type = FelicaUnknown; // Felica Link
             }
-            break;
-        case 0xE0:
-            data->workflow_type = FelicaUnknown; // Felica Plug
             break;
         default:
             data->workflow_type = FelicaUnknown;

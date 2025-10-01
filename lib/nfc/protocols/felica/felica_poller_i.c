@@ -255,14 +255,12 @@ FelicaError felica_poller_list_service_by_cursor(
     if(error != FelicaErrorNone) {
         FURI_LOG_E(TAG, "List service by cursor failed with error: %d", error);
         return error;
-    } else {
-        size_t rx_len = bit_buffer_get_size_bytes(instance->rx_buffer);
-        if(rx_len < sizeof(FelicaCommandHeaderRaw) + 2) return FelicaErrorProtocol;
-
-        if(error == FelicaErrorNone) {
-            *response_ptr =
-                (FelicaListServiceCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
-        }
     }
+
+    size_t rx_len = bit_buffer_get_size_bytes(instance->rx_buffer);
+    if(rx_len < sizeof(FelicaCommandHeaderRaw) + 2) return FelicaErrorProtocol;
+
+    // error is known to be FelicaErrorNone here
+    *response_ptr = (FelicaListServiceCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
     return error;
 }

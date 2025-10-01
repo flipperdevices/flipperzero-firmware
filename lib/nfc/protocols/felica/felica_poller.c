@@ -9,9 +9,9 @@
 
 #define TAG "FelicaPoller"
 
-ARRAY_DEF(felica_service_array, FelicaService, M_POD_OPLIST)
-ARRAY_DEF(felica_area_array, FelicaArea, M_POD_OPLIST)
-ARRAY_DEF(felica_public_block_array, FelicaPublicBlock, M_POD_OPLIST)
+ARRAY_DEF(felica_service_array, FelicaService, M_POD_OPLIST); // -V658
+ARRAY_DEF(felica_area_array, FelicaArea, M_POD_OPLIST); // -V658
+ARRAY_DEF(felica_public_block_array, FelicaPublicBlock, M_POD_OPLIST); // -V658
 
 typedef NfcCommand (*FelicaPollerReadHandler)(FelicaPoller* instance);
 
@@ -264,14 +264,12 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
 
         if(len == 0x0E) {
             FelicaArea* area = felica_area_array_push_raw(area_buffer);
-            if(!area) break;
             memset(area, 0, sizeof *area);
             area->code = code_begin;
             area->first_idx = (uint16_t)felica_service_array_size(service_buffer);
             area->last_idx = 0;
         } else {
             FelicaService* service = felica_service_array_push_raw(service_buffer);
-            if(!service) break;
             memset(service, 0, sizeof *service);
             service->code = code_begin;
             service->attr = (uint8_t)(code_begin & 0x3F);
