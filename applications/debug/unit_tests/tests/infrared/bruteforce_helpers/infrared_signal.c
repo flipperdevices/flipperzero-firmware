@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <core/check.h>
-#include <infrared_worker.h>
-#include <infrared_transmit.h>
+#include <infrared/worker/infrared_worker.h>
+#include <infrared/worker/infrared_transmit.h>
 
 #define TAG "InfraredSignal"
 

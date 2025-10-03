@@ -528,7 +528,7 @@ MU_TEST(infrared_test_encoder_decoder_all) {
 }
 
 MU_TEST(infrared_test_ac_database) {
-    infrared_brute_force_set_db_filename(test->brutedb, EXT_PATH("infrared/assets/ac.ir"));
+    infrared_brute_force_set_db_filename(test->brutedb, IR_TEST_FILES_DIR "universaldb/ac.ir");
     uint32_t i = 0;
     infrared_brute_force_add_record(test->brutedb, i++, "Off");
     infrared_brute_force_add_record(test->brutedb, i++, "Dh");
@@ -545,7 +545,7 @@ MU_TEST(infrared_test_ac_database) {
 }
 
 MU_TEST(infrared_test_audio_database) {
-    infrared_brute_force_set_db_filename(test->brutedb, EXT_PATH("infrared/assets/audio.ir"));
+    infrared_brute_force_set_db_filename(test->brutedb, IR_TEST_FILES_DIR "universaldb/audio.ir");
     uint32_t i = 0;
     infrared_brute_force_add_record(test->brutedb, i++, "Power");
     infrared_brute_force_add_record(test->brutedb, i++, "Mute");
@@ -564,7 +564,8 @@ MU_TEST(infrared_test_audio_database) {
 }
 
 MU_TEST(infrared_test_projector_database) {
-    infrared_brute_force_set_db_filename(test->brutedb, EXT_PATH("infrared/assets/projector.ir"));
+    infrared_brute_force_set_db_filename(
+        test->brutedb, IR_TEST_FILES_DIR "universaldb/projector.ir");
     uint32_t i = 0;
     infrared_brute_force_add_record(test->brutedb, i++, "Power");
     infrared_brute_force_add_record(test->brutedb, i++, "Mute");
@@ -579,7 +580,7 @@ MU_TEST(infrared_test_projector_database) {
 }
 
 MU_TEST(infrared_test_tv_database) {
-    infrared_brute_force_set_db_filename(test->brutedb, EXT_PATH("infrared/assets/tv.ir"));
+    infrared_brute_force_set_db_filename(test->brutedb, IR_TEST_FILES_DIR "universaldb/tv.ir");
     uint32_t i = 0;
     infrared_brute_force_add_record(test->brutedb, i++, "Power");
     infrared_brute_force_add_record(test->brutedb, i++, "Mute");
