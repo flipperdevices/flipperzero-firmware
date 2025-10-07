@@ -22,12 +22,12 @@ void nfc_scene_felica_more_info_on_enter(void* context) {
 
     switch(data->workflow_type) {
     case FelicaLite:
-        text_box_reset(nfc->text_box);
-        furi_string_reset(nfc->text_box_store);
-        nfc_more_info_render_felica_lite_dump(data, nfc->text_box_store);
-        text_box_set_font(nfc->text_box, TextBoxFontHex);
-        text_box_set_text(nfc->text_box, furi_string_get_cstr(nfc->text_box_store));
-        view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
+        widget_reset(nfc->widget);
+        FuriString* temp_str = furi_string_alloc();
+        nfc_more_info_render_felica_lite_dump(data, temp_str);
+        widget_add_text_scroll_element(nfc->widget, 0, 0, 128, 64, furi_string_get_cstr(temp_str));
+        furi_string_free(temp_str);
+        view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
         return;
         break;
     case FelicaStandard:
