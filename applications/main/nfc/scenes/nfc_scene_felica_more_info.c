@@ -50,7 +50,7 @@ void nfc_scene_felica_more_info_on_enter(void* context) {
 
     furi_string_free(label);
 
-    if(state >= FelicaMoreInfoStateItem) {
+    if(state > FelicaMoreInfoStateItem) {
         submenu_set_selected_item(
             nfc->submenu, state - FelicaMoreInfoStateItem + SubmenuIndexDynamic);
         scene_manager_set_scene_state(
@@ -73,12 +73,12 @@ bool nfc_scene_felica_more_info_on_event(void* context, SceneManagerEvent event)
             nfc->scene_manager,
             NfcSceneFelicaMoreInfo,
             FelicaMoreInfoStateItem + index);
-        scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaSystem, index << 1);
+        scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaSystem, index);
         scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaSystem);
         consumed = true;
 
     } else if(event.type == SceneManagerEventTypeBack) {
-        if(state >= FelicaMoreInfoStateItem) {
+        if(state > FelicaMoreInfoStateItem) {
             widget_reset(nfc->widget);
             text_box_reset(nfc->text_box);
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);

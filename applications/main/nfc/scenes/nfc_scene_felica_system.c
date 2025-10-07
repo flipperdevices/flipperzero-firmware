@@ -16,9 +16,9 @@ enum SubmenuIndex {
 void nfc_scene_felica_system_on_enter(void* context) {
     NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
+    submenu_reset(nfc->submenu);
 
-    const uint32_t state =
-        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaSystem);
+    const uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaSystem);
     const FelicaData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolFelica);
 
     submenu_add_item(
@@ -77,8 +77,7 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
     NfcApp* nfc = context;
     bool consumed = false;
 
-    const uint32_t state =
-        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaSystem);
+    const uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaSystem);
     const FelicaData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolFelica);
     const FelicaSystem* system = simple_array_cget(data->systems, state);
 
@@ -110,7 +109,8 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
             case FelicaStandard:
                 const FelicaService* service = simple_array_cget(system->services, service_ind);
                 furi_string_cat_printf(nfc->text_box_store, "Service 0x%04X\n", service->code);
-                nfc_more_info_render_felica_blocks(data, system, nfc->text_box_store, service->code);
+                nfc_more_info_render_felica_blocks(
+                    data, system, nfc->text_box_store, service->code);
                 break;
             default:
                 furi_string_set_str(nfc->text_box_store, "IC type not implemented yet");
@@ -127,14 +127,15 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
         if(state >= FelicaSystemStateItem) {
             widget_reset(nfc->widget);
             text_box_reset(nfc->text_box);
-            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneFelicaSystem, FelicaSystemStateMenu);
+            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
+
         } else {
             widget_reset(nfc->widget);
             text_box_reset(nfc->text_box);
-            // Return directly to the Info scene
-            scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, NfcSceneFelicaMoreInfo);
+            scene_manager_search_and_switch_to_previous_scene(
+                nfc->scene_manager, NfcSceneFelicaMoreInfo);
         }
         consumed = true;
     }
