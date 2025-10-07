@@ -18,7 +18,7 @@ typedef enum {
     FelicaPollerStateIdle,
     FelicaPollerStateActivated,
     FelicaPollerStateListSystem,
-    FelicaPollerStateSelectSystemByCode,
+    FelicaPollerStateSelectSystemIndex,
     FelicaPollerStateAuthenticateInternal,
     FelicaPollerStateAuthenticateExternal,
     FelicaPollerStateTraverseStandardSystem,
