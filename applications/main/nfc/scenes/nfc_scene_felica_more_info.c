@@ -34,7 +34,6 @@ void nfc_scene_felica_more_info_on_enter(void* context) {
     case FelicaStandard:
         for(uint32_t i = 0; i < simple_array_get_count(data->systems); ++i) {
             const FelicaSystem* system = simple_array_cget(data->systems, i);
-
             furi_string_printf(label, "System %04X", system->system_code);
             submenu_add_item(
                 submenu,
@@ -50,7 +49,7 @@ void nfc_scene_felica_more_info_on_enter(void* context) {
 
     furi_string_free(label);
 
-    if(state > FelicaMoreInfoStateItem) {
+    if(state >= FelicaMoreInfoStateItem) {
         submenu_set_selected_item(
             nfc->submenu, state - FelicaMoreInfoStateItem + SubmenuIndexDynamic);
         scene_manager_set_scene_state(
@@ -70,15 +69,13 @@ bool nfc_scene_felica_more_info_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         const uint32_t index = event.event - SubmenuIndexDynamic;
         scene_manager_set_scene_state(
-            nfc->scene_manager,
-            NfcSceneFelicaMoreInfo,
-            FelicaMoreInfoStateItem + index);
-        scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaSystem, index);
+            nfc->scene_manager, NfcSceneFelicaMoreInfo, FelicaMoreInfoStateItem + index);
+        scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaSystem, index << 4);
         scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaSystem);
         consumed = true;
 
     } else if(event.type == SceneManagerEventTypeBack) {
-        if(state > FelicaMoreInfoStateItem) {
+        if(state >= FelicaMoreInfoStateItem) {
             widget_reset(nfc->widget);
             text_box_reset(nfc->text_box);
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);

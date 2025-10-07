@@ -3,29 +3,31 @@
 #include "../helpers/protocol_support/nfc_protocol_support_gui_common.h"
 #include "../helpers/protocol_support/felica/felica_render.h"
 
-enum {
-    FelicaSystemStateMenu,
-    FelicaSystemStateItem, // MUST be last, states >= this correspond with submenu index
-};
-
 enum SubmenuIndex {
     SubmenuIndexDirectory,
     SubmenuIndexDynamic, // dynamic indices start here
 };
+
+static void nfc_scene_felica_system_submenu_callback(void* context, uint32_t index) {
+    NfcApp* nfc = context;
+
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
+}
 
 void nfc_scene_felica_system_on_enter(void* context) {
     NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
     submenu_reset(nfc->submenu);
 
-    const uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaSystem);
+    const uint32_t system_index =
+        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaSystem) >> 4;
     const FelicaData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolFelica);
 
     submenu_add_item(
         submenu,
         "Directory",
         SubmenuIndexDirectory,
-        nfc_protocol_support_common_submenu_callback,
+        nfc_scene_felica_system_submenu_callback,
         nfc);
 
     FuriString* label = furi_string_alloc();
@@ -41,7 +43,7 @@ void nfc_scene_felica_system_on_enter(void* context) {
             nfc);
         break;
     case FelicaStandard:
-        const FelicaSystem* system = simple_array_cget(data->systems, state);
+        const FelicaSystem* system = simple_array_cget(data->systems, system_index);
         for(uint32_t i = 0; i < simple_array_get_count(system->services); ++i) {
             const FelicaService* service = simple_array_cget(system->services, i);
             bool is_public = (service->attr & FELICA_SERVICE_ATTRIBUTE_UNAUTH_READ) == 1;
@@ -63,13 +65,6 @@ void nfc_scene_felica_system_on_enter(void* context) {
 
     furi_string_free(label);
 
-    if(state >= FelicaSystemStateItem) {
-        submenu_set_selected_item(
-            nfc->submenu, state - FelicaSystemStateItem + SubmenuIndexDynamic);
-        scene_manager_set_scene_state(
-            nfc->scene_manager, NfcSceneFelicaSystem, FelicaSystemStateMenu);
-    }
-
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
 
@@ -79,65 +74,59 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
 
     const uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaSystem);
     const FelicaData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolFelica);
-    const FelicaSystem* system = simple_array_cget(data->systems, state);
+
+    const uint32_t system_index = state >> 4;
+    const FelicaSystem* system = simple_array_cget(data->systems, system_index);
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexDirectory) {
-            FuriString* temp_str = furi_string_alloc();
-            nfc_more_info_render_felica_dir(system, temp_str);
-
-            widget_add_text_scroll_element(
-                nfc->widget, 0, 0, 128, 64, furi_string_get_cstr(temp_str));
-            furi_string_free(temp_str);
-
-            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
-            scene_manager_set_scene_state(
-                nfc->scene_manager,
-                NfcSceneFelicaSystem,
-                FelicaSystemStateItem + SubmenuIndexDirectory);
-            consumed = true;
+        if(event.event == NfcCustomEventViewExit) {
+            consumed = scene_manager_previous_scene(nfc->scene_manager);
         } else {
-            const uint16_t service_ind = event.event - 1; // offset the three enums above
+            if(event.event == SubmenuIndexDirectory) {
+                FuriString* temp_str = furi_string_alloc();
+                nfc_more_info_render_felica_dir(system, temp_str);
 
-            text_box_reset(nfc->text_box);
-            furi_string_reset(nfc->text_box_store);
+                widget_add_text_scroll_element(
+                    nfc->widget, 0, 0, 128, 64, furi_string_get_cstr(temp_str));
+                furi_string_free(temp_str);
 
-            switch(data->workflow_type) {
-            case FelicaLite:
-                nfc_more_info_render_felica_lite_dump(data, nfc->text_box_store);
-                break;
-            case FelicaStandard:
-                const FelicaService* service = simple_array_cget(system->services, service_ind);
-                furi_string_cat_printf(nfc->text_box_store, "Service 0x%04X\n", service->code);
-                nfc_more_info_render_felica_blocks(
-                    data, system, nfc->text_box_store, service->code);
-                break;
-            default:
-                furi_string_set_str(nfc->text_box_store, "IC type not implemented yet");
-                break;
+                view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
+            } else {
+                const uint32_t service_ind =
+                    event.event - SubmenuIndexDynamic; // offset the three enums above
+
+                text_box_reset(nfc->text_box);
+                furi_string_reset(nfc->text_box_store);
+
+                switch(data->workflow_type) {
+                case FelicaLite:
+                    nfc_more_info_render_felica_lite_dump(data, nfc->text_box_store);
+                    break;
+                case FelicaStandard:
+                    const FelicaService* service =
+                        simple_array_cget(system->services, service_ind);
+                    furi_string_cat_printf(nfc->text_box_store, "Service 0x%04X\n", service->code);
+                    nfc_more_info_render_felica_blocks(
+                        data, system, nfc->text_box_store, service->code);
+                    break;
+                default:
+                    furi_string_set_str(nfc->text_box_store, "IC type not implemented yet");
+                    break;
+                }
+                text_box_set_font(nfc->text_box, TextBoxFontHex);
+                text_box_set_text(nfc->text_box, furi_string_get_cstr(nfc->text_box_store));
+                view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
             }
-            text_box_set_font(nfc->text_box, TextBoxFontHex);
-            text_box_set_text(nfc->text_box, furi_string_get_cstr(nfc->text_box_store));
-            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
-            scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneFelicaSystem, FelicaSystemStateItem + event.event);
+            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaSystem, state | 1);
             consumed = true;
         }
-    } else if(event.type == SceneManagerEventTypeBack) {
-        if(state >= FelicaSystemStateItem) {
-            widget_reset(nfc->widget);
-            text_box_reset(nfc->text_box);
-            scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneFelicaSystem, FelicaSystemStateMenu);
-            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 
-        } else {
-            widget_reset(nfc->widget);
-            text_box_reset(nfc->text_box);
-            scene_manager_search_and_switch_to_previous_scene(
-                nfc->scene_manager, NfcSceneFelicaMoreInfo);
+    } else if(event.type == SceneManagerEventTypeBack) {
+        if(state & 1) {
+            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
+            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaSystem, state & ~1);
+            consumed = true;
         }
-        consumed = true;
     }
 
     return consumed;
