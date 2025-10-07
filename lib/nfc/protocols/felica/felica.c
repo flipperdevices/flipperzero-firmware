@@ -45,9 +45,11 @@ FelicaData* felica_alloc(void) {
     data->services = simple_array_alloc(&felica_service_array_cfg);
     data->areas = simple_array_alloc(&felica_area_array_cfg);
     data->public_blocks = simple_array_alloc(&felica_public_block_array_cfg);
+    data->systems = simple_array_alloc(&felica_system_array_cfg);
     furi_check(data->services);
     furi_check(data->areas);
     furi_check(data->public_blocks);
+    furi_check(data->systems);
     return data;
 }
 
@@ -62,6 +64,9 @@ void felica_free(FelicaData* data) {
 
     furi_check(data->public_blocks);
     simple_array_free(data->public_blocks);
+
+    furi_check(data->systems);
+    simple_array_free(data->systems);
 
     free(data);
 }
@@ -79,6 +84,10 @@ void felica_reset(FelicaData* data) {
 
     if(data->public_blocks) {
         simple_array_reset(data->public_blocks);
+    }
+
+    if(data->systems) {
+        simple_array_reset(data->systems);
     }
 
     data->blocks_read = 0;
@@ -105,6 +114,7 @@ void felica_copy(FelicaData* data, const FelicaData* other) {
     simple_array_copy(data->services, other->services);
     simple_array_copy(data->areas, other->areas);
     simple_array_copy(data->public_blocks, other->public_blocks);
+    simple_array_copy(data->systems, other->systems);
 }
 
 bool felica_verify(FelicaData* data, const FuriString* device_type) {
@@ -438,7 +448,8 @@ bool felica_is_equal(const FelicaData* data, const FelicaData* other) {
            memcmp(&data->data, &other->data, sizeof(data->data)) == 0 &&
            simple_array_is_equal(data->services, other->services) &&
            simple_array_is_equal(data->areas, other->areas) &&
-           simple_array_is_equal(data->public_blocks, other->public_blocks);
+           simple_array_is_equal(data->public_blocks, other->public_blocks) &&
+           simple_array_is_equal(data->systems, other->systems);
 }
 
 const char* felica_get_device_name(const FelicaData* data, NfcDeviceNameType name_type) {

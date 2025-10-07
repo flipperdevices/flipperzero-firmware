@@ -20,3 +20,10 @@ const SimpleArrayConfig felica_public_block_array_cfg = {
     .reset = NULL,
     .type_size = sizeof(FelicaPublicBlock),
 };
+
+const SimpleArrayConfig felica_system_array_cfg = {
+    .init = NULL,
+    .copy = NULL,
+    .reset = NULL,
+    .type_size = sizeof(FelicaSystem),
+};
