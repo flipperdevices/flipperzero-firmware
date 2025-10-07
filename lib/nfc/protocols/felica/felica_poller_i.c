@@ -295,27 +295,3 @@ FelicaError felica_poller_list_system_code(
         (FelicaListSystemCodeCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
     return error;
 }
-
-FelicaError felica_poller_select_system_by_code(FelicaPoller* instance, uint16_t system_code) {
-    furi_assert(instance);
-
-    bit_buffer_reset(instance->tx_buffer);
-    bit_buffer_reset(instance->rx_buffer);
-
-    uint16_t system_code_le = (system_code >> 8) | (system_code << 8);
-    // Send Polling command
-    const FelicaPollerPollingCommand polling_cmd = {
-        .system_code = system_code_le,
-        .request_code = 0,
-        .time_slot = FELICA_TIME_SLOT_1,
-    };
-    FelicaPollerPollingResponse polling_resp = {};
-
-    FelicaError error = felica_poller_polling(instance, &polling_cmd, &polling_resp);
-
-    if(error != FelicaErrorNone) {
-        FURI_LOG_T(TAG, "Select system by code %04X failed error: %d", system_code, error);
-    }
-
-    return error;
-}

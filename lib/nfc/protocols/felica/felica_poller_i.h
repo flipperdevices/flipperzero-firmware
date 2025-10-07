@@ -124,10 +124,6 @@ FelicaError felica_poller_list_system_code(
     FelicaPoller* instance,
     FelicaListSystemCodeCommandResponse** response_ptr);
 
-FelicaError felica_poller_select_system_by_code(
-    FelicaPoller* instance,
-    uint16_t system_code);
-
 #ifdef __cplusplus
 }
 #endif
