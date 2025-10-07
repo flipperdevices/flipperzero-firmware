@@ -10,7 +10,7 @@ void nfc_render_felica_blocks_count(
         if(render_auth_notification && data->blocks_read != data->blocks_total) {
             furi_string_cat_printf(str, "\nAuth-protected blocks!");
         }
-    } 
+    }
 }
 
 void nfc_render_felica_idm(
@@ -50,10 +50,7 @@ void nfc_render_felica_info(
     }
 
     furi_string_cat_printf(str, "\n");
-    furi_string_cat_printf(
-        str,
-        "Systems found: %lu \n",
-        simple_array_get_count(data->systems));
+    furi_string_cat_printf(str, "Systems found: %lu \n", simple_array_get_count(data->systems));
 
     nfc_render_felica_blocks_count(data, str, true);
 }

@@ -170,10 +170,7 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                    ff, furi_string_get_cstr(str_key_buffer), str_data_buffer))
                 break;
 
-            if(!sscanf(
-                   furi_string_get_cstr(str_data_buffer),
-                   "%04hX",
-                   &system_code)) {
+            if(!sscanf(furi_string_get_cstr(str_data_buffer), "%04hX", &system_code)) {
                 break;
             }
 

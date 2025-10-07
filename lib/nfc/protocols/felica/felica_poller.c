@@ -152,7 +152,7 @@ NfcCommand felica_poller_state_handler_list_system(FelicaPoller* instance) {
 NfcCommand felica_poller_state_handler_select_system_idx(FelicaPoller* instance) {
     FURI_LOG_D(TAG, "Select System Index %d", instance->systems_read);
     uint8_t system_index_mask = instance->systems_read << 4;
-    instance->data->idm.data[0] &= 0x0F; 
+    instance->data->idm.data[0] &= 0x0F;
     instance->data->idm.data[0] |= system_index_mask;
     instance->state = FelicaPollerStateTraverseStandardSystem;
 
@@ -342,9 +342,7 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
     if(area_num) {
         simple_array_init(system->areas, (uint32_t)area_num);
         memcpy(
-            simple_array_get(system->areas, 0),
-            area_buffer->ptr,
-            area_num * sizeof(FelicaArea));
+            simple_array_get(system->areas, 0), area_buffer->ptr, area_num * sizeof(FelicaArea));
     } else {
         simple_array_reset(system->areas);
     }

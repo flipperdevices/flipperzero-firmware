@@ -291,7 +291,6 @@ FelicaError felica_poller_list_system_code(
     // at least 1 system code + the count being 0x01
 
     // error is known to be FelicaErrorNone here
-    *response_ptr =
-        (FelicaListSystemCodeCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
+    *response_ptr = (FelicaListSystemCodeCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
     return error;
 }

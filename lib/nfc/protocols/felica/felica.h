@@ -50,8 +50,8 @@ extern "C" {
 #define FELICA_TIME_SLOT_8      (0x07U)
 #define FELICA_TIME_SLOT_16     (0x0FU)
 
-#define FELICA_CMD_LIST_SERVICE_CODE      0x0A
-#define FELICA_CMD_LIST_SERVICE_CODE_RESP 0x0B
+#define FELICA_CMD_LIST_SERVICE_CODE        0x0A
+#define FELICA_CMD_LIST_SERVICE_CODE_RESP   0x0B
 #define FELICA_CMD_REQUEST_SYSTEM_CODE      0x0C
 #define FELICA_CMD_REQUEST_SYSTEM_CODE_RESP 0x0D
 
@@ -201,7 +201,7 @@ typedef struct {
     FelicaFSUnion data;
 
     SimpleArray* systems;
-    
+
     FelicaWorkflowType workflow_type;
 } FelicaData;
 
