@@ -1,6 +1,7 @@
 #include "../nfc_app_i.h"
 
 #include "../helpers/protocol_support/nfc_protocol_support_gui_common.h"
+#include "../helpers/protocol_support/felica/felica_render.h"
 
 enum {
     FelicaMoreInfoStateMenu,
@@ -19,19 +20,19 @@ void nfc_scene_felica_more_info_on_enter(void* context) {
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaMoreInfo);
     const FelicaData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolFelica);
 
-    FuriString* label = furi_string_alloc();
-
     switch(data->workflow_type) {
     case FelicaLite:
-        furi_string_printf(label, "All blocks");
-        submenu_add_item(
-            submenu,
-            furi_string_get_cstr(label),
-            SubmenuIndexDynamic,
-            nfc_protocol_support_common_submenu_callback,
-            nfc);
+        text_box_reset(nfc->text_box);
+        furi_string_reset(nfc->text_box_store);
+        nfc_more_info_render_felica_lite_dump(data, nfc->text_box_store);
+        text_box_set_font(nfc->text_box, TextBoxFontHex);
+        text_box_set_text(nfc->text_box, furi_string_get_cstr(nfc->text_box_store));
+        view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
+        return;
         break;
     case FelicaStandard:
+        FuriString* label = furi_string_alloc();
+
         for(uint32_t i = 0; i < simple_array_get_count(data->systems); ++i) {
             const FelicaSystem* system = simple_array_cget(data->systems, i);
             furi_string_printf(label, "System %04X", system->system_code);
@@ -42,12 +43,11 @@ void nfc_scene_felica_more_info_on_enter(void* context) {
                 nfc_protocol_support_common_submenu_callback,
                 nfc);
         }
+        furi_string_free(label);
         break;
     default:
         break;
     }
-
-    furi_string_free(label);
 
     if(state >= FelicaMoreInfoStateItem) {
         submenu_set_selected_item(
@@ -68,6 +68,7 @@ bool nfc_scene_felica_more_info_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         const uint32_t index = event.event - SubmenuIndexDynamic;
+
         scene_manager_set_scene_state(
             nfc->scene_manager, NfcSceneFelicaMoreInfo, FelicaMoreInfoStateItem + index);
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaSystem, index << 4);
