@@ -267,16 +267,15 @@ FelicaError felica_poller_list_service_by_cursor(
     return error;
 }
 
-FelicaError felica_poller_request_system_code(
+FelicaError felica_poller_list_system_code(
     FelicaPoller* instance,
-    FelicaRequestSystemCodeCommandResponse** const response_ptr) {
+    FelicaListSystemCodeCommandResponse** const response_ptr) {
     furi_assert(instance);
     furi_assert(response_ptr);
 
     uint8_t data[] = {0};
 
-    felica_poller_prepare_tx_buffer_raw(
-        instance, FELICA_CMD_REQUEST_SYSTEM_CODE, data, 0);
+    felica_poller_prepare_tx_buffer_raw(instance, FELICA_CMD_REQUEST_SYSTEM_CODE, data, 0);
 
     bit_buffer_reset(instance->rx_buffer);
 
@@ -292,6 +291,31 @@ FelicaError felica_poller_request_system_code(
     // at least 1 system code + the count being 0x01
 
     // error is known to be FelicaErrorNone here
-    *response_ptr = (FelicaRequestSystemCodeCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
+    *response_ptr =
+        (FelicaListSystemCodeCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
+    return error;
+}
+
+FelicaError felica_poller_select_system_by_code(FelicaPoller* instance, uint16_t system_code) {
+    furi_assert(instance);
+
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_reset(instance->rx_buffer);
+
+    uint16_t system_code_le = (system_code >> 8) | (system_code << 8);
+    // Send Polling command
+    const FelicaPollerPollingCommand polling_cmd = {
+        .system_code = system_code_le,
+        .request_code = 0,
+        .time_slot = FELICA_TIME_SLOT_1,
+    };
+    FelicaPollerPollingResponse polling_resp = {};
+
+    FelicaError error = felica_poller_polling(instance, &polling_cmd, &polling_resp);
+
+    if(error != FelicaErrorNone) {
+        FURI_LOG_T(TAG, "Select system by code %04X failed error: %d", system_code, error);
+    }
+
     return error;
 }

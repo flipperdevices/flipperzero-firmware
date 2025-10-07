@@ -18,6 +18,7 @@ typedef enum {
     FelicaPollerStateIdle,
     FelicaPollerStateActivated,
     FelicaPollerStateListSystem,
+    FelicaPollerStateSelectSystemByCode,
     FelicaPollerStateAuthenticateInternal,
     FelicaPollerStateAuthenticateExternal,
     FelicaPollerStateTraverseStandardSystem,
@@ -119,9 +120,13 @@ FelicaError felica_poller_list_service_by_cursor(
     uint16_t cursor,
     FelicaListServiceCommandResponse** response_ptr);
 
-FelicaError felica_poller_request_system_code(
+FelicaError felica_poller_list_system_code(
     FelicaPoller* instance,
-    FelicaRequestSystemCodeCommandResponse** response_ptr);
+    FelicaListSystemCodeCommandResponse** response_ptr);
+
+FelicaError felica_poller_select_system_by_code(
+    FelicaPoller* instance,
+    uint16_t system_code);
 
 #ifdef __cplusplus
 }

@@ -201,6 +201,7 @@ typedef struct {
     SimpleArray* areas;
     SimpleArray* public_blocks;
     SimpleArray* systems;
+    
     FelicaWorkflowType workflow_type;
 } FelicaData;
 
@@ -260,7 +261,7 @@ typedef struct {
     FelicaCommandHeaderRaw header;
     uint8_t system_count;
     uint8_t system_code[];
-} FelicaRequestSystemCodeCommandResponse;
+} FelicaListSystemCodeCommandResponse;
 
 typedef FelicaCommandResponseHeader FelicaListenerWriteCommandResponse;
 
