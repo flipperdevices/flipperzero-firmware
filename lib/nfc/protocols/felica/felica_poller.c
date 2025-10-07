@@ -130,20 +130,14 @@ NfcCommand felica_poller_state_handler_list_system(FelicaPoller* instance) {
     FelicaError error = felica_poller_list_system_code(instance, &response_system_code);
 
     instance->systems_total = response_system_code->system_count;
+    simple_array_init(instance->data->systems, instance->systems_total);
     uint8_t* system_codes = response_system_code->system_code;
-    felica_system_array_t system_buffer;
-    felica_system_array_init(system_buffer);
+
     for(uint8_t i = 0; i < instance->systems_total; i++) {
-        FelicaSystem* system = felica_system_array_push_raw(system_buffer);
+        FelicaSystem* system = simple_array_get(instance->data->systems, i);
         system->system_code = system_codes[i * 2] << 8 | system_codes[i * 2 + 1];
         system->system_code_idx = i;
     }
-    simple_array_init(instance->data->systems, (uint32_t)felica_system_array_size(system_buffer));
-    memcpy(
-        simple_array_get(instance->data->systems, 0),
-        system_buffer->ptr,
-        felica_system_array_size(system_buffer) * sizeof(FelicaSystem));
-    felica_system_array_clear(system_buffer);
 
     if(error == FelicaErrorNone) {
         instance->state = FelicaPollerStateSelectSystemIndex;
@@ -334,31 +328,32 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
     const size_t service_num = felica_service_array_size(service_buffer);
     const size_t area_num = felica_area_array_size(area_buffer);
 
+    FelicaSystem* system = simple_array_get(instance->data->systems, instance->systems_read);
     if(service_num) {
-        simple_array_init(instance->data->services, (uint32_t)service_num);
+        simple_array_init(system->services, (uint32_t)service_num);
         memcpy(
-            simple_array_get(instance->data->services, 0),
+            simple_array_get(system->services, 0),
             service_buffer->ptr,
             service_num * sizeof(FelicaService));
     } else {
-        simple_array_reset(instance->data->services);
+        simple_array_reset(system->services);
     }
 
     if(area_num) {
-        simple_array_init(instance->data->areas, (uint32_t)area_num);
+        simple_array_init(system->areas, (uint32_t)area_num);
         memcpy(
-            simple_array_get(instance->data->areas, 0),
+            simple_array_get(system->areas, 0),
             area_buffer->ptr,
             area_num * sizeof(FelicaArea));
     } else {
-        simple_array_reset(instance->data->areas);
+        simple_array_reset(system->areas);
     }
 
     FURI_LOG_I(
         TAG,
         "Services found: %lu, Areas found: %lu",
-        simple_array_get_count(instance->data->services),
-        simple_array_get_count(instance->data->areas));
+        simple_array_get_count(system->services),
+        simple_array_get_count(system->areas));
 
     felica_service_array_clear(service_buffer);
     felica_area_array_clear(area_buffer);
@@ -370,7 +365,8 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
 NfcCommand felica_poller_state_handler_read_standard_blocks(FelicaPoller* instance) {
     FURI_LOG_D(TAG, "Read Standard Blocks");
 
-    const uint32_t service_count = simple_array_get_count(instance->data->services);
+    FelicaSystem* system = simple_array_get(instance->data->systems, instance->systems_read);
+    const uint32_t service_count = simple_array_get_count(system->services);
 
     felica_public_block_array_t public_block_buffer;
     felica_public_block_array_init(public_block_buffer);
@@ -379,7 +375,7 @@ NfcCommand felica_poller_state_handler_read_standard_blocks(FelicaPoller* instan
     FelicaError error = FelicaErrorNone;
 
     for(uint32_t i = 0; i < service_count; i++) {
-        const FelicaService* service = simple_array_get(instance->data->services, i);
+        const FelicaService* service = simple_array_get(system->services, i);
 
         if((service->attr & FELICA_SERVICE_ATTRIBUTE_UNAUTH_READ) == 0) continue;
 
@@ -429,9 +425,9 @@ NfcCommand felica_poller_state_handler_read_standard_blocks(FelicaPoller* instan
 
     if(have_read_anything) {
         const size_t n = felica_public_block_array_size(public_block_buffer);
-        simple_array_init(instance->data->public_blocks, (uint32_t)n);
+        simple_array_init(system->public_blocks, (uint32_t)n);
         memcpy(
-            simple_array_get(instance->data->public_blocks, 0),
+            simple_array_get(system->public_blocks, 0),
             public_block_buffer->ptr,
             n * sizeof(FelicaPublicBlock));
     }

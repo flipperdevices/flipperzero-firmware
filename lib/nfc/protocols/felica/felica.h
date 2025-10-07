@@ -187,6 +187,9 @@ typedef struct {
 typedef struct {
     uint8_t system_code_idx;
     uint16_t system_code;
+    SimpleArray* services;
+    SimpleArray* areas;
+    SimpleArray* public_blocks;
 } FelicaSystem;
 
 /** @brief Structure used to store Felica data and additional values about reading */
@@ -197,9 +200,6 @@ typedef struct {
     uint8_t blocks_read;
     FelicaFSUnion data;
 
-    SimpleArray* services;
-    SimpleArray* areas;
-    SimpleArray* public_blocks;
     SimpleArray* systems;
     
     FelicaWorkflowType workflow_type;
@@ -324,7 +324,7 @@ void felica_calculate_mac_write(
     const uint8_t* data,
     uint8_t* mac);
 
-void felica_write_directory_tree(const FelicaData* data, FuriString* str);
+void felica_write_directory_tree(const FelicaSystem* system, FuriString* str);
 
 void felica_get_workflow_type(FelicaData* data);
 
