@@ -2,7 +2,7 @@
 #include <flipper_format.h>
 #include <infrared.h>
 #include <common/infrared_common_i.h>
-#include "bruteforce_helpers/infrared_brute_force.h"
+#include <lib/infrared/signal/infrared_brute_force.h>
 #include "../test.h" // IWYU pragma: keep
 
 #define IR_TEST_FILES_DIR   EXT_PATH("unit_tests/infrared/")

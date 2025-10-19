@@ -12,6 +12,10 @@
 #include <stdbool.h>
 #include "infrared_error_code.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief InfraredBruteForce opaque type declaration.
  */
@@ -107,3 +111,7 @@ void infrared_brute_force_add_record(
  * @param[in,out] brute_force pointer to the instance to be reset.
  */
 void infrared_brute_force_reset(InfraredBruteForce* brute_force);
+
+#ifdef __cplusplus
+}
+#endif

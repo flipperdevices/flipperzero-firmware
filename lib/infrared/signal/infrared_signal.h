@@ -10,7 +10,11 @@
 
 #include "infrared_error_code.h"
 #include <flipper_format/flipper_format.h>
-#include <infrared/encoder_decoder/infrared.h>
+#include <infrared.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief InfraredSignal opaque type declaration.
@@ -218,3 +222,7 @@ InfraredErrorCode
  * @param[in] signal pointer to the instance holding the signal to be transmitted.
  */
 void infrared_signal_transmit(const InfraredSignal* signal);
+
+#ifdef __cplusplus
+}
+#endif

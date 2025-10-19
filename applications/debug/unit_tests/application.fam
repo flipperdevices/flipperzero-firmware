@@ -130,7 +130,6 @@ App(
     sources=[
         "tests/common/*.c",
         "tests/infrared/*.c",
-        "tests/infrared/bruteforce_helpers/*.c",
     ],
     apptype=FlipperAppType.PLUGIN,
     entry_point="get_api",
