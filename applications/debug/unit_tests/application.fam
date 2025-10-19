@@ -127,10 +127,7 @@ App(
 
 App(
     appid="test_infrared",
-    sources=[
-        "tests/common/*.c",
-        "tests/infrared/*.c",
-    ],
+    sources=["tests/common/*.c", "tests/infrared/*.c"],
     apptype=FlipperAppType.PLUGIN,
     entry_point="get_api",
     requires=["unit_tests"],
