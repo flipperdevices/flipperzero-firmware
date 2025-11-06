@@ -156,7 +156,8 @@ static NfcCommand
                 // Only set tdes_key for Manual/Reader auth types, not for dictionary attacks
                 if(instance->mf_ul_auth->type == MfUltralightAuthTypeManual ||
                    instance->mf_ul_auth->type == MfUltralightAuthTypeReader) {
-                    mf_ultralight_event->data->key_request_data.key = instance->mf_ul_auth->tdes_key;
+                    mf_ultralight_event->data->key_request_data.key =
+                        instance->mf_ul_auth->tdes_key;
                     mf_ultralight_event->data->key_request_data.key_provided = true;
                 } else {
                     mf_ultralight_event->data->key_request_data.key_provided = false;
