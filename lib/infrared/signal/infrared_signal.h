@@ -163,7 +163,7 @@ InfraredErrorCode infrared_signal_read_name(FlipperFormat* ff, FuriString* name)
  * Same behaviour as infrared_signal_read(), but only the body is read.
  *
  * @param[in,out] ff pointer to the FlipperFormat file instance to read from.
- * @param[out] body pointer to the InfraredSignal instance to hold the signal body. Must be properly allocated.
+ * @param[out] signal pointer to the InfraredSignal instance to hold the signal body. Must be properly allocated.
  * @returns InfraredErrorCodeNone if a signal body was successfully read, otherwise error code.
  */
 InfraredErrorCode infrared_signal_read_body(InfraredSignal* signal, FlipperFormat* ff);
