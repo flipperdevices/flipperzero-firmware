@@ -167,7 +167,7 @@ bool hworld_parse(const NfcDevice* device, FuriString* parsed_data) {
         // Check card type
         if(data->type != MfClassicType1k) break;
 
-        // Check static key for verificaiton
+        // Check static key for verification
         const uint8_t* data_room_sec_key_a_ptr = &data->block[ROOM_SECTOR_KEY_BLOCK].data[0];
         const uint8_t* data_room_sec_key_b_ptr = &data->block[ROOM_SECTOR_KEY_BLOCK].data[10];
         uint64_t data_room_sec_key_a = bit_lib_get_bits_64(data_room_sec_key_a_ptr, 0, 48);

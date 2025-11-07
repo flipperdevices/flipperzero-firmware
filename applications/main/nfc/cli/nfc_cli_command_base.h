@@ -6,7 +6,7 @@
 
 /**
  * @brief Type for action context to be created before action execution
- * must be hanlded through callbacks in each action separately
+ * must be handled through callbacks in each action separately
  */
 typedef void NfcCliActionContext;
 

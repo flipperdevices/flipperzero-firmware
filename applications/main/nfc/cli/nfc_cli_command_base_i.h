@@ -20,7 +20,7 @@
  * 1. Add new function for command to nfc_cli.c
  * 2. In nfc_cli_alloc function register command using cli_registry_add_command after nfc_cli_subscribe_commands 
  *
- * This option is NOT RECOMENDED, because such command will not have any 'help'
+ * This option is NOT RECOMMENDED, because such command will not have any 'help'
  * processing and parsing error checks. Argument parsing must also be done by hand. 
  * 
  * --------------------------------------------------------------------------

@@ -554,8 +554,8 @@ static void nfc_protocol_support_scene_save_name_on_exit(NfcApp* instance) {
  * The emulation scehe has two states: the default one showing information about
  * the card being emulated, and the logs which show the raw data received from the reader.
  *
- * The user has the ability to switch betweeen these two scenes, however the prompt to switch is
- * only shown after some information had appered in the log view.
+ * The user has the ability to switch between these two scenes, however the prompt to switch is
+ * only shown after some information had appeared in the log view.
  */
 enum {
     NfcSceneEmulateStateWidget, /**< Widget view is displayed. */
