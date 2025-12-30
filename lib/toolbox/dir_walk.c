@@ -1,6 +1,8 @@
 #include "dir_walk.h"
 #include <m-list.h>
 
+#define MAX_NAME_LEN 256
+
 LIST_DEF(DirIndexList, uint32_t);
 
 struct DirWalk {
@@ -63,12 +65,12 @@ static bool dir_walk_filter(DirWalk* dir_walk, const char* name, FileInfo* filei
 static DirWalkResult
     dir_walk_iter(DirWalk* dir_walk, FuriString* return_path, FileInfo* fileinfo) {
     DirWalkResult result = DirWalkError;
-    char* name = malloc(256); // FIXME: remove magic number
+    char* name = malloc(MAX_NAME_LEN);
     FileInfo info;
     bool end = false;
 
     while(!end) {
-        storage_dir_read(dir_walk->file, &info, name, 255);
+        storage_dir_read(dir_walk->file, &info, name, MAX_NAME_LEN);
 
         if(storage_file_get_error(dir_walk->file) == FSE_OK) {
             result = DirWalkOK;
@@ -126,7 +128,7 @@ static DirWalkResult
                         break;
                     }
 
-                    if(!storage_dir_read(dir_walk->file, &info, name, 255)) {
+                    if(!storage_dir_read(dir_walk->file, &info, name, MAX_NAME_LEN)) {
                         result = DirWalkError;
                         end = true;
                         break;
