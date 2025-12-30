@@ -265,7 +265,7 @@ switch(tipo_op) {
 	for (size_t i = 0; i < 16; i++) {
     	    furi_string_cat_printf(parsed_data, "%02X", data->block[1].data[i]);
     	    if (i % 8 == 7) {
-                // Dopo ogni 6 byte, vai a capo
+                // Dopo ogni 8 byte, vai a capo
                 furi_string_cat_printf(parsed_data, "\n");
     	    } else {
         	// Altrimenti, aggiungi uno spazio
