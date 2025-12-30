@@ -88,6 +88,7 @@ static void loader_show_gui_error(
     LoaderMessageLoaderStatusResult status,
     const char* name,
     FuriString* error_message) {
+    furi_check(name);
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     DialogMessage* message = dialog_message_alloc();
 
@@ -418,9 +419,6 @@ static void loader_start_internal_app(
     const FlipperInternalApplication* app,
     const char* args) {
     FURI_LOG_I(TAG, "Starting %s", app->name);
-    LoaderEvent event;
-    event.type = LoaderEventTypeApplicationBeforeLoad;
-    furi_pubsub_publish(loader->pubsub, &event);
 
     // store args
     furi_assert(loader->app.args == NULL);
@@ -508,10 +506,6 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
     result.value = loader_make_success_status(error_message);
     result.error = LoaderStatusErrorUnknown;
 
-    LoaderEvent event;
-    event.type = LoaderEventTypeApplicationBeforeLoad;
-    furi_pubsub_publish(loader->pubsub, &event);
-
     do {
         loader->app.fap = flipper_application_alloc(storage, firmware_api_interface);
         size_t start = furi_get_tick();
@@ -566,6 +560,7 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
     if(result.value != LoaderStatusOk) {
         flipper_application_free(loader->app.fap);
         loader->app.fap = NULL;
+        LoaderEvent event;
         event.type = LoaderEventTypeApplicationLoadFailed;
         furi_pubsub_publish(loader->pubsub, &event);
     }
@@ -614,6 +609,12 @@ static LoaderMessageLoaderStatusResult loader_do_start_by_name(
     LoaderMessageLoaderStatusResult status;
     status.value = loader_make_success_status(error_message);
     status.error = LoaderStatusErrorUnknown;
+
+    if(name == NULL) return status;
+
+    LoaderEvent event;
+    event.type = LoaderEventTypeApplicationBeforeLoad;
+    furi_pubsub_publish(loader->pubsub, &event);
 
     do {
         // check lock
@@ -696,6 +697,7 @@ static void loader_do_unlock(Loader* loader) {
 }
 
 static void loader_do_emit_queue_empty_event(Loader* loader) {
+    if(loader_do_is_locked(loader)) return;
     FURI_LOG_I(TAG, "Launch queue empty");
     LoaderEvent event;
     event.type = LoaderEventTypeNoMoreAppsInQueue;
@@ -836,7 +838,10 @@ int32_t loader_srv(void* p) {
             switch(message.type) {
             case LoaderMessageTypeStartByName: {
                 LoaderMessageLoaderStatusResult status = loader_do_start_by_name(
-                    loader, message.start.name, message.start.args, message.start.error_message);
+                    loader,
+                    message.start.name,
+                    message.start.args,
+                    message.start.error_message); //-V595
                 *(message.status_value) = status;
                 if(status.value != LoaderStatusOk) loader_do_emit_queue_empty_event(loader);
                 api_lock_unlock(message.api_lock);
@@ -845,7 +850,7 @@ int32_t loader_srv(void* p) {
             case LoaderMessageTypeStartByNameDetachedWithGuiError: {
                 FuriString* error_message = furi_string_alloc();
                 LoaderMessageLoaderStatusResult status = loader_do_start_by_name(
-                    loader, message.start.name, message.start.args, error_message);
+                    loader, message.start.name, message.start.args, error_message); //-V595
                 loader_show_gui_error(status, message.start.name, error_message);
                 if(status.value != LoaderStatusOk) loader_do_emit_queue_empty_event(loader);
                 if(message.start.name) free((void*)message.start.name);

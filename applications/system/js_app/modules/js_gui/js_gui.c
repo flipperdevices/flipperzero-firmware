@@ -17,8 +17,8 @@ typedef struct {
     JsEventLoopContract custom_contract;
     FuriMessageQueue* custom;
     JsEventLoopContract navigation_contract;
-    FuriSemaphore*
-        navigation; // FIXME: (-nofl) convert into callback once FuriEventLoop starts supporting this
+    JsEventLoopVoidCallback nav_callback;
+    void* nav_callback_context;
 } JsGui;
 
 // Useful for factories
@@ -30,6 +30,14 @@ typedef struct {
     void* specific_view;
     void* custom_data;
 } JsGuiViewData;
+
+static const JsValueEnumVariant js_gui_font_variants[] = {
+    {"primary", FontPrimary},
+    {"secondary", FontSecondary},
+    {"keyboard", FontKeyboard},
+    {"bit_numbers", FontBigNumbers},
+};
+const JsValueDeclaration js_gui_font_declaration = JS_VALUE_ENUM(Font, js_gui_font_variants);
 
 /**
  * @brief Transformer for custom events
@@ -60,8 +68,21 @@ static bool js_gui_vd_custom_callback(void* context, uint32_t event) {
 static bool js_gui_vd_nav_callback(void* context) {
     furi_check(context);
     JsGui* module = context;
-    furi_semaphore_release(module->navigation);
+    if(module->nav_callback) module->nav_callback(module, module->nav_callback_context);
     return true;
+}
+
+static void
+    js_gui_nav_subscribe(FuriEventLoopObject* object, JsEventLoopVoidCallback callback, void* context) {
+    JsGui* module = (JsGui*)object;
+    module->nav_callback = callback;
+    module->nav_callback_context = context;
+}
+
+static void js_gui_nav_unsubscribe(FuriEventLoopObject* object) {
+    JsGui* module = (JsGui*)object;
+    module->nav_callback = NULL;
+    module->nav_callback_context = NULL;
 }
 
 /**
@@ -142,7 +163,6 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
     module->gui = furi_record_open(RECORD_GUI);
     module->dispatcher = view_dispatcher_alloc_ex(loop);
     module->custom = furi_message_queue_alloc(EVENT_QUEUE_SIZE, sizeof(uint32_t));
-    module->navigation = furi_semaphore_alloc(EVENT_QUEUE_SIZE, 0);
     view_dispatcher_attach_to_gui(module->dispatcher, module->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_send_to_front(module->dispatcher);
 
@@ -162,11 +182,12 @@ static void* js_gui_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
     };
     module->navigation_contract = (JsEventLoopContract){
         .magic = JsForeignMagic_JsEventLoopContract,
-        .object = module->navigation,
-        .object_type = JsEventLoopObjectTypeSemaphore,
-        .non_timer =
+        .object = module,
+        .object_type = JsEventLoopObjectTypeVoid,
+        .void_contract =
             {
-                .event = FuriEventLoopEventIn,
+                .subscribe = js_gui_nav_subscribe,
+                .unsubscribe = js_gui_nav_unsubscribe,
             },
     };
 
@@ -197,9 +218,8 @@ static void js_gui_destroy(void* inst) {
 
     view_dispatcher_free(module->dispatcher);
     furi_event_loop_maybe_unsubscribe(module->loop, module->custom);
-    furi_event_loop_maybe_unsubscribe(module->loop, module->navigation);
+    furi_event_loop_maybe_unsubscribe(module->loop, module);
     furi_message_queue_free(module->custom);
-    furi_semaphore_free(module->navigation);
 
     furi_record_close(RECORD_GUI);
     free(module);
@@ -273,9 +293,12 @@ static bool
 /**
  * @brief Sets the list of children. Not available from JS.
  */
-static bool
-    js_gui_view_internal_set_children(struct mjs* mjs, mjs_val_t children, JsGuiViewData* data) {
-    data->descriptor->reset_children(data->specific_view, data->custom_data);
+static bool js_gui_view_internal_set_children(
+    struct mjs* mjs,
+    mjs_val_t children,
+    JsGuiViewData* data,
+    bool do_reset) {
+    if(do_reset) data->descriptor->reset_children(data->specific_view, data->custom_data);
 
     for(size_t i = 0; i < mjs_array_length(mjs, children); i++) {
         mjs_val_t child = mjs_array_get(mjs, children, i);
@@ -357,7 +380,7 @@ static void js_gui_view_set_children(struct mjs* mjs) {
     if(!data->descriptor->add_child || !data->descriptor->reset_children)
         JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "this View can't have children");
 
-    js_gui_view_internal_set_children(mjs, children, data);
+    js_gui_view_internal_set_children(mjs, children, data, true);
 }
 
 /**
@@ -450,7 +473,7 @@ static void js_gui_vf_make_with(struct mjs* mjs) {
         if(!data->descriptor->add_child || !data->descriptor->reset_children)
             JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "this View can't have children");
 
-        if(!js_gui_view_internal_set_children(mjs, children, data)) return;
+        if(!js_gui_view_internal_set_children(mjs, children, data, false)) return;
     }
 
     mjs_return(mjs, view_obj);
