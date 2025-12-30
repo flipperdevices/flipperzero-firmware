@@ -224,9 +224,20 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 
 	// Conversione tipo operazione in stringa
 	const char* tipo_op_str;
-	if(tipo_op == 0) tipo_op_str = "Firts operation"; // 00
-	else if(tipo_op == 1) tipo_op_str = "Recharge";   // 01
-	else tipo_op_str = "Payment";  // 10
+switch(tipo_op) {
+    case 0:
+        tipo_op_str = "First operation";
+        break;
+    case 1:
+        tipo_op_str = "Recharge";
+        break;
+    case 2:
+        tipo_op_str = "Payment";
+        break;
+    default:
+        tipo_op_str = "Unknown";
+        break;
+}
 
         // Numero operazione (Block 4, bytes 0-1)
         uint16_t num_op = (data->block[4].data[1] << 8) | data->block[4].data[0];
