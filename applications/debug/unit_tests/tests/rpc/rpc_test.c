@@ -576,13 +576,13 @@ static void
     message->content.storage_list_response.file[2].type = PB_Storage_File_FileType_DIR;
 
     char* str = malloc(4);
-    strcpy(str, "any");
+    strlcpy(str, "any", 4);
     message->content.storage_list_response.file[0].name = str;
     str = malloc(4);
-    strcpy(str, "int");
+    strlcpy(str, "int", 4);
     message->content.storage_list_response.file[1].name = str;
     str = malloc(4);
-    strcpy(str, "ext");
+    strlcpy(str, "ext", 4);
     message->content.storage_list_response.file[2].name = str;
 }
 
