@@ -104,6 +104,7 @@ void ccid_test_app_free(CcidTestApp* app) {
 
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, CcidTestAppViewSubmenu);
+    view_dispatcher_free(app->view_dispatcher);
     submenu_free(app->submenu);
 
     // Close gui record
