@@ -1,5 +1,16 @@
 #include "power_settings_app.h"
 
+const SubmenuSettingsHelperDescriptor settings_helper_descriptor = {
+    .app_name = "Power",
+    .options_cnt = 3,
+    .options =
+        {
+            {.name = "Battery Info", .scene_id = PowerSettingsAppSceneBatteryInfo},
+            {.name = "Reboot", .scene_id = PowerSettingsAppSceneReboot},
+            {.name = "Power OFF", .scene_id = PowerSettingsAppScenePowerOff},
+        },
+};
+
 static bool power_settings_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     PowerSettingsApp* app = context;
@@ -18,7 +29,7 @@ static void power_settings_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene) {
+PowerSettingsApp* power_settings_app_alloc(void) {
     PowerSettingsApp* app = malloc(sizeof(PowerSettingsApp));
 
     // Records
@@ -50,13 +61,23 @@ PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene) {
     view_dispatcher_add_view(
         app->view_dispatcher, PowerSettingsAppViewDialog, dialog_ex_get_view(app->dialog));
 
-    // Set first scene
-    scene_manager_next_scene(app->scene_manager, first_scene);
+    // Helper
+    app->settings_helper = submenu_settings_helpers_alloc(&settings_helper_descriptor);
+    submenu_settings_helpers_assign_objects(
+        app->settings_helper,
+        app->view_dispatcher,
+        app->scene_manager,
+        app->submenu,
+        PowerSettingsAppViewSubmenu,
+        PowerSettingsAppSceneStart);
+
     return app;
 }
 
 void power_settings_app_free(PowerSettingsApp* app) {
     furi_assert(app);
+    // Helper
+    submenu_settings_helpers_free(app->settings_helper);
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewBatteryInfo);
     battery_info_free(app->batery_info);
@@ -74,11 +95,14 @@ void power_settings_app_free(PowerSettingsApp* app) {
 }
 
 int32_t power_settings_app(void* p) {
-    uint32_t first_scene = PowerSettingsAppSceneStart;
-    if(p && strlen(p) && !strcmp(p, "off")) {
-        first_scene = PowerSettingsAppScenePowerOff;
+    PowerSettingsApp* app = power_settings_app_alloc();
+    if(!submenu_settings_helpers_app_start(app->settings_helper, p)) {
+        uint32_t first_scene = PowerSettingsAppSceneStart;
+        if(p && strlen(p) && !strcmp(p, "off")) {
+            first_scene = PowerSettingsAppScenePowerOff;
+        }
+        scene_manager_next_scene(app->scene_manager, first_scene);
     }
-    PowerSettingsApp* app = power_settings_app_alloc(first_scene);
     view_dispatcher_run(app->view_dispatcher);
     power_settings_app_free(app);
     return 0;

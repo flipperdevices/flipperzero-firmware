@@ -118,7 +118,11 @@ static void js_event_loop_subscription_cancel(struct mjs* mjs) {
         return;
     }
 
-    furi_event_loop_unsubscribe(subscription->loop, subscription->object);
+    if(subscription->object_type == JsEventLoopObjectTypeVoid) {
+        subscription->contract->void_contract.unsubscribe(subscription->object);
+    } else {
+        furi_event_loop_unsubscribe(subscription->loop, subscription->object);
+    }
 
     free(subscription->context->arguments);
     free(subscription->context);
@@ -144,10 +148,16 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
     JsEventLoop* module = JS_GET_CONTEXT(mjs);
 
     // get arguments
+    static const JsValueDeclaration js_loop_subscribe_arg_list[] = {
+        JS_VALUE_SIMPLE(JsValueTypeRawPointer),
+        JS_VALUE_SIMPLE(JsValueTypeFunction),
+    };
+    static const JsValueArguments js_loop_subscribe_args =
+        JS_VALUE_ARGS(js_loop_subscribe_arg_list);
+
     JsEventLoopContract* contract;
     mjs_val_t callback;
-    JS_FETCH_ARGS_OR_RETURN(
-        mjs, JS_AT_LEAST, JS_ARG_STRUCT(JsEventLoopContract, &contract), JS_ARG_FN(&callback));
+    JS_VALUE_PARSE_ARGS_OR_RETURN(mjs, &js_loop_subscribe_args, &contract, &callback);
 
     // create subscription object
     JsEventLoopSubscription* subscription = malloc(sizeof(JsEventLoopSubscription));
@@ -156,7 +166,9 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
     subscription->object_type = contract->object_type;
     subscription->context = context;
     subscription->subscriptions = module->subscriptions;
-    if(contract->object_type == JsEventLoopObjectTypeTimer) subscription->contract = contract;
+    if(contract->object_type == JsEventLoopObjectTypeTimer ||
+       contract->object_type == JsEventLoopObjectTypeVoid)
+        subscription->contract = contract;
     mjs_val_t subscription_obj = mjs_mk_object(mjs);
     mjs_set(mjs, subscription_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, subscription));
     mjs_set(mjs, subscription_obj, "cancel", ~0, MJS_MK_FN(js_event_loop_subscription_cancel));
@@ -212,6 +224,10 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
             js_event_loop_callback,
             context);
         break;
+    case JsEventLoopObjectTypeVoid:
+        contract->void_contract.subscribe(
+            contract->object, js_event_loop_callback, context);
+        break;
     default:
         furi_crash("unimplemented");
     }
@@ -242,20 +258,22 @@ static void js_event_loop_stop(struct mjs* mjs) {
  * event
  */
 static void js_event_loop_timer(struct mjs* mjs) {
-    // get arguments
-    const char* mode_str;
-    int32_t interval;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&mode_str), JS_ARG_INT32(&interval));
-    JsEventLoop* module = JS_GET_CONTEXT(mjs);
+    static const JsValueEnumVariant js_loop_timer_mode_variants[] = {
+        {"periodic", FuriEventLoopTimerTypePeriodic},
+        {"oneshot", FuriEventLoopTimerTypeOnce},
+    };
+
+    static const JsValueDeclaration js_loop_timer_arg_list[] = {
+        JS_VALUE_ENUM(FuriEventLoopTimerType, js_loop_timer_mode_variants),
+        JS_VALUE_SIMPLE(JsValueTypeInt32),
+    };
+    static const JsValueArguments js_loop_timer_args = JS_VALUE_ARGS(js_loop_timer_arg_list);
 
     FuriEventLoopTimerType mode;
-    if(strcasecmp(mode_str, "periodic") == 0) {
-        mode = FuriEventLoopTimerTypePeriodic;
-    } else if(strcasecmp(mode_str, "oneshot") == 0) {
-        mode = FuriEventLoopTimerTypeOnce;
-    } else {
-        JS_ERROR_AND_RETURN(mjs, MJS_BAD_ARGS_ERROR, "argument 0: unknown mode");
-    }
+    int32_t interval;
+    JS_VALUE_PARSE_ARGS_OR_RETURN(mjs, &js_loop_timer_args, &mode, &interval);
+
+    JsEventLoop* module = JS_GET_CONTEXT(mjs);
 
     // make timer contract
     JsEventLoopContract* contract = malloc(sizeof(JsEventLoopContract));
@@ -293,8 +311,14 @@ static mjs_val_t
  */
 static void js_event_loop_queue_send(struct mjs* mjs) {
     // get arguments
+    static const JsValueDeclaration js_loop_q_send_arg_list[] = {
+        JS_VALUE_SIMPLE(JsValueTypeAny),
+    };
+    static const JsValueArguments js_loop_q_send_args = JS_VALUE_ARGS(js_loop_q_send_arg_list);
+
     mjs_val_t message;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_ANY(&message));
+    JS_VALUE_PARSE_ARGS_OR_RETURN(mjs, &js_loop_q_send_args, &message);
+
     JsEventLoopContract* contract = JS_GET_CONTEXT(mjs);
 
     // send message
@@ -311,8 +335,14 @@ static void js_event_loop_queue_send(struct mjs* mjs) {
  */
 static void js_event_loop_queue(struct mjs* mjs) {
     // get arguments
+    static const JsValueDeclaration js_loop_q_arg_list[] = {
+        JS_VALUE_SIMPLE(JsValueTypeInt32),
+    };
+    static const JsValueArguments js_loop_q_args = JS_VALUE_ARGS(js_loop_q_arg_list);
+
     int32_t length;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_INT32(&length));
+    JS_VALUE_PARSE_ARGS_OR_RETURN(mjs, &js_loop_q_args, &length);
+
     JsEventLoop* module = JS_GET_CONTEXT(mjs);
 
     // make queue contract
@@ -384,6 +414,8 @@ static void js_event_loop_destroy(void* inst) {
             JsEventLoopContract* contract = *ContractArray_cref(iterator);
             if(contract->object_type == JsEventLoopObjectTypeTimer) {
                 furi_event_loop_timer_stop(contract->object);
+            } else if(contract->object_type == JsEventLoopObjectTypeVoid) {
+                contract->void_contract.unsubscribe(contract->object);
             } else {
                 furi_event_loop_unsubscribe(module->loop, contract->object);
             }

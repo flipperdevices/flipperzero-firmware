@@ -5,12 +5,13 @@ App(
     entry_point="js_app",
     stack_size=2 * 1024,
     resources="examples",
-    order=0,
+    order=10,
     provides=["js_app_start"],
     sources=[
         "js_app.c",
         "js_modules.c",
         "js_thread.c",
+        "js_value.c",
         "plugin_api/app_api_table.cpp",
         "views/console_view.c",
         "modules/js_flipper.c",
@@ -22,7 +23,7 @@ App(
     appid="js_app_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="js_app_on_system_start",
-    order=160,
+    order=110,
     sources=["js_app.c"],
 )
 
@@ -75,6 +76,54 @@ App(
     entry_point="js_view_text_input_ep",
     requires=["js_app"],
     sources=["modules/js_gui/text_input.c"],
+)
+
+App(
+    appid="js_gui__number_input",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_number_input_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/number_input.c"],
+)
+
+App(
+    appid="js_gui__button_panel",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_button_panel_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/button_panel.c"],
+)
+
+App(
+    appid="js_gui__popup",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_popup_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/popup.c"],
+)
+
+App(
+    appid="js_gui__button_menu",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_button_menu_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/button_menu.c"],
+)
+
+App(
+    appid="js_gui__menu",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_menu_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/menu.c"],
+)
+
+App(
+    appid="js_gui__vi_list",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_vi_list_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/vi_list.c"],
 )
 
 App(

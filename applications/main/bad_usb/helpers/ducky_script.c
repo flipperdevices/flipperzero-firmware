@@ -40,24 +40,28 @@ static const uint8_t numpad_keys[10] = {
 };
 
 uint32_t ducky_get_command_len(const char* line) {
-    uint32_t len = strlen(line);
-    for(uint32_t i = 0; i < len; i++) {
-        if(line[i] == ' ') return i;
-    }
-    return 0;
+    char* first_space = strchr(line, ' ');
+    return first_space ? (first_space - line) : 0;
 }
 
 bool ducky_is_line_end(const char chr) {
     return (chr == ' ') || (chr == '\0') || (chr == '\r') || (chr == '\n');
 }
 
-uint16_t ducky_get_keycode(BadUsbScript* bad_usb, const char* param, bool accept_chars) {
+uint16_t ducky_get_keycode(BadUsbScript* bad_usb, const char* param, bool accept_modifiers) {
     uint16_t keycode = ducky_get_keycode_by_name(param);
     if(keycode != HID_KEYBOARD_NONE) {
         return keycode;
     }
 
-    if((accept_chars) && (strlen(param) > 0)) {
+    if(accept_modifiers) {
+        uint16_t keycode = ducky_get_modifier_keycode_by_name(param);
+        if(keycode != HID_KEYBOARD_NONE) {
+            return keycode;
+        }
+    }
+
+    if(strlen(param) > 0) {
         return BADUSB_ASCII_TO_KEY(bad_usb, param[0]) & 0xFF;
     }
     return 0;
@@ -180,37 +184,44 @@ static bool ducky_string_next(BadUsbScript* bad_usb) {
 
 static int32_t ducky_parse_line(BadUsbScript* bad_usb, FuriString* line) {
     uint32_t line_len = furi_string_size(line);
-    const char* line_tmp = furi_string_get_cstr(line);
+    const char* line_cstr = furi_string_get_cstr(line);
 
     if(line_len == 0) {
         return SCRIPT_STATE_NEXT_LINE; // Skip empty lines
     }
-    FURI_LOG_D(WORKER_TAG, "line:%s", line_tmp);
+    FURI_LOG_D(WORKER_TAG, "line:%s", line_cstr);
 
     // Ducky Lang Functions
-    int32_t cmd_result = ducky_execute_cmd(bad_usb, line_tmp);
+    int32_t cmd_result = ducky_execute_cmd(bad_usb, line_cstr);
     if(cmd_result != SCRIPT_STATE_CMD_UNKNOWN) {
         return cmd_result;
     }
 
     // Mouse Keys
-    uint16_t key = ducky_get_mouse_keycode_by_name(line_tmp);
+    uint16_t key = ducky_get_mouse_keycode_by_name(line_cstr);
     if(key != HID_MOUSE_INVALID) {
         bad_usb->hid->mouse_press(bad_usb->hid_inst, key);
         bad_usb->hid->mouse_release(bad_usb->hid_inst, key);
         return 0;
     }
 
-    // Special keys + modifiers
-    key = ducky_get_keycode(bad_usb, line_tmp, false);
-    if(key == HID_KEYBOARD_NONE) {
-        return ducky_error(bad_usb, "No keycode defined for %s", line_tmp);
+    // Parse chain of modifiers linked by spaces and hyphens
+    uint16_t modifiers = 0;
+    while(1) {
+        key = ducky_get_next_modifier_keycode_by_name(&line_cstr);
+        if(key == HID_KEYBOARD_NONE) break;
+
+        modifiers |= key;
+        char next_char = *line_cstr;
+        if(next_char == ' ' || next_char == '-') line_cstr++;
     }
-    if((key & 0xFF00) != 0) {
-        // It's a modifier key
-        line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
-        key |= ducky_get_keycode(bad_usb, line_tmp, true);
-    }
+
+    // Main key
+    char next_char = *line_cstr;
+    key = modifiers | ducky_get_keycode(bad_usb, line_cstr, false);
+
+    if(key == 0 && next_char) ducky_error(bad_usb, "No keycode defined for %s", line_cstr);
+
     bad_usb->hid->kb_press(bad_usb->hid_inst, key);
     bad_usb->hid->kb_release(bad_usb->hid_inst, key);
     return 0;
