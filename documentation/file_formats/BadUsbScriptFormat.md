@@ -83,7 +83,7 @@ Up to 5 keys can be hold simultaneously.
 | ---------------- | ----------- | -----------------                          |
 | STRING           | Text string | Print text string                          |
 | STRINGLN         | Text string | Print text string and press enter after it |
-| STRING_FROM_FILE | File path   | Print text contained in a file             |
+| STRING_FROM_FILE | File path   | Print text contained in a file (up to 253 chars) |
 
 ## String delay
 
