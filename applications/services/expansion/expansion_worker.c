@@ -35,7 +35,8 @@ typedef enum {
     ExpansionWorkerFlagError = 1 << 2,
 } ExpansionWorkerFlag;
 
-#define EXPANSION_ALL_FLAGS (ExpansionWorkerFlagData | ExpansionWorkerFlagStop)
+#define EXPANSION_ALL_FLAGS \
+    (ExpansionWorkerFlagData | ExpansionWorkerFlagStop | ExpansionWorkerFlagError)
 
 struct ExpansionWorker {
     FuriThread* thread;
@@ -359,6 +360,8 @@ static int32_t expansion_worker(void* context) {
     if(expansion_worker_send_heartbeat(instance)) {
         expansion_worker_state_machine(instance);
     }
+
+    furi_hal_serial_async_rx_stop(instance->serial_handle);
 
     if(instance->state == ExpansionWorkerStateRpcActive) {
         expansion_worker_rpc_session_close(instance);
