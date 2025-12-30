@@ -35,6 +35,15 @@ App(
 )
 
 App(
+    appid="trea_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="trea_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/trea.c"],
+)
+
+App(
     appid="mizip_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="mizip_plugin_ep",
