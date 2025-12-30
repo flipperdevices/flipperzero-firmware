@@ -185,6 +185,10 @@ static bool infrared_cli_parse_raw(const char* str, InfraredSignal* signal) {
     str += strlen(frequency_str) + strlen(duty_cycle_str) + INFRARED_CLI_BUF_SIZE;
 
     uint32_t* timings = malloc(sizeof(uint32_t) * MAX_TIMINGS_AMOUNT);
+    if(timings == NULL) {
+        printf("Out of memory\r\n");
+        return false;
+    }
     size_t timings_size = 0;
     while(1) {
         while(*str == ' ') {
