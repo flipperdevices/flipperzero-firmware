@@ -14,7 +14,7 @@ static size_t mock_in_len, mock_in_pos;
 
 static void set_mock_in(const char* str) {
     size_t len = strlen(str);
-    strcpy(mock_in, str);
+    strlcpy(mock_in, str, sizeof(mock_in));
     mock_in_len = len;
     mock_in_pos = 0;
 }

@@ -50,19 +50,6 @@ __COMPILATION_DB_ENTRIES = []
 _TOOL_PATH_CACHE = {}
 
 
-# We make no effort to avoid rebuilding the entries. Someday, perhaps we could and even
-# integrate with the cache, but there doesn't seem to be much call for it.
-class __CompilationDbNode(SCons.Node.Python.Value):
-    def __init__(self, value):
-        SCons.Node.Python.Value.__init__(self, value)
-        self.Decider(changed_since_last_build_node)
-
-
-def changed_since_last_build_node(child, target, prev_ni, node):
-    """Dummy decider to force always building"""
-    return True
-
-
 def make_emit_compilation_DB_entry(comstr):
     """
     Effectively this creates a lambda function to capture:
@@ -72,7 +59,6 @@ def make_emit_compilation_DB_entry(comstr):
     :param comstr: unevaluated command line
     :return: an emitter which has captured the above
     """
-    user_action = SCons.Action.Action(comstr)
 
     def emit_compilation_db_entry(target, source, env):
         """
@@ -84,22 +70,22 @@ def make_emit_compilation_DB_entry(comstr):
         :return: target(s), source(s)
         """
 
-        dbtarget = __CompilationDbNode(source)
+        command = env.subst(comstr, target=target, source=source)
+        dbtarget = env.File(str(target[0]) + ".json")
+
+        config = {
+            "cmd": command,
+            "abspath": env.get("COMPILATIONDB_USE_BINARY_ABSPATH"),
+            "omit": env.get("COMPILATIONDB_OMIT_BINARIES", []),
+        }
 
         entry = env.__COMPILATIONDB_Entry(
             target=dbtarget,
-            source=[],
+            source=[SCons.Node.Python.Value(config)],
             __COMPILATIONDB_UOUTPUT=target,
             __COMPILATIONDB_USOURCE=source,
-            __COMPILATIONDB_UACTION=user_action,
             __COMPILATIONDB_ENV=env,
         )
-
-        # TODO: (-nofl) Technically, these next two lines should not be required: it should be fine to
-        # cache the entries. However, they don't seem to update properly. Since they are quick
-        # to re-generate disable caching and sidestep this problem.
-        env.AlwaysBuild(entry)
-        env.NoCache(entry)
 
         __COMPILATION_DB_ENTRIES.append(dbtarget)
 
@@ -124,34 +110,40 @@ def compilation_db_entry_action(target, source, env, **kw):
     :return: None
     """
 
-    command = env["__COMPILATIONDB_UACTION"].strfunction(
-        target=env["__COMPILATIONDB_UOUTPUT"],
-        source=env["__COMPILATIONDB_USOURCE"],
-        env=env["__COMPILATIONDB_ENV"],
-    )
+    config = source[0].read()
+    command = config["cmd"]
+    binaries_to_omit = config["omit"]
 
     cmdline = split(command)
-    binaries_to_omit = env["COMPILATIONDB_OMIT_BINARIES"]
-    while (executable := cmdline[0]) in binaries_to_omit:
+    while cmdline and (executable := cmdline[0]) in binaries_to_omit:
         cmdline.pop(0)
 
-    if __is_value_true(env["COMPILATIONDB_USE_BINARY_ABSPATH"]):
+    if not cmdline:
+        executable = ""
+    else:
+        executable = cmdline[0]
+
+    if __is_value_true(config["abspath"]):
         if not (tool_path := _TOOL_PATH_CACHE.get(executable, None)):
             tool_path = env.WhereIs(executable) or executable
             _TOOL_PATH_CACHE[executable] = tool_path
         # Replacing the executable with the full path
         executable = tool_path
 
-    command = join((executable, *cmdline[1:]))
+    if cmdline:
+        command = join((executable, *cmdline[1:]))
+    else:
+        command = executable
 
     entry = {
         "directory": env.Dir("#").abspath,
         "command": command,
-        "file": env["__COMPILATIONDB_USOURCE"][0],
-        "output": env["__COMPILATIONDB_UOUTPUT"][0],
+        "file": str(env["__COMPILATIONDB_USOURCE"][0]),
+        "output": str(env["__COMPILATIONDB_UOUTPUT"][0]),
     }
 
-    target[0].write(entry)
+    with open(target[0].path, "w") as f:
+        json.dump(entry, f)
 
 
 def write_compilation_db(target, source, env):
@@ -162,32 +154,42 @@ def write_compilation_db(target, source, env):
     use_srcpath_filter = env.subst("$COMPILATIONDB_SRCPATH_FILTER")
 
     for s in __COMPILATION_DB_ENTRIES:
-        entry = s.read()
-        source_file = entry["file"]
-        output_file = entry["output"]
+        if not s.exists():
+            continue
+
+        with open(s.path, "r") as f:
+            try:
+                entry = json.load(f)
+            except json.JSONDecodeError:
+                continue
+
+        source_path_str = entry["file"]
+        output_path_str = entry["output"]
+
+        source_file = env.File(source_path_str)
+        output_file = env.File(output_path_str)
 
         if source_file.rfile().srcnode().exists():
             source_file = source_file.rfile().srcnode()
 
         if use_abspath:
-            source_file = source_file.abspath
-            output_file = output_file.abspath
+            source_path = source_file.abspath
+            output_path = output_file.abspath
         else:
-            source_file = source_file.path
-            output_file = output_file.path
+            source_path = source_file.path
+            output_path = output_file.path
 
-        # print("output_file, path_filter", output_file, use_path_filter)
-        if use_path_filter and not fnmatch.fnmatch(output_file, use_path_filter):
+        if use_path_filter and not fnmatch.fnmatch(output_path, use_path_filter):
             continue
 
-        if use_srcpath_filter and not fnmatch.fnmatch(source_file, use_srcpath_filter):
+        if use_srcpath_filter and not fnmatch.fnmatch(source_path, use_srcpath_filter):
             continue
 
         path_entry = {
             "directory": entry["directory"],
             "command": entry["command"],
-            "file": source_file,
-            "output": output_file,
+            "file": source_path,
+            "output": output_path,
         }
 
         entries.append(path_entry)
