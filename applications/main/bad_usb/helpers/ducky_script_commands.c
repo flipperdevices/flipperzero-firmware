@@ -59,9 +59,79 @@ static int32_t ducky_fnc_defstrdelay(BadUsbScript* bad_usb, const char* line, in
     return 0;
 }
 
+static int32_t ducky_fnc_define(BadUsbScript* bad_usb, const char* line, int32_t param) {
+    line = &line[ducky_get_command_len(line) + 1];
+    return ducky_define(bad_usb, line, param);
+}
+
+// Function to check if a character is valid in a variable name
+int is_valid_var_char(char c, int is_first) {
+    if (is_first) {
+        return isalpha(c) || c == '_'; // First character must be a letter or underscore
+    }
+    return isalnum(c) || c == '_'; // Subsequent characters can be letters, digits, or underscores
+}
+
 static int32_t ducky_fnc_string(BadUsbScript* bad_usb, const char* line, int32_t param) {
     line = &line[ducky_get_command_len(line) + 1];
-    furi_string_set_str(bad_usb->string_print, line);
+
+    char* line_ptr = (char*)line;
+    bool first = true;
+
+    while (*line_ptr != '\0') {
+        // Skip leading spaces safely
+        while (*line_ptr != '\0' && *line_ptr == ' ') line_ptr++;
+        if (*line_ptr == '\0') break;
+
+        // Find the next space
+        char* end = strchr(line_ptr, ' ');
+        size_t token_length = (end) ? (size_t)(end - line_ptr) : strlen(line_ptr);
+
+        // Allocate token buffer dynamically
+        char* token = (char*)malloc(token_length + 1);
+        if (!token) break; // Handle allocation failure
+        strncpy(token, line_ptr, token_length);
+        token[token_length] = '\0';
+
+        // Determine the appropriate map
+        map_str_t* temp_map = &(bad_usb->constants);
+        if (token[0] == '#')
+            temp_map = &(bad_usb->constants_sharp);
+        else if (token[0] == '$')
+            temp_map = &(bad_usb->variables);
+
+        // Handle mapping
+        if (first) {
+            if (ducky_map_get(*temp_map, token) == NULL)
+                furi_string_set_str(bad_usb->string_print, token);
+            else
+                furi_string_set_str(bad_usb->string_print, ducky_map_get(*temp_map, token));
+            first = false;
+        } else {
+            if (ducky_map_get(*temp_map, token) == NULL)
+                furi_string_cat_str(bad_usb->string_print, token);
+            else
+                furi_string_cat_str(bad_usb->string_print, ducky_map_get(*temp_map, token));
+        }
+
+        // Free allocated memory
+        free(token);
+
+        // Add spaces if necessary
+        if (end) {
+            size_t space_count = 0;
+            while (*end == ' ') {
+                space_count++;
+                end++;
+            }
+            for (size_t i = 0; i < space_count; ++i)
+                furi_string_cat_str(bad_usb->string_print, " ");
+            line_ptr = end;
+        } else {
+            break; // Prevents undefined behavior if end is NULL
+        }
+    }
+
     if(param == 1) {
         furi_string_cat(bad_usb->string_print, "\n");
     }
@@ -281,6 +351,8 @@ static const DuckyCmd ducky_commands[] = {
     {"REM", NULL, -1},
     {"ID", NULL, -1},
     {"DELAY", ducky_fnc_delay, -1},
+    {"DEFINE", ducky_fnc_define, 1},
+    {"VAR", ducky_fnc_define, 0},
     {"STRING", ducky_fnc_string, 0},
     {"STRINGLN", ducky_fnc_string, 1},
     {"DEFAULT_DELAY", ducky_fnc_defdelay, -1},
