@@ -36,7 +36,22 @@ typedef enum {
     JsEventLoopObjectTypeMutex,
     JsEventLoopObjectTypeSemaphore,
     JsEventLoopObjectTypeStream,
+    JsEventLoopObjectTypeVoid,
 } JsEventLoopObjectType;
+
+typedef void (*JsEventLoopVoidCallback)(void* object, void* context);
+
+typedef void (*JsEventLoopVoidSubscribe)(
+    FuriEventLoopObject* object,
+    JsEventLoopVoidCallback callback,
+    void* context);
+
+typedef void (*JsEventLoopVoidUnsubscribe)(FuriEventLoopObject* object);
+
+typedef struct {
+    JsEventLoopVoidSubscribe subscribe;
+    JsEventLoopVoidUnsubscribe unsubscribe;
+} JsEventLoopVoidContract;
 
 typedef mjs_val_t (
     *JsEventLoopTransformer)(struct mjs* mjs, FuriEventLoopObject* object, void* context);
@@ -83,6 +98,7 @@ typedef struct {
     union {
         JsEventLoopNonTimerContract non_timer;
         JsEventLoopTimerContract timer;
+        JsEventLoopVoidContract void_contract;
     };
 } JsEventLoopContract;
 
