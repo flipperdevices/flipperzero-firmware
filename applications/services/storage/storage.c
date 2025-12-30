@@ -103,11 +103,22 @@ int32_t storage_srv(void* p) {
     furi_record_create(RECORD_STORAGE, app);
 
     StorageMessage message;
+    uint32_t last_tick = furi_get_tick();
+
     while(1) {
-        if(furi_message_queue_get(app->message_queue, &message, STORAGE_TICK) == FuriStatusOk) {
+        uint32_t now = furi_get_tick();
+        uint32_t elapsed = now - last_tick;
+        uint32_t timeout = (elapsed >= STORAGE_TICK) ? 0 : (STORAGE_TICK - elapsed);
+
+        if(furi_message_queue_get(app->message_queue, &message, timeout) == FuriStatusOk) {
             storage_process_message(app, &message);
+            if((furi_get_tick() - last_tick) >= STORAGE_TICK) {
+                storage_tick(app);
+                last_tick = furi_get_tick();
+            }
         } else {
             storage_tick(app);
+            last_tick = furi_get_tick();
         }
     }
 
