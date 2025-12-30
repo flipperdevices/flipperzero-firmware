@@ -1,4 +1,6 @@
+#include <furi.h>
 #include <furi_hal.h>
+#include <storage/storage.h>
 #include <lib/toolbox/strint.h>
 #include "ducky_script.h"
 #include "ducky_script_i.h"
@@ -162,7 +164,7 @@ static int32_t ducky_fnc_sysrq(BadUsbScript* bad_usb, const char* line, int32_t 
     UNUSED(param);
 
     line = &line[ducky_get_command_len(line) + 1];
-    uint16_t key = ducky_get_keycode(bad_usb, line, true);
+    uint16_t key = ducky_get_keycode(bad_usb, line, false);
     bad_usb->hid->kb_press(bad_usb->hid_inst, KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
     bad_usb->hid->kb_press(bad_usb->hid_inst, key);
     bad_usb->hid->release_all(bad_usb->hid_inst);
@@ -266,7 +268,7 @@ static int32_t ducky_fnc_globe(BadUsbScript* bad_usb, const char* line, int32_t 
     UNUSED(param);
 
     line = &line[ducky_get_command_len(line) + 1];
-    uint16_t key = ducky_get_keycode(bad_usb, line, true);
+    uint16_t key = ducky_get_keycode(bad_usb, line, false);
     if(key == HID_KEYBOARD_NONE) {
         return ducky_error(bad_usb, "No keycode defined for %s", line);
     }
@@ -323,6 +325,28 @@ static int32_t ducky_fnc_mouse_move(BadUsbScript* bad_usb, const char* line, int
     return 0;
 }
 
+static int32_t ducky_fnc_string_from_file(BadUsbScript* bad_usb, const char* line, int32_t param) {
+    UNUSED(param);
+    char buffer[254];
+    size_t read_bytes;
+    Storage* storage = furi_record_open("storage");
+    File* file = storage_file_alloc(storage);
+
+    line = &line[ducky_get_command_len(line) + 1];
+    if (file) {
+        storage_file_open(file, line, FSAM_READ, FSOM_OPEN_EXISTING);
+        read_bytes = storage_file_read(file, buffer, sizeof(buffer) - 1);
+        buffer[read_bytes] = '\0'; // Null-terminate the string
+        furi_string_set_str(bad_usb->string_print, buffer);
+        storage_file_close(file);
+        bool state = ducky_string(bad_usb, furi_string_get_cstr(bad_usb->string_print));
+        if(!state) {
+            return ducky_error(bad_usb, "Invalid string %s", line);
+        }
+    }
+    return 0;
+}
+
 static const DuckyCmd ducky_commands[] = {
     {"REM", NULL, -1},
     {"ID", NULL, -1},
@@ -351,6 +375,7 @@ static const DuckyCmd ducky_commands[] = {
     {"MOUSE_MOVE", ducky_fnc_mouse_move, -1},
     {"MOUSESCROLL", ducky_fnc_mouse_scroll, -1},
     {"MOUSE_SCROLL", ducky_fnc_mouse_scroll, -1},
+    {"STRING_FROM_FILE", ducky_fnc_string_from_file, -1},
 };
 
 #define TAG "BadUsb"
