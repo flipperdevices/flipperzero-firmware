@@ -10,7 +10,7 @@
             "command": "./fbt format"
         },
         {
-            "label": "[FBT] Clear",
+            "label": "[FBT] Clean",
             "group": "build",
             "type": "shell",
             "command": "./fbt -c"
