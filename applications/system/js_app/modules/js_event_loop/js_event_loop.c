@@ -118,7 +118,11 @@ static void js_event_loop_subscription_cancel(struct mjs* mjs) {
         return;
     }
 
-    furi_event_loop_unsubscribe(subscription->loop, subscription->object);
+    if(subscription->object_type == JsEventLoopObjectTypeVoid) {
+        subscription->contract->void_contract.unsubscribe(subscription->object);
+    } else {
+        furi_event_loop_unsubscribe(subscription->loop, subscription->object);
+    }
 
     free(subscription->context->arguments);
     free(subscription->context);
@@ -162,7 +166,9 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
     subscription->object_type = contract->object_type;
     subscription->context = context;
     subscription->subscriptions = module->subscriptions;
-    if(contract->object_type == JsEventLoopObjectTypeTimer) subscription->contract = contract;
+    if(contract->object_type == JsEventLoopObjectTypeTimer ||
+       contract->object_type == JsEventLoopObjectTypeVoid)
+        subscription->contract = contract;
     mjs_val_t subscription_obj = mjs_mk_object(mjs);
     mjs_set(mjs, subscription_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, subscription));
     mjs_set(mjs, subscription_obj, "cancel", ~0, MJS_MK_FN(js_event_loop_subscription_cancel));
@@ -217,6 +223,10 @@ static void js_event_loop_subscribe(struct mjs* mjs) {
             contract->non_timer.event,
             js_event_loop_callback,
             context);
+        break;
+    case JsEventLoopObjectTypeVoid:
+        contract->void_contract.subscribe(
+            contract->object, js_event_loop_callback, context);
         break;
     default:
         furi_crash("unimplemented");
@@ -404,6 +414,8 @@ static void js_event_loop_destroy(void* inst) {
             JsEventLoopContract* contract = *ContractArray_cref(iterator);
             if(contract->object_type == JsEventLoopObjectTypeTimer) {
                 furi_event_loop_timer_stop(contract->object);
+            } else if(contract->object_type == JsEventLoopObjectTypeVoid) {
+                contract->void_contract.unsubscribe(contract->object);
             } else {
                 furi_event_loop_unsubscribe(module->loop, contract->object);
             }
