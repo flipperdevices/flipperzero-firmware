@@ -14,9 +14,19 @@ typedef struct {
         .name = #icon, .data = &I_##icon \
     }
 
+#define ANIM_ICON_DEF(icon)              \
+    (IconDefinition) {                   \
+        .name = #icon, .data = &A_##icon \
+    }
+
 static const IconDefinition builtin_icons[] = {
     ICON_DEF(DolphinWait_59x54),
     ICON_DEF(js_script_10px),
+    ICON_DEF(off_19x20),
+    ICON_DEF(off_hover_19x20),
+    ICON_DEF(power_19x20),
+    ICON_DEF(power_hover_19x20),
+    ANIM_ICON_DEF(Settings_14),
 };
 
 // Firmware's Icon struct needs a frames array, and uses a small CompressHeader
@@ -39,9 +49,14 @@ typedef struct {
     FxbmIconWrapperList_t fxbm_list;
 } JsGuiIconInst;
 
+static const JsValueDeclaration js_icon_get_arg_list[] = {
+    JS_VALUE_SIMPLE(JsValueTypeString),
+};
+static const JsValueArguments js_icon_get_args = JS_VALUE_ARGS(js_icon_get_arg_list);
+
 static void js_gui_icon_get_builtin(struct mjs* mjs) {
     const char* icon_name;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&icon_name));
+    JS_VALUE_PARSE_ARGS_OR_RETURN(mjs, &js_icon_get_args, &icon_name);
 
     for(size_t i = 0; i < COUNT_OF(builtin_icons); i++) {
         if(strcmp(icon_name, builtin_icons[i].name) == 0) {
@@ -55,7 +70,7 @@ static void js_gui_icon_get_builtin(struct mjs* mjs) {
 
 static void js_gui_icon_load_fxbm(struct mjs* mjs) {
     const char* fxbm_path;
-    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&fxbm_path));
+    JS_VALUE_PARSE_ARGS_OR_RETURN(mjs, &js_icon_get_args, &fxbm_path);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
