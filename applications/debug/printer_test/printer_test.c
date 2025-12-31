@@ -10,12 +10,9 @@ typedef struct {
     Gui* gui;
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
-    size_t bytes_received;
     size_t total_bytes;
     bool job_active;
     bool usb_connected;
-    char last_data[64];  // Store last chunk of printable data for preview
-    FuriTimer* poll_timer;
     PrinterCallbacks* printer_callbacks;
     char current_job_name[64];  // Current job name from PJL
     char line_buffer[256];      // Buffer for parsing lines
@@ -25,7 +22,6 @@ typedef struct {
 
 typedef enum {
     EventTypeKey,
-    EventTypeTick,
     EventTypeDataReceived,
     EventTypeStatusChanged,
     EventTypeJobStarted,
@@ -64,72 +60,47 @@ static void parse_pjl_command(PrinterTest* app, const char* line) {
     while(*cmd == ' ' || *cmd == '\t') cmd++;
     
     // Check for SET JOBNAME or JOBNAME command
-    if(strncmp(cmd, "SET JOBNAME", 11) == 0) {
-        const char* jobname = cmd + 11;
-        while(*jobname == ' ' || *jobname == '\t' || *jobname == '=') jobname++;
-        
-        // Extract job name (remove quotes if present)
-        if(*jobname == '"') {
-            jobname++;
-            const char* end = strchr(jobname, '"');
-            if(end) {
-                size_t len = end - jobname;
-                if(len < sizeof(app->current_job_name)) {
-                    strncpy(app->current_job_name, jobname, len);
-                    app->current_job_name[len] = '\0';
-                }
-            }
-        } else {
-            // No quotes, copy until space or end
-            size_t i = 0;
-            while(jobname[i] && jobname[i] != ' ' && jobname[i] != '\t' && 
-                  jobname[i] != '\r' && jobname[i] != '\n' && 
-                  i < sizeof(app->current_job_name) - 1) {
-                app->current_job_name[i] = jobname[i];
-                i++;
-            }
-            app->current_job_name[i] = '\0';
+    if(strncmp(cmd, "SET JOBNAME", 11) == 0 || strncmp(cmd, "JOBNAME", 7) == 0) {
+        const char* jobname = NULL;
+        if(strncmp(cmd, "SET JOBNAME", 11) == 0) {
+            jobname = cmd + 11;
+        } else if(strncmp(cmd, "JOBNAME", 7) == 0) {
+            jobname = cmd + 7;
         }
-        
-        // Send job started event
-        PrinterTestEvent event = {
-            .type = EventTypeJobStarted,
-        };
-        strncpy(event.job_name, app->current_job_name, sizeof(event.job_name) - 1);
-        furi_message_queue_put(app->event_queue, &event, 0);
-        
-    } else if(strncmp(cmd, "JOBNAME", 7) == 0) {
-        const char* jobname = cmd + 7;
-        while(*jobname == ' ' || *jobname == '\t' || *jobname == '=') jobname++;
-        
-        // Extract job name (same logic as above)
-        if(*jobname == '"') {
-            jobname++;
-            const char* end = strchr(jobname, '"');
-            if(end) {
-                size_t len = end - jobname;
-                if(len < sizeof(app->current_job_name)) {
-                    strncpy(app->current_job_name, jobname, len);
-                    app->current_job_name[len] = '\0';
+
+        if(jobname) {
+            while(*jobname == ' ' || *jobname == '\t' || *jobname == '=') jobname++;
+
+            // Extract job name (remove quotes if present)
+            if(*jobname == '"') {
+                jobname++;
+                const char* end = strchr(jobname, '"');
+                if(end) {
+                    size_t len = end - jobname;
+                    if(len < sizeof(app->current_job_name)) {
+                        strncpy(app->current_job_name, jobname, len);
+                        app->current_job_name[len] = '\0';
+                    }
                 }
+            } else {
+                // No quotes, copy until space or end
+                size_t i = 0;
+                while(jobname[i] && jobname[i] != ' ' && jobname[i] != '\t' &&
+                      jobname[i] != '\r' && jobname[i] != '\n' &&
+                      i < sizeof(app->current_job_name) - 1) {
+                    app->current_job_name[i] = jobname[i];
+                    i++;
+                }
+                app->current_job_name[i] = '\0';
             }
-        } else {
-            size_t i = 0;
-            while(jobname[i] && jobname[i] != ' ' && jobname[i] != '\t' && 
-                  jobname[i] != '\r' && jobname[i] != '\n' && 
-                  i < sizeof(app->current_job_name) - 1) {
-                app->current_job_name[i] = jobname[i];
-                i++;
-            }
-            app->current_job_name[i] = '\0';
+
+            // Send job started event
+            PrinterTestEvent event = {
+                .type = EventTypeJobStarted,
+            };
+            snprintf(event.job_name, sizeof(event.job_name), "%s", app->current_job_name);
+            furi_message_queue_put(app->event_queue, &event, 0);
         }
-        
-        // Send job started event
-        PrinterTestEvent event = {
-            .type = EventTypeJobStarted,
-        };
-        strncpy(event.job_name, app->current_job_name, sizeof(event.job_name) - 1);
-        furi_message_queue_put(app->event_queue, &event, 0);
         
     } else if(strncmp(cmd, "EOJ", 3) == 0) {
         // End of job
@@ -182,16 +153,6 @@ static void printer_status_callback(bool connected, void* context) {
     PrinterTestEvent event = {
         .type = EventTypeStatusChanged,
         .connected = connected,
-    };
-    furi_message_queue_put(app->event_queue, &event, 0);
-}
-
-// Timer callback to poll for received data
-static void printer_test_timer_callback(void* context) {
-    PrinterTest* app = context;
-    
-    PrinterTestEvent event = {
-        .type = EventTypeTick,
     };
     furi_message_queue_put(app->event_queue, &event, 0);
 }
@@ -256,11 +217,9 @@ int32_t printer_test_app(void* p) {
 
     PrinterTest* app = malloc(sizeof(PrinterTest));
     app->event_queue = furi_message_queue_alloc(8, sizeof(PrinterTestEvent));
-    app->bytes_received = 0;
     app->total_bytes = 0;
     app->job_active = false;
     app->usb_connected = false;
-    app->last_data[0] = '\0';
     app->current_job_name[0] = '\0';
     app->line_pos = 0;
     app->job_complete = false;
@@ -276,10 +235,6 @@ int32_t printer_test_app(void* p) {
     view_port_draw_callback_set(app->view_port, printer_test_draw_callback, app);
     view_port_input_callback_set(app->view_port, printer_test_input_callback, app);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
-
-    // Create timer for polling received data
-    app->poll_timer = furi_timer_alloc(printer_test_timer_callback, FuriTimerTypePeriodic, app);
-    furi_timer_start(app->poll_timer, 100); // Poll every 100ms
 
     // Save previous USB mode
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
@@ -309,7 +264,6 @@ int32_t printer_test_app(void* p) {
                         // Reset counters
                         app->job_active = false;
                         app->total_bytes = 0;
-                        app->last_data[0] = '\0';
                         app->current_job_name[0] = '\0';
                         app->job_complete = false;
                         app->line_pos = 0;
@@ -344,8 +298,6 @@ int32_t printer_test_app(void* p) {
 
     // Cleanup
     furi_hal_usb_printer_set_callbacks(NULL, NULL);
-    furi_timer_stop(app->poll_timer);
-    furi_timer_free(app->poll_timer);
     furi_hal_usb_set_config(usb_mode_prev, NULL);
 
     view_port_enabled_set(app->view_port, false);

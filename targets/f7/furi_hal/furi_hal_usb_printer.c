@@ -185,6 +185,11 @@ static void printer_deinit(usbd_device* dev) {
         furi_message_queue_free(printer_queue);
         printer_queue = NULL;
     }
+
+    if(printer_semaphore) {
+        furi_semaphore_free(printer_semaphore);
+        printer_semaphore = NULL;
+    }
 }
 
 static void printer_on_wakeup(usbd_device* dev) {
