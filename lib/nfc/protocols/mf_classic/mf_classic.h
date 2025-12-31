@@ -50,6 +50,7 @@ typedef enum {
     MfClassicType1k,
     MfClassicTypePlus2k,
     MfClassicType4k,
+    MfClassicTypePlus2k,
 
     MfClassicTypeNum,
 } MfClassicType;
