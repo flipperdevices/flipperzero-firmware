@@ -1,6 +1,6 @@
 #include "infrared_app_i.h"
 
-#include <furi_hal_power.h>
+#include <power/power_service/power.h>
 
 #include <string.h>
 #include <toolbox/path.h>
@@ -87,6 +87,19 @@ static void infrared_rpc_command_callback(const RpcAppSystemEvent* event, void* 
             infrared->app_state.current_button_index = event->data.i32;
             view_dispatcher_send_custom_event(
                 infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressIndex);
+        }
+    } else if(event->type == RpcAppEventTypeButtonPressRelease) {
+        furi_assert(
+            event->data.type == RpcAppSystemEventDataTypeString ||
+            event->data.type == RpcAppSystemEventDataTypeInt32);
+        if(event->data.type == RpcAppSystemEventDataTypeString) {
+            furi_string_set(infrared->button_name, event->data.string);
+            view_dispatcher_send_custom_event(
+                infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressReleaseName);
+        } else {
+            infrared->app_state.current_button_index = event->data.i32;
+            view_dispatcher_send_custom_event(
+                infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressReleaseIndex);
         }
     } else if(event->type == RpcAppEventTypeButtonRelease) {
         view_dispatcher_send_custom_event(
@@ -411,6 +424,26 @@ void infrared_tx_stop(InfraredApp* infrared) {
     infrared->app_state.last_transmit_time = furi_get_tick();
 }
 
+void infrared_tx_send_once(InfraredApp* infrared) {
+    if(infrared->app_state.is_transmitting) {
+        return;
+    }
+
+    dolphin_deed(DolphinDeedIrSend);
+    infrared_signal_transmit(infrared->current_signal);
+}
+
+InfraredErrorCode infrared_tx_send_once_button_index(InfraredApp* infrared, size_t button_index) {
+    furi_assert(button_index < infrared_remote_get_signal_count(infrared->remote));
+
+    InfraredErrorCode error = infrared_remote_load_signal(
+        infrared->remote, infrared->current_signal, infrared->app_state.current_button_index);
+    if(!INFRARED_ERROR_PRESENT(error)) {
+        infrared_tx_send_once(infrared);
+    }
+
+    return error;
+}
 void infrared_blocking_task_start(InfraredApp* infrared, FuriThreadCallback callback) {
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewLoading);
     furi_thread_set_callback(infrared->task_thread, callback);
@@ -468,12 +501,12 @@ void infrared_set_tx_pin(InfraredApp* infrared, FuriHalInfraredTxPin tx_pin) {
 }
 
 void infrared_enable_otg(InfraredApp* infrared, bool enable) {
-    if(enable) {
-        furi_hal_power_enable_otg();
-    } else {
-        furi_hal_power_disable_otg();
-    }
+    Power* power = furi_record_open(RECORD_POWER);
+
+    power_enable_otg(power, enable);
     infrared->app_state.is_otg_enabled = enable;
+
+    furi_record_close(RECORD_POWER);
 }
 
 static void infrared_load_settings(InfraredApp* infrared) {

@@ -176,7 +176,7 @@ static bool plantain_read(Nfc* nfc, NfcDevice* device) {
         }
 
         MfClassicDeviceKeys keys = {};
-        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
+        for(size_t i = 0; i < mf_classic_get_scannable_sectors_num(data->type); i++) {
             bit_lib_num_to_bytes_be(cfg.keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
             bit_lib_num_to_bytes_be(cfg.keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
@@ -310,9 +310,11 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
                 last_payment_date.year,
                 last_payment_date.hour,
                 last_payment_date.minute);
-            //payment amount. This needs to be investigated more, currently it shows incorrect amount on some cards.
-            uint16_t last_payment = (data->block[18].data[9] << 8) | data->block[18].data[8];
-            furi_string_cat_printf(parsed_data, "Amount: %d rub", last_payment / 100);
+            //Last payment amount.
+            uint16_t last_payment = ((data->block[18].data[10] << 16) |
+                                     (data->block[18].data[9] << 8) | (data->block[18].data[8])) /
+                                    100;
+            furi_string_cat_printf(parsed_data, "Amount: %d rub", last_payment);
             furi_string_free(card_number_s);
             furi_string_free(tmp_s);
             //This is for 4K Plantains.
@@ -369,9 +371,11 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
                 last_payment_date.year,
                 last_payment_date.hour,
                 last_payment_date.minute);
-            //payment amount
-            uint16_t last_payment = (data->block[18].data[9] << 8) | data->block[18].data[8];
-            furi_string_cat_printf(parsed_data, "Amount: %d rub", last_payment / 100);
+            //Last payment amount
+            uint16_t last_payment = ((data->block[18].data[10] << 16) |
+                                     (data->block[18].data[9] << 8) | (data->block[18].data[8])) /
+                                    100;
+            furi_string_cat_printf(parsed_data, "Amount: %d rub", last_payment);
             furi_string_free(card_number_s);
             furi_string_free(tmp_s);
         }

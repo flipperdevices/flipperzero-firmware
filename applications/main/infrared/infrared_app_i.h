@@ -31,7 +31,7 @@
 
 #include "infrared_app.h"
 #include "infrared_remote.h"
-#include "infrared_brute_force.h"
+#include <lib/infrared/signal/infrared_brute_force.h>
 #include "infrared_custom_event.h"
 
 #include "scenes/infrared_scene.h"
@@ -217,6 +217,20 @@ InfraredErrorCode infrared_tx_start_button_index(InfraredApp* infrared, size_t b
  * @param[in,out] infrared pointer to the application instance.
  */
 void infrared_tx_stop(InfraredApp* infrared);
+
+/**
+ * @brief Transmit the currently loaded signal once.
+ * 
+ * @param[in,out] infrared pointer to the application instance.
+ */
+void infrared_tx_send_once(InfraredApp* infrared);
+
+/**
+ * @brief Load the signal under the given index and transmit it once.
+ *
+ * @param[in,out] infrared pointer to the application instance.
+ */
+InfraredErrorCode infrared_tx_send_once_button_index(InfraredApp* infrared, size_t button_index);
 
 /**
  * @brief Start a blocking task in a separate thread.

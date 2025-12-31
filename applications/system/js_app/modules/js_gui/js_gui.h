@@ -21,6 +21,11 @@ typedef union {
 } JsViewPropValue;
 
 /**
+ * JS-to-C font enum mapping
+ */
+extern const JsValueDeclaration js_gui_font_declaration;
+
+/**
  * @brief Assigns a value to a view property
  * 
  * The name and the type are implicit and defined in the property descriptor
@@ -50,6 +55,11 @@ typedef void (*JsViewFree)(void* specific_view);
 typedef void* (*JsViewCustomMake)(struct mjs* mjs, void* specific_view, mjs_val_t view_obj);
 /** @brief Context destruction for glue code */
 typedef void (*JsViewCustomDestroy)(void* specific_view, void* custom_state, FuriEventLoop* loop);
+/** @brief `addChild` callback for glue code */
+typedef bool (
+    *JsViewAddChild)(struct mjs* mjs, void* specific_view, void* custom_state, mjs_val_t child_obj);
+/** @brief `resetChildren` callback for glue code */
+typedef void (*JsViewResetChildren)(void* specific_view, void* custom_state);
 
 /**
  * @brief Descriptor for a JS view
@@ -66,15 +76,22 @@ typedef struct {
     JsViewAlloc alloc;
     JsViewGetView get_view;
     JsViewFree free;
+
     JsViewCustomMake custom_make; // <! May be NULL
     JsViewCustomDestroy custom_destroy; // <! May be NULL
+
+    JsViewAddChild add_child; // <! May be NULL
+    JsViewResetChildren reset_children; // <! May be NULL
+
     size_t prop_cnt; //<! Number of properties visible from JS
     JsViewPropDescriptor props[]; // <! Descriptors of properties visible from JS
 } JsViewDescriptor;
 
 // Callback ordering:
-// alloc -> get_view -> [custom_make (if set)] -> props[i].assign -> [custom_destroy (if_set)] -> free
-// \_______________ creation ________________/    \___ usage ___/    \_________ destruction _________/
+//                                   +-> add_child       -+
+//                                   +-> reset_children  -+
+// alloc -> get_view -> custom_make -+-> props[i].assign -+> custom_destroy -> free
+// \__________ creation __________/      \____ use ____/     \___ destruction ____/
 
 /**
  * @brief Creates a JS `ViewFactory` object
