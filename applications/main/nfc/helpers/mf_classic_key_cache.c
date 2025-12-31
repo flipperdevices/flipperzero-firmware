@@ -3,7 +3,7 @@
 #include <furi/furi.h>
 #include <storage/storage.h>
 
-#define NFC_APP_KEYS_EXTENSION ".keys"
+#define NFC_APP_KEYS_EXTENSION   ".keys"
 #define NFC_APP_KEY_CACHE_FOLDER "/ext/nfc/.cache"
 
 static const char* mf_classic_key_cache_file_header = "Flipper NFC keys";
@@ -23,7 +23,7 @@ static void nfc_get_key_cache_file_path(const uint8_t* uid, size_t uid_len, Furi
     furi_string_cat_printf(path, "%s", NFC_APP_KEYS_EXTENSION);
 }
 
-MfClassicKeyCache* mf_classic_key_cache_alloc() {
+MfClassicKeyCache* mf_classic_key_cache_alloc(void) {
     MfClassicKeyCache* instance = malloc(sizeof(MfClassicKeyCache));
 
     return instance;
@@ -63,7 +63,7 @@ bool mf_classic_key_cache_save(MfClassicKeyCache* instance, const MfClassicData*
         if(!flipper_format_write_hex_uint64(ff, "Key A map", &data->key_a_mask, 1)) break;
         if(!flipper_format_write_hex_uint64(ff, "Key B map", &data->key_b_mask, 1)) break;
 
-        uint8_t sector_num = mf_classic_get_total_sectors_num(data->type);
+        uint8_t sector_num = mf_classic_get_scannable_sectors_num(data->type);
         bool key_save_success = true;
         for(size_t i = 0; (i < sector_num) && (key_save_success); i++) {
             MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
@@ -166,7 +166,7 @@ void mf_classic_key_cache_load_from_data(MfClassicKeyCache* instance, const MfCl
     }
 }
 
-bool mf_classic_key_cahce_get_next_key(
+bool mf_classic_key_cache_get_next_key(
     MfClassicKeyCache* instance,
     uint8_t* sector_num,
     MfClassicKey* key,

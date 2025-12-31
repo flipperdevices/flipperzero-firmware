@@ -6,7 +6,7 @@
 #include <dolphin/dolphin.h>
 #include <toolbox/name_generator.h>
 
-#define MAX_TEXT_INPUT_LEN 22
+#define MAX_TEXT_INPUT_LEN 23
 
 void subghz_scene_save_name_text_input_callback(void* context) {
     furi_assert(context);
@@ -15,7 +15,7 @@ void subghz_scene_save_name_text_input_callback(void* context) {
 }
 
 void subghz_scene_save_name_get_timefilename(FuriString* name) {
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,
@@ -39,7 +39,7 @@ void subghz_scene_save_name_on_enter(void* context) {
     FuriString* dir_name = furi_string_alloc();
 
     if(!subghz_path_is_file(subghz->file_path)) {
-        char file_name_buf[SUBGHZ_MAX_LEN_NAME] = {0};
+        char file_name_buf[SUBGHZ_MAX_LEN_NAME];
 
         name_generator_make_auto(file_name_buf, SUBGHZ_MAX_LEN_NAME, SUBGHZ_APP_FILENAME_PREFIX);
 
@@ -62,7 +62,7 @@ void subghz_scene_save_name_on_enter(void* context) {
         furi_string_set(subghz->file_path, dir_name);
     }
 
-    strncpy(subghz->file_name_tmp, furi_string_get_cstr(file_name), SUBGHZ_MAX_LEN_NAME);
+    strlcpy(subghz->file_name_tmp, furi_string_get_cstr(file_name), SUBGHZ_MAX_LEN_NAME);
     text_input_set_header_text(text_input, "Name signal");
     text_input_set_result_callback(
         text_input,
@@ -132,7 +132,7 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                     scene_manager_set_scene_state(
                         subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerNoSet);
                 } else {
-                    subghz_file_name_clear(subghz);
+                    furi_string_reset(subghz->file_path_tmp);
                 }
 
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveSuccess);

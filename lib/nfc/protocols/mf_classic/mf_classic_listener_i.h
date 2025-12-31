@@ -3,7 +3,7 @@
 #include "mf_classic_listener.h"
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener_i.h>
 #include <nfc/protocols/nfc_generic_event.h>
-#include "crypto1.h"
+#include <nfc/helpers/crypto1.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,8 +40,12 @@ struct MfClassicListener {
     Crypto1* crypto;
     MfClassicAuthContext auth_context;
 
+    // Write block context
+    uint8_t write_block;
+
     // Value operation data
     int32_t transfer_value;
+    bool transfer_valid;
     MfClassicValueCommand value_cmd;
 
     NfcGenericEvent generic_event;

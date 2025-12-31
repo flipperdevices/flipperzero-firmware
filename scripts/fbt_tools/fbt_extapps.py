@@ -58,7 +58,8 @@ class AppBuilder:
         )
         self.app_env.Append(
             CPPDEFINES=[
-                ("FAP_VERSION", f'"{".".join(map(str, self.app.fap_version))}"')
+                ("FAP_VERSION", f'\\"{".".join(map(str, self.app.fap_version))}\\"'),
+                *self.app.cdefines,
             ],
         )
         self.app_env.VariantDir(self.app_work_dir, self.app._appdir, duplicate=False)
@@ -143,8 +144,8 @@ class AppBuilder:
             self.app._assets_dirs = [self.app._appdir.Dir(self.app.fap_file_assets)]
 
         self.app_env.Append(
-            LIBS=[*self.app.fap_libs, *self.private_libs],
-            CPPPATH=[self.app_work_dir, self.app._appdir],
+            LIBS=[*self.app.fap_libs, *self.private_libs, *self.app.fap_libs],
+            CPPPATH=[self.app_env.Dir(self.app_work_dir), self.app._appdir],
         )
 
         app_sources = self.app_env.GatherSources(
@@ -168,8 +169,12 @@ class AppBuilder:
             APP_ENTRY=self.app.entry_point,
         )[0]
 
+        app_suffix = ".fap"
+        if self.app.apptype == FlipperAppType.PLUGIN:
+            app_suffix = ".fal"
+
         app_artifacts.compact = self.app_env.EmbedAppMetadata(
-            self.ext_apps_work_dir.File(f"{self.app.appid}.fap"),
+            self.ext_apps_work_dir.File(f"{self.app.appid}{app_suffix}"),
             app_artifacts.debug,
             APP=self.app,
         )[0]
@@ -337,10 +342,6 @@ def GetExtAppByIdOrPath(env, app_dir):
 def _embed_app_metadata_emitter(target, source, env):
     app = env["APP"]
 
-    # Hack: change extension for fap libs
-    if app.apptype == FlipperAppType.PLUGIN:
-        target[0].name = target[0].name.replace(".fap", ".fal")
-
     app_work_dir = AppBuilder.get_app_work_dir(env, app)
     app._section_fapmeta = app_work_dir.File(_FAP_META_SECTION)
     target.append(app._section_fapmeta)
@@ -460,7 +461,8 @@ def _gather_app_components(env, appname) -> AppDeploymentComponents:
             else:
                 # host app is a built-in app
                 components.add_app(artifacts_app_to_run)
-                components.extra_launch_args = f"-a {host_app.name}"
+                if host_app.name:
+                    components.extra_launch_args = f"-a {host_app.name}"
         else:
             raise UserError("Host app is unknown")
     else:
@@ -472,7 +474,19 @@ def AddAppLaunchTarget(env, appname, launch_target_name):
     components = _gather_app_components(env, appname)
     target = env.PhonyTarget(
         launch_target_name,
-        '${PYTHON3} "${APP_RUN_SCRIPT}" -p ${FLIP_PORT} ${EXTRA_ARGS} -s ${SOURCES} -t ${FLIPPER_FILE_TARGETS}',
+        [
+            [
+                "${PYTHON3}",
+                "${APP_RUN_SCRIPT}",
+                "-p",
+                "${FLIP_PORT}",
+                "${EXTRA_ARGS}",
+                "-s",
+                "${SOURCES}",
+                "-t",
+                "${FLIPPER_FILE_TARGETS}",
+            ]
+        ],
         source=components.deploy_sources.values(),
         FLIPPER_FILE_TARGETS=components.deploy_sources.keys(),
         EXTRA_ARGS=components.extra_launch_args,

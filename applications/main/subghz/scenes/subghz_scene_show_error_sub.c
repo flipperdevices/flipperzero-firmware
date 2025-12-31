@@ -1,4 +1,4 @@
-#include "../subghz_i.h"
+#include "../subghz_i.h" // IWYU pragma: keep
 #include "../helpers/subghz_custom_event.h"
 
 void subghz_scene_show_error_sub_popup_callback(void* context) {
@@ -11,7 +11,7 @@ void subghz_scene_show_error_sub_on_enter(void* context) {
 
     // Setup view
     Popup* popup = subghz->popup;
-    popup_set_icon(popup, 72, 17, &I_DolphinCommon_56x48);
+    popup_set_icon(popup, 83, 22, &I_WarningDolphinFlip_45x42);
     popup_set_header(popup, furi_string_get_cstr(subghz->error_str), 14, 15, AlignLeft, AlignTop);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, subghz);

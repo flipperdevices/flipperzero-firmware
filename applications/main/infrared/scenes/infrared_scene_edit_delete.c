@@ -6,23 +6,48 @@ static void
     view_dispatcher_send_custom_event(infrared->view_dispatcher, result);
 }
 
+static int32_t infrared_scene_edit_delete_task_callback(void* context) {
+    InfraredApp* infrared = context;
+    InfraredAppState* app_state = &infrared->app_state;
+    const InfraredEditTarget edit_target = app_state->edit_target;
+
+    InfraredErrorCode error = InfraredErrorCodeNone;
+    if(edit_target == InfraredEditTargetButton) {
+        furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
+        error = infrared_remote_delete_signal(infrared->remote, app_state->current_button_index);
+    } else if(edit_target == InfraredEditTargetRemote) {
+        error = infrared_remote_remove(infrared->remote);
+    } else {
+        furi_crash();
+    }
+
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
+
+    return error;
+}
+
 void infrared_scene_edit_delete_on_enter(void* context) {
     InfraredApp* infrared = context;
     DialogEx* dialog_ex = infrared->dialog_ex;
     InfraredRemote* remote = infrared->remote;
-
     const InfraredEditTarget edit_target = infrared->app_state.edit_target;
+
     if(edit_target == InfraredEditTargetButton) {
         dialog_ex_set_header(dialog_ex, "Delete Button?", 64, 0, AlignCenter, AlignTop);
 
         const int32_t current_button_index = infrared->app_state.current_button_index;
         furi_check(current_button_index != InfraredButtonIndexNone);
 
-        if(!infrared_remote_load_signal(remote, infrared->current_signal, current_button_index)) {
+        InfraredErrorCode error =
+            infrared_remote_load_signal(remote, infrared->current_signal, current_button_index);
+        if(INFRARED_ERROR_PRESENT(error)) {
+            const char* format =
+                (INFRARED_ERROR_CHECK(error, InfraredErrorCodeSignalRawUnableToReadTooLongData)) ?
+                    "Failed to delete\n\"%s\" is too long.\nTry to edit file from pc" :
+                    "Failed to load\n\"%s\"";
             infrared_show_error_message(
-                infrared,
-                "Failed to load\n\"%s\"",
-                infrared_remote_get_signal_name(remote, current_button_index));
+                infrared, format, infrared_remote_get_signal_name(remote, current_button_index));
             scene_manager_previous_scene(infrared->scene_manager);
             return;
         }
@@ -70,10 +95,7 @@ void infrared_scene_edit_delete_on_enter(void* context) {
     dialog_ex_set_result_callback(dialog_ex, infrared_scene_edit_delete_dialog_result_callback);
     dialog_ex_set_context(dialog_ex, context);
 
-    view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationHorizontal);
-    view_stack_add_view(infrared->view_stack, dialog_ex_get_view(infrared->dialog_ex));
-
-    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
+    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewDialogEx);
 }
 
 bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event) {
@@ -84,39 +106,42 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == DialogExResultLeft) {
             scene_manager_previous_scene(scene_manager);
-            consumed = true;
         } else if(event.event == DialogExResultRight) {
-            bool success = false;
-            InfraredRemote* remote = infrared->remote;
+            // Delete a button or a remote in a separate thread
+            infrared_blocking_task_start(infrared, infrared_scene_edit_delete_task_callback);
+
+        } else if(event.event == InfraredCustomEventTypeTaskFinished) {
+            const InfraredErrorCode task_error = infrared_blocking_task_finalize(infrared);
+
             InfraredAppState* app_state = &infrared->app_state;
-            const InfraredEditTarget edit_target = app_state->edit_target;
 
-            if(edit_target == InfraredEditTargetButton) {
-                furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
-                infrared_show_loading_popup(infrared, true);
-                success = infrared_remote_delete_signal(remote, app_state->current_button_index);
-                infrared_show_loading_popup(infrared, false);
-                app_state->current_button_index = InfraredButtonIndexNone;
-            } else if(edit_target == InfraredEditTargetRemote) {
-                success = infrared_remote_remove(remote);
-                app_state->current_button_index = InfraredButtonIndexNone;
-            } else {
-                furi_crash();
-            }
-
-            if(success) {
+            if(!INFRARED_ERROR_PRESENT(task_error)) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEditDeleteDone);
             } else {
-                infrared_show_error_message(
-                    infrared,
-                    "Failed to\ndelete %s",
-                    edit_target == InfraredEditTargetButton ? "button" : "file");
-                const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneStart};
+                if(INFRARED_ERROR_CHECK(
+                       task_error, InfraredErrorCodeSignalRawUnableToReadTooLongData)) {
+                    const uint8_t index = INFRARED_ERROR_GET_INDEX(task_error);
+                    const char* format =
+                        "Failed to delete\n\"%s\" is too long.\nTry to edit file from pc";
+                    infrared_show_error_message(
+                        infrared,
+                        format,
+                        infrared_remote_get_signal_name(infrared->remote, index));
+                } else {
+                    const char* edit_target_text =
+                        app_state->edit_target == InfraredEditTargetButton ? "button" : "file";
+                    infrared_show_error_message(
+                        infrared, "Failed to\ndelete %s", edit_target_text);
+                }
+
+                const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneRemote};
                 scene_manager_search_and_switch_to_previous_scene_one_of(
                     scene_manager, possible_scenes, COUNT_OF(possible_scenes));
             }
-            consumed = true;
+
+            app_state->current_button_index = InfraredButtonIndexNone;
         }
+        consumed = true;
     }
 
     return consumed;
@@ -124,5 +149,5 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
 
 void infrared_scene_edit_delete_on_exit(void* context) {
     InfraredApp* infrared = context;
-    view_stack_remove_view(infrared->view_stack, dialog_ex_get_view(infrared->dialog_ex));
+    dialog_ex_reset(infrared->dialog_ex);
 }

@@ -1,13 +1,16 @@
 #include "cli_commands.h"
 #include "cli_command_gpio.h"
 
+#include <core/thread.h>
 #include <furi_hal.h>
 #include <furi_hal_info.h>
 #include <task_control_block.h>
 #include <time.h>
 #include <notification/notification_messages.h>
+#include <notification/notification_app.h>
 #include <loader/loader.h>
 #include <lib/toolbox/args.h>
+#include <lib/toolbox/strint.h>
 
 // Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
 #define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
@@ -64,7 +67,8 @@ void cli_command_help(Cli* cli, FuriString* args, void* context) {
     CliCommandTree_it(it_left, cli->commands);
     CliCommandTree_it_t it_right;
     CliCommandTree_it(it_right, cli->commands);
-    for(size_t i = 0; i < commands_count_mid; i++) CliCommandTree_next(it_right);
+    for(size_t i = 0; i < commands_count_mid; i++)
+        CliCommandTree_next(it_right);
 
     // Iterate throw tree
     for(size_t i = 0; i < commands_count_mid; i++) {
@@ -82,7 +86,7 @@ void cli_command_help(Cli* cli, FuriString* args, void* context) {
     };
 
     if(furi_string_size(args) > 0) {
-        cli_nl();
+        cli_nl(cli);
         printf("`");
         printf("%s", furi_string_get_cstr(args));
         printf("` command not found");
@@ -101,7 +105,7 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(context);
 
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
 
     if(furi_string_size(args) > 0) {
         uint16_t hours, minutes, seconds, month, day, year, weekday;
@@ -135,7 +139,7 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
             return;
         }
 
-        if(!furi_hal_rtc_validate_datetime(&datetime)) {
+        if(!datetime_validate_datetime(&datetime)) {
             printf("Invalid datetime data");
             return;
         }
@@ -166,7 +170,7 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
     }
 }
 
-#define CLI_COMMAND_LOG_RING_SIZE 2048
+#define CLI_COMMAND_LOG_RING_SIZE   2048
 #define CLI_COMMAND_LOG_BUFFER_SIZE 64
 
 void cli_command_log_tx_callback(const uint8_t* buffer, size_t size, void* context) {
@@ -211,7 +215,12 @@ void cli_command_log(Cli* cli, FuriString* args, void* context) {
     furi_log_level_to_string(furi_log_get_level(), &current_level);
     printf("Current log level: %s\r\n", current_level);
 
-    furi_hal_console_set_tx_callback(cli_command_log_tx_callback, ring);
+    FuriLogHandler log_handler = {
+        .callback = cli_command_log_tx_callback,
+        .context = ring,
+    };
+
+    furi_log_add_handler(log_handler);
 
     printf("Use <log ?> to list available log levels\r\n");
     printf("Press CTRL+C to stop...\r\n");
@@ -220,7 +229,7 @@ void cli_command_log(Cli* cli, FuriString* args, void* context) {
         cli_write(cli, buffer, ret);
     }
 
-    furi_hal_console_set_tx_callback(NULL, NULL);
+    furi_log_remove_handler(log_handler);
 
     if(restore_log_level) {
         // There will be strange behaviour if log level is set from settings while log command is running
@@ -253,7 +262,7 @@ void cli_command_sysctl_heap_track(Cli* cli, FuriString* args, void* context) {
     } else if(!furi_string_cmp(args, "main")) {
         furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeMain);
         printf("Heap tracking enabled for application main thread");
-#if FURI_DEBUG
+#ifdef FURI_DEBUG
     } else if(!furi_string_cmp(args, "tree")) {
         furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeTree);
         printf("Heap tracking enabled for application main and child threads");
@@ -266,13 +275,13 @@ void cli_command_sysctl_heap_track(Cli* cli, FuriString* args, void* context) {
     }
 }
 
-void cli_command_sysctl_print_usage() {
+void cli_command_sysctl_print_usage(void) {
     printf("Usage:\r\n");
     printf("sysctl <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
 
     printf("\tdebug <0|1>\t - Enable or disable system debug\r\n");
-#if FURI_DEBUG
+#ifdef FURI_DEBUG
     printf("\theap_track <none|main|tree|all>\t - Set heap allocation tracking mode\r\n");
 #else
     printf("\theap_track <none|main>\t - Set heap allocation tracking mode\r\n");
@@ -308,13 +317,24 @@ void cli_command_sysctl(Cli* cli, FuriString* args, void* context) {
 void cli_command_vibro(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(context);
+
     if(!furi_string_cmp(args, "0")) {
         NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
         notification_message_block(notification, &sequence_reset_vibro);
         furi_record_close(RECORD_NOTIFICATION);
     } else if(!furi_string_cmp(args, "1")) {
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode)) {
+            printf("Flipper is in stealth mode. Unmute the device to control vibration.");
+            return;
+        }
+
         NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-        notification_message_block(notification, &sequence_set_vibro_on);
+        if(notification->settings.vibro_on) {
+            notification_message_block(notification, &sequence_set_vibro_on);
+        } else {
+            printf("Vibro is disabled in settings. Enable it to control vibration.");
+        }
+
         furi_record_close(RECORD_NOTIFICATION);
     } else {
         cli_print_usage("vibro", "<1|0>", furi_string_get_cstr(args));
@@ -354,9 +374,9 @@ void cli_command_led(Cli* cli, FuriString* args, void* context) {
     }
     furi_string_free(light_name);
     // Read light value from the rest of the string
-    char* end_ptr;
-    uint32_t value = strtoul(furi_string_get_cstr(args), &end_ptr, 0);
-    if(!(value < 256 && *end_ptr == '\0')) {
+    uint32_t value;
+    if(strint_to_uint32(furi_string_get_cstr(args), NULL, &value, 0) != StrintParseNoError ||
+       value >= 256) {
         cli_print_usage("led", "<r|g|b|bl> <0-255>", furi_string_get_cstr(args));
         return;
     }
@@ -376,34 +396,70 @@ void cli_command_led(Cli* cli, FuriString* args, void* context) {
     furi_record_close(RECORD_NOTIFICATION);
 }
 
-void cli_command_ps(Cli* cli, FuriString* args, void* context) {
+static void cli_command_top(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
-    UNUSED(args);
     UNUSED(context);
 
-    const uint8_t threads_num_max = 32;
-    FuriThreadId threads_ids[threads_num_max];
-    uint8_t thread_num = furi_thread_enumerate(threads_ids, threads_num_max);
-    printf(
-        "%-20s %-20s %-14s %-8s %-8s %s\r\n",
-        "AppID",
-        "Name",
-        "Stack start",
-        "Heap",
-        "Stack",
-        "Stack min free");
-    for(uint8_t i = 0; i < thread_num; i++) {
-        TaskControlBlock* tcb = (TaskControlBlock*)threads_ids[i];
+    int interval = 1000;
+    args_read_int_and_trim(args, &interval);
+
+    FuriThreadList* thread_list = furi_thread_list_alloc();
+    while(!cli_cmd_interrupt_received(cli)) {
+        uint32_t tick = furi_get_tick();
+        furi_thread_enumerate(thread_list);
+
+        if(interval) printf("\e[2J\e[0;0f"); // Clear display and return to 0
+
+        uint32_t uptime = tick / furi_kernel_get_tick_frequency();
         printf(
-            "%-20s %-20s 0x%-12lx %-8zu %-8lu %-8lu\r\n",
-            furi_thread_get_appid(threads_ids[i]),
-            furi_thread_get_name(threads_ids[i]),
-            (uint32_t)tcb->pxStack,
-            memmgr_heap_get_thread_memory(threads_ids[i]),
-            (uint32_t)(tcb->pxEndOfStack - tcb->pxStack + 1) * sizeof(StackType_t),
-            furi_thread_get_stack_space(threads_ids[i]));
+            "Threads: %zu, ISR Time: %0.2f%%, Uptime: %luh%lum%lus\r\n",
+            furi_thread_list_size(thread_list),
+            (double)furi_thread_list_get_isr_time(thread_list),
+            uptime / 60 / 60,
+            uptime / 60 % 60,
+            uptime % 60);
+
+        printf(
+            "Heap: total %zu, free %zu, minimum %zu, max block %zu\r\n\r\n",
+            memmgr_get_total_heap(),
+            memmgr_get_free_heap(),
+            memmgr_get_minimum_free_heap(),
+            memmgr_heap_get_max_free_block());
+
+        printf(
+            "%-17s %-20s %-10s %5s %12s %6s %10s %7s %5s\r\n",
+            "AppID",
+            "Name",
+            "State",
+            "Prio",
+            "Stack start",
+            "Stack",
+            "Stack Min",
+            "Heap",
+            "CPU");
+
+        for(size_t i = 0; i < furi_thread_list_size(thread_list); i++) {
+            const FuriThreadListItem* item = furi_thread_list_get_at(thread_list, i);
+            printf(
+                "%-17s %-20s %-10s %5d   0x%08lx %6lu %10lu %7zu %5.1f\r\n",
+                item->app_id,
+                item->name,
+                item->state,
+                item->priority,
+                item->stack_address,
+                item->stack_size,
+                item->stack_min_free,
+                item->heap,
+                (double)item->cpu);
+        }
+
+        if(interval > 0) {
+            furi_delay_ms(interval);
+        } else {
+            break;
+        }
     }
-    printf("\r\nTotal: %d", thread_num);
+    furi_thread_list_free(thread_list);
 }
 
 void cli_command_free(Cli* cli, FuriString* args, void* context) {
@@ -463,7 +519,7 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "date", CliCommandFlagParallelSafe, cli_command_date, NULL);
     cli_add_command(cli, "log", CliCommandFlagParallelSafe, cli_command_log, NULL);
     cli_add_command(cli, "sysctl", CliCommandFlagDefault, cli_command_sysctl, NULL);
-    cli_add_command(cli, "ps", CliCommandFlagParallelSafe, cli_command_ps, NULL);
+    cli_add_command(cli, "top", CliCommandFlagParallelSafe, cli_command_top, NULL);
     cli_add_command(cli, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
     cli_add_command(cli, "free_blocks", CliCommandFlagParallelSafe, cli_command_free_blocks, NULL);
 

@@ -5,8 +5,9 @@
 #include "hid_icons.h"
 
 #define TAG "HidMouseClicker"
+
 #define DEFAULT_CLICK_RATE 1
-#define MAXIMUM_CLICK_RATE 60
+#define MAXIMUM_CLICK_RATE 100
 
 struct HidMouseClicker {
     View* view;
@@ -18,7 +19,7 @@ typedef struct {
     bool connected;
     bool running;
     int rate;
-    HidTransport transport;
+    enum HidMouseButtons btn;
 } HidMouseClickerModel;
 
 static void hid_mouse_clicker_start_or_restart_timer(void* context) {
@@ -34,7 +35,9 @@ static void hid_mouse_clicker_start_or_restart_timer(void* context) {
         HidMouseClickerModel * model,
         {
             furi_timer_start(
-                hid_mouse_clicker->timer, furi_kernel_get_tick_frequency() / model->rate);
+                hid_mouse_clicker->timer,
+                furi_kernel_get_tick_frequency() /
+                    ((model->rate) ? model->rate : MAXIMUM_CLICK_RATE));
         },
         true);
 }
@@ -44,46 +47,70 @@ static void hid_mouse_clicker_draw_callback(Canvas* canvas, void* context) {
     HidMouseClickerModel* model = context;
 
     // Header
-    if(model->transport == HidTransportBle) {
-        if(model->connected) {
-            canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
-        } else {
-            canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
-        }
+#ifdef HID_TRANSPORT_BLE
+    if(model->connected) {
+        canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
+    } else {
+        canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
     }
+#endif
 
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Mouse Clicker");
+    canvas_set_font(canvas, FontSecondary);
 
     // Ok
-    canvas_draw_icon(canvas, 63, 25, &I_Space_65x18);
-    if(model->running) {
-        canvas_set_font(canvas, FontPrimary);
+    canvas_draw_icon(canvas, 58, 25, &I_Space_65x18);
 
-        FuriString* rate_label = furi_string_alloc();
-        furi_string_printf(rate_label, "%d clicks/s\n\nUp / Down", model->rate);
-        elements_multiline_text(canvas, AlignLeft, 35, furi_string_get_cstr(rate_label));
-        canvas_set_font(canvas, FontSecondary);
-        furi_string_free(rate_label);
+    canvas_draw_icon(canvas, 61, 50, &I_ButtonLeft_4x7);
+    canvas_draw_icon(canvas, 117, 50, &I_ButtonRight_4x7);
 
-        elements_slightly_rounded_box(canvas, 66, 27, 60, 13);
-        canvas_set_color(canvas, ColorWhite);
-    } else {
-        canvas_set_font(canvas, FontPrimary);
-        elements_multiline_text(canvas, AlignLeft, 35, "Press Start\nto start\nclicking");
-        canvas_set_font(canvas, FontSecondary);
+    const char* btn_label;
+    switch(model->btn) {
+    case HID_MOUSE_BTN_LEFT:
+        btn_label = "Left";
+        break;
+    case HID_MOUSE_BTN_WHEEL:
+        btn_label = "Middle";
+        break;
+    case HID_MOUSE_BTN_RIGHT:
+        btn_label = "Right";
+        break;
+    default:
+        furi_crash();
     }
-    canvas_draw_icon(canvas, 74, 29, &I_Ok_btn_9x9);
+
+    elements_multiline_text_aligned(canvas, 89, 57, AlignCenter, AlignBottom, btn_label);
+
     if(model->running) {
-        elements_multiline_text_aligned(canvas, 91, 36, AlignLeft, AlignBottom, "Stop");
+        elements_slightly_rounded_box(canvas, 61, 27, 60, 13);
+        canvas_set_color(canvas, ColorWhite);
+    }
+
+    canvas_draw_icon(canvas, 69, 29, &I_Ok_btn_9x9);
+
+    if(model->running) {
+        elements_multiline_text_aligned(canvas, 86, 37, AlignLeft, AlignBottom, "Stop");
     } else {
-        elements_multiline_text_aligned(canvas, 91, 36, AlignLeft, AlignBottom, "Start");
+        elements_multiline_text_aligned(canvas, 86, 37, AlignLeft, AlignBottom, "Start");
     }
     canvas_set_color(canvas, ColorBlack);
 
+    // Clicks/s
+    char label[20];
+    if(model->rate) {
+        snprintf(label, sizeof(label), "%d clicks/s", model->rate);
+    } else {
+        snprintf(label, sizeof(label), "max clicks/s");
+    }
+    elements_multiline_text_aligned(canvas, 28, 37, AlignCenter, AlignBottom, label);
+
+    canvas_draw_icon(canvas, 25, 20, &I_ButtonUp_7x4);
+    canvas_draw_icon(canvas, 25, 44, &I_ButtonDown_7x4);
+
     // Back
-    canvas_draw_icon(canvas, 74, 49, &I_Pin_back_arrow_10x8);
-    elements_multiline_text_aligned(canvas, 91, 57, AlignLeft, AlignBottom, "Quit");
+    canvas_draw_icon(canvas, 0, 54, &I_Pin_back_arrow_10x8);
+    elements_multiline_text_aligned(canvas, 13, 62, AlignLeft, AlignBottom, "Exit");
 }
 
 static void hid_mouse_clicker_timer_callback(void* context) {
@@ -94,8 +121,8 @@ static void hid_mouse_clicker_timer_callback(void* context) {
         HidMouseClickerModel * model,
         {
             if(model->running) {
-                hid_hal_mouse_press(hid_mouse_clicker->hid, HID_MOUSE_BTN_LEFT);
-                hid_hal_mouse_release(hid_mouse_clicker->hid, HID_MOUSE_BTN_LEFT);
+                hid_hal_mouse_press(hid_mouse_clicker->hid, model->btn);
+                hid_hal_mouse_release(hid_mouse_clicker->hid, model->btn);
             }
         },
         false);
@@ -118,7 +145,7 @@ static bool hid_mouse_clicker_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
     bool rate_changed = false;
 
-    if(event->type != InputTypeShort && event->type != InputTypeRepeat) {
+    if(event->type == InputTypePress || event->type == InputTypeRelease) {
         return false;
     }
 
@@ -139,10 +166,41 @@ static bool hid_mouse_clicker_input_callback(InputEvent* event, void* context) {
                 consumed = true;
                 break;
             case InputKeyDown:
-                if(model->rate > 1) {
+                if(model->rate > 0) {
                     model->rate--;
                 }
                 rate_changed = true;
+                consumed = true;
+                break;
+            case InputKeyBack:
+                model->running = false;
+                break;
+            case InputKeyLeft:
+                switch(model->btn) {
+                case HID_MOUSE_BTN_LEFT:
+                    model->btn = HID_MOUSE_BTN_RIGHT;
+                    break;
+                case HID_MOUSE_BTN_WHEEL:
+                    model->btn = HID_MOUSE_BTN_LEFT;
+                    break;
+                case HID_MOUSE_BTN_RIGHT:
+                    model->btn = HID_MOUSE_BTN_WHEEL;
+                    break;
+                }
+                consumed = true;
+                break;
+            case InputKeyRight:
+                switch(model->btn) {
+                case HID_MOUSE_BTN_LEFT:
+                    model->btn = HID_MOUSE_BTN_WHEEL;
+                    break;
+                case HID_MOUSE_BTN_WHEEL:
+                    model->btn = HID_MOUSE_BTN_RIGHT;
+                    break;
+                case HID_MOUSE_BTN_RIGHT:
+                    model->btn = HID_MOUSE_BTN_LEFT;
+                    break;
+                }
                 consumed = true;
                 break;
             default:
@@ -180,8 +238,8 @@ HidMouseClicker* hid_mouse_clicker_alloc(Hid* hid) {
         hid_mouse_clicker->view,
         HidMouseClickerModel * model,
         {
-            model->transport = hid->transport;
             model->rate = DEFAULT_CLICK_RATE;
+            model->btn = HID_MOUSE_BTN_LEFT;
         },
         true);
 

@@ -25,11 +25,12 @@ typedef struct {
     const char* name;
 
     iButtonProtocolDallasReadWriteFunc read;
-    iButtonProtocolDallasReadWriteFunc write_blank;
+    iButtonProtocolDallasReadWriteFunc write_id;
     iButtonProtocolDallasReadWriteFunc write_copy;
     iButtonProtocolDallasEmulateFunc emulate;
     iButtonProtocolDallasSaveFunc save;
     iButtonProtocolDallasLoadFunc load;
+    iButtonProtocolDallasRenderDataFunc render_uid;
     iButtonProtocolDallasRenderDataFunc render_data;
     iButtonProtocolDallasRenderDataFunc render_brief_data;
     iButtonProtocolDallasRenderDataFunc render_error;

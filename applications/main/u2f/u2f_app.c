@@ -21,7 +21,7 @@ static void u2f_app_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-U2fApp* u2f_app_alloc() {
+U2fApp* u2f_app_alloc(void) {
     U2fApp* app = malloc(sizeof(U2fApp));
 
     app->gui = furi_record_open(RECORD_GUI);
@@ -29,7 +29,6 @@ U2fApp* u2f_app_alloc() {
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&u2f_scene_handlers, app);
-    view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
     view_dispatcher_set_tick_event_callback(
         app->view_dispatcher, u2f_app_tick_event_callback, 500);

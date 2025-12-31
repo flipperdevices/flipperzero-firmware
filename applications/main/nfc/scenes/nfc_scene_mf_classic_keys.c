@@ -1,7 +1,5 @@
 #include "../nfc_app_i.h"
 
-#define NFC_SCENE_MF_CLASSIC_KEYS_MAX (100)
-
 void nfc_scene_mf_classic_keys_widget_callback(GuiButtonType result, InputType type, void* context) {
     NfcApp* instance = context;
     if(type == InputTypeShort) {
@@ -14,21 +12,17 @@ void nfc_scene_mf_classic_keys_on_enter(void* context) {
 
     // Load flipper dict keys total
     uint32_t flipper_dict_keys_total = 0;
-    NfcDict* dict = nfc_dict_alloc(
-        NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH, NfcDictModeOpenExisting, sizeof(MfClassicKey));
-    if(dict) {
-        flipper_dict_keys_total = nfc_dict_get_total_keys(dict);
-        nfc_dict_free(dict);
-    }
+    KeysDict* dict = keys_dict_alloc(
+        NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH, KeysDictModeOpenExisting, sizeof(MfClassicKey));
+    flipper_dict_keys_total = keys_dict_get_total_keys(dict);
+    keys_dict_free(dict);
 
     // Load user dict keys total
     uint32_t user_dict_keys_total = 0;
-    dict = nfc_dict_alloc(
-        NFC_APP_MF_CLASSIC_DICT_USER_PATH, NfcDictModeOpenAlways, sizeof(MfClassicKey));
-    if(dict) {
-        user_dict_keys_total = nfc_dict_get_total_keys(dict);
-        nfc_dict_free(dict);
-    }
+    dict = keys_dict_alloc(
+        NFC_APP_MF_CLASSIC_DICT_USER_PATH, KeysDictModeOpenAlways, sizeof(MfClassicKey));
+    user_dict_keys_total = keys_dict_get_total_keys(dict);
+    keys_dict_free(dict);
 
     FuriString* temp_str = furi_string_alloc();
     widget_add_string_element(

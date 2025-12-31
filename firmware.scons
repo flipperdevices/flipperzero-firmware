@@ -20,6 +20,7 @@ env = ENV.Clone(
         "fbt_resources",
     ],
     COMPILATIONDB_USE_ABSPATH=False,
+    COMPILATIONDB_USE_BINARY_ABSPATH=True,
     BUILD_DIR=fw_build_meta["build_dir"],
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
     FW_FLAVOR=fw_build_meta["flavor"],
@@ -28,6 +29,8 @@ env = ENV.Clone(
     TARGETS_ROOT=Dir("#/targets"),
     LINT_SOURCES=[
         Dir("applications"),
+        # Not C code
+        Dir("!applications/system/js_app/packages"),
     ],
     LIBPATH=[
         "${LIB_DIST_DIR}",
@@ -139,8 +142,12 @@ for app_dir, _ in fwenv["APPDIRS"]:
 
 fwenv.PrepareApplicationsBuild()
 
+
 # Build external apps + configure SDK
 if env["IS_BASE_FIRMWARE"]:
+    # Ensure all libs are built - even if they are not used in firmware
+    fw_artifacts.append(fwenv["LIB_DIST_DIR"].glob("*.a"))
+
     fwenv.SetDefault(FBT_FAP_DEBUG_ELF_ROOT=fwenv["BUILD_DIR"].Dir(".extapps"))
     fw_extapps = fwenv["FW_EXTAPPS"] = SConscript(
         "site_scons/extapps.scons",
@@ -211,6 +218,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
     sources,
     LIBS=fwenv["TARGET_CFG"].linker_dependencies,
 )
+Depends(fwelf, fwenv["LINKER_SCRIPT_PATH"])
 
 # Firmware depends on everything child builders returned
 # Depends(fwelf, lib_targets)
@@ -219,7 +227,7 @@ AddPostAction(fwelf, fwenv["APPBUILD_DUMP"])
 AddPostAction(
     fwelf,
     Action(
-        '${PYTHON3} "${BIN_SIZE_SCRIPT}" elf ${TARGET}',
+        [["${PYTHON3}", "${BIN_SIZE_SCRIPT}", "elf", "${TARGET}"]],
         "Firmware size",
     ),
 )
@@ -229,7 +237,7 @@ fwhex = fwenv["FW_HEX"] = fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
 fwbin = fwenv["FW_BIN"] = fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
 AddPostAction(
     fwbin,
-    Action('@${PYTHON3} "${BIN_SIZE_SCRIPT}" bin ${TARGET}'),
+    Action([["@${PYTHON3}", "${BIN_SIZE_SCRIPT}", "bin", "${TARGET}"]]),
 )
 
 fwdfu = fwenv["FW_DFU"] = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
@@ -249,7 +257,7 @@ fw_artifacts.extend(
 )
 
 
-fwcdb = fwenv.CompilationDatabase()
+fwcdb = fwenv["FW_CDB"] = fwenv.CompilationDatabase()
 # without filtering, both updater & firmware commands would be generated in same file
 fwenv.Replace(
     COMPILATIONDB_PATH_FILTER=fwenv.subst("*${FW_FLAVOR}*"),

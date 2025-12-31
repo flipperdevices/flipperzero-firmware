@@ -34,7 +34,7 @@ void flipper_boot_recovery_draw_splash(Canvas* canvas) {
     canvas_commit(canvas);
 }
 
-void flipper_boot_recovery_exec() {
+void flipper_boot_recovery_exec(void) {
     Canvas* canvas = canvas_init();
 
     // Show recovery splashscreen
@@ -56,8 +56,7 @@ void flipper_boot_recovery_exec() {
     }
 
     if(!counter) {
-        furi_hal_rtc_set_flag(FuriHalRtcFlagFactoryReset);
-        furi_hal_rtc_set_pin_fails(0);
-        furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
+        furi_hal_rtc_reset_registers();
+        furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
     }
 }

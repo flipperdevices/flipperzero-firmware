@@ -4,6 +4,8 @@
 
 #include "slix_poller.h"
 
+#define SLIX_POLLER_SET_PASSWORD_FWT (100000)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,6 +14,8 @@ typedef enum {
     SlixPollerStateIdle,
     SlixPollerStateGetNxpSysInfo,
     SlixPollerStateReadSignature,
+    SlixPollerStateCheckPrivacyPassword,
+    SlixPollerStatePrivacyUnlock,
     SlixPollerStateReady,
     SlixPollerStateError,
     SlixPollerStateNum,
@@ -19,9 +23,12 @@ typedef enum {
 
 struct SlixPoller {
     Iso15693_3Poller* iso15693_3_poller;
+    SlixType type;
     SlixData* data;
     SlixPollerState poller_state;
     SlixError error;
+    SlixRandomNumber random_number;
+    bool privacy_password_checked;
 
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
@@ -32,16 +39,6 @@ struct SlixPoller {
     NfcGenericCallback callback;
     void* context;
 };
-
-SlixError slix_poller_send_frame(
-    SlixPoller* instance,
-    const BitBuffer* tx_data,
-    BitBuffer* rx_data,
-    uint32_t fwt);
-
-SlixError slix_poller_async_get_nxp_system_info(SlixPoller* instance, SlixSystemInfo* data);
-
-SlixError slix_poller_async_read_signature(SlixPoller* instance, SlixSignature* data);
 
 #ifdef __cplusplus
 }

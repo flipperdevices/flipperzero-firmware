@@ -1,6 +1,10 @@
-#include "storage_processing.h"
 #include <m-list.h>
 #include <m-dict.h>
+
+#include "storage_processing.h"
+#include "storage_internal_dirname_i.h"
+
+#define TAG "Storage"
 
 #define STORAGE_PATH_PREFIX_LEN 4u
 _Static_assert(
@@ -60,41 +64,38 @@ static StorageType storage_get_type_by_path(FuriString* path) {
 
     return type;
 }
-static void storage_path_change_to_real_storage(FuriString* path, StorageType real_storage) {
-    if(furi_string_search(path, STORAGE_ANY_PATH_PREFIX) == 0) {
-        switch(real_storage) {
-        case ST_EXT:
-            furi_string_replace_at(
-                path, 0, strlen(STORAGE_EXT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX);
-            break;
-        case ST_INT:
-            furi_string_replace_at(
-                path, 0, strlen(STORAGE_INT_PATH_PREFIX), STORAGE_INT_PATH_PREFIX);
-            break;
-        default:
-            break;
-        }
-    }
-}
 
 static FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** storage) {
     StorageType type = storage_get_type_by_path(path);
 
     if(storage_type_is_valid(type)) {
+        // Any storage phase-out: redirect "/any" to "/ext"
         if(type == ST_ANY) {
-            type = ST_INT;
-            if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusOK) {
-                type = ST_EXT;
-            }
-            storage_path_change_to_real_storage(path, type);
+            FURI_LOG_W(
+                TAG,
+                STORAGE_ANY_PATH_PREFIX " is deprecated, use " STORAGE_EXT_PATH_PREFIX " instead");
+            furi_string_replace_at(
+                path, 0, strlen(STORAGE_EXT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX);
+            type = ST_EXT;
         }
 
-        furi_assert(type == ST_EXT || type == ST_INT);
+        furi_assert(type == ST_EXT);
+
+        if(storage_data_status(&app->storage[type]) != StorageStatusOK) {
+            return FSE_NOT_READY;
+        }
+
         *storage = &app->storage[type];
 
         return FSE_OK;
     } else {
         return FSE_INVALID_NAME;
+    }
+}
+
+static void storage_path_trim_trailing_slashes(FuriString* path) {
+    while(furi_string_end_with(path, "/")) {
+        furi_string_left(path, furi_string_size(path) - 1);
     }
 }
 
@@ -357,6 +358,8 @@ static FS_Error storage_process_common_remove(Storage* app, FuriString* path) {
     FS_Error ret = storage_get_data(app, path, &storage);
 
     do {
+        if(ret != FSE_OK) break;
+
         if(storage_path_already_open(path, storage)) {
             ret = FSE_ALREADY_OPEN;
             break;
@@ -394,6 +397,31 @@ static FS_Error storage_process_common_fs_info(
             storage,
             common.fs_info(storage, cstr_path_without_vfs_prefix(path), total_space, free_space));
     }
+
+    return ret;
+}
+
+static bool
+    storage_process_common_equivalent_path(Storage* app, FuriString* path1, FuriString* path2) {
+    bool ret = false;
+
+    do {
+        const StorageType storage_type1 = storage_get_type_by_path(path1);
+        const StorageType storage_type2 = storage_get_type_by_path(path2);
+
+        // Paths on different storages are of course not equal
+        if(storage_type1 != storage_type2) break;
+
+        StorageData* storage;
+        const FS_Error status = storage_get_data(app, path1, &storage);
+
+        if(status != FSE_OK) break;
+
+        FS_CALL(
+            storage,
+            common.equivalent_path(furi_string_get_cstr(path1), furi_string_get_cstr(path2)));
+
+    } while(false);
 
     return ret;
 }
@@ -526,6 +554,16 @@ void storage_process_alias(
             furi_string_get_cstr(apps_assets_path_with_appsid));
 
         furi_string_free(apps_assets_path_with_appsid);
+
+    } else if(furi_string_start_with(path, STORAGE_INT_PATH_PREFIX)) {
+        furi_string_replace_at(
+            path, 0, strlen(STORAGE_INT_PATH_PREFIX), EXT_PATH(STORAGE_INTERNAL_DIR_NAME));
+
+        FuriString* int_on_ext_path = furi_string_alloc_set(EXT_PATH(STORAGE_INTERNAL_DIR_NAME));
+        if(storage_process_common_stat(app, int_on_ext_path, NULL) != FSE_OK) {
+            storage_process_common_mkdir(app, int_on_ext_path);
+        }
+        furi_string_free(int_on_ext_path);
     }
 }
 
@@ -648,6 +686,39 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         storage_process_alias(
             app, message->data->cresolvepath.path, message->data->cresolvepath.thread_id, true);
         break;
+
+    case StorageCommandCommonEquivalentPath: {
+        FuriString* path1 = furi_string_alloc_set(message->data->cequivpath.path1);
+        FuriString* path2 = furi_string_alloc_set(message->data->cequivpath.path2);
+        storage_path_trim_trailing_slashes(path1);
+        storage_path_trim_trailing_slashes(path2);
+        storage_process_alias(app, path1, message->data->cequivpath.thread_id, false);
+        storage_process_alias(app, path2, message->data->cequivpath.thread_id, false);
+        if(message->data->cequivpath.check_subdir) {
+            // by appending slashes at the end and then truncating the second path, we can
+            // effectively check for shared path components:
+            // example 1:
+            //   path1: "/ext/blah"      -> "/ext/blah/"      -> "/ext/blah/"
+            //   path2: "/ext/blah-blah" -> "/ect/blah-blah/" -> "/ext/blah-"
+            //   results unequal, conclusion: path2 is not a subpath of path1
+            // example 2:
+            //   path1: "/ext/blah"      -> "/ext/blah/"      -> "/ext/blah/"
+            //   path2: "/ext/blah/blah" -> "/ect/blah/blah/" -> "/ext/blah/"
+            //   results equal, conclusion: path2 is a subpath of path1
+            // example 3:
+            //   path1: "/ext/blah/blah" -> "/ect/blah/blah/" -> "/ext/blah/blah/"
+            //   path2: "/ext/blah"      -> "/ext/blah/"      -> "/ext/blah/"
+            //   results unequal, conclusion: path2 is not a subpath of path1
+            furi_string_push_back(path1, '/');
+            furi_string_push_back(path2, '/');
+            furi_string_left(path2, furi_string_size(path1));
+        }
+        message->return_data->bool_value =
+            storage_process_common_equivalent_path(app, path1, path2);
+        furi_string_free(path1);
+        furi_string_free(path2);
+        break;
+    }
 
     // SD operations
     case StorageCommandSDFormat:

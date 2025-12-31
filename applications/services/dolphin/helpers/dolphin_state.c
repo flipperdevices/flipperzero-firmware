@@ -1,25 +1,23 @@
 #include "dolphin_state.h"
-#include "dolphin/helpers/dolphin_deed.h"
 #include "dolphin_state_filename.h"
 
-#include <stdint.h>
-#include <storage/storage.h>
 #include <furi.h>
 #include <furi_hal.h>
-#include <math.h>
+
+#include <storage/storage.h>
 #include <toolbox/saved_struct.h>
 
 #define TAG "DolphinState"
 
-#define DOLPHIN_STATE_PATH INT_PATH(DOLPHIN_STATE_FILE_NAME)
-#define DOLPHIN_STATE_HEADER_MAGIC 0xD0
+#define DOLPHIN_STATE_PATH           INT_PATH(DOLPHIN_STATE_FILE_NAME)
+#define DOLPHIN_STATE_HEADER_MAGIC   0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
-#define LEVEL2_THRESHOLD 300
-#define LEVEL3_THRESHOLD 1800
-#define BUTTHURT_MAX 14
-#define BUTTHURT_MIN 0
+#define LEVEL2_THRESHOLD             300
+#define LEVEL3_THRESHOLD             1800
+#define BUTTHURT_MAX                 14
+#define BUTTHURT_MIN                 0
 
-DolphinState* dolphin_state_alloc() {
+DolphinState* dolphin_state_alloc(void) {
     return malloc(sizeof(DolphinState));
 }
 
@@ -27,29 +25,28 @@ void dolphin_state_free(DolphinState* dolphin_state) {
     free(dolphin_state);
 }
 
-bool dolphin_state_save(DolphinState* dolphin_state) {
+void dolphin_state_save(DolphinState* dolphin_state) {
     if(!dolphin_state->dirty) {
-        return true;
+        return;
     }
 
-    bool result = saved_struct_save(
+    bool success = saved_struct_save(
         DOLPHIN_STATE_PATH,
         &dolphin_state->data,
         sizeof(DolphinStoreData),
         DOLPHIN_STATE_HEADER_MAGIC,
         DOLPHIN_STATE_HEADER_VERSION);
 
-    if(result) {
+    if(success) {
         FURI_LOG_I(TAG, "State saved");
         dolphin_state->dirty = false;
+
     } else {
         FURI_LOG_E(TAG, "Failed to save state");
     }
-
-    return result;
 }
 
-bool dolphin_state_load(DolphinState* dolphin_state) {
+void dolphin_state_load(DolphinState* dolphin_state) {
     bool success = saved_struct_load(
         DOLPHIN_STATE_PATH,
         &dolphin_state->data,
@@ -65,18 +62,18 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
     }
 
     if(!success) {
-        FURI_LOG_W(TAG, "Reset dolphin-state");
-        memset(dolphin_state, 0, sizeof(*dolphin_state));
-        dolphin_state->dirty = true;
-    }
+        FURI_LOG_W(TAG, "Reset Dolphin state");
+        memset(dolphin_state, 0, sizeof(DolphinState));
 
-    return success;
+        dolphin_state->dirty = true;
+        dolphin_state_save(dolphin_state);
+    }
 }
 
-uint64_t dolphin_state_timestamp() {
-    FuriHalRtcDateTime datetime;
+uint64_t dolphin_state_timestamp(void) {
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
-    return furi_hal_rtc_datetime_to_timestamp(&datetime);
+    return datetime_datetime_to_timestamp(&datetime);
 }
 
 bool dolphin_state_is_levelup(uint32_t icounter) {

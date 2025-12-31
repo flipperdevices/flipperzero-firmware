@@ -2,14 +2,14 @@
 
 #include "mf_ultralight_poller.h"
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_i.h>
-#include <lib/nfc/helpers/nfc_util.h>
+#include <lib/bit_lib/bit_lib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC (60000)
-#define MF_ULTRALIGHT_MAX_BUFF_SIZE (64)
+#define MF_ULTRALIGHT_MAX_BUFF_SIZE          (64)
 
 #define MF_ULTRALIGHT_DEFAULT_PASSWORD (0xffffffffUL)
 
@@ -49,6 +49,7 @@ typedef union {
 
 typedef enum {
     MfUltralightPollerStateIdle,
+    MfUltralightPollerStateRequestMode,
     MfUltralightPollerStateReadVersion,
     MfUltralightPollerStateDetectMfulC,
     MfUltralightPollerStateDetectNtag203,
@@ -57,10 +58,16 @@ typedef enum {
     MfUltralightPollerStateReadCounters,
     MfUltralightPollerStateReadTearingFlags,
     MfUltralightPollerStateAuth,
+    MfUltralightPollerStateAuthMfulC,
     MfUltralightPollerStateReadPages,
     MfUltralightPollerStateTryDefaultPass,
+    MfUltralightPollerStateCheckMfulCAuthStatus,
     MfUltralightPollerStateReadFailed,
     MfUltralightPollerStateReadSuccess,
+    MfUltralightPollerStateRequestWriteData,
+    MfUltralightPollerStateWritePages,
+    MfUltralightPollerStateWriteFail,
+    MfUltralightPollerStateWriteSuccess,
 
     MfUltralightPollerStateNum,
 } MfUltralightPollerState;
@@ -68,6 +75,7 @@ typedef enum {
 struct MfUltralightPoller {
     Iso14443_3aPoller* iso14443_3a_poller;
     MfUltralightPollerState state;
+    MfUltralightPollerMode mode;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
     MfUltralightData* data;
@@ -79,7 +87,9 @@ struct MfUltralightPoller {
     uint8_t counters_total;
     uint8_t tearing_flag_read;
     uint8_t tearing_flag_total;
+    uint16_t current_page;
     MfUltralightError error;
+    mbedtls_des3_context des_context;
 
     NfcGenericEvent general_event;
     MfUltralightPollerEvent mfu_event;
@@ -103,45 +113,7 @@ bool mf_ultralight_poller_ntag_i2c_addr_lin_to_tag(
     uint8_t* tag,
     uint8_t* pages_left);
 
-MfUltralightError mf_ultralight_poller_async_auth_pwd(
-    MfUltralightPoller* instance,
-    MfUltralightPollerAuthContext* data);
-
-MfUltralightError mf_ultralight_poller_async_authenticate(MfUltralightPoller* instance);
-
-MfUltralightError mf_ultralight_poller_async_read_page(
-    MfUltralightPoller* instance,
-    uint8_t start_page,
-    MfUltralightPageReadCommandData* data);
-
-MfUltralightError mf_ultralight_poller_async_read_page_from_sector(
-    MfUltralightPoller* instance,
-    uint8_t sector,
-    uint8_t tag,
-    MfUltralightPageReadCommandData* data);
-
-MfUltralightError mf_ultralight_poller_async_write_page(
-    MfUltralightPoller* instance,
-    uint8_t page,
-    MfUltralightPage* data);
-
-MfUltralightError mf_ultralight_poller_async_read_version(
-    MfUltralightPoller* instance,
-    MfUltralightVersion* data);
-
-MfUltralightError mf_ultralight_poller_async_read_signature(
-    MfUltralightPoller* instance,
-    MfUltralightSignature* data);
-
-MfUltralightError mf_ultralight_poller_async_read_counter(
-    MfUltralightPoller* instance,
-    uint8_t counter_num,
-    MfUltralightCounter* data);
-
-MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
-    MfUltralightPoller* instance,
-    uint8_t tearing_falg_num,
-    MfUltralightTearingFlag* data);
+MfUltralightError mf_ultralight_poller_authentication_test(MfUltralightPoller* instance);
 
 #ifdef __cplusplus
 }

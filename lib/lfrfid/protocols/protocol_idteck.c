@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <toolbox/protocols/protocol.h>
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 
 // Example: 4944544B 351FBE4B
@@ -8,17 +8,17 @@
 // 4    9    4    4    5    4    4    B      3    5    1    F    B    E    4    B
 // 0100 1001 0100 0100 0101 0100 0100 1011   0011 0101 0001 1111 1011 1110 0100 1011
 
-#define IDTECK_PREAMBLE_BIT_SIZE (32)
+#define IDTECK_PREAMBLE_BIT_SIZE  (32)
 #define IDTECK_PREAMBLE_DATA_SIZE (8)
 
-#define IDTECK_ENCODED_BIT_SIZE (64)
+#define IDTECK_ENCODED_BIT_SIZE  (64)
 #define IDTECK_ENCODED_DATA_SIZE (((IDTECK_ENCODED_BIT_SIZE) / 8) + IDTECK_PREAMBLE_DATA_SIZE)
 #define IDTECK_ENCODED_DATA_LAST ((IDTECK_ENCODED_BIT_SIZE) / 8)
 
-#define IDTECK_DECODED_BIT_SIZE (64)
+#define IDTECK_DECODED_BIT_SIZE  (64)
 #define IDTECK_DECODED_DATA_SIZE (8)
 
-#define IDTECK_US_PER_BIT (255)
+#define IDTECK_US_PER_BIT             (255)
 #define IDTECK_ENCODER_PULSES_PER_BIT (16)
 
 typedef struct {
@@ -42,22 +42,22 @@ typedef struct {
 ProtocolIdteck* protocol_idteck_alloc(void) {
     ProtocolIdteck* protocol = malloc(sizeof(ProtocolIdteck));
     return protocol;
-};
+}
 
 void protocol_idteck_free(ProtocolIdteck* protocol) {
     free(protocol);
-};
+}
 
 uint8_t* protocol_idteck_get_data(ProtocolIdteck* protocol) {
     return protocol->data;
-};
+}
 
 void protocol_idteck_decoder_start(ProtocolIdteck* protocol) {
     memset(protocol->encoded_data, 0, IDTECK_ENCODED_DATA_SIZE);
     memset(protocol->negative_encoded_data, 0, IDTECK_ENCODED_DATA_SIZE);
     memset(protocol->corrupted_encoded_data, 0, IDTECK_ENCODED_DATA_SIZE);
     memset(protocol->corrupted_negative_encoded_data, 0, IDTECK_ENCODED_DATA_SIZE);
-};
+}
 
 static bool protocol_idteck_check_preamble(uint8_t* data, size_t bit_index) {
     // Preamble 01001001 01000100 01010100 01001011
@@ -144,7 +144,7 @@ bool protocol_idteck_decoder_feed(ProtocolIdteck* protocol, bool level, uint32_t
     }
 
     return result;
-};
+}
 
 bool protocol_idteck_encoder_start(ProtocolIdteck* protocol) {
     memset(protocol->encoded_data, 0, IDTECK_ENCODED_DATA_SIZE);
@@ -159,7 +159,7 @@ bool protocol_idteck_encoder_start(ProtocolIdteck* protocol) {
     protocol->encoder.bit_clock_index = 0;
 
     return true;
-};
+}
 
 LevelDuration protocol_idteck_encoder_yield(ProtocolIdteck* protocol) {
     LevelDuration level_duration;
@@ -189,7 +189,7 @@ LevelDuration protocol_idteck_encoder_yield(ProtocolIdteck* protocol) {
     }
 
     return level_duration;
-};
+}
 
 // factory code
 static uint32_t get_fc(const uint8_t* data) {
@@ -205,26 +205,16 @@ static uint32_t get_card(const uint8_t* data) {
     return cn;
 }
 
-void protocol_idteck_render_data_internal(ProtocolIdteck* protocol, FuriString* result, bool brief) {
+void protocol_idteck_render_data(ProtocolIdteck* protocol, FuriString* result) {
     const uint32_t fc = get_fc(protocol->data);
     const uint32_t card = get_card(protocol->data);
 
-    if(brief) {
-        furi_string_printf(result, "FC: %08lX\r\nCard: %08lX", fc, card);
-    } else {
-        furi_string_printf(
-            result,
-            "FC: %08lX\r\n"
-            "Card: %08lX\r\n",
-            fc,
-            card);
-    }
-}
-void protocol_idteck_render_data(ProtocolIdteck* protocol, FuriString* result) {
-    protocol_idteck_render_data_internal(protocol, result, false);
-}
-void protocol_idteck_render_brief_data(ProtocolIdteck* protocol, FuriString* result) {
-    protocol_idteck_render_data_internal(protocol, result, true);
+    furi_string_printf(
+        result,
+        "FC: %08lX\n"
+        "Card: %08lX",
+        fc,
+        card);
 }
 
 bool protocol_idteck_write_data(ProtocolIdteck* protocol, void* data) {
@@ -242,7 +232,7 @@ bool protocol_idteck_write_data(ProtocolIdteck* protocol, void* data) {
         result = true;
     }
     return result;
-};
+}
 
 const ProtocolBase protocol_idteck = {
     .name = "Idteck",
@@ -264,6 +254,6 @@ const ProtocolBase protocol_idteck = {
             .yield = (ProtocolEncoderYield)protocol_idteck_encoder_yield,
         },
     .render_data = (ProtocolRenderData)protocol_idteck_render_data,
-    .render_brief_data = (ProtocolRenderData)protocol_idteck_render_brief_data,
+    .render_brief_data = (ProtocolRenderData)protocol_idteck_render_data,
     .write_data = (ProtocolWriteData)protocol_idteck_write_data,
 };

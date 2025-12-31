@@ -8,6 +8,7 @@ void subghz_scene_saved_on_enter(void* context) {
             subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRAWLoad);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
         } else {
+            subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRAWLoad);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSavedMenu);
         }
     } else {
@@ -22,5 +23,7 @@ bool subghz_scene_saved_on_event(void* context, SceneManagerEvent event) {
 }
 
 void subghz_scene_saved_on_exit(void* context) {
+    SubGhz* subghz = context;
+    scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneSavedMenu, 0);
     UNUSED(context);
 }

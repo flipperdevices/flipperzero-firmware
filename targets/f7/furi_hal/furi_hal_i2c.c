@@ -9,20 +9,20 @@
 
 #define TAG "FuriHalI2c"
 
-void furi_hal_i2c_init_early() {
+void furi_hal_i2c_init_early(void) {
     furi_hal_i2c_bus_power.callback(&furi_hal_i2c_bus_power, FuriHalI2cBusEventInit);
 }
 
-void furi_hal_i2c_deinit_early() {
+void furi_hal_i2c_deinit_early(void) {
     furi_hal_i2c_bus_power.callback(&furi_hal_i2c_bus_power, FuriHalI2cBusEventDeinit);
 }
 
-void furi_hal_i2c_init() {
+void furi_hal_i2c_init(void) {
     furi_hal_i2c_bus_external.callback(&furi_hal_i2c_bus_external, FuriHalI2cBusEventInit);
     FURI_LOG_I(TAG, "Init OK");
 }
 
-void furi_hal_i2c_acquire(FuriHalI2cBusHandle* handle) {
+void furi_hal_i2c_acquire(const FuriHalI2cBusHandle* handle) {
     furi_hal_power_insomnia_enter();
     // Lock bus access
     handle->bus->callback(handle->bus, FuriHalI2cBusEventLock);
@@ -36,7 +36,7 @@ void furi_hal_i2c_acquire(FuriHalI2cBusHandle* handle) {
     handle->callback(handle, FuriHalI2cBusHandleEventActivate);
 }
 
-void furi_hal_i2c_release(FuriHalI2cBusHandle* handle) {
+void furi_hal_i2c_release(const FuriHalI2cBusHandle* handle) {
     // Ensure that current handle is our handle
     furi_check(handle->bus->current_handle == handle);
     // Deactivate handle
@@ -196,7 +196,7 @@ static bool furi_hal_i2c_transaction(
 }
 
 bool furi_hal_i2c_rx_ext(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint16_t address,
     bool ten_bit,
     uint8_t* data,
@@ -213,7 +213,7 @@ bool furi_hal_i2c_rx_ext(
 }
 
 bool furi_hal_i2c_tx_ext(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint16_t address,
     bool ten_bit,
     const uint8_t* data,
@@ -230,31 +230,31 @@ bool furi_hal_i2c_tx_ext(
 }
 
 bool furi_hal_i2c_tx(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint8_t address,
     const uint8_t* data,
     size_t size,
     uint32_t timeout) {
-    furi_assert(timeout > 0);
+    furi_check(timeout > 0);
 
     return furi_hal_i2c_tx_ext(
         handle, address, false, data, size, FuriHalI2cBeginStart, FuriHalI2cEndStop, timeout);
 }
 
 bool furi_hal_i2c_rx(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint8_t address,
     uint8_t* data,
     size_t size,
     uint32_t timeout) {
-    furi_assert(timeout > 0);
+    furi_check(timeout > 0);
 
     return furi_hal_i2c_rx_ext(
         handle, address, false, data, size, FuriHalI2cBeginStart, FuriHalI2cEndStop, timeout);
 }
 
 bool furi_hal_i2c_trx(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint8_t address,
     const uint8_t* tx_data,
     size_t tx_size,
@@ -281,10 +281,13 @@ bool furi_hal_i2c_trx(
                timeout);
 }
 
-bool furi_hal_i2c_is_device_ready(FuriHalI2cBusHandle* handle, uint8_t i2c_addr, uint32_t timeout) {
+bool furi_hal_i2c_is_device_ready(
+    const FuriHalI2cBusHandle* handle,
+    uint8_t i2c_addr,
+    uint32_t timeout) {
     furi_check(handle);
     furi_check(handle->bus->current_handle == handle);
-    furi_assert(timeout > 0);
+    furi_check(timeout > 0);
 
     bool ret = true;
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
@@ -314,7 +317,7 @@ bool furi_hal_i2c_is_device_ready(FuriHalI2cBusHandle* handle, uint8_t i2c_addr,
 }
 
 bool furi_hal_i2c_read_reg_8(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint8_t i2c_addr,
     uint8_t reg_addr,
     uint8_t* data,
@@ -325,7 +328,7 @@ bool furi_hal_i2c_read_reg_8(
 }
 
 bool furi_hal_i2c_read_reg_16(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint8_t i2c_addr,
     uint8_t reg_addr,
     uint16_t* data,
@@ -340,7 +343,7 @@ bool furi_hal_i2c_read_reg_16(
 }
 
 bool furi_hal_i2c_read_mem(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint8_t i2c_addr,
     uint8_t mem_addr,
     uint8_t* data,
@@ -352,7 +355,7 @@ bool furi_hal_i2c_read_mem(
 }
 
 bool furi_hal_i2c_write_reg_8(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint8_t i2c_addr,
     uint8_t reg_addr,
     uint8_t data,
@@ -368,7 +371,7 @@ bool furi_hal_i2c_write_reg_8(
 }
 
 bool furi_hal_i2c_write_reg_16(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint8_t i2c_addr,
     uint8_t reg_addr,
     uint16_t data,
@@ -385,7 +388,7 @@ bool furi_hal_i2c_write_reg_16(
 }
 
 bool furi_hal_i2c_write_mem(
-    FuriHalI2cBusHandle* handle,
+    const FuriHalI2cBusHandle* handle,
     uint8_t i2c_addr,
     uint8_t mem_addr,
     const uint8_t* data,
@@ -393,7 +396,7 @@ bool furi_hal_i2c_write_mem(
     uint32_t timeout) {
     furi_check(handle);
     furi_check(handle->bus->current_handle == handle);
-    furi_assert(timeout > 0);
+    furi_check(timeout > 0);
 
     return furi_hal_i2c_tx_ext(
                handle,

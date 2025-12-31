@@ -11,7 +11,7 @@ typedef struct {
     OneWireSlave* bus;
 } iButtonProtocolGroupDallas;
 
-static iButtonProtocolGroupDallas* ibutton_protocol_group_dallas_alloc() {
+static iButtonProtocolGroupDallas* ibutton_protocol_group_dallas_alloc(void) {
     iButtonProtocolGroupDallas* group = malloc(sizeof(iButtonProtocolGroupDallas));
 
     group->host = onewire_host_alloc(&gpio_ibutton);
@@ -48,6 +48,12 @@ static bool ibutton_protocol_group_dallas_get_id_by_name(
     // Handle older key files which refer to DS1990 as just "Dallas"
     if(strcmp(name, "Dallas") == 0) {
         *id = iButtonProtocolDS1990;
+        return true;
+    }
+
+    // Handle files that refer to Dallas "Raw Data" as DSGeneric
+    if(strcmp(name, "DSGeneric") == 0) {
+        *id = iButtonProtocolDSGeneric;
         return true;
     }
 
@@ -127,13 +133,13 @@ static bool ibutton_protocol_group_dallas_read(
     return success;
 }
 
-static bool ibutton_protocol_group_dallas_write_blank(
+static bool ibutton_protocol_group_dallas_write_id(
     iButtonProtocolGroupDallas* group,
     iButtonProtocolData* data,
     iButtonProtocolLocalId id) {
     furi_assert(id < iButtonProtocolDSMax);
     const iButtonProtocolDallasBase* protocol = ibutton_protocols_dallas[id];
-    furi_assert(protocol->features & iButtonProtocolFeatureWriteBlank);
+    furi_assert(protocol->features & iButtonProtocolFeatureWriteId);
 
     OneWireHost* host = group->host;
 
@@ -142,7 +148,7 @@ static bool ibutton_protocol_group_dallas_write_blank(
 
     FURI_CRITICAL_ENTER();
 
-    const bool success = protocol->write_blank(host, data);
+    const bool success = protocol->write_id(host, data);
     onewire_host_stop(host);
 
     FURI_CRITICAL_EXIT();
@@ -210,6 +216,18 @@ static bool ibutton_protocol_group_dallas_load(
     UNUSED(group);
     furi_assert(id < iButtonProtocolDSMax);
     return ibutton_protocols_dallas[id]->load(ff, version, data);
+}
+
+static void ibutton_protocol_group_dallas_render_uid(
+    iButtonProtocolGroupDallas* group,
+    const iButtonProtocolData* data,
+    iButtonProtocolLocalId id,
+    FuriString* result) {
+    UNUSED(group);
+    furi_assert(id < iButtonProtocolDSMax);
+    const iButtonProtocolDallasBase* protocol = ibutton_protocols_dallas[id];
+    furi_assert(protocol->render_uid);
+    protocol->render_uid(result, data);
 }
 
 static void ibutton_protocol_group_dallas_render_data(
@@ -289,7 +307,7 @@ const iButtonProtocolGroupBase ibutton_protocol_group_dallas = {
     .get_name = (iButtonProtocolGroupGetStringFunc)ibutton_protocol_group_dallas_get_name,
 
     .read = (iButtonProtocolGroupReadFunc)ibutton_protocol_group_dallas_read,
-    .write_blank = (iButtonProtocolGroupWriteFunc)ibutton_protocol_group_dallas_write_blank,
+    .write_id = (iButtonProtocolGroupWriteFunc)ibutton_protocol_group_dallas_write_id,
     .write_copy = (iButtonProtocolGroupWriteFunc)ibutton_protocol_group_dallas_write_copy,
 
     .emulate_start = (iButtonProtocolGroupApplyFunc)ibutton_protocol_group_dallas_emulate_start,
@@ -298,6 +316,7 @@ const iButtonProtocolGroupBase ibutton_protocol_group_dallas = {
     .save = (iButtonProtocolGroupSaveFunc)ibutton_protocol_group_dallas_save,
     .load = (iButtonProtocolGroupLoadFunc)ibutton_protocol_group_dallas_load,
 
+    .render_uid = (iButtonProtocolGroupRenderFunc)ibutton_protocol_group_dallas_render_uid,
     .render_data = (iButtonProtocolGroupRenderFunc)ibutton_protocol_group_dallas_render_data,
     .render_brief_data =
         (iButtonProtocolGroupRenderFunc)ibutton_protocol_group_dallas_render_brief_data,

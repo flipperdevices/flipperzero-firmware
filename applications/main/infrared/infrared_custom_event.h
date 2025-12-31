@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-enum InfraredCustomEventType {
+typedef enum {
     // Reserve first 100 events for button types and indexes, starting from 0
     InfraredCustomEventTypeReserved = 100,
     InfraredCustomEventTypeMenuSelected,
@@ -13,15 +13,21 @@ enum InfraredCustomEventType {
     InfraredCustomEventTypeTextEditDone,
     InfraredCustomEventTypePopupClosed,
     InfraredCustomEventTypeButtonSelected,
-    InfraredCustomEventTypeBackPressed,
+    InfraredCustomEventTypePopupInput,
+    InfraredCustomEventTypeTaskFinished,
 
     InfraredCustomEventTypeRpcLoadFile,
     InfraredCustomEventTypeRpcExit,
     InfraredCustomEventTypeRpcButtonPressName,
     InfraredCustomEventTypeRpcButtonPressIndex,
     InfraredCustomEventTypeRpcButtonRelease,
+    InfraredCustomEventTypeRpcButtonPressReleaseName,
+    InfraredCustomEventTypeRpcButtonPressReleaseIndex,
     InfraredCustomEventTypeRpcSessionClose,
-};
+
+    InfraredCustomEventTypeGpioTxPinChanged,
+    InfraredCustomEventTypeGpioOtgChanged,
+} InfraredCustomEventType;
 
 #pragma pack(push, 1)
 typedef union {

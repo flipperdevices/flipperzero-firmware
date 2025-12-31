@@ -15,8 +15,8 @@ static FelicaError felica_poller_process_error(NfcError error) {
     }
 }
 
-static FelicaError felica_poller_frame_exchange(
-    FelicaPoller* instance,
+FelicaError felica_poller_frame_exchange(
+    const FelicaPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
@@ -49,7 +49,7 @@ static FelicaError felica_poller_frame_exchange(
     return ret;
 }
 
-FelicaError felica_poller_async_polling(
+FelicaError felica_poller_polling(
     FelicaPoller* instance,
     const FelicaPollerPollingCommand* cmd,
     FelicaPollerPollingResponse* resp) {
@@ -93,10 +93,106 @@ FelicaError felica_poller_async_polling(
     return error;
 }
 
-FelicaError felica_poller_async_activate(FelicaPoller* instance, FelicaData* data) {
-    furi_assert(instance);
+// This is in fact a buffer preparer for a specified service. It should be have the _ex suffix. The prepare_tx_buffer_raw should have this name.
+static void felica_poller_prepare_tx_buffer(
+    const FelicaPoller* instance,
+    const uint8_t command,
+    const uint16_t service_code,
+    const uint8_t block_count,
+    const uint8_t* const blocks,
+    const uint8_t data_block_count,
+    const uint8_t* data) {
+    FelicaCommandHeader cmd = {
+        .code = command,
+        .idm = instance->data->idm,
+        .service_num = 1,
+        .service_code = service_code,
+        .block_count = block_count,
+    };
 
-    felica_reset(data);
+    FelicaBlockListElement block_list[4] = {{0}, {0}, {0}, {0}};
+    for(uint8_t i = 0; i < block_count; i++) {
+        block_list[i].length = 1;
+        block_list[i].block_number = blocks[i];
+    }
+
+    uint8_t block_list_count = block_count;
+    uint8_t block_list_size = block_list_count * sizeof(FelicaBlockListElement);
+    uint8_t total_size = sizeof(FelicaCommandHeader) + 1 + block_list_size +
+                         data_block_count * FELICA_DATA_BLOCK_SIZE;
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_append_byte(instance->tx_buffer, total_size);
+    bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&cmd, sizeof(FelicaCommandHeader));
+    bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&block_list, block_list_size);
+
+    if(data_block_count != 0) {
+        bit_buffer_append_bytes(
+            instance->tx_buffer, data, data_block_count * FELICA_DATA_BLOCK_SIZE);
+    }
+}
+
+FelicaError felica_poller_read_blocks(
+    FelicaPoller* instance,
+    const uint8_t block_count,
+    const uint8_t* const block_numbers,
+    uint16_t service_code,
+    FelicaPollerReadCommandResponse** const response_ptr) {
+    furi_assert(instance);
+    furi_assert(block_count <= 4);
+    furi_assert(block_numbers);
+    furi_assert(response_ptr);
+
+    felica_poller_prepare_tx_buffer(
+        instance,
+        FELICA_CMD_READ_WITHOUT_ENCRYPTION,
+        service_code,
+        block_count,
+        block_numbers,
+        0,
+        NULL);
+    bit_buffer_reset(instance->rx_buffer);
+
+    FelicaError error = felica_poller_frame_exchange(
+        instance, instance->tx_buffer, instance->rx_buffer, FELICA_POLLER_POLLING_FWT);
+    if(error == FelicaErrorNone) {
+        *response_ptr = (FelicaPollerReadCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
+    }
+    return error;
+}
+
+FelicaError felica_poller_write_blocks(
+    const FelicaPoller* instance,
+    const uint8_t block_count,
+    const uint8_t* const block_numbers,
+    const uint8_t* data,
+    FelicaPollerWriteCommandResponse** const response_ptr) {
+    furi_assert(instance);
+    furi_assert(block_count <= 2);
+    furi_assert(block_numbers);
+    furi_assert(data);
+    furi_assert(response_ptr);
+
+    felica_poller_prepare_tx_buffer(
+        instance,
+        FELICA_CMD_WRITE_WITHOUT_ENCRYPTION,
+        FELICA_SERVICE_RW_ACCESS,
+        block_count,
+        block_numbers,
+        block_count,
+        data);
+    bit_buffer_reset(instance->rx_buffer);
+
+    FelicaError error = felica_poller_frame_exchange(
+        instance, instance->tx_buffer, instance->rx_buffer, FELICA_POLLER_POLLING_FWT);
+    if(error == FelicaErrorNone) {
+        *response_ptr =
+            (FelicaPollerWriteCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
+    }
+    return error;
+}
+
+FelicaError felica_poller_activate(FelicaPoller* instance, FelicaData* data) {
+    furi_assert(instance);
 
     FelicaError ret;
 
@@ -112,7 +208,7 @@ FelicaError felica_poller_async_activate(FelicaPoller* instance, FelicaData* dat
         };
         FelicaPollerPollingResponse polling_resp = {};
 
-        ret = felica_poller_async_polling(instance, &polling_cmd, &polling_resp);
+        ret = felica_poller_polling(instance, &polling_cmd, &polling_resp);
 
         if(ret != FelicaErrorNone) {
             FURI_LOG_T(TAG, "Activation failed error: %d", ret);
@@ -125,4 +221,76 @@ FelicaError felica_poller_async_activate(FelicaPoller* instance, FelicaData* dat
     } while(false);
 
     return ret;
+}
+
+static void felica_poller_prepare_tx_buffer_raw(
+    const FelicaPoller* instance,
+    const uint8_t command,
+    const uint8_t* data,
+    const uint8_t data_length) {
+    FelicaCommandHeaderRaw cmd = {.length = 0x00, .command = command, .idm = instance->data->idm};
+
+    cmd.length = sizeof(FelicaCommandHeaderRaw) + data_length;
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&cmd, sizeof(FelicaCommandHeaderRaw));
+    if(data_length > 0) {
+        bit_buffer_append_bytes(instance->tx_buffer, data, data_length);
+    }
+}
+
+FelicaError felica_poller_list_service_by_cursor(
+    FelicaPoller* instance,
+    uint16_t cursor,
+    FelicaListServiceCommandResponse** const response_ptr) {
+    furi_assert(instance);
+    furi_assert(response_ptr);
+
+    const uint8_t data[2] = {(uint8_t)(cursor & 0xFF), (uint8_t)((cursor >> 8) & 0xFF)};
+
+    felica_poller_prepare_tx_buffer_raw(
+        instance, FELICA_CMD_LIST_SERVICE_CODE, data, sizeof(data));
+
+    bit_buffer_reset(instance->rx_buffer);
+
+    FelicaError error = felica_poller_frame_exchange(
+        instance, instance->tx_buffer, instance->rx_buffer, FELICA_POLLER_POLLING_FWT);
+    if(error != FelicaErrorNone) {
+        FURI_LOG_E(TAG, "List service by cursor failed with error: %d", error);
+        return error;
+    }
+
+    size_t rx_len = bit_buffer_get_size_bytes(instance->rx_buffer);
+    if(rx_len < sizeof(FelicaCommandHeaderRaw) + 2) return FelicaErrorProtocol;
+
+    // error is known to be FelicaErrorNone here
+    *response_ptr = (FelicaListServiceCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
+    return error;
+}
+
+FelicaError felica_poller_list_system_code(
+    FelicaPoller* instance,
+    FelicaListSystemCodeCommandResponse** const response_ptr) {
+    furi_assert(instance);
+    furi_assert(response_ptr);
+
+    uint8_t data[] = {0};
+
+    felica_poller_prepare_tx_buffer_raw(instance, FELICA_CMD_REQUEST_SYSTEM_CODE, data, 0);
+
+    bit_buffer_reset(instance->rx_buffer);
+
+    FelicaError error = felica_poller_frame_exchange(
+        instance, instance->tx_buffer, instance->rx_buffer, FELICA_POLLER_POLLING_FWT);
+    if(error != FelicaErrorNone) {
+        FURI_LOG_E(TAG, "Request system code failed with error: %d", error);
+        return error;
+    }
+
+    size_t rx_len = bit_buffer_get_size_bytes(instance->rx_buffer);
+    if(rx_len < sizeof(FelicaCommandHeaderRaw) + 3) return FelicaErrorProtocol;
+    // at least 1 system code + the count being 0x01
+
+    // error is known to be FelicaErrorNone here
+    *response_ptr = (FelicaListSystemCodeCommandResponse*)bit_buffer_get_data(instance->rx_buffer);
+    return error;
 }

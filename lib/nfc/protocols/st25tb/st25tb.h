@@ -1,6 +1,5 @@
 #pragma once
 
-#include <toolbox/bit_buffer.h>
 #include <nfc/protocols/nfc_device_base_i.h>
 
 #ifdef __cplusplus
@@ -10,13 +9,13 @@ extern "C" {
 #define ST25TB_UID_SIZE (8U)
 
 //#define ST25TB_FDT_FC (4205U)
-#define ST25TB_FDT_FC (8494U)
-#define ST25TB_GUARD_TIME_US (5000U)
+#define ST25TB_FDT_FC           (8494U)
+#define ST25TB_GUARD_TIME_US    (5000U)
 #define ST25TB_POLL_POLL_MIN_US (1280U)
 
-#define ST25TB_MAX_BLOCKS (128U)
+#define ST25TB_MAX_BLOCKS       (128U)
 #define ST25TB_SYSTEM_OTP_BLOCK (0xFFU)
-#define ST25TB_BLOCK_SIZE (4U)
+#define ST25TB_BLOCK_SIZE       (4U)
 
 typedef enum {
     St25tbErrorNone,
@@ -27,6 +26,7 @@ typedef enum {
     St25tbErrorFieldOff,
     St25tbErrorWrongCrc,
     St25tbErrorTimeout,
+    St25tbErrorWriteFailed,
 } St25tbError;
 
 typedef enum {
@@ -44,12 +44,11 @@ typedef struct {
     St25tbType type;
     uint32_t blocks[ST25TB_MAX_BLOCKS];
     uint32_t system_otp_block;
-    uint8_t chip_id;
 } St25tbData;
 
 extern const NfcDeviceBase nfc_device_st25tb;
 
-St25tbData* st25tb_alloc();
+St25tbData* st25tb_alloc(void);
 
 void st25tb_free(St25tbData* data);
 
@@ -74,6 +73,8 @@ const uint8_t* st25tb_get_uid(const St25tbData* data, size_t* uid_len);
 bool st25tb_set_uid(St25tbData* data, const uint8_t* uid, size_t uid_len);
 
 St25tbData* st25tb_get_base_data(const St25tbData* data);
+
+St25tbType st25tb_get_type_from_uid(const uint8_t* uid);
 
 #ifdef __cplusplus
 }

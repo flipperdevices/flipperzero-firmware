@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "infrared_error_code.h"
 
 /**
  * @brief InfraredBruteForce opaque type declaration.
@@ -21,7 +22,7 @@ typedef struct InfraredBruteForce InfraredBruteForce;
  *
  * @returns pointer to the created instance.
  */
-InfraredBruteForce* infrared_brute_force_alloc();
+InfraredBruteForce* infrared_brute_force_alloc(void);
 
 /**
  * @brief Delete an InfraredBruteForce instance.
@@ -45,9 +46,9 @@ void infrared_brute_force_set_db_filename(InfraredBruteForce* brute_force, const
  * a infrared_brute_force_set_db_filename() call.
  *
  * @param[in,out] brute_force pointer to the instance to be updated.
- * @returns true on success, false otherwise.
+ * @returns InfraredErrorCodeNone on success, otherwise error code.
  */
-bool infrared_brute_force_calculate_messages(InfraredBruteForce* brute_force);
+InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* brute_force);
 
 /**
  * @brief Start transmitting signals from a category stored in an InfraredBruteForce's instance dictionary.
@@ -77,18 +78,16 @@ bool infrared_brute_force_is_started(const InfraredBruteForce* brute_force);
 void infrared_brute_force_stop(InfraredBruteForce* brute_force);
 
 /**
- * @brief Send the next signal from the chosen category.
+ * @brief Send an arbitrary signal from the chosen category.
  *
- * This function is called repeatedly until no more signals are left
- * in the chosen signal category.
+ * @param[in] brute_force pointer to the instance
+ * @param signal_index the index of the signal within the category, must be
+ *                     between 0 and `record_count` as told by
+ *                     `infrared_brute_force_start`
  *
- * @warning Transmission must be started first by calling infrared_brute_force_start()
- * before calling this function.
- *
- * @param[in,out] brute_force pointer to the instance to be used.
- * @returns true if the next signal existed and could be transmitted, false otherwise.
+ * @returns true on success, false otherwise
  */
-bool infrared_brute_force_send_next(InfraredBruteForce* brute_force);
+bool infrared_brute_force_send(InfraredBruteForce* brute_force, uint32_t signal_index);
 
 /**
  * @brief Add a signal category to an InfraredBruteForce instance's dictionary.

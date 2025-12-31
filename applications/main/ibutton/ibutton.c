@@ -77,7 +77,7 @@ void ibutton_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(ibutton->scene_manager);
 }
 
-iButton* ibutton_alloc() {
+iButton* ibutton_alloc(void) {
     iButton* ibutton = malloc(sizeof(iButton));
 
     ibutton->file_path = furi_string_alloc();
@@ -85,7 +85,6 @@ iButton* ibutton_alloc() {
     ibutton->scene_manager = scene_manager_alloc(&ibutton_scene_handlers, ibutton);
 
     ibutton->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(ibutton->view_dispatcher);
     view_dispatcher_set_event_callback_context(ibutton->view_dispatcher, ibutton);
     view_dispatcher_set_custom_event_callback(
         ibutton->view_dispatcher, ibutton_custom_event_callback);
@@ -174,22 +173,21 @@ void ibutton_free(iButton* ibutton) {
     free(ibutton);
 }
 
-bool ibutton_load_key(iButton* ibutton) {
+bool ibutton_load_key(iButton* ibutton, bool show_error) {
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewLoading);
 
     const bool success = ibutton_protocols_load(
         ibutton->protocols, ibutton->key, furi_string_get_cstr(ibutton->file_path));
 
-    if(!success) {
-        dialog_message_show_storage_error(ibutton->dialogs, "Cannot load\nkey file");
-
-    } else {
+    if(success) {
         FuriString* tmp = furi_string_alloc();
 
         path_extract_filename(ibutton->file_path, tmp, true);
-        strncpy(ibutton->key_name, furi_string_get_cstr(tmp), IBUTTON_KEY_NAME_SIZE);
+        strlcpy(ibutton->key_name, furi_string_get_cstr(tmp), IBUTTON_KEY_NAME_SIZE);
 
         furi_string_free(tmp);
+    } else if(show_error) {
+        dialog_message_show_storage_error(ibutton->dialogs, "Cannot load\nkey file");
     }
 
     return success;
@@ -210,7 +208,7 @@ bool ibutton_select_and_load_key(iButton* ibutton) {
         if(!dialog_file_browser_show(
                ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options))
             break;
-        success = ibutton_load_key(ibutton);
+        success = ibutton_load_key(ibutton, true);
     } while(!success);
 
     return success;
@@ -245,7 +243,7 @@ bool ibutton_delete_key(iButton* ibutton) {
 }
 
 void ibutton_reset_key(iButton* ibutton) {
-    memset(ibutton->key_name, 0, IBUTTON_KEY_NAME_SIZE + 1);
+    ibutton->key_name[0] = '\0';
     furi_string_reset(ibutton->file_path);
     ibutton_key_reset(ibutton->key);
 }
@@ -283,7 +281,7 @@ int32_t ibutton_app(void* arg) {
 
         } else {
             furi_string_set(ibutton->file_path, (const char*)arg);
-            key_loaded = ibutton_load_key(ibutton);
+            key_loaded = ibutton_load_key(ibutton, true);
         }
     }
 
