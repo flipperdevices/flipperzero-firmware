@@ -2,17 +2,17 @@
 #include <toolbox/protocols/protocol.h>
 #include <lfrfid/tools/fsk_demod.h>
 #include <lfrfid/tools/fsk_osc.h>
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 
 #define JITTER_TIME (20)
-#define MIN_TIME (64 - JITTER_TIME)
-#define MAX_TIME (80 + JITTER_TIME)
+#define MIN_TIME    (64 - JITTER_TIME)
+#define MAX_TIME    (80 + JITTER_TIME)
 
 #define IOPROXXSF_DECODED_DATA_SIZE (4)
 #define IOPROXXSF_ENCODED_DATA_SIZE (8)
 
-#define IOPROXXSF_BIT_SIZE (8)
+#define IOPROXXSF_BIT_SIZE     (8)
 #define IOPROXXSF_BIT_MAX_SIZE (IOPROXXSF_BIT_SIZE * IOPROXXSF_ENCODED_DATA_SIZE)
 
 typedef struct {
@@ -36,21 +36,21 @@ ProtocolIOProxXSF* protocol_io_prox_xsf_alloc(void) {
     protocol->decoder.fsk_demod = fsk_demod_alloc(MIN_TIME, 8, MAX_TIME, 6);
     protocol->encoder.fsk_osc = fsk_osc_alloc(8, 10, 64);
     return protocol;
-};
+}
 
 void protocol_io_prox_xsf_free(ProtocolIOProxXSF* protocol) {
     fsk_demod_free(protocol->decoder.fsk_demod);
     fsk_osc_free(protocol->encoder.fsk_osc);
     free(protocol);
-};
+}
 
 uint8_t* protocol_io_prox_xsf_get_data(ProtocolIOProxXSF* protocol) {
     return protocol->data;
-};
+}
 
 void protocol_io_prox_xsf_decoder_start(ProtocolIOProxXSF* protocol) {
     memset(protocol->encoded_data, 0, IOPROXXSF_ENCODED_DATA_SIZE);
-};
+}
 
 static uint8_t protocol_io_prox_xsf_compute_checksum(const uint8_t* data) {
     // Packet structure:
@@ -172,7 +172,7 @@ bool protocol_io_prox_xsf_decoder_feed(ProtocolIOProxXSF* protocol, bool level, 
     }
 
     return result;
-};
+}
 
 static void protocol_io_prox_xsf_encode(const uint8_t* decoded_data, uint8_t* encoded_data) {
     // Packet to transmit:
@@ -217,7 +217,7 @@ bool protocol_io_prox_xsf_encoder_start(ProtocolIOProxXSF* protocol) {
     protocol->encoder.encoded_index = 0;
     fsk_osc_reset(protocol->encoder.fsk_osc);
     return true;
-};
+}
 
 LevelDuration protocol_io_prox_xsf_encoder_yield(ProtocolIOProxXSF* protocol) {
     bool level;
@@ -230,15 +230,15 @@ LevelDuration protocol_io_prox_xsf_encoder_yield(ProtocolIOProxXSF* protocol) {
         bit_lib_increment_index(protocol->encoder.encoded_index, IOPROXXSF_BIT_MAX_SIZE);
     }
     return level_duration_make(level, duration);
-};
+}
 
 void protocol_io_prox_xsf_render_data(ProtocolIOProxXSF* protocol, FuriString* result) {
     uint8_t* data = protocol->data;
     furi_string_printf(
         result,
-        "FC: %u\r\n"
-        "VС: %u\r\n"
-        "Card: %u",
+        "FC: %hhu\n"
+        "V: %hhu\n"
+        "Card: %hu",
         data[0],
         data[1],
         (uint16_t)((data[2] << 8) | (data[3])));
@@ -248,8 +248,8 @@ void protocol_io_prox_xsf_render_brief_data(ProtocolIOProxXSF* protocol, FuriStr
     uint8_t* data = protocol->data;
     furi_string_printf(
         result,
-        "FC: %u, VС: %u\r\n"
-        "Card: %u",
+        "FC: %hhu, V: %hhu\n"
+        "Card: %hu",
         data[0],
         data[1],
         (uint16_t)((data[2] << 8) | (data[3])));
@@ -274,7 +274,7 @@ bool protocol_io_prox_xsf_write_data(ProtocolIOProxXSF* protocol, void* data) {
         result = true;
     }
     return result;
-};
+}
 
 const ProtocolBase protocol_io_prox_xsf = {
     .name = "IoProxXSF",

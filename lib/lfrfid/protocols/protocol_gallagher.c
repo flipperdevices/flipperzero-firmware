@@ -1,27 +1,27 @@
 #include <furi.h>
 #include <toolbox/protocols/protocol.h>
 #include <toolbox/manchester_decoder.h>
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 
 #define GALLAGHER_CLOCK_PER_BIT (32)
 
-#define GALLAGHER_ENCODED_BIT_SIZE (96)
-#define GALLAGHER_ENCODED_BYTE_SIZE ((GALLAGHER_ENCODED_BIT_SIZE) / 8)
-#define GALLAGHER_PREAMBLE_BIT_SIZE (16)
+#define GALLAGHER_ENCODED_BIT_SIZE   (96)
+#define GALLAGHER_ENCODED_BYTE_SIZE  ((GALLAGHER_ENCODED_BIT_SIZE) / 8)
+#define GALLAGHER_PREAMBLE_BIT_SIZE  (16)
 #define GALLAGHER_PREAMBLE_BYTE_SIZE ((GALLAGHER_PREAMBLE_BIT_SIZE) / 8)
 #define GALLAGHER_ENCODED_BYTE_FULL_SIZE \
     (GALLAGHER_ENCODED_BYTE_SIZE + GALLAGHER_PREAMBLE_BYTE_SIZE)
 #define GALLAGHER_DECODED_DATA_SIZE 8
 
-#define GALLAGHER_READ_SHORT_TIME (128)
-#define GALLAGHER_READ_LONG_TIME (256)
+#define GALLAGHER_READ_SHORT_TIME  (128)
+#define GALLAGHER_READ_LONG_TIME   (256)
 #define GALLAGHER_READ_JITTER_TIME (60)
 
-#define GALLAGHER_READ_SHORT_TIME_LOW (GALLAGHER_READ_SHORT_TIME - GALLAGHER_READ_JITTER_TIME)
+#define GALLAGHER_READ_SHORT_TIME_LOW  (GALLAGHER_READ_SHORT_TIME - GALLAGHER_READ_JITTER_TIME)
 #define GALLAGHER_READ_SHORT_TIME_HIGH (GALLAGHER_READ_SHORT_TIME + GALLAGHER_READ_JITTER_TIME)
-#define GALLAGHER_READ_LONG_TIME_LOW (GALLAGHER_READ_LONG_TIME - GALLAGHER_READ_JITTER_TIME)
-#define GALLAGHER_READ_LONG_TIME_HIGH (GALLAGHER_READ_LONG_TIME + GALLAGHER_READ_JITTER_TIME)
+#define GALLAGHER_READ_LONG_TIME_LOW   (GALLAGHER_READ_LONG_TIME - GALLAGHER_READ_JITTER_TIME)
+#define GALLAGHER_READ_LONG_TIME_HIGH  (GALLAGHER_READ_LONG_TIME + GALLAGHER_READ_JITTER_TIME)
 
 typedef struct {
     uint8_t data[GALLAGHER_DECODED_DATA_SIZE];
@@ -36,15 +36,15 @@ typedef struct {
 ProtocolGallagher* protocol_gallagher_alloc(void) {
     ProtocolGallagher* proto = malloc(sizeof(ProtocolGallagher));
     return (void*)proto;
-};
+}
 
 void protocol_gallagher_free(ProtocolGallagher* protocol) {
     free(protocol);
-};
+}
 
 uint8_t* protocol_gallagher_get_data(ProtocolGallagher* protocol) {
     return protocol->data;
-};
+}
 
 static void protocol_gallagher_scramble(uint8_t* data, size_t length) {
     const uint8_t lut[] = {
@@ -152,7 +152,7 @@ void protocol_gallagher_decoder_start(ProtocolGallagher* protocol) {
         ManchesterEventReset,
         &protocol->decoder_manchester_state,
         NULL);
-};
+}
 
 bool protocol_gallagher_decoder_feed(ProtocolGallagher* protocol, bool level, uint32_t duration) {
     bool result = false;
@@ -189,7 +189,7 @@ bool protocol_gallagher_decoder_feed(ProtocolGallagher* protocol, bool level, ui
     }
 
     return result;
-};
+}
 
 bool protocol_gallagher_encoder_start(ProtocolGallagher* protocol) {
     // Preamble
@@ -227,7 +227,7 @@ bool protocol_gallagher_encoder_start(ProtocolGallagher* protocol) {
     bit_lib_set_bits(protocol->encoded_data, 16 + (9 * 8), crc, 8);
 
     return true;
-};
+}
 
 LevelDuration protocol_gallagher_encoder_yield(ProtocolGallagher* protocol) {
     bool level = bit_lib_get_bit(protocol->encoded_data, protocol->encoded_data_index);
@@ -243,7 +243,7 @@ LevelDuration protocol_gallagher_encoder_yield(ProtocolGallagher* protocol) {
     }
 
     return level_duration_make(level, duration);
-};
+}
 
 bool protocol_gallagher_write_data(ProtocolGallagher* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
@@ -264,20 +264,61 @@ bool protocol_gallagher_write_data(ProtocolGallagher* protocol, void* data) {
         request->t5577.block[3] = bit_lib_get_bits_32(protocol->encoded_data, 64, 32);
         request->t5577.blocks_to_write = 4;
         result = true;
+    } else if(request->write_type == LFRFIDWriteTypeEM4305) {
+        request->em4305.word[4] =
+            (EM4x05_MODULATION_MANCHESTER | EM4x05_SET_BITRATE(32) | (7 << EM4x05_MAXBLOCK_SHIFT));
+        uint32_t encoded_data_reversed[3] = {0};
+        for(uint8_t i = 0; i < (32 * 3); i++) {
+            encoded_data_reversed[i / 32] =
+                (encoded_data_reversed[i / 32] << 1) |
+                (bit_lib_get_bit(protocol->encoded_data, ((32 * 3) - i)) & 1);
+        }
+        request->em4305.word[5] = encoded_data_reversed[2];
+        request->em4305.word[6] = encoded_data_reversed[1];
+        request->em4305.word[7] = encoded_data_reversed[0];
+        request->em4305.mask = 0xF0;
+        result = true;
     }
     return result;
-};
+}
 
-void protocol_gallagher_render_data(ProtocolGallagher* protocol, FuriString* result) {
-    UNUSED(protocol);
-    uint8_t rc = bit_lib_get_bits(protocol->data, 0, 4);
-    uint8_t il = bit_lib_get_bits(protocol->data, 4, 4);
+static void protocol_gallagher_render_data_internal(
+    ProtocolGallagher* protocol,
+    FuriString* result,
+    bool brief) {
+    uint8_t region = bit_lib_get_bits(protocol->data, 0, 4);
+    uint8_t issue_level = bit_lib_get_bits(protocol->data, 4, 4);
     uint32_t fc = bit_lib_get_bits_32(protocol->data, 8, 24);
     uint32_t card_id = bit_lib_get_bits_32(protocol->data, 32, 32);
 
-    furi_string_cat_printf(result, "Region: %u, Issue Level: %u\r\n", rc, il);
-    furi_string_cat_printf(result, "FC: %lu, C: %lu\r\n", fc, card_id);
-};
+    if(brief) {
+        furi_string_printf(
+            result,
+            "FC: %lu\n"
+            "Card: %lu",
+            fc,
+            card_id);
+    } else {
+        furi_string_printf(
+            result,
+            "FC: %lu\n"
+            "Card: %lu\n"
+            "Region: %u\n"
+            "Issue Level: %u",
+            fc,
+            card_id,
+            region,
+            issue_level);
+    }
+}
+
+void protocol_gallagher_render_data(ProtocolGallagher* protocol, FuriString* result) {
+    protocol_gallagher_render_data_internal(protocol, result, false);
+}
+
+void protocol_gallagher_render_brief_data(ProtocolGallagher* protocol, FuriString* result) {
+    protocol_gallagher_render_data_internal(protocol, result, true);
+}
 
 const ProtocolBase protocol_gallagher = {
     .name = "Gallagher",
@@ -299,6 +340,6 @@ const ProtocolBase protocol_gallagher = {
             .yield = (ProtocolEncoderYield)protocol_gallagher_encoder_yield,
         },
     .render_data = (ProtocolRenderData)protocol_gallagher_render_data,
-    .render_brief_data = (ProtocolRenderData)protocol_gallagher_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_gallagher_render_brief_data,
     .write_data = (ProtocolWriteData)protocol_gallagher_write_data,
 };

@@ -8,21 +8,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <datetime/datetime.h>
+#include <core/common_defines.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    // Time
-    uint8_t hour; /**< Hour in 24H format: 0-23 */
-    uint8_t minute; /**< Minute: 0-59 */
-    uint8_t second; /**< Second: 0-59 */
-    // Date
-    uint8_t day; /**< Current day: 1-31 */
-    uint8_t month; /**< Current month: 1-12 */
-    uint16_t year; /**< Current year: 2000-2099 */
-    uint8_t weekday; /**< Current weekday: 1-7 */
-} FuriHalRtcDateTime;
 
 typedef enum {
     FuriHalRtcFlagDebug = (1 << 0),
@@ -54,11 +45,12 @@ typedef enum {
     FuriHalRtcRegisterHeader, /**< RTC structure header */
     FuriHalRtcRegisterSystem, /**< Various system bits */
     FuriHalRtcRegisterVersion, /**< Pointer to Version */
-    FuriHalRtcRegisterLfsFingerprint, /**< LFS geometry fingerprint */
+    FuriHalRtcRegisterLfsFingerprint FURI_DEPRECATED, /**< LFS geometry fingerprint */
     FuriHalRtcRegisterFaultData, /**< Pointer to last fault message */
-    FuriHalRtcRegisterPinFails, /**< Failed pins count */
+    FuriHalRtcRegisterPinFails, /**< Failed PINs count */
     /* Index of FS directory entry corresponding to FW update to be applied */
     FuriHalRtcRegisterUpdateFolderFSIndex,
+    FuriHalRtcRegisterPinValue, /**< Encoded value of the currently set PIN */
 
     FuriHalRtcRegisterMAX, /**< Service value, do not use */
 } FuriHalRtcRegister;
@@ -106,11 +98,19 @@ void furi_hal_rtc_deinit_early(void);
 /** Initialize RTC subsystem */
 void furi_hal_rtc_init(void);
 
+/** Prepare system for shutdown
+ *
+ * This function must be called before system sent to transport mode(power off).
+ * FlipperZero implementation configures and enables ALARM output on pin PC13
+ * (Back button). This allows the system to wake-up charger from transport mode.
+ */
+void furi_hal_rtc_prepare_for_shutdown(void);
+
 /** Force sync shadow registers */
 void furi_hal_rtc_sync_shadow(void);
 
 /** Reset ALL RTC registers content */
-void furi_hal_rtc_reset_registers();
+void furi_hal_rtc_reset_registers(void);
 
 /** Get RTC register content
  *
@@ -209,7 +209,7 @@ FuriHalRtcHeapTrackMode furi_hal_rtc_get_heap_track_mode(void);
 
 /** Set locale units
  *
- * @param[in]  mode  The RTC Locale Units
+ * @param[in]  value  The RTC Locale Units
  */
 void furi_hal_rtc_set_locale_units(FuriHalRtcLocaleUnits value);
 
@@ -247,21 +247,45 @@ FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat(void);
  *
  * @param      datetime  The date time to set
  */
-void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime);
+void furi_hal_rtc_set_datetime(DateTime* datetime);
 
 /** Get RTC Date Time
  *
  * @param      datetime  The datetime
  */
-void furi_hal_rtc_get_datetime(FuriHalRtcDateTime* datetime);
+void furi_hal_rtc_get_datetime(DateTime* datetime);
 
-/** Validate Date Time
+/** Set alarm
  *
- * @param      datetime  The datetime to validate
- *
- * @return     { description_of_the_return_value }
+ * @param[in]  datetime  The date time to set or NULL if time change is not needed
+ * @param[in]  enabled   Indicates if alarm must be enabled or disabled
  */
-bool furi_hal_rtc_validate_datetime(FuriHalRtcDateTime* datetime);
+void furi_hal_rtc_set_alarm(const DateTime* datetime, bool enabled);
+
+/** Get alarm
+ *
+ * @param      datetime  Pointer to DateTime object
+ *
+ * @return     true if alarm was set, false otherwise
+ */
+bool furi_hal_rtc_get_alarm(DateTime* datetime);
+
+/** Furi HAL RTC alarm callback signature */
+typedef void (*FuriHalRtcAlarmCallback)(void* context);
+
+/** Set alarm callback
+ *
+ * Use it to subscribe to alarm trigger event. Setting alarm callback is
+ * independent from setting alarm.
+ *
+ * @warning    Normally this callback will be delivered from the ISR, however we may
+ *             deliver it while this function is called. This happens when
+ *             the alarm has already triggered, but there was no ISR set.
+ *
+ * @param[in]  callback  The callback
+ * @param      context   The context
+ */
+void furi_hal_rtc_set_alarm_callback(FuriHalRtcAlarmCallback callback, void* context);
 
 /** Set RTC Fault Data
  *
@@ -275,66 +299,34 @@ void furi_hal_rtc_set_fault_data(uint32_t value);
  */
 uint32_t furi_hal_rtc_get_fault_data(void);
 
-/** Set Pin Fails count
+/** Set PIN Fails count
  *
- * @param[in]  value  The Pin Fails count
+ * @param[in]  value  The PIN Fails count
  */
 void furi_hal_rtc_set_pin_fails(uint32_t value);
 
-/** Get Pin Fails count
+/** Get PIN Fails count
  *
- * @return     Pin Fails Count
+ * @return     PIN Fails Count
  */
 uint32_t furi_hal_rtc_get_pin_fails(void);
+
+/** Set encoded PIN value
+ *
+ * @param[in] value new PIN code value to be set
+ */
+void furi_hal_rtc_set_pin_value(uint32_t value);
+
+/** Get the current PIN encoded value
+ *
+ */
+uint32_t furi_hal_rtc_get_pin_value(void);
 
 /** Get UNIX Timestamp
  *
  * @return     Unix Timestamp in seconds from UNIX epoch start
  */
 uint32_t furi_hal_rtc_get_timestamp(void);
-
-/** Convert DateTime to UNIX timestamp
- * 
- * @warning    Mind timezone when perform conversion
- *
- * @param      datetime  The datetime (UTC)
- *
- * @return     UNIX Timestamp in seconds from UNIX epoch start
- */
-uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime);
-
-/** Convert UNIX timestamp to DateTime
- *
- * @warning    Mind timezone when perform conversion
- *
- * @param[in]  timestamp  UNIX Timestamp in seconds from UNIX epoch start
- * @param[out] datetime   The datetime (UTC)
- */
-void furi_hal_rtc_timestamp_to_datetime(uint32_t timestamp, FuriHalRtcDateTime* datetime);
-
-/** Gets the number of days in the year according to the Gregorian calendar.
- *
- * @param year Input year.
- *
- * @return number of days in `year`.
- */
-uint16_t furi_hal_rtc_get_days_per_year(uint16_t year);
-
-/** Check if a year a leap year in the Gregorian calendar.
- *
- * @param year Input year.
- *
- * @return true if `year` is a leap year.
- */
-bool furi_hal_rtc_is_leap_year(uint16_t year);
-
-/** Get the number of days in the month.
- *
- * @param leap_year true to calculate based on leap years
- * @param month month to check, where 1 = January
- * @return the number of days in the month
- */
-uint8_t furi_hal_rtc_get_days_per_month(bool leap_year, uint8_t month);
 
 #ifdef __cplusplus
 }

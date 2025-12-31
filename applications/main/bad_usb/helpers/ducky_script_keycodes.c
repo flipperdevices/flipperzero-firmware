@@ -1,5 +1,4 @@
 #include <furi_hal.h>
-#include <furi_hal_usb_hid.h>
 #include "ducky_script_i.h"
 
 typedef struct {
@@ -7,21 +6,16 @@ typedef struct {
     uint16_t keycode;
 } DuckyKey;
 
-static const DuckyKey ducky_keys[] = {
-    {"CTRL-ALT", KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_ALT},
-    {"CTRL-SHIFT", KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_SHIFT},
-    {"ALT-SHIFT", KEY_MOD_LEFT_ALT | KEY_MOD_LEFT_SHIFT},
-    {"ALT-GUI", KEY_MOD_LEFT_ALT | KEY_MOD_LEFT_GUI},
-    {"GUI-SHIFT", KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_SHIFT},
-    {"GUI-CTRL", KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_CTRL},
-
+static const DuckyKey ducky_modifier_keys[] = {
     {"CTRL", KEY_MOD_LEFT_CTRL},
     {"CONTROL", KEY_MOD_LEFT_CTRL},
     {"SHIFT", KEY_MOD_LEFT_SHIFT},
     {"ALT", KEY_MOD_LEFT_ALT},
     {"GUI", KEY_MOD_LEFT_GUI},
     {"WINDOWS", KEY_MOD_LEFT_GUI},
+};
 
+static const DuckyKey ducky_keys[] = {
     {"DOWNARROW", HID_KEYBOARD_DOWN_ARROW},
     {"DOWN", HID_KEYBOARD_DOWN_ARROW},
     {"LEFTARROW", HID_KEYBOARD_LEFT_ARROW},
@@ -64,7 +58,90 @@ static const DuckyKey ducky_keys[] = {
     {"F10", HID_KEYBOARD_F10},
     {"F11", HID_KEYBOARD_F11},
     {"F12", HID_KEYBOARD_F12},
+    {"F13", HID_KEYBOARD_F13},
+    {"F14", HID_KEYBOARD_F14},
+    {"F15", HID_KEYBOARD_F15},
+    {"F16", HID_KEYBOARD_F16},
+    {"F17", HID_KEYBOARD_F17},
+    {"F18", HID_KEYBOARD_F18},
+    {"F19", HID_KEYBOARD_F19},
+    {"F20", HID_KEYBOARD_F20},
+    {"F21", HID_KEYBOARD_F21},
+    {"F22", HID_KEYBOARD_F22},
+    {"F23", HID_KEYBOARD_F23},
+    {"F24", HID_KEYBOARD_F24},
 };
+
+static const DuckyKey ducky_media_keys[] = {
+    {"POWER", HID_CONSUMER_POWER},
+    {"REBOOT", HID_CONSUMER_RESET},
+    {"SLEEP", HID_CONSUMER_SLEEP},
+    {"LOGOFF", HID_CONSUMER_AL_LOGOFF},
+
+    {"EXIT", HID_CONSUMER_AC_EXIT},
+    {"HOME", HID_CONSUMER_AC_HOME},
+    {"BACK", HID_CONSUMER_AC_BACK},
+    {"FORWARD", HID_CONSUMER_AC_FORWARD},
+    {"REFRESH", HID_CONSUMER_AC_REFRESH},
+
+    {"SNAPSHOT", HID_CONSUMER_SNAPSHOT},
+
+    {"PLAY", HID_CONSUMER_PLAY},
+    {"PAUSE", HID_CONSUMER_PAUSE},
+    {"PLAY_PAUSE", HID_CONSUMER_PLAY_PAUSE},
+    {"NEXT_TRACK", HID_CONSUMER_SCAN_NEXT_TRACK},
+    {"PREV_TRACK", HID_CONSUMER_SCAN_PREVIOUS_TRACK},
+    {"STOP", HID_CONSUMER_STOP},
+    {"EJECT", HID_CONSUMER_EJECT},
+
+    {"MUTE", HID_CONSUMER_MUTE},
+    {"VOLUME_UP", HID_CONSUMER_VOLUME_INCREMENT},
+    {"VOLUME_DOWN", HID_CONSUMER_VOLUME_DECREMENT},
+
+    {"FN", HID_CONSUMER_FN_GLOBE},
+    {"BRIGHT_UP", HID_CONSUMER_BRIGHTNESS_INCREMENT},
+    {"BRIGHT_DOWN", HID_CONSUMER_BRIGHTNESS_DECREMENT},
+};
+
+static const DuckyKey ducky_mouse_keys[] = {
+    {"LEFTCLICK", HID_MOUSE_BTN_LEFT},
+    {"LEFT_CLICK", HID_MOUSE_BTN_LEFT},
+    {"RIGHTCLICK", HID_MOUSE_BTN_RIGHT},
+    {"RIGHT_CLICK", HID_MOUSE_BTN_RIGHT},
+    {"MIDDLECLICK", HID_MOUSE_BTN_WHEEL},
+    {"MIDDLE_CLICK", HID_MOUSE_BTN_WHEEL},
+    {"WHEELCLICK", HID_MOUSE_BTN_WHEEL},
+    {"WHEEL_CLICK", HID_MOUSE_BTN_WHEEL},
+};
+
+uint16_t ducky_get_next_modifier_keycode_by_name(const char** param) {
+    const char* input_str = *param;
+
+    for(size_t i = 0; i < COUNT_OF(ducky_modifier_keys); i++) {
+        size_t key_cmd_len = strlen(ducky_modifier_keys[i].name);
+        if((strncmp(input_str, ducky_modifier_keys[i].name, key_cmd_len) == 0)) {
+            char next_char_after_key = input_str[key_cmd_len];
+            if(ducky_is_line_end(next_char_after_key) || (next_char_after_key == '-')) {
+                *param = &input_str[key_cmd_len];
+                return ducky_modifier_keys[i].keycode;
+            }
+        }
+    }
+
+    return HID_KEYBOARD_NONE;
+}
+
+uint16_t ducky_get_modifier_keycode_by_name(const char* param) {
+    for(size_t i = 0; i < COUNT_OF(ducky_modifier_keys); i++) {
+        size_t key_cmd_len = strlen(ducky_modifier_keys[i].name);
+        if((strncmp(param, ducky_modifier_keys[i].name, key_cmd_len) == 0) &&
+           (ducky_is_line_end(param[key_cmd_len]))) {
+            return ducky_modifier_keys[i].keycode;
+        }
+    }
+
+    return HID_KEYBOARD_NONE;
+}
 
 uint16_t ducky_get_keycode_by_name(const char* param) {
     for(size_t i = 0; i < COUNT_OF(ducky_keys); i++) {
@@ -76,4 +153,28 @@ uint16_t ducky_get_keycode_by_name(const char* param) {
     }
 
     return HID_KEYBOARD_NONE;
+}
+
+uint16_t ducky_get_media_keycode_by_name(const char* param) {
+    for(size_t i = 0; i < COUNT_OF(ducky_media_keys); i++) {
+        size_t key_cmd_len = strlen(ducky_media_keys[i].name);
+        if((strncmp(param, ducky_media_keys[i].name, key_cmd_len) == 0) &&
+           (ducky_is_line_end(param[key_cmd_len]))) {
+            return ducky_media_keys[i].keycode;
+        }
+    }
+
+    return HID_CONSUMER_UNASSIGNED;
+}
+
+uint8_t ducky_get_mouse_keycode_by_name(const char* param) {
+    for(size_t i = 0; i < COUNT_OF(ducky_mouse_keys); i++) {
+        size_t key_cmd_len = strlen(ducky_mouse_keys[i].name);
+        if((strncmp(param, ducky_mouse_keys[i].name, key_cmd_len) == 0) &&
+           (ducky_is_line_end(param[key_cmd_len]))) {
+            return ducky_mouse_keys[i].keycode;
+        }
+    }
+
+    return HID_MOUSE_INVALID;
 }

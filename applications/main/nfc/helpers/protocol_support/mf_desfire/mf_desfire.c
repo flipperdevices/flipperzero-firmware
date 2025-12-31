@@ -14,8 +14,10 @@ static void nfc_scene_info_on_enter_mf_desfire(NfcApp* instance) {
     const MfDesfireData* data = nfc_device_get_data(device, NfcProtocolMfDesfire);
 
     FuriString* temp_str = furi_string_alloc();
+    nfc_append_filename_string_when_present(instance, temp_str);
     furi_string_cat_printf(
         temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+    furi_string_replace(temp_str, "Mifare", "MIFARE");
     nfc_render_mf_desfire_info(data, NfcProtocolFormatTypeFull, temp_str);
 
     widget_add_text_scroll_element(
@@ -32,6 +34,8 @@ static void nfc_scene_more_info_on_enter_mf_desfire(NfcApp* instance) {
 static NfcCommand nfc_scene_read_poller_callback_mf_desfire(NfcGenericEvent event, void* context) {
     furi_assert(event.protocol == NfcProtocolMfDesfire);
 
+    NfcCommand command = NfcCommandContinue;
+
     NfcApp* instance = context;
     const MfDesfirePollerEvent* mf_desfire_event = event.event_data;
 
@@ -39,10 +43,12 @@ static NfcCommand nfc_scene_read_poller_callback_mf_desfire(NfcGenericEvent even
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolMfDesfire, nfc_poller_get_data(instance->poller));
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
-        return NfcCommandStop;
+        command = NfcCommandStop;
+    } else if(mf_desfire_event->type == MfDesfirePollerEventTypeReadFailed) {
+        command = NfcCommandReset;
     }
 
-    return NfcCommandContinue;
+    return command;
 }
 
 static void nfc_scene_read_on_enter_mf_desfire(NfcApp* instance) {
@@ -56,6 +62,7 @@ static void nfc_scene_read_success_on_enter_mf_desfire(NfcApp* instance) {
     FuriString* temp_str = furi_string_alloc();
     furi_string_cat_printf(
         temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+    furi_string_replace(temp_str, "Mifare", "MIFARE");
     nfc_render_mf_desfire_info(data, NfcProtocolFormatTypeShort, temp_str);
 
     widget_add_text_scroll_element(

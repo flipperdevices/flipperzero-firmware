@@ -64,8 +64,28 @@ typedef enum {
  * @brief Enumeration of suported control commands.
  */
 typedef enum {
-    ExpansionFrameControlCommandStartRpc = 0x00, /**< Start an RPC session. */
-    ExpansionFrameControlCommandStopRpc = 0x01, /**< Stop an open RPC session. */
+    /** @brief Start an RPC session.
+     *
+     * Must only be used while the RPC session is NOT active.
+     */
+    ExpansionFrameControlCommandStartRpc = 0x00,
+    /** @brief Stop an open RPC session.
+      *
+      * Must only be used while the RPC session IS active.
+      */
+    ExpansionFrameControlCommandStopRpc = 0x01,
+    /** @brief Enable OTG (5V) on external GPIO.
+      *
+      * Must only be used while the RPC session is NOT active,
+      * otherwise OTG is to be controlled via RPC messages.
+      */
+    ExpansionFrameControlCommandEnableOtg = 0x02,
+    /** @brief Disable OTG (5V) on external GPIO.
+      *
+      * Must only be used while the RPC session is NOT active,
+      * otherwise OTG is to be controlled via RPC messages.
+      */
+    ExpansionFrameControlCommandDisableOtg = 0x03,
 } ExpansionFrameControlCommand;
 
 #pragma pack(push, 1)
@@ -193,11 +213,18 @@ static inline size_t expansion_frame_get_encoded_size(const ExpansionFrame* fram
  *
  * @param[in] frame pointer to the frame to be evaluated.
  * @param[in] received_size number of bytes currently availabe for evaluation.
- * @returns number of bytes needed for a complete frame.
+ * @param[out] remaining_size pointer to the variable to contain the number of bytes needed for a complete frame.
+ * @returns true if the remaining size could be calculated, false on error.
  */
-static inline size_t
-    expansion_frame_get_remaining_size(const ExpansionFrame* frame, size_t received_size) {
-    if(received_size < sizeof(ExpansionFrameHeader)) return sizeof(ExpansionFrameHeader);
+static inline bool expansion_frame_get_remaining_size(
+    const ExpansionFrame* frame,
+    size_t received_size,
+    size_t* remaining_size) {
+    if(received_size < sizeof(ExpansionFrameHeader)) {
+        // Frame type is unknown as of now
+        *remaining_size = sizeof(ExpansionFrameHeader);
+        return true;
+    }
 
     const size_t received_content_size = received_size - sizeof(ExpansionFrameHeader);
     size_t content_size;
@@ -217,16 +244,26 @@ static inline size_t
         break;
     case ExpansionFrameTypeData:
         if(received_content_size < sizeof(frame->content.data.size)) {
+            // Data size is unknown as of now
             content_size = sizeof(frame->content.data.size);
+        } else if(frame->content.data.size > sizeof(frame->content.data.bytes)) {
+            // Malformed frame or garbage input
+            return false;
         } else {
             content_size = sizeof(frame->content.data.size) + frame->content.data.size;
         }
         break;
     default:
-        return SIZE_MAX;
+        return false;
     }
 
-    return content_size > received_content_size ? content_size - received_content_size : 0;
+    if(content_size > received_content_size) {
+        *remaining_size = content_size - received_content_size;
+    } else {
+        *remaining_size = 0;
+    }
+
+    return true;
 }
 
 /**
@@ -275,9 +312,7 @@ static inline ExpansionProtocolStatus expansion_protocol_decode(
     size_t remaining_size;
 
     while(true) {
-        remaining_size = expansion_frame_get_remaining_size(frame, total_size);
-
-        if(remaining_size == SIZE_MAX) {
+        if(!expansion_frame_get_remaining_size(frame, total_size, &remaining_size)) {
             return ExpansionProtocolStatusErrorFormat;
         } else if(remaining_size == 0) {
             break;

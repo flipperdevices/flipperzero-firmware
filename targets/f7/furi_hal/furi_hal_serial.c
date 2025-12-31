@@ -15,10 +15,10 @@
 #define FURI_HAL_SERIAL_USART_OVERSAMPLING LL_USART_OVERSAMPLING_16
 
 #define FURI_HAL_SERIAL_USART_DMA_INSTANCE (DMA1)
-#define FURI_HAL_SERIAL_USART_DMA_CHANNEL (LL_DMA_CHANNEL_6)
+#define FURI_HAL_SERIAL_USART_DMA_CHANNEL  (LL_DMA_CHANNEL_6)
 
 #define FURI_HAL_SERIAL_LPUART_DMA_INSTANCE (DMA1)
-#define FURI_HAL_SERIAL_LPUART_DMA_CHANNEL (LL_DMA_CHANNEL_7)
+#define FURI_HAL_SERIAL_LPUART_DMA_CHANNEL  (LL_DMA_CHANNEL_7)
 
 typedef struct {
     uint8_t* buffer_rx_ptr;
@@ -120,7 +120,7 @@ static void furi_hal_serial_usart_irq_callback(void* context) {
     }
     if(USART1->ISR & USART_ISR_PE) {
         USART1->ICR = USART_ICR_PECF;
-        event |= FuriHalSerialRxEventFrameError;
+        event |= FuriHalSerialRxEventParityError;
     }
 
     if(furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr == NULL) {
@@ -321,7 +321,7 @@ static void furi_hal_serial_lpuart_irq_callback(void* context) {
     }
     if(LPUART1->ISR & USART_ISR_PE) {
         LPUART1->ICR = USART_ICR_PECF;
-        event |= FuriHalSerialRxEventFrameError;
+        event |= FuriHalSerialRxEventParityError;
     }
 
     if(furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr == NULL) {
@@ -605,6 +605,144 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
     }
 }
 
+// Avoid duplicating look-up tables between USART and LPUART
+static_assert(LL_LPUART_DATAWIDTH_7B == LL_USART_DATAWIDTH_7B);
+static_assert(LL_LPUART_DATAWIDTH_8B == LL_USART_DATAWIDTH_8B);
+static_assert(LL_LPUART_DATAWIDTH_9B == LL_USART_DATAWIDTH_9B);
+static_assert(LL_LPUART_PARITY_NONE == LL_USART_PARITY_NONE);
+static_assert(LL_LPUART_PARITY_EVEN == LL_USART_PARITY_EVEN);
+static_assert(LL_LPUART_PARITY_ODD == LL_USART_PARITY_ODD);
+static_assert(LL_LPUART_STOPBITS_1 == LL_USART_STOPBITS_1);
+static_assert(LL_LPUART_STOPBITS_2 == LL_USART_STOPBITS_2);
+
+static const uint32_t serial_data_bits_lut[] = {
+    [FuriHalSerialDataBits7] = LL_USART_DATAWIDTH_7B,
+    [FuriHalSerialDataBits8] = LL_USART_DATAWIDTH_8B,
+    [FuriHalSerialDataBits9] = LL_USART_DATAWIDTH_9B,
+};
+
+static const uint32_t serial_parity_lut[] = {
+    [FuriHalSerialParityNone] = LL_USART_PARITY_NONE,
+    [FuriHalSerialParityEven] = LL_USART_PARITY_EVEN,
+    [FuriHalSerialParityOdd] = LL_USART_PARITY_ODD,
+};
+
+static const uint32_t serial_stop_bits_lut[] = {
+    [FuriHalSerialStopBits0_5] = LL_USART_STOPBITS_0_5,
+    [FuriHalSerialStopBits1] = LL_USART_STOPBITS_1,
+    [FuriHalSerialStopBits1_5] = LL_USART_STOPBITS_1_5,
+    [FuriHalSerialStopBits2] = LL_USART_STOPBITS_2,
+};
+
+static void furi_hal_serial_usart_configure_framing(
+    FuriHalSerialDataBits data_bits,
+    FuriHalSerialParity parity,
+    FuriHalSerialStopBits stop_bits) {
+    LL_USART_SetDataWidth(USART1, serial_data_bits_lut[data_bits]);
+    LL_USART_SetParity(USART1, serial_parity_lut[parity]);
+    LL_USART_SetStopBitsLength(USART1, serial_stop_bits_lut[stop_bits]);
+}
+
+static void furi_hal_serial_lpuart_configure_framing(
+    FuriHalSerialDataBits data_bits,
+    FuriHalSerialParity parity,
+    FuriHalSerialStopBits stop_bits) {
+    LL_LPUART_SetDataWidth(LPUART1, serial_data_bits_lut[data_bits]);
+    LL_LPUART_SetParity(LPUART1, serial_parity_lut[parity]);
+    // Unsupported non-whole stop bit numbers have been furi_check'ed away
+    LL_LPUART_SetStopBitsLength(LPUART1, serial_stop_bits_lut[stop_bits]);
+}
+
+void furi_hal_serial_configure_framing(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialDataBits data_bits,
+    FuriHalSerialParity parity,
+    FuriHalSerialStopBits stop_bits) {
+    furi_check(handle);
+
+    // Unsupported combinations
+    if(data_bits == FuriHalSerialDataBits9) furi_check(parity == FuriHalSerialParityNone);
+    if(data_bits == FuriHalSerialDataBits6) furi_check(parity != FuriHalSerialParityNone);
+
+    // Extend data word to account for parity bit
+    if(parity != FuriHalSerialParityNone) data_bits++;
+
+    if(handle->id == FuriHalSerialIdUsart) {
+        if(LL_USART_IsEnabled(USART1)) {
+            // Wait for transfer complete flag
+            while(!LL_USART_IsActiveFlag_TC(USART1))
+                ;
+            LL_USART_Disable(USART1);
+            furi_hal_serial_usart_configure_framing(data_bits, parity, stop_bits);
+            LL_USART_Enable(USART1);
+        }
+    } else if(handle->id == FuriHalSerialIdLpuart) {
+        // Unsupported configurations
+        furi_check(stop_bits == FuriHalSerialStopBits1 || stop_bits == FuriHalSerialStopBits2);
+
+        if(LL_LPUART_IsEnabled(LPUART1)) {
+            // Wait for transfer complete flag
+            while(!LL_LPUART_IsActiveFlag_TC(LPUART1))
+                ;
+            LL_LPUART_Disable(LPUART1);
+            furi_hal_serial_lpuart_configure_framing(data_bits, parity, stop_bits);
+            LL_LPUART_Enable(LPUART1);
+        }
+    }
+}
+
+static void furi_hal_serial_usart_configure_flow_control(bool rts, bool cts) {
+    uint32_t flow_control;
+    if(rts && cts) {
+        flow_control = LL_USART_HWCONTROL_RTS_CTS;
+    } else if(rts) {
+        flow_control = LL_USART_HWCONTROL_RTS;
+    } else if(cts) {
+        flow_control = LL_USART_HWCONTROL_CTS;
+    } else {
+        flow_control = LL_USART_HWCONTROL_NONE;
+    }
+    LL_USART_SetHWFlowCtrl(USART1, flow_control);
+}
+
+static void furi_hal_serial_lpuart_configure_flow_control(bool rts, bool cts) {
+    uint32_t flow_control;
+    if(rts && cts) {
+        flow_control = LL_LPUART_HWCONTROL_RTS_CTS;
+    } else if(rts) {
+        flow_control = LL_LPUART_HWCONTROL_RTS;
+    } else if(cts) {
+        flow_control = LL_LPUART_HWCONTROL_CTS;
+    } else {
+        flow_control = LL_LPUART_HWCONTROL_NONE;
+    }
+    LL_USART_SetHWFlowCtrl(LPUART1, flow_control);
+}
+
+void furi_hal_serial_configure_flow_control(FuriHalSerialHandle* handle, bool rts, bool cts) {
+    furi_check(handle);
+
+    if(handle->id == FuriHalSerialIdUsart) {
+        if(LL_USART_IsEnabled(USART1)) {
+            // Wait for transfer complete flag
+            while(!LL_USART_IsActiveFlag_TC(USART1))
+                ;
+            LL_USART_Disable(USART1);
+            furi_hal_serial_usart_configure_flow_control(rts, cts);
+            LL_USART_Enable(USART1);
+        }
+    } else if(handle->id == FuriHalSerialIdLpuart) {
+        if(LL_LPUART_IsEnabled(LPUART1)) {
+            // Wait for transfer complete flag
+            while(!LL_LPUART_IsActiveFlag_TC(LPUART1))
+                ;
+            LL_LPUART_Disable(LPUART1);
+            furi_hal_serial_lpuart_configure_flow_control(rts, cts);
+            LL_LPUART_Enable(LPUART1);
+        }
+    }
+}
+
 void furi_hal_serial_deinit(FuriHalSerialHandle* handle) {
     furi_check(handle);
     furi_hal_serial_async_rx_configure(handle, NULL, NULL);
@@ -658,6 +796,7 @@ void furi_hal_serial_resume(FuriHalSerialHandle* handle) {
 
 void furi_hal_serial_tx(FuriHalSerialHandle* handle, const uint8_t* buffer, size_t buffer_size) {
     furi_check(handle);
+
     if(handle->id == FuriHalSerialIdUsart) {
         if(LL_USART_IsEnabled(USART1) == 0) return;
 
@@ -730,33 +869,41 @@ static void furi_hal_serial_async_rx_configure(
     FuriHalSerialHandle* handle,
     FuriHalSerialAsyncRxCallback callback,
     void* context) {
-    if(handle->id == FuriHalSerialIdUsart) {
-        if(callback) {
-            furi_hal_serial_usart_deinit_dma_rx();
-            furi_hal_interrupt_set_isr(
-                FuriHalInterruptIdUart1, furi_hal_serial_usart_irq_callback, NULL);
-            LL_USART_EnableIT_RXNE_RXFNE(USART1);
-        } else {
+    // Disable RXFNE interrupts before unsetting the user callback that reads data
+    // Otherwise interrupt runs without reading data and without clearing RXFNE flag
+    // This would cause a system hang as the same interrupt runs in loop forever
+    if(!callback) {
+        if(handle->id == FuriHalSerialIdUsart) {
+            LL_USART_DisableIT_RXNE_RXFNE(USART1);
             furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);
             furi_hal_serial_usart_deinit_dma_rx();
-            LL_USART_DisableIT_RXNE_RXFNE(USART1);
-        }
-    } else if(handle->id == FuriHalSerialIdLpuart) {
-        if(callback) {
-            furi_hal_serial_lpuart_deinit_dma_rx();
-            furi_hal_interrupt_set_isr(
-                FuriHalInterruptIdLpUart1, furi_hal_serial_lpuart_irq_callback, NULL);
-            LL_LPUART_EnableIT_RXNE_RXFNE(LPUART1);
-        } else {
+        } else if(handle->id == FuriHalSerialIdLpuart) {
+            LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
             furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
             furi_hal_serial_lpuart_deinit_dma_rx();
-            LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
         }
     }
+
+    // Handle must be configured before enabling RX interrupt
+    // as it might be triggered right away on a misconfigured handle
     furi_hal_serial[handle->id].rx_byte_callback = callback;
     furi_hal_serial[handle->id].handle = handle;
     furi_hal_serial[handle->id].rx_dma_callback = NULL;
     furi_hal_serial[handle->id].context = context;
+
+    if(callback) {
+        if(handle->id == FuriHalSerialIdUsart) {
+            furi_hal_serial_usart_deinit_dma_rx();
+            furi_hal_interrupt_set_isr(
+                FuriHalInterruptIdUart1, furi_hal_serial_usart_irq_callback, NULL);
+            LL_USART_EnableIT_RXNE_RXFNE(USART1);
+        } else if(handle->id == FuriHalSerialIdLpuart) {
+            furi_hal_serial_lpuart_deinit_dma_rx();
+            furi_hal_interrupt_set_isr(
+                FuriHalInterruptIdLpUart1, furi_hal_serial_lpuart_irq_callback, NULL);
+            LL_LPUART_EnableIT_RXNE_RXFNE(LPUART1);
+        }
+    }
 }
 
 void furi_hal_serial_async_rx_start(
@@ -782,9 +929,20 @@ void furi_hal_serial_async_rx_stop(FuriHalSerialHandle* handle) {
     furi_hal_serial_async_rx_configure(handle, NULL, NULL);
 }
 
+bool furi_hal_serial_async_rx_available(FuriHalSerialHandle* handle) {
+    furi_check(FURI_IS_IRQ_MODE());
+    furi_check(handle->id < FuriHalSerialIdMax);
+
+    if(handle->id == FuriHalSerialIdUsart) {
+        return LL_USART_IsActiveFlag_RXNE_RXFNE(USART1);
+    } else {
+        return LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART1);
+    }
+}
+
 uint8_t furi_hal_serial_async_rx(FuriHalSerialHandle* handle) {
     furi_check(FURI_IS_IRQ_MODE());
-    furi_assert(handle->id < FuriHalSerialIdMax);
+    furi_check(handle->id < FuriHalSerialIdMax);
 
     if(handle->id == FuriHalSerialIdUsart) {
         return LL_USART_ReceiveData8(USART1);
@@ -827,7 +985,7 @@ static uint8_t furi_hal_serial_dma_rx_read_byte(FuriHalSerialHandle* handle) {
 
 size_t furi_hal_serial_dma_rx(FuriHalSerialHandle* handle, uint8_t* data, size_t len) {
     furi_check(FURI_IS_IRQ_MODE());
-    furi_assert(furi_hal_serial[handle->id].buffer_rx_ptr != NULL);
+    furi_check(furi_hal_serial[handle->id].buffer_rx_ptr != NULL);
     size_t i = 0;
     size_t available = furi_hal_serial_dma_bytes_available(handle->id);
     if(available < len) {
@@ -843,33 +1001,39 @@ static void furi_hal_serial_dma_configure(
     FuriHalSerialHandle* handle,
     FuriHalSerialDmaRxCallback callback,
     void* context) {
-    furi_check(handle);
-
-    if(handle->id == FuriHalSerialIdUsart) {
-        if(callback) {
-            furi_hal_serial_usart_init_dma_rx();
-            furi_hal_interrupt_set_isr(
-                FuriHalInterruptIdUart1, furi_hal_serial_usart_irq_callback, NULL);
-        } else {
+    // Disable RXFNE interrupts before unsetting the user callback that reads data
+    // Otherwise interrupt runs without reading data and without clearing RXFNE flag
+    // This would cause a system hang as the same interrupt runs in loop forever
+    if(!callback) {
+        if(handle->id == FuriHalSerialIdUsart) {
             LL_USART_DisableIT_RXNE_RXFNE(USART1);
             furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);
             furi_hal_serial_usart_deinit_dma_rx();
-        }
-    } else if(handle->id == FuriHalSerialIdLpuart) {
-        if(callback) {
-            furi_hal_serial_lpuart_init_dma_rx();
-            furi_hal_interrupt_set_isr(
-                FuriHalInterruptIdLpUart1, furi_hal_serial_lpuart_irq_callback, NULL);
-        } else {
+        } else if(handle->id == FuriHalSerialIdLpuart) {
             LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
             furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
             furi_hal_serial_lpuart_deinit_dma_rx();
         }
     }
+
+    // Handle must be configured before enabling RX interrupt
+    // as it might be triggered right away on a misconfigured handle
     furi_hal_serial[handle->id].rx_byte_callback = NULL;
     furi_hal_serial[handle->id].handle = handle;
     furi_hal_serial[handle->id].rx_dma_callback = callback;
     furi_hal_serial[handle->id].context = context;
+
+    if(callback) {
+        if(handle->id == FuriHalSerialIdUsart) {
+            furi_hal_serial_usart_init_dma_rx();
+            furi_hal_interrupt_set_isr(
+                FuriHalInterruptIdUart1, furi_hal_serial_usart_irq_callback, NULL);
+        } else if(handle->id == FuriHalSerialIdLpuart) {
+            furi_hal_serial_lpuart_init_dma_rx();
+            furi_hal_interrupt_set_isr(
+                FuriHalInterruptIdLpUart1, furi_hal_serial_lpuart_irq_callback, NULL);
+        }
+    }
 }
 
 void furi_hal_serial_dma_rx_start(

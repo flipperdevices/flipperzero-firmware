@@ -2,14 +2,16 @@
 
 #include <furi.h>
 #include <furi_hal_bt.h>
-#include <furi_hal_bt_hid.h>
 #include <furi_hal_usb.h>
 #include <furi_hal_usb_hid.h>
+
+#include <extra_profiles/hid_profile.h>
 
 #include <bt/bt_service/bt.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
+#include <gui/scene_manager.h>
 #include <notification/notification.h>
 #include <storage/storage.h>
 
@@ -24,22 +26,22 @@
 #include "views/hid_mouse_jiggler.h"
 #include "views/hid_tiktok.h"
 
-#define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
+#include "scenes/hid_scene.h"
 
-typedef enum {
-    HidTransportUsb,
-    HidTransportBle,
-} HidTransport;
+#define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
 
 typedef struct Hid Hid;
 
 struct Hid {
+    FuriHalBleProfileBase* ble_hid_profile;
     Bt* bt;
     Gui* gui;
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
-    Submenu* device_type_submenu;
+    SceneManager* scene_manager;
+    Submenu* submenu;
     DialogEx* dialog;
+    Popup* popup;
     HidKeynote* hid_keynote;
     HidKeyboard* hid_keyboard;
     HidMedia* hid_media;
@@ -47,10 +49,9 @@ struct Hid {
     HidMouseClicker* hid_mouse_clicker;
     HidMouseJiggler* hid_mouse_jiggler;
     HidTikTok* hid_tiktok;
-
-    HidTransport transport;
-    uint32_t view_id;
 };
+
+void bt_hid_remove_pairing(Hid* app);
 
 void hid_hal_keyboard_press(Hid* instance, uint16_t event);
 void hid_hal_keyboard_release(Hid* instance, uint16_t event);

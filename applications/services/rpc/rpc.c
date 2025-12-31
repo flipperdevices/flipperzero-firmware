@@ -9,7 +9,8 @@
 
 #include <furi.h>
 
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
+#include <cli/cli_main_commands.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <m-dict.h>
@@ -90,7 +91,7 @@ struct Rpc {
 };
 
 RpcOwner rpc_session_get_owner(RpcSession* session) {
-    furi_assert(session);
+    furi_check(session);
     return session->owner;
 }
 
@@ -111,7 +112,7 @@ static void rpc_close_session_process(const PB_Main* request, void* context) {
 }
 
 void rpc_session_set_context(RpcSession* session, void* context) {
-    furi_assert(session);
+    furi_check(session);
 
     furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     session->context = context;
@@ -119,7 +120,7 @@ void rpc_session_set_context(RpcSession* session, void* context) {
 }
 
 void rpc_session_set_close_callback(RpcSession* session, RpcSessionClosedCallback callback) {
-    furi_assert(session);
+    furi_check(session);
 
     furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     session->closed_callback = callback;
@@ -127,7 +128,7 @@ void rpc_session_set_close_callback(RpcSession* session, RpcSessionClosedCallbac
 }
 
 void rpc_session_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callback) {
-    furi_assert(session);
+    furi_check(session);
 
     furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     session->send_bytes_callback = callback;
@@ -137,7 +138,7 @@ void rpc_session_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallba
 void rpc_session_set_buffer_is_empty_callback(
     RpcSession* session,
     RpcBufferIsEmptyCallback callback) {
-    furi_assert(session);
+    furi_check(session);
 
     furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     session->buffer_is_empty_callback = callback;
@@ -147,7 +148,7 @@ void rpc_session_set_buffer_is_empty_callback(
 void rpc_session_set_terminated_callback(
     RpcSession* session,
     RpcSessionTerminatedCallback callback) {
-    furi_assert(session);
+    furi_check(session);
 
     furi_mutex_acquire(session->callbacks_mutex, FuriWaitForever);
     session->terminated_callback = callback;
@@ -165,8 +166,8 @@ size_t rpc_session_feed(
     const uint8_t* encoded_bytes,
     size_t size,
     uint32_t timeout) {
-    furi_assert(session);
-    furi_assert(encoded_bytes);
+    furi_check(session);
+    furi_check(encoded_bytes);
 
     if(!size) return 0;
 
@@ -178,7 +179,7 @@ size_t rpc_session_feed(
 }
 
 size_t rpc_session_get_available_size(RpcSession* session) {
-    furi_assert(session);
+    furi_check(session);
     return furi_stream_buffer_spaces_available(session->stream);
 }
 
@@ -188,6 +189,10 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     RpcSession* session = istream->state;
     furi_assert(session);
     furi_assert(istream->bytes_left);
+
+    if(session->terminate) {
+        return false;
+    }
 
     uint32_t flags = 0;
     size_t bytes_received = 0;
@@ -224,11 +229,11 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
         }
     }
 
-#if SRV_RPC_DEBUG
+#ifdef SRV_RPC_DEBUG
     rpc_debug_print_data("INPUT", buf, bytes_received);
 #endif
 
-    return (count == bytes_received);
+    return count == bytes_received;
 }
 
 static bool rpc_pb_content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg) {
@@ -264,7 +269,7 @@ static int32_t rpc_session_worker(void* context) {
         bool message_decode_failed = false;
 
         if(pb_decode_ex(&istream, &PB_Main_msg, session->decoded_message, PB_DECODE_DELIMITED)) {
-#if SRV_RPC_DEBUG
+#ifdef SRV_RPC_DEBUG
             FURI_LOG_I(TAG, "INPUT:");
             rpc_debug_print_message(session->decoded_message);
 #endif
@@ -325,7 +330,7 @@ static int32_t rpc_session_worker(void* context) {
                     // Disconnect BLE session
                     FURI_LOG_E("RPC", "BLE session closed due to a decode error");
                     Bt* bt = furi_record_open(RECORD_BT);
-                    bt_set_profile(bt, BtProfileSerial);
+                    bt_profile_restore_default(bt);
                     furi_record_close(RECORD_BT);
                     FURI_LOG_E("RPC", "Finished disconnecting the BLE session");
                 }
@@ -369,14 +374,16 @@ static void rpc_session_thread_pending_callback(void* context, uint32_t arg) {
     free(session);
 }
 
-static void rpc_session_thread_state_callback(FuriThreadState thread_state, void* context) {
-    if(thread_state == FuriThreadStateStopped) {
+static void
+    rpc_session_thread_state_callback(FuriThread* thread, FuriThreadState state, void* context) {
+    UNUSED(thread);
+    if(state == FuriThreadStateStopped) {
         furi_timer_pending_callback(rpc_session_thread_pending_callback, context, 0);
     }
 }
 
 RpcSession* rpc_session_open(Rpc* rpc, RpcOwner owner) {
-    furi_assert(rpc);
+    furi_check(rpc);
 
     RpcSession* session = malloc(sizeof(RpcSession));
     session->callbacks_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -414,8 +421,8 @@ RpcSession* rpc_session_open(Rpc* rpc, RpcOwner owner) {
 }
 
 void rpc_session_close(RpcSession* session) {
-    furi_assert(session);
-    furi_assert(session->rpc);
+    furi_check(session);
+    furi_check(session->rpc);
 
     rpc_session_set_send_bytes_callback(session, NULL);
     rpc_session_set_close_callback(session, NULL);
@@ -429,9 +436,14 @@ void rpc_on_system_start(void* p) {
 
     rpc->busy_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command(
-        cli, "start_rpc_session", CliCommandFlagParallelSafe, rpc_cli_command_start_session, rpc);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
+    cli_registry_add_command(
+        registry,
+        "start_rpc_session",
+        CliCommandFlagParallelSafe,
+        rpc_cli_command_start_session,
+        rpc);
+    furi_record_close(RECORD_CLI);
 
     furi_record_create(RECORD_RPC, rpc);
 }
@@ -448,7 +460,7 @@ void rpc_send(RpcSession* session, PB_Main* message) {
 
     pb_ostream_t ostream = PB_OSTREAM_SIZING;
 
-#if SRV_RPC_DEBUG
+#ifdef SRV_RPC_DEBUG
     FURI_LOG_I(TAG, "OUTPUT:");
     rpc_debug_print_message(message);
 #endif
@@ -461,7 +473,7 @@ void rpc_send(RpcSession* session, PB_Main* message) {
 
     pb_encode_ex(&ostream, &PB_Main_msg, message, PB_ENCODE_DELIMITED);
 
-#if SRV_RPC_DEBUG
+#ifdef SRV_RPC_DEBUG
     rpc_debug_print_data("OUTPUT", buffer, ostream.bytes_written);
 #endif
 

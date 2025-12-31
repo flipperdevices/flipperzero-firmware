@@ -41,6 +41,16 @@ extern "C" {
 #define CLAMP(x, upper, lower) (MIN(upper, MAX(x, lower)))
 #endif
 
+#ifndef CLAMP_WRAPAROUND
+#define CLAMP_WRAPAROUND(x, upper, lower)                       \
+    ({                                                          \
+        __typeof__(x) _x = (x);                                 \
+        __typeof__(upper) _upper = (upper);                     \
+        __typeof__(lower) _lower = (lower);                     \
+        (_x > _upper) ? _lower : ((_x < _lower) ? _upper : _x); \
+    })
+#endif
+
 #ifndef COUNT_OF
 #define COUNT_OF(x) (sizeof(x) / sizeof(x[0]))
 #endif
@@ -79,14 +89,14 @@ extern "C" {
 #endif
 
 #ifndef CONCATENATE
-#define CONCATENATE(a, b) CONCATENATE_(a, b)
+#define CONCATENATE(a, b)  CONCATENATE_(a, b)
 #define CONCATENATE_(a, b) a##b
 #endif
 
 #ifndef REVERSE_BYTES_U32
-#define REVERSE_BYTES_U32(x)                                                        \
-    ((((x)&0x000000FF) << 24) | (((x)&0x0000FF00) << 8) | (((x)&0x00FF0000) >> 8) | \
-     (((x)&0xFF000000) >> 24))
+#define REVERSE_BYTES_U32(x)                                                              \
+    ((((x) & 0x000000FF) << 24) | (((x) & 0x0000FF00) << 8) | (((x) & 0x00FF0000) >> 8) | \
+     (((x) & 0xFF000000) >> 24))
 #endif
 
 #ifndef FURI_BIT

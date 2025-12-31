@@ -2,16 +2,16 @@
 #include <math.h>
 #include <toolbox/protocols/protocol.h>
 #include <toolbox/hex.h>
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 
-#define PAC_STANLEY_ENCODED_BIT_SIZE (128)
-#define PAC_STANLEY_ENCODED_BYTE_SIZE (((PAC_STANLEY_ENCODED_BIT_SIZE) / 8))
-#define PAC_STANLEY_PREAMBLE_BIT_SIZE (8)
+#define PAC_STANLEY_ENCODED_BIT_SIZE   (128)
+#define PAC_STANLEY_ENCODED_BYTE_SIZE  (((PAC_STANLEY_ENCODED_BIT_SIZE) / 8))
+#define PAC_STANLEY_PREAMBLE_BIT_SIZE  (8)
 #define PAC_STANLEY_PREAMBLE_BYTE_SIZE (1)
 #define PAC_STANLEY_ENCODED_BYTE_FULL_SIZE \
     (PAC_STANLEY_ENCODED_BYTE_SIZE + PAC_STANLEY_PREAMBLE_BYTE_SIZE)
-#define PAC_STANLEY_BYTE_LENGTH (10) // start bit, 7 data bits, parity bit, stop bit
+#define PAC_STANLEY_BYTE_LENGTH      (10) // start bit, 7 data bits, parity bit, stop bit
 #define PAC_STANLEY_DATA_START_INDEX (8 + (3 * PAC_STANLEY_BYTE_LENGTH) + 1)
 
 #define PAC_STANLEY_DECODED_DATA_SIZE (4)
@@ -19,8 +19,8 @@
 
 #define PAC_STANLEY_CLOCKS_IN_US (32)
 #define PAC_STANLEY_CYCLE_LENGTH (256)
-#define PAC_STANLEY_MIN_TIME (60)
-#define PAC_STANLEY_MAX_TIME (4000)
+#define PAC_STANLEY_MIN_TIME     (60)
+#define PAC_STANLEY_MAX_TIME     (4000)
 
 typedef struct {
     bool inverted;
@@ -96,7 +96,7 @@ bool protocol_pac_stanley_decoder_feed(ProtocolPACStanley* protocol, bool level,
 
     if(duration > PAC_STANLEY_MAX_TIME) return false;
 
-    uint8_t pulses = (uint8_t)round((float)duration / PAC_STANLEY_CYCLE_LENGTH);
+    uint8_t pulses = (uint8_t)roundf((float)duration / PAC_STANLEY_CYCLE_LENGTH);
 
     // Handle last stopbit & preamble (1 sb, 8 bit preamble)
     if(pulses >= 9 && !protocol->got_preamble) {
@@ -137,7 +137,8 @@ bool protocol_pac_stanley_encoder_start(ProtocolPACStanley* protocol) {
     uint8_to_hex_chars(protocol->data, &idbytes[2], 8);
 
     // insert start and stop bits
-    for(size_t i = 0; i < 16; i++) protocol->encoded_data[i] = 0x40 >> ((i + 3) % 5 * 2);
+    for(size_t i = 0; i < 16; i++)
+        protocol->encoded_data[i] = 0x40 >> ((i + 3) % 5 * 2);
 
     protocol->encoded_data[0] = 0xFF; // mark + stop
     protocol->encoded_data[1] = 0x20; // start + reflect8(STX)
@@ -202,8 +203,7 @@ bool protocol_pac_stanley_write_data(ProtocolPACStanley* protocol, void* data) {
 }
 
 void protocol_pac_stanley_render_data(ProtocolPACStanley* protocol, FuriString* result) {
-    uint8_t* data = protocol->data;
-    furi_string_printf(result, "CIN: %02X%02X%02X%02X", data[0], data[1], data[2], data[3]);
+    furi_string_printf(result, "CIN: %08lX", bit_lib_get_bits_32(protocol->data, 0, 32));
 }
 
 const ProtocolBase protocol_pac_stanley = {

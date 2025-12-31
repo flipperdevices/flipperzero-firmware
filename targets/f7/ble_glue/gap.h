@@ -6,6 +6,11 @@
 #include <furi_hal_version.h>
 
 #define GAP_MAC_ADDR_SIZE (6)
+#define GAP_KEY_SIZE      (0x10)
+
+/*
+ * GAP helpers - background thread that handles BLE GAP events and advertising.
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +24,8 @@ typedef enum {
     GapEventTypePinCodeShow,
     GapEventTypePinCodeVerify,
     GapEventTypeUpdateMTU,
+    GapEventTypeBeaconStart,
+    GapEventTypeBeaconStop,
 } GapEventType;
 
 typedef union {
@@ -62,7 +69,13 @@ typedef struct {
 } GapConnectionParamsRequest;
 
 typedef struct {
-    uint16_t adv_service_uuid;
+    struct {
+        uint8_t UUID_Type;
+        uint16_t Service_UUID_16;
+        uint8_t Service_UUID_128[16];
+    } adv_service;
+    uint8_t mfg_data[23];
+    uint8_t mfg_data_len;
     uint16_t appearance_char;
     bool bonding_mode;
     GapPairing pairing_method;
@@ -71,15 +84,28 @@ typedef struct {
     GapConnectionParamsRequest conn_param;
 } GapConfig;
 
-bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context);
+typedef struct {
+    // Encryption Root key. Must be unique per-device (or app)
+    uint8_t erk[GAP_KEY_SIZE];
+    // Identity Root key. Used for resolving RPAs, if configured
+    uint8_t irk[GAP_KEY_SIZE];
+} GapRootSecurityKeys;
 
-void gap_start_advertising();
+bool gap_init(
+    GapConfig* config,
+    const GapRootSecurityKeys* root_keys,
+    GapEventCallback on_event_cb,
+    void* context);
 
-void gap_stop_advertising();
+void gap_start_advertising(void);
 
-GapState gap_get_state();
+void gap_stop_advertising(void);
 
-void gap_thread_stop();
+GapState gap_get_state(void);
+
+void gap_thread_stop(void);
+
+void gap_emit_ble_beacon_status_event(bool active);
 
 #ifdef __cplusplus
 }
