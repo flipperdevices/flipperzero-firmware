@@ -11,20 +11,25 @@ from SCons.Tool import ar, asm, gcc, gnulink, gxx
 def prefix_commands(env, command_prefix, cmd_list):
     for command in cmd_list:
         if command in env:
-            env[command] = command_prefix + env[command]
+            prefixed_binary = command_prefix + env[command]
+            if not env.WhereIs(prefixed_binary):
+                raise StopError(
+                    f"Toolchain binary {prefixed_binary} not found in PATH."
+                )
+            env.Replace(**{command: prefixed_binary})
 
 
 def _get_tool_version(env, tool):
     verstr = "version unknown"
     proc = _subproc(
         env,
-        env.subst("${%s} --version" % tool),
+        [env.subst("${%s}" % tool), "--version"],
         stdout=subprocess.PIPE,
         stderr="devnull",
         stdin="devnull",
         universal_newlines=True,
         error="raise",
-        shell=True,
+        shell=False,
     )
     if proc:
         verstr = proc.stdout.readline()

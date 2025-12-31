@@ -7,8 +7,8 @@ void lfrfid_scene_save_success_on_enter(void* context) {
     // Clear state of data enter scene
     scene_manager_set_scene_state(app->scene_manager, LfRfidSceneSaveData, 0);
 
-    popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-    popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
+    popup_set_icon(popup, 36, 5, &I_DolphinSaved_92x58);
+    popup_set_header(popup, "Saved", 15, 19, AlignLeft, AlignBottom);
     popup_set_context(popup, app);
     popup_set_callback(popup, lfrfid_popup_timeout_callback);
     popup_set_timeout(popup, 1500);
@@ -21,16 +21,9 @@ bool lfrfid_scene_save_success_on_event(void* context, SceneManagerEvent event) 
     LfRfid* app = context;
     bool consumed = false;
 
-    const uint32_t prev_scenes[] = {LfRfidSceneReadKeyMenu, LfRfidSceneSelectKey};
-
-    if((event.type == SceneManagerEventTypeBack) ||
-       ((event.type == SceneManagerEventTypeCustom) && (event.event == LfRfidEventPopupClosed))) {
-        bool result = scene_manager_search_and_switch_to_previous_scene_one_of(
-            app->scene_manager, prev_scenes, COUNT_OF(prev_scenes));
-        if(!result) {
-            scene_manager_search_and_switch_to_another_scene(
-                app->scene_manager, LfRfidSceneSelectKey);
-        }
+    if(event.type == SceneManagerEventTypeBack || event.type == SceneManagerEventTypeCustom) {
+        // Always return to SceneSelectKey from here
+        scene_manager_search_and_switch_to_another_scene(app->scene_manager, LfRfidSceneSelectKey);
         consumed = true;
     }
 

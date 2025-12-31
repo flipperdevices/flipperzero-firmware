@@ -8,13 +8,8 @@
 #include "../views/desktop_events.h"
 #include "../views/desktop_view_main.h"
 #include "desktop_scene.h"
-#include "desktop_scene_i.h"
 
 #define TAG "DesktopSrv"
-
-#define MUSIC_PLAYER_APP EXT_PATH("/apps/Media/music_player.fap")
-#define SNAKE_GAME_APP EXT_PATH("/apps/Games/snake_game.fap")
-#define CLOCK_APP EXT_PATH("/apps/Tools/clock.fap")
 
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
@@ -65,17 +60,19 @@ static void
 }
 #endif
 
-static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char* path) {
-    if(loader_start_with_gui_error(desktop->loader, path, NULL) != LoaderStatusOk) {
-        loader_start(desktop->loader, "Passport", NULL, NULL);
+static void desktop_scene_main_open_app_or_profile(Desktop* desktop, FavoriteApp* application) {
+    if(strlen(application->name_or_path) > 0) {
+        loader_start_detached_with_gui_error(desktop->loader, application->name_or_path, NULL);
+    } else {
+        loader_start_detached_with_gui_error(desktop->loader, "Passport", NULL);
     }
 }
 
 static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* application) {
     if(strlen(application->name_or_path) > 0) {
-        loader_start_with_gui_error(desktop->loader, application->name_or_path, NULL);
+        loader_start_detached_with_gui_error(desktop->loader, application->name_or_path, NULL);
     } else {
-        loader_start(desktop->loader, LOADER_APPLICATIONS_NAME, NULL, NULL);
+        loader_start_detached_with_gui_error(desktop->loader, LOADER_APPLICATIONS_NAME, NULL);
     }
 }
 
@@ -115,6 +112,11 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } break;
 
+        case DesktopMainEventLock:
+            desktop_lock(desktop);
+            consumed = true;
+            break;
+
         case DesktopMainEventOpenLockMenu:
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneLockMenu);
             consumed = true;
@@ -133,21 +135,32 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventOpenPowerOff: {
-            loader_start(desktop->loader, "Power", "off", NULL);
+            loader_start_detached_with_gui_error(desktop->loader, "Power", "off");
             consumed = true;
             break;
         }
 
-        case DesktopMainEventOpenFavoritePrimary:
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_primary);
+        case DesktopMainEventOpenFavoriteLeftShort:
+            desktop_scene_main_start_favorite(
+                desktop, &desktop->settings.favorite_apps[FavoriteAppLeftShort]);
             consumed = true;
             break;
-        case DesktopMainEventOpenFavoriteSecondary:
-            DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_secondary);
+        case DesktopMainEventOpenFavoriteLeftLong:
+            desktop_scene_main_start_favorite(
+                desktop, &desktop->settings.favorite_apps[FavoriteAppLeftLong]);
             consumed = true;
             break;
+        case DesktopMainEventOpenFavoriteRightShort:
+            desktop_scene_main_start_favorite(
+                desktop, &desktop->settings.favorite_apps[FavoriteAppRightShort]);
+            consumed = true;
+            break;
+        case DesktopMainEventOpenFavoriteRightLong:
+            desktop_scene_main_start_favorite(
+                desktop, &desktop->settings.favorite_apps[FavoriteAppRightLong]);
+            consumed = true;
+            break;
+
         case DesktopAnimationEventCheckAnimation:
             animation_manager_check_blocking_process(desktop->animation_manager);
             consumed = true;
@@ -158,26 +171,30 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopAnimationEventInteractAnimation:
             if(!animation_manager_interact_process(desktop->animation_manager)) {
-                loader_start(desktop->loader, "Passport", NULL, NULL);
+                if(!desktop->settings.dummy_mode) {
+                    desktop_scene_main_open_app_or_profile(
+                        desktop, &desktop->settings.favorite_apps[FavoriteAppRightShort]);
+                } else {
+                    desktop_scene_main_open_app_or_profile(
+                        desktop, &desktop->settings.dummy_apps[DummyAppRight]);
+                }
             }
             consumed = true;
             break;
-        case DesktopMainEventOpenPassport: {
-            loader_start(desktop->loader, "Passport", NULL, NULL);
+
+        case DesktopDummyEventOpenLeft:
+            desktop_scene_main_open_app_or_profile(
+                desktop, &desktop->settings.dummy_apps[DummyAppLeft]);
             break;
-        }
-        case DesktopMainEventOpenGame: {
-            desktop_scene_main_open_app_or_profile(desktop, SNAKE_GAME_APP);
+        case DesktopDummyEventOpenDown:
+            desktop_scene_main_open_app_or_profile(
+                desktop, &desktop->settings.dummy_apps[DummyAppDown]);
             break;
-        }
-        case DesktopMainEventOpenClock: {
-            desktop_scene_main_open_app_or_profile(desktop, CLOCK_APP);
+        case DesktopDummyEventOpenOk:
+            desktop_scene_main_open_app_or_profile(
+                desktop, &desktop->settings.dummy_apps[DummyAppOk]);
             break;
-        }
-        case DesktopMainEventOpenMusicPlayer: {
-            desktop_scene_main_open_app_or_profile(desktop, MUSIC_PLAYER_APP);
-            break;
-        }
+
         case DesktopLockedEventUpdate:
             desktop_view_locked_update(desktop->locked_view);
             consumed = true;

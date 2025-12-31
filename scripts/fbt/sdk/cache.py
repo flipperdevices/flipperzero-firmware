@@ -237,6 +237,7 @@ class SdkCache:
         removed_entries = known_set - new_set
         if removed_entries:
             print(f"Removed: {removed_entries}")
+            self.loaded_dirty_version = True
             known_set -= removed_entries
             # If any of removed entries was a part of active API, that's a major bump
             if update_version and any(
@@ -254,3 +255,18 @@ class SdkCache:
         self.sync_sets(self.sdk.headers, api.headers, False)
         self.sync_sets(self.sdk.functions, api.functions)
         self.sync_sets(self.sdk.variables, api.variables)
+
+
+class LazySdkVersionLoader:
+    def __init__(self, sdk_path: str):
+        self.sdk_path = sdk_path
+        self._version = None
+
+    @property
+    def version(self) -> SdkVersion:
+        if self._version is None:
+            self._version = SdkCache(self.sdk_path, load_version_only=True).version
+        return self._version
+
+    def __str__(self) -> str:
+        return str(self.version)

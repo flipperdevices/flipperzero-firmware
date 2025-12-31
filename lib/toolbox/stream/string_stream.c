@@ -37,7 +37,7 @@ const StreamVTable string_stream_vtable = {
     .delete_and_insert = (StreamDeleteAndInsertFn)string_stream_delete_and_insert,
 };
 
-Stream* string_stream_alloc() {
+Stream* string_stream_alloc(void) {
     StringStream* stream = malloc(sizeof(StringStream));
     stream->string = furi_string_alloc();
     stream->index = 0;
@@ -51,7 +51,7 @@ static void string_stream_free(StringStream* stream) {
 }
 
 static bool string_stream_eof(StringStream* stream) {
-    return (string_stream_tell(stream) >= string_stream_size(stream));
+    return string_stream_tell(stream) >= string_stream_size(stream);
 }
 
 static void string_stream_clean(StringStream* stream) {
@@ -106,7 +106,7 @@ static size_t string_stream_size(StringStream* stream) {
 }
 
 static size_t string_stream_write(StringStream* stream, const char* data, size_t size) {
-    // TODO: can be optimized for edge cases
+    // TODO FL-3544: can be optimized for edge cases
     size_t i;
     for(i = 0; i < size; i++) {
         string_stream_write_char(stream, data[i]);

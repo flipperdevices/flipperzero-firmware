@@ -1,11 +1,6 @@
 name: 'Lint sources & check submodule integrity'
 
 on:
-  push:
-    branches:
-      - dev
-    tags:
-      - '*'
   pull_request:
 
 env:
@@ -15,21 +10,20 @@ env:
 
 jobs:
   lint_sources_check_submodules:
-    runs-on: [self-hosted,FlipperZeroShell]
+    runs-on: [self-hosted, FlipperZeroShell]
     steps:
       - name: 'Wipe workspace'
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 1
-          ref: ${{ github.event.pull_request.head.sha }}
-
+          fetch-depth: 2
+          ref: ${{ github.sha }}
 
       - name: 'Check protobuf branch'
         run: |
-          git submodule update --init
+          git submodule update --init;
           SUB_PATH="assets/protobuf";
           SUB_BRANCH="dev";
           SUB_COMMITS_MIN=40;
@@ -48,8 +42,28 @@ jobs:
             exit 1;
           fi
 
+      - name: 'Check for new TODOs'
+        id: check_todos
+        if: github.event_name == 'pull_request'
+        run: |
+          set +e;
+          git diff --unified=0 --no-color ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '^\+' | grep -i -E '(TODO|HACK|FIXME|XXX)[ :]' | grep -v -- '-nofl' > lines.log;
+          MISSING_TICKETS=$( grep -v -E 'FL-[0-9]+' lines.log );
+          if [ -n "$MISSING_TICKETS" ]; then
+            echo "Error: Missing ticket number in \`TODO\` comment(s)" >> $GITHUB_STEP_SUMMARY;
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY;
+            echo "$MISSING_TICKETS" >> $GITHUB_STEP_SUMMARY;
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY;
+            echo "Error: Missing issue number in comment(s):";
+            echo "$MISSING_TICKETS";
+            exit 1;
+          else
+            echo "No new TODOs without tickets found" >> $GITHUB_STEP_SUMMARY;
+          fi
+
       - name: 'Check Python code formatting'
         id: syntax_check_py
+        if: always()
         run: |
           set +e;
           ./fbt -s lint_py 2>&1 | tee lint-py.log;
@@ -79,6 +93,22 @@ jobs:
             exit 1;
           else
             echo "C Lint: all good ✨" >> $GITHUB_STEP_SUMMARY;
+          fi
+
+      - name: 'Check image assets'
+        if: always()
+        run: |
+          set +e;
+          ./fbt -s lint_img 2>&1 | tee lint-assets.log;
+          if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+            # Save multiline output
+            echo "errors=1" >> $GITHUB_OUTPUT;
+            printf "Image Lint errors:\n\`\`\`\n" >> $GITHUB_STEP_SUMMARY;
+            echo "$(cat lint-assets.log)" >> $GITHUB_STEP_SUMMARY;
+            printf "\n\`\`\`\n" >> $GITHUB_STEP_SUMMARY;
+            exit 1;
+          else
+            echo "Image Lint: all good ✨" >> $GITHUB_STEP_SUMMARY;
           fi
 
       - name: Report code formatting errors

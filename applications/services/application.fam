@@ -3,8 +3,10 @@ App(
     name="Basic services",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
+        "cli_vcp",
         "crypto_start",
         "rpc_start",
+        "expansion_start",
         "bt",
         "desktop",
         "loader",

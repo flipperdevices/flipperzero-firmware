@@ -138,11 +138,15 @@ extern const NotificationSequence sequence_blink_stop;
 extern const NotificationSequence sequence_single_vibro;
 extern const NotificationSequence sequence_double_vibro;
 extern const NotificationSequence sequence_success;
+extern const NotificationSequence sequence_semi_success;
 extern const NotificationSequence sequence_error;
 extern const NotificationSequence sequence_audiovisual_alert;
 
 // LCD
 extern const NotificationSequence sequence_lcd_contrast_update;
+
+// Wait for notification queue become empty
+extern const NotificationSequence sequence_empty;
 
 #ifdef __cplusplus
 }

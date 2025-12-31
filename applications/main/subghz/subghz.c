@@ -20,33 +20,38 @@ void subghz_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(subghz->scene_manager);
 }
 
-static void subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) {
+static void subghz_rpc_command_callback(const RpcAppSystemEvent* event, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
 
     furi_assert(subghz->rpc_ctx);
 
-    if(event == RpcAppEventSessionClose) {
+    if(event->type == RpcAppEventTypeSessionClose) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneRpcSessionClose);
         rpc_system_app_set_callback(subghz->rpc_ctx, NULL, NULL);
         subghz->rpc_ctx = NULL;
-    } else if(event == RpcAppEventAppExit) {
+    } else if(event->type == RpcAppEventTypeAppExit) {
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneExit);
-    } else if(event == RpcAppEventLoadFile) {
+    } else if(event->type == RpcAppEventTypeLoadFile) {
+        furi_assert(event->data.type == RpcAppSystemEventDataTypeString);
+        furi_string_set(subghz->file_path, event->data.string);
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneRpcLoad);
-    } else if(event == RpcAppEventButtonPress) {
+    } else if(event->type == RpcAppEventTypeButtonPress) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneRpcButtonPress);
-    } else if(event == RpcAppEventButtonRelease) {
+    } else if(event->type == RpcAppEventTypeButtonRelease) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneRpcButtonRelease);
+    } else if(event->type == RpcAppEventTypeButtonPressRelease) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneRpcButtonPressRelease);
     } else {
-        rpc_system_app_confirm(subghz->rpc_ctx, event, false);
+        rpc_system_app_confirm(subghz->rpc_ctx, false);
     }
 }
 
-SubGhz* subghz_alloc() {
+SubGhz* subghz_alloc(void) {
     SubGhz* subghz = malloc(sizeof(SubGhz));
 
     subghz->file_path = furi_string_alloc();
@@ -57,7 +62,6 @@ SubGhz* subghz_alloc() {
 
     // View Dispatcher
     subghz->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(subghz->view_dispatcher);
 
     subghz->scene_manager = scene_manager_alloc(&subghz_scene_handlers, subghz);
     view_dispatcher_set_event_callback_context(subghz->view_dispatcher, subghz);

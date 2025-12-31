@@ -2,8 +2,10 @@
 
 #include <stdlib.h>
 
-#include "core/check.h"
 #include "core/common_defines.h"
+#include "core/check.h"
+#include "core/event_loop.h"
+#include "core/event_loop_timer.h"
 #include "core/event_flag.h"
 #include "core/kernel.h"
 #include "core/log.h"
@@ -15,22 +17,25 @@
 #include "core/record.h"
 #include "core/semaphore.h"
 #include "core/thread.h"
+#include "core/thread_list.h"
 #include "core/timer.h"
 #include "core/string.h"
 #include "core/stream_buffer.h"
 
 #include <furi_hal_gpio.h>
 
-// FreeRTOS timer, REMOVE AFTER REFACTORING
-#include <timers.h>
+// Workaround for math.h leaking through HAL in older versions
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void furi_init();
+void furi_init(void);
 
-void furi_run();
+void furi_run(void);
+
+void furi_background(void);
 
 #ifdef __cplusplus
 }

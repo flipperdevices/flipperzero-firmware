@@ -2,7 +2,6 @@
 
 #include "assets_icons.h"
 #include "subghz/types.h"
-#include <math.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
@@ -10,7 +9,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format.h>
-#include "views/receiver.h"
 
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/stream/stream.h>
@@ -60,17 +58,17 @@ void subghz_dialog_message_show_only_rx(SubGhz* subghz) {
     DialogsApp* dialogs = subghz->dialogs;
     DialogMessage* message = dialog_message_alloc();
 
-    const char* header_text = "Transmission is blocked";
-    const char* message_text = "Transmission on\nthis frequency is\nrestricted in\nyour region";
+    const char* header_text = "Transmission is Blocked!";
+    const char* message_text = "Transmission on\nthis frequency is\nrestricted in your\nregion";
     if(!furi_hal_region_is_provisioned()) {
         header_text = "Firmware update needed";
         message_text = "Please update\nfirmware before\nusing this feature\nflipp.dev/upd";
     }
 
-    dialog_message_set_header(message, header_text, 63, 3, AlignCenter, AlignTop);
-    dialog_message_set_text(message, message_text, 0, 17, AlignLeft, AlignTop);
+    dialog_message_set_header(message, header_text, 63, 0, AlignCenter, AlignTop);
+    dialog_message_set_text(message, message_text, 1, 13, AlignLeft, AlignTop);
 
-    dialog_message_set_icon(message, &I_DolphinCommon_56x48, 72, 17);
+    dialog_message_set_icon(message, &I_WarningDolphinFlip_45x42, 83, 22);
 
     dialog_message_show(dialogs, message);
     dialog_message_free(message);
@@ -134,7 +132,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
         SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
 
         if(!strcmp(furi_string_get_cstr(temp_str), "CUSTOM")) {
-            //Todo add Custom_preset_module
+            //TODO FL-3551: add Custom_preset_module
             //delete preset if it already exists
             subghz_setting_delete_custom_preset(setting, furi_string_get_cstr(temp_str));
             //load custom preset from file
@@ -238,7 +236,7 @@ bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len) {
             storage,
             furi_string_get_cstr(file_path),
             furi_string_get_cstr(file_name),
-            SUBGHZ_APP_EXTENSION,
+            SUBGHZ_APP_FILENAME_EXTENSION,
             file_name,
             max_len);
 
@@ -247,7 +245,7 @@ bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len) {
             "%s/%s%s",
             furi_string_get_cstr(file_path),
             furi_string_get_cstr(file_name),
-            SUBGHZ_APP_EXTENSION);
+            SUBGHZ_APP_FILENAME_EXTENSION);
         furi_string_set(subghz->file_path, temp_str);
         res = true;
     }
@@ -289,9 +287,12 @@ bool subghz_save_protocol_to_file(
         if(!storage_simply_remove(storage, dev_file_name)) {
             break;
         }
-        //ToDo check Write
         stream_seek(flipper_format_stream, 0, StreamOffsetFromStart);
         stream_save_to_file(flipper_format_stream, storage, dev_file_name, FSOM_CREATE_ALWAYS);
+
+        if(storage_common_stat(storage, dev_file_name, NULL) != FSE_OK) {
+            break;
+        }
 
         saved = true;
     } while(0);
@@ -317,7 +318,8 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
     FuriString* file_path = furi_string_alloc();
 
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, SUBGHZ_APP_EXTENSION, &I_sub1_10px);
+    dialog_file_browser_set_basic_options(
+        &browser_options, SUBGHZ_APP_FILENAME_EXTENSION, &I_sub1_10px);
     browser_options.base_path = SUBGHZ_APP_FOLDER;
 
     // Input events and views are managed by file_select
@@ -391,7 +393,7 @@ void subghz_file_name_clear(SubGhz* subghz) {
 }
 
 bool subghz_path_is_file(FuriString* path) {
-    return furi_string_end_with(path, SUBGHZ_APP_EXTENSION);
+    return furi_string_end_with(path, SUBGHZ_APP_FILENAME_EXTENSION);
 }
 
 void subghz_lock(SubGhz* subghz) {
@@ -406,7 +408,7 @@ void subghz_unlock(SubGhz* subghz) {
 
 bool subghz_is_locked(SubGhz* subghz) {
     furi_assert(subghz);
-    return (subghz->lock == SubGhzLockOn);
+    return subghz->lock == SubGhzLockOn;
 }
 
 void subghz_rx_key_state_set(SubGhz* subghz, SubGhzRxKeyState state) {

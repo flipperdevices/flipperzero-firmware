@@ -32,11 +32,7 @@ void updater_scene_main_on_enter(void* context) {
         furi_pubsub_subscribe(storage_get_pubsub(updater->storage), &sd_mount_callback, updater);
     updater_main_set_storage_pubsub(main_view, sub);
 
-    /* FIXME: there's a misbehavior in storage subsystem. If we produce heavy load on it before it
-    * fires an SD card event, it'll never do that until the load is lifted. Meanwhile SD card icon
-    * will be missing from UI, however, /ext will be fully operational. So, until it's fixed, this
-    * should remain commented out. */
-    // If (somehow) we started after SD card is mounted, initiate update immediately
+    // If we started after SD card is mounted, initiate update immediately
     if(storage_sd_status(updater->storage) == FSE_OK) {
         view_dispatcher_send_custom_event(updater->view_dispatcher, UpdaterCustomEventStartUpdate);
     }
@@ -45,7 +41,7 @@ void updater_scene_main_on_enter(void* context) {
     view_dispatcher_switch_to_view(updater->view_dispatcher, UpdaterViewMain);
 }
 
-static void updater_scene_cancel_update() {
+static void updater_scene_cancel_update(void) {
     update_operation_disarm();
     furi_hal_power_reset();
 }
@@ -80,7 +76,7 @@ bool updater_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case UpdaterCustomEventSdUnmounted:
-            // TODO: error out, stop worker (it's probably dead actually)
+            // TODO FL-3499: error out, stop worker (it's probably dead actually)
             break;
         default:
             break;

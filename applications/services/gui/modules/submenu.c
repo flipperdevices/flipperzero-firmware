@@ -11,8 +11,12 @@ struct Submenu {
 typedef struct {
     FuriString* label;
     uint32_t index;
-    SubmenuItemCallback callback;
+    union {
+        SubmenuItemCallback callback;
+        SubmenuItemCallbackEx callback_ex;
+    };
     void* callback_context;
+    bool has_extended_events;
 } SubmenuItem;
 
 static void SubmenuItem_init(SubmenuItem* item) {
@@ -57,7 +61,7 @@ typedef struct {
 
 static void submenu_process_up(Submenu* submenu);
 static void submenu_process_down(Submenu* submenu);
-static void submenu_process_ok(Submenu* submenu);
+static void submenu_process_ok(Submenu* submenu, InputType input_type);
 
 static void submenu_view_draw_callback(Canvas* canvas, void* _model) {
     SubmenuModel* model = _model;
@@ -120,7 +124,10 @@ static bool submenu_view_input_callback(InputEvent* event, void* context) {
     furi_assert(submenu);
     bool consumed = false;
 
-    if(event->type == InputTypeShort) {
+    if(event->key == InputKeyOk) {
+        consumed = true;
+        submenu_process_ok(submenu, event->type);
+    } else if(event->type == InputTypeShort) {
         switch(event->key) {
         case InputKeyUp:
             consumed = true;
@@ -129,10 +136,6 @@ static bool submenu_view_input_callback(InputEvent* event, void* context) {
         case InputKeyDown:
             consumed = true;
             submenu_process_down(submenu);
-            break;
-        case InputKeyOk:
-            consumed = true;
-            submenu_process_ok(submenu);
             break;
         default:
             break;
@@ -150,7 +153,7 @@ static bool submenu_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-Submenu* submenu_alloc() {
+Submenu* submenu_alloc(void) {
     Submenu* submenu = malloc(sizeof(Submenu));
     submenu->view = view_alloc();
     view_set_context(submenu->view, submenu);
@@ -173,7 +176,7 @@ Submenu* submenu_alloc() {
 }
 
 void submenu_free(Submenu* submenu) {
-    furi_assert(submenu);
+    furi_check(submenu);
 
     with_view_model(
         submenu->view,
@@ -188,7 +191,7 @@ void submenu_free(Submenu* submenu) {
 }
 
 View* submenu_get_view(Submenu* submenu) {
-    furi_assert(submenu);
+    furi_check(submenu);
     return submenu->view;
 }
 
@@ -199,8 +202,8 @@ void submenu_add_item(
     SubmenuItemCallback callback,
     void* callback_context) {
     SubmenuItem* item = NULL;
-    furi_assert(label);
-    furi_assert(submenu);
+    furi_check(label);
+    furi_check(submenu);
 
     with_view_model(
         submenu->view,
@@ -211,12 +214,57 @@ void submenu_add_item(
             item->index = index;
             item->callback = callback;
             item->callback_context = callback_context;
+            item->has_extended_events = false;
+        },
+        true);
+}
+
+void submenu_add_item_ex(
+    Submenu* submenu,
+    const char* label,
+    uint32_t index,
+    SubmenuItemCallbackEx callback,
+    void* callback_context) {
+    SubmenuItem* item = NULL;
+    furi_check(label);
+    furi_check(submenu);
+
+    with_view_model(
+        submenu->view,
+        SubmenuModel * model,
+        {
+            item = SubmenuItemArray_push_new(model->items);
+            furi_string_set_str(item->label, label);
+            item->index = index;
+            item->callback_ex = callback;
+            item->callback_context = callback_context;
+            item->has_extended_events = true;
+        },
+        true);
+}
+
+void submenu_change_item_label(Submenu* submenu, uint32_t index, const char* label) {
+    furi_check(submenu);
+    furi_check(label);
+
+    with_view_model(
+        submenu->view,
+        SubmenuModel * model,
+        {
+            SubmenuItemArray_it_t it;
+            for(SubmenuItemArray_it(it, model->items); !SubmenuItemArray_end_p(it);
+                SubmenuItemArray_next(it)) {
+                if(index == SubmenuItemArray_cref(it)->index) {
+                    furi_string_set_str(SubmenuItemArray_cref(it)->label, label);
+                    break;
+                }
+            }
         },
         true);
 }
 
 void submenu_reset(Submenu* submenu) {
-    furi_assert(submenu);
+    furi_check(submenu);
 
     with_view_model(
         submenu->view,
@@ -230,7 +278,27 @@ void submenu_reset(Submenu* submenu) {
         true);
 }
 
+uint32_t submenu_get_selected_item(Submenu* submenu) {
+    furi_check(submenu);
+
+    uint32_t selected_item_index = 0;
+
+    with_view_model(
+        submenu->view,
+        SubmenuModel * model,
+        {
+            if(model->position < SubmenuItemArray_size(model->items)) {
+                const SubmenuItem* item = SubmenuItemArray_cget(model->items, model->position);
+                selected_item_index = item->index;
+            }
+        },
+        false);
+
+    return selected_item_index;
+}
+
 void submenu_set_selected_item(Submenu* submenu, uint32_t index) {
+    furi_check(submenu);
     with_view_model(
         submenu->view,
         SubmenuModel * model,
@@ -317,7 +385,7 @@ void submenu_process_down(Submenu* submenu) {
         true);
 }
 
-void submenu_process_ok(Submenu* submenu) {
+void submenu_process_ok(Submenu* submenu, InputType input_type) {
     SubmenuItem* item = NULL;
 
     with_view_model(
@@ -331,13 +399,17 @@ void submenu_process_ok(Submenu* submenu) {
         },
         true);
 
-    if(item && item->callback) {
+    if(!item) return;
+
+    if(!item->has_extended_events && input_type == InputTypeShort && item->callback) {
         item->callback(item->callback_context, item->index);
+    } else if(item->has_extended_events && item->callback_ex) {
+        item->callback_ex(item->callback_context, input_type, item->index);
     }
 }
 
 void submenu_set_header(Submenu* submenu, const char* header) {
-    furi_assert(submenu);
+    furi_check(submenu);
 
     with_view_model(
         submenu->view,

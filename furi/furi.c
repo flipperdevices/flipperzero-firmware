@@ -1,26 +1,27 @@
 #include "furi.h"
-#include <string.h>
-#include "queue.h"
 
-void furi_init() {
-    furi_assert(!furi_kernel_is_irq_or_masked());
-    furi_assert(xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED);
+#include "core/thread_i.h"
 
+#include <FreeRTOS.h>
+#include <queue.h>
+
+void furi_init(void) {
+    furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED);
+
+    furi_thread_init();
     furi_log_init();
     furi_record_init();
 }
 
-void furi_run() {
-    furi_assert(!furi_kernel_is_irq_or_masked());
-    furi_assert(xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED);
-
-#if(__ARM_ARCH_7A__ == 0U)
-    /* Service Call interrupt might be configured before kernel start      */
-    /* and when its priority is lower or equal to BASEPRI, svc instruction */
-    /* causes a Hard Fault.                                                */
-    NVIC_SetPriority(SVCall_IRQn, 0U);
-#endif
+void furi_run(void) {
+    furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED);
 
     /* Start the kernel scheduler */
     vTaskStartScheduler();
+}
+
+void furi_background(void) {
+    furi_thread_scrub();
 }

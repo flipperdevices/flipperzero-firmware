@@ -15,7 +15,7 @@ extern "C" {
 typedef struct ButtonPanel ButtonPanel;
 
 /** Callback type to call for handling selecting button_panel items */
-typedef void (*ButtonItemCallback)(void* context, uint32_t index);
+typedef void (*ButtonItemCallback)(void* context, uint32_t index, InputType type);
 
 /** Allocate new button_panel module.
  *
@@ -99,6 +99,19 @@ void button_panel_add_label(
     uint16_t y,
     Font font,
     const char* label_str);
+
+/** Add a non-button icon to button_panel module.
+ *
+ * @param      button_panel  ButtonPanel instance
+ * @param      x             x-coordinate to place icon
+ * @param      y             y-coordinate to place icon
+ * @param      icon_name     name of the icon to draw
+ */
+void button_panel_add_icon(
+    ButtonPanel* button_panel,
+    uint16_t x,
+    uint16_t y,
+    const Icon* icon_name);
 
 #ifdef __cplusplus
 }

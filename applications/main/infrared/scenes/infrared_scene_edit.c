@@ -1,20 +1,21 @@
-#include "../infrared_i.h"
+#include "../infrared_app_i.h"
 
 typedef enum {
     SubmenuIndexAddButton,
     SubmenuIndexRenameButton,
+    SubmenuIndexMoveButton,
     SubmenuIndexDeleteButton,
     SubmenuIndexRenameRemote,
     SubmenuIndexDeleteRemote,
 } SubmenuIndex;
 
 static void infrared_scene_edit_submenu_callback(void* context, uint32_t index) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(infrared->view_dispatcher, index);
 }
 
 void infrared_scene_edit_on_enter(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     Submenu* submenu = infrared->submenu;
     SceneManager* scene_manager = infrared->scene_manager;
 
@@ -28,6 +29,12 @@ void infrared_scene_edit_on_enter(void* context) {
         submenu,
         "Rename Button",
         SubmenuIndexRenameButton,
+        infrared_scene_edit_submenu_callback,
+        context);
+    submenu_add_item(
+        submenu,
+        "Move Button",
+        SubmenuIndexMoveButton,
         infrared_scene_edit_submenu_callback,
         context);
     submenu_add_item(
@@ -57,7 +64,7 @@ void infrared_scene_edit_on_enter(void* context) {
 }
 
 bool infrared_scene_edit_on_event(void* context, SceneManagerEvent event) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     SceneManager* scene_manager = infrared->scene_manager;
     bool consumed = false;
 
@@ -73,6 +80,9 @@ bool infrared_scene_edit_on_event(void* context, SceneManagerEvent event) {
             infrared->app_state.edit_target = InfraredEditTargetButton;
             infrared->app_state.edit_mode = InfraredEditModeRename;
             scene_manager_next_scene(scene_manager, InfraredSceneEditButtonSelect);
+            consumed = true;
+        } else if(submenu_index == SubmenuIndexMoveButton) {
+            scene_manager_next_scene(scene_manager, InfraredSceneEditMove);
             consumed = true;
         } else if(submenu_index == SubmenuIndexDeleteButton) {
             infrared->app_state.edit_target = InfraredEditTargetButton;
@@ -96,6 +106,6 @@ bool infrared_scene_edit_on_event(void* context, SceneManagerEvent event) {
 }
 
 void infrared_scene_edit_on_exit(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     submenu_reset(infrared->submenu);
 }

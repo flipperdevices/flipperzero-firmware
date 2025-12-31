@@ -5,7 +5,7 @@
 #include <input/input.h>
 #include <gui/gui_i.h>
 #include <u8g2_glue.h>
-
+#include <lib/toolbox/float_tools.h>
 #include "notification.h"
 #include "notification_messages.h"
 #include "notification_app.h"
@@ -24,9 +24,9 @@ static const uint8_t reset_display_mask = 1 << 5;
 static const uint8_t reset_blink_mask = 1 << 6;
 
 static void notification_vibro_on(bool force);
-static void notification_vibro_off();
+static void notification_vibro_off(void);
 static void notification_sound_on(float freq, float volume, bool force);
-static void notification_sound_off();
+static void notification_sound_off(void);
 
 static uint8_t notification_settings_get_display_brightness(NotificationApp* app, uint8_t value);
 static uint8_t notification_settings_get_rgb_led_brightness(NotificationApp* app, uint8_t value);
@@ -39,7 +39,7 @@ void notification_message_save_settings(NotificationApp* app) {
     furi_event_flag_wait(
         m.back_event, NOTIFICATION_EVENT_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
     furi_event_flag_free(m.back_event);
-};
+}
 
 // internal layer
 static void
@@ -104,7 +104,10 @@ static void notification_reset_notification_led_layer(NotificationLedLayer* laye
     furi_hal_light_set(layer->light, layer->value[LayerInternal]);
 }
 
-static void notification_reset_notification_layer(NotificationApp* app, uint8_t reset_mask) {
+static void notification_reset_notification_layer(
+    NotificationApp* app,
+    uint8_t reset_mask,
+    float display_brightness_set) {
     if(reset_mask & reset_blink_mask) {
         furi_hal_light_blink_stop();
     }
@@ -124,6 +127,9 @@ static void notification_reset_notification_layer(NotificationApp* app, uint8_t 
         notification_sound_off();
     }
     if(reset_mask & reset_display_mask) {
+        if(!float_is_equal(display_brightness_set, app->settings.display_brightness)) {
+            furi_hal_light_set(LightBacklight, app->settings.display_brightness * 0xFF);
+        }
         furi_timer_start(app->display_timer, notification_settings_display_off_delay_ticks(app));
     }
 }
@@ -137,17 +143,16 @@ static void notification_apply_notification_leds(NotificationApp* app, const uin
 
 // settings
 uint8_t notification_settings_get_display_brightness(NotificationApp* app, uint8_t value) {
-    return (value * app->settings.display_brightness);
+    return value * app->settings.display_brightness;
 }
 
 static uint8_t notification_settings_get_rgb_led_brightness(NotificationApp* app, uint8_t value) {
-    return (value * app->settings.led_brightness);
+    return value * app->settings.led_brightness;
 }
 
 static uint32_t notification_settings_display_off_delay_ticks(NotificationApp* app) {
-    return (
-        (float)(app->settings.display_off_delay_ms) /
-        (1000.0f / furi_kernel_get_tick_frequency()));
+    return (float)(app->settings.display_off_delay_ms) /
+           (1000.0f / furi_kernel_get_tick_frequency());
 }
 
 // generics
@@ -157,7 +162,7 @@ static void notification_vibro_on(bool force) {
     }
 }
 
-static void notification_vibro_off() {
+static void notification_vibro_off(void) {
     furi_hal_vibro_on(false);
 }
 
@@ -169,7 +174,7 @@ static void notification_sound_on(float freq, float volume, bool force) {
     }
 }
 
-static void notification_sound_off() {
+static void notification_sound_off(void) {
     if(furi_hal_speaker_is_mine()) {
         furi_hal_speaker_stop();
         furi_hal_speaker_release();
@@ -212,16 +217,17 @@ static void notification_process_notification_message(
                 notification_apply_notification_led_layer(
                     &app->display,
                     notification_message->data.led.value * display_brightness_setting);
+                reset_mask |= reset_display_mask;
             } else {
+                reset_mask &= ~reset_display_mask;
                 notification_reset_notification_led_layer(&app->display);
                 if(furi_timer_is_running(app->display_timer)) {
                     furi_timer_stop(app->display_timer);
                 }
             }
-            reset_mask |= reset_display_mask;
             break;
         case NotificationMessageTypeLedDisplayBacklightEnforceOn:
-            furi_assert(app->display_led_lock < UINT8_MAX);
+            furi_check(app->display_led_lock < UINT8_MAX);
             app->display_led_lock++;
             if(app->display_led_lock == 1) {
                 notification_apply_internal_led_layer(
@@ -230,12 +236,15 @@ static void notification_process_notification_message(
             }
             break;
         case NotificationMessageTypeLedDisplayBacklightEnforceAuto:
-            furi_assert(app->display_led_lock > 0);
-            app->display_led_lock--;
-            if(app->display_led_lock == 0) {
-                notification_apply_internal_led_layer(
-                    &app->display,
-                    notification_message->data.led.value * display_brightness_setting);
+            if(app->display_led_lock > 0) {
+                app->display_led_lock--;
+                if(app->display_led_lock == 0) {
+                    notification_apply_internal_led_layer(
+                        &app->display,
+                        notification_message->data.led.value * display_brightness_setting);
+                }
+            } else {
+                FURI_LOG_E(TAG, "Incorrect BacklightEnforce use");
             }
             break;
         case NotificationMessageTypeLedRed:
@@ -370,7 +379,7 @@ static void notification_process_notification_message(
     }
 
     if(reset_notifications) {
-        notification_reset_notification_layer(app, reset_mask);
+        notification_reset_notification_layer(app, reset_mask, display_brightness_setting);
     }
 }
 
@@ -429,12 +438,12 @@ static bool notification_load_settings(NotificationApp* app) {
     File* file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
     const size_t settings_size = sizeof(NotificationSettings);
 
-    FURI_LOG_I(TAG, "loading settings from \"%s\"", NOTIFICATION_SETTINGS_PATH);
+    FURI_LOG_I(TAG, "Loading \"%s\"", NOTIFICATION_SETTINGS_PATH);
     bool fs_result =
         storage_file_open(file, NOTIFICATION_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(fs_result) {
-        uint16_t bytes_count = storage_file_read(file, &settings, settings_size);
+        size_t bytes_count = storage_file_read(file, &settings, settings_size);
 
         if(bytes_count != settings_size) {
             fs_result = false;
@@ -442,8 +451,6 @@ static bool notification_load_settings(NotificationApp* app) {
     }
 
     if(fs_result) {
-        FURI_LOG_I(TAG, "load success");
-
         if(settings.version != NOTIFICATION_SETTINGS_VERSION) {
             FURI_LOG_E(
                 TAG, "version(%d != %d) mismatch", settings.version, NOTIFICATION_SETTINGS_VERSION);
@@ -453,7 +460,7 @@ static bool notification_load_settings(NotificationApp* app) {
             furi_kernel_unlock();
         }
     } else {
-        FURI_LOG_E(TAG, "load failed, %s", storage_file_get_error_desc(file));
+        FURI_LOG_E(TAG, "Load failed, %s", storage_file_get_error_desc(file));
     }
 
     storage_file_close(file);
@@ -461,14 +468,14 @@ static bool notification_load_settings(NotificationApp* app) {
     furi_record_close(RECORD_STORAGE);
 
     return fs_result;
-};
+}
 
 static bool notification_save_settings(NotificationApp* app) {
     NotificationSettings settings;
     File* file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
     const size_t settings_size = sizeof(NotificationSettings);
 
-    FURI_LOG_I(TAG, "saving settings to \"%s\"", NOTIFICATION_SETTINGS_PATH);
+    FURI_LOG_I(TAG, "Saving \"%s\"", NOTIFICATION_SETTINGS_PATH);
 
     furi_kernel_lock();
     memcpy(&settings, &app->settings, settings_size);
@@ -478,7 +485,7 @@ static bool notification_save_settings(NotificationApp* app) {
         storage_file_open(file, NOTIFICATION_SETTINGS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS);
 
     if(fs_result) {
-        uint16_t bytes_count = storage_file_write(file, &settings, settings_size);
+        size_t bytes_count = storage_file_write(file, &settings, settings_size);
 
         if(bytes_count != settings_size) {
             fs_result = false;
@@ -486,9 +493,8 @@ static bool notification_save_settings(NotificationApp* app) {
     }
 
     if(fs_result) {
-        FURI_LOG_I(TAG, "save success");
     } else {
-        FURI_LOG_E(TAG, "save failed, %s", storage_file_get_error_desc(file));
+        FURI_LOG_E(TAG, "Save failed, %s", storage_file_get_error_desc(file));
     }
 
     storage_file_close(file);
@@ -496,7 +502,7 @@ static bool notification_save_settings(NotificationApp* app) {
     furi_record_close(RECORD_STORAGE);
 
     return fs_result;
-};
+}
 
 static void input_event_callback(const void* value, void* context) {
     furi_assert(value);
@@ -506,7 +512,7 @@ static void input_event_callback(const void* value, void* context) {
 }
 
 // App alloc
-static NotificationApp* notification_app_alloc() {
+static NotificationApp* notification_app_alloc(void) {
     NotificationApp* app = malloc(sizeof(NotificationApp));
     app->queue = furi_message_queue_alloc(8, sizeof(NotificationAppMessage));
     app->display_timer = furi_timer_alloc(notification_display_timer, FuriTimerTypeOnce, app);
@@ -545,16 +551,48 @@ static NotificationApp* notification_app_alloc() {
     notification_message(app, &sequence_display_backlight_on);
 
     return app;
-};
+}
+
+static void notification_storage_callback(const void* message, void* context) {
+    furi_assert(context);
+    NotificationApp* app = context;
+    const StorageEvent* event = message;
+
+    if(event->type == StorageEventTypeCardMount) {
+        NotificationAppMessage m = {
+            .type = LoadSettingsMessage,
+        };
+
+        furi_check(furi_message_queue_put(app->queue, &m, FuriWaitForever) == FuriStatusOk);
+    }
+}
+
+static void notification_apply_settings(NotificationApp* app) {
+    if(!notification_load_settings(app)) {
+        notification_save_settings(app);
+    }
+
+    notification_apply_lcd_contrast(app);
+}
+
+static void notification_init_settings(NotificationApp* app) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    furi_pubsub_subscribe(storage_get_pubsub(storage), notification_storage_callback, app);
+
+    if(storage_sd_status(storage) != FSE_OK) {
+        FURI_LOG_D(TAG, "SD Card not ready, skipping settings");
+        return;
+    }
+
+    notification_apply_settings(app);
+}
 
 // App
 int32_t notification_srv(void* p) {
     UNUSED(p);
     NotificationApp* app = notification_app_alloc();
 
-    if(!notification_load_settings(app)) {
-        notification_save_settings(app);
-    }
+    notification_init_settings(app);
 
     notification_vibro_off();
     notification_sound_off();
@@ -562,7 +600,6 @@ int32_t notification_srv(void* p) {
     notification_apply_internal_led_layer(&app->led[0], 0x00);
     notification_apply_internal_led_layer(&app->led[1], 0x00);
     notification_apply_internal_led_layer(&app->led[2], 0x00);
-    notification_apply_lcd_contrast(app);
 
     furi_record_create(RECORD_NOTIFICATION, app);
 
@@ -580,6 +617,9 @@ int32_t notification_srv(void* p) {
         case SaveSettingsMessage:
             notification_save_settings(app);
             break;
+        case LoadSettingsMessage:
+            notification_load_settings(app);
+            break;
         }
 
         if(message.back_event != NULL) {
@@ -588,4 +628,4 @@ int32_t notification_srv(void* p) {
     }
 
     return 0;
-};
+}

@@ -26,6 +26,7 @@ typedef enum {
     //SubGhzCustomEvent
     SubGhzCustomEventSceneDeleteSuccess = 100,
     SubGhzCustomEventSceneDelete,
+    SubGhzCustomEventSceneDeleteBack,
     SubGhzCustomEventSceneDeleteRAW,
     SubGhzCustomEventSceneDeleteRAWBack,
 
@@ -48,6 +49,7 @@ typedef enum {
     SubGhzCustomEventSceneRpcLoad,
     SubGhzCustomEventSceneRpcButtonPress,
     SubGhzCustomEventSceneRpcButtonRelease,
+    SubGhzCustomEventSceneRpcButtonPressRelease,
     SubGhzCustomEventSceneRpcSessionClose,
 
     SubGhzCustomEventViewReceiverOK,
@@ -70,5 +72,6 @@ typedef enum {
     SubGhzCustomEventViewTransmitterBack,
     SubGhzCustomEventViewTransmitterSendStart,
     SubGhzCustomEventViewTransmitterSendStop,
+    SubGhzCustomEventViewTransmitterSendSave,
     SubGhzCustomEventViewTransmitterError,
 } SubGhzCustomEvent;

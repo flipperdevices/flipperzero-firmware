@@ -8,14 +8,14 @@
 
 #include "animation_manager.h"
 #include "animation_storage.h"
-#include "animation_storage_i.h"
 #include <assets_dolphin_internal.h>
 #include <assets_dolphin_blocking.h>
 
-#define ANIMATION_META_FILE "meta.txt"
-#define ANIMATION_DIR EXT_PATH("dolphin")
-#define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
 #define TAG "AnimationStorage"
+
+#define ANIMATION_META_FILE     "meta.txt"
+#define ANIMATION_DIR           EXT_PATH("dolphin")
+#define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation);
 static void animation_storage_free_frames(BubbleAnimation* animation);
@@ -52,8 +52,7 @@ static bool animation_storage_load_single_manifest_info(
         if(furi_string_cmp_str(read_string, name)) break;
         flipper_format_set_strict_mode(file, true);
 
-        manifest_info->name = malloc(furi_string_size(read_string) + 1);
-        strcpy((char*)manifest_info->name, furi_string_get_cstr(read_string));
+        manifest_info->name = strdup(furi_string_get_cstr(read_string));
 
         if(!flipper_format_read_uint32(file, "Min butthurt", &u32value, 1)) break;
         manifest_info->min_butthurt = u32value;
@@ -105,9 +104,7 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
             storage_animation->manifest_info.name = NULL;
 
             if(!flipper_format_read_string(file, "Name", read_string)) break;
-            storage_animation->manifest_info.name = malloc(furi_string_size(read_string) + 1);
-            strcpy(
-                (char*)storage_animation->manifest_info.name, furi_string_get_cstr(read_string));
+            storage_animation->manifest_info.name = strdup(furi_string_get_cstr(read_string));
 
             if(!flipper_format_read_uint32(file, "Min butthurt", &u32value, 1)) break;
             storage_animation->manifest_info.min_butthurt = u32value;
@@ -304,7 +301,7 @@ static bool animation_storage_load_frames(
         if(file_info.size > max_filesize) {
             FURI_LOG_E(
                 TAG,
-                "Filesize %lld, max: %d (width %d, height %d)",
+                "Filesize %llu, max: %zu (width %u, height %u)",
                 file_info.size,
                 max_filesize,
                 width,
@@ -329,7 +326,7 @@ static bool animation_storage_load_frames(
     if(!frames_ok) {
         FURI_LOG_E(
             TAG,
-            "Load \'%s\' failed, %dx%d, size: %lld",
+            "Load \'%s\' failed, %ux%u, size: %llu",
             furi_string_get_cstr(filename),
             width,
             height,
@@ -401,8 +398,7 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFo
 
             furi_string_replace_all(str, "\\n", "\n");
 
-            FURI_CONST_ASSIGN_PTR(bubble->bubble.text, malloc(furi_string_size(str) + 1));
-            strcpy((char*)bubble->bubble.text, furi_string_get_cstr(str));
+            FURI_CONST_ASSIGN_PTR(bubble->bubble.text, strdup(furi_string_get_cstr(str)));
 
             if(!flipper_format_read_string(ff, "AlignH", str)) break;
             if(!animation_storage_cast_align(str, (Align*)&bubble->bubble.align_h)) break;

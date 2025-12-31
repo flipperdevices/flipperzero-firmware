@@ -1,6 +1,5 @@
 
 #include "../animation_manager.h"
-#include "../animation_storage.h"
 #include "bubble_animation_view.h"
 
 #include <furi_hal.h>
@@ -23,7 +22,7 @@ typedef struct {
     uint8_t active_bubbles;
     uint8_t passive_bubbles;
     uint8_t active_shift;
-    TickType_t active_ended_at;
+    uint32_t active_ended_at;
     Icon* freeze_frame;
 } BubbleAnimationViewModel;
 
@@ -94,12 +93,17 @@ static const FrameBubble*
     bubble_animation_pick_bubble(BubbleAnimationViewModel* model, bool active) {
     const FrameBubble* bubble = NULL;
 
-    if((model->active_bubbles == 0) && (model->passive_bubbles == 0)) {
+    // Check for division by zero based on the active parameter
+    if((active && model->active_bubbles == 0) || (!active && model->passive_bubbles == 0)) {
         return NULL;
     }
 
-    uint8_t index =
-        furi_hal_random_get() % (active ? model->active_bubbles : model->passive_bubbles);
+    uint8_t random_value = furi_hal_random_get();
+    // In case random generator return zero lets set it to 3
+    if(random_value == 0) {
+        random_value = 3;
+    }
+    uint8_t index = random_value % (active ? model->active_bubbles : model->passive_bubbles);
     const BubbleAnimation* animation = model->current;
 
     for(int i = 0; i < animation->frame_bubble_sequences_count; ++i) {
@@ -128,8 +132,8 @@ static bool bubble_animation_input_callback(InputEvent* event, void* context) {
 
     if(event->key == InputKeyRight) {
         /* Right button reserved for animation activation, so consume */
-        consumed = true;
         if(event->type == InputTypeShort) {
+            consumed = true;
             if(animation_view->interact_callback) {
                 animation_view->interact_callback(animation_view->interact_callback_context);
             }
@@ -154,7 +158,7 @@ static void bubble_animation_activate(BubbleAnimationView* view, bool force) {
     if(model->current != NULL) {
         if(!force) {
             if((model->active_ended_at + model->current->active_cooldown * 1000) >
-               xTaskGetTickCount()) {
+               furi_get_tick()) {
                 activate = false;
             } else if(model->active_shift) {
                 activate = false;
@@ -215,7 +219,7 @@ static void bubble_animation_next_frame(BubbleAnimationViewModel* model) {
             model->active_cycle = 0;
             model->current_frame = 0;
             model->current_bubble = bubble_animation_pick_bubble(model, false);
-            model->active_ended_at = xTaskGetTickCount();
+            model->active_ended_at = furi_get_tick();
         }
 
         if(model->current_bubble) {
@@ -355,7 +359,7 @@ void bubble_animation_view_set_animation(
     furi_assert(model);
     model->current = new_animation;
 
-    model->active_ended_at = xTaskGetTickCount() - (model->current->active_cooldown * 1000);
+    model->active_ended_at = furi_get_tick() - (model->current->active_cooldown * 1000);
     model->active_bubbles = 0;
     model->passive_bubbles = 0;
     for(int i = 0; i < new_animation->frame_bubble_sequences_count; ++i) {

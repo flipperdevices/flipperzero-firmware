@@ -109,6 +109,8 @@ class FlipperStorage:
 
     def start(self):
         self.port.open()
+        time.sleep(0.5)
+        self.read.until(self.CLI_PROMPT)
         self.port.reset_input_buffer()
         # Send a command with a known syntax to make sure the buffer is flushed
         self.send("device_info\r")
@@ -150,7 +152,7 @@ class FlipperStorage:
 
         for line in lines:
             try:
-                # TODO: better decoding, considering non-ascii characters
+                # TODO FL-3539: better decoding, considering non-ascii characters
                 line = line.decode("ascii")
             except Exception:
                 continue
@@ -193,7 +195,7 @@ class FlipperStorage:
 
         for line in lines:
             try:
-                # TODO: better decoding, considering non-ascii characters
+                # TODO FL-3539: better decoding, considering non-ascii characters
                 line = line.decode("ascii")
             except Exception:
                 continue

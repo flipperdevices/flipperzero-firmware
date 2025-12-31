@@ -1,6 +1,6 @@
 #include "../ibutton_i.h"
 
-#include <toolbox/random_name.h>
+#include <toolbox/name_generator.h>
 #include <toolbox/path.h>
 
 #include <dolphin/dolphin.h>
@@ -17,7 +17,8 @@ void ibutton_scene_save_name_on_enter(void* context) {
     const bool is_new_file = furi_string_empty(ibutton->file_path);
 
     if(is_new_file) {
-        set_random_name(ibutton->key_name, IBUTTON_KEY_NAME_SIZE);
+        name_generator_make_auto(
+            ibutton->key_name, IBUTTON_KEY_NAME_SIZE, IBUTTON_APP_FILENAME_PREFIX);
     }
 
     text_input_set_header_text(text_input, "Name the key");
@@ -29,8 +30,8 @@ void ibutton_scene_save_name_on_enter(void* context) {
         IBUTTON_KEY_NAME_SIZE,
         is_new_file);
 
-    ValidatorIsFile* validator_is_file =
-        validator_is_file_alloc_init(IBUTTON_APP_FOLDER, IBUTTON_APP_EXTENSION, ibutton->key_name);
+    ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
+        IBUTTON_APP_FOLDER, IBUTTON_APP_FILENAME_EXTENSION, ibutton->key_name);
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewTextInput);
@@ -40,15 +41,23 @@ bool ibutton_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
     bool consumed = false;
 
+    const bool is_new_file = furi_string_empty(ibutton->file_path);
+
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == iButtonCustomEventTextEditResult) {
+            if(!is_new_file) {
+                Storage* storage = furi_record_open(RECORD_STORAGE);
+                storage_simply_remove(storage, furi_string_get_cstr(ibutton->file_path));
+                furi_record_close(RECORD_STORAGE);
+            }
+
             furi_string_printf(
                 ibutton->file_path,
                 "%s/%s%s",
                 IBUTTON_APP_FOLDER,
                 ibutton->key_name,
-                IBUTTON_APP_EXTENSION);
+                IBUTTON_APP_FILENAME_EXTENSION);
 
             if(ibutton_save_key(ibutton)) {
                 scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveSuccess);

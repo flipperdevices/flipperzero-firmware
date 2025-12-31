@@ -2,13 +2,15 @@
 
 #include <core/kernel.h>
 
-#define TM2004_CMD_READ_STATUS 0xAA
-#define TM2004_CMD_READ_MEMORY 0xF0
-#define TM2004_CMD_WRITE_ROM 0x3C
-#define TM2004_CMD_FINALIZATION 0x35
+#define TM2004_CMD_READ_STATUS    0xAA
+#define TM2004_CMD_READ_MEMORY    0xF0
+#define TM2004_CMD_WRITE_ROM      0x3C
+#define TM2004_CMD_FINALIZATION   0x35
 #define TM2004_ANSWER_READ_MEMORY 0xF5
 
 bool tm2004_write(OneWireHost* host, const uint8_t* data, size_t data_size) {
+    onewire_host_set_timings_default(host);
+
     onewire_host_reset(host);
     onewire_host_write(host, TM2004_CMD_WRITE_ROM);
     // Starting writing from address 0x0000
@@ -21,7 +23,7 @@ bool tm2004_write(OneWireHost* host, const uint8_t* data, size_t data_size) {
 
         onewire_host_write(host, data[i]);
         answer = onewire_host_read(host);
-        // TODO: check answer CRC
+        // TODO FL-3529: check answer CRC
 
         // pulse indicating that data is correct
         furi_delay_us(600);
@@ -37,6 +39,6 @@ bool tm2004_write(OneWireHost* host, const uint8_t* data, size_t data_size) {
         }
     }
 
-    // TODO: Better error handling
+    // TODO FL-3529: Better error handling
     return i == data_size;
 }

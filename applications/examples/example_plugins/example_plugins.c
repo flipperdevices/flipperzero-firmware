@@ -1,5 +1,7 @@
-/* 
- * An example of a plugin host application.
+/**
+ * @file example_plugins.c
+ * @brief Plugin host application example.
+ *
  * Loads a single plugin and calls its methods.
  */
 
@@ -11,7 +13,7 @@
 #include <loader/firmware_api/firmware_api.h>
 #include <storage/storage.h>
 
-#define TAG "example_plugins"
+#define TAG "ExamplePlugins"
 
 int32_t example_plugins_app(void* p) {
     UNUSED(p);

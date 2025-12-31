@@ -1,0 +1,224 @@
+/**
+ * @file furi_hal_subghz.h
+ * SubGhz HAL API
+ */
+
+#pragma once
+
+#include <lib/subghz/devices/preset.h>
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <toolbox/level_duration.h>
+#include <furi_hal_gpio.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/** Various subghz defines */
+#define FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL (256u)
+#define FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF (FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL / 2)
+#define FURI_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME  (999u)
+
+/** Switchable Radio Paths */
+typedef enum {
+    FuriHalSubGhzPathIsolate, /**< Isolate Radio from antenna */
+    FuriHalSubGhzPath433, /**< Center Frequency: 433MHz. Path 1: SW1RF1-SW2RF2, LCLCL */
+    FuriHalSubGhzPath315, /**< Center Frequency: 315MHz. Path 2: SW1RF2-SW2RF1, LCLCLCL */
+    FuriHalSubGhzPath868, /**< Center Frequency: 868MHz. Path 3: SW1RF3-SW2RF3, LCLC */
+} FuriHalSubGhzPath;
+
+/* Mirror RX/TX async modulation signal to specified pin
+ *
+ * @warning    Configures pin to output mode. Make sure it is not connected
+ *             directly to power or ground.
+ *
+ * @param[in]  pin   pointer to the gpio pin structure or NULL to disable
+ */
+void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin);
+
+/** Get data GPIO
+ *
+ * @return     pointer to the gpio pin structure
+ */
+const GpioPin* furi_hal_subghz_get_data_gpio(void);
+
+/** Initialize and switch to power save mode Used by internal API-HAL
+ * initialization routine Can be used to reinitialize device to safe state and
+ * send it to sleep
+ */
+void furi_hal_subghz_init(void);
+
+/** Send device to sleep mode
+ */
+void furi_hal_subghz_sleep(void);
+
+/** Dump info to stdout
+ */
+void furi_hal_subghz_dump_state(void);
+
+/** Load custom registers from preset
+ *
+ * @param      preset_data   registers to load
+ */
+void furi_hal_subghz_load_custom_preset(const uint8_t* preset_data);
+
+/** Load registers
+ *
+ * @param      data  Registers data
+ */
+void furi_hal_subghz_load_registers(const uint8_t* data);
+
+/** Load PATABLE
+ *
+ * @param      data  8 uint8_t values
+ */
+void furi_hal_subghz_load_patable(const uint8_t data[8]);
+
+/** Write packet to FIFO
+ *
+ * @param      data  bytes array
+ * @param      size  size
+ */
+void furi_hal_subghz_write_packet(const uint8_t* data, uint8_t size);
+
+/** Check if receive pipe is not empty
+ *
+ * @return     true if not empty
+ */
+bool furi_hal_subghz_rx_pipe_not_empty(void);
+
+/** Check if received data crc is valid
+ *
+ * @return     true if valid
+ */
+bool furi_hal_subghz_is_rx_data_crc_valid(void);
+
+/** Read packet from FIFO
+ *
+ * @param      data  pointer
+ * @param      size  size
+ */
+void furi_hal_subghz_read_packet(uint8_t* data, uint8_t* size);
+
+/** Flush rx FIFO buffer
+ */
+void furi_hal_subghz_flush_rx(void);
+
+/** Flush tx FIFO buffer
+ */
+void furi_hal_subghz_flush_tx(void);
+
+/** Shutdown Issue SPWD command
+ * @warning    registers content will be lost
+ */
+void furi_hal_subghz_shutdown(void);
+
+/** Reset Issue reset command
+ * @warning    registers content will be lost
+ */
+void furi_hal_subghz_reset(void);
+
+/** Switch to Idle
+ */
+void furi_hal_subghz_idle(void);
+
+/** Switch to Receive
+ */
+void furi_hal_subghz_rx(void);
+
+/** Switch to Transmit
+ *
+ * @return     true if the transfer is allowed by belonging to the region
+ */
+bool furi_hal_subghz_tx(void);
+
+/** Get RSSI value in dBm
+ *
+ * @return     RSSI value
+ */
+float furi_hal_subghz_get_rssi(void);
+
+/** Get LQI
+ *
+ * @return     LQI value
+ */
+uint8_t furi_hal_subghz_get_lqi(void);
+
+/** Check if frequency is in valid range
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     true if frequency is valid, otherwise false
+ */
+bool furi_hal_subghz_is_frequency_valid(uint32_t value);
+
+/** Set frequency and path This function automatically selects antenna matching
+ * network
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     real frequency in Hz
+ */
+uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
+
+/** Set frequency
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     real frequency in Hz
+ */
+uint32_t furi_hal_subghz_set_frequency(uint32_t value);
+
+/** Set path
+ *
+ * @param      path  path to use
+ */
+void furi_hal_subghz_set_path(FuriHalSubGhzPath path);
+
+/* High Level API */
+
+/** Signal Timings Capture callback */
+typedef void (*FuriHalSubGhzCaptureCallback)(bool level, uint32_t duration, void* context);
+
+/** Enable signal timings capture Initializes GPIO and TIM2 for timings capture
+ *
+ * @param      callback  FuriHalSubGhzCaptureCallback
+ * @param      context   callback context
+ */
+void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void* context);
+
+/** Disable signal timings capture Resets GPIO and TIM2
+ */
+void furi_hal_subghz_stop_async_rx(void);
+
+/** Async TX callback type
+ * @param      context  callback context
+ * @return     LevelDuration
+ */
+typedef LevelDuration (*FuriHalSubGhzAsyncTxCallback)(void* context);
+
+/** Start async TX Initializes GPIO, TIM2 and DMA1 for signal output
+ *
+ * @param      callback  FuriHalSubGhzAsyncTxCallback
+ * @param      context   callback context
+ *
+ * @return     true if the transfer is allowed by belonging to the region
+ */
+bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void* context);
+
+/** Wait for async transmission to complete
+ *
+ * @return     true if TX complete
+ */
+bool furi_hal_subghz_is_async_tx_complete(void);
+
+/** Stop async transmission and cleanup resources Resets GPIO, TIM2, and DMA1
+ */
+void furi_hal_subghz_stop_async_tx(void);
+
+#ifdef __cplusplus
+}
+#endif

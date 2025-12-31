@@ -3,10 +3,10 @@
 #include <toolbox/stream/file_stream.h>
 #include <toolbox/varint.h>
 
-#define LFRFID_RAW_FILE_MAGIC 0x4C464952
+#define LFRFID_RAW_FILE_MAGIC   0x4C464952
 #define LFRFID_RAW_FILE_VERSION 1
 
-#define TAG "RFID RAW File"
+#define TAG "LfRfidRawFile"
 
 typedef struct {
     uint32_t magic;
@@ -26,6 +26,8 @@ struct LFRFIDRawFile {
 };
 
 LFRFIDRawFile* lfrfid_raw_file_alloc(Storage* storage) {
+    furi_check(storage);
+
     LFRFIDRawFile* file = malloc(sizeof(LFRFIDRawFile));
     file->stream = file_stream_alloc(storage);
     file->buffer = NULL;
@@ -33,16 +35,24 @@ LFRFIDRawFile* lfrfid_raw_file_alloc(Storage* storage) {
 }
 
 void lfrfid_raw_file_free(LFRFIDRawFile* file) {
+    furi_check(file);
+
     if(file->buffer) free(file->buffer);
     stream_free(file->stream);
     free(file);
 }
 
 bool lfrfid_raw_file_open_write(LFRFIDRawFile* file, const char* file_path) {
+    furi_check(file);
+    furi_check(file_path);
+
     return file_stream_open(file->stream, file_path, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS);
 }
 
 bool lfrfid_raw_file_open_read(LFRFIDRawFile* file, const char* file_path) {
+    furi_check(file);
+    furi_check(file_path);
+
     return file_stream_open(file->stream, file_path, FSAM_READ, FSOM_OPEN_EXISTING);
 }
 
@@ -51,6 +61,8 @@ bool lfrfid_raw_file_write_header(
     float frequency,
     float duty_cycle,
     uint32_t max_buffer_size) {
+    furi_check(file);
+
     LFRFIDRawFileHeader header = {
         .magic = LFRFID_RAW_FILE_MAGIC,
         .version = LFRFID_RAW_FILE_VERSION,
@@ -59,10 +71,14 @@ bool lfrfid_raw_file_write_header(
         .max_buffer_size = max_buffer_size};
 
     size_t size = stream_write(file->stream, (uint8_t*)&header, sizeof(LFRFIDRawFileHeader));
-    return (size == sizeof(LFRFIDRawFileHeader));
+    return size == sizeof(LFRFIDRawFileHeader);
 }
 
 bool lfrfid_raw_file_write_buffer(LFRFIDRawFile* file, uint8_t* buffer_data, size_t buffer_size) {
+    furi_check(file);
+    furi_check(buffer_data);
+    furi_check(buffer_size);
+
     size_t size;
     size = stream_write(file->stream, (uint8_t*)&buffer_size, sizeof(size_t));
     if(size != sizeof(size_t)) return false;
@@ -74,6 +90,10 @@ bool lfrfid_raw_file_write_buffer(LFRFIDRawFile* file, uint8_t* buffer_data, siz
 }
 
 bool lfrfid_raw_file_read_header(LFRFIDRawFile* file, float* frequency, float* duty_cycle) {
+    furi_check(file);
+    furi_check(frequency);
+    furi_check(duty_cycle);
+
     LFRFIDRawFileHeader header;
     size_t size = stream_read(file->stream, (uint8_t*)&header, sizeof(LFRFIDRawFileHeader));
     if(size == sizeof(LFRFIDRawFileHeader)) {
@@ -98,6 +118,10 @@ bool lfrfid_raw_file_read_pair(
     uint32_t* duration,
     uint32_t* pulse,
     bool* pass_end) {
+    furi_check(file);
+    furi_check(duration);
+    furi_check(pulse);
+
     size_t length = 0;
     if(file->buffer_counter >= file->buffer_size) {
         if(stream_eof(file->stream)) {

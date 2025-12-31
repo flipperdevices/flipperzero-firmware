@@ -1,4 +1,4 @@
-# Key Combos
+# Key Combos {#key_combos}
 
 There are times when your Flipper feels blue and doesn't respond to any of your commands due to a software issue. This guide will help you solve this problem.
 
@@ -10,7 +10,7 @@ There are times when your Flipper feels blue and doesn't respond to any of your 
 - Release `LEFT` and `BACK`
 
 This combo performs a hardware reset by pulling the MCU reset line down.
-Main components involved: Keys -> DD8(NC7SZ32M5X, OR-gate) -> DD1(STM32WB55, MCU).
+Main components involved: Keys → DD8(NC7SZ32M5X, OR-gate) → DD1(STM32WB55, MCU).
 
 It won't work only in one case:
 
@@ -26,7 +26,7 @@ It won't work only in one case:
 - Release the `BACK` key
 
 This combo performs a reset by switching SYS power line off and then on.
-Main components involved: Keys -> DD6(bq25896, charger).
+Main components involved: Keys → DD6(bq25896, charger).
 
 It won't work only in one case:
 

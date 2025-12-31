@@ -29,34 +29,25 @@ which is the name that most clang tools search for by default.
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-import json
-import itertools
 import fnmatch
+import itertools
+import json
+from oslex import join, split
+
 import SCons
-
-from SCons.Tool.cxx import CXXSuffixes
+from SCons.Tool.asm import ASPPSuffixes, ASSuffixes
 from SCons.Tool.cc import CSuffixes
-from SCons.Tool.asm import ASSuffixes, ASPPSuffixes
+from SCons.Tool.cxx import CXXSuffixes
 
-# TODO: Is there a better way to do this than this global? Right now this exists so that the
+# TODO: (-nofl) Is there a better way to do this than this global? Right now this exists so that the
 # emitter we add can record all of the things it emits, so that the scanner for the top level
 # compilation database can access the complete list, and also so that the writer has easy
 # access to write all of the files. But it seems clunky. How can the emitter and the scanner
 # communicate more gracefully?
 __COMPILATION_DB_ENTRIES = []
 
-
-# We make no effort to avoid rebuilding the entries. Someday, perhaps we could and even
-# integrate with the cache, but there doesn't seem to be much call for it.
-class __CompilationDbNode(SCons.Node.Python.Value):
-    def __init__(self, value):
-        SCons.Node.Python.Value.__init__(self, value)
-        self.Decider(changed_since_last_build_node)
-
-
-def changed_since_last_build_node(child, target, prev_ni, node):
-    """Dummy decider to force always building"""
-    return True
+# We cache the tool path lookups to avoid doing them over and over again.
+_TOOL_PATH_CACHE = {}
 
 
 def make_emit_compilation_DB_entry(comstr):
@@ -68,7 +59,6 @@ def make_emit_compilation_DB_entry(comstr):
     :param comstr: unevaluated command line
     :return: an emitter which has captured the above
     """
-    user_action = SCons.Action.Action(comstr)
 
     def emit_compilation_db_entry(target, source, env):
         """
@@ -80,28 +70,32 @@ def make_emit_compilation_DB_entry(comstr):
         :return: target(s), source(s)
         """
 
-        dbtarget = __CompilationDbNode(source)
+        command = env.subst(comstr, target=target, source=source)
+        dbtarget = env.File(str(target[0]) + ".json")
+
+        config = {
+            "cmd": command,
+            "abspath": env.get("COMPILATIONDB_USE_BINARY_ABSPATH"),
+            "omit": env.get("COMPILATIONDB_OMIT_BINARIES", []),
+        }
 
         entry = env.__COMPILATIONDB_Entry(
             target=dbtarget,
-            source=[],
+            source=[SCons.Node.Python.Value(config)],
             __COMPILATIONDB_UOUTPUT=target,
             __COMPILATIONDB_USOURCE=source,
-            __COMPILATIONDB_UACTION=user_action,
             __COMPILATIONDB_ENV=env,
         )
-
-        # TODO: Technically, these next two lines should not be required: it should be fine to
-        # cache the entries. However, they don't seem to update properly. Since they are quick
-        # to re-generate disable caching and sidestep this problem.
-        env.AlwaysBuild(entry)
-        env.NoCache(entry)
 
         __COMPILATION_DB_ENTRIES.append(dbtarget)
 
         return target, source
 
     return emit_compilation_db_entry
+
+
+def __is_value_true(value):
+    return value in [True, 1, "True", "true"]
 
 
 def compilation_db_entry_action(target, source, env, **kw):
@@ -116,56 +110,86 @@ def compilation_db_entry_action(target, source, env, **kw):
     :return: None
     """
 
-    command = env["__COMPILATIONDB_UACTION"].strfunction(
-        target=env["__COMPILATIONDB_UOUTPUT"],
-        source=env["__COMPILATIONDB_USOURCE"],
-        env=env["__COMPILATIONDB_ENV"],
-    )
+    config = source[0].read()
+    command = config["cmd"]
+    binaries_to_omit = config["omit"]
+
+    cmdline = split(command)
+    while cmdline and (executable := cmdline[0]) in binaries_to_omit:
+        cmdline.pop(0)
+
+    if not cmdline:
+        executable = ""
+    else:
+        executable = cmdline[0]
+
+    if __is_value_true(config["abspath"]):
+        if not (tool_path := _TOOL_PATH_CACHE.get(executable, None)):
+            tool_path = env.WhereIs(executable) or executable
+            _TOOL_PATH_CACHE[executable] = tool_path
+        # Replacing the executable with the full path
+        executable = tool_path
+
+    if cmdline:
+        command = join((executable, *cmdline[1:]))
+    else:
+        command = executable
 
     entry = {
         "directory": env.Dir("#").abspath,
         "command": command,
-        "file": env["__COMPILATIONDB_USOURCE"][0],
-        "output": env["__COMPILATIONDB_UOUTPUT"][0],
+        "file": str(env["__COMPILATIONDB_USOURCE"][0]),
+        "output": str(env["__COMPILATIONDB_UOUTPUT"][0]),
     }
 
-    target[0].write(entry)
+    with open(target[0].path, "w") as f:
+        json.dump(entry, f)
 
 
 def write_compilation_db(target, source, env):
     entries = []
 
-    use_abspath = env["COMPILATIONDB_USE_ABSPATH"] in [True, 1, "True", "true"]
+    use_abspath = __is_value_true(env["COMPILATIONDB_USE_ABSPATH"])
     use_path_filter = env.subst("$COMPILATIONDB_PATH_FILTER")
     use_srcpath_filter = env.subst("$COMPILATIONDB_SRCPATH_FILTER")
 
     for s in __COMPILATION_DB_ENTRIES:
-        entry = s.read()
-        source_file = entry["file"]
-        output_file = entry["output"]
+        if not s.exists():
+            continue
+
+        with open(s.path, "r") as f:
+            try:
+                entry = json.load(f)
+            except json.JSONDecodeError:
+                continue
+
+        source_path_str = entry["file"]
+        output_path_str = entry["output"]
+
+        source_file = env.File(source_path_str)
+        output_file = env.File(output_path_str)
 
         if source_file.rfile().srcnode().exists():
             source_file = source_file.rfile().srcnode()
 
         if use_abspath:
-            source_file = source_file.abspath
-            output_file = output_file.abspath
+            source_path = source_file.abspath
+            output_path = output_file.abspath
         else:
-            source_file = source_file.path
-            output_file = output_file.path
+            source_path = source_file.path
+            output_path = output_file.path
 
-        # print("output_file, path_filter", output_file, use_path_filter)
-        if use_path_filter and not fnmatch.fnmatch(output_file, use_path_filter):
+        if use_path_filter and not fnmatch.fnmatch(output_path, use_path_filter):
             continue
 
-        if use_srcpath_filter and not fnmatch.fnmatch(source_file, use_srcpath_filter):
+        if use_srcpath_filter and not fnmatch.fnmatch(source_path, use_srcpath_filter):
             continue
 
         path_entry = {
             "directory": entry["directory"],
             "command": entry["command"],
-            "file": source_file,
-            "output": output_file,
+            "file": source_path,
+            "output": output_path,
         }
 
         entries.append(path_entry)
@@ -210,6 +234,8 @@ def generate(env, **kwargs):
         COMPILATIONDB_USE_ABSPATH=False,
         COMPILATIONDB_PATH_FILTER="",
         COMPILATIONDB_SRCPATH_FILTER="",
+        COMPILATIONDB_OMIT_BINARIES=[],
+        COMPILATIONDB_USE_BINARY_ABSPATH=False,
     )
 
     components_by_suffix = itertools.chain(
@@ -242,10 +268,7 @@ def generate(env, **kwargs):
     for entry in components_by_suffix:
         suffix = entry[0]
         builder, base_emitter, command = entry[1]
-
-        # Assumes a dictionary emitter
-        emitter = builder.emitter.get(suffix, False)
-        if emitter:
+        if emitter := builder.emitter.get(suffix, False):
             # We may not have tools installed which initialize all or any of
             # cxx, cc, or assembly. If not skip resetting the respective emitter.
             builder.emitter[suffix] = SCons.Builder.ListEmitter(

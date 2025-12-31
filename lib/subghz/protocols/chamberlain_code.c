@@ -6,11 +6,11 @@
 #include "../blocks/generic.h"
 #include "../blocks/math.h"
 
-#define TAG "SubGhzProtocolChamb_Code"
+#define TAG "SubGhzProtocolChambCode"
 
 #define CHAMBERLAIN_CODE_BIT_STOP 0b0001
-#define CHAMBERLAIN_CODE_BIT_1 0b0011
-#define CHAMBERLAIN_CODE_BIT_0 0b0111
+#define CHAMBERLAIN_CODE_BIT_1    0b0011
+#define CHAMBERLAIN_CODE_BIT_0    0b0111
 
 #define CHAMBERLAIN_7_CODE_MASK 0xF000000FF0F
 #define CHAMBERLAIN_8_CODE_MASK 0xF00000F00F

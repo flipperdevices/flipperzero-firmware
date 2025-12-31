@@ -6,22 +6,21 @@
 #include <desktop/views/desktop_view_pin_input.h>
 #include "desktop_settings_scene.h"
 #include "desktop_settings_scene_i.h"
-#include <desktop/helpers/pin.h>
+#include <desktop/helpers/pin_code.h>
 #include "../desktop_settings_app.h"
-
-#define SCENE_EVENT_EXIT (0U)
+#include "../desktop_settings_custom_event.h"
 
 static void pin_error_back_callback(void* context) {
     furi_assert(context);
     DesktopSettingsApp* app = context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_EVENT_EXIT);
+    view_dispatcher_send_custom_event(app->view_dispatcher, DesktopSettingsCustomEventExit);
 }
 
-static void pin_error_done_callback(const PinCode* pin_code, void* context) {
+static void pin_error_done_callback(const DesktopPinCode* pin_code, void* context) {
     UNUSED(pin_code);
     furi_assert(context);
     DesktopSettingsApp* app = context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_EVENT_EXIT);
+    view_dispatcher_send_custom_event(app->view_dispatcher, DesktopSettingsCustomEventExit);
 }
 
 void desktop_settings_scene_pin_error_on_enter(void* context) {
@@ -39,7 +38,7 @@ void desktop_settings_scene_pin_error_on_enter(void* context) {
     } else if(state == SCENE_STATE_PIN_ERROR_WRONG) {
         desktop_view_pin_input_set_label_primary(app->pin_input_view, 35, 8, "Wrong PIN!");
     } else {
-        furi_assert(0);
+        furi_crash();
     }
     desktop_view_pin_input_set_label_secondary(app->pin_input_view, 0, 8, NULL);
     desktop_view_pin_input_set_label_button(app->pin_input_view, "Retry");
@@ -55,7 +54,7 @@ bool desktop_settings_scene_pin_error_on_event(void* context, SceneManagerEvent 
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case SCENE_EVENT_EXIT:
+        case DesktopSettingsCustomEventExit:
             scene_manager_previous_scene(app->scene_manager);
             consumed = true;
             break;

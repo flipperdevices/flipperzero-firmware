@@ -10,14 +10,14 @@
 #define DS1992_FAMILY_CODE 0x08U
 #define DS1992_FAMILY_NAME "DS1992"
 
-#define DS1992_SRAM_DATA_SIZE 128U
-#define DS1992_SRAM_PAGE_SIZE 4U
+#define DS1992_SRAM_DATA_SIZE          128U
+#define DS1992_SRAM_PAGE_SIZE          4U
 #define DS1992_COPY_SCRATCH_TIMEOUT_US 100U
 
 #define DS1992_DATA_BYTE_COUNT 4U
 
 #define DS1992_SRAM_DATA_KEY "Sram Data"
-#define DS1992_MEMORY_TYPE "SRAM"
+#define DS1992_MEMORY_TYPE   "SRAM"
 
 typedef struct {
     OneWireSlave* bus;
@@ -31,11 +31,12 @@ typedef struct {
 } DS1992ProtocolData;
 
 static bool dallas_ds1992_read(OneWireHost*, void*);
-static bool dallas_ds1992_write_blank(OneWireHost*, iButtonProtocolData*);
+static bool dallas_ds1992_write_id(OneWireHost*, iButtonProtocolData*);
 static bool dallas_ds1992_write_copy(OneWireHost*, iButtonProtocolData*);
 static void dallas_ds1992_emulate(OneWireSlave*, iButtonProtocolData*);
 static bool dallas_ds1992_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool dallas_ds1992_save(FlipperFormat*, const iButtonProtocolData*);
+static void dallas_ds1992_render_uid(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1992_render_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1992_render_brief_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1992_render_error(FuriString*, const iButtonProtocolData*);
@@ -45,18 +46,19 @@ static void dallas_ds1992_apply_edits(iButtonProtocolData*);
 
 const iButtonProtocolDallasBase ibutton_protocol_ds1992 = {
     .family_code = DS1992_FAMILY_CODE,
-    .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteBlank |
+    .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteId |
                 iButtonProtocolFeatureWriteCopy,
     .data_size = sizeof(DS1992ProtocolData),
     .manufacturer = DALLAS_COMMON_MANUFACTURER_NAME,
     .name = DS1992_FAMILY_NAME,
 
     .read = dallas_ds1992_read,
-    .write_blank = dallas_ds1992_write_blank,
+    .write_id = dallas_ds1992_write_id,
     .write_copy = dallas_ds1992_write_copy,
     .emulate = dallas_ds1992_emulate,
     .save = dallas_ds1992_save,
     .load = dallas_ds1992_load,
+    .render_uid = dallas_ds1992_render_uid,
     .render_data = dallas_ds1992_render_data,
     .render_brief_data = dallas_ds1992_render_brief_data,
     .render_error = dallas_ds1992_render_error,
@@ -71,10 +73,9 @@ bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
            dallas_common_read_mem(host, 0, data->sram_data, DS1992_SRAM_DATA_SIZE);
 }
 
-bool dallas_ds1992_write_blank(OneWireHost* host, iButtonProtocolData* protocol_data) {
+bool dallas_ds1992_write_id(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS1992ProtocolData* data = protocol_data;
-    // TODO: Make this work, currently broken
-    return tm2004_write(host, (uint8_t*)data, sizeof(DallasCommonRomData) + DS1992_SRAM_DATA_SIZE);
+    return tm2004_write(host, data->rom_data.bytes, sizeof(DallasCommonRomData));
 }
 
 bool dallas_ds1992_write_copy(OneWireHost* host, iButtonProtocolData* protocol_data) {
@@ -182,8 +183,16 @@ bool dallas_ds1992_save(FlipperFormat* ff, const iButtonProtocolData* protocol_d
     return success;
 }
 
+void dallas_ds1992_render_uid(FuriString* result, const iButtonProtocolData* protocol_data) {
+    const DS1992ProtocolData* data = protocol_data;
+    dallas_common_render_uid(result, &data->rom_data);
+}
+
 void dallas_ds1992_render_data(FuriString* result, const iButtonProtocolData* protocol_data) {
     const DS1992ProtocolData* data = protocol_data;
+
+    furi_string_cat_printf(result, "\e#Memory Data\n--------------------\n");
+
     pretty_format_bytes_hex_canonical(
         result,
         DS1992_DATA_BYTE_COUNT,

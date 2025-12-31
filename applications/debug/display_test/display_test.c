@@ -1,5 +1,3 @@
-#include "display_test.h"
-
 #include <furi_hal.h>
 #include <furi.h>
 
@@ -121,14 +119,13 @@ static void display_config_set_contrast(VariableItem* item) {
     display_test_reload_config(instance);
 }
 
-DisplayTest* display_test_alloc() {
+DisplayTest* display_test_alloc(void) {
     DisplayTest* instance = malloc(sizeof(DisplayTest));
 
     View* view = NULL;
 
     instance->gui = furi_record_open(RECORD_GUI);
     instance->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(instance->view_dispatcher);
     view_dispatcher_attach_to_gui(
         instance->view_dispatcher, instance->gui, ViewDispatcherTypeFullscreen);
 

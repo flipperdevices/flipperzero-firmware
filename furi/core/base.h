@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <furi_config.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +39,12 @@ typedef enum {
         -6, ///< Not allowed in ISR context: the function cannot be called from interrupt service routines.
     FuriStatusReserved = 0x7FFFFFFF ///< Prevents enum down-size compiler optimization.
 } FuriStatus;
+
+typedef enum {
+    FuriSignalExit, /**< Request (graceful) exit. */
+    // Other standard signals may be added in the future
+    FuriSignalCustom = 100, /**< Custom signal values start from here. */
+} FuriSignal;
 
 #ifdef __cplusplus
 }

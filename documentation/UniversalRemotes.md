@@ -1,4 +1,4 @@
-# Universal Remotes
+# Universal Remotes {#universal_remotes}
 
 ## Televisions
 
@@ -13,7 +13,7 @@ Each signal is recorded using the following algorithm:
 
 The signal names are self-explanatory. Remember to make sure that every recorded signal does what it's supposed to.
 
-If everything checks out, append these signals **to the end** of the [TV universal remote file](/assets/resources/infrared/assets/tv.ir).
+If everything checks out, append these signals **to the end** of the [TV universal remote file](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/tv.ir).
 
 ## Audio players
 
@@ -23,7 +23,7 @@ The signal names are self-explanatory.
 On many remotes, the `Play` button doubles as `Pause`. In this case, record it as `Play` omitting the `Pause`.
 Make sure that every signal does what it's supposed to.
 
-If everything checks out, append these signals **to the end** of the [audio player universal remote file](/assets/resources/infrared/assets/audio.ir).
+If everything checks out, append these signals **to the end** of the [audio player universal remote file](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/audio.ir).
 
 ## Projectors
 
@@ -41,11 +41,11 @@ When the user presses a button, a whole set of parameters is transmitted to the 
 In order to add a particular air conditioner to the universal remote, 6 signals must be recorded: `Off`, `Dh`, `Cool_hi`, `Cool_lo`, `Heat_hi`, and `Heat_lo`.
 Each signal (except `Off`) is recorded using the following algorithm:
 
-1. Get the remote and press the **Power Button** so that the display shows that A/C is ON.
+1. Get the remote and press the **POWER** button so that the display shows that A/C is ON.
 2. Set the A/C to the corresponding mode (see table below), leaving other parameters such as fan speed or vane on **AUTO** (if applicable).
 3. Press the **POWER** button to switch the A/C off.
 4. Start learning a new remote on Flipper if it's the first button or press `+` to add a new button otherwise.
-5. Point the remote to Flipper's IR receiver as directed and press **POWER** button once again.
+5. Point the remote to Flipper's IR receiver as directed and press the **POWER** button once again.
 6. Save the resulting signal under the specified name.
 7. Repeat steps 2-6 for each signal from the table below.
 
@@ -67,7 +67,7 @@ Finally, record the `Off` signal:
 The resulting remote file should now contain 6 signals. You can omit any of them, but you then won't be able to use their functionality.
 Test the file against the actual device. Make sure that every signal does what it's supposed to.
 
-If everything checks out, append these signals **to the end** of the [A/C universal remote file](/assets/resources/infrared/assets/ac.ir).
+If everything checks out, append these signals **to the end** of the [A/C universal remote file](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/ac.ir).
 
 ## Final steps
 

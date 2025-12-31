@@ -4,22 +4,22 @@
 #include <flipper_format/flipper_format.h>
 #include <flipper_format/flipper_format_i.h>
 
-#define MANIFEST_KEY_INFO "Info"
-#define MANIFEST_KEY_TARGET "Target"
-#define MANIFEST_KEY_LOADER_FILE "Loader"
-#define MANIFEST_KEY_LOADER_CRC "Loader CRC"
-#define MANIFEST_KEY_DFU_FILE "Firmware"
-#define MANIFEST_KEY_RADIO_FILE "Radio"
+#define MANIFEST_KEY_INFO          "Info"
+#define MANIFEST_KEY_TARGET        "Target"
+#define MANIFEST_KEY_LOADER_FILE   "Loader"
+#define MANIFEST_KEY_LOADER_CRC    "Loader CRC"
+#define MANIFEST_KEY_DFU_FILE      "Firmware"
+#define MANIFEST_KEY_RADIO_FILE    "Radio"
 #define MANIFEST_KEY_RADIO_ADDRESS "Radio address"
 #define MANIFEST_KEY_RADIO_VERSION "Radio version"
-#define MANIFEST_KEY_RADIO_CRC "Radio CRC"
-#define MANIFEST_KEY_ASSETS_FILE "Resources"
-#define MANIFEST_KEY_OB_REFERENCE "OB reference"
-#define MANIFEST_KEY_OB_MASK "OB mask"
+#define MANIFEST_KEY_RADIO_CRC     "Radio CRC"
+#define MANIFEST_KEY_ASSETS_FILE   "Resources"
+#define MANIFEST_KEY_OB_REFERENCE  "OB reference"
+#define MANIFEST_KEY_OB_MASK       "OB mask"
 #define MANIFEST_KEY_OB_WRITE_MASK "OB write mask"
-#define MANIFEST_KEY_SPLASH_FILE "Splashscreen"
+#define MANIFEST_KEY_SPLASH_FILE   "Splashscreen"
 
-UpdateManifest* update_manifest_alloc() {
+UpdateManifest* update_manifest_alloc(void) {
     UpdateManifest* update_manifest = malloc(sizeof(UpdateManifest));
     update_manifest->version = furi_string_alloc();
     update_manifest->firmware_dfu_image = furi_string_alloc();
@@ -54,10 +54,10 @@ static bool
 
     FuriString* filetype;
 
-    // TODO: compare filetype?
     filetype = furi_string_alloc();
     update_manifest->valid =
         flipper_format_read_header(flipper_file, filetype, &update_manifest->manifest_version) &&
+        furi_string_cmp_str(filetype, "Flipper firmware upgrade configuration") == 0 &&
         flipper_format_read_string(flipper_file, MANIFEST_KEY_INFO, update_manifest->version) &&
         flipper_format_read_uint32(
             flipper_file, MANIFEST_KEY_TARGET, &update_manifest->target, 1) &&

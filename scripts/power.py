@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+import time
+from typing import Optional
+
+from serial.serialutil import SerialException
+
 from flipper.app import App
 from flipper.storage import FlipperStorage
 from flipper.utils.cdc import resolve_port
@@ -27,37 +32,57 @@ class Main(App):
         )
         self.parser_reboot2dfu.set_defaults(func=self.reboot2dfu)
 
-    def _get_flipper(self):
-        if not (port := resolve_port(self.logger, self.args.port)):
+    def _get_flipper(self, retry_count: Optional[int] = 1):
+        port = None
+        for i in range(retry_count):
+            time.sleep(1)
+            self.logger.info(
+                f"Attempting to find flipper (Attempt {i + 1}/{retry_count})."
+            )
+
+            if port := resolve_port(self.logger, self.args.port):
+                self.logger.info(f"Found flipper at {port}")
+                break
+
+        if not port:
+            self.logger.info(f"Failed to find flipper")
             return None
 
         flipper = FlipperStorage(port)
-        flipper.start()
-        return flipper
+        for i in range(retry_count):
+            try:
+                flipper.start()
+                self.logger.info("Flipper successfully started.")
+                return flipper
+            except IOError as e:
+                self.logger.info(
+                    f"Failed to start flipper (Attempt {i + 1}/{retry_count}): {e}"
+                )
+                time.sleep(1)
 
     def power_off(self):
-        if not (flipper := self._get_flipper()):
+        if not (flipper := self._get_flipper(retry_count=10)):
             return 1
 
-        self.logger.debug("Powering off")
+        self.logger.info("Powering off")
         flipper.send("power off" + "\r")
         flipper.stop()
         return 0
 
     def reboot(self):
-        if not (flipper := self._get_flipper()):
+        if not (flipper := self._get_flipper(retry_count=10)):
             return 1
 
-        self.logger.debug("Rebooting")
+        self.logger.info("Rebooting")
         flipper.send("power reboot" + "\r")
         flipper.stop()
         return 0
 
     def reboot2dfu(self):
-        if not (flipper := self._get_flipper()):
+        if not (flipper := self._get_flipper(retry_count=10)):
             return 1
 
-        self.logger.debug("Rebooting to DFU")
+        self.logger.info("Rebooting to DFU")
         flipper.send("power reboot2dfu" + "\r")
         flipper.stop()
 

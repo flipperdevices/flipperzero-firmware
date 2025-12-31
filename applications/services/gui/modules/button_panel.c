@@ -2,6 +2,7 @@
 
 #include <gui/canvas.h>
 #include <gui/elements.h>
+#include <input/input.h>
 
 #include <furi.h>
 #include <furi_hal_resources.h>
@@ -29,6 +30,9 @@ typedef struct {
     const Icon* name_selected;
 } IconElement;
 
+LIST_DEF(IconList, IconElement, M_POD_OPLIST)
+#define M_OPL_IconList_t() LIST_OPLIST(IconList)
+
 typedef struct ButtonItem {
     uint32_t index;
     ButtonItemCallback callback;
@@ -36,17 +40,19 @@ typedef struct ButtonItem {
     void* callback_context;
 } ButtonItem;
 
-ARRAY_DEF(ButtonArray, ButtonItem*, M_PTR_OPLIST);
+ARRAY_DEF(ButtonArray, ButtonItem*, M_PTR_OPLIST); // NOLINT
 #define M_OPL_ButtonArray_t() ARRAY_OPLIST(ButtonArray, M_PTR_OPLIST)
 ARRAY_DEF(ButtonMatrix, ButtonArray_t);
 #define M_OPL_ButtonMatrix_t() ARRAY_OPLIST(ButtonMatrix, M_OPL_ButtonArray_t())
 
 struct ButtonPanel {
     View* view;
+    bool freeze_input;
 };
 
 typedef struct {
     ButtonMatrix_t button_matrix;
+    IconList_t icons;
     LabelList_t labels;
     uint16_t reserve_x;
     uint16_t reserve_y;
@@ -59,11 +65,11 @@ static void button_panel_process_up(ButtonPanel* button_panel);
 static void button_panel_process_down(ButtonPanel* button_panel);
 static void button_panel_process_left(ButtonPanel* button_panel);
 static void button_panel_process_right(ButtonPanel* button_panel);
-static void button_panel_process_ok(ButtonPanel* button_panel);
+static void button_panel_process_ok(ButtonPanel* button_panel, InputType input);
 static void button_panel_view_draw_callback(Canvas* canvas, void* _model);
 static bool button_panel_view_input_callback(InputEvent* event, void* context);
 
-ButtonPanel* button_panel_alloc() {
+ButtonPanel* button_panel_alloc(void) {
     ButtonPanel* button_panel = malloc(sizeof(ButtonPanel));
     button_panel->view = view_alloc();
     view_set_orientation(button_panel->view, ViewOrientationVertical);
@@ -92,7 +98,7 @@ void button_panel_reserve(ButtonPanel* button_panel, size_t reserve_x, size_t re
     furi_check(reserve_x > 0);
     furi_check(reserve_y > 0);
 
-    with_view_model(
+    with_view_model( //-V621
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -103,7 +109,6 @@ void button_panel_reserve(ButtonPanel* button_panel, size_t reserve_x, size_t re
                 ButtonArray_t* array = ButtonMatrix_get(model->button_matrix, i);
                 ButtonArray_init(*array);
                 ButtonArray_reserve(*array, reserve_x);
-                // TODO: do we need to clear allocated memory of ptr-s to ButtonItem ??
             }
             LabelList_init(model->labels);
         },
@@ -111,7 +116,7 @@ void button_panel_reserve(ButtonPanel* button_panel, size_t reserve_x, size_t re
 }
 
 void button_panel_free(ButtonPanel* button_panel) {
-    furi_assert(button_panel);
+    furi_check(button_panel);
 
     button_panel_reset(button_panel);
 
@@ -129,7 +134,7 @@ void button_panel_free(ButtonPanel* button_panel) {
 }
 
 void button_panel_reset(ButtonPanel* button_panel) {
-    furi_assert(button_panel);
+    furi_check(button_panel);
 
     with_view_model(
         button_panel->view,
@@ -147,6 +152,7 @@ void button_panel_reset(ButtonPanel* button_panel) {
             model->selected_item_x = 0;
             model->selected_item_y = 0;
             LabelList_reset(model->labels);
+            IconList_reset(model->icons);
             ButtonMatrix_reset(model->button_matrix);
         },
         true);
@@ -173,7 +179,7 @@ void button_panel_add_item(
     const Icon* icon_name_selected,
     ButtonItemCallback callback,
     void* callback_context) {
-    furi_assert(button_panel);
+    furi_check(button_panel);
 
     with_view_model( //-V773
         button_panel->view,
@@ -196,7 +202,7 @@ void button_panel_add_item(
 }
 
 View* button_panel_get_view(ButtonPanel* button_panel) {
-    furi_assert(button_panel);
+    furi_check(button_panel);
     return button_panel->view;
 }
 
@@ -209,9 +215,17 @@ static void button_panel_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
+    for
+        M_EACH(icon, model->icons, IconList_t) {
+            canvas_draw_icon(canvas, icon->x, icon->y, icon->name);
+        }
+
     for(size_t x = 0; x < model->reserve_x; ++x) {
         for(size_t y = 0; y < model->reserve_y; ++y) {
             ButtonItem* button_item = *button_panel_get_item(model, x, y);
+            if(!button_item) {
+                continue;
+            }
             const Icon* icon_name = button_item->icon.name;
             if((model->selected_item_x == x) && (model->selected_item_y == y)) {
                 icon_name = button_item->icon.name_selected;
@@ -335,7 +349,7 @@ static void button_panel_process_right(ButtonPanel* button_panel) {
         true);
 }
 
-void button_panel_process_ok(ButtonPanel* button_panel) {
+void button_panel_process_ok(ButtonPanel* button_panel, InputType type) {
     ButtonItem* button_item = NULL;
 
     with_view_model(
@@ -348,7 +362,7 @@ void button_panel_process_ok(ButtonPanel* button_panel) {
         true);
 
     if(button_item && button_item->callback) {
-        button_item->callback(button_item->callback_context, button_item->index);
+        button_item->callback(button_item->callback_context, button_item->index, type);
     }
 }
 
@@ -356,8 +370,15 @@ static bool button_panel_view_input_callback(InputEvent* event, void* context) {
     ButtonPanel* button_panel = context;
     furi_assert(button_panel);
     bool consumed = false;
-
-    if(event->type == InputTypeShort) {
+    if(event->key == InputKeyOk) {
+        if((event->type == InputTypePress) || (event->type == InputTypeRelease)) {
+            button_panel->freeze_input = (event->type == InputTypePress);
+        }
+        consumed = true;
+        button_panel_process_ok(button_panel, event->type);
+    }
+    if(!button_panel->freeze_input &&
+       (!(event->type == InputTypePress) && !(event->type == InputTypeRelease))) {
         switch(event->key) {
         case InputKeyUp:
             consumed = true;
@@ -375,10 +396,6 @@ static bool button_panel_view_input_callback(InputEvent* event, void* context) {
             consumed = true;
             button_panel_process_right(button_panel);
             break;
-        case InputKeyOk:
-            consumed = true;
-            button_panel_process_ok(button_panel);
-            break;
         default:
             break;
         }
@@ -393,7 +410,7 @@ void button_panel_add_label(
     uint16_t y,
     Font font,
     const char* label_str) {
-    furi_assert(button_panel);
+    furi_check(button_panel);
 
     with_view_model(
         button_panel->view,
@@ -404,6 +421,27 @@ void button_panel_add_label(
             label->y = y;
             label->font = font;
             label->str = label_str;
+        },
+        true);
+}
+
+// Draw an icon but don't make it a button.
+void button_panel_add_icon(
+    ButtonPanel* button_panel,
+    uint16_t x,
+    uint16_t y,
+    const Icon* icon_name) {
+    furi_check(button_panel);
+
+    with_view_model( //-V773
+        button_panel->view,
+        ButtonPanelModel * model,
+        {
+            IconElement* icon = IconList_push_raw(model->icons);
+            icon->x = x;
+            icon->y = y;
+            icon->name = icon_name;
+            icon->name_selected = icon_name;
         },
         true);
 }

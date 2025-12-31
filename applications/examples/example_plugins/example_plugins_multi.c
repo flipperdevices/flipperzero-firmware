@@ -1,5 +1,7 @@
-/*
- * An example of an advanced plugin host application.
+/**
+ * @file example_plugins_multi.c
+ * @brief Advanced plugin host application example.
+ *
  * It uses PluginManager to load all plugins from a directory
  */
 
@@ -11,7 +13,7 @@
 
 #include <furi.h>
 
-#define TAG "example_plugins"
+#define TAG "ExamplePlugins"
 
 int32_t example_plugins_multi_app(void* p) {
     UNUSED(p);

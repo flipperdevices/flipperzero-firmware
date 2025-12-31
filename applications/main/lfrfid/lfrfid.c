@@ -13,25 +13,27 @@ static bool lfrfid_debug_back_event_callback(void* context) {
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-static void rpc_command_callback(RpcAppSystemEvent rpc_event, void* context) {
+static void rpc_command_callback(const RpcAppSystemEvent* event, void* context) {
     furi_assert(context);
     LfRfid* app = (LfRfid*)context;
 
-    if(rpc_event == RpcAppEventSessionClose) {
+    if(event->type == RpcAppEventTypeSessionClose) {
         view_dispatcher_send_custom_event(app->view_dispatcher, LfRfidEventRpcSessionClose);
         // Detach RPC
         rpc_system_app_set_callback(app->rpc_ctx, NULL, NULL);
         app->rpc_ctx = NULL;
-    } else if(rpc_event == RpcAppEventAppExit) {
+    } else if(event->type == RpcAppEventTypeAppExit) {
         view_dispatcher_send_custom_event(app->view_dispatcher, LfRfidEventExit);
-    } else if(rpc_event == RpcAppEventLoadFile) {
+    } else if(event->type == RpcAppEventTypeLoadFile) {
+        furi_assert(event->data.type == RpcAppSystemEventDataTypeString);
+        furi_string_set(app->file_path, event->data.string);
         view_dispatcher_send_custom_event(app->view_dispatcher, LfRfidEventRpcLoadFile);
     } else {
-        rpc_system_app_confirm(app->rpc_ctx, rpc_event, false);
+        rpc_system_app_confirm(app->rpc_ctx, false);
     }
 }
 
-static LfRfid* lfrfid_alloc() {
+static LfRfid* lfrfid_alloc(void) {
     LfRfid* lfrfid = malloc(sizeof(LfRfid));
 
     lfrfid->storage = furi_record_open(RECORD_STORAGE);
@@ -51,7 +53,6 @@ static LfRfid* lfrfid_alloc() {
 
     lfrfid->view_dispatcher = view_dispatcher_alloc();
     lfrfid->scene_manager = scene_manager_alloc(&lfrfid_scene_handlers, lfrfid);
-    view_dispatcher_enable_queue(lfrfid->view_dispatcher);
     view_dispatcher_set_event_callback_context(lfrfid->view_dispatcher, lfrfid);
     view_dispatcher_set_custom_event_callback(
         lfrfid->view_dispatcher, lfrfid_debug_custom_event_callback);
@@ -186,13 +187,15 @@ int32_t lfrfid_app(void* p) {
             dolphin_deed(DolphinDeedRfidEmulate);
         } else {
             furi_string_set(app->file_path, args);
-            lfrfid_load_key_data(app, app->file_path, true);
-            view_dispatcher_attach_to_gui(
-                app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-            scene_manager_next_scene(app->scene_manager, LfRfidSceneEmulate);
-            dolphin_deed(DolphinDeedRfidEmulate);
+            if(lfrfid_load_key_data(app, app->file_path, true)) {
+                view_dispatcher_attach_to_gui(
+                    app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+                scene_manager_next_scene(app->scene_manager, LfRfidSceneEmulate);
+                dolphin_deed(DolphinDeedRfidEmulate);
+            } else {
+                view_dispatcher_stop(app->view_dispatcher);
+            }
         }
-
     } else {
         view_dispatcher_attach_to_gui(
             app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
@@ -213,13 +216,16 @@ bool lfrfid_save_key(LfRfid* app) {
 
     lfrfid_make_app_folder(app);
 
-    if(furi_string_end_with(app->file_path, LFRFID_APP_EXTENSION)) {
+    if(furi_string_end_with(app->file_path, LFRFID_APP_FILENAME_EXTENSION)) {
         size_t filename_start = furi_string_search_rchar(app->file_path, '/');
         furi_string_left(app->file_path, filename_start);
     }
 
     furi_string_cat_printf(
-        app->file_path, "/%s%s", furi_string_get_cstr(app->file_name), LFRFID_APP_EXTENSION);
+        app->file_path,
+        "/%s%s",
+        furi_string_get_cstr(app->file_name),
+        LFRFID_APP_FILENAME_EXTENSION);
 
     result = lfrfid_save_key_data(app, app->file_path);
     return result;
@@ -229,7 +235,8 @@ bool lfrfid_load_key_from_file_select(LfRfid* app) {
     furi_assert(app);
 
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, LFRFID_APP_EXTENSION, &I_125_10px);
+    dialog_file_browser_set_basic_options(
+        &browser_options, LFRFID_APP_FILENAME_EXTENSION, &I_125_10px);
     browser_options.base_path = LFRFID_APP_FOLDER;
 
     // Input events and views are managed by file_browser

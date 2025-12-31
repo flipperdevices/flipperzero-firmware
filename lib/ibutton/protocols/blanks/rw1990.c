@@ -3,12 +3,12 @@
 #include <core/kernel.h>
 
 #define RW1990_1_CMD_WRITE_RECORD_FLAG 0xD1
-#define RW1990_1_CMD_READ_RECORD_FLAG 0xB5
-#define RW1990_1_CMD_WRITE_ROM 0xD5
+#define RW1990_1_CMD_READ_RECORD_FLAG  0xB5
+#define RW1990_1_CMD_WRITE_ROM         0xD5
 
 #define RW1990_2_CMD_WRITE_RECORD_FLAG 0x1D
-#define RW1990_2_CMD_READ_RECORD_FLAG 0x1E
-#define RW1990_2_CMD_WRITE_ROM 0xD5
+#define RW1990_2_CMD_READ_RECORD_FLAG  0x1E
+#define RW1990_2_CMD_WRITE_ROM         0xD5
 
 #define DS1990_CMD_READ_ROM 0x33
 
@@ -38,6 +38,8 @@ static bool rw1990_read_and_compare(OneWireHost* host, const uint8_t* data, size
 }
 
 bool rw1990_write_v1(OneWireHost* host, const uint8_t* data, size_t data_size) {
+    onewire_host_set_timings_default(host);
+
     // Unlock sequence
     onewire_host_reset(host);
     onewire_host_write(host, RW1990_1_CMD_WRITE_RECORD_FLAG);
@@ -62,11 +64,13 @@ bool rw1990_write_v1(OneWireHost* host, const uint8_t* data, size_t data_size) {
     onewire_host_write_bit(host, true);
     furi_delay_us(10000);
 
-    // TODO: Better error handling
+    // TODO FL-3528: Better error handling
     return rw1990_read_and_compare(host, data, data_size);
 }
 
 bool rw1990_write_v2(OneWireHost* host, const uint8_t* data, size_t data_size) {
+    onewire_host_set_timings_default(host);
+
     // Unlock sequence
     onewire_host_reset(host);
     onewire_host_write(host, RW1990_2_CMD_WRITE_RECORD_FLAG);
@@ -90,6 +94,6 @@ bool rw1990_write_v2(OneWireHost* host, const uint8_t* data, size_t data_size) {
     onewire_host_write_bit(host, false);
     furi_delay_us(10000);
 
-    // TODO: Better error handling
+    // TODO Fl-3528: Better error handling
     return rw1990_read_and_compare(host, data, data_size);
 }

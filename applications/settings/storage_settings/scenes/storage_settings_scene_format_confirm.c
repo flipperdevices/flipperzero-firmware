@@ -14,14 +14,14 @@ void storage_settings_scene_format_confirm_on_enter(void* context) {
     FS_Error sd_status = storage_sd_status(app->fs_api);
 
     if(sd_status == FSE_NOT_READY) {
-        dialog_ex_set_icon(dialog_ex, 72, 17, &I_DolphinCommon_56x48);
+        dialog_ex_set_icon(dialog_ex, 83, 22, &I_WarningDolphinFlip_45x42);
         dialog_ex_set_header(dialog_ex, "SD Card Not Mounted", 64, 3, AlignCenter, AlignTop);
         dialog_ex_set_text(
             dialog_ex, "Try to reinsert\nor format SD\ncard.", 3, 19, AlignLeft, AlignTop);
         dialog_ex_set_center_button_text(dialog_ex, "Ok");
     } else {
-        dialog_ex_set_header(dialog_ex, "Format SD Card?", 64, 10, AlignCenter, AlignCenter);
-        dialog_ex_set_text(dialog_ex, "All data will be lost!", 64, 32, AlignCenter, AlignCenter);
+        dialog_ex_set_header(dialog_ex, "Format SD Card?", 64, 0, AlignCenter, AlignTop);
+        dialog_ex_set_text(dialog_ex, "All data will be lost!", 64, 12, AlignCenter, AlignTop);
         dialog_ex_set_left_button_text(dialog_ex, "Cancel");
         dialog_ex_set_right_button_text(dialog_ex, "Format");
     }

@@ -5,7 +5,6 @@
 #include <gui/view_dispatcher.h>
 #include <furi.h>
 #include <furi_hal.h>
-#include <portmacro.h>
 #include <stdint.h>
 
 static bool updater_custom_event_callback(void* context, uint32_t event) {
@@ -47,8 +46,6 @@ Updater* updater_alloc(const char* arg) {
     updater->gui = furi_record_open(RECORD_GUI);
     updater->view_dispatcher = view_dispatcher_alloc();
     updater->scene_manager = scene_manager_alloc(&updater_scene_handlers, updater);
-
-    view_dispatcher_enable_queue(updater->view_dispatcher);
 
     view_dispatcher_set_event_callback_context(updater->view_dispatcher, updater);
     view_dispatcher_set_custom_event_callback(

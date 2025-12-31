@@ -1,13 +1,15 @@
-from SCons.Platform import TempFileMunge
-from fbt.util import (
-    tempfile_arg_esc_func,
-    single_quote,
-    wrap_tempfile,
-    extract_abs_dir_path,
-)
-
-import os
 import multiprocessing
+import os
+
+from fbt.util import (
+    FORWARDED_ENV_VARIABLES,
+    PosixPathWrapper,
+    resolve_real_dir_node,
+    single_quote,
+    tempfile_arg_esc_func,
+    wrap_tempfile,
+)
+from SCons.Platform import TempFileMunge
 
 Import("VAR_ENV")
 
@@ -15,28 +17,15 @@ forward_os_env = {
     # Import PATH from OS env - scons doesn't do that by default
     "PATH": os.environ["PATH"],
 }
-# Proxying CI environment to child processes & scripts
-variables_to_forward = [
-    # CI/CD variables
-    "WORKFLOW_BRANCH_OR_TAG",
-    "DIST_SUFFIX",
-    # Python & other tools
-    "HOME",
-    "APPDATA",
-    "PYTHONHOME",
-    "PYTHONNOUSERSITE",
-    "TMP",
-    "TEMP",
-    # Colors for tools
-    "TERM",
-]
+
+variables_to_forward = list(FORWARDED_ENV_VARIABLES)
+
 if proxy_env := GetOption("proxy_env"):
     variables_to_forward.extend(proxy_env.split(","))
 
 for env_value_name in variables_to_forward:
     if environ_value := os.environ.get(env_value_name, None):
         forward_os_env[env_value_name] = environ_value
-
 
 coreenv = VAR_ENV.Clone(
     tools=[
@@ -54,15 +43,16 @@ coreenv = VAR_ENV.Clone(
         "ccache",
     ],
     TEMPFILE=TempFileMunge,
+    POSIXPATH=PosixPathWrapper,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
     ENV=forward_os_env,
     SINGLEQUOTEFUNC=single_quote,
-    ABSPATHGETTERFUNC=extract_abs_dir_path,
+    ABSPATHGETTERFUNC=resolve_real_dir_node,
     # Setting up temp file parameters - to overcome command line length limits
     TEMPFILEARGESCFUNC=tempfile_arg_esc_func,
     ROOT_DIR=Dir("#"),
-    FBT_SCRIPT_DIR="${ROOT_DIR}/scripts",
+    FBT_SCRIPT_DIR=Dir("#/scripts"),
 )
 
 # If DIST_SUFFIX is set in environment, is has precedence (set by CI)

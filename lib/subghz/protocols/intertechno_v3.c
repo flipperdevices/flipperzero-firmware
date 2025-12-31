@@ -193,6 +193,7 @@ SubGhzProtocolStatus subghz_protocol_encoder_intertechno_v3_deserialize(
 void subghz_protocol_encoder_intertechno_v3_stop(void* context) {
     SubGhzProtocolEncoderIntertechno_V3* instance = context;
     instance->encoder.is_running = false;
+    instance->encoder.front = 0; // reset position
 }
 
 LevelDuration subghz_protocol_encoder_intertechno_v3_yield(void* context) {
@@ -470,6 +471,6 @@ void subghz_protocol_decoder_intertechno_v3_get_string(void* context, FuriString
             output,
             "Ch:" CH_PATTERN " Dimm:%d%%\r\n",
             CNT_TO_CH(instance->generic.cnt),
-            (int)(6.67 * (float)instance->generic.btn));
+            (int)(6.67f * (float)instance->generic.btn));
     }
 }

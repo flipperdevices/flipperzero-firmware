@@ -20,7 +20,7 @@ static const DolphinDeedWeight dolphin_deed_weights[] = {
     {3, DolphinAppNfc}, // DolphinDeedNfcSave
     {1, DolphinAppNfc}, // DolphinDeedNfcDetectReader
     {2, DolphinAppNfc}, // DolphinDeedNfcEmulate
-    {2, DolphinAppNfc}, // DolphinDeedNfcMfcAdd
+    {2, DolphinAppNfc}, // DolphinDeedNfcKeyAdd
     {1, DolphinAppNfc}, // DolphinDeedNfcAddSave
     {1, DolphinAppNfc}, // DolphinDeedNfcAddEmulate
 
@@ -39,7 +39,7 @@ static const DolphinDeedWeight dolphin_deed_weights[] = {
 
     {1, DolphinAppPlugin}, // DolphinDeedGpioUartBridge
 
-    {1, DolphinAppPlugin}, // DolphinDeedPluginStart
+    {2, DolphinAppPlugin}, // DolphinDeedPluginStart
     {1, DolphinAppPlugin}, // DolphinDeedPluginGameStart
     {10, DolphinAppPlugin}, // DolphinDeedPluginGameWin
 };
