@@ -6,6 +6,8 @@
 
 #include <usb_ccid.h>
 
+#define CCID_TAG "usb_ccid"
+
 #define USB_DEVICE_NO_CLASS    (0x0)
 #define USB_DEVICE_NO_SUBCLASS (0x0)
 #define USB_DEVICE_NO_PROTOCOL (0x0)
@@ -23,16 +25,16 @@
 
 #define ENDPOINT_DIR_IN        (0x80)
 #define ENDPOINT_DIR_OUT       (0x00)
-#define ENDPOINT_DIR_INTERRUPT (0x40)
+#define ENDPOINT_DIR_INTERRUPT (0x80)
 
 #define INTERFACE_ID_CCID (0)
 
-#define CCID_IN_EPADDR (ENDPOINT_DIR_IN | 2)
+#define CCID_IN_EPADDR (ENDPOINT_DIR_IN + 2) //EP 2 IN
 
 /** Endpoint address of the CCID data OUT endpoint, for host-to-device data transfers. */
-#define CCID_OUT_EPADDR (ENDPOINT_DIR_OUT | 1)
+#define CCID_OUT_EPADDR (ENDPOINT_DIR_OUT + 1) // EP 1 OUT
 
-#define CCID_INTERRUPT_EPADDR (ENDPOINT_DIR_INTERRUPT | 2)
+#define CCID_INTERRUPT_EPADDR (ENDPOINT_DIR_INTERRUPT + 3) // EP 3 INTERRUPT IN
 
 /** Endpoint size in bytes of the CCID data being sent between IN and OUT endpoints. */
 #define CCID_EPSIZE 64
@@ -122,7 +124,7 @@ static const struct CcidConfigDescriptor ccid_cfg_desc = {
 
                  .bInterfaceNumber = INTERFACE_ID_CCID,
                  .bAlternateSetting = 0x00,
-                 .bNumEndpoints = 2,
+                 .bNumEndpoints = 3,
 
                  .bInterfaceClass = USB_CLASS_CCID,
                  .bInterfaceSubClass = 0,
@@ -144,7 +146,7 @@ static const struct CcidConfigDescriptor ccid_cfg_desc = {
                  .dwDataRate = 307200,
                  .dwMaxDataRate = 307200,
                  .bNumDataRatesSupported = 0,
-                 .dwMaxIFSD = 2038,
+                 .dwMaxIFSD = 254,
                  .dwSynchProtocols = 0,
                  .dwMechanical = 0,
                  .dwFeatures = CCID_Features_ExchangeLevel_ShortAPDU |
@@ -275,6 +277,7 @@ static void ccid_init(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx) {
     usbd_connect(dev, true);
 
     furi_hal_usb_ccid->receive_buffer_data_index = 0;
+    furi_hal_usb_ccid->smartcard_inserted = false;
     furi_hal_usb_ccid->ccid_thread = furi_thread_alloc_ex("CcidWorker", 2048, ccid_worker, ctx);
     furi_thread_start(furi_hal_usb_ccid->ccid_thread);
 }
@@ -457,23 +460,21 @@ void CCID_NotifySlotChange(
     if(slot == CCID_SLOT_INDEX && inserted != furi_hal_usb_ccid->smartcard_inserted) {
         message->bMessageType = RDR_TO_PC_NOTIFYSLOTCHANGE;
         if(inserted) {
-            message->bmSlotICCState[0] = 0x40; //ICC inserted for slot 0
+            message->bmSlotICCState[0] = 0x03; //ICC inserted for slot 0
         } else {
-            message->bmSlotICCState[0] = 0x80; //ICC removed for slot 0
+            message->bmSlotICCState[0] = 0x02; //ICC removed for slot 0
         }
     }
 }
 
 void furi_hal_usb_ccid_insert_smartcard(void) {
     furi_check(furi_hal_usb_ccid);
-    furi_hal_usb_ccid->smartcard_inserted = true;
     furi_thread_flags_set(
         furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtInsertSmartcard);
 }
 
 void furi_hal_usb_ccid_remove_smartcard(void) {
     furi_check(furi_hal_usb_ccid);
-    furi_hal_usb_ccid->smartcard_inserted = false;
     furi_thread_flags_set(
         furi_thread_get_id(furi_hal_usb_ccid->ccid_thread), WorkerEvtRemoveSmartcard);
 }
@@ -545,7 +546,14 @@ static int32_t ccid_worker(void* context) {
     while(1) {
         furi_check(furi_hal_usb_ccid);
         uint32_t flags = furi_thread_flags_wait(
-            WorkerEvtStop | WorkerEvtRequest, FuriFlagWaitAny, FuriWaitForever);
+            WorkerEvtStop | WorkerEvtRequest | WorkerEvtInsertSmartcard | WorkerEvtRemoveSmartcard, FuriFlagWaitAny, FuriWaitForever);
+
+        FURI_LOG_I(
+            CCID_TAG,
+            "Worker woke up: flags=0x%08lx smartcard_inserted=%d",
+            flags,
+            furi_hal_usb_ccid->smartcard_inserted
+        );
 
         if(flags & WorkerEvtRequest) {
             //read initial CCID message header
@@ -634,6 +642,9 @@ static int32_t ccid_worker(void* context) {
             break;
         } else if(flags & WorkerEvtInsertSmartcard) {
             if(!furi_hal_usb_ccid->smartcard_inserted) {
+
+                furi_hal_usb_ccid->smartcard_inserted = true;
+
                 struct rdr_to_pc_notify_slot_change* responseNotifySlotChange =
                     (struct rdr_to_pc_notify_slot_change*)&furi_hal_usb_ccid->send_buffer;
 
@@ -647,6 +658,9 @@ static int32_t ccid_worker(void* context) {
             }
         } else if(flags & WorkerEvtRemoveSmartcard) {
             if(furi_hal_usb_ccid->smartcard_inserted) {
+
+                furi_hal_usb_ccid->smartcard_inserted = false;
+
                 struct rdr_to_pc_notify_slot_change* responseNotifySlotChange =
                     (struct rdr_to_pc_notify_slot_change*)&furi_hal_usb_ccid->send_buffer;
 
@@ -673,6 +687,7 @@ static usbd_respond ccid_ep_config(usbd_device* dev, uint8_t cfg) {
 
         usbd_reg_endpoint(dev, CCID_IN_EPADDR, 0);
         usbd_reg_endpoint(dev, CCID_OUT_EPADDR, 0);
+        usbd_reg_endpoint(dev, CCID_INTERRUPT_EPADDR, 0);
         return usbd_ack;
     case 1:
         /* configuring device */
