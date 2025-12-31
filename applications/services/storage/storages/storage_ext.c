@@ -161,8 +161,7 @@ FS_Error sd_unmount_card(StorageData* storage) {
     storage->status = StorageStatusNotReady;
     error = FR_DISK_ERR;
 
-    // If the card is removed, open file handles become invalid.
-    // We cannot close them on the physical media.
+    // TODO FL-3522: do i need to close the files?
     f_mount(0, sd_data->path, 0);
 
     return storage_ext_parse_error(error);

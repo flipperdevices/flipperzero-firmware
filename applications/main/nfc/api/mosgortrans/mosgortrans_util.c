@@ -1103,22 +1103,12 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         // trip_number
         // furi_string_cat_printf(result, "Trips left: %d", data_block.remaining_trips);
         // trip_from
-        if(data_block.start_trip_neg_minutes) {
-            DateTime card_start_trip_minutes_s = {0};
-            from_minutes_to_datetime(
-                data_block.valid_from_date * 24 * 60 + data_block.valid_for_minutes -
-                    data_block.start_trip_neg_minutes,
-                &card_start_trip_minutes_s,
-                2016);
-            furi_string_cat_printf(
-                result,
-                "Trip from: %02d.%02d.%04d %02d:%02d\n",
-                card_start_trip_minutes_s.day,
-                card_start_trip_minutes_s.month,
-                card_start_trip_minutes_s.year,
-                card_start_trip_minutes_s.hour,
-                card_start_trip_minutes_s.minute);
-        }
+        DateTime card_start_trip_minutes_s = {0};
+        from_minutes_to_datetime(
+            data_block.valid_from_date * 24 * 60 + data_block.valid_for_minutes -
+                data_block.start_trip_neg_minutes,
+            &card_start_trip_minutes_s,
+            2016); // TODO: (-nofl) unused
         //transport
         FuriString* transport = furi_string_alloc();
         parse_transport_type(&data_block, transport);
