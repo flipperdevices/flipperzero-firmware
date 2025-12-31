@@ -3,21 +3,15 @@
 #include <furi_hal.h>
 #include "../subghz_i.h"
 
-#define SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD -93.0f
-
 typedef struct SubGhzFrequencyAnalyzerWorker SubGhzFrequencyAnalyzerWorker;
 
-typedef void (*SubGhzFrequencyAnalyzerWorkerPairCallback)(
-    void* context,
-    uint32_t frequency,
-    float rssi,
-    bool signal);
+typedef void (
+    *SubGhzFrequencyAnalyzerWorkerPairCallback)(void* context, uint32_t frequency, float rssi);
 
 typedef struct {
-    uint32_t frequency_coarse;
-    float rssi_coarse;
-    uint32_t frequency_fine;
-    float rssi_fine;
+    uint32_t frequency;
+    float rssi;
+    uint16_t channel;
 } FrequencyRSSI;
 
 /** Allocate SubGhzFrequencyAnalyzerWorker
