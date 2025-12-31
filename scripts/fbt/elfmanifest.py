@@ -7,6 +7,7 @@ from flipper.assets.icon import file2image
 from .appmanifest import FlipperApplication
 
 _MANIFEST_MAGIC = 0x52474448
+_MANIFEST_SUPPORTED_VERSION = 2
 
 
 @dataclass
@@ -15,12 +16,10 @@ class ElfManifestBaseHeader:
     api_version: int
     hardware_target_id: int
 
-    manifest_magic: int = 0x52474448
-
     def as_bytes(self):
         return struct.pack(
             "<IIIh",
-            self.manifest_magic,
+            _MANIFEST_MAGIC,
             self.manifest_version,
             self.api_version,
             self.hardware_target_id,
@@ -28,20 +27,22 @@ class ElfManifestBaseHeader:
 
 
 @dataclass
-class ElfManifestV1:
+class ElfManifestV2:
     stack_size: int
     app_version: int
     name: str = ""
     icon: bytes = field(default=b"")
+    appid: str = ""
 
     def as_bytes(self):
         return struct.pack(
-            "<hI32s?32s",
+            "<hI32s?32s32s",
             self.stack_size,
             self.app_version,
             bytes(self.name.encode("ascii")),
             bool(self.icon),
             self.icon,
+            bytes(self.appid.encode("ascii")),
         )
 
 
@@ -68,15 +69,16 @@ def assemble_manifest_data(
     )
 
     data = ElfManifestBaseHeader(
-        manifest_version=1,
+        manifest_version=_MANIFEST_SUPPORTED_VERSION,
         api_version=sdk_version,
         hardware_target_id=hardware_target,
     ).as_bytes()
-    data += ElfManifestV1(
+    data += ElfManifestV2(
         stack_size=app_manifest.stack_size,
         app_version=app_version_as_int,
         name=app_manifest.name,
         icon=image_data,
+        appid=app_manifest.appid,
     ).as_bytes()
 
     return data

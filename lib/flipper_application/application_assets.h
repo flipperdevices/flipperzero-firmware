@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-bool flipper_application_assets_load(File* file, const char* elf_path, size_t offset, size_t size);
+bool flipper_application_assets_load(File* file, const char* appid, size_t offset, size_t size);
 
 #ifdef __cplusplus
 }
