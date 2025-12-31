@@ -1,0 +1,19 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "name": "Flipper Zero JS API",
+    "excludePrivate": true,
+    "entryPointStrategy": "expand",
+    "entryPoints": [
+        ".",
+    ],
+    "exclude": [
+        "node_modules"
+    ],
+    "cleanOutputDir": true,
+    "out": "./docs",
+    "plugin": [
+        "typedoc-material-theme",
+    ],
+    "readme": "./docs_readme.md",
+    "themeColor": "#ff8200",
+}

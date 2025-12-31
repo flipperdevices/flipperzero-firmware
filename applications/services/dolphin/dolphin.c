@@ -212,7 +212,7 @@ static void dolphin_update_clear_limits_timer_period(void* context) {
     FURI_LOG_D(TAG, "Daily limits reset in %lu ms", time_to_clear_limits);
 }
 
-static bool dolphin_process_event(FuriEventLoopObject* object, void* context) {
+static void dolphin_process_event(FuriEventLoopObject* object, void* context) {
     UNUSED(object);
 
     Dolphin* dolphin = context;
@@ -264,8 +264,6 @@ static bool dolphin_process_event(FuriEventLoopObject* object, void* context) {
     }
 
     dolphin_event_release(&event);
-
-    return true;
 }
 
 static void dolphin_storage_callback(const void* message, void* context) {

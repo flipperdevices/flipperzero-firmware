@@ -11,6 +11,9 @@
  *             provide any compatibility with other event driven APIs. But
  *             programming concepts are the same, except some runtime
  *             limitations from our side.
+ *
+ * @warning Only ONE instance of FuriEventLoop per thread is possible. ALL FuriEventLoop
+ * functions MUST be called from the same thread that the instance was created in.
  */
 #pragma once
 
@@ -197,10 +200,35 @@ typedef void FuriEventLoopObject;
  *
  * @param      object   The object that triggered the event
  * @param      context  The context that was provided upon subscription
- *
- * @return     true if event was processed, false if we need to delay processing
  */
-typedef bool (*FuriEventLoopEventCallback)(FuriEventLoopObject* object, void* context);
+typedef void (*FuriEventLoopEventCallback)(FuriEventLoopObject* object, void* context);
+
+/** Callback type for event loop thread flag events
+ * 
+ * @param context The context that was provided upon subscription
+ */
+typedef void (*FuriEventLoopThreadFlagsCallback)(void* context);
+
+/** Opaque event flag type */
+typedef struct FuriEventFlag FuriEventFlag;
+
+/** Subscribe to event flag events
+ *
+ * @warning you can only have one subscription for one event type.
+ *
+ * @param      instance       The Event Loop instance
+ * @param      event_flag     The event flag to add
+ * @param[in]  event          The Event Loop event to trigger on
+ * @param[in]  callback       The callback to call on event
+ * @param      context        The context for callback
+ */
+
+void furi_event_loop_subscribe_event_flag(
+    FuriEventLoop* instance,
+    FuriEventFlag* event_flag,
+    FuriEventLoopEvent event,
+    FuriEventLoopEventCallback callback,
+    void* context);
 
 /** Opaque message queue type */
 typedef struct FuriMessageQueue FuriMessageQueue;
@@ -281,6 +309,23 @@ void furi_event_loop_subscribe_mutex(
     FuriEventLoopEvent event,
     FuriEventLoopEventCallback callback,
     void* context);
+
+/** Subscribe to thread flag events of the current thread
+ * 
+ * @param instance The Event Loop instance
+ * @param callback The callback to call when a flag has been set
+ * @param context  The context for callback
+ */
+void furi_event_loop_subscribe_thread_flags(
+    FuriEventLoop* instance,
+    FuriEventLoopThreadFlagsCallback callback,
+    void* context);
+
+/** Unsubscribe from thread flag events of the current thread
+ * 
+ * @param instance The Event Loop instance
+ */
+void furi_event_loop_unsubscribe_thread_flags(FuriEventLoop* instance);
 
 /** Unsubscribe from events (common)
  *

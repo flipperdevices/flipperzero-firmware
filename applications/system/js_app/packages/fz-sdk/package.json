@@ -1,0 +1,27 @@
+{
+  "name": "@flipperdevices/fz-sdk",
+  "version": "1.0.0",
+  "description": "Type declarations and documentation for native JS modules available on Flipper Zero",
+  "keywords": [
+    "flipper",
+    "flipper zero",
+    "framework"
+  ],
+  "author": "Flipper Devices",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flipperdevices/flipperzero-firmware.git",
+    "directory": "applications/system/js_app/packages/fz-sdk"
+  },
+  "type": "module",
+  "dependencies": {
+    "esbuild": "^0.24.0",
+    "esbuild-plugin-tsc": "^0.4.0",
+    "json5": "^2.2.3",
+    "typedoc": "^0.26.10",
+    "typedoc-material-theme": "^1.1.0",
+    "prompts": "^2.4.2",
+    "serialport": "^12.0.0"
+  }
+}
