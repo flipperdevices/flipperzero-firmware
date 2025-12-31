@@ -72,7 +72,7 @@
  * @brief Checks compatibility between the script and the JS SDK that the
  *        firmware provides
  * 
- * @note You're looking at JS SDK v0.1
+ * @note You're looking at JS SDK v1.0
  * 
  * @param expectedMajor JS SDK major version expected by the script
  * @param expectedMinor JS SDK minor version expected by the script
@@ -92,7 +92,7 @@ declare function sdkCompatibilityStatus(expectedMajor: number, expectedMinor: nu
  * @brief Checks compatibility between the script and the JS SDK that the
  *        firmware provides in a boolean fashion
  * 
- * @note You're looking at JS SDK v0.1
+ * @note You're looking at JS SDK v1.0
  * 
  * @param expectedMajor JS SDK major version expected by the script
  * @param expectedMinor JS SDK minor version expected by the script
@@ -105,7 +105,7 @@ declare function isSdkCompatible(expectedMajor: number, expectedMinor: number): 
  * @brief Asks the user whether to continue executing the script if the versions
  *        are not compatible. Does nothing if they are.
  * 
- * @note You're looking at JS SDK v0.1
+ * @note You're looking at JS SDK v1.0
  * 
  * @param expectedMajor JS SDK major version expected by the script
  * @param expectedMinor JS SDK minor version expected by the script
@@ -120,6 +120,7 @@ declare function checkSdkCompatibility(expectedMajor: number, expectedMinor: num
  *          recognized as a baseline feature. For more info, consult the module
  *          documentation.
  * @param features Array of named features to query
+ * @version Added in JS SDK 0.1
  */
 declare function doesSdkSupport(features: string[]): boolean;
 
@@ -131,6 +132,7 @@ declare function doesSdkSupport(features: string[]): boolean;
  *          features that are now recognized as baseline features. For more
  *          info, consult the module documentation.
  * @param features Array of named features to query
+ * @version Added in JS SDK 0.1
  */
 declare function checkSdkFeatures(features: string[]): void | never;
 
@@ -150,15 +152,48 @@ declare function delay(ms: number): void;
 declare function print(...args: any[]): void;
 
 /**
- * @brief Reads a JS value from a file
- * 
- * Reads a file at the specified path, interprets it as a JS value and returns
- * said value.
- * 
- * @param path The path to the file
+ * @brief Converts a string to a number
+ * @param text The string to convert to a number
+ * @param base Integer base (`2`...`16`), default: 10
  * @version Added in JS SDK 0.1
  */
-declare function load(path: string): any;
+declare function parseInt(text: string, base?: number): number;
+
+/**
+ * @brief Path to the directory containing the current script
+ * @version Added in JS SDK 0.1
+ */
+declare const __dirname: string;
+
+/**
+ * @brief Path to the current script file
+ * @version Added in JS SDK 0.1
+ */
+declare const __filename: string;
+
+/**
+ * @brief Runs a JS file and returns value from it
+ * 
+ * Reads a file at the specified path and runs it as JS, returning the last evaluated value.
+ * 
+ * The result is cached and this filepath will not re-evaluated on future
+ * load() calls for this session.
+ * 
+ * @param path The path to the file
+ * @param scope An object to use as global scope while running this file
+ * @version Added in JS SDK 0.1
+ */
+declare function load(path: string, scope?: object): any;
+
+/**
+ * @brief Return 1-byte string whose ASCII code is the integer `n`
+ * 
+ * If `n` is not numeric or outside of `0-255` range, `null` is returned
+ * 
+ * @param n The ASCII code to convert to string
+ * @version Added in JS SDK 0.1
+ */
+declare function chr(n: number): string | null;
 
 /**
  * @brief Loads a natively implemented module
@@ -166,6 +201,13 @@ declare function load(path: string): any;
  * @version Added in JS SDK 0.1
  */
 declare function require(module: string): any;
+
+/**
+ * @brief Exit JavaScript with given message
+ * @param message The error message to show to user
+ * @version Added in JS SDK 0.1
+ */
+declare function die(message: string): never;
 
 /**
  * @brief mJS Foreign Pointer type

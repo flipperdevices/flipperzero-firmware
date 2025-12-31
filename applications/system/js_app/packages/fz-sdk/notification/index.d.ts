@@ -14,6 +14,7 @@ export declare function success(): void;
 /**
  * @brief Signals failure to the user via the color LED, speaker and vibration
  *        motor
+ * @version Added in JS SDK 0.1
  */
 export declare function error(): void;
 
