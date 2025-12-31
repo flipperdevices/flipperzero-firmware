@@ -1,7 +1,7 @@
 #include "dir_walk.h"
 #include <m-list.h>
 
-#define MAX_NAME_LEN 255
+#define MAX_NAME_LEN 256
 
 LIST_DEF(DirIndexList, uint32_t);
 
@@ -65,7 +65,7 @@ static bool dir_walk_filter(DirWalk* dir_walk, const char* name, FileInfo* filei
 static DirWalkResult
     dir_walk_iter(DirWalk* dir_walk, FuriString* return_path, FileInfo* fileinfo) {
     DirWalkResult result = DirWalkError;
-    char* name = malloc(MAX_NAME_LEN + 1);
+    char* name = malloc(MAX_NAME_LEN);
     FileInfo info;
     bool end = false;
 
