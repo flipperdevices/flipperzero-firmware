@@ -43,10 +43,10 @@ distenv = coreenv.Clone(
         "blackmagic",
         "jflash",
         "doxygen",
+        "textfile",
     ],
     ENV=os.environ,
     UPDATE_BUNDLE_DIR="dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}",
-    VSCODE_LANG_SERVER=ARGUMENTS.get("LANG_SERVER", "cpptools"),
 )
 
 firmware_env = distenv.AddFwProject(
@@ -234,7 +234,7 @@ firmware_debug = distenv.PhonyTarget(
 )
 distenv.Depends(firmware_debug, firmware_flash)
 
-distenv.PhonyTarget(
+firmware_blackmagic = distenv.PhonyTarget(
     "blackmagic",
     "${GDBPYCOM}",
     source=firmware_env["FW_ELF"],
@@ -242,6 +242,7 @@ distenv.PhonyTarget(
     GDBREMOTE="${BLACKMAGIC_ADDR}",
     FBT_FAP_DEBUG_ELF_ROOT=firmware_env["FBT_FAP_DEBUG_ELF_ROOT"],
 )
+distenv.Depends(firmware_blackmagic, firmware_flash)
 
 # Debug alien elf
 debug_other_opts = [
@@ -322,7 +323,12 @@ firmware_env.Append(
         "SConstruct",
         "firmware.scons",
         "fbt_options.py",
-    ]
+    ],
+    IMG_LINT_SOURCES=[
+        # Image assets
+        "applications",
+        "assets",
+    ],
 )
 
 
@@ -359,6 +365,39 @@ distenv.PhonyTarget(
     PY_LINT_SOURCES=firmware_env["PY_LINT_SOURCES"],
 )
 
+# Image assets linting
+distenv.PhonyTarget(
+    "lint_img",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/imglint.py",
+            "check",
+            "${IMG_LINT_SOURCES}",
+            "${ARGS}",
+        ]
+    ],
+    IMG_LINT_SOURCES=firmware_env["IMG_LINT_SOURCES"],
+)
+
+distenv.PhonyTarget(
+    "format_img",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/imglint.py",
+            "format",
+            "${IMG_LINT_SOURCES}",
+            "${ARGS}",
+        ]
+    ],
+    IMG_LINT_SOURCES=firmware_env["IMG_LINT_SOURCES"],
+)
+
+distenv.Alias("lint_all", ["lint", "lint_py", "lint_img"])
+distenv.Alias("format_all", ["format", "format_py", "format_img"])
+
+
 # Start Flipper CLI via PySerial's miniterm
 distenv.PhonyTarget(
     "cli",
@@ -366,6 +405,21 @@ distenv.PhonyTarget(
         [
             "${PYTHON3}",
             "${FBT_SCRIPT_DIR}/serial_cli.py",
+            "-p",
+            "${FLIP_PORT}",
+            "${ARGS}",
+        ]
+    ],
+)
+
+
+# Measure CLI loopback performance
+distenv.PhonyTarget(
+    "cli_perf",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/serial_cli_perf.py",
             "-p",
             "${FLIP_PORT}",
             "${ARGS}",
@@ -403,14 +457,23 @@ distenv.PhonyTarget(
 )
 
 # Prepare vscode environment
-VSCODE_LANG_SERVER = cmd_environment["LANG_SERVER"]
 vscode_dist = distenv.Install(
     "#.vscode",
     [
-        distenv.Glob("#.vscode/example/*.json"),
-        distenv.Glob(f"#.vscode/example/{VSCODE_LANG_SERVER}/*.json"),
+        distenv.Glob("#.vscode/example/*.json", exclude="*.tmpl"),
+        distenv.Glob("#.vscode/example/${LANG_SERVER}/*.json"),
     ],
 )
+for template_file in distenv.Glob("#.vscode/example/*.tmpl"):
+    vscode_dist.append(
+        distenv.Substfile(
+            distenv.Dir("#.vscode").File(template_file.name.replace(".tmpl", "")),
+            template_file,
+            SUBST_DICT={
+                "@FBT_PLATFORM_EXECUTABLE_EXT@": ".exe" if os.name == "nt" else ""
+            },
+        )
+    )
 distenv.Precious(vscode_dist)
 distenv.NoClean(vscode_dist)
 distenv.Alias("vscode_dist", (vscode_dist, firmware_env["FW_CDB"]))

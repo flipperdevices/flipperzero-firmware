@@ -16,6 +16,9 @@ typedef struct {
 
 static const uint32_t mf_classic_data_format_version = 2;
 
+// MIFARE Plus 2K SL1 has 32 sectors (128 blocks total) per official specification
+#define MF_CLASSIC_PLUS2K_SCAN_SECTORS 32
+
 static const MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
     [MfClassicTypeMini] =
         {
@@ -30,6 +33,14 @@ static const MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
             .blocks_total = 64,
             .full_name = "Mifare Classic 1K",
             .type_name = "1K",
+        },
+    [MfClassicTypePlus2k] =
+        {
+            // MIFARE Plus 2K SL1 maps like a 2K Classic: 32 sectors x 4 blocks
+            .sectors_total = 32,
+            .blocks_total = 128,
+            .full_name = "Mifare Plus 2K SL1",
+            .type_name = "Plus 2K",
         },
     [MfClassicType4k] =
         {
@@ -387,6 +398,14 @@ uint8_t mf_classic_get_total_sectors_num(MfClassicType type) {
     return mf_classic_features[type].sectors_total;
 }
 
+uint8_t mf_classic_get_scannable_sectors_num(MfClassicType type) {
+    uint8_t total = mf_classic_get_total_sectors_num(type);
+    if((type == MfClassicTypePlus2k) && (total > MF_CLASSIC_PLUS2K_SCAN_SECTORS)) {
+        return MF_CLASSIC_PLUS2K_SCAN_SECTORS;
+    }
+    return total;
+}
+
 uint16_t mf_classic_get_total_block_num(MfClassicType type) {
     furi_check(type < MfClassicTypeNum);
     return mf_classic_features[type].blocks_total;
@@ -430,6 +449,23 @@ MfClassicSectorTrailer*
 
 bool mf_classic_is_sector_trailer(uint8_t block) {
     return block == mf_classic_get_sector_trailer_num_by_block(block);
+}
+
+void mf_classic_set_sector_trailer_read(
+    MfClassicData* data,
+    uint8_t block_num,
+    MfClassicSectorTrailer* sec_tr) {
+    furi_check(data);
+    furi_check(sec_tr);
+    furi_check(mf_classic_is_sector_trailer(block_num));
+
+    uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+    MfClassicSectorTrailer* sec_trailer =
+        mf_classic_get_sector_trailer_by_sector(data, sector_num);
+    memcpy(sec_trailer, sec_tr, sizeof(MfClassicSectorTrailer));
+    FURI_BIT_SET(data->block_read_mask[block_num / 32], block_num % 32);
+    FURI_BIT_SET(data->key_a_mask, sector_num);
+    FURI_BIT_SET(data->key_b_mask, sector_num);
 }
 
 uint8_t mf_classic_get_sector_by_block(uint8_t block) {
@@ -526,10 +562,26 @@ void mf_classic_set_key_not_found(
     }
 }
 
+MfClassicKey
+    mf_classic_get_key(const MfClassicData* data, uint8_t sector_num, MfClassicKeyType key_type) {
+    furi_check(data);
+    furi_check(sector_num < mf_classic_get_total_sectors_num(data->type));
+    furi_check(key_type == MfClassicKeyTypeA || key_type == MfClassicKeyTypeB);
+
+    const MfClassicSectorTrailer* sector_trailer =
+        mf_classic_get_sector_trailer_by_sector(data, sector_num);
+
+    if(key_type == MfClassicKeyTypeA) {
+        return sector_trailer->key_a;
+    } else {
+        return sector_trailer->key_b;
+    }
+}
+
 bool mf_classic_is_block_read(const MfClassicData* data, uint8_t block_num) {
     furi_check(data);
 
-    return (FURI_BIT(data->block_read_mask[block_num / 32], block_num % 32) == 1);
+    return FURI_BIT(data->block_read_mask[block_num / 32], block_num % 32) == 1;
 }
 
 void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data) {
@@ -573,7 +625,7 @@ void mf_classic_get_read_sectors_and_keys(
 
     *sectors_read = 0;
     *keys_found = 0;
-    uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
+    uint8_t sectors_total = mf_classic_get_scannable_sectors_num(data->type);
     for(size_t i = 0; i < sectors_total; i++) {
         if(mf_classic_is_key_found(data, i, MfClassicKeyTypeA)) {
             *keys_found += 1;
@@ -597,7 +649,7 @@ void mf_classic_get_read_sectors_and_keys(
 bool mf_classic_is_card_read(const MfClassicData* data) {
     furi_check(data);
 
-    uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
+    uint8_t sectors_total = mf_classic_get_scannable_sectors_num(data->type);
     uint8_t sectors_read = 0;
     uint8_t keys_found = 0;
     mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
@@ -644,22 +696,20 @@ static bool mf_classic_is_allowed_access_sector_trailer(
     }
     case MfClassicActionKeyAWrite:
     case MfClassicActionKeyBWrite: {
-        return (
-            (key_type == MfClassicKeyTypeA && (AC == 0x00 || AC == 0x01)) ||
-            (key_type == MfClassicKeyTypeB &&
-             (AC == 0x00 || AC == 0x04 || AC == 0x03 || AC == 0x01)));
+        return (key_type == MfClassicKeyTypeA && (AC == 0x00 || AC == 0x01)) ||
+               (key_type == MfClassicKeyTypeB &&
+                (AC == 0x00 || AC == 0x04 || AC == 0x03 || AC == 0x01));
     }
     case MfClassicActionKeyBRead: {
         return (key_type == MfClassicKeyTypeA && (AC == 0x00 || AC == 0x02 || AC == 0x01)) ||
                (key_type == MfClassicKeyTypeB && (AC == 0x00 || AC == 0x02 || AC == 0x01));
     }
     case MfClassicActionACRead: {
-        return ((key_type == MfClassicKeyTypeA) || (key_type == MfClassicKeyTypeB));
+        return (key_type == MfClassicKeyTypeA) || (key_type == MfClassicKeyTypeB);
     }
     case MfClassicActionACWrite: {
-        return (
-            (key_type == MfClassicKeyTypeA && (AC == 0x01)) ||
-            (key_type == MfClassicKeyTypeB && (AC == 0x01 || AC == 0x03 || AC == 0x05)));
+        return (key_type == MfClassicKeyTypeA && (AC == 0x01)) ||
+               (key_type == MfClassicKeyTypeB && (AC == 0x01 || AC == 0x03 || AC == 0x05));
     }
     default:
         return false;
@@ -710,25 +760,21 @@ bool mf_classic_is_allowed_access_data_block(
 
     switch(action) {
     case MfClassicActionDataRead: {
-        return (
-            (key_type == MfClassicKeyTypeA && !(AC == 0x03 || AC == 0x05 || AC == 0x07)) ||
-            (key_type == MfClassicKeyTypeB && !(AC == 0x07)));
+        return (key_type == MfClassicKeyTypeA && !(AC == 0x03 || AC == 0x05 || AC == 0x07)) ||
+               (key_type == MfClassicKeyTypeB && !(AC == 0x07));
     }
     case MfClassicActionDataWrite: {
-        return (
-            (key_type == MfClassicKeyTypeA && (AC == 0x00)) ||
-            (key_type == MfClassicKeyTypeB &&
-             (AC == 0x00 || AC == 0x04 || AC == 0x06 || AC == 0x03)));
+        return (key_type == MfClassicKeyTypeA && (AC == 0x00)) ||
+               (key_type == MfClassicKeyTypeB &&
+                (AC == 0x00 || AC == 0x04 || AC == 0x06 || AC == 0x03));
     }
     case MfClassicActionDataInc: {
-        return (
-            (key_type == MfClassicKeyTypeA && (AC == 0x00)) ||
-            (key_type == MfClassicKeyTypeB && (AC == 0x00 || AC == 0x06)));
+        return (key_type == MfClassicKeyTypeA && (AC == 0x00)) ||
+               (key_type == MfClassicKeyTypeB && (AC == 0x00 || AC == 0x06));
     }
     case MfClassicActionDataDec: {
-        return (
-            (key_type == MfClassicKeyTypeA && (AC == 0x00 || AC == 0x06 || AC == 0x01)) ||
-            (key_type == MfClassicKeyTypeB && (AC == 0x00 || AC == 0x06 || AC == 0x01)));
+        return (key_type == MfClassicKeyTypeA && (AC == 0x00 || AC == 0x06 || AC == 0x01)) ||
+               (key_type == MfClassicKeyTypeB && (AC == 0x00 || AC == 0x06 || AC == 0x01));
     }
     default:
         return false;

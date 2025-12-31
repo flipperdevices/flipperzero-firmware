@@ -46,13 +46,24 @@ struct STOP_EXTERNING_ME {};
 extern "C" {
 #endif
 
-/** Early FuriHal init, only essential subsystems */
+/** Early FuriHal init
+ * 
+ * Init essential subsystems used in pre-DFU stage.
+ * This state can be undone with `furi_hal_deinit_early`.
+ *
+ */
 void furi_hal_init_early(void);
 
-/** Early FuriHal deinit */
+/** Early FuriHal deinit
+ * 
+ * Undo `furi_hal_init_early`, prepare system for switch to another firmware/bootloader.
+ */
 void furi_hal_deinit_early(void);
 
-/** Init FuriHal */
+/** Init FuriHal
+ * 
+ * Initialize the rest of the HAL, must be used after `furi_hal_init_early`.
+ */
 void furi_hal_init(void);
 
 /** Jump to the void*

@@ -15,10 +15,10 @@
 
 #define TAG "SubGhzProtocoSecPlusV2"
 
-#define SECPLUS_V2_HEADER 0x3C0000000000
+#define SECPLUS_V2_HEADER      0x3C0000000000
 #define SECPLUS_V2_HEADER_MASK 0xFFFF3C0000000000
-#define SECPLUS_V2_PACKET_1 0x000000000000
-#define SECPLUS_V2_PACKET_2 0x010000000000
+#define SECPLUS_V2_PACKET_1    0x000000000000
+#define SECPLUS_V2_PACKET_2    0x010000000000
 #define SECPLUS_V2_PACKET_MASK 0x30000000000
 
 static const SubGhzBlockConst subghz_protocol_secplus_v2_const = {
@@ -554,6 +554,7 @@ SubGhzProtocolStatus
             break;
         }
 
+        instance->encoder.front = 0; // reset before start
         instance->encoder.is_running = true;
     } while(false);
 
@@ -563,6 +564,7 @@ SubGhzProtocolStatus
 void subghz_protocol_encoder_secplus_v2_stop(void* context) {
     SubGhzProtocolEncoderSecPlus_v2* instance = context;
     instance->encoder.is_running = false;
+    instance->encoder.front = 0; // reset position
 }
 
 LevelDuration subghz_protocol_encoder_secplus_v2_yield(void* context) {

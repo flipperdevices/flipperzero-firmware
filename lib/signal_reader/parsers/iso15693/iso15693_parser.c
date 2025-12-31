@@ -5,8 +5,8 @@
 #include <furi/furi.h>
 
 #define ISO15693_PARSER_SIGNAL_READER_BUFF_SIZE (2)
-#define ISO15693_PARSER_BITSTREAM_BUFF_SIZE (32)
-#define ISO15693_PARSER_BITRATE_F64MHZ (603U)
+#define ISO15693_PARSER_BITSTREAM_BUFF_SIZE     (32)
+#define ISO15693_PARSER_BITRATE_F64MHZ          (603U)
 
 #define TAG "Iso15693Parser"
 
@@ -243,6 +243,8 @@ static Iso15693ParserCommand iso15693_parser_parse_1_out_of_256(Iso15693Parser* 
                             instance->parsed_frame, instance->next_byte_part * 4 + j / 2);
                     }
                 }
+            } else {
+                instance->zero_found = true;
             }
         }
         instance->next_byte_part = (instance->next_byte_part + 1) % 64;

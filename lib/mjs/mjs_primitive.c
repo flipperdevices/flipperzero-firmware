@@ -6,6 +6,10 @@
 #include "mjs_core.h"
 #include "mjs_internal.h"
 #include "mjs_primitive.h"
+#include "mjs_string_public.h"
+#include "mjs_util.h"
+
+#include <float.h>
 
 mjs_val_t mjs_mk_null(void) {
     return MJS_NULL;
@@ -92,7 +96,7 @@ int mjs_is_boolean(mjs_val_t v) {
 }
 
 #define MJS_IS_POINTER_LEGIT(n) \
-    (((n)&MJS_TAG_MASK) == 0 || ((n)&MJS_TAG_MASK) == (~0 & MJS_TAG_MASK))
+    (((n) & MJS_TAG_MASK) == 0 || ((n) & MJS_TAG_MASK) == (~0 & MJS_TAG_MASK))
 
 MJS_PRIVATE mjs_val_t mjs_pointer_to_value(struct mjs* mjs, void* p) {
     uint64_t n = ((uint64_t)(uintptr_t)p);
@@ -156,5 +160,44 @@ MJS_PRIVATE void mjs_op_isnan(struct mjs* mjs) {
 
     ret = mjs_mk_boolean(mjs, val == MJS_TAG_NAN);
 
+    mjs_return(mjs, ret);
+}
+
+MJS_PRIVATE void mjs_number_to_string(struct mjs* mjs) {
+    mjs_val_t ret = MJS_UNDEFINED;
+    mjs_val_t base_v = MJS_UNDEFINED;
+    int32_t base = 10;
+    double num;
+
+    /* get number from `this` */
+    if(!mjs_check_arg(mjs, -1 /*this*/, "this", MJS_TYPE_NUMBER, NULL)) {
+        goto clean;
+    }
+    num = mjs_get_double(mjs, mjs->vals.this_obj);
+
+    if(mjs_nargs(mjs) >= 1) {
+        /* get base from arg 0 */
+        if(!mjs_check_arg(mjs, 0, "base", MJS_TYPE_NUMBER, &base_v)) {
+            goto clean;
+        }
+        base = mjs_get_int(mjs, base_v);
+    }
+
+    if(base != 10 || floor(num) == num) {
+        char tmp_str[] = "-2147483648";
+        itoa((int32_t)num, tmp_str, base);
+        ret = mjs_mk_string(mjs, tmp_str, ~0, true);
+    } else {
+        char tmp_str[] = "2.22514337200000e-308";
+        snprintf(tmp_str, sizeof(tmp_str), "%.*g", DBL_DIG, num);
+        size_t len = strlen(tmp_str);
+        while(len && tmp_str[len - 1] == '0') {
+            len--;
+        }
+        tmp_str[len] = '\0';
+        ret = mjs_mk_string(mjs, tmp_str, ~0, true);
+    }
+
+clean:
     mjs_return(mjs, ret);
 }
