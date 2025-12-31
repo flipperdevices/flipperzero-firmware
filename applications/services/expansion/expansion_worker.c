@@ -1,6 +1,8 @@
 #include "expansion_worker.h"
 
+#include <power/power_service/power.h>
 #include <furi_hal_power.h>
+
 #include <furi_hal_serial.h>
 #include <furi_hal_serial_control.h>
 
@@ -33,7 +35,8 @@ typedef enum {
     ExpansionWorkerFlagError = 1 << 2,
 } ExpansionWorkerFlag;
 
-#define EXPANSION_ALL_FLAGS (ExpansionWorkerFlagData | ExpansionWorkerFlagStop)
+#define EXPANSION_ALL_FLAGS \
+    (ExpansionWorkerFlagData | ExpansionWorkerFlagStop | ExpansionWorkerFlagError)
 
 struct ExpansionWorker {
     FuriThread* thread;
@@ -250,9 +253,13 @@ static bool expansion_worker_handle_state_connected(
                 if(!expansion_worker_rpc_session_open(instance)) break;
                 instance->state = ExpansionWorkerStateRpcActive;
             } else if(command == ExpansionFrameControlCommandEnableOtg) {
-                furi_hal_power_enable_otg();
+                Power* power = furi_record_open(RECORD_POWER);
+                power_enable_otg(power, true);
+                furi_record_close(RECORD_POWER);
             } else if(command == ExpansionFrameControlCommandDisableOtg) {
-                furi_hal_power_disable_otg();
+                Power* power = furi_record_open(RECORD_POWER);
+                power_enable_otg(power, false);
+                furi_record_close(RECORD_POWER);
             } else {
                 break;
             }
@@ -353,6 +360,8 @@ static int32_t expansion_worker(void* context) {
     if(expansion_worker_send_heartbeat(instance)) {
         expansion_worker_state_machine(instance);
     }
+
+    furi_hal_serial_async_rx_stop(instance->serial_handle);
 
     if(instance->state == ExpansionWorkerStateRpcActive) {
         expansion_worker_rpc_session_close(instance);

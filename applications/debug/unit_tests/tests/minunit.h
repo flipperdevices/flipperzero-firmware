@@ -300,11 +300,16 @@ void minunit_printf_warning(const char* format, ...);
             char tmp[500] = {0};                                                         \
             tmp[0] = '[';                                                                \
             for(i = 0; i < array_length; i++) {                                          \
-                sprintf(tmp + strlen(tmp), "%d, ", expected[i]);                         \
+                size_t used = strlen(tmp);                                               \
+                if(used < sizeof(tmp)) {                                                 \
+                    snprintf(tmp + used, sizeof(tmp) - used, "%d, ", expected[i]);       \
+                }                                                                        \
             }                                                                            \
             int len = strlen(tmp);                                                       \
-            tmp[len - 2] = ']';                                                          \
-            tmp[len - 1] = '\0';                                                         \
+            if(len >= 2) {                                                               \
+                tmp[len - 2] = ']';                                                      \
+                tmp[len - 1] = '\0';                                                     \
+            }                                                                            \
             snprintf(                                                                    \
                 minunit_last_message,                                                    \
                 MINUNIT_MESSAGE_LEN,                                                     \
@@ -389,12 +394,14 @@ void minunit_printf_warning(const char* format, ...);
                 __func__,                                                                   \
                 __FILE__,                                                                   \
                 __LINE__,                                                                   \
-                minunit_tmp_e,                                                              \
                 minunit_tmp_r,                                                              \
+                minunit_tmp_e,                                                              \
                 minunit_tmp_m);                                                             \
             minunit_status = 1;                                                             \
             return;                                                                         \
         } else { minunit_print_progress(); })
+
+//-V:mu_assert_string_eq:526, 547
 
 #define mu_assert_string_eq(expected, result)                                         \
     MU__SAFE_BLOCK(                                                                   \
@@ -415,6 +422,8 @@ void minunit_printf_warning(const char* format, ...);
             minunit_status = 1;                                                       \
             return;                                                                   \
         } else { minunit_print_progress(); })
+
+//-V:mu_assert_mem_eq:526
 
 #define mu_assert_mem_eq(expected, result, size)                                   \
     MU__SAFE_BLOCK(                                                                \

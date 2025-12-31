@@ -1,6 +1,9 @@
 /**
  * @file event_loop_timer.h
  * @brief Software timer functionality for FuriEventLoop.
+ *
+ * @warning ALL FuriEventLoopTimer functions MUST be called from the
+ * same thread that the owner FuriEventLoop instance was created in.
  */
 
 #pragma once

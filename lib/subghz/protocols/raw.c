@@ -245,8 +245,8 @@ void subghz_protocol_decoder_raw_reset(void* context) {
 void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t duration) {
     furi_check(context);
     SubGhzProtocolDecoderRAW* instance = context;
-
-    if(!instance->pause && (instance->upload_raw != NULL)) {
+    // Add check if we got duration higher than 1 second, we skipping it, temp fix
+    if((!instance->pause && (instance->upload_raw != NULL)) && (duration < ((uint32_t)1000000))) {
         if(duration > subghz_protocol_raw_const.te_short) {
             if(instance->last_level != level) {
                 instance->last_level = (level ? true : false);
@@ -273,7 +273,7 @@ void subghz_protocol_decoder_raw_get_string(void* context, FuriString* output) {
     furi_check(context);
     //SubGhzProtocolDecoderRAW* instance = context;
     UNUSED(context);
-    furi_string_cat_printf(output, "RAW Date");
+    furi_string_cat_printf(output, "RAW Data");
 }
 
 void* subghz_protocol_encoder_raw_alloc(SubGhzEnvironment* environment) {

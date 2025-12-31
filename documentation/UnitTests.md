@@ -20,7 +20,7 @@ To run the unit tests, follow these steps:
 3. Launch the CLI session and run the `unit_tests` command.
 
 **NOTE:** To run a particular test (and skip all others), specify its name as the command argument.
-See [test_index.c](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/debug/unit_tests/test_index.c) for the complete list of test names.
+Test names match application names defined [here](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/debug/unit_tests/application.fam).
 
 ## Adding unit tests
 
@@ -28,7 +28,7 @@ See [test_index.c](https://github.com/flipperdevices/flipperzero-firmware/blob/d
 
 #### Entry point
 
-The common entry point for all tests is the [unit_tests](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests) app. Test-specific code is placed into an arbitrarily named subdirectory and is then called from the [test_index.c](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests/test_index.c) source file.
+The common entry point for all tests is the [unit_tests](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests) app. Test-specific code is packaged as a `PLUGIN` app placed in a subdirectory of `tests` in the `unit_tests` mother-app and referenced in the common `application.fam`. Look at other tests for an example.
 
 #### Test assets
 
@@ -43,7 +43,7 @@ To add unit tests for your protocol, follow these steps:
 
 1. Create a file named `test_<your_protocol_name>.irtest` in the [assets](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests/resources/unit_tests/infrared) directory.
 2. Fill it with the test data (more on it below).
-3. Add the test code to [infrared_test.c](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/debug/unit_tests/infrared/infrared_test.c).
+3. Add the test code to [infrared_test.c](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/debug/unit_tests/tests/infrared/infrared_test.c).
 4. Build and install firmware with resources, install it on your Flipper and run the tests to see if they pass.
 
 ##### Test data format
