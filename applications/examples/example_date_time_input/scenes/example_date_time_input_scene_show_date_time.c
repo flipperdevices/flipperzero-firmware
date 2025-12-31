@@ -25,7 +25,7 @@ static void example_date_time_input_scene_update_view(void* context) {
         if(hour == 0) hour = 12;
     }
 
-    char buffer[24] = {};
+    char buffer[29] = {};
     snprintf(
         buffer,
         sizeof(buffer),
