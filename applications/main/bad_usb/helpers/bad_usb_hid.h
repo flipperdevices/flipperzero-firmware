@@ -20,6 +20,10 @@ typedef struct {
 
     bool (*kb_press)(void* inst, uint16_t button);
     bool (*kb_release)(void* inst, uint16_t button);
+    bool (*mouse_press)(void* inst, uint8_t button);
+    bool (*mouse_release)(void* inst, uint8_t button);
+    bool (*mouse_scroll)(void* inst, int8_t delta);
+    bool (*mouse_move)(void* inst, int8_t dx, int8_t dy);
     bool (*consumer_press)(void* inst, uint16_t button);
     bool (*consumer_release)(void* inst, uint16_t button);
     bool (*release_all)(void* inst);

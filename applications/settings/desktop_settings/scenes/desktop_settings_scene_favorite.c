@@ -76,7 +76,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
             default_passport = true;
         }
     } else {
-        favorite_id &= ~(SCENE_STATE_SET_DUMMY_APP);
+        favorite_id &= ~(SCENE_STATE_SET_DUMMY_APP); //-V784
         furi_assert(favorite_id < DummyAppNumber);
         curr_favorite_app = &app->settings.dummy_apps[favorite_id];
         default_passport = true;
@@ -182,7 +182,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
         furi_assert(favorite_id < FavoriteAppNumber);
         curr_favorite_app = &app->settings.favorite_apps[favorite_id];
     } else {
-        favorite_id &= ~(SCENE_STATE_SET_DUMMY_APP);
+        favorite_id &= ~(SCENE_STATE_SET_DUMMY_APP); //-V784
         furi_assert(favorite_id < DummyAppNumber);
         curr_favorite_app = &app->settings.dummy_apps[favorite_id];
     }
@@ -209,7 +209,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
 
             if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
                 submenu_reset(app->submenu); // Prevent menu from being shown when we exiting scene
-                strncpy(
+                strlcpy(
                     curr_favorite_app->name_or_path,
                     furi_string_get_cstr(temp_path),
                     sizeof(curr_favorite_app->name_or_path));
@@ -219,7 +219,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
             size_t app_index = event.event - 2;
             const char* name = favorite_fap_get_app_name(app_index);
             if(name)
-                strncpy(
+                strlcpy(
                     curr_favorite_app->name_or_path,
                     name,
                     sizeof(curr_favorite_app->name_or_path));

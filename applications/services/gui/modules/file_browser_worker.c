@@ -32,8 +32,8 @@ typedef enum {
     (WorkerEvtStop | WorkerEvtLoad | WorkerEvtFolderEnter | WorkerEvtFolderExit | \
      WorkerEvtFolderRefresh | WorkerEvtConfigChange)
 
-ARRAY_DEF(IdxLastArray, int32_t)
-ARRAY_DEF(ExtFilterArray, FuriString*, FURI_STRING_OPLIST)
+ARRAY_DEF(IdxLastArray, int32_t) //-V658
+ARRAY_DEF(ExtFilterArray, FuriString*, FURI_STRING_OPLIST) //-V658
 
 struct BrowserWorker {
     FuriThread* thread;
@@ -134,7 +134,7 @@ static bool browser_filter_by_name(BrowserWorker* browser, FuriString* name, boo
             if((furi_string_empty(ext)) || (furi_string_cmp_str(ext, "*") == 0)) {
                 return true;
             }
-            if(furi_string_end_with(name, ext)) {
+            if(furi_string_end_withi(name, ext)) {
                 return true;
             }
         }

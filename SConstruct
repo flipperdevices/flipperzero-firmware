@@ -234,7 +234,7 @@ firmware_debug = distenv.PhonyTarget(
 )
 distenv.Depends(firmware_debug, firmware_flash)
 
-distenv.PhonyTarget(
+firmware_blackmagic = distenv.PhonyTarget(
     "blackmagic",
     "${GDBPYCOM}",
     source=firmware_env["FW_ELF"],
@@ -242,6 +242,7 @@ distenv.PhonyTarget(
     GDBREMOTE="${BLACKMAGIC_ADDR}",
     FBT_FAP_DEBUG_ELF_ROOT=firmware_env["FBT_FAP_DEBUG_ELF_ROOT"],
 )
+distenv.Depends(firmware_blackmagic, firmware_flash)
 
 # Debug alien elf
 debug_other_opts = [
@@ -404,6 +405,21 @@ distenv.PhonyTarget(
         [
             "${PYTHON3}",
             "${FBT_SCRIPT_DIR}/serial_cli.py",
+            "-p",
+            "${FLIP_PORT}",
+            "${ARGS}",
+        ]
+    ],
+)
+
+
+# Measure CLI loopback performance
+distenv.PhonyTarget(
+    "cli_perf",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/serial_cli_perf.py",
             "-p",
             "${FLIP_PORT}",
             "${ARGS}",
