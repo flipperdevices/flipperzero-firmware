@@ -17,6 +17,7 @@
 #include "protocol_pac_stanley.h"
 #include "protocol_keri.h"
 #include "protocol_gallagher.h"
+#include "protocol_hitag1.h"
 #include "protocol_nexwatch.h"
 #include "protocol_securakey.h"
 #include "protocol_gproxii.h"
@@ -43,6 +44,7 @@ const ProtocolBase* const lfrfid_protocols[] = {
     [LFRFIDProtocolPACStanley] = &protocol_pac_stanley,
     [LFRFIDProtocolKeri] = &protocol_keri,
     [LFRFIDProtocolGallagher] = &protocol_gallagher,
+    [LFRFIDProtocolHitag1] = &protocol_hitag1,
     [LFRFIDProtocolNexwatch] = &protocol_nexwatch,
     [LFRFIDProtocolSecurakey] = &protocol_securakey,
     [LFRFIDProtocolGProxII] = &protocol_gproxii,
