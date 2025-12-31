@@ -2,11 +2,20 @@
 #include <furi.h>
 #include <toolbox/api_lock.h>
 #include <flipper_application/flipper_application.h>
+
+#include <gui/gui.h>
+#include <gui/view_holder.h>
+#include <gui/modules/loading.h>
+
+#include <m-array.h>
+
 #include "loader.h"
 #include "loader_menu.h"
 #include "loader_applications.h"
+#include "loader_queue.h"
 
 typedef struct {
+    FuriString* launch_path;
     char* args;
     FuriThread* thread;
     bool insomniac;
@@ -19,6 +28,12 @@ struct Loader {
     LoaderMenu* loader_menu;
     LoaderApplications* loader_applications;
     LoaderAppData app;
+
+    LoaderLaunchQueue launch_queue;
+
+    Gui* gui;
+    ViewHolder* view_holder;
+    Loading* loading;
 };
 
 typedef enum {
@@ -31,6 +46,11 @@ typedef enum {
     LoaderMessageTypeUnlock,
     LoaderMessageTypeIsLocked,
     LoaderMessageTypeStartByNameDetachedWithGuiError,
+    LoaderMessageTypeSignal,
+    LoaderMessageTypeGetApplicationName,
+    LoaderMessageTypeGetApplicationLaunchPath,
+    LoaderMessageTypeEnqueueLaunch,
+    LoaderMessageTypeClearLaunchQueue,
 } LoaderMessageType;
 
 typedef struct {
@@ -40,7 +60,24 @@ typedef struct {
 } LoaderMessageStartByName;
 
 typedef struct {
+    uint32_t signal;
+    void* arg;
+} LoaderMessageSignal;
+
+typedef enum {
+    LoaderStatusErrorUnknown,
+    LoaderStatusErrorInvalidFile,
+    LoaderStatusErrorInvalidManifest,
+    LoaderStatusErrorMissingImports,
+    LoaderStatusErrorHWMismatch,
+    LoaderStatusErrorOutdatedApp,
+    LoaderStatusErrorOutOfMemory,
+    LoaderStatusErrorOutdatedFirmware,
+} LoaderStatusError;
+
+typedef struct {
     LoaderStatus value;
+    LoaderStatusError error;
 } LoaderMessageLoaderStatusResult;
 
 typedef struct {
@@ -53,6 +90,9 @@ typedef struct {
 
     union {
         LoaderMessageStartByName start;
+        LoaderDeferredLaunchRecord defer_start;
+        LoaderMessageSignal signal;
+        FuriString* application_name;
     };
 
     union {

@@ -1,0 +1,26 @@
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/containers",
+    ],
+    LINT_SOURCES=[
+        Dir("."),
+    ],
+    SDK_HEADERS=[
+        File("bit_buffer.h"),
+        File("buffer_stream.h"),
+        File("m_cstr_dup.h"),
+        File("pipe.h"),
+        File("simple_array.h"),
+    ],
+)
+
+libenv = env.Clone(FW_LIB_NAME="containers")
+libenv.ApplyLibFlags()
+
+sources = libenv.GlobRecursive("*.c")
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

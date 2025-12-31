@@ -21,11 +21,11 @@
 #define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO (&gpio_ext_pb2)
 
 /* DMA Channels definition */
-#define SUBGHZ_DEVICE_CC1101_EXT_DMA (DMA2)
+#define SUBGHZ_DEVICE_CC1101_EXT_DMA             (DMA2)
 #define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_CHANNEL (LL_DMA_CHANNEL_3)
 #define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH4_CHANNEL (LL_DMA_CHANNEL_4)
 #define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH5_CHANNEL (LL_DMA_CHANNEL_5)
-#define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_IRQ (FuriHalInterruptIdDma2Ch3)
+#define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_IRQ     (FuriHalInterruptIdDma2Ch3)
 #define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF \
     SUBGHZ_DEVICE_CC1101_EXT_DMA, SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_CHANNEL
 #define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH4_DEF \
@@ -85,7 +85,7 @@ typedef struct {
     volatile SubGhzDeviceCC1101ExtState state;
     volatile SubGhzDeviceCC1101ExtRegulation regulation;
     const GpioPin* async_mirror_pin;
-    FuriHalSpiBusHandle* spi_bus_handle;
+    const FuriHalSpiBusHandle* spi_bus_handle;
     const GpioPin* g0_pin;
     SubGhzDeviceCC1101ExtAsyncTx async_tx;
     SubGhzDeviceCC1101ExtAsyncRx async_rx;
@@ -365,7 +365,7 @@ bool subghz_device_cc1101_ext_is_rx_data_crc_valid(void) {
     cc1101_read_reg(
         subghz_device_cc1101_ext->spi_bus_handle, CC1101_STATUS_LQI | CC1101_BURST, data);
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
-    if(((data[0] >> 7) & 0x01)) {
+    if((data[0] >> 7) & 0x01) {
         return true;
     } else {
         return false;
@@ -553,11 +553,13 @@ void subghz_device_cc1101_ext_start_async_rx(
     furi_hal_bus_enable(FuriHalBusTIM17);
 
     // Configure TIM
+    LL_TIM_InitTypeDef TIM_InitStruct = {0};
     //Set the timer resolution to 2 us
-    LL_TIM_SetPrescaler(TIM17, (64 << 1) - 1);
-    LL_TIM_SetCounterMode(TIM17, LL_TIM_COUNTERMODE_UP);
-    LL_TIM_SetAutoReload(TIM17, 0xFFFF);
-    LL_TIM_SetClockDivision(TIM17, LL_TIM_CLOCKDIVISION_DIV1);
+    TIM_InitStruct.Prescaler = (64 << 1) - 1;
+    TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+    TIM_InitStruct.Autoreload = 0xFFFF;
+    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+    LL_TIM_Init(TIM17, &TIM_InitStruct);
 
     // Timer: advanced
     LL_TIM_SetClockSource(TIM17, LL_TIM_CLOCKSOURCE_INTERNAL);
@@ -826,9 +828,8 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
 }
 
 bool subghz_device_cc1101_ext_is_async_tx_complete(void) {
-    return (
-        (subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTx) &&
-        (LL_TIM_GetAutoReload(TIM17) == 0));
+    return (subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTx) &&
+           (LL_TIM_GetAutoReload(TIM17) == 0);
 }
 
 void subghz_device_cc1101_ext_stop_async_tx(void) {

@@ -4,7 +4,7 @@ Import("env")
 env.Append(
     CPPPATH=[
         "#/",
-        "#/lib",  # TODO FL-3553: remove!
+        "#/lib",
         # Ugly hack
         Dir("../assets/compiled"),
     ],
@@ -27,13 +27,11 @@ libs = env.BuildModules(
         "one_wire",
         "ibutton",
         "infrared",
-        "littlefs",
         "subghz",
         "nfc",
         "digital_signal",
         "pulse_reader",
         "signal_reader",
-        "appframe",
         "u8g2",
         "lfrfid",
         "flipper_application",
@@ -45,6 +43,7 @@ libs = env.BuildModules(
         "ble_profile",
         "bit_lib",
         "datetime",
+        "ieee754_parse_wrap",
     ],
 )
 

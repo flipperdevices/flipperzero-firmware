@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal_adc.h>
+#include <furi_hal_pwm.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,6 +41,7 @@ typedef struct {
     const GpioPin* pin;
     const char* name;
     const FuriHalAdcChannel channel;
+    const FuriHalPwmOutputId pwm_output;
     const uint8_t number;
     const bool debug;
 } GpioPinRecord;
@@ -120,6 +122,26 @@ void furi_hal_resources_init(void);
  * @return pin number or -1 if gpio is not on the external connector
  */
 int32_t furi_hal_resources_get_ext_pin_number(const GpioPin* gpio);
+
+/**
+ * @brief Finds a pin by its name
+ * 
+ * @param name case-insensitive pin name to look for (e.g. `"Pc3"`, `"pA4"`)
+ * 
+ * @return a pointer to the corresponding `GpioPinRecord` if such a pin exists,
+ *         `NULL` otherwise.
+ */
+const GpioPinRecord* furi_hal_resources_pin_by_name(const char* name);
+
+/**
+ * @brief Finds a pin by its number
+ * 
+ * @param name pin number to look for (e.g. `7`, `4`)
+ * 
+ * @return a pointer to the corresponding `GpioPinRecord` if such a pin exists,
+ *         `NULL` otherwise.
+ */
+const GpioPinRecord* furi_hal_resources_pin_by_number(uint8_t number);
 
 #ifdef __cplusplus
 }

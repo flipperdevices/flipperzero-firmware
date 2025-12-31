@@ -1,0 +1,22 @@
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/srv_util",
+    ],
+    LINT_SOURCES=[
+        Dir("."),
+    ],
+    SDK_HEADERS=[
+        File("api_lock.h"),
+    ],
+)
+
+libenv = env.Clone(FW_LIB_NAME="srv_util")
+libenv.ApplyLibFlags()
+
+sources = libenv.GlobRecursive("*.c")
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

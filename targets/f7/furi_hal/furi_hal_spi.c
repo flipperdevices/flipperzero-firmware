@@ -11,13 +11,13 @@
 
 #define TAG "FuriHalSpi"
 
-#define SPI_DMA DMA2
+#define SPI_DMA            DMA2
 #define SPI_DMA_RX_CHANNEL LL_DMA_CHANNEL_6
 #define SPI_DMA_TX_CHANNEL LL_DMA_CHANNEL_7
-#define SPI_DMA_RX_IRQ FuriHalInterruptIdDma2Ch6
-#define SPI_DMA_TX_IRQ FuriHalInterruptIdDma2Ch7
-#define SPI_DMA_RX_DEF SPI_DMA, SPI_DMA_RX_CHANNEL
-#define SPI_DMA_TX_DEF SPI_DMA, SPI_DMA_TX_CHANNEL
+#define SPI_DMA_RX_IRQ     FuriHalInterruptIdDma2Ch6
+#define SPI_DMA_TX_IRQ     FuriHalInterruptIdDma2Ch7
+#define SPI_DMA_RX_DEF     SPI_DMA, SPI_DMA_RX_CHANNEL
+#define SPI_DMA_TX_DEF     SPI_DMA, SPI_DMA_TX_CHANNEL
 
 // For simplicity, I assume that only one SPI DMA transaction can occur at a time.
 static FuriSemaphore* spi_dma_lock = NULL;
@@ -38,17 +38,17 @@ void furi_hal_spi_bus_deinit(FuriHalSpiBus* bus) {
     bus->callback(bus, FuriHalSpiBusEventDeinit);
 }
 
-void furi_hal_spi_bus_handle_init(FuriHalSpiBusHandle* handle) {
+void furi_hal_spi_bus_handle_init(const FuriHalSpiBusHandle* handle) {
     furi_check(handle);
     handle->callback(handle, FuriHalSpiBusHandleEventInit);
 }
 
-void furi_hal_spi_bus_handle_deinit(FuriHalSpiBusHandle* handle) {
+void furi_hal_spi_bus_handle_deinit(const FuriHalSpiBusHandle* handle) {
     furi_check(handle);
     handle->callback(handle, FuriHalSpiBusHandleEventDeinit);
 }
 
-void furi_hal_spi_acquire(FuriHalSpiBusHandle* handle) {
+void furi_hal_spi_acquire(const FuriHalSpiBusHandle* handle) {
     furi_check(handle);
 
     furi_hal_power_insomnia_enter();
@@ -62,7 +62,7 @@ void furi_hal_spi_acquire(FuriHalSpiBusHandle* handle) {
     handle->callback(handle, FuriHalSpiBusHandleEventActivate);
 }
 
-void furi_hal_spi_release(FuriHalSpiBusHandle* handle) {
+void furi_hal_spi_release(const FuriHalSpiBusHandle* handle) {
     furi_check(handle);
     furi_check(handle->bus->current_handle == handle);
 
@@ -77,7 +77,7 @@ void furi_hal_spi_release(FuriHalSpiBusHandle* handle) {
     furi_hal_power_insomnia_exit();
 }
 
-static void furi_hal_spi_bus_end_txrx(FuriHalSpiBusHandle* handle, uint32_t timeout) {
+static void furi_hal_spi_bus_end_txrx(const FuriHalSpiBusHandle* handle, uint32_t timeout) {
     UNUSED(timeout); // FIXME
     while(LL_SPI_GetTxFIFOLevel(handle->bus->spi) != LL_SPI_TX_FIFO_EMPTY)
         ;
@@ -89,7 +89,7 @@ static void furi_hal_spi_bus_end_txrx(FuriHalSpiBusHandle* handle, uint32_t time
 }
 
 bool furi_hal_spi_bus_rx(
-    FuriHalSpiBusHandle* handle,
+    const FuriHalSpiBusHandle* handle,
     uint8_t* buffer,
     size_t size,
     uint32_t timeout) {
@@ -102,7 +102,7 @@ bool furi_hal_spi_bus_rx(
 }
 
 bool furi_hal_spi_bus_tx(
-    FuriHalSpiBusHandle* handle,
+    const FuriHalSpiBusHandle* handle,
     const uint8_t* buffer,
     size_t size,
     uint32_t timeout) {
@@ -128,7 +128,7 @@ bool furi_hal_spi_bus_tx(
 }
 
 bool furi_hal_spi_bus_trx(
-    FuriHalSpiBusHandle* handle,
+    const FuriHalSpiBusHandle* handle,
     const uint8_t* tx_buffer,
     uint8_t* rx_buffer,
     size_t size,
@@ -192,7 +192,7 @@ static void spi_dma_isr(void* context) {
 }
 
 bool furi_hal_spi_bus_trx_dma(
-    FuriHalSpiBusHandle* handle,
+    const FuriHalSpiBusHandle* handle,
     uint8_t* tx_buffer,
     uint8_t* rx_buffer,
     size_t size,
@@ -202,7 +202,7 @@ bool furi_hal_spi_bus_trx_dma(
     furi_check(size > 0);
 
     // If scheduler is not running, use blocking mode
-    if(furi_kernel_is_running()) {
+    if(!furi_kernel_is_running()) {
         return furi_hal_spi_bus_trx(handle, tx_buffer, rx_buffer, size, timeout_ms);
     }
 

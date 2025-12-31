@@ -1,0 +1,23 @@
+{
+    build: {
+        // Where to put the compiled file
+        output: "dist/<app_name>.js",
+
+        // Whether to reduce the final file size at the cost of readability and
+        // clarity of error messages
+        minify: false,
+
+        // Set this to `false` if you've thoroughly read the documentation and
+        // are sure that you can use manual version checks to your advantage
+        enforceSdkVersion: true,
+    },
+
+    upload: {
+        // Where to grab the file from. If you're not doing any extra processing
+        // after the SDK, this should match `build.output`
+        input: "dist/<app_name>.js",
+
+        // Where to put the file on the device
+        output: "/ext/apps/Scripts/<app_name>.js",
+    },
+}

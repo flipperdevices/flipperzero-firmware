@@ -15,6 +15,7 @@ enum {
     SubmenuIndexUnlockByReader,
     SubmenuIndexUnlockByPassword,
     SubmenuIndexWrite,
+    SubmenuIndexDictAttack
 };
 
 enum {
@@ -150,6 +151,18 @@ static NfcCommand
         }
         if(!mf_ultralight_event->data->auth_context.skip_auth) {
             mf_ultralight_event->data->auth_context.password = instance->mf_ul_auth->password;
+
+            if(data->type == MfUltralightTypeMfulC) {
+                // Only set tdes_key for Manual/Reader auth types, not for dictionary attacks
+                if(instance->mf_ul_auth->type == MfUltralightAuthTypeManual ||
+                   instance->mf_ul_auth->type == MfUltralightAuthTypeReader) {
+                    mf_ultralight_event->data->key_request_data.key =
+                        instance->mf_ul_auth->tdes_key;
+                    mf_ultralight_event->data->key_request_data.key_provided = true;
+                } else {
+                    mf_ultralight_event->data->key_request_data.key_provided = false;
+                }
+            }
         }
     } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeAuthSuccess) {
         instance->mf_ul_auth->pack = mf_ultralight_event->data->auth_context.pack;
@@ -165,15 +178,31 @@ static void nfc_scene_read_on_enter_mf_ultralight(NfcApp* instance) {
 
 bool nfc_scene_read_on_event_mf_ultralight(NfcApp* instance, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcCustomEventCardDetected) {
-            nfc_unlock_helper_card_detected_handler(instance);
-        } else if(event.event == NfcCustomEventPollerIncomplete) {
-            notification_message(instance->notifications, &sequence_semi_success);
+        if(event.event == NfcCustomEventPollerSuccess) {
+            notification_message(instance->notifications, &sequence_success);
             scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
             dolphin_deed(DolphinDeedNfcReadSuccess);
+            return true;
+        } else if(event.event == NfcCustomEventPollerIncomplete) {
+            const MfUltralightData* data =
+                nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
+            if(data->type == MfUltralightTypeMfulC &&
+               instance->mf_ul_auth->type == MfUltralightAuthTypeNone) {
+                // Start dict attack for MFUL C cards only if no specific auth was attempted
+                scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightCDictAttack);
+            } else {
+                if(data->pages_read == data->pages_total) {
+                    notification_message(instance->notifications, &sequence_success);
+                } else {
+                    notification_message(instance->notifications, &sequence_semi_success);
+                }
+                scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
+                dolphin_deed(DolphinDeedNfcReadSuccess);
+            }
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 static void nfc_scene_read_and_saved_menu_on_enter_mf_ultralight(NfcApp* instance) {
@@ -189,10 +218,18 @@ static void nfc_scene_read_and_saved_menu_on_enter_mf_ultralight(NfcApp* instanc
             SubmenuIndexUnlock,
             nfc_protocol_support_common_submenu_callback,
             instance);
+        if(data->type == MfUltralightTypeMfulC) {
+            submenu_add_item(
+                submenu,
+                "Unlock with Dictionary",
+                SubmenuIndexDictAttack,
+                nfc_protocol_support_common_submenu_callback,
+                instance);
+        }
     } else if(
         data->type == MfUltralightTypeNTAG213 || data->type == MfUltralightTypeNTAG215 ||
         data->type == MfUltralightTypeNTAG216 || data->type == MfUltralightTypeUL11 ||
-        data->type == MfUltralightTypeUL21) {
+        data->type == MfUltralightTypeUL21 || data->type == MfUltralightTypeOrigin) {
         submenu_add_item(
             submenu,
             "Write",
@@ -243,13 +280,25 @@ static bool nfc_scene_read_and_saved_menu_on_event_mf_ultralight(
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexUnlock) {
-            scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightUnlockMenu);
+            const MfUltralightData* data =
+                nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
+
+            uint32_t next_scene = (data->type == MfUltralightTypeMfulC) ?
+                                      NfcSceneDesAuthKeyInput :
+                                      NfcSceneMfUltralightUnlockMenu;
+            scene_manager_next_scene(instance->scene_manager, next_scene);
             consumed = true;
         } else if(event.event == SubmenuIndexWrite) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightWrite);
             consumed = true;
         } else if(event.event == SubmenuIndexCommonEdit) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
+            consumed = true;
+        } else if(event.event == SubmenuIndexDictAttack) {
+            if(!scene_manager_search_and_switch_to_previous_scene(
+                   instance->scene_manager, NfcSceneMfUltralightCDictAttack)) {
+                scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightCDictAttack);
+            }
             consumed = true;
         }
     }

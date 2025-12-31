@@ -19,6 +19,7 @@ App(
         "view_holder.h",
         "modules/button_menu.h",
         "modules/byte_input.h",
+        "modules/number_input.h",
         "modules/popup.h",
         "modules/text_input.h",
         "modules/widget.h",
@@ -34,5 +35,6 @@ App(
         "modules/submenu.h",
         "modules/widget_elements/widget_element.h",
         "modules/empty_screen.h",
+        "modules/date_time_input.h",
     ],
 )
