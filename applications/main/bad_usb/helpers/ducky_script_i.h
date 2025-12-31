@@ -11,6 +11,7 @@ extern "C" {
 #include <mlib/m-dict.h>
 #include "ducky_script.h"
 #include "bad_usb_hid.h"
+#include "keyboard.h"
 
 
 #define SCRIPT_STATE_ERROR        (-1)
@@ -43,7 +44,7 @@ struct BadUsbScript {
     uint32_t defdelay;
     uint32_t stringdelay;
     uint32_t defstringdelay;
-    uint16_t layout[128];
+    BadUsbKeyboard* layout;
 
     FuriString* line;
     FuriString* line_prev;
