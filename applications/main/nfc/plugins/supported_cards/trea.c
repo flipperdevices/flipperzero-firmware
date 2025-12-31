@@ -34,9 +34,9 @@ static MfClassicKeyPair trea_1k_keys[] = {
 const uint8_t verify_sector = 6;
 
 static const char* trea_identify_service_type(const MfClassicData* data) {
-    
+
     uint8_t service_indicator = data->block[24].data[7];
-    
+
     switch(service_indicator) {
         case 0x04:
             return "Autolavaggio";
@@ -64,7 +64,7 @@ void trea_calculateKeys(
     const uint8_t* codiceGestore,
     uint8_t* chiaveA,
     uint8_t* chiaveB) {
-    
+
     // calcolo della chiave A
     chiaveA[0] = codiceGestore[0];
     chiaveA[1] = (codiceGestore[0] + 0x02) & 0xFF;
@@ -106,7 +106,7 @@ static bool trea_read(Nfc* nfc, NfcDevice* device) {
         uint8_t keyF[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
         MfClassicKey key_default = {0};
         memcpy(key_default.data, keyF, sizeof(keyF));
-        
+
         bool __attribute__((unused)) default_auth_works = false;
         const uint8_t test_block = mf_classic_get_first_block_num_of_sector(1);
         MfClassicAuthContext auth_context;
@@ -117,21 +117,21 @@ static bool trea_read(Nfc* nfc, NfcDevice* device) {
 
         bool keys_found = false;
         uint8_t chiaveA[6], chiaveB[6];
-        
+
         for(int vendor = 0x00; vendor <= 0xFF && !keys_found; vendor++) {
             uint8_t codiceGestore[1] = {vendor};
             trea_calculateKeys(uid, codiceGestore, chiaveA, chiaveB);
 
             MfClassicKey key_calc = {0};
             memcpy(key_calc.data, chiaveA, sizeof(chiaveA));
-            
+
             const uint8_t block_num = mf_classic_get_first_block_num_of_sector(verify_sector);
             error = mf_classic_poller_sync_auth(nfc, block_num, &key_calc, MfClassicKeyTypeA, &auth_context);
-            
+
             if(error == MfClassicErrorNone) {
                 FURI_LOG_D(TAG, "TREA keys found with vendor code: %02X", vendor);
                 keys_found = true;
-                
+
                 trea_1k_keys[verify_sector].a = bit_lib_bytes_to_num_be(chiaveA, KEY_LENGTH);
                 trea_1k_keys[verify_sector].b = bit_lib_bytes_to_num_be(chiaveB, KEY_LENGTH);
                 break;
@@ -158,7 +158,7 @@ static bool trea_read(Nfc* nfc, NfcDevice* device) {
 
         nfc_device_set_data(device, NfcProtocolMfClassic, data);
         is_read = (error == MfClassicErrorNone);
-        
+
     } while(false);
 
     mf_classic_free(data);
@@ -181,7 +181,7 @@ static bool trea_parse(const NfcDevice* device, FuriString* parsed_data) {
         bool is_trea = false;
         uint8_t vendor_code = 0;
         uint8_t chiaveA[6], chiaveB[6];
-        
+
         for(int vendor = 0x00; vendor <= 0xFF; vendor++) {
             uint8_t codiceGestore[1] = {vendor};
             trea_calculateKeys(uid, codiceGestore, chiaveA, chiaveB);
@@ -189,7 +189,7 @@ static bool trea_parse(const NfcDevice* device, FuriString* parsed_data) {
             MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, verify_sector);
             uint64_t stored_key = bit_lib_bytes_to_num_be(sec_tr->key_a.data, 6);
             uint64_t calculated_key = bit_lib_bytes_to_num_be(chiaveA, KEY_LENGTH);
-            
+
             if(stored_key == calculated_key) {
                 is_trea = true;
                 vendor_code = vendor;
@@ -215,7 +215,7 @@ static bool trea_parse(const NfcDevice* device, FuriString* parsed_data) {
         uint8_t atqa_msb = data->block[0].data[7];
         uint8_t sak = data->block[0].data[5];
         furi_string_cat_printf(parsed_data, "ATQA: %02X %02X ~ SAK: %02X\n", atqa_msb, atqa_lsb, sak);
-        
+
         furi_string_cat_printf(parsed_data, "--------------------\n");
 
         // credito attuale
