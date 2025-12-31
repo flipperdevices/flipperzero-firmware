@@ -43,7 +43,7 @@ typedef struct {
 // Helper function to parse PJL commands
 static void parse_pjl_command(PrinterTest* app, const char* line) {
     const char* pjl_start = line;
-    
+
     // Check if line starts with 0x041B%-12345X (UEL sequence) followed by @PJL
     if(line[0] == 0x04 && line[1] == 0x1B && strncmp(line + 2, "%-12345X", 8) == 0) {
         // Skip the UEL sequence and look for @PJL
@@ -53,21 +53,21 @@ static void parse_pjl_command(PrinterTest* app, const char* line) {
             pjl_start++;
         }
     }
-    
+
     // Check if we have @PJL at the current position
     if(strncmp(pjl_start, "@PJL", 4) != 0) {
         return;
     }
-    
+
     // Skip @PJL and any spaces
     const char* cmd = pjl_start + 4;
     while(*cmd == ' ' || *cmd == '\t') cmd++;
-    
+
     // Check for SET JOBNAME or JOBNAME command
     if(strncmp(cmd, "SET JOBNAME", 11) == 0) {
         const char* jobname = cmd + 11;
         while(*jobname == ' ' || *jobname == '\t' || *jobname == '=') jobname++;
-        
+
         // Extract job name (remove quotes if present)
         if(*jobname == '"') {
             jobname++;
@@ -82,26 +82,26 @@ static void parse_pjl_command(PrinterTest* app, const char* line) {
         } else {
             // No quotes, copy until space or end
             size_t i = 0;
-            while(jobname[i] && jobname[i] != ' ' && jobname[i] != '\t' && 
-                  jobname[i] != '\r' && jobname[i] != '\n' && 
+            while(jobname[i] && jobname[i] != ' ' && jobname[i] != '\t' &&
+                  jobname[i] != '\r' && jobname[i] != '\n' &&
                   i < sizeof(app->current_job_name) - 1) {
                 app->current_job_name[i] = jobname[i];
                 i++;
             }
             app->current_job_name[i] = '\0';
         }
-        
+
         // Send job started event
         PrinterTestEvent event = {
             .type = EventTypeJobStarted,
         };
         strncpy(event.job_name, app->current_job_name, sizeof(event.job_name) - 1);
         furi_message_queue_put(app->event_queue, &event, 0);
-        
+
     } else if(strncmp(cmd, "JOBNAME", 7) == 0) {
         const char* jobname = cmd + 7;
         while(*jobname == ' ' || *jobname == '\t' || *jobname == '=') jobname++;
-        
+
         // Extract job name (same logic as above)
         if(*jobname == '"') {
             jobname++;
@@ -115,22 +115,22 @@ static void parse_pjl_command(PrinterTest* app, const char* line) {
             }
         } else {
             size_t i = 0;
-            while(jobname[i] && jobname[i] != ' ' && jobname[i] != '\t' && 
-                  jobname[i] != '\r' && jobname[i] != '\n' && 
+            while(jobname[i] && jobname[i] != ' ' && jobname[i] != '\t' &&
+                  jobname[i] != '\r' && jobname[i] != '\n' &&
                   i < sizeof(app->current_job_name) - 1) {
                 app->current_job_name[i] = jobname[i];
                 i++;
             }
             app->current_job_name[i] = '\0';
         }
-        
+
         // Send job started event
         PrinterTestEvent event = {
             .type = EventTypeJobStarted,
         };
         strncpy(event.job_name, app->current_job_name, sizeof(event.job_name) - 1);
         furi_message_queue_put(app->event_queue, &event, 0);
-        
+
     } else if(strncmp(cmd, "EOJ", 3) == 0) {
         // End of job
         PrinterTestEvent event = {
@@ -146,10 +146,10 @@ static void process_data_lines(PrinterTest* app, const uint8_t* data, size_t len
         if(data[i] == 0x0A) {  // Line feed (newline)
             // Null-terminate the line
             app->line_buffer[app->line_pos] = '\0';
-            
+
             // Parse the line for PJL commands
             parse_pjl_command(app, app->line_buffer);
-            
+
             // Reset line buffer
             app->line_pos = 0;
         } else if(data[i] != 0x0D) {  // Ignore carriage return
@@ -164,10 +164,10 @@ static void process_data_lines(PrinterTest* app, const uint8_t* data, size_t len
 // Callback for receiving print data
 static void printer_data_callback(const uint8_t* data, size_t len, void* context) {
     PrinterTest* app = context;
-    
+
     // Process data line by line for PJL command parsing
     process_data_lines(app, data, len);
-    
+
     PrinterTestEvent event = {
         .type = EventTypeDataReceived,
         .data_len = len,
@@ -178,7 +178,7 @@ static void printer_data_callback(const uint8_t* data, size_t len, void* context
 // Callback for USB connection status
 static void printer_status_callback(bool connected, void* context) {
     PrinterTest* app = context;
-    
+
     PrinterTestEvent event = {
         .type = EventTypeStatusChanged,
         .connected = connected,
@@ -189,7 +189,7 @@ static void printer_status_callback(bool connected, void* context) {
 // Timer callback to poll for received data
 static void printer_test_timer_callback(void* context) {
     PrinterTest* app = context;
-    
+
     PrinterTestEvent event = {
         .type = EventTypeTick,
     };
@@ -231,7 +231,7 @@ static void printer_test_draw_callback(Canvas* canvas, void* context) {
         } else {
             canvas_draw_str(canvas, 2, 36, "Print job active");
         }
-        
+
         char buf[32];
         snprintf(buf, sizeof(buf), "Total: %zu bytes", app->total_bytes);
         canvas_draw_str(canvas, 2, 48, buf);
@@ -283,7 +283,7 @@ int32_t printer_test_app(void* p) {
 
     // Save previous USB mode
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
-    
+
     // Switch to printer mode
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_printer, NULL) == true);
