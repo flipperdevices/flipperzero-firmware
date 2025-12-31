@@ -756,12 +756,20 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         //remaining_trips
         furi_string_cat_printf(result, "Trips left: %d", data_block.remaining_trips);
         //trip_from
-        if(data_block.start_trip_date) { // TODO: (-nofl) unused
+        if(data_block.start_trip_date) {
             DateTime card_start_trip_minutes_s = {0};
             from_minutes_to_datetime(
                 data_block.start_trip_date * 24 * 60 + data_block.start_trip_time,
                 &card_start_trip_minutes_s,
                 1992);
+            furi_string_cat_printf(
+                result,
+                "\nTrip from: %02d.%02d.%04d %02d:%02d",
+                card_start_trip_minutes_s.day,
+                card_start_trip_minutes_s.month,
+                card_start_trip_minutes_s.year,
+                card_start_trip_minutes_s.hour,
+                card_start_trip_minutes_s.minute);
         }
         //validator
         if(data_block.validator) {
@@ -804,21 +812,37 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_valid_to_date_s.month,
             card_valid_to_date_s.year);
         //trip_from
-        if(data_block.start_trip_date) { // TODO: (-nofl) unused
+        if(data_block.start_trip_date) {
             DateTime card_start_trip_minutes_s = {0};
             from_minutes_to_datetime(
                 data_block.start_trip_date * 24 * 60 + data_block.start_trip_time,
                 &card_start_trip_minutes_s,
                 1992);
+            furi_string_cat_printf(
+                result,
+                "\nTrip from: %02d.%02d.%04d %02d:%02d",
+                card_start_trip_minutes_s.day,
+                card_start_trip_minutes_s.month,
+                card_start_trip_minutes_s.year,
+                card_start_trip_minutes_s.hour,
+                card_start_trip_minutes_s.minute);
         }
         //trip_switch
-        if(data_block.passage_5_minutes) { // TODO: (-nofl) unused
+        if(data_block.passage_5_minutes) {
             DateTime card_start_switch_trip_minutes_s = {0};
             from_minutes_to_datetime(
                 data_block.start_trip_date * 24 * 60 + data_block.start_trip_time +
                     data_block.passage_5_minutes,
                 &card_start_switch_trip_minutes_s,
                 1992);
+            furi_string_cat_printf(
+                result,
+                "\nTrip switch: %02d.%02d.%04d %02d:%02d",
+                card_start_switch_trip_minutes_s.day,
+                card_start_switch_trip_minutes_s.month,
+                card_start_switch_trip_minutes_s.year,
+                card_start_switch_trip_minutes_s.hour,
+                card_start_switch_trip_minutes_s.minute);
         }
         //validator
         if(data_block.validator) {

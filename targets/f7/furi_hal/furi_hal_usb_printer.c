@@ -190,7 +190,7 @@ static void printer_deinit(usbd_device* dev) {
 static void printer_on_wakeup(usbd_device* dev) {
     UNUSED(dev);
     printer_connected = true;
-
+    
     // Call status callback
     if(printer_callbacks && printer_callbacks->status_callback) {
         printer_callbacks->status_callback(true, printer_callback_context);
@@ -200,7 +200,7 @@ static void printer_on_wakeup(usbd_device* dev) {
 static void printer_on_suspend(usbd_device* dev) {
     UNUSED(dev);
     printer_connected = false;
-
+    
     // Call status callback
     if(printer_callbacks && printer_callbacks->status_callback) {
         printer_callbacks->status_callback(false, printer_callback_context);
@@ -210,7 +210,7 @@ static void printer_on_suspend(usbd_device* dev) {
 // Handle printer class-specific requests
 static usbd_respond printer_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback) {
     UNUSED(callback);
-
+    
     // Handle only printer class specific requests
     if((req->bmRequestType & (USB_REQ_TYPE | USB_REQ_RECIPIENT)) != (USB_REQ_CLASS | USB_REQ_INTERFACE)) {
         return usbd_fail;
@@ -261,11 +261,11 @@ static usbd_respond printer_ep_config(usbd_device* dev, uint8_t cfg) {
 // Callback for receiving data from host
 static void printer_rx_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(event);
-
+    
     int32_t len = usbd_ep_read(dev, ep, printer_rx_buffer, PRINTER_RX_BUFFER_SIZE);
     if(len > 0) {
         printer_status = PrinterStatusBusy;
-
+        
         if(printer_callbacks && printer_callbacks->data_rx_callback) {
             printer_callbacks->data_rx_callback(printer_rx_buffer, len, printer_callback_context);
         } else if(printer_rx_user_callback) {
@@ -287,7 +287,7 @@ static void printer_rx_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
                 printer_error = PrinterErrorGeneral;
             }
         }
-
+        
         printer_status = PrinterStatusIdle;
     }
 }
@@ -297,7 +297,7 @@ static void printer_tx_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(dev);
     UNUSED(event);
     UNUSED(ep);
-
+    
     if(printer_semaphore) {
         furi_semaphore_release(printer_semaphore);
     }
@@ -316,7 +316,7 @@ int32_t furi_hal_usb_printer_receive(uint8_t* buffer, uint16_t max_len) {
         free(item.data);
         return copy_len;
     }
-
+    
     return 0;
 }
 
@@ -342,7 +342,7 @@ PrinterError furi_hal_usb_printer_get_error(void) {
 void furi_hal_usb_printer_set_callbacks(PrinterCallbacks* callbacks, void* context) {
     printer_callbacks = callbacks;
     printer_callback_context = context;
-
+    
     // Process any queued data if callback is being set
     if(callbacks && callbacks->data_rx_callback && printer_queue) {
         PrinterQueueItem item;
@@ -351,7 +351,7 @@ void furi_hal_usb_printer_set_callbacks(PrinterCallbacks* callbacks, void* conte
             free(item.data);
         }
     }
-
+    
     // Send current connection status
     if(callbacks && callbacks->status_callback) {
         callbacks->status_callback(printer_connected, context);
@@ -363,7 +363,7 @@ void furi_hal_usb_printer_set_rx_callback(
     void* context) {
     printer_rx_user_callback = callback;
     printer_rx_context = context;
-
+    
     // Process any queued data if callback is being set
     if(callback && printer_queue) {
         PrinterQueueItem item;
