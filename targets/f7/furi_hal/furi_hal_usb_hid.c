@@ -155,7 +155,7 @@ static const struct HidConfigDescriptor hid_cfg_desc = {
             .bConfigurationValue = 1,
             .iConfiguration = NO_DESCRIPTOR,
             .bmAttributes = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
-            .bMaxPower = USB_CFG_POWER_MA(100),
+            .bMaxPower = USB_CFG_POWER_MA(500),
         },
     .intf_0 =
         {
@@ -368,7 +368,8 @@ static void* hid_set_string_descr(char* str) {
     struct usb_string_descriptor* dev_str_desc = malloc(len * 2 + 2);
     dev_str_desc->bLength = len * 2 + 2;
     dev_str_desc->bDescriptorType = USB_DTYPE_STRING;
-    for(size_t i = 0; i < len; i++) dev_str_desc->wString[i] = str[i];
+    for(size_t i = 0; i < len; i++)
+        dev_str_desc->wString[i] = str[i];
 
     return dev_str_desc;
 }

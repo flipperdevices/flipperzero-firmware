@@ -9,8 +9,8 @@
 #include <furi.h>
 
 typedef struct {
-    void* data;
     FuriMutex* mutex;
+    uint8_t data[];
 } ViewModelLocking;
 
 struct View {
@@ -30,6 +30,9 @@ struct View {
     void* model;
     void* context;
 };
+
+/** Initialize View (for internal use) */
+void view_init(View* view);
 
 /** IconAnimation tie callback */
 void view_icon_animation_callback(IconAnimation* instance, void* context);

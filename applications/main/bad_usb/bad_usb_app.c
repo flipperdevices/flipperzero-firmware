@@ -5,9 +5,9 @@
 #include <lib/toolbox/path.h>
 #include <flipper_format/flipper_format.h>
 
-#define BAD_USB_SETTINGS_PATH BAD_USB_APP_BASE_FOLDER "/.badusb.settings"
-#define BAD_USB_SETTINGS_FILE_TYPE "Flipper BadUSB Settings File"
-#define BAD_USB_SETTINGS_VERSION 1
+#define BAD_USB_SETTINGS_PATH           BAD_USB_APP_BASE_FOLDER "/.badusb.settings"
+#define BAD_USB_SETTINGS_FILE_TYPE      "Flipper BadUSB Settings File"
+#define BAD_USB_SETTINGS_VERSION        1
 #define BAD_USB_SETTINGS_DEFAULT_LAYOUT BAD_USB_APP_PATH_LAYOUT_FOLDER "/en-US.kl"
 
 static bool bad_usb_app_custom_event_callback(void* context, uint32_t event) {
@@ -94,6 +94,11 @@ static void bad_usb_save_settings(BadUsbApp* app) {
     furi_record_close(RECORD_STORAGE);
 }
 
+void bad_usb_set_interface(BadUsbApp* app, BadUsbHidInterface interface) {
+    app->interface = interface;
+    bad_usb_view_set_interface(app->bad_usb_view, interface);
+}
+
 BadUsbApp* bad_usb_app_alloc(char* arg) {
     BadUsbApp* app = malloc(sizeof(BadUsbApp));
 
@@ -112,8 +117,6 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(app->view_dispatcher);
-
     app->scene_manager = scene_manager_alloc(&bad_usb_scene_handlers, app);
 
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
@@ -127,7 +130,11 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     // Custom Widget
     app->widget = widget_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadUsbAppViewError, widget_get_view(app->widget));
+        app->view_dispatcher, BadUsbAppViewWidget, widget_get_view(app->widget));
+
+    // Popup
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, BadUsbAppViewPopup, popup_get_view(app->popup));
 
     app->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
@@ -173,8 +180,12 @@ void bad_usb_app_free(BadUsbApp* app) {
     bad_usb_view_free(app->bad_usb_view);
 
     // Custom Widget
-    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewError);
+    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewWidget);
     widget_free(app->widget);
+
+    // Popup
+    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewPopup);
+    popup_free(app->popup);
 
     // Config menu
     view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfig);

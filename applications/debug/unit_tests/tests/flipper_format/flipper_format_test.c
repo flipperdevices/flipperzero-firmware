@@ -5,7 +5,7 @@
 #include "../test.h" // IWYU pragma: keep
 
 #define TEST_DIR_NAME EXT_PATH(".tmp/unit_tests/ff")
-#define TEST_DIR TEST_DIR_NAME "/"
+#define TEST_DIR      TEST_DIR_NAME "/"
 
 static const char* test_filetype = "Flipper File test";
 static const uint32_t test_version = 666;
@@ -265,6 +265,7 @@ static bool test_write(const char* file_name) {
         if(!flipper_format_file_open_always(file, file_name)) break;
         if(!flipper_format_write_header_cstr(file, test_filetype, test_version)) break;
         if(!flipper_format_write_comment_cstr(file, "This is comment")) break;
+        if(!flipper_format_write_empty_line(file)) break;
         if(!flipper_format_write_string_cstr(file, test_string_key, test_string_data)) break;
         if(!flipper_format_write_int32(file, test_int_key, test_int_data, COUNT_OF(test_int_data)))
             break;

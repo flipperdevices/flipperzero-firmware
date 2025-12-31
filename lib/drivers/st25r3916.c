@@ -2,7 +2,7 @@
 
 #include <furi.h>
 
-void st25r3916_mask_irq(FuriHalSpiBusHandle* handle, uint32_t mask) {
+void st25r3916_mask_irq(const FuriHalSpiBusHandle* handle, uint32_t mask) {
     furi_assert(handle);
 
     uint8_t irq_mask_regs[4] = {
@@ -14,7 +14,7 @@ void st25r3916_mask_irq(FuriHalSpiBusHandle* handle, uint32_t mask) {
     st25r3916_write_burst_regs(handle, ST25R3916_REG_IRQ_MASK_MAIN, irq_mask_regs, 4);
 }
 
-uint32_t st25r3916_get_irq(FuriHalSpiBusHandle* handle) {
+uint32_t st25r3916_get_irq(const FuriHalSpiBusHandle* handle) {
     furi_assert(handle);
 
     uint8_t irq_regs[4] = {};
@@ -32,7 +32,7 @@ uint32_t st25r3916_get_irq(FuriHalSpiBusHandle* handle) {
     return irq;
 }
 
-void st25r3916_write_fifo(FuriHalSpiBusHandle* handle, const uint8_t* buff, size_t bits) {
+void st25r3916_write_fifo(const FuriHalSpiBusHandle* handle, const uint8_t* buff, size_t bits) {
     furi_assert(handle);
     furi_assert(buff);
 
@@ -45,7 +45,7 @@ void st25r3916_write_fifo(FuriHalSpiBusHandle* handle, const uint8_t* buff, size
 }
 
 bool st25r3916_read_fifo(
-    FuriHalSpiBusHandle* handle,
+    const FuriHalSpiBusHandle* handle,
     uint8_t* buff,
     size_t buff_size,
     size_t* buff_bits) {
@@ -57,9 +57,12 @@ bool st25r3916_read_fifo(
     do {
         uint8_t fifo_status[2] = {};
         st25r3916_read_burst_regs(handle, ST25R3916_REG_FIFO_STATUS1, fifo_status, 2);
-        size_t bytes = ((fifo_status[1] & ST25R3916_REG_FIFO_STATUS2_fifo_b_mask) >>
-                        ST25R3916_REG_FIFO_STATUS2_fifo_b_shift) |
-                       fifo_status[0];
+
+        uint16_t fifo_status_b9_b8 =
+            ((fifo_status[1] & ST25R3916_REG_FIFO_STATUS2_fifo_b_mask) >>
+             ST25R3916_REG_FIFO_STATUS2_fifo_b_shift);
+        size_t bytes = (fifo_status_b9_b8 << 8) | fifo_status[0];
+
         uint8_t bits =
             ((fifo_status[1] & ST25R3916_REG_FIFO_STATUS2_fifo_lb_mask) >>
              ST25R3916_REG_FIFO_STATUS2_fifo_lb_shift);

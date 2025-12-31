@@ -73,6 +73,7 @@ const GpioPinRecord gpio_pins[] = {
     {.pin = &gpio_ext_pa7,
      .name = "PA7",
      .channel = FuriHalAdcChannel12,
+     .pwm_output = FuriHalPwmOutputIdTim1PA7,
      .number = 2,
      .debug = false},
     {.pin = &gpio_ext_pa6,
@@ -83,6 +84,7 @@ const GpioPinRecord gpio_pins[] = {
     {.pin = &gpio_ext_pa4,
      .name = "PA4",
      .channel = FuriHalAdcChannel9,
+     .pwm_output = FuriHalPwmOutputIdLptim2PA4,
      .number = 4,
      .debug = false},
     {.pin = &gpio_ext_pb3,
@@ -287,4 +289,20 @@ int32_t furi_hal_resources_get_ext_pin_number(const GpioPin* gpio) {
         }
     }
     return -1;
+}
+
+const GpioPinRecord* furi_hal_resources_pin_by_name(const char* name) {
+    for(size_t i = 0; i < gpio_pins_count; i++) {
+        const GpioPinRecord* record = &gpio_pins[i];
+        if(strcasecmp(name, record->name) == 0) return record;
+    }
+    return NULL;
+}
+
+const GpioPinRecord* furi_hal_resources_pin_by_number(uint8_t number) {
+    for(size_t i = 0; i < gpio_pins_count; i++) {
+        const GpioPinRecord* record = &gpio_pins[i];
+        if(record->number == number) return record;
+    }
+    return NULL;
 }

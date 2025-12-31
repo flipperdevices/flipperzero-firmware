@@ -28,8 +28,10 @@ ENV.AppendUnique(
         "-Wno-address-of-packed-member",
         "-Wredundant-decls",
         "-Wdouble-promotion",
+        "-Wundef",
         "-fdata-sections",
         "-ffunction-sections",
+        "-Wa,-gdwarf-sections",
         "-fsingle-precision-constant",
         "-fno-math-errno",
         # Generates .su files with stack usage information
