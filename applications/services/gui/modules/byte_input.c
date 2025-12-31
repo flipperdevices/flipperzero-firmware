@@ -18,22 +18,22 @@ typedef struct {
 typedef struct {
     const char* header;
     uint8_t* bytes;
-    uint8_t bytes_count;
+    uint16_t bytes_count;
 
     ByteInputCallback input_callback;
     ByteChangedCallback changed_callback;
     void* callback_context;
 
     bool selected_high_nibble;
-    uint8_t selected_byte;
+    uint16_t selected_byte;
     int8_t selected_row; // row -2 - mini_editor, -1 - input, row 0 & 1 - keyboard
     uint8_t selected_column;
-    uint8_t first_visible_byte;
+    uint16_t first_visible_byte;
 } ByteInputModel;
 
 static const uint8_t keyboard_origin_x = 7;
 static const uint8_t keyboard_origin_y = 31;
-static const int8_t keyboard_row_count = 2;
+static const uint8_t keyboard_row_count = 2;
 static const uint8_t enter_symbol = '\r';
 static const uint8_t backspace_symbol = '\b';
 static const uint8_t max_drawable_bytes = 8;
@@ -170,7 +170,7 @@ static void byte_input_draw_input(Canvas* canvas, ByteInputModel* model) {
     canvas_draw_icon(canvas, 2, 19, &I_ButtonLeftSmall_3x5);
     canvas_draw_icon(canvas, 123, 19, &I_ButtonRightSmall_3x5);
 
-    for(uint8_t i = model->first_visible_byte;
+    for(uint16_t i = model->first_visible_byte;
         i < model->first_visible_byte + MIN(model->bytes_count, max_drawable_bytes);
         i++) {
         uint8_t byte_position = i - model->first_visible_byte;
@@ -295,7 +295,7 @@ static void byte_input_draw_input_selected(Canvas* canvas, ByteInputModel* model
     canvas_draw_icon(canvas, 2, 19, &I_ButtonLeftSmall_3x5);
     canvas_draw_icon(canvas, 122, 19, &I_ButtonRightSmall_3x5);
 
-    for(uint8_t i = model->first_visible_byte;
+    for(uint16_t i = model->first_visible_byte;
         i < model->first_visible_byte + MIN(model->bytes_count, max_drawable_bytes);
         i++) {
         uint8_t byte_position = i - model->first_visible_byte;
@@ -355,7 +355,7 @@ static void byte_input_draw_input_selected(Canvas* canvas, ByteInputModel* model
  * @param      value        char value
  * @param      high_nibble  set high nibble
  */
-static void byte_input_set_nibble(uint8_t* data, uint8_t position, char value, bool high_nibble) {
+static void byte_input_set_nibble(uint8_t* data, uint16_t position, char value, bool high_nibble) {
     switch(value) {
     case '0':
     case '1':
@@ -649,11 +649,11 @@ static void byte_input_view_draw_callback(Canvas* canvas, void* _model) {
         }
         canvas_set_font(canvas, FontKeyboard);
         // Draw keyboard
-        for(int8_t row = 0; row < keyboard_row_count; row++) {
+        for(uint8_t row = 0; row < keyboard_row_count; row++) {
             const uint8_t column_count = byte_input_get_row_size(row);
             const ByteInputKey* keys = byte_input_get_row(row);
 
-            for(uint8_t column = 0; column < column_count; column++) {
+            for(size_t column = 0; column < column_count; column++) {
                 if(keys[column].value == enter_symbol) {
                     canvas_set_color(canvas, ColorBlack);
                     if(model->selected_row == row && model->selected_column == column) {
@@ -808,7 +808,7 @@ static void byte_input_reset_model_input_data(ByteInputModel* model) {
     model->first_visible_byte = 0;
 }
 
-ByteInput* byte_input_alloc(void) {
+ByteInput* byte_input_alloc() {
     ByteInput* byte_input = malloc(sizeof(ByteInput));
     byte_input->view = view_alloc();
     view_set_context(byte_input->view, byte_input);
@@ -832,13 +832,13 @@ ByteInput* byte_input_alloc(void) {
 }
 
 void byte_input_free(ByteInput* byte_input) {
-    furi_check(byte_input);
+    furi_assert(byte_input);
     view_free(byte_input->view);
     free(byte_input);
 }
 
 View* byte_input_get_view(ByteInput* byte_input) {
-    furi_check(byte_input);
+    furi_assert(byte_input);
     return byte_input->view;
 }
 
@@ -848,9 +848,7 @@ void byte_input_set_result_callback(
     ByteChangedCallback changed_callback,
     void* callback_context,
     uint8_t* bytes,
-    uint8_t bytes_count) {
-    furi_check(byte_input);
-
+    uint16_t bytes_count) {
     with_view_model(
         byte_input->view,
         ByteInputModel * model,
@@ -866,7 +864,6 @@ void byte_input_set_result_callback(
 }
 
 void byte_input_set_header_text(ByteInput* byte_input, const char* text) {
-    furi_check(byte_input);
-
-    with_view_model(byte_input->view, ByteInputModel * model, { model->header = text; }, true);
+    with_view_model(
+        byte_input->view, ByteInputModel * model, { model->header = text; }, true);
 }

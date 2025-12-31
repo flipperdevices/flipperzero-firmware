@@ -154,6 +154,10 @@ static const SubGhzDevice* subghz_cli_command_get_device(uint32_t* device_ind) {
         subghz_cli_radio_device_power_on();
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
         break;
+    case 2:
+        subghz_cli_radio_device_power_on();
+        device = subghz_devices_get_by_name(SUBGHZ_DEVICE_SI4463_EXT_NAME);
+        break;
 
     default:
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
@@ -174,7 +178,7 @@ void subghz_cli_command_tx(PipeSide* pipe, FuriString* args, void* context) {
     uint32_t key = 0x0074BADE;
     uint32_t repeat = 10;
     uint32_t te = 403;
-    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
+    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
 
     if(furi_string_size(args)) {
         char* args_cstr = (char*)furi_string_get_cstr(args);
@@ -187,7 +191,7 @@ void subghz_cli_command_tx(PipeSide* pipe, FuriString* args, void* context) {
         if(parse_err) {
             cli_print_usage(
                 "subghz tx",
-                "<3 Byte Key: in hex> <Frequency: in Hz> <Te us> <Repeat count> <Device: 0 - CC1101_INT, 1 - CC1101_EXT>",
+                "<3 Byte Key: in hex> <Frequency: in Hz> <Te us> <Repeat count> <Device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>",
                 furi_string_get_cstr(args));
             return;
         }
@@ -300,7 +304,7 @@ static void subghz_cli_command_rx_callback(
 void subghz_cli_command_rx(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(context);
     uint32_t frequency = 433920000;
-    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
+    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
 
     if(furi_string_size(args)) {
         char* args_cstr = (char*)furi_string_get_cstr(args);
@@ -310,7 +314,7 @@ void subghz_cli_command_rx(PipeSide* pipe, FuriString* args, void* context) {
         if(parse_err) {
             cli_print_usage(
                 "subghz rx",
-                "<Frequency: in Hz> <Device: 0 - CC1101_INT, 1 - CC1101_EXT>",
+                "<Frequency: in Hz> <Device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>",
                 furi_string_get_cstr(args));
             return;
         }
@@ -358,7 +362,7 @@ void subghz_cli_command_rx(PipeSide* pipe, FuriString* args, void* context) {
             instance->stream, &level_duration, sizeof(LevelDuration), 10);
         if(ret == sizeof(LevelDuration)) {
             if(level_duration_is_reset(level_duration)) {
-                printf(".");
+                furi_hal_console_printf(".");
                 subghz_receiver_reset(receiver);
             } else {
                 bool level = level_duration_get_level(level_duration);
@@ -821,10 +825,11 @@ static void subghz_cli_command_print_usage(void) {
     printf("Cmd list:\r\n");
 
     printf(
-        "\tchat <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Chat with other Flippers\r\n");
+        "\tchat <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>\t - Chat with other Flippers\r\n");
     printf(
         "\ttx <3 byte Key: in hex> <frequency: in Hz> <te: us> <repeat: count> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Transmitting key\r\n");
-    printf("\trx <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Receive\r\n");
+    printf(
+        "\trx <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>\t - Receive\r\n");
     printf("\trx_raw <frequency:in Hz>\t - Receive RAW\r\n");
     printf("\tdecode_raw <file_name: path_RAW_file>\t - Testing\r\n");
     printf(
@@ -924,7 +929,7 @@ static void subghz_cli_command_encrypt_raw(PipeSide* pipe, FuriString* args) {
 
 static void subghz_cli_command_chat(PipeSide* pipe, FuriString* args) {
     uint32_t frequency = 433920000;
-    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
+    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
 
     if(furi_string_size(args)) {
         char* args_cstr = (char*)furi_string_get_cstr(args);
@@ -934,7 +939,7 @@ static void subghz_cli_command_chat(PipeSide* pipe, FuriString* args) {
         if(parse_err) {
             cli_print_usage(
                 "subghz chat",
-                "<Frequency: in Hz> <Device: 0 - CC1101_INT, 1 - CC1101_EXT>",
+                "<Frequency: in Hz> <Device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>",
                 furi_string_get_cstr(args));
             return;
         }

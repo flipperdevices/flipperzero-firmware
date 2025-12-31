@@ -59,6 +59,15 @@ VariableItem* variable_item_list_add(
     VariableItemChangeCallback change_callback,
     void* context);
 
+/** Get pre-existing item instance in VariableItemList
+ *
+ * @param      variable_item_list  VariableItemList instance
+ * @param      position            index of the item instance to get
+ *
+ * @return     VariableItem* item instance
+ */
+VariableItem* variable_item_list_get(VariableItemList* variable_item_list, uint8_t position);
+
 /** Set enter callback
  *
  * @param      variable_item_list  VariableItemList instance
@@ -74,6 +83,14 @@ void variable_item_list_set_selected_item(VariableItemList* variable_item_list, 
 
 uint8_t variable_item_list_get_selected_item_index(VariableItemList* variable_item_list);
 
+/** Set optional header for variable item list
+ * Must be called before adding items OR after adding items and before set_selected_item()
+ *
+ * @param      variable_item_list  VariableItemList instance
+ * @param      header              header to set
+ */
+void variable_item_list_set_header(VariableItemList* variable_item_list, const char* header);
+
 /** Set item current selected index
  *
  * @param      item                 VariableItem* instance
@@ -88,12 +105,28 @@ void variable_item_set_current_value_index(VariableItem* item, uint8_t current_v
  */
 void variable_item_set_values_count(VariableItem* item, uint8_t values_count);
 
+/** Set new label for item
+ *
+ * @param      item                 VariableItem* instance
+ * @param      label                The new label text
+ */
+void variable_item_set_item_label(VariableItem* item, const char* label);
+
 /** Set item current selected text
  *
  * @param      item                VariableItem* instance
  * @param      current_value_text  The current value text
  */
 void variable_item_set_current_value_text(VariableItem* item, const char* current_value_text);
+
+/** Set item locked state and text
+ * Locked message is saved, you can set_locked(item, false, "Message") and then set_locked(item, true, NULL), it will use previous locked message
+ *
+ * @param      item                VariableItem* instance
+ * @param      locked              Is item locked boolean
+ * @param      locked_message      The locked message text
+ */
+void variable_item_set_locked(VariableItem* item, bool locked, const char* locked_message);
 
 /** Get item current selected index
  *

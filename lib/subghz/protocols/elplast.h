@@ -42,7 +42,7 @@ void subghz_protocol_encoder_elplast_stop(void* context);
 /**
  * Getting the level and duration of the upload to be loaded into DMA.
  * @param context Pointer to a SubGhzProtocolEncoderElplast instance
- * @return LevelDuration
+ * @return LevelDuration 
  */
 LevelDuration subghz_protocol_encoder_elplast_yield(void* context);
 

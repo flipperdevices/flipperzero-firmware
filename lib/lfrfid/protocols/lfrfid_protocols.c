@@ -4,6 +4,7 @@
 #include "protocol_h10301.h"
 #include "protocol_idteck.h"
 #include "protocol_indala26.h"
+#include "protocol_indala224.h"
 #include "protocol_io_prox_xsf.h"
 #include "protocol_awid.h"
 #include "protocol_fdx_a.h"
@@ -17,6 +18,7 @@
 #include "protocol_pac_stanley.h"
 #include "protocol_keri.h"
 #include "protocol_gallagher.h"
+#include "protocol_hitag1.h"
 #include "protocol_nexwatch.h"
 #include "protocol_securakey.h"
 #include "protocol_gproxii.h"
@@ -30,6 +32,7 @@ const ProtocolBase* const lfrfid_protocols[] = {
     [LFRFIDProtocolH10301] = &protocol_h10301,
     [LFRFIDProtocolIdteck] = &protocol_idteck,
     [LFRFIDProtocolIndala26] = &protocol_indala26,
+    [LFRFIDProtocolIndala224] = &protocol_indala224,
     [LFRFIDProtocolIOProxXSF] = &protocol_io_prox_xsf,
     [LFRFIDProtocolAwid] = &protocol_awid,
     [LFRFIDProtocolFDXA] = &protocol_fdx_a,
@@ -43,6 +46,7 @@ const ProtocolBase* const lfrfid_protocols[] = {
     [LFRFIDProtocolPACStanley] = &protocol_pac_stanley,
     [LFRFIDProtocolKeri] = &protocol_keri,
     [LFRFIDProtocolGallagher] = &protocol_gallagher,
+    [LFRFIDProtocolHitag1] = &protocol_hitag1,
     [LFRFIDProtocolNexwatch] = &protocol_nexwatch,
     [LFRFIDProtocolSecurakey] = &protocol_securakey,
     [LFRFIDProtocolGProxII] = &protocol_gproxii,

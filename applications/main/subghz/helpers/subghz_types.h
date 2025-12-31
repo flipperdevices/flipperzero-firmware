@@ -40,6 +40,7 @@ typedef enum {
     SubGhzRadioDeviceTypeAuto,
     SubGhzRadioDeviceTypeInternal,
     SubGhzRadioDeviceTypeExternalCC1101,
+    SubGhzRadioDeviceTypeExternalSi4463,
 } SubGhzRadioDeviceType;
 
 /** SubGhzRxKeyState state */

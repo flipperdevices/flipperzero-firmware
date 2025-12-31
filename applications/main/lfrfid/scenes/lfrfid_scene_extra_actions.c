@@ -4,6 +4,7 @@
 typedef enum {
     SubmenuIndexASK,
     SubmenuIndexPSK,
+    SubmenuIndexHitag,
     SubmenuIndexRAW,
 } SubmenuIndex;
 
@@ -27,6 +28,12 @@ void lfrfid_scene_extra_actions_on_enter(void* context) {
         submenu,
         "Read PSK (Indala)",
         SubmenuIndexPSK,
+        lfrfid_scene_extra_actions_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
+        "Read RTF (Reader Talks First)",
+        SubmenuIndexHitag,
         lfrfid_scene_extra_actions_submenu_callback,
         app);
 
@@ -62,6 +69,11 @@ bool lfrfid_scene_extra_actions_on_event(void* context, SceneManagerEvent event)
             consumed = true;
         } else if(event.event == SubmenuIndexPSK) {
             app->read_type = LFRFIDWorkerReadTypePSKOnly;
+            scene_manager_next_scene(app->scene_manager, LfRfidSceneRead);
+            dolphin_deed(DolphinDeedRfidRead);
+            consumed = true;
+        } else if(event.event == SubmenuIndexHitag) {
+            app->read_type = LFRFIDWorkerReadTypeRTFOnly;
             scene_manager_next_scene(app->scene_manager, LfRfidSceneRead);
             dolphin_deed(DolphinDeedRfidRead);
             consumed = true;

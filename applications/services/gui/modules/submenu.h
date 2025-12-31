@@ -100,11 +100,19 @@ uint32_t submenu_get_selected_item(Submenu* submenu);
 void submenu_set_selected_item(Submenu* submenu, uint32_t index);
 
 /** Set optional header for submenu
+ * Must be called before adding items OR after adding items and before set_selected_item()
  *
  * @param      submenu  Submenu instance
  * @param      header   header to set
  */
 void submenu_set_header(Submenu* submenu, const char* header);
+
+/** Set submenu orientation
+ *
+ * @param      submenu  Submenu instance
+ * @param      orientation  either vertical or horizontal
+ */
+void submenu_set_orientation(Submenu* submenu, ViewOrientation orientation);
 
 #ifdef __cplusplus
 }

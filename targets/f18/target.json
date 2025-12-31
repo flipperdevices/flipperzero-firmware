@@ -23,6 +23,7 @@
         "microtar",
         "usb_stm32",
         "assets",
+        "uzlib",
         "one_wire",
         "music_worker",
         "mjs",

@@ -234,3 +234,12 @@ void subghz_devices_write_packet(const SubGhzDevice* device, const uint8_t* data
         device->interconnect->write_packet(data, size);
     }
 }
+
+bool subghz_devices_io_control(const SubGhzDevice* device, uint32_t io_control_code, void* in_out_data) {
+    bool ret = false;
+    furi_assert(device);
+    if(device->interconnect->device_io_control) {
+        ret = device->interconnect->device_io_control(io_control_code, in_out_data);
+    }
+    return ret;
+}
