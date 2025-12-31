@@ -8,7 +8,8 @@
 #include <furi.h>
 
 #define TAG "FuriHalIbutton"
-#define FURI_HAL_IBUTTON_TIMER TIM1
+
+#define FURI_HAL_IBUTTON_TIMER     TIM1
 #define FURI_HAL_IBUTTON_TIMER_BUS FuriHalBusTIM1
 #define FURI_HAL_IBUTTON_TIMER_IRQ FuriHalInterruptIdTim1UpTim16
 
@@ -33,7 +34,7 @@ static void furi_hal_ibutton_emulate_isr(void* context) {
     }
 }
 
-void furi_hal_ibutton_init() {
+void furi_hal_ibutton_init(void) {
     furi_hal_ibutton = malloc(sizeof(FuriHalIbutton));
     furi_hal_ibutton->state = FuriHalIbuttonStateIdle;
 
@@ -44,8 +45,8 @@ void furi_hal_ibutton_emulate_start(
     uint32_t period,
     FuriHalIbuttonEmulateCallback callback,
     void* context) {
-    furi_assert(furi_hal_ibutton);
-    furi_assert(furi_hal_ibutton->state == FuriHalIbuttonStateIdle);
+    furi_check(furi_hal_ibutton);
+    furi_check(furi_hal_ibutton->state == FuriHalIbuttonStateIdle);
 
     furi_hal_ibutton->state = FuriHalIbuttonStateRunning;
     furi_hal_ibutton->callback = callback;
@@ -74,8 +75,8 @@ void furi_hal_ibutton_emulate_set_next(uint32_t period) {
     LL_TIM_SetAutoReload(FURI_HAL_IBUTTON_TIMER, period);
 }
 
-void furi_hal_ibutton_emulate_stop() {
-    furi_assert(furi_hal_ibutton);
+void furi_hal_ibutton_emulate_stop(void) {
+    furi_check(furi_hal_ibutton);
 
     if(furi_hal_ibutton->state == FuriHalIbuttonStateRunning) {
         furi_hal_ibutton->state = FuriHalIbuttonStateIdle;
@@ -89,12 +90,12 @@ void furi_hal_ibutton_emulate_stop() {
     }
 }
 
-void furi_hal_ibutton_pin_configure() {
+void furi_hal_ibutton_pin_configure(void) {
     furi_hal_gpio_write(&gpio_ibutton, true);
     furi_hal_gpio_init(&gpio_ibutton, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
 }
 
-void furi_hal_ibutton_pin_reset() {
+void furi_hal_ibutton_pin_reset(void) {
     furi_hal_gpio_write(&gpio_ibutton, true);
     furi_hal_gpio_init(&gpio_ibutton, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }

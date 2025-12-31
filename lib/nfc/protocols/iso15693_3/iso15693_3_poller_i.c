@@ -38,6 +38,8 @@ Iso15693_3Error iso15693_3_poller_send_frame(
     BitBuffer* rx_buffer,
     uint32_t fwt) {
     furi_assert(instance);
+    furi_check(tx_buffer);
+    furi_check(rx_buffer);
 
     Iso15693_3Error ret = Iso15693_3ErrorNone;
 
@@ -98,10 +100,12 @@ Iso15693_3Error iso15693_3_poller_activate(Iso15693_3Poller* instance, Iso15693_
             break;
         }
 
-        if(system_info->block_count > 0) {
-            // Read blocks: Optional command
+        if(system_info->block_count > 0 && system_info->block_size > 0) {
             simple_array_init(
                 data->block_data, system_info->block_count * system_info->block_size);
+            simple_array_init(data->block_security, system_info->block_count);
+
+            // Read blocks: Optional command
             ret = iso15693_3_poller_read_blocks(
                 instance,
                 simple_array_get_data(data->block_data),
@@ -113,8 +117,6 @@ Iso15693_3Error iso15693_3_poller_activate(Iso15693_3Poller* instance, Iso15693_
             }
 
             // Get block security status: Optional command
-            simple_array_init(data->block_security, system_info->block_count);
-
             ret = iso15693_3_poller_get_blocks_security(
                 instance, simple_array_get_data(data->block_security), system_info->block_count);
             if(ret != Iso15693_3ErrorNone) {

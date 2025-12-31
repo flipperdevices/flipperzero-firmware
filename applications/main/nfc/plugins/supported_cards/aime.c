@@ -52,7 +52,7 @@ static bool aime_read(Nfc* nfc, NfcDevice* device) {
 
         data->type = type;
         MfClassicDeviceKeys keys = {};
-        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
+        for(size_t i = 0; i < mf_classic_get_scannable_sectors_num(data->type); i++) {
             bit_lib_num_to_bytes_be(aime_key, sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
             bit_lib_num_to_bytes_be(aime_key, sizeof(MfClassicKey), keys.key_b[i].data);
@@ -164,6 +164,6 @@ static const FlipperAppPluginDescriptor aime_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* aime_plugin_ep() {
+const FlipperAppPluginDescriptor* aime_plugin_ep(void) {
     return &aime_plugin_descriptor;
 }

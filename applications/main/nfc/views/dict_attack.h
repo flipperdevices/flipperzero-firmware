@@ -2,10 +2,16 @@
 
 #include <stdint.h>
 #include <gui/view.h>
+#include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef enum {
+    DictAttackTypeMfClassic,
+    DictAttackTypeMfUltralightC,
+} DictAttackType;
 
 typedef struct DictAttack DictAttack;
 
@@ -15,7 +21,7 @@ typedef enum {
 
 typedef void (*DictAttackCallback)(DictAttackEvent event, void* context);
 
-DictAttack* dict_attack_alloc();
+DictAttack* dict_attack_alloc(void);
 
 void dict_attack_free(DictAttack* instance);
 
@@ -44,6 +50,24 @@ void dict_attack_set_current_dict_key(DictAttack* instance, size_t cur_key_num);
 void dict_attack_set_key_attack(DictAttack* instance, uint8_t sector);
 
 void dict_attack_reset_key_attack(DictAttack* instance);
+
+void dict_attack_set_nested_phase(DictAttack* instance, MfClassicNestedPhase nested_phase);
+
+void dict_attack_set_prng_type(DictAttack* instance, MfClassicPrngType prng_type);
+
+void dict_attack_set_backdoor(DictAttack* instance, MfClassicBackdoor backdoor);
+
+void dict_attack_set_nested_target_key(DictAttack* instance, uint16_t target_key);
+
+void dict_attack_set_msb_count(DictAttack* instance, uint16_t msb_count);
+
+void dict_attack_set_type(DictAttack* instance, DictAttackType type);
+
+void dict_attack_set_pages_total(DictAttack* instance, uint8_t pages_total);
+
+void dict_attack_set_pages_read(DictAttack* instance, uint8_t pages_read);
+
+void dict_attack_set_key_found(DictAttack* instance, bool key_found);
 
 #ifdef __cplusplus
 }

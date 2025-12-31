@@ -62,18 +62,18 @@ static const char* opal_usages[14] = {
 
 // Opal file 0x7 structure. Assumes a little-endian CPU.
 typedef struct FURI_PACKED {
-    uint32_t serial : 32;
-    uint8_t check_digit : 4;
-    bool blocked : 1;
-    uint16_t txn_number : 16;
-    int32_t balance : 21;
-    uint16_t days : 15;
-    uint16_t minutes : 11;
-    uint8_t mode : 3;
-    uint16_t usage : 4;
-    bool auto_topup : 1;
+    uint32_t serial         : 32;
+    uint8_t check_digit     : 4;
+    bool blocked            : 1;
+    uint16_t txn_number     : 16;
+    int32_t balance         : 21;
+    uint16_t days           : 15;
+    uint16_t minutes        : 11;
+    uint8_t mode            : 3;
+    uint16_t usage          : 4;
+    bool auto_topup         : 1;
     uint8_t weekly_journeys : 4;
-    uint16_t checksum : 16;
+    uint16_t checksum       : 16;
 } OpalFile;
 
 static_assert(sizeof(OpalFile) == 16, "OpalFile");
@@ -170,7 +170,7 @@ static bool opal_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         furi_string_printf(
             parsed_data,
-            "\e#Opal: $%s%ld.%02hu\n3085 22%02hhu %04hu %03hu%01hhu\n%s, %s\n",
+            "\e#Opal: $%s%ld.%02hu\nNo.: 3085 22%02hhu %04hu %03hu%01hhu\n%s, %s\n",
             sign,
             balance_dollars,
             balance_cents,
@@ -228,6 +228,6 @@ static const FlipperAppPluginDescriptor opal_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* opal_plugin_ep() {
+const FlipperAppPluginDescriptor* opal_plugin_ep(void) {
     return &opal_plugin_descriptor;
 }

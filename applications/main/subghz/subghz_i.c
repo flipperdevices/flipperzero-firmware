@@ -2,7 +2,6 @@
 
 #include "assets_icons.h"
 #include "subghz/types.h"
-#include <math.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
@@ -10,7 +9,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format.h>
-#include "views/receiver.h"
 
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/stream/stream.h>
@@ -410,7 +408,7 @@ void subghz_unlock(SubGhz* subghz) {
 
 bool subghz_is_locked(SubGhz* subghz) {
     furi_assert(subghz);
-    return (subghz->lock == SubGhzLockOn);
+    return subghz->lock == SubGhzLockOn;
 }
 
 void subghz_rx_key_state_set(SubGhz* subghz, SubGhzRxKeyState state) {

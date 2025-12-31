@@ -47,7 +47,7 @@ static int ptest(struct pstate* p) {
     return tok;
 }
 
-static int s_unary_ops[] = {
+static const int s_unary_ops[] = {
     TOK_NOT,
     TOK_TILDA,
     TOK_PLUS_PLUS,
@@ -56,10 +56,10 @@ static int s_unary_ops[] = {
     TOK_MINUS,
     TOK_PLUS,
     TOK_EOF};
-static int s_comparison_ops[] = {TOK_LT, TOK_LE, TOK_GT, TOK_GE, TOK_EOF};
-static int s_postfix_ops[] = {TOK_PLUS_PLUS, TOK_MINUS_MINUS, TOK_EOF};
-static int s_equality_ops[] = {TOK_EQ, TOK_NE, TOK_EQ_EQ, TOK_NE_NE, TOK_EOF};
-static int s_assign_ops[] = {
+static const int s_comparison_ops[] = {TOK_LT, TOK_LE, TOK_GT, TOK_GE, TOK_EOF};
+static const int s_postfix_ops[] = {TOK_PLUS_PLUS, TOK_MINUS_MINUS, TOK_EOF};
+static const int s_equality_ops[] = {TOK_EQ, TOK_NE, TOK_EQ_EQ, TOK_NE_NE, TOK_EOF};
+static const int s_assign_ops[] = {
     TOK_ASSIGN,
     TOK_PLUS_ASSIGN,
     TOK_MINUS_ASSIGN,
@@ -74,9 +74,10 @@ static int s_assign_ops[] = {
     TOK_OR_ASSIGN,
     TOK_EOF};
 
-static int findtok(int* toks, int tok) {
+static int findtok(int const* toks, int tok) {
     int i = 0;
-    while(tok != toks[i] && toks[i] != TOK_EOF) i++;
+    while(tok != toks[i] && toks[i] != TOK_EOF)
+        i++;
     return toks[i];
 }
 
@@ -87,7 +88,7 @@ static void emit_op(struct pstate* pstate, int tok) {
 }
 
 #define BINOP_STACK_FRAME_SIZE 16
-#define STACK_LIMIT 8192
+#define STACK_LIMIT            8192
 
 // Intentionally left as macro rather than a function, to let the
 // compiler to inline calls and mimimize runtime stack usage.
@@ -166,7 +167,8 @@ static mjs_err_t parse_statement_list(struct pstate* p, int et) {
         if(drop) emit_byte(p, OP_DROP);
         res = parse_statement(p);
         drop = 1;
-        while(p->tok.tok == TOK_SEMICOLON) pnext1(p);
+        while(p->tok.tok == TOK_SEMICOLON)
+            pnext1(p);
     }
 
     /*
@@ -523,7 +525,11 @@ static mjs_err_t parse_expr(struct pstate* p) {
 static mjs_err_t parse_let(struct pstate* p) {
     mjs_err_t res = MJS_OK;
     LOG(LL_VERBOSE_DEBUG, ("[%.*s]", 10, p->tok.ptr));
-    EXPECT(p, TOK_KEYWORD_LET);
+    if((p)->tok.tok != TOK_KEYWORD_VAR && (p)->tok.tok != TOK_KEYWORD_LET &&
+       (p)->tok.tok != TOK_KEYWORD_CONST)
+        SYNTAX_ERROR(p);
+    else
+        pnext1(p);
     for(;;) {
         struct tok tmp = p->tok;
         EXPECT(p, TOK_IDENT);
@@ -910,6 +916,8 @@ static mjs_err_t parse_statement(struct pstate* p) {
         pnext1(p);
         return MJS_OK;
     case TOK_KEYWORD_LET:
+    case TOK_KEYWORD_VAR:
+    case TOK_KEYWORD_CONST:
         return parse_let(p);
     case TOK_OPEN_CURLY:
         return parse_block(p, 1);
@@ -939,7 +947,6 @@ static mjs_err_t parse_statement(struct pstate* p) {
     case TOK_KEYWORD_SWITCH:
     case TOK_KEYWORD_THROW:
     case TOK_KEYWORD_TRY:
-    case TOK_KEYWORD_VAR:
     case TOK_KEYWORD_VOID:
     case TOK_KEYWORD_WITH:
         mjs_set_errorf(

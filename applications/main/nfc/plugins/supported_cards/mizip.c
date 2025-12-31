@@ -5,9 +5,10 @@
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
 #define TAG "MiZIP"
-#define KEY_LENGTH 6
+
+#define KEY_LENGTH       6
 #define MIZIP_KEY_TO_GEN 5
-#define UID_LENGTH 4
+#define UID_LENGTH       4
 
 typedef struct {
     uint64_t a;
@@ -149,7 +150,7 @@ static bool mizip_read(Nfc* nfc, NfcDevice* device) {
         uint8_t keyB[MIZIP_KEY_TO_GEN][KEY_LENGTH];
         mizip_generate_key(uid, keyA, keyB);
 
-        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
+        for(size_t i = 0; i < mf_classic_get_scannable_sectors_num(data->type); i++) {
             if(cfg.keys[i].a == 0x000000000000 && cfg.keys[i].b == 0x000000000000) {
                 cfg.keys[i].a = bit_lib_bytes_to_num_be(keyA[i], KEY_LENGTH);
                 cfg.keys[i].b = bit_lib_bytes_to_num_be(keyB[i], KEY_LENGTH);
@@ -157,7 +158,7 @@ static bool mizip_read(Nfc* nfc, NfcDevice* device) {
         }
 
         MfClassicDeviceKeys keys = {};
-        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
+        for(size_t i = 0; i < mf_classic_get_scannable_sectors_num(data->type); i++) {
             bit_lib_num_to_bytes_be(cfg.keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
             bit_lib_num_to_bytes_be(cfg.keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
@@ -251,6 +252,6 @@ static const FlipperAppPluginDescriptor mizip_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* mizip_plugin_ep() {
+const FlipperAppPluginDescriptor* mizip_plugin_ep(void) {
     return &mizip_plugin_descriptor;
 }

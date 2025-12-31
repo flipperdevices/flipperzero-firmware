@@ -21,8 +21,7 @@
 
 #define TAG "FuriHalBt"
 
-#define furi_hal_bt_DEFAULT_MAC_ADDR \
-    { 0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72 }
+#define furi_hal_bt_DEFAULT_MAC_ADDR {0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72}
 
 /* Time, in ms, to wait for mode transition before crashing */
 #define C2_MODE_SWITCH_TIMEOUT 10000
@@ -37,7 +36,10 @@ static FuriHalBt furi_hal_bt = {
     .stack = FuriHalBtStackUnknown,
 };
 
-void furi_hal_bt_init() {
+static FuriHalBleProfileBase* current_profile = NULL;
+static GapConfig current_config = {0};
+
+void furi_hal_bt_init(void) {
     FURI_LOG_I(TAG, "Start BT initialization");
     furi_hal_bus_enable(FuriHalBusHSEM);
     furi_hal_bus_enable(FuriHalBusIPCC);
@@ -47,7 +49,7 @@ void furi_hal_bt_init() {
 
     if(!furi_hal_bt.core2_mtx) {
         furi_hal_bt.core2_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
-        furi_assert(furi_hal_bt.core2_mtx);
+        furi_check(furi_hal_bt.core2_mtx);
     }
 
     // Explicitly tell that we are in charge of CLK48 domain
@@ -57,13 +59,13 @@ void furi_hal_bt_init() {
     ble_glue_init();
 }
 
-void furi_hal_bt_lock_core2() {
-    furi_assert(furi_hal_bt.core2_mtx);
+void furi_hal_bt_lock_core2(void) {
+    furi_check(furi_hal_bt.core2_mtx);
     furi_check(furi_mutex_acquire(furi_hal_bt.core2_mtx, FuriWaitForever) == FuriStatusOk);
 }
 
-void furi_hal_bt_unlock_core2() {
-    furi_assert(furi_hal_bt.core2_mtx);
+void furi_hal_bt_unlock_core2(void) {
+    furi_check(furi_hal_bt.core2_mtx);
     furi_check(furi_mutex_release(furi_hal_bt.core2_mtx) == FuriStatusOk);
 }
 
@@ -87,11 +89,10 @@ static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
     return supported;
 }
 
-bool furi_hal_bt_start_radio_stack() {
-    bool res = false;
-    furi_assert(furi_hal_bt.core2_mtx);
+bool furi_hal_bt_start_radio_stack(void) {
+    furi_hal_bt_lock_core2();
 
-    furi_mutex_acquire(furi_hal_bt.core2_mtx, FuriWaitForever);
+    bool res = false;
 
     // Explicitly tell that we are in charge of CLK48 domain
     furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
@@ -124,17 +125,18 @@ bool furi_hal_bt_start_radio_stack() {
         }
         res = true;
     } while(false);
-    furi_mutex_release(furi_hal_bt.core2_mtx);
+
+    furi_hal_bt_unlock_core2();
 
     gap_extra_beacon_init();
     return res;
 }
 
-FuriHalBtStack furi_hal_bt_get_radio_stack() {
+FuriHalBtStack furi_hal_bt_get_radio_stack(void) {
     return furi_hal_bt.stack;
 }
 
-bool furi_hal_bt_is_gatt_gap_supported() {
+bool furi_hal_bt_is_gatt_gap_supported(void) {
     if(furi_hal_bt.stack == FuriHalBtStackLight || furi_hal_bt.stack == FuriHalBtStackFull) {
         return true;
     } else {
@@ -142,16 +144,13 @@ bool furi_hal_bt_is_gatt_gap_supported() {
     }
 }
 
-bool furi_hal_bt_is_testing_supported() {
+bool furi_hal_bt_is_testing_supported(void) {
     if(furi_hal_bt.stack == FuriHalBtStackFull) {
         return true;
     } else {
         return false;
     }
 }
-
-static FuriHalBleProfileBase* current_profile = NULL;
-static GapConfig current_config = {0};
 
 bool furi_hal_bt_check_profile_type(
     FuriHalBleProfileBase* profile,
@@ -166,10 +165,12 @@ bool furi_hal_bt_check_profile_type(
 FuriHalBleProfileBase* furi_hal_bt_start_app(
     const FuriHalBleProfileTemplate* profile_template,
     FuriHalBleProfileParams params,
+    const GapRootSecurityKeys* root_keys,
     GapEventCallback event_cb,
     void* context) {
-    furi_assert(event_cb);
+    furi_check(event_cb);
     furi_check(profile_template);
+    furi_check(root_keys);
     furi_check(current_profile == NULL);
 
     do {
@@ -184,7 +185,7 @@ FuriHalBleProfileBase* furi_hal_bt_start_app(
 
         profile_template->get_gap_config(&current_config, params);
 
-        if(!gap_init(&current_config, event_cb, context)) {
+        if(!gap_init(&current_config, root_keys, event_cb, context)) {
             gap_thread_stop();
             FURI_LOG_E(TAG, "Failed to init GAP");
             break;
@@ -198,7 +199,9 @@ FuriHalBleProfileBase* furi_hal_bt_start_app(
     return current_profile;
 }
 
-void furi_hal_bt_reinit() {
+void furi_hal_bt_reinit(void) {
+    furi_hal_bt_lock_core2();
+
     furi_hal_power_insomnia_enter();
     FURI_LOG_I(TAG, "Disconnect and stop advertising");
     furi_hal_bt_stop_advertising();
@@ -230,6 +233,7 @@ void furi_hal_bt_reinit() {
     furi_hal_bus_disable(FuriHalBusCRC);
 
     furi_hal_bt_init();
+    furi_hal_bt_unlock_core2();
     furi_hal_bt_start_radio_stack();
     furi_hal_power_insomnia_exit();
 }
@@ -237,25 +241,24 @@ void furi_hal_bt_reinit() {
 FuriHalBleProfileBase* furi_hal_bt_change_app(
     const FuriHalBleProfileTemplate* profile_template,
     FuriHalBleProfileParams profile_params,
+    const GapRootSecurityKeys* root_keys,
     GapEventCallback event_cb,
     void* context) {
-    furi_assert(event_cb);
-
     furi_hal_bt_reinit();
-    return furi_hal_bt_start_app(profile_template, profile_params, event_cb, context);
+    return furi_hal_bt_start_app(profile_template, profile_params, root_keys, event_cb, context);
 }
 
-bool furi_hal_bt_is_active() {
+bool furi_hal_bt_is_active(void) {
     return gap_get_state() > GapStateIdle;
 }
 
-void furi_hal_bt_start_advertising() {
+void furi_hal_bt_start_advertising(void) {
     if(gap_get_state() == GapStateIdle) {
         gap_start_advertising();
     }
 }
 
-void furi_hal_bt_stop_advertising() {
+void furi_hal_bt_stop_advertising(void) {
     if(furi_hal_bt_is_active()) {
         gap_stop_advertising();
         while(furi_hal_bt_is_active()) {
@@ -279,21 +282,21 @@ void furi_hal_bt_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buf
 void furi_hal_bt_set_key_storage_change_callback(
     BleGlueKeyStorageChangedCallback callback,
     void* context) {
-    furi_assert(callback);
+    furi_check(callback);
     ble_glue_set_key_storage_changed_callback(callback, context);
 }
 
-void furi_hal_bt_nvm_sram_sem_acquire() {
+void furi_hal_bt_nvm_sram_sem_acquire(void) {
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_BLE_NVM_SRAM_SEMID)) {
         furi_thread_yield();
     }
 }
 
-void furi_hal_bt_nvm_sram_sem_release() {
+void furi_hal_bt_nvm_sram_sem_release(void) {
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_BLE_NVM_SRAM_SEMID, 0);
 }
 
-bool furi_hal_bt_clear_white_list() {
+bool furi_hal_bt_clear_white_list(void) {
     furi_hal_bt_nvm_sram_sem_acquire();
     tBleStatus status = aci_gap_clear_security_db();
     if(status) {
@@ -304,6 +307,8 @@ bool furi_hal_bt_clear_white_list() {
 }
 
 void furi_hal_bt_dump_state(FuriString* buffer) {
+    furi_check(buffer);
+
     if(furi_hal_bt_is_alive()) {
         uint8_t HCI_Version;
         uint16_t HCI_Revision;
@@ -328,7 +333,7 @@ void furi_hal_bt_dump_state(FuriString* buffer) {
     }
 }
 
-bool furi_hal_bt_is_alive() {
+bool furi_hal_bt_is_alive(void) {
     return ble_glue_is_alive();
 }
 
@@ -337,7 +342,7 @@ void furi_hal_bt_start_tone_tx(uint8_t channel, uint8_t power) {
     aci_hal_tone_start(channel, 0);
 }
 
-void furi_hal_bt_stop_tone_tx() {
+void furi_hal_bt_stop_tone_tx(void) {
     aci_hal_tone_stop();
 }
 
@@ -349,7 +354,7 @@ void furi_hal_bt_start_packet_rx(uint8_t channel, uint8_t datarate) {
     hci_le_enhanced_receiver_test(channel, datarate, 0);
 }
 
-uint16_t furi_hal_bt_stop_packet_test() {
+uint16_t furi_hal_bt_stop_packet_test(void) {
     uint16_t num_of_packets = 0;
     hci_le_test_end(&num_of_packets);
     return num_of_packets;
@@ -359,7 +364,7 @@ void furi_hal_bt_start_rx(uint8_t channel) {
     aci_hal_rx_start(channel);
 }
 
-float furi_hal_bt_get_rssi() {
+float furi_hal_bt_get_rssi(void) {
     float val;
     uint8_t rssi_raw[3];
 
@@ -383,13 +388,13 @@ float furi_hal_bt_get_rssi() {
     return val;
 }
 
-uint32_t furi_hal_bt_get_transmitted_packets() {
+uint32_t furi_hal_bt_get_transmitted_packets(void) {
     uint32_t packets = 0;
     aci_hal_le_tx_test_packet_number(&packets);
     return packets;
 }
 
-void furi_hal_bt_stop_rx() {
+void furi_hal_bt_stop_rx(void) {
     aci_hal_rx_stop();
 }
 
@@ -420,18 +425,18 @@ bool furi_hal_bt_extra_beacon_set_config(const GapExtraBeaconConfig* config) {
     return gap_extra_beacon_set_config(config);
 }
 
-const GapExtraBeaconConfig* furi_hal_bt_extra_beacon_get_config() {
+const GapExtraBeaconConfig* furi_hal_bt_extra_beacon_get_config(void) {
     return gap_extra_beacon_get_config();
 }
 
-bool furi_hal_bt_extra_beacon_start() {
+bool furi_hal_bt_extra_beacon_start(void) {
     return gap_extra_beacon_start();
 }
 
-bool furi_hal_bt_extra_beacon_stop() {
+bool furi_hal_bt_extra_beacon_stop(void) {
     return gap_extra_beacon_stop();
 }
 
-bool furi_hal_bt_extra_beacon_is_active() {
+bool furi_hal_bt_extra_beacon_is_active(void) {
     return gap_extra_beacon_get_state() == GapExtraBeaconStateStarted;
 }

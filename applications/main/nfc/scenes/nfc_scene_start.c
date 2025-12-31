@@ -25,11 +25,15 @@ void nfc_scene_start_on_enter(void* context) {
     nfc_device_clear(nfc->nfc_device);
     iso14443_3a_reset(nfc->iso14443_3a_edit_data);
     // Reset detected protocols list
-    nfc_app_reset_detected_protocols(nfc);
+    nfc_detected_protocols_reset(nfc->detected_protocols);
 
     submenu_add_item(submenu, "Read", SubmenuIndexRead, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
-        submenu, "Detect Reader", SubmenuIndexDetectReader, nfc_scene_start_submenu_callback, nfc);
+        submenu,
+        "Extract MF Keys",
+        SubmenuIndexDetectReader,
+        nfc_scene_start_submenu_callback,
+        nfc);
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Extra Actions", SubmenuIndexExtraAction, nfc_scene_start_submenu_callback, nfc);

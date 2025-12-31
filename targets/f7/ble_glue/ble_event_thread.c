@@ -9,8 +9,8 @@
 
 #define TAG "BleEvt"
 
-#define BLE_EVENT_THREAD_FLAG_SHCI_EVENT (1UL << 0)
-#define BLE_EVENT_THREAD_FLAG_HCI_EVENT (1UL << 1)
+#define BLE_EVENT_THREAD_FLAG_SHCI_EVENT  (1UL << 0)
+#define BLE_EVENT_THREAD_FLAG_HCI_EVENT   (1UL << 1)
 #define BLE_EVENT_THREAD_FLAG_KILL_THREAD (1UL << 2)
 
 #define BLE_EVENT_THREAD_FLAG_ALL                                         \
@@ -80,7 +80,7 @@ void ble_event_thread_stop(void) {
     }
 
     FuriThreadId thread_id = furi_thread_get_id(event_thread);
-    furi_assert(thread_id);
+    furi_check(thread_id);
     furi_thread_flags_set(thread_id, BLE_EVENT_THREAD_FLAG_KILL_THREAD);
     furi_thread_join(event_thread);
     furi_thread_free(event_thread);
@@ -90,7 +90,7 @@ void ble_event_thread_stop(void) {
 void ble_event_thread_start(void) {
     furi_check(event_thread == NULL);
 
-    event_thread = furi_thread_alloc_ex("BleEventWorker", 1024, ble_event_thread, NULL);
+    event_thread = furi_thread_alloc_ex("BleEventWorker", 1280, ble_event_thread, NULL);
     furi_thread_set_priority(event_thread, FuriThreadPriorityHigh);
     furi_thread_start(event_thread);
 }

@@ -28,8 +28,9 @@ struct CliSession {
     void (*init)(void);
     void (*deinit)(void);
     size_t (*rx)(uint8_t* buffer, size_t size, uint32_t timeout);
+    size_t (*rx_stdin)(uint8_t* buffer, size_t size, uint32_t timeout, void* context);
     void (*tx)(const uint8_t* buffer, size_t size);
-    void (*tx_stdout)(const char* data, size_t size);
+    void (*tx_stdout)(const char* data, size_t size, void* context);
     bool (*is_connected)(void);
 };
 
@@ -49,12 +50,12 @@ struct Cli {
     FuriSemaphore* idle_sem;
     FuriString* last_line;
     FuriString* line;
-    CliSession* session;
+    const CliSession* session;
 
     size_t cursor_position;
 };
 
-Cli* cli_alloc();
+Cli* cli_alloc(void);
 
 void cli_reset(Cli* cli);
 

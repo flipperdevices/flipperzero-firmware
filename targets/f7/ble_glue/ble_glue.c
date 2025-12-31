@@ -49,13 +49,13 @@ static BleGlue* ble_glue = NULL;
 // static int32_t ble_glue_shci_thread(void* argument);
 static void ble_sys_status_not_callback(SHCI_TL_CmdStatus_t status);
 static void ble_sys_user_event_callback(void* pPayload);
-static void ble_glue_clear_shared_memory();
+static void ble_glue_clear_shared_memory(void);
 
 void ble_glue_set_key_storage_changed_callback(
     BleGlueKeyStorageChangedCallback callback,
     void* context) {
-    furi_assert(ble_glue);
-    furi_assert(callback);
+    furi_check(ble_glue);
+    furi_check(callback);
     ble_glue->callback = callback;
     ble_glue->context = context;
 }
@@ -87,6 +87,8 @@ void ble_glue_init(void) {
     TL_Init();
 
     ble_glue->shci_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
+    // Take mutex, SHCI will release it in most unusual way later
+    furi_check(furi_mutex_acquire(ble_glue->shci_mtx, FuriWaitForever) == FuriStatusOk);
 
     // FreeRTOS system task creation
     ble_event_thread_start();
@@ -224,7 +226,7 @@ bool ble_glue_wait_for_c2_start(int32_t timeout_ms) {
 }
 
 bool ble_glue_start(void) {
-    furi_assert(ble_glue);
+    furi_check(ble_glue);
 
     if(ble_glue->status != BleGlueStatusC2Started) {
         return false;
@@ -243,12 +245,14 @@ bool ble_glue_start(void) {
 }
 
 void ble_glue_stop(void) {
-    furi_assert(ble_glue);
+    furi_check(ble_glue);
 
     ble_event_thread_stop();
     // Free resources
     furi_mutex_free(ble_glue->shci_mtx);
+    ble_glue->shci_mtx = NULL;
     furi_timer_free(ble_glue->hardfault_check_timer);
+    ble_glue->hardfault_check_timer = NULL;
 
     ble_glue_clear_shared_memory();
     free(ble_glue);
@@ -309,10 +313,13 @@ BleGlueCommandResult ble_glue_force_c2_mode(BleGlueC2Mode desired_mode) {
 static void ble_sys_status_not_callback(SHCI_TL_CmdStatus_t status) {
     switch(status) {
     case SHCI_TL_CmdBusy:
-        furi_mutex_acquire(ble_glue->shci_mtx, FuriWaitForever);
+        furi_check(
+            furi_mutex_acquire(
+                ble_glue->shci_mtx, furi_kernel_is_running() ? FuriWaitForever : 0) ==
+            FuriStatusOk);
         break;
     case SHCI_TL_CmdAvailable:
-        furi_mutex_release(ble_glue->shci_mtx);
+        furi_check(furi_mutex_release(ble_glue->shci_mtx) == FuriStatusOk);
         break;
     default:
         break;
@@ -370,7 +377,7 @@ static void ble_glue_clear_shared_memory(void) {
 }
 
 bool ble_glue_reinit_c2(void) {
-    return (SHCI_C2_Reinit() == SHCI_Success);
+    return SHCI_C2_Reinit() == SHCI_Success;
 }
 
 BleGlueCommandResult ble_glue_fus_stack_delete(void) {

@@ -23,14 +23,14 @@ typedef enum {
     FuriLogLevelTrace = 6,
 } FuriLogLevel;
 
-#define _FURI_LOG_CLR(clr) "\033[0;" clr "m"
+#define _FURI_LOG_CLR(clr)  "\033[0;" clr "m"
 #define _FURI_LOG_CLR_RESET "\033[0m"
 
-#define _FURI_LOG_CLR_BLACK "30"
-#define _FURI_LOG_CLR_RED "31"
-#define _FURI_LOG_CLR_GREEN "32"
-#define _FURI_LOG_CLR_BROWN "33"
-#define _FURI_LOG_CLR_BLUE "34"
+#define _FURI_LOG_CLR_BLACK  "30"
+#define _FURI_LOG_CLR_RED    "31"
+#define _FURI_LOG_CLR_GREEN  "32"
+#define _FURI_LOG_CLR_BROWN  "33"
+#define _FURI_LOG_CLR_BLUE   "34"
 #define _FURI_LOG_CLR_PURPLE "35"
 
 #define _FURI_LOG_CLR_E _FURI_LOG_CLR(_FURI_LOG_CLR_RED)
@@ -51,7 +51,7 @@ void furi_log_init(void);
 
 /** Add log TX callback
  *
- * @param[in]  callback  The callback
+ * @param[in]  handler  The callback and its context
  *
  * @return     true on success, false otherwise
  */
@@ -59,7 +59,7 @@ bool furi_log_add_handler(FuriLogHandler handler);
 
 /** Remove log TX callback
  *
- * @param[in]  callback  The callback
+ * @param[in]  handler  The callback and its context
  *
  * @return     true on success, false otherwise
  */
@@ -112,15 +112,16 @@ FuriLogLevel furi_log_get_level(void);
 /** Log level to string
  *
  * @param[in]  level  The level
+ * @param[out] str    String representation of the level
  *
- * @return     The string
+ * @return     True if success, False otherwise
  */
 bool furi_log_level_to_string(FuriLogLevel level, const char** str);
 
 /** Log level from string
  *
  * @param[in]  str    The string
- * @param      level  The level
+ * @param[out] level  The level
  * 
  * @return     True if success, False otherwise
  */

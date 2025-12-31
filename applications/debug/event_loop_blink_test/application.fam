@@ -1,0 +1,9 @@
+App(
+    appid="event_loop_blink_test",
+    name="Event Loop Blink Test",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="event_loop_blink_test_app",
+    requires=["input"],
+    stack_size=1 * 1024,
+    fap_category="Debug",
+)

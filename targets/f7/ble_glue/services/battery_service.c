@@ -30,10 +30,10 @@ enum {
 };
 
 typedef struct {
-    uint8_t present : 2;
+    uint8_t present     : 2;
     uint8_t discharging : 2;
-    uint8_t charging : 2;
-    uint8_t level : 2;
+    uint8_t charging    : 2;
+    uint8_t level       : 2;
 } BattrySvcPowerState;
 
 _Static_assert(sizeof(BattrySvcPowerState) == 1, "Incorrect structure size");
@@ -114,7 +114,7 @@ BleServiceBattery* ble_svc_battery_start(bool auto_update) {
 }
 
 void ble_svc_battery_stop(BleServiceBattery* battery_svc) {
-    furi_assert(battery_svc);
+    furi_check(battery_svc);
     if(battery_svc->auto_update) {
         BatterySvcInstanceList_it_t it;
         for(BatterySvcInstanceList_it(it, instances); !BatterySvcInstanceList_end_p(it);

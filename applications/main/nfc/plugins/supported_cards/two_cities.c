@@ -77,7 +77,7 @@ static bool two_cities_read(Nfc* nfc, NfcDevice* device) {
 
         data->type = type;
         MfClassicDeviceKeys keys = {};
-        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
+        for(size_t i = 0; i < mf_classic_get_scannable_sectors_num(data->type); i++) {
             bit_lib_num_to_bytes_be(
                 two_cities_4k_keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
@@ -158,7 +158,7 @@ static bool two_cities_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         furi_string_printf(
             parsed_data,
-            "\e#Troika+Plantain\nPN: %llu-\nPB: %lu rur.\nTN: %lu\nTB: %u rur.\n",
+            "\e#Troika+Plantain\nPN: %lluX\nPB: %lu rur.\nTN: %lu\nTB: %u rur.\n",
             card_number,
             balance,
             troika_number,
@@ -186,6 +186,6 @@ static const FlipperAppPluginDescriptor two_cities_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* two_cities_plugin_ep() {
+const FlipperAppPluginDescriptor* two_cities_plugin_ep(void) {
     return &two_cities_plugin_descriptor;
 }

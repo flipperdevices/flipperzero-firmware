@@ -20,6 +20,7 @@ env = ENV.Clone(
         "fbt_resources",
     ],
     COMPILATIONDB_USE_ABSPATH=False,
+    COMPILATIONDB_USE_BINARY_ABSPATH=True,
     BUILD_DIR=fw_build_meta["build_dir"],
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
     FW_FLAVOR=fw_build_meta["flavor"],
@@ -28,6 +29,8 @@ env = ENV.Clone(
     TARGETS_ROOT=Dir("#/targets"),
     LINT_SOURCES=[
         Dir("applications"),
+        # Not C code
+        Dir("!applications/system/js_app/packages"),
     ],
     LIBPATH=[
         "${LIB_DIST_DIR}",
@@ -215,6 +218,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
     sources,
     LIBS=fwenv["TARGET_CFG"].linker_dependencies,
 )
+Depends(fwelf, fwenv["LINKER_SCRIPT_PATH"])
 
 # Firmware depends on everything child builders returned
 # Depends(fwelf, lib_targets)

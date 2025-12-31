@@ -25,7 +25,7 @@ typedef void (*PopupCallback)(void* context);
  *
  * @return     Popup instance
  */
-Popup* popup_alloc();
+Popup* popup_alloc(void);
 
 /** Deinitialize and free popup
  *
@@ -41,7 +41,7 @@ void popup_free(Popup* popup);
  */
 View* popup_get_view(Popup* popup);
 
-/** Set popup header text
+/** Set popup timeout callback
  *
  * @param      popup     Popup instance
  * @param      callback  PopupCallback
