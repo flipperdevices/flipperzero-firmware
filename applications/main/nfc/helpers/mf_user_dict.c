@@ -4,7 +4,7 @@
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include <furi/furi.h>
 
-#define NFC_APP_FOLDER ANY_PATH("nfc")
+#define NFC_APP_FOLDER                    EXT_PATH("nfc")
 #define NFC_APP_MF_CLASSIC_DICT_USER_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict_user.nfc")
 
 struct MfUserDict {
@@ -17,7 +17,6 @@ MfUserDict* mf_user_dict_alloc(size_t max_keys_to_load) {
 
     KeysDict* dict = keys_dict_alloc(
         NFC_APP_MF_CLASSIC_DICT_USER_PATH, KeysDictModeOpenAlways, sizeof(MfClassicKey));
-    furi_assert(dict);
 
     size_t dict_keys_num = keys_dict_get_total_keys(dict);
     instance->keys_num = MIN(max_keys_to_load, dict_keys_num);
@@ -69,7 +68,6 @@ bool mf_user_dict_delete_key(MfUserDict* instance, uint32_t index) {
 
     KeysDict* dict = keys_dict_alloc(
         NFC_APP_MF_CLASSIC_DICT_USER_PATH, KeysDictModeOpenAlways, sizeof(MfClassicKey));
-    furi_assert(dict);
 
     bool key_delete_success =
         keys_dict_delete_key(dict, instance->keys_arr[index].data, sizeof(MfClassicKey));

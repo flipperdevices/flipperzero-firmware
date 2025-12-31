@@ -1,6 +1,6 @@
 #include "transmitter.h"
-#include "../subghz_i.h"
 
+#include <assets_icons.h>
 #include <input/input.h>
 #include <gui/elements.h>
 
@@ -201,7 +201,7 @@ void subghz_view_transmitter_exit(void* context) {
     furi_assert(context);
 }
 
-SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
+SubGhzViewTransmitter* subghz_view_transmitter_alloc(void) {
     SubGhzViewTransmitter* subghz_transmitter = malloc(sizeof(SubGhzViewTransmitter));
 
     // View allocation and configuration

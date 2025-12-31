@@ -13,7 +13,7 @@ static bool mykey_is_blank(const St25tbData* data) {
 }
 
 static bool mykey_has_lockid(const St25tbData* data) {
-    return (data->blocks[5] & 0xFF) == 0x7F;
+    return (data->blocks[5] >> 24) == 0x7F;
 }
 
 static bool check_invalid_low_nibble(uint8_t value) {
@@ -85,11 +85,10 @@ static bool mykey_parse(const NfcDevice* device, FuriString* parsed_data) {
 
     bool is_blank = mykey_is_blank(data);
     furi_string_cat_printf(parsed_data, "Serial#: %08lX\n", (uint32_t)__bswap32(data->blocks[7]));
-    furi_string_cat_printf(parsed_data, "Blank: %s\n", is_blank ? "yes" : "no");
-    furi_string_cat_printf(parsed_data, "LockID: %s\n", mykey_has_lockid(data) ? "maybe" : "no");
-
     furi_string_cat_printf(
-        parsed_data, "Prod. date: %02X/%02X/%04X", mfg_day, mfg_month, mfg_year);
+        parsed_data, "Prod. date: %02X/%02X/%04X\n", mfg_day, mfg_month, mfg_year);
+    furi_string_cat_printf(parsed_data, "Blank: %s\n", is_blank ? "yes" : "no");
+    furi_string_cat_printf(parsed_data, "LockID: %s", mykey_has_lockid(data) ? "maybe" : "no");
 
     if(!is_blank) {
         furi_string_cat_printf(
@@ -152,6 +151,6 @@ static const FlipperAppPluginDescriptor mykey_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* mykey_plugin_ep() {
+const FlipperAppPluginDescriptor* mykey_plugin_ep(void) {
     return &mykey_plugin_descriptor;
 }

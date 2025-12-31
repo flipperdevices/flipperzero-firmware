@@ -263,7 +263,7 @@ vars.AddVariables(
     EnumVariable(
         "LANG_SERVER",
         help="Language server type for vscode_dist.",
-        default="cpptools",
+        default="clangd",
         allowed_values=[
             "cpptools",
             "clangd",
@@ -273,6 +273,11 @@ vars.AddVariables(
         "STRICT_FAP_IMPORT_CHECK",
         help="Enable strict import check for .faps",
         default=True,
+    ),
+    (
+        "ARGS",
+        "Extra arguments to pass to certain scripts supporting it",
+        "",
     ),
 )
 

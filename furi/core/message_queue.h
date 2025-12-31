@@ -4,13 +4,13 @@
  */
 #pragma once
 
-#include "core/base.h"
+#include "base.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef void FuriMessageQueue;
+typedef struct FuriMessageQueue FuriMessageQueue;
 
 /** Allocate furi message queue
  *
@@ -32,7 +32,6 @@ void furi_message_queue_free(FuriMessageQueue* instance);
  * @param      instance  pointer to FuriMessageQueue instance
  * @param[in]  msg_ptr   The message pointer
  * @param[in]  timeout   The timeout
- * @param[in]  msg_prio  The message prio
  *
  * @return     The furi status.
  */
@@ -43,7 +42,6 @@ FuriStatus
  *
  * @param      instance  pointer to FuriMessageQueue instance
  * @param      msg_ptr   The message pointer
- * @param      msg_prio  The message prioority
  * @param[in]  timeout   The timeout
  *
  * @return     The furi status.

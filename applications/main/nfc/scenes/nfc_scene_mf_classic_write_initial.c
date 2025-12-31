@@ -65,8 +65,9 @@ static void nfc_scene_mf_classic_write_initial_setup_view(NfcApp* instance) {
         scene_manager_get_scene_state(instance->scene_manager, NfcSceneMfClassicWriteInitial);
 
     if(state == NfcSceneMfClassicWriteInitialStateCardSearch) {
+        popup_set_header(instance->popup, "Writing", 95, 20, AlignCenter, AlignCenter);
         popup_set_text(
-            instance->popup, "Apply the initial\ncard only", 128, 32, AlignRight, AlignCenter);
+            instance->popup, "Use the source\ncard only", 95, 38, AlignCenter, AlignCenter);
         popup_set_icon(instance->popup, 0, 8, &I_NFC_manual_60x50);
     } else {
         popup_set_header(popup, "Writing\nDon't move...", 52, 32, AlignLeft, AlignCenter);
@@ -114,7 +115,8 @@ bool nfc_scene_mf_classic_write_initial_on_event(void* context, SceneManagerEven
             nfc_scene_mf_classic_write_initial_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcCustomEventWrongCard) {
-            scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicWrongCard);
+            scene_manager_next_scene(
+                instance->scene_manager, NfcSceneMfClassicWriteInitialWrongCard);
             consumed = true;
         } else if(event.event == NfcCustomEventPollerSuccess) {
             scene_manager_next_scene(

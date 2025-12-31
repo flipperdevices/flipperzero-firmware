@@ -12,6 +12,7 @@ struct STOP_EXTERNING_ME {};
 
 #include <furi_hal_cortex.h>
 #include <furi_hal_clock.h>
+#include <furi_hal_adc.h>
 #include <furi_hal_bus.h>
 #include <furi_hal_crypto.h>
 #include <furi_hal_debug.h>
@@ -45,18 +46,35 @@ struct STOP_EXTERNING_ME {};
 extern "C" {
 #endif
 
-/** Early FuriHal init, only essential subsystems */
-void furi_hal_init_early();
-
-/** Early FuriHal deinit */
-void furi_hal_deinit_early();
-
-/** Init FuriHal */
-void furi_hal_init();
-
-/** Transfer execution to address
+/** Early FuriHal init
+ * 
+ * Init essential subsystems used in pre-DFU stage.
+ * This state can be undone with `furi_hal_deinit_early`.
  *
- * @param[in]  address  pointer to new executable
+ */
+void furi_hal_init_early(void);
+
+/** Early FuriHal deinit
+ * 
+ * Undo `furi_hal_init_early`, prepare system for switch to another firmware/bootloader.
+ */
+void furi_hal_deinit_early(void);
+
+/** Init FuriHal
+ * 
+ * Initialize the rest of the HAL, must be used after `furi_hal_init_early`.
+ */
+void furi_hal_init(void);
+
+/** Jump to the void*
+ *
+ * Allow your code to transfer control to another firmware.
+ *
+ * @warning    This code doesn't reset system before jump. Call it only from
+ *             main thread, no kernel should be running. Ensure that no
+ *             peripheral blocks active and no interrupts are pending.
+ *
+ * @param      address  The System Vector address(start of your new firmware)
  */
 void furi_hal_switch(void* address);
 

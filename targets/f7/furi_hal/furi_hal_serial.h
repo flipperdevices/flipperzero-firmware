@@ -16,7 +16,9 @@ extern "C" {
 
 /** Initialize Serial
  *
- * Configures GPIO, configures and enables transceiver.
+ * Configures GPIO, configures and enables transceiver. Default framing settings
+ * are used: 8 data bits, no parity, 1 stop bit. Override them with
+ * `furi_hal_serial_configure_framing`.
  *
  * @param      handle  Serial handle
  * @param      baud    baud rate
@@ -48,12 +50,44 @@ void furi_hal_serial_suspend(FuriHalSerialHandle* handle);
  */
 void furi_hal_serial_resume(FuriHalSerialHandle* handle);
 
+/**
+ * @brief Determine whether a certain baud rate is supported
+ *
+ * @param      handle  Serial handle
+ * @param      baud baud rate to be checked
+ * @returns    true if baud rate is supported, false otherwise.
+ */
+bool furi_hal_serial_is_baud_rate_supported(FuriHalSerialHandle* handle, uint32_t baud);
+
 /** Changes baud rate
  *
  * @param      handle  Serial handle
  * @param      baud    baud rate
  */
 void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud);
+
+/**
+ * @brief Configures framing of a serial interface
+ * 
+ * @param      handle     Serial handle
+ * @param      data_bits  Data bits
+ * @param      parity     Parity
+ * @param      stop_bits  Stop bits
+ */
+void furi_hal_serial_configure_framing(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialDataBits data_bits,
+    FuriHalSerialParity parity,
+    FuriHalSerialStopBits stop_bits);
+
+/**
+ * @brief Configures hardware flow control of a serial interface
+ *
+ * @param      handle     Serial handle
+ * @param      rts        Whether to enable RTS (Request To Send)
+ * @param      cts        Whether to enable CTS (Clear To Send)
+ */
+void furi_hal_serial_configure_flow_control(FuriHalSerialHandle* handle, bool rts, bool cts);
 
 /** Transmits data in semi-blocking mode
  *
@@ -84,6 +118,7 @@ typedef enum {
     FuriHalSerialRxEventFrameError = (1 << 2), /**< Framing Error: incorrect frame detected */
     FuriHalSerialRxEventNoiseError = (1 << 3), /**< Noise Error: noise on the line detected */
     FuriHalSerialRxEventOverrunError = (1 << 4), /**< Overrun Error: no space for received data */
+    FuriHalSerialRxEventParityError = (1 << 5), /**< Parity Error: incorrect parity bit received */
 } FuriHalSerialRxEvent;
 
 /** Receive callback
@@ -121,6 +156,16 @@ void furi_hal_serial_async_rx_start(
  */
 void furi_hal_serial_async_rx_stop(FuriHalSerialHandle* handle);
 
+/** Check if there is data available for reading
+ *
+ * @warning    This function must be called only from the callback
+ *             FuriHalSerialAsyncRxCallback
+ *
+ * @param      handle    Serial handle
+ * @return     true if data is available for reading, false otherwise
+ */
+bool furi_hal_serial_async_rx_available(FuriHalSerialHandle* handle);
+
 /** Get data Serial receive
  *
  * @warning    This function must be called only from the callback
@@ -151,6 +196,42 @@ typedef void (*FuriHalSerialDmaRxCallback)(
     FuriHalSerialRxEvent event,
     size_t data_len,
     void* context);
+
+/**
+ * @brief Enable an input/output direction
+ *
+ * Takes over the respective pin by reconfiguring it to
+ * the appropriate alternative function.
+ *
+ * @param     handle        Serial handle
+ * @param     direction     Direction to enable
+ */
+void furi_hal_serial_enable_direction(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialDirection direction);
+
+/**
+ * @brief Disable an input/output direction
+ *
+ * Releases the respective pin by reconfiguring it to
+ * initial state, making possible its use for other purposes.
+ *
+ * @param     handle        Serial handle
+ * @param     direction     Direction to disable
+ */
+void furi_hal_serial_disable_direction(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialDirection direction);
+
+/**
+ * @brief Get the GPIO pin associated with a serial
+ *
+ * @param     handle        Serial handle
+ * @param     direction     Direction to query
+ * @returns   pointer to the respective pin instance
+ */
+const GpioPin*
+    furi_hal_serial_get_gpio_pin(FuriHalSerialHandle* handle, FuriHalSerialDirection direction);
 
 /** Start and sets Serial event callback receive DMA
  *
