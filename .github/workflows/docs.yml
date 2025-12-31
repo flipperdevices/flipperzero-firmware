@@ -9,6 +9,7 @@ on:
 env:
   TARGETS: f7
   DEFAULT_TARGET: f7
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   check-secret:
@@ -54,15 +55,13 @@ jobs:
           fi
           python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE"
 
-      - name: 'Generate documentation'
-        uses: mattnotmitt/doxygen-action@edge
-        env:
-          DOXY_SRC_ROOT: "${{ github.workspace }}"
-          DOXY_CONFIG_DIR: "${{ github.workspace }}/documentation/doxygen"
-          DOXY_OUTPUT_DIR: "${{ github.workspace }}/documentation/doxygen/build"
+      - name: install-doxygen
+        uses: AdarshRawat1/Install-Doxygen@v1.0
         with:
-          working-directory: 'documentation/'
-          doxyfile-path: './doxygen/Doxyfile-awesome.cfg'
+          version: "1.12.0"
+
+      - name: 'Generate documentation'
+        run: ./fbt doxygen
 
       - name: 'Upload documentation'
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' && needs.check-secret.outputs.s3-valid-config == 'true' }}

@@ -1,0 +1,22 @@
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/settings_helpers",
+    ],
+    LINT_SOURCES=[
+        Dir("."),
+    ],
+    SDK_HEADERS=[
+        File("submenu_based.h"),
+    ],
+)
+
+libenv = env.Clone(FW_LIB_NAME="settings_helpers")
+libenv.ApplyLibFlags()
+
+sources = libenv.GlobRecursive("*.c")
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

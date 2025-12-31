@@ -21,20 +21,21 @@ extern "C" {
  * Many of the FuriThread functions MUST ONLY be called when the thread is STOPPED.
  */
 typedef enum {
-    FuriThreadStateStopped, /**< Thread is stopped */
-    FuriThreadStateStarting, /**< Thread is starting */
-    FuriThreadStateRunning, /**< Thread is running */
+    FuriThreadStateStopped, /**< Thread is stopped and is safe to release. Event delivered from system init thread(TCB cleanup routine). It is safe to release thread instance. */
+    FuriThreadStateStopping, /**< Thread is stopping. Event delivered from child thread. */
+    FuriThreadStateStarting, /**< Thread is starting. Event delivered from parent(self) thread. */
+    FuriThreadStateRunning, /**< Thread is running. Event delivered from child thread. */
 } FuriThreadState;
 
 /**
  * @brief Enumeration of possible FuriThread priorities.
  */
 typedef enum {
-    FuriThreadPriorityNone = 0, /**< Uninitialized, choose system default */
-    FuriThreadPriorityIdle = 1, /**< Idle priority */
+    FuriThreadPriorityIdle = 0, /**< Idle priority */
+    FuriThreadPriorityInit = 4, /**< Init System Thread Priority */
     FuriThreadPriorityLowest = 14, /**< Lowest */
     FuriThreadPriorityLow = 15, /**< Low */
-    FuriThreadPriorityNormal = 16, /**< Normal */
+    FuriThreadPriorityNormal = 16, /**< Normal, system default */
     FuriThreadPriorityHigh = 17, /**< High */
     FuriThreadPriorityHighest = 18, /**< Highest */
     FuriThreadPriorityIsr =
@@ -73,18 +74,36 @@ typedef int32_t (*FuriThreadCallback)(void* context);
  *
  * @param[in] data pointer to the data to be written to the standard out
  * @param[in] size size of the data in bytes
+ * @param[in] context optional context
  */
-typedef void (*FuriThreadStdoutWriteCallback)(const char* data, size_t size);
+typedef void (*FuriThreadStdoutWriteCallback)(const char* data, size_t size, void* context);
 
 /**
- * @brief State change callback function pointer type.
- *
- * The function to be used as a state callback MUST follow this signature.
- *
- * @param[in] state identifier of the state the thread has transitioned to
- * @param[in,out] context pointer to a user-specified object
+ * @brief Standard input callback function pointer type
+ * 
+ * The function to be used as a standard input callback MUST follow this signature.
+ * 
+ * @param[out] buffer buffer to read data into
+ * @param[in] size maximum number of bytes to read into the buffer
+ * @param[in] timeout how long to wait for (in ticks) before giving up
+ * @param[in] context optional context
+ * @returns number of bytes that was actually read into the buffer
  */
-typedef void (*FuriThreadStateCallback)(FuriThreadState state, void* context);
+typedef size_t (
+    *FuriThreadStdinReadCallback)(char* buffer, size_t size, FuriWait timeout, void* context);
+
+/**
+ * @brief         State change callback function pointer type.
+ *
+ *                The function to be used as a state callback MUST follow this
+ *                signature.
+ *
+ * @param[in]     thread   to the FuriThread instance that changed the state
+ * @param[in]     state    identifier of the state the thread has transitioned
+ *                         to
+ * @param[in,out] context  pointer to a user-specified object
+ */
+typedef void (*FuriThreadStateCallback)(FuriThread* thread, FuriThreadState state, void* context);
 
 /**
  * @brief Signal handler callback function pointer type.
@@ -460,17 +479,36 @@ uint32_t furi_thread_get_stack_space(FuriThreadId thread_id);
 /**
  * @brief Get the standard output callback for the current thead.
  *
- * @return pointer to the standard out callback function
+ * @param[out] callback where to store the stdout callback
+ * @param[out] context where to store the context
  */
-FuriThreadStdoutWriteCallback furi_thread_get_stdout_callback(void);
+void furi_thread_get_stdout_callback(FuriThreadStdoutWriteCallback* callback, void** context);
+
+/**
+ * @brief Get the standard input callback for the current thead.
+ *
+ * @param[out] callback where to store the stdin callback
+ * @param[out] context where to store the context
+ */
+void furi_thread_get_stdin_callback(FuriThreadStdinReadCallback* callback, void** context);
 
 /** Set standard output callback for the current thread.
  *
  * @param[in] callback pointer to the callback function or NULL to clear
+ * @param[in] context context to be passed to the callback
  */
-void furi_thread_set_stdout_callback(FuriThreadStdoutWriteCallback callback);
+void furi_thread_set_stdout_callback(FuriThreadStdoutWriteCallback callback, void* context);
+
+/** Set standard input callback for the current thread.
+ * 
+ * @param[in] callback pointer to the callback function or NULL to clear
+ * @param[in] context context to be passed to the callback
+ */
+void furi_thread_set_stdin_callback(FuriThreadStdinReadCallback callback, void* context);
 
 /** Write data to buffered standard output.
+ * 
+ * @note You can also use the standard C `putc`, `puts`, `printf` and friends.
  * 
  * @param[in] data pointer to the data to be written
  * @param[in] size data size in bytes
@@ -484,6 +522,29 @@ size_t furi_thread_stdout_write(const char* data, size_t size);
  * @return error code value
  */
 int32_t furi_thread_stdout_flush(void);
+
+/** Read data from the standard input
+ * 
+ * @note You can also use the standard C `getc`, `gets` and friends.
+ * 
+ * @param[in] buffer pointer to the buffer to read data into
+ * @param[in] size how many bytes to read into the buffer
+ * @param[in] timeout how long to wait for (in ticks) before giving up
+ * @return number of bytes that was actually read
+ */
+size_t furi_thread_stdin_read(char* buffer, size_t size, FuriWait timeout);
+
+/** Puts data back into the standard input buffer
+ * 
+ * `furi_thread_stdin_read` will return the bytes in the same order that they
+ * were supplied to this function.
+ * 
+ * @note You can also use the standard C `ungetc`.
+ * 
+ * @param[in] buffer pointer to the buffer to get data from
+ * @param[in] size how many bytes to read from the buffer
+ */
+void furi_thread_stdin_unread(char* buffer, size_t size);
 
 /**
  * @brief Suspend a thread.

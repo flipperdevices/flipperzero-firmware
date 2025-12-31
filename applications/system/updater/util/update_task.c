@@ -22,8 +22,8 @@ static const char* update_task_stage_descr[] = {
     [UpdateTaskStageRadioInstall] = "Installing radio FW",
     [UpdateTaskStageRadioBusy] = "Core 2 busy",
     [UpdateTaskStageOBValidation] = "Validating opt. bytes",
-    [UpdateTaskStageLfsBackup] = "Backing up LFS",
-    [UpdateTaskStageLfsRestore] = "Restoring LFS",
+    [UpdateTaskStageIntBackup] = "Backing up configuration",
+    [UpdateTaskStageIntRestore] = "Restoring configuration",
     [UpdateTaskStageResourcesFileCleanup] = "Cleaning up files",
     [UpdateTaskStageResourcesDirCleanup] = "Cleaning up directories",
     [UpdateTaskStageResourcesFileUnpack] = "Extracting resources",
@@ -82,7 +82,7 @@ static const struct {
     },
 #ifndef FURI_RAM_EXEC
     {
-        .stage = UpdateTaskStageLfsBackup,
+        .stage = UpdateTaskStageIntBackup,
         .percent_min = 0,
         .percent_max = 100,
         .descr = "FS R/W error",
@@ -193,10 +193,10 @@ static const struct {
 #endif
 #ifndef FURI_RAM_EXEC
     {
-        .stage = UpdateTaskStageLfsRestore,
+        .stage = UpdateTaskStageIntRestore,
         .percent_min = 0,
         .percent_max = 100,
-        .descr = "LFS I/O error",
+        .descr = "SD card I/O error",
     },
     {
         .stage = UpdateTaskStageResourcesFileCleanup,
@@ -245,7 +245,7 @@ static const UpdateTaskStageGroupMap update_task_stage_progress[] = {
     [UpdateTaskStageProgress] = STAGE_DEF(UpdateTaskStageGroupMisc, 0),
 
     [UpdateTaskStageReadManifest] = STAGE_DEF(UpdateTaskStageGroupPreUpdate, 45),
-    [UpdateTaskStageLfsBackup] = STAGE_DEF(UpdateTaskStageGroupPreUpdate, 5),
+    [UpdateTaskStageIntBackup] = STAGE_DEF(UpdateTaskStageGroupPreUpdate, 5),
 
     [UpdateTaskStageRadioImageValidate] = STAGE_DEF(UpdateTaskStageGroupRadio, 15),
     [UpdateTaskStageRadioErase] = STAGE_DEF(UpdateTaskStageGroupRadio, 25),
@@ -259,7 +259,7 @@ static const UpdateTaskStageGroupMap update_task_stage_progress[] = {
     [UpdateTaskStageFlashWrite] = STAGE_DEF(UpdateTaskStageGroupFirmware, 100),
     [UpdateTaskStageFlashValidate] = STAGE_DEF(UpdateTaskStageGroupFirmware, 20),
 
-    [UpdateTaskStageLfsRestore] = STAGE_DEF(UpdateTaskStageGroupPostUpdate, 5),
+    [UpdateTaskStageIntRestore] = STAGE_DEF(UpdateTaskStageGroupPostUpdate, 5),
 
     [UpdateTaskStageResourcesFileCleanup] = STAGE_DEF(UpdateTaskStageGroupResources, 100),
     [UpdateTaskStageResourcesDirCleanup] = STAGE_DEF(UpdateTaskStageGroupResources, 50),
@@ -395,14 +395,15 @@ bool update_task_open_file(UpdateTask* update_task, FuriString* filename) {
     return open_success;
 }
 
-static void update_task_worker_thread_cb(FuriThreadState state, void* context) {
-    UpdateTask* update_task = context;
+static void
+    update_task_worker_thread_cb(FuriThread* thread, FuriThreadState state, void* context) {
+    UNUSED(context);
 
     if(state != FuriThreadStateStopped) {
         return;
     }
 
-    if(furi_thread_get_return_code(update_task->thread) == UPDATE_TASK_NOERR) {
+    if(furi_thread_get_return_code(thread) == UPDATE_TASK_NOERR) {
         furi_delay_ms(UPDATE_DELAY_OPERATION_OK);
         furi_hal_power_reset();
     }
@@ -427,7 +428,6 @@ UpdateTask* update_task_alloc(void) {
         furi_thread_alloc_ex("UpdateWorker", 5120, NULL, update_task);
 
     furi_thread_set_state_callback(thread, update_task_worker_thread_cb);
-    furi_thread_set_state_context(thread, update_task);
 #ifdef FURI_RAM_EXEC
     UNUSED(update_task_worker_backup_restore);
     furi_thread_set_callback(thread, update_task_worker_flash_writer);

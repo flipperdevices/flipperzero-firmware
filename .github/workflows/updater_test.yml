@@ -1,73 +1,70 @@
 name: 'Updater test'
 on:
   pull_request:
+
 env:
   TARGETS: f7
   DEFAULT_TARGET: f7
-  FBT_TOOLCHAIN_PATH: /opt
+  FBT_TOOLCHAIN_PATH: /opt/
   FBT_GIT_SUBMODULE_SHALLOW: 1
 
 jobs:
-  test_updater_on_bench:
-    runs-on: [self-hosted, FlipperZeroUpdaterTest]
+  Run_updater_test:
+    runs-on: [self-hosted, FlipperZeroTest]
+    outputs:
+      timed_out: ${{ steps.check_timeout.outputs.timed_out }}
     steps:
-      - name: 'Wipe workspace'
-        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          submodules: false
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Get flipper from device manager (mock)'
-        id: device
-        run: |
-          echo "flipper=auto" >> $GITHUB_OUTPUT
-          echo "stlink=0F020D026415303030303032" >> $GITHUB_OUTPUT
-
-      - name: 'Flashing target firmware'
+      - name: Flashing target firmware
         id: first_full_flash
-        timeout-minutes: 10
+        timeout-minutes: 5
         run: |
           source scripts/toolchain/fbtenv.sh
-          ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FORCE=1
-          python3 scripts/testops.py -p=${{steps.device.outputs.flipper}} -t=180 await_flipper 
+          python3 scripts/testops.py -t=180 await_flipper
+          ./fbt flash_usb_full FORCE=1
 
-      - name: 'Validating updater'
+      - name: Validating updater
         id: second_full_flash
-        timeout-minutes: 10
-        if: success()
+        if: steps.first_full_flash.outcome == 'success'
+        timeout-minutes: 4
         run: |
           source scripts/toolchain/fbtenv.sh
-          ./fbt flash_usb PORT=${{steps.device.outputs.flipper}} FORCE=1
-          python3 scripts/testops.py -p=${{steps.device.outputs.flipper}} -t=180 await_flipper 
+          python3 scripts/testops.py -t=180 await_flipper
+          ./fbt flash_usb FORCE=1
+          python3 scripts/testops.py -t=180 await_flipper
 
-      - name: 'Get last release tag'
-        id: release_tag
-        if: failure()
-        run: |
-          echo "tag=$(git tag -l --sort=-version:refname | grep -v "rc\|RC" | head -1)" >> $GITHUB_OUTPUT
-
-      - name: 'Wipe workspace'
-        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
-
-      - name: 'Checkout latest release'
+  Retry_updater_test:
+    needs: Run_updater_test
+    if: failure()
+    runs-on: [self-hosted, FlipperZeroTest]
+    steps:
+      - name: Checkout code
         uses: actions/checkout@v4
-        if: failure()
         with:
           fetch-depth: 1
-          ref: ${{ steps.release_tag.outputs.tag }}
+          ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Flash last release'
-        if: failure()
-        run: |
-          ./fbt flash SWD_TRANSPORT_SERIAL=${{steps.device.outputs.stlink}} FORCE=1
-
-      - name: 'Wait for flipper and format ext'
-        if: failure()
+      - name: Flashing target firmware
+        timeout-minutes: 4
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 scripts/testops.py -p=${{steps.device.outputs.flipper}} -t=180 await_flipper 
-          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
+          python3 scripts/testops.py -t=180 await_flipper
+          ./fbt flash_usb_full FORCE=1 DEBUG=1
+
+      - name: Validating updater
+        timeout-minutes: 4
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testops.py -t=180 await_flipper
+          ./fbt flash_usb FORCE=1  DEBUG=1
+          python3 scripts/testops.py -t=180 await_flipper
+
+      - name: Check GDB output
+        if: failure()
+        run: |
+          ./fbt gdb_trace_all FORCE=1

@@ -11,6 +11,7 @@ env:
   DEFAULT_TARGET: f7
   FBT_TOOLCHAIN_PATH: /runner/_work
   FBT_GIT_SUBMODULE_SHALLOW: 1
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   analyse_c_cpp:

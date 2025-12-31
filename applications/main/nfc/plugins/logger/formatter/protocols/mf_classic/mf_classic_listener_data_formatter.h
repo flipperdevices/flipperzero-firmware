@@ -1,0 +1,13 @@
+#pragma once
+
+#include "../nfc_protocol_formatter_base.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern const NfcProtocolFormatterBase mf_classic_listener_data_formatter;
+
+#ifdef __cplusplus
+}
+#endif
