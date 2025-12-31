@@ -9,6 +9,8 @@
 
 #define TAG "Flipper"
 
+#define HEAP_CANARY_VALUE 0x8BADF00D
+
 static void flipper_print_version(const char* target, const Version* version) {
     if(version) {
         FURI_LOG_I(
@@ -37,12 +39,11 @@ void flipper_init(void) {
     for(size_t i = 0; i < FLIPPER_SERVICES_COUNT; i++) {
         FURI_LOG_D(TAG, "Starting service %s", FLIPPER_SERVICES[i].name);
 
-        FuriThread* thread = furi_thread_alloc_ex(
+        FuriThread* thread = furi_thread_alloc_service(
             FLIPPER_SERVICES[i].name,
             FLIPPER_SERVICES[i].stack_size,
             FLIPPER_SERVICES[i].app,
             NULL);
-        furi_thread_mark_as_service(thread);
         furi_thread_set_appid(thread, FLIPPER_SERVICES[i].appid);
 
         furi_thread_start(thread);
@@ -67,4 +68,8 @@ void vApplicationGetTimerTaskMemory(
     *tcb_ptr = memmgr_alloc_from_pool(sizeof(StaticTask_t));
     *stack_ptr = memmgr_alloc_from_pool(sizeof(StackType_t) * configTIMER_TASK_STACK_DEPTH);
     *stack_size = configTIMER_TASK_STACK_DEPTH;
+}
+
+void vApplicationGetRandomHeapCanary(portPOINTER_SIZE_TYPE* pxHeapCanary) {
+    *pxHeapCanary = HEAP_CANARY_VALUE;
 }

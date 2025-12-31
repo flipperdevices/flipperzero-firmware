@@ -1,12 +1,11 @@
 #include "assets_icons.h"
 #include "toolbox/path.h"
 #include <furi.h>
-#include "../archive_i.h"
 #include "archive_browser_view.h"
 #include "../helpers/archive_browser.h"
 
 #define SCROLL_INTERVAL (333)
-#define SCROLL_DELAY (2)
+#define SCROLL_DELAY    (2)
 
 static const char* ArchiveTabNames[] = {
     [ArchiveTabFavorites] = "Favorites",
@@ -29,6 +28,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeInfrared] = &I_ir_10px,
     [ArchiveFileTypeBadUsb] = &I_badusb_10px,
     [ArchiveFileTypeU2f] = &I_u2f_10px,
+    [ArchiveFileTypeSetting] = &I_settings_10px,
     [ArchiveFileTypeUpdateManifest] = &I_update_10px,
     [ArchiveFileTypeFolder] = &I_dir_10px,
     [ArchiveFileTypeUnknown] = &I_unknown_10px,

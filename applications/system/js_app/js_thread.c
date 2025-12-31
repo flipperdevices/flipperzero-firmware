@@ -1,5 +1,7 @@
 #include <common/cs_dbg.h>
+#include <toolbox/path.h>
 #include <toolbox/stream/file_stream.h>
+#include <toolbox/strint.h>
 #include <loader/firmware_api/firmware_api.h>
 #include <flipper_application/api_hashtable/api_hashtable.h>
 #include <flipper_application/plugins/composite_resolver.h>
@@ -90,7 +92,7 @@ static void js_console_debug(struct mjs* mjs) {
 }
 
 static void js_exit_flag_poll(struct mjs* mjs) {
-    uint32_t flags = furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny, 0);
+    uint32_t flags = furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny | FuriFlagNoClear, 0);
     if(flags & FuriFlagError) {
         return;
     }
@@ -100,7 +102,8 @@ static void js_exit_flag_poll(struct mjs* mjs) {
 }
 
 bool js_delay_with_flags(struct mjs* mjs, uint32_t time) {
-    uint32_t flags = furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny, time);
+    uint32_t flags =
+        furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny | FuriFlagNoClear, time);
     if(flags & FuriFlagError) {
         return false;
     }
@@ -122,7 +125,7 @@ uint32_t js_flags_wait(struct mjs* mjs, uint32_t flags_mask, uint32_t timeout) {
     uint32_t flags = furi_thread_flags_get();
     furi_check((flags & FuriFlagError) == 0);
     if(flags == 0) {
-        flags = furi_thread_flags_wait(flags_mask, FuriFlagWaitAny, timeout);
+        flags = furi_thread_flags_wait(flags_mask, FuriFlagWaitAny | FuriFlagNoClear, timeout);
     } else {
         uint32_t state = furi_thread_flags_clear(flags & flags_mask);
         furi_check((state & FuriFlagError) == 0);
@@ -194,20 +197,22 @@ static void js_require(struct mjs* mjs) {
     mjs_return(mjs, req_object);
 }
 
-static void js_global_to_string(struct mjs* mjs) {
-    double num = mjs_get_int(mjs, mjs_arg(mjs, 0));
-    char tmp_str[] = "-2147483648";
-    itoa(num, tmp_str, 10);
-    mjs_val_t ret = mjs_mk_string(mjs, tmp_str, ~0, true);
-    mjs_return(mjs, ret);
-}
+static void js_parse_int(struct mjs* mjs) {
+    static const JsValueDeclaration js_parse_int_arg_list[] = {
+        JS_VALUE_SIMPLE(JsValueTypeString),
+        JS_VALUE_SIMPLE_W_DEFAULT(JsValueTypeInt32, int32_val, 10),
+    };
+    static const JsValueArguments js_parse_int_args = JS_VALUE_ARGS(js_parse_int_arg_list);
 
-static void js_global_to_hex_string(struct mjs* mjs) {
-    double num = mjs_get_int(mjs, mjs_arg(mjs, 0));
-    char tmp_str[] = "-FFFFFFFF";
-    itoa(num, tmp_str, 16);
-    mjs_val_t ret = mjs_mk_string(mjs, tmp_str, ~0, true);
-    mjs_return(mjs, ret);
+    const char* str;
+    int32_t base;
+    JS_VALUE_PARSE_ARGS_OR_RETURN(mjs, &js_parse_int_args, &str, &base);
+
+    int32_t num;
+    if(strint_to_int32(str, NULL, &num, base) != StrintParseNoError) {
+        num = 0;
+    }
+    mjs_return(mjs, mjs_mk_number(mjs, num));
 }
 
 #ifdef JS_DEBUG
@@ -237,19 +242,48 @@ static int32_t js_thread(void* arg) {
     struct mjs* mjs = mjs_create(worker);
     worker->modules = js_modules_create(mjs, worker->resolver);
     mjs_val_t global = mjs_get_global(mjs);
-    mjs_set(mjs, global, "print", ~0, MJS_MK_FN(js_print));
-    mjs_set(mjs, global, "delay", ~0, MJS_MK_FN(js_delay));
-    mjs_set(mjs, global, "to_string", ~0, MJS_MK_FN(js_global_to_string));
-    mjs_set(mjs, global, "to_hex_string", ~0, MJS_MK_FN(js_global_to_hex_string));
-    mjs_set(mjs, global, "ffi_address", ~0, MJS_MK_FN(js_ffi_address));
-    mjs_set(mjs, global, "require", ~0, MJS_MK_FN(js_require));
-
     mjs_val_t console_obj = mjs_mk_object(mjs);
-    mjs_set(mjs, console_obj, "log", ~0, MJS_MK_FN(js_console_log));
-    mjs_set(mjs, console_obj, "warn", ~0, MJS_MK_FN(js_console_warn));
-    mjs_set(mjs, console_obj, "error", ~0, MJS_MK_FN(js_console_error));
-    mjs_set(mjs, console_obj, "debug", ~0, MJS_MK_FN(js_console_debug));
-    mjs_set(mjs, global, "console", ~0, console_obj);
+
+    if(worker->path) {
+        FuriString* dirpath = furi_string_alloc();
+        path_extract_dirname(furi_string_get_cstr(worker->path), dirpath);
+        mjs_set(
+            mjs,
+            global,
+            "__filename",
+            ~0,
+            mjs_mk_string(
+                mjs, furi_string_get_cstr(worker->path), furi_string_size(worker->path), true));
+        mjs_set(
+            mjs,
+            global,
+            "__dirname",
+            ~0,
+            mjs_mk_string(mjs, furi_string_get_cstr(dirpath), furi_string_size(dirpath), true));
+        furi_string_free(dirpath);
+    }
+
+    JS_ASSIGN_MULTI(mjs, global) {
+        JS_FIELD("print", MJS_MK_FN(js_print));
+        JS_FIELD("delay", MJS_MK_FN(js_delay));
+        JS_FIELD("parseInt", MJS_MK_FN(js_parse_int));
+        JS_FIELD("ffi_address", MJS_MK_FN(js_ffi_address));
+        JS_FIELD("require", MJS_MK_FN(js_require));
+        JS_FIELD("console", console_obj);
+
+        JS_FIELD("sdkCompatibilityStatus", MJS_MK_FN(js_sdk_compatibility_status));
+        JS_FIELD("isSdkCompatible", MJS_MK_FN(js_is_sdk_compatible));
+        JS_FIELD("checkSdkCompatibility", MJS_MK_FN(js_check_sdk_compatibility));
+        JS_FIELD("doesSdkSupport", MJS_MK_FN(js_does_sdk_support));
+        JS_FIELD("checkSdkFeatures", MJS_MK_FN(js_check_sdk_features));
+    }
+
+    JS_ASSIGN_MULTI(mjs, console_obj) {
+        JS_FIELD("log", MJS_MK_FN(js_console_log));
+        JS_FIELD("warn", MJS_MK_FN(js_console_warn));
+        JS_FIELD("error", MJS_MK_FN(js_console_error));
+        JS_FIELD("debug", MJS_MK_FN(js_console_debug));
+    }
 
     mjs_set_ffi_resolver(mjs, js_dlsym, worker->resolver);
 
@@ -285,7 +319,7 @@ static int32_t js_thread(void* arg) {
         }
         const char* stack_trace = mjs_get_stack_trace(mjs);
         if(stack_trace != NULL) {
-            FURI_LOG_E(TAG, "Stack trace:\n%s", stack_trace);
+            FURI_LOG_E(TAG, "Stack trace:\r\n%s", stack_trace);
             if(worker->app_callback) {
                 worker->app_callback(JsThreadEventErrorTrace, stack_trace, worker->context);
             }
@@ -296,8 +330,8 @@ static int32_t js_thread(void* arg) {
         }
     }
 
-    js_modules_destroy(worker->modules);
     mjs_destroy(mjs);
+    js_modules_destroy(worker->modules);
 
     composite_api_resolver_free(worker->resolver);
 

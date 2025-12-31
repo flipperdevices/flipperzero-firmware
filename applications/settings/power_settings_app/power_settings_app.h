@@ -14,6 +14,8 @@
 
 #include "scenes/power_settings_scene.h"
 
+#include <settings_helpers/submenu_based.h>
+
 typedef struct {
     Power* power;
     Gui* gui;
@@ -23,6 +25,7 @@ typedef struct {
     Submenu* submenu;
     DialogEx* dialog;
     PowerInfo info;
+    SubmenuSettingsHelper* settings_helper;
 } PowerSettingsApp;
 
 typedef enum {
@@ -30,3 +33,8 @@ typedef enum {
     PowerSettingsAppViewSubmenu,
     PowerSettingsAppViewDialog,
 } PowerSettingsAppView;
+
+typedef enum {
+    RebootTypeDFU,
+    RebootTypeNormal
+} RebootType;

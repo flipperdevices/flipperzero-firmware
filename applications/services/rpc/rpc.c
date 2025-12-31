@@ -1,4 +1,3 @@
-#include "profiles/serial_profile.h"
 #include "rpc_i.h"
 
 #include <pb.h>
@@ -10,7 +9,8 @@
 
 #include <furi.h>
 
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
+#include <cli/cli_main_commands.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <m-dict.h>
@@ -229,11 +229,11 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
         }
     }
 
-#if SRV_RPC_DEBUG
+#ifdef SRV_RPC_DEBUG
     rpc_debug_print_data("INPUT", buf, bytes_received);
 #endif
 
-    return (count == bytes_received);
+    return count == bytes_received;
 }
 
 static bool rpc_pb_content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg) {
@@ -269,7 +269,7 @@ static int32_t rpc_session_worker(void* context) {
         bool message_decode_failed = false;
 
         if(pb_decode_ex(&istream, &PB_Main_msg, session->decoded_message, PB_DECODE_DELIMITED)) {
-#if SRV_RPC_DEBUG
+#ifdef SRV_RPC_DEBUG
             FURI_LOG_I(TAG, "INPUT:");
             rpc_debug_print_message(session->decoded_message);
 #endif
@@ -374,8 +374,10 @@ static void rpc_session_thread_pending_callback(void* context, uint32_t arg) {
     free(session);
 }
 
-static void rpc_session_thread_state_callback(FuriThreadState thread_state, void* context) {
-    if(thread_state == FuriThreadStateStopped) {
+static void
+    rpc_session_thread_state_callback(FuriThread* thread, FuriThreadState state, void* context) {
+    UNUSED(thread);
+    if(state == FuriThreadStateStopped) {
         furi_timer_pending_callback(rpc_session_thread_pending_callback, context, 0);
     }
 }
@@ -434,9 +436,14 @@ void rpc_on_system_start(void* p) {
 
     rpc->busy_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command(
-        cli, "start_rpc_session", CliCommandFlagParallelSafe, rpc_cli_command_start_session, rpc);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
+    cli_registry_add_command(
+        registry,
+        "start_rpc_session",
+        CliCommandFlagParallelSafe,
+        rpc_cli_command_start_session,
+        rpc);
+    furi_record_close(RECORD_CLI);
 
     furi_record_create(RECORD_RPC, rpc);
 }
@@ -453,7 +460,7 @@ void rpc_send(RpcSession* session, PB_Main* message) {
 
     pb_ostream_t ostream = PB_OSTREAM_SIZING;
 
-#if SRV_RPC_DEBUG
+#ifdef SRV_RPC_DEBUG
     FURI_LOG_I(TAG, "OUTPUT:");
     rpc_debug_print_message(message);
 #endif
@@ -466,7 +473,7 @@ void rpc_send(RpcSession* session, PB_Main* message) {
 
     pb_encode_ex(&ostream, &PB_Main_msg, message, PB_ENCODE_DELIMITED);
 
-#if SRV_RPC_DEBUG
+#ifdef SRV_RPC_DEBUG
     rpc_debug_print_data("OUTPUT", buffer, ostream.bytes_written);
 #endif
 

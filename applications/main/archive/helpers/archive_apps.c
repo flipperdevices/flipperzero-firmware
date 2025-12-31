@@ -1,9 +1,9 @@
-#include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
 
-static const char* known_apps[] = {
+static const char* const known_apps[] = {
     [ArchiveAppTypeU2f] = "u2f",
+    [ArchiveAppTypeSetting] = "setting",
 };
 
 ArchiveAppTypeEnum archive_get_app_type(const char* path) {
@@ -31,12 +31,14 @@ bool archive_app_is_available(void* context, const char* path) {
         bool file_exists = false;
         Storage* storage = furi_record_open(RECORD_STORAGE);
 
-        if(storage_file_exists(storage, ANY_PATH("u2f/key.u2f"))) {
-            file_exists = storage_file_exists(storage, ANY_PATH("u2f/cnt.u2f"));
+        if(storage_file_exists(storage, EXT_PATH("u2f/key.u2f"))) {
+            file_exists = storage_file_exists(storage, EXT_PATH("u2f/cnt.u2f"));
         }
 
         furi_record_close(RECORD_STORAGE);
         return file_exists;
+    } else if(app == ArchiveAppTypeSetting) {
+        return true;
     } else {
         return false;
     }
@@ -54,6 +56,9 @@ bool archive_app_read_dir(void* context, const char* path) {
     if(app == ArchiveAppTypeU2f) {
         archive_add_app_item(browser, "/app:u2f/U2F Token");
         return true;
+    } else if(app == ArchiveAppTypeSetting) {
+        archive_add_app_item(browser, path);
+        return true;
     } else {
         return false;
     }
@@ -69,13 +74,15 @@ void archive_app_delete_file(void* context, const char* path) {
 
     if(app == ArchiveAppTypeU2f) {
         Storage* fs_api = furi_record_open(RECORD_STORAGE);
-        res = (storage_common_remove(fs_api, ANY_PATH("u2f/key.u2f")) == FSE_OK);
-        res |= (storage_common_remove(fs_api, ANY_PATH("u2f/cnt.u2f")) == FSE_OK);
+        res = (storage_common_remove(fs_api, EXT_PATH("u2f/key.u2f")) == FSE_OK);
+        res |= (storage_common_remove(fs_api, EXT_PATH("u2f/cnt.u2f")) == FSE_OK);
         furi_record_close(RECORD_STORAGE);
 
         if(archive_is_favorite("/app:u2f/U2F Token")) {
             archive_favorites_delete("/app:u2f/U2F Token");
         }
+    } else if(app == ArchiveAppTypeSetting) {
+        // can't delete a setting!
     }
 
     if(res) {

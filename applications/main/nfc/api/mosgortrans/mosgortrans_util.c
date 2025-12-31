@@ -2,6 +2,20 @@
 
 #define TAG "Mosgortrans"
 
+void render_section_header(
+    FuriString* str,
+    const char* name,
+    uint8_t prefix_separator_cnt,
+    uint8_t suffix_separator_cnt) {
+    for(uint8_t i = 0; i < prefix_separator_cnt; i++) {
+        furi_string_cat_printf(str, ":");
+    }
+    furi_string_cat_printf(str, "[ %s ]", name);
+    for(uint8_t i = 0; i < suffix_separator_cnt; i++) {
+        furi_string_cat_printf(str, ":");
+    }
+}
+
 void from_days_to_datetime(uint32_t days, DateTime* datetime, uint16_t start_year) {
     uint32_t timestamp = days * 24 * 60 * 60;
     DateTime start_datetime = {0};
@@ -505,8 +519,8 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.year);
 
         if(data_block.valid_from_date == 0 || data_block.valid_to_date == 0) {
-            furi_string_cat(result, "\e#No ticket\n");
-            return true;
+            furi_string_cat(result, "\e#No ticket");
+            return false;
         }
         //remaining_trips
         furi_string_cat_printf(result, "Trips: %d\n", data_block.total_trips);
@@ -625,7 +639,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             data_block.valid_from_date + data_block.valid_for_days, &card_valid_to_date_s, 1992);
         furi_string_cat_printf(
             result,
-            "Valid to: %02d.%02d.%04d\n",
+            "Valid to: %02d.%02d.%04d",
             card_valid_to_date_s.day,
             card_valid_to_date_s.month,
             card_valid_to_date_s.year);
@@ -663,7 +677,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             2016);
         furi_string_cat_printf(
             result,
-            "Valid to: %02d.%02d.%04d\n",
+            "Valid to: %02d.%02d.%04d",
             card_valid_to_date_s.day,
             card_valid_to_date_s.month,
             card_valid_to_date_s.year);
@@ -676,7 +690,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 2016);
             furi_string_cat_printf(
                 result,
-                "Trip from: %02d.%02d.%04d %02d:%02d\n",
+                "\nTrip from: %02d.%02d.%04d %02d:%02d",
                 card_start_trip_minutes_s.day,
                 card_start_trip_minutes_s.month,
                 card_start_trip_minutes_s.year,
@@ -693,7 +707,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 2016);
             furi_string_cat_printf(
                 result,
-                "Trip switch: %02d.%02d.%04d %02d:%02d\n",
+                "\nTrip switch: %02d.%02d.%04d %02d:%02d",
                 card_start_switch_trip_minutes_s.day,
                 card_start_switch_trip_minutes_s.month,
                 card_start_switch_trip_minutes_s.year,
@@ -703,10 +717,10 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         //transport
         FuriString* transport = furi_string_alloc();
         parse_transport_type(&data_block, transport);
-        furi_string_cat_printf(result, "Transport: %s\n", furi_string_get_cstr(transport));
+        furi_string_cat_printf(result, "\nTransport: %s", furi_string_get_cstr(transport));
         //validator
         if(data_block.validator) {
-            furi_string_cat_printf(result, "Validator: %05d\n", data_block.validator);
+            furi_string_cat_printf(result, "\nValidator: %05d", data_block.validator);
         }
         furi_string_free(transport);
         break;
@@ -740,9 +754,9 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_valid_to_date_s.month,
             card_valid_to_date_s.year);
         //remaining_trips
-        furi_string_cat_printf(result, "Trips left: %d\n", data_block.remaining_trips);
+        furi_string_cat_printf(result, "Trips left: %d", data_block.remaining_trips);
         //trip_from
-        if(data_block.start_trip_date) {
+        if(data_block.start_trip_date) { // TODO: (-nofl) unused
             DateTime card_start_trip_minutes_s = {0};
             from_minutes_to_datetime(
                 data_block.start_trip_date * 24 * 60 + data_block.start_trip_time,
@@ -751,7 +765,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         }
         //validator
         if(data_block.validator) {
-            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+            furi_string_cat_printf(result, "\nValidator: %05d", data_block.validator);
         }
         break;
     }
@@ -785,12 +799,12 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             data_block.valid_from_date + data_block.valid_for_days, &card_valid_to_date_s, 1992);
         furi_string_cat_printf(
             result,
-            "Valid to: %02d.%02d.%04d\n",
+            "Valid to: %02d.%02d.%04d",
             card_valid_to_date_s.day,
             card_valid_to_date_s.month,
             card_valid_to_date_s.year);
         //trip_from
-        if(data_block.start_trip_date) {
+        if(data_block.start_trip_date) { // TODO: (-nofl) unused
             DateTime card_start_trip_minutes_s = {0};
             from_minutes_to_datetime(
                 data_block.start_trip_date * 24 * 60 + data_block.start_trip_time,
@@ -798,7 +812,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 1992);
         }
         //trip_switch
-        if(data_block.passage_5_minutes) {
+        if(data_block.passage_5_minutes) { // TODO: (-nofl) unused
             DateTime card_start_switch_trip_minutes_s = {0};
             from_minutes_to_datetime(
                 data_block.start_trip_date * 24 * 60 + data_block.start_trip_time +
@@ -808,7 +822,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         }
         //validator
         if(data_block.validator) {
-            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+            furi_string_cat_printf(result, "\nValidator: %05d", data_block.validator);
         }
         break;
     }
@@ -870,10 +884,10 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             furi_string_cat(transport, "");
             break;
         }
-        furi_string_cat_printf(result, "Transport: %s\n", furi_string_get_cstr(transport));
+        furi_string_cat_printf(result, "Transport: %s", furi_string_get_cstr(transport));
         //validator
         if(data_block.validator) {
-            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+            furi_string_cat_printf(result, "\nValidator: %05d", data_block.validator);
         }
         furi_string_free(transport);
         break;
@@ -899,7 +913,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         from_days_to_datetime(data_block.valid_from_date, &card_valid_from_date_s, 1992);
         furi_string_cat_printf(
             result,
-            "Valid from: %02d.%02d.%04d\n",
+            "Valid from: %02d.%02d.%04d",
             card_valid_from_date_s.day,
             card_valid_from_date_s.month,
             card_valid_from_date_s.year);
@@ -912,7 +926,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 1992);
             furi_string_cat_printf(
                 result,
-                "Valid to: %02d.%02d.%04d\n",
+                "\nValid to: %02d.%02d.%04d",
                 card_valid_to_date_s.day,
                 card_valid_to_date_s.month,
                 card_valid_to_date_s.year);
@@ -924,7 +938,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 1992);
             furi_string_cat_printf(
                 result,
-                "Valid to: %02d.%02d.%04d\n",
+                "\nValid to: %02d.%02d.%04d",
                 card_valid_to_date_s.day,
                 card_valid_to_date_s.month,
                 card_valid_to_date_s.year);
@@ -939,7 +953,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 1992); //-time
             furi_string_cat_printf(
                 result,
-                "Trip from: %02d.%02d.%04d %02d:%02d\n",
+                "\nTrip from: %02d.%02d.%04d %02d:%02d",
                 card_start_trip_minutes_s.day,
                 card_start_trip_minutes_s.month,
                 card_start_trip_minutes_s.year,
@@ -956,7 +970,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 1992);
             furi_string_cat_printf(
                 result,
-                "Trip switch: %02d.%02d.%04d %02d:%02d\n",
+                "\nTrip switch: %02d.%02d.%04d %02d:%02d",
                 card_start_switch_trip_minutes_s.day,
                 card_start_switch_trip_minutes_s.month,
                 card_start_switch_trip_minutes_s.year,
@@ -965,7 +979,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         }
         //transport
         FuriString* transport = furi_string_alloc();
-        switch(data_block.transport_type) {
+        switch(data_block.transport_type) { // TODO: (-nofl) unused
         case 1:
             furi_string_cat(transport, "Metro");
             break;
@@ -981,7 +995,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         }
         //validator
         if(data_block.validator) {
-            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+            furi_string_cat_printf(result, "\nValidator: %05d", data_block.validator);
         }
         furi_string_free(transport);
         break;
@@ -1094,14 +1108,14 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             data_block.valid_from_date * 24 * 60 + data_block.valid_for_minutes -
                 data_block.start_trip_neg_minutes,
             &card_start_trip_minutes_s,
-            2016);
+            2016); // TODO: (-nofl) unused
         //transport
         FuriString* transport = furi_string_alloc();
         parse_transport_type(&data_block, transport);
-        furi_string_cat_printf(result, "Transport: %s\n", furi_string_get_cstr(transport));
+        furi_string_cat_printf(result, "Transport: %s", furi_string_get_cstr(transport));
         // validator
         if(data_block.validator) {
-            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+            furi_string_cat_printf(result, "\nValidator: %05d", data_block.validator);
         }
         furi_string_free(transport);
         break;
@@ -1121,7 +1135,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.month,
             card_use_before_date_s.year);
         //remaining_funds
-        furi_string_cat_printf(result, "Balance: %ld rub\n", data_block.remaining_funds / 100);
+        furi_string_cat_printf(result, "Balance: %ld rub", data_block.remaining_funds / 100);
         //start_trip_minutes
         if(data_block.start_trip_minutes) {
             DateTime card_start_trip_minutes_s = {0};
@@ -1129,7 +1143,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 data_block.start_trip_minutes, &card_start_trip_minutes_s, 2019);
             furi_string_cat_printf(
                 result,
-                "Trip from: %02d.%02d.%04d %02d:%02d\n",
+                "\nTrip from: %02d.%02d.%04d %02d:%02d",
                 card_start_trip_minutes_s.day,
                 card_start_trip_minutes_s.month,
                 card_start_trip_minutes_s.year,
@@ -1145,7 +1159,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 2019);
             furi_string_cat_printf(
                 result,
-                "(M) from: %02d.%02d.%04d %02d:%02d\n",
+                "\n(M) from: %02d.%02d.%04d %02d:%02d",
                 card_start_m_trip_minutes_s.day,
                 card_start_m_trip_minutes_s.month,
                 card_start_m_trip_minutes_s.year,
@@ -1160,7 +1174,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 2019);
             furi_string_cat_printf(
                 result,
-                "Trip edit: %02d.%02d.%04d %02d:%02d\n",
+                "\nTrip edit: %02d.%02d.%04d %02d:%02d",
                 card_start_change_trip_minutes_s.day,
                 card_start_change_trip_minutes_s.month,
                 card_start_change_trip_minutes_s.year,
@@ -1170,7 +1184,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         //transport
         //validator
         if(data_block.validator) {
-            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+            furi_string_cat_printf(result, "\nValidator: %05d", data_block.validator);
         }
         break;
     }
@@ -1207,7 +1221,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             2019);
         furi_string_cat_printf(
             result,
-            "Valid to: %02d.%02d.%04d\n",
+            "Valid to: %02d.%02d.%04d",
             card_use_to_date_s.day,
             card_use_to_date_s.month,
             card_use_to_date_s.year);
@@ -1221,7 +1235,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 2019); //-time
             furi_string_cat_printf(
                 result,
-                "Trip from: %02d.%02d.%04d %02d:%02d\n",
+                "\nTrip from: %02d.%02d.%04d %02d:%02d",
                 card_start_trip_minutes_s.day,
                 card_start_trip_minutes_s.month,
                 card_start_trip_minutes_s.year,
@@ -1238,7 +1252,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 2019);
             furi_string_cat_printf(
                 result,
-                "(M) from: %02d.%02d.%04d %02d:%02d\n",
+                "\n(M) from: %02d.%02d.%04d %02d:%02d",
                 card_start_trip_m_minutes_s.day,
                 card_start_trip_m_minutes_s.month,
                 card_start_trip_m_minutes_s.year,
@@ -1248,7 +1262,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         //transport
         //validator
         if(data_block.validator) {
-            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+            furi_string_cat_printf(result, "\nValidator: %05d", data_block.validator);
         }
         break;
     }

@@ -1,0 +1,24 @@
+let math = require("math");
+
+print("math.abs(-5):", math.abs(-5));
+print("math.acos(0.5):", math.acos(0.5));
+print("math.acosh(2):", math.acosh(2));
+print("math.asin(0.5):", math.asin(0.5));
+print("math.asinh(2):", math.asinh(2));
+print("math.atan(1):", math.atan(1));
+print("math.atan2(1, 1):", math.atan2(1, 1));
+print("math.atanh(0.5):", math.atanh(0.5));
+print("math.cbrt(27):", math.cbrt(27));
+print("math.ceil(5.3):", math.ceil(5.3));
+print("math.clz32(1):", math.clz32(1));
+print("math.cos(math.PI):", math.cos(math.PI));
+print("math.exp(1):", math.exp(1));
+print("math.floor(5.7):", math.floor(5.7));
+print("math.max(3, 5):", math.max(3, 5));
+print("math.min(3, 5):", math.min(3, 5));
+print("math.pow(2, 3):", math.pow(2, 3));
+print("math.random():", math.random());
+print("math.sign(-5):", math.sign(-5));
+print("math.sin(math.PI/2):", math.sin(math.PI / 2));
+print("math.sqrt(25):", math.sqrt(25));
+print("math.trunc(5.7):", math.trunc(5.7));

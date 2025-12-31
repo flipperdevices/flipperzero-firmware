@@ -15,7 +15,7 @@ const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
 
 Canvas* canvas_init(void) {
     Canvas* canvas = malloc(sizeof(Canvas));
-    canvas->compress_icon = compress_icon_alloc();
+    canvas->compress_icon = compress_icon_alloc(ICON_DECOMPRESSOR_BUFFER_SIZE);
 
     // Initialize mutex
     canvas->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -390,7 +390,7 @@ void canvas_draw_icon_ex(
     x += canvas->offset_x;
     y += canvas->offset_y;
     uint8_t* icon_data = NULL;
-    compress_icon_decode(canvas->compress_icon, icon_get_data(icon), &icon_data);
+    compress_icon_decode(canvas->compress_icon, icon_get_frame_data(icon, 0), &icon_data);
     canvas_draw_u8g2_bitmap(
         &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data, rotation);
 }
@@ -402,7 +402,7 @@ void canvas_draw_icon(Canvas* canvas, int32_t x, int32_t y, const Icon* icon) {
     x += canvas->offset_x;
     y += canvas->offset_y;
     uint8_t* icon_data = NULL;
-    compress_icon_decode(canvas->compress_icon, icon_get_data(icon), &icon_data);
+    compress_icon_decode(canvas->compress_icon, icon_get_frame_data(icon, 0), &icon_data);
     canvas_draw_u8g2_bitmap(
         &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data, IconRotation0);
 }
@@ -512,9 +512,21 @@ void canvas_draw_xbm(
     size_t height,
     const uint8_t* bitmap) {
     furi_check(canvas);
+    canvas_draw_xbm_ex(canvas, x, y, width, height, IconRotation0, bitmap);
+}
+
+void canvas_draw_xbm_ex(
+    Canvas* canvas,
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t height,
+    IconRotation rotation,
+    const uint8_t* bitmap_data) {
+    furi_check(canvas);
     x += canvas->offset_x;
     y += canvas->offset_y;
-    canvas_draw_u8g2_bitmap(&canvas->fb, x, y, width, height, bitmap, IconRotation0);
+    canvas_draw_u8g2_bitmap(&canvas->fb, x, y, width, height, bitmap_data, rotation);
 }
 
 void canvas_draw_glyph(Canvas* canvas, int32_t x, int32_t y, uint16_t ch) {

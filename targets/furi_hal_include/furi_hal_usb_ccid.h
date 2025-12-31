@@ -1,9 +1,13 @@
 #pragma once
+
 #include "hid_usage_desktop.h"
 #include "hid_usage_button.h"
 #include "hid_usage_keyboard.h"
 #include "hid_usage_consumer.h"
 #include "hid_usage_led.h"
+#include <stdint.h>
+
+#define CCID_SHORT_APDU_SIZE (0xFF)
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,17 +23,25 @@ typedef struct {
 typedef struct {
     void (*icc_power_on_callback)(uint8_t* dataBlock, uint32_t* dataBlockLen, void* context);
     void (*xfr_datablock_callback)(
-        const uint8_t* dataBlock,
-        uint32_t dataBlockLen,
-        uint8_t* responseDataBlock,
-        uint32_t* responseDataBlockLen,
+        const uint8_t* pcToReaderDataBlock,
+        uint32_t pcToReaderDataBlockLen,
+        uint8_t* readerToPcDataBlock,
+        uint32_t* readerToPcDataBlockLen,
         void* context);
 } CcidCallbacks;
 
-void furi_hal_ccid_set_callbacks(CcidCallbacks* cb);
+/** Set CCID callbacks
+ *
+ * @param      cb       CcidCallbacks instance
+ * @param      context  The context for callbacks
+ */
+void furi_hal_usb_ccid_set_callbacks(CcidCallbacks* cb, void* context);
 
-void furi_hal_ccid_ccid_insert_smartcard(void);
-void furi_hal_ccid_ccid_remove_smartcard(void);
+/** Insert Smart Card */
+void furi_hal_usb_ccid_insert_smartcard(void);
+
+/** Remove Smart Card */
+void furi_hal_usb_ccid_remove_smartcard(void);
 
 #ifdef __cplusplus
 }

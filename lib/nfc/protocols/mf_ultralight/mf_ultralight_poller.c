@@ -3,6 +3,7 @@
 #include <nfc/protocols/nfc_poller_base.h>
 
 #include <furi.h>
+#include <furi_hal.h>
 
 #define TAG "MfUltralightPoller"
 
@@ -180,7 +181,7 @@ MfUltralightPoller* mf_ultralight_poller_alloc(Iso14443_3aPoller* iso14443_3a_po
     instance->general_event.protocol = NfcProtocolMfUltralight;
     instance->general_event.event_data = &instance->mfu_event;
     instance->general_event.instance = instance;
-
+    mbedtls_des3_init(&instance->des_context);
     return instance;
 }
 
@@ -193,6 +194,7 @@ void mf_ultralight_poller_free(MfUltralightPoller* instance) {
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
     mf_ultralight_free(instance->data);
+    mbedtls_des3_free(&instance->des_context);
     free(instance);
 }
 
@@ -249,7 +251,7 @@ static NfcCommand mf_ultralight_poller_handler_read_version(MfUltralightPoller* 
         instance->data->type = mf_ultralight_get_type_by_version(&instance->data->version);
         instance->state = MfUltralightPollerStateGetFeatureSet;
     } else {
-        FURI_LOG_D(TAG, "Didn't response. Check Ultralight C");
+        FURI_LOG_D(TAG, "Didn't respond. Check Ultralight C");
         iso14443_3a_poller_halt(instance->iso14443_3a_poller);
         instance->state = MfUltralightPollerStateDetectMfulC;
     }
@@ -258,13 +260,13 @@ static NfcCommand mf_ultralight_poller_handler_read_version(MfUltralightPoller* 
 }
 
 static NfcCommand mf_ultralight_poller_handler_check_ultralight_c(MfUltralightPoller* instance) {
-    instance->error = mf_ultralight_poller_authenticate(instance);
+    instance->error = mf_ultralight_poller_authentication_test(instance);
     if(instance->error == MfUltralightErrorNone) {
         FURI_LOG_D(TAG, "Ultralight C detected");
         instance->data->type = MfUltralightTypeMfulC;
         instance->state = MfUltralightPollerStateGetFeatureSet;
     } else {
-        FURI_LOG_D(TAG, "Didn't response. Check NTAG 203");
+        FURI_LOG_D(TAG, "Didn't respond. Check NTAG 203");
         instance->state = MfUltralightPollerStateDetectNtag203;
     }
     iso14443_3a_poller_halt(instance->iso14443_3a_poller);
@@ -281,12 +283,7 @@ static NfcCommand mf_ultralight_poller_handler_check_ntag_203(MfUltralightPoller
     } else {
         FURI_LOG_D(TAG, "Original Ultralight detected");
         iso14443_3a_poller_halt(instance->iso14443_3a_poller);
-        instance->data->type = MfUltralightTypeUnknown;
-        if(instance->mode == MfUltralightPollerModeWrite) {
-            instance->mfu_event.type = MfUltralightPollerEventTypeCardMismatch;
-            instance->callback(instance->general_event, instance->context);
-            next_state = MfUltralightPollerStateWriteFail;
-        }
+        instance->data->type = MfUltralightTypeOrigin;
     }
     instance->state = next_state;
 
@@ -320,6 +317,10 @@ static NfcCommand mf_ultralight_poller_handler_read_signature(MfUltralightPoller
         }
     } else {
         FURI_LOG_D(TAG, "Skip reading signature");
+        if(mf_ultralight_support_feature(
+               instance->feature_set, MfUltralightFeatureSupportAuthenticate)) {
+            next_state = MfUltralightPollerStateAuthMfulC;
+        }
     }
     instance->state = next_state;
 
@@ -441,6 +442,111 @@ static NfcCommand mf_ultralight_poller_handler_auth(MfUltralightPoller* instance
     return command;
 }
 
+static NfcCommand mf_ultralight_poller_handler_auth_ultralight_c(MfUltralightPoller* instance) {
+    NfcCommand command = NfcCommandContinue;
+    FURI_LOG_D(TAG, "MfulC auth");
+    if(mf_ultralight_support_feature(
+           instance->feature_set, MfUltralightFeatureSupportAuthenticate)) {
+        instance->mfu_event.type = MfUltralightPollerEventTypeAuthRequest;
+
+        command = instance->callback(instance->general_event, instance->context);
+        if(!instance->mfu_event.data->auth_context.skip_auth) {
+            FURI_LOG_D(TAG, "Trying to authenticate with 3des key");
+            // Only use the key if it was actually provided
+            if(instance->mfu_event.data->key_request_data.key_provided) {
+                instance->auth_context.tdes_key = instance->mfu_event.data->key_request_data.key;
+            } else if(instance->mode == MfUltralightPollerModeDictAttack) {
+                // TODO:  -nofl Can logic be rearranged to request this key
+                // before reaching mf_ultralight_poller_handler_auth_ultralight_c in poller?
+                FURI_LOG_D(TAG, "No initial key provided, requesting key from dictionary");
+                // Trigger dictionary key request
+                instance->mfu_event.type = MfUltralightPollerEventTypeRequestKey;
+                command = instance->callback(instance->general_event, instance->context);
+                if(!instance->mfu_event.data->key_request_data.key_provided) {
+                    instance->state = MfUltralightPollerStateReadPages;
+                    return command;
+                } else {
+                    instance->auth_context.tdes_key =
+                        instance->mfu_event.data->key_request_data.key;
+                }
+            } else {
+                // Fallback: use key from auth context (for sync poller compatibility)
+                instance->auth_context.tdes_key = instance->mfu_event.data->auth_context.tdes_key;
+            }
+            instance->auth_context.auth_success = false;
+            // For debugging
+            FURI_LOG_D(
+                "TAG",
+                "Key data: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+                instance->auth_context.tdes_key.data[0],
+                instance->auth_context.tdes_key.data[1],
+                instance->auth_context.tdes_key.data[2],
+                instance->auth_context.tdes_key.data[3],
+                instance->auth_context.tdes_key.data[4],
+                instance->auth_context.tdes_key.data[5],
+                instance->auth_context.tdes_key.data[6],
+                instance->auth_context.tdes_key.data[7],
+                instance->auth_context.tdes_key.data[8],
+                instance->auth_context.tdes_key.data[9],
+                instance->auth_context.tdes_key.data[10],
+                instance->auth_context.tdes_key.data[11],
+                instance->auth_context.tdes_key.data[12],
+                instance->auth_context.tdes_key.data[13],
+                instance->auth_context.tdes_key.data[14],
+                instance->auth_context.tdes_key.data[15]);
+            do {
+                uint8_t output[MF_ULTRALIGHT_C_AUTH_DATA_SIZE];
+                uint8_t RndA[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE] = {0};
+                furi_hal_random_fill_buf(RndA, sizeof(RndA));
+                instance->error = mf_ultralight_poller_authenticate_start(instance, RndA, output);
+                if(instance->error != MfUltralightErrorNone) break;
+
+                uint8_t decoded_shifted_RndA[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE] = {0};
+                const uint8_t* RndB = output + MF_ULTRALIGHT_C_AUTH_RND_B_BLOCK_OFFSET;
+                instance->error = mf_ultralight_poller_authenticate_end(
+                    instance, RndB, output, decoded_shifted_RndA);
+                if(instance->error != MfUltralightErrorNone) break;
+
+                mf_ultralight_3des_shift_data(RndA);
+                instance->auth_context.auth_success =
+                    (memcmp(RndA, decoded_shifted_RndA, sizeof(decoded_shifted_RndA)) == 0);
+                if(instance->auth_context.auth_success) {
+                    FURI_LOG_E(TAG, "Auth success");
+                    if(instance->mode == MfUltralightPollerModeDictAttack) {
+                        memcpy(
+                            &instance->data->page[44],
+                            instance->auth_context.tdes_key.data,
+                            MF_ULTRALIGHT_C_AUTH_DES_KEY_SIZE);
+                        // Continue to read pages after successful authentication
+                        instance->state = MfUltralightPollerStateReadPages;
+                    }
+                }
+            } while(false);
+            if(instance->error != MfUltralightErrorNone || !instance->auth_context.auth_success) {
+                FURI_LOG_E(TAG, "Auth failed");
+                iso14443_3a_poller_halt(instance->iso14443_3a_poller);
+                if(instance->mode == MfUltralightPollerModeDictAttack) {
+                    // Not needed? We already do a callback earlier?
+                    instance->mfu_event.type = MfUltralightPollerEventTypeRequestKey;
+                    command = instance->callback(instance->general_event, instance->context);
+                    if(!instance->mfu_event.data->key_request_data.key_provided) {
+                        instance->state = MfUltralightPollerStateReadPages;
+                    } else {
+                        instance->auth_context.tdes_key =
+                            instance->mfu_event.data->key_request_data.key;
+                        instance->state = MfUltralightPollerStateAuthMfulC;
+                    }
+                }
+            }
+        }
+    }
+    // Regression review
+    if(instance->mode != MfUltralightPollerModeDictAttack) {
+        instance->state = MfUltralightPollerStateReadPages;
+    }
+    return command;
+}
+
 static NfcCommand mf_ultralight_poller_handler_read_pages(MfUltralightPoller* instance) {
     MfUltralightPageReadCommandData data = {};
     uint16_t start_page = instance->pages_read;
@@ -461,23 +567,27 @@ static NfcCommand mf_ultralight_poller_handler_read_pages(MfUltralightPoller* in
     }
 
     if(instance->error == MfUltralightErrorNone) {
-        for(size_t i = 0; i < 4; i++) {
-            if(start_page + i < instance->pages_total) {
-                FURI_LOG_D(TAG, "Read page %d success", start_page + i);
-                instance->data->page[start_page + i] = data.page[i];
-                instance->pages_read++;
-                instance->data->pages_read = instance->pages_read;
-            }
+        if(start_page < instance->pages_total) {
+            FURI_LOG_D(TAG, "Read page %d success", start_page);
+            instance->data->page[start_page] = data.page[0];
+            instance->pages_read++;
+            instance->data->pages_read = instance->pages_read;
         }
+
         if(instance->pages_read == instance->pages_total) {
             instance->state = MfUltralightPollerStateReadCounters;
         }
     } else {
-        FURI_LOG_D(TAG, "Read page %d failed", instance->pages_read);
-        if(instance->pages_read) {
-            instance->state = MfUltralightPollerStateReadCounters;
+        if(instance->data->type == MfUltralightTypeMfulC &&
+           !mf_ultralight_3des_key_valid(instance->data)) {
+            instance->state = MfUltralightPollerStateCheckMfulCAuthStatus;
         } else {
-            instance->state = MfUltralightPollerStateReadFailed;
+            FURI_LOG_D(TAG, "Read page %d failed", instance->pages_read);
+            if(instance->pages_read) {
+                instance->state = MfUltralightPollerStateReadCounters;
+            } else {
+                instance->state = MfUltralightPollerStateReadFailed;
+            }
         }
     }
 
@@ -529,6 +639,31 @@ static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoll
     return NfcCommandContinue;
 }
 
+static NfcCommand
+    mf_ultralight_poller_handler_check_mfuc_auth_status(MfUltralightPoller* instance) {
+    instance->state = MfUltralightPollerStateReadSuccess;
+
+    do {
+        if(!mf_ultralight_support_feature(
+               instance->feature_set, MfUltralightFeatureSupportAuthenticate))
+            break;
+
+        if(!instance->auth_context.auth_success) {
+            FURI_LOG_D(TAG, "Skip 3des key populating");
+            break;
+        }
+
+        memcpy(
+            &instance->data->page[44],
+            instance->auth_context.tdes_key.data,
+            MF_ULTRALIGHT_C_AUTH_DES_KEY_SIZE);
+        instance->data->pages_read = instance->pages_total;
+        instance->pages_read = instance->pages_total;
+    } while(false);
+
+    return NfcCommandContinue;
+}
+
 static NfcCommand mf_ultralight_poller_handler_read_fail(MfUltralightPoller* instance) {
     FURI_LOG_D(TAG, "Read Failed");
     iso14443_3a_poller_halt(instance->iso14443_3a_poller);
@@ -575,10 +710,12 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
             break;
         }
 
-        if(!instance->auth_context.auth_success) {
-            FURI_LOG_D(TAG, "Unknown password");
-            instance->mfu_event.type = MfUltralightPollerEventTypeCardLocked;
-            break;
+        if(mf_ultralight_support_feature(features, MfUltralightFeatureSupportPasswordAuth)) {
+            if(!instance->auth_context.auth_success) {
+                FURI_LOG_D(TAG, "Unknown password");
+                instance->mfu_event.type = MfUltralightPollerEventTypeCardLocked;
+                break;
+            }
         }
 
         const MfUltralightPage staticlock_page = tag_data->page[2];
@@ -616,7 +753,7 @@ static NfcCommand mf_ultralight_poller_handler_write_pages(MfUltralightPoller* i
 
     do {
         const MfUltralightData* write_data = instance->mfu_event.data->write_data;
-        uint8_t end_page = mf_ultralight_get_config_page_num(write_data->type) - 1;
+        uint8_t end_page = mf_ultralight_get_write_end_page(write_data->type);
         if(instance->current_page == end_page) {
             instance->state = MfUltralightPollerStateWriteSuccess;
             break;
@@ -666,6 +803,9 @@ static const MfUltralightPollerReadHandler
             mf_ultralight_poller_handler_read_tearing_flags,
         [MfUltralightPollerStateAuth] = mf_ultralight_poller_handler_auth,
         [MfUltralightPollerStateTryDefaultPass] = mf_ultralight_poller_handler_try_default_pass,
+        [MfUltralightPollerStateCheckMfulCAuthStatus] =
+            mf_ultralight_poller_handler_check_mfuc_auth_status,
+        [MfUltralightPollerStateAuthMfulC] = mf_ultralight_poller_handler_auth_ultralight_c,
         [MfUltralightPollerStateReadPages] = mf_ultralight_poller_handler_read_pages,
         [MfUltralightPollerStateReadFailed] = mf_ultralight_poller_handler_read_fail,
         [MfUltralightPollerStateReadSuccess] = mf_ultralight_poller_handler_read_success,
@@ -674,7 +814,6 @@ static const MfUltralightPollerReadHandler
         [MfUltralightPollerStateWritePages] = mf_ultralight_poller_handler_write_pages,
         [MfUltralightPollerStateWriteFail] = mf_ultralight_poller_handler_write_fail,
         [MfUltralightPollerStateWriteSuccess] = mf_ultralight_poller_handler_write_success,
-
 };
 
 static NfcCommand mf_ultralight_poller_run(NfcGenericEvent event, void* context) {

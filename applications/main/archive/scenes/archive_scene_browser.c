@@ -1,6 +1,5 @@
 #include "../archive_i.h"
 #include "../helpers/archive_files.h"
-#include "../helpers/archive_apps.h"
 #include "../helpers/archive_favorites.h"
 #include "../helpers/archive_browser.h"
 #include "../views/archive_browser_view.h"
@@ -9,7 +8,7 @@
 
 #define TAG "ArchiveSceneBrowser"
 
-#define SCENE_STATE_DEFAULT (0)
+#define SCENE_STATE_DEFAULT      (0)
 #define SCENE_STATE_NEED_REFRESH (1)
 
 static const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
@@ -43,7 +42,7 @@ static void archive_loader_callback(const void* message, void* context) {
     const LoaderEvent* event = message;
     ArchiveApp* archive = (ArchiveApp*)context;
 
-    if(event->type == LoaderEventTypeApplicationStopped) {
+    if(event->type == LoaderEventTypeNoMoreAppsInQueue) {
         view_dispatcher_send_custom_event(
             archive->view_dispatcher, ArchiveBrowserEventListRefresh);
     }
@@ -53,20 +52,37 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
     UNUSED(browser);
     Loader* loader = furi_record_open(RECORD_LOADER);
 
-    const char* app_name = archive_get_flipper_app_name(selected->type);
-
-    if(app_name) {
-        if(selected->is_app) {
-            char* param = strrchr(furi_string_get_cstr(selected->path), '/');
-            if(param != NULL) {
-                param++;
-            }
-            loader_start_with_gui_error(loader, app_name, param);
+    if(selected->type == ArchiveFileTypeSetting) {
+        FuriString* app_name = furi_string_alloc_set(selected->path);
+        furi_string_right(app_name, furi_string_search_char(app_name, '/', 1) + 1);
+        size_t slash = furi_string_search_char(app_name, '/', 1);
+        if(slash != FURI_STRING_FAILURE) {
+            furi_string_left(app_name, slash);
+            FuriString* app_args =
+                furi_string_alloc_set_str(furi_string_get_cstr(app_name) + slash + 1);
+            loader_start_with_gui_error(
+                loader, furi_string_get_cstr(app_name), furi_string_get_cstr(app_args));
+            furi_string_free(app_args);
         } else {
-            loader_start_with_gui_error(loader, app_name, furi_string_get_cstr(selected->path));
+            loader_start_with_gui_error(loader, furi_string_get_cstr(app_name), NULL);
         }
+        furi_string_free(app_name);
     } else {
-        loader_start_with_gui_error(loader, furi_string_get_cstr(selected->path), NULL);
+        const char* app_name = archive_get_flipper_app_name(selected->type);
+        if(app_name) {
+            if(selected->is_app) {
+                char* param = strrchr(furi_string_get_cstr(selected->path), '/');
+                if(param != NULL) {
+                    param++;
+                }
+                loader_start_with_gui_error(loader, app_name, param);
+            } else {
+                loader_start_with_gui_error(
+                    loader, app_name, furi_string_get_cstr(selected->path));
+            }
+        } else {
+            loader_start_with_gui_error(loader, furi_string_get_cstr(selected->path), NULL);
+        }
     }
 
     furi_record_close(RECORD_LOADER);
@@ -86,10 +102,8 @@ void archive_scene_browser_on_enter(void* context) {
     archive_update_focus(browser, archive->text_store);
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewBrowser);
 
-    Loader* loader = furi_record_open(RECORD_LOADER);
-    archive->loader_stop_subscription =
-        furi_pubsub_subscribe(loader_get_pubsub(loader), archive_loader_callback, archive);
-    furi_record_close(RECORD_LOADER);
+    archive->loader_stop_subscription = furi_pubsub_subscribe(
+        loader_get_pubsub(archive->loader), archive_loader_callback, archive);
 
     uint32_t state = scene_manager_get_scene_state(archive->scene_manager, ArchiveAppSceneBrowser);
 
@@ -213,10 +227,11 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             if(!archive_is_home(browser)) {
                 archive_leave_dir(browser);
             } else {
-                Loader* loader = furi_record_open(RECORD_LOADER);
-                furi_pubsub_unsubscribe(
-                    loader_get_pubsub(loader), archive->loader_stop_subscription);
-                furi_record_close(RECORD_LOADER);
+                if(archive->loader_stop_subscription) {
+                    furi_pubsub_unsubscribe(
+                        loader_get_pubsub(archive->loader), archive->loader_stop_subscription);
+                    archive->loader_stop_subscription = NULL;
+                }
 
                 view_dispatcher_stop(archive->view_dispatcher);
             }
@@ -232,8 +247,9 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
 
 void archive_scene_browser_on_exit(void* context) {
     ArchiveApp* archive = (ArchiveApp*)context;
-
-    Loader* loader = furi_record_open(RECORD_LOADER);
-    furi_pubsub_unsubscribe(loader_get_pubsub(loader), archive->loader_stop_subscription);
-    furi_record_close(RECORD_LOADER);
+    if(archive->loader_stop_subscription) {
+        furi_pubsub_unsubscribe(
+            loader_get_pubsub(archive->loader), archive->loader_stop_subscription);
+        archive->loader_stop_subscription = NULL;
+    }
 }

@@ -1,30 +1,25 @@
-#include "subghz_txrx_i.h"
+#include "subghz_txrx_i.h" // IWYU pragma: keep
 
 #include <lib/subghz/protocols/protocol_items.h>
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
+#include <power/power_service/power.h>
+
 #define TAG "SubGhz"
 
 static void subghz_txrx_radio_device_power_on(SubGhzTxRx* instance) {
     UNUSED(instance);
-    uint8_t attempts = 5;
-    while(--attempts > 0) {
-        if(furi_hal_power_enable_otg()) break;
-    }
-    if(attempts == 0) {
-        if(furi_hal_power_get_usb_voltage() < 4.5f) {
-            FURI_LOG_E(
-                TAG,
-                "Error power otg enable. BQ2589 check otg fault = %d",
-                furi_hal_power_check_otg_fault() ? 1 : 0);
-        }
-    }
+    Power* power = furi_record_open(RECORD_POWER);
+    power_enable_otg(power, true);
+    furi_record_close(RECORD_POWER);
 }
 
 static void subghz_txrx_radio_device_power_off(SubGhzTxRx* instance) {
     UNUSED(instance);
-    if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
+    Power* power = furi_record_open(RECORD_POWER);
+    power_enable_otg(power, false);
+    furi_record_close(RECORD_POWER);
 }
 
 SubGhzTxRx* subghz_txrx_alloc(void) {
@@ -508,22 +503,19 @@ SubGhzProtocolDecoderBase* subghz_txrx_get_decoder(SubGhzTxRx* instance) {
 
 bool subghz_txrx_protocol_is_serializable(SubGhzTxRx* instance) {
     furi_assert(instance);
-    return (
-        (instance->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
-        SubGhzProtocolFlag_Save);
+    return (instance->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
+           SubGhzProtocolFlag_Save;
 }
 
 bool subghz_txrx_protocol_is_transmittable(SubGhzTxRx* instance, bool check_type) {
     furi_assert(instance);
     const SubGhzProtocol* protocol = instance->decoder_result->protocol;
     if(check_type) {
-        return (
-            ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
-            protocol->encoder->deserialize && protocol->type == SubGhzProtocolTypeStatic);
+        return ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
+               protocol->encoder->deserialize && protocol->type == SubGhzProtocolTypeStatic;
     }
-    return (
-        ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
-        protocol->encoder->deserialize);
+    return ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
+           protocol->encoder->deserialize;
 }
 
 void subghz_txrx_receiver_set_filter(SubGhzTxRx* instance, SubGhzProtocolFlag filter) {

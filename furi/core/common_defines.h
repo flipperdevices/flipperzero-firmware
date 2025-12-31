@@ -29,8 +29,8 @@ extern "C" {
 #define FURI_PACKED __attribute__((packed))
 #endif
 
-#ifndef FURI_ALWAYS_STATIC_INLINE
-#define FURI_ALWAYS_STATIC_INLINE __attribute__((always_inline)) static inline
+#ifndef FURI_ALWAYS_INLINE
+#define FURI_ALWAYS_INLINE __attribute__((always_inline)) inline
 #endif
 
 #ifndef FURI_IS_IRQ_MASKED
@@ -65,6 +65,14 @@ void __furi_critical_exit(__FuriCriticalInfo info);
 
 #ifndef FURI_CHECK_RETURN
 #define FURI_CHECK_RETURN __attribute__((__warn_unused_result__))
+#endif
+
+#ifndef FURI_NAKED
+#define FURI_NAKED __attribute__((naked))
+#endif
+
+#ifndef FURI_DEFAULT
+#define FURI_DEFAULT(x) __attribute__((weak, alias(x)))
 #endif
 
 #ifdef __cplusplus

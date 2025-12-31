@@ -93,13 +93,12 @@ static bool popup_view_input_callback(InputEvent* event, void* context) {
 void popup_start_timer(void* context) {
     Popup* popup = context;
     if(popup->timer_enabled) {
-        uint32_t timer_period =
-            popup->timer_period_in_ms / (1000.0f / furi_kernel_get_tick_frequency());
+        uint32_t timer_period = furi_ms_to_ticks(popup->timer_period_in_ms);
         if(timer_period == 0) timer_period = 1;
 
         if(furi_timer_start(popup->timer, timer_period) != FuriStatusOk) {
             furi_crash();
-        };
+        }
     }
 }
 
@@ -112,7 +111,6 @@ Popup* popup_alloc(void) {
     Popup* popup = malloc(sizeof(Popup));
     popup->view = view_alloc();
     popup->timer = furi_timer_alloc(popup_timer_callback, FuriTimerTypeOnce, popup);
-    furi_assert(popup->timer);
     popup->timer_period_in_ms = 1000;
     popup->timer_enabled = false;
 

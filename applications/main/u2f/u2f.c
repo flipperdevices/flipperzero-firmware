@@ -1,11 +1,9 @@
 #include "u2f.h"
-#include "u2f_hid.h"
 #include "u2f_data.h"
 
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_random.h>
-#include <littlefs/lfs_util.h> // for lfs_tobe32
 
 #include <mbedtls/sha256.h>
 #include <mbedtls/md.h>
@@ -13,13 +11,14 @@
 #include <mbedtls/error.h>
 
 #define TAG "U2f"
+
 #define WORKER_TAG TAG "Worker"
 
 #define MCHECK(expr) furi_check((expr) == 0)
 
-#define U2F_CMD_REGISTER 0x01
+#define U2F_CMD_REGISTER     0x01
 #define U2F_CMD_AUTHENTICATE 0x02
-#define U2F_CMD_VERSION 0x03
+#define U2F_CMD_VERSION      0x03
 
 typedef enum {
     U2fCheckOnly = 0x07, // "check-only" - only check key handle, don't send auth response
@@ -29,14 +28,14 @@ typedef enum {
         0x08, // "dont-enforce-user-presence-and-sign" - send auth response even if user is missing
 } U2fAuthMode;
 
-#define U2F_HASH_SIZE 32
-#define U2F_NONCE_SIZE 32
+#define U2F_HASH_SIZE      32
+#define U2F_NONCE_SIZE     32
 #define U2F_CHALLENGE_SIZE 32
-#define U2F_APP_ID_SIZE 32
+#define U2F_APP_ID_SIZE    32
 
-#define U2F_EC_KEY_SIZE 32
+#define U2F_EC_KEY_SIZE    32
 #define U2F_EC_BIGNUM_SIZE 32
-#define U2F_EC_POINT_SIZE 65
+#define U2F_EC_POINT_SIZE  65
 
 typedef struct {
     uint8_t format;
@@ -281,6 +280,8 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
         MCHECK(mbedtls_md_hmac_update(&hmac_ctx, private, sizeof(private)));
         MCHECK(mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id)));
         MCHECK(mbedtls_md_hmac_finish(&hmac_ctx, handle.hash));
+
+        mbedtls_md_free(&hmac_ctx);
     }
 
     // Generate public key
@@ -316,7 +317,11 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     uint8_t signature_len = u2f_der_encode_signature(resp->cert + cert_len, signature);
     memcpy(resp->cert + cert_len + signature_len, state_no_error, 2);
 
-    return (sizeof(U2fRegisterResp) + cert_len + signature_len + 2);
+    return sizeof(U2fRegisterResp) + cert_len + signature_len + 2;
+}
+
+static inline uint32_t u2f_to_big_endian(uint32_t a) {
+    return __builtin_bswap32(a);
 }
 
 static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
@@ -348,7 +353,7 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     U2F->user_present = false;
 
     // The 4 byte counter is represented in big endian. Increment it before use
-    be_u2f_counter = lfs_tobe32(U2F->counter + 1);
+    be_u2f_counter = u2f_to_big_endian(U2F->counter + 1);
 
     // Generate hash
     {
@@ -384,6 +389,8 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
         MCHECK(mbedtls_md_hmac_update(&hmac_ctx, priv_key, sizeof(priv_key)));
         MCHECK(mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id)));
         MCHECK(mbedtls_md_hmac_finish(&hmac_ctx, mac_control));
+
+        mbedtls_md_free(&hmac_ctx);
     }
 
     if(memcmp(req->key_handle.hash, mac_control, sizeof(mac_control)) != 0) {
@@ -411,7 +418,7 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
 
     if(U2F->callback != NULL) U2F->callback(U2fNotifyAuthSuccess, U2F->context);
 
-    return (sizeof(U2fAuthResp) + signature_len + 2);
+    return sizeof(U2fAuthResp) + signature_len + 2;
 }
 
 uint16_t u2f_msg_parse(U2fData* U2F, uint8_t* buf, uint16_t len) {

@@ -12,6 +12,8 @@
 #include <m-algo.h>
 #include <furi.h>
 
+#define ICON_DECOMPRESSOR_BUFFER_SIZE (128u * 64 / 8)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,7 +29,7 @@ typedef struct {
     void* context;
 } CanvasCallbackPair;
 
-ARRAY_DEF(CanvasCallbackPairArray, CanvasCallbackPair, M_POD_OPLIST);
+ARRAY_DEF(CanvasCallbackPairArray, CanvasCallbackPair, M_POD_OPLIST); //-V658
 
 #define M_OPL_CanvasCallbackPairArray_t() ARRAY_OPLIST(CanvasCallbackPairArray, M_POD_OPLIST)
 

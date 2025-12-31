@@ -1,4 +1,4 @@
-#include "../infrared_app_i.h"
+#include "../infrared_app_i.h" // IWYU pragma: keep
 
 #include "common/infrared_scene_universal_common.h"
 
@@ -118,7 +118,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
     button_panel_add_icon(button_panel, 0, 60, &I_cool_30x51);
     button_panel_add_icon(button_panel, 34, 60, &I_heat_30x51);
 
-    button_panel_add_label(button_panel, 4, 10, FontPrimary, "AC remote");
+    button_panel_add_label(button_panel, 24, 10, FontPrimary, "AC");
 
     infrared_scene_universal_common_on_enter(context);
 }

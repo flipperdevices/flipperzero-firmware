@@ -6,6 +6,8 @@
 #include "helpers/wiegand.h"
 #include <one_wire/one_wire_host.h>
 #include <notification/notification_messages.h>
+#include <expansion/expansion.h>
+#include <power/power_service/power.h>
 
 class AccessorApp {
 public:
@@ -51,4 +53,6 @@ private:
     OneWireHost* onewire_host;
 
     NotificationApp* notification;
+    Expansion* expansion;
+    Power* power;
 };

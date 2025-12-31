@@ -102,6 +102,7 @@ env = core_env.Clone(
         core_env.subst("$SDK_DEFINITION"), load_version_only=True
     ).version,
     APPCHECK_COMSTR="\tAPPCHK\t${SOURCE}\n\t\tTarget: ${TARGET_HW}, API: ${UFBT_API_VERSION}",
+    COMPILATIONDB_USE_BINARY_ABSPATH=True,
 )
 
 wrap_tempfile(env, "LINKCOM")
@@ -401,6 +402,9 @@ for template_file in project_template_dir.Dir(".vscode").glob("*"):
                 ),
                 "@UFBT_FIRMWARE_ELF@": PosixPathWrapper.fix_path(
                     dist_env["FW_ELF"].abspath
+                ),
+                "@UFBT_TOOLCHAIN_CLANGD@": PosixPathWrapper.fix_path(
+                    dist_env.WhereIs("clangd")
                 ),
             },
         )

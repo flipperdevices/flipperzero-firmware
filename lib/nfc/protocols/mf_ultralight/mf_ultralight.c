@@ -5,15 +5,15 @@
 
 #define MF_ULTRALIGHT_PROTOCOL_NAME "NTAG/Ultralight"
 
-#define MF_ULTRALIGHT_FORMAT_VERSION_KEY "Data format version"
-#define MF_ULTRALIGHT_TYPE_KEY MF_ULTRALIGHT_PROTOCOL_NAME " type"
-#define MF_ULTRALIGHT_SIGNATURE_KEY "Signature"
-#define MF_ULTRALIGHT_MIFARE_VERSION_KEY "Mifare version"
-#define MF_ULTRALIGHT_COUNTER_KEY "Counter"
-#define MF_ULTRALIGHT_TEARING_KEY "Tearing"
-#define MF_ULTRALIGHT_PAGES_TOTAL_KEY "Pages total"
-#define MF_ULTRALIGHT_PAGES_READ_KEY "Pages read"
-#define MF_ULTRALIGHT_PAGE_KEY "Page"
+#define MF_ULTRALIGHT_FORMAT_VERSION_KEY  "Data format version"
+#define MF_ULTRALIGHT_TYPE_KEY            MF_ULTRALIGHT_PROTOCOL_NAME " type"
+#define MF_ULTRALIGHT_SIGNATURE_KEY       "Signature"
+#define MF_ULTRALIGHT_MIFARE_VERSION_KEY  "Mifare version"
+#define MF_ULTRALIGHT_COUNTER_KEY         "Counter"
+#define MF_ULTRALIGHT_TEARING_KEY         "Tearing"
+#define MF_ULTRALIGHT_PAGES_TOTAL_KEY     "Pages total"
+#define MF_ULTRALIGHT_PAGES_READ_KEY      "Pages read"
+#define MF_ULTRALIGHT_PAGE_KEY            "Page"
 #define MF_ULTRALIGHT_FAILED_ATTEMPTS_KEY "Failed authentication attempts"
 
 typedef struct {
@@ -26,7 +26,7 @@ typedef struct {
 static const uint32_t mf_ultralight_data_format_version = 2;
 
 static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = {
-    [MfUltralightTypeUnknown] =
+    [MfUltralightTypeOrigin] =
         {
             .device_name = "Mifare Ultralight",
             .total_pages = 16,
@@ -215,7 +215,7 @@ static const char*
     mf_ultralight_get_device_name_by_type(MfUltralightType type, NfcDeviceNameType name_type) {
     if(name_type == NfcDeviceNameTypeShort &&
        (type == MfUltralightTypeUL11 || type == MfUltralightTypeUL21)) {
-        type = MfUltralightTypeUnknown;
+        type = MfUltralightTypeOrigin;
     }
 
     return mf_ultralight_features[type].device_name;
@@ -512,7 +512,7 @@ Iso14443_3aData* mf_ultralight_get_base_data(const MfUltralightData* data) {
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version) {
     furi_check(version);
 
-    MfUltralightType type = MfUltralightTypeUnknown;
+    MfUltralightType type = MfUltralightTypeOrigin;
 
     if(version->storage_size == 0x0B || version->storage_size == 0x00) {
         type = MfUltralightTypeUL11;
@@ -570,6 +570,24 @@ uint16_t mf_ultralight_get_config_page_num(MfUltralightType type) {
     return mf_ultralight_features[type].config_page;
 }
 
+uint8_t mf_ultralight_get_write_end_page(MfUltralightType type) {
+    furi_check(type < MfUltralightTypeNum);
+    furi_assert(
+        type == MfUltralightTypeUL11 || type == MfUltralightTypeUL21 ||
+        type == MfUltralightTypeNTAG213 || type == MfUltralightTypeNTAG215 ||
+        type == MfUltralightTypeNTAG216 || type == MfUltralightTypeOrigin);
+
+    uint8_t end_page = mf_ultralight_get_config_page_num(type);
+    if(type == MfUltralightTypeNTAG213 || type == MfUltralightTypeNTAG215 ||
+       type == MfUltralightTypeNTAG216) {
+        end_page -= 1;
+    } else if(type == MfUltralightTypeOrigin) {
+        end_page = mf_ultralight_features[type].total_pages;
+    }
+
+    return end_page;
+}
+
 uint8_t mf_ultralight_get_pwd_page_num(MfUltralightType type) {
     furi_check(type < MfUltralightTypeNum);
 
@@ -580,7 +598,7 @@ uint8_t mf_ultralight_get_pwd_page_num(MfUltralightType type) {
 bool mf_ultralight_is_page_pwd_or_pack(MfUltralightType type, uint16_t page) {
     uint8_t pwd_page = mf_ultralight_get_pwd_page_num(type);
     uint8_t pack_page = pwd_page + 1;
-    return ((pwd_page != 0) && (page == pwd_page || page == pack_page));
+    return (pwd_page != 0) && (page == pwd_page || page == pack_page);
 }
 
 bool mf_ultralight_support_feature(const uint32_t feature_set, const uint32_t features_to_check) {
@@ -606,15 +624,19 @@ bool mf_ultralight_is_all_data_read(const MfUltralightData* data) {
     furi_check(data);
 
     bool all_read = false;
-    if(data->pages_read == data->pages_total ||
-       (data->type == MfUltralightTypeMfulC && data->pages_read == data->pages_total - 4)) {
-        // Having read all the pages doesn't mean that we've got everything.
-        // By default PWD is 0xFFFFFFFF, but if read back it is always 0x00000000,
-        // so a default read on an auth-supported NTAG is never complete.
+
+    if(data->pages_read == data->pages_total) {
         uint32_t feature_set = mf_ultralight_get_feature_support_set(data->type);
-        if(!mf_ultralight_support_feature(feature_set, MfUltralightFeatureSupportPasswordAuth)) {
+        if((data->type == MfUltralightTypeMfulC) &&
+           mf_ultralight_support_feature(feature_set, MfUltralightFeatureSupportAuthenticate)) {
+            all_read = true;
+        } else if(!mf_ultralight_support_feature(
+                      feature_set, MfUltralightFeatureSupportPasswordAuth)) {
             all_read = true;
         } else {
+            // Having read all the pages doesn't mean that we've got everything.
+            // By default PWD is 0xFFFFFFFF, but if read back it is always 0x00000000,
+            // so a default read on an auth-supported NTAG is never complete.
             MfUltralightConfigPages* config = NULL;
             if(mf_ultralight_get_config_page(data, &config)) {
                 uint32_t pass = bit_lib_bytes_to_num_be(
@@ -650,4 +672,62 @@ bool mf_ultralight_is_counter_configured(const MfUltralightData* data) {
     }
 
     return configured;
+}
+
+void mf_ultralight_3des_shift_data(uint8_t* const data) {
+    furi_check(data);
+
+    uint8_t buf = data[0];
+    for(uint8_t i = 1; i < MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE; i++) {
+        data[i - 1] = data[i];
+    }
+    data[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE - 1] = buf;
+}
+
+bool mf_ultralight_3des_key_valid(const MfUltralightData* data) {
+    furi_check(data);
+    furi_check(data->type == MfUltralightTypeMfulC);
+
+    return !(data->pages_read == data->pages_total - 4);
+}
+
+const uint8_t* mf_ultralight_3des_get_key(const MfUltralightData* data) {
+    furi_check(data);
+    furi_check(data->type == MfUltralightTypeMfulC);
+
+    return data->page[44].data;
+}
+
+void mf_ultralight_3des_encrypt(
+    mbedtls_des3_context* ctx,
+    const uint8_t* ck,
+    const uint8_t* iv,
+    const uint8_t* input,
+    const uint8_t length,
+    uint8_t* out) {
+    furi_check(ctx);
+    furi_check(ck);
+    furi_check(iv);
+    furi_check(input);
+    furi_check(out);
+
+    mbedtls_des3_set2key_enc(ctx, ck);
+    mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_ENCRYPT, length, (uint8_t*)iv, input, out);
+}
+
+void mf_ultralight_3des_decrypt(
+    mbedtls_des3_context* ctx,
+    const uint8_t* ck,
+    const uint8_t* iv,
+    const uint8_t* input,
+    const uint8_t length,
+    uint8_t* out) {
+    furi_check(ctx);
+    furi_check(ck);
+    furi_check(iv);
+    furi_check(input);
+    furi_check(out);
+
+    mbedtls_des3_set2key_dec(ctx, ck);
+    mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_DECRYPT, length, (uint8_t*)iv, input, out);
 }

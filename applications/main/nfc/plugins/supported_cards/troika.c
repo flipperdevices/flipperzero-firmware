@@ -7,7 +7,6 @@
 #include <bit_lib/bit_lib.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 #include "../../api/mosgortrans/mosgortrans_util.h"
-#include "furi_hal_rtc.h"
 
 #define TAG "Troika"
 
@@ -152,7 +151,7 @@ static bool troika_read(Nfc* nfc, NfcDevice* device) {
             .key_a_mask = 0,
             .key_b_mask = 0,
         };
-        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
+        for(size_t i = 0; i < mf_classic_get_scannable_sectors_num(data->type); i++) {
             bit_lib_num_to_bytes_be(cfg.keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
             bit_lib_num_to_bytes_be(cfg.keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
@@ -199,30 +198,33 @@ static bool troika_parse(const NfcDevice* device, FuriString* parsed_data) {
         FuriString* ground_result = furi_string_alloc();
         FuriString* tat_result = furi_string_alloc();
 
-        bool result1 = mosgortrans_parse_transport_block(&data->block[32], metro_result);
-        bool result2 = mosgortrans_parse_transport_block(&data->block[28], ground_result);
-        bool result3 = mosgortrans_parse_transport_block(&data->block[16], tat_result);
+        bool is_metro_data_present =
+            mosgortrans_parse_transport_block(&data->block[32], metro_result);
+        bool is_ground_data_present =
+            mosgortrans_parse_transport_block(&data->block[28], ground_result);
+        bool is_tat_data_present = mosgortrans_parse_transport_block(&data->block[16], tat_result);
 
         furi_string_cat_printf(parsed_data, "\e#Troyka card\n");
-        if(result1) {
-            furi_string_cat_printf(
-                parsed_data, "\e#Metro\n%s\n", furi_string_get_cstr(metro_result));
+        if(is_metro_data_present && !furi_string_empty(metro_result)) {
+            render_section_header(parsed_data, "Metro", 22, 21);
+            furi_string_cat_printf(parsed_data, "%s\n", furi_string_get_cstr(metro_result));
         }
 
-        if(result2) {
-            furi_string_cat_printf(
-                parsed_data, "\e#Ediniy\n%s\n", furi_string_get_cstr(ground_result));
+        if(is_ground_data_present && !furi_string_empty(ground_result)) {
+            render_section_header(parsed_data, "Ediny", 22, 22);
+            furi_string_cat_printf(parsed_data, "%s\n", furi_string_get_cstr(ground_result));
         }
 
-        if(result3) {
-            furi_string_cat_printf(parsed_data, "\e#TAT\n%s\n", furi_string_get_cstr(tat_result));
+        if(is_tat_data_present && !furi_string_empty(tat_result)) {
+            render_section_header(parsed_data, "TAT", 24, 23);
+            furi_string_cat_printf(parsed_data, "%s\n", furi_string_get_cstr(tat_result));
         }
 
         furi_string_free(tat_result);
         furi_string_free(ground_result);
         furi_string_free(metro_result);
 
-        parsed = result1 || result2 || result3;
+        parsed = is_metro_data_present || is_ground_data_present || is_tat_data_present;
     } while(false);
 
     return parsed;
