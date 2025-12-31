@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdbool.h>
-#include <m-string.h>
 #include <storage/storage.h>
 
 #ifdef __cplusplus
@@ -9,8 +8,8 @@ extern "C" {
 #endif
 
 #define UPDATE_OPERATION_ROOT_DIR_PACKAGE_MAGIC 0
-#define UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN 255u
-#define UPDATE_OPERATION_MIN_MANIFEST_VERSION 2
+#define UPDATE_OPERATION_MAX_MANIFEST_PATH_LEN  255u
+#define UPDATE_OPERATION_MIN_MANIFEST_VERSION   2
 
 /* 
  * Checks if supplied full manifest path is valid
@@ -19,7 +18,7 @@ extern "C" {
  *   May be empty if update is in root update directory
  * @return bool if supplied path is valid and out_manifest_dir contains dir to apply
  */
-bool update_operation_get_package_dir_name(const char* full_path, string_t out_manifest_dir);
+bool update_operation_get_package_dir_name(const char* full_path, FuriString* out_manifest_dir);
 
 /* When updating this enum, also update assets/protobuf/system.proto */
 typedef enum {
@@ -29,9 +28,12 @@ typedef enum {
     UpdatePrepareResultManifestInvalid,
     UpdatePrepareResultStageMissing,
     UpdatePrepareResultStageIntegrityError,
-    UpdatePrepareResultManifestPointerError,
+    UpdatePrepareResultManifestPointerCreateError,
+    UpdatePrepareResultManifestPointerCheckError,
     UpdatePrepareResultTargetMismatch,
     UpdatePrepareResultOutdatedManifestVersion,
+    UpdatePrepareResultIntFull,
+    UpdatePrepareResultUnspecifiedError,
 } UpdatePrepareResult;
 
 const char* update_operation_describe_preparation_result(const UpdatePrepareResult value);
@@ -49,17 +51,17 @@ UpdatePrepareResult update_operation_prepare(const char* manifest_file_path);
  * @param out_path Path to manifest. Must be initialized
  * @return true if path was restored successfully
  */
-bool update_operation_get_current_package_manifest_path(Storage* storage, string_t out_path);
+bool update_operation_get_current_package_manifest_path(Storage* storage, FuriString* out_path);
 
 /* 
  * Checks if an update operation step is pending after reset
  */
-bool update_operation_is_armed();
+bool update_operation_is_armed(void);
 
 /* 
  * Cancels pending update operation
  */
-void update_operation_disarm();
+void update_operation_disarm(void);
 
 #ifdef __cplusplus
 }

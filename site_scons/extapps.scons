@@ -1,0 +1,137 @@
+from dataclasses import dataclass, field
+from fbt.appmanifest import FlipperAppType
+
+from SCons.Node import NodeList
+from SCons.Warnings import warn, WarningOnByDefault
+
+
+Import("ENV")
+
+
+appenv = ENV["APPENV"] = ENV.Clone(
+    tools=[
+        "fbt_extapps",
+        "fbt_assets",
+        "fbt_sdk",
+    ],
+)
+
+appenv.Replace(
+    LINKER_SCRIPT_PATH=appenv["APP_LINKER_SCRIPT_PATH"],
+)
+
+appenv.AppendUnique(
+    CCFLAGS=[
+        "-mword-relocations",
+        "-mlong-calls",
+        "-fno-common",
+        "-nostdlib",
+    ],
+    LINKFLAGS=[
+        "-Ur",
+        "-Wl,-Ur",
+        "-nostartfiles",
+        "-mlong-calls",
+        "-fno-common",
+        "-nostdlib",
+        "-Wl,--gc-sections",
+        "-Wl,--no-export-dynamic",
+        "-fvisibility=hidden",
+        "-Wl,-e${APP_ENTRY}",
+        "-Xlinker",
+        "-Map=${TARGET}.map",
+        "-specs=nano.specs",
+    ],
+    LIBS=[
+        "m",
+        "gcc",
+        "stdc++",
+        "supc++",
+    ],
+    CFLAGS=[
+        "-Wno-strict-prototypes",
+    ],
+)
+
+
+@dataclass
+class FlipperExtAppBuildArtifacts:
+    application_map: dict = field(default_factory=dict)
+    sdk_tree: NodeList = field(default_factory=NodeList)
+
+
+for app in appenv["APPBUILD"].get_ext_apps():
+    appenv.BuildAppElf(app)
+
+extapps = FlipperExtAppBuildArtifacts()
+extapps.application_map = appenv["EXT_APPS"]
+
+
+if appenv["FORCE"]:
+    appenv.AlwaysBuild(
+        list(app_artifact.compact for app_artifact in extapps.application_map.values())
+    )
+
+
+Alias(
+    "faps",
+    list(app_artifact.validator for app_artifact in extapps.application_map.values()),
+)
+
+
+if appsrc := appenv.subst("$APPSRC"):
+    launch_target = appenv.AddAppLaunchTarget(appsrc, "launch")
+    Alias("launch_app", launch_target)
+    appenv.PhonyTarget(
+        "launch_app",
+        Action(
+            lambda **kw: warn(
+                WarningOnByDefault,
+                "The 'launch_app' target is deprecated. Use 'launch' instead.",
+            ),
+            None,
+        ),
+    )
+
+    appenv.AddAppBuildTarget(appsrc, "build")
+
+# SDK management
+
+amalgamated_api = "${BUILD_DIR}/sdk_origin"
+sdk_source = appenv.ApiAmalgamator(
+    amalgamated_api,
+    # Deps on root SDK headers and generated files
+    (appenv["SDK_HEADERS"], appenv["FW_ASSETS_HEADERS"]),
+)
+# Extra deps on headers included in deeper levels
+# Available on second and subsequent builds
+Depends(sdk_source, appenv.ProcessSdkDepends(f"{amalgamated_api}.d"))
+
+appenv["SDK_DIR"] = appenv.Dir("${BUILD_DIR}/sdk_headers")
+sdk_header_tree = appenv.SDKHeaderTreeExtractor(appenv["SDK_DIR"], amalgamated_api)
+Depends(sdk_header_tree, appenv["SDK_DEFINITION"])
+# AlwaysBuild(sdk_tree)
+Alias("sdk_tree", sdk_header_tree)
+extapps.sdk_tree = sdk_header_tree
+
+api_check = appenv.ApiTableValidator(appenv["SDK_DEFINITION"], amalgamated_api)
+Precious(api_check)
+NoClean(api_check)
+AlwaysBuild(api_check)
+Alias("api_check", api_check)
+
+firmware_apitable = appenv.ApiSymbolTable(
+    "${BUILD_DIR}/assets/compiled/firmware_api_table.h", appenv["SDK_DEFINITION"]
+)
+Alias("api_table", firmware_apitable)
+ENV.Replace(
+    FW_API_TABLE=firmware_apitable,
+    _APP_ICONS=appenv["_APP_ICONS"],
+)
+
+
+if appenv["FORCE"]:
+    appenv.AlwaysBuild(sdk_source, sdk_header_tree, api_check, firmware_apitable)
+
+
+Return("extapps")

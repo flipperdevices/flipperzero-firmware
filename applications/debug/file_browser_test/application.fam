@@ -1,0 +1,10 @@
+App(
+    appid="file_browser_test",
+    name="File Browser Test",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="file_browser_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_category="Debug",
+    fap_icon_assets="icons",
+)

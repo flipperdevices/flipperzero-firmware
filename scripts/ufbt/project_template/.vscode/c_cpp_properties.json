@@ -1,0 +1,13 @@
+{
+    "configurations": [
+        {
+            "name": "main",
+            "compilerPath": "@UFBT_TOOLCHAIN_GCC@",
+            "intelliSenseMode": "gcc-arm",
+            "compileCommands": "${workspaceFolder}/.vscode/compile_commands.json",
+            "cStandard": "gnu23",
+            "cppStandard": "c++20"
+        }
+    ],
+    "version": 4
+}

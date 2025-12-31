@@ -28,9 +28,10 @@ void subghz_protocol_encoder_holtek_free(void* context);
  * Deserialize and generating an upload to send.
  * @param context Pointer to a SubGhzProtocolEncoderHoltek instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_encoder_holtek_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_encoder_holtek_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.
@@ -83,27 +84,26 @@ uint8_t subghz_protocol_decoder_holtek_get_hash_data(void* context);
  * Serialize data SubGhzProtocolDecoderHoltek.
  * @param context Pointer to a SubGhzProtocolDecoderHoltek instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @param frequency The frequency at which the signal was received, Hz
- * @param preset The modulation on which the signal was received, FuriHalSubGhzPreset
- * @return true On success
+ * @param preset The modulation on which the signal was received, SubGhzRadioPreset
+ * @return status
  */
-bool subghz_protocol_decoder_holtek_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_holtek_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset);
+    SubGhzRadioPreset* preset);
 
 /**
  * Deserialize data SubGhzProtocolDecoderHoltek.
  * @param context Pointer to a SubGhzProtocolDecoderHoltek instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_holtek_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_decoder_holtek_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
  * @param context Pointer to a SubGhzProtocolDecoderHoltek instance
  * @param output Resulting text
  */
-void subghz_protocol_decoder_holtek_get_string(void* context, string_t output);
+void subghz_protocol_decoder_holtek_get_string(void* context, FuriString* output);

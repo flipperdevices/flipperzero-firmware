@@ -1,0 +1,23 @@
+App(
+    appid="lfrfid",
+    name="125 kHz RFID",
+    apptype=FlipperAppType.MENUEXTERNAL,
+    targets=["f7"],
+    entry_point="lfrfid_app",
+    icon="A_125khz_14",
+    stack_size=2 * 1024,
+    order=20,
+    resources="resources",
+    fap_libs=["assets"],
+    fap_icon="icon.png",
+    fap_category="RFID",
+)
+
+App(
+    appid="cli_rfid",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_rfid_ep",
+    requires=["cli"],
+    sources=["lfrfid_cli.c"],
+)

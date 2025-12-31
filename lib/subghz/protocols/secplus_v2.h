@@ -1,5 +1,7 @@
 #pragma once
+
 #include "base.h"
+#include "public_api.h"
 
 #define SUBGHZ_PROTOCOL_SECPLUS_V2_NAME "Security+ 2.0"
 
@@ -27,9 +29,10 @@ void subghz_protocol_encoder_secplus_v2_free(void* context);
  * Deserialize and generating an upload to send.
  * @param context Pointer to a SubGhzProtocolEncoderSecPlus_v2 instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_encoder_secplus_v2_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_encoder_secplus_v2_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.
@@ -43,27 +46,6 @@ void subghz_protocol_encoder_secplus_v2_stop(void* context);
  * @return LevelDuration 
  */
 LevelDuration subghz_protocol_encoder_secplus_v2_yield(void* context);
-
-/**
- * Key generation from simple data.
- * @param context Pointer to a SubGhzProtocolEncoderSecPlus_v2 instance
- * @param flipper_format Pointer to a FlipperFormat instance
- * @param serial Serial number, 32 bit
- * @param btn Button number, 8 bit
- * @param cnt Container value, 28 bit
- * @param manufacture_name Name of manufacturer's key
- * @param frequency Transmission frequency, Hz
- * @param preset Modulation, FuriHalSubGhzPreset
- * @return true On success
- */
-bool subghz_protocol_secplus_v2_create_data(
-    void* context,
-    FlipperFormat* flipper_format,
-    uint32_t serial,
-    uint8_t btn,
-    uint32_t cnt,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset);
 
 /**
  * Allocate SubGhzProtocolDecoderSecPlus_v2.
@@ -103,27 +85,26 @@ uint8_t subghz_protocol_decoder_secplus_v2_get_hash_data(void* context);
  * Serialize data SubGhzProtocolDecoderSecPlus_v2.
  * @param context Pointer to a SubGhzProtocolDecoderSecPlus_v2 instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @param frequency The frequency at which the signal was received, Hz
- * @param preset The modulation on which the signal was received, FuriHalSubGhzPreset
- * @return true On success
+ * @param preset The modulation on which the signal was received, SubGhzRadioPreset
+ * @return status
  */
-bool subghz_protocol_decoder_secplus_v2_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_secplus_v2_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset);
+    SubGhzRadioPreset* preset);
 
 /**
  * Deserialize data SubGhzProtocolDecoderSecPlus_v2.
  * @param context Pointer to a SubGhzProtocolDecoderSecPlus_v2 instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_secplus_v2_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_decoder_secplus_v2_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
  * @param context Pointer to a SubGhzProtocolDecoderSecPlus_v2 instance
  * @param output Resulting text
  */
-void subghz_protocol_decoder_secplus_v2_get_string(void* context, string_t output);
+void subghz_protocol_decoder_secplus_v2_get_string(void* context, FuriString* output);

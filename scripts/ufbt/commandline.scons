@@ -1,0 +1,103 @@
+AddOption(
+    "--extra-define",
+    action="append",
+    dest="extra_defines",
+    default=[],
+    help="Extra global define that will be passed to C/C++ compiler, can be specified multiple times",
+)
+
+AddOption(
+    "--proxy-env",
+    action="store",
+    dest="proxy_env",
+    default="",
+    help="Comma-separated list of additional environment variables to pass to "
+    "child SCons processes",
+)
+
+vars = Variables("ufbt_options.py", ARGUMENTS)
+
+vars.AddVariables(
+    BoolVariable(
+        "VERBOSE",
+        help="Print full commands",
+        default=False,
+    ),
+    BoolVariable(
+        "FORCE",
+        help="Force target action (for supported targets)",
+        default=False,
+    ),
+    # These 2 are inherited from SDK
+    # BoolVariable(
+    #     "DEBUG",
+    #     help="Enable debug build",
+    #     default=True,
+    # ),
+    # BoolVariable(
+    #     "COMPACT",
+    #     help="Optimize for size",
+    #     default=False,
+    # ),
+    PathVariable(
+        "OTHER_ELF",
+        help="Path to prebuilt ELF file to debug",
+        validator=PathVariable.PathAccept,
+        default="",
+    ),
+    (
+        "OPENOCD_OPTS",
+        "Options to pass to OpenOCD",
+        "",
+    ),
+    (
+        "BLACKMAGIC",
+        "Blackmagic probe location",
+        "auto",
+    ),
+    EnumVariable(
+        "SWD_TRANSPORT",
+        help="SWD interface adapter type",
+        default="auto",
+        allowed_values=[
+            "auto",
+            "cmsis-dap",
+            "stlink",
+            "blackmagic_usb",
+            "blackmagic_wifi",
+        ],
+    ),
+    (
+        "SWD_TRANSPORT_SERIAL",
+        "SWD interface adapter serial number",
+        "auto",
+    ),
+    (
+        "APPID",
+        "Application id",
+        "",
+    ),
+    PathVariable(
+        "UFBT_APP_DIR",
+        help="Application dir to work with",
+        validator=PathVariable.PathIsDir,
+        default="",
+    ),
+    (
+        "FLIP_PORT",
+        "CDC Port of Flipper to use, if multiple are connected",
+        "auto",
+    ),
+    BoolVariable(
+        "STRICT_FAP_IMPORT_CHECK",
+        help="Enable strict import check for .faps",
+        default=True,
+    ),
+    (
+        "ARGS",
+        "Extra arguments to pass to certain scripts supporting it",
+        "",
+    ),
+)
+
+Return("vars")

@@ -1,0 +1,13 @@
+App(
+    appid="battery_test",
+    name="Battery Test",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="battery_test_app",
+    requires=[
+        "gui",
+        "power",
+    ],
+    stack_size=1 * 1024,
+    fap_category="Debug",
+    fap_libs=["assets"],
+)

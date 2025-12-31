@@ -6,14 +6,23 @@
 
 #include <lib/toolbox/level_duration.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
-    bool is_runing;
+    bool is_running;
     size_t repeat;
     size_t front;
     size_t size_upload;
     LevelDuration* upload;
 
 } SubGhzProtocolBlockEncoder;
+
+typedef enum {
+    SubGhzProtocolBlockAlignBitLeft,
+    SubGhzProtocolBlockAlignBitRight,
+} SubGhzProtocolBlockAlignBit;
 
 /**
  * Set data bit when encoding HEX array.
@@ -43,10 +52,16 @@ bool subghz_protocol_blocks_get_bit_array(uint8_t data_array[], size_t read_inde
  * @param upload Pointer to a LevelDuration
  * @param max_size_upload upload size, check not to overflow
  * @param duration_bit duration 1 bit
+ * @param align_bit alignment of useful bits in an array
  */
-size_t subghz_protocol_blocks_get_upload(
+size_t subghz_protocol_blocks_get_upload_from_bit_array(
     uint8_t data_array[],
     size_t count_bit_data_array,
     LevelDuration* upload,
     size_t max_size_upload,
-    uint32_t duration_bit);
+    uint32_t duration_bit,
+    SubGhzProtocolBlockAlignBit align_bit);
+
+#ifdef __cplusplus
+}
+#endif

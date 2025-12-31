@@ -1,0 +1,9 @@
+App(
+    appid="uart_echo",
+    name="UART Echo",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="uart_echo_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_category="Debug",
+)

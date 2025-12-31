@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -8,9 +9,9 @@ extern "C" {
 #endif
 
 #define INFRARED_COMMON_CARRIER_FREQUENCY ((uint32_t)38000)
-#define INFRARED_COMMON_DUTY_CYCLE ((float)0.33)
+#define INFRARED_COMMON_DUTY_CYCLE        ((float)0.33)
 
-/* if we want to see splitted raw signals during brutforce,
+/* if we want to see split raw signals during bruteforce,
  * we have to have RX raw timing delay less than TX */
 #define INFRARED_RAW_RX_TIMING_DELAY_US 150000
 #define INFRARED_RAW_TX_TIMING_DELAY_US 180000
@@ -31,6 +32,10 @@ typedef enum {
     InfraredProtocolSIRC,
     InfraredProtocolSIRC15,
     InfraredProtocolSIRC20,
+    InfraredProtocolKaseikyo,
+    InfraredProtocolRCA,
+    InfraredProtocolPioneer,
+    /* Add new protocols here */
     InfraredProtocolMAX,
 } InfraredProtocol;
 
@@ -199,6 +204,15 @@ uint32_t infrared_get_protocol_frequency(InfraredProtocol protocol);
  * \return      duty cycle
  */
 float infrared_get_protocol_duty_cycle(InfraredProtocol protocol);
+
+/**
+ * Get the minimum count of signal repeats for the selected protocol
+ *
+ * \param[in]   protocol    - protocol to get the repeat count from
+ *
+ * \return      repeat count
+ */
+size_t infrared_get_protocol_min_repeat_count(InfraredProtocol protocol);
 
 #ifdef __cplusplus
 }

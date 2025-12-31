@@ -1,0 +1,514 @@
+import multiprocessing
+import os
+import pathlib
+
+from SCons.Errors import UserError
+from SCons.Node import FS
+from SCons.Platform import TempFileMunge
+
+SetOption("num_jobs", multiprocessing.cpu_count())
+SetOption("max_drift", 1)
+# SetOption("silent", False)
+
+ufbt_state_dir = Dir(os.environ.get("UFBT_STATE_DIR", "#.ufbt"))
+ufbt_script_dir = Dir(os.environ.get("UFBT_SCRIPT_DIR"))
+ufbt_build_dir = ufbt_state_dir.Dir("build")
+
+ufbt_current_sdk_dir = ufbt_state_dir.Dir("current")
+
+SConsignFile(ufbt_state_dir.File(".sconsign.dblite").abspath)
+
+ufbt_variables = SConscript("commandline.scons")
+
+forward_os_env = {
+    # Import PATH from OS env - scons doesn't do that by default
+    "PATH": os.environ["PATH"],
+}
+
+
+# Core environment init - loads SDK state, sets up paths, etc.
+core_env = Environment(
+    variables=ufbt_variables,
+    UFBT_STATE_DIR=ufbt_state_dir,
+    UFBT_CURRENT_SDK_DIR=ufbt_current_sdk_dir,
+    UFBT_SCRIPT_DIR=ufbt_script_dir,
+    toolpath=[ufbt_current_sdk_dir.Dir("scripts/ufbt/site_tools")],
+    tools=[
+        "ufbt_state",
+        ("ufbt_help", {"vars": ufbt_variables}),
+    ],
+)
+
+core_env.Append(CPPDEFINES=GetOption("extra_defines"))
+
+# Now we can import stuff bundled with SDK - it was added to sys.path by ufbt_state
+
+from fbt.appmanifest import FlipperApplication, FlipperAppType
+from fbt.sdk.cache import SdkCache
+from fbt.util import (
+    FORWARDED_ENV_VARIABLES,
+    PosixPathWrapper,
+    resolve_real_dir_node,
+    single_quote,
+    tempfile_arg_esc_func,
+    wrap_tempfile,
+)
+
+variables_to_forward = list(FORWARDED_ENV_VARIABLES)
+
+if proxy_env := GetOption("proxy_env"):
+    variables_to_forward.extend(proxy_env.split(","))
+
+for env_value_name in variables_to_forward:
+    if environ_value := os.environ.get(env_value_name, None):
+        forward_os_env[env_value_name] = environ_value
+
+
+# Base environment with all tools loaded from SDK
+env = core_env.Clone(
+    ENV=forward_os_env,
+    toolpath=[core_env["FBT_SCRIPT_DIR"].Dir("fbt_tools")],
+    tools=[
+        "fbt_tweaks",
+        (
+            "crosscc",
+            {
+                "toolchain_prefix": "arm-none-eabi-",
+                "versions": (" 12.3.", " 13.2."),
+            },
+        ),
+        "fwbin",
+        "python3",
+        "sconsrecursiveglob",
+        "sconsmodular",
+        "ccache",
+        "fbt_apps",
+        "fbt_extapps",
+        "fbt_assets",
+        "fbt_envhooks",
+        ("compilation_db", {"COMPILATIONDB_COMSTR": "\tCDB\t${TARGET}"}),
+    ],
+    FBT_FAP_DEBUG_ELF_ROOT=ufbt_build_dir,
+    POSIXPATH=PosixPathWrapper,
+    TEMPFILE=TempFileMunge,
+    MAXLINELENGTH=2048,
+    PROGSUFFIX=".elf",
+    TEMPFILEARGESCFUNC=tempfile_arg_esc_func,
+    SINGLEQUOTEFUNC=single_quote,
+    ABSPATHGETTERFUNC=resolve_real_dir_node,
+    APPS=[],
+    EXTRA_EXT_APPS=[],
+    UFBT_API_VERSION=SdkCache(
+        core_env.subst("$SDK_DEFINITION"), load_version_only=True
+    ).version,
+    APPCHECK_COMSTR="\tAPPCHK\t${SOURCE}\n\t\tTarget: ${TARGET_HW}, API: ${UFBT_API_VERSION}",
+    COMPILATIONDB_USE_BINARY_ABSPATH=True,
+)
+
+wrap_tempfile(env, "LINKCOM")
+wrap_tempfile(env, "ARCOM")
+
+env.PreConfigureUfbtEnvionment()
+
+# print(env.Dump())
+
+# Dist env
+
+dist_env = env.Clone(
+    tools=[
+        "fbt_dist",
+        "fbt_debugopts",
+        "openocd",
+        "blackmagic",
+        "jflash",
+        "textfile",
+    ],
+    ENV=os.environ,
+    OPENOCD_OPTS=[
+        "-f",
+        "interface/stlink.cfg",
+        "-c",
+        "transport select hla_swd",
+        "-f",
+        "${POSIXPATH('$FBT_DEBUG_DIR')}/stm32wbx.cfg",
+        "-c",
+        "stm32wbx.cpu configure -rtos auto",
+    ],
+)
+
+flash_target = dist_env.FwFlash(
+    dist_env["UFBT_STATE_DIR"].File("flash"),
+    dist_env["FW_ELF"],
+)
+dist_env.Alias("firmware_flash", flash_target)
+dist_env.Alias("flash", flash_target)
+if env["FORCE"]:
+    env.AlwaysBuild(flash_target)
+
+
+firmware_jflash = dist_env.JFlash(
+    dist_env["UFBT_STATE_DIR"].File("jflash"),
+    dist_env["FW_BIN"],
+    JFLASHADDR="0x08000000",
+)
+dist_env.Alias("firmware_jflash", firmware_jflash)
+dist_env.Alias("jflash", firmware_jflash)
+if env["FORCE"]:
+    env.AlwaysBuild(firmware_jflash)
+
+
+firmware_debug = dist_env.PhonyTarget(
+    "debug",
+    "${GDBPYCOM}",
+    source=dist_env["FW_ELF"],
+    GDBOPTS="${GDBOPTS_BASE}",
+    GDBREMOTE="${OPENOCD_GDB_PIPE}",
+)
+
+dist_env.PhonyTarget(
+    "blackmagic",
+    "${GDBPYCOM}",
+    source=dist_env["FW_ELF"],
+    GDBOPTS="${GDBOPTS_BASE} ${GDBOPTS_BLACKMAGIC}",
+    GDBREMOTE="${BLACKMAGIC_ADDR}",
+)
+
+# Debug alien elf
+debug_other_opts = [
+    "-ex",
+    "source ${POSIXPATH('FBT_DEBUG_DIR')}/PyCortexMDebug/PyCortexMDebug.py",
+    "-ex",
+    "source ${POSIXPATH('FBT_DEBUG_DIR')}/flipperversion.py",
+    "-ex",
+    "fw-version",
+]
+
+dist_env.PhonyTarget(
+    "debug_other",
+    "${GDBPYCOM}",
+    GDBOPTS="${GDBOPTS_BASE}",
+    GDBREMOTE="${OPENOCD_GDB_PIPE}",
+    GDBPYOPTS=debug_other_opts,
+)
+
+dist_env.PhonyTarget(
+    "debug_other_blackmagic",
+    "${GDBPYCOM}",
+    GDBOPTS="${GDBOPTS_BASE}  ${GDBOPTS_BLACKMAGIC}",
+    GDBREMOTE="${BLACKMAGIC_ADDR}",
+    GDBPYOPTS=debug_other_opts,
+)
+
+flash_usb_full = dist_env.UsbInstall(
+    dist_env["UFBT_STATE_DIR"].File("usbinstall"),
+    [],
+)
+dist_env.AlwaysBuild(flash_usb_full)
+dist_env.Alias("flash_usb", flash_usb_full)
+dist_env.Alias("flash_usb_full", flash_usb_full)
+
+# App build environment
+
+appenv = env.Clone(
+    CCCOM=env["CCCOM"].replace("$CFLAGS", "$CFLAGS_APP $CFLAGS"),
+    CXXCOM=env["CXXCOM"].replace("$CXXFLAGS", "$CXXFLAGS_APP $CXXFLAGS"),
+    LINKCOM=env["LINKCOM"].replace("$LINKFLAGS", "$LINKFLAGS_APP $LINKFLAGS"),
+    COMPILATIONDB_USE_ABSPATH=True,
+)
+
+
+original_app_dir = Dir(appenv.subst("$UFBT_APP_DIR"))
+app_mount_point = Dir("#/app/")
+app_mount_point.addRepository(original_app_dir)
+
+appenv.LoadAppManifest(app_mount_point)
+appenv.PrepareApplicationsBuild()
+
+#######################
+
+apps_artifacts = appenv["EXT_APPS"]
+
+apps_to_build_as_faps = [
+    FlipperAppType.PLUGIN,
+    FlipperAppType.EXTERNAL,
+    FlipperAppType.MENUEXTERNAL,
+]
+
+known_extapps = [
+    app
+    for apptype in apps_to_build_as_faps
+    for app in appenv["APPBUILD"].get_apps_of_type(apptype, True)
+]
+incompatible_apps = []
+for app in known_extapps:
+    if not app.supports_hardware_target(appenv.subst("f${TARGET_HW}")):
+        incompatible_apps.append(app)
+        continue
+
+    app_artifacts = appenv.BuildAppElf(app)
+    app_src_dir = resolve_real_dir_node(app_artifacts.app._appdir)
+    app_artifacts.installer = [
+        appenv.Install(app_src_dir.Dir("dist"), app_artifacts.compact),
+        appenv.Install(app_src_dir.Dir("dist").Dir("debug"), app_artifacts.debug),
+    ]
+
+if len(incompatible_apps):
+    print(
+        "WARNING: The following apps are not compatible with the current target hardware and will not be built: {}".format(
+            ", ".join([app.name for app in incompatible_apps])
+        )
+    )
+
+if appenv["FORCE"]:
+    appenv.AlwaysBuild([extapp.compact for extapp in apps_artifacts.values()])
+
+# Final steps - target aliases
+
+install_and_check = [
+    (extapp.installer, extapp.validator) for extapp in apps_artifacts.values()
+]
+Alias(
+    "faps",
+    install_and_check,
+)
+Default(install_and_check)
+
+# Compilation database
+
+app_cdb = appenv.CompilationDatabase(
+    original_app_dir.Dir(".vscode").File("compile_commands.json")
+)
+
+AlwaysBuild(app_cdb)
+Precious(app_cdb)
+NoClean(app_cdb)
+if len(apps_artifacts):
+    Default(app_cdb)
+Alias("cdb", app_cdb)
+
+
+# launch handler
+runnable_apps = appenv["APPBUILD"].get_apps_of_type(FlipperAppType.EXTERNAL, True)
+
+app_to_launch = None
+if len(runnable_apps) == 1:
+    app_to_launch = runnable_apps[0].appid
+elif len(runnable_apps) > 1:
+    # more than 1 app - try to find one with matching id
+    app_to_launch = appenv.subst("$APPID")
+
+
+def ambiguous_app_call(**kw):
+    raise UserError(
+        f"More than one app is runnable: {', '.join(app.appid for app in runnable_apps)}. Please specify an app with APPID=..."
+    )
+
+
+if app_to_launch:
+    appenv.AddAppLaunchTarget(app_to_launch, "launch")
+    appenv.AddAppBuildTarget(app_to_launch, "build")
+else:
+    dist_env.PhonyTarget("launch", Action(ambiguous_app_call, None))
+    dist_env.PhonyTarget("build", Action(ambiguous_app_call, None))
+
+# cli handler
+
+appenv.PhonyTarget(
+    "cli",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/serial_cli.py",
+            "-p",
+            "${FLIP_PORT}",
+            "${ARGS}",
+        ]
+    ],
+)
+
+# Update WiFi devboard firmware
+dist_env.PhonyTarget(
+    "devboard_flash",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/wifi_board.py",
+            "${ARGS}",
+        ]
+    ],
+)
+
+# Linter
+dist_env.PhonyTarget(
+    "lint",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/lint.py",
+            "check",
+            "${LINT_SOURCES}",
+            "${ARGS}",
+        ]
+    ],
+    source=original_app_dir.File(".clang-format"),
+    LINT_SOURCES=[original_app_dir],
+)
+
+dist_env.PhonyTarget(
+    "format",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/lint.py",
+            "format",
+            "${LINT_SOURCES}",
+            "${ARGS}",
+        ]
+    ],
+    source=original_app_dir.File(".clang-format"),
+    LINT_SOURCES=[original_app_dir],
+)
+
+
+# Prepare vscode environment
+vscode_dist = []
+project_template_dir = dist_env["UFBT_SCRIPT_ROOT"].Dir("project_template")
+for template_file in project_template_dir.Dir(".vscode").glob("*"):
+    vscode_dist.append(
+        dist_env.Substfile(
+            original_app_dir.Dir(".vscode").File(template_file.name),
+            template_file,
+            SUBST_DICT={
+                "@UFBT_VSCODE_PATH_SEP@": os.path.pathsep,
+                "@UFBT_TOOLCHAIN_ARM_TOOLCHAIN_DIR@": pathlib.Path(
+                    dist_env.WhereIs("arm-none-eabi-gcc")
+                ).parent.as_posix(),
+                "@UFBT_TOOLCHAIN_GCC@": PosixPathWrapper.fix_path(
+                    dist_env.WhereIs("arm-none-eabi-gcc")
+                ),
+                "@UFBT_TOOLCHAIN_GDB_PY@": PosixPathWrapper.fix_path(
+                    dist_env.WhereIs("arm-none-eabi-gdb-py3")
+                ),
+                "@UFBT_TOOLCHAIN_OPENOCD@": PosixPathWrapper.fix_path(
+                    dist_env.WhereIs("openocd")
+                ),
+                "@UFBT_APP_DIR@": PosixPathWrapper.fix_path(original_app_dir.abspath),
+                "@UFBT_ROOT_DIR@": PosixPathWrapper.fix_path(Dir("#").abspath),
+                "@UFBT_DEBUG_DIR@": PosixPathWrapper.fix_path(
+                    dist_env.subst("$FBT_DEBUG_DIR")
+                ),
+                "@UFBT_DEBUG_ELF_DIR@": PosixPathWrapper.fix_path(
+                    dist_env["FBT_FAP_DEBUG_ELF_ROOT"].abspath
+                ),
+                "@UFBT_FIRMWARE_ELF@": PosixPathWrapper.fix_path(
+                    dist_env["FW_ELF"].abspath
+                ),
+                "@UFBT_TOOLCHAIN_CLANGD@": PosixPathWrapper.fix_path(
+                    dist_env.WhereIs("clangd")
+                ),
+            },
+        )
+    )
+
+for config_file in project_template_dir.glob(".*"):
+    if isinstance(config_file, FS.Dir):
+        continue
+    vscode_dist.append(dist_env.Install(original_app_dir, config_file))
+
+dist_env.Precious(vscode_dist)
+dist_env.NoClean(vscode_dist)
+dist_env.Alias("vscode_dist", (vscode_dist, app_cdb))
+
+
+# Creating app from base template
+
+dist_env.SetDefault(FBT_APPID=appenv.subst("$APPID") or "template")
+if fbt_appid := dist_env.subst("$FBT_APPID"):
+    if not FlipperApplication.APP_ID_REGEX.match(fbt_appid):
+        raise UserError(
+            f"Invalid app id '{fbt_appid}'. App id must match {FlipperApplication.APP_ID_REGEX.pattern}"
+        )
+
+app_template_dir = project_template_dir.Dir("app_template")
+app_template_dist = []
+for template_file in app_template_dir.glob("*"):
+    dist_file_name = dist_env.subst(template_file.name)
+    if template_file.name.endswith(".png"):
+        app_template_dist.append(
+            dist_env.InstallAs(original_app_dir.File(dist_file_name), template_file)
+        )
+    else:
+        app_template_dist.append(
+            dist_env.Substfile(
+                original_app_dir.File(dist_file_name),
+                template_file,
+                SUBST_DICT={
+                    "@FBT_APPID@": dist_env.subst("$FBT_APPID"),
+                },
+            )
+        )
+AddPostAction(
+    app_template_dist[-1],
+    [
+        Mkdir(original_app_dir.Dir("images")),
+        Touch(original_app_dir.Dir("images").File(".gitkeep")),
+        # scons' glob ignores .dot directories, so we need to copy .github manually
+        Copy(original_app_dir.Dir(".github"), app_template_dir.Dir(".github")),
+    ],
+)
+dist_env.Precious(app_template_dist)
+dist_env.NoClean(app_template_dist)
+dist_env.Alias("create", app_template_dist)
+
+dist_env.PhonyTarget(
+    "get_blackmagic",
+    "@echo $( ${BLACKMAGIC_ADDR} $)",
+)
+
+dist_env.PhonyTarget(
+    "get_apiversion",
+    "@echo $( ${UFBT_API_VERSION} $)",
+)
+
+# Dolphin animation builder. Expects "external" directory in current dir
+# with animation sources & manifests. Builds & uploads them to connected Flipper
+dolphin_src_dir = original_app_dir.Dir("external")
+if dolphin_src_dir.exists():
+    dolphin_dir = ufbt_build_dir.Dir("dolphin")
+    dolphin_external = dist_env.DolphinExtBuilder(
+        ufbt_build_dir.Dir("dolphin"),
+        original_app_dir,
+        DOLPHIN_RES_TYPE="external",
+    )
+    dist_env.PhonyTarget(
+        "dolphin_ext",
+        [
+            [
+                "${PYTHON3}",
+                "${FBT_SCRIPT_DIR}/storage.py",
+                "-p",
+                "${FLIP_PORT}",
+                "send",
+                "${SOURCE}",
+                "/ext/dolphin",
+                "${ARGS}",
+            ]
+        ],
+        source=ufbt_build_dir.Dir("dolphin"),
+    )
+else:
+
+    def missing_dolphin_folder(**kw):
+        raise UserError(f"Dolphin folder not found: {dolphin_src_dir}")
+
+    dist_env.PhonyTarget("dolphin_ext", Action(missing_dolphin_folder, None))
+
+# print(env.Dump())
+dist_env.PhonyTarget(
+    "env",
+    '@echo "FBT_TOOLCHAIN_PATH='
+    + forward_os_env["FBT_TOOLCHAIN_PATH"]
+    + '" source $( "${FBT_SCRIPT_DIR.abspath}/toolchain/fbtenv.sh" $)',
+)
+
+dist_env.PostConfigureUfbtEnvionment()

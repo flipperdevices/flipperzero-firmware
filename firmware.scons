@@ -1,0 +1,309 @@
+import itertools
+
+from fbt.sdk.cache import LazySdkVersionLoader
+from fbt.version import get_git_commit_unix_timestamp
+from fbt_extra.util import link_elf_dir_as_latest, should_gen_cdb_and_link_dir
+from SCons.Errors import UserError
+from SCons.Node import FS
+
+Import("ENV", "fw_build_meta")
+
+# Building initial C environment for libs
+env = ENV.Clone(
+    tools=[
+        ("compilation_db", {"COMPILATIONDB_COMSTR": "\tCDB\t${TARGET}"}),
+        "fwbin",
+        "fbt_apps",
+        "pvsstudio",
+        "fbt_hwtarget",
+        "fbt_envhooks",
+        "fbt_resources",
+    ],
+    COMPILATIONDB_USE_ABSPATH=False,
+    COMPILATIONDB_USE_BINARY_ABSPATH=True,
+    BUILD_DIR=fw_build_meta["build_dir"],
+    IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
+    FW_FLAVOR=fw_build_meta["flavor"],
+    LIB_DIST_DIR=fw_build_meta["build_dir"].Dir("lib"),
+    RESOURCES_ROOT=fw_build_meta["build_dir"].Dir("resources"),
+    TARGETS_ROOT=Dir("#/targets"),
+    LINT_SOURCES=[
+        Dir("applications"),
+        # Not C code
+        Dir("!applications/system/js_app/packages"),
+    ],
+    LIBPATH=[
+        "${LIB_DIST_DIR}",
+    ],
+    CPPPATH=[
+        "#/furi",
+        *(f"#/{app_dir[0]}" for app_dir in ENV["APPDIRS"] if app_dir[1]),
+        "#/targets/furi_hal_include",
+    ],
+    # Specific flags for building libraries - always do optimized builds
+    FW_LIB_OPTS={
+        "Default": {
+            "CCFLAGS": [
+                "-Og" if ENV["LIB_DEBUG"] else "-Os",
+            ],
+            "CPPDEFINES": [
+                "NDEBUG",
+                "FURI_DEBUG" if ENV["LIB_DEBUG"] else "FURI_NDEBUG",
+            ],
+            # You can add other entries named after libraries
+            # If they are present, they have precedence over Default
+        },
+        # for furi_check to respect build type
+        "furi": {
+            "CCFLAGS": [
+                "-Os",
+            ],
+            "CPPDEFINES": [
+                "NDEBUG",
+                "FURI_DEBUG" if ENV["DEBUG"] else "FURI_NDEBUG",
+            ],
+        },
+        "flipper_application": {
+            "CCFLAGS": [
+                "-Og",
+            ],
+            "CPPDEFINES": [
+                "NDEBUG",
+                "FURI_DEBUG" if ENV["DEBUG"] else "FURI_NDEBUG",
+            ],
+        },
+    },
+    FW_API_TABLE=None,
+    _APP_ICONS=None,
+    APPS=_.split(",") if (_ := GetOption("extra_int_apps")) else [],
+    EXTRA_EXT_APPS=_.split(",") if (_ := GetOption("extra_ext_apps")) else [],
+)
+
+env.PreConfigureFwEnvionment()
+
+if env["IS_BASE_FIRMWARE"]:
+    env.Append(
+        FIRMWARE_BUILD_CFG="firmware",
+        RAM_EXEC=False,
+    )
+else:
+    env.Append(
+        FIRMWARE_BUILD_CFG="updater",
+        RAM_EXEC=True,
+        CPPDEFINES=[
+            "FURI_RAM_EXEC",
+        ],
+    )
+env.AppendUnique(CPPDEFINES=["FW_CFG_${FIRMWARE_APP_SET}"])
+
+env.ConfigureForTarget(env.subst("${TARGET_HW}"))
+
+Export("env")
+
+# Invoke child SCopscripts to populate global `env` + build their own part of the code
+lib_targets = env.BuildModules(
+    [
+        "lib",
+        "assets",
+        "targets",
+        "furi",
+    ],
+)
+
+# Configure firmware origin definitions
+env.Append(
+    CPPDEFINES=[
+        env.subst("FW_ORIGIN_${FIRMWARE_ORIGIN}"),
+    ]
+)
+
+
+# Now, env is fully set up with everything to build apps
+fwenv = env.Clone(FW_ARTIFACTS=[])
+
+fw_artifacts = fwenv["FW_ARTIFACTS"]
+
+# Set up additional app-specific build flags
+SConscript("site_scons/firmwareopts.scons", exports={"ENV": fwenv})
+
+# Set up app configuration
+if env["IS_BASE_FIRMWARE"]:
+    fwenv.Append(APPS=fwenv["FIRMWARE_APPS"].get(fwenv.subst("$FIRMWARE_APP_SET")))
+else:
+    fwenv.Append(APPS=["updater"])
+
+
+for app_dir, _ in fwenv["APPDIRS"]:
+    app_dir_node = env.Dir("#").Dir(app_dir)
+
+    for entry in app_dir_node.glob("*"):
+        if isinstance(entry, FS.Dir) and not str(entry).startswith("."):
+            fwenv.LoadAppManifest(entry)
+
+fwenv.PrepareApplicationsBuild()
+
+
+# Build external apps + configure SDK
+if env["IS_BASE_FIRMWARE"]:
+    # Ensure all libs are built - even if they are not used in firmware
+    fw_artifacts.append(fwenv["LIB_DIST_DIR"].glob("*.a"))
+
+    fwenv.SetDefault(FBT_FAP_DEBUG_ELF_ROOT=fwenv["BUILD_DIR"].Dir(".extapps"))
+    fw_extapps = fwenv["FW_EXTAPPS"] = SConscript(
+        "site_scons/extapps.scons",
+        exports={"ENV": fwenv},
+    )
+    fw_artifacts.append(fw_extapps.sdk_tree)
+
+    # Resources & manifest for SD card
+    manifest = fwenv.ManifestBuilder(
+        "${RESOURCES_ROOT}/Manifest",
+        GIT_UNIX_TIMESTAMP=get_git_commit_unix_timestamp(),
+        _EXTRA_DIST=[fwenv["DOLPHIN_EXTERNAL_OUT_DIR"]],
+    )
+    fwenv.Replace(FW_RESOURCES_MANIFEST=manifest)
+    fwenv.Alias("resources", manifest)
+
+    # API getter
+    fwenv.Append(FBT_API_VERSION=LazySdkVersionLoader(fwenv.subst("$SDK_DEFINITION")))
+    fwenv.PhonyTarget(
+        "get_apiversion",
+        "@echo $( ${FBT_API_VERSION} $)",
+    )
+
+# Add preprocessor definitions for current set of apps
+fwenv.Append(
+    CPPDEFINES=fwenv["APPBUILD"].get_apps_cdefs(),
+)
+
+# Build applications.c for selected services & apps
+# Depends on virtual value-only node, so it only gets rebuilt when set of apps changes
+apps_c = fwenv.ApplicationsC(
+    "applications/applications.c",
+    [Value(fwenv["APPS"]), Value(fwenv["LOADER_AUTOSTART"])],
+)
+
+# Adding dependency on manifest files so apps.c is rebuilt when any manifest is changed
+for app_dir, _ in env["APPDIRS"]:
+    app_dir_node = env.Dir("#").Dir(app_dir)
+    fwenv.Depends(apps_c, app_dir_node.glob("*/application.fam"))
+
+# Sanity check - certain external apps are using features that are not available in base firmware
+if advanced_faps := list(
+    filter(
+        lambda app: app.fap_extbuild or app.fap_private_libs or app.fap_icon_assets,
+        fwenv["APPBUILD"].get_builtin_apps(),
+    )
+):
+    raise UserError(
+        "An Application that is using fap-specific features cannot be built into base firmware."
+        f" Offending app(s): {', '.join(app.appid for app in advanced_faps)}"
+    )
+
+sources = [apps_c]
+# Gather sources only from app folders in current configuration
+sources.extend(
+    itertools.chain.from_iterable(
+        fwenv.GatherSources([source_type, "!lib"], appdir.relpath)
+        for appdir, source_type in fwenv["APPBUILD"].get_builtin_app_folders()
+    )
+)
+
+# Debug
+# print(fwenv.Dump())
+
+# Full firmware definition
+fwelf = fwenv["FW_ELF"] = fwenv.Program(
+    "${FIRMWARE_BUILD_CFG}",
+    sources,
+    LIBS=fwenv["TARGET_CFG"].linker_dependencies,
+)
+Depends(fwelf, fwenv["LINKER_SCRIPT_PATH"])
+
+# Firmware depends on everything child builders returned
+# Depends(fwelf, lib_targets)
+# Output extra details after building firmware
+AddPostAction(fwelf, fwenv["APPBUILD_DUMP"])
+AddPostAction(
+    fwelf,
+    Action(
+        [["${PYTHON3}", "${BIN_SIZE_SCRIPT}", "elf", "${TARGET}"]],
+        "Firmware size",
+    ),
+)
+
+# Produce extra firmware files
+fwhex = fwenv["FW_HEX"] = fwenv.HEXBuilder("${FIRMWARE_BUILD_CFG}")
+fwbin = fwenv["FW_BIN"] = fwenv.BINBuilder("${FIRMWARE_BUILD_CFG}")
+AddPostAction(
+    fwbin,
+    Action([["@${PYTHON3}", "${BIN_SIZE_SCRIPT}", "bin", "${TARGET}"]]),
+)
+
+fwdfu = fwenv["FW_DFU"] = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
+
+fwdump = fwenv.ObjDump("${FIRMWARE_BUILD_CFG}")
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_list", fwdump)
+
+
+fw_artifacts.extend(
+    [
+        fwhex,
+        fwbin,
+        fwdfu,
+        fwenv["FW_VERSION_JSON"],
+    ]
+)
+
+
+fwcdb = fwenv["FW_CDB"] = fwenv.CompilationDatabase()
+# without filtering, both updater & firmware commands would be generated in same file
+fwenv.Replace(
+    COMPILATIONDB_PATH_FILTER=fwenv.subst("*${FW_FLAVOR}*"),
+    COMPILATIONDB_SRCPATH_FILTER="*.c*",
+)
+AlwaysBuild(fwcdb)
+Precious(fwcdb)
+NoClean(fwcdb)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
+
+pvscheck = fwenv.PVSCheck("pvsreport.log", fwcdb)
+Depends(
+    pvscheck,
+    [
+        fwenv["FW_VERSION_JSON"],
+        fwenv["FW_ASSETS_HEADERS"],
+        fwenv["FW_API_TABLE"],
+        fwenv["_APP_ICONS"],
+    ],
+)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_pvscheck", pvscheck)
+AlwaysBuild(pvscheck)
+Precious(pvscheck)
+
+pvsreport = fwenv.PVSReport(None, pvscheck, REPORT_DIR=Dir("pvsreport"))
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_pvs", pvsreport)
+AlwaysBuild(pvsreport)
+
+# If current configuration was explicitly requested, generate compilation database
+# and link its directory as build/latest
+if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
+    fw_artifacts.append(fwcdb)
+
+    # Adding as a phony target, so folder link is updated even if elf didn't change
+    link_dir_command = fwenv.PhonyTarget(
+        fwenv.subst("${FIRMWARE_BUILD_CFG}_latest"),
+        Action(
+            lambda source, target, env: link_elf_dir_as_latest(env, source[0]),
+            None,
+        ),
+        source=fwelf,
+    )
+    fw_artifacts.append(link_dir_command)
+
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_artifacts)
+
+env.PostConfigureFwEnvionment()
+
+Return("fwenv")

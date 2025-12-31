@@ -1,0 +1,64 @@
+// This file is autogeneated by the ufbt.
+// You can modify it, and it will not be overwritten if exists.
+// Some paths are absolute, and will need to be updated if you move the project.
+// To regenerate the file, delete it and run `ufbt vscode_dist` again.
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "options": {
+        "env": {
+            "PATH": "${workspaceFolder}@UFBT_VSCODE_PATH_SEP@${env:PATH}@UFBT_VSCODE_PATH_SEP@@UFBT_ROOT_DIR@"
+        }
+    },
+    "tasks": [
+        {
+            "label": "Launch App on Flipper",
+            "group": "build",
+            "type": "shell",
+            "command": "ufbt launch"
+        },
+        {
+            "label": "Build",
+            "group": "build",
+            "type": "shell",
+            "command": "ufbt"
+        },
+        {
+            "label": "Clean",
+            "group": "build",
+            "type": "shell",
+            "command": "ufbt -c"
+        },
+        {
+            "label": "Flash FW (SWD)",
+            "group": "build",
+            "type": "shell",
+            "command": "ufbt FORCE=1 flash"
+        },
+        {
+            "label": "Flash FW (USB, with resources)",
+            "group": "build",
+            "type": "shell",
+            "command": "ufbt FORCE=1 flash_usb"
+        },
+        {
+            "label": "Open Flipper CLI session",
+            "group": "build",
+            "type": "shell",
+            "command": "ufbt cli"
+        },
+        {
+            "label": "Update uFBT SDK",
+            "group": "build",
+            "type": "shell",
+            "command": "ufbt update"
+        },
+        {
+            "label": "Update VSCode config",
+            "group": "build",
+            "type": "shell",
+            "command": "ufbt vscode_dist"
+        }
+    ]
+}

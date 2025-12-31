@@ -1,0 +1,11 @@
+App(
+    appid="settings_apps",
+    name="Basic settings apps bundle",
+    apptype=FlipperAppType.METAPACKAGE,
+    provides=[
+        "passport",
+        "system_settings",
+        "clock_settings",
+        "about",
+    ],
+)

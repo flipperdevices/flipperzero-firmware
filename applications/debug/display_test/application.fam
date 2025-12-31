@@ -1,0 +1,10 @@
+App(
+    appid="display_test",
+    name="Display Test",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="display_test_app",
+    requires=["gui"],
+    fap_libs=["u8g2"],
+    stack_size=1 * 1024,
+    fap_category="Debug",
+)

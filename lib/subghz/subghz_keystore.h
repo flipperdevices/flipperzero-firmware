@@ -1,16 +1,20 @@
 #pragma once
 
-#include <m-string.h>
+#include <furi.h>
 #include <m-array.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
-    string_t name;
+    FuriString* name;
     uint64_t key;
     uint16_t type;
 } SubGhzKey;
 
-ARRAY_DEF(SubGhzKeyArray, SubGhzKey, M_POD_OPLIST)
+ARRAY_DEF(SubGhzKeyArray, SubGhzKey, M_POD_OPLIST) //-V658
 
 #define M_OPL_SubGhzKeyArray_t() ARRAY_OPLIST(SubGhzKeyArray, M_POD_OPLIST)
 
@@ -20,7 +24,7 @@ typedef struct SubGhzKeystore SubGhzKeystore;
  * Allocate SubGhzKeystore.
  * @return SubGhzKeystore* pointer to a SubGhzKeystore instance
  */
-SubGhzKeystore* subghz_keystore_alloc();
+SubGhzKeystore* subghz_keystore_alloc(void);
 
 /**
  * Free SubGhzKeystore.
@@ -70,3 +74,7 @@ bool subghz_keystore_raw_encrypted_save(
  * @return true On success
  */
 bool subghz_keystore_raw_get_data(const char* file_name, size_t offset, uint8_t* data, size_t len);
+
+#ifdef __cplusplus
+}
+#endif

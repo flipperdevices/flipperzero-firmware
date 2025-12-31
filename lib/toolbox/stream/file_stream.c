@@ -35,6 +35,8 @@ const StreamVTable file_stream_vtable = {
 };
 
 Stream* file_stream_alloc(Storage* storage) {
+    furi_check(storage);
+
     FileStream* stream = malloc(sizeof(FileStream));
     stream->file = storage_file_alloc(storage);
     stream->storage = storage;
@@ -48,21 +50,21 @@ bool file_stream_open(
     const char* path,
     FS_AccessMode access_mode,
     FS_OpenMode open_mode) {
-    furi_assert(_stream);
+    furi_check(_stream);
     FileStream* stream = (FileStream*)_stream;
     furi_check(stream->stream_base.vtable == &file_stream_vtable);
     return storage_file_open(stream->file, path, access_mode, open_mode);
 }
 
 bool file_stream_close(Stream* _stream) {
-    furi_assert(_stream);
+    furi_check(_stream);
     FileStream* stream = (FileStream*)_stream;
     furi_check(stream->stream_base.vtable == &file_stream_vtable);
     return storage_file_close(stream->file);
 }
 
 FS_Error file_stream_get_error(Stream* _stream) {
-    furi_assert(_stream);
+    furi_check(_stream);
     FileStream* stream = (FileStream*)_stream;
     furi_check(stream->stream_base.vtable == &file_stream_vtable);
     return storage_file_get_error(stream->file);
@@ -134,31 +136,11 @@ static size_t file_stream_size(FileStream* stream) {
 }
 
 static size_t file_stream_write(FileStream* stream, const uint8_t* data, size_t size) {
-    // TODO cache
-    size_t need_to_write = size;
-    while(need_to_write > 0) {
-        uint16_t was_written =
-            storage_file_write(stream->file, data + (size - need_to_write), need_to_write);
-        need_to_write -= was_written;
-
-        if(was_written == 0) break;
-    }
-
-    return size - need_to_write;
+    return storage_file_write(stream->file, data, size);
 }
 
 static size_t file_stream_read(FileStream* stream, uint8_t* data, size_t size) {
-    // TODO cache
-    size_t need_to_read = size;
-    while(need_to_read > 0) {
-        uint16_t was_read =
-            storage_file_read(stream->file, data + (size - need_to_read), need_to_read);
-        need_to_read -= was_read;
-
-        if(was_read == 0) break;
-    }
-
-    return size - need_to_read;
+    return storage_file_read(stream->file, data, size);
 }
 
 static bool file_stream_delete_and_insert(
@@ -172,17 +154,21 @@ static bool file_stream_delete_and_insert(
     // open scratchpad
     Stream* scratch_stream = file_stream_alloc(_stream->storage);
 
-    // TODO: we need something like "storage_open_tmpfile and storage_close_tmpfile"
-    string_t scratch_name;
-    string_t tmp_name;
-    string_init(tmp_name);
-    storage_get_next_filename(_stream->storage, "/any", ".scratch", ".pad", tmp_name, 255);
-    string_init_printf(scratch_name, "/any/%s.pad", string_get_cstr(tmp_name));
-    string_clear(tmp_name);
+    // TODO FL-3546: we need something like "storage_open_tmpfile and storage_close_tmpfile"
+    FuriString* scratch_name;
+    FuriString* tmp_name;
+    tmp_name = furi_string_alloc();
+    storage_get_next_filename(
+        _stream->storage, STORAGE_EXT_PATH_PREFIX, ".scratch", ".pad", tmp_name, 255);
+    scratch_name = furi_string_alloc_printf(EXT_PATH("%s.pad"), furi_string_get_cstr(tmp_name));
+    furi_string_free(tmp_name);
 
     do {
         if(!file_stream_open(
-               scratch_stream, string_get_cstr(scratch_name), FSAM_READ_WRITE, FSOM_CREATE_NEW))
+               scratch_stream,
+               furi_string_get_cstr(scratch_name),
+               FSAM_READ_WRITE,
+               FSOM_CREATE_NEW))
             break;
 
         size_t current_position = stream_tell(stream);
@@ -224,8 +210,8 @@ static bool file_stream_delete_and_insert(
     } while(false);
 
     stream_free(scratch_stream);
-    storage_common_remove(_stream->storage, string_get_cstr(scratch_name));
-    string_clear(scratch_name);
+    storage_common_remove(_stream->storage, furi_string_get_cstr(scratch_name));
+    furi_string_free(scratch_name);
 
     return result;
 }

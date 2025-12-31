@@ -1,0 +1,25 @@
+App(
+    appid="infrared",
+    name="Infrared",
+    apptype=FlipperAppType.MENUEXTERNAL,
+    entry_point="infrared_app",
+    targets=["f7"],
+    icon="A_Infrared_14",
+    stack_size=3 * 1024,
+    order=40,
+    sources=["*.c", "!infrared_cli.c"],
+    resources="resources",
+    fap_libs=["assets", "infrared"],
+    fap_icon="icon.png",
+    fap_category="Infrared",
+)
+
+App(
+    appid="cli_ir",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_ir_ep",
+    requires=["cli"],
+    sources=["infrared_cli.c"],
+    fap_libs=["infrared"],
+)

@@ -1,0 +1,301 @@
+"""
+Implements the ability for SCons to emit a compilation database for the MongoDB project. See
+http://clang.llvm.org/docs/JSONCompilationDatabase.html for details on what a compilation
+database is, and why you might want one. The only user visible entry point here is
+'env.CompilationDatabase'. This method takes an optional 'target' to name the file that
+should hold the compilation database, otherwise, the file defaults to compile_commands.json,
+which is the name that most clang tools search for by default.
+"""
+
+# Copyright 2020 MongoDB Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+# KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+# WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+
+import fnmatch
+import itertools
+import json
+from oslex import join, split
+
+import SCons
+from SCons.Tool.asm import ASPPSuffixes, ASSuffixes
+from SCons.Tool.cc import CSuffixes
+from SCons.Tool.cxx import CXXSuffixes
+
+# TODO: (-nofl) Is there a better way to do this than this global? Right now this exists so that the
+# emitter we add can record all of the things it emits, so that the scanner for the top level
+# compilation database can access the complete list, and also so that the writer has easy
+# access to write all of the files. But it seems clunky. How can the emitter and the scanner
+# communicate more gracefully?
+__COMPILATION_DB_ENTRIES = []
+
+# We cache the tool path lookups to avoid doing them over and over again.
+_TOOL_PATH_CACHE = {}
+
+
+def make_emit_compilation_DB_entry(comstr):
+    """
+    Effectively this creates a lambda function to capture:
+    * command line
+    * source
+    * target
+    :param comstr: unevaluated command line
+    :return: an emitter which has captured the above
+    """
+
+    def emit_compilation_db_entry(target, source, env):
+        """
+        This emitter will be added to each c/c++ object build to capture the info needed
+        for clang tools
+        :param target: target node(s)
+        :param source: source node(s)
+        :param env: Environment for use building this node
+        :return: target(s), source(s)
+        """
+
+        command = env.subst(comstr, target=target, source=source)
+        dbtarget = env.File(str(target[0]) + ".json")
+
+        config = {
+            "cmd": command,
+            "abspath": env.get("COMPILATIONDB_USE_BINARY_ABSPATH"),
+            "omit": env.get("COMPILATIONDB_OMIT_BINARIES", []),
+        }
+
+        entry = env.__COMPILATIONDB_Entry(
+            target=dbtarget,
+            source=[SCons.Node.Python.Value(config)],
+            __COMPILATIONDB_UOUTPUT=target,
+            __COMPILATIONDB_USOURCE=source,
+            __COMPILATIONDB_ENV=env,
+        )
+
+        __COMPILATION_DB_ENTRIES.append(dbtarget)
+
+        return target, source
+
+    return emit_compilation_db_entry
+
+
+def __is_value_true(value):
+    return value in [True, 1, "True", "true"]
+
+
+def compilation_db_entry_action(target, source, env, **kw):
+    """
+    Create a dictionary with evaluated command line, target, source
+    and store that info as an attribute on the target
+    (Which has been stored in __COMPILATION_DB_ENTRIES array
+    :param target: target node(s)
+    :param source: source node(s)
+    :param env: Environment for use building this node
+    :param kw:
+    :return: None
+    """
+
+    config = source[0].read()
+    command = config["cmd"]
+    binaries_to_omit = config["omit"]
+
+    cmdline = split(command)
+    while cmdline and (executable := cmdline[0]) in binaries_to_omit:
+        cmdline.pop(0)
+
+    if not cmdline:
+        executable = ""
+    else:
+        executable = cmdline[0]
+
+    if __is_value_true(config["abspath"]):
+        if not (tool_path := _TOOL_PATH_CACHE.get(executable, None)):
+            tool_path = env.WhereIs(executable) or executable
+            _TOOL_PATH_CACHE[executable] = tool_path
+        # Replacing the executable with the full path
+        executable = tool_path
+
+    if cmdline:
+        command = join((executable, *cmdline[1:]))
+    else:
+        command = executable
+
+    entry = {
+        "directory": env.Dir("#").abspath,
+        "command": command,
+        "file": str(env["__COMPILATIONDB_USOURCE"][0]),
+        "output": str(env["__COMPILATIONDB_UOUTPUT"][0]),
+    }
+
+    with open(target[0].path, "w") as f:
+        json.dump(entry, f)
+
+
+def write_compilation_db(target, source, env):
+    entries = []
+
+    use_abspath = __is_value_true(env["COMPILATIONDB_USE_ABSPATH"])
+    use_path_filter = env.subst("$COMPILATIONDB_PATH_FILTER")
+    use_srcpath_filter = env.subst("$COMPILATIONDB_SRCPATH_FILTER")
+
+    for s in __COMPILATION_DB_ENTRIES:
+        if not s.exists():
+            continue
+
+        with open(s.path, "r") as f:
+            try:
+                entry = json.load(f)
+            except json.JSONDecodeError:
+                continue
+
+        source_path_str = entry["file"]
+        output_path_str = entry["output"]
+
+        source_file = env.File(source_path_str)
+        output_file = env.File(output_path_str)
+
+        if source_file.rfile().srcnode().exists():
+            source_file = source_file.rfile().srcnode()
+
+        if use_abspath:
+            source_path = source_file.abspath
+            output_path = output_file.abspath
+        else:
+            source_path = source_file.path
+            output_path = output_file.path
+
+        if use_path_filter and not fnmatch.fnmatch(output_path, use_path_filter):
+            continue
+
+        if use_srcpath_filter and not fnmatch.fnmatch(source_path, use_srcpath_filter):
+            continue
+
+        path_entry = {
+            "directory": entry["directory"],
+            "command": entry["command"],
+            "file": source_path,
+            "output": output_path,
+        }
+
+        entries.append(path_entry)
+
+    with open(target[0].path, "w") as output_file:
+        json.dump(
+            entries, output_file, sort_keys=True, indent=4, separators=(",", ": ")
+        )
+
+
+def scan_compilation_db(node, env, path):
+    return __COMPILATION_DB_ENTRIES
+
+
+def compilation_db_emitter(target, source, env):
+    """fix up the source/targets"""
+
+    # Someone called env.CompilationDatabase('my_targetname.json')
+    if not target and len(source) == 1:
+        target = source
+
+    # Default target name is compilation_db.json
+    if not target:
+        target = [
+            "compile_commands.json",
+        ]
+
+    # No source should have been passed. Drop it.
+    if source:
+        source = []
+
+    return target, source
+
+
+def generate(env, **kwargs):
+    static_obj, shared_obj = SCons.Tool.createObjBuilders(env)
+
+    env.SetDefault(
+        COMPILATIONDB_COMSTR=kwargs.get(
+            "COMPILATIONDB_COMSTR", "Building compilation database $TARGET"
+        ),
+        COMPILATIONDB_USE_ABSPATH=False,
+        COMPILATIONDB_PATH_FILTER="",
+        COMPILATIONDB_SRCPATH_FILTER="",
+        COMPILATIONDB_OMIT_BINARIES=[],
+        COMPILATIONDB_USE_BINARY_ABSPATH=False,
+    )
+
+    components_by_suffix = itertools.chain(
+        itertools.product(
+            CSuffixes,
+            [
+                (static_obj, SCons.Defaults.StaticObjectEmitter, "$CCCOM"),
+                (shared_obj, SCons.Defaults.SharedObjectEmitter, "$SHCCCOM"),
+            ],
+        ),
+        itertools.product(
+            CXXSuffixes,
+            [
+                (static_obj, SCons.Defaults.StaticObjectEmitter, "$CXXCOM"),
+                (shared_obj, SCons.Defaults.SharedObjectEmitter, "$SHCXXCOM"),
+            ],
+        ),
+        itertools.product(
+            ASSuffixes,
+            [(static_obj, SCons.Defaults.StaticObjectEmitter, "$ASCOM")],
+            [(shared_obj, SCons.Defaults.SharedObjectEmitter, "$ASCOM")],
+        ),
+        itertools.product(
+            ASPPSuffixes,
+            [(static_obj, SCons.Defaults.StaticObjectEmitter, "$ASPPCOM")],
+            [(shared_obj, SCons.Defaults.SharedObjectEmitter, "$ASPPCOM")],
+        ),
+    )
+
+    for entry in components_by_suffix:
+        suffix = entry[0]
+        builder, base_emitter, command = entry[1]
+        if emitter := builder.emitter.get(suffix, False):
+            # We may not have tools installed which initialize all or any of
+            # cxx, cc, or assembly. If not skip resetting the respective emitter.
+            builder.emitter[suffix] = SCons.Builder.ListEmitter(
+                [
+                    emitter,
+                    make_emit_compilation_DB_entry(command),
+                ]
+            )
+
+    env.Append(
+        BUILDERS={
+            "__COMPILATIONDB_Entry": SCons.Builder.Builder(
+                action=SCons.Action.Action(compilation_db_entry_action, None),
+            ),
+            "CompilationDatabase": SCons.Builder.Builder(
+                action=SCons.Action.Action(
+                    write_compilation_db, "$COMPILATIONDB_COMSTR"
+                ),
+                target_scanner=SCons.Scanner.Scanner(
+                    function=scan_compilation_db, node_class=None
+                ),
+                emitter=compilation_db_emitter,
+                suffix="json",
+            ),
+        }
+    )
+
+
+def exists(env):
+    return True

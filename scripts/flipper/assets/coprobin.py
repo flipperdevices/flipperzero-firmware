@@ -1,10 +1,11 @@
 import struct
 import math
-import os, os.path
+import os
+import os.path
 import sys
 
 
-#  From STM32CubeWB\Middlewares\ST\STM32_WPAN\interface\patterns\ble_thread\shci\shci.h
+#  From lib/stm32wb_copro/wpan/interface/patterns/ble_thread/shci/shci.h
 __STACK_TYPE_CODES = {
     "BLE_FULL": 0x01,
     "BLE_HCI": 0x02,
@@ -45,7 +46,10 @@ class CoproFooterBase:
     _SIG_BIN_COMMON_SIZE = 2 * 4
 
     def get_version(self):
-        return f"Version {self.version_major}.{self.version_minor}.{self.version_sub}, branch {self.version_branch}, build {self.version_build} (magic {self.magic:X})"
+        return (
+            f"Version {self.version_major}.{self.version_minor}.{self.version_sub}, "
+            f"branch {self.version_branch}, build {self.version_build} (magic {self.magic:X})"
+        )
 
     def get_details(self):
         raise CoproException("Not implemented")

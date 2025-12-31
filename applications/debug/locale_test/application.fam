@@ -1,0 +1,9 @@
+App(
+    appid="locale_test",
+    name="Locale Test",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="locale_test_app",
+    requires=["gui", "locale"],
+    stack_size=2 * 1024,
+    fap_category="Debug",
+)

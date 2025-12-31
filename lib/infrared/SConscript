@@ -1,0 +1,30 @@
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/infrared/encoder_decoder",
+        "#/lib/infrared/worker",
+        "#/lib/infrared/signal",
+    ],
+    SDK_HEADERS=[
+        File("encoder_decoder/infrared.h"),
+        File("worker/infrared_worker.h"),
+        File("worker/infrared_transmit.h"),
+        File("signal/infrared_error_code.h"),
+        File("signal/infrared_signal.h"),
+        File("signal/infrared_brute_force.h"),
+    ],
+    LINT_SOURCES=[
+        Dir("."),
+    ],
+)
+
+
+libenv = env.Clone(FW_LIB_NAME="infrared")
+libenv.ApplyLibFlags()
+
+sources = libenv.GlobRecursive("*.c")
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

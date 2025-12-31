@@ -1,7 +1,7 @@
 import logging
 import argparse
 import sys
-import os
+import colorlog
 
 
 class App:
@@ -11,7 +11,7 @@ class App:
         self.parser = argparse.ArgumentParser()
         self.parser.add_argument("-d", "--debug", action="store_true", help="Debug")
         # Logging
-        self.logger = logging.getLogger()
+        self.logger = colorlog.getLogger()
         # Application specific initialization
         self.init()
 
@@ -20,11 +20,21 @@ class App:
         # configure log output
         self.log_level = logging.DEBUG if self.args.debug else logging.INFO
         self.logger.setLevel(self.log_level)
-        self.handler = logging.StreamHandler(sys.stdout)
-        self.handler.setLevel(self.log_level)
-        self.formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-        self.handler.setFormatter(self.formatter)
-        self.logger.addHandler(self.handler)
+        if not self.logger.hasHandlers():
+            self.handler = colorlog.StreamHandler(sys.stdout)
+            self.handler.setLevel(self.log_level)
+            self.formatter = colorlog.ColoredFormatter(
+                "%(log_color)s%(asctime)s [%(levelname)s] %(message)s",
+                log_colors={
+                    "DEBUG": "cyan",
+                    # "INFO": "white",
+                    "WARNING": "yellow",
+                    "ERROR": "red",
+                    "CRITICAL": "red,bg_white",
+                },
+            )
+            self.handler.setFormatter(self.formatter)
+            self.logger.addHandler(self.handler)
 
         # execute requested function
         self.before()
@@ -33,7 +43,7 @@ class App:
         if isinstance(return_code, int):
             return self._exit(return_code)
         else:
-            self.logger.error(f"Missing return code")
+            self.logger.error("Missing return code")
             return self._exit(255)
 
     def _exit(self, code):

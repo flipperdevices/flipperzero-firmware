@@ -1,0 +1,9 @@
+App(
+    appid="crash_test",
+    name="Crash Test",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="crash_test_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_category="Debug",
+)

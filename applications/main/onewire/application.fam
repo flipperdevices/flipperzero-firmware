@@ -1,0 +1,8 @@
+App(
+    appid="cli_onewire",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_onewire_ep",
+    requires=["cli"],
+    sources=["onewire_cli.c"],
+)

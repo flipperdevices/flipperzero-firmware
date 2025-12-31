@@ -1,6 +1,5 @@
 #pragma once
 #include <stdlib.h>
-#include <mlib/m-string.h>
 #include "stream.h"
 
 #ifdef __cplusplus
@@ -11,7 +10,7 @@ extern "C" {
  * Allocate string stream
  * @return Stream* 
  */
-Stream* string_stream_alloc();
+Stream* string_stream_alloc(void);
 
 #ifdef __cplusplus
 }

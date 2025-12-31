@@ -1,5 +1,8 @@
+*~
 *.swp
+*.swo
 *.gdb_history
+*.old
 
 
 # LSP
@@ -8,6 +11,9 @@ compile_commands.json
 
 # JetBrains IDEs
 .idea/
+
+# Sublime Text
+.sublime-project.sublime-workspace
 
 # Python VirtEnvironments
 .env
@@ -27,15 +33,41 @@ bindings/
 .mxproject
 Brewfile.lock.json
 
-# Visual Studio Code
-.vscode/
-
-# legendary cmake's
-build
-CMakeLists.txt
-
-# bundle output
-dist
+# Kate
+.kateproject
+.kateconfig
 
 # kde
 .directory
+
+# SCons
+.sconsign.dblite
+
+
+# bundle output
+/dist
+
+# SCons build dir
+/build
+
+# Toolchain
+/toolchain
+
+# openocd output file
+openocd.log
+
+# PVS Studio temporary files
+.PVS-Studio/
+PVS-Studio.log
+*.PVS-Studio.*
+
+.gdbinit
+
+/fbt_options_local.py
+
+# JS packages
+node_modules/
+
+# cli_perf script output in case of errors
+/block.bin
+/return_block.bin

@@ -1,0 +1,79 @@
+import multiprocessing
+import os
+
+from fbt.util import (
+    FORWARDED_ENV_VARIABLES,
+    PosixPathWrapper,
+    resolve_real_dir_node,
+    single_quote,
+    tempfile_arg_esc_func,
+    wrap_tempfile,
+)
+from SCons.Platform import TempFileMunge
+
+Import("VAR_ENV")
+
+forward_os_env = {
+    # Import PATH from OS env - scons doesn't do that by default
+    "PATH": os.environ["PATH"],
+}
+
+variables_to_forward = list(FORWARDED_ENV_VARIABLES)
+
+if proxy_env := GetOption("proxy_env"):
+    variables_to_forward.extend(proxy_env.split(","))
+
+for env_value_name in variables_to_forward:
+    if environ_value := os.environ.get(env_value_name, None):
+        forward_os_env[env_value_name] = environ_value
+
+coreenv = VAR_ENV.Clone(
+    tools=[
+        "fbt_tweaks",
+        (
+            "crosscc",
+            {
+                "toolchain_prefix": "arm-none-eabi-",
+                "versions": VAR_ENV["FBT_TOOLCHAIN_VERSIONS"],
+            },
+        ),
+        "python3",
+        "sconsmodular",
+        "sconsrecursiveglob",
+        "ccache",
+    ],
+    TEMPFILE=TempFileMunge,
+    POSIXPATH=PosixPathWrapper,
+    MAXLINELENGTH=2048,
+    PROGSUFFIX=".elf",
+    ENV=forward_os_env,
+    SINGLEQUOTEFUNC=single_quote,
+    ABSPATHGETTERFUNC=resolve_real_dir_node,
+    # Setting up temp file parameters - to overcome command line length limits
+    TEMPFILEARGESCFUNC=tempfile_arg_esc_func,
+    ROOT_DIR=Dir("#"),
+    FBT_SCRIPT_DIR=Dir("#/scripts"),
+)
+
+# If DIST_SUFFIX is set in environment, is has precedence (set by CI)
+if os_suffix := os.environ.get("DIST_SUFFIX", None):
+    coreenv.Replace(
+        DIST_SUFFIX=os_suffix,
+    )
+
+# Default value for commandline options
+
+SetOption("num_jobs", multiprocessing.cpu_count())
+## NB - disabled both caches since they seem to do more harm then good in our case
+# Avoiding re-scan of all sources on every startup
+# SetOption("implicit_cache", True)
+# SetOption("implicit_deps_unchanged", True)
+# More aggressive caching
+SetOption("max_drift", 1)
+# Random task queue - to discover isses with build logic faster
+# SetOption("random", 1)
+
+wrap_tempfile(coreenv, "LINKCOM")
+wrap_tempfile(coreenv, "ARCOM")
+
+Return("coreenv")

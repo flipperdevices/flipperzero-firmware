@@ -1,0 +1,12 @@
+App(
+    appid="gpio",
+    name="GPIO",
+    apptype=FlipperAppType.MENUEXTERNAL,
+    entry_point="gpio_app",
+    stack_size=2 * 1024,
+    icon="A_GPIO_14",
+    order=50,
+    fap_libs=["assets"],
+    fap_icon="icon.png",
+    fap_category="GPIO",
+)

@@ -1,0 +1,87 @@
+from fbt.version import get_fast_git_version_id
+
+
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/toolbox",
+    ],
+    LINT_SOURCES=[
+        Dir("."),
+    ],
+    SDK_HEADERS=[
+        File("api_lock.h"),
+        File("cli/cli_ansi.h"),
+        File("cli/cli_command.h"),
+        File("cli/cli_registry.h"),
+        File("cli/shell/cli_shell.h"),
+        File("compress.h"),
+        File("manchester_decoder.h"),
+        File("manchester_encoder.h"),
+        File("path.h"),
+        File("name_generator.h"),
+        File("crc32_calc.h"),
+        File("dir_walk.h"),
+        File("args.h"),
+        File("saved_struct.h"),
+        File("version.h"),
+        File("float_tools.h"),
+        File("value_index.h"),
+        File("tar/tar_archive.h"),
+        File("str_buffer.h"),
+        File("stream/stream.h"),
+        File("stream/file_stream.h"),
+        File("stream/string_stream.h"),
+        File("stream/buffered_file_stream.h"),
+        File("strint.h"),
+        File("pipe.h"),
+        File("protocols/protocol_dict.h"),
+        File("pretty_format.h"),
+        File("hex.h"),
+        File("simple_array.h"),
+        File("bit_buffer.h"),
+        File("keys_dict.h"),
+        File("pulse_protocols/pulse_glue.h"),
+        File("md5_calc.h"),
+        File("varint.h"),
+    ],
+)
+
+
+libenv = env.Clone(tools=["fbt_version"], FW_LIB_NAME="toolbox")
+libenv.ApplyLibFlags()
+
+
+# Git Version management
+version_depends = []
+version_id_data = get_fast_git_version_id()
+if version_id_data:
+    version_depends = Value(version_id_data)
+
+# Only invoke version generator if preliminary check target (version_depends) has changed
+build_version = libenv.VersionBuilder(
+    Dir("."),
+    version_depends,
+)
+
+fw_version_json = libenv.InstallAs(
+    "${BUILD_DIR}/${FIRMWARE_BUILD_CFG}.json", "version.json"
+)
+Alias("version_json", fw_version_json)
+env.Append(FW_VERSION_JSON=fw_version_json)
+
+# Default(fw_version_json)
+
+
+if not version_depends:
+    libenv.Precious(build_version)
+    libenv.AlwaysBuild(build_version)
+
+sources = libenv.GlobRecursive("*.c")
+
+libenv.Append(CPPPATH=[libenv.Dir(".")])
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

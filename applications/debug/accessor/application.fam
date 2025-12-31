@@ -1,0 +1,10 @@
+App(
+    appid="accessor",
+    name="Accessor",
+    apptype=FlipperAppType.DEBUG,
+    targets=["f7"],
+    entry_point="accessor_app",
+    requires=["gui"],
+    stack_size=4 * 1024,
+    fap_category="Debug",
+)

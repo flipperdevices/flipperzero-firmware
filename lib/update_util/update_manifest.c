@@ -4,27 +4,29 @@
 #include <flipper_format/flipper_format.h>
 #include <flipper_format/flipper_format_i.h>
 
-#define MANIFEST_KEY_INFO "Info"
-#define MANIFEST_KEY_TARGET "Target"
-#define MANIFEST_KEY_LOADER_FILE "Loader"
-#define MANIFEST_KEY_LOADER_CRC "Loader CRC"
-#define MANIFEST_KEY_DFU_FILE "Firmware"
-#define MANIFEST_KEY_RADIO_FILE "Radio"
+#define MANIFEST_KEY_INFO          "Info"
+#define MANIFEST_KEY_TARGET        "Target"
+#define MANIFEST_KEY_LOADER_FILE   "Loader"
+#define MANIFEST_KEY_LOADER_CRC    "Loader CRC"
+#define MANIFEST_KEY_DFU_FILE      "Firmware"
+#define MANIFEST_KEY_RADIO_FILE    "Radio"
 #define MANIFEST_KEY_RADIO_ADDRESS "Radio address"
 #define MANIFEST_KEY_RADIO_VERSION "Radio version"
-#define MANIFEST_KEY_RADIO_CRC "Radio CRC"
-#define MANIFEST_KEY_ASSETS_FILE "Resources"
-#define MANIFEST_KEY_OB_REFERENCE "OB reference"
-#define MANIFEST_KEY_OB_MASK "OB mask"
+#define MANIFEST_KEY_RADIO_CRC     "Radio CRC"
+#define MANIFEST_KEY_ASSETS_FILE   "Resources"
+#define MANIFEST_KEY_OB_REFERENCE  "OB reference"
+#define MANIFEST_KEY_OB_MASK       "OB mask"
 #define MANIFEST_KEY_OB_WRITE_MASK "OB write mask"
+#define MANIFEST_KEY_SPLASH_FILE   "Splashscreen"
 
-UpdateManifest* update_manifest_alloc() {
+UpdateManifest* update_manifest_alloc(void) {
     UpdateManifest* update_manifest = malloc(sizeof(UpdateManifest));
-    string_init(update_manifest->version);
-    string_init(update_manifest->firmware_dfu_image);
-    string_init(update_manifest->radio_image);
-    string_init(update_manifest->staged_loader_file);
-    string_init(update_manifest->resource_bundle);
+    update_manifest->version = furi_string_alloc();
+    update_manifest->firmware_dfu_image = furi_string_alloc();
+    update_manifest->radio_image = furi_string_alloc();
+    update_manifest->staged_loader_file = furi_string_alloc();
+    update_manifest->resource_bundle = furi_string_alloc();
+    update_manifest->splash_file = furi_string_alloc();
     update_manifest->target = 0;
     update_manifest->manifest_version = 0;
     memset(update_manifest->ob_reference.bytes, 0, FURI_HAL_FLASH_OB_RAW_SIZE_BYTES);
@@ -36,11 +38,12 @@ UpdateManifest* update_manifest_alloc() {
 
 void update_manifest_free(UpdateManifest* update_manifest) {
     furi_assert(update_manifest);
-    string_clear(update_manifest->version);
-    string_clear(update_manifest->firmware_dfu_image);
-    string_clear(update_manifest->radio_image);
-    string_clear(update_manifest->staged_loader_file);
-    string_clear(update_manifest->resource_bundle);
+    furi_string_free(update_manifest->version);
+    furi_string_free(update_manifest->firmware_dfu_image);
+    furi_string_free(update_manifest->radio_image);
+    furi_string_free(update_manifest->staged_loader_file);
+    furi_string_free(update_manifest->resource_bundle);
+    furi_string_free(update_manifest->splash_file);
     free(update_manifest);
 }
 
@@ -49,12 +52,12 @@ static bool
     furi_assert(update_manifest);
     furi_assert(flipper_file);
 
-    string_t filetype;
+    FuriString* filetype;
 
-    // TODO: compare filetype?
-    string_init(filetype);
+    filetype = furi_string_alloc();
     update_manifest->valid =
         flipper_format_read_header(flipper_file, filetype, &update_manifest->manifest_version) &&
+        furi_string_cmp_str(filetype, "Flipper firmware upgrade configuration") == 0 &&
         flipper_format_read_string(flipper_file, MANIFEST_KEY_INFO, update_manifest->version) &&
         flipper_format_read_uint32(
             flipper_file, MANIFEST_KEY_TARGET, &update_manifest->target, 1) &&
@@ -65,7 +68,7 @@ static bool
             MANIFEST_KEY_LOADER_CRC,
             (uint8_t*)&update_manifest->staged_loader_crc,
             sizeof(uint32_t));
-    string_clear(filetype);
+    furi_string_free(filetype);
 
     if(update_manifest->valid) {
         /* Optional fields - we can have dfu, radio, resources, or any combination */
@@ -107,10 +110,13 @@ static bool
             update_manifest->ob_write_mask.bytes,
             FURI_HAL_FLASH_OB_RAW_SIZE_BYTES);
 
+        flipper_format_read_string(
+            flipper_file, MANIFEST_KEY_SPLASH_FILE, update_manifest->splash_file);
+
         update_manifest->valid =
-            (!string_empty_p(update_manifest->firmware_dfu_image) ||
-             !string_empty_p(update_manifest->radio_image) ||
-             !string_empty_p(update_manifest->resource_bundle));
+            (!furi_string_empty(update_manifest->firmware_dfu_image) ||
+             !furi_string_empty(update_manifest->radio_image) ||
+             !furi_string_empty(update_manifest->resource_bundle));
     }
 
     return update_manifest->valid;
@@ -151,14 +157,14 @@ bool update_manifest_has_obdata(UpdateManifest* update_manifest) {
 }
 
 bool update_manifest_init(UpdateManifest* update_manifest, const char* manifest_filename) {
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* flipper_file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(flipper_file, manifest_filename)) {
         update_manifest_init_from_ff(update_manifest, flipper_file);
     }
 
     flipper_format_free(flipper_file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     return update_manifest->valid;
 }
