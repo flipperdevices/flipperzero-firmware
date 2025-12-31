@@ -2,8 +2,8 @@
 
 #include <stdlib.h>
 
-#include "core/check.h"
 #include "core/common_defines.h"
+#include "core/check.h"
 #include "core/event_loop.h"
 #include "core/event_loop_timer.h"
 #include "core/event_flag.h"
@@ -34,6 +34,8 @@ extern "C" {
 void furi_init(void);
 
 void furi_run(void);
+
+void furi_background(void);
 
 #ifdef __cplusplus
 }

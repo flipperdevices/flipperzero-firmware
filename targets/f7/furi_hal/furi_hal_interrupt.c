@@ -68,6 +68,9 @@ const IRQn_Type furi_hal_interrupt_irqn[FuriHalInterruptIdMax] = {
     // COMP
     [FuriHalInterruptIdCOMP] = COMP_IRQn,
 
+    // RTC
+    [FuriHalInterruptIdRtcAlarm] = RTC_Alarm_IRQn,
+
     // HSEM
     [FuriHalInterruptIdHsem] = HSEM_IRQn,
 
@@ -120,6 +123,7 @@ void furi_hal_interrupt_init(void) {
         TAMP_STAMP_LSECSS_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
     NVIC_EnableIRQ(TAMP_STAMP_LSECSS_IRQn);
 
+    NVIC_SetPriority(SVCall_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
     NVIC_SetPriority(PendSV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
 
     NVIC_SetPriority(FPU_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
@@ -253,6 +257,10 @@ void DMA2_Channel6_IRQHandler(void) {
 
 void DMA2_Channel7_IRQHandler(void) {
     furi_hal_interrupt_call(FuriHalInterruptIdDma2Ch7);
+}
+
+void RTC_Alarm_IRQHandler(void) {
+    furi_hal_interrupt_call(FuriHalInterruptIdRtcAlarm);
 }
 
 void HSEM_IRQHandler(void) {

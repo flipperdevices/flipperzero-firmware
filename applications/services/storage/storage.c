@@ -3,7 +3,6 @@
 #include "storage_message.h"
 #include "storage_processing.h"
 #include "storage/storage_glue.h"
-#include "storages/storage_int.h"
 #include "storages/storage_ext.h"
 #include <assets_icons.h>
 
@@ -42,17 +41,14 @@ Storage* storage_app_alloc(void) {
         storage_data_timestamp(&app->storage[i]);
     }
 
-#ifndef FURI_RAM_EXEC
-    storage_int_init(&app->storage[ST_INT]);
-#endif
     storage_ext_init(&app->storage[ST_EXT]);
 
     // sd icon gui
-    app->sd_gui.enabled = false;
+    app->sd_gui.enabled = (app->storage[ST_EXT].status != StorageStatusNotReady);
     app->sd_gui.view_port = view_port_alloc();
     view_port_set_width(app->sd_gui.view_port, icon_get_width(ICON_SD_MOUNTED));
     view_port_draw_callback_set(app->sd_gui.view_port, storage_app_sd_icon_draw_callback, app);
-    view_port_enabled_set(app->sd_gui.view_port, false);
+    view_port_enabled_set(app->sd_gui.view_port, app->sd_gui.enabled);
 
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, app->sd_gui.view_port, GuiLayerStatusBarLeft);
@@ -107,11 +103,22 @@ int32_t storage_srv(void* p) {
     furi_record_create(RECORD_STORAGE, app);
 
     StorageMessage message;
+    uint32_t last_tick = furi_get_tick();
+
     while(1) {
-        if(furi_message_queue_get(app->message_queue, &message, STORAGE_TICK) == FuriStatusOk) {
+        uint32_t now = furi_get_tick();
+        uint32_t elapsed = now - last_tick;
+        uint32_t timeout = (elapsed >= STORAGE_TICK) ? 0 : (STORAGE_TICK - elapsed);
+
+        if(furi_message_queue_get(app->message_queue, &message, timeout) == FuriStatusOk) {
             storage_process_message(app, &message);
+            if((furi_get_tick() - last_tick) >= STORAGE_TICK) {
+                storage_tick(app);
+                last_tick = furi_get_tick();
+            }
         } else {
             storage_tick(app);
+            last_tick = furi_get_tick();
         }
     }
 

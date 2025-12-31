@@ -4,28 +4,30 @@
 #include "event_loop_link_i.h"
 #include "event_loop_timer_i.h"
 #include "event_loop_tick_i.h"
+#include "event_loop_thread_flag_interface.h"
 
 #include <m-list.h>
 #include <m-bptree.h>
 #include <m-i-list.h>
 
 #include "thread.h"
+#include "thread_i.h"
 
 struct FuriEventLoopItem {
     // Source
     FuriEventLoop* owner;
 
     // Tracking item
-    const FuriEventLoopContract* contract;
-    void* object;
     FuriEventLoopEvent event;
+    FuriEventLoopObject* object;
+    const FuriEventLoopContract* contract;
 
     // Callback and context
-    FuriEventLoopMessageQueueCallback callback;
+    FuriEventLoopEventCallback callback;
     void* callback_context;
 
     // Waiting list
-    ILIST_INTERFACE(WaitingList, struct FuriEventLoopItem);
+    ILIST_INTERFACE(WaitingList, FuriEventLoopItem);
 };
 
 ILIST_DEF(WaitingList, FuriEventLoopItem, M_POD_OPLIST)
@@ -36,7 +38,7 @@ ILIST_DEF(WaitingList, FuriEventLoopItem, M_POD_OPLIST)
 BPTREE_DEF2( // NOLINT
     FuriEventLoopTree,
     FURI_EVENT_LOOP_TREE_RANK,
-    void*, /* pointer to object we track */
+    FuriEventLoopObject*, /* pointer to object we track */
     M_PTR_OPLIST,
     FuriEventLoopItem*, /* pointer to the FuriEventLoopItem */
     M_PTR_OPLIST)
@@ -50,22 +52,22 @@ typedef enum {
     FuriEventLoopFlagStop = (1 << 1),
     FuriEventLoopFlagTimer = (1 << 2),
     FuriEventLoopFlagPending = (1 << 3),
+    FuriEventLoopFlagThreadFlag = (1 << 4),
 } FuriEventLoopFlag;
 
 #define FuriEventLoopFlagAll                                                   \
     (FuriEventLoopFlagEvent | FuriEventLoopFlagStop | FuriEventLoopFlagTimer | \
-     FuriEventLoopFlagPending)
+     FuriEventLoopFlagPending | FuriEventLoopFlagThreadFlag)
 
 typedef enum {
     FuriEventLoopProcessStatusComplete,
     FuriEventLoopProcessStatusIncomplete,
-    FuriEventLoopProcessStatusAgain,
+    FuriEventLoopProcessStatusFreeLater,
 } FuriEventLoopProcessStatus;
 
 typedef enum {
     FuriEventLoopStateStopped,
-    FuriEventLoopStateIdle,
-    FuriEventLoopStateProcessing,
+    FuriEventLoopStateRunning,
 } FuriEventLoopState;
 
 typedef struct {
@@ -81,6 +83,7 @@ struct FuriEventLoop {
 
     // Poller state
     volatile FuriEventLoopState state;
+    volatile FuriEventLoopItem* current_item;
 
     // Event handling
     FuriEventLoopTree_t tree;
@@ -94,4 +97,9 @@ struct FuriEventLoop {
     PendingQueue_t pending_queue;
     // Tick event
     FuriEventLoopTick tick;
+
+    // Thread flags callback
+    bool are_thread_flags_subscribed;
+    FuriEventLoopThreadFlagsCallback thread_flags_callback;
+    void* thread_flags_callback_context;
 };

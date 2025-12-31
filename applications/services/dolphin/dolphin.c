@@ -1,6 +1,7 @@
 #include "dolphin_i.h"
 
 #include <furi_hal.h>
+#include <storage/storage.h>
 
 #define TAG "Dolphin"
 
@@ -44,6 +45,26 @@ void dolphin_deed(DolphinDeed deed) {
     dolphin_event_send_async(dolphin, &event);
 
     furi_record_close(RECORD_DOLPHIN);
+}
+
+void dolphin_get_settings(Dolphin* dolphin, DolphinSettings* settings) {
+    furi_check(dolphin);
+    furi_check(settings);
+
+    DolphinEvent event;
+    event.type = DolphinEventTypeSettingsGet;
+    event.settings = settings;
+    dolphin_event_send_wait(dolphin, &event);
+}
+
+void dolphin_set_settings(Dolphin* dolphin, DolphinSettings* settings) {
+    furi_check(dolphin);
+    furi_check(settings);
+
+    DolphinEvent event;
+    event.type = DolphinEventTypeSettingsSet;
+    event.settings = settings;
+    dolphin_event_send_wait(dolphin, &event);
 }
 
 DolphinStats dolphin_stats(Dolphin* dolphin) {
@@ -191,8 +212,8 @@ static void dolphin_update_clear_limits_timer_period(void* context) {
     FURI_LOG_D(TAG, "Daily limits reset in %lu ms", time_to_clear_limits);
 }
 
-static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
-    UNUSED(queue);
+static void dolphin_process_event(FuriEventLoopObject* object, void* context) {
+    UNUSED(object);
 
     Dolphin* dolphin = context;
     DolphinEvent event;
@@ -203,14 +224,16 @@ static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
     if(event.type == DolphinEventTypeDeed) {
         dolphin_state_on_deed(dolphin->state, event.deed);
 
-        DolphinPubsubEvent event = DolphinPubsubEventUpdate;
-        furi_pubsub_publish(dolphin->pubsub, &event);
+        DolphinPubsubEvent pubsub_event = DolphinPubsubEventUpdate;
+        furi_pubsub_publish(dolphin->pubsub, &pubsub_event);
         furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
         furi_event_loop_timer_start(dolphin->flush_timer, FLUSH_TIMEOUT_TICKS);
 
     } else if(event.type == DolphinEventTypeStats) {
         event.stats->icounter = dolphin->state->data.icounter;
-        event.stats->butthurt = dolphin->state->data.butthurt;
+        event.stats->butthurt = (dolphin->state->data.flags & DolphinFlagHappyMode) ?
+                                    0 :
+                                    dolphin->state->data.butthurt;
         event.stats->timestamp = dolphin->state->data.timestamp;
         event.stats->level = dolphin_get_level(dolphin->state->data.icounter);
         event.stats->level_up_is_pending =
@@ -223,13 +246,50 @@ static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
         dolphin_state_increase_level(dolphin->state);
         furi_event_loop_timer_start(dolphin->flush_timer, FLUSH_TIMEOUT_TICKS);
 
+    } else if(event.type == DolphinEventTypeReloadState) {
+        dolphin_state_load(dolphin->state);
+        furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
+
+    } else if(event.type == DolphinEventTypeSettingsGet) {
+        event.settings->happy_mode = dolphin->state->data.flags & DolphinFlagHappyMode;
+
+    } else if(event.type == DolphinEventTypeSettingsSet) {
+        dolphin->state->data.flags &= ~DolphinFlagHappyMode;
+        if(event.settings->happy_mode) dolphin->state->data.flags |= DolphinFlagHappyMode;
+        dolphin->state->dirty = true;
+        dolphin_state_save(dolphin->state);
+
     } else {
         furi_crash();
     }
 
     dolphin_event_release(&event);
+}
 
-    return true;
+static void dolphin_storage_callback(const void* message, void* context) {
+    furi_assert(context);
+    Dolphin* dolphin = context;
+    const StorageEvent* event = message;
+
+    if(event->type == StorageEventTypeCardMount) {
+        DolphinEvent event = {
+            .type = DolphinEventTypeReloadState,
+        };
+
+        dolphin_event_send_async(dolphin, &event);
+    }
+}
+
+static void dolphin_init_state(Dolphin* dolphin) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    furi_pubsub_subscribe(storage_get_pubsub(storage), dolphin_storage_callback, dolphin);
+
+    if(storage_sd_status(storage) != FSE_OK) {
+        FURI_LOG_D(TAG, "SD Card not ready, skipping state");
+        return;
+    }
+
+    dolphin_state_load(dolphin->state);
 }
 
 // Application thread
@@ -247,9 +307,9 @@ int32_t dolphin_srv(void* p) {
     Dolphin* dolphin = dolphin_alloc();
     furi_record_create(RECORD_DOLPHIN, dolphin);
 
-    dolphin_state_load(dolphin->state);
+    dolphin_init_state(dolphin);
 
-    furi_event_loop_message_queue_subscribe(
+    furi_event_loop_subscribe_message_queue(
         dolphin->event_loop,
         dolphin->event_queue,
         FuriEventLoopEventIn,

@@ -12,6 +12,9 @@ typedef enum {
     DolphinEventTypeStats,
     DolphinEventTypeFlush,
     DolphinEventTypeLevel,
+    DolphinEventTypeReloadState,
+    DolphinEventTypeSettingsGet,
+    DolphinEventTypeSettingsSet,
 } DolphinEventType;
 
 typedef struct {
@@ -20,6 +23,7 @@ typedef struct {
     union {
         DolphinDeed deed;
         DolphinStats* stats;
+        DolphinSettings* settings;
     };
 } DolphinEvent;
 

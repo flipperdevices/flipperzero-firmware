@@ -13,10 +13,10 @@ App(
 )
 
 App(
-    appid="ibutton_start",
-    apptype=FlipperAppType.STARTUP,
+    appid="cli_ikey",
     targets=["f7"],
-    entry_point="ibutton_on_system_start",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_ikey_ep",
+    requires=["cli"],
     sources=["ibutton_cli.c"],
-    order=60,
 )
