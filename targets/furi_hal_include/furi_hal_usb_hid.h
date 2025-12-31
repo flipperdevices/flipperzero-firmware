@@ -10,14 +10,9 @@ extern "C" {
 #endif
 
 /** Max number of simultaneously pressed keys (keyboard) */
-#define HID_KB_MAX_KEYS       6
+#define HID_KB_MAX_KEYS 6
 /** Max number of simultaneously pressed keys (consumer control) */
 #define HID_CONSUMER_MAX_KEYS 2
-
-/** OS-specific consumer keys, defined as "Reserved" in HID Usage Tables document */
-#define HID_CONSUMER_BRIGHTNESS_INCREMENT 0x006F
-#define HID_CONSUMER_BRIGHTNESS_DECREMENT 0x0070
-#define HID_CONSUMER_FN_GLOBE             0x029D
 
 #define HID_KEYBOARD_NONE 0x00
 
@@ -195,13 +190,13 @@ enum HidMouseButtons {
  *
  * @return      true / false
  */
-bool furi_hal_hid_is_connected(void);
+bool furi_hal_hid_is_connected();
 
 /** Get USB HID keyboard leds state
  *
  * @return      leds state
  */
-uint8_t furi_hal_hid_get_led_state(void);
+uint8_t furi_hal_hid_get_led_state();
 
 /** Set USB HID connect/disconnect callback
  *
@@ -225,7 +220,7 @@ bool furi_hal_hid_kb_release(uint16_t button);
 /** Clear all pressed keys and send HID report
  *
  */
-bool furi_hal_hid_kb_release_all(void);
+bool furi_hal_hid_kb_release_all();
 
 /** Set mouse movement and send HID report
  *
@@ -263,11 +258,6 @@ bool furi_hal_hid_consumer_key_press(uint16_t button);
  * @param      button  key code
  */
 bool furi_hal_hid_consumer_key_release(uint16_t button);
-
-/** Clear all pressed consumer keys and send HID report
- *
- */
-bool furi_hal_hid_consumer_key_release_all(void);
 
 #ifdef __cplusplus
 }

@@ -18,6 +18,7 @@ typedef InfraredStatus (
 typedef struct {
     InfraredTimings timings;
     bool manchester_start_from_space;
+    bool no_stop_bit;
     uint8_t databit_len[4];
     InfraredCommonDecode decode;
     InfraredCommonDecodeRepeat decode_repeat;

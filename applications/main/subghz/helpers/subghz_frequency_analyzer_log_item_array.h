@@ -35,13 +35,11 @@ TUPLE_DEF2( //-V1048
         M_DEFAULT_OPLIST)
 
 /* Define the array, register the oplist and define further algorithms on it */
-ARRAY_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItem_t) //-V779 //-V658
+ARRAY_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItem_t) //-V779
 #define M_OPL_SubGhzFrequencyAnalyzerLogItemArray_t() \
     ARRAY_OPLIST(SubGhzFrequencyAnalyzerLogItemArray, M_OPL_SubGhzFrequencyAnalyzerLogItem_t())
 ALGO_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItemArray_t)
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warray-bounds"
 FUNC_OBJ_INS_DEF(
     SubGhzFrequencyAnalyzerLogItemArray_compare_by /* name of the instance */,
     SubGhzFrequencyAnalyzerLogItemArray_cmp_obj /* name of the interface */,
@@ -78,4 +76,3 @@ FUNC_OBJ_INS_DEF(
     (order_by, SubGhzFrequencyAnalyzerLogOrderBy))
 #define M_OPL_SubGhzFrequencyAnalyzerLogItemArray_compare_by_t() \
     FUNC_OBJ_INS_OPLIST(SubGhzFrequencyAnalyzerLogItemArray_compare_by, M_DEFAULT_OPLIST)
-#pragma GCC diagnostic pop

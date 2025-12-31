@@ -25,9 +25,12 @@ typedef struct {
     Submenu* submenu;
     DialogEx* dialog;
     PowerInfo info;
+<<<<<<< HEAD
     VariableItemList* variable_item_list;
     uint32_t shutdown_idle_delay_ms;
     FuriPubSub* settings_events;
+=======
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 } PowerSettingsApp;
 
 typedef enum {
@@ -36,5 +39,8 @@ typedef enum {
     PowerSettingsAppViewDialog,
     PowerSettingsAppViewVariableItemList
 } PowerSettingsAppView;
+<<<<<<< HEAD
 
 typedef enum { RebootTypeDFU, RebootTypeNormal } RebootType;
+=======
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner

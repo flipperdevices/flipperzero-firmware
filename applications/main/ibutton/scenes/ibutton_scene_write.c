@@ -40,24 +40,25 @@ void ibutton_scene_write_on_enter(void* context) {
 
     widget_add_icon_element(widget, 3, 10, &I_iButtonKey_49x44);
 
-    if(furi_string_empty(ibutton->file_path)) {
-        furi_string_printf(
-            tmp, "Unsaved\n%s", ibutton_protocols_get_name(ibutton->protocols, protocol_id));
-    } else {
-        furi_string_printf(tmp, "%s", ibutton->key_name);
-    }
+    furi_string_printf(
+        tmp,
+        "%s\n[%s]",
+        ibutton->key_name,
+        ibutton_protocols_get_name(ibutton->protocols, protocol_id));
 
     widget_add_text_box_element(
-        widget, 52, 23, 75, 26, AlignCenter, AlignTop, furi_string_get_cstr(tmp), false);
+        widget, 52, 38, 75, 26, AlignCenter, AlignCenter, furi_string_get_cstr(tmp), true);
 
     ibutton_worker_write_set_callback(worker, ibutton_scene_write_callback, ibutton);
 
-    if(ibutton->write_mode == iButtonWriteModeId) {
-        furi_string_set(tmp, "Writing ID");
-        ibutton_worker_write_id_start(worker, key);
+    furi_string_set(tmp, "iButton\nwriting ");
+
+    if(ibutton->write_mode == iButtonWriteModeBlank) {
+        furi_string_cat(tmp, "Blank");
+        ibutton_worker_write_blank_start(worker, key);
 
     } else if(ibutton->write_mode == iButtonWriteModeCopy) {
-        furi_string_set(tmp, "Full Writing");
+        furi_string_cat(tmp, "Copy");
         ibutton_worker_write_copy_start(worker, key);
     }
 

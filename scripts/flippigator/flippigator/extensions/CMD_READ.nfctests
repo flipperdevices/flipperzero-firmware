@@ -1,0 +1,14 @@
+#Some test cases for nfc
+#this is one line comment
+
+'''
+Multiline 
+comment
+'''
+
+[Scenario=1, Card=NTAG213.nfc, Description="Describes what scenario does"]
+hf 14a raw -sc 3000 ->  04 BA FF C9 CA 4D 5D 80 5A 48 00 00 E1 10 12 00 [ F5 67 ]
+
+[Scenario=2, Card=NTAG213.nfc, Description="Reading password protected data"]
+hf 14a raw -sck 1BDEADBEAF ->   00 00 [ A0 1E ] //Authentication with pwd = DEADBEAF
+hf 14a raw -sc 300A ->  04 BA FF C9 CA 4D 5D 80 5A 48 00 00 E1 10 12 00 [ F5 67 ]   //Read pages 0x0A - 0x0D

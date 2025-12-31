@@ -1,4 +1,4 @@
-# Dolphin assets {#dolphin_assets}
+# Dolphin assets
 
 Dolphin assets are split into 3 parts:
 

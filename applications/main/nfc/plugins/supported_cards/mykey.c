@@ -13,36 +13,7 @@ static bool mykey_is_blank(const St25tbData* data) {
 }
 
 static bool mykey_has_lockid(const St25tbData* data) {
-    return (data->blocks[5] >> 24) == 0x7F;
-}
-
-static bool check_invalid_low_nibble(uint8_t value) {
-    uint8_t value_lo = value & 0xF;
-    return value_lo >= 0xA;
-}
-
-static bool mykey_get_production_date(
-    const St25tbData* data,
-    uint16_t* year_ptr,
-    uint8_t* month_ptr,
-    uint8_t* day_ptr) {
-    uint32_t date_block = data->blocks[8];
-    uint8_t year = date_block >> 16 & 0xFF;
-    uint8_t month = date_block >> 8 & 0xFF;
-    uint8_t day = date_block & 0xFF;
-    // dates are coded in a peculiar way, the hexadecimal value should in fact be interpreted as a decimal value
-    // so anything in range A-F is invalid.
-    if(day > 0x31 || month > 0x12 || day == 0 || month == 0 || year == 0) {
-        return false;
-    }
-    if(check_invalid_low_nibble(day) || check_invalid_low_nibble(month) ||
-       check_invalid_low_nibble(year) || check_invalid_low_nibble(year >> 4)) {
-        return false;
-    }
-    *year_ptr = year + 0x2000;
-    *month_ptr = month;
-    *day_ptr = day;
-    return true;
+    return (data->blocks[5] & 0xFF) == 0x7F;
 }
 
 static bool mykey_parse(const NfcDevice* device, FuriString* parsed_data) {
@@ -63,10 +34,7 @@ static bool mykey_parse(const NfcDevice* device, FuriString* parsed_data) {
         }
     }
 
-    uint16_t mfg_year;
-    uint8_t mfg_month, mfg_day;
-
-    if(!mykey_get_production_date(data, &mfg_year, &mfg_month, &mfg_day)) {
+    if((data->blocks[8] >> 16 & 0xFF) > 0x31 || (data->blocks[8] >> 8 & 0xFF) > 0x12) {
         FURI_LOG_D(TAG, "bad mfg date");
         return false;
     }
@@ -85,10 +53,16 @@ static bool mykey_parse(const NfcDevice* device, FuriString* parsed_data) {
 
     bool is_blank = mykey_is_blank(data);
     furi_string_cat_printf(parsed_data, "Serial#: %08lX\n", (uint32_t)__bswap32(data->blocks[7]));
-    furi_string_cat_printf(
-        parsed_data, "Prod. date: %02X/%02X/%04X\n", mfg_day, mfg_month, mfg_year);
     furi_string_cat_printf(parsed_data, "Blank: %s\n", is_blank ? "yes" : "no");
-    furi_string_cat_printf(parsed_data, "LockID: %s", mykey_has_lockid(data) ? "maybe" : "no");
+    furi_string_cat_printf(parsed_data, "LockID: %s\n", mykey_has_lockid(data) ? "maybe" : "no");
+
+    uint32_t block8 = data->blocks[8];
+    furi_string_cat_printf(
+        parsed_data,
+        "Prod. date: %02lX/%02lX/%04lX",
+        block8 >> 16 & 0xFF,
+        block8 >> 8 & 0xFF,
+        0x2000 + (block8 & 0xFF));
 
     if(!is_blank) {
         furi_string_cat_printf(
@@ -151,6 +125,6 @@ static const FlipperAppPluginDescriptor mykey_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* mykey_plugin_ep(void) {
+const FlipperAppPluginDescriptor* mykey_plugin_ep() {
     return &mykey_plugin_descriptor;
 }

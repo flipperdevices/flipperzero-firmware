@@ -2,26 +2,28 @@
 
 class WIEGAND {
 public:
-    WIEGAND(void);
-    void begin(void);
-    void end(void);
-    bool available(void);
-    unsigned long getCode(void);
-    unsigned long getCodeHigh(void);
-    int getWiegandType(void);
+    WIEGAND();
+    void begin();
+    void end();
+    bool available();
+    unsigned long getCode();
+    unsigned long getCodeHigh();
+    int getWiegandType();
 
-    static void ReadD0(void);
-    static void ReadD1(void);
+    static void ReadD0();
+    static void ReadD1();
 
 private:
-    static bool DoWiegandConversion(void);
-    static unsigned long
-        GetCardId(unsigned long* codehigh, unsigned long* codelow, char bitlength);
+    static bool DoWiegandConversion();
+    static unsigned long GetCardId(
+        volatile unsigned long* codehigh,
+        volatile unsigned long* codelow,
+        char bitlength);
 
-    static unsigned long _cardTempHigh;
-    static unsigned long _cardTemp;
-    static unsigned long _lastWiegand;
-    static int _bitCount;
+    static volatile unsigned long _cardTempHigh;
+    static volatile unsigned long _cardTemp;
+    static volatile unsigned long _lastWiegand;
+    static volatile int _bitCount;
     static int _wiegandType;
     static unsigned long _code;
     static unsigned long _codeHigh;

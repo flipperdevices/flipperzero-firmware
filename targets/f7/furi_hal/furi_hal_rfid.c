@@ -9,7 +9,10 @@
 #include <stm32wbxx_ll_comp.h>
 #include <stm32wbxx_ll_dma.h>
 
+<<<<<<< HEAD
 // TIMER definitions
+=======
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 #define FURI_HAL_RFID_READ_TIMER TIM1
 #define FURI_HAL_RFID_READ_TIMER_BUS FuriHalBusTIM1
 #define FURI_HAL_RFID_READ_TIMER_CHANNEL LL_TIM_CHANNEL_CH1N
@@ -21,6 +24,7 @@
 #define FURI_HAL_RFID_EMULATE_TIMER_IRQ FuriHalInterruptIdTIM2
 #define FURI_HAL_RFID_EMULATE_TIMER_CHANNEL LL_TIM_CHANNEL_CH3
 
+<<<<<<< HEAD
 #define FURI_HAL_RFID_RTF_PULL_OUT_TIMER TIM2
 //#define FURI_HAL_RFID_RTF_PULL_OUT_TIMER_BUS FuriHalBusTIM2
 #define FURI_HAL_RFID_RTF_PULL_OUT_TIMER_CHANNEL LL_TIM_CHANNEL_CH3
@@ -32,14 +36,19 @@
 #define FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER TIM1
 #define FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER_BUS FuriHalBusTIM1
 
+=======
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 #define RFID_CAPTURE_TIM TIM2
 #define RFID_CAPTURE_TIM_BUS FuriHalBusTIM2
 #define RFID_CAPTURE_IND_CH LL_TIM_CHANNEL_CH3
 #define RFID_CAPTURE_DIR_CH LL_TIM_CHANNEL_CH4
+<<<<<<< HEAD
 
 #define CARRIER_OUT_TIMER TIM1
 #define CARRIER_OUT_TIMER_BUS FuriHalBusTIM1
 #define CARRIER_OUT_TIMER_CHANNEL LL_TIM_CHANNEL_CH1 // or LL_TIM_CHANNEL_CH1N
+=======
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
 // Field presence detection
 #define FURI_HAL_RFID_FIELD_FREQUENCY_MIN 80000
@@ -61,6 +70,7 @@
 #define RFID_DMA_CH1_IRQ FuriHalInterruptIdDma2Ch1
 #define RFID_DMA_CH1_DEF RFID_DMA, RFID_DMA_CH1_CHANNEL
 #define RFID_DMA_CH2_DEF RFID_DMA, RFID_DMA_CH2_CHANNEL
+<<<<<<< HEAD
 
 // DMA Channels definition for RTF mode
 #define FURI_HAL_RFID_RTF_PULL_OUT_DMA DMA2
@@ -71,6 +81,8 @@
     FURI_HAL_RFID_RTF_PULL_OUT_DMA, FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1
 #define FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2_DEF \
     FURI_HAL_RFID_RTF_PULL_OUT_DMA, FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2
+=======
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
 typedef struct {
     uint32_t counter;
@@ -343,8 +355,7 @@ void furi_hal_rfid_tim_read_capture_stop() {
     furi_hal_bus_disable(RFID_CAPTURE_TIM_BUS);
 }
 
-static void furi_hal_rfid_dma_isr(void* context) {
-    UNUSED(context);
+static void furi_hal_rfid_dma_isr() {
 #if RFID_DMA_CH1_CHANNEL == LL_DMA_CHANNEL_1
     if(LL_DMA_IsActiveFlag_HT1(RFID_DMA)) {
         LL_DMA_ClearFlag_HT1(RFID_DMA);
@@ -459,6 +470,7 @@ void furi_hal_rfid_set_read_pulse(uint32_t pulse) {
 #endif
 }
 
+<<<<<<< HEAD
 static void furi_hal_rfid_rtf_carrier_out_dma_isr(void* dma_context) {
     if(LL_DMA_IsActiveFlag_HT1(DMA1)) {
         LL_DMA_ClearFlag_HT1(DMA1);
@@ -915,6 +927,8 @@ void furi_hal_rfid_rtf_carrier_in_stop() {
     FURI_CRITICAL_EXIT();
 }
 
+=======
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 void furi_hal_rfid_comp_start() {
     LL_COMP_Enable(COMP1);
     // Magic

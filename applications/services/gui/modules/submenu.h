@@ -14,7 +14,6 @@ extern "C" {
 /** Submenu anonymous structure */
 typedef struct Submenu Submenu;
 typedef void (*SubmenuItemCallback)(void* context, uint32_t index);
-typedef void (*SubmenuItemCallbackEx)(void* context, InputType input_type, uint32_t index);
 
 /** Allocate and initialize submenu 
  * 
@@ -22,7 +21,7 @@ typedef void (*SubmenuItemCallbackEx)(void* context, InputType input_type, uint3
  *
  * @return     Submenu instance
  */
-Submenu* submenu_alloc(void);
+Submenu* submenu_alloc();
 
 /** Deinitialize and free submenu
  *
@@ -54,48 +53,16 @@ void submenu_add_item(
     SubmenuItemCallback callback,
     void* callback_context);
 
-/** Add item to submenu with extended press events
- *
- * @param      submenu           Submenu instance
- * @param      label             menu item label
- * @param      index             menu item index, used for callback, may be
- *                               the same with other items
- * @param      callback          menu item extended callback
- * @param      callback_context  menu item callback context
- */
-void submenu_add_item_ex(
-    Submenu* submenu,
-    const char* label,
-    uint32_t index,
-    SubmenuItemCallbackEx callback,
-    void* callback_context);
-
-/** Change label of an existing item
- * 
- * @param      submenu  Submenu instance
- * @param      index    The index of the item
- * @param      label    The new label
- */
-void submenu_change_item_label(Submenu* submenu, uint32_t index, const char* label);
-
 /** Remove all items from submenu
  *
  * @param      submenu  Submenu instance
  */
 void submenu_reset(Submenu* submenu);
 
-/** Get submenu selected item index
+/** Set submenu item selector
  *
  * @param      submenu  Submenu instance
- *
- * @return     Index of the selected item
- */
-uint32_t submenu_get_selected_item(Submenu* submenu);
-
-/** Set submenu selected item by index
- *
- * @param      submenu  Submenu instance
- * @param      index    The index of the selected item
+ * @param      index    The index
  */
 void submenu_set_selected_item(Submenu* submenu, uint32_t index);
 

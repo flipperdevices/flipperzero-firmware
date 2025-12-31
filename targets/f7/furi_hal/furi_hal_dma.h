@@ -5,10 +5,10 @@ extern "C" {
 #endif
 
 /** Early initialization */
-void furi_hal_dma_init_early(void);
+void furi_hal_dma_init_early();
 
 /** Early de-initialization */
-void furi_hal_dma_deinit_early(void);
+void furi_hal_dma_deinit_early();
 
 #ifdef __cplusplus
 }

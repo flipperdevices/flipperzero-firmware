@@ -1,6 +1,7 @@
 #pragma once
 
 #include "helpers/subghz_types.h"
+#include "helpers/subghz_error_type.h"
 #include <lib/subghz/types.h>
 #include "subghz.h"
 #include "views/receiver.h"
@@ -27,8 +28,6 @@
 #include <lib/toolbox/path.h>
 
 #include "rpc/rpc_app.h"
-
-#include <power/power_service/power.h>
 
 #include "helpers/subghz_threshold_rssi.h"
 

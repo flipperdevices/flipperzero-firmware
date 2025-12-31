@@ -2,6 +2,7 @@
 
 #include "assets_icons.h"
 #include "subghz/types.h"
+#include <math.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
@@ -9,6 +10,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format.h>
+#include "views/receiver.h"
 
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/stream/stream.h>
@@ -58,15 +60,15 @@ void subghz_dialog_message_show_only_rx(SubGhz* subghz) {
     DialogsApp* dialogs = subghz->dialogs;
     DialogMessage* message = dialog_message_alloc();
 
-    const char* header_text = "Transmission is Blocked!";
-    const char* message_text = "Transmission on\nthis frequency is\nrestricted in your\nregion";
+    const char* header_text = "Transmission is blocked";
+    const char* message_text = "Transmission on\nthis frequency is\nrestricted in\nyour region";
     if(!furi_hal_region_is_provisioned()) {
         header_text = "Firmware update needed";
         message_text = "Please update\nfirmware before\nusing this feature\nflipp.dev/upd";
     }
 
-    dialog_message_set_header(message, header_text, 63, 0, AlignCenter, AlignTop);
-    dialog_message_set_text(message, message_text, 1, 13, AlignLeft, AlignTop);
+    dialog_message_set_header(message, header_text, 63, 3, AlignCenter, AlignTop);
+    dialog_message_set_text(message, message_text, 0, 17, AlignLeft, AlignTop);
 
     dialog_message_set_icon(message, &I_WarningDolphinFlip_45x42, 83, 22);
 
@@ -408,7 +410,7 @@ void subghz_unlock(SubGhz* subghz) {
 
 bool subghz_is_locked(SubGhz* subghz) {
     furi_assert(subghz);
-    return subghz->lock == SubGhzLockOn;
+    return (subghz->lock == SubGhzLockOn);
 }
 
 void subghz_rx_key_state_set(SubGhz* subghz, SubGhzRxKeyState state) {

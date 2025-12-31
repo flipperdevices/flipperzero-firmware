@@ -109,6 +109,13 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
 
     FrequencyRSSI frequency_rssi = {.frequency = 0, .rssi = 0, .channel = 0};
     float rssi = 0;
+<<<<<<< HEAD
+=======
+    uint32_t frequency = 0;
+    float rssi_temp = -127.0f;
+    uint32_t frequency_temp = 0;
+    CC1101Status status;
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
 #ifdef CC1101
     uint32_t frequency = 0;

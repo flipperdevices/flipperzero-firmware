@@ -1,13 +1,14 @@
+#include "assets_icons.h"
+#include "dolphin/helpers/dolphin_state.h"
+#include <core/check.h>
+#include <core/record.h>
 #include <furi.h>
-#include <furi_hal_version.h>
-
 #include <gui/gui.h>
-#include <dolphin/dolphin.h>
-#include <dolphin/helpers/dolphin_state.h>
+#include <furi_hal_version.h>
+#include "dolphin/dolphin.h"
+#include "math.h"
 
-#include <assets_icons.h>
-
-#define MOODS_TOTAL  3
+#define MOODS_TOTAL 3
 #define BUTTHURT_MAX 3
 
 static const Icon* const portrait_happy[BUTTHURT_MAX] = {
@@ -90,6 +91,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
 int32_t passport_app(void* p) {
     UNUSED(p);
     FuriSemaphore* semaphore = furi_semaphore_alloc(1, 0);
+    furi_assert(semaphore);
+
     ViewPort* view_port = view_port_alloc();
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);

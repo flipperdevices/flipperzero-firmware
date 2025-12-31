@@ -18,13 +18,13 @@ extern "C" {
  *
  * @param      thread_id  - thread id to track
  */
-void memmgr_heap_enable_thread_trace(FuriThreadId thread_id);
+void memmgr_heap_enable_thread_trace(FuriThreadId taks_handle);
 
 /** Memmgr heap disable thread allocation tracking
  *
  * @param      thread_id  - thread id to track
  */
-void memmgr_heap_disable_thread_trace(FuriThreadId thread_id);
+void memmgr_heap_disable_thread_trace(FuriThreadId taks_handle);
 
 /** Memmgr heap get allocatred thread memory
  *
@@ -32,17 +32,17 @@ void memmgr_heap_disable_thread_trace(FuriThreadId thread_id);
  *
  * @return     bytes allocated right now
  */
-size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id);
+size_t memmgr_heap_get_thread_memory(FuriThreadId taks_handle);
 
 /** Memmgr heap get the max contiguous block size on the heap
  *
  * @return     size_t max contiguous block size
  */
-size_t memmgr_heap_get_max_free_block(void);
+size_t memmgr_heap_get_max_free_block();
 
 /** Print the address and size of all free blocks to stdout
  */
-void memmgr_heap_printf_free_blocks(void);
+void memmgr_heap_printf_free_blocks();
 
 #ifdef __cplusplus
 }

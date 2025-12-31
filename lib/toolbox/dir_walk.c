@@ -1,8 +1,6 @@
 #include "dir_walk.h"
 #include <m-list.h>
 
-#define MAX_NAME_LEN 256
-
 LIST_DEF(DirIndexList, uint32_t);
 
 struct DirWalk {
@@ -16,8 +14,6 @@ struct DirWalk {
 };
 
 DirWalk* dir_walk_alloc(Storage* storage) {
-    furi_check(storage);
-
     DirWalk* dir_walk = malloc(sizeof(DirWalk));
     dir_walk->path = furi_string_alloc();
     dir_walk->file = storage_file_alloc(storage);
@@ -28,8 +24,6 @@ DirWalk* dir_walk_alloc(Storage* storage) {
 }
 
 void dir_walk_free(DirWalk* dir_walk) {
-    furi_check(dir_walk);
-
     storage_file_free(dir_walk->file);
     furi_string_free(dir_walk->path);
     DirIndexList_clear(dir_walk->index_list);
@@ -37,18 +31,15 @@ void dir_walk_free(DirWalk* dir_walk) {
 }
 
 void dir_walk_set_recursive(DirWalk* dir_walk, bool recursive) {
-    furi_check(dir_walk);
     dir_walk->recursive = recursive;
 }
 
 void dir_walk_set_filter_cb(DirWalk* dir_walk, DirWalkFilterCb cb, void* context) {
-    furi_check(dir_walk);
     dir_walk->filter_cb = cb;
     dir_walk->filter_context = context;
 }
 
 bool dir_walk_open(DirWalk* dir_walk, const char* path) {
-    furi_check(dir_walk);
     furi_string_set(dir_walk->path, path);
     dir_walk->current_index = 0;
     return storage_dir_open(dir_walk->file, path);
@@ -65,12 +56,12 @@ static bool dir_walk_filter(DirWalk* dir_walk, const char* name, FileInfo* filei
 static DirWalkResult
     dir_walk_iter(DirWalk* dir_walk, FuriString* return_path, FileInfo* fileinfo) {
     DirWalkResult result = DirWalkError;
-    char* name = malloc(MAX_NAME_LEN);
+    char* name = malloc(256); // FIXME: remove magic number
     FileInfo info;
     bool end = false;
 
     while(!end) {
-        storage_dir_read(dir_walk->file, &info, name, MAX_NAME_LEN);
+        storage_dir_read(dir_walk->file, &info, name, 255);
 
         if(storage_file_get_error(dir_walk->file) == FSE_OK) {
             result = DirWalkOK;
@@ -128,7 +119,7 @@ static DirWalkResult
                         break;
                     }
 
-                    if(!storage_dir_read(dir_walk->file, &info, name, MAX_NAME_LEN)) {
+                    if(!storage_dir_read(dir_walk->file, &info, name, 255)) {
                         result = DirWalkError;
                         end = true;
                         break;
@@ -148,17 +139,14 @@ static DirWalkResult
 }
 
 FS_Error dir_walk_get_error(DirWalk* dir_walk) {
-    furi_check(dir_walk);
     return storage_file_get_error(dir_walk->file);
 }
 
 DirWalkResult dir_walk_read(DirWalk* dir_walk, FuriString* return_path, FileInfo* fileinfo) {
-    furi_check(dir_walk);
     return dir_walk_iter(dir_walk, return_path, fileinfo);
 }
 
 void dir_walk_close(DirWalk* dir_walk) {
-    furi_check(dir_walk);
     if(storage_file_is_open(dir_walk->file)) {
         storage_dir_close(dir_walk->file);
     }

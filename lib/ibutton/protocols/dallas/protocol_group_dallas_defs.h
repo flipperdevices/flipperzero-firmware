@@ -7,7 +7,6 @@ typedef enum {
     iButtonProtocolDS1992,
     iButtonProtocolDS1996,
     iButtonProtocolDS1971,
-    iButtonProtocolDS1904,
     /* Add new 1-Wire protocols here */
 
     /* Default catch-all 1-Wire protocol */
@@ -15,4 +14,4 @@ typedef enum {
     iButtonProtocolDSMax,
 } iButtonProtocolDallas;
 
-extern const iButtonProtocolDallasBase* const ibutton_protocols_dallas[];
+extern const iButtonProtocolDallasBase* ibutton_protocols_dallas[];

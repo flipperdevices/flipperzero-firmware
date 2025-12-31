@@ -1,4 +1,4 @@
-#include "../subghz_test_app_i.h" // IWYU pragma: keep
+#include "../subghz_test_app_i.h"
 
 // Generate scene on_enter handlers array
 #define ADD_SCENE(prefix, name, id) prefix##_scene_##name##_on_enter,

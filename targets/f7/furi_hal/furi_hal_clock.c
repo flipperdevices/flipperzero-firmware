@@ -15,22 +15,22 @@
 
 #define CPU_CLOCK_EARLY_HZ 4000000
 #define CPU_CLOCK_HSI16_HZ 16000000
-#define CPU_CLOCK_HSE_HZ   32000000
-#define CPU_CLOCK_PLL_HZ   64000000
+#define CPU_CLOCK_HSE_HZ 32000000
+#define CPU_CLOCK_PLL_HZ 64000000
 
-#define TICK_INT_PRIORITY   15U
+#define TICK_INT_PRIORITY 15U
 #define HS_CLOCK_IS_READY() (LL_RCC_HSE_IsReady() && LL_RCC_HSI_IsReady())
 #define LS_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
-void furi_hal_clock_init_early(void) {
+void furi_hal_clock_init_early() {
     LL_SetSystemCoreClock(CPU_CLOCK_EARLY_HZ);
     LL_Init1msTick(SystemCoreClock);
 }
 
-void furi_hal_clock_deinit_early(void) {
+void furi_hal_clock_deinit_early() {
 }
 
-void furi_hal_clock_init(void) {
+void furi_hal_clock_init() {
     /* HSE and HSI configuration and activation */
     LL_RCC_HSE_SetCapacitorTuning(0x26);
     LL_RCC_HSE_Enable();
@@ -121,19 +121,18 @@ void furi_hal_clock_init(void) {
     LL_RCC_SetSMPSClockSource(LL_RCC_SMPS_CLKSOURCE_HSI);
     LL_RCC_SetSMPSPrescaler(LL_RCC_SMPS_DIV_1);
     LL_RCC_SetRFWKPClockSource(LL_RCC_RFWKP_CLKSOURCE_LSE);
-    LL_RCC_SetADCClockSource(LL_RCC_ADC_CLKSOURCE_SYSCLK);
 
     FURI_LOG_I(TAG, "Init OK");
 }
 
-void furi_hal_clock_switch_hse2hsi(void) {
+void furi_hal_clock_switch_hse2hsi() {
     LL_RCC_HSI_Enable();
 
     while(!LL_RCC_HSI_IsReady())
         ;
 
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSI);
-    furi_check(LL_RCC_GetSMPSClockSelection() == LL_RCC_SMPS_CLKSOURCE_HSI);
+    furi_assert(LL_RCC_GetSMPSClockSelection() == LL_RCC_SMPS_CLKSOURCE_HSI);
 
     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSI)
         ;
@@ -143,7 +142,7 @@ void furi_hal_clock_switch_hse2hsi(void) {
         ;
 }
 
-void furi_hal_clock_switch_hsi2hse(void) {
+void furi_hal_clock_switch_hsi2hse() {
 #ifdef FURI_HAL_CLOCK_TRACK_STARTUP
     uint32_t clock_start_time = DWT->CYCCNT;
 #endif
@@ -169,8 +168,8 @@ void furi_hal_clock_switch_hsi2hse(void) {
 #endif
 }
 
-bool furi_hal_clock_switch_hse2pll(void) {
-    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
+bool furi_hal_clock_switch_hse2pll() {
+    furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
 
     LL_RCC_PLL_Enable();
     LL_RCC_PLLSAI1_Enable();
@@ -180,12 +179,11 @@ bool furi_hal_clock_switch_hse2pll(void) {
     while(!LL_RCC_PLLSAI1_IsReady())
         ;
 
-    // This API returns garbage if stack version < 1.20.0
-    SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL);
-    // So we'll check results by asking hardware directly
-    if(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
+    if(SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL) != SHCI_Success) {
         return false;
     }
+
+    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
 
     LL_SetSystemCoreClock(CPU_CLOCK_PLL_HZ);
     SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
@@ -193,19 +191,18 @@ bool furi_hal_clock_switch_hse2pll(void) {
     return true;
 }
 
-bool furi_hal_clock_switch_pll2hse(void) {
-    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
+bool furi_hal_clock_switch_pll2hse() {
+    furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
 
     LL_RCC_HSE_Enable();
     while(!LL_RCC_HSE_IsReady())
         ;
 
-    // This API returns garbage if stack version < 1.20.0
-    SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE);
-    // So we'll check results by asking hardware directly
-    if(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE) {
+    if(SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE) != SHCI_Success) {
         return false;
     }
+
+    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
 
     LL_SetSystemCoreClock(CPU_CLOCK_HSE_HZ);
     SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
@@ -213,11 +210,11 @@ bool furi_hal_clock_switch_pll2hse(void) {
     return true;
 }
 
-void furi_hal_clock_suspend_tick(void) {
+void furi_hal_clock_suspend_tick() {
     CLEAR_BIT(SysTick->CTRL, SysTick_CTRL_ENABLE_Msk);
 }
 
-void furi_hal_clock_resume_tick(void) {
+void furi_hal_clock_resume_tick() {
     SET_BIT(SysTick->CTRL, SysTick_CTRL_ENABLE_Msk);
 }
 
@@ -274,7 +271,7 @@ void furi_hal_clock_mco_enable(FuriHalClockMcoSourceId source, FuriHalClockMcoDi
     }
 }
 
-void furi_hal_clock_mco_disable(void) {
+void furi_hal_clock_mco_disable() {
     LL_RCC_ConfigMCO(LL_RCC_MCO1SOURCE_NOCLOCK, FuriHalClockMcoDiv1);
     LL_RCC_MSI_Disable();
     while(LL_RCC_MSI_IsReady() != 0)

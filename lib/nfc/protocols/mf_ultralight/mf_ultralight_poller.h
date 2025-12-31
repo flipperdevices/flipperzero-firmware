@@ -27,7 +27,6 @@ typedef enum {
     MfUltralightPollerEventTypeCardLocked, /**< Presented card is locked by password, AUTH0 or lock bytes. */
     MfUltralightPollerEventTypeWriteSuccess, /**< Poller wrote card successfully. */
     MfUltralightPollerEventTypeWriteFail, /**< Poller failed to write card. */
-    MfUltralightPollerEventTypeRequestKey, /**< Poller requests key for dict attack. */
 } MfUltralightPollerEventType;
 
 /**
@@ -36,7 +35,6 @@ typedef enum {
 typedef enum {
     MfUltralightPollerModeRead, /**< Poller will only read card. It's a default mode. */
     MfUltralightPollerModeWrite, /**< Poller will write already saved card to another presented card. */
-    MfUltralightPollerModeDictAttack, /**< Poller will perform dictionary attack against card. */
 } MfUltralightPollerMode;
 
 /**
@@ -44,19 +42,10 @@ typedef enum {
  */
 typedef struct {
     MfUltralightAuthPassword password; /**< Password to be used for authentication. */
-    MfUltralightC3DesAuthKey tdes_key; /**< 3DES key to be used for authentication. */
-    MfUltralightAuthPack pack; /**< Pack received on successful authentication. */
+    MfUltralightAuthPack pack; /**< Pack received on successfull authentication. */
     bool auth_success; /**< Set to true if authentication succeeded, false otherwise. */
     bool skip_auth; /**< Set to true if authentication should be skipped, false otherwise. */
 } MfUltralightPollerAuthContext;
-
-/**
- * @brief MfUltralight poller key request data.
- */
-typedef struct {
-    MfUltralightC3DesAuthKey key; /**< Key to try. */
-    bool key_provided; /**< Set to true if key was provided, false to stop attack. */
-} MfUltralightPollerKeyRequestData;
 
 /**
  * @brief MfUltralight poller event data.
@@ -64,9 +53,8 @@ typedef struct {
 typedef union {
     MfUltralightPollerAuthContext auth_context; /**< Authentication context. */
     MfUltralightError error; /**< Error code indicating reading fail reason. */
-    const MfUltralightData* write_data; /**< Data to be written to card. */
-    MfUltralightPollerMode poller_mode; /**< Mode to operate in. */
-    MfUltralightPollerKeyRequestData key_request_data; /**< Key request data. */
+    const MfUltralightData* write_data;
+    MfUltralightPollerMode poller_mode;
 } MfUltralightPollerEventData;
 
 /**
@@ -75,7 +63,7 @@ typedef union {
  * Upon emission of an event, an instance of this struct will be passed to the callback.
  */
 typedef struct {
-    MfUltralightPollerEventType type; /**< Type of emitted event. */
+    MfUltralightPollerEventType type; /**< Type of emmitted event. */
     MfUltralightPollerEventData* data; /**< Pointer to event specific data. */
 } MfUltralightPollerEvent;
 
@@ -97,33 +85,12 @@ MfUltralightError mf_ultralight_poller_auth_pwd(
  *
  * Must ONLY be used inside the callback function.
  *
- * This function is used to start authentication process for Ultralight C cards.
+ * This function now is used only to identify Mf Ultralight C cards.
  *
  * @param[in, out] instance pointer to the instance to be used in the transaction.
- * @param[in] RndA Randomly generated block which is required for authentication process.
- * @param[out] output Authentication encryption result.
  * @return MfUltralightErrorNone if card supports authentication command, an error code on otherwise.
  */
-MfUltralightError mf_ultralight_poller_authenticate_start(
-    MfUltralightPoller* instance,
-    const uint8_t* RndA,
-    uint8_t* output);
-
-/**
- * @brief End authentication procedure
- * 
- * This function is used to end authentication process for Ultralight C cards.
- * 
- * @param[in, out] instance pointer to the instance to be used in the transaction.
- * @param[in] RndB Block received from the card (card generates it randomly) which is required for authentication process.
- * @param[in] request Contains data of RndA + RndB', where RndB' is decoded and shifted RndB received from the card on previous step.
- * @param[out] response Must return RndA' which an encrypted shifted RndA value received from the card and decrypted by this function.
-*/
-MfUltralightError mf_ultralight_poller_authenticate_end(
-    MfUltralightPoller* instance,
-    const uint8_t* RndB,
-    const uint8_t* request,
-    uint8_t* response);
+MfUltralightError mf_ultralight_poller_authenticate(MfUltralightPoller* instance);
 
 /**
  * @brief Read page from card.

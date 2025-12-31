@@ -26,7 +26,6 @@ struct ViewPort {
 
 /** Set GUI reference.
  *
- * @warning called on the GUI thread.
  * To be used by GUI, called upon view_port tree insert
  *
  * @param      view_port  ViewPort instance
@@ -36,7 +35,6 @@ void view_port_gui_set(ViewPort* view_port, Gui* gui);
 
 /** Process draw call. Calls draw callback.
  *
- * @warning called on the GUI thread.
  * To be used by GUI, called on tree redraw.
  *
  * @param      view_port  ViewPort instance
@@ -46,7 +44,6 @@ void view_port_draw(ViewPort* view_port, Canvas* canvas);
 
 /** Process input. Calls input callback.
  *
- * @warning called on the GUI thread.
  * To be used by GUI, called on input dispatch.
  *
  * @param      view_port  ViewPort instance

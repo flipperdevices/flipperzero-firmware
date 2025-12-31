@@ -1,11 +1,6 @@
 #include "ble_glue.h"
 #include "app_common.h"
 #include "ble_app.h"
-#include "ble_event_thread.h"
-
-#include <furi_hal_cortex.h>
-#include <core/mutex.h>
-#include <core/timer.h>
 #include <ble/ble.h>
 #include <hci_tl.h>
 
@@ -18,26 +13,26 @@
 
 #define TAG "Core2"
 
-#define BLE_GLUE_HARDFAULT_CHECK_PERIOD_MS (5000)
-
-#define BLE_GLUE_HARDFAULT_INFO_MAGIC (0x1170FD0F)
+#define BLE_GLUE_FLAG_SHCI_EVENT (1UL << 0)
+#define BLE_GLUE_FLAG_KILL_THREAD (1UL << 1)
+#define BLE_GLUE_FLAG_ALL (BLE_GLUE_FLAG_SHCI_EVENT | BLE_GLUE_FLAG_KILL_THREAD)
 
 #define POOL_SIZE                      \
     (CFG_TLBLE_EVT_QUEUE_LENGTH * 4U * \
      DIVC((sizeof(TL_PacketHeader_t) + TL_BLE_EVENT_FRAME_SIZE), 4U))
 
-PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint8_t ble_event_pool[POOL_SIZE];
-PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static TL_CmdPacket_t ble_glue_cmd_buff;
+PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint8_t ble_glue_event_pool[POOL_SIZE];
+PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static TL_CmdPacket_t ble_glue_system_cmd_buff;
 PLACE_IN_SECTION("MB_MEM2")
 ALIGN(4)
-static uint8_t ble_glue_spare_event_buff[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + 255U];
+static uint8_t ble_glue_system_spare_event_buff[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + 255U];
 PLACE_IN_SECTION("MB_MEM2")
 ALIGN(4)
-static uint8_t ble_spare_event_buff[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + 255];
+static uint8_t ble_glue_ble_spare_event_buff[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + 255];
 
 typedef struct {
     FuriMutex* shci_mtx;
-    FuriTimer* hardfault_check_timer;
+    FuriThread* thread;
     BleGlueStatus status;
     BleGlueKeyStorageChangedCallback callback;
     BleGlueC2Info c2_info;
@@ -46,35 +41,56 @@ typedef struct {
 
 static BleGlue* ble_glue = NULL;
 
-// static int32_t ble_glue_shci_thread(void* argument);
-static void ble_sys_status_not_callback(SHCI_TL_CmdStatus_t status);
-static void ble_sys_user_event_callback(void* pPayload);
-static void ble_glue_clear_shared_memory(void);
+static int32_t ble_glue_shci_thread(void* argument);
+static void ble_glue_sys_status_not_callback(SHCI_TL_CmdStatus_t status);
+static void ble_glue_sys_user_event_callback(void* pPayload);
 
 void ble_glue_set_key_storage_changed_callback(
     BleGlueKeyStorageChangedCallback callback,
     void* context) {
-    furi_check(ble_glue);
-    furi_check(callback);
+    furi_assert(ble_glue);
+    furi_assert(callback);
     ble_glue->callback = callback;
     ble_glue->context = context;
 }
 
-static void furi_hal_bt_hardfault_check(void* context) {
-    UNUSED(context);
-    if(ble_glue_get_hardfault_info()) {
+///////////////////////////////////////////////////////////////////////////////
+
+/* TL hook to catch hardfaults */
+
+int32_t ble_glue_TL_SYS_SendCmd(uint8_t* buffer, uint16_t size) {
+    if(furi_hal_bt_get_hardfault_info()) {
         furi_crash("ST(R) Copro(R) HardFault");
     }
+
+    return TL_SYS_SendCmd(buffer, size);
+}
+
+void shci_register_io_bus(tSHciIO* fops) {
+    /* Register IO bus services */
+    fops->Init = TL_SYS_Init;
+    fops->Send = ble_glue_TL_SYS_SendCmd;
+}
+
+static int32_t ble_glue_TL_BLE_SendCmd(uint8_t* buffer, uint16_t size) {
+    if(furi_hal_bt_get_hardfault_info()) {
+        furi_crash("ST(R) Copro(R) HardFault");
+    }
+
+    return TL_BLE_SendCmd(buffer, size);
+}
+
+void hci_register_io_bus(tHciIO* fops) {
+    /* Register IO bus services */
+    fops->Init = TL_BLE_Init;
+    fops->Send = ble_glue_TL_BLE_SendCmd;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ble_glue_init(void) {
+void ble_glue_init() {
     ble_glue = malloc(sizeof(BleGlue));
     ble_glue->status = BleGlueStatusStartup;
-    ble_glue->hardfault_check_timer =
-        furi_timer_alloc(furi_hal_bt_hardfault_check, FuriTimerTypePeriodic, NULL);
-    furi_timer_start(ble_glue->hardfault_check_timer, BLE_GLUE_HARDFAULT_CHECK_PERIOD_MS);
 
 #ifdef BLE_GLUE_DEBUG
     APPD_Init();
@@ -87,21 +103,20 @@ void ble_glue_init(void) {
     TL_Init();
 
     ble_glue->shci_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
-    // Take mutex, SHCI will release it in most unusual way later
-    furi_check(furi_mutex_acquire(ble_glue->shci_mtx, FuriWaitForever) == FuriStatusOk);
 
     // FreeRTOS system task creation
-    ble_event_thread_start();
+    ble_glue->thread = furi_thread_alloc_ex("BleShciDriver", 1024, ble_glue_shci_thread, ble_glue);
+    furi_thread_start(ble_glue->thread);
 
     // System channel initialization
-    SHci_Tl_Init_Conf.p_cmdbuffer = (uint8_t*)&ble_glue_cmd_buff;
-    SHci_Tl_Init_Conf.StatusNotCallBack = ble_sys_status_not_callback;
-    shci_init(ble_sys_user_event_callback, (void*)&SHci_Tl_Init_Conf);
+    SHci_Tl_Init_Conf.p_cmdbuffer = (uint8_t*)&ble_glue_system_cmd_buff;
+    SHci_Tl_Init_Conf.StatusNotCallBack = ble_glue_sys_status_not_callback;
+    shci_init(ble_glue_sys_user_event_callback, (void*)&SHci_Tl_Init_Conf);
 
     /**< Memory Manager channel initialization */
-    tl_mm_config.p_BleSpareEvtBuffer = ble_spare_event_buff;
-    tl_mm_config.p_SystemSpareEvtBuffer = ble_glue_spare_event_buff;
-    tl_mm_config.p_AsynchEvtPool = ble_event_pool;
+    tl_mm_config.p_BleSpareEvtBuffer = ble_glue_ble_spare_event_buff;
+    tl_mm_config.p_SystemSpareEvtBuffer = ble_glue_system_spare_event_buff;
+    tl_mm_config.p_AsynchEvtPool = ble_glue_event_pool;
     tl_mm_config.AsynchEvtPoolSize = POOL_SIZE;
     TL_MM_Init(&tl_mm_config);
     TL_Enable();
@@ -109,15 +124,15 @@ void ble_glue_init(void) {
     /*
      * From now, the application is waiting for the ready event ( VS_HCI_C2_Ready )
      * received on the system channel before starting the Stack
-     * This system event is received with ble_sys_user_event_callback()
+     * This system event is received with ble_glue_sys_user_event_callback()
      */
 }
 
-const BleGlueC2Info* ble_glue_get_c2_info(void) {
+const BleGlueC2Info* ble_glue_get_c2_info() {
     return &ble_glue->c2_info;
 }
 
-BleGlueStatus ble_glue_get_c2_status(void) {
+BleGlueStatus ble_glue_get_c2_status() {
     return ble_glue->status;
 }
 
@@ -144,7 +159,7 @@ static const char* ble_glue_get_reltype_str(const uint8_t reltype) {
     }
 }
 
-static void ble_glue_update_c2_fw_info(void) {
+static void ble_glue_update_c2_fw_info() {
     WirelessFwInfo_t wireless_info;
     SHCI_GetWirelessFwInfo(&wireless_info);
     BleGlueC2Info* local_info = &ble_glue->c2_info;
@@ -163,7 +178,7 @@ static void ble_glue_update_c2_fw_info(void) {
     local_info->StackType = wireless_info.StackType;
     snprintf(
         local_info->StackTypeString,
-        BLE_MAX_VERSION_STRING_LEN,
+        BLE_GLUE_MAX_VERSION_STRING_LEN,
         "%d.%d.%d:%s",
         local_info->VersionMajor,
         local_info->VersionMinor,
@@ -178,7 +193,7 @@ static void ble_glue_update_c2_fw_info(void) {
     local_info->FusMemorySizeFlash = wireless_info.FusMemorySizeFlash;
 }
 
-static void ble_glue_dump_stack_info(void) {
+static void ble_glue_dump_stack_info() {
     const BleGlueC2Info* c2_info = &ble_glue->c2_info;
     FURI_LOG_I(
         TAG,
@@ -201,65 +216,59 @@ static void ble_glue_dump_stack_info(void) {
         c2_info->MemorySizeFlash);
 }
 
-bool ble_glue_wait_for_c2_start(int32_t timeout_ms) {
+bool ble_glue_wait_for_c2_start(int32_t timeout) {
     bool started = false;
 
-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
     do {
-        furi_delay_tick(1);
         started = ble_glue->status == BleGlueStatusC2Started;
-    } while(!started && !furi_hal_cortex_timer_is_expired(timer));
+        if(!started) {
+            timeout--;
+            furi_delay_tick(1);
+        }
+    } while(!started && (timeout > 0));
 
-    if(!started) {
+    if(started) {
+        FURI_LOG_I(
+            TAG,
+            "C2 boot completed, mode: %s",
+            ble_glue->c2_info.mode == BleGlueC2ModeFUS ? "FUS" : "Stack");
+        ble_glue_update_c2_fw_info();
+        ble_glue_dump_stack_info();
+    } else {
         FURI_LOG_E(TAG, "C2 startup failed");
         ble_glue->status = BleGlueStatusBroken;
-        return false;
     }
 
-    FURI_LOG_I(
-        TAG,
-        "C2 boot completed, mode: %s",
-        ble_glue->c2_info.mode == BleGlueC2ModeFUS ? "FUS" : "Stack");
-    ble_glue_update_c2_fw_info();
-    ble_glue_dump_stack_info();
-    return true;
+    return started;
 }
 
-bool ble_glue_start(void) {
-    furi_check(ble_glue);
+bool ble_glue_start() {
+    furi_assert(ble_glue);
 
     if(ble_glue->status != BleGlueStatusC2Started) {
         return false;
     }
 
-    if(!ble_app_init()) {
+    bool ret = false;
+    if(ble_app_init()) {
+        FURI_LOG_I(TAG, "Radio stack started");
+        ble_glue->status = BleGlueStatusRadioStackRunning;
+        ret = true;
+        if(SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7) == SHCI_Success) {
+            FURI_LOG_I(TAG, "Flash activity control switched to SEM7");
+        } else {
+            FURI_LOG_E(TAG, "Failed to switch flash activity control to SEM7");
+        }
+    } else {
         FURI_LOG_E(TAG, "Radio stack startup failed");
         ble_glue->status = BleGlueStatusRadioStackMissing;
-        ble_app_deinit();
-        return false;
+        ble_app_thread_stop();
     }
 
-    FURI_LOG_I(TAG, "Radio stack started");
-    ble_glue->status = BleGlueStatusRadioStackRunning;
-    return true;
+    return ret;
 }
 
-void ble_glue_stop(void) {
-    furi_check(ble_glue);
-
-    ble_event_thread_stop();
-    // Free resources
-    furi_mutex_free(ble_glue->shci_mtx);
-    ble_glue->shci_mtx = NULL;
-    furi_timer_free(ble_glue->hardfault_check_timer);
-    ble_glue->hardfault_check_timer = NULL;
-
-    ble_glue_clear_shared_memory();
-    free(ble_glue);
-    ble_glue = NULL;
-}
-
-bool ble_glue_is_alive(void) {
+bool ble_glue_is_alive() {
     if(!ble_glue) {
         return false;
     }
@@ -267,7 +276,7 @@ bool ble_glue_is_alive(void) {
     return ble_glue->status >= BleGlueStatusC2Started;
 }
 
-bool ble_glue_is_radio_stack_ready(void) {
+bool ble_glue_is_radio_stack_ready() {
     if(!ble_glue) {
         return false;
     }
@@ -310,16 +319,13 @@ BleGlueCommandResult ble_glue_force_c2_mode(BleGlueC2Mode desired_mode) {
     return BleGlueCommandResultError;
 }
 
-static void ble_sys_status_not_callback(SHCI_TL_CmdStatus_t status) {
+static void ble_glue_sys_status_not_callback(SHCI_TL_CmdStatus_t status) {
     switch(status) {
     case SHCI_TL_CmdBusy:
-        furi_check(
-            furi_mutex_acquire(
-                ble_glue->shci_mtx, furi_kernel_is_running() ? FuriWaitForever : 0) ==
-            FuriStatusOk);
+        furi_mutex_acquire(ble_glue->shci_mtx, FuriWaitForever);
         break;
     case SHCI_TL_CmdAvailable:
-        furi_check(furi_mutex_release(ble_glue->shci_mtx) == FuriStatusOk);
+        furi_mutex_release(ble_glue->shci_mtx);
         break;
     default:
         break;
@@ -335,7 +341,7 @@ static void ble_sys_status_not_callback(SHCI_TL_CmdStatus_t status) {
  * ( eg ((tSHCI_UserEvtRxParam*)pPayload)->status shall be set to SHCI_TL_UserEventFlow_Disable )
  * When the status is not filled, the buffer is released by default
  */
-static void ble_sys_user_event_callback(void* pPayload) {
+static void ble_glue_sys_user_event_callback(void* pPayload) {
     UNUSED(pPayload);
 
 #ifdef BLE_GLUE_DEBUG
@@ -369,18 +375,60 @@ static void ble_sys_user_event_callback(void* pPayload) {
     }
 }
 
-static void ble_glue_clear_shared_memory(void) {
-    memset(ble_event_pool, 0, sizeof(ble_event_pool));
-    memset(&ble_glue_cmd_buff, 0, sizeof(ble_glue_cmd_buff));
-    memset(ble_glue_spare_event_buff, 0, sizeof(ble_glue_spare_event_buff));
-    memset(ble_spare_event_buff, 0, sizeof(ble_spare_event_buff));
+static void ble_glue_clear_shared_memory() {
+    memset(ble_glue_event_pool, 0, sizeof(ble_glue_event_pool));
+    memset(&ble_glue_system_cmd_buff, 0, sizeof(ble_glue_system_cmd_buff));
+    memset(ble_glue_system_spare_event_buff, 0, sizeof(ble_glue_system_spare_event_buff));
+    memset(ble_glue_ble_spare_event_buff, 0, sizeof(ble_glue_ble_spare_event_buff));
 }
 
-bool ble_glue_reinit_c2(void) {
+void ble_glue_thread_stop() {
+    if(ble_glue) {
+        FuriThreadId thread_id = furi_thread_get_id(ble_glue->thread);
+        furi_assert(thread_id);
+        furi_thread_flags_set(thread_id, BLE_GLUE_FLAG_KILL_THREAD);
+        furi_thread_join(ble_glue->thread);
+        furi_thread_free(ble_glue->thread);
+        // Free resources
+        furi_mutex_free(ble_glue->shci_mtx);
+        ble_glue_clear_shared_memory();
+        free(ble_glue);
+        ble_glue = NULL;
+    }
+}
+
+// Wrap functions
+static int32_t ble_glue_shci_thread(void* context) {
+    UNUSED(context);
+    uint32_t flags = 0;
+
+    while(true) {
+        flags = furi_thread_flags_wait(BLE_GLUE_FLAG_ALL, FuriFlagWaitAny, FuriWaitForever);
+        if(flags & BLE_GLUE_FLAG_SHCI_EVENT) {
+            shci_user_evt_proc();
+        }
+        if(flags & BLE_GLUE_FLAG_KILL_THREAD) {
+            break;
+        }
+    }
+
+    return 0;
+}
+
+void shci_notify_asynch_evt(void* pdata) {
+    UNUSED(pdata);
+    if(ble_glue) {
+        FuriThreadId thread_id = furi_thread_get_id(ble_glue->thread);
+        furi_assert(thread_id);
+        furi_thread_flags_set(thread_id, BLE_GLUE_FLAG_SHCI_EVENT);
+    }
+}
+
+bool ble_glue_reinit_c2() {
     return SHCI_C2_Reinit() == SHCI_Success;
 }
 
-BleGlueCommandResult ble_glue_fus_stack_delete(void) {
+BleGlueCommandResult ble_glue_fus_stack_delete() {
     FURI_LOG_I(TAG, "Erasing stack");
     SHCI_CmdStatus_t erase_stat = SHCI_C2_FUS_FwDelete();
     FURI_LOG_I(TAG, "Cmd res = %x", erase_stat);
@@ -402,9 +450,8 @@ BleGlueCommandResult ble_glue_fus_stack_install(uint32_t src_addr, uint32_t dst_
     return BleGlueCommandResultError;
 }
 
-BleGlueCommandResult ble_glue_fus_get_status(void) {
+BleGlueCommandResult ble_glue_fus_get_status() {
     furi_check(ble_glue->c2_info.mode == BleGlueC2ModeFUS);
-
     SHCI_FUS_GetState_ErrorCode_t error_code = 0;
     uint8_t fus_state = SHCI_C2_FUS_GetState(&error_code);
     FURI_LOG_I(TAG, "FUS state: %x, error: %x", fus_state, error_code);
@@ -418,7 +465,7 @@ BleGlueCommandResult ble_glue_fus_get_status(void) {
     return BleGlueCommandResultOK;
 }
 
-BleGlueCommandResult ble_glue_fus_wait_operation(void) {
+BleGlueCommandResult ble_glue_fus_wait_operation() {
     furi_check(ble_glue->c2_info.mode == BleGlueC2ModeFUS);
 
     while(true) {
@@ -431,13 +478,4 @@ BleGlueCommandResult ble_glue_fus_wait_operation(void) {
             return BleGlueCommandResultOK;
         }
     }
-}
-
-const BleGlueHardfaultInfo* ble_glue_get_hardfault_info(void) {
-    /* AN5289, 4.8.2 */
-    const BleGlueHardfaultInfo* info = (BleGlueHardfaultInfo*)(SRAM2A_BASE);
-    if(info->magic != BLE_GLUE_HARDFAULT_INFO_MAGIC) {
-        return NULL;
-    }
-    return info;
 }

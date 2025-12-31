@@ -6,6 +6,7 @@
 #include <input/input.h>
 #include <dolphin/dolphin.h>
 
+#include "../desktop_i.h"
 #include "desktop_view_main.h"
 
 struct DesktopMainView {
@@ -98,7 +99,7 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
     return true;
 }
 
-DesktopMainView* desktop_main_alloc(void) {
+DesktopMainView* desktop_main_alloc() {
     DesktopMainView* main_view = malloc(sizeof(DesktopMainView));
 
     main_view->view = view_alloc();

@@ -1,0 +1,8 @@
+PB_App.StartRequest.args            type:FT_POINTER
+PB_App.StartRequest.args            max_length:512
+PB_App.StartRequest.name            type:FT_POINTER
+PB_App.StartRequest.name            max_length:512
+PB_App.AppLoadFileRequest.path      max_length:512
+PB_App.AppButtonPressRequest.args   max_length:512
+PB_App.GetErrorResponse.text        type:FT_POINTER
+PB_App.DataExchangeRequest.data     type:FT_POINTER

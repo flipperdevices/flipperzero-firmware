@@ -1,15 +1,15 @@
 #include "subghz_read_raw.h"
+#include "../subghz_i.h"
 
+#include <math.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
 
 #include <assets_icons.h>
-
-#define TAG "SubGhzReadRaw"
-
 #define SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE 100
+#define TAG "SubGhzReadRaw"
 
 struct SubGhzReadRAW {
     View* view;
@@ -72,7 +72,7 @@ void subghz_read_raw_add_data_rssi(SubGhzReadRAW* instance, float rssi, bool tra
     if(rssi < SUBGHZ_RAW_THRESHOLD_MIN) {
         u_rssi = 0;
     } else {
-        u_rssi = (uint8_t)((rssi - SUBGHZ_RAW_THRESHOLD_MIN) / 2.7f);
+        u_rssi = (uint8_t)((rssi - SUBGHZ_RAW_THRESHOLD_MIN) / 2.7);
     }
 
     with_view_model(
@@ -273,7 +273,7 @@ void subghz_read_raw_draw_threshold_rssi(Canvas* canvas, SubGhzReadRAWModel* mod
 
     if(model->raw_threshold_rssi > SUBGHZ_RAW_THRESHOLD_MIN) {
         uint8_t x = 118;
-        y -= (uint8_t)((model->raw_threshold_rssi - SUBGHZ_RAW_THRESHOLD_MIN) / 2.7f);
+        y -= (uint8_t)((model->raw_threshold_rssi - SUBGHZ_RAW_THRESHOLD_MIN) / 2.7);
 
         uint8_t width = 3;
         for(uint8_t i = 0; i < x; i += width * 2) {
@@ -295,9 +295,9 @@ void subghz_read_raw_draw(Canvas* canvas, SubGhzReadRAWModel* model) {
         canvas, 106, 2, AlignRight, AlignTop, furi_string_get_cstr(model->sample_write));
 
     if(model->device_type == SubGhzRadioDeviceTypeInternal) {
-        canvas_draw_icon(canvas, 109, 0, &I_Internal_ant_1_9x11);
+        canvas_draw_icon(canvas, 108, 0, &I_Internal_antenna_20x12);
     } else {
-        canvas_draw_icon(canvas, 109, 0, &I_External_ant_1_9x11);
+        canvas_draw_icon(canvas, 108, 0, &I_External_antenna_20x12);
     }
     canvas_draw_line(canvas, 0, 14, 115, 14);
     canvas_draw_line(canvas, 0, 48, 115, 48);
@@ -588,7 +588,7 @@ void subghz_read_raw_exit(void* context) {
         true);
 }
 
-SubGhzReadRAW* subghz_read_raw_alloc(void) {
+SubGhzReadRAW* subghz_read_raw_alloc() {
     SubGhzReadRAW* instance = malloc(sizeof(SubGhzReadRAW));
 
     // View allocation and configuration

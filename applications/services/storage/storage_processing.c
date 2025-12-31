@@ -1,10 +1,6 @@
+#include "storage_processing.h"
 #include <m-list.h>
 #include <m-dict.h>
-
-#include "storage_processing.h"
-#include "storage_internal_dirname_i.h"
-
-#define TAG "Storage"
 
 #define STORAGE_PATH_PREFIX_LEN 4u
 _Static_assert(
@@ -64,27 +60,36 @@ static StorageType storage_get_type_by_path(FuriString* path) {
 
     return type;
 }
+static void storage_path_change_to_real_storage(FuriString* path, StorageType real_storage) {
+    if(furi_string_search(path, STORAGE_ANY_PATH_PREFIX) == 0) {
+        switch(real_storage) {
+        case ST_EXT:
+            furi_string_replace_at(
+                path, 0, strlen(STORAGE_EXT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX);
+            break;
+        case ST_INT:
+            furi_string_replace_at(
+                path, 0, strlen(STORAGE_INT_PATH_PREFIX), STORAGE_INT_PATH_PREFIX);
+            break;
+        default:
+            break;
+        }
+    }
+}
 
 static FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** storage) {
     StorageType type = storage_get_type_by_path(path);
 
     if(storage_type_is_valid(type)) {
-        // Any storage phase-out: redirect "/any" to "/ext"
         if(type == ST_ANY) {
-            FURI_LOG_W(
-                TAG,
-                STORAGE_ANY_PATH_PREFIX " is deprecated, use " STORAGE_EXT_PATH_PREFIX " instead");
-            furi_string_replace_at(
-                path, 0, strlen(STORAGE_EXT_PATH_PREFIX), STORAGE_EXT_PATH_PREFIX);
-            type = ST_EXT;
+            type = ST_INT;
+            if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusOK) {
+                type = ST_EXT;
+            }
+            storage_path_change_to_real_storage(path, type);
         }
 
-        furi_assert(type == ST_EXT);
-
-        if(storage_data_status(&app->storage[type]) != StorageStatusOK) {
-            return FSE_NOT_READY;
-        }
-
+        furi_assert(type == ST_EXT || type == ST_INT);
         *storage = &app->storage[type];
 
         return FSE_OK;
@@ -526,6 +531,7 @@ void storage_process_alias(Storage* app, FuriString* path, bool create_folders) 
             furi_string_left(apps_data_appid, slash);
         }
 
+<<<<<<< HEAD
         // Create app data folder if not exists
         if(create_folders && storage_process_common_stat(app, apps_data_appid, NULL) != FSE_OK) {
             FuriString* apps_data = furi_string_alloc_set(STORAGE_APPS_DATA_STEM);
@@ -545,6 +551,21 @@ void storage_process_alias(Storage* app, FuriString* path, bool create_folders) 
         }
 
         furi_string_free(int_on_ext_path);
+=======
+        furi_string_free(apps_data_path_with_appsid);
+    } else if(furi_string_start_with(path, STORAGE_APP_ASSETS_PATH_PREFIX)) {
+        FuriString* apps_assets_path_with_appsid = furi_string_alloc_set(APPS_ASSETS_PATH "/");
+        furi_string_cat(apps_assets_path_with_appsid, furi_thread_get_appid(thread_id));
+
+        // "/assets" -> "/ext/apps_assets/appsid"
+        furi_string_replace_at(
+            path,
+            0,
+            strlen(STORAGE_APP_ASSETS_PATH_PREFIX),
+            furi_string_get_cstr(apps_assets_path_with_appsid));
+
+        furi_string_free(apps_assets_path_with_appsid);
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
     }
 }
 
@@ -674,23 +695,7 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         storage_path_trim_trailing_slashes(path2);
         storage_process_alias(app, path1, message->data->cequivpath.thread_id, false);
         storage_process_alias(app, path2, message->data->cequivpath.thread_id, false);
-        if(message->data->cequivpath.check_subdir) {
-            // by appending slashes at the end and then truncating the second path, we can
-            // effectively check for shared path components:
-            // example 1:
-            //   path1: "/ext/blah"      -> "/ext/blah/"      -> "/ext/blah/"
-            //   path2: "/ext/blah-blah" -> "/ect/blah-blah/" -> "/ext/blah-"
-            //   results unequal, conclusion: path2 is not a subpath of path1
-            // example 2:
-            //   path1: "/ext/blah"      -> "/ext/blah/"      -> "/ext/blah/"
-            //   path2: "/ext/blah/blah" -> "/ect/blah/blah/" -> "/ext/blah/"
-            //   results equal, conclusion: path2 is a subpath of path1
-            // example 3:
-            //   path1: "/ext/blah/blah" -> "/ect/blah/blah/" -> "/ext/blah/blah/"
-            //   path2: "/ext/blah"      -> "/ext/blah/"      -> "/ext/blah/"
-            //   results unequal, conclusion: path2 is not a subpath of path1
-            furi_string_push_back(path1, '/');
-            furi_string_push_back(path2, '/');
+        if(message->data->cequivpath.truncate) {
             furi_string_left(path2, furi_string_size(path1));
         }
         message->return_data->bool_value =

@@ -6,21 +6,22 @@
 #include <desktop/views/desktop_view_pin_input.h>
 #include "desktop_settings_scene.h"
 #include "desktop_settings_scene_i.h"
-#include <desktop/helpers/pin_code.h>
+#include <desktop/helpers/pin.h>
 #include "../desktop_settings_app.h"
-#include "../desktop_settings_custom_event.h"
+
+#define SCENE_EVENT_EXIT (0U)
 
 static void pin_error_back_callback(void* context) {
     furi_assert(context);
     DesktopSettingsApp* app = context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, DesktopSettingsCustomEventExit);
+    view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_EVENT_EXIT);
 }
 
-static void pin_error_done_callback(const DesktopPinCode* pin_code, void* context) {
+static void pin_error_done_callback(const PinCode* pin_code, void* context) {
     UNUSED(pin_code);
     furi_assert(context);
     DesktopSettingsApp* app = context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, DesktopSettingsCustomEventExit);
+    view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_EVENT_EXIT);
 }
 
 void desktop_settings_scene_pin_error_on_enter(void* context) {
@@ -54,7 +55,7 @@ bool desktop_settings_scene_pin_error_on_event(void* context, SceneManagerEvent 
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case DesktopSettingsCustomEventExit:
+        case SCENE_EVENT_EXIT:
             scene_manager_previous_scene(app->scene_manager);
             consumed = true;
             break;

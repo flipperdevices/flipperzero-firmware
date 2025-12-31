@@ -22,7 +22,7 @@ DIST_SUFFIX = "local"
 COPRO_OB_DATA = "scripts/ob.data"
 
 # Must match lib/stm32wb_copro version
-COPRO_CUBE_VERSION = "1.20.0"
+COPRO_CUBE_VERSION = "1.17.3"
 
 COPRO_CUBE_DIR = "lib/stm32wb_copro"
 
@@ -38,8 +38,7 @@ COPRO_STACK_ADDR = "0x0"
 COPRO_STACK_BIN_DIR = posixpath.join(COPRO_CUBE_DIR, "firmware")
 
 # Supported toolchain versions
-# Also specify in scripts/ufbt/SConstruct
-FBT_TOOLCHAIN_VERSIONS = (" 12.3.", " 13.2.")
+FBT_TOOLCHAIN_VERSIONS = (" 10.3.",)
 
 OPENOCD_OPTS = [
     "-f",
@@ -75,9 +74,6 @@ FIRMWARE_APPS = {
         "updater_app",
         "radio_device_cc1101_ext",
         "unit_tests",
-        "js_app",
-        "infrared",
-        "archive",
     ],
 }
 

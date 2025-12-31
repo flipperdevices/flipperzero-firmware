@@ -158,7 +158,7 @@ class AppManager:
                     f"App {kw.get('appid')} cannot have fal_embedded set"
                 )
 
-        if apptype in AppBuildset.DIST_APP_TYPES:
+        if apptype in AppBuildset.dist_app_types:
             # For distributing .fap's resources, there's "fap_file_assets"
             for app_property in ("resources",):
                 if kw.get(app_property):
@@ -258,12 +258,14 @@ class AppBuildset:
         FlipperAppType.DEBUG: True,
         FlipperAppType.MENUEXTERNAL: False,
     }
-    DIST_APP_TYPES = list(
-        # Applications that are installed on SD card
-        entry[0]
-        for entry in EXTERNAL_APP_TYPES_MAP.items()
-        if entry[1]
-    )
+
+    @classmethod
+    @property
+    def dist_app_types(cls):
+        """Applications that are installed on SD card"""
+        return list(
+            entry[0] for entry in cls.EXTERNAL_APP_TYPES_MAP.items() if entry[1]
+        )
 
     @staticmethod
     def print_writer(message):
@@ -349,10 +351,10 @@ class AppBuildset:
             ).append(app)
 
     def get_ext_apps(self):
-        return list(self.extapps)
+        return self.extapps
 
     def get_incompatible_ext_apps(self):
-        return list(self.incompatible_extapps)
+        return self.incompatible_extapps
 
     def _check_conflicts(self):
         conflicts = []
@@ -397,30 +399,14 @@ class AppBuildset:
     def _group_plugins(self):
         known_extensions = self.get_apps_of_type(FlipperAppType.PLUGIN, all_known=True)
         for extension_app in known_extensions:
-            keep_app = False
             for parent_app_id in extension_app.requires:
                 try:
                     parent_app = self.appmgr.get(parent_app_id)
                     parent_app._plugins.append(extension_app)
-
-                    if (
-                        parent_app.apptype in self.BUILTIN_APP_TYPES
-                        and parent_app_id in self.appnames
-                    ) or parent_app.apptype not in self.BUILTIN_APP_TYPES:
-                        keep_app |= True
-
                 except FlipperManifestException:
                     self._writer(
                         f"Module {extension_app.appid} has unknown parent {parent_app_id}"
                     )
-                    keep_app = True
-            # Debug output for plugin parentage
-            # print(
-            #     f"Module {extension_app.appid} has parents {extension_app.requires} keep={keep_app}"
-            # )
-            if not keep_app and extension_app in self.extapps:
-                # print(f"Excluding plugin {extension_app.appid}")
-                self.extapps.remove(extension_app)
 
     def get_apps_cdefs(self):
         cdefs = set()
@@ -446,11 +432,9 @@ class AppBuildset:
         return sorted(
             filter(
                 lambda app: app.apptype == apptype,
-                (
-                    self.appmgr.known_apps.values()
-                    if all_known
-                    else map(self.appmgr.get, self.appnames)
-                ),
+                self.appmgr.known_apps.values()
+                if all_known
+                else map(self.appmgr.get, self.appnames),
             ),
             key=lambda app: app.order,
         )

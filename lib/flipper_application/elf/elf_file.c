@@ -8,11 +8,11 @@
 
 #define TAG "Elf"
 
-#define ELF_NAME_BUFFER_LEN        32
-#define SECTION_OFFSET(e, n)       ((e)->section_table + (n) * sizeof(Elf32_Shdr))
-#define IS_FLAGS_SET(v, m)         (((v) & (m)) == (m))
+#define ELF_NAME_BUFFER_LEN 32
+#define SECTION_OFFSET(e, n) ((e)->section_table + (n) * sizeof(Elf32_Shdr))
+#define IS_FLAGS_SET(v, m) (((v) & (m)) == (m))
 #define RESOLVER_THREAD_YIELD_STEP 30
-#define FAST_RELOCATION_VERSION    1
+#define FAST_RELOCATION_VERSION 1
 
 // #define ELF_DEBUG_LOG 1
 
@@ -202,7 +202,6 @@ __attribute__((unused)) static const char* elf_reloc_type_to_str(int symt) {
         STRCASE(R_ARM_NONE)
         STRCASE(R_ARM_TARGET1)
         STRCASE(R_ARM_ABS32)
-        STRCASE(R_ARM_REL32)
         STRCASE(R_ARM_THM_PC22)
         STRCASE(R_ARM_THM_JUMP24)
     default:
@@ -330,10 +329,6 @@ static bool elf_relocate_symbol(ELFFile* elf, Elf32_Addr relAddr, int type, Elf3
         *((uint32_t*)relAddr) += symAddr;
         FURI_LOG_D(TAG, "  R_ARM_ABS32 relocated is 0x%08X", (unsigned int)*((uint32_t*)relAddr));
         break;
-    case R_ARM_REL32:
-        *((uint32_t*)relAddr) += symAddr - relAddr;
-        FURI_LOG_D(TAG, "  R_ARM_REL32 relocated is 0x%08X", (unsigned int)*((uint32_t*)relAddr));
-        break;
     case R_ARM_THM_PC22:
     case R_ARM_CALL:
     case R_ARM_THM_JUMP24:
@@ -435,6 +430,7 @@ static bool elf_relocate(ELFFile* elf, ELFSection* s) {
 /************************************ Internal FAP interfaces *************************************/
 /**************************************************************************************************/
 typedef enum {
+    SectionTypeERROR = 0,
     SectionTypeUnused = 1 << 0,
     SectionTypeData = 1 << 1,
     SectionTypeRelData = 1 << 2,
@@ -442,6 +438,8 @@ typedef enum {
     SectionTypeStrTab = 1 << 4,
     SectionTypeDebugLink = 1 << 5,
     SectionTypeFastRelData = 1 << 6,
+
+    SectionTypeValid = SectionTypeSymTab | SectionTypeStrTab,
 } SectionType;
 
 static bool elf_load_debug_link(ELFFile* elf, Elf32_Shdr* section_header) {
@@ -457,62 +455,37 @@ static bool str_prefix(const char* str, const char* prefix) {
     return strncmp(prefix, str, strlen(prefix)) == 0;
 }
 
-typedef enum {
-    ELFLoadSectionResultSuccess,
-    ELFLoadSectionResultNoMemory,
-    ELFLoadSectionResultError,
-} ELFLoadSectionResult;
-
-typedef struct {
-    SectionType type;
-    ELFLoadSectionResult result;
-} SectionTypeInfo;
-
-static ELFLoadSectionResult
-    elf_load_section_data(ELFFile* elf, ELFSection* section, Elf32_Shdr* section_header) {
+static bool elf_load_section_data(ELFFile* elf, ELFSection* section, Elf32_Shdr* section_header) {
     if(section_header->sh_size == 0) {
         FURI_LOG_D(TAG, "No data for section");
-        return ELFLoadSectionResultSuccess;
-    }
-
-    size_t safe_size = section_header->sh_size + 1024;
-
-    furi_kernel_lock();
-
-    if(memmgr_heap_get_max_free_block() < safe_size) {
-        furi_kernel_unlock();
-        FURI_LOG_E(TAG, "Not enough memory to load section data");
-        return ELFLoadSectionResultNoMemory;
+        return true;
     }
 
     section->data = aligned_malloc(section_header->sh_size, section_header->sh_addralign);
     section->size = section_header->sh_size;
 
-    furi_kernel_unlock();
-
     if(section_header->sh_type == SHT_NOBITS) {
         // BSS section, no data to load
-        return ELFLoadSectionResultSuccess;
+        return true;
     }
 
     if((!storage_file_seek(elf->fd, section_header->sh_offset, true)) ||
        (storage_file_read(elf->fd, section->data, section_header->sh_size) !=
         section_header->sh_size)) {
         FURI_LOG_E(TAG, "    seek/read fail");
-        return ELFLoadSectionResultError;
+        return false;
     }
 
     FURI_LOG_D(TAG, "0x%p", section->data);
-    return ELFLoadSectionResultSuccess;
+    return true;
 }
 
-static SectionTypeInfo elf_preload_section(
+static SectionType elf_preload_section(
     ELFFile* elf,
     size_t section_idx,
     Elf32_Shdr* section_header,
     FuriString* name_string) {
     const char* name = furi_string_get_cstr(name_string);
-    SectionTypeInfo info;
 
 #ifdef ELF_DEBUG_LOG
     // log section name, type and flags
@@ -549,10 +522,7 @@ static SectionTypeInfo elf_preload_section(
     if(str_prefix(name, ".ARM.") || str_prefix(name, ".rel.ARM.") ||
        str_prefix(name, ".fast.rel.ARM.")) {
         FURI_LOG_D(TAG, "Ignoring ARM section");
-
-        info.type = SectionTypeUnused;
-        info.result = ELFLoadSectionResultSuccess;
-        return info;
+        return SectionTypeUnused;
     }
 
     // Load allocable section
@@ -571,32 +541,26 @@ static SectionTypeInfo elf_preload_section(
             elf->fini_array = section_p;
         }
 
-        info.type = SectionTypeData;
-        info.result = elf_load_section_data(elf, section_p, section_header);
-
-        if(info.result != ELFLoadSectionResultSuccess) {
+        if(!elf_load_section_data(elf, section_p, section_header)) {
             FURI_LOG_E(TAG, "Error loading section '%s'", name);
+            return SectionTypeERROR;
+        } else {
+            return SectionTypeData;
         }
-
-        return info;
     }
 
     // Load link info section
     if(section_header->sh_flags & SHF_INFO_LINK) {
-        info.type = SectionTypeRelData;
-
         if(str_prefix(name, ".rel")) {
             name = name + strlen(".rel");
             ELFSection* section_p = elf_file_get_or_put_section(elf, name);
             section_p->rel_count = section_header->sh_size / sizeof(Elf32_Rel);
             section_p->rel_offset = section_header->sh_offset;
-            info.result = ELFLoadSectionResultSuccess;
+            return SectionTypeRelData;
         } else {
             FURI_LOG_E(TAG, "Unknown link info section '%s'", name);
-            info.result = ELFLoadSectionResultError;
+            return SectionTypeERROR;
         }
-
-        return info;
     }
 
     // Load fast rel section
@@ -605,16 +569,13 @@ static SectionTypeInfo elf_preload_section(
         ELFSection* section_p = elf_file_get_or_put_section(elf, name);
         section_p->fast_rel = malloc(sizeof(ELFSection));
 
-        info.type = SectionTypeFastRelData;
-        info.result = elf_load_section_data(elf, section_p->fast_rel, section_header);
-
-        if(info.result != ELFLoadSectionResultSuccess) {
+        if(!elf_load_section_data(elf, section_p->fast_rel, section_header)) {
             FURI_LOG_E(TAG, "Error loading section '%s'", name);
-        } else {
-            FURI_LOG_D(TAG, "Loaded fast rel section for '%s'", name);
+            return SectionTypeERROR;
         }
 
-        return info;
+        FURI_LOG_D(TAG, "Loaded fast rel section for '%s'", name);
+        return SectionTypeFastRelData;
     }
 
     // Load symbol table
@@ -622,39 +583,27 @@ static SectionTypeInfo elf_preload_section(
         FURI_LOG_D(TAG, "Found .symtab section");
         elf->symbol_table = section_header->sh_offset;
         elf->symbol_count = section_header->sh_size / sizeof(Elf32_Sym);
-
-        info.type = SectionTypeSymTab;
-        info.result = ELFLoadSectionResultSuccess;
-        return info;
+        return SectionTypeSymTab;
     }
 
     // Load string table
     if(strcmp(name, ".strtab") == 0) {
         FURI_LOG_D(TAG, "Found .strtab section");
         elf->symbol_table_strings = section_header->sh_offset;
-
-        info.type = SectionTypeStrTab;
-        info.result = ELFLoadSectionResultSuccess;
-        return info;
+        return SectionTypeStrTab;
     }
 
     // Load debug link section
     if(strcmp(name, ".gnu_debuglink") == 0) {
         FURI_LOG_D(TAG, "Found .gnu_debuglink section");
-        info.type = SectionTypeDebugLink;
-
         if(elf_load_debug_link(elf, section_header)) {
-            info.result = ELFLoadSectionResultSuccess;
-            return info;
+            return SectionTypeDebugLink;
         } else {
-            info.result = ELFLoadSectionResultError;
-            return info;
+            return SectionTypeERROR;
         }
     }
 
-    info.type = SectionTypeUnused;
-    info.result = ELFLoadSectionResultSuccess;
-    return info;
+    return SectionTypeUnused;
 }
 
 static Elf32_Addr elf_address_of_by_hash(ELFFile* elf, uint32_t hash) {
@@ -830,7 +779,9 @@ void elf_file_free(ELFFile* elf) {
         for(ELFSectionDict_it(it, elf->sections); !ELFSectionDict_end_p(it);
             ELFSectionDict_next(it)) {
             const ELFSectionDict_itref_t* itref = ELFSectionDict_cref(it);
-            aligned_free(itref->value.data);
+            if(itref->value.data) {
+                aligned_free(itref->value.data);
+            }
             if(itref->value.fast_rel) {
                 aligned_free(itref->value.fast_rel->data);
                 free(itref->value.fast_rel);
@@ -880,57 +831,35 @@ bool elf_file_open(ELFFile* elf, const char* path) {
     return true;
 }
 
-ElfLoadSectionTableResult elf_file_load_section_table(ELFFile* elf) {
-    SectionType loaded_sections = 0;
+bool elf_file_load_section_table(ELFFile* elf) {
+    SectionType loaded_sections = SectionTypeERROR;
     FuriString* name = furi_string_alloc();
-    ElfLoadSectionTableResult result = ElfLoadSectionTableResultSuccess;
 
     FURI_LOG_D(TAG, "Scan ELF indexs...");
-
+    // TODO FL-3526: why we start from 1?
     for(size_t section_idx = 1; section_idx < elf->sections_count; section_idx++) {
         Elf32_Shdr section_header;
 
         furi_string_reset(name);
         if(!elf_read_section(elf, section_idx, &section_header, name)) {
-            loaded_sections = 0;
+            loaded_sections = SectionTypeERROR;
             break;
         }
 
         FURI_LOG_D(
             TAG, "Preloading data for section #%d %s", section_idx, furi_string_get_cstr(name));
-        SectionTypeInfo section_type_info =
-            elf_preload_section(elf, section_idx, &section_header, name);
-        loaded_sections |= section_type_info.type;
+        SectionType section_type = elf_preload_section(elf, section_idx, &section_header, name);
+        loaded_sections |= section_type;
 
-        if(section_type_info.result != ELFLoadSectionResultSuccess) {
-            if(section_type_info.result == ELFLoadSectionResultNoMemory) {
-                FURI_LOG_E(TAG, "Not enough memory");
-                result = ElfLoadSectionTableResultNoMemory;
-            } else if(section_type_info.result == ELFLoadSectionResultError) {
-                FURI_LOG_E(TAG, "Error loading section");
-                result = ElfLoadSectionTableResultError;
-            }
-
-            loaded_sections = 0;
+        if(section_type == SectionTypeERROR) {
+            loaded_sections = SectionTypeERROR;
             break;
         }
     }
 
     furi_string_free(name);
 
-    if(result != ElfLoadSectionTableResultSuccess) {
-        return result;
-    } else {
-        bool sections_valid =
-            IS_FLAGS_SET(loaded_sections, SectionTypeSymTab | SectionTypeStrTab) |
-            IS_FLAGS_SET(loaded_sections, SectionTypeFastRelData);
-        if(sections_valid) {
-            return ElfLoadSectionTableResultSuccess;
-        } else {
-            FURI_LOG_E(TAG, "No valid sections found");
-            return ElfLoadSectionTableResultError;
-        }
-    }
+    return IS_FLAGS_SET(loaded_sections, SectionTypeValid);
 }
 
 ElfProcessSectionResult elf_process_section(
@@ -943,6 +872,7 @@ ElfProcessSectionResult elf_process_section(
     Elf32_Shdr section_header;
 
     // find section
+    // TODO FL-3526: why we start from 1?
     for(size_t section_idx = 1; section_idx < elf->sections_count; section_idx++) {
         furi_string_reset(section_name);
         if(!elf_read_section(elf, section_idx, &section_header, section_name)) {

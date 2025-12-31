@@ -155,3 +155,11 @@ bool subghz_worker_is_running(SubGhzWorker* instance) {
     furi_assert(instance);
     return instance->running;
 }
+<<<<<<< HEAD
+=======
+
+void subghz_worker_set_filter(SubGhzWorker* instance, uint16_t timeout) {
+    furi_assert(instance);
+    instance->filter_duration = timeout;
+}
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner

@@ -18,7 +18,7 @@ typedef void (*HidU2fCallback)(HidU2fEvent ev, void* context);
  *
  * @return      true / false
  */
-bool furi_hal_hid_u2f_is_connected(void);
+bool furi_hal_hid_u2f_is_connected();
 
 /** Set HID U2F event callback
  *

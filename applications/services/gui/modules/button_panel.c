@@ -2,7 +2,6 @@
 
 #include <gui/canvas.h>
 #include <gui/elements.h>
-#include <input/input.h>
 
 #include <furi.h>
 #include <furi_hal_resources.h>
@@ -40,14 +39,13 @@ typedef struct ButtonItem {
     void* callback_context;
 } ButtonItem;
 
-ARRAY_DEF(ButtonArray, ButtonItem*, M_PTR_OPLIST); // NOLINT
+ARRAY_DEF(ButtonArray, ButtonItem*, M_PTR_OPLIST);
 #define M_OPL_ButtonArray_t() ARRAY_OPLIST(ButtonArray, M_PTR_OPLIST)
 ARRAY_DEF(ButtonMatrix, ButtonArray_t);
 #define M_OPL_ButtonMatrix_t() ARRAY_OPLIST(ButtonMatrix, M_OPL_ButtonArray_t())
 
 struct ButtonPanel {
     View* view;
-    bool freeze_input;
 };
 
 typedef struct {
@@ -65,11 +63,11 @@ static void button_panel_process_up(ButtonPanel* button_panel);
 static void button_panel_process_down(ButtonPanel* button_panel);
 static void button_panel_process_left(ButtonPanel* button_panel);
 static void button_panel_process_right(ButtonPanel* button_panel);
-static void button_panel_process_ok(ButtonPanel* button_panel, InputType input);
+static void button_panel_process_ok(ButtonPanel* button_panel);
 static void button_panel_view_draw_callback(Canvas* canvas, void* _model);
 static bool button_panel_view_input_callback(InputEvent* event, void* context);
 
-ButtonPanel* button_panel_alloc(void) {
+ButtonPanel* button_panel_alloc() {
     ButtonPanel* button_panel = malloc(sizeof(ButtonPanel));
     button_panel->view = view_alloc();
     view_set_orientation(button_panel->view, ViewOrientationVertical);
@@ -98,7 +96,7 @@ void button_panel_reserve(ButtonPanel* button_panel, size_t reserve_x, size_t re
     furi_check(reserve_x > 0);
     furi_check(reserve_y > 0);
 
-    with_view_model( //-V621
+    with_view_model(
         button_panel->view,
         ButtonPanelModel * model,
         {
@@ -116,7 +114,7 @@ void button_panel_reserve(ButtonPanel* button_panel, size_t reserve_x, size_t re
 }
 
 void button_panel_free(ButtonPanel* button_panel) {
-    furi_check(button_panel);
+    furi_assert(button_panel);
 
     button_panel_reset(button_panel);
 
@@ -134,7 +132,7 @@ void button_panel_free(ButtonPanel* button_panel) {
 }
 
 void button_panel_reset(ButtonPanel* button_panel) {
-    furi_check(button_panel);
+    furi_assert(button_panel);
 
     with_view_model(
         button_panel->view,
@@ -179,7 +177,7 @@ void button_panel_add_item(
     const Icon* icon_name_selected,
     ButtonItemCallback callback,
     void* callback_context) {
-    furi_check(button_panel);
+    furi_assert(button_panel);
 
     with_view_model( //-V773
         button_panel->view,
@@ -202,7 +200,7 @@ void button_panel_add_item(
 }
 
 View* button_panel_get_view(ButtonPanel* button_panel) {
-    furi_check(button_panel);
+    furi_assert(button_panel);
     return button_panel->view;
 }
 
@@ -349,7 +347,7 @@ static void button_panel_process_right(ButtonPanel* button_panel) {
         true);
 }
 
-void button_panel_process_ok(ButtonPanel* button_panel, InputType type) {
+void button_panel_process_ok(ButtonPanel* button_panel) {
     ButtonItem* button_item = NULL;
 
     with_view_model(
@@ -362,7 +360,7 @@ void button_panel_process_ok(ButtonPanel* button_panel, InputType type) {
         true);
 
     if(button_item && button_item->callback) {
-        button_item->callback(button_item->callback_context, button_item->index, type);
+        button_item->callback(button_item->callback_context, button_item->index);
     }
 }
 
@@ -370,15 +368,8 @@ static bool button_panel_view_input_callback(InputEvent* event, void* context) {
     ButtonPanel* button_panel = context;
     furi_assert(button_panel);
     bool consumed = false;
-    if(event->key == InputKeyOk) {
-        if((event->type == InputTypePress) || (event->type == InputTypeRelease)) {
-            button_panel->freeze_input = (event->type == InputTypePress);
-        }
-        consumed = true;
-        button_panel_process_ok(button_panel, event->type);
-    }
-    if(!button_panel->freeze_input &&
-       (!(event->type == InputTypePress) && !(event->type == InputTypeRelease))) {
+
+    if(event->type == InputTypeShort) {
         switch(event->key) {
         case InputKeyUp:
             consumed = true;
@@ -396,6 +387,10 @@ static bool button_panel_view_input_callback(InputEvent* event, void* context) {
             consumed = true;
             button_panel_process_right(button_panel);
             break;
+        case InputKeyOk:
+            consumed = true;
+            button_panel_process_ok(button_panel);
+            break;
         default:
             break;
         }
@@ -410,7 +405,7 @@ void button_panel_add_label(
     uint16_t y,
     Font font,
     const char* label_str) {
-    furi_check(button_panel);
+    furi_assert(button_panel);
 
     with_view_model(
         button_panel->view,
@@ -431,7 +426,7 @@ void button_panel_add_icon(
     uint16_t x,
     uint16_t y,
     const Icon* icon_name) {
-    furi_check(button_panel);
+    furi_assert(button_panel);
 
     with_view_model( //-V773
         button_panel->view,

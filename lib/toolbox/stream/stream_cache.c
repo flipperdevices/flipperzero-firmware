@@ -8,7 +8,7 @@ struct StreamCache {
     size_t position;
 };
 
-StreamCache* stream_cache_alloc(void) {
+StreamCache* stream_cache_alloc() {
     StreamCache* cache = malloc(sizeof(StreamCache));
     cache->data_size = 0;
     cache->position = 0;

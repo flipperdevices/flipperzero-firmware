@@ -1,5 +1,6 @@
 #include <furi.h>
 #include <gui/gui.h>
+#include <gui/canvas_i.h>
 #include <input/input.h>
 
 #define BUFFER_SIZE (32U)
@@ -25,7 +26,7 @@ static void gui_input_events_callback(const void* value, void* ctx) {
     }
 }
 
-static DirectDraw* direct_draw_alloc(void) {
+static DirectDraw* direct_draw_alloc() {
     DirectDraw* instance = malloc(sizeof(DirectDraw));
 
     instance->input = furi_record_open(RECORD_INPUT_EVENTS);
@@ -41,11 +42,10 @@ static DirectDraw* direct_draw_alloc(void) {
 static void direct_draw_free(DirectDraw* instance) {
     furi_pubsub_unsubscribe(instance->input, instance->input_subscription);
 
+    instance->canvas = NULL;
     gui_direct_draw_release(instance->gui);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_INPUT_EVENTS);
-
-    free(instance);
 }
 
 static void direct_draw_block(Canvas* canvas, uint32_t size, uint32_t counter) {

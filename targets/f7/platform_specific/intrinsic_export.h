@@ -8,7 +8,6 @@ extern "C" {
 
 void __clear_cache(void*, void*);
 void* __aeabi_uldivmod(uint64_t, uint64_t);
-double __aeabi_f2d(float);
 
 #ifdef __cplusplus
 }

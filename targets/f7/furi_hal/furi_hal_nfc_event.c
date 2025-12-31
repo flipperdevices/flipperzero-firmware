@@ -2,12 +2,12 @@
 
 FuriHalNfcEventInternal* furi_hal_nfc_event = NULL;
 
-void furi_hal_nfc_event_init(void) {
+void furi_hal_nfc_event_init() {
     furi_hal_nfc_event = malloc(sizeof(FuriHalNfcEventInternal));
 }
 
-FuriHalNfcError furi_hal_nfc_event_start(void) {
-    furi_check(furi_hal_nfc_event);
+FuriHalNfcError furi_hal_nfc_event_start() {
+    furi_assert(furi_hal_nfc_event);
 
     furi_hal_nfc_event->thread = furi_thread_get_current_id();
     furi_thread_flags_clear(FURI_HAL_NFC_EVENT_INTERNAL_ALL);
@@ -15,8 +15,8 @@ FuriHalNfcError furi_hal_nfc_event_start(void) {
     return FuriHalNfcErrorNone;
 }
 
-FuriHalNfcError furi_hal_nfc_event_stop(void) {
-    furi_check(furi_hal_nfc_event);
+FuriHalNfcError furi_hal_nfc_event_stop() {
+    furi_assert(furi_hal_nfc_event);
 
     furi_hal_nfc_event->thread = NULL;
 
@@ -24,21 +24,21 @@ FuriHalNfcError furi_hal_nfc_event_stop(void) {
 }
 
 void furi_hal_nfc_event_set(FuriHalNfcEventInternalType event) {
-    furi_check(furi_hal_nfc_event);
+    furi_assert(furi_hal_nfc_event);
 
     if(furi_hal_nfc_event->thread) {
         furi_thread_flags_set(furi_hal_nfc_event->thread, event);
     }
 }
 
-FuriHalNfcError furi_hal_nfc_abort(void) {
+FuriHalNfcError furi_hal_nfc_abort() {
     furi_hal_nfc_event_set(FuriHalNfcEventInternalTypeAbort);
     return FuriHalNfcErrorNone;
 }
 
 FuriHalNfcEvent furi_hal_nfc_wait_event_common(uint32_t timeout_ms) {
-    furi_check(furi_hal_nfc_event);
-    furi_check(furi_hal_nfc_event->thread);
+    furi_assert(furi_hal_nfc_event);
+    furi_assert(furi_hal_nfc_event->thread);
 
     FuriHalNfcEvent event = 0;
     uint32_t event_timeout = timeout_ms == FURI_HAL_NFC_EVENT_WAIT_FOREVER ? FuriWaitForever :
@@ -48,7 +48,7 @@ FuriHalNfcEvent furi_hal_nfc_wait_event_common(uint32_t timeout_ms) {
     if(event_flag != (unsigned)FuriFlagErrorTimeout) {
         if(event_flag & FuriHalNfcEventInternalTypeIrq) {
             furi_thread_flags_clear(FuriHalNfcEventInternalTypeIrq);
-            const FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+            FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
             uint32_t irq = furi_hal_nfc_get_irq(handle);
             if(irq & ST25R3916_IRQ_MASK_OSC) {
                 event |= FuriHalNfcEventOscOn;
@@ -77,9 +77,6 @@ FuriHalNfcEvent furi_hal_nfc_wait_event_common(uint32_t timeout_ms) {
             if(irq & ST25R3916_IRQ_MASK_WU_A_X) {
                 event |= FuriHalNfcEventListenerActive;
             }
-            if(irq & ST25R3916_IRQ_MASK_WU_F) {
-                event |= FuriHalNfcEventListenerActive;
-            }
         }
         if(event_flag & FuriHalNfcEventInternalTypeTimerFwtExpired) {
             event |= FuriHalNfcEventTimerFwtExpired;
@@ -101,11 +98,11 @@ FuriHalNfcEvent furi_hal_nfc_wait_event_common(uint32_t timeout_ms) {
 }
 
 bool furi_hal_nfc_event_wait_for_specific_irq(
-    const FuriHalSpiBusHandle* handle,
+    FuriHalSpiBusHandle* handle,
     uint32_t mask,
     uint32_t timeout_ms) {
-    furi_check(furi_hal_nfc_event);
-    furi_check(furi_hal_nfc_event->thread);
+    furi_assert(furi_hal_nfc_event);
+    furi_assert(furi_hal_nfc_event->thread);
 
     bool irq_received = false;
     uint32_t event_flag =

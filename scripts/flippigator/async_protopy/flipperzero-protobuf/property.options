@@ -1,0 +1,3 @@
+PB_Property.GetRequest.key              type:FT_POINTER
+PB_Property.GetResponse.key             type:FT_POINTER
+PB_Property.GetResponse.value           type:FT_POINTER

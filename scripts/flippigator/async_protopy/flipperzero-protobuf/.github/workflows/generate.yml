@@ -1,0 +1,30 @@
+name: 'Generate protobuf sources'
+
+on:
+  push:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout flipperzero-protobuf
+        uses: actions/checkout@v2
+
+      - name: Checkout nanopb
+        uses: actions/checkout@v2
+        with:
+          repository: nanopb/nanopb
+          path: nanopb
+
+      - name: Setup python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+
+      - name: Setup protobuf
+        run: |
+          sudo apt -y install protobuf-compiler
+          python3 -m pip install --upgrade python3-protobuf==2.5.0 protobuf==3.20.1 grpcio-tools==1.47.0 grpcio==1.47.0
+
+      - name: Generate sources
+        run: python3 nanopb/generator/nanopb_generator.py -q -I . -D /tmp *.proto

@@ -3,7 +3,7 @@
 #include <nfc/protocols/nfc_listener_base.h>
 
 #include <nfc/helpers/iso14443_crc.h>
-#include <bit_lib/bit_lib.h>
+#include <nfc/helpers/nfc_util.h>
 
 #include <furi.h>
 #include <furi_hal_random.h>
@@ -19,7 +19,7 @@ typedef struct {
     uint8_t cmd_start_byte;
     size_t cmd_len_bits;
     size_t command_num;
-    const MfClassicListenerCommandHandler* handler;
+    MfClassicListenerCommandHandler* handler;
 } MfClassicListenerCmd;
 
 static void mf_classic_listener_prepare_emulation(MfClassicListener* instance) {
@@ -65,27 +65,17 @@ static MfClassicListenerCommand mf_classic_listener_auth_first_part_handler(
 
         uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
 
-        // Reject authentication immediately if keys are not found (uninitialized sector)
-        // This matches real card behavior where empty sectors reject authentication
-        // Fast path: check mask directly instead of function call
-        if(key_type == MfClassicKeyTypeA) {
-            if(FURI_BIT(instance->data->key_a_mask, sector_num) == 0) break;
-        } else {
-            if(FURI_BIT(instance->data->key_b_mask, sector_num) == 0) break;
-        }
-
         MfClassicSectorTrailer* sec_tr =
             mf_classic_get_sector_trailer_by_sector(instance->data, sector_num);
         MfClassicKey* key = (key_type == MfClassicKeyTypeA) ? &sec_tr->key_a : &sec_tr->key_b;
-        uint64_t key_num = bit_lib_bytes_to_num_be(key->data, sizeof(MfClassicKey));
+        uint64_t key_num = nfc_util_bytes2num(key->data, sizeof(MfClassicKey));
         uint32_t cuid = iso14443_3a_get_cuid(instance->data->iso14443_3a_data);
 
         instance->auth_context.key_type = key_type;
         instance->auth_context.block_num = block_num;
 
         furi_hal_random_fill_buf(instance->auth_context.nt.data, sizeof(MfClassicNt));
-        uint32_t nt_num =
-            bit_lib_bytes_to_num_be(instance->auth_context.nt.data, sizeof(MfClassicNt));
+        uint32_t nt_num = nfc_util_bytes2num(instance->auth_context.nt.data, sizeof(MfClassicNt));
 
         crypto1_init(instance->crypto, key_num);
         if(instance->comm_state == MfClassicListenerCommStatePlain) {
@@ -98,7 +88,7 @@ static MfClassicListenerCommand mf_classic_listener_auth_first_part_handler(
             command = MfClassicListenerCommandProcessed;
         } else {
             uint8_t key_stream[4] = {};
-            bit_lib_num_to_bytes_be(nt_num ^ cuid, sizeof(uint32_t), key_stream);
+            nfc_util_num2bytes(nt_num ^ cuid, sizeof(uint32_t), key_stream);
             bit_buffer_copy_bytes(
                 instance->tx_plain_buffer, instance->auth_context.nt.data, sizeof(MfClassicNt));
             crypto1_encrypt(
@@ -157,27 +147,21 @@ static MfClassicListenerCommand
             instance->callback(instance->generic_event, instance->context);
         }
 
-        uint32_t nr_num =
-            bit_lib_bytes_to_num_be(instance->auth_context.nr.data, sizeof(MfClassicNr));
-        uint32_t ar_num =
-            bit_lib_bytes_to_num_be(instance->auth_context.ar.data, sizeof(MfClassicAr));
+        uint32_t nr_num = nfc_util_bytes2num(instance->auth_context.nr.data, sizeof(MfClassicNr));
+        uint32_t ar_num = nfc_util_bytes2num(instance->auth_context.ar.data, sizeof(MfClassicAr));
 
         crypto1_word(instance->crypto, nr_num, 1);
-        uint32_t nt_num =
-            bit_lib_bytes_to_num_be(instance->auth_context.nt.data, sizeof(MfClassicNt));
+        uint32_t nt_num = nfc_util_bytes2num(instance->auth_context.nt.data, sizeof(MfClassicNt));
         uint32_t secret_poller = ar_num ^ crypto1_word(instance->crypto, 0, 0);
-        if(secret_poller != crypto1_prng_successor(nt_num, 64)) {
+        if(secret_poller != prng_successor(nt_num, 64)) {
             FURI_LOG_T(
-                TAG,
-                "Wrong reader key: %08lX != %08lX",
-                secret_poller,
-                crypto1_prng_successor(nt_num, 64));
+                TAG, "Wrong reader key: %08lX != %08lX", secret_poller, prng_successor(nt_num, 64));
             command = MfClassicListenerCommandSleep;
             break;
         }
 
-        uint32_t at_num = crypto1_prng_successor(nt_num, 96);
-        bit_lib_num_to_bytes_be(at_num, sizeof(uint32_t), instance->auth_context.at.data);
+        uint32_t at_num = prng_successor(nt_num, 96);
+        nfc_util_num2bytes(at_num, sizeof(uint32_t), instance->auth_context.at.data);
         bit_buffer_copy_bytes(
             instance->tx_plain_buffer, instance->auth_context.at.data, sizeof(MfClassicAr));
         crypto1_encrypt(
@@ -450,42 +434,42 @@ static MfClassicListenerCommand
     return command;
 }
 
-static const MfClassicListenerCommandHandler mf_classic_listener_halt_handlers[] = {
+static MfClassicListenerCommandHandler mf_classic_listener_halt_handlers[] = {
     mf_classic_listener_halt_handler,
 };
 
-static const MfClassicListenerCommandHandler mf_classic_listener_auth_key_a_handlers[] = {
+static MfClassicListenerCommandHandler mf_classic_listener_auth_key_a_handlers[] = {
     mf_classic_listener_auth_key_a_handler,
     mf_classic_listener_auth_second_part_handler,
 };
 
-static const MfClassicListenerCommandHandler mf_classic_listener_auth_key_b_handlers[] = {
+static MfClassicListenerCommandHandler mf_classic_listener_auth_key_b_handlers[] = {
     mf_classic_listener_auth_key_b_handler,
     mf_classic_listener_auth_second_part_handler,
 };
 
-static const MfClassicListenerCommandHandler mf_classic_listener_read_block_handlers[] = {
+static MfClassicListenerCommandHandler mf_classic_listener_read_block_handlers[] = {
     mf_classic_listener_read_block_handler,
 };
 
-static const MfClassicListenerCommandHandler mf_classic_listener_write_block_handlers[] = {
+static MfClassicListenerCommandHandler mf_classic_listener_write_block_handlers[] = {
     mf_classic_listener_write_block_first_part_handler,
     mf_classic_listener_write_block_second_part_handler,
 };
 
-static const MfClassicListenerCommandHandler mf_classic_listener_value_dec_handlers[] = {
+static MfClassicListenerCommandHandler mf_classic_listener_value_dec_handlers[] = {
     mf_classic_listener_value_dec_handler,
     mf_classic_listener_value_data_receive_handler,
     mf_classic_listener_value_transfer_handler,
 };
 
-static const MfClassicListenerCommandHandler mf_classic_listener_value_inc_handlers[] = {
+static MfClassicListenerCommandHandler mf_classic_listener_value_inc_handlers[] = {
     mf_classic_listener_value_inc_handler,
     mf_classic_listener_value_data_receive_handler,
     mf_classic_listener_value_transfer_handler,
 };
 
-static const MfClassicListenerCommandHandler mf_classic_listener_value_restore_handlers[] = {
+static MfClassicListenerCommandHandler mf_classic_listener_value_restore_handlers[] = {
     mf_classic_listener_value_restore_handler,
     mf_classic_listener_value_data_receive_handler,
     mf_classic_listener_value_transfer_handler,

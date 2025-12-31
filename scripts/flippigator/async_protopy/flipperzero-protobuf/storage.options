@@ -1,0 +1,23 @@
+PB_Storage.File.name                          type:FT_POINTER
+PB_Storage.File.data                          type:FT_POINTER
+PB_Storage.InfoRequest.path                   type:FT_POINTER
+PB_Storage.TimestampRequest.path              type:FT_POINTER
+PB_Storage.StatRequest.path                   type:FT_POINTER
+PB_Storage.ListRequest.path                   type:FT_POINTER
+PB_Storage.ReadRequest.path                   type:FT_POINTER
+PB_Storage.WriteRequest.path                  type:FT_POINTER
+PB_Storage.DeleteRequest.path                 type:FT_POINTER
+PB_Storage.MkdirRequest.path                  type:FT_POINTER
+PB_Storage.Md5sumRequest.path                 type:FT_POINTER
+PB_Storage.RenameRequest.old_path             type:FT_POINTER
+PB_Storage.RenameRequest.new_path             type:FT_POINTER
+PB_Storage.BackupCreateRequest.archive_path   type:FT_POINTER
+PB_Storage.BackupRestoreRequest.archive_path  type:FT_POINTER
+
+PB_Storage.ListResponse.file                  max_count:8
+
+// not affected by nanopb, so server & client should keep in mind these max values
+PB_Storage.File.data                          max_size:512
+PB_Storage.Md5sumResponse.md5sum              max_length:32
+PB_Storage.File.md5sum                        max_length:32
+PB_Storage.*.path                             max_length:255

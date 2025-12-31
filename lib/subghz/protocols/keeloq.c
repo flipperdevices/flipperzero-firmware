@@ -175,7 +175,7 @@ bool subghz_protocol_keeloq_create_data(
     uint16_t cnt,
     const char* manufacture_name,
     SubGhzRadioPreset* preset) {
-    furi_check(context);
+    furi_assert(context);
     SubGhzProtocolEncoderKeeloq* instance = context;
     instance->generic.serial = serial;
     instance->generic.cnt = cnt;
@@ -299,7 +299,7 @@ SubGhzProtocolStatus
             ret = SubGhzProtocolStatusErrorParserKey;
             break;
         }
-        instance->encoder.front = 0; // reset before start
+
         instance->encoder.is_running = true;
     } while(false);
 
@@ -309,7 +309,6 @@ SubGhzProtocolStatus
 void subghz_protocol_encoder_keeloq_stop(void* context) {
     SubGhzProtocolEncoderKeeloq* instance = context;
     instance->encoder.is_running = false;
-    instance->encoder.front = 0; // reset position
 }
 
 LevelDuration subghz_protocol_encoder_keeloq_yield(void* context) {
@@ -474,7 +473,7 @@ static inline bool subghz_protocol_keeloq_check_decrypt_centurion(
     uint8_t btn) {
     furi_assert(instance);
 
-    if((decrypt >> 28 == btn) && ((((uint16_t)(decrypt >> 16)) & 0x3FF) == 0x1CE)) {
+    if((decrypt >> 28 == btn) && (((((uint16_t)(decrypt >> 16)) & 0x3FF) == 0x1CE))) {
         instance->cnt = decrypt & 0x0000FFFF;
         return true;
     }
@@ -522,7 +521,7 @@ static uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
                 // https://phreakerclub.com/forum/showpost.php?p=43557&postcount=37
                 man = subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
-                if(strcmp(furi_string_get_cstr(manufacture_code->name), "Centurion") == 0) {
+                if((strcmp(furi_string_get_cstr(manufacture_code->name), "Centurion") == 0)) {
                     if(subghz_protocol_keeloq_check_decrypt_centurion(instance, decrypt, btn)) {
                         *manufacture_name = furi_string_get_cstr(manufacture_code->name);
                         return 1;

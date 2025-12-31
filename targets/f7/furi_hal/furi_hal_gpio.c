@@ -5,7 +5,7 @@
 #include <stm32wbxx_ll_comp.h>
 #include <stm32wbxx_ll_pwr.h>
 
-static uint32_t furi_hal_gpio_invalid_argument_crash(void) {
+static uint32_t furi_hal_gpio_invalid_argument_crash() {
     furi_crash("Invalid argument");
     return 0;
 }
@@ -39,11 +39,11 @@ static uint32_t furi_hal_gpio_invalid_argument_crash(void) {
                                    furi_hal_gpio_invalid_argument_crash())
 
 #define GET_SYSCFG_EXTI_PORT(port) GPIO_PORT_MAP(port, LL_SYSCFG_EXTI_PORT)
-#define GET_SYSCFG_EXTI_LINE(pin)  GPIO_PIN_MAP(pin, LL_SYSCFG_EXTI_LINE)
-#define GET_EXTI_LINE(pin)         GPIO_PIN_MAP(pin, LL_EXTI_LINE_)
+#define GET_SYSCFG_EXTI_LINE(pin) GPIO_PIN_MAP(pin, LL_SYSCFG_EXTI_LINE)
+#define GET_EXTI_LINE(pin) GPIO_PIN_MAP(pin, LL_EXTI_LINE_)
 
 #define GET_PWR_PORT(port) GPIO_PORT_MAP(port, LL_PWR_GPIO_)
-#define GET_PWR_PIN(pin)   GPIO_PIN_MAP(pin, LL_PWR_GPIO_BIT_)
+#define GET_PWR_PIN(pin) GPIO_PIN_MAP(pin, LL_PWR_GPIO_BIT_)
 
 static volatile GpioInterrupt gpio_interrupt[GPIO_NUMBER];
 
@@ -129,9 +129,11 @@ void furi_hal_gpio_init_ex(
         LL_GPIO_SetPinMode(gpio->port, gpio->pin, LL_GPIO_MODE_INPUT);
         LL_SYSCFG_SetEXTISource(sys_exti_port, sys_exti_line);
         if(mode == GpioModeInterruptRise || mode == GpioModeInterruptRiseFall) {
+            LL_EXTI_EnableIT_0_31(exti_line);
             LL_EXTI_EnableRisingTrig_0_31(exti_line);
         }
         if(mode == GpioModeInterruptFall || mode == GpioModeInterruptRiseFall) {
+            LL_EXTI_EnableIT_0_31(exti_line);
             LL_EXTI_EnableFallingTrig_0_31(exti_line);
         }
         if(mode == GpioModeEventRise || mode == GpioModeEventRiseFall) {
@@ -147,7 +149,6 @@ void furi_hal_gpio_init_ex(
         if(LL_SYSCFG_GetEXTISource(sys_exti_line) == sys_exti_port &&
            LL_EXTI_IsEnabledIT_0_31(exti_line)) {
             LL_EXTI_DisableIT_0_31(exti_line);
-            LL_EXTI_ClearFlag_0_31(exti_line);
             LL_EXTI_DisableRisingTrig_0_31(exti_line);
             LL_EXTI_DisableFallingTrig_0_31(exti_line);
         }
@@ -194,63 +195,51 @@ void furi_hal_gpio_init_ex(
 }
 
 void furi_hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* ctx) {
-    furi_check(gpio);
-    furi_check(cb);
+    furi_assert(gpio);
+    furi_assert(cb);
 
     FURI_CRITICAL_ENTER();
-
     uint8_t pin_num = furi_hal_gpio_get_pin_num(gpio);
     furi_check(gpio_interrupt[pin_num].callback == NULL);
     gpio_interrupt[pin_num].callback = cb;
     gpio_interrupt[pin_num].context = ctx;
-
-    const uint32_t exti_line = GET_EXTI_LINE(gpio->pin);
-    LL_EXTI_EnableIT_0_31(exti_line);
-
+    gpio_interrupt[pin_num].ready = true;
     FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_gpio_enable_int_callback(const GpioPin* gpio) {
-    furi_check(gpio);
+    furi_assert(gpio);
 
     FURI_CRITICAL_ENTER();
-
-    const uint32_t exti_line = GET_EXTI_LINE(gpio->pin);
-    LL_EXTI_EnableIT_0_31(exti_line);
-
+    uint8_t pin_num = furi_hal_gpio_get_pin_num(gpio);
+    if(gpio_interrupt[pin_num].callback) {
+        gpio_interrupt[pin_num].ready = true;
+    }
     FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_gpio_disable_int_callback(const GpioPin* gpio) {
-    furi_check(gpio);
+    furi_assert(gpio);
 
     FURI_CRITICAL_ENTER();
-
-    const uint32_t exti_line = GET_EXTI_LINE(gpio->pin);
-    LL_EXTI_DisableIT_0_31(exti_line);
-    LL_EXTI_ClearFlag_0_31(exti_line);
-
+    uint8_t pin_num = furi_hal_gpio_get_pin_num(gpio);
+    gpio_interrupt[pin_num].ready = false;
     FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_gpio_remove_int_callback(const GpioPin* gpio) {
-    furi_check(gpio);
+    furi_assert(gpio);
 
     FURI_CRITICAL_ENTER();
-
-    const uint32_t exti_line = GET_EXTI_LINE(gpio->pin);
-    LL_EXTI_DisableIT_0_31(exti_line);
-    LL_EXTI_ClearFlag_0_31(exti_line);
-
     uint8_t pin_num = furi_hal_gpio_get_pin_num(gpio);
     gpio_interrupt[pin_num].callback = NULL;
     gpio_interrupt[pin_num].context = NULL;
-
+    gpio_interrupt[pin_num].ready = false;
     FURI_CRITICAL_EXIT();
 }
 
-FURI_ALWAYS_INLINE static void furi_hal_gpio_int_call(uint16_t pin_num) {
-    if(gpio_interrupt[pin_num].callback) {
+static void furi_hal_gpio_int_call(uint16_t pin_num) {
+    if(gpio_interrupt[pin_num].callback && gpio_interrupt[pin_num].ready) {
         gpio_interrupt[pin_num].callback(gpio_interrupt[pin_num].context);
     }
 }
@@ -258,85 +247,85 @@ FURI_ALWAYS_INLINE static void furi_hal_gpio_int_call(uint16_t pin_num) {
 /* Interrupt handlers */
 void EXTI0_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_0)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_0);
         furi_hal_gpio_int_call(0);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_0);
     }
 }
 
 void EXTI1_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_1)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_1);
         furi_hal_gpio_int_call(1);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_1);
     }
 }
 
 void EXTI2_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_2)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_2);
         furi_hal_gpio_int_call(2);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_2);
     }
 }
 
 void EXTI3_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_3)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_3);
         furi_hal_gpio_int_call(3);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_3);
     }
 }
 
 void EXTI4_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_4)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_4);
         furi_hal_gpio_int_call(4);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_4);
     }
 }
 
 void EXTI9_5_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_5)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_5);
         furi_hal_gpio_int_call(5);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_5);
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_6)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_6);
         furi_hal_gpio_int_call(6);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_6);
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_7)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_7);
         furi_hal_gpio_int_call(7);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_7);
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_8)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_8);
         furi_hal_gpio_int_call(8);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_8);
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_9)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_9);
         furi_hal_gpio_int_call(9);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_9);
     }
 }
 
 void EXTI15_10_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_10)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_10);
         furi_hal_gpio_int_call(10);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_10);
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_11)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_11);
         furi_hal_gpio_int_call(11);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_11);
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_12)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_12);
         furi_hal_gpio_int_call(12);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_12);
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
         furi_hal_gpio_int_call(13);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_14)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_14);
         furi_hal_gpio_int_call(14);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_14);
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15)) {
-        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
         furi_hal_gpio_int_call(15);
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
     }
 }

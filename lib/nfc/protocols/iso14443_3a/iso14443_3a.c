@@ -6,11 +6,11 @@
 #define ISO14443A_ATS_BIT (1U << 5)
 
 #define ISO14443_3A_PROTOCOL_NAME_LEGACY "UID"
-#define ISO14443_3A_PROTOCOL_NAME        "ISO14443-3A"
-#define ISO14443_3A_DEVICE_NAME          "ISO14443-3A (Unknown)"
+#define ISO14443_3A_PROTOCOL_NAME "ISO14443-3A"
+#define ISO14443_3A_DEVICE_NAME "ISO14443-3A (Unknown)"
 
 #define ISO14443_3A_ATQA_KEY "ATQA"
-#define ISO14443_3A_SAK_KEY  "SAK"
+#define ISO14443_3A_SAK_KEY "SAK"
 
 const NfcDeviceBase nfc_device_iso14443_3a = {
     .protocol_name = ISO14443_3A_PROTOCOL_NAME,
@@ -28,40 +28,36 @@ const NfcDeviceBase nfc_device_iso14443_3a = {
     .get_base_data = (NfcDeviceGetBaseData)iso14443_3a_get_base_data,
 };
 
-Iso14443_3aData* iso14443_3a_alloc(void) {
+Iso14443_3aData* iso14443_3a_alloc() {
     Iso14443_3aData* data = malloc(sizeof(Iso14443_3aData));
     return data;
 }
 
 void iso14443_3a_free(Iso14443_3aData* data) {
-    furi_check(data);
+    furi_assert(data);
 
     free(data);
 }
 
 void iso14443_3a_reset(Iso14443_3aData* data) {
-    furi_check(data);
-
+    furi_assert(data);
     memset(data, 0, sizeof(Iso14443_3aData));
 }
 
 void iso14443_3a_copy(Iso14443_3aData* data, const Iso14443_3aData* other) {
-    furi_check(data);
-    furi_check(other);
+    furi_assert(data);
+    furi_assert(other);
 
     *data = *other;
 }
 
 bool iso14443_3a_verify(Iso14443_3aData* data, const FuriString* device_type) {
     UNUSED(data);
-    furi_check(device_type);
-
     return furi_string_equal(device_type, ISO14443_3A_PROTOCOL_NAME_LEGACY);
 }
 
 bool iso14443_3a_load(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
-    furi_check(data);
-    furi_check(ff);
+    furi_assert(data);
 
     bool parsed = false;
 
@@ -82,8 +78,7 @@ bool iso14443_3a_load(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version
 }
 
 bool iso14443_3a_save(const Iso14443_3aData* data, FlipperFormat* ff) {
-    furi_check(data);
-    furi_check(ff);
+    furi_assert(data);
 
     bool saved = false;
 
@@ -103,8 +98,8 @@ bool iso14443_3a_save(const Iso14443_3aData* data, FlipperFormat* ff) {
 }
 
 bool iso14443_3a_is_equal(const Iso14443_3aData* data, const Iso14443_3aData* other) {
-    furi_check(data);
-    furi_check(other);
+    furi_assert(data);
+    furi_assert(other);
 
     return memcmp(data, other, sizeof(Iso14443_3aData)) == 0;
 }
@@ -116,7 +111,7 @@ const char* iso14443_3a_get_device_name(const Iso14443_3aData* data, NfcDeviceNa
 }
 
 const uint8_t* iso14443_3a_get_uid(const Iso14443_3aData* data, size_t* uid_len) {
-    furi_check(data);
+    furi_assert(data);
 
     if(uid_len) {
         *uid_len = data->uid_len;
@@ -126,8 +121,7 @@ const uint8_t* iso14443_3a_get_uid(const Iso14443_3aData* data, size_t* uid_len)
 }
 
 bool iso14443_3a_set_uid(Iso14443_3aData* data, const uint8_t* uid, size_t uid_len) {
-    furi_check(data);
-    furi_check(uid);
+    furi_assert(data);
 
     const bool uid_valid = uid_len == ISO14443_3A_UID_4_BYTES ||
                            uid_len == ISO14443_3A_UID_7_BYTES ||
@@ -147,7 +141,7 @@ Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data) {
 }
 
 uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* data) {
-    furi_check(data);
+    furi_assert(data);
 
     uint32_t cuid = 0;
     const uint8_t* cuid_start = data->uid;
@@ -160,33 +154,33 @@ uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* data) {
 }
 
 bool iso14443_3a_supports_iso14443_4(const Iso14443_3aData* data) {
-    furi_check(data);
+    furi_assert(data);
 
     return data->sak & ISO14443A_ATS_BIT;
 }
 
 uint8_t iso14443_3a_get_sak(const Iso14443_3aData* data) {
-    furi_check(data);
+    furi_assert(data);
 
     return data->sak;
 }
 
 void iso14443_3a_get_atqa(const Iso14443_3aData* data, uint8_t atqa[2]) {
-    furi_check(data);
-    furi_check(atqa);
+    furi_assert(data);
+    furi_assert(atqa);
 
     memcpy(atqa, data->atqa, sizeof(data->atqa));
 }
 
 void iso14443_3a_set_sak(Iso14443_3aData* data, uint8_t sak) {
-    furi_check(data);
+    furi_assert(data);
 
     data->sak = sak;
 }
 
 void iso14443_3a_set_atqa(Iso14443_3aData* data, const uint8_t atqa[2]) {
-    furi_check(data);
-    furi_check(atqa);
+    furi_assert(data);
+    furi_assert(atqa);
 
     memcpy(data->atqa, atqa, sizeof(data->atqa));
 }

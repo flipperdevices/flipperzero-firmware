@@ -2,6 +2,7 @@
 
 #include "protocols/base.h"
 #include "registry.h"
+#include "protocols/protocol_items.h"
 
 struct SubGhzTransmitter {
     const SubGhzProtocol* protocol;
@@ -26,18 +27,18 @@ SubGhzTransmitter*
 }
 
 void subghz_transmitter_free(SubGhzTransmitter* instance) {
-    furi_check(instance);
+    furi_assert(instance);
     instance->protocol->encoder->free(instance->protocol_instance);
     free(instance);
 }
 
 SubGhzProtocolEncoderBase* subghz_transmitter_get_protocol_instance(SubGhzTransmitter* instance) {
-    furi_check(instance);
+    furi_assert(instance);
     return instance->protocol_instance;
 }
 
 bool subghz_transmitter_stop(SubGhzTransmitter* instance) {
-    furi_check(instance);
+    furi_assert(instance);
     bool ret = false;
     if(instance->protocol && instance->protocol->encoder && instance->protocol->encoder->stop) {
         instance->protocol->encoder->stop(instance->protocol_instance);
@@ -48,7 +49,7 @@ bool subghz_transmitter_stop(SubGhzTransmitter* instance) {
 
 SubGhzProtocolStatus
     subghz_transmitter_deserialize(SubGhzTransmitter* instance, FlipperFormat* flipper_format) {
-    furi_check(instance);
+    furi_assert(instance);
     SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     if(instance->protocol && instance->protocol->encoder &&
        instance->protocol->encoder->deserialize) {

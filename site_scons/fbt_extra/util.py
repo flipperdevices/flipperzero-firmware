@@ -1,5 +1,5 @@
-from ansi.color import fg
 from fbt.util import link_dir
+from ansi.color import fg
 
 
 def link_elf_dir_as_latest(env, elf_node):

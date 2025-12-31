@@ -14,7 +14,7 @@ typedef enum {
 
 typedef void (*DetectReaderDoneCallback)(void* context);
 
-DetectReader* detect_reader_alloc(void);
+DetectReader* detect_reader_alloc();
 
 void detect_reader_free(DetectReader* detect_reader);
 

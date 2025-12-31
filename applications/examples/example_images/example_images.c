@@ -1,7 +1,3 @@
-/**
- * @file example_images.c
- * @brief Custom images example.
- */
 #include <furi.h>
 #include <furi_hal.h>
 
@@ -13,7 +9,7 @@
 #include "example_images_icons.h"
 
 typedef struct {
-    int32_t x, y;
+    uint8_t x, y;
 } ImagePosition;
 
 static ImagePosition image_position = {.x = 0, .y = 0};
@@ -23,7 +19,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     canvas_clear(canvas);
-    canvas_draw_icon(canvas, image_position.x, image_position.y, &I_dolphin_71x25);
+    canvas_draw_icon(canvas, image_position.x % 128, image_position.y % 64, &I_dolphin_71x25);
 }
 
 static void app_input_callback(InputEvent* input_event, void* ctx) {
@@ -39,7 +35,7 @@ int32_t example_images_main(void* p) {
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, app_draw_callback, NULL);
+    view_port_draw_callback_set(view_port, app_draw_callback, view_port);
     view_port_input_callback_set(view_port, app_input_callback, event_queue);
 
     // Register view port in GUI

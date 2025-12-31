@@ -15,9 +15,6 @@
  * Example:
  * ./fbt --extra-define=DIGITAL_SIGNAL_DEBUG_OUTPUT_PIN=gpio_ext_pb3
  */
-#ifdef DIGITAL_SIGNAL_DEBUG_OUTPUT_PIN
-#include <furi_hal.h>
-#endif
 
 #define TAG "DigitalSequence"
 
@@ -25,7 +22,7 @@
 #define DIGITAL_SEQUENCE_TIMER_MAX 0xFFFFFFFFUL
 
 /* Time to wait in loops before returning */
-#define DIGITAL_SEQUENCE_LOCK_WAIT_MS    10UL
+#define DIGITAL_SEQUENCE_LOCK_WAIT_MS 10UL
 #define DIGITAL_SEQUENCE_LOCK_WAIT_TICKS (DIGITAL_SEQUENCE_LOCK_WAIT_MS * 1000 * 64)
 
 #define DIGITAL_SEQUENCE_GPIO_BUFFER_SIZE 2
@@ -58,6 +55,7 @@ struct DigitalSequence {
 
     uint32_t size;
     uint32_t max_size;
+    uint8_t* data;
 
     LL_DMA_InitTypeDef dma_config_gpio;
     LL_DMA_InitTypeDef dma_config_timer;
@@ -66,18 +64,18 @@ struct DigitalSequence {
     DigitalSequenceRingBuffer timer_buf;
     DigitalSequenceSignalBank signals;
     DigitalSequenceState state;
-
-    uint8_t data[];
 };
 
 DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
     furi_assert(size);
     furi_assert(gpio);
 
-    DigitalSequence* sequence = malloc(sizeof(DigitalSequence) + size);
+    DigitalSequence* sequence = malloc(sizeof(DigitalSequence));
 
     sequence->gpio = gpio;
     sequence->max_size = size;
+
+    sequence->data = malloc(sequence->max_size);
 
     sequence->dma_config_gpio.PeriphOrM2MSrcAddress = (uint32_t)&gpio->port->BSRR;
     sequence->dma_config_gpio.MemoryOrM2MDstAddress = (uint32_t)sequence->gpio_buf;
@@ -109,6 +107,7 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
 void digital_sequence_free(DigitalSequence* sequence) {
     furi_assert(sequence);
 
+    free(sequence->data);
     free(sequence);
 }
 
@@ -116,17 +115,17 @@ void digital_sequence_register_signal(
     DigitalSequence* sequence,
     uint8_t signal_index,
     const DigitalSignal* signal) {
-    furi_check(sequence);
-    furi_check(signal);
-    furi_check(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);
+    furi_assert(sequence);
+    furi_assert(signal);
+    furi_assert(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);
 
     sequence->signals[signal_index] = signal;
 }
 
 void digital_sequence_add_signal(DigitalSequence* sequence, uint8_t signal_index) {
-    furi_check(sequence);
-    furi_check(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);
-    furi_check(sequence->size < sequence->max_size);
+    furi_assert(sequence);
+    furi_assert(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);
+    furi_assert(sequence->size < sequence->max_size);
 
     sequence->data[sequence->size++] = signal_index;
 }
@@ -141,14 +140,14 @@ static inline void digital_sequence_start_dma(DigitalSequence* sequence) {
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
 }
 
-static inline void digital_sequence_stop_dma(void) {
+static inline void digital_sequence_stop_dma() {
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
     LL_DMA_ClearFlag_TC1(DMA1);
     LL_DMA_ClearFlag_TC2(DMA1);
 }
 
-static inline void digital_sequence_start_timer(void) {
+static inline void digital_sequence_start_timer() {
     furi_hal_bus_enable(FuriHalBusTIM2);
 
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
@@ -163,7 +162,7 @@ static inline void digital_sequence_start_timer(void) {
     LL_TIM_GenerateEvent_UPDATE(TIM2);
 }
 
-static void digital_sequence_stop_timer(void) {
+static void digital_sequence_stop_timer() {
     LL_TIM_DisableCounter(TIM2);
     LL_TIM_DisableUpdateEvent(TIM2);
     LL_TIM_DisableDMAReq_UPDATE(TIM2);
@@ -281,9 +280,9 @@ static inline void digital_sequence_timer_buffer_reset(DigitalSequence* sequence
 }
 
 void digital_sequence_transmit(DigitalSequence* sequence) {
-    furi_check(sequence);
-    furi_check(sequence->size);
-    furi_check(sequence->state == DigitalSequenceStateIdle);
+    furi_assert(sequence);
+    furi_assert(sequence->size);
+    furi_assert(sequence->state == DigitalSequenceStateIdle);
 
     FURI_CRITICAL_ENTER();
 

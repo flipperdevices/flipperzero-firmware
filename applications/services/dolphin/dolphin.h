@@ -1,9 +1,10 @@
 #pragma once
 
-#include <stdbool.h>
-#include <core/pubsub.h>
-
 #include "helpers/dolphin_deed.h"
+
+#include <gui/view.h>
+#include <core/pubsub.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,10 +22,6 @@ typedef struct {
     bool level_up_is_pending;
 } DolphinStats;
 
-typedef struct {
-    bool happy_mode;
-} DolphinSettings;
-
 typedef enum {
     DolphinPubsubEventUpdate,
 } DolphinPubsubEvent;
@@ -34,10 +31,6 @@ typedef enum {
  * Thread safe, async
  */
 void dolphin_deed(DolphinDeed deed);
-
-void dolphin_get_settings(Dolphin* dolphin, DolphinSettings* settings);
-
-void dolphin_set_settings(Dolphin* dolphin, DolphinSettings* settings);
 
 /** Retrieve dolphin stats
  * Thread safe, blocking

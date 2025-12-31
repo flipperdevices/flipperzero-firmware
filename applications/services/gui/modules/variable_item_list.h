@@ -20,7 +20,7 @@ typedef void (*VariableItemListEnterCallback)(void* context, uint32_t index);
  *
  * @return     VariableItemList*
  */
-VariableItemList* variable_item_list_alloc(void);
+VariableItemList* variable_item_list_alloc();
 
 /** Deinitialize and free VariableItemList
  *

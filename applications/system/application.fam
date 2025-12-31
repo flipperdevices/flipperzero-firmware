@@ -4,9 +4,13 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "updater_app",
+<<<<<<< HEAD
         "js_app",
         "js_app_start",
         "mfkey",
+=======
+        "storage_move_to_sd",
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
         # "archive",
     ],
 )

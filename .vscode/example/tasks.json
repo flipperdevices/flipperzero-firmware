@@ -4,18 +4,6 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "[FBT] Format",
-            "group": "build",
-            "type": "shell",
-            "command": "./fbt format"
-        },
-        {
-            "label": "[FBT] Clean",
-            "group": "build",
-            "type": "shell",
-            "command": "./fbt -c"
-        },
-        {
             "label": "[Release] Build Firmware",
             "group": "build",
             "type": "shell",
@@ -76,28 +64,22 @@
             "command": "./fbt updater_all"
         },
         {
-            "label": "[Release] Flash (USB, w/o resources)",
-            "group": "build",
-            "type": "shell",
-            "command": "./fbt COMPACT=1 DEBUG=0 FORCE=1 flash_usb"
-        },
-        {
             "label": "[Debug] Flash (USB, w/o resources)",
             "group": "build",
             "type": "shell",
             "command": "./fbt FORCE=1 flash_usb"
         },
         {
+            "label": "[Release] Flash (USB, w/o resources)",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt COMPACT=1 DEBUG=0 FORCE=1 flash_usb"
+        },
+        {
             "label": "[Debug:unit_tests] Flash (USB)",
             "group": "build",
             "type": "shell",
-            "command": "./fbt FIRMWARE_APP_SET=unit_tests FORCE=1 flash_usb_full"
-        },
-        {
-            "label": "[Release] Flash (USB, with resources)",
-            "group": "build",
-            "type": "shell",
-            "command": "./fbt COMPACT=1 DEBUG=0 FORCE=1 flash_usb_full"
+            "command": "./fbt FIRMWARE_APP_SET=unit_tests FORCE=1 flash_usb"
         },
         {
             "label": "[Debug] Flash (USB, with resources)",
@@ -106,16 +88,16 @@
             "command": "./fbt FORCE=1 flash_usb_full"
         },
         {
+            "label": "[Release] Flash (USB, with resources)",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt COMPACT=1 DEBUG=0 FORCE=1 flash_usb_full"
+        },
+        {
             "label": "[Debug] Create PVS-Studio report",
             "group": "build",
             "type": "shell",
             "command": "./fbt firmware_pvs"
-        },
-        {
-            "label": "[Release] Build FAPs",
-            "group": "build",
-            "type": "shell",
-            "command": "./fbt COMPACT=1 DEBUG=0 fap_dist"
         },
         {
             "label": "[Debug] Build FAPs",
@@ -124,10 +106,10 @@
             "command": "./fbt fap_dist"
         },
         {
-            "label": "[Release] Build App",
+            "label": "[Release] Build FAPs",
             "group": "build",
             "type": "shell",
-            "command": "./fbt COMPACT=1 DEBUG=0 build APPSRC=${relativeFileDirname}"
+            "command": "./fbt COMPACT=1 DEBUG=0 fap_dist"
         },
         {
             "label": "[Debug] Build App",
@@ -136,16 +118,22 @@
             "command": "./fbt build APPSRC=${relativeFileDirname}"
         },
         {
-            "label": "[Release] Launch App on Flipper",
+            "label": "[Release] Build App",
             "group": "build",
             "type": "shell",
-            "command": "./fbt COMPACT=1 DEBUG=0 launch APPSRC=${relativeFileDirname}"
+            "command": "./fbt COMPACT=1 DEBUG=0 build APPSRC=${relativeFileDirname}"
         },
         {
             "label": "[Debug] Launch App on Flipper",
             "group": "build",
             "type": "shell",
             "command": "./fbt launch APPSRC=${relativeFileDirname}"
+        },
+        {
+            "label": "[Release] Launch App on Flipper",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt COMPACT=1 DEBUG=0 launch APPSRC=${relativeFileDirname}"
         },
         {
             "label": "[Debug] Launch App on Flipper with Serial Console",
@@ -157,16 +145,16 @@
             ]
         },
         {
-            "label": "[Release] Build and upload all FAPs to Flipper over USB",
-            "group": "build",
-            "type": "shell",
-            "command": "./fbt COMPACT=1 DEBUG=0 fap_deploy"
-        },
-        {
             "label": "[Debug] Build and upload all FAPs to Flipper over USB",
             "group": "build",
             "type": "shell",
             "command": "./fbt fap_deploy"
+        },
+        {
+            "label": "[Release] Build and upload all FAPs to Flipper over USB",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt COMPACT=1 DEBUG=0 fap_deploy"
         },
         {
             // Press Ctrl+] to quit

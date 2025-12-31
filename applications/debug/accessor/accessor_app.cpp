@@ -2,7 +2,6 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <stdarg.h>
-#include <power/power_service/power.h>
 
 void AccessorApp::run(void) {
     AccessorEvent event;
@@ -35,19 +34,13 @@ void AccessorApp::run(void) {
 AccessorApp::AccessorApp()
     : text_store{0} {
     notification = static_cast<NotificationApp*>(furi_record_open(RECORD_NOTIFICATION));
-    expansion = static_cast<Expansion*>(furi_record_open(RECORD_EXPANSION));
-    power = static_cast<Power*>(furi_record_open(RECORD_POWER));
     onewire_host = onewire_host_alloc(&gpio_ibutton);
-    expansion_disable(expansion);
-    power_enable_otg(power, true);
+    furi_hal_power_enable_otg();
 }
 
 AccessorApp::~AccessorApp() {
-    power_enable_otg(power, false);
-    expansion_enable(expansion);
-    furi_record_close(RECORD_EXPANSION);
+    furi_hal_power_disable_otg();
     furi_record_close(RECORD_NOTIFICATION);
-    furi_record_close(RECORD_POWER);
     onewire_host_free(onewire_host);
 }
 

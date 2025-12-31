@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package PB_App;
+option java_package = "com.flipperdevices.protobuf.app";
+
+message StartRequest {
+    string name = 1;
+    string args = 2;
+}
+
+message LockStatusRequest {
+}
+
+message LockStatusResponse {
+    bool locked = 1;
+}
+
+message AppExitRequest {
+}
+
+message AppLoadFileRequest {
+    string path = 1;
+}
+
+message AppButtonPressRequest {
+    string args = 1;
+    int32 index = 2;
+}
+
+message AppButtonReleaseRequest {
+}
+
+enum AppState {
+    APP_CLOSED = 0;
+    APP_STARTED = 1;
+};
+
+message AppStateResponse {
+    AppState state = 1;
+}
+
+message GetErrorRequest {
+}
+
+message GetErrorResponse {
+    uint32 code = 1;
+    string text = 2;
+}
+
+message DataExchangeRequest {
+    bytes data = 1;
+}

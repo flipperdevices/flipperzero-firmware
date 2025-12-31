@@ -1,10 +1,6 @@
-/**
- * @file timer.h
- * @brief Furi software Timer API.
- */
 #pragma once
 
-#include "base.h"
+#include "core/base.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +13,7 @@ typedef enum {
     FuriTimerTypePeriodic = 1 ///< Repeating timer.
 } FuriTimerType;
 
-typedef struct FuriTimer FuriTimer;
+typedef void FuriTimer;
 
 /** Allocate timer
  *
@@ -34,12 +30,6 @@ FuriTimer* furi_timer_alloc(FuriTimerCallback func, FuriTimerType type, void* co
  * @param      instance  The pointer to FuriTimer instance
  */
 void furi_timer_free(FuriTimer* instance);
-
-/** Flush timer task control message queue
- *
- * Ensures that all commands before this point was processed.
- */
-void furi_timer_flush(void);
 
 /** Start timer
  *
@@ -67,7 +57,8 @@ FuriStatus furi_timer_restart(FuriTimer* instance, uint32_t ticks);
 
 /** Stop timer
  *
- * @warning    This is synchronous call that will be blocked till timer queue processed.
+ * @warning    This is asynchronous call, real operation will happen as soon as
+ *             timer service process this request.
  *
  * @param      instance  The pointer to FuriTimer instance
  *

@@ -6,40 +6,42 @@
 #define TAG "DigitalSignal"
 
 DigitalSignal* digital_signal_alloc(uint32_t max_size) {
-    DigitalSignal* signal = malloc(sizeof(DigitalSignal) + (max_size * sizeof(uint32_t)));
+    DigitalSignal* signal = malloc(sizeof(DigitalSignal));
 
     signal->max_size = max_size;
+    signal->data = malloc(max_size * sizeof(uint32_t));
 
     return signal;
 }
 
 void digital_signal_free(DigitalSignal* signal) {
-    furi_check(signal);
+    furi_assert(signal);
 
+    free(signal->data);
     free(signal);
 }
 
 bool digital_signal_get_start_level(const DigitalSignal* signal) {
-    furi_check(signal);
+    furi_assert(signal);
 
     return signal->start_level;
 }
 
 void digital_signal_set_start_level(DigitalSignal* signal, bool level) {
-    furi_check(signal);
+    furi_assert(signal);
 
     signal->start_level = level;
 }
 
 uint32_t digital_signal_get_size(const DigitalSignal* signal) {
-    furi_check(signal);
+    furi_assert(signal);
 
     return signal->size;
 }
 
 void digital_signal_add_period(DigitalSignal* signal, uint32_t ticks) {
-    furi_check(signal);
-    furi_check(signal->size < signal->max_size);
+    furi_assert(signal);
+    furi_assert(signal->size < signal->max_size);
 
     const uint32_t duration = ticks + signal->remainder;
 
@@ -78,7 +80,7 @@ static void digital_signal_extend_last_period(DigitalSignal* signal, uint32_t ti
 }
 
 void digital_signal_add_period_with_level(DigitalSignal* signal, uint32_t ticks, bool level) {
-    furi_check(signal);
+    furi_assert(signal);
 
     if(signal->size == 0) {
         signal->start_level = level;

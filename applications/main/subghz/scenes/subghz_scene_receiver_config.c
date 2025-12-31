@@ -297,7 +297,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
        SubGhzCustomEventManagerSet) {
         item = variable_item_list_add(
             subghz->variable_item_list,
-            "Bin_Raw:",
+            "Bin_RAW:",
             BIN_RAW_COUNT,
             subghz_scene_receiver_config_set_bin_raw,
             subghz);

@@ -1,7 +1,9 @@
 #include "subghz_test_static.h"
+#include "../subghz_test_app_i.h"
 #include "../helpers/subghz_test_frequency.h"
 #include <lib/subghz/devices/cc1101_configs.h>
 
+#include <math.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
@@ -162,7 +164,7 @@ void subghz_test_static_exit(void* context) {
     furi_hal_subghz_sleep();
 }
 
-SubGhzTestStatic* subghz_test_static_alloc(void) {
+SubGhzTestStatic* subghz_test_static_alloc() {
     SubGhzTestStatic* instance = malloc(sizeof(SubGhzTestStatic));
 
     // View allocation and configuration

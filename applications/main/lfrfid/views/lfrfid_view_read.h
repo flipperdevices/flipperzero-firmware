@@ -17,7 +17,7 @@ typedef enum {
 
 typedef struct LfRfidReadView LfRfidReadView;
 
-LfRfidReadView* lfrfid_view_read_alloc(void);
+LfRfidReadView* lfrfid_view_read_alloc();
 
 void lfrfid_view_read_free(LfRfidReadView* read_view);
 

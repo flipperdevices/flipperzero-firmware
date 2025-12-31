@@ -10,13 +10,13 @@
 extern "C" {
 #endif
 
-typedef struct FuriEventFlag FuriEventFlag;
+typedef void FuriEventFlag;
 
 /** Allocate FuriEventFlag
  *
  * @return     pointer to FuriEventFlag
  */
-FuriEventFlag* furi_event_flag_alloc(void);
+FuriEventFlag* furi_event_flag_alloc();
 
 /** Deallocate FuriEventFlag
  *
@@ -26,15 +26,10 @@ void furi_event_flag_free(FuriEventFlag* instance);
 
 /** Set flags
  *
- * @warning    result of this function can be flags that you've just asked to
- *             set or not if someone was waiting for them and asked to clear it.
- *             It is highly recommended to read this function and
- *             xEventGroupSetBits source code.
- *
  * @param      instance  pointer to FuriEventFlag
- * @param[in]  flags     The flags to set
+ * @param[in]  flags     The flags
  *
- * @return     Resulting flags(see warning) or error (FuriStatus)
+ * @return     Resulting flags or error (FuriStatus)
  */
 uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags);
 

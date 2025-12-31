@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-typedef struct FuriSemaphore FuriSemaphore;
+typedef void FuriSemaphore;
 
 /** Allocate semaphore
  *
@@ -52,14 +52,6 @@ FuriStatus furi_semaphore_release(FuriSemaphore* instance);
  * @return     Semaphore count
  */
 uint32_t furi_semaphore_get_count(FuriSemaphore* instance);
-
-/** Get available space
- *
- * @param      instance  The pointer to FuriSemaphore instance
- *
- * @return     Semaphore available space
- */
-uint32_t furi_semaphore_get_space(FuriSemaphore* instance);
 
 #ifdef __cplusplus
 }

@@ -1,10 +1,9 @@
 #include "ibutton_worker_i.h"
 
 #include <core/check.h>
-#include <core/record.h>
 
 #include <furi_hal_rfid.h>
-#include <power/power_service/power.h>
+#include <furi_hal_power.h>
 
 #include "ibutton_protocols.h"
 
@@ -21,7 +20,7 @@ static void ibutton_worker_mode_read_tick(iButtonWorker* worker);
 static void ibutton_worker_mode_read_stop(iButtonWorker* worker);
 
 static void ibutton_worker_mode_write_common_start(iButtonWorker* worker);
-static void ibutton_worker_mode_write_id_tick(iButtonWorker* worker);
+static void ibutton_worker_mode_write_blank_tick(iButtonWorker* worker);
 static void ibutton_worker_mode_write_copy_tick(iButtonWorker* worker);
 static void ibutton_worker_mode_write_common_stop(iButtonWorker* worker);
 
@@ -41,7 +40,7 @@ const iButtonWorkerModeType ibutton_worker_modes[] = {
     {
         .quant = 1000,
         .start = ibutton_worker_mode_write_common_start,
-        .tick = ibutton_worker_mode_write_id_tick,
+        .tick = ibutton_worker_mode_write_blank_tick,
         .stop = ibutton_worker_mode_write_common_stop,
     },
     {
@@ -76,9 +75,7 @@ void ibutton_worker_mode_idle_stop(iButtonWorker* worker) {
 
 void ibutton_worker_mode_read_start(iButtonWorker* worker) {
     UNUSED(worker);
-    Power* power = furi_record_open(RECORD_POWER);
-    power_enable_otg(power, true);
-    furi_record_close(RECORD_POWER);
+    furi_hal_power_enable_otg();
 }
 
 void ibutton_worker_mode_read_tick(iButtonWorker* worker) {
@@ -93,9 +90,7 @@ void ibutton_worker_mode_read_tick(iButtonWorker* worker) {
 
 void ibutton_worker_mode_read_stop(iButtonWorker* worker) {
     UNUSED(worker);
-    Power* power = furi_record_open(RECORD_POWER);
-    power_enable_otg(power, false);
-    furi_record_close(RECORD_POWER);
+    furi_hal_power_disable_otg();
 }
 
 /*********************** EMULATE ***********************/
@@ -125,15 +120,13 @@ void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
 
 void ibutton_worker_mode_write_common_start(iButtonWorker* worker) { //-V524
     UNUSED(worker);
-    Power* power = furi_record_open(RECORD_POWER);
-    power_enable_otg(power, true);
-    furi_record_close(RECORD_POWER);
+    furi_hal_power_enable_otg();
 }
 
-void ibutton_worker_mode_write_id_tick(iButtonWorker* worker) {
+void ibutton_worker_mode_write_blank_tick(iButtonWorker* worker) {
     furi_assert(worker->key);
 
-    const bool success = ibutton_protocols_write_id(worker->protocols, worker->key);
+    const bool success = ibutton_protocols_write_blank(worker->protocols, worker->key);
     // TODO FL-3527: pass a proper result to the callback
     const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK :
                                                       iButtonWorkerWriteNoDetect;
@@ -156,7 +149,5 @@ void ibutton_worker_mode_write_copy_tick(iButtonWorker* worker) {
 
 void ibutton_worker_mode_write_common_stop(iButtonWorker* worker) { //-V524
     UNUSED(worker);
-    Power* power = furi_record_open(RECORD_POWER);
-    power_enable_otg(power, false);
-    furi_record_close(RECORD_POWER);
+    furi_hal_power_disable_otg();
 }

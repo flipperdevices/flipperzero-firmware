@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package PB_System;
+option java_package = "com.flipperdevices.protobuf.system";
+
+message PingRequest {
+    bytes data = 1;
+}
+
+message PingResponse {
+    bytes data = 1;
+}
+
+message RebootRequest {
+    enum RebootMode {
+        OS = 0;   // default value
+        DFU = 1;
+        UPDATE = 2;
+    }
+    RebootMode mode = 1;
+}
+
+message DeviceInfoRequest {
+}
+
+message DeviceInfoResponse {
+    string key = 1;
+    string value = 2;
+}
+
+message FactoryResetRequest {
+}
+
+message GetDateTimeRequest {
+}
+
+message GetDateTimeResponse {
+    DateTime datetime = 1;
+}
+
+message SetDateTimeRequest {
+    DateTime datetime = 1;
+}
+
+message DateTime {
+    // Time
+    uint32 hour = 1;    /**< Hour in 24H format: 0-23 */
+    uint32 minute = 2;  /**< Minute: 0-59 */
+    uint32 second = 3;  /**< Second: 0-59 */
+    // Date
+    uint32 day = 4;     /**< Current day: 1-31 */
+    uint32 month = 5;   /**< Current month: 1-12 */
+    uint32 year = 6;    /**< Current year: 2000-2099 */
+    uint32 weekday = 7; /**< Current weekday: 1-7 */
+}
+
+message PlayAudiovisualAlertRequest {
+}
+
+message ProtobufVersionRequest {
+}
+
+message ProtobufVersionResponse {
+    uint32 major = 1;
+    uint32 minor = 2;
+}
+
+message UpdateRequest {
+    string update_manifest = 1;
+}
+
+message UpdateResponse {
+    enum UpdateResultCode {
+        OK = 0;
+        ManifestPathInvalid = 1;
+        ManifestFolderNotFound = 2;
+        ManifestInvalid = 3;
+        StageMissing = 4;
+        StageIntegrityError = 5;
+        ManifestPointerError = 6;
+        TargetMismatch = 7;
+        OutdatedManifestVersion = 8;
+        IntFull = 9;
+        UnspecifiedError = 10;
+    }
+    UpdateResultCode code = 1;
+}
+
+message PowerInfoRequest {
+}
+
+message PowerInfoResponse {
+    string key = 1;
+    string value = 2;
+}

@@ -3,12 +3,12 @@
 #include <furi.h>
 
 #define ISO14443_4A_PROTOCOL_NAME "ISO14443-4A"
-#define ISO14443_4A_DEVICE_NAME   "ISO14443-4A (Unknown)"
+#define ISO14443_4A_DEVICE_NAME "ISO14443-4A (Unknown)"
 
-#define ISO14443_4A_T0_KEY    "T0"
-#define ISO14443_4A_TA1_KEY   "TA(1)"
-#define ISO14443_4A_TB1_KEY   "TB(1)"
-#define ISO14443_4A_TC1_KEY   "TC(1)"
+#define ISO14443_4A_T0_KEY "T0"
+#define ISO14443_4A_TA1_KEY "TA(1)"
+#define ISO14443_4A_TB1_KEY "TB(1)"
+#define ISO14443_4A_TC1_KEY "TC(1)"
 #define ISO14443_4A_T1_TK_KEY "T1...Tk"
 
 #define ISO14443_4A_FDT_DEFAULT_FC ISO14443_3A_FDT_POLL_FC
@@ -35,7 +35,7 @@ const NfcDeviceBase nfc_device_iso14443_4a = {
     .get_base_data = (NfcDeviceGetBaseData)iso14443_4a_get_base_data,
 };
 
-Iso14443_4aData* iso14443_4a_alloc(void) {
+Iso14443_4aData* iso14443_4a_alloc() {
     Iso14443_4aData* data = malloc(sizeof(Iso14443_4aData));
 
     data->iso14443_3a_data = iso14443_3a_alloc();
@@ -45,7 +45,7 @@ Iso14443_4aData* iso14443_4a_alloc(void) {
 }
 
 void iso14443_4a_free(Iso14443_4aData* data) {
-    furi_check(data);
+    furi_assert(data);
 
     simple_array_free(data->ats_data.t1_tk);
     iso14443_3a_free(data->iso14443_3a_data);
@@ -54,7 +54,7 @@ void iso14443_4a_free(Iso14443_4aData* data) {
 }
 
 void iso14443_4a_reset(Iso14443_4aData* data) {
-    furi_check(data);
+    furi_assert(data);
 
     iso14443_3a_reset(data->iso14443_3a_data);
 
@@ -68,8 +68,8 @@ void iso14443_4a_reset(Iso14443_4aData* data) {
 }
 
 void iso14443_4a_copy(Iso14443_4aData* data, const Iso14443_4aData* other) {
-    furi_check(data);
-    furi_check(other);
+    furi_assert(data);
+    furi_assert(other);
 
     iso14443_3a_copy(data->iso14443_3a_data, other->iso14443_3a_data);
 
@@ -91,8 +91,7 @@ bool iso14443_4a_verify(Iso14443_4aData* data, const FuriString* device_type) {
 }
 
 bool iso14443_4a_load(Iso14443_4aData* data, FlipperFormat* ff, uint32_t version) {
-    furi_check(data);
-    furi_check(ff);
+    furi_assert(data);
 
     bool parsed = false;
 
@@ -146,8 +145,7 @@ bool iso14443_4a_load(Iso14443_4aData* data, FlipperFormat* ff, uint32_t version
 }
 
 bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff) {
-    furi_check(data);
-    furi_check(ff);
+    furi_assert(data);
 
     bool saved = false;
 
@@ -188,9 +186,6 @@ bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff) {
 }
 
 bool iso14443_4a_is_equal(const Iso14443_4aData* data, const Iso14443_4aData* other) {
-    furi_check(data);
-    furi_check(other);
-
     return iso14443_3a_is_equal(data->iso14443_3a_data, other->iso14443_3a_data);
 }
 
@@ -201,26 +196,23 @@ const char* iso14443_4a_get_device_name(const Iso14443_4aData* data, NfcDeviceNa
 }
 
 const uint8_t* iso14443_4a_get_uid(const Iso14443_4aData* data, size_t* uid_len) {
-    furi_check(data);
-    furi_check(uid_len);
-
     return iso14443_3a_get_uid(data->iso14443_3a_data, uid_len);
 }
 
 bool iso14443_4a_set_uid(Iso14443_4aData* data, const uint8_t* uid, size_t uid_len) {
-    furi_check(data);
+    furi_assert(data);
 
     return iso14443_3a_set_uid(data->iso14443_3a_data, uid, uid_len);
 }
 
 Iso14443_3aData* iso14443_4a_get_base_data(const Iso14443_4aData* data) {
-    furi_check(data);
+    furi_assert(data);
 
     return data->iso14443_3a_data;
 }
 
 uint16_t iso14443_4a_get_frame_size_max(const Iso14443_4aData* data) {
-    furi_check(data);
+    furi_assert(data);
 
     const uint8_t fsci = data->ats_data.t0 & 0x0F;
 
@@ -238,7 +230,7 @@ uint16_t iso14443_4a_get_frame_size_max(const Iso14443_4aData* data) {
 }
 
 uint32_t iso14443_4a_get_fwt_fc_max(const Iso14443_4aData* data) {
-    furi_check(data);
+    furi_assert(data);
 
     uint32_t fwt_fc_max = ISO14443_4A_FDT_DEFAULT_FC;
 
@@ -256,20 +248,15 @@ uint32_t iso14443_4a_get_fwt_fc_max(const Iso14443_4aData* data) {
 }
 
 const uint8_t* iso14443_4a_get_historical_bytes(const Iso14443_4aData* data, uint32_t* count) {
-    furi_check(data);
-    furi_check(count);
+    furi_assert(data);
+    furi_assert(count);
 
     *count = simple_array_get_count(data->ats_data.t1_tk);
-    const uint8_t* hist_bytes = NULL;
-    if(*count > 0) {
-        hist_bytes = simple_array_cget_data(data->ats_data.t1_tk);
-    }
-
-    return hist_bytes;
+    return simple_array_cget_data(data->ats_data.t1_tk);
 }
 
 bool iso14443_4a_supports_bit_rate(const Iso14443_4aData* data, Iso14443_4aBitRate bit_rate) {
-    furi_check(data);
+    furi_assert(data);
 
     if(!(data->ats_data.t0 & ISO14443_4A_ATS_T0_TA1))
         return bit_rate == Iso14443_4aBitRateBoth106Kbit;
@@ -297,7 +284,7 @@ bool iso14443_4a_supports_bit_rate(const Iso14443_4aData* data, Iso14443_4aBitRa
 }
 
 bool iso14443_4a_supports_frame_option(const Iso14443_4aData* data, Iso14443_4aFrameOption option) {
-    furi_check(data);
+    furi_assert(data);
 
     const Iso14443_4aAtsData* ats_data = &data->ats_data;
     if(!(ats_data->t0 & ISO14443_4A_ATS_T0_TC1)) return false;

@@ -4,12 +4,10 @@
  */
 
 #pragma once
-
-#include "../widget.h"
-#include "widget_element.h"
 #include <furi.h>
 #include <gui/view.h>
 #include <input/input.h>
+#include "widget_element.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,28 +71,20 @@ WidgetElement* widget_element_button_create(
 /** Create icon element */
 WidgetElement* widget_element_icon_create(uint8_t x, uint8_t y, const Icon* icon);
 
-/** Create rect element */
-WidgetElement* widget_element_rect_create(
+/** Create frame element */
+WidgetElement* widget_element_frame_create(
     uint8_t x,
     uint8_t y,
     uint8_t width,
     uint8_t height,
-    uint8_t radius,
-    bool fill);
+    uint8_t radius);
 
-/** Create text scroll element */
 WidgetElement* widget_element_text_scroll_create(
     uint8_t x,
     uint8_t y,
     uint8_t width,
     uint8_t height,
     const char* text);
-
-/** Create circle element */
-WidgetElement* widget_element_circle_create(uint8_t x, uint8_t y, uint8_t radius, bool fill);
-
-/** Create line element */
-WidgetElement* widget_element_line_create(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 
 #ifdef __cplusplus
 }

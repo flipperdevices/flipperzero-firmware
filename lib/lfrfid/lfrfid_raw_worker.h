@@ -15,7 +15,7 @@ typedef struct LFRFIDRawWorker LFRFIDRawWorker;
  * 
  * @return LFRFIDRawWorker* 
  */
-LFRFIDRawWorker* lfrfid_raw_worker_alloc(void);
+LFRFIDRawWorker* lfrfid_raw_worker_alloc();
 
 /**
  * @brief Free a LFRFIDRawWorker instance

@@ -16,7 +16,7 @@ typedef struct SubGhzProtocolRegistry SubGhzProtocolRegistry;
  * Allocate SubGhzEnvironment.
  * @return SubGhzEnvironment* pointer to a SubGhzEnvironment instance
  */
-SubGhzEnvironment* subghz_environment_alloc(void);
+SubGhzEnvironment* subghz_environment_alloc();
 
 /**
  * Free SubGhzEnvironment.

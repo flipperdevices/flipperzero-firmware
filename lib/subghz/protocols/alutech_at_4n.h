@@ -1,7 +1,7 @@
 #pragma once
 #include "base.h"
 
-#define SUBGHZ_PROTOCOL_ALUTECH_AT_4N_NAME "Alutech AT-4N"
+#define SUBGHZ_PROTOCOL_ALUTECH_AT_4N_NAME "Alutech at-4n"
 
 typedef struct SubGhzProtocolDecoderAlutech_at_4n SubGhzProtocolDecoderAlutech_at_4n;
 typedef struct SubGhzProtocolEncoderAlutech_at_4n SubGhzProtocolEncoderAlutech_at_4n;

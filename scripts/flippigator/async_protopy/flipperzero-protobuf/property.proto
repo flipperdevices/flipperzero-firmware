@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package PB_Property;
+option java_package = "com.flipperdevices.protobuf.property";
+
+message GetRequest {
+    string key = 1;
+}
+
+message GetResponse {
+    string key = 1;
+    string value = 2;
+}

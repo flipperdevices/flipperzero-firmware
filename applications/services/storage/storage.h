@@ -15,10 +15,16 @@ extern "C" {
 #define STORAGE_INT_PATH_PREFIX "/int"
 #define STORAGE_EXT_PATH_PREFIX "/ext"
 #define STORAGE_ANY_PATH_PREFIX "/any"
+<<<<<<< HEAD
+=======
+#define STORAGE_APP_DATA_PATH_PREFIX "/data"
+#define STORAGE_APP_ASSETS_PATH_PREFIX "/assets"
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
 #define INT_PATH(path) STORAGE_INT_PATH_PREFIX "/" path
 #define EXT_PATH(path) STORAGE_EXT_PATH_PREFIX "/" path
 #define ANY_PATH(path) STORAGE_ANY_PATH_PREFIX "/" path
+<<<<<<< HEAD
 
 #define STORAGE_APPS_DATA_STEM   EXT_PATH("apps_data")
 #define STORAGE_APPS_ASSETS_STEM EXT_PATH("apps_assets")
@@ -27,6 +33,10 @@ extern "C" {
 #define STORAGE_APP_ASSETS_PATH_PREFIX STORAGE_APPS_ASSETS_STEM "/" FAP_APPID
 #define APP_DATA_PATH(path)            STORAGE_APP_DATA_PATH_PREFIX "/" path
 #define APP_ASSETS_PATH(path)          STORAGE_APP_ASSETS_PATH_PREFIX "/" path
+=======
+#define APP_DATA_PATH(path) STORAGE_APP_DATA_PATH_PREFIX "/" path
+#define APP_ASSETS_PATH(path) STORAGE_APP_ASSETS_PATH_PREFIX "/" path
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
 #define RECORD_STORAGE "storage"
 
@@ -343,7 +353,7 @@ FS_Error storage_common_merge(Storage* storage, const char* old_path, const char
  * @brief Create a directory.
  *
  * @param storage pointer to a storage API instance.
- * @param path pointer to a zero-terminated string containing the directory path.
+ * @param fs_path pointer to a zero-terminated string containing the directory path.
  * @return FSE_OK if the directory has been successfully created, any other error code on failure.
  */
 FS_Error storage_common_mkdir(Storage* storage, const char* path);
@@ -370,6 +380,7 @@ FS_Error storage_common_fs_info(
  * 
  * @param storage pointer to a storage API instance.
  * @param path pointer to a zero-terminated string containing the path in question.
+ * @return true if the path was successfully resolved, false otherwise.
  */
 void storage_common_resolve_path_and_ensure_app_directory(Storage* storage, FuriString* path);
 
@@ -381,7 +392,7 @@ void storage_common_resolve_path_and_ensure_app_directory(Storage* storage, Furi
  * @param storage pointer to a storage API instance.
  * @param source pointer to a zero-terminated string containing the source path.
  * @param dest pointer to a zero-terminated string containing the destination path.
- * @return FSE_OK if the migration was successfully completed, any other error code on failure.
+ * @return FSE_OK if the migration was successfull completed, any other error code on failure.
  */
 FS_Error storage_common_migrate(Storage* storage, const char* source, const char* dest);
 
@@ -405,31 +416,26 @@ bool storage_common_exists(Storage* storage, const char* path);
  * - /int/Test and /int/test -> false (Case-sensitive storage),
  * - /ext/Test and /ext/test -> true (Case-insensitive storage).
  *
+ * If the truncate parameter is set to true, the second path will be
+ * truncated to be no longer than the first one. It is useful to determine
+ * whether path2 is a subdirectory of path1.
+ *
  * @param storage pointer to a storage API instance.
  * @param path1 pointer to a zero-terminated string containing the first path.
  * @param path2 pointer to a zero-terminated string containing the second path.
+ * @param truncate whether to truncate path2 to be no longer than path1.
  * @return true if paths are equivalent, false otherwise.
  */
-bool storage_common_equivalent_path(Storage* storage, const char* path1, const char* path2);
-
-/**
- * @brief Check whether a path is a subpath of another path.
- * 
- * This function respects storage-defined equivalence rules
- * (see `storage_common_equivalent_path`).
- * 
- * @param storage pointer to a storage API instance.
- * @param parent pointer to a zero-terminated string containing the parent path.
- * @param child pointer to a zero-terminated string containing the child path.
- * @return true if `child` is a subpath of `parent`, or if `child` is equivalent
- *         to `parent`; false otherwise.
- */
-bool storage_common_is_subdir(Storage* storage, const char* parent, const char* child);
+bool storage_common_equivalent_path(
+    Storage* storage,
+    const char* path1,
+    const char* path2,
+    bool truncate);
 
 /******************* Error Functions *******************/
 
 /**
- * @brief Get the textual description of a numeric error identifier.
+ * @brief Get the textual description of a numeric error identifer.
  *
  * @param error_id numeric identifier of the error in question.
  * @return pointer to a statically allocated zero-terminated string containing the respective error text.
@@ -513,9 +519,9 @@ FS_Error storage_sd_info(Storage* storage, SDInfo* info);
  */
 FS_Error storage_sd_status(Storage* storage);
 
-/************ Internal Storage Backup/Restore ************/
+/******************* Internal LFS Functions *******************/
 
-typedef void (*StorageNameConverter)(FuriString*);
+typedef void (*Storage_name_converter)(FuriString*);
 
 /**
  * @brief Back up the internal storage contents to a *.tar archive.
@@ -534,8 +540,7 @@ FS_Error storage_int_backup(Storage* storage, const char* dstname);
  * @param converter pointer to a filename conversion function (may be NULL).
  * @return FSE_OK if the storage was successfully restored, any other error code on failure.
  */
-FS_Error
-    storage_int_restore(Storage* storage, const char* dstname, StorageNameConverter converter);
+FS_Error storage_int_restore(Storage* api, const char* dstname, Storage_name_converter converter);
 
 /***************** Simplified Functions ******************/
 

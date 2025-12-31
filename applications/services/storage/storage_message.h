@@ -66,7 +66,7 @@ typedef struct {
 typedef struct {
     const char* path1;
     const char* path2;
-    bool check_subdir;
+    bool truncate;
     FuriThreadId thread_id;
 } SADataCEquivPath;
 

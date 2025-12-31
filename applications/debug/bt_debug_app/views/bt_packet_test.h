@@ -3,7 +3,7 @@
 
 typedef struct BtPacketTest BtPacketTest;
 
-BtPacketTest* bt_packet_test_alloc(void);
+BtPacketTest* bt_packet_test_alloc();
 
 void bt_packet_test_free(BtPacketTest* bt_packet_test);
 

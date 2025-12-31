@@ -13,13 +13,13 @@ extern "C" {
 #endif
 
 /** Enable MCU debug */
-void furi_hal_debug_enable(void);
+void furi_hal_debug_enable();
 
 /** Disable MCU debug */
-void furi_hal_debug_disable(void);
+void furi_hal_debug_disable();
 
 /** Check if GDB debug session is active */
-bool furi_hal_debug_is_gdb_session_active(void);
+bool furi_hal_debug_is_gdb_session_active();
 
 #ifdef __cplusplus
 }

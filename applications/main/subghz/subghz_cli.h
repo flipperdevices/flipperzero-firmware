@@ -1,3 +1,5 @@
 #pragma once
 
-void subghz_on_system_start(void);
+#include <cli/cli.h>
+
+void subghz_on_system_start();

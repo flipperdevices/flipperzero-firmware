@@ -158,7 +158,6 @@ SubGhzProtocolStatus
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         if(!subghz_protocol_encoder_hormann_get_upload(instance)) {
-            instance->encoder.front = 0; // reset position before start
             ret = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
@@ -171,7 +170,6 @@ SubGhzProtocolStatus
 void subghz_protocol_encoder_hormann_stop(void* context) {
     SubGhzProtocolEncoderHormann* instance = context;
     instance->encoder.is_running = false;
-    instance->encoder.front = 0; // reset position
 }
 
 LevelDuration subghz_protocol_encoder_hormann_yield(void* context) {
@@ -287,7 +285,7 @@ void subghz_protocol_decoder_hormann_feed(void* context, bool level, uint32_t du
  * @param instance Pointer to a SubGhzBlockGeneric* instance
  */
 static void subghz_protocol_hormann_check_remote_controller(SubGhzBlockGeneric* instance) {
-    instance->btn = (instance->data >> 8) & 0xF;
+    instance->btn = (instance->data >> 4) & 0xF;
 }
 
 uint8_t subghz_protocol_decoder_hormann_get_hash_data(void* context) {

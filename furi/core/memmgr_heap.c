@@ -39,8 +39,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stm32wbxx.h>
-#include <stm32wb55_linker.h>
-#include <core/log.h>
+#include <furi_hal_console.h>
 #include <core/common_defines.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
@@ -53,8 +52,13 @@ task.h is included from an application file. */
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
+<<<<<<< HEAD
 #ifdef HEAP_PRINT_DEBUG
 #error This feature is broken, logging transport must be replaced with RTT
+=======
+#if(configSUPPORT_DYNAMIC_ALLOCATION == 0)
+#error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 #endif
 
 /* Block sizes must not get too small. */
@@ -64,6 +68,8 @@ task.h is included from an application file. */
 #define heapBITS_PER_BYTE ((size_t)8)
 
 /* Heap start end symbols provided by linker */
+extern const void __heap_start__;
+extern const void __heap_end__;
 uint8_t* ucHeap = (uint8_t*)&__heap_start__;
 
 /* Define the linked list structure.  This is used to link free blocks in order
@@ -128,7 +134,7 @@ static MemmgrHeapThreadDict_t memmgr_heap_thread_dict = {0};
 static volatile uint32_t memmgr_heap_thread_trace_depth = 0;
 
 /* Initialize tracing storage on start */
-void memmgr_heap_init(void) {
+void memmgr_heap_init() {
     MemmgrHeapThreadDict_init(memmgr_heap_thread_dict);
 }
 
@@ -219,7 +225,11 @@ static inline void traceFREE(void* pointer, size_t size) {
     }
 }
 
+<<<<<<< HEAD
 size_t memmgr_heap_get_max_free_block(void) {
+=======
+size_t memmgr_heap_get_max_free_block() {
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
     size_t max_free_size = 0;
     BlockLink_t* pxBlock;
     vTaskSuspendAll();
@@ -236,9 +246,9 @@ size_t memmgr_heap_get_max_free_block(void) {
     return max_free_size;
 }
 
-void memmgr_heap_printf_free_blocks(void) {
+void memmgr_heap_printf_free_blocks() {
     BlockLink_t* pxBlock;
-    //can be enabled once we can do printf with a locked scheduler
+    //TODO enable when we can do printf with a locked scheduler
     //vTaskSuspendAll();
 
     pxBlock = xStart.pxNextFreeBlock;
@@ -278,13 +288,18 @@ char* ultoa(unsigned long num, char* str, int radix) {
     return str;
 }
 
+<<<<<<< HEAD
 static void print_heap_init(void) {
+=======
+static void print_heap_init() {
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
     char tmp_str[33];
     size_t heap_start = (size_t)&__heap_start__;
     size_t heap_end = (size_t)&__heap_end__;
 
     // {PHStart|heap_start|heap_end}
     FURI_CRITICAL_ENTER();
+<<<<<<< HEAD
     furi_log_puts("{PHStart|");
     ultoa(heap_start, tmp_str, 16);
     furi_log_puts(tmp_str);
@@ -292,6 +307,15 @@ static void print_heap_init(void) {
     ultoa(heap_end, tmp_str, 16);
     furi_log_puts(tmp_str);
     furi_log_puts("}\r\n");
+=======
+    furi_hal_console_puts("{PHStart|");
+    ultoa(heap_start, tmp_str, 16);
+    furi_hal_console_puts(tmp_str);
+    furi_hal_console_puts("|");
+    ultoa(heap_end, tmp_str, 16);
+    furi_hal_console_puts(tmp_str);
+    furi_hal_console_puts("}\r\n");
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
     FURI_CRITICAL_EXIT();
 }
 
@@ -304,6 +328,7 @@ static void print_heap_malloc(void* ptr, size_t size) {
 
     // {thread name|m|address|size}
     FURI_CRITICAL_ENTER();
+<<<<<<< HEAD
     furi_log_puts("{");
     furi_log_puts(name);
     furi_log_puts("|m|0x");
@@ -313,6 +338,17 @@ static void print_heap_malloc(void* ptr, size_t size) {
     utoa(size, tmp_str, 10);
     furi_log_puts(tmp_str);
     furi_log_puts("}\r\n");
+=======
+    furi_hal_console_puts("{");
+    furi_hal_console_puts(name);
+    furi_hal_console_puts("|m|0x");
+    ultoa((unsigned long)ptr, tmp_str, 16);
+    furi_hal_console_puts(tmp_str);
+    furi_hal_console_puts("|");
+    utoa(size, tmp_str, 10);
+    furi_hal_console_puts(tmp_str);
+    furi_hal_console_puts("}\r\n");
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
     FURI_CRITICAL_EXIT();
 }
 
@@ -325,12 +361,21 @@ static void print_heap_free(void* ptr) {
 
     // {thread name|f|address}
     FURI_CRITICAL_ENTER();
+<<<<<<< HEAD
     furi_log_puts("{");
     furi_log_puts(name);
     furi_log_puts("|f|0x");
     ultoa((unsigned long)ptr, tmp_str, 16);
     furi_log_puts(tmp_str);
     furi_log_puts("}\r\n");
+=======
+    furi_hal_console_puts("{");
+    furi_hal_console_puts(name);
+    furi_hal_console_puts("|f|0x");
+    ultoa((unsigned long)ptr, tmp_str, 16);
+    furi_hal_console_puts(tmp_str);
+    furi_hal_console_puts("}\r\n");
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
     FURI_CRITICAL_EXIT();
 }
 #endif
@@ -481,7 +526,11 @@ void* pvPortMalloc(size_t xWantedSize) {
 
     configASSERT((((size_t)pvReturn) & (size_t)portBYTE_ALIGNMENT_MASK) == 0);
 
+<<<<<<< HEAD
     furi_check(pvReturn, xWantedSize ? "out of memory" : "malloc(0)");
+=======
+    furi_check(pvReturn);
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
     pvReturn = memset(pvReturn, 0, to_wipe);
     return pvReturn;
 }
@@ -527,8 +576,13 @@ void vPortFree(void* pv) {
                     /* Add this block to the list of free blocks. */
                     xFreeBytesRemaining += pxLink->xBlockSize;
                     traceFREE(pv, pxLink->xBlockSize);
+<<<<<<< HEAD
                     memset(pv, 0xDD, pxLink->xBlockSize - xHeapStructSize);
                     prvInsertBlockIntoFreeList((BlockLink_t*)pxLink);
+=======
+                    memset(pv, 0, pxLink->xBlockSize - xHeapStructSize);
+                    prvInsertBlockIntoFreeList(((BlockLink_t*)pxLink));
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
                 }
                 (void)xTaskResumeAll();
             } else {

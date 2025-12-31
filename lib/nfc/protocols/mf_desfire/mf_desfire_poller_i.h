@@ -47,8 +47,6 @@ struct MfDesfirePoller {
 
 MfDesfireError mf_desfire_process_error(Iso14443_4aError error);
 
-MfDesfireError mf_desfire_process_status_code(uint8_t status_code);
-
 const MfDesfireData* mf_desfire_poller_get_data(MfDesfirePoller* instance);
 
 #ifdef __cplusplus

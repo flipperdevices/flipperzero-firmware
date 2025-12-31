@@ -31,7 +31,7 @@ typedef void (*FuriHalSpiBusEventCallback)(FuriHalSpiBus* bus, FuriHalSpiBusEven
 struct FuriHalSpiBus {
     SPI_TypeDef* spi;
     FuriHalSpiBusEventCallback callback;
-    const FuriHalSpiBusHandle* current_handle;
+    FuriHalSpiBusHandle* current_handle;
 };
 
 /** FuriHal spi handle states */
@@ -44,7 +44,7 @@ typedef enum {
 
 /** FuriHal spi handle event callback */
 typedef void (*FuriHalSpiBusHandleEventCallback)(
-    const FuriHalSpiBusHandle* handle,
+    FuriHalSpiBusHandle* handle,
     FuriHalSpiBusHandleEvent event);
 
 /** FuriHal spi handle */

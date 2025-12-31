@@ -7,16 +7,11 @@
 extern "C" {
 #endif
 
-/*
- * Device information service. 
- * Holds Flipper name, version and other information.
- */
+void dev_info_svc_start();
 
-typedef struct BleServiceDevInfo BleServiceDevInfo;
+void dev_info_svc_stop();
 
-BleServiceDevInfo* ble_svc_dev_info_start(void);
-
-void ble_svc_dev_info_stop(BleServiceDevInfo* service);
+bool dev_info_svc_is_started();
 
 #ifdef __cplusplus
 }

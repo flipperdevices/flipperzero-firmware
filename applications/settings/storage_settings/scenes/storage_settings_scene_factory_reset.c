@@ -21,14 +21,14 @@ void storage_settings_scene_factory_reset_on_enter(void* context) {
     dialog_ex_set_left_button_text(dialog_ex, "Cancel");
     dialog_ex_set_right_button_text(dialog_ex, "Erase");
 
-    dialog_ex_set_header(dialog_ex, "Confirm Factory Reset?", 64, 0, AlignCenter, AlignTop);
+    dialog_ex_set_header(dialog_ex, "Confirm Factory Reset", 64, 10, AlignCenter, AlignCenter);
     dialog_ex_set_text(
         dialog_ex,
-        "Internal storage will be erased\ndata and settings will be lost!",
+        "Internal storage will be erased\r\nData and settings will be lost!",
         64,
-        14,
+        32,
         AlignCenter,
-        AlignTop);
+        AlignCenter);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, StorageSettingsViewDialogEx);
 }
@@ -65,9 +65,7 @@ bool storage_settings_scene_factory_reset_on_event(void* context, SceneManagerEv
             } else {
                 furi_hal_rtc_reset_registers();
                 furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
-
-                Power* power = furi_record_open(RECORD_POWER);
-                power_reboot(power, PowerBootModeNormal);
+                power_reboot(PowerBootModeNormal);
             }
 
             consumed = true;

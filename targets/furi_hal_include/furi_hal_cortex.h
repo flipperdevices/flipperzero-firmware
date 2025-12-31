@@ -20,7 +20,7 @@ typedef struct {
 
 /** Early init stage for cortex
  */
-void furi_hal_cortex_init_early(void);
+void furi_hal_cortex_init_early();
 
 /** Microseconds delay
  *
@@ -32,7 +32,7 @@ void furi_hal_cortex_delay_us(uint32_t microseconds);
  *
  * @return     instructions per microsecond count
  */
-uint32_t furi_hal_cortex_instructions_per_microsecond(void);
+uint32_t furi_hal_cortex_instructions_per_microsecond();
 
 /** Get Timer
  *

@@ -14,8 +14,8 @@
 extern "C" {
 #endif
 
-#define FURI_HAL_VERSION_NAME_LENGTH        8
-#define FURI_HAL_VERSION_ARRAY_NAME_LENGTH  (FURI_HAL_VERSION_NAME_LENGTH + 1)
+#define FURI_HAL_VERSION_NAME_LENGTH 8
+#define FURI_HAL_VERSION_ARRAY_NAME_LENGTH (FURI_HAL_VERSION_NAME_LENGTH + 1)
 /** BLE symbol + "Flipper " + name */
 #define FURI_HAL_VERSION_DEVICE_NAME_LENGTH (1 + 8 + FURI_HAL_VERSION_ARRAY_NAME_LENGTH)
 
@@ -54,157 +54,157 @@ typedef enum {
 
 /** Init flipper version
  */
-void furi_hal_version_init(void);
+void furi_hal_version_init();
 
 /** Check target firmware version
  *
  * @return     true if target and real matches
  */
-bool furi_hal_version_do_i_belong_here(void);
+bool furi_hal_version_do_i_belong_here();
 
 /** Get model name
  *
  * @return     model name C-string
  */
-const char* furi_hal_version_get_model_name(void);
+const char* furi_hal_version_get_model_name();
 
 /** Get model name
  *
  * @return     model code C-string
  */
-const char* furi_hal_version_get_model_code(void);
+const char* furi_hal_version_get_model_code();
 
 /** Get FCC ID
  *
  * @return     FCC id as C-string
  */
-const char* furi_hal_version_get_fcc_id(void);
+const char* furi_hal_version_get_fcc_id();
 
 /** Get IC id
  *
  * @return     IC id as C-string
  */
-const char* furi_hal_version_get_ic_id(void);
+const char* furi_hal_version_get_ic_id();
 
 /** Get MIC id
  *
  * @return     MIC id as C-string
  */
-const char* furi_hal_version_get_mic_id(void);
+const char* furi_hal_version_get_mic_id();
 
 /** Get SRRC id
  *
  * @return     SRRC id as C-string
  */
-const char* furi_hal_version_get_srrc_id(void);
+const char* furi_hal_version_get_srrc_id();
 
 /** Get NCC id
  *
  * @return     NCC id as C-string
  */
-const char* furi_hal_version_get_ncc_id(void);
+const char* furi_hal_version_get_ncc_id();
 
 /** Get OTP version
  *
  * @return     OTP Version
  */
-FuriHalVersionOtpVersion furi_hal_version_get_otp_version(void);
+FuriHalVersionOtpVersion furi_hal_version_get_otp_version();
 
 /** Get hardware version
  *
  * @return     Hardware Version
  */
-uint8_t furi_hal_version_get_hw_version(void);
+uint8_t furi_hal_version_get_hw_version();
 
 /** Get hardware target
  *
  * @return     Hardware Target
  */
-uint8_t furi_hal_version_get_hw_target(void);
+uint8_t furi_hal_version_get_hw_target();
 
 /** Get hardware body
  *
  * @return     Hardware Body
  */
-uint8_t furi_hal_version_get_hw_body(void);
+uint8_t furi_hal_version_get_hw_body();
 
 /** Get hardware body color
  *
  * @return     Hardware Color
  */
-FuriHalVersionColor furi_hal_version_get_hw_color(void);
+FuriHalVersionColor furi_hal_version_get_hw_color();
 
 /** Get hardware connect
  *
  * @return     Hardware Interconnect
  */
-uint8_t furi_hal_version_get_hw_connect(void);
+uint8_t furi_hal_version_get_hw_connect();
 
 /** Get hardware region
  *
  * @return     Hardware Region
  */
-FuriHalVersionRegion furi_hal_version_get_hw_region(void);
+FuriHalVersionRegion furi_hal_version_get_hw_region();
 
 /** Get hardware region name
  *
  * @return     Hardware Region name
  */
-const char* furi_hal_version_get_hw_region_name(void);
+const char* furi_hal_version_get_hw_region_name();
 
 /** Get hardware display id
  *
  * @return     Display id
  */
-FuriHalVersionDisplay furi_hal_version_get_hw_display(void);
+FuriHalVersionDisplay furi_hal_version_get_hw_display();
 
 /** Get hardware timestamp
  *
  * @return     Hardware Manufacture timestamp
  */
-uint32_t furi_hal_version_get_hw_timestamp(void);
+uint32_t furi_hal_version_get_hw_timestamp();
 
 /** Get pointer to target name
  *
  * @return     Hardware Name C-string
  */
-const char* furi_hal_version_get_name_ptr(void);
+const char* furi_hal_version_get_name_ptr();
 
 /** Get pointer to target device name
  *
  * @return     Hardware Device Name C-string
  */
-const char* furi_hal_version_get_device_name_ptr(void);
+const char* furi_hal_version_get_device_name_ptr();
 
 /** Get pointer to target ble local device name
  *
  * @return     Ble Device Name C-string
  */
-const char* furi_hal_version_get_ble_local_device_name_ptr(void);
+const char* furi_hal_version_get_ble_local_device_name_ptr();
 
 /** Get BLE MAC address
  *
  * @return     pointer to BLE MAC address
  */
-const uint8_t* furi_hal_version_get_ble_mac(void);
+const uint8_t* furi_hal_version_get_ble_mac();
 
 /** Get address of version structure of firmware.
  *
  * @return     Address of firmware version structure.
  */
-const struct Version* furi_hal_version_get_firmware_version(void);
+const struct Version* furi_hal_version_get_firmware_version();
 
 /** Get platform UID size in bytes
  *
  * @return     UID size in bytes
  */
-size_t furi_hal_version_uid_size(void);
+size_t furi_hal_version_uid_size();
 
 /** Get const pointer to UID
  *
  * @return     pointer to UID
  */
-const uint8_t* furi_hal_version_uid(void);
+const uint8_t* furi_hal_version_uid();
 
 #ifdef __cplusplus
 }

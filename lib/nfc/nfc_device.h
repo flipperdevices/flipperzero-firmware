@@ -47,7 +47,7 @@ typedef void (*NfcLoadingCallback)(void* context, bool state);
  *
  * @returns pointer to the allocated instance.
  */
-NfcDevice* nfc_device_alloc(void);
+NfcDevice* nfc_device_alloc();
 
 /**
  * @brief Delete an NfcDevice instance.

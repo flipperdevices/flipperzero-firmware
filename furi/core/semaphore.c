@@ -1,63 +1,44 @@
 #include "semaphore.h"
+#include "check.h"
+#include "common_defines.h"
 
 #include <FreeRTOS.h>
 #include <semphr.h>
 
-#include "check.h"
-#include "kernel.h"
-
-#include "event_loop_link_i.h"
-
-// Internal FreeRTOS member names
-#define uxMessagesWaiting uxDummy4[0]
-#define uxLength          uxDummy4[1]
-
-struct FuriSemaphore {
-    StaticSemaphore_t container;
-    FuriEventLoopLink event_loop_link;
-};
-
-// IMPORTANT: container MUST be the FIRST struct member
-static_assert(offsetof(FuriSemaphore, container) == 0);
-
 FuriSemaphore* furi_semaphore_alloc(uint32_t max_count, uint32_t initial_count) {
-    furi_check(!FURI_IS_IRQ_MODE());
-    furi_check((max_count > 0U) && (initial_count <= max_count));
+    furi_assert(!FURI_IS_IRQ_MODE());
+    furi_assert((max_count > 0U) && (initial_count <= max_count));
 
-    FuriSemaphore* instance = malloc(sizeof(FuriSemaphore));
-
-    SemaphoreHandle_t hSemaphore;
-
+    SemaphoreHandle_t hSemaphore = NULL;
     if(max_count == 1U) {
-        hSemaphore = xSemaphoreCreateBinaryStatic(&instance->container);
+        hSemaphore = xSemaphoreCreateBinary();
+        if((hSemaphore != NULL) && (initial_count != 0U)) {
+            if(xSemaphoreGive(hSemaphore) != pdPASS) {
+                vSemaphoreDelete(hSemaphore);
+                hSemaphore = NULL;
+            }
+        }
     } else {
-        hSemaphore =
-            xSemaphoreCreateCountingStatic(max_count, initial_count, &instance->container);
+        hSemaphore = xSemaphoreCreateCounting(max_count, initial_count);
     }
 
-    furi_check(hSemaphore == (SemaphoreHandle_t)instance);
+    furi_check(hSemaphore);
 
-    if(max_count == 1U && initial_count != 0U) {
-        furi_check(xSemaphoreGive(hSemaphore) == pdPASS);
-    }
-
-    return instance;
+    /* Return semaphore ID */
+    return ((FuriSemaphore*)hSemaphore);
 }
 
 void furi_semaphore_free(FuriSemaphore* instance) {
-    furi_check(instance);
-    furi_check(!FURI_IS_IRQ_MODE());
+    furi_assert(instance);
+    furi_assert(!FURI_IS_IRQ_MODE());
 
-    // Event Loop must be disconnected
-    furi_check(!instance->event_loop_link.item_in);
-    furi_check(!instance->event_loop_link.item_out);
+    SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
 
-    vSemaphoreDelete((SemaphoreHandle_t)instance);
-    free(instance);
+    vSemaphoreDelete(hSemaphore);
 }
 
 FuriStatus furi_semaphore_acquire(FuriSemaphore* instance, uint32_t timeout) {
-    furi_check(instance);
+    furi_assert(instance);
 
     SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
     FuriStatus stat;
@@ -77,7 +58,6 @@ FuriStatus furi_semaphore_acquire(FuriSemaphore* instance, uint32_t timeout) {
                 portYIELD_FROM_ISR(yield);
             }
         }
-
     } else {
         if(xSemaphoreTake(hSemaphore, (TickType_t)timeout) != pdPASS) {
             if(timeout != 0U) {
@@ -88,15 +68,12 @@ FuriStatus furi_semaphore_acquire(FuriSemaphore* instance, uint32_t timeout) {
         }
     }
 
-    if(stat == FuriStatusOk) {
-        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
-    }
-
-    return stat;
+    /* Return execution status */
+    return (stat);
 }
 
 FuriStatus furi_semaphore_release(FuriSemaphore* instance) {
-    furi_check(instance);
+    furi_assert(instance);
 
     SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
     FuriStatus stat;
@@ -114,13 +91,13 @@ FuriStatus furi_semaphore_release(FuriSemaphore* instance) {
         } else {
             portYIELD_FROM_ISR(yield);
         }
-
     } else {
         if(xSemaphoreGive(hSemaphore) != pdPASS) {
             stat = FuriStatusErrorResource;
         }
     }
 
+<<<<<<< HEAD
     if(stat == FuriStatusOk) {
         furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventIn);
     }
@@ -128,10 +105,14 @@ FuriStatus furi_semaphore_release(FuriSemaphore* instance) {
     FURI_CRITICAL_EXIT();
 
     return stat;
+=======
+    /* Return execution status */
+    return (stat);
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 }
 
 uint32_t furi_semaphore_get_count(FuriSemaphore* instance) {
-    furi_check(instance);
+    furi_assert(instance);
 
     SemaphoreHandle_t hSemaphore = (SemaphoreHandle_t)instance;
     uint32_t count;
@@ -142,48 +123,6 @@ uint32_t furi_semaphore_get_count(FuriSemaphore* instance) {
         count = (uint32_t)uxSemaphoreGetCount(hSemaphore);
     }
 
-    return count;
+    /* Return number of tokens */
+    return (count);
 }
-
-uint32_t furi_semaphore_get_space(FuriSemaphore* instance) {
-    furi_assert(instance);
-
-    uint32_t space;
-
-    if(furi_kernel_is_irq_or_masked() != 0U) {
-        uint32_t isrm = taskENTER_CRITICAL_FROM_ISR();
-
-        space = instance->container.uxLength - instance->container.uxMessagesWaiting;
-
-        taskEXIT_CRITICAL_FROM_ISR(isrm);
-    } else {
-        space = uxQueueSpacesAvailable((QueueHandle_t)instance);
-    }
-
-    return space;
-}
-
-static FuriEventLoopLink* furi_semaphore_event_loop_get_link(FuriEventLoopObject* object) {
-    FuriSemaphore* instance = object;
-    furi_assert(instance);
-    return &instance->event_loop_link;
-}
-
-static bool
-    furi_semaphore_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
-    FuriSemaphore* instance = object;
-    furi_assert(instance);
-
-    if(event == FuriEventLoopEventIn) {
-        return furi_semaphore_get_count(instance);
-    } else if(event == FuriEventLoopEventOut) {
-        return furi_semaphore_get_space(instance);
-    } else {
-        furi_crash();
-    }
-}
-
-const FuriEventLoopContract furi_semaphore_event_loop_contract = {
-    .get_link = furi_semaphore_event_loop_get_link,
-    .get_level = furi_semaphore_event_loop_get_level,
-};

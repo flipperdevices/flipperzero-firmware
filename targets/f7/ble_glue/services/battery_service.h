@@ -7,27 +7,15 @@
 extern "C" {
 #endif
 
-/*
- * Battery service. Can be used in most profiles.
- * If auto_update is true, the service will automatically update the battery 
- * level and charging state from power state updates.
- */
+void battery_svc_start();
 
-typedef struct BleServiceBattery BleServiceBattery;
+void battery_svc_stop();
 
-BleServiceBattery* ble_svc_battery_start(bool auto_update);
+bool battery_svc_is_started();
 
-void ble_svc_battery_stop(BleServiceBattery* service);
+bool battery_svc_update_level(uint8_t battery_level);
 
-bool ble_svc_battery_update_level(BleServiceBattery* service, uint8_t battery_level);
-
-bool ble_svc_battery_update_power_state(BleServiceBattery* service, bool charging);
-
-/* Global function, callable without a service instance 
- * Will update all service instances created with auto_update==true
- * Both parameters are optional, pass NULL if no value is available
- */
-void ble_svc_battery_state_update(uint8_t* battery_level, bool* charging);
+bool battery_svc_update_power_state();
 
 #ifdef __cplusplus
 }

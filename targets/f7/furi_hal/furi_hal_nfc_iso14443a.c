@@ -13,7 +13,7 @@
 
 static Iso14443_3aSignal* iso14443_3a_signal = NULL;
 
-static FuriHalNfcError furi_hal_nfc_iso14443a_common_init(const FuriHalSpiBusHandle* handle) {
+static FuriHalNfcError furi_hal_nfc_iso14443a_common_init(FuriHalSpiBusHandle* handle) {
     // Common NFC-A settings, 106 kbps
 
     // 1st stage zero = 600kHz, 3rd stage zero = 200 kHz
@@ -40,7 +40,7 @@ static FuriHalNfcError furi_hal_nfc_iso14443a_common_init(const FuriHalSpiBusHan
     return FuriHalNfcErrorNone;
 }
 
-static FuriHalNfcError furi_hal_nfc_iso14443a_poller_init(const FuriHalSpiBusHandle* handle) {
+static FuriHalNfcError furi_hal_nfc_iso14443a_poller_init(FuriHalSpiBusHandle* handle) {
     // Enable ISO14443A mode, OOK modulation
     st25r3916_change_reg_bits(
         handle,
@@ -57,7 +57,7 @@ static FuriHalNfcError furi_hal_nfc_iso14443a_poller_init(const FuriHalSpiBusHan
     return furi_hal_nfc_iso14443a_common_init(handle);
 }
 
-static FuriHalNfcError furi_hal_nfc_iso14443a_poller_deinit(const FuriHalSpiBusHandle* handle) {
+static FuriHalNfcError furi_hal_nfc_iso14443a_poller_deinit(FuriHalSpiBusHandle* handle) {
     st25r3916_change_reg_bits(
         handle,
         ST25R3916_REG_ISO14443A_NFC,
@@ -67,7 +67,7 @@ static FuriHalNfcError furi_hal_nfc_iso14443a_poller_deinit(const FuriHalSpiBusH
     return FuriHalNfcErrorNone;
 }
 
-static FuriHalNfcError furi_hal_nfc_iso14443a_listener_init(const FuriHalSpiBusHandle* handle) {
+static FuriHalNfcError furi_hal_nfc_iso14443a_listener_init(FuriHalSpiBusHandle* handle) {
     furi_check(iso14443_3a_signal == NULL);
     iso14443_3a_signal = iso14443_3a_signal_alloc(&gpio_spi_r_mosi);
 
@@ -105,7 +105,7 @@ static FuriHalNfcError furi_hal_nfc_iso14443a_listener_init(const FuriHalSpiBusH
     return furi_hal_nfc_iso14443a_common_init(handle);
 }
 
-static FuriHalNfcError furi_hal_nfc_iso14443a_listener_deinit(const FuriHalSpiBusHandle* handle) {
+static FuriHalNfcError furi_hal_nfc_iso14443a_listener_deinit(FuriHalSpiBusHandle* handle) {
     UNUSED(handle);
 
     if(iso14443_3a_signal) {
@@ -118,7 +118,7 @@ static FuriHalNfcError furi_hal_nfc_iso14443a_listener_deinit(const FuriHalSpiBu
 
 static FuriHalNfcEvent furi_hal_nfc_iso14443_3a_listener_wait_event(uint32_t timeout_ms) {
     FuriHalNfcEvent event = furi_hal_nfc_wait_event_common(timeout_ms);
-    const FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     if(event & FuriHalNfcEventListenerActive) {
         st25r3916_set_reg_bits(
@@ -131,7 +131,7 @@ static FuriHalNfcEvent furi_hal_nfc_iso14443_3a_listener_wait_event(uint32_t tim
 FuriHalNfcError furi_hal_nfc_iso14443a_poller_trx_short_frame(FuriHalNfcaShortFrame frame) {
     FuriHalNfcError error = FuriHalNfcErrorNone;
 
-    const FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     // Disable crc check
     st25r3916_set_reg_bits(handle, ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
@@ -182,10 +182,10 @@ FuriHalNfcError
 
 FuriHalNfcError
     furi_hal_nfc_iso14443a_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits) {
-    furi_check(tx_data);
+    furi_assert(tx_data);
 
     FuriHalNfcError err = FuriHalNfcErrorNone;
-    const FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     // Prepare tx
     st25r3916_direct_cmd(handle, ST25R3916_CMD_CLEAR_FIFO);
@@ -215,12 +215,13 @@ FuriHalNfcError furi_hal_nfc_iso14443a_listener_set_col_res_data(
     uint8_t uid_len,
     uint8_t* atqa,
     uint8_t sak) {
-    furi_check(uid);
-    furi_check(atqa);
-
+    furi_assert(uid);
+    furi_assert(atqa);
+    UNUSED(uid_len);
+    UNUSED(sak);
     FuriHalNfcError error = FuriHalNfcErrorNone;
 
-    const FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     // Set 4 or 7 bytes UID
     if(uid_len == 4) {
@@ -255,7 +256,7 @@ FuriHalNfcError furi_hal_nfc_iso14443a_listener_set_col_res_data(
 }
 
 FuriHalNfcError furi_hal_nfc_iso4443a_listener_tx(
-    const FuriHalSpiBusHandle* handle,
+    FuriHalSpiBusHandle* handle,
     const uint8_t* tx_data,
     size_t tx_bits) {
     FuriHalNfcError error = FuriHalNfcErrorNone;
@@ -279,12 +280,12 @@ FuriHalNfcError furi_hal_nfc_iso14443a_listener_tx_custom_parity(
     const uint8_t* tx_data,
     const uint8_t* tx_parity,
     size_t tx_bits) {
-    furi_check(tx_data);
-    furi_check(tx_parity);
+    furi_assert(tx_data);
+    furi_assert(tx_parity);
 
-    furi_check(iso14443_3a_signal);
+    furi_assert(iso14443_3a_signal);
 
-    const FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSPARENT_MODE);
     // Reconfigure gpio for Transparent mode
@@ -303,7 +304,7 @@ FuriHalNfcError furi_hal_nfc_iso14443a_listener_tx_custom_parity(
     return FuriHalNfcErrorNone;
 }
 
-FuriHalNfcError furi_hal_nfc_iso14443_3a_listener_sleep(const FuriHalSpiBusHandle* handle) {
+FuriHalNfcError furi_hal_nfc_iso14443_3a_listener_sleep(FuriHalSpiBusHandle* handle) {
     // Enable auto collision resolution
     st25r3916_clear_reg_bits(
         handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
@@ -313,7 +314,7 @@ FuriHalNfcError furi_hal_nfc_iso14443_3a_listener_sleep(const FuriHalSpiBusHandl
     return FuriHalNfcErrorNone;
 }
 
-FuriHalNfcError furi_hal_nfc_iso14443_3a_listener_idle(const FuriHalSpiBusHandle* handle) {
+FuriHalNfcError furi_hal_nfc_iso14443_3a_listener_idle(FuriHalSpiBusHandle* handle) {
     // Enable auto collision resolution
     st25r3916_clear_reg_bits(
         handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);

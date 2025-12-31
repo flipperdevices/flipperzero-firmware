@@ -4,7 +4,7 @@
 
 typedef struct Slideshow Slideshow;
 
-Slideshow* slideshow_alloc(void);
+Slideshow* slideshow_alloc();
 
 void slideshow_free(Slideshow* slideshow);
 bool slideshow_load(Slideshow* slideshow, const char* fspath);

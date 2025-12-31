@@ -12,6 +12,12 @@ extern "C" {
 
 #define STORAGE_COUNT (ST_INT + 1)
 
+<<<<<<< HEAD
+=======
+#define APPS_DATA_PATH EXT_PATH("apps_data")
+#define APPS_ASSETS_PATH EXT_PATH("apps_assets")
+
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 typedef struct {
     ViewPort* view_port;
     bool enabled;

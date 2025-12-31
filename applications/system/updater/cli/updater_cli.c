@@ -1,16 +1,14 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <toolbox/cli/cli_command.h>
-#include <cli/cli_main_commands.h>
+#include <cli/cli.h>
 #include <storage/storage.h>
 #include <loader/loader.h>
 #include <toolbox/path.h>
 #include <toolbox/tar/tar_archive.h>
 #include <toolbox/args.h>
-#include <toolbox/pipe.h>
 #include <update_util/update_manifest.h>
-#include <update_util/int_backup.h>
+#include <update_util/lfs_backup.h>
 #include <update_util/update_operation.h>
 
 typedef void (*cmd_handler)(FuriString* args);
@@ -37,7 +35,7 @@ static void updater_cli_install(FuriString* manifest_path) {
 static void updater_cli_backup(FuriString* args) {
     printf("Backup /int to '%s'\r\n", furi_string_get_cstr(args));
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    bool success = int_backup_create(storage, furi_string_get_cstr(args));
+    bool success = lfs_backup_create(storage, furi_string_get_cstr(args));
     furi_record_close(RECORD_STORAGE);
     printf("Result: %s\r\n", success ? "OK" : "FAIL");
 }
@@ -45,7 +43,7 @@ static void updater_cli_backup(FuriString* args) {
 static void updater_cli_restore(FuriString* args) {
     printf("Restore /int from '%s'\r\n", furi_string_get_cstr(args));
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    bool success = int_backup_unpack(storage, furi_string_get_cstr(args));
+    bool success = lfs_backup_unpack(storage, furi_string_get_cstr(args));
     furi_record_close(RECORD_STORAGE);
     printf("Result: %s\r\n", success ? "OK" : "FAIL");
 }
@@ -65,8 +63,8 @@ static const CliSubcommand update_cli_subcommands[] = {
     {.command = "help", .handler = updater_cli_help},
 };
 
-static void updater_cli_ep(PipeSide* pipe, FuriString* args, void* context) {
-    UNUSED(pipe);
+static void updater_cli_ep(Cli* cli, FuriString* args, void* context) {
+    UNUSED(cli);
     UNUSED(context);
     FuriString* subcommand;
     subcommand = furi_string_alloc();
@@ -105,10 +103,10 @@ static void updater_start_app(void* context, uint32_t arg) {
     furi_record_close(RECORD_LOADER);
 }
 
-void updater_on_system_start(void) {
+void updater_on_system_start() {
 #ifdef SRV_CLI
-    CliRegistry* registry = furi_record_open(RECORD_CLI);
-    cli_registry_add_command(registry, "update", CliCommandFlagDefault, updater_cli_ep, NULL);
+    Cli* cli = (Cli*)furi_record_open(RECORD_CLI);
+    cli_add_command(cli, "update", CliCommandFlagDefault, updater_cli_ep, NULL);
     furi_record_close(RECORD_CLI);
 #else
     UNUSED(updater_cli_ep);

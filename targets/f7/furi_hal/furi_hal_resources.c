@@ -70,90 +70,28 @@ const GpioPin gpio_usb_dp = {.port = GPIOA, .pin = LL_GPIO_PIN_12};
 
 const GpioPinRecord gpio_pins[] = {
     // 5V: 1
-    {.pin = &gpio_ext_pa7,
-     .name = "PA7",
-     .channel = FuriHalAdcChannel12,
-     .pwm_output = FuriHalPwmOutputIdTim1PA7,
-     .number = 2,
-     .debug = false},
-    {.pin = &gpio_ext_pa6,
-     .name = "PA6",
-     .channel = FuriHalAdcChannel11,
-     .number = 3,
-     .debug = false},
-    {.pin = &gpio_ext_pa4,
-     .name = "PA4",
-     .channel = FuriHalAdcChannel9,
-     .pwm_output = FuriHalPwmOutputIdLptim2PA4,
-     .number = 4,
-     .debug = false},
-    {.pin = &gpio_ext_pb3,
-     .name = "PB3",
-     .channel = FuriHalAdcChannelNone,
-     .number = 5,
-     .debug = false},
-    {.pin = &gpio_ext_pb2,
-     .name = "PB2",
-     .channel = FuriHalAdcChannelNone,
-     .number = 6,
-     .debug = false},
-    {.pin = &gpio_ext_pc3,
-     .name = "PC3",
-     .channel = FuriHalAdcChannel4,
-     .number = 7,
-     .debug = false},
+    {.pin = &gpio_ext_pa7, .name = "PA7", .number = 2, .debug = false},
+    {.pin = &gpio_ext_pa6, .name = "PA6", .number = 3, .debug = false},
+    {.pin = &gpio_ext_pa4, .name = "PA4", .number = 4, .debug = false},
+    {.pin = &gpio_ext_pb3, .name = "PB3", .number = 5, .debug = false},
+    {.pin = &gpio_ext_pb2, .name = "PB2", .number = 6, .debug = false},
+    {.pin = &gpio_ext_pc3, .name = "PC3", .number = 7, .debug = false},
     // GND: 8
     // Space
     // 3v3: 9
-    {.pin = &gpio_swclk,
-     .name = "PA14",
-     .channel = FuriHalAdcChannelNone,
-     .number = 10,
-     .debug = true},
+    {.pin = &gpio_swclk, .name = "PA14", .number = 10, .debug = true},
     // GND: 11
-    {.pin = &gpio_swdio,
-     .name = "PA13",
-     .channel = FuriHalAdcChannelNone,
-     .number = 12,
-     .debug = true},
-    {.pin = &gpio_usart_tx,
-     .name = "PB6",
-     .channel = FuriHalAdcChannelNone,
-     .number = 13,
-     .debug = true},
-    {.pin = &gpio_usart_rx,
-     .name = "PB7",
-     .channel = FuriHalAdcChannelNone,
-     .number = 14,
-     .debug = true},
-    {.pin = &gpio_ext_pc1,
-     .name = "PC1",
-     .channel = FuriHalAdcChannel2,
-     .number = 15,
-     .debug = false},
-    {.pin = &gpio_ext_pc0,
-     .name = "PC0",
-     .channel = FuriHalAdcChannel1,
-     .number = 16,
-     .debug = false},
-    {.pin = &gpio_ibutton,
-     .name = "PB14",
-     .channel = FuriHalAdcChannelNone,
-     .number = 17,
-     .debug = true},
+    {.pin = &gpio_swdio, .name = "PA13", .number = 12, .debug = true},
+    {.pin = &gpio_usart_tx, .name = "PB6", .number = 13, .debug = true},
+    {.pin = &gpio_usart_rx, .name = "PB7", .number = 14, .debug = true},
+    {.pin = &gpio_ext_pc1, .name = "PC1", .number = 15, .debug = false},
+    {.pin = &gpio_ext_pc0, .name = "PC0", .number = 16, .debug = false},
+    {.pin = &gpio_ibutton, .name = "PB14", .number = 17, .debug = true},
     // GND: 18
 
     /* Dangerous pins, may damage hardware */
-    {.pin = &gpio_speaker,
-     .name = "PB8",
-     .channel = FuriHalAdcChannelNone,
-     .number = 0,
-     .debug = true},
-    {.pin = &gpio_infrared_tx,
-     .name = "PB9",
-     .channel = FuriHalAdcChannelNone,
-     .number = 0,
-     .debug = true},
+    {.pin = &gpio_speaker, .name = "PB8", .debug = true},
+    {.pin = &gpio_infrared_tx, .name = "PB9", .debug = true},
 };
 
 const size_t gpio_pins_count = COUNT_OF(gpio_pins);
@@ -187,7 +125,7 @@ static void furi_hal_resources_init_gpio_pins(GpioMode mode) {
     }
 }
 
-void furi_hal_resources_init_early(void) {
+void furi_hal_resources_init_early() {
     furi_hal_bus_enable(FuriHalBusGPIOA);
     furi_hal_bus_enable(FuriHalBusGPIOB);
     furi_hal_bus_enable(FuriHalBusGPIOC);
@@ -234,7 +172,7 @@ void furi_hal_resources_init_early(void) {
     furi_hal_resources_init_gpio_pins(GpioModeAnalog);
 }
 
-void furi_hal_resources_deinit_early(void) {
+void furi_hal_resources_deinit_early() {
     furi_hal_resources_init_input_pins(GpioModeAnalog);
     furi_hal_bus_disable(FuriHalBusGPIOA);
     furi_hal_bus_disable(FuriHalBusGPIOB);
@@ -244,7 +182,7 @@ void furi_hal_resources_deinit_early(void) {
     furi_hal_bus_disable(FuriHalBusGPIOH);
 }
 
-void furi_hal_resources_init(void) {
+void furi_hal_resources_init() {
     // Button pins
     furi_hal_resources_init_input_pins(GpioModeInterruptRiseFall);
 
@@ -289,20 +227,4 @@ int32_t furi_hal_resources_get_ext_pin_number(const GpioPin* gpio) {
         }
     }
     return -1;
-}
-
-const GpioPinRecord* furi_hal_resources_pin_by_name(const char* name) {
-    for(size_t i = 0; i < gpio_pins_count; i++) {
-        const GpioPinRecord* record = &gpio_pins[i];
-        if(strcasecmp(name, record->name) == 0) return record;
-    }
-    return NULL;
-}
-
-const GpioPinRecord* furi_hal_resources_pin_by_number(uint8_t number) {
-    for(size_t i = 0; i < gpio_pins_count; i++) {
-        const GpioPinRecord* record = &gpio_pins[i];
-        if(record->number == number) return record;
-    }
-    return NULL;
 }

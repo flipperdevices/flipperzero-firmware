@@ -1,5 +1,12 @@
 name: 'Unit tests'
+
 on:
+  push:
+    branches:
+      - dev
+      - "release*"
+    tags:
+      - '*'
   pull_request:
 env:
   TARGETS: f7
@@ -13,6 +20,10 @@ jobs:
     steps:
       - name: 'Wipe workspace'
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -23,6 +34,10 @@ jobs:
         id: device
         run: |
           echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
       - name: 'Flash unit tests firmware'
         id: flashing
         if: success()
@@ -38,6 +53,10 @@ jobs:
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
           python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
       - name: 'Copy assets and unit data, reboot and wait for flipper'
         id: copy
         if: steps.format_ext.outcome == 'success'
@@ -49,6 +68,10 @@ jobs:
           python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send build/latest/resources /ext
           python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
       - name: 'Run units and validate results'
         id: run_units
         if: steps.copy.outcome == 'success'
@@ -56,6 +79,10 @@ jobs:
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testing/units.py ${{steps.device.outputs.flipper}}
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
       - name: 'Check GDB output'
         if: failure()
         run: |

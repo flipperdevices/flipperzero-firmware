@@ -10,7 +10,7 @@ typedef struct {
     FuriString* text;
 } TextScrollLineArray;
 
-ARRAY_DEF(TextScrollLineArray, TextScrollLineArray, M_POD_OPLIST) //-V658
+ARRAY_DEF(TextScrollLineArray, TextScrollLineArray, M_POD_OPLIST)
 
 typedef struct {
     TextScrollLineArray_t line_array;
@@ -19,8 +19,8 @@ typedef struct {
     uint8_t width;
     uint8_t height;
     FuriString* text;
-    uint16_t scroll_pos_total;
-    uint16_t scroll_pos_current;
+    uint8_t scroll_pos_total;
+    uint8_t scroll_pos_current;
     bool text_formatted;
 } WidgetElementTextScrollModel;
 

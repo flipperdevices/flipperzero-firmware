@@ -15,16 +15,16 @@ void power_settings_scene_reboot_on_enter(void* context) {
     PowerSettingsApp* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_set_header(submenu, "Reboot Type");
+    submenu_set_header(submenu, "Reboot type");
     submenu_add_item(
         submenu,
-        "Firmware Upgrade",
+        "Firmware upgrade",
         PowerSettingsRebootSubmenuIndexDfu,
         power_settings_scene_reboot_submenu_callback,
         app);
     submenu_add_item(
         submenu,
-        "Reboot Flipper",
+        "Flipper OS",
         PowerSettingsRebootSubmenuIndexOs,
         power_settings_scene_reboot_submenu_callback,
         app);
@@ -33,18 +33,14 @@ void power_settings_scene_reboot_on_enter(void* context) {
 }
 
 bool power_settings_scene_reboot_on_event(void* context, SceneManagerEvent event) {
-    PowerSettingsApp* app = context;
+    UNUSED(context);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == PowerSettingsRebootSubmenuIndexDfu) {
-            scene_manager_set_scene_state(
-                app->scene_manager, PowerSettingsAppSceneRebootConfirm, RebootTypeDFU);
-            scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneRebootConfirm);
+            power_reboot(PowerBootModeDfu);
         } else if(event.event == PowerSettingsRebootSubmenuIndexOs) {
-            scene_manager_set_scene_state(
-                app->scene_manager, PowerSettingsAppSceneRebootConfirm, RebootTypeNormal);
-            scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneRebootConfirm);
+            power_reboot(PowerBootModeNormal);
         }
         consumed = true;
     }

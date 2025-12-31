@@ -13,12 +13,8 @@ struct Submenu {
 typedef struct {
     FuriString* label;
     uint32_t index;
-    union {
-        SubmenuItemCallback callback;
-        SubmenuItemCallbackEx callback_ex;
-    };
+    SubmenuItemCallback callback;
     void* callback_context;
-    bool has_extended_events;
 } SubmenuItem;
 
 static void SubmenuItem_init(SubmenuItem* item) {
@@ -72,7 +68,7 @@ typedef struct {
 
 static void submenu_process_up(Submenu* submenu);
 static void submenu_process_down(Submenu* submenu);
-static void submenu_process_ok(Submenu* submenu, InputType input_type);
+static void submenu_process_ok(Submenu* submenu);
 
 static size_t submenu_items_on_screen(SubmenuModel* model) {
     size_t res = (model->is_vertical) ? 8 : 4;
@@ -173,10 +169,7 @@ static bool submenu_view_input_callback(InputEvent* event, void* context) {
     furi_assert(submenu);
     bool consumed = false;
 
-    if(event->key == InputKeyOk) {
-        consumed = true;
-        submenu_process_ok(submenu, event->type);
-    } else if(event->type == InputTypeShort) {
+    if(event->type == InputTypeShort) {
         switch(event->key) {
         case InputKeyUp:
             consumed = true;
@@ -185,6 +178,10 @@ static bool submenu_view_input_callback(InputEvent* event, void* context) {
         case InputKeyDown:
             consumed = true;
             submenu_process_down(submenu);
+            break;
+        case InputKeyOk:
+            consumed = true;
+            submenu_process_ok(submenu);
             break;
         default:
             break;
@@ -202,6 +199,7 @@ static bool submenu_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
+<<<<<<< HEAD
 void submenu_timer_callback(void* context) {
     furi_assert(context);
     Submenu* submenu = context;
@@ -211,6 +209,9 @@ void submenu_timer_callback(void* context) {
 }
 
 Submenu* submenu_alloc(void) {
+=======
+Submenu* submenu_alloc() {
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
     Submenu* submenu = malloc(sizeof(Submenu));
     submenu->view = view_alloc();
     view_set_context(submenu->view, submenu);
@@ -235,7 +236,7 @@ Submenu* submenu_alloc(void) {
 }
 
 void submenu_free(Submenu* submenu) {
-    furi_check(submenu);
+    furi_assert(submenu);
 
     with_view_model(
         submenu->view,
@@ -252,7 +253,7 @@ void submenu_free(Submenu* submenu) {
 }
 
 View* submenu_get_view(Submenu* submenu) {
-    furi_check(submenu);
+    furi_assert(submenu);
     return submenu->view;
 }
 
@@ -274,11 +275,16 @@ void submenu_add_lockable_item(
     bool locked,
     const char* locked_message) {
     SubmenuItem* item = NULL;
+<<<<<<< HEAD
     furi_check(label);
     furi_check(submenu);
     if(locked) {
         furi_check(locked_message);
     }
+=======
+    furi_assert(label);
+    furi_assert(submenu);
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
     with_view_model(
         submenu->view,
@@ -289,58 +295,17 @@ void submenu_add_lockable_item(
             item->index = index;
             item->callback = callback;
             item->callback_context = callback_context;
-            item->has_extended_events = false;
-        },
-        true);
-}
-
-void submenu_add_item_ex(
-    Submenu* submenu,
-    const char* label,
-    uint32_t index,
-    SubmenuItemCallbackEx callback,
-    void* callback_context) {
-    SubmenuItem* item = NULL;
-    furi_check(label);
-    furi_check(submenu);
-
-    with_view_model(
-        submenu->view,
-        SubmenuModel * model,
-        {
-            item = SubmenuItemArray_push_new(model->items);
-            furi_string_set_str(item->label, label);
-            item->index = index;
-            item->callback_ex = callback;
-            item->callback_context = callback_context;
-            item->has_extended_events = true;
-        },
-        true);
-}
-
-void submenu_change_item_label(Submenu* submenu, uint32_t index, const char* label) {
-    furi_check(submenu);
-    furi_check(label);
-
-    with_view_model(
-        submenu->view,
-        SubmenuModel * model,
-        {
-            SubmenuItemArray_it_t it;
-            for(SubmenuItemArray_it(it, model->items); !SubmenuItemArray_end_p(it);
-                SubmenuItemArray_next(it)) {
-                if(index == SubmenuItemArray_cref(it)->index) {
-                    furi_string_set_str(SubmenuItemArray_cref(it)->label, label);
-                    break;
-                }
-            }
         },
         true);
 }
 
 void submenu_reset(Submenu* submenu) {
+<<<<<<< HEAD
     furi_check(submenu);
     view_set_orientation(submenu->view, ViewOrientationHorizontal);
+=======
+    furi_assert(submenu);
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
     with_view_model(
         submenu->view,
@@ -355,27 +320,7 @@ void submenu_reset(Submenu* submenu) {
         true);
 }
 
-uint32_t submenu_get_selected_item(Submenu* submenu) {
-    furi_check(submenu);
-
-    uint32_t selected_item_index = 0;
-
-    with_view_model(
-        submenu->view,
-        SubmenuModel * model,
-        {
-            if(model->position < SubmenuItemArray_size(model->items)) {
-                const SubmenuItem* item = SubmenuItemArray_cget(model->items, model->position);
-                selected_item_index = item->index;
-            }
-        },
-        false);
-
-    return selected_item_index;
-}
-
 void submenu_set_selected_item(Submenu* submenu, uint32_t index) {
-    furi_check(submenu);
     with_view_model(
         submenu->view,
         SubmenuModel * model,
@@ -462,7 +407,7 @@ void submenu_process_down(Submenu* submenu) {
         true);
 }
 
-void submenu_process_ok(Submenu* submenu, InputType input_type) {
+void submenu_process_ok(Submenu* submenu) {
     SubmenuItem* item = NULL;
 
     with_view_model(
@@ -480,17 +425,13 @@ void submenu_process_ok(Submenu* submenu, InputType input_type) {
         },
         true);
 
-    if(!item) return;
-
-    if(!item->has_extended_events && input_type == InputTypeShort && item->callback) {
+    if(item && item->callback) {
         item->callback(item->callback_context, item->index);
-    } else if(item->has_extended_events && item->callback_ex) {
-        item->callback_ex(item->callback_context, input_type, item->index);
     }
 }
 
 void submenu_set_header(Submenu* submenu, const char* header) {
-    furi_check(submenu);
+    furi_assert(submenu);
 
     with_view_model(
         submenu->view,

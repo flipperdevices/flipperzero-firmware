@@ -6,15 +6,13 @@
 #include <stdint.h>
 
 #include "desktop_view_pin_input.h"
+#include <desktop/desktop_settings.h>
 
 #define NO_ACTIVITY_TIMEOUT 15000
 
 #define PIN_CELL_WIDTH 13
-#define DEFAULT_PIN_X  64
-#define DEFAULT_PIN_Y  32
-
-#define MIN_PIN_LENGTH DESKTOP_PIN_CODE_MIN_LEN
-#define MAX_PIN_LENGTH DESKTOP_PIN_CODE_MAX_LEN
+#define DEFAULT_PIN_X 64
+#define DEFAULT_PIN_Y 32
 
 struct DesktopViewPinInput {
     View* view;
@@ -26,7 +24,7 @@ struct DesktopViewPinInput {
 };
 
 typedef struct {
-    DesktopPinCode pin;
+    PinCode pin;
     bool pin_hidden;
     bool locked_input;
     uint8_t pin_x;
@@ -37,9 +35,6 @@ typedef struct {
     const char* secondary_str;
     uint8_t secondary_str_x;
     uint8_t secondary_str_y;
-    const char* tertiary_str;
-    uint8_t tertiary_str_x;
-    uint8_t tertiary_str_y;
     const char* button_label;
 } DesktopViewPinInputModel;
 
@@ -52,7 +47,7 @@ static bool desktop_view_pin_input_input(InputEvent* event, void* context) {
 
     bool call_back_callback = false;
     bool call_done_callback = false;
-    DesktopPinCode pin_code = {0};
+    PinCode pin_code = {0};
 
     if(event->type == InputTypeShort) {
         switch(event->key) {
@@ -61,13 +56,13 @@ static bool desktop_view_pin_input_input(InputEvent* event, void* context) {
         case InputKeyDown:
         case InputKeyUp:
             if(!model->locked_input) {
-                if(model->pin.length < MAX_PIN_LENGTH) {
+                if(model->pin.length < MAX_PIN_SIZE) {
                     model->pin.data[model->pin.length++] = event->key;
                 }
             }
             break;
         case InputKeyOk:
-            if(model->pin.length >= MIN_PIN_LENGTH) {
+            if(model->pin.length >= MIN_PIN_SIZE) {
                 call_done_callback = true;
                 pin_code = model->pin;
             }
@@ -103,8 +98,8 @@ static void desktop_view_pin_input_draw_cells(Canvas* canvas, DesktopViewPinInpu
     furi_assert(canvas);
     furi_assert(model);
 
-    uint8_t draw_pin_size = MAX(MIN_PIN_LENGTH, model->pin.length + 1);
-    if(model->locked_input || (model->pin.length == MAX_PIN_LENGTH)) {
+    uint8_t draw_pin_size = MAX(4, model->pin.length + 1);
+    if(model->locked_input || (model->pin.length == MAX_PIN_SIZE)) {
         draw_pin_size = model->pin.length;
     }
 
@@ -157,7 +152,7 @@ static void desktop_view_pin_input_draw(Canvas* canvas, void* context) {
         canvas_draw_str(canvas, 16, 60, "= clear");
     }
 
-    if(model->button_label && ((model->pin.length >= MIN_PIN_LENGTH) || model->locked_input)) {
+    if(model->button_label && ((model->pin.length >= MIN_PIN_SIZE) || model->locked_input)) {
         elements_button_center(canvas, model->button_label);
     }
 
@@ -171,17 +166,6 @@ static void desktop_view_pin_input_draw(Canvas* canvas, void* context) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(
             canvas, model->secondary_str_x, model->secondary_str_y, model->secondary_str);
-    }
-
-    if(model->tertiary_str && model->pin.length == 0) {
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(
-            canvas,
-            model->tertiary_str_x,
-            model->tertiary_str_y,
-            AlignCenter,
-            AlignBottom,
-            model->tertiary_str);
     }
 }
 
@@ -249,7 +233,7 @@ void desktop_view_pin_input_unlock_input(DesktopViewPinInput* pin_input) {
     view_commit_model(pin_input->view, true);
 }
 
-void desktop_view_pin_input_set_pin(DesktopViewPinInput* pin_input, const DesktopPinCode* pin) {
+void desktop_view_pin_input_set_pin(DesktopViewPinInput* pin_input, const PinCode* pin) {
     furi_assert(pin_input);
     furi_assert(pin);
 
@@ -307,20 +291,6 @@ void desktop_view_pin_input_set_label_secondary(
     model->secondary_str = label;
     model->secondary_str_x = x;
     model->secondary_str_y = y;
-    view_commit_model(pin_input->view, true);
-}
-
-void desktop_view_pin_input_set_label_tertiary(
-    DesktopViewPinInput* pin_input,
-    uint8_t x,
-    uint8_t y,
-    const char* label) {
-    furi_assert(pin_input);
-
-    DesktopViewPinInputModel* model = view_get_model(pin_input->view);
-    model->tertiary_str = label;
-    model->tertiary_str_x = x;
-    model->tertiary_str_y = y;
     view_commit_model(pin_input->view, true);
 }
 

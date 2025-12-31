@@ -24,7 +24,7 @@ SubGhzProtocolStatus subghz_block_generic_serialize(
     SubGhzBlockGeneric* instance,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
-    furi_check(instance);
+    furi_assert(instance);
     SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     FuriString* temp_str;
     temp_str = furi_string_alloc();
@@ -94,8 +94,7 @@ SubGhzProtocolStatus subghz_block_generic_serialize(
 
 SubGhzProtocolStatus
     subghz_block_generic_deserialize(SubGhzBlockGeneric* instance, FlipperFormat* flipper_format) {
-    furi_check(instance);
-
+    furi_assert(instance);
     SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     FuriString* temp_str;
     temp_str = furi_string_alloc();
@@ -136,7 +135,6 @@ SubGhzProtocolStatus subghz_block_generic_deserialize_check_count_bit(
     SubGhzBlockGeneric* instance,
     FlipperFormat* flipper_format,
     uint16_t count_bit) {
-    furi_check(instance);
     SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize(instance, flipper_format);

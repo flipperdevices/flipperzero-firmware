@@ -14,7 +14,7 @@ extern "C" {
 
 typedef struct PulseGlue PulseGlue;
 
-PulseGlue* pulse_glue_alloc(void);
+PulseGlue* pulse_glue_alloc();
 void pulse_glue_free(PulseGlue* pulse_glue);
 void pulse_glue_reset(PulseGlue* pulse_glue);
 

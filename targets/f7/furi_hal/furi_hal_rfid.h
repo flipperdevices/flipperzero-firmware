@@ -15,19 +15,19 @@ extern "C" {
 
 /** Initialize RFID subsystem
  */
-void furi_hal_rfid_init(void);
+void furi_hal_rfid_init();
 
 /** Config rfid pins to reset state
  */
-void furi_hal_rfid_pins_reset(void);
+void furi_hal_rfid_pins_reset();
 
 /** Release rfid pull pin
  */
-void furi_hal_rfid_pin_pull_release(void);
+void furi_hal_rfid_pin_pull_release();
 
 /** Pulldown rfid pull pin
  */
-void furi_hal_rfid_pin_pull_pulldown(void);
+void furi_hal_rfid_pin_pull_pulldown();
 
 /** Start read timer
  * @param      freq        timer frequency
@@ -37,21 +37,21 @@ void furi_hal_rfid_tim_read_start(float freq, float duty_cycle);
 
 /** Pause read timer, to be able to continue later
  */
-void furi_hal_rfid_tim_read_pause(void);
+void furi_hal_rfid_tim_read_pause();
 
 /** Continue read timer
  */
-void furi_hal_rfid_tim_read_continue(void);
+void furi_hal_rfid_tim_read_continue();
 
 /** Stop read timer
  */
-void furi_hal_rfid_tim_read_stop(void);
+void furi_hal_rfid_tim_read_stop();
 
 typedef void (*FuriHalRfidReadCaptureCallback)(bool level, uint32_t duration, void* context);
 
 void furi_hal_rfid_tim_read_capture_start(FuriHalRfidReadCaptureCallback callback, void* context);
 
-void furi_hal_rfid_tim_read_capture_stop(void);
+void furi_hal_rfid_tim_read_capture_stop();
 
 typedef void (*FuriHalRfidDMACallback)(bool half, void* context);
 
@@ -62,7 +62,7 @@ void furi_hal_rfid_tim_emulate_dma_start(
     FuriHalRfidDMACallback callback,
     void* context);
 
-void furi_hal_rfid_tim_emulate_dma_stop(void);
+void furi_hal_rfid_tim_emulate_dma_stop();
 
 /** Set read timer period
  *
@@ -108,10 +108,10 @@ void furi_hal_rfid_rtf_carrier_in_start(
 void furi_hal_rfid_rtf_carrier_in_stop();
 
 /** Start/Enable comparator */
-void furi_hal_rfid_comp_start(void);
+void furi_hal_rfid_comp_start();
 
 /** Stop/Disable comparator */
-void furi_hal_rfid_comp_stop(void);
+void furi_hal_rfid_comp_stop();
 
 typedef void (*FuriHalRfidCompCallback)(bool level, void* context);
 
@@ -119,10 +119,10 @@ typedef void (*FuriHalRfidCompCallback)(bool level, void* context);
 void furi_hal_rfid_comp_set_callback(FuriHalRfidCompCallback callback, void* context);
 
 /** Start/Enable Field Presence detect */
-void furi_hal_rfid_field_detect_start(void);
+void furi_hal_rfid_field_detect_start();
 
 /** Stop/Disable Field Presence detect */
-void furi_hal_rfid_field_detect_stop(void);
+void furi_hal_rfid_field_detect_stop();
 
 /** Check Field Presence
  *

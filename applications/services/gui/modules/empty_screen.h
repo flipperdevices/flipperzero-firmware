@@ -20,7 +20,7 @@ typedef struct EmptyScreen EmptyScreen;
  *
  * @return     EmptyScreen instance
  */
-EmptyScreen* empty_screen_alloc(void);
+EmptyScreen* empty_screen_alloc();
 
 /** Deinitialize and free empty screen
  *

@@ -13,7 +13,7 @@ typedef struct PulseJoiner PulseJoiner;
  * 
  * @return PulseJoiner* 
  */
-PulseJoiner* pulse_joiner_alloc(void);
+PulseJoiner* pulse_joiner_alloc();
 
 /**
  * @brief Free PulseJoiner

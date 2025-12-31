@@ -1,0 +1,146 @@
+syntax = "proto3";
+import "storage.proto";
+import "system.proto";
+import "application.proto";
+import "gui.proto";
+import "gpio.proto";
+import "property.proto";
+import "desktop.proto";
+
+package PB;
+option java_package = "com.flipperdevices.protobuf";
+
+enum CommandStatus {
+    OK = 0;
+
+    /**< Common Errors */
+    ERROR = 1; /**< Unknown error */
+    ERROR_DECODE = 2; /**< Command can't be decoded successfully - command_id in response may be wrong! */
+    ERROR_NOT_IMPLEMENTED = 3; /**< Command successfully decoded, but not implemented (deprecated or not yet implemented) */
+    ERROR_BUSY = 4; /**< Somebody took global lock, so not all commands are available */
+    ERROR_CONTINUOUS_COMMAND_INTERRUPTED = 14; /**< Not received has_next == 0 */
+    ERROR_INVALID_PARAMETERS = 15; /**< not provided (or provided invalid) crucial parameters to perform RPC */
+
+    /**< Storage Errors */
+    ERROR_STORAGE_NOT_READY = 5; /**< FS not ready */
+    ERROR_STORAGE_EXIST = 6; /**< File/Dir already exist */
+    ERROR_STORAGE_NOT_EXIST = 7; /**< File/Dir does not exist */
+    ERROR_STORAGE_INVALID_PARAMETER = 8; /**< Invalid API parameter */
+    ERROR_STORAGE_DENIED = 9; /**< Access denied */
+    ERROR_STORAGE_INVALID_NAME = 10; /**< Invalid name/path */
+    ERROR_STORAGE_INTERNAL = 11; /**< Internal error */
+    ERROR_STORAGE_NOT_IMPLEMENTED = 12; /**< Function is not implemented */
+    ERROR_STORAGE_ALREADY_OPEN = 13; /**< File/Dir already opened */
+    ERROR_STORAGE_DIR_NOT_EMPTY = 18; /**< Directory, you're going to remove is not empty */
+
+    /**< Application Errors */
+    ERROR_APP_CANT_START = 16; /**< Can't start app - internal error */
+    ERROR_APP_SYSTEM_LOCKED = 17; /**< Another app is running */
+    ERROR_APP_NOT_RUNNING = 21; /**< App is not running or doesn't support RPC commands */
+    ERROR_APP_CMD_ERROR = 22; /**< Command execution error */
+
+    /**< Virtual Display Errors */
+    ERROR_VIRTUAL_DISPLAY_ALREADY_STARTED = 19; /**< Virtual Display session can't be started twice */
+    ERROR_VIRTUAL_DISPLAY_NOT_STARTED = 20; /**< Virtual Display session can't be stopped when it's not started */
+
+    /**< GPIO Errors */
+    ERROR_GPIO_MODE_INCORRECT = 58;
+    ERROR_GPIO_UNKNOWN_PIN_MODE = 59;
+}
+
+/* There are Server commands (e.g. Storage_write), which have no body message
+ * in response. But 'oneof' obligate to have at least 1 encoded message
+ * in scope. For this needs Empty message is implemented.
+ */
+message Empty {
+}
+
+message StopSession {
+}
+
+message Main {
+    uint32 command_id = 1;
+    CommandStatus command_status = 2;
+    bool has_next = 3;
+    oneof content {
+        Empty empty = 4;
+        StopSession stop_session = 19;
+        .PB_System.PingRequest system_ping_request = 5;
+        .PB_System.PingResponse system_ping_response = 6;
+        .PB_System.RebootRequest system_reboot_request = 31;
+        .PB_System.DeviceInfoRequest system_device_info_request = 32;
+        .PB_System.DeviceInfoResponse system_device_info_response = 33;
+        .PB_System.FactoryResetRequest system_factory_reset_request = 34;
+        .PB_System.GetDateTimeRequest system_get_datetime_request = 35;
+        .PB_System.GetDateTimeResponse system_get_datetime_response = 36;
+        .PB_System.SetDateTimeRequest system_set_datetime_request = 37;
+        .PB_System.PlayAudiovisualAlertRequest system_play_audiovisual_alert_request = 38;
+        .PB_System.ProtobufVersionRequest system_protobuf_version_request = 39;
+        .PB_System.ProtobufVersionResponse system_protobuf_version_response = 40;
+        .PB_System.UpdateRequest system_update_request = 41;
+        .PB_System.UpdateResponse system_update_response = 46;
+        .PB_System.PowerInfoRequest system_power_info_request = 44;
+        .PB_System.PowerInfoResponse system_power_info_response = 45;
+        .PB_Storage.InfoRequest storage_info_request = 28;
+        .PB_Storage.InfoResponse storage_info_response = 29;
+        .PB_Storage.TimestampRequest storage_timestamp_request = 59;
+        .PB_Storage.TimestampResponse storage_timestamp_response = 60;
+        .PB_Storage.StatRequest storage_stat_request = 24;
+        .PB_Storage.StatResponse storage_stat_response = 25;
+        .PB_Storage.ListRequest storage_list_request = 7;
+        .PB_Storage.ListResponse storage_list_response = 8;
+        .PB_Storage.ReadRequest storage_read_request = 9;
+        .PB_Storage.ReadResponse storage_read_response = 10;
+        .PB_Storage.WriteRequest storage_write_request = 11;
+        .PB_Storage.DeleteRequest storage_delete_request = 12;
+        .PB_Storage.MkdirRequest storage_mkdir_request = 13;
+        .PB_Storage.Md5sumRequest storage_md5sum_request = 14;
+        .PB_Storage.Md5sumResponse storage_md5sum_response = 15;
+        .PB_Storage.RenameRequest storage_rename_request = 30;
+        .PB_Storage.BackupCreateRequest storage_backup_create_request = 42;
+        .PB_Storage.BackupRestoreRequest storage_backup_restore_request = 43;
+        .PB_App.StartRequest app_start_request = 16;
+        .PB_App.LockStatusRequest app_lock_status_request = 17;
+        .PB_App.LockStatusResponse app_lock_status_response = 18;
+        .PB_App.AppExitRequest app_exit_request = 47;
+        .PB_App.AppLoadFileRequest app_load_file_request = 48;
+        .PB_App.AppButtonPressRequest app_button_press_request = 49;
+        .PB_App.AppButtonReleaseRequest app_button_release_request = 50;
+        .PB_App.GetErrorRequest app_get_error_request = 63;
+        .PB_App.GetErrorResponse app_get_error_response = 64;
+        .PB_App.DataExchangeRequest app_data_exchange_request = 65;
+        .PB_Gui.StartScreenStreamRequest gui_start_screen_stream_request = 20;
+        .PB_Gui.StopScreenStreamRequest gui_stop_screen_stream_request = 21;
+        .PB_Gui.ScreenFrame gui_screen_frame = 22;
+        .PB_Gui.SendInputEventRequest gui_send_input_event_request = 23;
+        .PB_Gui.StartVirtualDisplayRequest gui_start_virtual_display_request = 26;
+        .PB_Gui.StopVirtualDisplayRequest gui_stop_virtual_display_request = 27;
+        .PB_Gpio.SetPinMode gpio_set_pin_mode = 51;
+        .PB_Gpio.SetInputPull gpio_set_input_pull = 52;
+        .PB_Gpio.GetPinMode gpio_get_pin_mode = 53;
+        .PB_Gpio.GetPinModeResponse gpio_get_pin_mode_response = 54;
+        .PB_Gpio.ReadPin gpio_read_pin = 55;
+        .PB_Gpio.ReadPinResponse gpio_read_pin_response = 56;
+        .PB_Gpio.WritePin gpio_write_pin = 57;
+        .PB_App.AppStateResponse app_state_response = 58;
+        .PB_Property.GetRequest property_get_request = 61;
+        .PB_Property.GetResponse property_get_response = 62;
+        .PB_Desktop.IsLockedRequest desktop_is_locked_request = 66;
+        .PB_Desktop.UnlockRequest desktop_unlock_request = 67;
+        .PB_Desktop.StatusSubscribeRequest desktop_status_subscribe_request = 68;
+        .PB_Desktop.StatusUnsubscribeRequest desktop_status_unsubscribe_request = 69;
+        .PB_Desktop.Status desktop_status = 70;
+    }
+}
+
+message Region {
+    message Band {
+        uint32 start = 1;
+        uint32 end = 2;
+        int32 power_limit = 3;
+        uint32 duty_cycle = 4;
+    }
+
+    bytes country_code = 1;
+    repeated Band bands = 2;
+}

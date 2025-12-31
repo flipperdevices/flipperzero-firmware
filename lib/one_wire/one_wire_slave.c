@@ -150,7 +150,7 @@ static inline bool onewire_slave_receive_and_process_command(OneWireSlave* bus) 
             }
         }
 
-        return bus->error == OneWireSlaveErrorResetInProgress;
+        return (bus->error == OneWireSlaveErrorResetInProgress);
     }
 
     return false;
@@ -158,8 +158,6 @@ static inline bool onewire_slave_receive_and_process_command(OneWireSlave* bus) 
 
 static inline bool onewire_slave_bus_start(OneWireSlave* bus) {
     FURI_CRITICAL_ENTER();
-
-    furi_hal_gpio_disable_int_callback(bus->gpio_pin);
     furi_hal_gpio_init(bus->gpio_pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
 
     while(onewire_slave_receive_and_process_command(bus))
@@ -168,8 +166,6 @@ static inline bool onewire_slave_bus_start(OneWireSlave* bus) {
     const bool result = (bus->error == OneWireSlaveErrorNone);
 
     furi_hal_gpio_init(bus->gpio_pin, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
-    furi_hal_gpio_enable_int_callback(bus->gpio_pin);
-
     FURI_CRITICAL_EXIT();
 
     return result;
@@ -204,12 +200,11 @@ static void onewire_slave_exti_callback(void* context) {
     } else {
         pulse_start = DWT->CYCCNT;
     }
-}
+};
 
 /*********************** PUBLIC ***********************/
 
 OneWireSlave* onewire_slave_alloc(const GpioPin* gpio_pin) {
-    furi_check(gpio_pin);
     OneWireSlave* bus = malloc(sizeof(OneWireSlave));
 
     bus->gpio_pin = gpio_pin;
@@ -220,23 +215,17 @@ OneWireSlave* onewire_slave_alloc(const GpioPin* gpio_pin) {
 }
 
 void onewire_slave_free(OneWireSlave* bus) {
-    furi_check(bus);
-
     onewire_slave_stop(bus);
     free(bus);
 }
 
 void onewire_slave_start(OneWireSlave* bus) {
-    furi_check(bus);
-
     furi_hal_gpio_add_int_callback(bus->gpio_pin, onewire_slave_exti_callback, bus);
     furi_hal_gpio_write(bus->gpio_pin, true);
     furi_hal_gpio_init(bus->gpio_pin, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
 }
 
 void onewire_slave_stop(OneWireSlave* bus) {
-    furi_check(bus);
-
     furi_hal_gpio_write(bus->gpio_pin, true);
     furi_hal_gpio_init(bus->gpio_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_remove_int_callback(bus->gpio_pin);
@@ -246,7 +235,6 @@ void onewire_slave_set_reset_callback(
     OneWireSlave* bus,
     OneWireSlaveResetCallback callback,
     void* context) {
-    furi_check(bus);
     bus->reset_callback = callback;
     bus->reset_callback_context = context;
 }
@@ -255,8 +243,6 @@ void onewire_slave_set_command_callback(
     OneWireSlave* bus,
     OneWireSlaveCommandCallback callback,
     void* context) {
-    furi_check(bus);
-
     bus->command_callback = callback;
     bus->command_callback_context = context;
 }
@@ -265,14 +251,11 @@ void onewire_slave_set_result_callback(
     OneWireSlave* bus,
     OneWireSlaveResultCallback result_cb,
     void* context) {
-    furi_check(bus);
     bus->result_callback = result_cb;
     bus->result_callback_context = context;
 }
 
 bool onewire_slave_receive_bit(OneWireSlave* bus) {
-    furi_check(bus);
-
     const OneWireSlaveTimings* timings = bus->timings;
     // wait while bus is low
     if(!onewire_slave_wait_while_gpio_is(bus, timings->tslot_max, false)) {
@@ -291,8 +274,6 @@ bool onewire_slave_receive_bit(OneWireSlave* bus) {
 }
 
 bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
-    furi_check(bus);
-
     const OneWireSlaveTimings* timings = bus->timings;
     // wait while bus is low
     if(!onewire_slave_wait_while_gpio_is(bus, timings->tslot_max, false)) {
@@ -324,8 +305,6 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
 }
 
 bool onewire_slave_send(OneWireSlave* bus, const uint8_t* data, size_t data_size) {
-    furi_check(bus);
-
     furi_hal_gpio_write(bus->gpio_pin, true);
 
     size_t bytes_sent = 0;
@@ -345,8 +324,6 @@ bool onewire_slave_send(OneWireSlave* bus, const uint8_t* data, size_t data_size
 }
 
 bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size) {
-    furi_check(bus);
-
     furi_hal_gpio_write(bus->gpio_pin, true);
 
     size_t bytes_received = 0;
@@ -370,7 +347,6 @@ bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size) {
 }
 
 void onewire_slave_set_overdrive(OneWireSlave* bus, bool set) {
-    furi_check(bus);
     const OneWireSlaveTimings* new_timings = set ? &onewire_slave_timings_overdrive :
                                                    &onewire_slave_timings_normal;
     if(bus->timings != new_timings) {

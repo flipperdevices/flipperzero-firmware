@@ -14,9 +14,9 @@
 
 #define TAG "BrowserWorker"
 
-#define ASSETS_DIR          "assets"
-#define BROWSER_ROOT        STORAGE_EXT_PATH_PREFIX
-#define FILE_NAME_LEN_MAX   256
+#define ASSETS_DIR "assets"
+#define BROWSER_ROOT STORAGE_ANY_PATH_PREFIX
+#define FILE_NAME_LEN_MAX 256
 #define LONG_LOAD_THRESHOLD 100
 
 typedef enum {
@@ -32,12 +32,12 @@ typedef enum {
     (WorkerEvtStop | WorkerEvtLoad | WorkerEvtFolderEnter | WorkerEvtFolderExit | \
      WorkerEvtFolderRefresh | WorkerEvtConfigChange)
 
-ARRAY_DEF(IdxLastArray, int32_t) //-V658
-ARRAY_DEF(ExtFilterArray, FuriString*, FURI_STRING_OPLIST) //-V658
+ARRAY_DEF(idx_last_array, int32_t)
 
 struct BrowserWorker {
     FuriThread* thread;
 
+    FuriString* filter_extension;
     FuriString* path_start;
     FuriString* path_current;
     FuriString* path_next;
@@ -46,8 +46,7 @@ struct BrowserWorker {
     uint32_t load_count;
     bool skip_assets;
     bool hide_dot_files;
-    IdxLastArray_t idx_last;
-    ExtFilterArray_t ext_filter;
+    idx_last_array_t idx_last;
 
     void* cb_ctx;
     BrowserWorkerFolderOpenCallback folder_cb;
@@ -79,32 +78,6 @@ static bool browser_path_trim(FuriString* path) {
     }
     return is_root;
 }
-static void browser_parse_ext_filter(ExtFilterArray_t ext_filter, const char* filter_str) {
-    ExtFilterArray_reset(ext_filter);
-    if(!filter_str) {
-        return;
-    }
-
-    size_t len = strlen(filter_str);
-    if(len == 0) {
-        return;
-    }
-
-    size_t str_offset = 0;
-    FuriString* ext_temp = furi_string_alloc();
-    while(1) {
-        size_t ext_len = strcspn(&filter_str[str_offset], "|");
-
-        furi_string_set_strn(ext_temp, &filter_str[str_offset], ext_len);
-        ExtFilterArray_push_back(ext_filter, ext_temp);
-
-        str_offset += ext_len + 1;
-        if(str_offset >= len) {
-            break;
-        }
-    }
-    furi_string_free(ext_temp);
-}
 
 static bool browser_filter_by_name(BrowserWorker* browser, FuriString* name, bool is_folder) {
     // Skip dot files if enabled
@@ -117,26 +90,18 @@ static bool browser_filter_by_name(BrowserWorker* browser, FuriString* name, boo
     if(is_folder) {
         // Skip assets folders (if enabled)
         if(browser->skip_assets) {
-            return (furi_string_cmp_str(name, ASSETS_DIR) == 0) ? (false) : (true);
+            return ((furi_string_cmp_str(name, ASSETS_DIR) == 0) ? (false) : (true));
         } else {
             return true;
         }
     } else {
         // Filter files by extension
-        if(ExtFilterArray_size(browser->ext_filter) == 0) {
+        if((furi_string_empty(browser->filter_extension)) ||
+           (furi_string_cmp_str(browser->filter_extension, "*") == 0)) {
             return true;
         }
-
-        ExtFilterArray_it_t it;
-        for(ExtFilterArray_it(it, browser->ext_filter); !ExtFilterArray_end_p(it);
-            ExtFilterArray_next(it)) {
-            FuriString* ext = *ExtFilterArray_cref(it);
-            if((furi_string_empty(ext)) || (furi_string_cmp_str(ext, "*") == 0)) {
-                return true;
-            }
-            if(furi_string_end_withi(name, ext)) {
-                return true;
-            }
+        if(furi_string_end_with(name, browser->filter_extension)) {
+            return true;
         }
     }
     return false;
@@ -295,12 +260,12 @@ static bool
 
     furi_record_close(RECORD_STORAGE);
 
-    return items_cnt == count;
+    return (items_cnt == count);
 }
 
 static int32_t browser_worker(void* context) {
     BrowserWorker* browser = (BrowserWorker*)context;
-    furi_check(browser);
+    furi_assert(browser);
     FURI_LOG_D(TAG, "Start");
 
     uint32_t items_cnt = 0;
@@ -316,14 +281,14 @@ static int32_t browser_worker(void* context) {
     while(1) {
         uint32_t flags =
             furi_thread_flags_wait(WORKER_FLAGS_ALL, FuriFlagWaitAny, FuriWaitForever);
-        furi_check((flags & FuriFlagError) == 0);
+        furi_assert((flags & FuriFlagError) == 0);
 
         if(flags & WorkerEvtConfigChange) {
             // If start path is a path to the file - try finding index of this file in a folder
             if(browser_path_is_file(browser->path_next)) {
                 path_extract_filename(browser->path_next, filename, false);
             }
-            IdxLastArray_reset(browser->idx_last);
+            idx_last_array_reset(browser->idx_last);
 
             furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderEnter);
         }
@@ -333,7 +298,7 @@ static int32_t browser_worker(void* context) {
             bool is_root = browser_folder_check_and_switch(path);
 
             // Push previous selected item index to history array
-            IdxLastArray_push_back(browser->idx_last, browser->item_sel_idx);
+            idx_last_array_push_back(browser->idx_last, browser->item_sel_idx);
 
             int32_t file_idx = 0;
             browser_folder_init(browser, path, filename, &items_cnt, &file_idx);
@@ -356,9 +321,9 @@ static int32_t browser_worker(void* context) {
 
             int32_t file_idx = 0;
             browser_folder_init(browser, path, filename, &items_cnt, &file_idx);
-            if(IdxLastArray_size(browser->idx_last) > 0) {
+            if(idx_last_array_size(browser->idx_last) > 0) {
                 // Pop previous selected item index from history array
-                IdxLastArray_pop_back(&file_idx, browser->idx_last);
+                idx_last_array_pop_back(&file_idx, browser->idx_last);
             }
             furi_string_set(browser->path_current, path);
             FURI_LOG_D(
@@ -410,15 +375,14 @@ static int32_t browser_worker(void* context) {
 BrowserWorker* file_browser_worker_alloc(
     FuriString* path,
     const char* base_path,
-    const char* ext_filter,
+    const char* filter_ext,
     bool skip_assets,
     bool hide_dot_files) {
     BrowserWorker* browser = malloc(sizeof(BrowserWorker));
 
-    IdxLastArray_init(browser->idx_last);
-    ExtFilterArray_init(browser->ext_filter);
+    idx_last_array_init(browser->idx_last);
 
-    browser_parse_ext_filter(browser->ext_filter, ext_filter);
+    browser->filter_extension = furi_string_alloc_set(filter_ext);
     browser->skip_assets = skip_assets;
     browser->hide_dot_files = hide_dot_files;
 
@@ -437,94 +401,94 @@ BrowserWorker* file_browser_worker_alloc(
 } //-V773
 
 void file_browser_worker_free(BrowserWorker* browser) {
-    furi_check(browser);
+    furi_assert(browser);
 
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtStop);
     furi_thread_join(browser->thread);
     furi_thread_free(browser->thread);
 
+    furi_string_free(browser->filter_extension);
     furi_string_free(browser->path_next);
     furi_string_free(browser->path_current);
     furi_string_free(browser->path_start);
 
-    IdxLastArray_clear(browser->idx_last);
-    ExtFilterArray_clear(browser->ext_filter);
+    idx_last_array_clear(browser->idx_last);
 
     free(browser);
 }
 
 void file_browser_worker_set_callback_context(BrowserWorker* browser, void* context) {
-    furi_check(browser);
+    furi_assert(browser);
     browser->cb_ctx = context;
 }
 
 void file_browser_worker_set_folder_callback(
     BrowserWorker* browser,
     BrowserWorkerFolderOpenCallback cb) {
-    furi_check(browser);
+    furi_assert(browser);
     browser->folder_cb = cb;
 }
 
 void file_browser_worker_set_list_callback(
     BrowserWorker* browser,
     BrowserWorkerListLoadCallback cb) {
-    furi_check(browser);
+    furi_assert(browser);
     browser->list_load_cb = cb;
 }
 
 void file_browser_worker_set_item_callback(
     BrowserWorker* browser,
     BrowserWorkerListItemCallback cb) {
-    furi_check(browser);
+    furi_assert(browser);
     browser->list_item_cb = cb;
 }
 
 void file_browser_worker_set_long_load_callback(
     BrowserWorker* browser,
     BrowserWorkerLongLoadCallback cb) {
-    furi_check(browser);
+    furi_assert(browser);
     browser->long_load_cb = cb;
 }
 
 void file_browser_worker_set_config(
     BrowserWorker* browser,
     FuriString* path,
-    const char* ext_filter,
+    const char* filter_ext,
     bool skip_assets,
     bool hide_dot_files) {
-    furi_check(browser);
+    furi_assert(browser);
     furi_string_set(browser->path_next, path);
-    browser_parse_ext_filter(browser->ext_filter, ext_filter);
+    furi_string_set(browser->filter_extension, filter_ext);
     browser->skip_assets = skip_assets;
     browser->hide_dot_files = hide_dot_files;
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtConfigChange);
 }
 
 void file_browser_worker_folder_enter(BrowserWorker* browser, FuriString* path, int32_t item_idx) {
-    furi_check(browser);
+    furi_assert(browser);
     furi_string_set(browser->path_next, path);
     browser->item_sel_idx = item_idx;
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderEnter);
 }
 
 bool file_browser_worker_is_in_start_folder(BrowserWorker* browser) {
-    furi_check(browser);
-    return furi_string_cmp(browser->path_start, browser->path_current) == 0;
+    furi_assert(browser);
+    return (furi_string_cmp(browser->path_start, browser->path_current) == 0);
 }
 
 void file_browser_worker_folder_exit(BrowserWorker* browser) {
-    furi_check(browser);
+    furi_assert(browser);
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderExit);
 }
 
 void file_browser_worker_folder_refresh(BrowserWorker* browser, int32_t item_idx) {
-    furi_check(browser);
+    furi_assert(browser);
     browser->item_sel_idx = item_idx;
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderRefresh);
 }
 
 void file_browser_worker_load(BrowserWorker* browser, uint32_t offset, uint32_t count) {
-    furi_check(browser);
+    furi_assert(browser);
     browser->load_offset = offset;
     browser->load_count = count;
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtLoad);

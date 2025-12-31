@@ -73,7 +73,7 @@ static bool myki_parse(const NfcDevice* device, FuriString* parsed_data) {
         // Stored card number doesn't include check digit
         card_number += myki_calculate_luhn(card_number);
 
-        furi_string_set(parsed_data, "\e#myki\nNo.: ");
+        furi_string_set(parsed_data, "\e#myki\n");
 
         // Stylise card number according to the physical card
         char card_string[20];
@@ -111,6 +111,6 @@ static const FlipperAppPluginDescriptor myki_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* myki_plugin_ep(void) {
+const FlipperAppPluginDescriptor* myki_plugin_ep() {
     return &myki_plugin_descriptor;
 }

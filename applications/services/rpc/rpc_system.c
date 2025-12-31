@@ -30,8 +30,7 @@ static void rpc_system_system_ping_process(const PB_Main* request, void* context
     }
 
     PB_Main response = PB_Main_init_default;
-    // PB_CommandStatus_OK is 0 in current case, and var by default is 0 too, commenting PVS warn
-    response.command_status = PB_CommandStatus_OK; //-V1048
+    response.command_status = PB_CommandStatus_OK;
     response.command_id = request->command_id;
     response.which_content = PB_Main_system_ping_response_tag;
 
@@ -55,21 +54,18 @@ static void rpc_system_system_reboot_process(const PB_Main* request, void* conte
     RpcSession* session = (RpcSession*)context;
     furi_assert(session);
 
-    Power* power = furi_record_open(RECORD_POWER);
     const int mode = request->content.system_reboot_request.mode;
 
     if(mode == PB_System_RebootRequest_RebootMode_OS) {
-        power_reboot(power, PowerBootModeNormal);
+        power_reboot(PowerBootModeNormal);
     } else if(mode == PB_System_RebootRequest_RebootMode_DFU) {
-        power_reboot(power, PowerBootModeDfu);
+        power_reboot(PowerBootModeDfu);
     } else if(mode == PB_System_RebootRequest_RebootMode_UPDATE) {
-        power_reboot(power, PowerBootModeUpdateStart);
+        power_reboot(PowerBootModeUpdateStart);
     } else {
         rpc_send_and_release_empty(
             session, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
     }
-
-    furi_record_close(RECORD_POWER);
 }
 
 static void rpc_system_system_device_info_callback(
@@ -126,7 +122,7 @@ static void rpc_system_system_get_datetime_process(const PB_Main* request, void*
     RpcSession* session = (RpcSession*)context;
     furi_assert(session);
 
-    DateTime datetime;
+    FuriHalRtcDateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
 
     PB_Main* response = malloc(sizeof(PB_Main));
@@ -161,7 +157,7 @@ static void rpc_system_system_set_datetime_process(const PB_Main* request, void*
         return;
     }
 
-    DateTime datetime;
+    FuriHalRtcDateTime datetime;
     datetime.hour = request->content.system_set_datetime_request.datetime.hour;
     datetime.minute = request->content.system_set_datetime_request.datetime.minute;
     datetime.second = request->content.system_set_datetime_request.datetime.second;
@@ -185,9 +181,9 @@ static void rpc_system_system_factory_reset_process(const PB_Main* request, void
 
     furi_hal_rtc_reset_registers();
     furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
+    power_reboot(PowerBootModeNormal);
 
-    Power* power = furi_record_open(RECORD_POWER);
-    power_reboot(power, PowerBootModeNormal);
+    (void)session;
 }
 
 static void

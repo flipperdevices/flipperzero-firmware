@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package PB_Gui;
+option java_package = "com.flipperdevices.protobuf.screen";
+
+enum InputKey {
+    UP = 0;
+    DOWN = 1;
+    RIGHT = 2;
+    LEFT = 3;
+    OK = 4;
+    BACK = 5;
+};
+
+enum InputType {
+    PRESS = 0; /**< Press event, emitted after de-bounce */
+    RELEASE = 1; /**< Release event, emitted after de-bounce */
+    SHORT = 2; /**< Short event, emitted after InputTypeRelease done withing INPUT_LONG_PRESS interval */
+    LONG = 3; /**< Long event, emitted after INPUT_LONG_PRESS interval, asynchronous to InputTypeRelease  */
+    REPEAT = 4; /**< Repeat event, emitted with INPUT_REPEATE_PRESS period after InputTypeLong event */
+}
+
+enum ScreenOrientation {
+    HORIZONTAL = 0; /**< Horizontal */
+    HORIZONTAL_FLIP = 1; /**< Horizontal flipped (180) */
+    VERTICAL = 2; /**< Vertical (90) */
+    VERTICAL_FLIP = 3; /**< Vertical flipped (270) */
+}
+
+message ScreenFrame {
+    bytes data = 1;
+    ScreenOrientation orientation = 2;
+}
+
+message StartScreenStreamRequest {
+}
+
+message StopScreenStreamRequest {
+}
+
+message SendInputEventRequest {
+    InputKey key = 1;
+    InputType type = 2;
+}
+
+message StartVirtualDisplayRequest {
+    ScreenFrame first_frame = 1; /**< Optional: screen frame to show */
+    bool send_input = 2; /**< Optional: send flipper input */
+}
+
+message StopVirtualDisplayRequest {
+}

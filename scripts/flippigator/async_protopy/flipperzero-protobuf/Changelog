@@ -1,0 +1,109 @@
+# Changelog
+
+## [0.22]
+### Added
+- StartVirtualDisplayRequest: optional send_input to request input from device
+
+## [0.21]
+### Added
+- Application AppButtonPressRequest now supports button indices in addition to names.
+
+## [0.20]
+### Added
+- Storage ListRequest message now has a file size filter.
+
+## [0.19]
+### Added
+- Storage ListRequest message now supports md5sum calculation for each file
+
+## [0.18]
+### Added
+- Loader is now able to load apps from SD card
+
+## [0.17]
+### Added
+- Desktop service subscription API
+
+## [0.16]
+### Added
+- Desktop service API
+
+## [0.15]
+### Modified
+- ScreenFrame: additional orientation field
+
+## [0.14]
+### Added
+- New subsystem: Property
+- Property messages: GetRequest, GetResponse
+- App messages: GetErrorRequest, GetErrorResponse, DataExchangeRequest
+
+## [0.13]
+### Added
+- Storage: timestamp
+
+## [0.12]
+### Added
+- Region message
+
+## [0.11]
+### Added
+- App messages: AppStateResponse
+
+## [0.10]
+### Added
+- GPIO message: SetPinMode, SetInputPull, GetPinMode, GetPinModeResponse, ReadPin, ReadPinResponse, WritePin
+
+## [0.9]
+### Added
+- System message: UpdateResponse, enum UpdateResultCode: new entries
+    OutdatedManifestVersion, IntFull, UnspecifiedError
+
+## [0.8]
+### Added
+- App messages: AppExitRequest, AppLoadFileRequest, AppButtonPressRequest, AppButtonReleaseRequest
+
+## [0.7]
+### Added
+- System message: UpdateResponse: passing update preparation detailed status
+
+## [0.6]
+### Added
+- System message: RebootRequest: added UPDATE restart mode
+### Fixed
+- System message: UpdateRequest: renamed manifest field
+
+## [0.5]
+### Added
+- System message: PowerInfo
+
+## [0.4]
+### Added
+- System message: UpdateRequest
+- Storage messages: BackupCreateRequest, BackupRestoreRequest
+
+## [0.3]
+### Fixed
+- BLE disconnection after writing / erasing FLASH
+
+## [0.2]
+### Added
+- System messages: ProtobufVersion
+- Support parallel RPC sessions
+- Screen streaming optimization
+
+## [0.1]
+### Added
+- Code owners
+- CI setup
+- System messages: Ping, Reboot, DeviceInfo, FactoryReset, DateTime,
+                   AudiovisualAlert
+- Storage messages: Info, Stat, Read, Write, Delete, Mkdir, Md5sum,
+                    Rename
+- App messages: Start, LockStatus
+- Gui messages: ScreenStream, ScreenFrame, SendInput, VirtualDisplay
+
+## [0.0]
+### Added
+- Introduced Flipper Zero Protobuf repository
+- StorageList messages

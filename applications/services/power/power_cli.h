@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-void power_on_system_start(void);
+void power_on_system_start();
 
 #ifdef __cplusplus
 }

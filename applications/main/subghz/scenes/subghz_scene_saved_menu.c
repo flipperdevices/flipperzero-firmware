@@ -1,4 +1,4 @@
-#include "../subghz_i.h" // IWYU pragma: keep
+#include "../subghz_i.h"
 
 enum SubmenuIndex {
     SubmenuIndexEmulate,

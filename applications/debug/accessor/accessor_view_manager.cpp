@@ -1,53 +1,49 @@
 #include "accessor_view_manager.h"
 #include "accessor_event.h"
-#include "callback_connector.h"
+#include <callback-connector.h>
 
 AccessorAppViewManager::AccessorAppViewManager() {
     event_queue = furi_message_queue_alloc(10, sizeof(AccessorEvent));
 
-    view_holder = view_holder_alloc();
-    auto callback =
-        cbc::obtain_connector(this, &AccessorAppViewManager::view_holder_back_callback);
+    view_dispatcher = view_dispatcher_alloc();
+    auto callback = cbc::obtain_connector(this, &AccessorAppViewManager::previous_view_callback);
 
     // allocate views
     submenu = submenu_alloc();
-    popup = popup_alloc();
+    add_view(ViewType::Submenu, submenu_get_view(submenu));
 
-    // set back callback
-    view_holder_set_back_callback(view_holder, callback, NULL);
+    popup = popup_alloc();
+    add_view(ViewType::Popup, popup_get_view(popup));
 
     gui = static_cast<Gui*>(furi_record_open(RECORD_GUI));
-    view_holder_attach_to_gui(view_holder, gui);
+    view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+
+    // set previous view callback for all views
+    view_set_previous_callback(submenu_get_view(submenu), callback);
+    view_set_previous_callback(popup_get_view(popup), callback);
 }
 
 AccessorAppViewManager::~AccessorAppViewManager() {
-    // remove current view
-    view_holder_set_view(view_holder, NULL);
+    // remove views
+    view_dispatcher_remove_view(
+        view_dispatcher, static_cast<uint32_t>(AccessorAppViewManager::ViewType::Submenu));
+    view_dispatcher_remove_view(
+        view_dispatcher, static_cast<uint32_t>(AccessorAppViewManager::ViewType::Popup));
+
     // free view modules
     furi_record_close(RECORD_GUI);
     submenu_free(submenu);
     popup_free(popup);
-    // free view holder
-    view_holder_free(view_holder);
+
+    // free dispatcher
+    view_dispatcher_free(view_dispatcher);
+
     // free event queue
     furi_message_queue_free(event_queue);
 }
 
 void AccessorAppViewManager::switch_to(ViewType type) {
-    View* view;
-
-    switch(type) {
-    case ViewType::Submenu:
-        view = submenu_get_view(submenu);
-        break;
-    case ViewType::Popup:
-        view = popup_get_view(popup);
-        break;
-    default:
-        furi_crash();
-    }
-
-    view_holder_set_view(view_holder, view);
+    view_dispatcher_switch_to_view(view_dispatcher, static_cast<uint32_t>(type));
 }
 
 Submenu* AccessorAppViewManager::get_submenu() {
@@ -69,10 +65,16 @@ void AccessorAppViewManager::send_event(AccessorEvent* event) {
     furi_check(result == FuriStatusOk);
 }
 
-void AccessorAppViewManager::view_holder_back_callback(void*) {
+uint32_t AccessorAppViewManager::previous_view_callback(void*) {
     if(event_queue != NULL) {
         AccessorEvent event;
         event.type = AccessorEvent::Type::Back;
         send_event(&event);
     }
+
+    return VIEW_IGNORE;
+}
+
+void AccessorAppViewManager::add_view(ViewType view_type, View* view) {
+    view_dispatcher_add_view(view_dispatcher, static_cast<uint32_t>(view_type), view);
 }

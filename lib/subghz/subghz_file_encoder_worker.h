@@ -2,10 +2,6 @@
 
 #include <furi_hal.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef void (*SubGhzFileEncoderWorkerCallbackEnd)(void* context);
 
 typedef struct SubGhzFileEncoderWorker SubGhzFileEncoderWorker;
@@ -24,7 +20,7 @@ void subghz_file_encoder_worker_callback_end(
  * Allocate SubGhzFileEncoderWorker.
  * @return SubGhzFileEncoderWorker* pointer to a SubGhzFileEncoderWorker instance 
  */
-SubGhzFileEncoderWorker* subghz_file_encoder_worker_alloc(void);
+SubGhzFileEncoderWorker* subghz_file_encoder_worker_alloc();
 
 /** 
  * Free SubGhzFileEncoderWorker.
@@ -63,7 +59,3 @@ void subghz_file_encoder_worker_stop(SubGhzFileEncoderWorker* instance);
  * @return bool - true if running
  */
 bool subghz_file_encoder_worker_is_running(SubGhzFileEncoderWorker* instance);
-
-#ifdef __cplusplus
-}
-#endif

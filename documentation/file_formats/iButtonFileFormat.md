@@ -1,4 +1,4 @@
-# iButton key file format {#ibutton_file_format}
+# iButton key file format
 
 ## Example
 

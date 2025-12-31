@@ -31,6 +31,7 @@ bool nfc_scene_mf_classic_keys_add_on_event(void* context, SceneManagerEvent eve
             // Add key to dict
             KeysDict* dict = keys_dict_alloc(
                 NFC_APP_MF_CLASSIC_DICT_USER_PATH, KeysDictModeOpenAlways, sizeof(MfClassicKey));
+            furi_assert(dict);
 
             MfClassicKey key = {};
             memcpy(key.data, instance->byte_input_store, sizeof(MfClassicKey));
@@ -39,7 +40,7 @@ bool nfc_scene_mf_classic_keys_add_on_event(void* context, SceneManagerEvent eve
                     instance->scene_manager, NfcSceneMfClassicKeysWarnDuplicate);
             } else if(keys_dict_add_key(dict, key.data, sizeof(MfClassicKey))) {
                 scene_manager_next_scene(instance->scene_manager, NfcSceneSaveSuccess);
-                dolphin_deed(DolphinDeedNfcKeyAdd);
+                dolphin_deed(DolphinDeedNfcMfcAdd);
             } else {
                 scene_manager_previous_scene(instance->scene_manager);
             }

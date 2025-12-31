@@ -35,25 +35,21 @@ class Main(App):
         self.parser_format.set_defaults(func=self.format)
 
     @staticmethod
-    def _filter_lint_directories(
-        dirpath: str, dirnames: list[str], excludes: tuple[str]
-    ):
+    def _filter_lint_directories(dirnames: list[str]):
         # Skipping 3rd-party code - usually resides in subfolder "lib"
         if "lib" in dirnames:
             dirnames.remove("lib")
-        # Skipping hidden and excluded folders
+        # Skipping hidden folders
         for dirname in dirnames.copy():
             if dirname.startswith("."):
                 dirnames.remove(dirname)
-            if os.path.join(dirpath, dirname).startswith(excludes):
-                dirnames.remove(dirname)
 
-    def _check_folders(self, folders: list, excludes: tuple[str]):
+    def _check_folders(self, folders: list):
         show_message = False
         pattern = re.compile(SOURCE_CODE_DIR_PATTERN)
         for folder in folders:
             for dirpath, dirnames, filenames in os.walk(folder):
-                self._filter_lint_directories(dirpath, dirnames, excludes)
+                self._filter_lint_directories(dirnames)
 
                 for dirname in dirnames:
                     if not pattern.match(dirname):
@@ -65,11 +61,11 @@ class Main(App):
                 "Folders are not renamed automatically, please fix it by yourself"
             )
 
-    def _find_sources(self, folders: list, excludes: tuple[str]):
+    def _find_sources(self, folders: list):
         output = []
         for folder in folders:
             for dirpath, dirnames, filenames in os.walk(folder):
-                self._filter_lint_directories(dirpath, dirnames, excludes)
+                self._filter_lint_directories(dirnames)
 
                 for filename in filenames:
                     ext = os.path.splitext(filename.lower())[1]
@@ -172,20 +168,14 @@ class Main(App):
 
     def _perform(self, dry_run: bool):
         result = 0
-        excludes = []
-        for folder in self.args.input.copy():
-            if folder.startswith("!"):
-                excludes.append(folder.removeprefix("!"))
-                self.args.input.remove(folder)
-        excludes = tuple(excludes)
-        sources = self._find_sources(self.args.input, excludes)
+        sources = self._find_sources(self.args.input)
         if not self._format_sources(sources, dry_run=dry_run):
             result |= 0b001
         if not self._apply_file_naming_convention(sources, dry_run=dry_run):
             result |= 0b010
         if not self._apply_file_permissions(sources, dry_run=dry_run):
             result |= 0b100
-        self._check_folders(self.args.input, excludes)
+        self._check_folders(self.args.input)
         return result
 
     def check(self):

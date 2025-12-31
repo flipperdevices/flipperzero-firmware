@@ -37,7 +37,7 @@ typedef void (
  *
  * @return just created instance of InfraredWorker
  */
-InfraredWorker* infrared_worker_alloc(void);
+InfraredWorker* infrared_worker_alloc();
 
 /** Free InfraredWorker
  *

@@ -1,6 +1,7 @@
 #include "flipper.pb.h"
 #include "rpc_i.h"
 #include <desktop/desktop.h>
+#include "desktop.pb.h"
 
 #define TAG "RpcDesktop"
 

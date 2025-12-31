@@ -1,7 +1,4 @@
-/**
- * @file plugin2.c
- * @brief Plugin example 2.
- *
+/*
  * This plugin uses both firmware's API interface and private application headers.
  * It can be loaded by a plugin manager that uses CompoundApiInterface,
  * which combines both interfaces.
@@ -18,7 +15,7 @@ static void advanced_plugin2_method1(int arg1) {
     app_api_accumulator_mul(arg1);
 }
 
-static void advanced_plugin2_method2(void) {
+static void advanced_plugin2_method2() {
     /* Accumulator value is stored inside host application */
     FURI_LOG_I("TEST", "Plugin 2, accumulator: %lu", app_api_accumulator_get());
 }
@@ -38,6 +35,6 @@ static const FlipperAppPluginDescriptor advanced_plugin2_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor */
-const FlipperAppPluginDescriptor* advanced_plugin2_ep(void) {
+const FlipperAppPluginDescriptor* advanced_plugin2_ep() {
     return &advanced_plugin2_descriptor;
 }

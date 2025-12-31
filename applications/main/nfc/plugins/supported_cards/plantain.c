@@ -3,21 +3,10 @@
 #include <flipper_application/flipper_application.h>
 
 #include <nfc/nfc_device.h>
-#include <bit_lib/bit_lib.h>
-#include <datetime.h>
+#include <nfc/helpers/nfc_util.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
 #define TAG "Plantain"
-
-void from_minutes_to_datetime(uint32_t minutes, DateTime* datetime, uint16_t start_year) {
-    uint32_t timestamp = minutes * 60;
-    DateTime start_datetime = {0};
-    start_datetime.year = start_year - 1;
-    start_datetime.month = 12;
-    start_datetime.day = 31;
-    timestamp += datetime_datetime_to_timestamp(&start_datetime);
-    datetime_timestamp_to_datetime(timestamp, datetime);
-}
 
 typedef struct {
     uint64_t a;
@@ -71,29 +60,6 @@ static const MfClassicKeyPair plantain_4k_keys[] = {
     {.a = 0xb27addfb64b0, .b = 0x152fd0c420a7}, {.a = 0x7259fa0197c6, .b = 0x5583698df085},
 };
 
-static const MfClassicKeyPair plantain_4k_keys_legacy[] = {
-    {.a = 0xffffffffffff, .b = 0xffffffffffff}, {.a = 0xffffffffffff, .b = 0xffffffffffff},
-    {.a = 0xffffffffffff, .b = 0xffffffffffff}, {.a = 0xffffffffffff, .b = 0xffffffffffff},
-    {.a = 0xe56ac127dd45, .b = 0x19fc84a3784b}, {.a = 0x77dabc9825e1, .b = 0x9764fec3154a},
-    {.a = 0xffffffffffff, .b = 0xffffffffffff}, {.a = 0xffffffffffff, .b = 0xffffffffffff},
-    {.a = 0x26973ea74321, .b = 0xd27058c6e2c7}, {.a = 0xeb0a8ff88ade, .b = 0x578a9ada41e3},
-    {.a = 0xea0fd73cb149, .b = 0x29c35fa068fb}, {.a = 0xc76bf71a2509, .b = 0x9ba241db3f56},
-    {.a = 0xacffffffffff, .b = 0x71f3a315ad26}, {.a = 0xffffffffffff, .b = 0xffffffffffff},
-    {.a = 0xffffffffffff, .b = 0xffffffffffff}, {.a = 0xffffffffffff, .b = 0xffffffffffff},
-    {.a = 0x72f96bdd3714, .b = 0x462225cd34cf}, {.a = 0x044ce1872bc3, .b = 0x8c90c70cff4a},
-    {.a = 0xbc2d1791dec1, .b = 0xca96a487de0b}, {.a = 0x8791b2ccb5c4, .b = 0xc956c3b80da3},
-    {.a = 0x8e26e45e7d65, .b = 0x8e65b3af7d22}, {.a = 0x0f318130ed18, .b = 0x0c420a20e056},
-    {.a = 0x045ceca15535, .b = 0x31bec3d9e510}, {.a = 0x9d993c5d4ef4, .b = 0x86120e488abf},
-    {.a = 0xc65d4eaa645b, .b = 0xb69d40d1a439}, {.a = 0x46d78e850a7e, .b = 0xa470f8130991},
-    {.a = 0x42e9b54e51ab, .b = 0x0231b86df52e}, {.a = 0x0f01ceff2742, .b = 0x6fec74559ca7},
-    {.a = 0xb81f2b0c2f66, .b = 0xa7e2d95f0003}, {.a = 0x9ea3387a63c1, .b = 0x437e59f57561},
-    {.a = 0x0eb23cc8110b, .b = 0x04dc35277635}, {.a = 0xbc4580b7f20b, .b = 0xd0a4131fb290},
-    {.a = 0x7a396f0d633d, .b = 0xad2bdc097023}, {.a = 0xa3faa6daff67, .b = 0x7600e889adf9},
-    {.a = 0xfd8705e721b0, .b = 0x296fc317a513}, {.a = 0x22052b480d11, .b = 0xe19504c39461},
-    {.a = 0xa7141147d430, .b = 0xff16014fefc7}, {.a = 0x8a8d88151a00, .b = 0x038b5f9b5a2a},
-    {.a = 0xb27addfb64b0, .b = 0x152fd0c420a7}, {.a = 0x7259fa0197c6, .b = 0x5583698df085},
-};
-
 static bool plantain_get_card_config(PlantainCardConfig* config, MfClassicType type) {
     bool success = true;
 
@@ -121,7 +87,7 @@ static bool plantain_verify_type(Nfc* nfc, MfClassicType type) {
         FURI_LOG_D(TAG, "Verifying sector %lu", cfg.data_sector);
 
         MfClassicKey key = {0};
-        bit_lib_num_to_bytes_be(cfg.keys[cfg.data_sector].a, COUNT_OF(key.data), key.data);
+        nfc_util_num2bytes(cfg.keys[cfg.data_sector].a, COUNT_OF(key.data), key.data);
 
         MfClassicAuthContext auth_context;
         MfClassicError error =
@@ -160,38 +126,23 @@ static bool plantain_read(Nfc* nfc, NfcDevice* device) {
         PlantainCardConfig cfg = {};
         if(!plantain_get_card_config(&cfg, data->type)) break;
 
-        const uint8_t legacy_check_sec_num = 26;
-        const uint8_t legacy_check_block_num =
-            mf_classic_get_first_block_num_of_sector(legacy_check_sec_num);
-
-        MfClassicKey key = {0};
-        bit_lib_num_to_bytes_be(
-            plantain_4k_keys_legacy[legacy_check_sec_num].a, COUNT_OF(key.data), key.data);
-
-        error = mf_classic_poller_sync_auth(
-            nfc, legacy_check_block_num, &key, MfClassicKeyTypeA, NULL);
-        if(error == MfClassicErrorNone) {
-            FURI_LOG_D(TAG, "Legacy keys detected");
-            cfg.keys = plantain_4k_keys_legacy;
-        }
-
         MfClassicDeviceKeys keys = {};
-        for(size_t i = 0; i < mf_classic_get_scannable_sectors_num(data->type); i++) {
-            bit_lib_num_to_bytes_be(cfg.keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
+        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
+            nfc_util_num2bytes(cfg.keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
-            bit_lib_num_to_bytes_be(cfg.keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
+            nfc_util_num2bytes(cfg.keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
             FURI_BIT_SET(keys.key_b_mask, i);
         }
 
         error = mf_classic_poller_sync_read(nfc, &keys, data);
-        if(error == MfClassicErrorNotPresent) {
+        if(error != MfClassicErrorNone) {
             FURI_LOG_W(TAG, "Failed to read data");
             break;
         }
 
         nfc_device_set_data(device, NfcProtocolMfClassic, data);
 
-        is_read = (error == MfClassicErrorNone);
+        is_read = true;
     } while(false);
 
     mf_classic_free(data);
@@ -201,9 +152,8 @@ static bool plantain_read(Nfc* nfc, NfcDevice* device) {
 
 static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
-    size_t uid_len = 0;
+
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
-    const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
 
     bool parsed = false;
 
@@ -216,169 +166,32 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
         const MfClassicSectorTrailer* sec_tr =
             mf_classic_get_sector_trailer_by_sector(data, cfg.data_sector);
 
-        const uint64_t key =
-            bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
+        const uint64_t key = nfc_util_bytes2num(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
         if(key != cfg.keys[cfg.data_sector].a) break;
 
-        furi_string_printf(parsed_data, "\e#Plantain card\n");
-
-        const uint8_t* temp_ptr = &uid[0];
-
-        // UID is read from last to first byte
-        uint8_t card_number_tmp[uid_len];
-
-        if(uid_len == 4) {
-            for(size_t i = 0; i < 4; i++) {
-                card_number_tmp[i] = temp_ptr[3 - i];
-            }
-        } else if(uid_len == 7) {
-            for(size_t i = 0; i < 7; i++) {
-                card_number_tmp[i] = temp_ptr[6 - i];
-            }
-        } else {
-            break;
+        // Point to block 0 of sector 4, value 0
+        const uint8_t* temp_ptr = data->block[16].data;
+        // Read first 4 bytes of block 0 of sector 4 from last to first and convert them to uint32_t
+        // 38 18 00 00 becomes 00 00 18 38, and equals to 6200 decimal
+        uint32_t balance =
+            ((temp_ptr[3] << 24) | (temp_ptr[2] << 16) | (temp_ptr[1] << 8) | temp_ptr[0]) / 100;
+        // Read card number
+        // Point to block 0 of sector 0, value 0
+        temp_ptr = data->block[0].data;
+        // Read first 7 bytes of block 0 of sector 0 from last to first and convert them to uint64_t
+        // 04 31 16 8A 23 5C 80 becomes 80 5C 23 8A 16 31 04, and equals to 36130104729284868 decimal
+        uint8_t card_number_arr[7];
+        for(size_t i = 0; i < 7; i++) {
+            card_number_arr[i] = temp_ptr[6 - i];
         }
-        //UID is converted to a card number
+        // Copy card number to uint64_t
         uint64_t card_number = 0;
-        for(size_t i = 0; i < uid_len; i++) {
-            card_number = (card_number << 8) | card_number_tmp[i];
+        for(size_t i = 0; i < 7; i++) {
+            card_number = (card_number << 8) | card_number_arr[i];
         }
 
-        // Print card number with 4-digit groups. "3" in "3078" denotes a ticket type "3 - full ticket", will differ on discounted cards.
-        furi_string_cat_printf(parsed_data, "Number: ");
-        FuriString* card_number_s = furi_string_alloc();
-        furi_string_cat_printf(card_number_s, "%llu", card_number);
-        FuriString* tmp_s = furi_string_alloc_set_str("9643 3078 ");
-        for(uint8_t i = 0; i < 24; i += 4) {
-            for(uint8_t j = 0; j < 4; j++) {
-                furi_string_push_back(tmp_s, furi_string_get_char(card_number_s, i + j));
-            }
-            furi_string_push_back(tmp_s, ' ');
-        }
-        furi_string_cat_printf(parsed_data, "%s\n", furi_string_get_cstr(tmp_s));
-        // this works for 2K Plantain
-        if(data->type == MfClassicType1k) {
-            //balance
-            uint32_t balance = 0;
-            for(uint8_t i = 0; i < 4; i++) {
-                balance = (balance << 8) | data->block[16].data[3 - i];
-            }
-            furi_string_cat_printf(parsed_data, "Balance: %ld rub\n", balance / 100);
-
-            //trips
-            uint8_t trips_metro = data->block[21].data[0];
-            uint8_t trips_ground = data->block[21].data[1];
-            furi_string_cat_printf(parsed_data, "Trips: %d\n", trips_metro + trips_ground);
-            //trip time
-            uint32_t last_trip_timestamp = 0;
-            for(uint8_t i = 0; i < 3; i++) {
-                last_trip_timestamp = (last_trip_timestamp << 8) | data->block[21].data[4 - i];
-            }
-            DateTime last_trip = {0};
-            from_minutes_to_datetime(last_trip_timestamp + 24 * 60, &last_trip, 2010);
-            furi_string_cat_printf(
-                parsed_data,
-                "Trip start: %02d.%02d.%04d %02d:%02d\n",
-                last_trip.day,
-                last_trip.month,
-                last_trip.year,
-                last_trip.hour,
-                last_trip.minute);
-            //validator
-            uint16_t validator = (data->block[20].data[5] << 8) | data->block[20].data[4];
-            furi_string_cat_printf(parsed_data, "Validator: %d\n", validator);
-            //tariff
-            uint16_t fare = (data->block[20].data[7] << 8) | data->block[20].data[6];
-            furi_string_cat_printf(parsed_data, "Tariff: %d rub\n", fare / 100);
-            //trips in metro
-            furi_string_cat_printf(parsed_data, "Trips (Metro): %d\n", trips_metro);
-            //trips on ground
-            furi_string_cat_printf(parsed_data, "Trips (Ground): %d\n", trips_ground);
-            //last payment
-            uint32_t last_payment_timestamp = 0;
-            for(uint8_t i = 0; i < 3; i++) {
-                last_payment_timestamp = (last_payment_timestamp << 8) |
-                                         data->block[18].data[4 - i];
-            }
-            DateTime last_payment_date = {0};
-            from_minutes_to_datetime(last_payment_timestamp + 24 * 60, &last_payment_date, 2010);
-            furi_string_cat_printf(
-                parsed_data,
-                "Last pay: %02d.%02d.%04d %02d:%02d\n",
-                last_payment_date.day,
-                last_payment_date.month,
-                last_payment_date.year,
-                last_payment_date.hour,
-                last_payment_date.minute);
-            //Last payment amount.
-            uint16_t last_payment = ((data->block[18].data[10] << 16) |
-                                     (data->block[18].data[9] << 8) | (data->block[18].data[8])) /
-                                    100;
-            furi_string_cat_printf(parsed_data, "Amount: %d rub", last_payment);
-            furi_string_free(card_number_s);
-            furi_string_free(tmp_s);
-            //This is for 4K Plantains.
-        } else if(data->type == MfClassicType4k) {
-            //balance
-            uint32_t balance = 0;
-            for(uint8_t i = 0; i < 4; i++) {
-                balance = (balance << 8) | data->block[16].data[3 - i];
-            }
-            furi_string_cat_printf(parsed_data, "Balance: %ld rub\n", balance / 100);
-
-            //trips
-            uint8_t trips_metro = data->block[21].data[0];
-            uint8_t trips_ground = data->block[21].data[1];
-            furi_string_cat_printf(parsed_data, "Trips: %d\n", trips_metro + trips_ground);
-            //trip time
-            uint32_t last_trip_timestamp = 0;
-            for(uint8_t i = 0; i < 3; i++) {
-                last_trip_timestamp = (last_trip_timestamp << 8) | data->block[21].data[4 - i];
-            }
-            DateTime last_trip = {0};
-            from_minutes_to_datetime(last_trip_timestamp + 24 * 60, &last_trip, 2010);
-            furi_string_cat_printf(
-                parsed_data,
-                "Trip start: %02d.%02d.%04d %02d:%02d\n",
-                last_trip.day,
-                last_trip.month,
-                last_trip.year,
-                last_trip.hour,
-                last_trip.minute);
-            //validator
-            uint16_t validator = (data->block[20].data[5] << 8) | data->block[20].data[4];
-            furi_string_cat_printf(parsed_data, "Validator: %d\n", validator);
-            //tariff
-            uint16_t fare = (data->block[20].data[7] << 8) | data->block[20].data[6];
-            furi_string_cat_printf(parsed_data, "Tariff: %d rub\n", fare / 100);
-            //trips in metro
-            furi_string_cat_printf(parsed_data, "Trips (Metro): %d\n", trips_metro);
-            //trips on ground
-            furi_string_cat_printf(parsed_data, "Trips (Ground): %d\n", trips_ground);
-            //last payment
-            uint32_t last_payment_timestamp = 0;
-            for(uint8_t i = 0; i < 3; i++) {
-                last_payment_timestamp = (last_payment_timestamp << 8) |
-                                         data->block[18].data[4 - i];
-            }
-            DateTime last_payment_date = {0};
-            from_minutes_to_datetime(last_payment_timestamp + 24 * 60, &last_payment_date, 2010);
-            furi_string_cat_printf(
-                parsed_data,
-                "Last pay: %02d.%02d.%04d %02d:%02d\n",
-                last_payment_date.day,
-                last_payment_date.month,
-                last_payment_date.year,
-                last_payment_date.hour,
-                last_payment_date.minute);
-            //Last payment amount
-            uint16_t last_payment = ((data->block[18].data[10] << 16) |
-                                     (data->block[18].data[9] << 8) | (data->block[18].data[8])) /
-                                    100;
-            furi_string_cat_printf(parsed_data, "Amount: %d rub", last_payment);
-            furi_string_free(card_number_s);
-            furi_string_free(tmp_s);
-        }
+        furi_string_printf(
+            parsed_data, "\e#Plantain\nN:%llu-\nBalance:%lu\n", card_number, balance);
         parsed = true;
     } while(false);
 
@@ -401,6 +214,6 @@ static const FlipperAppPluginDescriptor plantain_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* plantain_plugin_ep(void) {
+const FlipperAppPluginDescriptor* plantain_plugin_ep() {
     return &plantain_plugin_descriptor;
 }

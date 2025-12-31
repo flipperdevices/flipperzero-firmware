@@ -1,25 +1,21 @@
 #include "icon_animation_i.h"
-#include "icon_i.h" // IWYU pragma: keep
+#include "icon_i.h"
 
 #include <furi.h>
 
 IconAnimation* icon_animation_alloc(const Icon* icon) {
-    furi_check(icon);
-
+    furi_assert(icon);
     IconAnimation* instance = malloc(sizeof(IconAnimation));
     instance->icon = icon;
     instance->timer =
         furi_timer_alloc(icon_animation_timer_callback, FuriTimerTypePeriodic, instance);
-
     return instance;
 }
 
 void icon_animation_free(IconAnimation* instance) {
-    furi_check(instance);
-
+    furi_assert(instance);
     icon_animation_stop(instance);
     furi_timer_free(instance->timer);
-
     free(instance);
 }
 
@@ -27,8 +23,7 @@ void icon_animation_set_update_callback(
     IconAnimation* instance,
     IconAnimationCallback callback,
     void* context) {
-    furi_check(instance);
-
+    furi_assert(instance);
     instance->callback = callback;
     instance->callback_context = context;
 }
@@ -56,20 +51,17 @@ void icon_animation_timer_callback(void* context) {
 }
 
 uint8_t icon_animation_get_width(const IconAnimation* instance) {
-    furi_check(instance);
-
+    furi_assert(instance);
     return instance->icon->width;
 }
 
 uint8_t icon_animation_get_height(const IconAnimation* instance) {
-    furi_check(instance);
-
+    furi_assert(instance);
     return instance->icon->height;
 }
 
 void icon_animation_start(IconAnimation* instance) {
-    furi_check(instance);
-
+    furi_assert(instance);
     if(!instance->animating) {
         instance->animating = true;
         furi_assert(instance->icon->frame_rate);
@@ -81,8 +73,7 @@ void icon_animation_start(IconAnimation* instance) {
 }
 
 void icon_animation_stop(IconAnimation* instance) {
-    furi_check(instance);
-
+    furi_assert(instance);
     if(instance->animating) {
         instance->animating = false;
         furi_timer_stop(instance->timer);
@@ -91,7 +82,6 @@ void icon_animation_stop(IconAnimation* instance) {
 }
 
 bool icon_animation_is_last_frame(const IconAnimation* instance) {
-    furi_check(instance);
-
+    furi_assert(instance);
     return instance->icon->frame_count - instance->frame <= 1;
 }

@@ -1,5 +1,6 @@
 
 #include "../animation_manager.h"
+#include "../animation_storage.h"
 #include "bubble_animation_view.h"
 
 #include <furi_hal.h>
@@ -93,17 +94,12 @@ static const FrameBubble*
     bubble_animation_pick_bubble(BubbleAnimationViewModel* model, bool active) {
     const FrameBubble* bubble = NULL;
 
-    // Check for division by zero based on the active parameter
-    if((active && model->active_bubbles == 0) || (!active && model->passive_bubbles == 0)) {
+    if((model->active_bubbles == 0) && (model->passive_bubbles == 0)) {
         return NULL;
     }
 
-    uint8_t random_value = furi_hal_random_get();
-    // In case random generator return zero lets set it to 3
-    if(random_value == 0) {
-        random_value = 3;
-    }
-    uint8_t index = random_value % (active ? model->active_bubbles : model->passive_bubbles);
+    uint8_t index =
+        furi_hal_random_get() % (active ? model->active_bubbles : model->passive_bubbles);
     const BubbleAnimation* animation = model->current;
 
     for(int i = 0; i < animation->frame_bubble_sequences_count; ++i) {

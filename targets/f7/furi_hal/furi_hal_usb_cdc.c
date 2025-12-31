@@ -75,7 +75,7 @@ static const struct CdcConfigDescriptorSingle cdc_cfg_desc_single = {
             .bConfigurationValue = 1,
             .iConfiguration = NO_DESCRIPTOR,
             .bmAttributes = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
-            .bMaxPower = USB_CFG_POWER_MA(500),
+            .bMaxPower = USB_CFG_POWER_MA(100),
         },
     .iad_0 =
         {
@@ -188,7 +188,7 @@ static const struct CdcConfigDescriptorDual
                     .bConfigurationValue = 1,
                     .iConfiguration = NO_DESCRIPTOR,
                     .bmAttributes = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
-                    .bMaxPower = USB_CFG_POWER_MA(500),
+                    .bMaxPower = USB_CFG_POWER_MA(100),
                 },
             .iad_0 =
                 {
@@ -392,11 +392,16 @@ static void cdc_on_suspend(usbd_device* dev);
 
 static usbd_respond cdc_ep_config(usbd_device* dev, uint8_t cfg);
 static usbd_respond cdc_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback);
-
 static usbd_device* usb_dev;
+<<<<<<< HEAD
 static volatile FuriHalUsbInterface* cdc_if_cur = NULL;
 static volatile bool connected = false;
 static volatile const CdcCallbacks* callbacks[IF_NUM_MAX] = {};
+=======
+static FuriHalUsbInterface* cdc_if_cur = NULL;
+static bool connected = false;
+static CdcCallbacks* callbacks[IF_NUM_MAX] = {NULL};
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 static void* cb_ctx[IF_NUM_MAX];
 
 FuriHalUsbInterface usb_cdc_single = {
@@ -439,9 +444,7 @@ static void cdc_init(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx) {
     struct usb_string_descriptor* dev_prod_desc = malloc(len * 2 + 2);
     dev_prod_desc->bLength = len * 2 + 2;
     dev_prod_desc->bDescriptorType = USB_DTYPE_STRING;
-    for(uint8_t i = 0; i < len; i++) {
-        dev_prod_desc->wString[i] = name[i];
-    }
+    for(uint8_t i = 0; i < len; i++) dev_prod_desc->wString[i] = name[i];
 
     name = (char*)furi_hal_version_get_name_ptr();
     len = (name == NULL) ? (0) : (strlen(name));
@@ -449,9 +452,7 @@ static void cdc_init(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx) {
     dev_serial_desc->bLength = (len + 5) * 2 + 2;
     dev_serial_desc->bDescriptorType = USB_DTYPE_STRING;
     memcpy(dev_serial_desc->wString, "f\0l\0i\0p\0_\0", 5 * 2);
-    for(uint8_t i = 0; i < len; i++) {
-        dev_serial_desc->wString[i + 5] = name[i];
-    }
+    for(uint8_t i = 0; i < len; i++) dev_serial_desc->wString[i + 5] = name[i];
 
     cdc_if_cur->str_prod_descr = dev_prod_desc;
     cdc_if_cur->str_serial_descr = dev_serial_desc;
@@ -472,8 +473,13 @@ static void cdc_deinit(usbd_device* dev) {
     cdc_if_cur = NULL;
 }
 
+<<<<<<< HEAD
 void furi_hal_cdc_set_callbacks(uint8_t if_num, const CdcCallbacks* cb, void* context) {
     furi_check(if_num < IF_NUM_MAX);
+=======
+void furi_hal_cdc_set_callbacks(uint8_t if_num, CdcCallbacks* cb, void* context) {
+    furi_assert(if_num < IF_NUM_MAX);
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
     if(callbacks[if_num] != NULL) {
         if(callbacks[if_num]->state_callback != NULL) {
@@ -495,35 +501,34 @@ void furi_hal_cdc_set_callbacks(uint8_t if_num, const CdcCallbacks* cb, void* co
 }
 
 struct usb_cdc_line_coding* furi_hal_cdc_get_port_settings(uint8_t if_num) {
-    furi_check(if_num < IF_NUM_MAX);
+    furi_assert(if_num < IF_NUM_MAX);
     return &cdc_config[if_num];
 }
 
 uint8_t furi_hal_cdc_get_ctrl_line_state(uint8_t if_num) {
-    furi_check(if_num < IF_NUM_MAX);
+    furi_assert(if_num < IF_NUM_MAX);
     return cdc_ctrl_line_state[if_num];
 }
 
+<<<<<<< HEAD
 void furi_hal_cdc_send(uint8_t if_num, const uint8_t* buf, uint16_t len) {
     if(if_num == 0) {
+=======
+void furi_hal_cdc_send(uint8_t if_num, uint8_t* buf, uint16_t len) {
+    if(if_num == 0)
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
         usbd_ep_write(usb_dev, CDC0_TXD_EP, buf, len);
-    } else if(if_num == 1) {
+    else
         usbd_ep_write(usb_dev, CDC1_TXD_EP, buf, len);
-    } else {
-        furi_crash();
-    }
 }
 
 int32_t furi_hal_cdc_receive(uint8_t if_num, uint8_t* buf, uint16_t max_len) {
     int32_t len = 0;
-    if(if_num == 0) {
+    if(if_num == 0)
         len = usbd_ep_read(usb_dev, CDC0_RXD_EP, buf, max_len);
-    } else if(if_num == 1) {
+    else
         len = usbd_ep_read(usb_dev, CDC1_RXD_EP, buf, max_len);
-    } else {
-        furi_crash();
-    }
-    return (len < 0) ? 0 : len;
+    return ((len < 0) ? 0 : len);
 }
 
 static void cdc_on_wakeup(usbd_device* dev) {
@@ -551,16 +556,14 @@ static void cdc_rx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(dev);
     UNUSED(event);
     uint8_t if_num = 0;
-    if(ep == CDC0_RXD_EP) {
+    if(ep == CDC0_RXD_EP)
         if_num = 0;
-    } else {
+    else
         if_num = 1;
-    }
 
     if(callbacks[if_num] != NULL) {
-        if(callbacks[if_num]->rx_ep_callback != NULL) {
+        if(callbacks[if_num]->rx_ep_callback != NULL)
             callbacks[if_num]->rx_ep_callback(cb_ctx[if_num]);
-        }
     }
 }
 
@@ -568,16 +571,14 @@ static void cdc_tx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(dev);
     UNUSED(event);
     uint8_t if_num = 0;
-    if(ep == CDC0_TXD_EP) {
+    if(ep == CDC0_TXD_EP)
         if_num = 0;
-    } else {
+    else
         if_num = 1;
-    }
 
     if(callbacks[if_num] != NULL) {
-        if(callbacks[if_num]->tx_ep_callback != NULL) {
+        if(callbacks[if_num]->tx_ep_callback != NULL)
             callbacks[if_num]->tx_ep_callback(cb_ctx[if_num]);
-        }
     }
 }
 
@@ -657,28 +658,25 @@ static usbd_respond cdc_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_cal
     if(((USB_REQ_RECIPIENT | USB_REQ_TYPE) & req->bmRequestType) ==
            (USB_REQ_INTERFACE | USB_REQ_CLASS) &&
        (req->wIndex == 0 || req->wIndex == 2)) {
-        if(req->wIndex == 0) {
+        if(req->wIndex == 0)
             if_num = 0;
-        } else {
+        else
             if_num = 1;
-        }
 
         switch(req->bRequest) {
         case USB_CDC_SET_CONTROL_LINE_STATE:
             if(callbacks[if_num] != NULL) {
                 cdc_ctrl_line_state[if_num] = req->wValue;
-                if(callbacks[if_num]->ctrl_line_callback != NULL) {
+                if(callbacks[if_num]->ctrl_line_callback != NULL)
                     callbacks[if_num]->ctrl_line_callback(
                         cb_ctx[if_num], cdc_ctrl_line_state[if_num]);
-                }
             }
             return usbd_ack;
         case USB_CDC_SET_LINE_CODING:
             memcpy(&cdc_config[if_num], req->data, sizeof(cdc_config[0]));
             if(callbacks[if_num] != NULL) {
-                if(callbacks[if_num]->config_callback != NULL) {
+                if(callbacks[if_num]->config_callback != NULL)
                     callbacks[if_num]->config_callback(cb_ctx[if_num], &cdc_config[if_num]);
-                }
             }
             return usbd_ack;
         case USB_CDC_GET_LINE_CODING:

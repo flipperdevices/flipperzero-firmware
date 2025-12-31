@@ -1,4 +1,5 @@
 #include "subghz_test_packet.h"
+#include "../subghz_test_app_i.h"
 #include "../helpers/subghz_test_frequency.h"
 #include <lib/subghz/devices/cc1101_configs.h>
 
@@ -122,7 +123,7 @@ static void subghz_test_packet_draw(Canvas* canvas, SubGhzTestPacketModel* model
             sizeof(buffer),
             "RSSI: %ld.%ld dBm",
             (int32_t)(model->rssi),
-            (int32_t)fabsf(model->rssi * 10.0f) % 10);
+            (int32_t)fabs(model->rssi * 10) % 10);
         canvas_draw_str(canvas, 0, 53, buffer);
     } else {
         canvas_draw_str(canvas, 0, 53, "TX");
@@ -235,7 +236,7 @@ void subghz_test_packet_exit(void* context) {
     furi_hal_subghz_sleep();
 }
 
-SubGhzTestPacket* subghz_test_packet_alloc(void) {
+SubGhzTestPacket* subghz_test_packet_alloc() {
     SubGhzTestPacket* instance = malloc(sizeof(SubGhzTestPacket));
 
     // View allocation and configuration

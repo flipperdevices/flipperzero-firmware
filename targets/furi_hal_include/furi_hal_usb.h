@@ -41,7 +41,7 @@ typedef void (*FuriHalUsbStateCallback)(FuriHalUsbStateEvent state, void* contex
 
 /** USB device low-level initialization
  */
-void furi_hal_usb_init(void);
+void furi_hal_usb_init();
 
 /** Set USB device configuration
  *
@@ -55,29 +55,29 @@ bool furi_hal_usb_set_config(FuriHalUsbInterface* new_if, void* ctx);
  *
  * @return    current USB device mode
  */
-FuriHalUsbInterface* furi_hal_usb_get_config(void);
+FuriHalUsbInterface* furi_hal_usb_get_config();
 
 /** Lock USB device mode switch
  */
-void furi_hal_usb_lock(void);
+void furi_hal_usb_lock();
 
 /** Unlock USB device mode switch
  */
-void furi_hal_usb_unlock(void);
+void furi_hal_usb_unlock();
 
 /** Check if USB device mode switch locked
  * 
  * @return    lock state
  */
-bool furi_hal_usb_is_locked(void);
+bool furi_hal_usb_is_locked();
 
 /** Disable USB device
  */
-void furi_hal_usb_disable(void);
+void furi_hal_usb_disable();
 
 /** Enable USB device
  */
-void furi_hal_usb_enable(void);
+void furi_hal_usb_enable();
 
 /** Set USB state callback
  */
@@ -85,7 +85,7 @@ void furi_hal_usb_set_state_callback(FuriHalUsbStateCallback cb, void* ctx);
 
 /** Restart USB device
  */
-void furi_hal_usb_reinit(void);
+void furi_hal_usb_reinit();
 
 #ifdef __cplusplus
 }

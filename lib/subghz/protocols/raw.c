@@ -3,13 +3,15 @@
 #include "../subghz_file_encoder_worker.h"
 
 #include "../blocks/const.h"
+#include "../blocks/decoder.h"
+#include "../blocks/encoder.h"
 #include "../blocks/generic.h"
+#include "../blocks/math.h"
 
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/stream/stream.h>
 
 #define TAG "SubGhzProtocolRaw"
-
 #define SUBGHZ_DOWNLOAD_MAX_SIZE 512
 
 static const SubGhzBlockConst subghz_protocol_raw_const = {
@@ -85,7 +87,7 @@ bool subghz_protocol_raw_save_to_file_init(
     SubGhzProtocolDecoderRAW* instance,
     const char* dev_name,
     SubGhzRadioPreset* preset) {
-    furi_check(instance);
+    furi_assert(instance);
 
     instance->storage = furi_record_open(RECORD_STORAGE);
     instance->flipper_file = flipper_format_file_alloc(instance->storage);
@@ -187,7 +189,7 @@ static bool subghz_protocol_raw_save_to_file_write(SubGhzProtocolDecoderRAW* ins
 }
 
 void subghz_protocol_raw_save_to_file_stop(SubGhzProtocolDecoderRAW* instance) {
-    furi_check(instance);
+    furi_assert(instance);
 
     if(instance->file_is_open == RAWFileIsOpenWrite && instance->ind_write)
         subghz_protocol_raw_save_to_file_write(instance);
@@ -203,7 +205,7 @@ void subghz_protocol_raw_save_to_file_stop(SubGhzProtocolDecoderRAW* instance) {
 }
 
 void subghz_protocol_raw_save_to_file_pause(SubGhzProtocolDecoderRAW* instance, bool pause) {
-    furi_check(instance);
+    furi_assert(instance);
 
     if(instance->pause != pause) {
         instance->pause = pause;
@@ -211,7 +213,6 @@ void subghz_protocol_raw_save_to_file_pause(SubGhzProtocolDecoderRAW* instance, 
 }
 
 size_t subghz_protocol_raw_get_sample_write(SubGhzProtocolDecoderRAW* instance) {
-    furi_check(instance);
     return instance->sample_write + instance->ind_write;
 }
 
@@ -229,24 +230,24 @@ void* subghz_protocol_decoder_raw_alloc(SubGhzEnvironment* environment) {
 }
 
 void subghz_protocol_decoder_raw_free(void* context) {
-    furi_check(context);
+    furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
     furi_string_free(instance->file_name);
     free(instance);
 }
 
 void subghz_protocol_decoder_raw_reset(void* context) {
-    furi_check(context);
+    furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
     instance->ind_write = 0;
     instance->last_level = false;
 }
 
 void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t duration) {
-    furi_check(context);
+    furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
-    // Add check if we got duration higher than 1 second, we skipping it, temp fix
-    if((!instance->pause && (instance->upload_raw != NULL)) && (duration < ((uint32_t)1000000))) {
+
+    if(!instance->pause && (instance->upload_raw != NULL)) {
         if(duration > subghz_protocol_raw_const.te_short) {
             if(instance->last_level != level) {
                 instance->last_level = (level ? true : false);
@@ -262,7 +263,7 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
 
 SubGhzProtocolStatus
     subghz_protocol_decoder_raw_deserialize(void* context, FlipperFormat* flipper_format) {
-    furi_check(context);
+    furi_assert(context);
     UNUSED(context);
     UNUSED(flipper_format);
     // stub, for backwards compatibility
@@ -270,10 +271,10 @@ SubGhzProtocolStatus
 }
 
 void subghz_protocol_decoder_raw_get_string(void* context, FuriString* output) {
-    furi_check(context);
+    furi_assert(context);
     //SubGhzProtocolDecoderRAW* instance = context;
     UNUSED(context);
-    furi_string_cat_printf(output, "RAW Data");
+    furi_string_cat_printf(output, "RAW Date");
 }
 
 void* subghz_protocol_encoder_raw_alloc(SubGhzEnvironment* environment) {
@@ -288,7 +289,6 @@ void* subghz_protocol_encoder_raw_alloc(SubGhzEnvironment* environment) {
 }
 
 void subghz_protocol_encoder_raw_stop(void* context) {
-    furi_check(context);
     SubGhzProtocolEncoderRAW* instance = context;
     instance->is_running = false;
     if(subghz_file_encoder_worker_is_running(instance->file_worker_encoder)) {
@@ -298,7 +298,7 @@ void subghz_protocol_encoder_raw_stop(void* context) {
 }
 
 void subghz_protocol_encoder_raw_free(void* context) {
-    furi_check(context);
+    furi_assert(context);
     SubGhzProtocolEncoderRAW* instance = context;
     subghz_protocol_encoder_raw_stop(instance);
     furi_string_free(instance->file_name);
@@ -310,8 +310,8 @@ void subghz_protocol_raw_file_encoder_worker_set_callback_end(
     SubGhzProtocolEncoderRAW* instance,
     SubGhzProtocolEncoderRAWCallbackEnd callback_end,
     void* context_end) {
-    furi_check(instance);
-    furi_check(callback_end);
+    furi_assert(instance);
+    furi_assert(callback_end);
     subghz_file_encoder_worker_callback_end(
         instance->file_worker_encoder, callback_end, context_end);
 }
@@ -337,8 +337,6 @@ void subghz_protocol_raw_gen_fff_data(
     FlipperFormat* flipper_format,
     const char* file_path,
     const char* radio_device_name) {
-    furi_check(flipper_format);
-
     do {
         stream_clean(flipper_format_get_raw_stream(flipper_format));
         if(!flipper_format_write_string_cstr(flipper_format, "Protocol", "RAW")) {
@@ -361,7 +359,7 @@ void subghz_protocol_raw_gen_fff_data(
 
 SubGhzProtocolStatus
     subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipper_format) {
-    furi_check(context);
+    furi_assert(context);
     SubGhzProtocolEncoderRAW* instance = context;
     SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     FuriString* temp_str;
@@ -398,7 +396,6 @@ SubGhzProtocolStatus
 }
 
 LevelDuration subghz_protocol_encoder_raw_yield(void* context) {
-    furi_check(context);
     SubGhzProtocolEncoderRAW* instance = context;
 
     if(!instance->is_running) return level_duration_reset();

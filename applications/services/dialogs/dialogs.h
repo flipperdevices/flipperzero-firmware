@@ -87,7 +87,7 @@ typedef struct DialogMessage DialogMessage;
  * Allocate and fill message
  * @return DialogMessage* 
  */
-DialogMessage* dialog_message_alloc(void);
+DialogMessage* dialog_message_alloc();
 
 /**
  * Free message struct

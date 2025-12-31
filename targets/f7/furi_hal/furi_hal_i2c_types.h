@@ -25,7 +25,7 @@ typedef void (*FuriHalI2cBusEventCallback)(FuriHalI2cBus* bus, FuriHalI2cBusEven
 /** FuriHal i2c bus */
 struct FuriHalI2cBus {
     I2C_TypeDef* i2c;
-    const FuriHalI2cBusHandle* current_handle;
+    FuriHalI2cBusHandle* current_handle;
     FuriHalI2cBusEventCallback callback;
 };
 
@@ -37,7 +37,7 @@ typedef enum {
 
 /** FuriHal i2c handle event callback */
 typedef void (*FuriHalI2cBusHandleEventCallback)(
-    const FuriHalI2cBusHandle* handle,
+    FuriHalI2cBusHandle* handle,
     FuriHalI2cBusHandleEvent event);
 
 /** FuriHal i2c handle */

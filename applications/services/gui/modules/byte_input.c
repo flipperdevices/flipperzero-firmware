@@ -848,7 +848,11 @@ void byte_input_set_result_callback(
     ByteChangedCallback changed_callback,
     void* callback_context,
     uint8_t* bytes,
+<<<<<<< HEAD
     uint16_t bytes_count) {
+=======
+    uint8_t bytes_count) {
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
     with_view_model(
         byte_input->view,
         ByteInputModel * model,

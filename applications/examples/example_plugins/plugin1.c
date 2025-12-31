@@ -1,15 +1,10 @@
-/**
- * @file plugin1.c
- * @brief Plugin example 1.
- *
- * A simple plugin implementing example_plugins application's plugin interface
- */
+/* A simple plugin implementing example_plugins application's plugin interface */
 
 #include "plugin_interface.h"
 
 #include <flipper_application/flipper_application.h>
 
-static int example_plugin1_method1(void) {
+static int example_plugin1_method1() {
     return 42;
 }
 
@@ -32,6 +27,6 @@ static const FlipperAppPluginDescriptor example_plugin1_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* example_plugin1_ep(void) {
+const FlipperAppPluginDescriptor* example_plugin1_ep() {
     return &example_plugin1_descriptor;
 }

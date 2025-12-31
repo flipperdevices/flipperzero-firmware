@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package PB_Gpio;
+option java_package = "com.flipperdevices.protobuf.gpio";
+
+enum GpioPin {
+    PC0 = 0;
+    PC1 = 1;
+    PC3 = 2;
+    PB2 = 3;
+    PB3 = 4;
+    PA4 = 5;
+    PA6 = 6;
+    PA7 = 7;
+};
+
+enum GpioPinMode {
+    OUTPUT = 0;
+    INPUT = 1;
+};
+
+enum GpioInputPull {
+    NO = 0;
+    UP = 1;
+    DOWN = 2;
+};
+
+message SetPinMode {
+    GpioPin pin = 1;
+    GpioPinMode mode = 2;
+}
+
+message SetInputPull {
+    GpioPin pin = 1;
+    GpioInputPull pull_mode = 2;
+}
+
+message GetPinMode {
+    GpioPin pin = 1;
+}
+
+message GetPinModeResponse {
+    GpioPinMode mode = 1;
+}
+
+message ReadPin {
+    GpioPin pin = 1;
+}
+
+message ReadPinResponse {
+    uint32 value = 2;
+}
+
+message WritePin {
+    GpioPin pin = 1;
+    uint32 value = 2;
+}

@@ -39,16 +39,16 @@ extern FuriHalSpiBus furi_hal_spi_bus_d;
  * Bus pins are floating on inactive state, CS high after initialization
  * 
  */
-extern const FuriHalSpiBusHandle furi_hal_spi_bus_handle_external;
+extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_external;
 
 /** ST7567(Display) on `furi_hal_spi_bus_d` */
-extern const FuriHalSpiBusHandle furi_hal_spi_bus_handle_display;
+extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_display;
 
 /** SdCard in fast mode on `furi_hal_spi_bus_d` */
-extern const FuriHalSpiBusHandle furi_hal_spi_bus_handle_sd_fast;
+extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_sd_fast;
 
 /** SdCard in slow mode on `furi_hal_spi_bus_d` */
-extern const FuriHalSpiBusHandle furi_hal_spi_bus_handle_sd_slow;
+extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_sd_slow;
 
 #ifdef __cplusplus
 }

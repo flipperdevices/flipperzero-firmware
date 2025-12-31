@@ -1,0 +1,5 @@
+PB.Main                     submsg_callback:true
+PB.Region.country_code      type:FT_POINTER
+PB.Region.country_code      max_size:2
+PB.Region.Band.power_limit  int_size:IS_8
+PB.Region.Band.duty_cycle   int_size:IS_8

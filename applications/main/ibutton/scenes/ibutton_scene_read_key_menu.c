@@ -5,7 +5,7 @@ typedef enum {
     SubmenuIndexSave,
     SubmenuIndexEmulate,
     SubmenuIndexViewData,
-    SubmenuIndexWriteId,
+    SubmenuIndexWriteBlank,
     SubmenuIndexWriteCopy,
 } SubmenuIndex;
 
@@ -30,11 +30,20 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
         ibutton_scene_read_key_menu_submenu_callback,
         ibutton);
 
-    if(features & iButtonProtocolFeatureWriteId) {
+    if(features & iButtonProtocolFeatureExtData) {
         submenu_add_item(
             submenu,
-            "Write ID",
-            SubmenuIndexWriteId,
+            "View Data",
+            SubmenuIndexViewData,
+            ibutton_scene_read_key_menu_submenu_callback,
+            ibutton);
+    }
+
+    if(features & iButtonProtocolFeatureWriteBlank) {
+        submenu_add_item(
+            submenu,
+            "Write Blank",
+            SubmenuIndexWriteBlank,
             ibutton_scene_read_key_menu_submenu_callback,
             ibutton);
     }
@@ -42,17 +51,8 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
     if(features & iButtonProtocolFeatureWriteCopy) {
         submenu_add_item(
             submenu,
-            "Full Write on Same Type",
+            "Write Copy",
             SubmenuIndexWriteCopy,
-            ibutton_scene_read_key_menu_submenu_callback,
-            ibutton);
-    }
-
-    if(features & iButtonProtocolFeatureExtData) {
-        submenu_add_item(
-            submenu,
-            "Data Info",
-            SubmenuIndexViewData,
             ibutton_scene_read_key_menu_submenu_callback,
             ibutton);
     }
@@ -78,8 +78,8 @@ bool ibutton_scene_read_key_menu_on_event(void* context, SceneManagerEvent event
             dolphin_deed(DolphinDeedIbuttonEmulate);
         } else if(event.event == SubmenuIndexViewData) {
             scene_manager_next_scene(scene_manager, iButtonSceneViewData);
-        } else if(event.event == SubmenuIndexWriteId) {
-            ibutton->write_mode = iButtonWriteModeId;
+        } else if(event.event == SubmenuIndexWriteBlank) {
+            ibutton->write_mode = iButtonWriteModeBlank;
             scene_manager_next_scene(scene_manager, iButtonSceneWrite);
         } else if(event.event == SubmenuIndexWriteCopy) {
             ibutton->write_mode = iButtonWriteModeCopy;

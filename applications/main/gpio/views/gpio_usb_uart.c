@@ -1,8 +1,7 @@
-#include "gpio_usb_uart.h"
 #include "../usb_uart_bridge.h"
+#include "../gpio_app_i.h"
 #include <furi_hal.h>
 #include <gui/elements.h>
-#include <assets_icons.h>
 
 struct GpioUsbUart {
     View* view;
@@ -102,7 +101,7 @@ static bool gpio_usb_uart_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-GpioUsbUart* gpio_usb_uart_alloc(void) {
+GpioUsbUart* gpio_usb_uart_alloc() {
     GpioUsbUart* usb_uart = malloc(sizeof(GpioUsbUart));
 
     usb_uart->view = view_alloc();

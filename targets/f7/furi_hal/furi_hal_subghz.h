@@ -14,6 +14,7 @@
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 /** Radio Presets */
 typedef enum {
     FuriHalSubGhzPresetIDLE, /**< default configuration */
@@ -25,6 +26,12 @@ typedef enum {
     FuriHalSubGhzPresetMSK99_97KbAsync, /**< MSK, deviation 47.60742 kHz, 99.97Kb/s, asynchronous */
     FuriHalSubGhzPresetGFSK9_99KbAsync /**< GFSK, deviation 19.042969 kHz, 9.996Kb/s, asynchronous */
 } FuriHalSubGhzPreset;
+=======
+/** Low level buffer dimensions and guard times */
+#define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL (256)
+#define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF (API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL / 2)
+#define API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME 999
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
 /** Switchable Radio Paths */
 typedef enum {
@@ -38,6 +45,7 @@ typedef enum {
 typedef enum {
     SubGhzStateInit, /**< Init pending */
 
+<<<<<<< HEAD
     SubGhzStateIdle, /**< Idle, energy save mode */
 
     SubGhzStateAsyncRx, /**< Async RX started */
@@ -54,6 +62,13 @@ typedef enum {
     SubGhzRegulationOnlyRx, /**only Rx*/
     SubGhzRegulationTxRx, /**TxRx*/
 } SubGhzRegulation;
+=======
+/** Get data GPIO
+ *
+ * @return     pointer to the gpio pin structure
+ */
+const GpioPin* furi_hal_subghz_get_data_gpio();
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
 /** Initialize and switch to power save mode Used by internal API-HAL
  * initalization routine Can be used to reinitialize device to safe state and

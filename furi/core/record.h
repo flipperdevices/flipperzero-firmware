@@ -14,7 +14,7 @@ extern "C" {
 
 /** Initialize record storage For internal use only.
  */
-void furi_record_init(void);
+void furi_record_init();
 
 /** Check if record exists
  *
@@ -27,7 +27,7 @@ bool furi_record_exists(const char* name);
 /** Create record
  *
  * @param      name  record name
- * @param      data  data pointer (not NULL)
+ * @param      data  data pointer
  * @note       Thread safe. Create and destroy must be executed from the same
  *             thread.
  */

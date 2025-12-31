@@ -14,7 +14,7 @@ typedef struct Loading Loading;
  *
  * @return     Loading View instance
  */
-Loading* loading_alloc(void);
+Loading* loading_alloc();
 
 /** Deinitialize and free Loading View
  *

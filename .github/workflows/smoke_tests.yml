@@ -1,0 +1,123 @@
+name: 'Smoke tests'
+
+on:
+  push:
+    branches:
+      - "release*"
+
+env:
+  TARGETS: f7
+  DEFAULT_TARGET: f7
+  FBT_TOOLCHAIN_PATH: /opt
+
+jobs:
+  run_smoke_on_bench:
+    runs-on: [self-hosted, FlipperZeroIntegrationTest]
+    steps:
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
+
+      - name: Checkout code
+        timeout-minutes: 0.5
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 'Install submodules'
+        timeout-minutes: 0.5
+        run:
+          git submodule update --init --recursive --force
+
+      - name: 'Get flipper from device manager (mock)'
+        id: device
+        timeout-minutes: 0.5
+        run: |
+          echo "flipper=/dev/ttyACM1" >> $GITHUB_OUTPUT
+          echo "stlink=49FF75065182575513201587" >> $GITHUB_OUTPUT
+
+      - name: 'Flash firmware and upload all applications'
+        id: flashing
+        if: success()
+        timeout-minutes: 7
+        run: |                               
+          ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FORCE=1
+
+      - name: 'Wait for flipper'
+        id: await_flipper
+        if: steps.flashing.outcome == 'success'
+        timeout-minutes: 3
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+
+      - name: 'Run smoke tests'
+        id: run_smoke
+        if: steps.await_flipper.outcome == 'success'
+        timeout-minutes: 15
+        run: |
+          cd scripts/flippigator
+          docker buildx build -t pytest-runner .
+          docker run --rm --device ${{steps.device.outputs.flipper}}:/dev/ttyACM0 pytest-runner
+
+      - name: 'Generate allure reports'
+        id: generate_allure_reports
+        if: steps.run_smoke.outcome == 'success'
+        timeout-minutes: 0.5
+        run: |
+          pwd
+
+      - name: 'Upload allure reports'
+        id: upload_allure_reports
+        if: steps.generate_allure_reports.outcome == 'success'
+        timeout-minutes: 0.5
+        run: |
+          pwd
+
+      - name: 'Wait for flipper and format ext after tests'
+        id: format_ext
+        if: always()
+        timeout-minutes: 3
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
+          python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
+          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+
+      - name: 'Get last release tag if flipper not responding'
+        id: release_tag
+        if: steps.format_ext.outcome == 'failure'
+        run: |
+          echo "tag=$(git tag -l --sort=-version:refname | grep -v "rc\|RC" | head -1)" >> $GITHUB_OUTPUT
+
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
+
+      - name: 'Checkout latest release'
+        uses: actions/checkout@v3
+        if: steps.format_ext.outcome == 'failure'
+        with:
+          fetch-depth: 1
+          ref: ${{ steps.release_tag.outputs.tag }}
+
+      - name: 'Flash last release'
+        id: fbt_flash_with_serial
+        if: steps.format_ext.outcome == 'failure'
+        run: |
+          ./fbt flash OPENOCD_ADAPTER_SERIAL=${{steps.device.outputs.stlink}} FORCE=1
+
+      - name: 'Wait for flipper and format ext'
+        if: steps.format_ext.outcome == 'failure'
+        timeout-minutes: 3
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
+          python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
+          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+
+      - name: 'Check GDB output if we failed to flash'
+        if: steps.fbt_flash_with_serial.outcome == 'failure'
+        run: |
+          ./fbt gdb_trace_all OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1

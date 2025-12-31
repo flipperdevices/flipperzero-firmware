@@ -1,5 +1,5 @@
 @echo off
-call "%~dp0scripts\toolchain\fbtenv.cmd" env || exit /b
+call "%~dp0scripts\toolchain\fbtenv.cmd" env
 
 set SCONS_EP=python -m SCons
 

@@ -9,7 +9,7 @@ typedef void (*UpdaterMainInputCallback)(InputType type, void* context);
 
 View* updater_main_get_view(UpdaterMainView* main_view);
 
-UpdaterMainView* updater_main_alloc(void);
+UpdaterMainView* updater_main_alloc();
 
 void updater_main_free(UpdaterMainView* main_view);
 

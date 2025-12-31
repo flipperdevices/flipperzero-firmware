@@ -1,13 +1,11 @@
 #include "serial_service.h"
 #include "app_common.h"
 #include <ble/ble.h>
-#include <furi_ble/event_dispatcher.h>
-#include <furi_ble/gatt.h>
+#include "gatt_char.h"
 
 #include <furi.h>
 
 #include "serial_service_uuid.inc"
-#include <stdint.h>
 
 #define TAG "BtSerialSvc"
 
@@ -19,12 +17,12 @@ typedef enum {
     SerialSvcGattCharacteristicCount,
 } SerialSvcGattCharacteristicId;
 
-static const BleGattCharacteristicParams ble_svc_serial_chars[SerialSvcGattCharacteristicCount] = {
+static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattCharacteristicCount] = {
     [SerialSvcGattCharacteristicRx] =
         {.name = "RX",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
-         .data.fixed.length = BLE_SVC_SERIAL_DATA_LEN_MAX,
-         .uuid.Char_UUID_128 = BLE_SVC_SERIAL_RX_CHAR_UUID,
+         .data.fixed.length = SERIAL_SVC_DATA_LEN_MAX,
+         .uuid.Char_UUID_128 = SERIAL_SVC_RX_CHAR_UUID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE | CHAR_PROP_READ,
          .security_permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
@@ -33,8 +31,8 @@ static const BleGattCharacteristicParams ble_svc_serial_chars[SerialSvcGattChara
     [SerialSvcGattCharacteristicTx] =
         {.name = "TX",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
-         .data.fixed.length = BLE_SVC_SERIAL_DATA_LEN_MAX,
-         .uuid.Char_UUID_128 = BLE_SVC_SERIAL_TX_CHAR_UUID,
+         .data.fixed.length = SERIAL_SVC_DATA_LEN_MAX,
+         .uuid.Char_UUID_128 = SERIAL_SVC_TX_CHAR_UUID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_READ | CHAR_PROP_INDICATE,
          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
@@ -44,7 +42,7 @@ static const BleGattCharacteristicParams ble_svc_serial_chars[SerialSvcGattChara
         {.name = "Flow control",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
          .data.fixed.length = sizeof(uint32_t),
-         .uuid.Char_UUID_128 = BLE_SVC_SERIAL_FLOW_CONTROL_UUID,
+         .uuid.Char_UUID_128 = SERIAL_SVC_FLOW_CONTROL_UUID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
@@ -53,28 +51,28 @@ static const BleGattCharacteristicParams ble_svc_serial_chars[SerialSvcGattChara
     [SerialSvcGattCharacteristicStatus] = {
         .name = "RPC status",
         .data_prop_type = FlipperGattCharacteristicDataFixed,
-        .data.fixed.length = sizeof(uint32_t),
-        .uuid.Char_UUID_128 = BLE_SVC_SERIAL_RPC_STATUS_UUID,
+        .data.fixed.length = sizeof(SerialServiceRpcStatus),
+        .uuid.Char_UUID_128 = SERIAL_SVC_RPC_STATUS_UUID,
         .uuid_type = UUID_TYPE_128,
         .char_properties = CHAR_PROP_READ | CHAR_PROP_WRITE | CHAR_PROP_NOTIFY,
         .security_permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
         .gatt_evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
         .is_variable = CHAR_VALUE_LEN_CONSTANT}};
 
-struct BleServiceSerial {
+typedef struct {
     uint16_t svc_handle;
-    BleGattCharacteristicInstance chars[SerialSvcGattCharacteristicCount];
+    FlipperGattCharacteristicInstance chars[SerialSvcGattCharacteristicCount];
     FuriMutex* buff_size_mtx;
     uint32_t buff_size;
     uint16_t bytes_ready_to_receive;
     SerialServiceEventCallback callback;
     void* context;
-    GapSvcEventHandler* event_handler;
-};
+} SerialSvc;
 
-static BleEventAckStatus ble_svc_serial_event_handler(void* event, void* context) {
-    BleServiceSerial* serial_svc = (BleServiceSerial*)context;
-    BleEventAckStatus ret = BleEventNotAck;
+static SerialSvc* serial_svc = NULL;
+
+static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void* event) {
+    SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
     hci_event_pckt* event_pckt = (hci_event_pckt*)(((hci_uart_pckt*)event)->data);
     evt_blecore_aci* blecore_evt = (evt_blecore_aci*)event_pckt->data;
     aci_gatt_attribute_modified_event_rp0* attribute_modified;
@@ -84,7 +82,7 @@ static BleEventAckStatus ble_svc_serial_event_handler(void* event, void* context
             if(attribute_modified->Attr_Handle ==
                serial_svc->chars[SerialSvcGattCharacteristicRx].handle + 2) {
                 // Descriptor handle
-                ret = BleEventAckFlowEnable;
+                ret = SVCCTL_EvtAckFlowEnable;
                 FURI_LOG_D(TAG, "RX descriptor event");
             } else if(
                 attribute_modified->Attr_Handle ==
@@ -113,12 +111,13 @@ static BleEventAckStatus ble_svc_serial_event_handler(void* event, void* context
                     FURI_LOG_D(TAG, "Available buff size: %ld", buff_free_size);
                     furi_check(furi_mutex_release(serial_svc->buff_size_mtx) == FuriStatusOk);
                 }
-                ret = BleEventAckFlowEnable;
+                ret = SVCCTL_EvtAckFlowEnable;
             } else if(
                 attribute_modified->Attr_Handle ==
                 serial_svc->chars[SerialSvcGattCharacteristicStatus].handle + 1) {
-                bool* rpc_status = (bool*)attribute_modified->Attr_Data;
-                if(!*rpc_status) {
+                SerialServiceRpcStatus* rpc_status =
+                    (SerialServiceRpcStatus*)attribute_modified->Attr_Data;
+                if(*rpc_status == SerialServiceRpcStatusNotActive) {
                     if(serial_svc->callback) {
                         SerialServiceEvent event = {
                             .event = SerialServiceEventTypesBleResetRequest,
@@ -135,66 +134,62 @@ static BleEventAckStatus ble_svc_serial_event_handler(void* event, void* context
                 };
                 serial_svc->callback(event, serial_svc->context);
             }
-            ret = BleEventAckFlowEnable;
+            ret = SVCCTL_EvtAckFlowEnable;
         }
     }
     return ret;
 }
 
-typedef enum {
-    SerialServiceRpcStatusNotActive = 0UL,
-    SerialServiceRpcStatusActive = 1UL,
-} SerialServiceRpcStatus;
-
-static void
-    ble_svc_serial_update_rpc_char(BleServiceSerial* serial_svc, SerialServiceRpcStatus status) {
-    ble_gatt_characteristic_update(
+static void serial_svc_update_rpc_char(SerialServiceRpcStatus status) {
+    flipper_gatt_characteristic_update(
         serial_svc->svc_handle, &serial_svc->chars[SerialSvcGattCharacteristicStatus], &status);
 }
 
-BleServiceSerial* ble_svc_serial_start(void) {
-    BleServiceSerial* serial_svc = malloc(sizeof(BleServiceSerial));
+void serial_svc_start() {
+    UNUSED(serial_svc_chars);
+    tBleStatus status;
+    serial_svc = malloc(sizeof(SerialSvc));
+    // Register event handler
+    SVCCTL_RegisterSvcHandler(serial_svc_event_handler);
 
-    serial_svc->event_handler =
-        ble_event_dispatcher_register_svc_handler(ble_svc_serial_event_handler, serial_svc);
-
-    if(!ble_gatt_service_add(
-           UUID_TYPE_128, &service_uuid, PRIMARY_SERVICE, 12, &serial_svc->svc_handle)) {
-        free(serial_svc);
-        return NULL;
+    // Add service
+    status = aci_gatt_add_service(
+        UUID_TYPE_128, &service_uuid, PRIMARY_SERVICE, 12, &serial_svc->svc_handle);
+    if(status) {
+        FURI_LOG_E(TAG, "Failed to add Serial service: %d", status);
     }
+
+    // Add characteristics
     for(uint8_t i = 0; i < SerialSvcGattCharacteristicCount; i++) {
-        ble_gatt_characteristic_init(
-            serial_svc->svc_handle, &ble_svc_serial_chars[i], &serial_svc->chars[i]);
+        flipper_gatt_characteristic_init(
+            serial_svc->svc_handle, &serial_svc_chars[i], &serial_svc->chars[i]);
     }
 
-    ble_svc_serial_update_rpc_char(serial_svc, SerialServiceRpcStatusNotActive);
+    serial_svc_update_rpc_char(SerialServiceRpcStatusNotActive);
+    // Allocate buffer size mutex
     serial_svc->buff_size_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
-
-    return serial_svc;
 }
 
-void ble_svc_serial_set_callbacks(
-    BleServiceSerial* serial_svc,
+void serial_svc_set_callbacks(
     uint16_t buff_size,
     SerialServiceEventCallback callback,
     void* context) {
-    furi_check(serial_svc);
+    furi_assert(serial_svc);
     serial_svc->callback = callback;
     serial_svc->context = context;
     serial_svc->buff_size = buff_size;
     serial_svc->bytes_ready_to_receive = buff_size;
 
     uint32_t buff_size_reversed = REVERSE_BYTES_U32(serial_svc->buff_size);
-    ble_gatt_characteristic_update(
+    flipper_gatt_characteristic_update(
         serial_svc->svc_handle,
         &serial_svc->chars[SerialSvcGattCharacteristicFlowCtrl],
         &buff_size_reversed);
 }
 
-void ble_svc_serial_notify_buffer_is_empty(BleServiceSerial* serial_svc) {
-    furi_check(serial_svc);
-    furi_check(serial_svc->buff_size_mtx);
+void serial_svc_notify_buffer_is_empty() {
+    furi_assert(serial_svc);
+    furi_assert(serial_svc->buff_size_mtx);
 
     furi_check(furi_mutex_acquire(serial_svc->buff_size_mtx, FuriWaitForever) == FuriStatusOk);
     if(serial_svc->bytes_ready_to_receive == 0) {
@@ -202,7 +197,7 @@ void ble_svc_serial_notify_buffer_is_empty(BleServiceSerial* serial_svc) {
         serial_svc->bytes_ready_to_receive = serial_svc->buff_size;
 
         uint32_t buff_size_reversed = REVERSE_BYTES_U32(serial_svc->buff_size);
-        ble_gatt_characteristic_update(
+        flipper_gatt_characteristic_update(
             serial_svc->svc_handle,
             &serial_svc->chars[SerialSvcGattCharacteristicFlowCtrl],
             &buff_size_reversed);
@@ -210,26 +205,35 @@ void ble_svc_serial_notify_buffer_is_empty(BleServiceSerial* serial_svc) {
     furi_check(furi_mutex_release(serial_svc->buff_size_mtx) == FuriStatusOk);
 }
 
-void ble_svc_serial_stop(BleServiceSerial* serial_svc) {
-    furi_check(serial_svc);
-
-    ble_event_dispatcher_unregister_svc_handler(serial_svc->event_handler);
-
-    for(uint8_t i = 0; i < SerialSvcGattCharacteristicCount; i++) {
-        ble_gatt_characteristic_delete(serial_svc->svc_handle, &serial_svc->chars[i]);
+void serial_svc_stop() {
+    tBleStatus status;
+    if(serial_svc) {
+        for(uint8_t i = 0; i < SerialSvcGattCharacteristicCount; i++) {
+            flipper_gatt_characteristic_delete(serial_svc->svc_handle, &serial_svc->chars[i]);
+        }
+        // Delete service
+        status = aci_gatt_del_service(serial_svc->svc_handle);
+        if(status) {
+            FURI_LOG_E(TAG, "Failed to delete Serial service: %d", status);
+        }
+        // Delete buffer size mutex
+        furi_mutex_free(serial_svc->buff_size_mtx);
+        free(serial_svc);
+        serial_svc = NULL;
     }
-    ble_gatt_service_delete(serial_svc->svc_handle);
-    furi_mutex_free(serial_svc->buff_size_mtx);
-    free(serial_svc);
 }
 
-bool ble_svc_serial_update_tx(BleServiceSerial* serial_svc, uint8_t* data, uint16_t data_len) {
-    if(data_len > BLE_SVC_SERIAL_DATA_LEN_MAX) {
+bool serial_svc_is_started() {
+    return serial_svc != NULL;
+}
+
+bool serial_svc_update_tx(uint8_t* data, uint16_t data_len) {
+    if(data_len > SERIAL_SVC_DATA_LEN_MAX) {
         return false;
     }
 
     for(uint16_t remained = data_len; remained > 0;) {
-        uint8_t value_len = MIN(BLE_SVC_SERIAL_CHAR_VALUE_LEN_MAX, remained);
+        uint8_t value_len = MIN(SERIAL_SVC_CHAR_VALUE_LEN_MAX, remained);
         uint16_t value_offset = data_len - remained;
         remained -= value_len;
 
@@ -252,8 +256,7 @@ bool ble_svc_serial_update_tx(BleServiceSerial* serial_svc, uint8_t* data, uint1
     return true;
 }
 
-void ble_svc_serial_set_rpc_active(BleServiceSerial* serial_svc, bool active) {
-    furi_check(serial_svc);
-    ble_svc_serial_update_rpc_char(
-        serial_svc, active ? SerialServiceRpcStatusActive : SerialServiceRpcStatusNotActive);
+void serial_svc_set_rpc_status(SerialServiceRpcStatus status) {
+    furi_assert(serial_svc);
+    serial_svc_update_rpc_char(status);
 }

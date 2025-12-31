@@ -28,7 +28,7 @@ typedef enum {
  *
  * @return     The locale measurement units.
  */
-LocaleMeasurementUnits locale_get_measurement_unit(void);
+LocaleMeasurementUnits locale_get_measurement_unit();
 
 /** Set locale measurement units
  *
@@ -56,7 +56,7 @@ float locale_celsius_to_fahrenheit(float temp_c);
  *
  * @return     The locale time format.
  */
-LocaleTimeFormat locale_get_time_format(void);
+LocaleTimeFormat locale_get_time_format();
 
 /** Set Locale Time Format
  *
@@ -73,7 +73,7 @@ void locale_set_time_format(LocaleTimeFormat format);
  */
 void locale_format_time(
     FuriString* out_str,
-    const DateTime* datetime,
+    const FuriHalRtcDateTime* datetime,
     const LocaleTimeFormat format,
     const bool show_seconds);
 
@@ -98,7 +98,7 @@ void locale_set_date_format(LocaleDateFormat format);
  */
 void locale_format_date(
     FuriString* out_str,
-    const DateTime* datetime,
+    const FuriHalRtcDateTime* datetime,
     const LocaleDateFormat format,
     const char* separator);
 

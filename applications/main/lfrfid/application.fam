@@ -7,17 +7,16 @@ App(
     icon="A_125khz_14",
     stack_size=2 * 1024,
     order=20,
-    resources="resources",
     fap_libs=["assets"],
     fap_icon="icon.png",
     fap_category="RFID",
 )
 
 App(
-    appid="cli_rfid",
+    appid="lfrfid_start",
     targets=["f7"],
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_rfid_ep",
-    requires=["cli"],
+    apptype=FlipperAppType.STARTUP,
+    entry_point="lfrfid_on_system_start",
     sources=["lfrfid_cli.c"],
+    order=50,
 )

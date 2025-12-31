@@ -6,8 +6,11 @@
 #define POWER_OFF_TIMEOUT 90
 #define TAG "Power"
 
+<<<<<<< HEAD
 static void power_loader_callback(const void*, void*);
 
+=======
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Power* power = context;
@@ -15,7 +18,11 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
 
     if(power->info.gauge_is_ok) {
         canvas_draw_box(canvas, 2, 2, (power->info.charge + 4) / 5, 4);
+<<<<<<< HEAD
         if(power->info.voltage_battery_charge_limit < 4.2f) {
+=======
+        if(power->info.voltage_battery_charge_limit < 4.2) {
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
             // Battery charge voltage limit is modified, indicate with cross pattern
             canvas_invert_color(canvas);
             uint8_t battery_bar_width = (power->info.charge + 4) / 5;
@@ -51,6 +58,7 @@ static ViewPort* power_battery_view_port_alloc(Power* power) {
     return battery_view_port;
 }
 
+<<<<<<< HEAD
 static void power_start_auto_shutdown_timer(Power* power) {
     furi_timer_start(power->auto_shutdown_timer, furi_ms_to_ticks(power->shutdown_idle_delay_ms));
 }
@@ -156,6 +164,17 @@ Power* power_alloc(void) {
     power->app_start_stop_subscription = NULL;
     power->settings_events_subscription =
         furi_pubsub_subscribe(power->settings_events, power_shutdown_time_changed_callback, power);
+=======
+Power* power_alloc() {
+    Power* power = malloc(sizeof(Power));
+
+    // Records
+    power->notification = furi_record_open(RECORD_NOTIFICATION);
+    power->gui = furi_record_open(RECORD_GUI);
+
+    // Pubsub
+    power->event_pubsub = furi_pubsub_alloc();
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 
     // State initialization
     power->state = PowerStateNotCharging;
@@ -296,8 +315,6 @@ int32_t power_srv(void* p) {
 
     if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
         FURI_LOG_W(TAG, "Skipping start in special boot mode");
-
-        furi_thread_suspend(furi_thread_get_current_id());
         return 0;
     }
 

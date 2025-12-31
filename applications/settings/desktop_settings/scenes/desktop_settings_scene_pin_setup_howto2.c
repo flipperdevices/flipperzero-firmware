@@ -1,19 +1,22 @@
 #include <furi.h>
 #include <gui/scene_manager.h>
+#include <stdint.h>
 
 #include "desktop_settings_scene.h"
 #include "../desktop_settings_app.h"
 #include "../views/desktop_settings_view_pin_setup_howto2.h"
-#include "../desktop_settings_custom_event.h"
+
+#define SCENE_EXIT_EVENT (0U)
+#define SCENE_DONE_EVENT (1U)
 
 static void desktop_settings_scene_pin_setup_howto2_done_callback(void* context) {
     DesktopSettingsApp* app = context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, DesktopSettingsCustomEventDone);
+    view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_DONE_EVENT);
 }
 
 static void desktop_settings_scene_pin_setup_howto2_exit_callback(void* context) {
     DesktopSettingsApp* app = context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, DesktopSettingsCustomEventExit);
+    view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_EXIT_EVENT);
 }
 
 void desktop_settings_scene_pin_setup_howto2_on_enter(void* context) {
@@ -33,12 +36,12 @@ bool desktop_settings_scene_pin_setup_howto2_on_event(void* context, SceneManage
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case DesktopSettingsCustomEventDone: {
+        case SCENE_DONE_EVENT: {
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinSetupDone);
             consumed = true;
             break;
         }
-        case DesktopSettingsCustomEventExit: {
+        case SCENE_EXIT_EVENT: {
             bool scene_found = false;
             scene_found = scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, DesktopSettingsAppScenePinMenu);

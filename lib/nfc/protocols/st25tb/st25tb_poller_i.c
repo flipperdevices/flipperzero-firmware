@@ -20,9 +20,7 @@ St25tbError st25tb_poller_send_frame(
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
-    furi_check(instance);
-    furi_check(tx_buffer);
-    furi_check(rx_buffer);
+    furi_assert(instance);
 
     const size_t tx_bytes = bit_buffer_get_size_bytes(tx_buffer);
     furi_assert(
@@ -56,8 +54,8 @@ St25tbError st25tb_poller_send_frame(
 
 St25tbError st25tb_poller_initiate(St25tbPoller* instance, uint8_t* chip_id_ptr) {
     // Send Initiate()
-    furi_check(instance);
-    furi_check(instance->nfc);
+    furi_assert(instance);
+    furi_assert(instance->nfc);
 
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
@@ -88,8 +86,8 @@ St25tbError st25tb_poller_initiate(St25tbPoller* instance, uint8_t* chip_id_ptr)
 }
 
 St25tbError st25tb_poller_select(St25tbPoller* instance, uint8_t* chip_id_ptr) {
-    furi_check(instance);
-    furi_check(instance->nfc);
+    furi_assert(instance);
+    furi_assert(instance->nfc);
 
     St25tbError ret;
 
@@ -171,9 +169,8 @@ St25tbError st25tb_poller_read(St25tbPoller* instance, St25tbData* data) {
 }
 
 St25tbError st25tb_poller_get_uid(St25tbPoller* instance, uint8_t* uid) {
-    furi_check(instance);
-    furi_check(instance->nfc);
-    furi_check(uid);
+    furi_assert(instance);
+    furi_assert(instance->nfc);
 
     St25tbError ret;
 
@@ -216,10 +213,10 @@ St25tbError st25tb_poller_get_uid(St25tbPoller* instance, uint8_t* uid) {
 
 St25tbError
     st25tb_poller_read_block(St25tbPoller* instance, uint32_t* block, uint8_t block_number) {
-    furi_check(instance);
-    furi_check(instance->nfc);
-    furi_check(block);
-    furi_check(
+    furi_assert(instance);
+    furi_assert(instance->nfc);
+    furi_assert(block);
+    furi_assert(
         (block_number <= st25tb_get_block_count(instance->data->type)) ||
         block_number == ST25TB_SYSTEM_OTP_BLOCK);
     FURI_LOG_T(TAG, "reading block %d", block_number);
@@ -251,9 +248,9 @@ St25tbError
 
 St25tbError
     st25tb_poller_write_block(St25tbPoller* instance, uint32_t block, uint8_t block_number) {
-    furi_check(instance);
-    furi_check(instance->nfc);
-    furi_check(
+    furi_assert(instance);
+    furi_assert(instance->nfc);
+    furi_assert(
         (block_number <= st25tb_get_block_count(instance->data->type)) ||
         block_number == ST25TB_SYSTEM_OTP_BLOCK);
     FURI_LOG_T(TAG, "writing block %d", block_number);
@@ -295,7 +292,7 @@ St25tbError
 }
 
 St25tbError st25tb_poller_halt(St25tbPoller* instance) {
-    furi_check(instance);
+    furi_assert(instance);
 
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);

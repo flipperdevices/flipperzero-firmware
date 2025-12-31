@@ -19,7 +19,7 @@ extern "C" {
  *
  * @return     device status
  */
-CC1101Status cc1101_strobe(const FuriHalSpiBusHandle* handle, uint8_t strobe);
+CC1101Status cc1101_strobe(FuriHalSpiBusHandle* handle, uint8_t strobe);
 
 /** Write device register
  *
@@ -29,7 +29,7 @@ CC1101Status cc1101_strobe(const FuriHalSpiBusHandle* handle, uint8_t strobe);
  *
  * @return     device status
  */
-CC1101Status cc1101_write_reg(const FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t data);
+CC1101Status cc1101_write_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t data);
 
 /** Read device register
  *
@@ -39,7 +39,7 @@ CC1101Status cc1101_write_reg(const FuriHalSpiBusHandle* handle, uint8_t reg, ui
  *
  * @return     device status
  */
-CC1101Status cc1101_read_reg(const FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* data);
+CC1101Status cc1101_read_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* data);
 
 /* High level API */
 
@@ -49,7 +49,7 @@ CC1101Status cc1101_read_reg(const FuriHalSpiBusHandle* handle, uint8_t reg, uin
  * 
  * @return     CC1101Status structure
  */
-CC1101Status cc1101_reset(const FuriHalSpiBusHandle* handle);
+CC1101Status cc1101_reset(FuriHalSpiBusHandle* handle);
 
 /** Get status
  *
@@ -57,20 +57,7 @@ CC1101Status cc1101_reset(const FuriHalSpiBusHandle* handle);
  *
  * @return     CC1101Status structure
  */
-CC1101Status cc1101_get_status(const FuriHalSpiBusHandle* handle);
-
-/** Wait specific chip state
- *
- * @param      handle      The SPI bus handle
- * @param[in]  state       The state to wait
- * @param[in]  timeout_us  The timeout in microseconds
- *
- * @return     true on success, false otherwise
- */
-bool cc1101_wait_status_state(
-    const FuriHalSpiBusHandle* handle,
-    CC1101State state,
-    uint32_t timeout_us);
+CC1101Status cc1101_get_status(FuriHalSpiBusHandle* handle);
 
 /** Enable shutdown mode
  *
@@ -78,7 +65,7 @@ bool cc1101_wait_status_state(
  * 
  * @return     CC1101Status structure
  */
-CC1101Status cc1101_shutdown(const FuriHalSpiBusHandle* handle);
+CC1101Status cc1101_shutdown(FuriHalSpiBusHandle* handle);
 
 /** Get Partnumber
  *
@@ -86,7 +73,7 @@ CC1101Status cc1101_shutdown(const FuriHalSpiBusHandle* handle);
  *
  * @return     part number id
  */
-uint8_t cc1101_get_partnumber(const FuriHalSpiBusHandle* handle);
+uint8_t cc1101_get_partnumber(FuriHalSpiBusHandle* handle);
 
 /** Get Version
  *
@@ -94,7 +81,7 @@ uint8_t cc1101_get_partnumber(const FuriHalSpiBusHandle* handle);
  *
  * @return     version
  */
-uint8_t cc1101_get_version(const FuriHalSpiBusHandle* handle);
+uint8_t cc1101_get_version(FuriHalSpiBusHandle* handle);
 
 /** Get raw RSSI value
  *
@@ -102,7 +89,7 @@ uint8_t cc1101_get_version(const FuriHalSpiBusHandle* handle);
  *
  * @return     rssi value
  */
-uint8_t cc1101_get_rssi(const FuriHalSpiBusHandle* handle);
+uint8_t cc1101_get_rssi(FuriHalSpiBusHandle* handle);
 
 /** Calibrate oscillator
  *
@@ -110,13 +97,13 @@ uint8_t cc1101_get_rssi(const FuriHalSpiBusHandle* handle);
  * 
  * @return     CC1101Status structure
  */
-CC1101Status cc1101_calibrate(const FuriHalSpiBusHandle* handle);
+CC1101Status cc1101_calibrate(FuriHalSpiBusHandle* handle);
 
 /** Switch to idle
  *
  * @param      handle  - pointer to FuriHalSpiHandle
  */
-CC1101Status cc1101_switch_to_idle(const FuriHalSpiBusHandle* handle);
+CC1101Status cc1101_switch_to_idle(FuriHalSpiBusHandle* handle);
 
 /** Switch to RX
  *
@@ -124,7 +111,7 @@ CC1101Status cc1101_switch_to_idle(const FuriHalSpiBusHandle* handle);
  * 
  * @return     CC1101Status structure
  */
-CC1101Status cc1101_switch_to_rx(const FuriHalSpiBusHandle* handle);
+CC1101Status cc1101_switch_to_rx(FuriHalSpiBusHandle* handle);
 
 /** Switch to TX
  *
@@ -132,7 +119,7 @@ CC1101Status cc1101_switch_to_rx(const FuriHalSpiBusHandle* handle);
  * 
  * @return     CC1101Status structure
  */
-CC1101Status cc1101_switch_to_tx(const FuriHalSpiBusHandle* handle);
+CC1101Status cc1101_switch_to_tx(FuriHalSpiBusHandle* handle);
 
 /** Flush RX FIFO
  *
@@ -140,13 +127,13 @@ CC1101Status cc1101_switch_to_tx(const FuriHalSpiBusHandle* handle);
  * 
  * @return     CC1101Status structure
  */
-CC1101Status cc1101_flush_rx(const FuriHalSpiBusHandle* handle);
+CC1101Status cc1101_flush_rx(FuriHalSpiBusHandle* handle);
 
 /** Flush TX FIFO
  *
  * @param      handle  - pointer to FuriHalSpiHandle
  */
-CC1101Status cc1101_flush_tx(const FuriHalSpiBusHandle* handle);
+CC1101Status cc1101_flush_tx(FuriHalSpiBusHandle* handle);
 
 /** Set Frequency
  *
@@ -155,7 +142,7 @@ CC1101Status cc1101_flush_tx(const FuriHalSpiBusHandle* handle);
  *
  * @return     real frequency that were synthesized
  */
-uint32_t cc1101_set_frequency(const FuriHalSpiBusHandle* handle, uint32_t value);
+uint32_t cc1101_set_frequency(FuriHalSpiBusHandle* handle, uint32_t value);
 
 /** Set Intermediate Frequency
  *
@@ -164,14 +151,14 @@ uint32_t cc1101_set_frequency(const FuriHalSpiBusHandle* handle, uint32_t value)
  *
  * @return     real inermediate frequency that were synthesized
  */
-uint32_t cc1101_set_intermediate_frequency(const FuriHalSpiBusHandle* handle, uint32_t value);
+uint32_t cc1101_set_intermediate_frequency(FuriHalSpiBusHandle* handle, uint32_t value);
 
 /** Set Power Amplifier level table, ramp
  *
  * @param      handle  - pointer to FuriHalSpiHandle
  * @param      value   - array of power level values
  */
-void cc1101_set_pa_table(const FuriHalSpiBusHandle* handle, const uint8_t value[8]);
+void cc1101_set_pa_table(FuriHalSpiBusHandle* handle, const uint8_t value[8]);
 
 /** Write FIFO
  *
@@ -181,7 +168,7 @@ void cc1101_set_pa_table(const FuriHalSpiBusHandle* handle, const uint8_t value[
  *
  * @return     size, written bytes count
  */
-uint8_t cc1101_write_fifo(const FuriHalSpiBusHandle* handle, const uint8_t* data, uint8_t size);
+uint8_t cc1101_write_fifo(FuriHalSpiBusHandle* handle, const uint8_t* data, uint8_t size);
 
 /** Read FIFO
  *
@@ -191,7 +178,7 @@ uint8_t cc1101_write_fifo(const FuriHalSpiBusHandle* handle, const uint8_t* data
  *
  * @return     size, read bytes count
  */
-uint8_t cc1101_read_fifo(const FuriHalSpiBusHandle* handle, uint8_t* data, uint8_t* size);
+uint8_t cc1101_read_fifo(FuriHalSpiBusHandle* handle, uint8_t* data, uint8_t* size);
 
 #ifdef __cplusplus
 }

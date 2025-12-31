@@ -6,7 +6,7 @@ extern "C" {
 
 #include "fatfs/ff_gen_drv.h"
 
-extern const Diskio_drvTypeDef sd_fatfs_driver;
+extern Diskio_drvTypeDef sd_fatfs_driver;
 
 #ifdef __cplusplus
 }

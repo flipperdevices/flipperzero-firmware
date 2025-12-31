@@ -1,5 +1,5 @@
 #pragma once
 
-#include <toolbox/pipe.h>
+#include "cli_i.h"
 
-void cli_command_gpio(PipeSide* pipe, FuriString* args, void* context);
+void cli_command_gpio(Cli* cli, FuriString* args, void* context);

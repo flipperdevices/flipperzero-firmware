@@ -1,14 +1,11 @@
 #include "bad_usb_app_i.h"
+#include "bad_usb_settings_filename.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
-#include <flipper_format/flipper_format.h>
 
-#define BAD_USB_SETTINGS_PATH           BAD_USB_APP_BASE_FOLDER "/.badusb.settings"
-#define BAD_USB_SETTINGS_FILE_TYPE      "Flipper BadUSB Settings File"
-#define BAD_USB_SETTINGS_VERSION        1
-#define BAD_USB_SETTINGS_DEFAULT_LAYOUT BAD_USB_APP_PATH_LAYOUT_FOLDER "/en-US.kl"
+#define BAD_USB_SETTINGS_PATH BAD_USB_APP_BASE_FOLDER "/" BAD_USB_SETTINGS_FILE_NAME
 
 static bool bad_usb_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -29,74 +26,46 @@ static void bad_usb_app_tick_event_callback(void* context) {
 }
 
 static void bad_usb_load_settings(BadUsbApp* app) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* fff = flipper_format_file_alloc(storage);
-    bool state = false;
-
-    FuriString* temp_str = furi_string_alloc();
-    uint32_t version = 0;
-    uint32_t interface = 0;
-
-    if(flipper_format_file_open_existing(fff, BAD_USB_SETTINGS_PATH)) {
-        do {
-            if(!flipper_format_read_header(fff, temp_str, &version)) break;
-            if((strcmp(furi_string_get_cstr(temp_str), BAD_USB_SETTINGS_FILE_TYPE) != 0) ||
-               (version != BAD_USB_SETTINGS_VERSION))
-                break;
-
-            if(!flipper_format_read_string(fff, "layout", temp_str)) break;
-            if(!flipper_format_read_uint32(fff, "interface", &interface, 1)) break;
-            if(interface > BadUsbHidInterfaceBle) break;
-
-            state = true;
-        } while(0);
+    File* settings_file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
+    if(storage_file_open(settings_file, BAD_USB_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        char chr;
+        while((storage_file_read(settings_file, &chr, 1) == 1) &&
+              !storage_file_eof(settings_file) && !isspace(chr)) {
+            furi_string_push_back(app->keyboard_layout, chr);
+        }
+    } else {
+        furi_string_reset(app->keyboard_layout);
     }
-    flipper_format_free(fff);
-    furi_record_close(RECORD_STORAGE);
+    storage_file_close(settings_file);
+    storage_file_free(settings_file);
 
-    if(state) {
-        furi_string_set(app->keyboard_layout, temp_str);
-        app->interface = interface;
-
+    if(!furi_string_empty(app->keyboard_layout)) {
         Storage* fs_api = furi_record_open(RECORD_STORAGE);
         FileInfo layout_file_info;
         FS_Error file_check_err = storage_common_stat(
             fs_api, furi_string_get_cstr(app->keyboard_layout), &layout_file_info);
         furi_record_close(RECORD_STORAGE);
-        if((file_check_err != FSE_OK) || (layout_file_info.size != 256)) {
-            furi_string_set(app->keyboard_layout, BAD_USB_SETTINGS_DEFAULT_LAYOUT);
+        if(file_check_err != FSE_OK) {
+            furi_string_reset(app->keyboard_layout);
+            return;
         }
-    } else {
-        furi_string_set(app->keyboard_layout, BAD_USB_SETTINGS_DEFAULT_LAYOUT);
-        app->interface = BadUsbHidInterfaceUsb;
+        if(layout_file_info.size != 256) {
+            furi_string_reset(app->keyboard_layout);
+        }
     }
-
-    furi_string_free(temp_str);
 }
 
 static void bad_usb_save_settings(BadUsbApp* app) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* fff = flipper_format_file_alloc(storage);
-
-    if(flipper_format_file_open_always(fff, BAD_USB_SETTINGS_PATH)) {
-        do {
-            if(!flipper_format_write_header_cstr(
-                   fff, BAD_USB_SETTINGS_FILE_TYPE, BAD_USB_SETTINGS_VERSION))
-                break;
-            if(!flipper_format_write_string(fff, "layout", app->keyboard_layout)) break;
-            uint32_t interface_id = app->interface;
-            if(!flipper_format_write_uint32(fff, "interface", (const uint32_t*)&interface_id, 1))
-                break;
-        } while(0);
+    File* settings_file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
+    if(storage_file_open(settings_file, BAD_USB_SETTINGS_PATH, FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
+        storage_file_write(
+            settings_file,
+            furi_string_get_cstr(app->keyboard_layout),
+            furi_string_size(app->keyboard_layout));
+        storage_file_write(settings_file, "\n", 1);
     }
-
-    flipper_format_free(fff);
-    furi_record_close(RECORD_STORAGE);
-}
-
-void bad_usb_set_interface(BadUsbApp* app, BadUsbHidInterface interface) {
-    app->interface = interface;
-    bad_usb_view_set_interface(app->bad_usb_view, interface);
+    storage_file_close(settings_file);
+    storage_file_free(settings_file);
 }
 
 BadUsbApp* bad_usb_app_alloc(char* arg) {
@@ -117,6 +86,8 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
+    view_dispatcher_enable_queue(app->view_dispatcher);
+
     app->scene_manager = scene_manager_alloc(&bad_usb_scene_handlers, app);
 
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
@@ -130,21 +101,15 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
     // Custom Widget
     app->widget = widget_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadUsbAppViewWidget, widget_get_view(app->widget));
+        app->view_dispatcher, BadUsbAppViewError, widget_get_view(app->widget));
 
-    // Popup
-    app->popup = popup_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, BadUsbAppViewPopup, popup_get_view(app->popup));
-
-    app->var_item_list = variable_item_list_alloc();
+    app->submenu = submenu_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        BadUsbAppViewConfig,
-        variable_item_list_get_view(app->var_item_list));
+        app->view_dispatcher, BadUsbAppViewConfig, submenu_get_view(app->submenu));
 
-    app->bad_usb_view = bad_usb_view_alloc();
+    app->bad_usb_view = bad_usb_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadUsbAppViewWork, bad_usb_view_get_view(app->bad_usb_view));
+        app->view_dispatcher, BadUsbAppViewWork, bad_usb_get_view(app->bad_usb_view));
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -157,6 +122,8 @@ BadUsbApp* bad_usb_app_alloc(char* arg) {
         furi_check(furi_hal_usb_set_config(NULL, NULL));
 
         if(!furi_string_empty(app->file_path)) {
+            app->bad_usb_script = bad_usb_script_open(app->file_path);
+            bad_usb_script_set_keyboard_layout(app->bad_usb_script, app->keyboard_layout);
             scene_manager_next_scene(app->scene_manager, BadUsbSceneWork);
         } else {
             furi_string_set(app->file_path, BAD_USB_APP_BASE_FOLDER);
@@ -177,19 +144,15 @@ void bad_usb_app_free(BadUsbApp* app) {
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewWork);
-    bad_usb_view_free(app->bad_usb_view);
+    bad_usb_free(app->bad_usb_view);
 
     // Custom Widget
-    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewWidget);
+    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewError);
     widget_free(app->widget);
 
-    // Popup
-    view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewPopup);
-    popup_free(app->popup);
-
-    // Config menu
+    // Submenu
     view_dispatcher_remove_view(app->view_dispatcher, BadUsbAppViewConfig);
-    variable_item_list_free(app->var_item_list);
+    submenu_free(app->submenu);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

@@ -9,12 +9,10 @@
 extern "C" {
 #endif
 
-#define RECORD_CLI_VCP "cli_vcp"
+typedef struct CliSession CliSession;
 
-typedef struct CliVcp CliVcp;
+extern CliSession cli_vcp;
 
-void cli_vcp_enable(CliVcp* cli_vcp);
-void cli_vcp_disable(CliVcp* cli_vcp);
 #ifdef __cplusplus
 }
 #endif

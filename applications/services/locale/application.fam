@@ -4,6 +4,6 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="locale_on_system_start",
     cdefines=["SRV_LOCALE"],
-    order=70,
+    order=90,
     sdk_headers=["locale.h"],
 )

@@ -1,7 +1,7 @@
 #include "memmgr.h"
+#include "common_defines.h"
 #include <string.h>
 #include <furi_hal_memory.h>
-#include <FreeRTOS.h>
 
 extern void* pvPortMalloc(size_t xSize);
 extern void vPortFree(void* pv);
@@ -52,7 +52,7 @@ size_t memmgr_get_free_heap(void) {
 }
 
 size_t memmgr_get_total_heap(void) {
-    return configTOTAL_HEAP_SIZE;
+    return xPortGetTotalHeapSize();
 }
 
 size_t memmgr_get_minimum_free_heap(void) {
@@ -107,7 +107,5 @@ void* aligned_malloc(size_t size, size_t alignment) {
 }
 
 void aligned_free(void* p) {
-    if(p) {
-        free(((void**)p)[-1]);
-    }
+    free(((void**)p)[-1]);
 }

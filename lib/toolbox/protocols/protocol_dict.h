@@ -9,10 +9,10 @@ typedef struct ProtocolDict ProtocolDict;
 
 typedef int32_t ProtocolId;
 
-#define PROTOCOL_NO           (-1)
+#define PROTOCOL_NO (-1)
 #define PROTOCOL_ALL_FEATURES (0xFFFFFFFF)
 
-ProtocolDict* protocol_dict_alloc(const ProtocolBase* const* protocols, size_t protocol_count);
+ProtocolDict* protocol_dict_alloc(const ProtocolBase** protocols, size_t protocol_count);
 
 void protocol_dict_free(ProtocolDict* dict);
 
@@ -57,8 +57,6 @@ ProtocolId protocol_dict_decoders_feed_by_id(
 bool protocol_dict_encoder_start(ProtocolDict* dict, size_t protocol_index);
 
 LevelDuration protocol_dict_encoder_yield(ProtocolDict* dict, size_t protocol_index);
-
-void protocol_dict_render_uid(ProtocolDict* dict, FuriString* result, size_t protocol_index);
 
 void protocol_dict_render_data(ProtocolDict* dict, FuriString* result, size_t protocol_index);
 

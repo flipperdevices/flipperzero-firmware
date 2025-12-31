@@ -27,51 +27,37 @@ class Main(App):
             return 1
 
         data = []
-        unique_combo = {}
-        unique_payload = {}
+        unique = {}
         while True:
             try:
                 d = {}
-                d["comments"] = []
-                while (comment := f.readComment()) is not None:
-                    d["comments"].append(comment)
                 d["name"] = f.readKey("name")
                 d["type"] = f.readKey("type")
-                key_combo = f'{d["name"]}'
-                key_payload = None
+                key = None
                 if d["type"] == "parsed":
                     d["protocol"] = f.readKey("protocol")
                     d["address"] = f.readKey("address")
                     d["command"] = f.readKey("command")
-                    key_payload = f'{d["protocol"]}{d["address"]}{d["command"]}'
-                    key_combo += key_payload
+                    key = f'{d["protocol"]}{d["address"]}{d["command"]}'
                 elif d["type"] == "raw":
                     d["frequency"] = f.readKey("frequency")
                     d["duty_cycle"] = f.readKey("duty_cycle")
                     d["data"] = f.readKey("data")
-                    key_payload = f'{d["frequency"]}{d["duty_cycle"]}{d["data"]}'
-                    key_combo += key_payload
+                    key = f'{d["frequency"]}{d["duty_cycle"]}{d["data"]}'
                 else:
                     raise Exception(f'Unknown type: {d["type"]}')
-
-                if not key_combo in unique_combo:
-                    unique_combo[key_combo] = d
+                if not key in unique:
+                    unique[key] = d
                     data.append(d)
-                    # Check payload only
-                    if not key_payload in unique_payload:
-                        unique_payload[key_payload] = d
-                    else:
-                        self.logger.warning(f"Duplicate payload, check manually: {d}")
                 else:
-                    self.logger.info(f"Duplicate data removed: {d}")
+                    self.logger.warn(f"Duplicate key: {key}")
             except EOFError:
                 break
         # Form new file
         f = FlipperFormatFile()
         f.setHeader(filetype, version)
         for i in data:
-            for comment in i["comments"]:
-                f.writeComment(comment)
+            f.writeComment(None)
             f.writeKey("name", i["name"])
             f.writeKey("type", i["type"])
             if i["type"] == "parsed":

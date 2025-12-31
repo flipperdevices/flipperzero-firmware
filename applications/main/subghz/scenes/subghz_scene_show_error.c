@@ -1,4 +1,4 @@
-#include "../subghz_i.h" // IWYU pragma: keep
+#include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
 
 static const NotificationSequence subghs_sequence_sd_error = {

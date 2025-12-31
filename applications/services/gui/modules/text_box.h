@@ -28,7 +28,7 @@ typedef enum {
  *
  * @return     TextBox instance
  */
-TextBox* text_box_alloc(void);
+TextBox* text_box_alloc();
 
 /** Deinitialize and free text_box
  *

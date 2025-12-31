@@ -10,26 +10,17 @@
 extern "C" {
 #endif
 
-/** Anonymous instance */
+/** Anonumous instance */
 typedef struct InfraredProgressView InfraredProgressView;
 
-typedef enum {
-    InfraredProgressViewInputStop,
-    InfraredProgressViewInputPause,
-    InfraredProgressViewInputResume,
-    InfraredProgressViewInputPreviousSignal,
-    InfraredProgressViewInputNextSignal,
-    InfraredProgressViewInputSendSingle,
-} InfraredProgressViewInput;
-
-/** Callback for input handling */
-typedef void (*InfraredProgressViewInputCallback)(void* context, InfraredProgressViewInput event);
+/** Callback for back button handling */
+typedef void (*InfraredProgressViewBackCallback)(void*);
 
 /** Allocate and initialize Infrared view
  *
  * @retval new allocated instance
  */
-InfraredProgressView* infrared_progress_view_alloc(void);
+InfraredProgressView* infrared_progress_view_alloc();
 
 /** Free previously allocated Progress view module instance
  *
@@ -44,12 +35,13 @@ void infrared_progress_view_free(InfraredProgressView* instance);
  */
 View* infrared_progress_view_get_view(InfraredProgressView* instance);
 
-/** Set progress of progress view module
+/** Increase progress on progress view module
  *
  * @param instance view module
- * @param progress progress value
+ * @retval true - value is incremented and maximum is reached,
+ *      false - value is incremented and maximum is not reached
  */
-bool infrared_progress_view_set_progress(InfraredProgressView* instance, uint16_t progress);
+bool infrared_progress_view_increase_progress(InfraredProgressView* instance);
 
 /** Set maximum progress value
  *
@@ -60,22 +52,15 @@ void infrared_progress_view_set_progress_total(
     InfraredProgressView* instance,
     uint16_t progress_max);
 
-/** Selects the variant of the View
- * 
- * @param instance view instance
- * @param is_paused the "paused" variant is displayed if true; the "sending" one if false
- */
-void infrared_progress_view_set_paused(InfraredProgressView* instance, bool is_paused);
-
-/** Set input callback
+/** Set back button callback
  *
  * @param instance - view module
- * @param callback - callback to call for input
+ * @param callback - callback to call for back button
  * @param context - context to pass to callback
  */
-void infrared_progress_view_set_input_callback(
+void infrared_progress_view_set_back_callback(
     InfraredProgressView* instance,
-    InfraredProgressViewInputCallback callback,
+    InfraredProgressViewBackCallback callback,
     void* context);
 
 #ifdef __cplusplus

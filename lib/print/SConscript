@@ -44,24 +44,18 @@ wrapped_fn_list = [
     "vsiprintf",
     "vsniprintf",
     #
-    # standard input
-    #
-    "fgetc",
-    "getc",
-    "getchar",
-    "fgets",
-    "ungetc",
-    #
-    # standard input, but unimplemented
-    #
-    "gets",
-    #
-    # scanf, not implemented for now
+    # Scanf is not implemented 4 now
     #
     # "fscanf",
     # "scanf",
     # "sscanf",
     # "vsprintf",
+    # "fgetc",
+    # "fgets",
+    # "getc",
+    # "getchar",
+    # "gets",
+    # "ungetc",
     # "vfscanf",
     # "vscanf",
     # "vsscanf",
@@ -113,9 +107,6 @@ env.Append(
 
 libenv = env.Clone(FW_LIB_NAME="print")
 libenv.ApplyLibFlags()
-if env["RAM_EXEC"]:
-    libenv.AppendUnique(CPPDEFINES=["PRINTF_DISABLE_SUPPORT_FLOAT"])
-
 libenv.Append(CCFLAGS=["-Wno-double-promotion"])
 
 sources = libenv.GlobRecursive("*.c*", ".")

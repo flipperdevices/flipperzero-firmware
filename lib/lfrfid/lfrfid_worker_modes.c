@@ -5,7 +5,7 @@
 #include <toolbox/pulse_protocols/pulse_glue.h>
 #include <toolbox/buffer_stream.h>
 #include "tools/varint_pair.h"
-#include <lib/bit_lib/bit_lib.h>
+#include "tools/bit_lib.h"
 
 #define TAG "LfRfidWorker"
 
@@ -614,7 +614,11 @@ static void lfrfid_worker_mode_write_process(LFRFIDWorker* worker) {
             t5577_write(&request->t5577);
 
             ProtocolId read_result = PROTOCOL_NO;
+<<<<<<< HEAD
             LFRFIDWorkerReadState state = lfrfid_worker_read_ttf(
+=======
+            LFRFIDWorkerReadState state = lfrfid_worker_read_internal(
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
                 worker,
                 protocol_dict_get_features(worker->protocols, protocol),
                 LFRFID_WORKER_WRITE_VERIFY_TIME_MS,

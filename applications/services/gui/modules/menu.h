@@ -21,7 +21,7 @@ typedef void (*MenuItemCallback)(void* context, uint32_t index);
  *
  * @return     Menu instance
  */
-Menu* menu_alloc(void);
+Menu* menu_alloc();
 
 /** Free menu
  *

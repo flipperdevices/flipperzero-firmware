@@ -17,7 +17,7 @@ struct VariableItem {
     void* context;
 };
 
-ARRAY_DEF(VariableItemArray, VariableItem, M_POD_OPLIST); //-V658
+ARRAY_DEF(VariableItemArray, VariableItem, M_POD_OPLIST);
 
 struct VariableItemList {
     View* view;
@@ -161,7 +161,6 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
 }
 
 void variable_item_list_set_selected_item(VariableItemList* variable_item_list, uint8_t index) {
-    furi_check(variable_item_list);
     with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
@@ -194,7 +193,6 @@ void variable_item_list_set_selected_item(VariableItemList* variable_item_list, 
 }
 
 uint8_t variable_item_list_get_selected_item_index(VariableItemList* variable_item_list) {
-    furi_check(variable_item_list);
     VariableItemListModel* model = view_get_model(variable_item_list->view);
     uint8_t idx = model->position;
     view_commit_model(variable_item_list->view, false);
@@ -431,7 +429,7 @@ void variable_item_list_locked_timer_callback(void* context) {
         true);
 }
 
-VariableItemList* variable_item_list_alloc(void) {
+VariableItemList* variable_item_list_alloc() {
     VariableItemList* variable_item_list = malloc(sizeof(VariableItemList));
     variable_item_list->view = view_alloc();
     view_set_context(variable_item_list->view, variable_item_list);
@@ -462,7 +460,7 @@ VariableItemList* variable_item_list_alloc(void) {
 }
 
 void variable_item_list_free(VariableItemList* variable_item_list) {
-    furi_check(variable_item_list);
+    furi_assert(variable_item_list);
 
     with_view_model(
         variable_item_list->view,
@@ -488,7 +486,7 @@ void variable_item_list_free(VariableItemList* variable_item_list) {
 }
 
 void variable_item_list_reset(VariableItemList* variable_item_list) {
-    furi_check(variable_item_list);
+    furi_assert(variable_item_list);
 
     with_view_model(
         variable_item_list->view,
@@ -508,7 +506,7 @@ void variable_item_list_reset(VariableItemList* variable_item_list) {
 }
 
 View* variable_item_list_get_view(VariableItemList* variable_item_list) {
-    furi_check(variable_item_list);
+    furi_assert(variable_item_list);
     return variable_item_list->view;
 }
 
@@ -519,8 +517,8 @@ VariableItem* variable_item_list_add(
     VariableItemChangeCallback change_callback,
     void* context) {
     VariableItem* item = NULL;
-    furi_check(label);
-    furi_check(variable_item_list);
+    furi_assert(label);
+    furi_assert(variable_item_list);
 
     with_view_model(
         variable_item_list->view,
@@ -562,7 +560,7 @@ void variable_item_list_set_enter_callback(
     VariableItemList* variable_item_list,
     VariableItemListEnterCallback callback,
     void* context) {
-    furi_check(callback);
+    furi_assert(callback);
     with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
@@ -575,12 +573,10 @@ void variable_item_list_set_enter_callback(
 }
 
 void variable_item_set_current_value_index(VariableItem* item, uint8_t current_value_index) {
-    furi_check(item);
     item->current_value_index = current_value_index;
 }
 
 void variable_item_set_values_count(VariableItem* item, uint8_t values_count) {
-    furi_check(item);
     item->values_count = values_count;
 }
 
@@ -591,7 +587,6 @@ void variable_item_set_item_label(VariableItem* item, const char* label) {
 }
 
 void variable_item_set_current_value_text(VariableItem* item, const char* current_value_text) {
-    furi_check(item);
     furi_string_set(item->current_value_text, current_value_text);
 }
 
@@ -606,11 +601,9 @@ void variable_item_set_locked(VariableItem* item, bool locked, const char* locke
 }
 
 uint8_t variable_item_get_current_value_index(VariableItem* item) {
-    furi_check(item);
     return item->current_value_index;
 }
 
 void* variable_item_get_context(VariableItem* item) {
-    furi_check(item);
     return item->context;
 }

@@ -1,162 +1,125 @@
 #include "mutex.h"
+#include "check.h"
+#include "common_defines.h"
 
 #include <FreeRTOS.h>
 #include <semphr.h>
 
-#include "check.h"
-
-#include "event_loop_link_i.h"
-
-// Internal FreeRTOS member names
-#define ucQueueType ucDummy9
-
-struct FuriMutex {
-    StaticSemaphore_t container;
-    FuriEventLoopLink event_loop_link;
-};
-
-// IMPORTANT: container MUST be the FIRST struct member
-static_assert(offsetof(FuriMutex, container) == 0);
-
 FuriMutex* furi_mutex_alloc(FuriMutexType type) {
-    furi_check(!FURI_IS_IRQ_MODE());
+    furi_assert(!FURI_IS_IRQ_MODE());
 
-    FuriMutex* instance = malloc(sizeof(FuriMutex));
-
-    SemaphoreHandle_t hMutex;
+    SemaphoreHandle_t hMutex = NULL;
 
     if(type == FuriMutexTypeNormal) {
-        hMutex = xSemaphoreCreateMutexStatic(&instance->container);
+        hMutex = xSemaphoreCreateMutex();
     } else if(type == FuriMutexTypeRecursive) {
-        hMutex = xSemaphoreCreateRecursiveMutexStatic(&instance->container);
+        hMutex = xSemaphoreCreateRecursiveMutex();
     } else {
-        furi_crash();
+        furi_crash("Programming error");
     }
 
-    furi_check(hMutex == (SemaphoreHandle_t)instance);
+    furi_check(hMutex != NULL);
 
-    return instance;
+    if(type == FuriMutexTypeRecursive) {
+        /* Set LSB as 'recursive mutex flag' */
+        hMutex = (SemaphoreHandle_t)((uint32_t)hMutex | 1U);
+    }
+
+    /* Return mutex ID */
+    return ((FuriMutex*)hMutex);
 }
 
 void furi_mutex_free(FuriMutex* instance) {
-    furi_check(!FURI_IS_IRQ_MODE());
-    furi_check(instance);
+    furi_assert(!FURI_IS_IRQ_MODE());
+    furi_assert(instance);
 
-    // Event Loop must be disconnected
-    furi_check(!instance->event_loop_link.item_in);
-    furi_check(!instance->event_loop_link.item_out);
-
-    vSemaphoreDelete((SemaphoreHandle_t)instance);
-    free(instance);
+    vSemaphoreDelete((SemaphoreHandle_t)((uint32_t)instance & ~1U));
 }
 
 FuriStatus furi_mutex_acquire(FuriMutex* instance, uint32_t timeout) {
-    furi_check(instance);
+    SemaphoreHandle_t hMutex;
+    FuriStatus stat;
+    uint32_t rmtx;
 
-    SemaphoreHandle_t hMutex = (SemaphoreHandle_t)(instance);
-    const uint8_t mutex_type = instance->container.ucQueueType;
+    hMutex = (SemaphoreHandle_t)((uint32_t)instance & ~1U);
 
-    FuriStatus stat = FuriStatusOk;
+    /* Extract recursive mutex flag */
+    rmtx = (uint32_t)instance & 1U;
+
+    stat = FuriStatusOk;
 
     if(FURI_IS_IRQ_MODE()) {
         stat = FuriStatusErrorISR;
-
-    } else if(mutex_type == queueQUEUE_TYPE_RECURSIVE_MUTEX) {
-        if(xSemaphoreTakeRecursive(hMutex, timeout) != pdPASS) {
-            if(timeout != 0U) {
-                stat = FuriStatusErrorTimeout;
-            } else {
-                stat = FuriStatusErrorResource;
-            }
-        }
-
-    } else if(mutex_type == queueQUEUE_TYPE_MUTEX) {
-        if(xSemaphoreTake(hMutex, timeout) != pdPASS) {
-            if(timeout != 0U) {
-                stat = FuriStatusErrorTimeout;
-            } else {
-                stat = FuriStatusErrorResource;
-            }
-        }
-
+    } else if(hMutex == NULL) {
+        stat = FuriStatusErrorParameter;
     } else {
-        furi_crash();
+        if(rmtx != 0U) {
+            if(xSemaphoreTakeRecursive(hMutex, timeout) != pdPASS) {
+                if(timeout != 0U) {
+                    stat = FuriStatusErrorTimeout;
+                } else {
+                    stat = FuriStatusErrorResource;
+                }
+            }
+        } else {
+            if(xSemaphoreTake(hMutex, timeout) != pdPASS) {
+                if(timeout != 0U) {
+                    stat = FuriStatusErrorTimeout;
+                } else {
+                    stat = FuriStatusErrorResource;
+                }
+            }
+        }
     }
 
-    if(stat == FuriStatusOk) {
-        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
-    }
-
-    return stat;
+    /* Return execution status */
+    return (stat);
 }
 
 FuriStatus furi_mutex_release(FuriMutex* instance) {
-    furi_check(instance);
+    SemaphoreHandle_t hMutex;
+    FuriStatus stat;
+    uint32_t rmtx;
 
-    SemaphoreHandle_t hMutex = (SemaphoreHandle_t)(instance);
-    const uint8_t mutex_type = instance->container.ucQueueType;
+    hMutex = (SemaphoreHandle_t)((uint32_t)instance & ~1U);
 
-    FuriStatus stat = FuriStatusOk;
+    /* Extract recursive mutex flag */
+    rmtx = (uint32_t)instance & 1U;
+
+    stat = FuriStatusOk;
 
     if(FURI_IS_IRQ_MODE()) {
         stat = FuriStatusErrorISR;
-
-    } else if(mutex_type == queueQUEUE_TYPE_RECURSIVE_MUTEX) {
-        if(xSemaphoreGiveRecursive(hMutex) != pdPASS) {
-            stat = FuriStatusErrorResource;
-        }
-
-    } else if(mutex_type == queueQUEUE_TYPE_MUTEX) {
-        if(xSemaphoreGive(hMutex) != pdPASS) {
-            stat = FuriStatusErrorResource;
-        }
-
+    } else if(hMutex == NULL) {
+        stat = FuriStatusErrorParameter;
     } else {
-        furi_crash();
+        if(rmtx != 0U) {
+            if(xSemaphoreGiveRecursive(hMutex) != pdPASS) {
+                stat = FuriStatusErrorResource;
+            }
+        } else {
+            if(xSemaphoreGive(hMutex) != pdPASS) {
+                stat = FuriStatusErrorResource;
+            }
+        }
     }
 
-    if(stat == FuriStatusOk) {
-        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventIn);
-    }
-
-    return stat;
+    /* Return execution status */
+    return (stat);
 }
 
 FuriThreadId furi_mutex_get_owner(FuriMutex* instance) {
-    furi_check(instance);
-
-    SemaphoreHandle_t hMutex = (SemaphoreHandle_t)instance;
-
+    SemaphoreHandle_t hMutex;
     FuriThreadId owner;
 
-    if(FURI_IS_IRQ_MODE()) {
-        owner = (FuriThreadId)xSemaphoreGetMutexHolderFromISR(hMutex);
+    hMutex = (SemaphoreHandle_t)((uint32_t)instance & ~1U);
+
+    if((FURI_IS_IRQ_MODE()) || (hMutex == NULL)) {
+        owner = 0;
     } else {
         owner = (FuriThreadId)xSemaphoreGetMutexHolder(hMutex);
     }
 
-    return owner;
+    /* Return owner thread ID */
+    return (owner);
 }
-
-static FuriEventLoopLink* furi_mutex_event_loop_get_link(FuriEventLoopObject* object) {
-    FuriMutex* instance = object;
-    furi_assert(instance);
-    return &instance->event_loop_link;
-}
-
-static bool
-    furi_mutex_event_loop_get_level(FuriEventLoopObject* object, FuriEventLoopEvent event) {
-    FuriMutex* instance = object;
-    furi_assert(instance);
-
-    if(event == FuriEventLoopEventIn || event == FuriEventLoopEventOut) {
-        return !furi_mutex_get_owner(instance);
-    } else {
-        furi_crash();
-    }
-}
-
-const FuriEventLoopContract furi_mutex_event_loop_contract = {
-    .get_link = furi_mutex_event_loop_get_link,
-    .get_level = furi_mutex_event_loop_get_level,
-};

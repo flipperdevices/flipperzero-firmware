@@ -8,7 +8,7 @@ extern "C" {
 
 typedef struct GPIOItems GPIOItems;
 
-GPIOItems* gpio_items_alloc(void);
+GPIOItems* gpio_items_alloc();
 
 void gpio_items_free(GPIOItems* items);
 

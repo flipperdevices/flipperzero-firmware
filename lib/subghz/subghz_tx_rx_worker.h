@@ -57,7 +57,7 @@ void subghz_tx_rx_worker_set_callback_have_read(
  * Allocate SubGhzTxRxWorker
  * @return SubGhzTxRxWorker* Pointer to a SubGhzTxRxWorker instance
  */
-SubGhzTxRxWorker* subghz_tx_rx_worker_alloc(void);
+SubGhzTxRxWorker* subghz_tx_rx_worker_alloc();
 
 /** 
  * Free SubGhzTxRxWorker

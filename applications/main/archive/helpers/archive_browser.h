@@ -3,24 +3,24 @@
 #include "../archive_i.h"
 #include <storage/storage.h>
 
-#define TAB_RIGHT         InputKeyRight // Default tab switch direction
-#define TAB_DEFAULT       ArchiveTabFavorites // Start tab
+#define TAB_RIGHT InputKeyRight // Default tab switch direction
+#define TAB_DEFAULT ArchiveTabFavorites // Start tab
 #define FILE_LIST_BUF_LEN 50
 
-static const char* const tab_default_paths[] = {
+static const char* tab_default_paths[] = {
     [ArchiveTabFavorites] = "/app:favorites",
-    [ArchiveTabIButton] = EXT_PATH("ibutton"),
-    [ArchiveTabNFC] = EXT_PATH("nfc"),
-    [ArchiveTabSubGhz] = EXT_PATH("subghz"),
-    [ArchiveTabLFRFID] = EXT_PATH("lfrfid"),
-    [ArchiveTabInfrared] = EXT_PATH("infrared"),
-    [ArchiveTabBadUsb] = EXT_PATH("badusb"),
+    [ArchiveTabIButton] = ANY_PATH("ibutton"),
+    [ArchiveTabNFC] = ANY_PATH("nfc"),
+    [ArchiveTabSubGhz] = ANY_PATH("subghz"),
+    [ArchiveTabLFRFID] = ANY_PATH("lfrfid"),
+    [ArchiveTabInfrared] = ANY_PATH("infrared"),
+    [ArchiveTabBadUsb] = ANY_PATH("badusb"),
     [ArchiveTabU2f] = "/app:u2f",
-    [ArchiveTabApplications] = EXT_PATH("apps"),
-    [ArchiveTabBrowser] = STORAGE_EXT_PATH_PREFIX,
+    [ArchiveTabApplications] = ANY_PATH("apps"),
+    [ArchiveTabBrowser] = STORAGE_ANY_PATH_PREFIX,
 };
 
-static const char* const known_ext[] = {
+static const char* known_ext[] = {
     [ArchiveFileTypeIButton] = ".ibtn",
     [ArchiveFileTypeNFC] = ".nfc",
     [ArchiveFileTypeSubGhz] = ".sub",
@@ -29,12 +29,9 @@ static const char* const known_ext[] = {
     [ArchiveFileTypeBadUsb] = ".txt",
     [ArchiveFileTypeU2f] = "?",
     [ArchiveFileTypeApplication] = ".fap",
-    [ArchiveFileTypeJS] = ".js",
     [ArchiveFileTypeUpdateManifest] = ".fuf",
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
-    [ArchiveFileTypeAppOrJs] = ".fap|.js",
-    [ArchiveFileTypeSetting] = "?",
 };
 
 static const ArchiveFileTypeEnum known_type[] = {
@@ -46,7 +43,7 @@ static const ArchiveFileTypeEnum known_type[] = {
     [ArchiveTabInfrared] = ArchiveFileTypeInfrared,
     [ArchiveTabBadUsb] = ArchiveFileTypeBadUsb,
     [ArchiveTabU2f] = ArchiveFileTypeU2f,
-    [ArchiveTabApplications] = ArchiveFileTypeAppOrJs,
+    [ArchiveTabApplications] = ArchiveFileTypeApplication,
     [ArchiveTabBrowser] = ArchiveFileTypeUnknown,
 };
 
@@ -63,7 +60,7 @@ static inline const char* archive_get_default_path(ArchiveTabEnum tab) {
 }
 
 inline bool archive_is_known_app(ArchiveFileTypeEnum type) {
-    return type != ArchiveFileTypeFolder && type != ArchiveFileTypeUnknown;
+    return (type != ArchiveFileTypeFolder && type != ArchiveFileTypeUnknown);
 }
 
 bool archive_is_item_in_array(ArchiveBrowserViewModel* model, uint32_t idx);

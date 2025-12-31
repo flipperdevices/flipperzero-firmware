@@ -7,6 +7,7 @@
 #include <core/log.h>
 #include <gui/modules/file_browser_worker.h>
 #include <flipper_application/flipper_application.h>
+#include <math.h>
 
 static void
     archive_folder_open_cb(void* context, uint32_t item_cnt, int32_t file_idx, bool is_root) {
@@ -360,7 +361,7 @@ bool archive_is_home(ArchiveBrowserView* browser) {
     }
 
     const char* default_path = archive_get_default_path(archive_get_tab(browser));
-    return furi_string_cmp_str(browser->path, default_path) == 0;
+    return (furi_string_cmp_str(browser->path, default_path) == 0);
 }
 
 const char* archive_get_name(ArchiveBrowserView* browser) {
@@ -460,14 +461,16 @@ void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active) {
 }
 
 static bool archive_is_dir_exists(FuriString* path) {
+    if(furi_string_equal(path, STORAGE_ANY_PATH_PREFIX)) {
+        return true;
+    }
     bool state = false;
     FileInfo file_info;
     Storage* storage = furi_record_open(RECORD_STORAGE);
-
-    if(furi_string_equal(path, STORAGE_EXT_PATH_PREFIX)) {
-        state = storage_sd_status(storage) == FSE_OK;
-    } else if(storage_common_stat(storage, furi_string_get_cstr(path), &file_info) == FSE_OK) {
-        state = file_info_is_dir(&file_info);
+    if(storage_common_stat(storage, furi_string_get_cstr(path), &file_info) == FSE_OK) {
+        if(file_info_is_dir(&file_info)) {
+            state = true;
+        }
     }
     furi_record_close(RECORD_STORAGE);
     return state;

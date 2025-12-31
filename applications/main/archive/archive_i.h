@@ -22,7 +22,6 @@ typedef enum {
 
 struct ArchiveApp {
     Gui* gui;
-    Loader* loader;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
     ArchiveBrowserView* browser;

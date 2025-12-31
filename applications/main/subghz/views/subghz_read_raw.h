@@ -28,7 +28,7 @@ void subghz_read_raw_set_callback(
     SubGhzReadRAWCallback callback,
     void* context);
 
-SubGhzReadRAW* subghz_read_raw_alloc(void);
+SubGhzReadRAW* subghz_read_raw_alloc();
 
 void subghz_read_raw_free(SubGhzReadRAW* subghz_static);
 

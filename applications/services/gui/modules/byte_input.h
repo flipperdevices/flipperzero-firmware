@@ -24,7 +24,7 @@ typedef void (*ByteChangedCallback)(void* context);
  *
  * @return     ByteInput instance pointer
  */
-ByteInput* byte_input_alloc(void);
+ByteInput* byte_input_alloc();
 
 /** Deinitialize and free byte input
  *

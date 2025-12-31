@@ -7,7 +7,7 @@ struct GPIOItems {
     size_t count;
 };
 
-GPIOItems* gpio_items_alloc(void) {
+GPIOItems* gpio_items_alloc() {
     GPIOItems* items = malloc(sizeof(GPIOItems));
 
     items->count = 0;

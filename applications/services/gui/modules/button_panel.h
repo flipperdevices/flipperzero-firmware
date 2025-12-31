@@ -15,7 +15,7 @@ extern "C" {
 typedef struct ButtonPanel ButtonPanel;
 
 /** Callback type to call for handling selecting button_panel items */
-typedef void (*ButtonItemCallback)(void* context, uint32_t index, InputType type);
+typedef void (*ButtonItemCallback)(void* context, uint32_t index);
 
 /** Allocate new button_panel module.
  *

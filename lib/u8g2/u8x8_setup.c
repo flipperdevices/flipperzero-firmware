@@ -109,8 +109,7 @@ void u8x8_SetupDefaults(u8x8_t* u8x8) {
 #ifdef U8X8_USE_PINS
     {
         uint8_t i;
-        for(i = 0; i < U8X8_PIN_CNT; i++)
-            u8x8->pins[i] = U8X8_PIN_NONE;
+        for(i = 0; i < U8X8_PIN_CNT; i++) u8x8->pins[i] = U8X8_PIN_NONE;
     }
 #endif
 }

@@ -1,12 +1,11 @@
 #include "cli_command_gpio.h"
 
+#include "core/string.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <lib/toolbox/args.h>
-#include <toolbox/pipe.h>
-#include <toolbox/cli/cli_command.h>
 
-void cli_command_gpio_print_usage(void) {
+void cli_command_gpio_print_usage() {
     printf("Usage:\r\n");
     printf("gpio <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
@@ -72,8 +71,8 @@ static GpioParseReturn gpio_command_parse(FuriString* args, size_t* pin_num, uin
     return ret;
 }
 
-void cli_command_gpio_mode(PipeSide* pipe, FuriString* args, void* context) {
-    UNUSED(pipe);
+void cli_command_gpio_mode(Cli* cli, FuriString* args, void* context) {
+    UNUSED(cli);
     UNUSED(context);
 
     size_t num = 0;
@@ -95,7 +94,7 @@ void cli_command_gpio_mode(PipeSide* pipe, FuriString* args, void* context) {
     if(gpio_pins[num].debug) { //-V779
         printf(
             "Changing this pin mode may damage hardware. Are you sure you want to continue? (y/n)?\r\n");
-        char c = getchar();
+        char c = cli_getc(cli);
         if(c != 'y' && c != 'Y') {
             printf("Cancelled.\r\n");
             return;
@@ -112,8 +111,8 @@ void cli_command_gpio_mode(PipeSide* pipe, FuriString* args, void* context) {
     }
 }
 
-void cli_command_gpio_read(PipeSide* pipe, FuriString* args, void* context) {
-    UNUSED(pipe);
+void cli_command_gpio_read(Cli* cli, FuriString* args, void* context) {
+    UNUSED(cli);
     UNUSED(context);
 
     size_t num = 0;
@@ -133,8 +132,7 @@ void cli_command_gpio_read(PipeSide* pipe, FuriString* args, void* context) {
     printf("Pin %s <= %u", gpio_pins[num].name, val);
 }
 
-void cli_command_gpio_set(PipeSide* pipe, FuriString* args, void* context) {
-    UNUSED(pipe);
+void cli_command_gpio_set(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
 
     size_t num = 0;
@@ -162,7 +160,7 @@ void cli_command_gpio_set(PipeSide* pipe, FuriString* args, void* context) {
     if(gpio_pins[num].debug) {
         printf(
             "Setting this pin may damage hardware. Are you sure you want to continue? (y/n)?\r\n");
-        char c = getchar();
+        char c = cli_getc(cli);
         if(c != 'y' && c != 'Y') {
             printf("Cancelled.\r\n");
             return;
@@ -173,7 +171,7 @@ void cli_command_gpio_set(PipeSide* pipe, FuriString* args, void* context) {
     printf("Pin %s => %u", gpio_pins[num].name, !!value);
 }
 
-void cli_command_gpio(PipeSide* pipe, FuriString* args, void* context) {
+void cli_command_gpio(Cli* cli, FuriString* args, void* context) {
     FuriString* cmd;
     cmd = furi_string_alloc();
 
@@ -184,17 +182,17 @@ void cli_command_gpio(PipeSide* pipe, FuriString* args, void* context) {
         }
 
         if(furi_string_cmp_str(cmd, "mode") == 0) {
-            cli_command_gpio_mode(pipe, args, context);
+            cli_command_gpio_mode(cli, args, context);
             break;
         }
 
         if(furi_string_cmp_str(cmd, "set") == 0) {
-            cli_command_gpio_set(pipe, args, context);
+            cli_command_gpio_set(cli, args, context);
             break;
         }
 
         if(furi_string_cmp_str(cmd, "read") == 0) {
-            cli_command_gpio_read(pipe, args, context);
+            cli_command_gpio_read(cli, args, context);
             break;
         }
 

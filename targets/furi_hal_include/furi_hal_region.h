@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +22,7 @@ typedef struct {
 } FuriHalRegion;
 
 /** Initialize region */
-void furi_hal_region_init(void);
+void furi_hal_region_init();
 
 /** Get Region Data.
  * 
@@ -30,7 +31,7 @@ void furi_hal_region_init(void);
  *
  * @return     pointer to FuriHalRegion instance (in RAM or Flash, check before freeing on region update)
  */
-const FuriHalRegion* furi_hal_region_get(void);
+const FuriHalRegion* furi_hal_region_get();
 
 /** Set device region data
  *
@@ -42,7 +43,7 @@ void furi_hal_region_set(FuriHalRegion* region);
  *
  * @return     true if provisioned, false otherwise
  */
-bool furi_hal_region_is_provisioned(void);
+bool furi_hal_region_is_provisioned();
 
 /** Get region name
  * 
@@ -54,7 +55,7 @@ bool furi_hal_region_is_provisioned(void);
  *
  * @return     Pointer to string
  */
-const char* furi_hal_region_get_name(void);
+const char* furi_hal_region_get_name();
 
 /** Сheck if transmission is allowed on this frequency for your flipper region
  *

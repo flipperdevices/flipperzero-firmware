@@ -1,0 +1,16 @@
+PB_System.PingRequest.data                  type:FT_POINTER
+PB_System.PingRequest.data                  max_size:1024
+PB_System.PingResponse.data                 type:FT_POINTER
+PB_System.PingResponse.data                 max_size:1024
+PB_System.DeviceInfoResponse.key            type:FT_POINTER
+PB_System.DeviceInfoResponse.value          type:FT_POINTER
+PB_System.DateTime.hour                     int_size:IS_8
+PB_System.DateTime.minute                   int_size:IS_8
+PB_System.DateTime.second                   int_size:IS_8
+PB_System.DateTime.day                      int_size:IS_8
+PB_System.DateTime.month                    int_size:IS_8
+PB_System.DateTime.year                     int_size:IS_16
+PB_System.DateTime.weekday                  int_size:IS_8
+PB_System.UpdateRequest.update_manifest     type:FT_POINTER
+PB_System.PowerInfoResponse.key             type:FT_POINTER
+PB_System.PowerInfoResponse.value           type:FT_POINTER

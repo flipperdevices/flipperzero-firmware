@@ -1,5 +1,3 @@
-#pragma once
-
 #include <furi_hal_infrared.h>
 #include <infrared.h>
 #include <stdint.h>

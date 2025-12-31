@@ -21,20 +21,17 @@ void ibutton_scene_emulate_on_enter(void* context) {
 
     widget_add_icon_element(widget, 3, 10, &I_iButtonKey_49x44);
 
-    if(furi_string_empty(ibutton->file_path)) {
-        furi_string_printf(
-            tmp,
-            "Unsaved\n%s",
-            ibutton_protocols_get_name(ibutton->protocols, ibutton_key_get_protocol_id(key)));
-    } else {
-        furi_string_printf(tmp, "%s", ibutton->key_name);
-    }
+    furi_string_printf(
+        tmp,
+        "%s\n[%s]",
+        furi_string_empty(ibutton->file_path) ? "Unsaved Key" : ibutton->key_name,
+        ibutton_protocols_get_name(ibutton->protocols, ibutton_key_get_protocol_id(key)));
 
     widget_add_text_box_element(
-        widget, 52, 23, 75, 26, AlignCenter, AlignTop, furi_string_get_cstr(tmp), false);
+        widget, 52, 38, 75, 26, AlignCenter, AlignCenter, furi_string_get_cstr(tmp), true);
 
     widget_add_string_multiline_element(
-        widget, 88, 10, AlignCenter, AlignTop, FontPrimary, "Emulating");
+        widget, 88, 10, AlignCenter, AlignTop, FontPrimary, "iButton\nemulating");
 
     ibutton_worker_emulate_set_callback(ibutton->worker, ibutton_scene_emulate_callback, ibutton);
     ibutton_worker_emulate_start(ibutton->worker, key);

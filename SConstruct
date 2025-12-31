@@ -7,7 +7,7 @@
 # construction of certain targets behind command-line options.
 
 import os
-from fbt.util import open_browser_action
+from fbt.util import path_as_posix
 
 DefaultEnvironment(tools=[])
 
@@ -42,11 +42,10 @@ distenv = coreenv.Clone(
         "openocd",
         "blackmagic",
         "jflash",
-        "doxygen",
-        "textfile",
     ],
     ENV=os.environ,
     UPDATE_BUNDLE_DIR="dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}",
+    VSCODE_LANG_SERVER=ARGUMENTS.get("LANG_SERVER", "cpptools"),
 )
 
 firmware_env = distenv.AddFwProject(
@@ -67,7 +66,6 @@ if GetOption("fullenv") or any(
 
     # Target for self-update package
     dist_basic_arguments = [
-        "${ARGS}",
         "--bundlever",
         "${UPDATE_VERSION_STRING}",
     ]
@@ -184,7 +182,6 @@ fap_deploy = distenv.PhonyTarget(
                 "send",
                 "${SOURCE}",
                 "/ext/apps",
-                "${ARGS}",
             ]
         ]
     ),
@@ -211,7 +208,7 @@ distenv.Alias("jflash", firmware_jflash)
 
 distenv.PhonyTarget(
     "gdb_trace_all",
-    [["${GDB}", "${GDBOPTS}", "${SOURCES}", "${GDBFLASH}"]],
+    "$GDB $GDBOPTS $SOURCES $GDBFLASH",
     source=firmware_env["FW_ELF"],
     GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
@@ -230,19 +227,18 @@ firmware_debug = distenv.PhonyTarget(
     source=firmware_env["FW_ELF"],
     GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
-    FBT_FAP_DEBUG_ELF_ROOT=firmware_env["FBT_FAP_DEBUG_ELF_ROOT"],
+    FBT_FAP_DEBUG_ELF_ROOT=path_as_posix(firmware_env.subst("$FBT_FAP_DEBUG_ELF_ROOT")),
 )
 distenv.Depends(firmware_debug, firmware_flash)
 
-firmware_blackmagic = distenv.PhonyTarget(
+distenv.PhonyTarget(
     "blackmagic",
     "${GDBPYCOM}",
     source=firmware_env["FW_ELF"],
     GDBOPTS="${GDBOPTS_BASE} ${GDBOPTS_BLACKMAGIC}",
     GDBREMOTE="${BLACKMAGIC_ADDR}",
-    FBT_FAP_DEBUG_ELF_ROOT=firmware_env["FBT_FAP_DEBUG_ELF_ROOT"],
+    FBT_FAP_DEBUG_ELF_ROOT=path_as_posix(firmware_env.subst("$FBT_FAP_DEBUG_ELF_ROOT")),
 )
-distenv.Depends(firmware_blackmagic, firmware_flash)
 
 # Debug alien elf
 debug_other_opts = [
@@ -276,35 +272,19 @@ distenv.PhonyTarget(
 # Just start OpenOCD
 distenv.PhonyTarget(
     "openocd",
-    [["${OPENOCDCOM}", "${ARGS}"]],
+    "${OPENOCDCOM}",
 )
 
 # Linter
 distenv.PhonyTarget(
     "lint",
-    [
-        [
-            "${PYTHON3}",
-            "${FBT_SCRIPT_DIR}/lint.py",
-            "check",
-            "${LINT_SOURCES}",
-            "${ARGS}",
-        ]
-    ],
+    [["${PYTHON3}", "${FBT_SCRIPT_DIR}/lint.py", "check", "${LINT_SOURCES}"]],
     LINT_SOURCES=[n.srcnode() for n in firmware_env["LINT_SOURCES"]],
 )
 
 distenv.PhonyTarget(
     "format",
-    [
-        [
-            "${PYTHON3}",
-            "${FBT_SCRIPT_DIR}/lint.py",
-            "format",
-            "${LINT_SOURCES}",
-            "${ARGS}",
-        ]
-    ],
+    [["${PYTHON3}", "${FBT_SCRIPT_DIR}/lint.py", "format", "${LINT_SOURCES}"]],
     LINT_SOURCES=[n.srcnode() for n in firmware_env["LINT_SOURCES"]],
 )
 
@@ -323,25 +303,11 @@ firmware_env.Append(
         "SConstruct",
         "firmware.scons",
         "fbt_options.py",
-    ],
-    IMG_LINT_SOURCES=[
-        # Image assets
-        "applications",
-        "assets",
-    ],
+    ]
 )
 
 
-black_commandline = [
-    [
-        "@${PYTHON3}",
-        "-m",
-        "black",
-        "${PY_BLACK_ARGS}",
-        "${PY_LINT_SOURCES}",
-        "${ARGS}",
-    ]
-]
+black_commandline = "@${PYTHON3} -m black ${PY_BLACK_ARGS} ${PY_LINT_SOURCES}"
 black_base_args = [
     "--include",
     '"(\\.scons|\\.py|SConscript|SConstruct|\\.fam)$"',
@@ -365,78 +331,14 @@ distenv.PhonyTarget(
     PY_LINT_SOURCES=firmware_env["PY_LINT_SOURCES"],
 )
 
-# Image assets linting
-distenv.PhonyTarget(
-    "lint_img",
-    [
-        [
-            "${PYTHON3}",
-            "${FBT_SCRIPT_DIR}/imglint.py",
-            "check",
-            "${IMG_LINT_SOURCES}",
-            "${ARGS}",
-        ]
-    ],
-    IMG_LINT_SOURCES=firmware_env["IMG_LINT_SOURCES"],
-)
-
-distenv.PhonyTarget(
-    "format_img",
-    [
-        [
-            "${PYTHON3}",
-            "${FBT_SCRIPT_DIR}/imglint.py",
-            "format",
-            "${IMG_LINT_SOURCES}",
-            "${ARGS}",
-        ]
-    ],
-    IMG_LINT_SOURCES=firmware_env["IMG_LINT_SOURCES"],
-)
-
-distenv.Alias("lint_all", ["lint", "lint_py", "lint_img"])
-distenv.Alias("format_all", ["format", "format_py", "format_img"])
-
-
 # Start Flipper CLI via PySerial's miniterm
 distenv.PhonyTarget(
-    "cli",
-    [
-        [
-            "${PYTHON3}",
-            "${FBT_SCRIPT_DIR}/serial_cli.py",
-            "-p",
-            "${FLIP_PORT}",
-            "${ARGS}",
-        ]
-    ],
+    "cli", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/serial_cli.py", "-p", "${FLIP_PORT}"]]
 )
 
-
-# Measure CLI loopback performance
+# Update WiFi devboard firmware
 distenv.PhonyTarget(
-    "cli_perf",
-    [
-        [
-            "${PYTHON3}",
-            "${FBT_SCRIPT_DIR}/serial_cli_perf.py",
-            "-p",
-            "${FLIP_PORT}",
-            "${ARGS}",
-        ]
-    ],
-)
-
-# Update WiFi devboard firmware with release channel
-distenv.PhonyTarget(
-    "devboard_flash",
-    [
-        [
-            "${PYTHON3}",
-            "${FBT_SCRIPT_DIR}/wifi_board.py",
-            "${ARGS}",
-        ]
-    ],
+    "devboard_flash", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/wifi_board.py"]]
 )
 
 
@@ -451,50 +353,26 @@ distenv.PhonyTarget(
 distenv.PhonyTarget(
     "get_stlink",
     distenv.Action(
-        lambda **_: distenv.GetDevices(),
+        lambda **kw: distenv.GetDevices(),
         None,
     ),
 )
 
 # Prepare vscode environment
+VSCODE_LANG_SERVER = cmd_environment["LANG_SERVER"]
 vscode_dist = distenv.Install(
     "#.vscode",
     [
-        distenv.Glob("#.vscode/example/*.json", exclude="*.tmpl"),
-        distenv.Glob("#.vscode/example/${LANG_SERVER}/*.json"),
+        distenv.Glob("#.vscode/example/*.json"),
+        distenv.Glob(f"#.vscode/example/{VSCODE_LANG_SERVER}/*.json"),
     ],
 )
-for template_file in distenv.Glob("#.vscode/example/*.tmpl"):
-    vscode_dist.append(
-        distenv.Substfile(
-            distenv.Dir("#.vscode").File(template_file.name.replace(".tmpl", "")),
-            template_file,
-            SUBST_DICT={
-                "@FBT_PLATFORM_EXECUTABLE_EXT@": ".exe" if os.name == "nt" else ""
-            },
-        )
-    )
 distenv.Precious(vscode_dist)
 distenv.NoClean(vscode_dist)
-distenv.Alias("vscode_dist", (vscode_dist, firmware_env["FW_CDB"]))
+distenv.Alias("vscode_dist", vscode_dist)
 
 # Configure shell with build tools
 distenv.PhonyTarget(
     "env",
     "@echo $( ${FBT_SCRIPT_DIR.abspath}/toolchain/fbtenv.sh $)",
 )
-
-doxy_build = distenv.DoxyBuild(
-    "documentation/doxygen/build/html/index.html",
-    "documentation/doxygen/Doxyfile-awesome.cfg",
-    doxy_env_variables={
-        "DOXY_SRC_ROOT": Dir(".").abspath,
-        "DOXY_BUILD_DIR": Dir("documentation/doxygen/build").abspath,
-        "DOXY_CONFIG_DIR": "documentation/doxygen",
-    },
-)
-distenv.Alias("doxygen", doxy_build)
-distenv.AlwaysBuild(doxy_build)
-
-# Open generated documentation in browser
-distenv.PhonyTarget("doxy", open_browser_action, source=doxy_build)

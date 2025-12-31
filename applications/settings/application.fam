@@ -5,7 +5,6 @@ App(
     provides=[
         "passport",
         "system_settings",
-        "clock_settings",
         "about",
     ],
 )

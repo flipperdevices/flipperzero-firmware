@@ -1,12 +1,9 @@
-#include <fatfs.h>
-#include <furi_hal.h>
-#include <furi_hal_sd.h>
-
-#include "sd_notify.h"
-#include "storage_ext.h"
-
+#include "fatfs.h"
 #include "../filesystem_api_internal.h"
-#include "../storage_internal_dirname_i.h"
+#include "storage_ext.h"
+#include <furi_hal.h>
+#include "sd_notify.h"
+#include <furi_hal_sd.h>
 
 typedef FIL SDFile;
 typedef DIR SDDir;
@@ -96,64 +93,6 @@ static bool sd_mount_card_internal(StorageData* storage, bool notify) {
     return result;
 }
 
-static bool sd_remove_recursive(const char* path) {
-    SDDir* current_dir = malloc(sizeof(DIR));
-    SDFileInfo* file_info = malloc(sizeof(FILINFO));
-    FuriString* current_path = furi_string_alloc_set(path);
-
-    bool go_deeper = false;
-    SDError status;
-
-    while(true) {
-        status = f_opendir(current_dir, furi_string_get_cstr(current_path));
-        if(status != FR_OK) break;
-
-        while(true) {
-            status = f_readdir(current_dir, file_info);
-            if(status != FR_OK || !strlen(file_info->fname)) break;
-
-            if(file_info->fattrib & AM_DIR) {
-                furi_string_cat_printf(current_path, "/%s", file_info->fname);
-                go_deeper = true;
-                break;
-
-            } else {
-                FuriString* file_path = furi_string_alloc_printf(
-                    "%s/%s", furi_string_get_cstr(current_path), file_info->fname);
-                status = f_unlink(furi_string_get_cstr(file_path));
-                furi_string_free(file_path);
-
-                if(status != FR_OK) break;
-            }
-        }
-
-        status = f_closedir(current_dir);
-        if(status != FR_OK) break;
-
-        if(go_deeper) {
-            go_deeper = false;
-            continue;
-        }
-
-        status = f_unlink(furi_string_get_cstr(current_path));
-        if(status != FR_OK) break;
-
-        if(!furi_string_equal(current_path, path)) {
-            size_t last_char_pos = furi_string_search_rchar(current_path, '/');
-            furi_assert(last_char_pos != FURI_STRING_FAILURE);
-            furi_string_left(current_path, last_char_pos);
-        } else {
-            break;
-        }
-    }
-
-    free(current_dir);
-    free(file_info);
-    furi_string_free(current_path);
-
-    return status == FR_OK;
-}
-
 FS_Error sd_unmount_card(StorageData* storage) {
     SDData* sd_data = storage->data;
     SDError error;
@@ -174,32 +113,21 @@ FS_Error sd_mount_card(StorageData* storage, bool notify) {
 
     if(storage->status != StorageStatusOK) {
         FURI_LOG_E(TAG, "sd init error: %s", storage_data_status_text(storage));
+        if(notify) {
+            NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+            sd_notify_error(notification);
+            furi_record_close(RECORD_NOTIFICATION);
+        }
         error = FSE_INTERNAL;
-
     } else {
         FURI_LOG_I(TAG, "card mounted");
-
-#ifndef FURI_RAM_EXEC
-        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStorageFormatInternal)) {
-            FURI_LOG_I(TAG, "deleting internal storage directory");
-            error = sd_remove_recursive(STORAGE_INTERNAL_DIR_NAME) ? FSE_OK : FSE_INTERNAL;
-        } else {
-            error = FSE_OK;
-        }
-#else
-        UNUSED(sd_remove_recursive);
-        error = FSE_OK;
-#endif
-    }
-
-    if(notify) {
-        NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-        if(error != FSE_OK) {
-            sd_notify_error(notification);
-        } else {
+        if(notify) {
+            NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
             sd_notify_success(notification);
+            furi_record_close(RECORD_NOTIFICATION);
         }
-        furi_record_close(RECORD_NOTIFICATION);
+
+        error = FSE_OK;
     }
 
     return error;
@@ -410,7 +338,7 @@ static bool storage_ext_file_open(
 
     file->internal_error_id = f_open(file_data, path, _mode);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return file->error_id == FSE_OK;
+    return (file->error_id == FSE_OK);
 }
 
 static bool storage_ext_file_close(void* ctx, File* file) {
@@ -420,7 +348,7 @@ static bool storage_ext_file_close(void* ctx, File* file) {
     file->error_id = storage_ext_parse_error(file->internal_error_id);
     free(file_data);
     storage_set_storage_file_data(file, NULL, storage);
-    return file->error_id == FSE_OK;
+    return (file->error_id == FSE_OK);
 }
 
 static uint16_t
@@ -465,7 +393,7 @@ static bool
     }
 
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return file->error_id == FSE_OK;
+    return (file->error_id == FSE_OK);
 }
 
 static uint64_t storage_ext_file_tell(void* ctx, File* file) {
@@ -489,7 +417,7 @@ static bool storage_ext_file_truncate(void* ctx, File* file) {
 
     file->internal_error_id = f_truncate(file_data);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return file->error_id == FSE_OK;
+    return (file->error_id == FSE_OK);
 #endif
 }
 
@@ -504,7 +432,7 @@ static bool storage_ext_file_sync(void* ctx, File* file) {
 
     file->internal_error_id = f_sync(file_data);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return file->error_id == FSE_OK;
+    return (file->error_id == FSE_OK);
 #endif
 }
 
@@ -537,7 +465,7 @@ static bool storage_ext_dir_open(void* ctx, File* file, const char* path) {
     storage_set_storage_file_data(file, file_data, storage);
     file->internal_error_id = f_opendir(file_data, path);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return file->error_id == FSE_OK;
+    return (file->error_id == FSE_OK);
 }
 
 static bool storage_ext_dir_close(void* ctx, File* file) {
@@ -547,7 +475,7 @@ static bool storage_ext_dir_close(void* ctx, File* file) {
     file->internal_error_id = f_closedir(file_data);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
     free(file_data);
-    return file->error_id == FSE_OK;
+    return (file->error_id == FSE_OK);
 }
 
 static bool storage_ext_dir_read(
@@ -578,7 +506,7 @@ static bool storage_ext_dir_read(
         file->error_id = FSE_NOT_EXIST;
     }
 
-    return file->error_id == FSE_OK;
+    return (file->error_id == FSE_OK);
 }
 
 static bool storage_ext_dir_rewind(void* ctx, File* file) {
@@ -587,7 +515,7 @@ static bool storage_ext_dir_rewind(void* ctx, File* file) {
 
     file->internal_error_id = f_readdir(file_data, NULL);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return file->error_id == FSE_OK;
+    return (file->error_id == FSE_OK);
 }
 /******************* Common FS Functions *******************/
 
@@ -727,8 +655,4 @@ void storage_ext_init(StorageData* storage) {
 
     // do not notify on first launch, notifications app is waiting for our thread to read settings
     storage_ext_tick_internal(storage, false);
-#ifndef FURI_RAM_EXEC
-    // always reset the flag to prevent accidental wipe on SD card insertion
-    furi_hal_rtc_reset_flag(FuriHalRtcFlagStorageFormatInternal);
-#endif
 }

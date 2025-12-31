@@ -11,7 +11,11 @@
 
 #define MAX_NAME_LENGTH 255
 
+<<<<<<< HEAD
 static void storage_cli_print_usage(void) {
+=======
+static void storage_cli_print_usage() {
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
     printf("Usage:\r\n");
     printf("storage <cmd> <path> <args>\r\n");
     printf("The path must start with /int or /ext\r\n");
@@ -443,6 +447,7 @@ static void storage_cli_remove(Cli* cli, FuriString* path) {
     furi_record_close(RECORD_STORAGE);
 }
 
+<<<<<<< HEAD
 #include <lib/uzlib/src/uzlib.h>
 
 typedef struct {
@@ -583,6 +588,8 @@ static void storage_cli_unzip(Cli* cli, FuriString* path) {
     furi_record_close(RECORD_STORAGE);
 }
 
+=======
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
 static void storage_cli_rename(Cli* cli, FuriString* old_path, FuriString* args) {
     UNUSED(cli);
     Storage* api = furi_record_open(RECORD_STORAGE);
@@ -704,11 +711,14 @@ void storage_cli(Cli* cli, FuriString* args, void* context) {
             break;
         }
 
+<<<<<<< HEAD
         if(furi_string_cmp_str(cmd, "unzip") == 0) {
             storage_cli_unzip(cli, path);
             break;
         }
 
+=======
+>>>>>>> origin/upstream-pr-2141-doom/2991-e2e-runner
         if(furi_string_cmp_str(cmd, "rename") == 0) {
             storage_cli_rename(cli, path, args);
             break;
@@ -756,7 +766,7 @@ static void storage_cli_factory_reset(Cli* cli, FuriString* args, void* context)
     }
 }
 
-void storage_on_system_start(void) {
+void storage_on_system_start() {
 #ifdef SRV_CLI
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_add_command(cli, RECORD_STORAGE, CliCommandFlagParallelSafe, storage_cli, NULL);

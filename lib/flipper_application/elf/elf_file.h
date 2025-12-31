@@ -33,6 +33,7 @@ typedef struct {
 typedef enum {
     ELFFileLoadStatusSuccess = 0,
     ELFFileLoadStatusUnspecifiedError,
+    ELFFileLoadStatusNoFreeMemory,
     ELFFileLoadStatusMissingImports,
 } ELFFileLoadStatus;
 
@@ -41,12 +42,6 @@ typedef enum {
     ElfProcessSectionResultCannotProcess,
     ElfProcessSectionResultSuccess,
 } ElfProcessSectionResult;
-
-typedef enum {
-    ElfLoadSectionTableResultError,
-    ElfLoadSectionTableResultNoMemory,
-    ElfLoadSectionTableResultSuccess,
-} ElfLoadSectionTableResult;
 
 typedef bool(ElfProcessSection)(File* file, size_t offset, size_t size, void* context);
 
@@ -75,9 +70,9 @@ bool elf_file_open(ELFFile* elf_file, const char* path);
 /**
  * @brief Load ELF file section table (load stage #1)
  * @param elf_file 
- * @return ElfLoadSectionTableResult 
+ * @return bool 
  */
-ElfLoadSectionTableResult elf_file_load_section_table(ELFFile* elf_file);
+bool elf_file_load_section_table(ELFFile* elf_file);
 
 /**
  * @brief Load and relocate ELF file sections (load stage #2)
@@ -103,7 +98,8 @@ bool elf_file_is_init_complete(ELFFile* elf);
 /**
  * @brief Get actual entry point for ELF file
  * @param elf_file 
- * @return void*
+ * @param args 
+ * @return int32_t 
  */
 void* elf_file_get_entry_point(ELFFile* elf_file);
 

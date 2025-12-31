@@ -14,7 +14,7 @@ typedef struct {
     uint16_t type;
 } SubGhzKey;
 
-ARRAY_DEF(SubGhzKeyArray, SubGhzKey, M_POD_OPLIST) //-V658
+ARRAY_DEF(SubGhzKeyArray, SubGhzKey, M_POD_OPLIST)
 
 #define M_OPL_SubGhzKeyArray_t() ARRAY_OPLIST(SubGhzKeyArray, M_POD_OPLIST)
 
@@ -24,7 +24,7 @@ typedef struct SubGhzKeystore SubGhzKeystore;
  * Allocate SubGhzKeystore.
  * @return SubGhzKeystore* pointer to a SubGhzKeystore instance
  */
-SubGhzKeystore* subghz_keystore_alloc(void);
+SubGhzKeystore* subghz_keystore_alloc();
 
 /**
  * Free SubGhzKeystore.

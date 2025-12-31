@@ -9,8 +9,8 @@ extern "C" {
 #endif
 
 #define FURI_HAL_FLASH_OB_RAW_SIZE_BYTES 0x80
-#define FURI_HAL_FLASH_OB_SIZE_WORDS     (FURI_HAL_FLASH_OB_RAW_SIZE_BYTES / sizeof(uint32_t))
-#define FURI_HAL_FLASH_OB_TOTAL_VALUES   (FURI_HAL_FLASH_OB_SIZE_WORDS / 2)
+#define FURI_HAL_FLASH_OB_SIZE_WORDS (FURI_HAL_FLASH_OB_RAW_SIZE_BYTES / sizeof(uint32_t))
+#define FURI_HAL_FLASH_OB_TOTAL_VALUES (FURI_HAL_FLASH_OB_SIZE_WORDS / 2)
 
 typedef union {
     uint8_t bytes[FURI_HAL_FLASH_OB_RAW_SIZE_BYTES];
@@ -29,61 +29,61 @@ _Static_assert(
 
 /** Init flash, applying necessary workarounds
  */
-void furi_hal_flash_init(void);
+void furi_hal_flash_init();
 
 /** Get flash base address
  *
  * @return     pointer to flash base
  */
-size_t furi_hal_flash_get_base(void);
+size_t furi_hal_flash_get_base();
 
 /** Get flash read block size
  *
  * @return     size in bytes
  */
-size_t furi_hal_flash_get_read_block_size(void);
+size_t furi_hal_flash_get_read_block_size();
 
 /** Get flash write block size
  *
  * @return     size in bytes
  */
-size_t furi_hal_flash_get_write_block_size(void);
+size_t furi_hal_flash_get_write_block_size();
 
 /** Get flash page size
  *
  * @return     size in bytes
  */
-size_t furi_hal_flash_get_page_size(void);
+size_t furi_hal_flash_get_page_size();
 
 /** Get expected flash cycles count
  *
  * @return     count of erase-write operations
  */
-size_t furi_hal_flash_get_cycles_count(void);
+size_t furi_hal_flash_get_cycles_count();
 
 /** Get free flash start address
  *
  * @return     pointer to free region start
  */
-const void* furi_hal_flash_get_free_start_address(void);
+const void* furi_hal_flash_get_free_start_address();
 
 /** Get free flash end address
  *
  * @return     pointer to free region end
  */
-const void* furi_hal_flash_get_free_end_address(void);
+const void* furi_hal_flash_get_free_end_address();
 
 /** Get first free page start address
  *
  * @return     first free page memory address
  */
-size_t furi_hal_flash_get_free_page_start_address(void);
+size_t furi_hal_flash_get_free_page_start_address();
 
 /** Get free page count
  *
  * @return     free page count
  */
-size_t furi_hal_flash_get_free_page_count(void);
+size_t furi_hal_flash_get_free_page_count();
 
 /** Erase Flash
  *
@@ -133,13 +133,13 @@ bool furi_hal_flash_ob_set_word(size_t word_idx, const uint32_t value);
  * @warning Initializes system restart
  *
  */
-void furi_hal_flash_ob_apply(void);
+void furi_hal_flash_ob_apply();
 
 /** Get raw OB storage data
  *
  * @return     pointer to read-only data of OB (raw + complementary values)
  */
-const FuriHalFlashRawOptionByteData* furi_hal_flash_ob_get_raw_ptr(void);
+const FuriHalFlashRawOptionByteData* furi_hal_flash_ob_get_raw_ptr();
 
 #ifdef __cplusplus
 }
