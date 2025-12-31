@@ -392,10 +392,11 @@ static void cdc_on_suspend(usbd_device* dev);
 
 static usbd_respond cdc_ep_config(usbd_device* dev, uint8_t cfg);
 static usbd_respond cdc_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback);
+
 static usbd_device* usb_dev;
-static FuriHalUsbInterface* cdc_if_cur = NULL;
-static bool connected = false;
-static CdcCallbacks* callbacks[IF_NUM_MAX] = {NULL};
+static volatile FuriHalUsbInterface* cdc_if_cur = NULL;
+static volatile bool connected = false;
+static volatile CdcCallbacks* callbacks[IF_NUM_MAX] = {NULL};
 static void* cb_ctx[IF_NUM_MAX];
 
 FuriHalUsbInterface usb_cdc_single = {
@@ -506,8 +507,10 @@ uint8_t furi_hal_cdc_get_ctrl_line_state(uint8_t if_num) {
 void furi_hal_cdc_send(uint8_t if_num, uint8_t* buf, uint16_t len) {
     if(if_num == 0) {
         usbd_ep_write(usb_dev, CDC0_TXD_EP, buf, len);
-    } else {
+    } else if(if_num == 1) {
         usbd_ep_write(usb_dev, CDC1_TXD_EP, buf, len);
+    } else {
+        furi_crash();
     }
 }
 
@@ -515,8 +518,10 @@ int32_t furi_hal_cdc_receive(uint8_t if_num, uint8_t* buf, uint16_t max_len) {
     int32_t len = 0;
     if(if_num == 0) {
         len = usbd_ep_read(usb_dev, CDC0_RXD_EP, buf, max_len);
-    } else {
+    } else if(if_num == 1) {
         len = usbd_ep_read(usb_dev, CDC1_RXD_EP, buf, max_len);
+    } else {
+        furi_crash();
     }
     return (len < 0) ? 0 : len;
 }

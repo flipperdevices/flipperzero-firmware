@@ -43,6 +43,9 @@ static void subghz_rpc_command_callback(const RpcAppSystemEvent* event, void* co
     } else if(event->type == RpcAppEventTypeButtonRelease) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneRpcButtonRelease);
+    } else if(event->type == RpcAppEventTypeButtonPressRelease) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneRpcButtonPressRelease);
     } else {
         rpc_system_app_confirm(subghz->rpc_ctx, false);
     }
@@ -59,7 +62,6 @@ SubGhz* subghz_alloc(void) {
 
     // View Dispatcher
     subghz->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(subghz->view_dispatcher);
 
     subghz->scene_manager = scene_manager_alloc(&subghz_scene_handlers, subghz);
     view_dispatcher_set_event_callback_context(subghz->view_dispatcher, subghz);

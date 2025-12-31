@@ -82,7 +82,8 @@ static void view_port_input_callback(InputEvent* input_event, void* context) {
     furi_message_queue_put(app->input_queue, input_event, 0);
 }
 
-static bool input_queue_callback(FuriMessageQueue* queue, void* context) {
+static void input_queue_callback(FuriEventLoopObject* object, void* context) {
+    FuriMessageQueue* queue = object;
     EventLoopBlinkTestApp* app = context;
 
     InputEvent event;
@@ -106,8 +107,6 @@ static bool input_queue_callback(FuriMessageQueue* queue, void* context) {
             furi_event_loop_stop(app->event_loop);
         }
     }
-
-    return true;
 }
 
 static void blink_timer_callback(void* context) {
@@ -144,7 +143,7 @@ int32_t event_loop_blink_test_app(void* arg) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     furi_event_loop_tick_set(app.event_loop, 500, event_loop_tick_callback, &app);
-    furi_event_loop_message_queue_subscribe(
+    furi_event_loop_subscribe_message_queue(
         app.event_loop, app.input_queue, FuriEventLoopEventIn, input_queue_callback, &app);
 
     furi_event_loop_run(app.event_loop);
@@ -154,7 +153,7 @@ int32_t event_loop_blink_test_app(void* arg) {
 
     furi_record_close(RECORD_GUI);
 
-    furi_event_loop_message_queue_unsubscribe(app.event_loop, app.input_queue);
+    furi_event_loop_unsubscribe(app.event_loop, app.input_queue);
     furi_message_queue_free(app.input_queue);
 
     for(size_t i = 0; i < TIMER_COUNT; ++i) {

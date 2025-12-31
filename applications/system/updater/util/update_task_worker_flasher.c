@@ -6,7 +6,6 @@
 #include <storage/storage.h>
 #include <toolbox/path.h>
 #include <update_util/dfu_file.h>
-#include <update_util/lfs_backup.h>
 #include <update_util/update_operation.h>
 #include <toolbox/tar/tar_archive.h>
 #include <toolbox/crc32_calc.h>
@@ -342,7 +341,7 @@ int32_t update_task_worker_flash_writer(void* context) {
         }
 
         furi_hal_rtc_set_boot_mode(FuriHalRtcBootModePostUpdate);
-        // Format LFS before restoring backup on next boot
+        // Clean up /int before restoring backup on next boot
         furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
 #ifdef FURI_NDEBUG
         // Production

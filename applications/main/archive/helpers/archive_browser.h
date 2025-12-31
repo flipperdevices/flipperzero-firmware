@@ -7,20 +7,20 @@
 #define TAB_DEFAULT       ArchiveTabFavorites // Start tab
 #define FILE_LIST_BUF_LEN 50
 
-static const char* tab_default_paths[] = {
+static const char* const tab_default_paths[] = {
     [ArchiveTabFavorites] = "/app:favorites",
-    [ArchiveTabIButton] = ANY_PATH("ibutton"),
-    [ArchiveTabNFC] = ANY_PATH("nfc"),
-    [ArchiveTabSubGhz] = ANY_PATH("subghz"),
-    [ArchiveTabLFRFID] = ANY_PATH("lfrfid"),
-    [ArchiveTabInfrared] = ANY_PATH("infrared"),
-    [ArchiveTabBadUsb] = ANY_PATH("badusb"),
+    [ArchiveTabIButton] = EXT_PATH("ibutton"),
+    [ArchiveTabNFC] = EXT_PATH("nfc"),
+    [ArchiveTabSubGhz] = EXT_PATH("subghz"),
+    [ArchiveTabLFRFID] = EXT_PATH("lfrfid"),
+    [ArchiveTabInfrared] = EXT_PATH("infrared"),
+    [ArchiveTabBadUsb] = EXT_PATH("badusb"),
     [ArchiveTabU2f] = "/app:u2f",
-    [ArchiveTabApplications] = ANY_PATH("apps"),
-    [ArchiveTabBrowser] = STORAGE_ANY_PATH_PREFIX,
+    [ArchiveTabApplications] = EXT_PATH("apps"),
+    [ArchiveTabBrowser] = STORAGE_EXT_PATH_PREFIX,
 };
 
-static const char* known_ext[] = {
+static const char* const known_ext[] = {
     [ArchiveFileTypeIButton] = ".ibtn",
     [ArchiveFileTypeNFC] = ".nfc",
     [ArchiveFileTypeSubGhz] = ".sub",
@@ -34,6 +34,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
     [ArchiveFileTypeAppOrJs] = ".fap|.js",
+    [ArchiveFileTypeSetting] = "?",
 };
 
 static const ArchiveFileTypeEnum known_type[] = {

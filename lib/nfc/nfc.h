@@ -361,6 +361,7 @@ NfcError nfc_iso14443a_listener_set_col_res_data(
  * @param[in] idm_len IDm length in bytes.
  * @param[in] pmm pointer to a byte array containing the PMm.
  * @param[in] pmm_len PMm length in bytes.
+ * @param[in] sys_code System code from SYS_C block
  * @returns NfcErrorNone on success, any other error code on failure.
 */
 NfcError nfc_felica_listener_set_sensf_res_data(
@@ -368,7 +369,8 @@ NfcError nfc_felica_listener_set_sensf_res_data(
     const uint8_t* idm,
     const uint8_t idm_len,
     const uint8_t* pmm,
-    const uint8_t pmm_len);
+    const uint8_t pmm_len,
+    const uint16_t sys_code);
 
 /**
  * @brief Send ISO15693 Start of Frame pattern in listener mode
@@ -377,6 +379,24 @@ NfcError nfc_felica_listener_set_sensf_res_data(
  * @returns NfcErrorNone on success, any other error code on failure.
  */
 NfcError nfc_iso15693_listener_tx_sof(Nfc* instance);
+
+/**
+ * @brief Start the timer used for manual FeliCa collision resolution in listener mode.
+ * 
+ * This blocks TX until the desired Time Slot, and should be called as soon as the listener
+ * determines that a collision resolution needs to be handled manually.
+ *
+ * @param[in, out] instance instance pointer to the instance to be configured.
+ * @param[in] target_time_slot Target Time Slot number. Should be a value within the range of 0-15 (double-inclusive).
+ */
+void nfc_felica_listener_timer_anticol_start(Nfc* instance, uint8_t target_time_slot);
+
+/**
+ * @brief Cancel the timer used for manual FeliCa collision resolution in listener mode.
+ * 
+ * @param[in, out] instance instance pointer to the instance to be configured.
+ */
+void nfc_felica_listener_timer_anticol_stop(Nfc* instance);
 
 #ifdef __cplusplus
 }

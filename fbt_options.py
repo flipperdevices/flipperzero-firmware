@@ -75,6 +75,9 @@ FIRMWARE_APPS = {
         "updater_app",
         "radio_device_cc1101_ext",
         "unit_tests",
+        "js_app",
+        "infrared",
+        "archive",
     ],
 }
 
