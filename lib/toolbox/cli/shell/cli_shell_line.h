@@ -35,7 +35,7 @@ void cli_shell_line_ensure_not_overwriting_history(CliShellLine* line);
 
 void cli_shell_line_set_about_to_exit(CliShellLine* line);
 
-extern CliShellKeyComboSet cli_shell_line_key_combo_set;
+extern const CliShellKeyComboSet cli_shell_line_key_combo_set;
 
 #ifdef __cplusplus
 }

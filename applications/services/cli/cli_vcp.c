@@ -130,7 +130,7 @@ static void cli_vcp_cdc_ctrl_line_callback(void* context, CdcCtrlLine ctrl_lines
     }
 }
 
-static CdcCallbacks cdc_callbacks = {
+static const CdcCallbacks cdc_callbacks = {
     .tx_ep_callback = cli_vcp_cdc_tx_done,
     .rx_ep_callback = cli_vcp_cdc_rx,
     .state_callback = cli_vcp_cdc_state_callback,

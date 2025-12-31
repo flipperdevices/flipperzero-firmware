@@ -351,7 +351,7 @@ static bool key_combo_esc(CliKeyCombo combo, void* context) {
     return true;
 }
 
-CliShellKeyComboSet cli_shell_completions_key_combo_set = {
+const CliShellKeyComboSet cli_shell_completions_key_combo_set = {
     .fallback = hide_if_open_and_continue_handling,
     .count = 7,
     .records =

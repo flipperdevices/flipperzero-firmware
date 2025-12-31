@@ -1275,8 +1275,8 @@ Function,+,furi_hal_ccid_set_callbacks,void,"CcidCallbacks*, void*"
 Function,+,furi_hal_cdc_get_ctrl_line_state,uint8_t,uint8_t
 Function,+,furi_hal_cdc_get_port_settings,usb_cdc_line_coding*,uint8_t
 Function,+,furi_hal_cdc_receive,int32_t,"uint8_t, uint8_t*, uint16_t"
-Function,+,furi_hal_cdc_send,void,"uint8_t, uint8_t*, uint16_t"
-Function,+,furi_hal_cdc_set_callbacks,void,"uint8_t, CdcCallbacks*, void*"
+Function,+,furi_hal_cdc_send,void,"uint8_t, const uint8_t*, uint16_t"
+Function,+,furi_hal_cdc_set_callbacks,void,"uint8_t, const CdcCallbacks*, void*"
 Function,-,furi_hal_clock_deinit_early,void,
 Function,-,furi_hal_clock_init,void,
 Function,-,furi_hal_clock_init_early,void,

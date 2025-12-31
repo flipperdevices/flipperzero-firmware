@@ -113,7 +113,7 @@ static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
         furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
         cli_vcp_enable(usb_uart->cli_vcp);
     }
-    furi_hal_cdc_set_callbacks(vcp_ch, (CdcCallbacks*)&cdc_cb, usb_uart);
+    furi_hal_cdc_set_callbacks(vcp_ch, &cdc_cb, usb_uart);
 }
 
 static void usb_uart_vcp_deinit(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
