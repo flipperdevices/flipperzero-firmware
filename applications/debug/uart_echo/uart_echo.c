@@ -183,6 +183,7 @@ static int32_t uart_echo_worker(void* context) {
 
 static UartEchoApp* uart_echo_app_alloc(uint32_t baudrate) {
     UartEchoApp* app = malloc(sizeof(UartEchoApp));
+    furi_check(app);
 
     app->rx_stream = furi_stream_buffer_alloc(2048, 1);
 
@@ -208,6 +209,7 @@ static UartEchoApp* uart_echo_app_alloc(uint32_t baudrate) {
                 model->line = 0;
                 model->escape = false;
                 model->list[i] = malloc(sizeof(ListElement));
+                furi_check(model->list[i]);
                 model->list[i]->text = furi_string_alloc();
             }
         },

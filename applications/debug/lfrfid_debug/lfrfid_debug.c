@@ -14,6 +14,7 @@ static bool lfrfid_debug_back_event_callback(void* context) {
 
 static LfRfidDebug* lfrfid_debug_alloc() {
     LfRfidDebug* app = malloc(sizeof(LfRfidDebug));
+    furi_check(app);
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&lfrfid_debug_scene_handlers, app);

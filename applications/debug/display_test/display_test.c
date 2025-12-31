@@ -123,6 +123,7 @@ static void display_config_set_contrast(VariableItem* item) {
 
 DisplayTest* display_test_alloc() {
     DisplayTest* instance = malloc(sizeof(DisplayTest));
+    furi_check(instance);
 
     View* view = NULL;
 

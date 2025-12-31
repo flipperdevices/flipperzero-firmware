@@ -688,7 +688,9 @@ void mfkey(ProgramState* program_state) {
         }
         if(already_found == false) {
             // New key
-            keyarray = realloc(keyarray, sizeof(MfClassicKey) * (keyarray_size + 1)); //-V701
+            MfClassicKey* temp = realloc(keyarray, sizeof(MfClassicKey) * (keyarray_size + 1)); //-V701
+            furi_check(temp);
+            keyarray = temp;
             keyarray_size += 1;
             keyarray[keyarray_size - 1] = found_key;
             (program_state->unique_cracked)++;

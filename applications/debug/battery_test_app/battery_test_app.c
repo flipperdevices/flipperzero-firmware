@@ -33,6 +33,7 @@ static void battery_test_battery_info_update_model(void* context) {
 
 BatteryTestApp* battery_test_alloc() {
     BatteryTestApp* app = malloc(sizeof(BatteryTestApp));
+    furi_check(app);
 
     // Records
     app->gui = furi_record_open(RECORD_GUI);

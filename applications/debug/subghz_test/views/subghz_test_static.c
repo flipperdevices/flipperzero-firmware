@@ -166,6 +166,7 @@ void subghz_test_static_exit(void* context) {
 
 SubGhzTestStatic* subghz_test_static_alloc() {
     SubGhzTestStatic* instance = malloc(sizeof(SubGhzTestStatic));
+    furi_check(instance);
 
     // View allocation and configuration
     instance->view = view_alloc();

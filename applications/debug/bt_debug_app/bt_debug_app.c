@@ -30,6 +30,7 @@ uint32_t bt_debug_start_view(void* context) {
 
 BtDebugApp* bt_debug_app_alloc() {
     BtDebugApp* app = malloc(sizeof(BtDebugApp));
+    furi_check(app);
 
     // Gui
     app->gui = furi_record_open(RECORD_GUI);

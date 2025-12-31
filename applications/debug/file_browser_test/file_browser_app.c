@@ -28,6 +28,7 @@ static void file_browser_app_tick_event_callback(void* context) {
 FileBrowserApp* file_browser_app_alloc(char* arg) {
     UNUSED(arg);
     FileBrowserApp* app = malloc(sizeof(FileBrowserApp));
+    furi_check(app);
 
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);

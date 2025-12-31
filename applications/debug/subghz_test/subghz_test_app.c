@@ -23,6 +23,7 @@ static void subghz_test_app_tick_event_callback(void* context) {
 
 SubGhzTestApp* subghz_test_app_alloc() {
     SubGhzTestApp* app = malloc(sizeof(SubGhzTestApp));
+    furi_check(app);
 
     // GUI
     app->gui = furi_record_open(RECORD_GUI);

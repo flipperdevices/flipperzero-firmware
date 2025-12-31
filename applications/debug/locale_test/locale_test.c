@@ -55,6 +55,7 @@ static uint32_t locale_test_exit(void* context) {
 
 static LocaleTestApp* locale_test_alloc() {
     LocaleTestApp* app = malloc(sizeof(LocaleTestApp));
+    furi_check(app);
 
     // Gui
     app->gui = furi_record_open(RECORD_GUI);
