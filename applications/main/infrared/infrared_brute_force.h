@@ -79,12 +79,12 @@ void infrared_brute_force_stop(InfraredBruteForce* brute_force);
 
 /**
  * @brief Send an arbitrary signal from the chosen category.
- * 
+ *
  * @param[in] brute_force pointer to the instance
  * @param signal_index the index of the signal within the category, must be
  *                     between 0 and `record_count` as told by
  *                     `infrared_brute_force_start`
- * 
+ *
  * @returns true on success, false otherwise
  */
 bool infrared_brute_force_send(InfraredBruteForce* brute_force, uint32_t signal_index);

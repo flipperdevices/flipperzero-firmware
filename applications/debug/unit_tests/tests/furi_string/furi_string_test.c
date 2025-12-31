@@ -69,7 +69,10 @@ MU_TEST(mu_test_furi_string_mem) {
     mu_check(string != NULL);
     mu_check(!furi_string_empty(string));
 
-    // TODO FL-3493: how to test furi_string_reserve?
+    // test furi_string_reserve
+    furi_string_reserve(string, 100);
+    mu_assert_int_greater_than(100, furi_string_capacity(string));
+    furi_string_reserve(string, 0);
 
     // test furi_string_reset
     furi_string_reset(string);
