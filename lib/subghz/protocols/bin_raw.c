@@ -14,15 +14,15 @@
 #define TAG "SubGhzProtocolBinRaw"
 
 //change very carefully, RAM ends at the most inopportune moment
-#define BIN_RAW_BUF_RAW_SIZE 2048
+#define BIN_RAW_BUF_RAW_SIZE  2048
 #define BIN_RAW_BUF_DATA_SIZE 512
 
-#define BIN_RAW_THRESHOLD_RSSI -85.0f
-#define BIN_RAW_DELTA_RSSI 7.0f
-#define BIN_RAW_SEARCH_CLASSES 20
-#define BIN_RAW_TE_MIN_COUNT 40
+#define BIN_RAW_THRESHOLD_RSSI     -85.0f
+#define BIN_RAW_DELTA_RSSI         7.0f
+#define BIN_RAW_SEARCH_CLASSES     20
+#define BIN_RAW_TE_MIN_COUNT       40
 #define BIN_RAW_BUF_MIN_DATA_COUNT 128
-#define BIN_RAW_MAX_MARKUP_COUNT 20
+#define BIN_RAW_MAX_MARKUP_COUNT   20
 
 //#define BIN_RAW_DEBUG
 
@@ -131,7 +131,7 @@ static uint16_t subghz_protocol_bin_raw_get_full_byte(uint16_t bit_count) {
     if(bit_count & 0x7) {
         return (bit_count >> 3) + 1;
     } else {
-        return (bit_count >> 3);
+        return bit_count >> 3;
     }
 }
 
@@ -314,9 +314,10 @@ SubGhzProtocolStatus
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         if(!subghz_protocol_encoder_bin_raw_get_upload(instance)) {
-            break;
             res = SubGhzProtocolStatusErrorEncoderGetUpload;
+            break;
         }
+
         instance->encoder.is_running = true;
 
         res = SubGhzProtocolStatusOk;
@@ -454,7 +455,7 @@ static bool
 
     //sort by number of occurrences
     bool swap = true;
-    while(swap) {
+    while(swap) { //-V1044
         swap = false;
         for(size_t i = 1; i < BIN_RAW_SEARCH_CLASSES; i++) {
             if(classes[i].count > classes[i - 1].count) {
@@ -570,7 +571,7 @@ static bool
                 bit_count = 0;
 
                 if(data_markup_ind == BIN_RAW_MAX_MARKUP_COUNT) break;
-                ind &= 0xFFFFFFF8; //jump to the pre whole byte
+                ind &= 0xFFFFFFF8; //jump to the pre whole byte //-V784
             }
         } while(gap_ind != 0);
         if((data_markup_ind != BIN_RAW_MAX_MARKUP_COUNT) && (ind != 0)) {

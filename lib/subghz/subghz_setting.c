@@ -7,11 +7,11 @@
 
 #define TAG "SubGhzSetting"
 
-#define SUBGHZ_SETTING_FILE_TYPE "Flipper SubGhz Setting File"
+#define SUBGHZ_SETTING_FILE_TYPE    "Flipper SubGhz Setting File"
 #define SUBGHZ_SETTING_FILE_VERSION 1
 
 #define FREQUENCY_FLAG_DEFAULT (1 << 31)
-#define FREQUENCY_MASK (0xFFFFFFFF ^ FREQUENCY_FLAG_DEFAULT)
+#define FREQUENCY_MASK         (0xFFFFFFFF ^ FREQUENCY_FLAG_DEFAULT)
 
 /* Default */
 static const uint32_t subghz_frequency_list[] = {
@@ -163,7 +163,7 @@ typedef struct {
     size_t custom_preset_data_size;
 } SubGhzSettingCustomPresetItem;
 
-ARRAY_DEF(SubGhzSettingCustomPresetItemArray, SubGhzSettingCustomPresetItem, M_POD_OPLIST)
+ARRAY_DEF(SubGhzSettingCustomPresetItemArray, SubGhzSettingCustomPresetItem, M_POD_OPLIST) //-V658
 
 #define M_OPL_SubGhzSettingCustomPresetItemArray_t() \
     ARRAY_OPLIST(SubGhzSettingCustomPresetItemArray, M_POD_OPLIST)

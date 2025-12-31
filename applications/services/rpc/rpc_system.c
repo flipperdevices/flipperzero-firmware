@@ -30,7 +30,8 @@ static void rpc_system_system_ping_process(const PB_Main* request, void* context
     }
 
     PB_Main response = PB_Main_init_default;
-    response.command_status = PB_CommandStatus_OK;
+    // PB_CommandStatus_OK is 0 in current case, and var by default is 0 too, commenting PVS warn
+    response.command_status = PB_CommandStatus_OK; //-V1048
     response.command_id = request->command_id;
     response.which_content = PB_Main_system_ping_response_tag;
 
@@ -54,18 +55,21 @@ static void rpc_system_system_reboot_process(const PB_Main* request, void* conte
     RpcSession* session = (RpcSession*)context;
     furi_assert(session);
 
+    Power* power = furi_record_open(RECORD_POWER);
     const int mode = request->content.system_reboot_request.mode;
 
     if(mode == PB_System_RebootRequest_RebootMode_OS) {
-        power_reboot(PowerBootModeNormal);
+        power_reboot(power, PowerBootModeNormal);
     } else if(mode == PB_System_RebootRequest_RebootMode_DFU) {
-        power_reboot(PowerBootModeDfu);
+        power_reboot(power, PowerBootModeDfu);
     } else if(mode == PB_System_RebootRequest_RebootMode_UPDATE) {
-        power_reboot(PowerBootModeUpdateStart);
+        power_reboot(power, PowerBootModeUpdateStart);
     } else {
         rpc_send_and_release_empty(
             session, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
     }
+
+    furi_record_close(RECORD_POWER);
 }
 
 static void rpc_system_system_device_info_callback(
@@ -181,9 +185,9 @@ static void rpc_system_system_factory_reset_process(const PB_Main* request, void
 
     furi_hal_rtc_reset_registers();
     furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
-    power_reboot(PowerBootModeNormal);
 
-    (void)session;
+    Power* power = furi_record_open(RECORD_POWER);
+    power_reboot(power, PowerBootModeNormal);
 }
 
 static void
