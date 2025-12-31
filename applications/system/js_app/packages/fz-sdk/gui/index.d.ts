@@ -24,25 +24,24 @@
  * ### View
  * In Flipper's terminology, a "View" is a fullscreen design element that
  * assumes control over the entire viewport and all input events. Different
- * types of views are available (not all of which are unfortunately currently
- * implemented in JS):
- * | View                 | Has JS adapter?  |
- * |----------------------|------------------|
- * | `button_menu`        | ❌               |
- * | `button_panel`       | ❌               |
- * | `byte_input`         | ✅               |
- * | `dialog_ex`          | ✅ (as `dialog`) |
- * | `empty_screen`       | ✅               |
- * | `file_browser`       | ❌               |
- * | `loading`            | ✅               |
- * | `menu`               | ❌               |
- * | `number_input`       | ❌               |
- * | `popup`              | ❌               |
- * | `submenu`            | ✅               |
- * | `text_box`           | ✅               |
- * | `text_input`         | ✅               |
- * | `variable_item_list` | ❌               |
- * | `widget`             | ❌               |
+ * types of views are available:
+ * | View                 | Has JS adapter?       |
+ * |----------------------|-----------------------|
+ * | `button_menu`        | ✅                    |
+ * | `button_panel`       | ✅                    |
+ * | `byte_input`         | ✅                    |
+ * | `dialog_ex`          | ✅ (as `dialog`)      |
+ * | `empty_screen`       | ✅                    |
+ * | `file_browser`       | ✅ (as `file_picker`) |
+ * | `loading`            | ✅                    |
+ * | `menu`               | ✅                    |
+ * | `number_input`       | ✅                    |
+ * | `popup`              | ✅                    |
+ * | `submenu`            | ✅                    |
+ * | `text_box`           | ✅                    |
+ * | `text_input`         | ✅                    |
+ * | `variable_item_list` | ✅ (as `vi_list`)     |
+ * | `widget`             | ✅                    |
  * 
  * In JS, each view has its own set of properties (or just "props"). The
  * programmer can manipulate these properties in two ways:
@@ -119,9 +118,12 @@
 
 import type { Contract } from "../event_loop";
 
+export type Font = "primary" | "secondary" | "keyboard" | "big_numbers";
+export type InputType = "press" | "release" | "short" | "long" | "repeat";
+
 type Properties = { [K: string]: any };
 
-export declare class View<Props extends Properties> {
+export declare class View<Props extends Properties, Child> {
     /**
      * Assign value to property by name
      * @param property Name of the property
@@ -129,9 +131,29 @@ export declare class View<Props extends Properties> {
      * @version Added in JS SDK 0.1
      */
     set<P extends keyof Props>(property: P, value: Props[P]): void;
+    /**
+     * Adds a child to the View
+     * @param child Child to add
+     * @version Added in JS SDK 0.2, extra feature `"gui-widget"`
+     * @version Baseline since JS SDK 1.0
+     */
+    addChild<C extends Child>(child: C): void;
+    /**
+     * Removes all children from the View
+     * @version Added in JS SDK 0.2, extra feature `"gui-widget"`
+     * @version Baseline since JS SDK 1.0
+     */
+    resetChildren(): void;
+    /**
+     * Removes all previous children from the View and assigns new children
+     * @param children The list of children to assign
+     * @version Added in JS SDK 0.2, extra feature `"gui-widget"`
+     * @version Baseline since JS SDK 1.0
+     */
+    setChildren(children: Child[]): void;
 }
 
-export declare class ViewFactory<Props extends Properties, V extends View<Props>> {
+export declare class ViewFactory<Props extends Properties, Child, V extends View<Props, Child>> {
     /**
      * Create view instance with default values, can be changed later with set()
      * @version Added in JS SDK 0.1
@@ -140,9 +162,12 @@ export declare class ViewFactory<Props extends Properties, V extends View<Props>
     /**
      * Create view instance with custom values, can be changed later with set()
      * @param initial Dictionary of property names to values
+     * @param children Optional list of children to add to the view
      * @version Added in JS SDK 0.1
+     * @version Amended in JS SDK 0.2, extra feature `"gui-widget"`
+     * @version Baseline since JS SDK 1.0
      */
-    makeWith(initial: Partial<Props>): V;
+    makeWith(initial: Partial<Props>, children?: Child[]): V;
 }
 
 /**
@@ -163,7 +188,7 @@ declare class ViewDispatcher {
      * View object currently shown
      * @version Added in JS SDK 0.1
      */
-    currentView: View<any>;
+    currentView: View<any, any>;
     /**
      * Sends a number to the custom event handler
      * @param event number to send
@@ -175,7 +200,7 @@ declare class ViewDispatcher {
      * @param assoc View-ViewDispatcher association as returned by `add`
      * @version Added in JS SDK 0.1
      */
-    switchTo(assoc: View<any>): void;
+    switchTo(assoc: View<any, any>): void;
     /**
      * Sends this ViewDispatcher to the front or back, above or below all other
      * GUI viewports

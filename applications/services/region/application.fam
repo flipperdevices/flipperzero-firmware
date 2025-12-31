@@ -6,5 +6,5 @@ App(
     entry_point="region_on_system_start",
     cdefines=["SRV_REGION"],
     requires=["storage"],
-    order=170,
+    order=120,
 )

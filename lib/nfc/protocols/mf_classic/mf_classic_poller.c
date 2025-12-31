@@ -141,6 +141,10 @@ NfcCommand mf_classic_poller_handler_detect_type(MfClassicPoller* instance) {
         // Second-last block in sector 16, which may exist if said sector is not in SL3 mode
         MfClassicError error =
             mf_classic_poller_get_nt(instance, 66, MfClassicKeyTypeA, NULL, false);
+        if(error != MfClassicErrorNone) {
+            // If sector 16 is locked/SL3, try sector 17 as well before falling back
+            error = mf_classic_poller_get_nt(instance, 70, MfClassicKeyTypeA, NULL, false);
+        }
         if(error == MfClassicErrorNone) {
             instance->data->type = MfClassicTypePlus2k;
             instance->state = MfClassicPollerStateStart;
@@ -169,7 +173,7 @@ NfcCommand mf_classic_poller_handler_detect_type(MfClassicPoller* instance) {
 NfcCommand mf_classic_poller_handler_start(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandContinue;
 
-    instance->sectors_total = mf_classic_get_total_sectors_num(instance->data->type);
+    instance->sectors_total = mf_classic_get_scannable_sectors_num(instance->data->type);
     memset(&instance->mode_ctx, 0, sizeof(MfClassicPollerModeContext));
 
     instance->mfc_event.type = MfClassicPollerEventTypeRequestMode;
@@ -1933,7 +1937,8 @@ NfcCommand mf_classic_poller_handler_nested_controller(MfClassicPoller* instance
                         sizeof(MfClassicKey)) :
                     NULL;
         }
-        if((is_weak || is_last_iter_for_hard_key) && dict_attack_ctx->nested_nonce.count > 0) {
+        if((is_weak && (dict_attack_ctx->nested_nonce.count == 1)) ||
+           (is_last_iter_for_hard_key && (dict_attack_ctx->nested_nonce.count == 8))) {
             // Key verify and reuse
             dict_attack_ctx->nested_phase = MfClassicNestedPhaseDictAttackVerify;
             dict_attack_ctx->auth_passed = false;

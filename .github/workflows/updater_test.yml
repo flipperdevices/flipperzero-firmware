@@ -9,8 +9,10 @@ env:
   FBT_GIT_SUBMODULE_SHALLOW: 1
 
 jobs:
-  test_updater_on_bench:
-    runs-on: [self-hosted, FlipperZeroTest ]
+  Run_updater_test:
+    runs-on: [self-hosted, FlipperZeroTest]
+    outputs:
+      timed_out: ${{ steps.check_timeout.outputs.timed_out }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,22 +20,51 @@ jobs:
           fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Flashing target firmware'
+      - name: Flashing target firmware
         id: first_full_flash
-        timeout-minutes: 20
+        timeout-minutes: 5
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testops.py -t=180 await_flipper
           ./fbt flash_usb_full FORCE=1
-          
 
-      - name: 'Validating updater'
+      - name: Validating updater
         id: second_full_flash
-        timeout-minutes: 10
-        if: success()
+        if: steps.first_full_flash.outcome == 'success'
+        timeout-minutes: 4
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testops.py -t=180 await_flipper
           ./fbt flash_usb FORCE=1
           python3 scripts/testops.py -t=180 await_flipper
 
+  Retry_updater_test:
+    needs: Run_updater_test
+    if: failure()
+    runs-on: [self-hosted, FlipperZeroTest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Flashing target firmware
+        timeout-minutes: 4
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testops.py -t=180 await_flipper
+          ./fbt flash_usb_full FORCE=1 DEBUG=1
+
+      - name: Validating updater
+        timeout-minutes: 4
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testops.py -t=180 await_flipper
+          ./fbt flash_usb FORCE=1  DEBUG=1
+          python3 scripts/testops.py -t=180 await_flipper
+
+      - name: Check GDB output
+        if: failure()
+        run: |
+          ./fbt gdb_trace_all FORCE=1
