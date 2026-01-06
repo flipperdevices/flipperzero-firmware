@@ -247,7 +247,7 @@ FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat(void);
  *
  * @param      datetime  The date time to set
  */
-void furi_hal_rtc_set_datetime(DateTime* datetime);
+void furi_hal_rtc_set_datetime(const DateTime* datetime);
 
 /** Get RTC Date Time
  *

@@ -392,7 +392,7 @@ FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat(void) {
     return data->locale_dateformat;
 }
 
-void furi_hal_rtc_set_datetime(DateTime* datetime) {
+void furi_hal_rtc_set_datetime(const DateTime* datetime) {
     furi_check(!FURI_IS_IRQ_MODE());
     furi_check(datetime);
 
