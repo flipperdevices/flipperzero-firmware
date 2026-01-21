@@ -152,7 +152,7 @@ static void widget_element_text_scroll_draw(Canvas* canvas, WidgetElement* eleme
             }
             canvas_draw_str_aligned(
                 canvas, x, y, line->horizontal, AlignTop, furi_string_get_cstr(line->text));
-            y += params->leading_default;
+            y += params->leading_default - 1;
         }
         // Draw scroll bar
         if(model->scroll_pos_total > 1) {
