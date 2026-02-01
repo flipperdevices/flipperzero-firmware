@@ -63,6 +63,10 @@ static RpcSystemCallbacks rpc_systems[] = {
         .alloc = rpc_desktop_alloc,
         .free = rpc_desktop_free,
     },
+    {
+        .alloc = rpc_system_network_alloc,
+        .free = rpc_system_network_free,
+    },
 };
 
 struct RpcSession {

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,87.1,,
+Version,+,87.3,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -39,6 +39,7 @@ Header,+,applications/services/notification/notification.h,,
 Header,+,applications/services/notification/notification_messages.h,,
 Header,+,applications/services/power/power_service/power.h,,
 Header,+,applications/services/rpc/rpc_app.h,,
+Header,+,applications/services/rpc/rpc_network.h,,
 Header,+,applications/services/storage/storage.h,,
 Header,+,lib/bit_lib/bit_lib.h,,
 Header,+,lib/ble_profile/extra_profiles/hid_profile.h,,
@@ -2472,6 +2473,11 @@ Function,-,rintl,long double,long double
 Function,-,round,double,double
 Function,+,roundf,float,float
 Function,-,roundl,long double,long double
+Function,+,rpc_network_close,void,int32_t
+Function,+,rpc_network_connect,int32_t,"const char*, uint16_t, _Bool, uint32_t, char*, size_t"
+Function,+,rpc_network_is_available,_Bool,
+Function,+,rpc_network_receive,int32_t,"int32_t, uint8_t*, size_t, uint32_t"
+Function,+,rpc_network_send,int32_t,"int32_t, const uint8_t*, size_t"
 Function,+,rpc_session_close,void,RpcSession*
 Function,+,rpc_session_feed,size_t,"RpcSession*, const uint8_t*, size_t, uint32_t"
 Function,+,rpc_session_get_available_size,size_t,RpcSession*
@@ -2482,6 +2488,11 @@ Function,+,rpc_session_set_close_callback,void,"RpcSession*, RpcSessionClosedCal
 Function,+,rpc_session_set_context,void,"RpcSession*, void*"
 Function,+,rpc_session_set_send_bytes_callback,void,"RpcSession*, RpcSendBytesCallback"
 Function,+,rpc_session_set_terminated_callback,void,"RpcSession*, RpcSessionTerminatedCallback"
+Function,+,rpc_network_close,void,int32_t
+Function,+,rpc_network_connect,int32_t,"const char*, uint16_t, _Bool, uint32_t, char*, size_t"
+Function,+,rpc_network_is_available,_Bool,
+Function,+,rpc_network_receive,int32_t,"int32_t, uint8_t*, size_t, uint32_t"
+Function,+,rpc_network_send,int32_t,"int32_t, const uint8_t*, size_t"
 Function,+,rpc_system_app_confirm,void,"RpcAppSystem*, _Bool"
 Function,+,rpc_system_app_error_reset,void,RpcAppSystem*
 Function,+,rpc_system_app_exchange_data,void,"RpcAppSystem*, const uint8_t*, size_t"

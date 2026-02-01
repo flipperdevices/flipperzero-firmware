@@ -5,5 +5,5 @@ App(
     cdefines=["SRV_RPC"],
     requires=["cli"],
     order=10,
-    sdk_headers=["rpc_app.h"],
+    sdk_headers=["rpc_app.h", "rpc_network.h"],
 )
