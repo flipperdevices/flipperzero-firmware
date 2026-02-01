@@ -91,7 +91,7 @@ static void rpc_network_connection_free(NetworkConnection* conn) {
     conn->last_error = PB_Network_ErrorCode_NONE;
 }
 
-// Handle connect_response from Android
+// Handle connect_response from host
 static void rpc_network_connect_response_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_network_connect_response_tag);
@@ -126,7 +126,7 @@ static void rpc_network_connect_response_process(const PB_Main* request, void* c
     }
 }
 
-// Handle send_response from Android
+// Handle send_response from host
 static void rpc_network_send_response_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_network_send_response_tag);
@@ -150,7 +150,7 @@ static void rpc_network_send_response_process(const PB_Main* request, void* cont
     }
 }
 
-// Handle receive_data from Android (unsolicited data push)
+// Handle receive_data from host (unsolicited data push)
 static void rpc_network_receive_data_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_network_receive_data_tag);
@@ -185,7 +185,7 @@ static void rpc_network_receive_data_process(const PB_Main* request, void* conte
     }
 }
 
-// Handle close_response from Android
+// Handle close_response from host
 static void rpc_network_close_response_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_network_close_response_tag);
@@ -214,7 +214,7 @@ static void rpc_network_close_response_process(const PB_Main* request, void* con
     }
 }
 
-// Handle state_changed from Android (connection state notifications)
+// Handle state_changed from host (connection state notifications)
 static void rpc_network_state_changed_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_network_state_changed_tag);
@@ -531,7 +531,7 @@ void* rpc_system_network_alloc(RpcSession* session) {
         system->connections[i].receive_buffer_size = 0;
     }
 
-    // Register handlers for RESPONSES from Android
+    // Register handlers for responses from host
     RpcHandler rpc_handler = {
         .message_handler = NULL,
         .decode_submessage = NULL,

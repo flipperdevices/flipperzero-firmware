@@ -12,7 +12,7 @@ extern "C" {
  * @brief Connect to a remote host via the network proxy.
  *
  * Requires an active RPC session (Flipper app connected via BLE).
- * The Android app handles DNS resolution and socket management.
+ * The host app handles DNS resolution and socket management.
  *
  * @param host          Hostname or IP address (max 255 chars)
  * @param port          Port number (1-65535)
