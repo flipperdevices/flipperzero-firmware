@@ -261,7 +261,7 @@ static void network_test_connect_http(NetworkTestApp* app) {
     network_test_update_status(app);
 
     // Wait for response
-    uint8_t recv_buf[256];
+    uint8_t recv_buf[128];
     int32_t received = rpc_network_receive(conn_id, recv_buf, sizeof(recv_buf) - 1, 15000);
 
     if(received > 0) {
