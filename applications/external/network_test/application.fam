@@ -1,8 +1,0 @@
-App(
-    appid="network_test",
-    name="Network Test",
-    apptype=FlipperAppType.EXTERNAL,
-    entry_point="network_test_app",
-    requires=["gui"],
-    fap_category="Tools",
-)
