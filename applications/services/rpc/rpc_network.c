@@ -4,6 +4,7 @@
 #include <m-dict.h>
 
 #include "rpc_i.h"
+#include "rpc_network.h"
 
 #define TAG "RpcNetwork"
 
@@ -49,7 +50,8 @@ typedef struct {
 
 static RpcNetworkSystem* rpc_network_system = NULL;
 
-static NetworkConnection* rpc_network_find_connection(RpcNetworkSystem* system, uint32_t connection_id) {
+static NetworkConnection*
+    rpc_network_find_connection(RpcNetworkSystem* system, uint32_t connection_id) {
     for(size_t i = 0; i < RPC_NETWORK_MAX_CONNECTIONS; i++) {
         if(system->connections[i].connection_id == connection_id &&
            system->connections[i].state != PB_Network_ConnectionState_DISCONNECTED) {
@@ -173,8 +175,7 @@ static void rpc_network_receive_data_process(const PB_Main* request, void* conte
             conn->receive_buffer = realloc(conn->receive_buffer, new_size);
             conn->receive_buffer_size = new_size;
         }
-        memcpy(
-            conn->receive_buffer + conn->receive_data_len, data->data->bytes, data->data->size);
+        memcpy(conn->receive_buffer + conn->receive_data_len, data->data->bytes, data->data->size);
         conn->receive_data_len = new_size;
         conn->receive_data_ready = true;
 
@@ -252,7 +253,7 @@ static void rpc_network_state_changed_process(const PB_Main* request, void* cont
 __attribute__((used)) int32_t rpc_network_connect(
     const char* host,
     uint16_t port,
-    bool is_udp,
+    RpcNetworkProtocol protocol,
     uint32_t timeout_ms,
     char* resolved_ip_out,
     size_t resolved_ip_size) {
@@ -274,7 +275,8 @@ __attribute__((used)) int32_t rpc_network_connect(
     uint32_t connection_id = ++system->next_connection_id;
     conn->connection_id = connection_id;
     conn->state = PB_Network_ConnectionState_CONNECTING;
-    conn->protocol = is_udp ? PB_Network_Protocol_UDP : PB_Network_Protocol_TCP;
+    conn->protocol = (protocol == RpcNetworkProtocolUdp) ? PB_Network_Protocol_UDP :
+                                                           PB_Network_Protocol_TCP;
     conn->host = strdup(host);
     conn->port = port;
     conn->receive_buffer = malloc(512);
@@ -286,7 +288,7 @@ __attribute__((used)) int32_t rpc_network_connect(
         TAG,
         "Connecting %lu: %s to %s:%u",
         (unsigned long)connection_id,
-        is_udp ? "UDP" : "TCP",
+        (protocol == RpcNetworkProtocolUdp) ? "UDP" : "TCP",
         host,
         port);
 
@@ -351,7 +353,8 @@ __attribute__((used)) int32_t rpc_network_connect(
     return -1;
 }
 
-__attribute__((used)) int32_t rpc_network_send(int32_t connection_id, const uint8_t* data, size_t size) {
+__attribute__((used)) int32_t
+    rpc_network_send(int32_t connection_id, const uint8_t* data, size_t size) {
     if(!rpc_network_system || !rpc_network_system->session) {
         return -1;
     }
@@ -376,8 +379,7 @@ __attribute__((used)) int32_t rpc_network_send(int32_t connection_id, const uint
         request.which_content = PB_Main_network_send_request_tag;
         request.has_next = (total_sent + chunk_size < size);
         request.content.network_send_request.connection_id = connection_id;
-        request.content.network_send_request.data =
-            malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(chunk_size));
+        request.content.network_send_request.data = malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(chunk_size));
         request.content.network_send_request.data->size = chunk_size;
         memcpy(request.content.network_send_request.data->bytes, data + total_sent, chunk_size);
 
@@ -411,7 +413,11 @@ __attribute__((used)) int32_t rpc_network_send(int32_t connection_id, const uint
     return (int32_t)total_sent;
 }
 
-__attribute__((used)) int32_t rpc_network_receive(int32_t connection_id, uint8_t* buffer, size_t buffer_size, uint32_t timeout_ms) {
+__attribute__((used)) int32_t rpc_network_receive(
+    int32_t connection_id,
+    uint8_t* buffer,
+    size_t buffer_size,
+    uint32_t timeout_ms) {
     if(!rpc_network_system || !rpc_network_system->session) {
         return -1;
     }

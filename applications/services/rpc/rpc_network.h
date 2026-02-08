@@ -9,6 +9,14 @@ extern "C" {
 #endif
 
 /**
+ * @brief Network protocol type for connections.
+ */
+typedef enum {
+    RpcNetworkProtocolTcp = 0, /**< TCP protocol */
+    RpcNetworkProtocolUdp = 1, /**< UDP protocol */
+} RpcNetworkProtocol;
+
+/**
  * @brief Connect to a remote host via the network proxy.
  *
  * Requires an active RPC session (Flipper app connected via BLE).
@@ -16,7 +24,7 @@ extern "C" {
  *
  * @param host          Hostname or IP address (max 255 chars)
  * @param port          Port number (1-65535)
- * @param is_udp        true for UDP, false for TCP
+ * @param protocol      Protocol to use (RpcNetworkProtocolTcp or RpcNetworkProtocolUdp)
  * @param timeout_ms    Connection timeout in milliseconds (0 = default 30s)
  * @param resolved_ip_out   Buffer to receive resolved IP (can be NULL)
  * @param resolved_ip_size  Size of resolved_ip_out buffer
@@ -25,7 +33,7 @@ extern "C" {
 int32_t rpc_network_connect(
     const char* host,
     uint16_t port,
-    bool is_udp,
+    RpcNetworkProtocol protocol,
     uint32_t timeout_ms,
     char* resolved_ip_out,
     size_t resolved_ip_size);

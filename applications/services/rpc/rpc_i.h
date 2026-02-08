@@ -46,28 +46,6 @@ void rpc_desktop_free(void* ctx);
 void* rpc_system_network_alloc(RpcSession* session);
 void rpc_system_network_free(void* ctx);
 
-// Public Network API for Flipper apps
-// Returns connection_id on success, -1 on failure
-int32_t rpc_network_connect(
-    const char* host,
-    uint16_t port,
-    bool is_udp,
-    uint32_t timeout_ms,
-    char* resolved_ip_out,
-    size_t resolved_ip_size);
-
-// Returns bytes sent on success, -1 on failure
-int32_t rpc_network_send(int32_t connection_id, const uint8_t* data, size_t size);
-
-// Returns bytes received on success, 0 on timeout, -1 on failure/disconnect
-int32_t rpc_network_receive(int32_t connection_id, uint8_t* buffer, size_t buffer_size, uint32_t timeout_ms);
-
-// Close a connection
-void rpc_network_close(int32_t connection_id);
-
-// Check if network is available (RPC session active)
-bool rpc_network_is_available(void);
-
 void rpc_debug_print_message(const PB_Main* message);
 void rpc_debug_print_data(const char* prefix, uint8_t* buffer, size_t size);
 

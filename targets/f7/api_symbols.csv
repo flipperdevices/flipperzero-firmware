@@ -3160,7 +3160,7 @@ Function,-,round,double,double
 Function,+,roundf,float,float
 Function,-,roundl,long double,long double
 Function,+,rpc_network_close,void,int32_t
-Function,+,rpc_network_connect,int32_t,"const char*, uint16_t, _Bool, uint32_t, char*, size_t"
+Function,+,rpc_network_connect,int32_t,"const char*, uint16_t, RpcNetworkProtocol, uint32_t, char*, size_t"
 Function,+,rpc_network_is_available,_Bool,
 Function,+,rpc_network_receive,int32_t,"int32_t, uint8_t*, size_t, uint32_t"
 Function,+,rpc_network_send,int32_t,"int32_t, const uint8_t*, size_t"

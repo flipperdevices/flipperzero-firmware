@@ -137,14 +137,16 @@ static void example_network_udp_ntp(ExampleNetworkApp* app) {
 
     if(!rpc_network_is_available()) {
         app->state = ExampleNetworkStateError;
-        snprintf(app->status_text, sizeof(app->status_text), "No RPC session\nConnect phone first");
+        snprintf(
+            app->status_text, sizeof(app->status_text), "No RPC session\nConnect phone first");
         example_network_update_status(app);
         return;
     }
 
     // Connect via UDP to NTP server
     char resolved_ip[64] = {0};
-    int32_t conn_id = rpc_network_connect("pool.ntp.org", 123, true, 10000, resolved_ip, sizeof(resolved_ip));
+    int32_t conn_id = rpc_network_connect(
+        "pool.ntp.org", 123, RpcNetworkProtocolUdp, 10000, resolved_ip, sizeof(resolved_ip));
 
     if(conn_id < 0) {
         app->state = ExampleNetworkStateError;
@@ -191,9 +193,8 @@ static void example_network_udp_ntp(ExampleNetworkApp* app) {
         // Extract transmit timestamp (bytes 40-43, big-endian)
         // This is the 10th 32-bit word (0-indexed)
         uint32_t ntp_time = ((uint32_t)ntp_response[40] << 24) |
-                           ((uint32_t)ntp_response[41] << 16) |
-                           ((uint32_t)ntp_response[42] << 8) |
-                           ((uint32_t)ntp_response[43]);
+                            ((uint32_t)ntp_response[41] << 16) |
+                            ((uint32_t)ntp_response[42] << 8) | ((uint32_t)ntp_response[43]);
 
         // Convert NTP timestamp (since 1900) to Unix timestamp (since 1970)
         // NTP epoch offset: 2208988800 seconds
@@ -203,15 +204,21 @@ static void example_network_udp_ntp(ExampleNetworkApp* app) {
         snprintf(app->status_text, sizeof(app->status_text), "NTP time received!");
 
         // Display Unix timestamp (user can convert to readable time)
-        snprintf(app->response_text, sizeof(app->response_text), "Unix: %lu", (unsigned long)unix_time);
+        snprintf(
+            app->response_text, sizeof(app->response_text), "Unix: %lu", (unsigned long)unix_time);
 
-        FURI_LOG_I(TAG, "NTP time: %lu (unix: %lu)", (unsigned long)ntp_time, (unsigned long)unix_time);
+        FURI_LOG_I(
+            TAG, "NTP time: %lu (unix: %lu)", (unsigned long)ntp_time, (unsigned long)unix_time);
     } else if(received == 0) {
         app->state = ExampleNetworkStateError;
         snprintf(app->status_text, sizeof(app->status_text), "Timeout - no response");
     } else if(received > 0) {
         app->state = ExampleNetworkStateError;
-        snprintf(app->status_text, sizeof(app->status_text), "Short response: %ld bytes", (long)received);
+        snprintf(
+            app->status_text,
+            sizeof(app->status_text),
+            "Short response: %ld bytes",
+            (long)received);
     } else {
         app->state = ExampleNetworkStateError;
         snprintf(app->status_text, sizeof(app->status_text), "Receive error");
@@ -232,13 +239,15 @@ static void example_network_tcp_echo(ExampleNetworkApp* app) {
 
     if(!rpc_network_is_available()) {
         app->state = ExampleNetworkStateError;
-        snprintf(app->status_text, sizeof(app->status_text), "No RPC session\nConnect phone first");
+        snprintf(
+            app->status_text, sizeof(app->status_text), "No RPC session\nConnect phone first");
         example_network_update_status(app);
         return;
     }
 
     char resolved_ip[64] = {0};
-    int32_t conn_id = rpc_network_connect("tcpbin.com", 4242, false, 15000, resolved_ip, sizeof(resolved_ip));
+    int32_t conn_id = rpc_network_connect(
+        "tcpbin.com", 4242, RpcNetworkProtocolTcp, 15000, resolved_ip, sizeof(resolved_ip));
 
     if(conn_id < 0) {
         app->state = ExampleNetworkStateError;
@@ -282,7 +291,8 @@ static void example_network_tcp_echo(ExampleNetworkApp* app) {
     if(received > 0) {
         recv_buf[received] = '\0';
         app->state = ExampleNetworkStateSuccess;
-        snprintf(app->status_text, sizeof(app->status_text), "Received %ld bytes:", (long)received);
+        snprintf(
+            app->status_text, sizeof(app->status_text), "Received %ld bytes:", (long)received);
         strncpy(app->response_text, (char*)recv_buf, 30);
         app->response_text[30] = '\0';
         FURI_LOG_I(TAG, "Echo response: %s", recv_buf);
@@ -309,13 +319,15 @@ static void example_network_tcp_http(ExampleNetworkApp* app) {
 
     if(!rpc_network_is_available()) {
         app->state = ExampleNetworkStateError;
-        snprintf(app->status_text, sizeof(app->status_text), "No RPC session\nConnect phone first");
+        snprintf(
+            app->status_text, sizeof(app->status_text), "No RPC session\nConnect phone first");
         example_network_update_status(app);
         return;
     }
 
     char resolved_ip[64] = {0};
-    int32_t conn_id = rpc_network_connect("example.com", 80, false, 15000, resolved_ip, sizeof(resolved_ip));
+    int32_t conn_id = rpc_network_connect(
+        "example.com", 80, RpcNetworkProtocolTcp, 15000, resolved_ip, sizeof(resolved_ip));
 
     if(conn_id < 0) {
         app->state = ExampleNetworkStateError;
@@ -358,11 +370,15 @@ static void example_network_tcp_http(ExampleNetworkApp* app) {
         if(strncmp((char*)recv_buf, "HTTP/", 5) == 0) {
             char* newline = strchr((char*)recv_buf, '\r');
             if(newline) *newline = '\0';
-            snprintf(app->status_text, sizeof(app->status_text), "Received %ld bytes", (long)received);
+            snprintf(
+                app->status_text, sizeof(app->status_text), "Received %ld bytes", (long)received);
             strncpy(app->response_text, (char*)recv_buf, sizeof(app->response_text) - 1);
         } else {
             snprintf(
-                app->status_text, sizeof(app->status_text), "Received %ld bytes\n(not HTTP)", (long)received);
+                app->status_text,
+                sizeof(app->status_text),
+                "Received %ld bytes\n(not HTTP)",
+                (long)received);
         }
         FURI_LOG_I(TAG, "HTTP response: %.100s", recv_buf);
     } else if(received == 0) {
@@ -404,21 +420,40 @@ static ExampleNetworkApp* example_network_app_alloc(void) {
 
     app->submenu = submenu_alloc();
     submenu_add_item(
-        app->submenu, "Check Status", ExampleNetworkMenuCheckStatus, example_network_submenu_callback, app);
+        app->submenu,
+        "Check Status",
+        ExampleNetworkMenuCheckStatus,
+        example_network_submenu_callback,
+        app);
     submenu_add_item(
-        app->submenu, "UDP Test (NTP time)", ExampleNetworkMenuUdpNtp, example_network_submenu_callback, app);
+        app->submenu,
+        "UDP Test (NTP time)",
+        ExampleNetworkMenuUdpNtp,
+        example_network_submenu_callback,
+        app);
     submenu_add_item(
-        app->submenu, "TCP Echo (tcpbin)", ExampleNetworkMenuTcpEcho, example_network_submenu_callback, app);
+        app->submenu,
+        "TCP Echo (tcpbin)",
+        ExampleNetworkMenuTcpEcho,
+        example_network_submenu_callback,
+        app);
     submenu_add_item(
-        app->submenu, "TCP HTTP (example.com)", ExampleNetworkMenuTcpHttp, example_network_submenu_callback, app);
+        app->submenu,
+        "TCP HTTP (example.com)",
+        ExampleNetworkMenuTcpHttp,
+        example_network_submenu_callback,
+        app);
 
     app->widget = widget_alloc();
 
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-    view_dispatcher_add_view(app->view_dispatcher, ExampleNetworkViewMenu, submenu_get_view(app->submenu));
-    view_dispatcher_add_view(app->view_dispatcher, ExampleNetworkViewStatus, widget_get_view(app->widget));
-    view_dispatcher_set_navigation_event_callback(app->view_dispatcher, example_network_navigation_callback);
+    view_dispatcher_add_view(
+        app->view_dispatcher, ExampleNetworkViewMenu, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(
+        app->view_dispatcher, ExampleNetworkViewStatus, widget_get_view(app->widget));
+    view_dispatcher_set_navigation_event_callback(
+        app->view_dispatcher, example_network_navigation_callback);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
 
     return app;
