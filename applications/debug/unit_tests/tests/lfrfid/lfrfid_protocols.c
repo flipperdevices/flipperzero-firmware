@@ -526,6 +526,68 @@ MU_TEST(test_lfrfid_protocol_fdxb_read_simple) {
     protocol_dict_free(dict);
 }
 
+// Indala224: 224-bit PSK1 frame, no known FC/CN descramble,
+// test data uses the Proxmark3-compatible preamble (0x80000000...)
+#define INDALA224_TEST_DATA_SIZE 28
+#define INDALA224_TEST_DATA \
+    { \
+        0x80, 0x00, 0x00, 0x01, 0xB2, 0x35, 0x23, 0xA6, 0xC2, 0xE3, 0x1E, 0xBA, 0x3C, 0xBE, \
+        0xE4, 0xAF, 0xB3, 0xC6, 0xAD, 0x1F, 0xCF, 0x64, 0x93, 0x93, 0x92, 0x8C, 0x14, 0xE5 \
+    }
+
+MU_TEST(test_lfrfid_protocol_indala224_roundtrip) {
+    ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
+    mu_assert_int_eq(
+        INDALA224_TEST_DATA_SIZE, protocol_dict_get_data_size(dict, LFRFIDProtocolIndala224));
+    mu_assert_string_eq("Indala224", protocol_dict_get_name(dict, LFRFIDProtocolIndala224));
+    mu_assert_string_eq(
+        "Motorola", protocol_dict_get_manufacturer(dict, LFRFIDProtocolIndala224));
+
+    const uint8_t data[INDALA224_TEST_DATA_SIZE] = INDALA224_TEST_DATA;
+
+    // Encode: set data and start encoder
+    protocol_dict_set_data(dict, LFRFIDProtocolIndala224, data, INDALA224_TEST_DATA_SIZE);
+    mu_check(protocol_dict_encoder_start(dict, LFRFIDProtocolIndala224));
+
+    // Decode: feed encoder output through PulseGlue into decoder
+    protocol_dict_decoders_start(dict);
+    PulseGlue* pulse_glue = pulse_glue_alloc();
+    ProtocolId protocol = PROTOCOL_NO;
+
+    // 224 bits * 16 pulses/bit * 2 (hi+lo) = 7168 yields per frame
+    // Need ~6 frames for validate_count=6, plus margin
+    const size_t max_yields = 224 * 16 * 2 * 10;
+    for(size_t i = 0; i < max_yields; i++) {
+        LevelDuration level_duration =
+            protocol_dict_encoder_yield(dict, LFRFIDProtocolIndala224);
+        bool level = level_duration_get_level(level_duration);
+        uint32_t duration = level_duration_get_duration(level_duration);
+
+        bool pulse_pop =
+            pulse_glue_push(pulse_glue, level, duration * LF_RFID_READ_TIMING_MULTIPLIER);
+
+        if(pulse_pop) {
+            uint32_t length, period;
+            pulse_glue_pop(pulse_glue, &length, &period);
+
+            protocol = protocol_dict_decoders_feed(dict, true, period);
+            if(protocol != PROTOCOL_NO) break;
+
+            protocol = protocol_dict_decoders_feed(dict, false, length - period);
+            if(protocol != PROTOCOL_NO) break;
+        }
+    }
+
+    pulse_glue_free(pulse_glue);
+
+    mu_assert_int_eq(LFRFIDProtocolIndala224, protocol);
+    uint8_t received_data[INDALA224_TEST_DATA_SIZE] = {0};
+    protocol_dict_get_data(dict, protocol, received_data, INDALA224_TEST_DATA_SIZE);
+    mu_assert_mem_eq(data, received_data, INDALA224_TEST_DATA_SIZE);
+
+    protocol_dict_free(dict);
+}
+
 MU_TEST_SUITE(test_lfrfid_protocols_suite) {
     MU_RUN_TEST(test_lfrfid_protocol_em_read_simple);
     MU_RUN_TEST(test_lfrfid_protocol_em_emulate_simple);
@@ -537,6 +599,8 @@ MU_TEST_SUITE(test_lfrfid_protocols_suite) {
     MU_RUN_TEST(test_lfrfid_protocol_ioprox_xsf_emulate_simple);
 
     MU_RUN_TEST(test_lfrfid_protocol_inadala26_emulate_simple);
+
+    MU_RUN_TEST(test_lfrfid_protocol_indala224_roundtrip);
 
     MU_RUN_TEST(test_lfrfid_protocol_fdxb_read_simple);
     MU_RUN_TEST(test_lfrfid_protocol_fdxb_emulate_simple);
