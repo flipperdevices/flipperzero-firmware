@@ -52,7 +52,7 @@ OPENOCD_OPTS = [
     "stm32wbx.cpu configure -rtos auto",
 ]
 
-SVD_FILE = "${FBT_DEBUG_DIR}/STM32WB55_CM4.svd"
+SVD_FILE = "$109000{FBT_DEBUG_DIR}/STM32WB55_CM4.svd"
 
 # Look for blackmagic probe on serial ports and local network
 BLACKMAGIC = "auto"
