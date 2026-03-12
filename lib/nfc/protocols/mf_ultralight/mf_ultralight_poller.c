@@ -305,22 +305,34 @@ static NfcCommand mf_ultralight_poller_handler_get_feature_set(MfUltralightPolle
 }
 
 static NfcCommand mf_ultralight_poller_handler_read_signature(MfUltralightPoller* instance) {
-    MfUltralightPollerState next_state = MfUltralightPollerStateAuth;
+    bool signature_read_ok = false;
+
     if(mf_ultralight_support_feature(
            instance->feature_set, MfUltralightFeatureSupportReadSignature)) {
         FURI_LOG_D(TAG, "Reading signature");
         instance->error =
             mf_ultralight_poller_read_signature(instance, &instance->data->signature);
-        if(instance->error != MfUltralightErrorNone) {
-            FURI_LOG_D(TAG, "Read signature failed");
-            next_state = MfUltralightPollerStateReadFailed;
+        if(instance->error == MfUltralightErrorNone) {
+            signature_read_ok = true;
+        } else {
+            FURI_LOG_D(TAG, "Read signature failed, continuing without signature");
+            memset(
+                instance->data->signature.data,
+                0,
+                sizeof(instance->data->signature.data));
         }
     } else {
         FURI_LOG_D(TAG, "Skip reading signature");
-        if(mf_ultralight_support_feature(
-               instance->feature_set, MfUltralightFeatureSupportAuthenticate)) {
-            next_state = MfUltralightPollerStateAuthMfulC;
-        }
+    }
+
+    MfUltralightPollerState next_state;
+    if(signature_read_ok) {
+        next_state = MfUltralightPollerStateAuth;
+    } else if(mf_ultralight_support_feature(
+                  instance->feature_set, MfUltralightFeatureSupportAuthenticate)) {
+        next_state = MfUltralightPollerStateAuthMfulC;
+    } else {
+        next_state = MfUltralightPollerStateAuth;
     }
     instance->state = next_state;
 
