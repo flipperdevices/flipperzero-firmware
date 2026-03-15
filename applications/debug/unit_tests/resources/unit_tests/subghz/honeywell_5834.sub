@@ -1,0 +1,7 @@
+Filetype: Flipper SubGhz Key File
+Version: 1
+Frequency: 345000000
+Preset: FuriHalSubGhzPresetOok650Async
+Protocol: Honeywell5834
+Bit: 48
+Key: 00 00 AB CD E0 00 04 00

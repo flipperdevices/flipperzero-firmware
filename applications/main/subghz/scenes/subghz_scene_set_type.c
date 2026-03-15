@@ -109,6 +109,12 @@ void subghz_scene_set_type_on_enter(void* context) {
         SubmenuIndexSecPlus_v2_390_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Honeywell5834_345",
+        SubmenuIndexHoneywell5834_345,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
 
     submenu_set_selected_item(
         subghz->submenu, scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneSetType));
@@ -212,6 +218,16 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
             generated_protocol = subghz_txrx_gen_secplus_v2_protocol(
                 subghz->txrx, "AM650", 390000000, key, 0x68, 0xE500000);
             break;
+        case SubmenuIndexHoneywell5834_345: {
+            /* 20-bit random serial in bits [47:28], default Arm Away state */
+            uint64_t serial_20 = (uint64_t)(key & 0xFFFFF) << 28;
+            uint64_t state_bits = (uint64_t)0x40 << 4; /* Arm Away in state byte */
+            uint64_t frame = serial_20 | state_bits;
+            /* Set parity: bit 0 = popcount parity of bits [47:1] */
+            frame |= subghz_protocol_blocks_get_parity(frame >> 1, 47);
+            generated_protocol = subghz_txrx_gen_data_protocol(
+                subghz->txrx, "AM650", 345000000, SUBGHZ_PROTOCOL_HONEYWELL_5834_NAME, frame, 48);
+        } break;
         default:
             return false;
             break;

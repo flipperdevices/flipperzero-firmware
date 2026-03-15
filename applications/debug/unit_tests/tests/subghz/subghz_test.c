@@ -585,6 +585,14 @@ MU_TEST(subghz_decoder_honeywell_wdb_test) {
         "Test decoder " SUBGHZ_PROTOCOL_HONEYWELL_WDB_NAME " error\r\n");
 }
 
+MU_TEST(subghz_decoder_honeywell_5834_test) {
+    mu_assert(
+        subghz_decoder_test(
+            EXT_PATH("unit_tests/subghz/honeywell_5834_raw.sub"),
+            SUBGHZ_PROTOCOL_HONEYWELL_5834_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_HONEYWELL_5834_NAME " error\r\n");
+}
+
 MU_TEST(subghz_decoder_magellan_test) {
     mu_assert(
         subghz_decoder_test(
@@ -837,6 +845,12 @@ MU_TEST(subghz_encoder_honeywell_wdb_test) {
         "Test encoder " SUBGHZ_PROTOCOL_HONEYWELL_WDB_NAME " error\r\n");
 }
 
+MU_TEST(subghz_encoder_honeywell_5834_test) {
+    mu_assert(
+        subghz_encoder_test(EXT_PATH("unit_tests/subghz/honeywell_5834.sub")),
+        "Test encoder " SUBGHZ_PROTOCOL_HONEYWELL_5834_NAME " error\r\n");
+}
+
 MU_TEST(subghz_encoder_magellan_test) {
     mu_assert(
         subghz_encoder_test(EXT_PATH("unit_tests/subghz/magellan.sub")),
@@ -973,6 +987,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_doitrand_test);
     MU_RUN_TEST(subghz_decoder_phoenix_v2_test);
     MU_RUN_TEST(subghz_decoder_honeywell_wdb_test);
+    MU_RUN_TEST(subghz_decoder_honeywell_5834_test);
     MU_RUN_TEST(subghz_decoder_magellan_test);
     MU_RUN_TEST(subghz_decoder_intertechno_v3_test);
     MU_RUN_TEST(subghz_decoder_clemsa_test);
@@ -1012,6 +1027,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_encoder_doitrand_test);
     MU_RUN_TEST(subghz_encoder_phoenix_v2_test);
     MU_RUN_TEST(subghz_encoder_honeywell_wdb_test);
+    MU_RUN_TEST(subghz_encoder_honeywell_5834_test);
     MU_RUN_TEST(subghz_encoder_magellan_test);
     MU_RUN_TEST(subghz_encoder_intertechno_v3_test);
     MU_RUN_TEST(subghz_encoder_clemsa_test);

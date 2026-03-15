@@ -40,6 +40,10 @@ F:54ceacb8c156f9534fc7ee0a0911f4da:11380:subghz/holtek_ht12x_raw.sub
 F:4a9567c1543cf3e7bb5350b635d9076f:31238:subghz/holtek_raw.sub
 F:ca86c0d78364d704ff62b0698093d396:162:subghz/honeywell_wdb.sub
 F:f606548c935adc8d8bc804326ef67543:38415:subghz/honeywell_wdb_raw.sub
+F:14edaac76a69457b795c5c391cf581b1:12281:subghz/honeywell_5834_arm_away.sub
+F:a958447531d0ea1a1f6ee3ccb3501842:10041:subghz/honeywell_5834_disarm.sub
+F:d8f736cc1c020e9c062bb8ced371dcba:10239:subghz/honeywell_5834_panic.sub
+F:f406deee6ecb957cb40a8edcad58f842:13442:subghz/honeywell_5834_stay.sub
 F:20bba4b0aec006ced7e82513f9459e31:15532:subghz/hormann_hsm_raw.sub
 F:3392f2db6aa7777e937db619b86203bb:10637:subghz/ido_117_111_raw.sub
 F:cc5c7968527cc233ef11a08986e31bf2:167:subghz/intertechno_v3.sub
