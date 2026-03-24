@@ -24,6 +24,9 @@ struct SubGhzTxRxWorker {
     const SubGhzDevice* device;
     const GpioPin* device_data_gpio;
 
+    FuriHalSubGhzPreset preset;
+    uint8_t* preset_data;
+
     SubGhzTxRxWorkerCallbackHaveRead callback_have_read;
     void* context_have_read;
 };
@@ -61,6 +64,15 @@ void subghz_tx_rx_worker_set_callback_have_read(
     furi_check(context);
     instance->callback_have_read = callback;
     instance->context_have_read = context;
+}
+
+void subghz_tx_rx_worker_set_preset(
+    SubGhzTxRxWorker* instance,
+    FuriHalSubGhzPreset preset,
+    uint8_t* preset_data) {
+    furi_check(instance);
+    instance->preset = preset;
+    instance->preset_data = preset_data;
 }
 
 bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* size) {
@@ -139,7 +151,7 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
     instance->device_data_gpio = subghz_devices_get_data_gpio(instance->device);
     subghz_devices_reset(instance->device);
     subghz_devices_idle(instance->device);
-    subghz_devices_load_preset(instance->device, FuriHalSubGhzPresetGFSK9_99KbAsync, NULL);
+    subghz_devices_load_preset(instance->device, instance->preset, instance->preset_data);
 
     furi_hal_gpio_init(instance->device_data_gpio, GpioModeInput, GpioPullNo, GpioSpeedLow);
 

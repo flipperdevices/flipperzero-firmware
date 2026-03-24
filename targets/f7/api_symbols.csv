@@ -3625,6 +3625,7 @@ Function,+,subghz_tx_rx_worker_free,void,SubGhzTxRxWorker*
 Function,+,subghz_tx_rx_worker_is_running,_Bool,SubGhzTxRxWorker*
 Function,+,subghz_tx_rx_worker_read,size_t,"SubGhzTxRxWorker*, uint8_t*, size_t"
 Function,+,subghz_tx_rx_worker_set_callback_have_read,void,"SubGhzTxRxWorker*, SubGhzTxRxWorkerCallbackHaveRead, void*"
+Function,+,subghz_tx_rx_worker_set_preset,void,"SubGhzTxRxWorker*, FuriHalSubGhzPreset, uint8_t*"
 Function,+,subghz_tx_rx_worker_start,_Bool,"SubGhzTxRxWorker*, const SubGhzDevice*, uint32_t"
 Function,+,subghz_tx_rx_worker_stop,void,SubGhzTxRxWorker*
 Function,+,subghz_tx_rx_worker_write,_Bool,"SubGhzTxRxWorker*, uint8_t*, size_t"
