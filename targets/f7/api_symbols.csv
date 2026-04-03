@@ -3490,6 +3490,7 @@ Function,+,subghz_devices_end,void,const SubGhzDevice*
 Function,+,subghz_devices_flush_rx,void,const SubGhzDevice*
 Function,+,subghz_devices_flush_tx,void,const SubGhzDevice*
 Function,+,subghz_devices_get_by_name,const SubGhzDevice*,const char*
+Function,+,subghz_devices_get_channel,uint8_t,const SubGhzDevice*
 Function,+,subghz_devices_get_data_gpio,const GpioPin*,const SubGhzDevice*
 Function,+,subghz_devices_get_lqi,uint8_t,const SubGhzDevice*
 Function,+,subghz_devices_get_name,const char*,const SubGhzDevice*
@@ -3505,6 +3506,7 @@ Function,+,subghz_devices_read_packet,void,"const SubGhzDevice*, uint8_t*, uint8
 Function,+,subghz_devices_reset,void,const SubGhzDevice*
 Function,+,subghz_devices_rx_pipe_not_empty,_Bool,const SubGhzDevice*
 Function,+,subghz_devices_set_async_mirror_pin,void,"const SubGhzDevice*, const GpioPin*"
+Function,+,subghz_devices_set_channel,void,"const SubGhzDevice*, uint8_t"
 Function,+,subghz_devices_set_frequency,uint32_t,"const SubGhzDevice*, uint32_t"
 Function,+,subghz_devices_set_rx,void,const SubGhzDevice*
 Function,+,subghz_devices_set_tx,_Bool,const SubGhzDevice*
