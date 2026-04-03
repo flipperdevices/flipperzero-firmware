@@ -163,6 +163,16 @@ void cc1101_set_pa_table(const FuriHalSpiBusHandle* handle, const uint8_t value[
     assert((rx[0].CHIP_RDYn | rx[8].CHIP_RDYn) == 0);
 }
 
+void cc1101_set_channel(const FuriHalSpiBusHandle* handle, uint8_t channel) {
+    cc1101_write_reg(handle, CC1101_CHANNR, channel);
+}
+
+uint8_t cc1101_get_channel(const FuriHalSpiBusHandle* handle) {
+    uint8_t channel = 0xff;
+    cc1101_read_reg(handle, CC1101_CHANNR, &channel);
+    return channel;
+}
+
 uint8_t cc1101_write_fifo(const FuriHalSpiBusHandle* handle, const uint8_t* data, uint8_t size) {
     uint8_t buff_tx[64];
     uint8_t buff_rx[64];
