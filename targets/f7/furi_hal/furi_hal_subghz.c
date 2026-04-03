@@ -399,8 +399,13 @@ void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
 }
 
 void furi_hal_subghz_set_channel(uint8_t channel) {
+    // must go idle first
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_CHANNR, channel);
+    cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
+
+    furi_check(cc1101_wait_status_state(&furi_hal_spi_bus_handle_subghz, CC1101StateIDLE, 10000));
+
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
