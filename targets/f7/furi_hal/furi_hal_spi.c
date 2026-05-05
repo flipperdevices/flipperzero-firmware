@@ -268,8 +268,9 @@ bool furi_hal_spi_bus_trx_dma(
         dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
         LL_DMA_Init(SPI_DMA_TX_DEF, &dma_config);
 
-#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6
+#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6 && SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_7
         LL_DMA_ClearFlag_TC6(SPI_DMA);
+        LL_DMA_ClearFlag_TC7(SPI_DMA);
 #else
 #error Update this code. Would you kindly?
 #endif
@@ -302,8 +303,9 @@ bool furi_hal_spi_bus_trx_dma(
         // semaphore. On timeout the ISR may still fire and would try to
         // re-release the binary semaphore, crashing furi_check.
         LL_DMA_DisableIT_TC(SPI_DMA_RX_DEF);
-#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6
+#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6 && SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_7
         LL_DMA_ClearFlag_TC6(SPI_DMA);
+        LL_DMA_ClearFlag_TC7(SPI_DMA);
 #else
 #error Update this code. Would you kindly?
 #endif
@@ -362,8 +364,9 @@ bool furi_hal_spi_bus_trx_dma(
         dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
         LL_DMA_Init(SPI_DMA_RX_DEF, &dma_config);
 
-#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6
+#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6 && SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_7
         LL_DMA_ClearFlag_TC6(SPI_DMA);
+        LL_DMA_ClearFlag_TC7(SPI_DMA);
 #else
 #error Update this code. Would you kindly?
 #endif
@@ -398,8 +401,9 @@ bool furi_hal_spi_bus_trx_dma(
         // semaphore. On timeout the ISR may still fire and would try to
         // re-release the binary semaphore, crashing furi_check.
         LL_DMA_DisableIT_TC(SPI_DMA_RX_DEF);
-#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6
+#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6 && SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_7
         LL_DMA_ClearFlag_TC6(SPI_DMA);
+        LL_DMA_ClearFlag_TC7(SPI_DMA);
 #else
 #error Update this code. Would you kindly?
 #endif
