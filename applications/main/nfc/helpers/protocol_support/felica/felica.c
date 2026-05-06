@@ -155,8 +155,12 @@ static void nfc_scene_read_menu_on_enter_felica(NfcApp* instance) {
 
 static bool nfc_scene_read_menu_on_event_felica(NfcApp* instance, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexUnlock) {
+        switch(event.event) {
+        case SubmenuIndexUnlock:
             scene_manager_next_scene(instance->scene_manager, NfcSceneDesAuthKeyInput);
+            return true;
+        case SubmenuIndexCommonEdit:
+            scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
             return true;
         }
     }
