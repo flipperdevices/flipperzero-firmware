@@ -154,6 +154,10 @@ void nfc_scene_write_ndef_on_enter(void* context) {
     NfcApp* instance = context;
     dolphin_deed(DolphinDeedNfcEmulate);
 
+    // Clear any stale poller pointer left by a previous scene so on_exit can
+    // tell whether *this* scene allocated one.
+    instance->poller = NULL;
+
     if(!nfc_scene_write_ndef_build_payload(instance)) {
         scene_manager_set_scene_state(
             instance->scene_manager, NfcSceneWriteNdef, NfcSceneWriteNdefStateFail);
