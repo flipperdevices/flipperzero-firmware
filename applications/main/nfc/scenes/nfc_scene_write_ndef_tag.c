@@ -17,14 +17,23 @@ void nfc_scene_write_ndef_tag_on_enter(void* context) {
 
     submenu_set_header(submenu, "Target tag type");
     submenu_add_item(
-        submenu, "NTAG213 (144 B)", SubmenuIndexNtag213,
-        nfc_scene_write_ndef_tag_submenu_callback, instance);
+        submenu,
+        "NTAG213 (144 B)",
+        SubmenuIndexNtag213,
+        nfc_scene_write_ndef_tag_submenu_callback,
+        instance);
     submenu_add_item(
-        submenu, "NTAG215 (504 B)", SubmenuIndexNtag215,
-        nfc_scene_write_ndef_tag_submenu_callback, instance);
+        submenu,
+        "NTAG215 (504 B)",
+        SubmenuIndexNtag215,
+        nfc_scene_write_ndef_tag_submenu_callback,
+        instance);
     submenu_add_item(
-        submenu, "NTAG216 (888 B)", SubmenuIndexNtag216,
-        nfc_scene_write_ndef_tag_submenu_callback, instance);
+        submenu,
+        "NTAG216 (888 B)",
+        SubmenuIndexNtag216,
+        nfc_scene_write_ndef_tag_submenu_callback,
+        instance);
 
     // Default selection: NTAG215
     uint32_t state = scene_manager_get_scene_state(instance->scene_manager, NfcSceneWriteNdefTag);
@@ -39,8 +48,7 @@ bool nfc_scene_write_ndef_tag_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         instance->ndef_write.ntag_type = (NdefNtagType)event.event;
-        scene_manager_set_scene_state(
-            instance->scene_manager, NfcSceneWriteNdefTag, event.event);
+        scene_manager_set_scene_state(instance->scene_manager, NfcSceneWriteNdefTag, event.event);
         scene_manager_next_scene(instance->scene_manager, NfcSceneWriteNdef);
         consumed = true;
     }

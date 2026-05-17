@@ -20,17 +20,9 @@ void nfc_scene_write_ndef_type_on_enter(void* context) {
     submenu_add_item(
         submenu, "URL", SubmenuIndexUri, nfc_scene_write_ndef_type_submenu_callback, instance);
     submenu_add_item(
-        submenu,
-        "Email",
-        SubmenuIndexEmail,
-        nfc_scene_write_ndef_type_submenu_callback,
-        instance);
+        submenu, "Email", SubmenuIndexEmail, nfc_scene_write_ndef_type_submenu_callback, instance);
     submenu_add_item(
-        submenu,
-        "Phone",
-        SubmenuIndexPhone,
-        nfc_scene_write_ndef_type_submenu_callback,
-        instance);
+        submenu, "Phone", SubmenuIndexPhone, nfc_scene_write_ndef_type_submenu_callback, instance);
     submenu_add_item(
         submenu, "Text", SubmenuIndexText, nfc_scene_write_ndef_type_submenu_callback, instance);
     submenu_add_item(
@@ -54,8 +46,7 @@ bool nfc_scene_write_ndef_type_on_event(void* context, SceneManagerEvent event) 
         instance->ndef_write.input_step = NdefWriteInputStepPrimary;
         furi_string_reset(instance->ndef_write.primary);
         furi_string_reset(instance->ndef_write.secondary);
-        scene_manager_set_scene_state(
-            instance->scene_manager, NfcSceneWriteNdefType, event.event);
+        scene_manager_set_scene_state(instance->scene_manager, NfcSceneWriteNdefType, event.event);
         scene_manager_next_scene(instance->scene_manager, NfcSceneWriteNdefInput);
         consumed = true;
     }

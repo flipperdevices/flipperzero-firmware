@@ -73,13 +73,7 @@ static void nfc_scene_write_ndef_setup_view(NfcApp* instance) {
         notification_message(instance->notifications, &sequence_error);
         popup_set_icon(popup, 72, 17, &I_WarningDolphinFlip_45x42);
         popup_set_header(popup, "Write failed", 64, 4, AlignCenter, AlignTop);
-        popup_set_text(
-            popup,
-            "Tag may be\nlocked or moved",
-            8,
-            22,
-            AlignLeft,
-            AlignTop);
+        popup_set_text(popup, "Tag may be\nlocked or moved", 8, 22, AlignLeft, AlignTop);
         popup_set_timeout(popup, 2000);
         popup_set_context(popup, instance);
         popup_set_callback(popup, nfc_scene_write_ndef_popup_callback);
@@ -88,13 +82,7 @@ static void nfc_scene_write_ndef_setup_view(NfcApp* instance) {
         notification_message(instance->notifications, &sequence_error);
         popup_set_icon(popup, 72, 17, &I_WarningDolphinFlip_45x42);
         popup_set_header(popup, "Wrong tag type", 64, 4, AlignCenter, AlignTop);
-        popup_set_text(
-            popup,
-            "Use selected\nNTAG variant",
-            8,
-            22,
-            AlignLeft,
-            AlignTop);
+        popup_set_text(popup, "Use selected\nNTAG variant", 8, 22, AlignLeft, AlignTop);
         popup_set_timeout(popup, 2000);
         popup_set_context(popup, instance);
         popup_set_callback(popup, nfc_scene_write_ndef_popup_callback);
@@ -118,16 +106,15 @@ static bool nfc_scene_write_ndef_build_payload(NfcApp* instance) {
     case NdefWriteRecordTypeEmail: {
         // mailto: prefix is in the URI prefix table (code 0x06), so the builder
         // strips it from the on-tag payload automatically.
-        FuriString* uri = furi_string_alloc_printf(
-            "mailto:%s", furi_string_get_cstr(ctx->primary));
+        FuriString* uri =
+            furi_string_alloc_printf("mailto:%s", furi_string_get_cstr(ctx->primary));
         built = ndef_builder_build_uri(furi_string_get_cstr(uri), blob, sizeof(blob), &blob_size);
         furi_string_free(uri);
         break;
     }
     case NdefWriteRecordTypePhone: {
         // tel: prefix is in the URI prefix table (code 0x05).
-        FuriString* uri = furi_string_alloc_printf(
-            "tel:%s", furi_string_get_cstr(ctx->primary));
+        FuriString* uri = furi_string_alloc_printf("tel:%s", furi_string_get_cstr(ctx->primary));
         built = ndef_builder_build_uri(furi_string_get_cstr(uri), blob, sizeof(blob), &blob_size);
         furi_string_free(uri);
         break;

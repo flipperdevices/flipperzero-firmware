@@ -45,61 +45,129 @@ static const uint8_t keyboard_row_count = 3;
 // Letter layout: identical to stock text_input except `_` is replaced with SHIFT.
 // `_` is reachable via the symbol layout (symbols_row_2[0]).
 static const NdefTextInputKey letters_row_1[] = {
-    {'q', 1, 8},  {'w', 10, 8}, {'e', 19, 8},  {'r', 28, 8},  {'t', 37, 8},
-    {'y', 46, 8}, {'u', 55, 8}, {'i', 64, 8},  {'o', 73, 8},  {'p', 82, 8},
-    {'0', 91, 8}, {'1', 100, 8},{'2', 110, 8}, {'3', 120, 8},
+    {'q', 1, 8},
+    {'w', 10, 8},
+    {'e', 19, 8},
+    {'r', 28, 8},
+    {'t', 37, 8},
+    {'y', 46, 8},
+    {'u', 55, 8},
+    {'i', 64, 8},
+    {'o', 73, 8},
+    {'p', 82, 8},
+    {'0', 91, 8},
+    {'1', 100, 8},
+    {'2', 110, 8},
+    {'3', 120, 8},
 };
 static const NdefTextInputKey letters_row_2[] = {
-    {'a', 1, 20}, {'s', 10, 20}, {'d', 19, 20}, {'f', 28, 20}, {'g', 37, 20},
-    {'h', 46, 20},{'j', 55, 20}, {'k', 64, 20}, {'l', 73, 20},
+    {'a', 1, 20},
+    {'s', 10, 20},
+    {'d', 19, 20},
+    {'f', 28, 20},
+    {'g', 37, 20},
+    {'h', 46, 20},
+    {'j', 55, 20},
+    {'k', 64, 20},
+    {'l', 73, 20},
     {BACKSPACE_KEY, 82, 12},
-    {'4', 100, 20}, {'5', 110, 20}, {'6', 120, 20},
+    {'4', 100, 20},
+    {'5', 110, 20},
+    {'6', 120, 20},
 };
 static const NdefTextInputKey letters_row_3[] = {
-    {'z', 1, 32},  {'x', 10, 32}, {'c', 19, 32}, {'v', 28, 32}, {'b', 37, 32},
-    {'n', 46, 32}, {'m', 55, 32},
+    {'z', 1, 32},
+    {'x', 10, 32},
+    {'c', 19, 32},
+    {'v', 28, 32},
+    {'b', 37, 32},
+    {'n', 46, 32},
+    {'m', 55, 32},
     {SHIFT_KEY, 64, 32},
     {ENTER_KEY, 74, 23},
-    {'7', 100, 32}, {'8', 110, 32}, {'9', 120, 32},
+    {'7', 100, 32},
+    {'8', 110, 32},
+    {'9', 120, 32},
 };
 
 // Symbol layout: same key counts and positions as letters; punctuation in
 // place of the letters. The shift key keeps the same slot so muscle memory
 // works across modes.
 static const NdefTextInputKey symbols_row_1[] = {
-    {'.', 1, 8},  {'/', 10, 8}, {':', 19, 8},  {'-', 28, 8},  {'?', 37, 8},
-    {'=', 46, 8}, {'&', 55, 8}, {'#', 64, 8},  {'@', 73, 8},  {'+', 82, 8},
-    {'0', 91, 8}, {'1', 100, 8},{'2', 110, 8}, {'3', 120, 8},
+    {'.', 1, 8},
+    {'/', 10, 8},
+    {':', 19, 8},
+    {'-', 28, 8},
+    {'?', 37, 8},
+    {'=', 46, 8},
+    {'&', 55, 8},
+    {'#', 64, 8},
+    {'@', 73, 8},
+    {'+', 82, 8},
+    {'0', 91, 8},
+    {'1', 100, 8},
+    {'2', 110, 8},
+    {'3', 120, 8},
 };
 static const NdefTextInputKey symbols_row_2[] = {
-    {'_', 1, 20}, {'!', 10, 20}, {'~', 19, 20}, {',', 28, 20}, {'*', 37, 20},
-    {';', 46, 20},{'(', 55, 20}, {')', 64, 20}, {'\'', 73, 20},
+    {'_', 1, 20},
+    {'!', 10, 20},
+    {'~', 19, 20},
+    {',', 28, 20},
+    {'*', 37, 20},
+    {';', 46, 20},
+    {'(', 55, 20},
+    {')', 64, 20},
+    {'\'', 73, 20},
     {BACKSPACE_KEY, 82, 12},
-    {'4', 100, 20}, {'5', 110, 20}, {'6', 120, 20},
+    {'4', 100, 20},
+    {'5', 110, 20},
+    {'6', 120, 20},
 };
 static const NdefTextInputKey symbols_row_3[] = {
-    {'<', 1, 32}, {'>', 10, 32}, {'"', 19, 32}, {'%', 28, 32}, {'$', 37, 32},
-    {'[', 46, 32},{']', 55, 32},
+    {'<', 1, 32},
+    {'>', 10, 32},
+    {'"', 19, 32},
+    {'%', 28, 32},
+    {'$', 37, 32},
+    {'[', 46, 32},
+    {']', 55, 32},
     {SHIFT_KEY, 64, 32},
     {ENTER_KEY, 74, 23},
-    {'7', 100, 32}, {'8', 110, 32}, {'9', 120, 32},
+    {'7', 100, 32},
+    {'8', 110, 32},
+    {'9', 120, 32},
 };
 
 static uint8_t get_row_size(const NdefTextInputModel* model, uint8_t row_index) {
     uint8_t row_size = 0;
     if(model->symbol_mode) {
         switch(row_index + 1) {
-        case 1: row_size = COUNT_OF(symbols_row_1); break;
-        case 2: row_size = COUNT_OF(symbols_row_2); break;
-        case 3: row_size = COUNT_OF(symbols_row_3); break;
-        default: furi_crash();
+        case 1:
+            row_size = COUNT_OF(symbols_row_1);
+            break;
+        case 2:
+            row_size = COUNT_OF(symbols_row_2);
+            break;
+        case 3:
+            row_size = COUNT_OF(symbols_row_3);
+            break;
+        default:
+            furi_crash();
         }
     } else {
         switch(row_index + 1) {
-        case 1: row_size = COUNT_OF(letters_row_1); break;
-        case 2: row_size = COUNT_OF(letters_row_2); break;
-        case 3: row_size = COUNT_OF(letters_row_3); break;
-        default: furi_crash();
+        case 1:
+            row_size = COUNT_OF(letters_row_1);
+            break;
+        case 2:
+            row_size = COUNT_OF(letters_row_2);
+            break;
+        case 3:
+            row_size = COUNT_OF(letters_row_3);
+            break;
+        default:
+            furi_crash();
         }
     }
     return row_size;
@@ -109,17 +177,31 @@ static const NdefTextInputKey* get_row(const NdefTextInputModel* model, uint8_t 
     const NdefTextInputKey* row = NULL;
     if(model->symbol_mode) {
         switch(row_index + 1) {
-        case 1: row = symbols_row_1; break;
-        case 2: row = symbols_row_2; break;
-        case 3: row = symbols_row_3; break;
-        default: furi_crash();
+        case 1:
+            row = symbols_row_1;
+            break;
+        case 2:
+            row = symbols_row_2;
+            break;
+        case 3:
+            row = symbols_row_3;
+            break;
+        default:
+            furi_crash();
         }
     } else {
         switch(row_index + 1) {
-        case 1: row = letters_row_1; break;
-        case 2: row = letters_row_2; break;
-        case 3: row = letters_row_3; break;
-        default: furi_crash();
+        case 1:
+            row = letters_row_1;
+            break;
+        case 2:
+            row = letters_row_2;
+            break;
+        case 3:
+            row = letters_row_3;
+            break;
+        default:
+            furi_crash();
         }
     }
     return row;
@@ -216,10 +298,7 @@ static void ndef_text_input_view_draw_callback(Canvas* canvas, void* _model) {
             if(keys[column].text == ENTER_KEY) {
                 canvas_set_color(canvas, ColorBlack);
                 canvas_draw_icon(
-                    canvas,
-                    key_x,
-                    key_y,
-                    selected ? &I_KeySaveSelected_24x11 : &I_KeySave_24x11);
+                    canvas, key_x, key_y, selected ? &I_KeySaveSelected_24x11 : &I_KeySave_24x11);
             } else if(keys[column].text == BACKSPACE_KEY) {
                 canvas_set_color(canvas, ColorBlack);
                 canvas_draw_icon(
@@ -243,8 +322,7 @@ static void ndef_text_input_view_draw_callback(Canvas* canvas, void* _model) {
                 if((model->clear_default_text ||
                     (text_length == 0 && char_is_lowercase(keys[column].text))) &&
                    !model->symbol_mode) {
-                    canvas_draw_glyph(
-                        canvas, key_x, key_y, char_to_uppercase(keys[column].text));
+                    canvas_draw_glyph(canvas, key_x, key_y, char_to_uppercase(keys[column].text));
                 } else {
                     canvas_draw_glyph(canvas, key_x, key_y, keys[column].text);
                 }
@@ -356,33 +434,71 @@ static bool ndef_text_input_view_input_callback(InputEvent* event, void* context
     } else if(event->type == InputTypeShort) {
         consumed = true;
         switch(event->key) {
-        case InputKeyUp: ndef_text_input_handle_up(text_input, model); break;
-        case InputKeyDown: ndef_text_input_handle_down(text_input, model); break;
-        case InputKeyLeft: ndef_text_input_handle_left(text_input, model); break;
-        case InputKeyRight: ndef_text_input_handle_right(text_input, model); break;
-        case InputKeyOk: ndef_text_input_handle_ok(text_input, model, false); break;
-        default: consumed = false; break;
+        case InputKeyUp:
+            ndef_text_input_handle_up(text_input, model);
+            break;
+        case InputKeyDown:
+            ndef_text_input_handle_down(text_input, model);
+            break;
+        case InputKeyLeft:
+            ndef_text_input_handle_left(text_input, model);
+            break;
+        case InputKeyRight:
+            ndef_text_input_handle_right(text_input, model);
+            break;
+        case InputKeyOk:
+            ndef_text_input_handle_ok(text_input, model, false);
+            break;
+        default:
+            consumed = false;
+            break;
         }
     } else if(event->type == InputTypeLong) {
         consumed = true;
         switch(event->key) {
-        case InputKeyUp: ndef_text_input_handle_up(text_input, model); break;
-        case InputKeyDown: ndef_text_input_handle_down(text_input, model); break;
-        case InputKeyLeft: ndef_text_input_handle_left(text_input, model); break;
-        case InputKeyRight: ndef_text_input_handle_right(text_input, model); break;
-        case InputKeyOk: ndef_text_input_handle_ok(text_input, model, true); break;
-        case InputKeyBack: ndef_text_input_backspace_cb(model); break;
-        default: consumed = false; break;
+        case InputKeyUp:
+            ndef_text_input_handle_up(text_input, model);
+            break;
+        case InputKeyDown:
+            ndef_text_input_handle_down(text_input, model);
+            break;
+        case InputKeyLeft:
+            ndef_text_input_handle_left(text_input, model);
+            break;
+        case InputKeyRight:
+            ndef_text_input_handle_right(text_input, model);
+            break;
+        case InputKeyOk:
+            ndef_text_input_handle_ok(text_input, model, true);
+            break;
+        case InputKeyBack:
+            ndef_text_input_backspace_cb(model);
+            break;
+        default:
+            consumed = false;
+            break;
         }
     } else if(event->type == InputTypeRepeat) {
         consumed = true;
         switch(event->key) {
-        case InputKeyUp: ndef_text_input_handle_up(text_input, model); break;
-        case InputKeyDown: ndef_text_input_handle_down(text_input, model); break;
-        case InputKeyLeft: ndef_text_input_handle_left(text_input, model); break;
-        case InputKeyRight: ndef_text_input_handle_right(text_input, model); break;
-        case InputKeyBack: ndef_text_input_backspace_cb(model); break;
-        default: consumed = false; break;
+        case InputKeyUp:
+            ndef_text_input_handle_up(text_input, model);
+            break;
+        case InputKeyDown:
+            ndef_text_input_handle_down(text_input, model);
+            break;
+        case InputKeyLeft:
+            ndef_text_input_handle_left(text_input, model);
+            break;
+        case InputKeyRight:
+            ndef_text_input_handle_right(text_input, model);
+            break;
+        case InputKeyBack:
+            ndef_text_input_backspace_cb(model);
+            break;
+        default:
+            consumed = false;
+            break;
         }
     }
 
@@ -536,6 +652,5 @@ void* ndef_text_input_get_validator_callback_context(NdefTextInput* text_input) 
 
 void ndef_text_input_set_header_text(NdefTextInput* text_input, const char* text) {
     furi_check(text_input);
-    with_view_model(
-        text_input->view, NdefTextInputModel * model, { model->header = text; }, true);
+    with_view_model(text_input->view, NdefTextInputModel * model, { model->header = text; }, true);
 }

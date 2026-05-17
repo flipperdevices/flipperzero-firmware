@@ -23,20 +23,12 @@ extern "C" {
  * @param out_size          on success, set to the number of bytes written
  * @return                  true if the blob fit; false otherwise
  */
-bool ndef_builder_build_uri(
-    const char* uri,
-    uint8_t* out,
-    size_t out_capacity,
-    size_t* out_size);
+bool ndef_builder_build_uri(const char* uri, uint8_t* out, size_t out_capacity, size_t* out_size);
 
 /**
  * Build a complete NDEF Message TLV for a plain Text record (UTF-8, language code "en").
  */
-bool ndef_builder_build_text(
-    const char* text,
-    uint8_t* out,
-    size_t out_capacity,
-    size_t* out_size);
+bool ndef_builder_build_text(const char* text, uint8_t* out, size_t out_capacity, size_t* out_size);
 
 /**
  * Build a complete NDEF Message TLV for a Wi-Fi Simple Configuration credential

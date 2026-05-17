@@ -38,10 +38,9 @@ void nfc_scene_write_ndef_input_on_enter(void* context) {
 
     // Seed buffer with prior value (if any) or scheme hint
     memset(instance->text_store, 0, sizeof(instance->text_store));
-    const char* prior =
-        (instance->ndef_write.input_step == NdefWriteInputStepPrimary) ?
-            furi_string_get_cstr(instance->ndef_write.primary) :
-            furi_string_get_cstr(instance->ndef_write.secondary);
+    const char* prior = (instance->ndef_write.input_step == NdefWriteInputStepPrimary) ?
+                            furi_string_get_cstr(instance->ndef_write.primary) :
+                            furi_string_get_cstr(instance->ndef_write.secondary);
     if(prior && prior[0] != '\0') {
         strlcpy(instance->text_store, prior, sizeof(instance->text_store));
     } else if(seed) {
@@ -72,11 +71,9 @@ bool nfc_scene_write_ndef_input_on_event(void* context, SceneManagerEvent event)
                 if(ctx->record_type == NdefWriteRecordTypeWifi) {
                     // Wi-Fi needs a second prompt for the password.
                     ctx->input_step = NdefWriteInputStepSecondary;
-                    scene_manager_next_scene(
-                        instance->scene_manager, NfcSceneWriteNdefInput);
+                    scene_manager_next_scene(instance->scene_manager, NfcSceneWriteNdefInput);
                 } else {
-                    scene_manager_next_scene(
-                        instance->scene_manager, NfcSceneWriteNdefTag);
+                    scene_manager_next_scene(instance->scene_manager, NfcSceneWriteNdefTag);
                 }
             } else {
                 furi_string_set(ctx->secondary, instance->text_store);

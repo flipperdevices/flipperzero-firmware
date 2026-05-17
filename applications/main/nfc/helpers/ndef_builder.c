@@ -41,14 +41,14 @@ static const struct {
 };
 
 // NDEF record header flag bits
-#define NDEF_MB 0x80 // Message Begin
-#define NDEF_ME 0x40 // Message End
-#define NDEF_SR 0x10 // Short Record (1-byte payload length)
+#define NDEF_MB             0x80 // Message Begin
+#define NDEF_ME             0x40 // Message End
+#define NDEF_SR             0x10 // Short Record (1-byte payload length)
 #define NDEF_TNF_WELL_KNOWN 0x01
 #define NDEF_TNF_MIME_MEDIA 0x02
 
 // TLV markers
-#define NDEF_TLV_MESSAGE 0x03
+#define NDEF_TLV_MESSAGE    0x03
 #define NDEF_TLV_TERMINATOR 0xFE
 
 static uint8_t ndef_uri_match_prefix(const char** uri_io) {
@@ -97,11 +97,7 @@ static bool ndef_tlv_wrap(
     return true;
 }
 
-bool ndef_builder_build_uri(
-    const char* uri,
-    uint8_t* out,
-    size_t out_capacity,
-    size_t* out_size) {
+bool ndef_builder_build_uri(const char* uri, uint8_t* out, size_t out_capacity, size_t* out_size) {
     if(!uri || !out || !out_size) return false;
 
     const char* uri_body = uri;
@@ -130,11 +126,7 @@ bool ndef_builder_build_uri(
     return ndef_tlv_wrap(out, out_capacity, body_start, record_len, out_size);
 }
 
-bool ndef_builder_build_text(
-    const char* text,
-    uint8_t* out,
-    size_t out_capacity,
-    size_t* out_size) {
+bool ndef_builder_build_text(const char* text, uint8_t* out, size_t out_capacity, size_t* out_size) {
     if(!text || !out || !out_size) return false;
 
     static const char lang[] = "en";
@@ -163,16 +155,16 @@ bool ndef_builder_build_text(
 }
 
 // WPS attribute IDs (big-endian on the wire)
-#define WPS_ATTR_CREDENTIAL       0x100E
-#define WPS_ATTR_NETWORK_INDEX    0x1026
-#define WPS_ATTR_SSID             0x1045
-#define WPS_ATTR_AUTH_TYPE        0x1003
-#define WPS_ATTR_ENCRYPT_TYPE     0x100F
-#define WPS_ATTR_NETWORK_KEY      0x1027
-#define WPS_ATTR_MAC_ADDRESS      0x1020
+#define WPS_ATTR_CREDENTIAL    0x100E
+#define WPS_ATTR_NETWORK_INDEX 0x1026
+#define WPS_ATTR_SSID          0x1045
+#define WPS_ATTR_AUTH_TYPE     0x1003
+#define WPS_ATTR_ENCRYPT_TYPE  0x100F
+#define WPS_ATTR_NETWORK_KEY   0x1027
+#define WPS_ATTR_MAC_ADDRESS   0x1020
 
-#define WPS_AUTH_WPA2_PSK         0x0020
-#define WPS_ENCRYPT_AES           0x0008
+#define WPS_AUTH_WPA2_PSK 0x0020
+#define WPS_ENCRYPT_AES   0x0008
 
 static uint8_t* wps_put_u8(uint8_t* p, uint16_t attr, uint8_t value) {
     *p++ = (uint8_t)(attr >> 8);

@@ -20,8 +20,7 @@ extern "C" {
 
 typedef struct NdefTextInput NdefTextInput;
 typedef void (*NdefTextInputCallback)(void* context);
-typedef bool (
-    *NdefTextInputValidatorCallback)(const char* text, FuriString* error, void* context);
+typedef bool (*NdefTextInputValidatorCallback)(const char* text, FuriString* error, void* context);
 
 NdefTextInput* ndef_text_input_alloc(void);
 void ndef_text_input_free(NdefTextInput* text_input);
