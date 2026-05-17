@@ -105,9 +105,9 @@ bool ndef_builder_build_uri(const char* uri, uint8_t* out, size_t out_capacity, 
     size_t uri_body_len = strlen(uri_body);
     size_t payload_len = 1 + uri_body_len; // 1 byte prefix code + URI string
 
-    // Record layout: [hdr][type_len][payload_len][type='U'][prefix_code][uri_body]
-    // = 4 header bytes + 1 type + payload_len
-    size_t record_len = 4 + 1 + payload_len;
+    // Record layout: [flags][type_len][payload_len][type='U'][prefix_code][uri_body]
+    // = 3 header bytes (SR record, no ID) + 1 type byte + payload_len bytes
+    size_t record_len = 3 + 1 + payload_len;
 
     // Reserve space at the start for the TLV header (worst case 4 bytes).
     // We always write the body starting at offset 4 and let tlv_wrap shift it
@@ -137,7 +137,7 @@ bool ndef_builder_build_text(const char* text, uint8_t* out, size_t out_capacity
     const size_t payload_len = 1 + lang_len + text_len;
     if(payload_len > 0xFF) return false; // We only support short records
 
-    const size_t record_len = 4 + 1 + payload_len; // header + 'T' + payload
+    const size_t record_len = 3 + 1 + payload_len; // 3 hdr bytes + 'T' + payload
     const size_t body_start = 4;
     if(body_start + record_len + 1 > out_capacity) return false;
 
