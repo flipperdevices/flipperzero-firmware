@@ -112,6 +112,25 @@ class FlipperApplication:
             raise FlipperManifestException(
                 f"Invalid appid '{self.appid}'. Must match regex '{self.APP_ID_REGEX}'"
             )
+
+        # Accept a bare int as shorthand for "<n>.0" — common when users write
+        # fap_version=1 expecting it to mean 1.0. bool subclasses int in Python,
+        # so guard against True/False being accidentally treated as 1/0.
+        if isinstance(self.fap_version, int) and not isinstance(self.fap_version, bool):
+            self.fap_version = (self.fap_version, 0)
+
+        # Reject float explicitly. Python float literals silently drop trailing
+        # zeros (1.10 becomes 1.1), so a float is never a safe way to write a
+        # version number — surface the problem here with a clear message rather
+        # than letting a cryptic "'float' object is not iterable" TypeError
+        # appear deep in the build step (see flipperdevices/flipperzero-ufbt#52).
+        if isinstance(self.fap_version, float):
+            raise FlipperManifestException(
+                f"Invalid fap_version {self.fap_version!r}: floats are not accepted "
+                f"because Python drops trailing zeros (1.10 becomes 1.1). "
+                f'Write the version as a string ("1.0") or a tuple ((1, 0)).'
+            )
+
         if isinstance(self.fap_version, str):
             try:
                 self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
@@ -121,6 +140,11 @@ class FlipperApplication:
                 )
             if len(self.fap_version) < 2:
                 raise ValueError("Not enough version components")
+        elif not isinstance(self.fap_version, tuple):
+            raise FlipperManifestException(
+                f"fap_version must be a string like '1.2' or a tuple like (1, 2), "
+                f"got {type(self.fap_version).__name__}: {self.fap_version!r}"
+            )
 
 
 class AppManager:
