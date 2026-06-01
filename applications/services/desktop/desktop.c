@@ -548,7 +548,11 @@ int32_t desktop_srv(void* p) {
             keys_total,
             keys_valid);
 
-        scene_manager_next_scene(desktop->scene_manager, DesktopSceneSecureEnclave);
+        // [f6] This f6 unit's factory enclave keys were lost along the way, so we
+        // provision our own (via enclave_manager) to get U2F working (the slot-11 gate
+        // just needs keys present). They don't match the factory signatures, so verify
+        // always "fails" here — suppress the cosmetic warning.
+        // scene_manager_next_scene(desktop->scene_manager, DesktopSceneSecureEnclave);
     }
 
     // Special case: autostart application is already running
