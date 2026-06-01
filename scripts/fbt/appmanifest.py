@@ -95,6 +95,10 @@ class FlipperApplication:
         return any(plugin.fal_embedded for plugin in self._plugins)
 
     def supports_hardware_target(self, target: str):
+        # f6 is hardware-compatible with f7 and inherits its target; let it
+        # build apps gated to f7.
+        if target == "f6" and "f7" in self.targets:
+            return True
         return target in self.targets or "all" in self.targets
 
     @property

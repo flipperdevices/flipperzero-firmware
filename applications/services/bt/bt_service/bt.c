@@ -529,12 +529,15 @@ int32_t bt_srv(void* p) {
         return 0;
     }
 
-    if(furi_hal_bt_start_radio_stack()) {
+    // [f6] f6's core2 radio stack is incompatible and hangs the boot in
+    // furi_hal_bt_start_radio_stack(); skip it so the device boots with BT off.
+    bool radio_stack_started = false;
+    if(radio_stack_started) {
         bt_init_keys_settings(bt);
         furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
 
     } else {
-        FURI_LOG_E(TAG, "Radio stack start failed");
+        FURI_LOG_E(TAG, "Radio stack start skipped (f6)");
     }
 
     furi_record_create(RECORD_BT, bt);
