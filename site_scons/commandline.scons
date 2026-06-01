@@ -86,6 +86,7 @@ vars.AddVariables(
         help="Hardware target",
         default="7",
         allowed_values=[
+            "6",
             "7",
             "18",
         ],

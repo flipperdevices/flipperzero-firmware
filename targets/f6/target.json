@@ -1,0 +1,47 @@
+{
+    "inherit": "7",
+    "include_paths": [
+        "furi_hal"
+    ],
+    "sdk_header_paths": [
+        "../furi_hal_include",
+        "furi_hal"
+    ],
+    "sdk_symbols": "api_symbols.csv",
+    "linker_dependencies": [
+        "print",
+        "flipper6",
+        "furi",
+        "freertos",
+        "stm32wb",
+        "hwdrivers",
+        "fatfs",
+        "subghz",
+        "toolbox",
+        "nfc",
+        "digital_signal",
+        "pulse_reader",
+        "signal_reader",
+        "microtar",
+        "usb_stm32",
+        "infrared",
+        "assets",
+        "one_wire",
+        "ibutton",
+        "music_worker",
+        "mjs",
+        "mbedtls",
+        "lfrfid",
+        "flipper_application",
+        "u8g2",
+        "nanopb",
+        "update_util",
+        "heatshrink",
+        "flipperformat",
+        "flipper6",
+        "bit_lib",
+        "toolbox",
+        "datetime",
+        "ieee754_parse_wrap"
+    ]
+}

@@ -24,6 +24,10 @@ ENV.AppendUnique(
         "-Wall",
         "-Wextra",
         "-Werror",
+        # toolchain is gcc 13.2 vs flipper's pinned 12.3; the newer gcc raises
+        # warnings (unused-parameter, etc.) the supported build doesn't. keep
+        # them visible but non-fatal so the backport builds. last flag wins.
+        "-Wno-error",
         "-Wno-error=deprecated-declarations",
         "-Wno-address-of-packed-member",
         "-Wredundant-decls",
@@ -34,6 +38,10 @@ ENV.AppendUnique(
         "-Wa,-gdwarf-sections",
         "-fsingle-precision-constant",
         "-fno-math-errno",
+        # ST LL/HAL headers type-pun in inline functions; gcc 13.2 (vs flipper's
+        # pinned 12.3) flags this under -Werror=strict-aliasing in every TU that
+        # includes them. ST code is built -fno-strict-aliasing by design.
+        "-fno-strict-aliasing",
         # Generates .su files with stack usage information
         # "-fstack-usage",
         "-g",
