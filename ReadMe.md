@@ -13,6 +13,31 @@
 - [User Documentation](https://docs.flipper.net). Learn more about your dolphin: specs, usage guides, and anything you want to ask.
 - [Developer Documentation](https://developer.flipper.net/flipperzero/doxygen). Dive into the Flipper Zero Firmware source code: build system, firmware structure, and more.
 
+## F6 Hardware Backport
+
+This repository backports the **F6** hardware target to the modern Flipper Zero firmware (having been dropped upstream in PR #1049). It is implemented as a thin target inheriting from F7 (as they share STM32WB55 silicon) with specific hardware adaptations:
+
+- **Pin Mapping**: The vibro motor is mapped to `PA15` whilst the RFID carrier is mapped to `PA8` (via [furi_hal_resources.h](file:///Users/dappy/Documents/Werk/repos/personal/flipper/flipperzero-firmware/targets/f6/furi_hal/furi_hal_resources.h)) to match the F6 hardware layout.
+- **Bluetooth Stack**: Restored the Bluetooth stack initialization to support standard Bluetooth service startup.
+- **Application Compatibility**: External applications (`.fap` files) compiled for target 7 (F7) are compatible with target 6 (F6) and vice versa, allowing them to run at runtime.
+- **Enclave Keys**: Provisions local keys (via `enclave_manager`) so U2F works, whilst suppressing the cosmetic "damaged" enclave warning dialogue on boot (since dev/prototype units lack factory signatures).
+- **Nix Environment**: A Nix flake ([flake.nix](file:///Users/dappy/Documents/Werk/repos/personal/flipper/flipperzero-firmware/flake.nix)) is included, providing a reproducible build environment with arm-none-eabi-gcc 13.2 and the required Python packages.
+
+### Compiling for F6
+
+To compile the firmware for the F6 target, specify `TARGET_HW=6`:
+
+```shell
+./fbt TARGET_HW=6
+```
+
+If you are using the Nix environment:
+
+```shell
+nix develop
+./fbt TARGET_HW=6 updater_package
+```
+
 # Contributing
 
 Our main goal is to build a healthy and sustainable community around Flipper, so we're open to any new ideas and contributions. We also have some rules and taboos here, so please read this page and our [Code of Conduct](/CODE_OF_CONDUCT.md) carefully.
