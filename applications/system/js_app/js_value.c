@@ -275,6 +275,7 @@ JsValueParseStatus js_value_parse(
     furi_check(n_c_vals == js_value_resulting_c_values_count(declaration));
 #else
     UNUSED(js_value_resulting_c_values_count);
+    UNUSED(n_c_vals);
 #endif
 
     va_list out_pointers;

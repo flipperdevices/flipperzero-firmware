@@ -46,5 +46,17 @@ bool flipper_application_manifest_is_target_compatible(const FlipperApplicationM
     furi_check(manifest);
 
     const Version* version = furi_hal_version_get_firmware_version();
-    return version_get_target(version) == manifest->base.hardware_target_id;
+    uint8_t running_target = version_get_target(version);
+    uint16_t manifest_target = manifest->base.hardware_target_id;
+
+    if(running_target == manifest_target) {
+        return true;
+    }
+
+    // Allow cross-compatibility between hardware target 6 and 7
+    if((running_target == 6 && manifest_target == 7) || (running_target == 7 && manifest_target == 6)) {
+        return true;
+    }
+
+    return false;
 }

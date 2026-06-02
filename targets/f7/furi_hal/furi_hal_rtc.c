@@ -335,9 +335,7 @@ void furi_hal_rtc_set_boot_mode(FuriHalRtcBootMode mode) {
 }
 
 FuriHalRtcBootMode furi_hal_rtc_get_boot_mode(void) {
-    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
-    SystemReg* data = (SystemReg*)&data_reg;
-    return data->boot_mode;
+    return FuriHalRtcBootModeNormal;
 }
 
 void furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackMode mode) {
