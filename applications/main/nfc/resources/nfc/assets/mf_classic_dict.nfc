@@ -1,4 +1,3 @@
-# Key dictionary from https://github.com/RfidResearchGroup/proxmark3/
 #
 # Mifare Default Keys
 #   -- Iceman Fork Version --
@@ -32,6 +31,12 @@ D01AFEEB890A
 #
 # 17 B
 4B791BEA7BCC
+#
+# Mifare Plus SE post-1K blocks
+# Key A
+4823741386AB
+# Key B
+326587C3D17F
 #
 # QL88 keys
 # 17 A/B
@@ -381,6 +386,10 @@ B39AE17435DC
 #
 # Lift system
 190819842023
+#
+# Washing machine Italy
+B001614C6602
+353631303041
 #
 # Data from http://pastebin.com/gQ6nk38G
 D39BB83F5297
@@ -1493,7 +1502,7 @@ D7744A1A0C44
 82908B57EF4F
 FE04ECFE5577
 #
-# comfort inn hotel
+# MIWA ALVH Hotel Locks, A/B sector keys respectively, ASCII MWALVH and MHALVH
 4D57414C5648
 4D48414C5648
 #
@@ -3215,3 +3224,44 @@ b6e56bad206a
 # University of Portsmouth external library card keys
 505254554E49
 505457524954
+#
+# BASHAUTOTRANS Russian Transport (social) Card
+F4086EA40D79
+8CA8838CB080
+8FCB040DEAC8
+08BAD3020D68
+58AE4C1A3E01
+31C268AE2CC1
+AB20B557C1F8
+F22F1C08B37F
+C816C7B6DAC1
+C74004620E10
+C2D332AD405D
+45C2165B43DC
+1AB95E6D3E9D
+F22FDAA1EADA
+CD3864A458FD
+B001892A8029
+7FAE67B685F4
+62C752A41CB0
+C4BC8940EC37
+3DBF8538CB29
+1F7AA89EBA19
+1FAD1F7CE38C
+EF62ABCE3DFB
+E058DC0E2C34
+75AD292C1649
+#
+# Ufanet Key
+59D7FD628402
+#
+# Yerevan Transport
+26ABFC3C24FB
+#
+# Vanderbilt Industries, ACT Line
+# "ACTact" in ASCII -- appears to hold creds in Sector 1, Block 4
+# Note: "Acces"+N pattern keys (416363657300-4163636573FF) can be generated
+# dynamically using: hf mf keygen -k 6
+414354616374
+4D61071B7254
+34016FAC127D
