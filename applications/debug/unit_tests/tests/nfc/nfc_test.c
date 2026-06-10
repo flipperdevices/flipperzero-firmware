@@ -689,6 +689,57 @@ MU_TEST(felica_read) {
     felica_free(felica_data);
 }
 
+MU_TEST(felica_standard_read) {
+    NfcDeviceData* nfc_device = nfc_device_alloc();
+    mu_assert(
+        nfc_device_load(nfc_device, EXT_PATH("unit_tests/nfc/Felica_Standard_with_keys.nfc")),
+        "nfc_device_load() failed");
+
+    Nfc* poller = nfc_alloc();
+    Nfc* listener = nfc_alloc();
+    NfcListener* felica_listener = nfc_listener_alloc(
+        listener, NfcProtocolFelica, nfc_device_get_data(nfc_device, NfcProtocolFelica));
+    nfc_listener_start(felica_listener, NULL, NULL);
+
+    FelicaData* felica_data = felica_alloc();
+    FelicaError error = felica_poller_sync_read(poller, felica_data, NULL);
+
+    nfc_listener_stop(felica_listener);
+    nfc_listener_free(felica_listener);
+    nfc_free(listener);
+    nfc_free(poller);
+    nfc_device_free(nfc_device);
+
+    mu_assert(error == FelicaErrorNone, "felica_poller_sync_read() failed");
+    mu_assert(simple_array_get_count(felica_data->systems) == 1, "system count != 1");
+
+    const FelicaSystem* system = simple_array_cget(felica_data->systems, 0);
+    mu_assert(system->key_version == 0x0001, "system key_version != 0x0001");
+    mu_assert(simple_array_get_count(system->public_blocks) == 2, "public block count != 2");
+
+    const FelicaPublicBlock* pb0 = simple_array_cget(system->public_blocks, 0);
+    mu_assert(pb0->service_code == 0x0009, "block[0] service_code != 0x0009");
+    mu_assert(pb0->block_idx == 0, "block[0] block_idx != 0");
+    static const uint8_t expected_block0[FELICA_DATA_BLOCK_SIZE] = {
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10};
+    mu_assert(
+        memcmp(pb0->block.data, expected_block0, FELICA_DATA_BLOCK_SIZE) == 0,
+        "block[0] data mismatch");
+
+    const FelicaPublicBlock* pb1 = simple_array_cget(system->public_blocks, 1);
+    mu_assert(pb1->service_code == 0x000B, "block[1] service_code != 0x000B");
+    mu_assert(pb1->block_idx == 0, "block[1] block_idx != 0");
+    static const uint8_t expected_block1[FELICA_DATA_BLOCK_SIZE] = {
+        0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8,
+        0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, 0xB0};
+    mu_assert(
+        memcmp(pb1->block.data, expected_block1, FELICA_DATA_BLOCK_SIZE) == 0,
+        "block[1] data mismatch");
+
+    felica_free(felica_data);
+}
+
 MU_TEST(felica_read_auth) {
     FelicaData* felica_data = felica_alloc();
     FelicaCardKey card_key;
@@ -866,6 +917,7 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(mf_classic_dict_test);
     MU_RUN_TEST(felica_read);
     MU_RUN_TEST(felica_read_auth);
+    MU_RUN_TEST(felica_standard_read);
 
     MU_RUN_TEST(slix_file_with_capabilities_test);
     MU_RUN_TEST(slix_set_password_default_cap_correct_pass);
