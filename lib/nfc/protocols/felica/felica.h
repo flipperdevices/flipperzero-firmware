@@ -174,6 +174,7 @@ typedef struct {
 
 typedef struct {
     uint16_t code;
+    uint16_t end_code;
     uint16_t first_idx;
     uint16_t last_idx;
 } FelicaArea;

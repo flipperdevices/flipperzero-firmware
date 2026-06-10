@@ -198,11 +198,21 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                     FelicaArea* area = simple_array_get(system->areas, i);
                     if(sscanf(
                            furi_string_get_cstr(str_data_buffer),
-                           "| Code %04hX | Services #%03hX-#%03hX |",
+                           "| Code %04hX | End %04hX | Services #%03hX-#%03hX |",
                            &area->code,
+                           &area->end_code,
                            &area->first_idx,
-                           &area->last_idx) != 3) {
-                        break;
+                           &area->last_idx) != 4) {
+                        // Fall back to old format without end_code
+                        if(sscanf(
+                               furi_string_get_cstr(str_data_buffer),
+                               "| Code %04hX | Services #%03hX-#%03hX |",
+                               &area->code,
+                               &area->first_idx,
+                               &area->last_idx) != 3) {
+                            break;
+                        }
+                        area->end_code = 0xFFFF;
                     }
                 }
             } while(false);
@@ -380,8 +390,9 @@ bool felica_save(const FelicaData* data, FlipperFormat* ff) {
                     furi_string_printf(str_key_buffer, "Area %03X", i);
                     furi_string_printf(
                         str_data_buffer,
-                        "| Code %04X | Services #%03X-#%03X |",
+                        "| Code %04X | End %04X | Services #%03X-#%03X |",
                         area->code,
+                        area->end_code,
                         area->first_idx,
                         area->last_idx);
                     if(!flipper_format_write_string(
