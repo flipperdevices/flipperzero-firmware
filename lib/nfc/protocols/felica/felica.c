@@ -179,6 +179,14 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
             system->system_code = system_code;
             system->system_code_idx = sys_idx;
 
+            // Try to read system key version from the same value line (backward compat: default 0xFFFF)
+            system->key_version = 0xFFFF;
+            const char* sys_kv_ptr =
+                strstr(furi_string_get_cstr(str_data_buffer), "Key version ");
+            if(sys_kv_ptr) {
+                sscanf(sys_kv_ptr, "Key version %04hX", &system->key_version);
+            }
+
             // Areas
             do {
                 uint32_t area_count = 0;
@@ -198,21 +206,32 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                     FelicaArea* area = simple_array_get(system->areas, i);
                     if(sscanf(
                            furi_string_get_cstr(str_data_buffer),
-                           "| Code %04hX | End %04hX | Services #%03hX-#%03hX |",
+                           "| Code %04hX | End %04hX | Services #%03hX-#%03hX | Key version %04hX |",
                            &area->code,
                            &area->end_code,
                            &area->first_idx,
-                           &area->last_idx) != 4) {
-                        // Fall back to old format without end_code
+                           &area->last_idx,
+                           &area->key_version) != 5) {
+                        // Fall back to format without key version
+                        area->key_version = 0xFFFF;
                         if(sscanf(
                                furi_string_get_cstr(str_data_buffer),
-                               "| Code %04hX | Services #%03hX-#%03hX |",
+                               "| Code %04hX | End %04hX | Services #%03hX-#%03hX |",
                                &area->code,
+                               &area->end_code,
                                &area->first_idx,
-                               &area->last_idx) != 3) {
-                            break;
+                               &area->last_idx) != 4) {
+                            // Fall back to old format without end_code
+                            if(sscanf(
+                                   furi_string_get_cstr(str_data_buffer),
+                                   "| Code %04hX | Services #%03hX-#%03hX |",
+                                   &area->code,
+                                   &area->first_idx,
+                                   &area->last_idx) != 3) {
+                                break;
+                            }
+                            area->end_code = 0xFFFF;
                         }
-                        area->end_code = 0xFFFF;
                     }
                 }
             } while(false);
@@ -243,6 +262,14 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                         break;
                     }
                     service->attr = service->code & 0x3F;
+
+                    // Try to read key version from the same line (backward compat: default 0xFFFF)
+                    service->key_version = 0xFFFF;
+                    const char* svc_kv_ptr =
+                        strstr(furi_string_get_cstr(str_data_buffer), "Key version ");
+                    if(svc_kv_ptr) {
+                        sscanf(svc_kv_ptr, "Key version %04hX", &service->key_version);
+                    }
                 }
             } while(false);
 
@@ -366,7 +393,11 @@ bool felica_save(const FelicaData* data, FlipperFormat* ff) {
             furi_string_reset(str_data_buffer);
             furi_string_reset(str_key_buffer);
             furi_string_printf(str_key_buffer, "\n\nSystem %02X", (uint8_t)sys_idx);
-            furi_string_printf(str_data_buffer, "%04X", system->system_code);
+            furi_string_printf(
+                str_data_buffer,
+                "%04X | Key version %04X |",
+                system->system_code,
+                system->key_version);
             if(!flipper_format_write_string(
                    ff, furi_string_get_cstr(str_key_buffer), str_data_buffer))
                 break;
@@ -390,11 +421,12 @@ bool felica_save(const FelicaData* data, FlipperFormat* ff) {
                     furi_string_printf(str_key_buffer, "Area %03X", i);
                     furi_string_printf(
                         str_data_buffer,
-                        "| Code %04X | End %04X | Services #%03X-#%03X |",
+                        "| Code %04X | End %04X | Services #%03X-#%03X | Key version %04X |",
                         area->code,
                         area->end_code,
                         area->first_idx,
-                        area->last_idx);
+                        area->last_idx,
+                        area->key_version);
                     if(!flipper_format_write_string(
                            ff, furi_string_get_cstr(str_key_buffer), str_data_buffer))
                         break;
@@ -416,6 +448,8 @@ bool felica_save(const FelicaData* data, FlipperFormat* ff) {
                         service->code,
                         service->attr);
                     felica_service_get_attribute_string(service, str_data_buffer);
+                    furi_string_cat_printf(
+                        str_data_buffer, " Key version %04X |", service->key_version);
                     if(!flipper_format_write_string(
                            ff, furi_string_get_cstr(str_key_buffer), str_data_buffer))
                         break;

@@ -356,6 +356,50 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
         simple_array_get_count(system->services),
         simple_array_get_count(system->areas));
 
+    // Request key versions for system (0xFFFF), all areas, and all services in one command.
+    // Buffer limit: 11 + 2n ≤ 254 bytes → n ≤ 121
+    do {
+        uint32_t svc_count = simple_array_get_count(system->services);
+        uint32_t area_cnt = simple_array_get_count(system->areas);
+        uint32_t total_u32 = 1 + area_cnt + svc_count;
+        uint8_t total = (uint8_t)(total_u32 > 121 ? 121 : total_u32);
+
+        uint16_t* codes = malloc(total * sizeof(uint16_t));
+        uint16_t* key_vers = malloc(total * sizeof(uint16_t));
+
+        codes[0] = 0xFFFF; // system key version sentinel
+        uint8_t idx = 1;
+        for(uint32_t i = 0; i < area_cnt && idx < total; i++, idx++) {
+            const FelicaArea* a = simple_array_cget(system->areas, i);
+            codes[idx] = a->code;
+        }
+        for(uint32_t i = 0; i < svc_count && idx < total; i++, idx++) {
+            const FelicaService* s = simple_array_cget(system->services, i);
+            codes[idx] = s->code;
+        }
+
+        FelicaError req_err = felica_poller_request_service(instance, codes, total, key_vers);
+
+        if(req_err == FelicaErrorNone) {
+            system->key_version = key_vers[0];
+            idx = 1;
+            for(uint32_t i = 0; i < area_cnt && idx < total; i++, idx++) {
+                FelicaArea* a = simple_array_get(system->areas, i);
+                a->key_version = key_vers[idx];
+            }
+            for(uint32_t i = 0; i < svc_count && idx < total; i++, idx++) {
+                FelicaService* s = simple_array_get(system->services, i);
+                s->key_version = key_vers[idx];
+            }
+            FURI_LOG_D(TAG, "System key version: %04X", system->key_version);
+        } else {
+            FURI_LOG_W(TAG, "Request service failed, key versions unavailable: %d", req_err);
+        }
+
+        free(codes);
+        free(key_vers);
+    } while(false);
+
     felica_service_array_clear(service_buffer);
     felica_area_array_clear(area_buffer);
 

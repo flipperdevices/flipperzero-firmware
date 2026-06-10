@@ -356,6 +356,72 @@ static FelicaError felica_listener_command_handler_standard_write(
     return felica_listener_frame_exchange(instance, instance->tx_buffer);
 }
 
+static FelicaError felica_listener_command_handler_request_service(
+    FelicaListener* instance,
+    const FelicaListenerGenericRequest* const generic_request) {
+    const uint8_t* raw = (const uint8_t*)generic_request;
+    // raw[0]=length, raw[1]=0x02, raw[2..9]=IDm, raw[10]=n, raw[11..10+2n]=area/service_list
+    uint8_t n = raw[10];
+    FURI_LOG_D(TAG, "Request Service cmd, n=%u", n);
+
+    // Clamp to what fits in the tx buffer (126 bytes payload max, 11 header, 2 per entry)
+    const uint8_t n_max = (FELICA_LISTENER_MAX_BUFFER_SIZE - 2 - 11) / 2;
+    if(n > n_max) n = n_max;
+
+    const FelicaSystem* system = NULL;
+    if(simple_array_get_count(instance->data->systems) > 0) {
+        system = simple_array_cget(instance->data->systems, 0);
+    }
+
+    // Response: length(1) + RC(1) + IDm(8) + n(1) + key_version_list(2n)
+    size_t resp_size = 11 + (size_t)n * 2;
+    uint8_t* resp_buf = malloc(resp_size);
+    resp_buf[0] = (uint8_t)resp_size;
+    resp_buf[1] = FELICA_CMD_REQUEST_SERVICE_RESP;
+    memcpy(resp_buf + 2, instance->data->idm.data, 8);
+    resp_buf[10] = n;
+
+    for(uint8_t i = 0; i < n; i++) {
+        uint16_t req_code = (uint16_t)(raw[11 + i * 2] | ((uint16_t)raw[12 + i * 2] << 8));
+        uint16_t kv = 0xFFFF;
+
+        if(req_code == 0xFFFF) {
+            // System key version
+            kv = system ? system->key_version : 0xFFFF;
+        } else if(system) {
+            // Search areas first
+            uint32_t area_count = simple_array_get_count(system->areas);
+            for(uint32_t j = 0; j < area_count; j++) {
+                const FelicaArea* area = simple_array_cget(system->areas, j);
+                if(area->code == req_code) {
+                    kv = area->key_version;
+                    break;
+                }
+            }
+            if(kv == 0xFFFF) {
+                // Search services
+                uint32_t svc_count = simple_array_get_count(system->services);
+                for(uint32_t j = 0; j < svc_count; j++) {
+                    const FelicaService* svc = simple_array_cget(system->services, j);
+                    if(svc->code == req_code) {
+                        kv = svc->key_version;
+                        break;
+                    }
+                }
+            }
+        }
+
+        resp_buf[11 + i * 2] = (uint8_t)(kv & 0xFF);
+        resp_buf[12 + i * 2] = (uint8_t)(kv >> 8);
+    }
+
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_append_bytes(instance->tx_buffer, resp_buf, resp_size);
+    free(resp_buf);
+
+    return felica_listener_frame_exchange(instance, instance->tx_buffer);
+}
+
 static FelicaError felica_listener_command_handler_search_service_code(
     FelicaListener* instance,
     const FelicaListenerGenericRequest* const generic_request) {
@@ -480,6 +546,8 @@ static FelicaError felica_listener_process_request(
     const FelicaListenerGenericRequest* generic_request) {
     const uint8_t cmd_code = generic_request->header.code;
     switch(cmd_code) {
+    case FELICA_CMD_REQUEST_SERVICE:
+        return felica_listener_command_handler_request_service(instance, generic_request);
     case FELICA_CMD_READ_WITHOUT_ENCRYPTION:
         if(instance->data->workflow_type == FelicaStandard) {
             return felica_listener_command_handler_standard_read(instance, generic_request);

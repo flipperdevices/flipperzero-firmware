@@ -124,6 +124,12 @@ FelicaError felica_poller_list_system_code(
     FelicaPoller* instance,
     FelicaListSystemCodeCommandResponse** response_ptr);
 
+FelicaError felica_poller_request_service(
+    FelicaPoller* instance,
+    const uint16_t* codes,
+    uint8_t code_count,
+    uint16_t* key_versions_out);
+
 #ifdef __cplusplus
 }
 #endif

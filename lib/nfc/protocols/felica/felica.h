@@ -50,6 +50,8 @@ extern "C" {
 #define FELICA_TIME_SLOT_8      (0x07U)
 #define FELICA_TIME_SLOT_16     (0x0FU)
 
+#define FELICA_CMD_REQUEST_SERVICE          0x02
+#define FELICA_CMD_REQUEST_SERVICE_RESP     0x03
 #define FELICA_CMD_LIST_SERVICE_CODE        0x0A
 #define FELICA_CMD_LIST_SERVICE_CODE_RESP   0x0B
 #define FELICA_CMD_REQUEST_SYSTEM_CODE      0x0C
@@ -170,6 +172,7 @@ typedef union {
 typedef struct {
     uint16_t code;
     uint8_t attr;
+    uint16_t key_version;
 } FelicaService;
 
 typedef struct {
@@ -177,6 +180,7 @@ typedef struct {
     uint16_t end_code;
     uint16_t first_idx;
     uint16_t last_idx;
+    uint16_t key_version;
 } FelicaArea;
 
 typedef struct {
@@ -188,6 +192,7 @@ typedef struct {
 typedef struct {
     uint8_t system_code_idx;
     uint16_t system_code;
+    uint16_t key_version;
     SimpleArray* services;
     SimpleArray* areas;
     SimpleArray* public_blocks;

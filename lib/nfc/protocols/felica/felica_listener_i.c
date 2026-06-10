@@ -181,7 +181,8 @@ bool felica_listener_check_block_list_size(
     furi_assert(req);
 
     if(req->header.code == FELICA_CMD_REQUEST_SYSTEM_CODE ||
-       req->header.code == FELICA_CMD_LIST_SERVICE_CODE) {
+       req->header.code == FELICA_CMD_LIST_SERVICE_CODE ||
+       req->header.code == FELICA_CMD_REQUEST_SERVICE) {
         return true;
     }
 
