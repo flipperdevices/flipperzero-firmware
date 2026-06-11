@@ -123,6 +123,22 @@ const uint32_t mesurement_units_value[] = {
     LocaleMeasurementUnitsImperial,
 };
 
+const char* const language_text[] = {
+    "English",
+    "Hungarian",
+};
+
+const uint32_t language_value[] = {
+    LocaleLanguageEnglish,
+    LocaleLanguageHungarian,
+};
+
+static void language_changed(VariableItem* item) {
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, language_text[index]);
+    locale_set_language(language_value[index]);
+}
+
 static void mesurement_units_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, mesurement_units_text[index]);
@@ -227,6 +243,13 @@ SystemSettings* system_settings_alloc(void) {
     VariableItem* item;
     uint8_t value_index;
     app->var_item_list = variable_item_list_alloc();
+
+    item = variable_item_list_add(
+        app->var_item_list, "Language", COUNT_OF(language_text), language_changed, app);
+    value_index =
+        value_index_uint32(locale_get_language(), language_value, COUNT_OF(language_value));
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, language_text[value_index]);
 
     item = variable_item_list_add(
         app->var_item_list, "Hand Orient", COUNT_OF(hand_mode), hand_orient_changed, app);

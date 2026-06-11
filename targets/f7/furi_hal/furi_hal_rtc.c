@@ -29,7 +29,8 @@ typedef struct {
 
 typedef struct {
     uint8_t log_level    : 4;
-    uint8_t log_reserved : 4;
+    uint8_t log_reserved : 2;
+    FuriHalRtcLocaleLanguage locale_language : 2;
     uint8_t flags;
     FuriHalRtcBootMode boot_mode                 : 4;
     FuriHalRtcHeapTrackMode heap_track_mode      : 2;
@@ -390,6 +391,19 @@ FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat(void) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
     return data->locale_dateformat;
+}
+
+void furi_hal_rtc_set_locale_language(FuriHalRtcLocaleLanguage value) {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    SystemReg* data = (SystemReg*)&data_reg;
+    data->locale_language = value;
+    furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
+}
+
+FuriHalRtcLocaleLanguage furi_hal_rtc_get_locale_language(void) {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    SystemReg* data = (SystemReg*)&data_reg;
+    return data->locale_language;
 }
 
 void furi_hal_rtc_set_datetime(DateTime* datetime) {

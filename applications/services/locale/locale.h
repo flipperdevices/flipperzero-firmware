@@ -24,6 +24,13 @@ typedef enum {
     LocaleDateFormatYMD = 2, /**< Year/Month/Day */
 } LocaleDateFormat;
 
+typedef enum {
+    LocaleLanguageEnglish = 0,
+    LocaleLanguageHungarian = 1,
+
+    LocaleLanguageMax,
+} LocaleLanguage;
+
 /** Get Locale measurement units
  *
  * @return     The locale measurement units.
@@ -88,6 +95,24 @@ LocaleDateFormat locale_get_date_format(void);
  * @param[in]  format  The Locale DateFormat
  */
 void locale_set_date_format(LocaleDateFormat format);
+
+/** Get locale language
+ *
+ * @return     The locale language.
+ */
+LocaleLanguage locale_get_language(void);
+
+/** Set locale language
+ *
+ * @param[in]  language  The locale language
+ */
+void locale_set_language(LocaleLanguage language);
+
+/** Get translated text for the current language
+ *
+ * @param[out]  out_str  The localised string
+ */
+void i18n(char* out_str);
 
 /** Format date to furi string
  *

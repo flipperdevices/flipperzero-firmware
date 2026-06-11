@@ -26,6 +26,25 @@ void locale_set_date_format(LocaleDateFormat format) {
     furi_hal_rtc_set_locale_dateformat((FuriHalRtcLocaleDateFormat)format);
 }
 
+LocaleLanguage locale_get_language(void) {
+    LocaleLanguage language = (LocaleLanguage)furi_hal_rtc_get_locale_language();
+    if(language >= LocaleLanguageMax) {
+        language = LocaleLanguageEnglish;
+    }
+    return language;
+}
+
+void locale_set_language(LocaleLanguage language) {
+    if(language >= LocaleLanguageMax) {
+        language = LocaleLanguageEnglish;
+    }
+    furi_hal_rtc_set_locale_language((FuriHalRtcLocaleLanguage)language);
+}
+
+void i18n(char* text) {
+    text[0] = 'a';
+}
+
 float locale_fahrenheit_to_celsius(float temp_f) {
     return (temp_f - 32.f) / 1.8f;
 }

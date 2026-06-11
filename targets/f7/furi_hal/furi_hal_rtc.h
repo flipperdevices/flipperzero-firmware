@@ -72,6 +72,12 @@ typedef enum {
 } FuriHalRtcLocaleDateFormat;
 
 typedef enum {
+    FuriHalRtcLocaleLanguageEnglish = 0x0,
+    FuriHalRtcLocaleLanguageHungarian = 0x1,
+} FuriHalRtcLocaleLanguage;
+
+
+typedef enum {
     FuriHalRtcLogDeviceUsart = 0x0, /**< Default: USART */
     FuriHalRtcLogDeviceLpuart = 0x1, /**< Default: LPUART */
     FuriHalRtcLogDeviceReserved = 0x2, /**< Reserved for future use */
@@ -242,6 +248,18 @@ void furi_hal_rtc_set_locale_dateformat(FuriHalRtcLocaleDateFormat value);
  * @return     The RTC Locale Date Format
  */
 FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat(void);
+
+/** Set RTC Locale Language
+ *
+ * @param[in]  value  The RTC Locale Language
+ */
+void furi_hal_rtc_set_locale_language(FuriHalRtcLocaleLanguage value);
+
+/** Get RTC Locale Language
+ *
+ * @return     The RTC Locale Language
+ */
+FuriHalRtcLocaleLanguage furi_hal_rtc_get_locale_language(void);
 
 /** Set RTC Date Time
  *
