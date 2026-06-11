@@ -36,6 +36,7 @@ FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
 
     memcpy(instance->mc_shadow.data, instance->data->data.fs.mc.data, FELICA_DATA_BLOCK_SIZE);
     instance->data->data.fs.state.data[0] = 0;
+    instance->mode = 0;
     nfc_config(instance->nfc, NfcModeListener, NfcTechFelica);
     const uint16_t system_code = *(uint16_t*)data->data.fs.sys_c.data;
     nfc_felica_listener_set_sensf_res_data(
@@ -348,6 +349,24 @@ static FelicaError felica_listener_command_handler_standard_write(
     return felica_listener_frame_exchange(instance, instance->tx_buffer);
 }
 
+static FelicaError felica_listener_command_handler_request_response(
+    FelicaListener* instance,
+    const FelicaListenerGenericRequest* const generic_request) {
+    UNUSED(generic_request);
+
+    // Response: length(1) + RC(1) + IDm(8) + mode(1) = 11 bytes
+    const size_t resp_size = 11;
+    uint8_t resp_buf[resp_size];
+    resp_buf[0] = (uint8_t)resp_size;
+    resp_buf[1] = FELICA_CMD_REQUEST_RESPONSE_RESP;
+    memcpy(resp_buf + 2, instance->data->idm.data, 8);
+    resp_buf[10] = instance->mode;
+
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_append_bytes(instance->tx_buffer, resp_buf, resp_size);
+    return felica_listener_frame_exchange(instance, instance->tx_buffer);
+}
+
 static FelicaError felica_listener_command_handler_request_service(
     FelicaListener* instance,
     const FelicaListenerGenericRequest* const generic_request) {
@@ -528,6 +547,8 @@ static FelicaError felica_listener_process_request(
     const FelicaListenerGenericRequest* generic_request) {
     const uint8_t cmd_code = generic_request->header.code;
     switch(cmd_code) {
+    case FELICA_CMD_REQUEST_RESPONSE:
+        return felica_listener_command_handler_request_response(instance, generic_request);
     case FELICA_CMD_REQUEST_SERVICE:
         return felica_listener_command_handler_request_service(instance, generic_request);
     case FELICA_CMD_READ_WITHOUT_ENCRYPTION:

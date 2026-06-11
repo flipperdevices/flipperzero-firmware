@@ -182,7 +182,8 @@ bool felica_listener_check_block_list_size(
 
     if(req->header.code == FELICA_CMD_REQUEST_SYSTEM_CODE ||
        req->header.code == FELICA_CMD_LIST_SERVICE_CODE ||
-       req->header.code == FELICA_CMD_REQUEST_SERVICE) {
+       req->header.code == FELICA_CMD_REQUEST_SERVICE ||
+       req->header.code == FELICA_CMD_REQUEST_RESPONSE) {
         return true;
     }
 
@@ -226,6 +227,7 @@ void felica_listener_reset(FelicaListener* instance) {
     instance->auth.context.auth_status.external = false;
     instance->data->data.fs.state.data[0] = 0;
     instance->rc_written = false;
+    instance->mode = 0;
     memset(instance->auth.session_key.data, 0, FELICA_DATA_BLOCK_SIZE);
 
     memcpy(instance->data->data.fs.mc.data, instance->mc_shadow.data, FELICA_DATA_BLOCK_SIZE);

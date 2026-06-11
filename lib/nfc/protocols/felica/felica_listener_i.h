@@ -103,6 +103,7 @@ struct FelicaListener {
     uint8_t requested_blocks[FELICA_LISTENER_READ_BLOCK_COUNT_MAX];
     uint8_t mac_calc_start;
     bool rc_written;
+    uint8_t mode;
 
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
