@@ -1,3 +1,4 @@
+#include "locale/locale.h"
 #include <furi.h>
 
 #include <gui/gui.h>
@@ -18,14 +19,14 @@ static DialogMessageButton about_screen_product(DialogsApp* dialogs, DialogMessa
     DialogMessageButton result;
 
     FuriString* screen_header = furi_string_alloc_printf(
-        "Product: %s\n"
-        "Model: %s",
+        i18n("Product: %s\n"
+             "Model: %s"),
         furi_hal_version_get_model_name(),
         furi_hal_version_get_model_code());
 
     FuriString* screen_text = furi_string_alloc_printf(
-        "FCC ID: %s\n"
-        "IC: %s",
+        i18n("FCC ID: %s\n"
+             "IC: %s"),
         furi_hal_version_get_fcc_id(),
         furi_hal_version_get_ic_id());
 
@@ -44,10 +45,10 @@ static DialogMessageButton about_screen_product(DialogsApp* dialogs, DialogMessa
 static DialogMessageButton about_screen_address(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    const char* screen_text = "Flipper Devices Inc.\n"
-                              "Suite B #551, 2803\n"
-                              "Philadelphia Pike, Claymont\n"
-                              "DE, USA 19703\n";
+    const char* screen_text = i18n("Flipper Devices Inc.\n"
+                                   "Suite B #551, 2803\n"
+                                   "Philadelphia Pike, Claymont\n"
+                                   "DE, USA 19703\n");
 
     dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
@@ -58,9 +59,9 @@ static DialogMessageButton about_screen_address(DialogsApp* dialogs, DialogMessa
 static DialogMessageButton about_screen_compliance(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    const char* screen_text = "For all compliance\n"
-                              "certificates, please visit:\n"
-                              "www.flipp.dev/compliance";
+    const char* screen_text = i18n("For all compliance\n"
+                                   "certificates, please visit:\n"
+                                   "www.flipp.dev/compliance");
 
     dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
@@ -143,15 +144,15 @@ static DialogMessageButton about_screen_hw_version(DialogsApp* dialogs, DialogMe
         furi_hal_version_get_hw_connect(),
         furi_hal_version_get_hw_region_name(),
         furi_hal_region_get_name(),
-        my_name ? my_name : "Unknown");
+        my_name ? my_name : i18n("Unknown"));
 
-    furi_string_cat_printf(buffer, "Serial Number:\n");
+    furi_string_cat_printf(buffer, i18n("Serial Number:\n"));
     const uint8_t* uid = furi_hal_version_uid();
     for(size_t i = 0; i < furi_hal_version_uid_size(); i++) {
         furi_string_cat_printf(buffer, "%02X", uid[i]);
     }
 
-    dialog_message_set_header(message, "HW Version Info:", 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, i18n("HW Version Info:"), 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, furi_string_get_cstr(buffer), 0, 13, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
     furi_string_free(buffer);
@@ -170,7 +171,7 @@ static DialogMessageButton about_screen_fw_version(DialogsApp* dialogs, DialogMe
 #endif
 
     if(!ver) { //-V1051
-        furi_string_cat_printf(buffer, "No info\n");
+        furi_string_cat_printf(buffer, i18n("No info\n"));
     } else {
         uint16_t api_major, api_minor;
         furi_hal_info_get_api_version(&api_major, &api_minor);
@@ -183,12 +184,12 @@ static DialogMessageButton about_screen_fw_version(DialogsApp* dialogs, DialogMe
             version_get_githash(ver),
             api_major,
             api_minor,
-            c2_ver ? c2_ver->StackTypeString : "<none>",
+            c2_ver ? c2_ver->StackTypeString : i18n("<none>"),
             version_get_target(ver),
             version_get_gitbranch(ver));
     }
 
-    dialog_message_set_header(message, "FW Version Info:", 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, i18n("FW Version Info:"), 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, furi_string_get_cstr(buffer), 0, 13, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
     furi_string_free(buffer);
@@ -228,11 +229,11 @@ int32_t about_settings_app(void* p) {
 
     while(1) {
         if(screen_index >= COUNT_OF(about_screens) - 1) {
-            dialog_message_set_buttons(message, "Prev.", NULL, NULL);
+            dialog_message_set_buttons(message, i18n("Prev."), NULL, NULL);
         } else if(screen_index == 0) {
-            dialog_message_set_buttons(message, NULL, NULL, "Next");
+            dialog_message_set_buttons(message, NULL, NULL, i18n("Next"));
         } else {
-            dialog_message_set_buttons(message, "Prev.", NULL, "Next");
+            dialog_message_set_buttons(message, i18n("Prev."), NULL, i18n("Next"));
         }
 
         screen_result = about_screens[screen_index](dialogs, message);
