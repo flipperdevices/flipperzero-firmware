@@ -110,9 +110,10 @@ void locale_set_language(LocaleLanguage language);
 
 /** Get translated text for the current language
  *
- * @param[out]  out_str  The localised string
+ * @param[out]  id  ID for the string, AKA the English original
+ * @return          The localised string
  */
-void i18n(char* out_str);
+char* i18n(char* id);
 
 /** Format date to furi string
  *

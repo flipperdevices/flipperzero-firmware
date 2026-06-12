@@ -125,7 +125,7 @@ const uint32_t mesurement_units_value[] = {
 
 const char* const language_text[] = {
     "English",
-    "Hungarian",
+    "magyar",
 };
 
 const uint32_t language_value[] = {

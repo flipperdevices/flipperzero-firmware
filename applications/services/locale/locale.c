@@ -41,8 +41,10 @@ void locale_set_language(LocaleLanguage language) {
     furi_hal_rtc_set_locale_language((FuriHalRtcLocaleLanguage)language);
 }
 
-void i18n(char* text) {
-    text[0] = 'a';
+char* i18n(char* text) {
+    if(!locale_get_language()) return text; //English == 0
+
+    return "asdfgh12345";
 }
 
 float locale_fahrenheit_to_celsius(float temp_f) {
