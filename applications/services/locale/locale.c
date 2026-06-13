@@ -44,7 +44,7 @@ void locale_set_language(LocaleLanguage language) {
 char* i18n(char* text) {
     if(!locale_get_language()) return text; //English == 0
 
-    return "asdfgh12345";
+    return "i18n";
 }
 
 float locale_fahrenheit_to_celsius(float temp_f) {
