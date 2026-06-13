@@ -1,3 +1,4 @@
+#include "locale/locale.h"
 #include <applications.h>
 #include <lib/toolbox/value_index.h>
 
@@ -13,21 +14,21 @@ typedef enum {
 } DesktopSettingsEntry;
 
 #define AUTO_LOCK_DELAY_COUNT 6
-static const char* const auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
-    "OFF",
-    "30s",
-    "60s",
-    "2min",
-    "5min",
-    "10min",
+static const char* auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
 };
 static const uint32_t auto_lock_delay_value[AUTO_LOCK_DELAY_COUNT] =
     {0, 30000, 60000, 120000, 300000, 600000};
 
 #define CLOCK_ENABLE_COUNT 2
-const char* const clock_enable_text[CLOCK_ENABLE_COUNT] = {
-    "OFF",
-    "ON",
+const char* clock_enable_text[CLOCK_ENABLE_COUNT] = {
+    NULL,
+    NULL,
 };
 
 const uint32_t clock_enable_value[CLOCK_ENABLE_COUNT] = {0, 1};
@@ -60,11 +61,25 @@ void desktop_settings_scene_start_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    variable_item_list_add(variable_item_list, "PIN Setup", 1, NULL, NULL);
+    if(!auto_lock_delay_text[0]) {
+        auto_lock_delay_text[0] = i18n("OFF");
+        auto_lock_delay_text[1] = i18n("30s");
+        auto_lock_delay_text[2] = i18n("60s");
+        auto_lock_delay_text[3] = i18n("2min");
+        auto_lock_delay_text[4] = i18n("5min");
+        auto_lock_delay_text[5] = i18n("10min");
+    }
+
+    if(!clock_enable_text[0]) {
+        clock_enable_text[0] = i18n("OFF");
+        clock_enable_text[1] = i18n("ON");
+    }
+
+    variable_item_list_add(variable_item_list, i18n("PIN Setup"), 1, NULL, NULL);
 
     item = variable_item_list_add(
         variable_item_list,
-        "Auto Lock Time",
+        i18n("Auto Lock Time"),
         AUTO_LOCK_DELAY_COUNT,
         desktop_settings_scene_start_auto_lock_delay_changed,
         app);
@@ -76,7 +91,7 @@ void desktop_settings_scene_start_on_enter(void* context) {
 
     item = variable_item_list_add(
         variable_item_list,
-        "Show Clock",
+        i18n("Show Clock"),
         CLOCK_ENABLE_COUNT,
         desktop_settings_scene_start_clock_enable_changed,
         app);
@@ -86,9 +101,9 @@ void desktop_settings_scene_start_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, clock_enable_text[value_index]);
 
-    variable_item_list_add(variable_item_list, "Set Quick Access Apps", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, i18n("Set Quick Access Apps"), 1, NULL, NULL);
 
-    variable_item_list_add(variable_item_list, "Happy Mode", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, i18n("Happy Mode"), 1, NULL, NULL);
 
     variable_item_list_set_enter_callback(
         variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);

@@ -2,6 +2,7 @@
 #include "applications.h"
 #include "desktop_settings_scene.h"
 #include "desktop_settings_scene_i.h"
+#include "locale/locale.h"
 #include <flipper_application/flipper_application.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
@@ -9,17 +10,17 @@
 #define APPS_COUNT (FLIPPER_APPS_COUNT + FLIPPER_EXTERNAL_APPS_COUNT)
 
 #define DEFAULT_INDEX                  (0)
-#define EXTERNAL_BROWSER_NAME          ("(   ) Apps Menu (Default)")
-#define EXTERNAL_BROWSER_NAME_SELECTED ("(*) Apps Menu (Default)")
-#define PASSPORT_NAME                  ("(   ) Passport (Default)")
-#define PASSPORT_NAME_SELECTED         ("(*) Passport (Default)")
+#define EXTERNAL_BROWSER_NAME          (i18n("(   ) Apps Menu (Default)"))
+#define EXTERNAL_BROWSER_NAME_SELECTED (i18n("(*) Apps Menu (Default)"))
+#define PASSPORT_NAME                  (i18n("(   ) Passport (Default)"))
+#define PASSPORT_NAME_SELECTED         (i18n("(*) Passport (Default)"))
 
-#define SELECTED_PREFIX     ("(*) ")
-#define NOT_SELECTED_PREFIX ("(   ) ")
+#define SELECTED_PREFIX     (i18n("(*) "))
+#define NOT_SELECTED_PREFIX (i18n("(   ) "))
 
 #define EXTERNAL_APPLICATION_INDEX         (1)
-#define EXTERNAL_APPLICATION_NAME          ("(   ) [Select App]")
-#define EXTERNAL_APPLICATION_NAME_SELECTED ("(*) [Select App]")
+#define EXTERNAL_APPLICATION_NAME          (i18n("(   ) [Select App]"))
+#define EXTERNAL_APPLICATION_NAME_SELECTED (i18n("(*) [Select App]"))
 
 #define PRESELECTED_SPECIAL 0xffffffff
 
@@ -143,23 +144,23 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
     switch(favorite_id) {
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppLeftShort:
     case SCENE_STATE_SET_DUMMY_APP | DummyAppLeft:
-        submenu_set_header(submenu, "Left - Press");
+        submenu_set_header(submenu, i18n("Left - Press"));
         break;
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppLeftLong:
-        submenu_set_header(submenu, "Left - Hold");
+        submenu_set_header(submenu, i18n("Left - Hold"));
         break;
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppRightShort:
     case SCENE_STATE_SET_DUMMY_APP | DummyAppRight:
-        submenu_set_header(submenu, "Right - Press");
+        submenu_set_header(submenu, i18n("Right - Press"));
         break;
     case SCENE_STATE_SET_FAVORITE_APP | FavoriteAppRightLong:
-        submenu_set_header(submenu, "Right - Hold");
+        submenu_set_header(submenu, i18n("Right - Hold"));
         break;
     case SCENE_STATE_SET_DUMMY_APP | DummyAppDown:
-        submenu_set_header(submenu, "Down - Press");
+        submenu_set_header(submenu, i18n("Down - Press"));
         break;
     case SCENE_STATE_SET_DUMMY_APP | DummyAppOk:
-        submenu_set_header(submenu, "Middle - Press");
+        submenu_set_header(submenu, i18n("Middle - Press"));
         break;
     default:
         break;

@@ -1,3 +1,4 @@
+#include "locale/locale.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/elements.h>
@@ -27,12 +28,12 @@ static void desktop_settings_view_pin_setup_howto2_draw(Canvas* canvas, void* mo
         0,
         AlignCenter,
         AlignTop,
-        "Forgotten PIN can only be\n"
-        "reset with entire device.\n"
-        "Read docs How to reset PIN.");
+        i18n("Forgotten PIN can only be\n"
+             "reset with entire device.\n"
+             "Read docs How to reset PIN."));
 
-    elements_button_right(canvas, "OK");
-    elements_button_left(canvas, "Cancel");
+    elements_button_right(canvas, i18n("OK"));
+    elements_button_left(canvas, i18n("Cancel"));
 }
 
 static bool desktop_settings_view_pin_setup_howto2_input(InputEvent* event, void* context) {

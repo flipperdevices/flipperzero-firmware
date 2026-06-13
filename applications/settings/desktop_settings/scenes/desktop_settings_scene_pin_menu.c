@@ -1,3 +1,4 @@
+#include "locale/locale.h"
 #include <gui/scene_manager.h>
 #include <applications.h>
 
@@ -19,7 +20,7 @@ void desktop_settings_scene_pin_menu_on_enter(void* context) {
     if(!desktop_pin_code_is_set()) {
         submenu_add_item(
             submenu,
-            "Set PIN",
+            i18n("Set PIN"),
             DesktopSettingsCustomEventSetPin,
             desktop_settings_scene_pin_menu_submenu_callback,
             app);
@@ -27,20 +28,20 @@ void desktop_settings_scene_pin_menu_on_enter(void* context) {
     } else {
         submenu_add_item(
             submenu,
-            "Change PIN",
+            i18n("Change PIN"),
             DesktopSettingsCustomEventChangePin,
             desktop_settings_scene_pin_menu_submenu_callback,
             app);
 
         submenu_add_item(
             submenu,
-            "Remove PIN",
+            i18n("Remove PIN"),
             DesktopSettingsCustomEventDisablePin,
             desktop_settings_scene_pin_menu_submenu_callback,
             app);
     }
 
-    submenu_set_header(app->submenu, "PIN Code Settings");
+    submenu_set_header(app->submenu, i18n("PIN Code Settings"));
     submenu_set_selected_item(app->submenu, app->pin_menu_idx);
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewMenu);
 }

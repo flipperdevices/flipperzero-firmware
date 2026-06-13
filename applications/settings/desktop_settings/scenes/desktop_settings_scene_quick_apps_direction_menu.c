@@ -1,3 +1,4 @@
+#include "locale/locale.h"
 #include <gui/scene_manager.h>
 #include <applications.h>
 
@@ -60,7 +61,7 @@ void desktop_settings_scene_quick_apps_direction_menu_on_enter(void* context) {
             desktop_settings_scene_quick_apps_direction_menu_submenu_callback,
             app);
 
-        submenu_set_header(app->submenu, "Default Mode");
+        submenu_set_header(app->submenu, i18n("Default Mode"));
     } else {
         submenu_add_item(
             submenu,
@@ -90,7 +91,7 @@ void desktop_settings_scene_quick_apps_direction_menu_on_enter(void* context) {
             desktop_settings_scene_quick_apps_direction_menu_submenu_callback,
             app);
 
-        submenu_set_header(app->submenu, "Dummy Mode");
+        submenu_set_header(app->submenu, i18n("Dummy Mode"));
     }
 
     submenu_set_selected_item(app->submenu, app->quick_apps_direction_menu_idx);

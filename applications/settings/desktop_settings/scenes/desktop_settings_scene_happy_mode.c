@@ -1,3 +1,4 @@
+#include "locale/locale.h"
 #include <furi.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
@@ -26,17 +27,19 @@ void desktop_settings_scene_happy_mode_on_enter(void* context) {
     dolphin_get_settings(dolphin, &settings);
     furi_record_close(RECORD_DOLPHIN);
 
-    dialog_ex_set_header(app->dialog_ex, "Happy Mode", 64, 0, AlignCenter, AlignTop);
+    dialog_ex_set_header(app->dialog_ex, i18n("Happy Mode"), 64, 0, AlignCenter, AlignTop);
     dialog_ex_set_text(
         app->dialog_ex,
-        "I will never get angry at you\nfor not spending time with me\nas long as this mode is enabled",
+        i18n(
+            "I will never get angry at you\nfor not spending time with me\nas long as this mode is enabled"),
         64,
         30,
         AlignCenter,
         AlignCenter);
-    dialog_ex_set_left_button_text(app->dialog_ex, settings.happy_mode ? "Disable" : "Go back");
+    dialog_ex_set_left_button_text(
+        app->dialog_ex, settings.happy_mode ? i18n("Disable") : i18n("Go back"));
     dialog_ex_set_right_button_text(
-        app->dialog_ex, settings.happy_mode ? "Keep enabled" : "Enable");
+        app->dialog_ex, settings.happy_mode ? i18n("Keep enabled") : i18n("Enable"));
     dialog_ex_set_result_callback(app->dialog_ex, desktop_settings_scene_happy_mode_done_callback);
     dialog_ex_set_context(app->dialog_ex, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewDialogEx);

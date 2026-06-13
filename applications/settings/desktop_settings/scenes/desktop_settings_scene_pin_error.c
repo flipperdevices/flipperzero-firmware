@@ -1,3 +1,4 @@
+#include "locale/locale.h"
 #include <stdint.h>
 #include <core/check.h>
 #include <gui/scene_manager.h>
@@ -34,9 +35,10 @@ void desktop_settings_scene_pin_error_on_enter(void* context) {
     uint32_t state =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppScenePinError);
     if(state == SCENE_STATE_PIN_ERROR_MISMATCH) {
-        desktop_view_pin_input_set_label_primary(app->pin_input_view, 29, 8, "PIN mismatch!");
+        desktop_view_pin_input_set_label_primary(
+            app->pin_input_view, 29, 8, i18n("PIN mismatch!"));
     } else if(state == SCENE_STATE_PIN_ERROR_WRONG) {
-        desktop_view_pin_input_set_label_primary(app->pin_input_view, 35, 8, "Wrong PIN!");
+        desktop_view_pin_input_set_label_primary(app->pin_input_view, 35, 8, i18n("Wrong PIN!"));
     } else {
         furi_crash();
     }
