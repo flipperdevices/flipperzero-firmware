@@ -1,4 +1,5 @@
 #include "../bt_settings_app.h"
+#include "locale/locale.h"
 #include <furi_hal_bt.h>
 
 void bt_settings_scene_forget_dev_confirm_dialog_callback(DialogExResult result, void* context) {
@@ -10,11 +11,11 @@ void bt_settings_scene_forget_dev_confirm_dialog_callback(DialogExResult result,
 void bt_settings_scene_forget_dev_confirm_on_enter(void* context) {
     BtSettingsApp* app = context;
     DialogEx* dialog = app->dialog;
-    dialog_ex_set_header(dialog, "Unpair All Devices?", 64, 0, AlignCenter, AlignTop);
+    dialog_ex_set_header(dialog, i18n("Unpair All Devices?"), 64, 0, AlignCenter, AlignTop);
     dialog_ex_set_text(
-        dialog, "All previous pairings\nwill be lost!", 64, 14, AlignCenter, AlignTop);
-    dialog_ex_set_left_button_text(dialog, "Cancel");
-    dialog_ex_set_right_button_text(dialog, "Unpair");
+        dialog, i18n("All previous pairings\nwill be lost!"), 64, 14, AlignCenter, AlignTop);
+    dialog_ex_set_left_button_text(dialog, i18n("Cancel"));
+    dialog_ex_set_right_button_text(dialog, i18n("Unpair"));
     dialog_ex_set_context(dialog, app);
     dialog_ex_set_result_callback(dialog, bt_settings_scene_forget_dev_confirm_dialog_callback);
 

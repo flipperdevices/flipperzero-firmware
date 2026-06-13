@@ -1,4 +1,5 @@
 #include "../bt_settings_app.h"
+#include "locale/locale.h"
 #include <furi_hal_bt.h>
 
 enum BtSetting {
@@ -12,9 +13,9 @@ enum BtSettingIndex {
     BtSettingIndexForgetDev,
 };
 
-const char* const bt_settings_text[BtSettingNum] = {
-    "OFF",
-    "ON",
+const char* bt_settings_text[BtSettingNum] = {
+    NULL,
+    NULL,
 };
 
 static void bt_settings_scene_start_var_list_change_callback(VariableItem* item) {
@@ -39,10 +40,15 @@ void bt_settings_scene_start_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
+    if(!bt_settings_text[0]) {
+        bt_settings_text[0] = i18n("OFF");
+        bt_settings_text[0] = i18n("ON");
+    }
+
     if(furi_hal_bt_is_gatt_gap_supported()) {
         item = variable_item_list_add(
             var_item_list,
-            "Bluetooth",
+            i18n("Bluetooth"),
             BtSettingNum,
             bt_settings_scene_start_var_list_change_callback,
             app);
@@ -57,8 +63,8 @@ void bt_settings_scene_start_on_enter(void* context) {
         variable_item_list_set_enter_callback(
             var_item_list, bt_settings_scene_start_var_list_enter_callback, app);
     } else {
-        item = variable_item_list_add(var_item_list, "Bluetooth", 1, NULL, NULL);
-        variable_item_set_current_value_text(item, "Broken");
+        item = variable_item_list_add(var_item_list, i18n("Bluetooth"), 1, NULL, NULL);
+        variable_item_set_current_value_text(item, i18n("Broken"));
     }
 
     view_dispatcher_switch_to_view(app->view_dispatcher, BtSettingsAppViewVarItemList);
