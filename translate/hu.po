@@ -1,0 +1,339 @@
+# Translation of Flipper Zero Firmware in LANGUAGE
+# Copyright (C) 2026
+# This file is distributed under the same license as the Flipper Zero Firmware package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flipper Zero Firmware\n"
+"Report-Msgid-Bugs-To: https://github.com/flipperdevices/flipperzero-firmware/\n"
+"POT-Creation-Date: 2026-06-14 22:16+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../applications/settings/about/about.c
+#, c-format
+msgid ""
+"Product: %s\n"
+"Model: %s"
+msgstr ""
+
+#: ../applications/settings/about/about.c
+#, c-format
+msgid ""
+"FCC ID: %s\n"
+"IC: %s"
+msgstr ""
+
+#: ../applications/settings/about/about.c
+msgid ""
+"Flipper Devices Inc.\n"
+"Suite B #551, 2803\n"
+"Philadelphia Pike, Claymont\n"
+"DE, USA 19703\n"
+msgstr ""
+
+#: ../applications/settings/about/about.c
+msgid ""
+"For all compliance\n"
+"certificates, please visit:\n"
+"www.flipp.dev/compliance"
+msgstr ""
+
+#: ../applications/settings/about/about.c
+msgid "Unknown"
+msgstr ""
+
+#: ../applications/settings/about/about.c
+msgid "Serial Number:\n"
+msgstr ""
+
+#: ../applications/settings/about/about.c
+msgid "HW Version Info:"
+msgstr ""
+
+#: ../applications/settings/about/about.c
+msgid "No info\n"
+msgstr ""
+
+#: ../applications/settings/about/about.c
+msgid "<none>"
+msgstr ""
+
+#: ../applications/settings/about/about.c
+msgid "FW Version Info:"
+msgstr ""
+
+#: ../applications/settings/about/about.c
+msgid "Prev."
+msgstr ""
+
+#: ../applications/settings/about/about.c ../applications/settings/desktop_settings/views/desktop_settings_view_pin_setup_howto.c
+msgid "Next"
+msgstr ""
+
+#: ../applications/settings/bt_settings_app/scenes/bt_settings_scene_forget_dev_confirm.c
+msgid "Unpair All Devices?"
+msgstr ""
+
+#: ../applications/settings/bt_settings_app/scenes/bt_settings_scene_forget_dev_confirm.c
+msgid ""
+"All previous pairings\n"
+"will be lost!"
+msgstr ""
+
+#: ../applications/settings/bt_settings_app/scenes/bt_settings_scene_forget_dev_confirm.c ../applications/settings/desktop_settings/views/desktop_settings_view_pin_setup_howto2.c
+msgid "Cancel"
+msgstr ""
+
+#: ../applications/settings/bt_settings_app/scenes/bt_settings_scene_forget_dev_confirm.c
+msgid "Unpair"
+msgstr ""
+
+#: ../applications/settings/bt_settings_app/scenes/bt_settings_scene_forget_dev_success.c ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_setup_done.c
+msgid "Done"
+msgstr ""
+
+#: ../applications/settings/bt_settings_app/scenes/bt_settings_scene_start.c ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "OFF"
+msgstr ""
+
+#: ../applications/settings/bt_settings_app/scenes/bt_settings_scene_start.c ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "ON"
+msgstr ""
+
+#: ../applications/settings/bt_settings_app/scenes/bt_settings_scene_start.c
+msgid "Bluetooth"
+msgstr ""
+
+#: ../applications/settings/bt_settings_app/scenes/bt_settings_scene_start.c
+msgid "Unpair All Devices"
+msgstr ""
+
+#: ../applications/settings/bt_settings_app/scenes/bt_settings_scene_start.c
+msgid "Broken"
+msgstr ""
+
+#: ../applications/settings/clock_settings/views/clock_settings_module.c
+msgid "Time"
+msgstr ""
+
+#: ../applications/settings/clock_settings/views/clock_settings_module.c
+msgid "Date"
+msgstr ""
+
+#: ../applications/settings/clock_settings/views/clock_settings_module.c
+msgid "Alarm"
+msgstr ""
+
+#: ../applications/settings/clock_settings/views/clock_settings_module.c
+msgid "On"
+msgstr ""
+
+#: ../applications/settings/clock_settings/views/clock_settings_module.c
+msgid "Off"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "(   ) Apps Menu (Default)"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "(*) Apps Menu (Default)"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "(   ) Passport (Default)"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "(*) Passport (Default)"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "(*) "
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "(   ) "
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "(   ) [Select App]"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "(*) [Select App]"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "Left - Press"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "Left - Hold"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "Right - Press"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "Right - Hold"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "Down - Press"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_favorite.c
+msgid "Middle - Press"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_happy_mode.c ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "Happy Mode"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_happy_mode.c
+msgid ""
+"I will never get angry at you\n"
+"for not spending time with me\n"
+"as long as this mode is enabled"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_happy_mode.c
+msgid "Disable"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_happy_mode.c
+msgid "Go back"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_happy_mode.c
+msgid "Keep enabled"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_happy_mode.c
+msgid "Enable"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_auth.c ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_setup.c
+#: ../applications/settings/desktop_settings/views/desktop_settings_view_pin_setup_howto2.c
+msgid "OK"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_auth.c
+msgid "Enter your current PIN:"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_disable.c
+msgid "Removed"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_error.c
+msgid "PIN mismatch!"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_error.c
+msgid "Wrong PIN!"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_menu.c
+msgid "Set PIN"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_menu.c
+msgid "Change PIN"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_menu.c
+msgid "Remove PIN"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_menu.c
+msgid "PIN Code Settings"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_setup.c
+msgid "Enter from 4 to 10 arrows:"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_setup.c
+msgid "Confirm your PIN:"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_setup_done.c
+msgid "PIN Activated!"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_pin_setup_done.c
+msgid "Remember or write it down"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_quick_apps_direction_menu.c ../applications/settings/desktop_settings/scenes/desktop_settings_scene_quick_apps_menu.c
+msgid "Default Mode"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_quick_apps_direction_menu.c ../applications/settings/desktop_settings/scenes/desktop_settings_scene_quick_apps_menu.c
+msgid "Dummy Mode"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_quick_apps_menu.c ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "Set Quick Access Apps"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "30s"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "60s"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "2min"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "5min"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "10min"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "PIN Setup"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "Auto Lock Time"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/scenes/desktop_settings_scene_start.c
+msgid "Show Clock"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/views/desktop_settings_view_pin_setup_howto2.c
+msgid ""
+"Forgotten PIN can only be\n"
+"reset with entire device.\n"
+"Read docs How to reset PIN."
+msgstr ""
+
+#: ../applications/settings/desktop_settings/views/desktop_settings_view_pin_setup_howto.c
+msgid "Setting Up PIN"
+msgstr ""
+
+#: ../applications/settings/desktop_settings/views/desktop_settings_view_pin_setup_howto.c
+msgid ""
+"Prepare to use\n"
+"arrows as\n"
+"PIN symbols"
+msgstr ""
