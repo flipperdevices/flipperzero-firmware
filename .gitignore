@@ -71,3 +71,4 @@ node_modules/
 # cli_perf script output in case of errors
 /block.bin
 /return_block.bin
+translate/infiles.list
