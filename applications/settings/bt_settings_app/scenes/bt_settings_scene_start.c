@@ -13,9 +13,9 @@ enum BtSettingIndex {
     BtSettingIndexForgetDev,
 };
 
-const char* bt_settings_text[BtSettingNum] = {
-    NULL,
-    NULL,
+char* bt_settings_text[BtSettingNum] = {
+    "OFF",
+    "ON",
 };
 
 static void bt_settings_scene_start_var_list_change_callback(VariableItem* item) {
@@ -40,10 +40,8 @@ void bt_settings_scene_start_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
-    if(!bt_settings_text[0]) {
-        bt_settings_text[0] = i18n("OFF");
-        bt_settings_text[0] = i18n("ON");
-    }
+    bt_settings_text[0] = i18n("OFF");
+    bt_settings_text[1] = i18n("ON");
 
     if(furi_hal_bt_is_gatt_gap_supported()) {
         item = variable_item_list_add(
@@ -59,7 +57,7 @@ void bt_settings_scene_start_on_enter(void* context) {
             variable_item_set_current_value_index(item, BtSettingOff);
             variable_item_set_current_value_text(item, bt_settings_text[BtSettingOff]);
         }
-        variable_item_list_add(var_item_list, "Unpair All Devices", 1, NULL, NULL);
+        variable_item_list_add(var_item_list, i18n("Unpair All Devices"), 1, NULL, NULL);
         variable_item_list_set_enter_callback(
             var_item_list, bt_settings_scene_start_var_list_enter_callback, app);
     } else {

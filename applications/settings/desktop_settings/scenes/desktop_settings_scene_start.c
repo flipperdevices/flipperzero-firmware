@@ -14,21 +14,21 @@ typedef enum {
 } DesktopSettingsEntry;
 
 #define AUTO_LOCK_DELAY_COUNT 6
-static const char* auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+char* auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
+    "OFF",
+    "30s",
+    "60s",
+    "2min",
+    "5min",
+    "10min",
 };
 static const uint32_t auto_lock_delay_value[AUTO_LOCK_DELAY_COUNT] =
     {0, 30000, 60000, 120000, 300000, 600000};
 
 #define CLOCK_ENABLE_COUNT 2
-const char* clock_enable_text[CLOCK_ENABLE_COUNT] = {
-    NULL,
-    NULL,
+char* clock_enable_text[CLOCK_ENABLE_COUNT] = {
+    "OFF",
+    "ON",
 };
 
 const uint32_t clock_enable_value[CLOCK_ENABLE_COUNT] = {0, 1};
@@ -61,19 +61,15 @@ void desktop_settings_scene_start_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    if(!auto_lock_delay_text[0]) {
-        auto_lock_delay_text[0] = i18n("OFF");
-        auto_lock_delay_text[1] = i18n("30s");
-        auto_lock_delay_text[2] = i18n("60s");
-        auto_lock_delay_text[3] = i18n("2min");
-        auto_lock_delay_text[4] = i18n("5min");
-        auto_lock_delay_text[5] = i18n("10min");
-    }
+    auto_lock_delay_text[0] = i18n("OFF");
+    auto_lock_delay_text[1] = i18n("30s");
+    auto_lock_delay_text[2] = i18n("60s");
+    auto_lock_delay_text[3] = i18n("2min");
+    auto_lock_delay_text[4] = i18n("5min");
+    auto_lock_delay_text[5] = i18n("10min");
 
-    if(!clock_enable_text[0]) {
-        clock_enable_text[0] = i18n("OFF");
-        clock_enable_text[1] = i18n("ON");
-    }
+    clock_enable_text[0] = i18n("OFF");
+    clock_enable_text[1] = i18n("ON");
 
     variable_item_list_add(variable_item_list, i18n("PIN Setup"), 1, NULL, NULL);
 
