@@ -1999,6 +1999,7 @@ Function,-,getsubopt,int,"char**, char* const*, char**"
 Function,-,getw,int,FILE*
 Function,+,gps_request_location,_Bool,Gps*
 Function,+,gps_request_stream,_Bool,"Gps*, uint8_t"
+Function,+,gps_report_location,_Bool,"Gps*, const GpsLocation*"
 Function,+,gps_set_location_callback,void,"Gps*, GpsLocationCallback, void*"
 Function,+,gps_stop_stream,_Bool,Gps*
 Function,+,gui_add_framebuffer_callback,void,"Gui*, GuiCanvasCommitCallback, void*"
