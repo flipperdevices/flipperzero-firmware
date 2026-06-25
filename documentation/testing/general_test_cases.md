@@ -503,7 +503,7 @@ Steps:
 
 3. Change Time Format to 12h.
 
-    **Expected result:** the time will change to AM\PM format.
+    **Expected result:** the time will change to AM/PM format.
 
 4. Date format change to any other.
 
@@ -511,7 +511,7 @@ Steps:
 
 5. Change Log Level.
 
-    **Expected result:** displaying logs in the CLI\Putty interface.
+    **Expected result:** displaying logs in the CLI/Putty interface.
 
 6. Enable/disable debug.
 
