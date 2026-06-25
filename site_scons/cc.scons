@@ -36,6 +36,7 @@ ENV.AppendUnique(
         "-fsingle-precision-constant",
         "-fno-math-errno",
         # Generates .su files with stack usage information
+        # Disabled in production - only enable for stack analysis
         # "-fstack-usage",
         "-g",
     ],
