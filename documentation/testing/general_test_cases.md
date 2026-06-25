@@ -529,7 +529,7 @@ Steps:
 
     **Expected result:** when creating a key without specifying your own name, the name has its own format from "Untolded_door_" to "Key_type_dd_mm_yyyy".
 
-11. Change log device from USART.
+10. Change log device from USART.
 
     **Expected result:** after the change, the Game module will stop working and being recognized.
 
