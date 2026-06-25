@@ -50,6 +50,83 @@ static const uint32_t subghz_hopper_frequency_list[] = {
     0,
 };
 
+/* Developer region: expose broader defaults across the board-supported CC1101 bands */
+static const uint32_t subghz_frequency_list_region_dev[] = {
+    /* 300 - 348 */
+    299999755,
+    300000000,
+    305000000,
+    310000000,
+    315000000,
+    320000000,
+    325000000,
+    330000000,
+    335000000,
+    340000000,
+    345000000,
+    348000335,
+
+    /* 387 - 464 */
+    386999938,
+    390000000,
+    395000000,
+    400000000,
+    405000000,
+    410000000,
+    415000000,
+    418000000,
+    420000000,
+    425000000,
+    430000000,
+    433075000,
+    433420000,
+    433920000 | FREQUENCY_FLAG_DEFAULT,
+    434420000,
+    434775000,
+    435000000,
+    438900000,
+    440000000,
+    445000000,
+    450000000,
+    455000000,
+    460000000,
+    464000000,
+
+    /* 779 - 928 */
+    778999847,
+    780000000,
+    790000000,
+    800000000,
+    810000000,
+    820000000,
+    830000000,
+    840000000,
+    850000000,
+    860000000,
+    868350000,
+    870000000,
+    880000000,
+    890000000,
+    900000000,
+    910000000,
+    915000000,
+    920000000,
+    925000000,
+    928000000,
+    0,
+};
+
+static const uint32_t subghz_hopper_frequency_list_region_dev[] = {
+    310000000,
+    315000000,
+    318000000,
+    390000000,
+    433920000,
+    868350000,
+    915000000,
+    0,
+};
+
 /* Europe and Russia */
 static const uint32_t subghz_frequency_list_region_eu_ru[] = {
     /* 300 - 348 */
@@ -269,6 +346,10 @@ static void subghz_setting_load_default_region(
 
 void subghz_setting_load_default(SubGhzSetting* instance) {
     switch(furi_hal_version_get_hw_region()) {
+    case FuriHalVersionRegionUnknown:
+        subghz_setting_load_default_region(
+            instance, subghz_frequency_list_region_dev, subghz_hopper_frequency_list_region_dev);
+        break;
     case FuriHalVersionRegionEuRu:
         subghz_setting_load_default_region(
             instance,
