@@ -1,19 +1,22 @@
 # Integration Tests
 
+> [!NOTE]
+> This guide is for Flipper Zero firmware repository maintainers.
+
 Manual integration test cases for Flipper Zero firmware, grouped by feature. Each page lists the steps to verify the corresponding functionality.
 
-## How testing is performed
+## What to test
 
-Testing is **scoped to the subsystem that changed** — you don't run every test case for every change.
+Testing covers the **subsystem that changed.** You don't run every test case for every change.
 
-- **Test what you touched, plus related regressions.** When you change a subsystem, test the new behavior and re-run a few existing cases for that subsystem (using the steps in the pages below) to confirm nothing broke. For example, when adding a new Sub-GHz protocol, test the new protocol and some of the existing ones.
+- **Test what changed, plus related regressions.** When you review changes in a subsystem, test the new behavior and re-run a few existing cases for that subsystem (using the steps in the test cases below) to confirm nothing broke. For example, when adding a new Sub-GHz protocol, test the new protocol and some of the existing ones.
 - **Skip unrelated subsystems.** There's no point testing NFC when only Sub-GHz was changed.
-- **Test everything for core-wide changes.** If a change affects something global (e.g. in the core), run all the test cases in order.
+- **Test everything for core-wide changes.** If a change affects something global, run all the test cases in order.
 
-### When to run
+## When to test
 
-- Before a release candidate.
 - Before accepting new pull requests.
+- Before a release candidate.
 
 ## Test cases
 
