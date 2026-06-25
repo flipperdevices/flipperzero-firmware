@@ -29,7 +29,7 @@ Before writing code and creating a PR, make sure your contribution aligns with o
 - A code owner must approve the PR.
 - AI-generated PRs (especially with changes in core parts like FURI, FreeRTOS, Libs, SDK) may not be accepted if changes are hard or impossible to verify.
 
-Feel free to ask questions in [issues](https://github.com/flipperdevices/flipperzero-firmware/issues) or [discussions](https://github.com/flipperdevices/flipperzero-firmware/discussions) if you're not sure. For feature requests and voting, follow our [Discussions Guidelines](DISCUSSIONS_GUIDELINES.md).
+Feel free to ask questions in [issues](https://github.com/flipperdevices/flipperzero-firmware/issues) or [discussions](https://github.com/flipperdevices/flipperzero-firmware/discussions) if you're not sure. For feature requests and voting, follow our [Discussion Guidelines](DISCUSSION_GUIDELINES.md).
 
 
 ### Step 2. Check for an existing issue
