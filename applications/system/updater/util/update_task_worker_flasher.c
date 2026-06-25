@@ -329,7 +329,8 @@ int32_t update_task_worker_flash_writer(void* context) {
         CHECK_RESULT(update_task_parse_manifest(update_task));
 
         if(update_task->state.groups & UpdateTaskStageGroupRadio) {
-            CHECK_RESULT(update_task_manage_radiostack(update_task));
+            FURI_LOG_W(TAG, "Skipping radio update to prevent FUS bootloop on f6");
+            UNUSED(update_task_manage_radiostack);
         }
 
         if(update_task->state.groups & UpdateTaskStageGroupOptionBytes) {
