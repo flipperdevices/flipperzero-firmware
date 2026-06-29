@@ -25,6 +25,10 @@ The best place to search for answers is our [User Documentation](https://docs.fl
 
 If you've found an issue and want to report it, please check our [Issues](https://github.com/flipperdevices/flipperzero-firmware/issues) page. Make sure the description contains information about the firmware version you're using, your platform, and a clear explanation of the steps to reproduce the issue.
 
+## I want to propose a new feature
+
+If you have a feature request or want to vote on an existing one, please use [Discussions](https://github.com/flipperdevices/flipperzero-firmware/discussions).
+
 ## I want to contribute code
 
 Before opening a PR, please confirm that your changes must be contained in the firmware. Many ideas can easily be implemented as external applications and published in the [Flipper Application Catalog](https://github.com/flipperdevices/flipper-application-catalog). If you are unsure, reach out to us on the [Discord Server](https://flipp.dev/discord) or the [Issues](https://github.com/flipperdevices/flipperzero-firmware/issues) page, and we'll help you find the right place for your code.
@@ -36,10 +40,6 @@ Finally, open a [Pull Request](https://github.com/flipperdevices/flipperzero-fir
 # Development
 
 Flipper Zero Firmware is written in C, with some bits and pieces written in C++ and armv7m assembly languages. An intermediate level of C knowledge is recommended for comfortable programming. C, C++, and armv7m assembly languages are supported for Flipper applications.
-
-# Firmware RoadMap
-
-[Firmware RoadMap Miro Board](https://miro.com/app/board/uXjVO_3D6xU=/)
 
 ## Requirements
 
@@ -97,7 +97,6 @@ Make sure your Flipper is on, and your firmware is functioning. Connect your Fli
 - [Hardware combos and Un-bricking](/documentation/KeyCombo.md) - recovering your Flipper from the most nasty situations
 - [Flipper File Formats](/documentation/file_formats) - everything about how Flipper stores your data and how you can work with it
 - [Universal Remotes](/documentation/UniversalRemotes.md) - contributing your infrared remote to the universal remote database
-- [Firmware Roadmap](https://miro.com/app/board/uXjVO_3D6xU=/)
 - And much more in the [Developer Documentation](https://developer.flipper.net/flipperzero/doxygen)
 
 # Project structure
