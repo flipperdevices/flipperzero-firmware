@@ -27,7 +27,7 @@ If you've found an issue and want to report it, please check our [Issues](https:
 
 ## I want to propose a new feature
 
-If you have a feature request or want to vote on an existing one, please use [Discussions](https://github.com/flipperdevices/flipperzero-firmware/discussions).
+If you have a feature request or want to vote on an existing one, please use [Discussions](https://github.com/flipperdevices/flipperzero-firmware/discussions) and follow our [Discussion Guidelines](https://github.com/flipperdevices/flipperzero-firmware/discussions/4395).
 
 ## I want to contribute code
 
