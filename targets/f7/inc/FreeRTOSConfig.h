@@ -20,7 +20,16 @@
 #define configSUPPORT_STATIC_ALLOCATION  1
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
 #define configENABLE_HEAP_PROTECTOR      1
-#define configHEAP_CLEAR_MEMORY_ON_FREE  1
+/* Wipe-on-free is debug-only: pvPortMalloc() always memsets the returned
+ * buffer to zero (memmgr_heap.c, see xToWipe), so the next allocation
+ * never sees stale data. The exposure window is only between free() and
+ * the next reuse of the same block. Code that handles secrets must zero
+ * its buffers explicitly before free(). */
+#ifdef FURI_DEBUG
+#define configHEAP_CLEAR_MEMORY_ON_FREE 1
+#else
+#define configHEAP_CLEAR_MEMORY_ON_FREE 0
+#endif
 #define configUSE_MALLOC_FAILED_HOOK     0
 #define configUSE_IDLE_HOOK              0
 #define configUSE_TICK_HOOK              0
@@ -56,7 +65,7 @@
    if lengths will always be less than the number of bytes in a size_t. */
 #define configMESSAGE_BUFFER_LENGTH_TYPE        size_t
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 1
-#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP   4
+#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP   2
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES 0

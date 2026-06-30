@@ -111,6 +111,14 @@ bool furi_hal_spi_bus_tx(
     furi_check(buffer);
     furi_check(size > 0);
 
+    if(furi_kernel_is_running()) {
+        // Use DMA for TX when scheduler is running, freeing the CPU during transfer
+        bool ret = furi_hal_spi_bus_trx_dma(handle, buffer, NULL, size, timeout);
+        LL_SPI_ClearFlag_OVR(handle->bus->spi);
+        return ret;
+    }
+
+    // Polling fallback for pre-scheduler context
     bool ret = true;
 
     while(size > 0) {
@@ -193,7 +201,7 @@ static void spi_dma_isr(void* context) {
 
 bool furi_hal_spi_bus_trx_dma(
     const FuriHalSpiBusHandle* handle,
-    uint8_t* tx_buffer,
+    const uint8_t* tx_buffer,
     uint8_t* rx_buffer,
     size_t size,
     uint32_t timeout_ms) {
@@ -227,9 +235,26 @@ bool furi_hal_spi_bus_trx_dma(
     }
 
     if(rx_buffer == NULL) {
-        // Only TX mode, do not use RX channel
+        // TX-only mode: set up RX DMA to drain incoming bytes (prevents OVR)
+        uint8_t dma_rx_dummy;
 
         LL_DMA_InitTypeDef dma_config = {0};
+
+        // RX DMA channel: drain SPI RX FIFO into dummy byte (no increment)
+        dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (spi->DR);
+        dma_config.MemoryOrM2MDstAddress = (uint32_t)&dma_rx_dummy;
+        dma_config.Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY;
+        dma_config.Mode = LL_DMA_MODE_NORMAL;
+        dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+        dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_NOINCREMENT;
+        dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_BYTE;
+        dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE;
+        dma_config.NbData = size;
+        dma_config.PeriphRequest = dma_rx_req;
+        dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
+        LL_DMA_Init(SPI_DMA_RX_DEF, &dma_config);
+
+        // TX DMA channel
         dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (spi->DR);
         dma_config.MemoryOrM2MDstAddress = (uint32_t)tx_buffer;
         dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
@@ -243,48 +268,70 @@ bool furi_hal_spi_bus_trx_dma(
         dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
         LL_DMA_Init(SPI_DMA_TX_DEF, &dma_config);
 
-#if SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_7
+#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6 && SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_7
+        LL_DMA_ClearFlag_TC6(SPI_DMA);
         LL_DMA_ClearFlag_TC7(SPI_DMA);
 #else
 #error Update this code. Would you kindly?
 #endif
 
-        furi_hal_interrupt_set_isr(SPI_DMA_TX_IRQ, spi_dma_isr, NULL);
+        furi_hal_interrupt_set_isr(SPI_DMA_RX_IRQ, spi_dma_isr, NULL);
 
         bool dma_tx_was_enabled = LL_SPI_IsEnabledDMAReq_TX(spi);
+        bool dma_rx_was_enabled = LL_SPI_IsEnabledDMAReq_RX(spi);
         if(!dma_tx_was_enabled) {
             LL_SPI_EnableDMAReq_TX(spi);
+        }
+        if(!dma_rx_was_enabled) {
+            LL_SPI_EnableDMAReq_RX(spi);
         }
 
         // acquire semaphore before enabling DMA
         furi_check(furi_semaphore_acquire(spi_dma_completed, timeout_ms) == FuriStatusOk);
 
-        LL_DMA_EnableIT_TC(SPI_DMA_TX_DEF);
+        LL_DMA_EnableIT_TC(SPI_DMA_RX_DEF);
+        LL_DMA_EnableChannel(SPI_DMA_RX_DEF);
         LL_DMA_EnableChannel(SPI_DMA_TX_DEF);
 
-        // and wait for it to be released (DMA transfer complete)
+        // wait for RX DMA complete (all bytes transmitted and drained)
         if(furi_semaphore_acquire(spi_dma_completed, timeout_ms) != FuriStatusOk) {
             ret = false;
             FURI_LOG_E(TAG, "DMA timeout\r\n");
         }
+
+        // Disable TC IRQ and clear pending TC flag BEFORE releasing the
+        // semaphore. On timeout the ISR may still fire and would try to
+        // re-release the binary semaphore, crashing furi_check.
+        LL_DMA_DisableIT_TC(SPI_DMA_RX_DEF);
+#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6 && SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_7
+        LL_DMA_ClearFlag_TC6(SPI_DMA);
+        LL_DMA_ClearFlag_TC7(SPI_DMA);
+#else
+#error Update this code. Would you kindly?
+#endif
+
         // release semaphore, because we are using it as a flag
         furi_semaphore_release(spi_dma_completed);
 
-        LL_DMA_DisableIT_TC(SPI_DMA_TX_DEF);
         LL_DMA_DisableChannel(SPI_DMA_TX_DEF);
+        LL_DMA_DisableChannel(SPI_DMA_RX_DEF);
         if(!dma_tx_was_enabled) {
             LL_SPI_DisableDMAReq_TX(spi);
         }
-        furi_hal_interrupt_set_isr(SPI_DMA_TX_IRQ, NULL, NULL);
+        if(!dma_rx_was_enabled) {
+            LL_SPI_DisableDMAReq_RX(spi);
+        }
+        furi_hal_interrupt_set_isr(SPI_DMA_RX_IRQ, NULL, NULL);
 
         LL_DMA_DeInit(SPI_DMA_TX_DEF);
+        LL_DMA_DeInit(SPI_DMA_RX_DEF);
     } else {
         // TRX or RX mode, use both channels
         uint32_t tx_mem_increase_mode;
 
         if(tx_buffer == NULL) {
             // RX mode, use dummy data instead of TX buffer
-            tx_buffer = (uint8_t*)&dma_dummy_u32;
+            tx_buffer = (const uint8_t*)&dma_dummy_u32;
             tx_mem_increase_mode = LL_DMA_MEMORY_NOINCREMENT;
         } else {
             tx_mem_increase_mode = LL_DMA_MEMORY_INCREMENT;
@@ -317,8 +364,9 @@ bool furi_hal_spi_bus_trx_dma(
         dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
         LL_DMA_Init(SPI_DMA_RX_DEF, &dma_config);
 
-#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6
+#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6 && SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_7
         LL_DMA_ClearFlag_TC6(SPI_DMA);
+        LL_DMA_ClearFlag_TC7(SPI_DMA);
 #else
 #error Update this code. Would you kindly?
 #endif
@@ -348,10 +396,20 @@ bool furi_hal_spi_bus_trx_dma(
             ret = false;
             FURI_LOG_E(TAG, "DMA timeout\r\n");
         }
+
+        // Disable TC IRQ and clear pending TC flag BEFORE releasing the
+        // semaphore. On timeout the ISR may still fire and would try to
+        // re-release the binary semaphore, crashing furi_check.
+        LL_DMA_DisableIT_TC(SPI_DMA_RX_DEF);
+#if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_6 && SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_7
+        LL_DMA_ClearFlag_TC6(SPI_DMA);
+        LL_DMA_ClearFlag_TC7(SPI_DMA);
+#else
+#error Update this code. Would you kindly?
+#endif
+
         // release semaphore, because we are using it as a flag
         furi_semaphore_release(spi_dma_completed);
-
-        LL_DMA_DisableIT_TC(SPI_DMA_RX_DEF);
 
         LL_DMA_DisableChannel(SPI_DMA_TX_DEF);
         LL_DMA_DisableChannel(SPI_DMA_RX_DEF);
