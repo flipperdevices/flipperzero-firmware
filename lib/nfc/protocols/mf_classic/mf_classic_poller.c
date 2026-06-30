@@ -823,7 +823,8 @@ NfcCommand mf_classic_poller_handler_next_sector(MfClassicPoller* instance) {
 
         // In CUID mode, NFC app manages sector based on key_idx - read it back
         if(dict_attack_ctx->mode == MfClassicPollerModeDictAttackCUID) {
-            dict_attack_ctx->current_sector = instance->mfc_event_data.next_sector_data.current_sector;
+            dict_attack_ctx->current_sector =
+                instance->mfc_event_data.next_sector_data.current_sector;
         }
 
         instance->state = MfClassicPollerStateRequestKey;

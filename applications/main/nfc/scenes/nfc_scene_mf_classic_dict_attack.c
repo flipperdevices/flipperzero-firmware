@@ -4,7 +4,7 @@
 #include <dolphin/dolphin.h>
 #include <toolbox/stream/buffered_file_stream.h>
 
-#define TAG "NfcMfClassicDictAttack"
+#define TAG       "NfcMfClassicDictAttack"
 #define BIT(x, n) ((x) >> (n) & 1)
 
 // TODO FL-3926: Fix lag when leaving the dictionary attack view after Hardnested
@@ -85,7 +85,7 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
                 uint8_t key_with_idx[sizeof(MfClassicKey) + 1];
 
                 while(keys_dict_get_next_key(
-                          instance->nfc_dict_context.dict, key_with_idx, sizeof(MfClassicKey) + 1)) {
+                    instance->nfc_dict_context.dict, key_with_idx, sizeof(MfClassicKey) + 1)) {
                     // Extract key_idx from first byte
                     uint8_t key_idx = key_with_idx[0];
 
@@ -149,9 +149,11 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
         if(is_cuid_dict) {
             instance->nfc_dict_context.current_key_idx++;
             // Calculate sector from key_idx (each sector has 2 keys: A and B)
-            instance->nfc_dict_context.current_sector = instance->nfc_dict_context.current_key_idx / 2;
+            instance->nfc_dict_context.current_sector =
+                instance->nfc_dict_context.current_key_idx / 2;
             // Write back to event data so poller can read it
-            mfc_event->data->next_sector_data.current_sector = instance->nfc_dict_context.current_sector;
+            mfc_event->data->next_sector_data.current_sector =
+                instance->nfc_dict_context.current_sector;
         } else {
             instance->nfc_dict_context.current_sector =
                 mfc_event->data->next_sector_data.current_sector;
@@ -243,7 +245,10 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* instance) {
             dict->total_keys = 0;
 
             if(!buffered_file_stream_open(
-                   dict->stream, furi_string_get_cstr(cuid_dict_path), FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+                   dict->stream,
+                   furi_string_get_cstr(cuid_dict_path),
+                   FSAM_READ_WRITE,
+                   FSOM_OPEN_EXISTING)) {
                 buffered_file_stream_close(dict->stream);
                 free(dict);
                 state = DictAttackStateUserDictInProgress;
