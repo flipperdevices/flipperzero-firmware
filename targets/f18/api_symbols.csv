@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,87.2,,
+Version,+,87.3,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -767,6 +767,8 @@ Function,+,canvas_draw_str_aligned,void,"Canvas*, int32_t, int32_t, Align, Align
 Function,+,canvas_draw_triangle,void,"Canvas*, int32_t, int32_t, size_t, size_t, CanvasDirection"
 Function,+,canvas_draw_xbm,void,"Canvas*, int32_t, int32_t, size_t, size_t, const uint8_t*"
 Function,+,canvas_draw_xbm_ex,void,"Canvas*, int32_t, int32_t, size_t, size_t, IconRotation, const uint8_t*"
+Function,+,canvas_get_buffer,uint8_t*,Canvas*
+Function,+,canvas_get_buffer_size,size_t,const Canvas*
 Function,+,canvas_get_font_params,const CanvasFontParameters*,"const Canvas*, Font"
 Function,+,canvas_glyph_width,size_t,"Canvas*, uint16_t"
 Function,+,canvas_height,size_t,const Canvas*
@@ -1772,7 +1774,7 @@ Function,+,gui_get_framebuffer_size,size_t,const Gui*
 Function,+,gui_remove_framebuffer_callback,void,"Gui*, GuiCanvasCommitCallback, void*"
 Function,+,gui_remove_view_port,void,"Gui*, ViewPort*"
 Function,+,gui_set_lockdown,void,"Gui*, _Bool"
-Function,-,gui_view_port_send_to_back,void,"Gui*, ViewPort*"
+Function,+,gui_view_port_send_to_back,void,"Gui*, ViewPort*"
 Function,+,gui_view_port_send_to_front,void,"Gui*, ViewPort*"
 Function,-,hci_send_req,int,"hci_request*, uint8_t"
 Function,+,hex_char_to_hex_nibble,_Bool,"char, uint8_t*"
