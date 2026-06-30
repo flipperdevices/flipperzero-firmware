@@ -2638,6 +2638,7 @@ Function,+,mf_classic_get_device_name,const char*,"const MfClassicData*, NfcDevi
 Function,+,mf_classic_get_first_block_num_of_sector,uint8_t,uint8_t
 Function,+,mf_classic_get_key,MfClassicKey,"const MfClassicData*, uint8_t, MfClassicKeyType"
 Function,+,mf_classic_get_read_sectors_and_keys,void,"const MfClassicData*, uint8_t*, uint8_t*"
+Function,+,mf_classic_get_scannable_sectors_num,uint8_t,MfClassicType
 Function,+,mf_classic_get_sector_by_block,uint8_t,uint8_t
 Function,+,mf_classic_get_sector_trailer_by_sector,MfClassicSectorTrailer*,"const MfClassicData*, uint8_t"
 Function,+,mf_classic_get_sector_trailer_num_by_block,uint8_t,uint8_t

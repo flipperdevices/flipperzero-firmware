@@ -65,6 +65,15 @@ static MfClassicListenerCommand mf_classic_listener_auth_first_part_handler(
 
         uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
 
+        // Reject authentication immediately if keys are not found (uninitialized sector)
+        // This matches real card behavior where empty sectors reject authentication
+        // Fast path: check mask directly instead of function call
+        if(key_type == MfClassicKeyTypeA) {
+            if(FURI_BIT(instance->data->key_a_mask, sector_num) == 0) break;
+        } else {
+            if(FURI_BIT(instance->data->key_b_mask, sector_num) == 0) break;
+        }
+
         MfClassicSectorTrailer* sec_tr =
             mf_classic_get_sector_trailer_by_sector(instance->data, sector_num);
         MfClassicKey* key = (key_type == MfClassicKeyTypeA) ? &sec_tr->key_a : &sec_tr->key_b;
