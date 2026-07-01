@@ -9,7 +9,59 @@ env:
   FBT_GIT_SUBMODULE_SHALLOW: 1
 
 jobs:
-  run_units_on_bench:
+  Run_unit_tests:
+    runs-on: [ self-hosted, FlipperZeroTest ]
+    outputs:
+      timed_out: ${{ steps.check_timeout.outputs.timed_out }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Flash unit tests firmware
+        id: flashing
+        timeout-minutes: 5
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          ./fbt resources firmware_latest flash LIB_DEBUG=1 FIRMWARE_APP_SET=unit_tests FORCE=1
+
+      - name: Copy assets and unit data, reboot and wait for flipper
+        id: copy
+        if: steps.flashing.outcome == 'success'
+        timeout-minutes: 2
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testops.py -t=15 await_flipper
+          python3 scripts/storage.py -f send build/latest/resources /ext
+          python3 scripts/storage.py -f send /region_data /ext/.int/.region_data
+          python3 scripts/power.py reboot
+          python3 scripts/testops.py -t=30 await_flipper
+
+      - name: Run units and validate results
+        id: run_units
+        if: steps.copy.outcome == 'success'
+        timeout-minutes: 5
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testops.py run_units
+
+      - name: Upload test results
+        if: failure() && steps.flashing.outcome == 'success' && steps.run_units.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-tests_output
+          path: unit_tests*.txt
+
+      - name: Check GDB output
+        if: failure() && steps.flashing.outcome == 'success'
+        run: |
+          ./fbt gdb_trace_all LIB_DEBUG=1 FIRMWARE_APP_SET=unit_tests FORCE=1
+
+  Retry_unit_tests:
+    needs: Run_unit_tests
+    if: failure()
     runs-on: [ self-hosted, FlipperZeroTest ]
     steps:
       - name: Checkout code
@@ -18,16 +70,14 @@ jobs:
           fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Flash unit tests firmware'
+      - name: Flash unit tests firmware
         id: flashing
-        if: success()
         timeout-minutes: 5
         run: |
           source scripts/toolchain/fbtenv.sh
           ./fbt resources firmware_latest flash LIB_DEBUG=1 FIRMWARE_APP_SET=unit_tests FORCE=1
 
-
-      - name: 'Copy assets and unit data, reboot and wait for flipper'
+      - name: Copy assets and unit data, reboot and wait for flipper
         id: copy
         if: steps.flashing.outcome == 'success'
         timeout-minutes: 5
@@ -39,7 +89,7 @@ jobs:
           python3 scripts/power.py reboot
           python3 scripts/testops.py -t=30 await_flipper
 
-      - name: 'Run units and validate results'
+      - name: Run units and validate results
         id: run_units
         if: steps.copy.outcome == 'success'
         timeout-minutes: 5
@@ -47,14 +97,14 @@ jobs:
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testops.py run_units
 
-      - name: 'Upload test results'
+      - name: Upload test results
         if: failure() && steps.flashing.outcome == 'success' && steps.run_units.outcome != 'skipped'
         uses: actions/upload-artifact@v4
         with:
           name: unit-tests_output
           path: unit_tests*.txt
 
-      - name: 'Check GDB output'
-        if: failure() && steps.flashing.outcome == 'success'
+      - name: Check GDB output
+        if: failure()
         run: |
           ./fbt gdb_trace_all LIB_DEBUG=1 FIRMWARE_APP_SET=unit_tests FORCE=1
