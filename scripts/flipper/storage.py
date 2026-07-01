@@ -65,12 +65,15 @@ class FlipperStorageException(Exception):
 
 
 class BufferedRead:
+    IDLE_TIMEOUT = 60.0
+
     def __init__(self, stream):
         self.buffer = bytearray()
         self.stream = stream
 
     def until(self, eol: str = "\n", cut_eol: bool = True):
         eol = eol.encode("ascii")
+        deadline = time.monotonic() + self.IDLE_TIMEOUT
         while True:
             # search in buffer
             i = self.buffer.find(eol)
@@ -86,6 +89,13 @@ class BufferedRead:
             i = max(1, self.stream.in_waiting)
             data = self.stream.read(i)
             self.buffer.extend(data)
+            if data:
+                deadline = time.monotonic() + self.IDLE_TIMEOUT
+            elif time.monotonic() > deadline:
+                raise FlipperStorageException(
+                    f"Timed out after {self.IDLE_TIMEOUT:.0f}s waiting for "
+                    f"{eol!r} from Flipper (CLI/RPC hung)"
+                )
 
 
 class FlipperStorage:
@@ -99,6 +109,7 @@ class FlipperStorage:
         self.port.baudrate = 115200  # Doesn't matter for VCP
         self.read = BufferedRead(self.port)
         self.chunk_size = chunk_size
+        self.logger = logging.getLogger("FlipperStorage")
 
     def __enter__(self):
         self.start()
@@ -120,6 +131,25 @@ class FlipperStorage:
 
     def stop(self) -> None:
         self.port.close()
+
+    def reconnect(self) -> None:
+        # A hung transfer can leave the firmware blocked in write_chunk waiting
+        # for the rest of a declared chunk; closing the port does not reliably
+        # signal a disconnect (e.g. on macOS), so first flush enough bytes to
+        # complete any pending chunk, then reopen for a clean CLI handshake.
+        try:
+            self.logger.warning(
+                f"Flushing {self.chunk_size} bytes to unblock a possibly hung "
+                "write_chunk, then reconnecting"
+            )
+            self.port.write(b"\x00" * self.chunk_size)
+            time.sleep(0.5)
+        except serial.SerialException:
+            pass
+        self.stop()
+        time.sleep(1)
+        self.read.buffer = bytearray()
+        self.start()
 
     def send(self, line: str) -> None:
         self.port.write(line.encode("ascii"))
@@ -411,6 +441,8 @@ class FlipperStorageOperations:
         self.storage: FlipperStorage = storage
         self.logger = logging.getLogger("FStorageOps")
 
+    SEND_RETRIES = 3
+
     def send_file_to_storage(
         self, flipper_file_path: str, local_file_path: str, force: bool = False
     ):
@@ -425,9 +457,22 @@ class FlipperStorageOperations:
             self.logger.debug(f"hash check: local {hash_local}, flipper {hash_flipper}")
             do_upload = force or (hash_local != hash_flipper)
 
-        if do_upload:
-            self.logger.info(f'Sending "{local_file_path}" to "{flipper_file_path}"')
-            self.storage.send_file(local_file_path, flipper_file_path)
+        if not do_upload:
+            return
+
+        self.logger.info(f'Sending "{local_file_path}" to "{flipper_file_path}"')
+        for attempt in range(1, self.SEND_RETRIES + 1):
+            try:
+                self.storage.send_file(local_file_path, flipper_file_path)
+                return
+            except FlipperStorageException as e:
+                if attempt == self.SEND_RETRIES:
+                    raise
+                self.logger.warning(
+                    f"Send failed ({e}), reconnecting and retrying "
+                    f"({attempt}/{self.SEND_RETRIES - 1})"
+                )
+                self.storage.reconnect()
 
     # make directory with exist check
     def mkpath(self, flipper_dir_path: str):
