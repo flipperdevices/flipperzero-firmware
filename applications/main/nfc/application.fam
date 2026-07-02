@@ -318,3 +318,12 @@ App(
     requires=["nfc"],
     sources=["plugins/supported_cards/aic.c"],
 )
+
+App(
+    appid="octopus_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="octopus_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/octopus.c"],
+)
