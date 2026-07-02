@@ -356,22 +356,24 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
         simple_array_get_count(system->services),
         simple_array_get_count(system->areas));
 
-    // Request key versions for system (0xFFFF), all areas, and all services.
+    // Request key versions for all discovered areas and services.
     // FeliCa spec limits n ≤ 32 per Request Service command; batch if needed.
+    // Note: 0xFFFF is not a valid Area/Service code and must never be queried here -
+    // some real cards stop responding to the whole exchange when sent an out-of-range
+    // code, which previously broke traversal of every system after the first.
     do {
         uint32_t svc_count = simple_array_get_count(system->services);
         uint32_t area_cnt = simple_array_get_count(system->areas);
-        uint32_t total = 1 + area_cnt + svc_count;
+        uint32_t total = area_cnt + svc_count;
+        if(total == 0) break;
 
         uint16_t* codes = malloc(total * sizeof(uint16_t));
         uint16_t* key_vers = malloc(total * sizeof(uint16_t));
 
-        codes[0] = 0xFFFF; // system key version sentinel
         for(uint32_t i = 0; i < area_cnt; i++)
-            codes[1 + i] =
-                ((const FelicaArea*)simple_array_cget(system->areas, i))->code;
+            codes[i] = ((const FelicaArea*)simple_array_cget(system->areas, i))->code;
         for(uint32_t i = 0; i < svc_count; i++)
-            codes[1 + area_cnt + i] =
+            codes[area_cnt + i] =
                 ((const FelicaService*)simple_array_cget(system->services, i))->code;
 
         bool all_ok = true;
@@ -384,28 +386,26 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
                 felica_poller_request_service(instance, codes + offset, batch, key_vers + offset);
             if(err != FelicaErrorNone) {
                 FURI_LOG_W(TAG, "Request service failed (offset=%lu, err=%d)", offset, err);
-                for(uint32_t i = offset; i < total; i++) key_vers[i] = 0;
+                for(uint32_t i = offset; i < total; i++) key_vers[i] = 0xFFFF;
                 all_ok = false;
                 break;
             }
         }
 
-        if(all_ok) {
-            system->key_version = key_vers[0];
-            for(uint32_t i = 0; i < area_cnt; i++)
-                ((FelicaArea*)simple_array_get(system->areas, i))->key_version =
-                    key_vers[1 + i];
-            for(uint32_t i = 0; i < svc_count; i++)
-                ((FelicaService*)simple_array_get(system->services, i))->key_version =
-                    key_vers[1 + area_cnt + i];
-            FURI_LOG_I(TAG, "System key version: %04X", system->key_version);
-        } else {
-            system->key_version = 0;
-            for(uint32_t i = 0; i < area_cnt; i++)
-                ((FelicaArea*)simple_array_get(system->areas, i))->key_version = 0;
-            for(uint32_t i = 0; i < svc_count; i++)
-                ((FelicaService*)simple_array_get(system->services, i))->key_version = 0;
+        for(uint32_t i = 0; i < area_cnt; i++) {
+            FelicaArea* area = (FelicaArea*)simple_array_get(system->areas, i);
+            area->key_version = key_vers[i];
+            // Area 0000 represents the System itself; mirror its key version.
+            if(area->code == 0x0000) {
+                system->key_version = key_vers[i];
+            }
         }
+        for(uint32_t i = 0; i < svc_count; i++)
+            ((FelicaService*)simple_array_get(system->services, i))->key_version =
+                key_vers[area_cnt + i];
+
+        FURI_LOG_I(
+            TAG, "System key version: %04X (all_ok=%d)", system->key_version, all_ok);
 
         free(codes);
         free(key_vers);
