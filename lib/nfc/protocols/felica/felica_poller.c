@@ -46,6 +46,8 @@ static FelicaPoller* felica_poller_alloc(Nfc* nfc) {
 
     instance->systems_read = 0;
     instance->systems_total = 0;
+    memset(&instance->card_idm, 0, sizeof(instance->card_idm));
+    memset(&instance->card_pmm, 0, sizeof(instance->card_pmm));
 
     return instance;
 }
@@ -88,6 +90,8 @@ NfcCommand felica_poller_state_handler_activate(FelicaPoller* instance) {
 
     FelicaError error = felica_poller_activate(instance, instance->data);
     if(error == FelicaErrorNone) {
+        instance->card_idm = instance->data->idm;
+        instance->card_pmm = instance->data->pmm;
         furi_hal_random_fill_buf(instance->data->data.fs.rc.data, FELICA_DATA_BLOCK_SIZE);
         felica_get_workflow_type(instance->data);
 
@@ -151,10 +155,35 @@ NfcCommand felica_poller_state_handler_list_system(FelicaPoller* instance) {
 
 NfcCommand felica_poller_state_handler_select_system_idx(FelicaPoller* instance) {
     FURI_LOG_D(TAG, "Select System Index %d", instance->systems_read);
-    uint8_t system_index_mask = instance->systems_read << 4;
-    instance->data->idm.data[0] &= 0x0F;
-    instance->data->idm.data[0] |= system_index_mask;
-    instance->state = FelicaPollerStateTraverseStandardSystem;
+
+    // Each System on a multi-system card can only be addressed after Polling again
+    // with that System's own Code, which returns the IDm/PMm valid for it. Not every
+    // card tolerates commands sent with a locally-guessed IDm (e.g. Android HCE
+    // FeliCa emulation times out), so this must be a real over-the-air exchange.
+    const FelicaSystem* system =
+        simple_array_cget(instance->data->systems, instance->systems_read);
+    const FelicaPollerPollingCommand polling_cmd = {
+        .system_code = __builtin_bswap16(system->system_code),
+        .request_code = 0,
+        .time_slot = FELICA_TIME_SLOT_1,
+    };
+    FelicaPollerPollingResponse polling_resp = {};
+
+    FelicaError error = felica_poller_polling(instance, &polling_cmd, &polling_resp);
+    if(error == FelicaErrorNone) {
+        instance->data->idm = polling_resp.idm;
+        instance->data->pmm = polling_resp.pmm;
+        instance->state = FelicaPollerStateTraverseStandardSystem;
+    } else {
+        // Couldn't switch into this System - leave it empty and move on rather than
+        // failing the whole multi-System read over one unreachable System.
+        FURI_LOG_W(TAG, "Polling for System %d failed: %d", instance->systems_read, error);
+        FelicaSystem* mut_system =
+            simple_array_get(instance->data->systems, instance->systems_read);
+        simple_array_reset(mut_system->services);
+        simple_array_reset(mut_system->areas);
+        instance->state = FelicaPollerStateReadStandardBlocks;
+    }
 
     return NfcCommandContinue;
 }
@@ -559,7 +588,10 @@ NfcCommand felica_poller_state_handler_read_success(FelicaPoller* instance) {
         instance->felica_event.type = FelicaPollerEventTypeReady;
     }
 
-    instance->data->idm.data[0] &= 0x0F;
+    if(instance->data->workflow_type == FelicaStandard) {
+        instance->data->idm = instance->card_idm;
+        instance->data->pmm = instance->card_pmm;
+    }
 
     instance->felica_event_data.error = FelicaErrorNone;
     return instance->callback(instance->general_event, instance->context);
@@ -568,7 +600,10 @@ NfcCommand felica_poller_state_handler_read_success(FelicaPoller* instance) {
 NfcCommand felica_poller_state_handler_read_failed(FelicaPoller* instance) {
     FURI_LOG_D(TAG, "Read Fail");
     instance->callback(instance->general_event, instance->context);
-    instance->data->idm.data[0] &= 0x0F;
+    if(instance->data->workflow_type == FelicaStandard) {
+        instance->data->idm = instance->card_idm;
+        instance->data->pmm = instance->card_pmm;
+    }
 
     return NfcCommandStop;
 }

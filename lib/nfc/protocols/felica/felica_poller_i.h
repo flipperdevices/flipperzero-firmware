@@ -49,6 +49,13 @@ struct FelicaPoller {
     uint8_t block_index;
     uint8_t systems_read;
     uint8_t systems_total;
+    // IDm/PMm obtained from the initial (wildcard) activation Polling - this is the
+    // card's own identity, distinct from whatever System is currently selected via
+    // instance->data->idm while traversing. Restored into instance->data on success/
+    // failure so the saved/displayed IDm always reflects the card, not the last
+    // System visited.
+    FelicaIDm card_idm;
+    FelicaPMm card_pmm;
     void* context;
 };
 
