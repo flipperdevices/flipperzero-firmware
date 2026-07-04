@@ -14,10 +14,10 @@ typedef struct {
     bool job_active;
     bool usb_connected;
     PrinterCallbacks* printer_callbacks;
-    char current_job_name[64];  // Current job name from PJL
-    char line_buffer[256];      // Buffer for parsing lines
-    size_t line_pos;           // Current position in line buffer
-    bool job_complete;         // Flag for job completion
+    char current_job_name[64]; // Current job name from PJL
+    char line_buffer[256]; // Buffer for parsing lines
+    size_t line_pos; // Current position in line buffer
+    bool job_complete; // Flag for job completion
 } PrinterTest;
 
 typedef enum {
@@ -33,32 +33,34 @@ typedef struct {
     InputEvent input;
     size_t data_len;
     bool connected;
-    char job_name[64];  // Job name for job events
+    char job_name[64]; // Job name for job events
 } PrinterTestEvent;
 
 // Helper function to parse PJL commands
 static void parse_pjl_command(PrinterTest* app, const char* line) {
     const char* pjl_start = line;
-    
+
     // Check if line starts with 0x041B%-12345X (UEL sequence) followed by @PJL
     if(line[0] == 0x04 && line[1] == 0x1B && strncmp(line + 2, "%-12345X", 8) == 0) {
         // Skip the UEL sequence and look for @PJL
         pjl_start = line + 10; // Skip 0x041B%-12345X
         // Skip any whitespace after UEL
-        while(*pjl_start == ' ' || *pjl_start == '\t' || *pjl_start == '\r' || *pjl_start == '\n') {
+        while(*pjl_start == ' ' || *pjl_start == '\t' || *pjl_start == '\r' ||
+              *pjl_start == '\n') {
             pjl_start++;
         }
     }
-    
+
     // Check if we have @PJL at the current position
     if(strncmp(pjl_start, "@PJL", 4) != 0) {
         return;
     }
-    
+
     // Skip @PJL and any spaces
     const char* cmd = pjl_start + 4;
-    while(*cmd == ' ' || *cmd == '\t') cmd++;
-    
+    while(*cmd == ' ' || *cmd == '\t')
+        cmd++;
+
     // Check for SET JOBNAME or JOBNAME command
     if(strncmp(cmd, "SET JOBNAME", 11) == 0 || strncmp(cmd, "JOBNAME", 7) == 0) {
         const char* jobname = NULL;
@@ -69,7 +71,8 @@ static void parse_pjl_command(PrinterTest* app, const char* line) {
         }
 
         if(jobname) {
-            while(*jobname == ' ' || *jobname == '\t' || *jobname == '=') jobname++;
+            while(*jobname == ' ' || *jobname == '\t' || *jobname == '=')
+                jobname++;
 
             // Extract job name (remove quotes if present)
             if(*jobname == '"') {
@@ -101,7 +104,7 @@ static void parse_pjl_command(PrinterTest* app, const char* line) {
             snprintf(event.job_name, sizeof(event.job_name), "%s", app->current_job_name);
             furi_message_queue_put(app->event_queue, &event, 0);
         }
-        
+
     } else if(strncmp(cmd, "EOJ", 3) == 0) {
         // End of job
         PrinterTestEvent event = {
@@ -114,16 +117,16 @@ static void parse_pjl_command(PrinterTest* app, const char* line) {
 // Helper function to process received data line by line
 static void process_data_lines(PrinterTest* app, const uint8_t* data, size_t len) {
     for(size_t i = 0; i < len; i++) {
-        if(data[i] == 0x0A) {  // Line feed (newline)
+        if(data[i] == 0x0A) { // Line feed (newline)
             // Null-terminate the line
             app->line_buffer[app->line_pos] = '\0';
-            
+
             // Parse the line for PJL commands
             parse_pjl_command(app, app->line_buffer);
-            
+
             // Reset line buffer
             app->line_pos = 0;
-        } else if(data[i] != 0x0D) {  // Ignore carriage return
+        } else if(data[i] != 0x0D) { // Ignore carriage return
             // Add character to line buffer if there's space
             if(app->line_pos < sizeof(app->line_buffer) - 1) {
                 app->line_buffer[app->line_pos++] = data[i];
@@ -135,10 +138,10 @@ static void process_data_lines(PrinterTest* app, const uint8_t* data, size_t len
 // Callback for receiving print data
 static void printer_data_callback(const uint8_t* data, size_t len, void* context) {
     PrinterTest* app = context;
-    
+
     // Process data line by line for PJL command parsing
     process_data_lines(app, data, len);
-    
+
     PrinterTestEvent event = {
         .type = EventTypeDataReceived,
         .data_len = len,
@@ -149,7 +152,7 @@ static void printer_data_callback(const uint8_t* data, size_t len, void* context
 // Callback for USB connection status
 static void printer_status_callback(bool connected, void* context) {
     PrinterTest* app = context;
-    
+
     PrinterTestEvent event = {
         .type = EventTypeStatusChanged,
         .connected = connected,
@@ -192,7 +195,7 @@ static void printer_test_draw_callback(Canvas* canvas, void* context) {
         } else {
             canvas_draw_str(canvas, 2, 36, "Print job active");
         }
-        
+
         char buf[32];
         snprintf(buf, sizeof(buf), "Total: %zu bytes", app->total_bytes);
         canvas_draw_str(canvas, 2, 48, buf);
@@ -205,10 +208,7 @@ static void printer_test_draw_callback(Canvas* canvas, void* context) {
 static void printer_test_input_callback(InputEvent* input_event, void* context) {
     PrinterTest* app = context;
 
-    PrinterTestEvent event = {
-        .type = EventTypeKey,
-        .input = *input_event
-    };
+    PrinterTestEvent event = {.type = EventTypeKey, .input = *input_event};
     furi_message_queue_put(app->event_queue, &event, FuriWaitForever);
 }
 
@@ -238,7 +238,7 @@ int32_t printer_test_app(void* p) {
 
     // Save previous USB mode
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
-    
+
     // Switch to printer mode
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_printer, NULL) == true);
@@ -250,7 +250,8 @@ int32_t printer_test_app(void* p) {
     bool running = true;
 
     while(running) {
-        FuriStatus event_status = furi_message_queue_get(app->event_queue, &event, FuriWaitForever);
+        FuriStatus event_status =
+            furi_message_queue_get(app->event_queue, &event, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             if(event.type == EventTypeKey) {

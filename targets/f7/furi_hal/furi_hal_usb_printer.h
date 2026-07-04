@@ -78,7 +78,9 @@ void furi_hal_usb_printer_set_callbacks(PrinterCallbacks* callbacks, void* conte
  * @param callback Function pointer to callback
  * @param context Context pointer passed to callback
  */
-void furi_hal_usb_printer_set_rx_callback(void (*callback)(uint8_t* data, size_t len, void* context), void* context);
+void furi_hal_usb_printer_set_rx_callback(
+    void (*callback)(uint8_t* data, size_t len, void* context),
+    void* context);
 
 #ifdef __cplusplus
 }

@@ -7,23 +7,23 @@
 #include "furi_hal_usb_printer.h"
 
 // USB Printer Class specific definitions
-#define USB_PRINTER_CLASS 0x07
+#define USB_PRINTER_CLASS    0x07
 #define USB_PRINTER_SUBCLASS 0x01
-#define USB_PRINTER_PROTOCOL 0x02  // Bidirectional interface
+#define USB_PRINTER_PROTOCOL 0x02 // Bidirectional interface
 
 // Printer Class specific requests
-#define USB_PRINTER_GET_DEVICE_ID 0x00
+#define USB_PRINTER_GET_DEVICE_ID   0x00
 #define USB_PRINTER_GET_PORT_STATUS 0x01
-#define USB_PRINTER_SOFT_RESET 0x02
+#define USB_PRINTER_SOFT_RESET      0x02
 
 // Printer Port Status Bits
 #define PRINTER_STATUS_PAPER_EMPTY (1 << 5)
-#define PRINTER_STATUS_SELECT (1 << 4)
-#define PRINTER_STATUS_NOT_ERROR (1 << 3)
+#define PRINTER_STATUS_SELECT      (1 << 4)
+#define PRINTER_STATUS_NOT_ERROR   (1 << 3)
 
 // Endpoints
 #define PRINTER_DATA_OUT_EP 0x01
-#define PRINTER_DATA_IN_EP 0x82
+#define PRINTER_DATA_IN_EP  0x82
 
 #define PRINTER_EP_SZ 64
 
@@ -46,8 +46,8 @@ static struct usb_device_descriptor printer_device_desc = {
     .bDeviceSubClass = USB_PRINTER_SUBCLASS,
     .bDeviceProtocol = USB_PRINTER_PROTOCOL,
     .bMaxPacketSize0 = USB_EP0_SIZE,
-    .idVendor = 0x0483,  // STMicroelectronics
-    .idProduct = 0x5743,  // Unique PID for printer
+    .idVendor = 0x0483, // STMicroelectronics
+    .idProduct = 0x5743, // Unique PID for printer
     .bcdDevice = VERSION_BCD(1, 0, 0),
     .iManufacturer = 0,
     .iProduct = 0,
@@ -57,43 +57,47 @@ static struct usb_device_descriptor printer_device_desc = {
 
 // Configuration descriptor
 static const struct PrinterConfigDescriptor printer_cfg_desc = {
-    .config = {
-        .bLength = sizeof(struct usb_config_descriptor),
-        .bDescriptorType = USB_DTYPE_CONFIGURATION,
-        .wTotalLength = sizeof(struct PrinterConfigDescriptor),
-        .bNumInterfaces = 1,
-        .bConfigurationValue = 1,
-        .iConfiguration = NO_DESCRIPTOR,
-        .bmAttributes = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
-        .bMaxPower = USB_CFG_POWER_MA(500),
-    },
-    .printer = {
-        .bLength = sizeof(struct usb_interface_descriptor),
-        .bDescriptorType = USB_DTYPE_INTERFACE,
-        .bInterfaceNumber = 0,
-        .bAlternateSetting = 0,
-        .bNumEndpoints = 2,
-        .bInterfaceClass = USB_PRINTER_CLASS,
-        .bInterfaceSubClass = USB_PRINTER_SUBCLASS,
-        .bInterfaceProtocol = USB_PRINTER_PROTOCOL,
-        .iInterface = NO_DESCRIPTOR,
-    },
-    .printer_ep_out = {
-        .bLength = sizeof(struct usb_endpoint_descriptor),
-        .bDescriptorType = USB_DTYPE_ENDPOINT,
-        .bEndpointAddress = PRINTER_DATA_OUT_EP,
-        .bmAttributes = USB_EPTYPE_BULK,
-        .wMaxPacketSize = PRINTER_EP_SZ,
-        .bInterval = 0,
-    },
-    .printer_ep_in = {
-        .bLength = sizeof(struct usb_endpoint_descriptor),
-        .bDescriptorType = USB_DTYPE_ENDPOINT,
-        .bEndpointAddress = PRINTER_DATA_IN_EP,
-        .bmAttributes = USB_EPTYPE_BULK,
-        .wMaxPacketSize = PRINTER_EP_SZ,
-        .bInterval = 0,
-    },
+    .config =
+        {
+            .bLength = sizeof(struct usb_config_descriptor),
+            .bDescriptorType = USB_DTYPE_CONFIGURATION,
+            .wTotalLength = sizeof(struct PrinterConfigDescriptor),
+            .bNumInterfaces = 1,
+            .bConfigurationValue = 1,
+            .iConfiguration = NO_DESCRIPTOR,
+            .bmAttributes = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
+            .bMaxPower = USB_CFG_POWER_MA(500),
+        },
+    .printer =
+        {
+            .bLength = sizeof(struct usb_interface_descriptor),
+            .bDescriptorType = USB_DTYPE_INTERFACE,
+            .bInterfaceNumber = 0,
+            .bAlternateSetting = 0,
+            .bNumEndpoints = 2,
+            .bInterfaceClass = USB_PRINTER_CLASS,
+            .bInterfaceSubClass = USB_PRINTER_SUBCLASS,
+            .bInterfaceProtocol = USB_PRINTER_PROTOCOL,
+            .iInterface = NO_DESCRIPTOR,
+        },
+    .printer_ep_out =
+        {
+            .bLength = sizeof(struct usb_endpoint_descriptor),
+            .bDescriptorType = USB_DTYPE_ENDPOINT,
+            .bEndpointAddress = PRINTER_DATA_OUT_EP,
+            .bmAttributes = USB_EPTYPE_BULK,
+            .wMaxPacketSize = PRINTER_EP_SZ,
+            .bInterval = 0,
+        },
+    .printer_ep_in =
+        {
+            .bLength = sizeof(struct usb_endpoint_descriptor),
+            .bDescriptorType = USB_DTYPE_ENDPOINT,
+            .bEndpointAddress = PRINTER_DATA_IN_EP,
+            .bmAttributes = USB_EPTYPE_BULK,
+            .wMaxPacketSize = PRINTER_EP_SZ,
+            .bInterval = 0,
+        },
 };
 
 static const struct usb_string_descriptor dev_manuf_desc = USB_STRING_DESC("Flipper Devices Inc.");
@@ -113,7 +117,7 @@ static void (*printer_rx_user_callback)(uint8_t* data, size_t len, void* context
 static void* printer_rx_context = NULL;
 
 #define PRINTER_RX_BUFFER_SIZE 1024
-#define PRINTER_QUEUE_SIZE 8
+#define PRINTER_QUEUE_SIZE     8
 
 typedef struct {
     uint8_t* data;
@@ -125,7 +129,8 @@ static void printer_deinit(usbd_device* dev);
 static void printer_on_wakeup(usbd_device* dev);
 static void printer_on_suspend(usbd_device* dev);
 static usbd_respond printer_ep_config(usbd_device* dev, uint8_t cfg);
-static usbd_respond printer_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback);
+static usbd_respond
+    printer_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback);
 static void printer_rx_callback(usbd_device* dev, uint8_t event, uint8_t ep);
 static void printer_tx_callback(usbd_device* dev, uint8_t event, uint8_t ep);
 
@@ -195,7 +200,7 @@ static void printer_deinit(usbd_device* dev) {
 static void printer_on_wakeup(usbd_device* dev) {
     UNUSED(dev);
     printer_connected = true;
-    
+
     // Call status callback
     if(printer_callbacks && printer_callbacks->status_callback) {
         printer_callbacks->status_callback(true, printer_callback_context);
@@ -205,7 +210,7 @@ static void printer_on_wakeup(usbd_device* dev) {
 static void printer_on_suspend(usbd_device* dev) {
     UNUSED(dev);
     printer_connected = false;
-    
+
     // Call status callback
     if(printer_callbacks && printer_callbacks->status_callback) {
         printer_callbacks->status_callback(false, printer_callback_context);
@@ -213,11 +218,13 @@ static void printer_on_suspend(usbd_device* dev) {
 }
 
 // Handle printer class-specific requests
-static usbd_respond printer_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback) {
+static usbd_respond
+    printer_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback) {
     UNUSED(callback);
-    
+
     // Handle only printer class specific requests
-    if((req->bmRequestType & (USB_REQ_TYPE | USB_REQ_RECIPIENT)) != (USB_REQ_CLASS | USB_REQ_INTERFACE)) {
+    if((req->bmRequestType & (USB_REQ_TYPE | USB_REQ_RECIPIENT)) !=
+       (USB_REQ_CLASS | USB_REQ_INTERFACE)) {
         return usbd_fail;
     }
 
@@ -266,11 +273,11 @@ static usbd_respond printer_ep_config(usbd_device* dev, uint8_t cfg) {
 // Callback for receiving data from host
 static void printer_rx_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(event);
-    
+
     int32_t len = usbd_ep_read(dev, ep, printer_rx_buffer, PRINTER_RX_BUFFER_SIZE);
     if(len > 0) {
         printer_status = PrinterStatusBusy;
-        
+
         if(printer_callbacks && printer_callbacks->data_rx_callback) {
             printer_callbacks->data_rx_callback(printer_rx_buffer, len, printer_callback_context);
         } else if(printer_rx_user_callback) {
@@ -292,7 +299,7 @@ static void printer_rx_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
                 printer_error = PrinterErrorGeneral;
             }
         }
-        
+
         printer_status = PrinterStatusIdle;
     }
 }
@@ -302,7 +309,7 @@ static void printer_tx_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(dev);
     UNUSED(event);
     UNUSED(ep);
-    
+
     if(printer_semaphore) {
         furi_semaphore_release(printer_semaphore);
     }
@@ -321,7 +328,7 @@ int32_t furi_hal_usb_printer_receive(uint8_t* buffer, uint16_t max_len) {
         free(item.data);
         return copy_len;
     }
-    
+
     return 0;
 }
 
@@ -347,7 +354,7 @@ PrinterError furi_hal_usb_printer_get_error(void) {
 void furi_hal_usb_printer_set_callbacks(PrinterCallbacks* callbacks, void* context) {
     printer_callbacks = callbacks;
     printer_callback_context = context;
-    
+
     // Process any queued data if callback is being set
     if(callbacks && callbacks->data_rx_callback && printer_queue) {
         PrinterQueueItem item;
@@ -356,7 +363,7 @@ void furi_hal_usb_printer_set_callbacks(PrinterCallbacks* callbacks, void* conte
             free(item.data);
         }
     }
-    
+
     // Send current connection status
     if(callbacks && callbacks->status_callback) {
         callbacks->status_callback(printer_connected, context);
@@ -368,7 +375,7 @@ void furi_hal_usb_printer_set_rx_callback(
     void* context) {
     printer_rx_user_callback = callback;
     printer_rx_context = context;
-    
+
     // Process any queued data if callback is being set
     if(callback && printer_queue) {
         PrinterQueueItem item;
