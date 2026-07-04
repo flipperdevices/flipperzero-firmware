@@ -546,14 +546,15 @@ static int32_t ccid_worker(void* context) {
     while(1) {
         furi_check(furi_hal_usb_ccid);
         uint32_t flags = furi_thread_flags_wait(
-            WorkerEvtStop | WorkerEvtRequest | WorkerEvtInsertSmartcard | WorkerEvtRemoveSmartcard, FuriFlagWaitAny, FuriWaitForever);
+            WorkerEvtStop | WorkerEvtRequest | WorkerEvtInsertSmartcard | WorkerEvtRemoveSmartcard,
+            FuriFlagWaitAny,
+            FuriWaitForever);
 
-        FURI_LOG_I(
+        FURI_LOG_D(
             CCID_TAG,
             "Worker woke up: flags=0x%08lx smartcard_inserted=%d",
             flags,
-            furi_hal_usb_ccid->smartcard_inserted
-        );
+            furi_hal_usb_ccid->smartcard_inserted);
 
         if(flags & WorkerEvtRequest) {
             //read initial CCID message header
@@ -642,7 +643,6 @@ static int32_t ccid_worker(void* context) {
             break;
         } else if(flags & WorkerEvtInsertSmartcard) {
             if(!furi_hal_usb_ccid->smartcard_inserted) {
-
                 furi_hal_usb_ccid->smartcard_inserted = true;
 
                 struct rdr_to_pc_notify_slot_change* responseNotifySlotChange =
@@ -658,7 +658,6 @@ static int32_t ccid_worker(void* context) {
             }
         } else if(flags & WorkerEvtRemoveSmartcard) {
             if(furi_hal_usb_ccid->smartcard_inserted) {
-
                 furi_hal_usb_ccid->smartcard_inserted = false;
 
                 struct rdr_to_pc_notify_slot_change* responseNotifySlotChange =
