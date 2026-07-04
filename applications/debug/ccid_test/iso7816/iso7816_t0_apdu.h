@@ -36,6 +36,13 @@ uint8_t iso7816_read_command_apdu(
     const uint8_t* pc_to_reader_datablock,
     uint32_t pc_to_reader_datablock_len,
     uint32_t max_apdu_size);
+
+uint8_t iso7816_read_command_apdu_extended(
+    ISO7816_Command_APDU* command,
+    const uint8_t* pc_to_reader_datablock,
+    uint32_t pc_to_reader_datablock_len,
+    uint32_t max_apdu_size);
+
 void iso7816_write_response_apdu(
     const ISO7816_Response_APDU* response,
     uint8_t* reader_to_pc_datablock,

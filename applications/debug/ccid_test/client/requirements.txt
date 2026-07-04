@@ -1,2 +1,6 @@
 pyscard
 # or sudo apt install python3-pyscard
+
+pyusb
+# For CCID-level tests (ccid_test.py)
+# Requires libusb: sudo apt install libusb-1.0-0-dev

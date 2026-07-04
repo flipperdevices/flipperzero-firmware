@@ -9,6 +9,11 @@
 
 #define CCID_SHORT_APDU_SIZE (0xFF)
 
+// Extended APDU support - max data size for Lc/Le
+// Limited to 2048 bytes to balance functionality with RAM constraints
+// Full extended APDU spec allows up to 65535 bytes
+#define CCID_EXTENDED_APDU_SIZE (0x800)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
