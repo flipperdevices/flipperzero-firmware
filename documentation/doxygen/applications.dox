@@ -10,15 +10,15 @@ For easy app development, a software tool called [uFBT](https://github.com/flipp
 
 ## Guides
 
-- @subpage app_dev_your_first_app_in_c — Create a simple app with GUI and run it on Flipper Zero
+- @subpage app_dev_your_first_app_in_c — Create a simple app with GUI and run it on Flipper Zero
 - @subpage app_dev_debugging_faps — How to debug apps using the Devboard or other SWD probes
-- @subpage app_dev_furi_api — Capabilities and architecture of the Flipper system API
-- @subpage app_dev_gui — How to make a GUI application
-- @subpage app_publishing — Learn how to publish your app to the Apps Catalog
+- @subpage app_dev_furi_api — Capabilities and architecture of the Flipper system API
+- @subpage app_dev_gui — How to make a GUI application
+- @subpage app_publishing — Learn how to publish your app to the Apps Catalog
 
 ## Examples
 
-- @subpage app_examples — Various app examples, complete with the source code
+- @subpage app_examples — Various app examples, complete with the source code
 - [Apps Catalog](https://lab.flipper.net/apps) — Check out community developers’ repos
 
 ## Additional resources
