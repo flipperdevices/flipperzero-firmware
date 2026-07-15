@@ -20,6 +20,7 @@ To run the unit tests, follow these steps:
 3. Launch the CLI session and run the `unit_tests` command.
 
 **NOTE:** To run a particular test (and skip all others), specify its name as the command argument.
+For example, `unit_tests test_furi` runs only the Furi core tests.
 Test names match application names defined [here](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/debug/unit_tests/application.fam).
 
 ## Adding unit tests
