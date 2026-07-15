@@ -10,7 +10,6 @@
 
 [![Build](https://github.com/flipperdevices/flipperzero-firmware/actions/workflows/build.yml/badge.svg)](https://github.com/flipperdevices/flipperzero-firmware/actions/workflows/build.yml)
 [![Latest Release](https://img.shields.io/github/v/release/flipperdevices/flipperzero-firmware)](https://github.com/flipperdevices/flipperzero-firmware/releases/latest)
-[![Open for Contribution](https://img.shields.io/github/issues/flipperdevices/flipperzero-firmware/Open%20for%20Contribution?label=open%20for%20contribution)](https://github.com/flipperdevices/flipperzero-firmware/issues?q=is%3Aissue+is%3Aopen+label%3A%22Open+for+Contribution%22)
 [![License](https://img.shields.io/github/license/flipperdevices/flipperzero-firmware)](/LICENSE)
 
 - [Flipper Zero Official Website](https://flipper.net) - A simple way to explain to your friends what Flipper Zero can do.
