@@ -3767,6 +3767,7 @@ Function,+,view_dispatcher_add_view,void,"ViewDispatcher*, uint32_t, View*"
 Function,+,view_dispatcher_alloc,ViewDispatcher*,
 Function,+,view_dispatcher_alloc_ex,ViewDispatcher*,FuriEventLoop*
 Function,+,view_dispatcher_attach_to_gui,void,"ViewDispatcher*, Gui*, ViewDispatcherType"
+Function,+,view_dispatcher_check_id,_Bool,"ViewDispatcher*, uint32_t"
 Function,+,view_dispatcher_enable_queue,void,ViewDispatcher*
 Function,+,view_dispatcher_free,void,ViewDispatcher*
 Function,+,view_dispatcher_get_event_loop,FuriEventLoop*,ViewDispatcher*
