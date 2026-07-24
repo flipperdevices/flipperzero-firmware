@@ -18,7 +18,7 @@ CliShellCompletions*
 
 void cli_shell_completions_free(CliShellCompletions* completions);
 
-extern CliShellKeyComboSet cli_shell_completions_key_combo_set;
+extern const CliShellKeyComboSet cli_shell_completions_key_combo_set;
 
 #ifdef __cplusplus
 }

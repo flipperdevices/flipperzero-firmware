@@ -355,7 +355,7 @@ static bool cli_shell_line_input_normal(CliKeyCombo combo, void* context) {
     return true;
 }
 
-CliShellKeyComboSet cli_shell_line_key_combo_set = {
+const CliShellKeyComboSet cli_shell_line_key_combo_set = {
     .fallback = cli_shell_line_input_normal,
     .count = 14,
     .records =

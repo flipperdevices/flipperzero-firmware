@@ -396,7 +396,7 @@ static usbd_respond cdc_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_cal
 static usbd_device* usb_dev;
 static volatile FuriHalUsbInterface* cdc_if_cur = NULL;
 static volatile bool connected = false;
-static volatile CdcCallbacks* callbacks[IF_NUM_MAX] = {NULL};
+static volatile const CdcCallbacks* callbacks[IF_NUM_MAX] = {};
 static void* cb_ctx[IF_NUM_MAX];
 
 FuriHalUsbInterface usb_cdc_single = {
@@ -472,7 +472,7 @@ static void cdc_deinit(usbd_device* dev) {
     cdc_if_cur = NULL;
 }
 
-void furi_hal_cdc_set_callbacks(uint8_t if_num, CdcCallbacks* cb, void* context) {
+void furi_hal_cdc_set_callbacks(uint8_t if_num, const CdcCallbacks* cb, void* context) {
     furi_check(if_num < IF_NUM_MAX);
 
     if(callbacks[if_num] != NULL) {
@@ -504,7 +504,7 @@ uint8_t furi_hal_cdc_get_ctrl_line_state(uint8_t if_num) {
     return cdc_ctrl_line_state[if_num];
 }
 
-void furi_hal_cdc_send(uint8_t if_num, uint8_t* buf, uint16_t len) {
+void furi_hal_cdc_send(uint8_t if_num, const uint8_t* buf, uint16_t len) {
     if(if_num == 0) {
         usbd_ep_write(usb_dev, CDC0_TXD_EP, buf, len);
     } else if(if_num == 1) {

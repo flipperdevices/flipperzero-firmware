@@ -16,17 +16,6 @@
 #define NEXWATCH_ENCODER_PULSES_PER_BIT (16)
 
 typedef struct {
-    uint8_t magic;
-    char desc[13];
-    uint8_t chk;
-} ProtocolNexwatchMagic;
-
-static ProtocolNexwatchMagic magic_items[] = {
-    {0xBE, "Quadrakey", 0},
-    {0x88, "Nexkey", 0},
-    {0x86, "Honeywell", 0}};
-
-typedef struct {
     uint8_t data_index;
     uint8_t bit_clock_index;
     bool last_bit;
@@ -143,10 +132,10 @@ static bool protocol_nexwatch_decoder_feed_internal(bool polarity, uint32_t time
     return result;
 }
 
-static void protocol_nexwatch_descramble(uint32_t* id, uint32_t* scrambled) {
+static void protocol_nexwatch_descramble(uint32_t* id, const uint32_t* scrambled) {
     // 255 = Not used/Unknown other values are the bit offset in the ID/FC values
-    const uint8_t hex_2_id[] = {31, 27, 23, 19, 15, 11, 7, 3, 30, 26, 22, 18, 14, 10, 6, 2,
-                                29, 25, 21, 17, 13, 9,  5, 1, 28, 24, 20, 16, 12, 8,  4, 0};
+    static const uint8_t hex_2_id[] = {31, 27, 23, 19, 15, 11, 7, 3, 30, 26, 22, 18, 14, 10, 6, 2,
+                                       29, 25, 21, 17, 13, 9,  5, 1, 28, 24, 20, 16, 12, 8,  4, 0};
 
     *id = 0;
     for(uint8_t idx = 0; idx < 32; idx++) {
@@ -264,26 +253,32 @@ LevelDuration protocol_nexwatch_encoder_yield(ProtocolNexwatch* protocol) {
 }
 
 static void protocol_nexwatch_render_data_internal(
-    ProtocolNexwatch* protocol,
+    const ProtocolNexwatch* protocol,
     FuriString* result,
     bool brief) {
     uint32_t id = 0;
-    uint32_t scrambled = bit_lib_get_bits_32(protocol->data, 8, 32);
+    const uint32_t scrambled = bit_lib_get_bits_32(protocol->data, 8, 32);
     protocol_nexwatch_descramble(&id, &scrambled);
 
-    uint8_t m_idx;
-    uint8_t mode = bit_lib_get_bits(protocol->data, 40, 4);
-    uint8_t parity = bit_lib_get_bits(protocol->data, 44, 4);
-    uint8_t chk = bit_lib_get_bits(protocol->data, 48, 8);
+    const uint8_t mode = bit_lib_get_bits(protocol->data, 40, 4);
+    const uint8_t parity = bit_lib_get_bits(protocol->data, 44, 4);
+    const uint8_t chk = bit_lib_get_bits(protocol->data, 48, 8);
 
-    for(m_idx = 0; m_idx < COUNT_OF(magic_items); m_idx++) {
-        magic_items[m_idx].chk = protocol_nexwatch_checksum(magic_items[m_idx].magic, id, parity);
-        if(magic_items[m_idx].chk == chk) {
+    typedef struct {
+        const char* desc;
+        uint8_t magic;
+    } ProtocolNexwatchMagic;
+
+    static const ProtocolNexwatchMagic magic_items[] = {
+        {"Quadrakey", 0xBE}, {"Nexkey", 0x88}, {"Honeywell", 0x86}};
+
+    const char* type = "Unknown";
+    for(size_t idx = 0; idx < COUNT_OF(magic_items); idx++) {
+        if(protocol_nexwatch_checksum(magic_items[idx].magic, id, parity) == chk) {
+            type = magic_items[idx].desc;
             break;
         }
     }
-
-    const char* type = m_idx < COUNT_OF(magic_items) ? magic_items[m_idx].desc : "Unknown";
 
     if(brief) {
         furi_string_printf(
