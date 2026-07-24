@@ -394,7 +394,7 @@ void variable_item_list_set_enter_callback(
         false);
 }
 
-void variable_item_set_label(VariableItem* item, const char* label) {
+void variable_item_set_item_label(VariableItem* item, const char* label) {
     furi_check(item);
     furi_check(label);
     item->label = label;
