@@ -97,6 +97,8 @@ void view_dispatcher_set_custom_event_callback(
 
 /** Set navigation event handler
  *
+ * @note this will be called on the thread that invoked view_dispatcher_run
+ *
  * Called on Input Short Back Event, if it is not consumed by view
  *
  * @param      view_dispatcher  ViewDispatcher instance
