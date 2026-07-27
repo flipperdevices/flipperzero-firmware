@@ -12,7 +12,11 @@
 #define FELICA_MANUFACTURE_ID        "Manufacture id"
 #define FELICA_MANUFACTURE_PARAMETER "Manufacture parameter"
 
-static const uint32_t felica_data_format_version = 2;
+// Version history:
+//  1 - everything was saved as FeliCa Lite
+//  2 - FeliCa Standard systems/areas/services/public blocks
+//  3 - area end codes and system/area/service key versions
+static const uint32_t felica_data_format_version = 3;
 
 /** @brief This is used in felica_prepare_first_block to define which 
  * type of block needs to be prepared.

@@ -5,7 +5,7 @@ Device type: FeliCa
 # UID is common for all formats
 UID: 01 12 34 56 78 9A BC DE
 # FeliCa specific data
-Data format version: 2
+Data format version: 3
 Manufacture id: 01 12 34 56 78 9A BC DE
 Manufacture parameter: 0B 0B 08 20 20 20 FF FF
 IC Type: FeliCa Standard RC-S9X4, Japan Transit IC
@@ -15,17 +15,13 @@ System found: 1
 
 
 System 00: 0003 | Key version 0001 |
-System 00 Key: 01 23 45 67 89 AB CD EF
 
 Area found: 1
-Area 000: | Code 0000 | End FFFE | Services #000-#001 | Key version 0002 |
-Area 000 Key: FE DC BA 98 76 54 32 10
+Area 000: | Code 0000 | End FFFE | Services #000-#001 | Key version 0001 |
 
 Service found: 2
 Service 000: | Code 0009 | Attrib. 09 | Public  | Random | Read/Write | Key version 0003 |
-Service 000 Key: 11 22 33 44 55 66 77 88
 Service 001: | Code 000B | Attrib. 0B | Public  | Random | Read Only  | Key version 0004 |
-Service 001 Key: 88 77 66 55 44 33 22 11
 
 Public blocks read: 2
 Block 0000: | Service code 0009 | Block index 00 | Data: 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 10 |

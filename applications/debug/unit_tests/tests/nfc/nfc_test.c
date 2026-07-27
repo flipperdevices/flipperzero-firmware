@@ -689,6 +689,39 @@ MU_TEST(felica_read) {
     felica_free(felica_data);
 }
 
+// Minimal check of the FeliCa file format v3: no radio involved, just parsing
+MU_TEST(felica_standard_file_test) {
+    NfcDevice* nfc_device = nfc_device_alloc();
+    mu_assert(
+        nfc_device_load(nfc_device, EXT_PATH("unit_tests/nfc/Felica_Standard_with_keys.nfc")),
+        "nfc_device_load() failed");
+
+    const FelicaData* data = nfc_device_get_data(nfc_device, NfcProtocolFelica);
+    mu_assert(data->workflow_type == FelicaStandard, "workflow_type != FelicaStandard");
+    mu_assert(simple_array_get_count(data->systems) == 1, "system count != 1");
+
+    const FelicaSystem* system = simple_array_cget(data->systems, 0);
+    mu_assert(system->system_code == 0x0003, "system_code != 0x0003");
+    mu_assert(system->key_version == 0x0001, "system key_version != 0x0001");
+
+    mu_assert(simple_array_get_count(system->areas) == 1, "area count != 1");
+    const FelicaArea* area = simple_array_cget(system->areas, 0);
+    mu_assert(area->code == 0x0000, "area code != 0x0000");
+    mu_assert(area->end_code == 0xFFFE, "area end_code != 0xFFFE");
+    // Area 0000 is the system itself, so its key version mirrors the system one
+    mu_assert(area->key_version == 0x0001, "area key_version != 0x0001");
+
+    mu_assert(simple_array_get_count(system->services) == 2, "service count != 2");
+    const FelicaService* service0 = simple_array_cget(system->services, 0);
+    mu_assert(service0->code == 0x0009, "service[0] code != 0x0009");
+    mu_assert(service0->key_version == 0x0003, "service[0] key_version != 0x0003");
+    const FelicaService* service1 = simple_array_cget(system->services, 1);
+    mu_assert(service1->code == 0x000B, "service[1] code != 0x000B");
+    mu_assert(service1->key_version == 0x0004, "service[1] key_version != 0x0004");
+
+    nfc_device_free(nfc_device);
+}
+
 MU_TEST(felica_standard_read) {
     NfcDeviceData* nfc_device = nfc_device_alloc();
     mu_assert(
@@ -945,6 +978,7 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(mf_classic_dict_test);
     MU_RUN_TEST(felica_read);
     MU_RUN_TEST(felica_read_auth);
+    MU_RUN_TEST(felica_standard_file_test);
     MU_RUN_TEST(felica_standard_read);
 
     MU_RUN_TEST(slix_file_with_capabilities_test);
