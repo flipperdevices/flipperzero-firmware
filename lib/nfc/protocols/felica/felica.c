@@ -102,6 +102,7 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
     furi_check(data);
 
     bool parsed = false;
+    uint32_t data_format_version = 0;
     FuriString* str_key_buffer = furi_string_alloc();
     FuriString* str_data_buffer = furi_string_alloc();
 
@@ -109,7 +110,6 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
     do {
         if(version < NFC_UNIFIED_FORMAT_VERSION) break;
 
-        uint32_t data_format_version = 0;
         if(!flipper_format_read_uint32(ff, FELICA_DATA_FORMAT_VERSION, &data_format_version, 1))
             break;
 
@@ -159,6 +159,9 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
         } while(false);
         break;
     case FelicaStandard:
+        // Key versions and area end codes appeared in version 3
+        const bool has_key_versions = data_format_version >= 3;
+
         uint32_t systems_total = 0;
         if(!flipper_format_read_uint32(ff, "System found", &systems_total, 1)) break;
         if(systems_total == 0) break;
@@ -176,19 +179,23 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                    ff, furi_string_get_cstr(str_key_buffer), str_data_buffer))
                 break;
 
-            if(!sscanf(furi_string_get_cstr(str_data_buffer), "%04hX", &system_code)) {
-                break;
+            system->key_version = FELICA_KEY_VERSION_UNKNOWN;
+            if(has_key_versions) {
+                if(sscanf(
+                       furi_string_get_cstr(str_data_buffer),
+                       "%04hX | Key version %04hX |",
+                       &system_code,
+                       &system->key_version) != 2) {
+                    break;
+                }
+            } else {
+                if(sscanf(furi_string_get_cstr(str_data_buffer), "%04hX", &system_code) != 1) {
+                    break;
+                }
             }
 
             system->system_code = system_code;
             system->system_code_idx = sys_idx;
-
-            // Try to read system key version from the same value line (backward compat: default 0xFFFF)
-            system->key_version = 0xFFFF;
-            const char* sys_kv_ptr = strstr(furi_string_get_cstr(str_data_buffer), "Key version ");
-            if(sys_kv_ptr) {
-                sscanf(sys_kv_ptr, "Key version %04hX", &system->key_version);
-            }
 
             // Areas
             do {
@@ -207,33 +214,28 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                         break;
                     }
                     FelicaArea* area = simple_array_get(system->areas, i);
-                    if(sscanf(
-                           furi_string_get_cstr(str_data_buffer),
-                           "| Code %04hX | End %04hX | Services #%03hX-#%03hX | Key version %04hX |",
-                           &area->code,
-                           &area->end_code,
-                           &area->first_idx,
-                           &area->last_idx,
-                           &area->key_version) != 5) {
-                        // Fall back to format without key version
-                        area->key_version = 0xFFFF;
+                    if(has_key_versions) {
                         if(sscanf(
                                furi_string_get_cstr(str_data_buffer),
-                               "| Code %04hX | End %04hX | Services #%03hX-#%03hX |",
+                               "| Code %04hX | End %04hX | Services #%03hX-#%03hX | Key version %04hX |",
                                &area->code,
                                &area->end_code,
                                &area->first_idx,
-                               &area->last_idx) != 4) {
-                            // Fall back to old format without end_code
-                            if(sscanf(
-                                   furi_string_get_cstr(str_data_buffer),
-                                   "| Code %04hX | Services #%03hX-#%03hX |",
-                                   &area->code,
-                                   &area->first_idx,
-                                   &area->last_idx) != 3) {
-                                break;
-                            }
-                            area->end_code = 0xFFFF;
+                               &area->last_idx,
+                               &area->key_version) != 5) {
+                            break;
+                        }
+                    } else {
+                        // Version 2 knew neither the area end code nor its key version
+                        area->end_code = FELICA_AREA_END_CODE_UNKNOWN;
+                        area->key_version = FELICA_KEY_VERSION_UNKNOWN;
+                        if(sscanf(
+                               furi_string_get_cstr(str_data_buffer),
+                               "| Code %04hX | Services #%03hX-#%03hX |",
+                               &area->code,
+                               &area->first_idx,
+                               &area->last_idx) != 3) {
+                            break;
                         }
                     }
                 }
@@ -258,20 +260,24 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                     FelicaService* service = simple_array_get(system->services, i);
 
                     // all unread in the beginning. reserved for future block load
-                    if(!sscanf(
+                    if(sscanf(
                            furi_string_get_cstr(str_data_buffer),
                            "| Code %04hX |",
-                           &service->code)) {
+                           &service->code) != 1) {
                         break;
                     }
                     service->attr = service->code & 0x3F;
 
-                    // Try to read key version from the same line (backward compat: default 0xFFFF)
-                    service->key_version = 0xFFFF;
-                    const char* svc_kv_ptr =
-                        strstr(furi_string_get_cstr(str_data_buffer), "Key version ");
-                    if(svc_kv_ptr) {
-                        sscanf(svc_kv_ptr, "Key version %04hX", &service->key_version);
+                    // The key version trails the human readable attribute text,
+                    // so it can not be picked up by the sscanf above
+                    service->key_version = FELICA_KEY_VERSION_UNKNOWN;
+                    if(has_key_versions) {
+                        const char* svc_kv_ptr =
+                            strstr(furi_string_get_cstr(str_data_buffer), "Key version ");
+                        if(!svc_kv_ptr ||
+                           sscanf(svc_kv_ptr, "Key version %04hX", &service->key_version) != 1) {
+                            break;
+                        }
                     }
                 }
             } while(false);

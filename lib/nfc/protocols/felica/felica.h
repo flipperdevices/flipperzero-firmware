@@ -19,6 +19,11 @@ extern "C" {
 #define FELICA_SERVICE_RW_ACCESS (0x0009U)
 #define FELICA_SERVICE_RO_ACCESS (0x000BU)
 
+/** @brief Placeholders for data that files older than format version 3 do not carry.
+ * Both match what a card returns for a node it does not know about. */
+#define FELICA_KEY_VERSION_UNKNOWN   (0xFFFFU)
+#define FELICA_AREA_END_CODE_UNKNOWN (0xFFFFU)
+
 #define FELICA_BLOCKS_TOTAL_COUNT    (28U)
 #define FELICA_BLOCK_INDEX_REG       (0x0EU)
 #define FELICA_BLOCK_INDEX_RC        (0x80U)
