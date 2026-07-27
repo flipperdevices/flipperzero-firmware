@@ -253,9 +253,7 @@ static FelicaError felica_listener_command_handler_standard_read(
         resp_buf[12] = actual_block_count;
         for(uint8_t i = 0; i < actual_block_count; i++) {
             memcpy(
-                resp_buf + 13 + i * FELICA_DATA_BLOCK_SIZE,
-                block_data[i],
-                FELICA_DATA_BLOCK_SIZE);
+                resp_buf + 13 + i * FELICA_DATA_BLOCK_SIZE, block_data[i], FELICA_DATA_BLOCK_SIZE);
         }
     }
 
@@ -340,7 +338,8 @@ static FelicaError felica_listener_command_handler_standard_write(
             uint32_t pb_count = simple_array_get_count(system->public_blocks);
             for(uint32_t j = 0; j < pb_count; j++) {
                 FelicaPublicBlock* pb = simple_array_get(system->public_blocks, j);
-                if(pb->service_code == targets[i].svc_code && pb->block_idx == targets[i].blk_num) {
+                if(pb->service_code == targets[i].svc_code &&
+                   pb->block_idx == targets[i].blk_num) {
                     memcpy(
                         pb->block.data, bptr + i * FELICA_DATA_BLOCK_SIZE, FELICA_DATA_BLOCK_SIZE);
                     found = true;

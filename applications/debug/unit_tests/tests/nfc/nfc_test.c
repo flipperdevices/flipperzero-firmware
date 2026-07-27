@@ -721,8 +721,22 @@ MU_TEST(felica_standard_read) {
     mu_assert(pb0->service_code == 0x0009, "block[0] service_code != 0x0009");
     mu_assert(pb0->block_idx == 0, "block[0] block_idx != 0");
     static const uint8_t expected_block0[FELICA_DATA_BLOCK_SIZE] = {
-        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-        0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10};
+        0x01,
+        0x02,
+        0x03,
+        0x04,
+        0x05,
+        0x06,
+        0x07,
+        0x08,
+        0x09,
+        0x0A,
+        0x0B,
+        0x0C,
+        0x0D,
+        0x0E,
+        0x0F,
+        0x10};
     mu_assert(
         memcmp(pb0->block.data, expected_block0, FELICA_DATA_BLOCK_SIZE) == 0,
         "block[0] data mismatch");
@@ -731,8 +745,22 @@ MU_TEST(felica_standard_read) {
     mu_assert(pb1->service_code == 0x000B, "block[1] service_code != 0x000B");
     mu_assert(pb1->block_idx == 0, "block[1] block_idx != 0");
     static const uint8_t expected_block1[FELICA_DATA_BLOCK_SIZE] = {
-        0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8,
-        0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, 0xB0};
+        0xA1,
+        0xA2,
+        0xA3,
+        0xA4,
+        0xA5,
+        0xA6,
+        0xA7,
+        0xA8,
+        0xA9,
+        0xAA,
+        0xAB,
+        0xAC,
+        0xAD,
+        0xAE,
+        0xAF,
+        0xB0};
     mu_assert(
         memcmp(pb1->block.data, expected_block1, FELICA_DATA_BLOCK_SIZE) == 0,
         "block[1] data mismatch");

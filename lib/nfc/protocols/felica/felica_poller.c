@@ -415,7 +415,8 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
                 felica_poller_request_service(instance, codes + offset, batch, key_vers + offset);
             if(err != FelicaErrorNone) {
                 FURI_LOG_W(TAG, "Request service failed (offset=%lu, err=%d)", offset, err);
-                for(uint32_t i = offset; i < total; i++) key_vers[i] = 0xFFFF;
+                for(uint32_t i = offset; i < total; i++)
+                    key_vers[i] = 0xFFFF;
                 all_ok = false;
                 break;
             }
@@ -433,8 +434,7 @@ NfcCommand felica_poller_state_handler_traverse_standard_system(FelicaPoller* in
             ((FelicaService*)simple_array_get(system->services, i))->key_version =
                 key_vers[area_cnt + i];
 
-        FURI_LOG_I(
-            TAG, "System key version: %04X (all_ok=%d)", system->key_version, all_ok);
+        FURI_LOG_I(TAG, "System key version: %04X (all_ok=%d)", system->key_version, all_ok);
 
         free(codes);
         free(key_vers);

@@ -181,8 +181,7 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
 
             // Try to read system key version from the same value line (backward compat: default 0xFFFF)
             system->key_version = 0xFFFF;
-            const char* sys_kv_ptr =
-                strstr(furi_string_get_cstr(str_data_buffer), "Key version ");
+            const char* sys_kv_ptr = strstr(furi_string_get_cstr(str_data_buffer), "Key version ");
             if(sys_kv_ptr) {
                 sscanf(sys_kv_ptr, "Key version %04hX", &system->key_version);
             }
