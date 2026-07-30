@@ -71,8 +71,7 @@ static void loader_cli_open(FuriString* args, Loader* loader) {
             }
         }
 
-        const char* args_str =
-            furi_string_empty(app_args) ? NULL : furi_string_get_cstr(app_args);
+        const char* args_str = furi_string_empty(app_args) ? NULL : furi_string_get_cstr(app_args);
 
         const char* app_name_str = furi_string_get_cstr(app_name);
 
