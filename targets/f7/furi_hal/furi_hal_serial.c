@@ -691,6 +691,58 @@ void furi_hal_serial_configure_framing(
     }
 }
 
+static void furi_hal_serial_usart_configure_flow_control(bool rts, bool cts) {
+    uint32_t flow_control;
+    if(rts && cts) {
+        flow_control = LL_USART_HWCONTROL_RTS_CTS;
+    } else if(rts) {
+        flow_control = LL_USART_HWCONTROL_RTS;
+    } else if(cts) {
+        flow_control = LL_USART_HWCONTROL_CTS;
+    } else {
+        flow_control = LL_USART_HWCONTROL_NONE;
+    }
+    LL_USART_SetHWFlowCtrl(USART1, flow_control);
+}
+
+static void furi_hal_serial_lpuart_configure_flow_control(bool rts, bool cts) {
+    uint32_t flow_control;
+    if(rts && cts) {
+        flow_control = LL_LPUART_HWCONTROL_RTS_CTS;
+    } else if(rts) {
+        flow_control = LL_LPUART_HWCONTROL_RTS;
+    } else if(cts) {
+        flow_control = LL_LPUART_HWCONTROL_CTS;
+    } else {
+        flow_control = LL_LPUART_HWCONTROL_NONE;
+    }
+    LL_USART_SetHWFlowCtrl(LPUART1, flow_control);
+}
+
+void furi_hal_serial_configure_flow_control(FuriHalSerialHandle* handle, bool rts, bool cts) {
+    furi_check(handle);
+
+    if(handle->id == FuriHalSerialIdUsart) {
+        if(LL_USART_IsEnabled(USART1)) {
+            // Wait for transfer complete flag
+            while(!LL_USART_IsActiveFlag_TC(USART1))
+                ;
+            LL_USART_Disable(USART1);
+            furi_hal_serial_usart_configure_flow_control(rts, cts);
+            LL_USART_Enable(USART1);
+        }
+    } else if(handle->id == FuriHalSerialIdLpuart) {
+        if(LL_LPUART_IsEnabled(LPUART1)) {
+            // Wait for transfer complete flag
+            while(!LL_LPUART_IsActiveFlag_TC(LPUART1))
+                ;
+            LL_LPUART_Disable(LPUART1);
+            furi_hal_serial_lpuart_configure_flow_control(rts, cts);
+            LL_LPUART_Enable(LPUART1);
+        }
+    }
+}
+
 void furi_hal_serial_deinit(FuriHalSerialHandle* handle) {
     furi_check(handle);
     furi_hal_serial_async_rx_configure(handle, NULL, NULL);
