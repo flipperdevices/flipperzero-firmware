@@ -13,6 +13,7 @@ static const char* protocol_names[NfcProtocolNum] = {
     [NfcProtocolMfPlus] = "Mifare Plus",
     [NfcProtocolSlix] = "Slix",
     [NfcProtocolSt25tb] = "St25tb",
+    [NfcProtocolInnovatron] = "Innovatron",
 };
 
 const char* nfc_cli_get_protocol_name(NfcProtocol protocol) {

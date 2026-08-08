@@ -21,6 +21,7 @@
 #include "mf_desfire/mf_desfire.h"
 #include "slix/slix.h"
 #include "st25tb/st25tb.h"
+#include "innovatron/innovatron.h"
 
 /**
  * @brief Array of pointers to concrete protocol support implementations.
@@ -43,5 +44,6 @@ const NfcProtocolSupportBase* nfc_protocol_support[NfcProtocolNum] = {
     [NfcProtocolMfDesfire] = &nfc_protocol_support_mf_desfire,
     [NfcProtocolSlix] = &nfc_protocol_support_slix,
     [NfcProtocolSt25tb] = &nfc_protocol_support_st25tb,
+    [NfcProtocolInnovatron] = &nfc_protocol_support_innovatron,
     /* Add new protocol support implementations here */
 };
