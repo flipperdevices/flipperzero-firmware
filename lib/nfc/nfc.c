@@ -71,6 +71,7 @@ static const FuriHalNfcTech nfc_tech_table[NfcModeNum][NfcTechNum] = {
         {
             [NfcTechIso14443a] = FuriHalNfcTechIso14443a,
             [NfcTechIso14443b] = FuriHalNfcTechIso14443b,
+            [NfcTechInnovatron] = FuriHalNfcTechInnovatron,
             [NfcTechIso15693] = FuriHalNfcTechIso15693,
             [NfcTechFelica] = FuriHalNfcTechFelica,
         },
@@ -78,6 +79,7 @@ static const FuriHalNfcTech nfc_tech_table[NfcModeNum][NfcTechNum] = {
         {
             [NfcTechIso14443a] = FuriHalNfcTechIso14443a,
             [NfcTechIso14443b] = FuriHalNfcTechInvalid,
+            [NfcTechInnovatron] = FuriHalNfcTechInvalid,
             [NfcTechIso15693] = FuriHalNfcTechIso15693,
             [NfcTechFelica] = FuriHalNfcTechFelica,
         },

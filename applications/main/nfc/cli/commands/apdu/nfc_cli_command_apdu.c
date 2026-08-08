@@ -5,6 +5,7 @@
 #include "protocol_handlers/iso14443_4a/nfc_cli_apdu_iso14443_4a.h"
 #include "protocol_handlers/iso14443_4b/nfc_cli_apdu_iso14443_4b.h"
 #include "protocol_handlers/iso15693_3/nfc_cli_apdu_iso15693_3.h"
+#include "protocol_handlers/innovatron/nfc_cli_apdu_innovatron.h"
 
 #include <furi.h>
 #include <nfc/nfc.h>
@@ -139,9 +140,15 @@ static NfcProtocol nfc_cli_apdu_protocol_autodetect(Nfc* nfc) {
         NfcProtocolIso14443_4a,
         NfcProtocolIso14443_4b,
         NfcProtocolIso15693_3,
+        NfcProtocolInnovatron,
     };
 
-    const char* supported_names[] = {"Iso14443_4a", "Iso14443_4b", "Iso15693_3"};
+    const char* supported_names[] = {
+        "Iso14443_4a",
+        "Iso14443_4b",
+        "Iso15693_3",
+        "Innovatron",
+    };
 
     NfcProtocol protocol = NfcProtocolInvalid;
     for(uint8_t i = 0; i < COUNT_OF(supported_protocols); i++) {
@@ -164,6 +171,8 @@ static NfcCliApduProtocolHandler nfc_cli_apdu_poller_get_handler(NfcProtocol pro
         return nfc_cli_apdu_iso14443_4b_handler;
     else if(protocol == NfcProtocolIso15693_3)
         return nfc_cli_apdu_iso15693_3_handler;
+    else if(protocol == NfcProtocolInnovatron)
+        return nfc_cli_apdu_innovatron_handler;
     else
         return NULL;
 }
@@ -226,6 +235,7 @@ static const NfcProtocolNameValuePair supported_protocols[] = {
     {.name = "4a", .value = NfcProtocolIso14443_4a},
     {.name = "4b", .value = NfcProtocolIso14443_4b},
     {.name = "15", .value = NfcProtocolIso15693_3},
+    {.name = "bi", .value = NfcProtocolInnovatron},
 };
 
 static bool nfc_cli_apdu_parse_protocol(FuriString* value, void* output) {
@@ -275,7 +285,7 @@ const NfcCliKeyDescriptor apdu_keys[] = {
     {
         .long_name = "protocol",
         .short_name = "p",
-        .description = "set protocol (4a, 4b, 15) directly, otherwise autodetected",
+        .description = "set protocol (4a, 4b, 15, bi) directly, otherwise autodetected",
         .features = {.parameter = true, .required = false},
         .parse = nfc_cli_apdu_parse_protocol,
     },
@@ -290,7 +300,7 @@ const NfcCliKeyDescriptor apdu_keys[] = {
 
 const NfcCliActionDescriptor apdu_action = {
     .name = "apdu",
-    .description = "Send APDU data to iso14443_4a, iso14443_4b or iso15693_3",
+    .description = "Send APDU data to iso14443_4a, iso14443_4b, iso15693_3 or innovatron",
     .alloc = nfc_cli_apdu_alloc_ctx,
     .free = nfc_cli_apdu_free_ctx,
     .execute = nfc_cli_apdu_execute,
@@ -309,3 +319,4 @@ ADD_NFC_CLI_COMMAND(apdu, "", apdu_actions_collection);
 //apdu -p 4a -d 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
 //apdu -p 4b -d 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
 //apdu -p 15 -d 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102
+//apdu -p bi -d 00a404000e325041592e5359532e444446303100 00A4040008A000000333010102

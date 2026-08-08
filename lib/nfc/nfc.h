@@ -106,6 +106,7 @@ typedef enum {
     NfcTechIso14443b, /**< Configure the Nfc instance to use the ISO14443-3B technology. */
     NfcTechIso15693, /**< Configure the Nfc instance to use the ISO15693 technology. */
     NfcTechFelica, /**< Configure the Nfc instance to use the FeliCa technology. */
+    NfcTechInnovatron, /**< Configure the Nfc instance for the Innovatron B Prime technology. */
 
     NfcTechNum, /**< Technologies count. Internal use. */
 } NfcTech;
