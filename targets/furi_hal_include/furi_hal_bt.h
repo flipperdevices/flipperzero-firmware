@@ -62,6 +62,13 @@ bool furi_hal_bt_is_gatt_gap_supported(void);
  */
 bool furi_hal_bt_is_testing_supported(void);
 
+/** Check if radio stack supports the central role, i.e. scanning for and
+ * connecting to other devices. Requires the full stack.
+ *
+ * @return  true if supported
+ */
+bool furi_hal_bt_is_central_supported(void);
+
 /** Check if particular instance of profile belongs to given type
  *
  * @param profile           FuriHalBtProfile instance. If NULL, uses current profile
@@ -128,6 +135,13 @@ void furi_hal_bt_update_power_state(bool charging);
  * @return          true if device is connected or advertising, false otherwise
  */
 bool furi_hal_bt_is_active(void);
+
+/** Check whether the peripheral GAP role is currently advertising. Unlike
+ * furi_hal_bt_is_active(), this returns false for an established connection.
+ *
+ * @return true if advertising is starting or active
+ */
+bool furi_hal_bt_is_advertising(void);
 
 /** Start advertising
  */

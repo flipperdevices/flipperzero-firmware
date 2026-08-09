@@ -42,7 +42,9 @@ BleEventFlowStatus ble_event_app_notification(void* pckt);
 FURI_WARN_UNUSED GapSvcEventHandler*
     ble_event_dispatcher_register_svc_handler(BleSvcEventHandlerCb handler, void* context);
 
-/* Remove a handler from the list of handlers */
+/* Remove a handler from the list. Returns only after an in-flight invocation of
+ * that handler has completed, so its context may then be released safely. Do
+ * not register or unregister handlers from inside a dispatcher callback. */
 void ble_event_dispatcher_unregister_svc_handler(GapSvcEventHandler* handler);
 
 #ifdef __cplusplus
