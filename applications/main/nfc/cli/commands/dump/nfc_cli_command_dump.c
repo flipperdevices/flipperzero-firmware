@@ -16,6 +16,7 @@
 #include "protocols/slix/nfc_cli_dump_slix.h"
 #include "protocols/st25tb/nfc_cli_dump_st25tb.h"
 #include "protocols/felica/nfc_cli_dump_felica.h"
+#include "protocols/ask_ctx/nfc_cli_dump_ask_ctx.h"
 
 #include <datetime.h>
 #include <furi_hal_rtc.h>
@@ -93,6 +94,7 @@ NfcGenericCallback protocol_poller_callbacks[NfcProtocolNum] = {
     [NfcProtocolMfDesfire] = nfc_cli_dump_poller_callback_mf_desfire,
     [NfcProtocolMfPlus] = nfc_cli_dump_poller_callback_mf_plus,
     [NfcProtocolSt25tb] = nfc_cli_dump_poller_callback_st25tb,
+    [NfcProtocolAskCtx] = nfc_cli_dump_poller_callback_ask_ctx,
 };
 
 static void nfc_cli_dump_generate_filename(FuriString* file_path) {
@@ -219,6 +221,7 @@ static const NfcProtocolNameValuePair supported_protocols[] = {
     {.name = "des", .value = NfcProtocolMfDesfire},
     {.name = "slix", .value = NfcProtocolSlix},
     {.name = "st25", .value = NfcProtocolSt25tb},
+    {.name = "askctx", .value = NfcProtocolAskCtx},
 };
 
 static bool nfc_cli_dump_parse_protocol(FuriString* value, void* output) {
