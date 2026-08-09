@@ -199,6 +199,14 @@ App(
 )
 
 App(
+    appid="test_ble_central",
+    sources=["tests/common/*.c", "tests/ble_central/*.c"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="get_api",
+    requires=["unit_tests"],
+)
+
+App(
     appid="test_dialogs_file_browser_options",
     sources=["tests/common/*.c", "tests/dialogs_file_browser_options/*.c"],
     apptype=FlipperAppType.PLUGIN,
