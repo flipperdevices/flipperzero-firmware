@@ -91,6 +91,14 @@ static FuriHalNfcError furi_hal_nfc_iso14443b_poller_init(const FuriHalSpiBusHan
         0);
 }
 
+static FuriHalNfcError furi_hal_nfc_ask_ctx_poller_init(const FuriHalSpiBusHandle* handle) {
+    return furi_hal_nfc_iso14443b_poller_init_base(
+        handle,
+        ST25R3916_REG_ISO14443B_1_sof_0_10etu | ST25R3916_REG_ISO14443B_1_sof_1_2etu |
+            ST25R3916_REG_ISO14443B_1_eof_10etu,
+        ST25R3916_REG_ISO14443B_2_no_sof | ST25R3916_REG_ISO14443B_2_no_eof);
+}
+
 static FuriHalNfcError furi_hal_nfc_iso14443b_poller_deinit(const FuriHalSpiBusHandle* handle) {
     UNUSED(handle);
     return FuriHalNfcErrorNone;
@@ -105,6 +113,24 @@ const FuriHalNfcTechBase furi_hal_nfc_iso14443b = {
                     .fwt = FURI_HAL_NFC_POLLER_FWT_COMP_FC,
                 },
             .init = furi_hal_nfc_iso14443b_poller_init,
+            .deinit = furi_hal_nfc_iso14443b_poller_deinit,
+            .wait_event = furi_hal_nfc_wait_event_common,
+            .tx = furi_hal_nfc_poller_tx_common,
+            .rx = furi_hal_nfc_common_fifo_rx,
+        },
+
+    .listener = {},
+};
+
+const FuriHalNfcTechBase furi_hal_nfc_ask_ctx = {
+    .poller =
+        {
+            .compensation =
+                {
+                    .fdt = FURI_HAL_NFC_POLLER_FDT_COMP_FC,
+                    .fwt = FURI_HAL_NFC_POLLER_FWT_COMP_FC,
+                },
+            .init = furi_hal_nfc_ask_ctx_poller_init,
             .deinit = furi_hal_nfc_iso14443b_poller_deinit,
             .wait_event = furi_hal_nfc_wait_event_common,
             .tx = furi_hal_nfc_poller_tx_common,
