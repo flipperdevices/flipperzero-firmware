@@ -497,6 +497,11 @@ bool felica_set_uid(FelicaData* data, const uint8_t* uid, size_t uid_len) {
     const bool uid_valid = uid_len == FELICA_IDM_SIZE;
     if(uid_valid) {
         memcpy(data->idm.data, uid, uid_len);
+        // Also sync ID and D_ID with IDm if system is FeliCa Lite.
+        if(data->workflow_type == FelicaLite) {
+            memcpy(data->data.fs.id.data, uid, uid_len);
+            memcpy(data->data.fs.d_id.data, uid, uid_len);
+        }
     }
 
     return uid_valid;
