@@ -14,9 +14,11 @@ LIST_DEF(GapSvcEventHandlerList, GapSvcEventHandler, M_POD_OPLIST);
 
 static GapSvcEventHandlerList_t handlers;
 static bool initialized = false;
+static FuriMutex* handlers_mutex = NULL;
 
 BleEventFlowStatus ble_event_dispatcher_process_event(void* payload) {
     furi_check(initialized);
+    furi_check(furi_mutex_acquire(handlers_mutex, FuriWaitForever) == FuriStatusOk);
 
     GapSvcEventHandlerList_it_t it;
     BleEventAckStatus ack_status = BleEventNotAck;
@@ -32,6 +34,11 @@ BleEventFlowStatus ble_event_dispatcher_process_event(void* payload) {
             break;
         }
     }
+
+    /* Registration and removal wait for callback execution to finish. This is
+     * what makes it safe for a service to free its callback context immediately
+     * after unregister_svc_handler returns. */
+    furi_check(furi_mutex_release(handlers_mutex) == FuriStatusOk);
 
     /* Handlers for client-mode events are also to be implemented here. But not today. */
 
@@ -52,15 +59,18 @@ BleEventFlowStatus ble_event_dispatcher_process_event(void* payload) {
 void ble_event_dispatcher_init(void) {
     if(!initialized) {
         GapSvcEventHandlerList_init(handlers);
+        handlers_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
         initialized = true;
     }
 }
 
 void ble_event_dispatcher_reset(void) {
     furi_check(initialized);
+    furi_check(furi_mutex_acquire(handlers_mutex, FuriWaitForever) == FuriStatusOk);
     furi_check(GapSvcEventHandlerList_size(handlers) == 0);
 
     GapSvcEventHandlerList_clear(handlers);
+    furi_check(furi_mutex_release(handlers_mutex) == FuriStatusOk);
 }
 
 GapSvcEventHandler*
@@ -68,16 +78,19 @@ GapSvcEventHandler*
     furi_check(handler);
     furi_check(context);
     furi_check(initialized);
+    furi_check(furi_mutex_acquire(handlers_mutex, FuriWaitForever) == FuriStatusOk);
 
     GapSvcEventHandler* item = GapSvcEventHandlerList_push_raw(handlers);
     item->context = context;
     item->callback = handler;
+    furi_check(furi_mutex_release(handlers_mutex) == FuriStatusOk);
 
     return item;
 }
 
 void ble_event_dispatcher_unregister_svc_handler(GapSvcEventHandler* handler) {
     furi_check(handler);
+    furi_check(furi_mutex_acquire(handlers_mutex, FuriWaitForever) == FuriStatusOk);
 
     bool found = false;
     GapSvcEventHandlerList_it_t it;
@@ -93,5 +106,6 @@ void ble_event_dispatcher_unregister_svc_handler(GapSvcEventHandler* handler) {
         }
     }
 
+    furi_check(furi_mutex_release(handlers_mutex) == FuriStatusOk);
     furi_check(found);
 }

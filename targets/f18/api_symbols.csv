@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,88.2,,
+Version,+,88.3,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -187,6 +187,7 @@ Header,+,lib/toolbox/version.h,,
 Header,+,targets/f18/furi_hal/furi_hal_resources.h,,
 Header,+,targets/f18/furi_hal/furi_hal_spi_config.h,,
 Header,+,targets/f18/furi_hal/furi_hal_target_hw.h,,
+Header,+,targets/f7/ble_glue/furi_ble/central.h,,
 Header,+,targets/f7/ble_glue/furi_ble/event_dispatcher.h,,
 Header,+,targets/f7/ble_glue/furi_ble/gatt.h,,
 Header,+,targets/f7/ble_glue/furi_ble/profile_interface.h,,
@@ -641,6 +642,28 @@ Function,+,bit_lib_test_parity_32,_Bool,"uint32_t, BitLibParity"
 Function,-,ble_app_deinit,void,
 Function,-,ble_app_get_key_storage_buff,void,"uint8_t**, uint16_t*"
 Function,-,ble_app_init,_Bool,
+Function,+,ble_central_adv_find,_Bool,"const BleCentralAdvReport*, uint8_t, const uint8_t**, uint8_t*"
+Function,+,ble_central_connect,_Bool,"const uint8_t[6], uint8_t, uint32_t"
+Function,+,ble_central_connection_handle,uint16_t,
+Function,+,ble_central_deinit,_Bool,
+Function,+,ble_central_disconnect,_Bool,
+Function,+,ble_central_enumerate_characteristics,_Bool,"uint16_t, uint16_t, BleCentralCharCallback, void*, uint32_t"
+Function,+,ble_central_enumerate_services,_Bool,"BleCentralServiceCallback, void*, uint32_t"
+Function,+,ble_central_exchange_mtu,_Bool,uint32_t
+Function,+,ble_central_find_cccd,_Bool,"uint16_t, uint16_t, uint16_t*, uint32_t"
+Function,+,ble_central_find_characteristic_128,_Bool,"const uint8_t[16], const uint8_t[16], uint16_t*, uint16_t*, uint32_t"
+Function,+,ble_central_find_characteristic_16,_Bool,"uint16_t, uint16_t, uint16_t*, uint16_t*, uint32_t"
+Function,+,ble_central_init,void,
+Function,+,ble_central_is_connected,_Bool,
+Function,+,ble_central_is_scanning,_Bool,
+Function,+,ble_central_last_status,uint8_t,
+Function,+,ble_central_read,_Bool,"uint16_t, uint8_t*, uint8_t, uint8_t*, uint32_t"
+Function,+,ble_central_scan_start,_Bool,"BleCentralScanCallback, void*"
+Function,+,ble_central_scan_stop,_Bool,
+Function,+,ble_central_set_notify_callback,void,"BleCentralNotifyCallback, void*"
+Function,+,ble_central_subscribe,_Bool,"uint16_t, uint32_t"
+Function,+,ble_central_unsubscribe,_Bool,"uint16_t, uint32_t"
+Function,+,ble_central_write,_Bool,"uint16_t, const uint8_t*, uint8_t, _Bool, uint32_t"
 Function,-,ble_event_app_notification,BleEventFlowStatus,void*
 Function,-,ble_event_dispatcher_init,void,
 Function,-,ble_event_dispatcher_process_event,BleEventFlowStatus,void*
@@ -1204,7 +1227,9 @@ Function,+,furi_hal_bt_get_rssi,float,
 Function,+,furi_hal_bt_get_transmitted_packets,uint32_t,
 Function,-,furi_hal_bt_init,void,
 Function,+,furi_hal_bt_is_active,_Bool,
+Function,+,furi_hal_bt_is_advertising,_Bool,
 Function,+,furi_hal_bt_is_alive,_Bool,
+Function,+,furi_hal_bt_is_central_supported,_Bool,
 Function,+,furi_hal_bt_is_gatt_gap_supported,_Bool,
 Function,+,furi_hal_bt_is_testing_supported,_Bool,
 Function,+,furi_hal_bt_lock_core2,void,

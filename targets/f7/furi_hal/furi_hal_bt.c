@@ -152,6 +152,17 @@ bool furi_hal_bt_is_testing_supported(void) {
     }
 }
 
+bool furi_hal_bt_is_central_supported(void) {
+    /* The light stack accepts GAP_CENTRAL_ROLE at aci_gap_init but then rejects
+     * the central procedures themselves with Unknown HCI Command, so the role
+     * byte is not a usable capability test. */
+    if(furi_hal_bt.stack == FuriHalBtStackFull) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool furi_hal_bt_check_profile_type(
     FuriHalBleProfileBase* profile,
     const FuriHalBleProfileTemplate* profile_template) {
@@ -250,6 +261,12 @@ FuriHalBleProfileBase* furi_hal_bt_change_app(
 
 bool furi_hal_bt_is_active(void) {
     return gap_get_state() > GapStateIdle;
+}
+
+bool furi_hal_bt_is_advertising(void) {
+    GapState state = gap_get_state();
+    return state == GapStateStartingAdv || state == GapStateAdvFast ||
+           state == GapStateAdvLowPower;
 }
 
 void furi_hal_bt_start_advertising(void) {
