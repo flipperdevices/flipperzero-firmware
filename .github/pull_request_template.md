@@ -13,14 +13,17 @@
 - [ ] I have performed a self-review of my own code.
 - [ ] I have commented my code, particularly in hard-to-understand areas.
 
-# AI usage disclosure (Fill this out):
+# AI usage disclosure (Fill this out)
 
-- [ ] Partially AI assisted (clarify below which code was AI assisted and briefly explain what it does).
-- [ ] Fully AI generated (explain what all the generated code does in moderate detail).
+Keep the ONE option below that matches your submission and DELETE the other two.
 
-- [ Describe here how AI was used in this PR if it was used ]
+- No AI was used - all code was written by hand.
+- Partially AI assisted - clarify below which parts were AI assisted and briefly explain what they do.
+- Fully AI generated - explain what all the generated code does in moderate detail.
 
-# Reviewer checklist (Don't fill this out!)
+- [ If AI was used, describe how here. Delete this line if no AI was used. ]
+
+# Reviewer Checklist (Don't fill this out, and don't remove it from the template)
 
 - [ ] PR has description of feature/bug or link to GitHub Project task.
 - [ ] Description contains actions to verify feature/bugfix.
