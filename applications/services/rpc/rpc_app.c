@@ -22,6 +22,10 @@ struct RpcAppSystem {
 
 #define RPC_SYSTEM_APP_TEMP_ARGS_SIZE 16
 
+/* Upper bound on how long session teardown waits for the app to acknowledge the
+ * session close (by clearing its callback) before proceeding regardless. */
+#define RPC_APP_SESSION_CLOSE_TIMEOUT_MS 250
+
 static void rpc_system_app_send_state_response(
     RpcAppSystem* rpc_app,
     PB_App_AppState state,
@@ -348,18 +352,26 @@ static void rpc_system_app_data_exchange_process(const PB_Main* request, void* c
     }
 }
 
+/* The functions below form the app-facing RPC API. They are invoked by the
+ * owning application, usually from the application's own thread. When the RPC
+ * session is torn down (transport disconnect), the service clears the app's
+ * context on a different thread; the application, racing that teardown, can
+ * call these with an already-cleared (NULL) handle. Treat a NULL handle as a
+ * no-op instead of crashing on furi_check - the operation is meaningless once
+ * the session is gone (issue #4073). */
+
 void rpc_system_app_send_started(RpcAppSystem* rpc_app) {
-    furi_check(rpc_app);
+    if(rpc_app == NULL) return;
     rpc_system_app_send_state_response(rpc_app, PB_App_AppState_APP_STARTED, "SendStarted");
 }
 
 void rpc_system_app_send_exited(RpcAppSystem* rpc_app) {
-    furi_check(rpc_app);
+    if(rpc_app == NULL) return;
     rpc_system_app_send_state_response(rpc_app, PB_App_AppState_APP_CLOSED, "SendExit");
 }
 
 void rpc_system_app_confirm(RpcAppSystem* rpc_app, bool result) {
-    furi_check(rpc_app);
+    if(rpc_app == NULL) return;
     furi_check(rpc_app->last_command_id != 0);
     /* Ensure that only commands of these types can be confirmed */
     furi_check(
@@ -389,19 +401,19 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, bool result) {
 }
 
 void rpc_system_app_set_callback(RpcAppSystem* rpc_app, RpcAppSystemCallback callback, void* ctx) {
-    furi_check(rpc_app);
+    if(rpc_app == NULL) return;
 
     rpc_app->callback = callback;
     rpc_app->callback_context = ctx;
 }
 
 void rpc_system_app_set_error_code(RpcAppSystem* rpc_app, uint32_t error_code) {
-    furi_check(rpc_app);
+    if(rpc_app == NULL) return;
     rpc_app->error_code = error_code;
 }
 
 void rpc_system_app_set_error_text(RpcAppSystem* rpc_app, const char* error_text) {
-    furi_check(rpc_app);
+    if(rpc_app == NULL) return;
 
     if(rpc_app->error_text) {
         free(rpc_app->error_text);
@@ -411,14 +423,14 @@ void rpc_system_app_set_error_text(RpcAppSystem* rpc_app, const char* error_text
 }
 
 void rpc_system_app_error_reset(RpcAppSystem* rpc_app) {
-    furi_check(rpc_app);
+    if(rpc_app == NULL) return;
 
     rpc_system_app_set_error_code(rpc_app, 0);
     rpc_system_app_set_error_text(rpc_app, NULL);
 }
 
 void rpc_system_app_exchange_data(RpcAppSystem* rpc_app, const uint8_t* data, size_t data_size) {
-    furi_check(rpc_app);
+    if(rpc_app == NULL) return;
 
     PB_Main* request = malloc(sizeof(PB_Main));
 
@@ -498,8 +510,18 @@ void rpc_system_app_free(void* context) {
         rpc_app->callback(&event, rpc_app->callback_context);
     }
 
-    while(rpc_app->callback) {
+    /* Wait for the app to acknowledge the session close by clearing its callback,
+     * but bound the wait so a stuck or already-gone app cannot wedge the RPC
+     * service thread (which runs the timer/pending-callback context). In-tree
+     * apps clear their callback synchronously inside the SessionClose callback
+     * above, so for them this loop exits immediately; the timeout only matters
+     * for out-of-tree apps that defer the acknowledgement, where proceeding
+     * regardless is preferable to blocking the timer service forever. */
+    uint32_t elapsed_ticks = 0;
+    const uint32_t timeout_ticks = furi_ms_to_ticks(RPC_APP_SESSION_CLOSE_TIMEOUT_MS);
+    while(rpc_app->callback && elapsed_ticks < timeout_ticks) {
         furi_delay_tick(1);
+        elapsed_ticks++;
     }
 
     free(rpc_app);
