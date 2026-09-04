@@ -8,6 +8,10 @@
 
 # Flipper Zero Firmware
 
+[![Build](https://github.com/flipperdevices/flipperzero-firmware/actions/workflows/build.yml/badge.svg)](https://github.com/flipperdevices/flipperzero-firmware/actions/workflows/build.yml)
+[![Latest Release](https://img.shields.io/github/v/release/flipperdevices/flipperzero-firmware)](https://github.com/flipperdevices/flipperzero-firmware/releases/latest)
+[![License](https://img.shields.io/github/license/flipperdevices/flipperzero-firmware)](/LICENSE)
+
 - [Flipper Zero Official Website](https://flipper.net) - A simple way to explain to your friends what Flipper Zero can do.
 - [Flipper Zero Firmware Update](https://flipper.net/pages/downloads) - Improvements for your dolphin: latest firmware releases, upgrade tools for PC and mobile devices.
 - [User Documentation](https://docs.flipper.net/zero) - Learn more about your dolphin: specs, usage guides, and anything you want to ask.
