@@ -127,6 +127,13 @@ const char* furi_hal_interrupt_get_name(uint8_t exception_number);
  */
 uint32_t furi_hal_interrupt_get_time_in_isr_total(void);
 
+/** Trigger interrupt from software (e.g. for unit tests).
+ * Sets the interrupt pending so the CPU will run the registered ISR.
+ *
+ * @param index interrupt ID (e.g. FuriHalInterruptIdLpTim2)
+ */
+void furi_hal_interrupt_trigger_pending(FuriHalInterruptId index);
+
 #ifdef __cplusplus
 }
 #endif
