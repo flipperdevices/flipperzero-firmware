@@ -295,6 +295,11 @@ MfUltralightError mf_ultralight_poller_write_page(
             break;
         }
         if(!bit_buffer_starts_with_byte(instance->rx_buffer, MF_ULTRALIGHT_CMD_ACK)) {
+            FURI_LOG_D(
+                TAG,
+                "Write page %u NAK'd with %u",
+                page,
+                bit_buffer_get_byte(instance->rx_buffer, 0));
             ret = MfUltralightErrorProtocol;
             break;
         }
