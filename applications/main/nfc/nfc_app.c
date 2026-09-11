@@ -477,6 +477,8 @@ static void nfc_show_initial_scene_for_device(NfcApp* nfc) {
         nfc_show_loading_popup(nfc, true);
         nfc_supported_cards_load_cache(nfc->nfc_supported_cards);
         nfc_show_loading_popup(nfc, false);
+    } else {
+        dolphin_deed(DolphinDeedNfcEmulate);
     }
     scene_manager_next_scene(nfc->scene_manager, scene);
 }
