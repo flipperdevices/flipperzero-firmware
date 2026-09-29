@@ -40,7 +40,10 @@ static FuriHalNfcError furi_hal_nfc_iso14443b_common_init(const FuriHalSpiBusHan
     return FuriHalNfcErrorNone;
 }
 
-static FuriHalNfcError furi_hal_nfc_iso14443b_poller_init(const FuriHalSpiBusHandle* handle) {
+static FuriHalNfcError furi_hal_nfc_iso14443b_poller_init_base(
+    const FuriHalSpiBusHandle* handle,
+    uint8_t tx_framing,
+    uint8_t rx_framing) {
     // Enable ISO14443B mode, AM modulation
     st25r3916_change_reg_bits(
         handle,
@@ -62,26 +65,30 @@ static FuriHalNfcError furi_hal_nfc_iso14443b_poller_init(const FuriHalSpiBusHan
         ST25R3916_REG_AUX_MOD_dis_reg_am | ST25R3916_REG_AUX_MOD_res_am);
 
     // EGT = 0 etu
-    // SOF = 10 etu LOW + 2 etu HIGH
-    // EOF = 10 etu
     st25r3916_change_reg_bits(
         handle,
         ST25R3916_REG_ISO14443B_1,
         ST25R3916_REG_ISO14443B_1_egt_mask | ST25R3916_REG_ISO14443B_1_sof_mask |
             ST25R3916_REG_ISO14443B_1_eof,
-        (0U << ST25R3916_REG_ISO14443B_1_egt_shift) | ST25R3916_REG_ISO14443B_1_sof_0_10etu |
-            ST25R3916_REG_ISO14443B_1_sof_1_2etu | ST25R3916_REG_ISO14443B_1_eof_10etu);
+        (0U << ST25R3916_REG_ISO14443B_1_egt_shift) | tx_framing);
 
     // TR1 = 80 / fs
-    // B' mode off (no_sof & no_eof = 0)
     st25r3916_change_reg_bits(
         handle,
         ST25R3916_REG_ISO14443B_2,
         ST25R3916_REG_ISO14443B_2_tr1_mask | ST25R3916_REG_ISO14443B_2_no_sof |
             ST25R3916_REG_ISO14443B_2_no_eof,
-        ST25R3916_REG_ISO14443B_2_tr1_80fs80fs);
+        ST25R3916_REG_ISO14443B_2_tr1_80fs80fs | rx_framing);
 
     return furi_hal_nfc_iso14443b_common_init(handle);
+}
+
+static FuriHalNfcError furi_hal_nfc_iso14443b_poller_init(const FuriHalSpiBusHandle* handle) {
+    return furi_hal_nfc_iso14443b_poller_init_base(
+        handle,
+        ST25R3916_REG_ISO14443B_1_sof_0_10etu | ST25R3916_REG_ISO14443B_1_sof_1_2etu |
+            ST25R3916_REG_ISO14443B_1_eof_10etu,
+        0);
 }
 
 static FuriHalNfcError furi_hal_nfc_iso14443b_poller_deinit(const FuriHalSpiBusHandle* handle) {
