@@ -80,11 +80,21 @@ jobs:
 
       - name: 'Check free flash space'
         id: size
-        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}
+        if: ${{ matrix.target == env.DEFAULT_TARGET }}
         continue-on-error: true
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/fwsize.py free build/${{ matrix.target }}-firmware-*/firmware.elf --label release
+
+      - name: 'Fail on flash overflow'
+        if: ${{ steps.size.outputs.free_flash }}
+        env:
+          FREE_FLASH: ${{ steps.size.outputs.free_flash }}
+        run: |
+          if [ "$FREE_FLASH" -le 0 ]; then
+            echo "::error::No free flash left ($FREE_FLASH bytes): firmware reaches into the core2 radio stack region, which the linker counts as .free_flash and cannot catch"
+            exit 1
+          fi
 
       - name: 'Find previous comment'
         if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}

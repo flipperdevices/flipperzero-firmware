@@ -113,15 +113,20 @@ class Main(App):
             )
         )
 
+        warning = " :warning: **flash overflow!**" if free <= 0 else ""
+        report = (
+            f"💾 Free flash{label}: **{free/1024:.2f} K**{warning} "
+            f"(firmware {used/1024:.2f} K, core2 reserves {reserved/1024:.2f} K)"
+        )
         if github_output := os.environ.get("GITHUB_OUTPUT"):
-            warning = " :warning: **flash overflow!**" if free <= 0 else ""
-            report = (
-                f"💾 Free flash{label}: **{free/1024:.2f} K**{warning} "
-                f"(firmware {used/1024:.2f} K, core2 reserves {reserved/1024:.2f} K)"
-            )
             with open(github_output, "a") as file:
                 file.write(f"free_flash={free}\n")
                 file.write(f"size_report={report}\n")
+        # Fork PRs get a read-only token, so the comment steps are skipped there:
+        # the run summary is the only place contributors can see this
+        if step_summary := os.environ.get("GITHUB_STEP_SUMMARY"):
+            with open(step_summary, "a") as file:
+                file.write(f"- {report}\n")
 
         return 0
 
