@@ -26,9 +26,17 @@ struct RpcAppSystem {
 
 /* Applications receive their RpcAppSystem instance as a hexadecimal address inside the
  * launch argument string, which is not a trusted channel: anything able to start an
- * application with arbitrary arguments could otherwise hand it a forged pointer.
- * Every live instance is therefore kept in this list and validated before being used.
- * Sessions are opened and closed from service threads while the list is walked from
+ * application with arbitrary arguments could otherwise hand one a forged pointer.
+ * Every live instance is therefore kept in this list, and rpc_system_app_set_callback()
+ * - the first and only place an application presents that pointer before it has attached
+ * itself to a session - looks it up before storing anything through it.
+ *
+ * Lifetime past that point is unchanged and still belongs to rpc_system_app_free(), which
+ * asks the application to detach and waits for it before freeing the instance; the lookup
+ * makes no promise about it, which is why it is done while holding the same lock as the
+ * store it guards.
+ *
+ * Sessions are opened and closed from service threads while the list is read from
  * application threads, and nothing here runs in interrupt context, so suspending the
  * scheduler is enough to keep the (at most a handful of entries) list consistent. */
 static RpcAppSystem* rpc_app_instances = NULL;
@@ -51,24 +59,13 @@ static void rpc_system_app_instance_unregister(RpcAppSystem* rpc_app) {
     furi_kernel_restore_lock(lock);
 }
 
-static bool rpc_system_app_instance_is_valid(const RpcAppSystem* rpc_app) {
-    bool valid = false;
-
-    const int32_t lock = furi_kernel_lock();
+/** Caller must hold the kernel lock for as long as the answer is relied upon. */
+static bool rpc_system_app_instance_is_valid_locked(const RpcAppSystem* rpc_app) {
     for(const RpcAppSystem* it = rpc_app_instances; it != NULL; it = it->next) {
-        if(it == rpc_app) {
-            valid = true;
-            break;
-        }
+        if(it == rpc_app) return true;
     }
-    furi_kernel_restore_lock(lock);
-
-    return valid;
+    return false;
 }
-
-/* Same contract as the plain furi_check(rpc_app) that used to guard these entry points,
- * but it also rejects a pointer that does not belong to a live RPC session. */
-#define rpc_system_app_check(rpc_app) furi_check(rpc_system_app_instance_is_valid(rpc_app))
 
 static void rpc_system_app_send_state_response(
     RpcAppSystem* rpc_app,
@@ -410,17 +407,17 @@ static void rpc_system_app_data_exchange_process(const PB_Main* request, void* c
 }
 
 void rpc_system_app_send_started(RpcAppSystem* rpc_app) {
-    rpc_system_app_check(rpc_app);
+    furi_check(rpc_app);
     rpc_system_app_send_state_response(rpc_app, PB_App_AppState_APP_STARTED, "SendStarted");
 }
 
 void rpc_system_app_send_exited(RpcAppSystem* rpc_app) {
-    rpc_system_app_check(rpc_app);
+    furi_check(rpc_app);
     rpc_system_app_send_state_response(rpc_app, PB_App_AppState_APP_CLOSED, "SendExit");
 }
 
 void rpc_system_app_confirm(RpcAppSystem* rpc_app, bool result) {
-    rpc_system_app_check(rpc_app);
+    furi_check(rpc_app);
     furi_check(rpc_app->last_command_id != 0);
     /* Ensure that only commands of these types can be confirmed */
     furi_check(
@@ -450,19 +447,29 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, bool result) {
 }
 
 void rpc_system_app_set_callback(RpcAppSystem* rpc_app, RpcAppSystemCallback callback, void* ctx) {
-    rpc_system_app_check(rpc_app);
+    furi_check(rpc_app);
 
-    rpc_app->callback = callback;
-    rpc_app->callback_context = ctx;
+    /* Validated and stored under one lock: an instance cannot be unregistered between the
+     * two, and by the time the lock is dropped the application is attached, so the detach
+     * handshake in rpc_system_app_free() covers it from here on. */
+    const int32_t lock = furi_kernel_lock();
+    const bool valid = rpc_system_app_instance_is_valid_locked(rpc_app);
+    if(valid) {
+        rpc_app->callback = callback;
+        rpc_app->callback_context = ctx;
+    }
+    furi_kernel_restore_lock(lock);
+
+    furi_check(valid);
 }
 
 void rpc_system_app_set_error_code(RpcAppSystem* rpc_app, uint32_t error_code) {
-    rpc_system_app_check(rpc_app);
+    furi_check(rpc_app);
     rpc_app->error_code = error_code;
 }
 
 void rpc_system_app_set_error_text(RpcAppSystem* rpc_app, const char* error_text) {
-    rpc_system_app_check(rpc_app);
+    furi_check(rpc_app);
 
     if(rpc_app->error_text) {
         free(rpc_app->error_text);
@@ -472,14 +479,14 @@ void rpc_system_app_set_error_text(RpcAppSystem* rpc_app, const char* error_text
 }
 
 void rpc_system_app_error_reset(RpcAppSystem* rpc_app) {
-    rpc_system_app_check(rpc_app);
+    furi_check(rpc_app);
 
     rpc_system_app_set_error_code(rpc_app, 0);
     rpc_system_app_set_error_text(rpc_app, NULL);
 }
 
 void rpc_system_app_exchange_data(RpcAppSystem* rpc_app, const uint8_t* data, size_t data_size) {
-    rpc_system_app_check(rpc_app);
+    furi_check(rpc_app);
 
     PB_Main* request = malloc(sizeof(PB_Main));
 
