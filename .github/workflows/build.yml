@@ -114,7 +114,6 @@ jobs:
       - name: 'Check free flash space'
         id: size
         if: ${{ matrix.target == env.DEFAULT_TARGET && github.event.pull_request }}
-        continue-on-error: true
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/fwsize.py free build/${TARGET}-firmware-*/firmware.elf --label debug
