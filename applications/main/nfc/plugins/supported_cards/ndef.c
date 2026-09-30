@@ -128,9 +128,7 @@ static const char* ndef_uri_prepends[] = {
 
 // ---=== card memory layout abstraction ===---
 
-// SmartPoster records embed a whole NDEF message, which is parsed recursively.
-// Real tags never nest more than a level or two, but a crafted tag can chain
-// hundreds of them, so the nesting is capped to keep the parser off the stack limit.
+// SmartPoster records nest NDEF messages, cap the recursion to bound stack usage
 #define NDEF_SMART_POSTER_MAX_DEPTH (8)
 
 // Shared context and state, read above

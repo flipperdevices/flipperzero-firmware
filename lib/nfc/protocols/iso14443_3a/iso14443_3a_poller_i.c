@@ -213,8 +213,6 @@ Iso14443_3aError
                     sizeof(instance->col_res.sel_resp));
                 FURI_LOG_T(TAG, "Sel resp: %02X", instance->col_res.sel_resp.sak);
                 if(instance->col_res.sel_req.nfcid[0] == ISO14443_3A_POLLER_SDD_CL) {
-                    // A card may not request more cascade levels than the standard defines,
-                    // nor a UID longer than the buffer it is collected into
                     if((instance->col_res.cascade_level >= ISO14443_3A_POLLER_MAX_CASCADE_LEVEL) ||
                        (instance->data->uid_len + 3U > ISO14443_3A_MAX_UID_SIZE)) {
                         FURI_LOG_E(TAG, "Too many cascade levels");

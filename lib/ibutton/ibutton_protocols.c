@@ -37,7 +37,6 @@ static void ibutton_protocols_get_group_by_id(
     iButtonProtocolGroupInfo* info) {
     iButtonProtocolLocalId local_id = id;
 
-    // An invalid (negative) id must never be used to index a protocol table
     furi_check(local_id >= 0);
 
     for(iButtonProtocolGroupId i = 0; i < iButtonProtocolGroupMax; ++i) {

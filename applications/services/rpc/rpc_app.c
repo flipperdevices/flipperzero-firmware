@@ -24,21 +24,9 @@ struct RpcAppSystem {
 
 #define RPC_SYSTEM_APP_TEMP_ARGS_SIZE 16
 
-/* Applications receive their RpcAppSystem instance as a hexadecimal address inside the
- * launch argument string, which is not a trusted channel: anything able to start an
- * application with arbitrary arguments could otherwise hand one a forged pointer.
- * Every live instance is therefore kept in this list, and rpc_system_app_set_callback()
- * - the first and only place an application presents that pointer before it has attached
- * itself to a session - looks it up before storing anything through it.
- *
- * Lifetime past that point is unchanged and still belongs to rpc_system_app_free(), which
- * asks the application to detach and waits for it before freeing the instance; the lookup
- * makes no promise about it, which is why it is done while holding the same lock as the
- * store it guards.
- *
- * Sessions are opened and closed from service threads while the list is read from
- * application threads, and nothing here runs in interrupt context, so suspending the
- * scheduler is enough to keep the (at most a handful of entries) list consistent. */
+/* Applications get their RpcAppSystem as an address inside the launch argument string,
+ * so a forged argument could hand one an arbitrary pointer. Live instances are tracked
+ * here to reject that. Touched from service and application threads, never from an ISR. */
 static RpcAppSystem* rpc_app_instances = NULL;
 
 static void rpc_system_app_instance_register(RpcAppSystem* rpc_app) {
@@ -133,10 +121,6 @@ static void rpc_system_app_start_process(const PB_Main* request, void* context) 
             snprintf(app_args_temp, RPC_SYSTEM_APP_TEMP_ARGS_SIZE, "RPC %08lX", (uint32_t)rpc_app);
             app_args = app_args_temp;
         } else if(app_args) {
-            /* Only the exact string "RPC" is substituted with this session's context above,
-             * anything else is forwarded to the application verbatim. Applications parse
-             * "RPC <address>" back into the context pointer, so an argument of that shape
-             * coming from the client would hand one a pointer of the client's choosing. */
             uint32_t forged_ctx;
             app_args_forged = (sscanf(app_args, "RPC %lX", &forged_ctx) == 1);
         }
@@ -449,9 +433,7 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, bool result) {
 void rpc_system_app_set_callback(RpcAppSystem* rpc_app, RpcAppSystemCallback callback, void* ctx) {
     furi_check(rpc_app);
 
-    /* Validated and stored under one lock: an instance cannot be unregistered between the
-     * two, and by the time the lock is dropped the application is attached, so the detach
-     * handshake in rpc_system_app_free() covers it from here on. */
+    // Validated and stored under one lock, so the instance cannot be freed in between
     const int32_t lock = furi_kernel_lock();
     const bool valid = rpc_system_app_instance_is_valid_locked(rpc_app);
     if(valid) {
