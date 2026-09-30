@@ -18,9 +18,57 @@ struct RpcAppSystem {
 
     uint32_t last_command_id;
     RpcAppSystemEventType last_event_type;
+
+    RpcAppSystem* next;
 };
 
 #define RPC_SYSTEM_APP_TEMP_ARGS_SIZE 16
+
+/* Applications receive their RpcAppSystem instance as a hexadecimal address inside the
+ * launch argument string, which is not a trusted channel: anything able to start an
+ * application with arbitrary arguments could otherwise hand it a forged pointer.
+ * Every live instance is therefore kept in this list and validated before being used.
+ * Sessions are opened and closed from service threads while the list is walked from
+ * application threads, and nothing here runs in interrupt context, so suspending the
+ * scheduler is enough to keep the (at most a handful of entries) list consistent. */
+static RpcAppSystem* rpc_app_instances = NULL;
+
+static void rpc_system_app_instance_register(RpcAppSystem* rpc_app) {
+    const int32_t lock = furi_kernel_lock();
+    rpc_app->next = rpc_app_instances;
+    rpc_app_instances = rpc_app;
+    furi_kernel_restore_lock(lock);
+}
+
+static void rpc_system_app_instance_unregister(RpcAppSystem* rpc_app) {
+    const int32_t lock = furi_kernel_lock();
+    for(RpcAppSystem** it = &rpc_app_instances; *it != NULL; it = &(*it)->next) {
+        if(*it == rpc_app) {
+            *it = rpc_app->next;
+            break;
+        }
+    }
+    furi_kernel_restore_lock(lock);
+}
+
+static bool rpc_system_app_instance_is_valid(const RpcAppSystem* rpc_app) {
+    bool valid = false;
+
+    const int32_t lock = furi_kernel_lock();
+    for(const RpcAppSystem* it = rpc_app_instances; it != NULL; it = it->next) {
+        if(it == rpc_app) {
+            valid = true;
+            break;
+        }
+    }
+    furi_kernel_restore_lock(lock);
+
+    return valid;
+}
+
+/* Same contract as the plain furi_check(rpc_app) that used to guard these entry points,
+ * but it also rejects a pointer that does not belong to a live RPC session. */
+#define rpc_system_app_check(rpc_app) furi_check(rpc_system_app_instance_is_valid(rpc_app))
 
 static void rpc_system_app_send_state_response(
     RpcAppSystem* rpc_app,
@@ -81,24 +129,37 @@ static void rpc_system_app_start_process(const PB_Main* request, void* context) 
 
         char app_args_temp[RPC_SYSTEM_APP_TEMP_ARGS_SIZE];
         const char* app_args = request->content.app_start_request.args;
+        bool app_args_forged = false;
 
         if(app_args && strcmp(app_args, "RPC") == 0) {
             // If app is being started in RPC mode - pass RPC context via args string
             snprintf(app_args_temp, RPC_SYSTEM_APP_TEMP_ARGS_SIZE, "RPC %08lX", (uint32_t)rpc_app);
             app_args = app_args_temp;
+        } else if(app_args) {
+            /* Only the exact string "RPC" is substituted with this session's context above,
+             * anything else is forwarded to the application verbatim. Applications parse
+             * "RPC <address>" back into the context pointer, so an argument of that shape
+             * coming from the client would hand one a pointer of the client's choosing. */
+            uint32_t forged_ctx;
+            app_args_forged = (sscanf(app_args, "RPC %lX", &forged_ctx) == 1);
         }
 
-        const LoaderStatus status = loader_start(loader, app_name, app_args, NULL);
-        if(status == LoaderStatusErrorAppStarted) {
-            result = PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED;
-        } else if(status == LoaderStatusErrorInternal) {
-            result = PB_CommandStatus_ERROR_APP_CANT_START;
-        } else if(status == LoaderStatusErrorUnknownApp) {
+        if(app_args_forged) {
+            FURI_LOG_E(TAG, "StartProcess: rejected forged RPC context argument");
             result = PB_CommandStatus_ERROR_INVALID_PARAMETERS;
-        } else if(status == LoaderStatusOk) {
-            result = PB_CommandStatus_OK;
         } else {
-            furi_crash();
+            const LoaderStatus status = loader_start(loader, app_name, app_args, NULL);
+            if(status == LoaderStatusErrorAppStarted) {
+                result = PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED;
+            } else if(status == LoaderStatusErrorInternal) {
+                result = PB_CommandStatus_ERROR_APP_CANT_START;
+            } else if(status == LoaderStatusErrorUnknownApp) {
+                result = PB_CommandStatus_ERROR_INVALID_PARAMETERS;
+            } else if(status == LoaderStatusOk) {
+                result = PB_CommandStatus_OK;
+            } else {
+                furi_crash();
+            }
         }
     } else {
         result = PB_CommandStatus_ERROR_INVALID_PARAMETERS;
@@ -349,17 +410,17 @@ static void rpc_system_app_data_exchange_process(const PB_Main* request, void* c
 }
 
 void rpc_system_app_send_started(RpcAppSystem* rpc_app) {
-    furi_check(rpc_app);
+    rpc_system_app_check(rpc_app);
     rpc_system_app_send_state_response(rpc_app, PB_App_AppState_APP_STARTED, "SendStarted");
 }
 
 void rpc_system_app_send_exited(RpcAppSystem* rpc_app) {
-    furi_check(rpc_app);
+    rpc_system_app_check(rpc_app);
     rpc_system_app_send_state_response(rpc_app, PB_App_AppState_APP_CLOSED, "SendExit");
 }
 
 void rpc_system_app_confirm(RpcAppSystem* rpc_app, bool result) {
-    furi_check(rpc_app);
+    rpc_system_app_check(rpc_app);
     furi_check(rpc_app->last_command_id != 0);
     /* Ensure that only commands of these types can be confirmed */
     furi_check(
@@ -389,19 +450,19 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, bool result) {
 }
 
 void rpc_system_app_set_callback(RpcAppSystem* rpc_app, RpcAppSystemCallback callback, void* ctx) {
-    furi_check(rpc_app);
+    rpc_system_app_check(rpc_app);
 
     rpc_app->callback = callback;
     rpc_app->callback_context = ctx;
 }
 
 void rpc_system_app_set_error_code(RpcAppSystem* rpc_app, uint32_t error_code) {
-    furi_check(rpc_app);
+    rpc_system_app_check(rpc_app);
     rpc_app->error_code = error_code;
 }
 
 void rpc_system_app_set_error_text(RpcAppSystem* rpc_app, const char* error_text) {
-    furi_check(rpc_app);
+    rpc_system_app_check(rpc_app);
 
     if(rpc_app->error_text) {
         free(rpc_app->error_text);
@@ -411,14 +472,14 @@ void rpc_system_app_set_error_text(RpcAppSystem* rpc_app, const char* error_text
 }
 
 void rpc_system_app_error_reset(RpcAppSystem* rpc_app) {
-    furi_check(rpc_app);
+    rpc_system_app_check(rpc_app);
 
     rpc_system_app_set_error_code(rpc_app, 0);
     rpc_system_app_set_error_text(rpc_app, NULL);
 }
 
 void rpc_system_app_exchange_data(RpcAppSystem* rpc_app, const uint8_t* data, size_t data_size) {
-    furi_check(rpc_app);
+    rpc_system_app_check(rpc_app);
 
     PB_Main* request = malloc(sizeof(PB_Main));
 
@@ -443,6 +504,7 @@ void* rpc_system_app_alloc(RpcSession* session) {
 
     RpcAppSystem* rpc_app = malloc(sizeof(RpcAppSystem));
     rpc_app->session = session;
+    rpc_system_app_instance_register(rpc_app);
 
     RpcHandler rpc_handler = {
         .message_handler = NULL,
@@ -501,6 +563,8 @@ void rpc_system_app_free(void* context) {
     while(rpc_app->callback) {
         furi_delay_tick(1);
     }
+
+    rpc_system_app_instance_unregister(rpc_app);
 
     free(rpc_app);
 }

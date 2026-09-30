@@ -213,6 +213,15 @@ Iso14443_3aError
                     sizeof(instance->col_res.sel_resp));
                 FURI_LOG_T(TAG, "Sel resp: %02X", instance->col_res.sel_resp.sak);
                 if(instance->col_res.sel_req.nfcid[0] == ISO14443_3A_POLLER_SDD_CL) {
+                    // A card may not request more cascade levels than the standard defines,
+                    // nor a UID longer than the buffer it is collected into
+                    if((instance->col_res.cascade_level >= ISO14443_3A_POLLER_MAX_CASCADE_LEVEL) ||
+                       (instance->data->uid_len + 3U > ISO14443_3A_MAX_UID_SIZE)) {
+                        FURI_LOG_E(TAG, "Too many cascade levels");
+                        instance->state = Iso14443_3aPollerStateColResFailed;
+                        ret = Iso14443_3aErrorColResFailed;
+                        break;
+                    }
                     // Copy part of UID
                     memcpy(
                         &instance->data->uid[instance->data->uid_len],
@@ -222,6 +231,12 @@ Iso14443_3aError
                     instance->col_res.cascade_level++;
                     instance->col_res.state = Iso14443_3aPollerColResStateStateNewCascade;
                 } else {
+                    if(instance->data->uid_len + 4U > ISO14443_3A_MAX_UID_SIZE) {
+                        FURI_LOG_E(TAG, "UID too long");
+                        instance->state = Iso14443_3aPollerStateColResFailed;
+                        ret = Iso14443_3aErrorColResFailed;
+                        break;
+                    }
                     FURI_LOG_T(TAG, "Col resolution complete");
                     instance->data->sak = instance->col_res.sel_resp.sak;
                     memcpy(
