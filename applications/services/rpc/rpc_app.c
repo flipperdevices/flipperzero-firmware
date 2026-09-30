@@ -3,6 +3,7 @@
 #include "rpc_i.h"
 #include <furi.h>
 #include <loader/loader.h>
+#include <m-list.h>
 #include "rpc_app.h"
 
 #define TAG "RpcSystemApp"
@@ -18,41 +19,67 @@ struct RpcAppSystem {
 
     uint32_t last_command_id;
     RpcAppSystemEventType last_event_type;
-
-    RpcAppSystem* next;
 };
 
 #define RPC_SYSTEM_APP_TEMP_ARGS_SIZE 16
 
+LIST_DEF(RpcAppInstanceList, RpcAppSystem*, M_PTR_OPLIST)
+
 /* Applications get their RpcAppSystem as an address inside the launch argument string,
  * so a forged argument could hand one an arbitrary pointer. Live instances are tracked
- * here to reject that. Touched from service and application threads, never from an ISR. */
-static RpcAppSystem* rpc_app_instances = NULL;
+ * here to reject that. */
+typedef struct {
+    FuriMutex* mutex;
+    RpcAppInstanceList_t list;
+} RpcAppInstances;
+
+static RpcAppInstances* rpc_app_instances = NULL;
+
+static void rpc_system_app_instances_lock(void) {
+    furi_check(furi_mutex_acquire(rpc_app_instances->mutex, FuriWaitForever) == FuriStatusOk);
+}
+
+static void rpc_system_app_instances_unlock(void) {
+    furi_check(furi_mutex_release(rpc_app_instances->mutex) == FuriStatusOk);
+}
 
 static void rpc_system_app_instance_register(RpcAppSystem* rpc_app) {
-    const int32_t lock = furi_kernel_lock();
-    rpc_app->next = rpc_app_instances;
-    rpc_app_instances = rpc_app;
-    furi_kernel_restore_lock(lock);
+    rpc_system_app_instances_lock();
+    RpcAppInstanceList_push_back(rpc_app_instances->list, rpc_app);
+    rpc_system_app_instances_unlock();
 }
 
 static void rpc_system_app_instance_unregister(RpcAppSystem* rpc_app) {
-    const int32_t lock = furi_kernel_lock();
-    for(RpcAppSystem** it = &rpc_app_instances; *it != NULL; it = &(*it)->next) {
-        if(*it == rpc_app) {
-            *it = rpc_app->next;
+    rpc_system_app_instances_lock();
+
+    RpcAppInstanceList_it_t it;
+    for(RpcAppInstanceList_it(it, rpc_app_instances->list); !RpcAppInstanceList_end_p(it);
+        RpcAppInstanceList_next(it)) {
+        if(*RpcAppInstanceList_ref(it) == rpc_app) {
+            RpcAppInstanceList_remove(rpc_app_instances->list, it);
             break;
         }
     }
-    furi_kernel_restore_lock(lock);
+
+    rpc_system_app_instances_unlock();
 }
 
-/** Caller must hold the kernel lock for as long as the answer is relied upon. */
-static bool rpc_system_app_instance_is_valid_locked(const RpcAppSystem* rpc_app) {
-    for(const RpcAppSystem* it = rpc_app_instances; it != NULL; it = it->next) {
-        if(it == rpc_app) return true;
+/** Caller must hold the instance mutex for as long as the answer is relied upon. */
+static bool rpc_system_app_instance_is_valid(const RpcAppSystem* rpc_app) {
+    RpcAppInstanceList_it_t it;
+    for(RpcAppInstanceList_it(it, rpc_app_instances->list); !RpcAppInstanceList_end_p(it);
+        RpcAppInstanceList_next(it)) {
+        if(*RpcAppInstanceList_ref(it) == rpc_app) return true;
     }
     return false;
+}
+
+void rpc_system_app_init(void) {
+    furi_check(rpc_app_instances == NULL);
+
+    rpc_app_instances = malloc(sizeof(RpcAppInstances));
+    rpc_app_instances->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    RpcAppInstanceList_init(rpc_app_instances->list);
 }
 
 static void rpc_system_app_send_state_response(
@@ -434,13 +461,13 @@ void rpc_system_app_set_callback(RpcAppSystem* rpc_app, RpcAppSystemCallback cal
     furi_check(rpc_app);
 
     // Validated and stored under one lock, so the instance cannot be freed in between
-    const int32_t lock = furi_kernel_lock();
-    const bool valid = rpc_system_app_instance_is_valid_locked(rpc_app);
+    rpc_system_app_instances_lock();
+    const bool valid = rpc_system_app_instance_is_valid(rpc_app);
     if(valid) {
         rpc_app->callback = callback;
         rpc_app->callback_context = ctx;
     }
-    furi_kernel_restore_lock(lock);
+    rpc_system_app_instances_unlock();
 
     furi_check(valid);
 }
