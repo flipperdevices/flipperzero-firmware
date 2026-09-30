@@ -111,6 +111,14 @@ jobs:
               "--analyser_url=${{ secrets.ANALYSER_URL }}" \
               "--analyser_token=${{ secrets.ANALYSER_TOKEN }}";
 
+      - name: 'Check free flash space'
+        id: size
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET && github.event.pull_request }}
+        continue-on-error: true
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/fwsize.py free build/${TARGET}-firmware-*/firmware.elf --label debug
+
       - name: 'Find previous comment'
         if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET && github.event.pull_request }}
         uses: peter-evans/find-comment@v3
@@ -132,6 +140,7 @@ jobs:
             - [📥 DFU file](https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-full-${{steps.names.outputs.suffix}}.dfu)
             - [☁️ Web/App updater](https://lab.flipper.net/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
             - [📊 Size report](https://fw-reports.flipp.dev/?branch=${{steps.names.outputs.branch_name}})
+            - ${{ steps.size.outputs.size_report }}
           edit-mode: replace
 
       - name: 'SDK submission to staging catalog'
