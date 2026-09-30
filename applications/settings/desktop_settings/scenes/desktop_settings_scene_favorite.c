@@ -76,7 +76,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
             default_passport = true;
         }
     } else {
-        favorite_id &= ~(SCENE_STATE_SET_DUMMY_APP);
+        favorite_id &= ~(SCENE_STATE_SET_DUMMY_APP); //-V784
         furi_assert(favorite_id < DummyAppNumber);
         curr_favorite_app = &app->settings.dummy_apps[favorite_id];
         default_passport = true;
@@ -182,7 +182,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
         furi_assert(favorite_id < FavoriteAppNumber);
         curr_favorite_app = &app->settings.favorite_apps[favorite_id];
     } else {
-        favorite_id &= ~(SCENE_STATE_SET_DUMMY_APP);
+        favorite_id &= ~(SCENE_STATE_SET_DUMMY_APP); //-V784
         furi_assert(favorite_id < DummyAppNumber);
         curr_favorite_app = &app->settings.dummy_apps[favorite_id];
     }

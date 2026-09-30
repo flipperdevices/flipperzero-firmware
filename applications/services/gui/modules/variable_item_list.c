@@ -14,7 +14,7 @@ struct VariableItem {
     void* context;
 };
 
-ARRAY_DEF(VariableItemArray, VariableItem, M_POD_OPLIST);
+ARRAY_DEF(VariableItemArray, VariableItem, M_POD_OPLIST); //-V658
 
 struct VariableItemList {
     View* view;
@@ -392,6 +392,12 @@ void variable_item_list_set_enter_callback(
             variable_item_list->context = context;
         },
         false);
+}
+
+void variable_item_set_item_label(VariableItem* item, const char* label) {
+    furi_check(item);
+    furi_check(label);
+    item->label = label;
 }
 
 void variable_item_set_current_value_index(VariableItem* item, uint8_t current_value_index) {

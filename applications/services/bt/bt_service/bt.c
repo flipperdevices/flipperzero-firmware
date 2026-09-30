@@ -403,6 +403,7 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
         bt->current_profile = furi_hal_bt_change_app(
             message->data.profile.template,
             message->data.profile.params,
+            bt_keys_storage_get_root_keys(bt->keys_storage),
             bt_on_gap_event_callback,
             bt);
         if(bt->current_profile) {
@@ -458,7 +459,6 @@ static void bt_load_keys(Bt* bt) {
         bt_keys_storage_load(bt->keys_storage);
 
         bt->current_profile = NULL;
-
     } else {
         FURI_LOG_I(TAG, "Keys unchanged");
     }
@@ -466,8 +466,12 @@ static void bt_load_keys(Bt* bt) {
 
 static void bt_start_application(Bt* bt) {
     if(!bt->current_profile) {
-        bt->current_profile =
-            furi_hal_bt_change_app(ble_profile_serial, NULL, bt_on_gap_event_callback, bt);
+        bt->current_profile = furi_hal_bt_change_app(
+            ble_profile_serial,
+            NULL,
+            bt_keys_storage_get_root_keys(bt->keys_storage),
+            bt_on_gap_event_callback,
+            bt);
 
         if(!bt->current_profile) {
             FURI_LOG_E(TAG, "BLE App start failed");

@@ -4833,3 +4833,29 @@ type: raw
 frequency: 38000
 duty_cycle: 0.330000
 data: 590 412 592 4026 593 5030 593 412 592 4025 594 5029 594 412 616 4002 618 5003 593 439 564 4027 592 439 564 4029 590 5033 590 5035 588 440 563
+#
+# Model: ONN Roku TV
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: EA C7 00 00
+command: 10 EF 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: EA C7 00 00
+command: 0F F0 00 00
+#
+name: Mute
+type: parsed
+protocol: NECext
+address: EA C7 00 00
+command: 20 DF 00 00
+#
+name: Power
+type: parsed
+protocol: NECext
+address: EA C7 00 00
+command: 17 E8 00 00

@@ -35,7 +35,7 @@ TUPLE_DEF2( //-V1048
         M_DEFAULT_OPLIST)
 
 /* Define the array, register the oplist and define further algorithms on it */
-ARRAY_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItem_t) //-V779
+ARRAY_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItem_t) //-V779 //-V658
 #define M_OPL_SubGhzFrequencyAnalyzerLogItemArray_t() \
     ARRAY_OPLIST(SubGhzFrequencyAnalyzerLogItemArray, M_OPL_SubGhzFrequencyAnalyzerLogItem_t())
 ALGO_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItemArray_t)
