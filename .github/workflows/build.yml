@@ -10,8 +10,9 @@ on:
 
 env:
   DEFAULT_TARGET: f7
-  # Minimum free flash (bytes) below the core2 radio stack before CI fails
-  MIN_FREE_FLASH: 2048
+  # Minimum free flash below the core2 radio stack before CI fails: 2 flash pages
+  # of FURI_HAL_FLASH_PAGE_SIZE (4096)
+  MIN_FREE_FLASH: 8192
   FBT_TOOLCHAIN_PATH: /runner/_work
   FBT_GIT_SUBMODULE_SHALLOW: 1
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
