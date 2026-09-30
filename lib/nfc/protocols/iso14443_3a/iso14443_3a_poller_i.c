@@ -212,7 +212,10 @@ Iso14443_3aError
                     &instance->col_res.sel_resp,
                     sizeof(instance->col_res.sel_resp));
                 FURI_LOG_T(TAG, "Sel resp: %02X", instance->col_res.sel_resp.sak);
-                if(instance->col_res.sel_req.nfcid[0] == ISO14443_3A_POLLER_SDD_CL) {
+                // The SAK cascade bit is the authority on UID completeness, not the first
+                // UID byte: a real 4-byte UID can begin with the 0x88 cascade tag value
+                // (non-compliant, but seen on some MIFARE Classic / magic cards).
+                if(instance->col_res.sel_resp.sak & ISO14443_3A_POLLER_SAK_CASCADE_BIT) {
                     if((instance->col_res.cascade_level >= ISO14443_3A_POLLER_MAX_CASCADE_LEVEL) ||
                        (instance->data->uid_len + 3U > ISO14443_3A_MAX_UID_SIZE)) {
                         FURI_LOG_E(TAG, "Too many cascade levels");
@@ -220,7 +223,7 @@ Iso14443_3aError
                         ret = Iso14443_3aErrorColResFailed;
                         break;
                     }
-                    // Copy part of UID
+                    // UID incomplete: keep the 3 bytes after the cascade tag
                     memcpy(
                         &instance->data->uid[instance->data->uid_len],
                         &instance->col_res.sel_req.nfcid[1],
