@@ -10,6 +10,8 @@ on:
 
 env:
   DEFAULT_TARGET: f7
+  # Minimum free flash (bytes) below the core2 radio stack before CI fails
+  MIN_FREE_FLASH: 2048
   FBT_TOOLCHAIN_PATH: /runner/_work
   FBT_GIT_SUBMODULE_SHALLOW: 1
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -118,15 +120,20 @@ jobs:
           source scripts/toolchain/fbtenv.sh
           python3 scripts/fwsize.py free build/${TARGET}-firmware-*/firmware.elf --label debug
 
-      - name: 'Fail on flash overflow'
+      - name: 'Fail on low free flash'
         if: ${{ steps.size.outputs.free_flash }}
         env:
           FREE_FLASH: ${{ steps.size.outputs.free_flash }}
         run: |
-          if [ "$FREE_FLASH" -le 0 ]; then
-            echo "::error::No free flash left ($FREE_FLASH bytes): firmware reaches into the core2 radio stack region, which the linker counts as .free_flash and cannot catch"
+          if [ "$FREE_FLASH" -lt "$MIN_FREE_FLASH" ]; then
+            if [ "$FREE_FLASH" -le 0 ]; then
+              echo "::error::Firmware reaches into the core2 radio stack region ($FREE_FLASH bytes free), which the linker counts as .free_flash and cannot catch"
+            else
+              echo "::error::Only $FREE_FLASH bytes of free flash left, below the $MIN_FREE_FLASH byte minimum"
+            fi
             exit 1
           fi
+          echo "Free flash: $FREE_FLASH bytes (minimum $MIN_FREE_FLASH)"
 
       - name: 'Find previous comment'
         if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET && github.event.pull_request }}
