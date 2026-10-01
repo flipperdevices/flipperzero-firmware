@@ -291,6 +291,7 @@ App(
         "cli/commands/dump/protocols/slix/nfc_cli_dump_slix.c",
         "cli/commands/dump/protocols/st25tb/nfc_cli_dump_st25tb.c",
         "cli/commands/dump/protocols/felica/nfc_cli_dump_felica.c",
+        "cli/commands/dump/protocols/ask_ctx/nfc_cli_dump_ask_ctx.c",
         "cli/commands/mfu/nfc_cli_command_mfu.c",
         "cli/commands/mfu/nfc_cli_action_info.c",
         "cli/commands/mfu/nfc_cli_action_rdbl.c",
