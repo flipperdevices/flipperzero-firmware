@@ -356,8 +356,17 @@ static void gap_init_svc(Gap* gap, const GapRootSecurityKeys* root_keys) {
     // Initialize GAP interface
     // Skip fist symbol AD_TYPE_COMPLETE_LOCAL_NAME
     char* name = gap->service.adv_name + 1;
+    /* Central is additive: requesting both roles leaves peripheral behaviour
+     * unchanged and lets a central session run alongside a peripheral profile.
+     * Gated on the radio stack, since the light stack accepts the role byte but
+     * not the central procedures. */
+    uint8_t gap_role = GAP_PERIPHERAL_ROLE;
+    if(furi_hal_bt_is_central_supported()) {
+        gap_role |= GAP_CENTRAL_ROLE;
+    }
+
     aci_gap_init(
-        GAP_PERIPHERAL_ROLE,
+        gap_role,
         0,
         strlen(name),
         &gap->service.gap_svc_handle,
