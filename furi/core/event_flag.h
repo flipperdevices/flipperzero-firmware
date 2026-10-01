@@ -40,6 +40,11 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags);
 
 /** Clear flags
  *
+ * Safe to call from interrupt context (ISR). When used with FuriEventLoop
+ * (furi_event_loop_subscribe_event_flag, FuriEventLoopEventOut), the event
+ * loop is notified only after the clear has been applied, so the callback
+ * observes the cleared flag value.
+ *
  * @param      instance  pointer to FuriEventFlag
  * @param[in]  flags     The flags
  *
