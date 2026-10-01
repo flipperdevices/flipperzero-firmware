@@ -214,6 +214,9 @@ typedef struct FuriEventFlag FuriEventFlag;
 
 /** Subscribe to event flag events
  *
+ * Event flags set from interrupt context (furi_event_flag_set from ISR) are
+ * delivered to the callback with the correct flag value; no one-event delay.
+ *
  * @warning you can only have one subscription for one event type.
  *
  * @param      instance       The Event Loop instance
@@ -222,7 +225,6 @@ typedef struct FuriEventFlag FuriEventFlag;
  * @param[in]  callback       The callback to call on event
  * @param      context        The context for callback
  */
-
 void furi_event_loop_subscribe_event_flag(
     FuriEventLoop* instance,
     FuriEventFlag* event_flag,
