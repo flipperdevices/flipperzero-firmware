@@ -148,6 +148,8 @@ Header,+,lib/nfc/protocols/felica/felica.h,,
 Header,+,lib/nfc/protocols/felica/felica_listener.h,,
 Header,+,lib/nfc/protocols/felica/felica_poller.h,,
 Header,+,lib/nfc/protocols/felica/felica_poller_sync.h,,
+Header,+,lib/nfc/protocols/innovatron/innovatron.h,,
+Header,+,lib/nfc/protocols/innovatron/innovatron_poller.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h,,
@@ -2136,6 +2138,20 @@ Function,+,infrared_worker_tx_set_signal_sent_callback,void,"InfraredWorker*, In
 Function,+,infrared_worker_tx_start,void,InfraredWorker*
 Function,+,infrared_worker_tx_stop,void,InfraredWorker*
 Function,-,initstate,char*,"unsigned, char*, size_t"
+Function,+,innovatron_alloc,InnovatronData*,
+Function,+,innovatron_copy,void,"InnovatronData*, const InnovatronData*"
+Function,+,innovatron_free,void,InnovatronData*
+Function,+,innovatron_get_base_data,InnovatronData*,const InnovatronData*
+Function,+,innovatron_get_device_name,const char*,"const InnovatronData*, NfcDeviceNameType"
+Function,+,innovatron_get_uid,const uint8_t*,"const InnovatronData*, size_t*"
+Function,+,innovatron_is_equal,_Bool,"const InnovatronData*, const InnovatronData*"
+Function,+,innovatron_load,_Bool,"InnovatronData*, FlipperFormat*, uint32_t"
+Function,+,innovatron_poller_activate,InnovatronError,"InnovatronPoller*, InnovatronData*"
+Function,+,innovatron_poller_com_r,InnovatronError,"InnovatronPoller*, const BitBuffer*, BitBuffer*"
+Function,+,innovatron_reset,void,InnovatronData*
+Function,+,innovatron_save,_Bool,"const InnovatronData*, FlipperFormat*"
+Function,+,innovatron_set_uid,_Bool,"InnovatronData*, const uint8_t*, size_t"
+Function,+,innovatron_verify,_Bool,"InnovatronData*, const FuriString*"
 Function,+,input_get_key_name,const char*,InputKey
 Function,+,input_get_type_name,const char*,InputType
 Function,-,iprintf,int,"const char*, ..."
@@ -4092,6 +4108,7 @@ Variable,+,message_sound_off,const NotificationMessage,
 Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
 Variable,-,nfc_device_felica,const NfcDeviceBase,
+Variable,-,nfc_device_innovatron,const NfcDeviceBase,
 Variable,-,nfc_device_mf_classic,const NfcDeviceBase,
 Variable,-,nfc_device_mf_desfire,const NfcDeviceBase,
 Variable,-,nfc_device_mf_plus,const NfcDeviceBase,
