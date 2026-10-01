@@ -16,7 +16,7 @@ const FuriHalRegion furi_hal_region_zero = {
 
 const FuriHalRegion furi_hal_region_eu_ru = {
     .country_code = "EU",
-    .bands_count = 2,
+    .bands_count = 3,
     .bands = {
         {
             .start = 433050000,
@@ -25,8 +25,14 @@ const FuriHalRegion furi_hal_region_eu_ru = {
             .duty_cycle = 50,
         },
         {
-            .start = 868150000,
-            .end = 868550000,
+            .start = 868000000,
+            .end = 868600000,
+            .power_limit = 12,
+            .duty_cycle = 50,
+        },
+        {
+            .start = 868700000,
+            .end = 869200000,
             .power_limit = 12,
             .duty_cycle = 50,
         }}};
