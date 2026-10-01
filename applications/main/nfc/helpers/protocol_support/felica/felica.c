@@ -143,7 +143,8 @@ static void nfc_scene_emulate_on_enter_felica(NfcApp* instance) {
 
 static void nfc_scene_read_menu_on_enter_felica(NfcApp* instance) {
     const FelicaData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolFelica);
-    if(data->blocks_read != data->blocks_total) {
+    if(data->blocks_read != data->blocks_total &&
+       !scene_manager_has_previous_scene(instance->scene_manager, NfcSceneGenerateInfo)) {
         submenu_add_item(
             instance->submenu,
             "Unlock",
@@ -155,8 +156,12 @@ static void nfc_scene_read_menu_on_enter_felica(NfcApp* instance) {
 
 static bool nfc_scene_read_menu_on_event_felica(NfcApp* instance, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexUnlock) {
+        switch(event.event) {
+        case SubmenuIndexUnlock:
             scene_manager_next_scene(instance->scene_manager, NfcSceneDesAuthKeyInput);
+            return true;
+        case SubmenuIndexCommonEdit:
+            scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
             return true;
         }
     }

@@ -2,6 +2,7 @@
 
 #include <furi/furi.h>
 #include <furi_hal_random.h>
+#include <nfc/protocols/felica/felica.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
@@ -24,6 +25,10 @@ static const uint8_t default_data_ntag213[] = {0x01, 0x03, 0xA0, 0x0C, 0x34, 0x0
 static const uint8_t default_data_ntag215_216[] = {0x03, 0x00, 0xFE};
 static const uint8_t default_data_ntag_i2c[] = {0xE1, 0x10, 0x00, 0x00, 0x03, 0x00, 0xFE};
 static const uint8_t default_config_ntag_i2c[] = {0x01, 0x00, 0xF8, 0x48, 0x08, 0x01, 0x00, 0x00};
+static const uint8_t pmm_felica_lite_s[] = {0x00, 0xF1, 0x00, 0x00, 0x00, 0x01, 0x43, 0x00};
+static const uint8_t default_mc_felica_lite_s[] =
+    {0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+static const uint8_t default_wcnt_felica_lite_s[] = {0x00, 0xFE, 0xFF};
 
 static void nfc_generate_mf_ul_uid(uint8_t* uid) {
     uid[0] = NXP_MANUFACTURER_ID;
@@ -314,6 +319,12 @@ static void nfc_generate_mf_classic_uid(uint8_t* uid, uint8_t length) {
     uid[3] |= 0x01; // To avoid forbidden 0x88 value
 }
 
+static void nfc_generate_felica_idm(uint8_t idm[8], uint16_t mfr_code) {
+    idm[0] = mfr_code & 0xff;
+    idm[1] = mfr_code >> 8;
+    furi_hal_random_fill_buf(&idm[2], FELICA_IDM_SIZE - 2);
+}
+
 static void
     nfc_generate_mf_classic_common(MfClassicData* data, uint8_t uid_len, MfClassicType type) {
     data->iso14443_3a_data->uid_len = uid_len;
@@ -436,6 +447,47 @@ static void nfc_generate_mf_classic_4k_7b_uid(NfcDevice* nfc_device) {
     nfc_generate_mf_classic(nfc_device, 7, MfClassicType4k);
 }
 
+static void nfc_generate_felica_lite_s(NfcDevice* nfc_device) {
+    uint8_t idm[FELICA_IDM_SIZE];
+
+    FelicaData* felica_data = felica_alloc();
+    felica_data->workflow_type = FelicaLite;
+
+    // All Lite-S cards I've seen have the manufacturer code of 0x2E01 although this could differ.
+    // Hard-code this to be 0x2E01 for now.
+    nfc_generate_felica_idm(idm, 0x2E01);
+
+    memcpy(felica_data->idm.data, idm, sizeof(idm));
+    memcpy(felica_data->pmm.data, pmm_felica_lite_s, sizeof(pmm_felica_lite_s));
+
+    felica_data->blocks_total = 28;
+    felica_data->blocks_read = 26;
+    memset(felica_data->data.dump, 0, sizeof(felica_data->data.dump));
+
+    FelicaFileSystem* fs = &felica_data->data.fs;
+
+    memset(fs->reg.data, 0xFF, sizeof(fs->reg.data));
+
+    memcpy(fs->id.data, idm, sizeof(idm));
+    memcpy(fs->d_id.data, idm, sizeof(idm));
+    memcpy(&fs->d_id.data[8], pmm_felica_lite_s, sizeof(pmm_felica_lite_s));
+
+    fs->sys_c.data[0] = 0x88;
+    fs->sys_c.data[1] = 0xB4;
+
+    memcpy(fs->mc.data, default_mc_felica_lite_s, sizeof(default_mc_felica_lite_s));
+    memcpy(fs->wcnt.data, default_wcnt_felica_lite_s, sizeof(default_wcnt_felica_lite_s));
+
+    // When MAC_A is read casually by the current reader, status code 01B2 will always
+    // be returned as the reader does not start authentication by default.
+    // Simulate this behavior in the generator.
+    fs->mac_a.SF1 = 0x01;
+    fs->mac_a.SF2 = 0xB2;
+
+    nfc_device_set_data(nfc_device, NfcProtocolFelica, felica_data);
+    felica_free(felica_data);
+}
+
 static const NfcDataGenerator nfc_data_generator[NfcDataGeneratorTypeNum] = {
     [NfcDataGeneratorTypeMfUltralight] =
         {
@@ -526,6 +578,11 @@ static const NfcDataGenerator nfc_data_generator[NfcDataGeneratorTypeNum] = {
         {
             .name = "Mifare Classic 4k 7byte UID",
             .handler = nfc_generate_mf_classic_4k_7b_uid,
+        },
+    [NfcDataGeneratorTypeFelicaLiteS] =
+        {
+            .name = "FeliCa Lite-S",
+            .handler = nfc_generate_felica_lite_s,
         },
 };
 
