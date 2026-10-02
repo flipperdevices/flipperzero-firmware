@@ -38,6 +38,14 @@ static const MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
             .full_name = "Mifare Classic 4K",
             .type_name = "4K",
         },
+    [MfClassicTypePlus2k] =
+        {
+            // TODO: need to validate whether 17 or 18 sectors are accessible
+            .sectors_total = 17,
+            .blocks_total = 544,
+            .full_name = "Mifare Plus 2K",
+            .type_name = "Plus 2K",
+        },
 };
 
 const NfcDeviceBase nfc_device_mf_classic = {
