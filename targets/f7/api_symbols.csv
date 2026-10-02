@@ -1671,6 +1671,7 @@ Function,+,furi_hal_serial_async_rx,uint8_t,FuriHalSerialHandle*
 Function,+,furi_hal_serial_async_rx_available,_Bool,FuriHalSerialHandle*
 Function,+,furi_hal_serial_async_rx_start,void,"FuriHalSerialHandle*, FuriHalSerialAsyncRxCallback, void*, _Bool"
 Function,+,furi_hal_serial_async_rx_stop,void,FuriHalSerialHandle*
+Function,+,furi_hal_serial_configure_flow_control,void,"FuriHalSerialHandle*, _Bool, _Bool"
 Function,+,furi_hal_serial_configure_framing,void,"FuriHalSerialHandle*, FuriHalSerialDataBits, FuriHalSerialParity, FuriHalSerialStopBits"
 Function,+,furi_hal_serial_control_acquire,FuriHalSerialHandle*,FuriHalSerialId
 Function,+,furi_hal_serial_control_deinit,void,
