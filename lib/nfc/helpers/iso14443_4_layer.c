@@ -199,7 +199,8 @@ Iso14443_4LayerResult iso14443_4_layer_decode_command(
                 uint8_t pps1 = bit_buffer_get_byte(input_data, 2);
                 uint8_t dsi = pps1 & ISO14443_4_BLOCK_PPS_1_DSI_MASK;
                 uint8_t dri = pps1 & ISO14443_4_BLOCK_PPS_1_DRI_MASK;
-                // TODO: do we need to change bit timings somehow? DRI and DSI mean different bit timing divisors
+                // DRI and DSI select different bit timing divisors. The request is acknowledged
+                // but the layer keeps the default timings, so only the default rates are used.
                 UNUSED(dsi);
                 UNUSED(dri);
             }
@@ -225,7 +226,7 @@ Iso14443_4LayerResult iso14443_4_layer_decode_command(
         } else if(instance->cid != ISO14443_4_LAYER_CID_NOT_SUPPORTED && instance->cid != 0) {
             return Iso14443_4LayerResultSkip;
         }
-        // TODO: properly handle block chaining
+        // Chaining is not implemented: every I-block is passed up as a complete message.
         if(instance->pcb & ISO14443_4_BLOCK_PCB_I_NAD_MASK) {
             if(instance->nad == ISO14443_4_LAYER_NAD_NOT_SUPPORTED) {
                 return Iso14443_4LayerResultSkip;
@@ -256,7 +257,7 @@ Iso14443_4LayerResult iso14443_4_layer_decode_command(
         }
 
     } else if(ISO14443_4_BLOCK_PCB_IS_R_BLOCK(instance->pcb)) {
-        // TODO: properly handle R blocks while chaining
+        // Without chaining support there is nothing to resume, so every R-block gets a NACK.
         iso14443_4_layer_update_pcb(instance, true);
         instance->pcb |= ISO14443_4_BLOCK_PCB_R_NACK_MASK;
         bit_buffer_reset(block_data);
@@ -278,7 +279,8 @@ bool iso14443_4_layer_encode_response(
         if(instance->pcb_prev & ISO14443_4_BLOCK_PCB_I_CID_MASK) {
             bit_buffer_append_byte(block_data, instance->cid);
         }
-        // TODO: properly handle block chaining and related R block responses
+        // Responses are always sent as a single I-block, so neither chaining nor the R-block
+        // exchange it would require is produced here.
         if(instance->pcb_prev & ISO14443_4_BLOCK_PCB_I_NAD_MASK &&
            instance->nad != ISO14443_4_LAYER_NAD_NOT_SET) {
             bit_buffer_append_byte(block_data, instance->nad);
