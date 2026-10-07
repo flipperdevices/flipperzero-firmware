@@ -34,6 +34,7 @@
 #include "doitrand.h"
 #include "phoenix_v2.h"
 #include "honeywell_wdb.h"
+#include "honeywell_5834.h"
 #include "magellan.h"
 #include "intertechno_v3.h"
 #include "clemsa.h"
