@@ -615,11 +615,9 @@ MU_TEST(test_lfrfid_protocol_fdxb_read_simple) {
 // Indala224: 224-bit PSK2 frame, no known FC/CN descramble,
 // test data uses the Proxmark3-verified reference (lf indala reader output)
 #define INDALA224_TEST_DATA_SIZE 28
-#define INDALA224_TEST_DATA \
-    { \
-        0x80, 0x00, 0x00, 0x01, 0xB2, 0x35, 0x23, 0xA6, 0xC2, 0xE3, 0x1E, 0xBA, 0x3C, 0xBE, \
-        0xE4, 0xAF, 0xB3, 0xC6, 0xAD, 0x1F, 0xCF, 0x64, 0x93, 0x93, 0x92, 0x8C, 0x14, 0xE5 \
-    }
+#define INDALA224_TEST_DATA                                                              \
+    {0x80, 0x00, 0x00, 0x01, 0xB2, 0x35, 0x23, 0xA6, 0xC2, 0xE3, 0x1E, 0xBA, 0x3C, 0xBE, \
+     0xE4, 0xAF, 0xB3, 0xC6, 0xAD, 0x1F, 0xCF, 0x64, 0x93, 0x93, 0x92, 0x8C, 0x14, 0xE5}
 #define INDALA224_BITS_PER_FRAME   224
 #define INDALA224_US_PER_BIT       255
 #define INDALA224_FRAMES_TO_DECODE 3
@@ -629,8 +627,7 @@ MU_TEST(test_lfrfid_protocol_indala224_roundtrip) {
     mu_assert_int_eq(
         INDALA224_TEST_DATA_SIZE, protocol_dict_get_data_size(dict, LFRFIDProtocolIndala224));
     mu_assert_string_eq("Indala224", protocol_dict_get_name(dict, LFRFIDProtocolIndala224));
-    mu_assert_string_eq(
-        "Motorola", protocol_dict_get_manufacturer(dict, LFRFIDProtocolIndala224));
+    mu_assert_string_eq("Motorola", protocol_dict_get_manufacturer(dict, LFRFIDProtocolIndala224));
 
     const uint8_t data[INDALA224_TEST_DATA_SIZE] = INDALA224_TEST_DATA;
 
@@ -688,11 +685,9 @@ MU_TEST(test_lfrfid_protocol_indala224_roundtrip) {
 // Indala224 phase-alternating test: data with odd number of 1-bits
 // causes PSK2 carrier phase to invert between consecutive frames.
 // Decoder must accept inverted preamble at the second frame boundary.
-#define INDALA224_ALT_TEST_DATA \
-    { \
-        0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 \
-    }
+#define INDALA224_ALT_TEST_DATA                                                          \
+    {0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
+     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
 MU_TEST(test_lfrfid_protocol_indala224_alternating_phase) {
     ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
