@@ -24,7 +24,7 @@ appenv["CCFLAGS"] = [flag for flag in appenv["CCFLAGS"] if flag not in ("-Og", "
 
 appenv.AppendUnique(
     CCFLAGS=[
-        "-Og" if (appenv["DEBUG"] and not appenv["COMPACT"]) else "-Os",
+        "-Og" if appenv["DEBUG"] else "-Os",
         "-mword-relocations",
         "-mlong-calls",
         "-fno-common",
