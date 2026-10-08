@@ -17,7 +17,7 @@ System found: 1
 System 00: 0003 | Key version 0001 |
 
 Area found: 1
-Area 000: | Code 0000 | End FFFE | Services #000-#001 | Key version 0001 |
+Area 000: | Code 0000 | End FFFE | Services #000-#001 | Key version 0002 |
 
 Service found: 2
 Service 000: | Code 0009 | Attrib. 09 | Public  | Random | Read/Write | Key version 0003 |

@@ -708,8 +708,7 @@ MU_TEST(felica_standard_file_test) {
     const FelicaArea* area = simple_array_cget(system->areas, 0);
     mu_assert(area->code == 0x0000, "area code != 0x0000");
     mu_assert(area->end_code == 0xFFFE, "area end_code != 0xFFFE");
-    // Area 0000 is the system itself, so its key version mirrors the system one
-    mu_assert(area->key_version == 0x0001, "area key_version != 0x0001");
+    mu_assert(area->key_version == 0x0002, "area key_version != 0x0002");
 
     mu_assert(simple_array_get_count(system->services) == 2, "service count != 2");
     const FelicaService* service0 = simple_array_cget(system->services, 0);
@@ -784,6 +783,20 @@ MU_TEST(felica_standard_read) {
 
     const FelicaSystem* system = simple_array_cget(felica_data->systems, 0);
     mu_assert(system->key_version == 0x0001, "system key_version != 0x0001");
+
+    mu_assert(simple_array_get_count(system->areas) == 1, "area count != 1");
+    const FelicaArea* area = simple_array_cget(system->areas, 0);
+    mu_assert(area->code == 0x0000, "area code != 0x0000");
+    mu_assert(area->key_version == 0x0002, "area key_version != 0x0002");
+
+    mu_assert(simple_array_get_count(system->services) == 2, "service count != 2");
+    const FelicaService* service0 = simple_array_cget(system->services, 0);
+    mu_assert(service0->code == 0x0009, "service[0] code != 0x0009");
+    mu_assert(service0->key_version == 0x0003, "service[0] key_version != 0x0003");
+    const FelicaService* service1 = simple_array_cget(system->services, 1);
+    mu_assert(service1->code == 0x000B, "service[1] code != 0x000B");
+    mu_assert(service1->key_version == 0x0004, "service[1] key_version != 0x0004");
+
     mu_assert(simple_array_get_count(system->public_blocks) == 2, "public block count != 2");
 
     const FelicaPublicBlock* pb0 = simple_array_cget(system->public_blocks, 0);
