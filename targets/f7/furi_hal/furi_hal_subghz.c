@@ -398,6 +398,28 @@ void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
+void furi_hal_subghz_set_channel(uint8_t channel) {
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+
+    // frequency & channel should only be updated in IDLE state
+    furi_check(cc1101_wait_status_state(&furi_hal_spi_bus_handle_subghz, CC1101StateIDLE, 10000));
+
+    cc1101_set_channel(&furi_hal_spi_bus_handle_subghz, channel);
+    cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
+
+    furi_check(cc1101_wait_status_state(&furi_hal_spi_bus_handle_subghz, CC1101StateIDLE, 10000));
+
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+}
+
+uint8_t furi_hal_subghz_get_channel() {
+    uint8_t channel;
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    channel = cc1101_get_channel(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    return channel;
+}
+
 static bool furi_hal_subghz_start_debug(void) {
     bool ret = false;
     if(furi_hal_subghz.async_mirror_pin != NULL) {
