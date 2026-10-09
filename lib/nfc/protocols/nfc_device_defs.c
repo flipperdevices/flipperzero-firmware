@@ -26,6 +26,7 @@
 #include <nfc/protocols/st25tb/st25tb.h>
 #include <nfc/protocols/ntag4xx/ntag4xx.h>
 #include <nfc/protocols/type_4_tag/type_4_tag.h>
+#include <nfc/protocols/innovatron/innovatron.h>
 
 /**
  * @brief List of registered NFC device implementations.
@@ -48,5 +49,6 @@ const NfcDeviceBase* const nfc_devices[NfcProtocolNum] = {
     [NfcProtocolSt25tb] = &nfc_device_st25tb,
     [NfcProtocolNtag4xx] = &nfc_device_ntag4xx,
     [NfcProtocolType4Tag] = &nfc_device_type_4_tag,
+    [NfcProtocolInnovatron] = &nfc_device_innovatron,
     /* Add new protocols here */
 };
