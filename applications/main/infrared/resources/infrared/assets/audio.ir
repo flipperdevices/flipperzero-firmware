@@ -4721,3 +4721,29 @@ frequency: 38000
 duty_cycle: 0.333333
 data: 8400 4200 526 1578 526 1578 526 1578 526 1578 526 1578 526 526 526 526 526 1578 526 526 526 1578 526 1578 526 1578 526 1578 526 1578 526 526 526 526 526 25248 526 1578 526 1578 526 1578 526 1578 526 1578 526 526 526 526 526 1578 526 526 526 1578 526 1578 526 1578 526 1578 526 1578 526 526 526 526 526 33664
 #
+# Model: Teufel KB 62 RC
+#
+name: Power
+type: parsed
+protocol: NECext
+address: FF FF 00 00
+command: 53 AC 00 00
+# 
+name: Mute
+type: parsed
+protocol: NECext
+address: FF FF 00 00
+command: 51 AE 00 00
+# 
+name: Vol_up
+type: parsed
+protocol: NECext
+address: FF FF 00 00
+command: 4D B2 00 00
+# 
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: FF FF 00 00
+command: 0E F1 00 00
+
