@@ -495,6 +495,109 @@ void test_furi_event_loop_self_unsubscribe(void) {
     furi_event_loop_free(event_loop);
 }
 
+/*
+ * Regression test for issue #4336: event loop must receive the correct flag
+ * value when furi_event_flag_set() is called from ISR (no one-event delay).
+ * Uses a software-pending LPTIM2 interrupt to run the ISR path.
+ */
+#define EVENT_FLAG_ISR_TEST_BITS 3U
+#define EVENT_FLAG_ISR_TEST_MASK ((1U << EVENT_FLAG_ISR_TEST_BITS) - 1U)
+
+typedef struct {
+    FuriEventFlag* flag;
+    uint32_t bits_to_set;
+} EventFlagIsrTestIsrContext;
+
+typedef struct {
+    FuriEventFlag* flag;
+    FuriEventLoop* loop;
+    FuriSemaphore* ready;
+    FuriSemaphore* sync;
+    uint32_t bits_received;
+} EventFlagIsrTestContext;
+
+static void event_flag_isr_test_isr(void* context) {
+    EventFlagIsrTestIsrContext* ctx = context;
+    furi_event_flag_set(ctx->flag, ctx->bits_to_set);
+}
+
+static void event_flag_isr_test_callback(FuriEventLoopObject* object, void* context) {
+    EventFlagIsrTestContext* ctx = context;
+    ctx->bits_received =
+        furi_event_flag_wait((FuriEventFlag*)object, EVENT_FLAG_ISR_TEST_MASK, FuriFlagWaitAny, 0);
+    furi_semaphore_release(ctx->sync);
+}
+
+// The event loop is owned by this thread: every FuriEventLoop call except
+// furi_event_loop_stop() must run on the thread the loop was created in.
+static int32_t event_flag_isr_test_loop_thread(void* arg) {
+    EventFlagIsrTestContext* ctx = arg;
+
+    ctx->loop = furi_event_loop_alloc();
+    furi_event_loop_subscribe_event_flag(
+        ctx->loop, ctx->flag, FuriEventLoopEventIn, event_flag_isr_test_callback, ctx);
+
+    furi_semaphore_release(ctx->ready);
+    furi_event_loop_run(ctx->loop);
+
+    furi_event_loop_unsubscribe(ctx->loop, ctx->flag);
+    furi_event_loop_free(ctx->loop);
+
+    return 0;
+}
+
+void test_furi_event_loop_event_flag_from_isr(void) {
+    EventFlagIsrTestContext ctx = {
+        .flag = furi_event_flag_alloc(),
+        .loop = NULL,
+        .ready = furi_semaphore_alloc(1, 0),
+        .sync = furi_semaphore_alloc(1, 0),
+        .bits_received = 0,
+    };
+    EventFlagIsrTestIsrContext isr_ctx = {.flag = ctx.flag, .bits_to_set = 0};
+
+    FuriThread* loop_thread =
+        furi_thread_alloc_ex("event_flag_isr_loop", 1024, event_flag_isr_test_loop_thread, &ctx);
+    furi_thread_start(loop_thread);
+
+    // Only trigger the interrupt once the loop thread is subscribed, otherwise
+    // the flag would be set before anything is listening for it.
+    furi_check(furi_semaphore_acquire(ctx.ready, furi_ms_to_ticks(1000)) == FuriStatusOk);
+
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdLpTim2, event_flag_isr_test_isr, &isr_ctx);
+
+    const uint32_t test_bits[] = {1U, 2U, 4U};
+    uint32_t bits_received[3] = {0};
+    bool timed_out = false;
+
+    for(size_t i = 0; i < sizeof(test_bits) / sizeof(test_bits[0]); i++) {
+        isr_ctx.bits_to_set = test_bits[i];
+        furi_hal_interrupt_trigger_pending(FuriHalInterruptIdLpTim2);
+
+        if(furi_semaphore_acquire(ctx.sync, furi_ms_to_ticks(500)) != FuriStatusOk) {
+            timed_out = true;
+            break;
+        }
+        bits_received[i] = ctx.bits_received;
+    }
+
+    // Tear down before asserting so a failure cannot leave the ISR registered
+    // against this function's stack.
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdLpTim2, NULL, NULL);
+    furi_event_loop_stop(ctx.loop);
+    furi_thread_join(loop_thread);
+    furi_thread_free(loop_thread);
+
+    mu_assert(!timed_out, "timeout waiting for event flag callback");
+    for(size_t i = 0; i < sizeof(test_bits) / sizeof(test_bits[0]); i++) {
+        mu_assert_int_eq(bits_received[i], test_bits[i]);
+    }
+
+    furi_semaphore_free(ctx.sync);
+    furi_semaphore_free(ctx.ready);
+    furi_event_flag_free(ctx.flag);
+}
+
 void test_furi_event_loop(void) {
     TestFuriEventLoopData data = {};
 
