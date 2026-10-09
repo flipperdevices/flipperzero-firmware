@@ -38,6 +38,16 @@ static bq25896_regs_t bq25896_regs;
 bool bq25896_init(const FuriHalI2cBusHandle* handle) {
     bool result = true;
 
+    // Check whether OTG is enabled before resetting registers
+    result &= furi_hal_i2c_read_mem(
+        handle,
+        BQ25896_ADDRESS,
+        0x00,
+        (uint8_t*)&bq25896_regs,
+        sizeof(bq25896_regs),
+        BQ25896_I2C_TIMEOUT);
+    bool otg_enabled = bq25896_regs.r03.OTG_CONFIG;
+
     bq25896_regs.r14.REG_RST = 1;
     result &= furi_hal_i2c_write_reg_8(
         handle, BQ25896_ADDRESS, 0x14, *(uint8_t*)&bq25896_regs.r14, BQ25896_I2C_TIMEOUT);
@@ -66,6 +76,19 @@ bool bq25896_init(const FuriHalI2cBusHandle* handle) {
     bq25896_regs.r0A.BOOST_LIM = BoostLim_1400; // BOOST Current limit: 1.4A
     result &= furi_hal_i2c_write_reg_8(
         handle, BQ25896_ADDRESS, 0x0A, *(uint8_t*)&bq25896_regs.r0A, BQ25896_I2C_TIMEOUT);
+
+    result &= furi_hal_i2c_read_mem(
+        handle,
+        BQ25896_ADDRESS,
+        0x00,
+        (uint8_t*)&bq25896_regs,
+        sizeof(bq25896_regs),
+        BQ25896_I2C_TIMEOUT);
+
+    // Re-enable OTG output if it was previously enabled
+    bq25896_regs.r03.OTG_CONFIG = otg_enabled;
+    furi_hal_i2c_write_reg_8(
+        handle, BQ25896_ADDRESS, 0x03, *(uint8_t*)&bq25896_regs.r03, BQ25896_I2C_TIMEOUT);
 
     result &= furi_hal_i2c_read_mem(
         handle,
