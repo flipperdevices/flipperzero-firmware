@@ -27,6 +27,8 @@ typedef enum {
     NfcDataGeneratorTypeMfClassic4k_4b,
     NfcDataGeneratorTypeMfClassic4k_7b,
 
+    NfcDataGeneratorTypeFelicaLiteS,
+
     NfcDataGeneratorTypeNum,
 
 } NfcDataGeneratorType;
