@@ -85,6 +85,7 @@ typedef enum {
     FelicaErrorProtocol,
     FelicaErrorTimeout,
     FelicaErrorFeatureUnsupported,
+    FelicaErrorIgnore,
 } FelicaError;
 
 typedef enum {
