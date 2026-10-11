@@ -613,12 +613,16 @@ static uint16_t felica_listener_get_response_system_code(
     uint8_t* matched_idx) {
     uint16_t resp_system_code = FELICA_SYSTEM_CODE_CODE;
     *matched_idx = 0;
-    if(felica_listener_check_system_code(generic_request, FELICA_LISTENER_SYSTEM_CODE_NDEF) &&
+    // Standard cards only answer to Systems from their dump
+    const bool is_standard = instance->data->workflow_type == FelicaStandard;
+    if(!is_standard &&
+       felica_listener_check_system_code(generic_request, FELICA_LISTENER_SYSTEM_CODE_NDEF) &&
        instance->data->data.fs.mc.data[FELICA_MC_SYS_OP] == 1) {
         // NDEF
         resp_system_code = FELICA_LISTENER_SYSTEM_CODE_NDEF;
-    } else if(felica_listener_check_system_code(
-                  generic_request, FELICA_LISTENER_SYSTEM_CODE_LITES)) {
+    } else if(
+        !is_standard &&
+        felica_listener_check_system_code(generic_request, FELICA_LISTENER_SYSTEM_CODE_LITES)) {
         // Lite-S
         resp_system_code = FELICA_LISTENER_SYSTEM_CODE_LITES;
     } else {
