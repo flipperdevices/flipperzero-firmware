@@ -47,7 +47,12 @@ FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
     // the session mid-transaction. Widen them to the max so readers wait long enough.
     memset(data->pmm.data + 2, 0xFF, FELICA_PMM_SIZE - 2);
 
-    const uint16_t system_code = *(uint16_t*)data->data.fs.sys_c.data;
+    uint16_t system_code = *(uint16_t*)data->data.fs.sys_c.data;
+    // Standard cards keep their System Codes in the System list rather than in SYS_C
+    if(data->workflow_type == FelicaStandard && simple_array_get_count(data->systems) > 0) {
+        const FelicaSystem* system = simple_array_cget(data->systems, 0);
+        system_code = __builtin_bswap16(system->system_code);
+    }
     nfc_felica_listener_set_sensf_res_data(
         nfc, data->idm.data, sizeof(data->idm), data->pmm.data, sizeof(data->pmm), system_code);
 
@@ -690,6 +695,8 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
         FURI_LOG_D(TAG, "Field On");
     } else if(nfc_event->type == NfcEventTypeListenerActivated) {
         instance->state = Felica_ListenerStateActivated;
+        // The NFC controller answered a Polling by itself, with the IDm of System 0
+        instance->current_system_idx = 0;
         FURI_LOG_D(TAG, "Activated");
     } else if(nfc_event->type == NfcEventTypeFieldOff) {
         instance->state = Felica_ListenerStateIdle;
