@@ -156,10 +156,6 @@ NfcCommand felica_poller_state_handler_list_system(FelicaPoller* instance) {
 NfcCommand felica_poller_state_handler_select_system_idx(FelicaPoller* instance) {
     FURI_LOG_D(TAG, "Select System Index %d", instance->systems_read);
 
-    // Each System on a multi-system card can only be addressed after Polling again
-    // with that System's own Code, which returns the IDm/PMm valid for it. Not every
-    // card tolerates commands sent with a locally-guessed IDm (e.g. Android HCE
-    // FeliCa emulation times out), so this must be a real over-the-air exchange.
     const FelicaSystem* system =
         simple_array_cget(instance->data->systems, instance->systems_read);
     const FelicaPollerPollingCommand polling_cmd = {

@@ -773,7 +773,7 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
                     error = FelicaErrorIgnore;
                     break;
                 }
-            } else if(!felica_listener_check_idm(instance, &request->header.idm)) {
+            } else if(!felica_listener_select_system_by_idm(instance, &request->header.idm)) {
                 FURI_LOG_E(TAG, "Wrong IDm");
                 error = FelicaErrorIgnore;
                 break;
