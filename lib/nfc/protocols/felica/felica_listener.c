@@ -334,13 +334,9 @@ static FelicaError felica_listener_command_handler_standard_write(
 
     uint8_t sf1 = FELICA_SF1_SUCCESS, sf2 = FELICA_SF2_SUCCESS;
 
-    struct {
-        uint16_t svc_code;
-        uint16_t blk_num;
-    } targets[16];
-    uint8_t valid_count = 0;
+    FelicaPublicBlock* blocks[16];
 
-    if(block_count == 0 || block_count > COUNT_OF(targets)) {
+    if(block_count == 0 || block_count > COUNT_OF(blocks)) {
         sf1 = 0xFF;
         sf2 = FELICA_SF2_ERROR_BLOCK_COUNT;
     }
@@ -370,9 +366,21 @@ static FelicaError felica_listener_command_handler_standard_write(
             break;
         }
 
-        targets[i].svc_code = svc_code;
-        targets[i].blk_num = blk_num;
-        valid_count++;
+        blocks[i] = NULL;
+        uint32_t pb_count = simple_array_get_count(system->public_blocks);
+        for(uint32_t j = 0; j < pb_count; j++) {
+            FelicaPublicBlock* pb = simple_array_get(system->public_blocks, j);
+            if(pb->service_code == svc_code && pb->block_idx == blk_num) {
+                blocks[i] = pb;
+                break;
+            }
+        }
+
+        if(!blocks[i]) {
+            sf1 = 0xFF;
+            sf2 = FELICA_SF2_ERROR_BLOCK_NUMBER;
+            break;
+        }
     }
 
     // Block Data must be present in full for every block in the Block List
@@ -382,26 +390,8 @@ static FelicaError felica_listener_command_handler_standard_write(
         return FelicaErrorProtocol;
     }
 
-    if(sf1 == FELICA_SF1_SUCCESS && system) {
-        for(uint8_t i = 0; i < valid_count; i++) {
-            bool found = false;
-            uint32_t pb_count = simple_array_get_count(system->public_blocks);
-            for(uint32_t j = 0; j < pb_count; j++) {
-                FelicaPublicBlock* pb = simple_array_get(system->public_blocks, j);
-                if(pb->service_code == targets[i].svc_code &&
-                   pb->block_idx == targets[i].blk_num) {
-                    memcpy(
-                        pb->block.data, bptr + i * FELICA_DATA_BLOCK_SIZE, FELICA_DATA_BLOCK_SIZE);
-                    found = true;
-                    break;
-                }
-            }
-            if(!found) {
-                sf1 = 0xFF;
-                sf2 = FELICA_SF2_ERROR_BLOCK_NUMBER;
-                break;
-            }
-        }
+    for(uint8_t i = 0; sf1 == FELICA_SF1_SUCCESS && i < block_count; i++) {
+        memcpy(blocks[i]->block.data, bptr + i * FELICA_DATA_BLOCK_SIZE, FELICA_DATA_BLOCK_SIZE);
     }
 
     return felica_listener_send_status_response(
