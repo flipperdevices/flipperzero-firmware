@@ -48,7 +48,8 @@ FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
     // real (hardware-fast) FeliCa IC carry short values here; our software emulation
     // is slower to respond, so real readers following those short timeouts abandon
     // the session mid-transaction. Widen them to the max so readers wait long enough.
-    memset(data->pmm.data + 2, 0xFF, FELICA_PMM_SIZE - 2);
+    instance->pmm = data->pmm;
+    memset(instance->pmm.data + 2, 0xFF, FELICA_PMM_SIZE - 2);
 
     uint16_t system_code = *(uint16_t*)data->data.fs.sys_c.data;
     // Standard cards keep their System Codes in the System list rather than in SYS_C
@@ -57,7 +58,12 @@ FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
         system_code = __builtin_bswap16(system->system_code);
     }
     nfc_felica_listener_set_sensf_res_data(
-        nfc, data->idm.data, sizeof(data->idm), data->pmm.data, sizeof(data->pmm), system_code);
+        nfc,
+        data->idm.data,
+        sizeof(data->idm),
+        instance->pmm.data,
+        sizeof(instance->pmm),
+        system_code);
 
     return instance;
 }
@@ -620,7 +626,7 @@ static void felica_listener_populate_polling_response_header(
     FelicaListener* instance,
     FelicaListenerPollingResponseHeader* resp) {
     resp->idm = felica_listener_get_current_idm(instance);
-    resp->pmm = instance->data->pmm;
+    resp->pmm = instance->pmm;
     resp->response_code = FELICA_LISTENER_RESPONSE_POLLING;
 }
 

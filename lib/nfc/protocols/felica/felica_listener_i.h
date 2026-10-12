@@ -97,6 +97,7 @@ struct FelicaListener {
     FelicaListenerState state;
     FelicaAuthentication auth;
     FelicaBlockData mc_shadow;
+    FelicaPMm pmm;
 
     uint8_t request_size_buf;
     uint8_t block_list_size;
