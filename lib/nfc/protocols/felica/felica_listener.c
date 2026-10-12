@@ -19,6 +19,9 @@
 
 #define FELICA_LISTENER_PERFORMANCE_VALUE (__builtin_bswap16(0x0083U))
 
+#define FELICA_BLOCK_LIST_ELEMENT_HEADER_SHORT_MASK         (0x80U)
+#define FELICA_BLOCK_LIST_ELEMENT_HEADER_SERVICE_INDEX_MASK (0x0FU)
+
 #define TAG "FelicaListener"
 
 FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
@@ -242,17 +245,15 @@ static FelicaError felica_listener_command_handler_standard_read(
     }
 
     for(uint8_t i = 0; sf1 == FELICA_SF1_SUCCESS && i < block_count; i++) {
-        uint8_t svc_idx = bptr[0] & 0x0F;
-        bool is_2byte = (bptr[0] >> 7) != 0;
-        uint8_t blk_num;
+        uint8_t ble_hdr = bptr[0];
+        uint8_t svc_idx = ble_hdr & FELICA_BLOCK_LIST_ELEMENT_HEADER_SERVICE_INDEX_MASK;
+        bool is_extended = (ble_hdr & FELICA_BLOCK_LIST_ELEMENT_HEADER_SHORT_MASK) == 0;
+        uint16_t blk_num = bptr[1];
 
-        if(is_2byte) {
-            blk_num = bptr[1];
-            bptr += 2;
-        } else {
-            blk_num = bptr[1]; // lower byte of LE block number; upper byte (bptr[2]) must be 0
-            bptr += 3;
+        if(is_extended) {
+            blk_num |= (uint16_t)bptr[2] << 8;
         }
+        bptr += is_extended ? 3 : 2;
 
         if(svc_idx >= service_num) {
             sf1 = 0xFF;
@@ -335,7 +336,7 @@ static FelicaError felica_listener_command_handler_standard_write(
 
     struct {
         uint16_t svc_code;
-        uint8_t blk_num;
+        uint16_t blk_num;
     } targets[16];
     uint8_t valid_count = 0;
 
@@ -345,17 +346,15 @@ static FelicaError felica_listener_command_handler_standard_write(
     }
 
     for(uint8_t i = 0; sf1 == FELICA_SF1_SUCCESS && i < block_count; i++) {
-        uint8_t svc_idx = bptr[0] & 0x0F;
-        bool is_2byte = (bptr[0] >> 7) != 0;
-        uint8_t blk_num;
+        uint8_t ble_hdr = bptr[0];
+        uint8_t svc_idx = ble_hdr & FELICA_BLOCK_LIST_ELEMENT_HEADER_SERVICE_INDEX_MASK;
+        bool is_extended = (ble_hdr & FELICA_BLOCK_LIST_ELEMENT_HEADER_SHORT_MASK) == 0;
+        uint16_t blk_num = bptr[1];
 
-        if(is_2byte) {
-            blk_num = bptr[1];
-            bptr += 2;
-        } else {
-            blk_num = bptr[1];
-            bptr += 3;
+        if(is_extended) {
+            blk_num |= (uint16_t)bptr[2] << 8;
         }
+        bptr += is_extended ? 3 : 2;
 
         if(svc_idx >= service_num) {
             sf1 = 0xFF;
