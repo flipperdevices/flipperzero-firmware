@@ -4,6 +4,9 @@
   "description": "Template package for JS apps Flipper Zero",
   "bin": "index.js",
   "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
   "keywords": [
     "flipper",
     "flipper zero"
