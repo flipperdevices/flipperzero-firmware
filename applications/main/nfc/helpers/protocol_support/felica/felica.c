@@ -105,9 +105,7 @@ static void nfc_scene_read_success_on_enter_felica(NfcApp* instance) {
         if(data->workflow_type == FelicaLite) {
             bool all_unlocked = data->blocks_read == data->blocks_total;
             furi_string_cat_printf(
-                temp_str,
-                "\e#%s\n",
-                all_unlocked ? "All Blocks Are Unlocked" : "Some Blocks Are Locked");
+                temp_str, "\e#%s\n", all_unlocked ? "All Blocks Unlocked" : "Some Blocks Locked");
             nfc_render_felica_idm(data, NfcProtocolFormatTypeShort, temp_str);
             uint8_t* ck_data = instance->felica_auth->card_key.data;
             furi_string_cat_printf(temp_str, "Key:");
@@ -124,15 +122,6 @@ static void nfc_scene_read_success_on_enter_felica(NfcApp* instance) {
         instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
 
     furi_string_free(temp_str);
-}
-
-static bool nfc_scene_saved_menu_on_event_felica(NfcApp* instance, SceneManagerEvent event) {
-    if(event.type == SceneManagerEventTypeCustom && event.event == SubmenuIndexCommonEdit) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
-        return true;
-    }
-
-    return false;
 }
 
 static void nfc_scene_emulate_on_enter_felica(NfcApp* instance) {
@@ -194,7 +183,7 @@ const NfcProtocolSupportBase nfc_protocol_support_felica = {
     .scene_saved_menu =
         {
             .on_enter = nfc_protocol_support_common_on_enter_empty,
-            .on_event = nfc_scene_saved_menu_on_event_felica,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_save_name =
         {
@@ -204,6 +193,11 @@ const NfcProtocolSupportBase nfc_protocol_support_felica = {
     .scene_emulate =
         {
             .on_enter = nfc_scene_emulate_on_enter_felica,
+            .on_event = nfc_protocol_support_common_on_event_empty,
+        },
+    .scene_write =
+        {
+            .on_enter = nfc_protocol_support_common_on_enter_empty,
             .on_event = nfc_protocol_support_common_on_event_empty,
         },
 };

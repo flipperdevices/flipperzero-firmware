@@ -11,8 +11,21 @@ extern "C" {
 
 #define FELICA_POLLER_POLLING_FWT (200000U)
 
+// FeliCa spec section 4.4.3: 1 ≤ n ≤ 32
+#define FELICA_REQUEST_SERVICE_MAX_NODES (32U)
+
 #define FELICA_POLLER_CMD_POLLING_REQ_CODE  (0x00U)
 #define FELICA_POLLER_CMD_POLLING_RESP_CODE (0x01U)
+
+/** @brief Command classes, in the order of their maximum response time parameters in PMm. */
+typedef enum {
+    FelicaPollerCommandClassVariable, /**< e.g. Request Service, Search Service Code */
+    FelicaPollerCommandClassFixed, /**< e.g. Request Response */
+    FelicaPollerCommandClassMutualAuth,
+    FelicaPollerCommandClassRead,
+    FelicaPollerCommandClassWrite,
+    FelicaPollerCommandClassOther,
+} FelicaPollerCommandClass;
 
 typedef enum {
     FelicaPollerStateIdle,
@@ -46,6 +59,13 @@ struct FelicaPoller {
     uint8_t block_index;
     uint8_t systems_read;
     uint8_t systems_total;
+    // IDm/PMm obtained from the initial (wildcard) activation Polling - this is the
+    // card's own identity, distinct from whatever System is currently selected via
+    // instance->data->idm while traversing. Restored into instance->data on success/
+    // failure so the saved/displayed IDm always reflects the card, not the last
+    // System visited.
+    FelicaIDm card_idm;
+    FelicaPMm card_pmm;
     void* context;
 };
 
@@ -115,6 +135,19 @@ FelicaError felica_poller_frame_exchange(
     BitBuffer* rx_buffer,
     uint32_t fwt);
 
+/**
+ * @brief Get the timeout for a command, from the maximum response time the card declares in PMm.
+ *
+ * @param[in] instance pointer to the instance to be used in the transaction.
+ * @param[in] command_class class of the command.
+ * @param[in] units number of units the command operates on (e.g. nodes or blocks).
+ * @return timeout window in carrier cycles, never shorter than FELICA_POLLER_POLLING_FWT.
+ */
+uint32_t felica_poller_get_fwt(
+    const FelicaPoller* instance,
+    FelicaPollerCommandClass command_class,
+    uint8_t units);
+
 FelicaError felica_poller_list_service_by_cursor(
     FelicaPoller* instance,
     uint16_t cursor,
@@ -123,6 +156,12 @@ FelicaError felica_poller_list_service_by_cursor(
 FelicaError felica_poller_list_system_code(
     FelicaPoller* instance,
     FelicaListSystemCodeCommandResponse** response_ptr);
+
+FelicaError felica_poller_request_service(
+    FelicaPoller* instance,
+    const uint16_t* codes,
+    uint8_t code_count,
+    uint16_t* key_versions_out);
 
 #ifdef __cplusplus
 }

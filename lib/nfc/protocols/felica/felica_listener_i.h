@@ -97,12 +97,16 @@ struct FelicaListener {
     FelicaListenerState state;
     FelicaAuthentication auth;
     FelicaBlockData mc_shadow;
+    FelicaPMm pmm;
 
     uint8_t request_size_buf;
     uint8_t block_list_size;
     uint8_t requested_blocks[FELICA_LISTENER_READ_BLOCK_COUNT_MAX];
     uint8_t mac_calc_start;
     bool rc_written;
+    uint8_t mode;
+    // Index of the currently selected System
+    uint8_t current_system_idx;
 
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
@@ -125,14 +129,24 @@ void felica_listener_reset(FelicaListener* instance);
  */
 void felica_wcnt_increment(FelicaData* data);
 
-/** Compares IDm of card loaded for emulation with IDm from request.
+/** Selects the System addressed by the request IDm.
  *
  * @param      instance     pointer to the listener instance to be used.
  * @param      request_idm  pointer to IDm block from request structure.
  *
- * @return     True if IDms' are equal, otherwise false.
+ * @return     True if the IDm matches an emulated System, otherwise false.
  */
-bool felica_listener_check_idm(const FelicaListener* instance, const FelicaIDm* request_idm);
+bool felica_listener_select_system_by_idm(FelicaListener* instance, const FelicaIDm* request_idm);
+
+/** Computes the IDm for the currently selected System (instance->current_system_idx),
+ * derived from the card's base IDm by encoding the System index into the upper
+ * nibble of the first byte.
+ *
+ * @param      instance  pointer to the listener instance to be used.
+ *
+ * @return     IDm to use for responses/comparisons in the current System context.
+ */
+FelicaIDm felica_listener_get_current_idm(const FelicaListener* instance);
 
 /** This is the first request validation function.
  *

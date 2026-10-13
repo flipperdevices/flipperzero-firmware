@@ -19,6 +19,13 @@ extern "C" {
 #define FELICA_SERVICE_RW_ACCESS (0x0009U)
 #define FELICA_SERVICE_RO_ACCESS (0x000BU)
 
+#define FELICA_SYSTEM_NODE_CODE (0xFFFFU)
+
+/** @brief Placeholders for data that files older than format version 3 do not carry.
+ * Both match what a card returns for a node it does not know about. */
+#define FELICA_KEY_VERSION_UNKNOWN   (0xFFFFU)
+#define FELICA_AREA_END_CODE_UNKNOWN (0xFFFFU)
+
 #define FELICA_BLOCKS_TOTAL_COUNT    (28U)
 #define FELICA_BLOCK_INDEX_REG       (0x0EU)
 #define FELICA_BLOCK_INDEX_RC        (0x80U)
@@ -50,6 +57,10 @@ extern "C" {
 #define FELICA_TIME_SLOT_8      (0x07U)
 #define FELICA_TIME_SLOT_16     (0x0FU)
 
+#define FELICA_CMD_REQUEST_SERVICE          0x02
+#define FELICA_CMD_REQUEST_SERVICE_RESP     0x03
+#define FELICA_CMD_REQUEST_RESPONSE         0x04
+#define FELICA_CMD_REQUEST_RESPONSE_RESP    0x05
 #define FELICA_CMD_LIST_SERVICE_CODE        0x0A
 #define FELICA_CMD_LIST_SERVICE_CODE_RESP   0x0B
 #define FELICA_CMD_REQUEST_SYSTEM_CODE      0x0C
@@ -61,6 +72,20 @@ extern "C" {
 #define FELICA_SERVICE_ATTRIBUTE_CYCLIC         (0b001100)
 #define FELICA_SERVICE_ATTRIBUTE_PURSE          (0b010000)
 #define FELICA_SERVICE_ATTRIBUTE_PURSE_SUBFIELD (0b000110)
+
+#define FELICA_SF1_SUCCESS (0x00U)
+
+#define FELICA_SF2_SUCCESS                        (0x00U)
+#define FELICA_SF2_WARNING_REWRITE_LIMIT          (0x71U)
+#define FELICA_SF2_ERROR_SERVICE_COUNT            (0xA1U)
+#define FELICA_SF2_ERROR_BLOCK_COUNT              (0xA2U)
+#define FELICA_SF2_ERROR_BLOCK_LIST_SERVICE_ORDER (0xA3U)
+#define FELICA_SF2_ERROR_SERVICE_CODE             (0xA6U)
+#define FELICA_SF2_ERROR_BLOCK_LIST_ACCESS_MODE   (0xA7U)
+#define FELICA_SF2_ERROR_BLOCK_NUMBER             (0xA8U)
+#define FELICA_SF2_ERROR_MAC_BLOCKS_MIXED         (0xB0U)
+#define FELICA_SF2_ERROR_AUTHENTICATION_REQUIRED  (0xB1U)
+#define FELICA_SF2_ERROR_RC_MAC_WCNT              (0xB2U)
 
 /** @brief Type of possible Felica errors */
 typedef enum {
@@ -74,6 +99,7 @@ typedef enum {
     FelicaErrorProtocol,
     FelicaErrorTimeout,
     FelicaErrorFeatureUnsupported,
+    FelicaErrorIgnore,
 } FelicaError;
 
 typedef enum {
@@ -170,12 +196,15 @@ typedef union {
 typedef struct {
     uint16_t code;
     uint8_t attr;
+    uint16_t key_version;
 } FelicaService;
 
 typedef struct {
     uint16_t code;
+    uint16_t end_code;
     uint16_t first_idx;
     uint16_t last_idx;
+    uint16_t key_version;
 } FelicaArea;
 
 typedef struct {
@@ -187,6 +216,7 @@ typedef struct {
 typedef struct {
     uint8_t system_code_idx;
     uint16_t system_code;
+    uint16_t key_version;
     SimpleArray* services;
     SimpleArray* areas;
     SimpleArray* public_blocks;
