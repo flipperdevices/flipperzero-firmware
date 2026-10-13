@@ -86,6 +86,9 @@ bool subghz_chat_worker_start(
     furi_assert(!instance->worker_running);
     bool res = false;
 
+    subghz_tx_rx_worker_set_preset(
+        instance->subghz_txrx, FuriHalSubGhzPresetGFSK9_99KbAsync, NULL);
+
     if(subghz_tx_rx_worker_start(instance->subghz_txrx, device, frequency)) {
         furi_message_queue_reset(instance->event_queue);
         subghz_tx_rx_worker_set_callback_have_read(
