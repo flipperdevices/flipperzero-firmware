@@ -88,6 +88,7 @@ typedef enum {
     FuriHalNfcTechIso14443b, /**< Configure NFC HAL to use the ISO14443 (type B) technology. */
     FuriHalNfcTechIso15693, /**< Configure NFC HAL to use the ISO15693 technology. */
     FuriHalNfcTechFelica, /**< Configure NFC HAL to use the FeliCa technology. */
+    FuriHalNfcTechLegic, /**< Configure NFC HAL to use the LEGIC Prime technology. */
 
     FuriHalNfcTechNum, /**< Special value equal to the supported technologies count. Internal use. */
     FuriHalNfcTechInvalid, /**< Special value indicating the unconfigured state. Internal use. */
@@ -470,6 +471,97 @@ FuriHalNfcError furi_hal_nfc_felica_listener_set_sensf_res_data(
     const uint8_t* pmm,
     const uint8_t pmm_len,
     const uint16_t sys_code);
+
+/**
+ * @brief Set the length of the tag reply expected for the next frame.
+ *
+ * @param[in] bits number of reply bits, 0 if no reply is expected.
+ */
+void furi_hal_nfc_legic_poller_set_rx_bits(size_t bits);
+
+/**
+ * @brief Expect a LEGIC Prime write ACK as the reply to the next frame.
+ *
+ * The ACK is a single bit in the bit window in which the tag finished
+ * writing.  A frame queued with furi_hal_nfc_legic_poller_set_next() is sent
+ * 260 µs after the ACK, but only if the ACK came in bit window `window`
+ * (counted from 0 like reply bits), because the queued frame's keystream
+ * depends on it; otherwise, or if no ACK comes, the queued frame is dropped.
+ * Applies to the next exchange only.
+ *
+ * @param[in] window bit window the queued frame was built for.
+ */
+void furi_hal_nfc_legic_poller_set_rx_ack(size_t window);
+
+/**
+ * @brief Select the receiver gain for LEGIC Prime exchanges.
+ *
+ * Takes effect with the next frame sent by the poller's tx() (not with a
+ * frame queued by furi_hal_nfc_legic_poller_set_next()).
+ *
+ * @param[in] reduced true for the default first-stage gain reduction, false for full gain.
+ */
+void furi_hal_nfc_legic_poller_set_rx_reduced_gain(bool reduced);
+
+/**
+ * @brief Queue the LEGIC Prime reader frame that follows the next reply.
+ *
+ * Real tags only wait a few 99.1 µs slots for the reader's next frame, so it
+ * is sent from the receive path, 260 µs after the tag's reply ends (240 µs
+ * after a write ACK), before the reply is decoded.  The following poller tx()
+ * of the same frame then only waits for its reply, whose length is set with
+ * furi_hal_nfc_legic_poller_set_rx_bits() as for any other frame.
+ *
+ * @param[in] first first frame, LSB-first bits.
+ * @param[in] first_bits number of bits in the first frame.
+ * @param[in] second optional frame chained ~220 µs after the first (or NULL).
+ * @param[in] second_bits number of bits in the second frame.
+ */
+void furi_hal_nfc_legic_poller_set_next(
+    const uint8_t* first,
+    size_t first_bits,
+    const uint8_t* second,
+    size_t second_bits);
+
+/**
+ * @brief Check whether the queued LEGIC Prime frame went out in its slot.
+ *
+ * @returns true if it was sent and has not been claimed by tx() yet.
+ */
+bool furi_hal_nfc_legic_poller_next_sent(void);
+
+/**
+ * @brief Get when the last received LEGIC Prime reader frame started (first pause).
+ *
+ * @returns DWT cycle count.
+ */
+uint32_t furi_hal_nfc_legic_listener_get_frame_start(void);
+
+/**
+ * @brief Get when the last received LEGIC Prime reader frame ended (closing pause end).
+ *
+ * @returns DWT cycle count.
+ */
+uint32_t furi_hal_nfc_legic_listener_get_frame_end(void);
+
+/**
+ * @brief Get when the last LEGIC Prime tag reply ended.
+ *
+ * @returns DWT cycle count.
+ */
+uint32_t furi_hal_nfc_legic_listener_get_tx_end(void);
+
+/**
+ * @brief Delay the next LEGIC Prime tag reply.
+ *
+ * Applies to the next transmission only.  Replies normally start 330 µs (70
+ * subcarrier periods) after the reader's frame; a write ACK comes ~3.6 ms
+ * after it.
+ *
+ * @param[in] chips delay after the reader's closing pause, in 212 kHz
+ *            subcarrier periods (64/fc, 4.72 µs).
+ */
+void furi_hal_nfc_legic_listener_set_tx_delay(uint32_t chips);
 
 #ifdef __cplusplus
 }

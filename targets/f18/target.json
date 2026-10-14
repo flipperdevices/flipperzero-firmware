@@ -49,6 +49,7 @@
         "furi_hal_nfc_iso14443a.c",
         "furi_hal_nfc_iso14443b.c",
         "furi_hal_nfc_felica.c",
+        "furi_hal_nfc_legic.c",
         "furi_hal_rfid.c",
         "furi_hal_subghz.c"
     ],
