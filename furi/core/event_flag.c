@@ -4,6 +4,8 @@
 
 #include <FreeRTOS.h>
 #include <event_groups.h>
+#include <task.h>
+#include <timers.h>
 
 #include "event_loop_link_i.h"
 
@@ -18,6 +20,28 @@ struct FuriEventFlag {
 
 // IMPORTANT: container MUST be the FIRST struct member
 static_assert(offsetof(FuriEventFlag, container) == 0);
+
+/**
+ * Runs in timer daemon context. Sets the event group bits then notifies the
+ * event loop, so the loop sees the new bits when it runs (fixes ISR one-event-
+ * late delivery: see https://github.com/flipperdevices/flipperzero-firmware/issues/4336).
+ */
+static void
+    furi_event_flag_set_bits_and_notify_callback(void* pvParameter1, uint32_t ulParameter2) {
+    FuriEventFlag* instance = (FuriEventFlag*)pvParameter1;
+    EventBits_t bits = (EventBits_t)ulParameter2;
+
+    /* xEventGroupSetBits() ends in xTaskResumeAll(), which yields to any woken
+     * higher-priority task before returning. That task may free the instance
+     * (FuriApiLock is a FuriEventFlag), so notifying afterwards would touch
+     * freed memory. Suspending the scheduler here makes that inner resume
+     * nest instead of switching context, keeping the instance alive until we
+     * are done with it. */
+    vTaskSuspendAll();
+    (void)xEventGroupSetBits((EventGroupHandle_t)instance, bits);
+    furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventIn);
+    (void)xTaskResumeAll();
+}
 
 FuriEventFlag* furi_event_flag_alloc(void) {
     furi_check(!FURI_IS_IRQ_MODE());
@@ -51,8 +75,15 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
     FURI_CRITICAL_ENTER();
 
     if(FURI_IS_IRQ_MODE()) {
+        /* Defer set + notify to timer daemon so bits are visible when the event
+         * loop runs (xEventGroupSetBitsFromISR defers only the set; we notify
+         * from our pended callback after the set). */
         yield = pdFALSE;
-        if(xEventGroupSetBitsFromISR(hEventGroup, (EventBits_t)flags, &yield) == pdFAIL) {
+        if(xTimerPendFunctionCallFromISR(
+               furi_event_flag_set_bits_and_notify_callback,
+               (void*)instance,
+               (uint32_t)flags,
+               &yield) != pdPASS) {
             rflags = (uint32_t)FuriFlagErrorResource;
         } else {
             rflags = flags;
@@ -60,10 +91,9 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
         }
     } else {
         rflags = xEventGroupSetBits(hEventGroup, (EventBits_t)flags);
-    }
-
-    if(rflags & flags) {
-        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventIn);
+        if(rflags & flags) {
+            furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventIn);
+        }
     }
 
     FURI_CRITICAL_EXIT();
