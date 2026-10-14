@@ -1,0 +1,25 @@
+name: "Rerun Timed Out Workflow"
+
+on:
+  workflow_run:
+    workflows: ["Unit tests", "Updater test"]
+    types:
+      - completed
+
+jobs:
+  rerun_if_timed_out:
+    runs-on: ubuntu-latest
+    # Only run if the workflow concluded with "timed_out" and it's the first attempt.
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.run_attempt == 1 }}
+    steps:
+      - name: Rerun workflow due to timeout
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const runId = context.payload.workflow_run.id;
+            console.log(`Workflow run ${runId} timed out. Triggering rerun...`);
+            await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId
+            });
