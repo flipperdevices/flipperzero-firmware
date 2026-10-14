@@ -33,6 +33,16 @@
 #define MARKED_FREE(p) (((struct gc_cell*)(p))->head.word & 2)
 
 /*
+ * Helpers to read/write the free-list link through the same union member
+ * (`word`) that MARK()/UNMARK() use. Reading or writing a union member
+ * other than the last one stored into is unspecified behavior per
+ * ISO/IEC 9899 Annex J.1, so we always go through `word` and cast
+ * explicitly instead of using `head.link` directly.
+ */
+#define GC_LINK_GET(p) ((struct gc_cell*)(uintptr_t)((p)->head.word))
+#define GC_LINK_SET(p, v) ((p)->head.word = (uintptr_t)(v))
+
+/*
  * When each arena has that or less free cells, GC will be scheduled
  */
 #define GC_ARENA_CELLS_RESERVE 2
@@ -99,7 +109,7 @@ static struct gc_block* gc_new_block(struct gc_arena* a, size_t size) {
 
     for(cur = GC_CELL_OP(a, b->base, +, 0); cur < GC_CELL_OP(a, b->base, +, b->size);
         cur = GC_CELL_OP(a, cur, +, 1)) {
-        cur->head.link = a->free;
+        GC_LINK_SET(cur, a->free);
         a->free = cur;
     }
 
@@ -114,7 +124,7 @@ static int gc_arena_is_gc_needed(struct gc_arena* a) {
     struct gc_cell* r = a->free;
     int i;
 
-    for(i = 0; i <= GC_ARENA_CELLS_RESERVE; i++, r = r->head.link) {
+    for(i = 0; i <= GC_ARENA_CELLS_RESERVE; i++, r = GC_LINK_GET(r)) {
         if(r == NULL) {
             return 1;
         }
@@ -140,7 +150,7 @@ MJS_PRIVATE void* gc_alloc_cell(struct mjs* mjs, struct gc_arena* a) {
 
     UNMARK(r);
 
-    a->free = r->head.link;
+    a->free = GC_LINK_GET(r);
 
 #if MJS_MEMORY_STATS
     a->allocations++;
@@ -181,7 +191,7 @@ void gc_sweep(struct mjs* mjs, struct gc_arena* a, size_t start) {
     {
         struct gc_cell* next;
         for(cur = a->free; cur != NULL; cur = next) {
-            next = cur->head.link;
+            next = GC_LINK_GET(cur);
             MARK_FREE(cur);
         }
     }
@@ -230,7 +240,7 @@ void gc_sweep(struct mjs* mjs, struct gc_arena* a, size_t start) {
                 }
 
                 /* Add this cell to the `free` list */
-                cur->head.link = a->free;
+                GC_LINK_SET(cur, a->free);
                 a->free = cur;
                 freed_in_block++;
 #if MJS_MEMORY_STATS
