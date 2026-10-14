@@ -107,6 +107,12 @@ void furi_hal_nfc_timers_deinit(void);
 uint32_t furi_hal_nfc_get_irq(const FuriHalSpiBusHandle* handle);
 
 /**
+ * @brief Check whether a queued LEGIC Prime frame is on air (see
+ * furi_hal_nfc_legic_poller_set_next); trx_reset must not stop it.
+ */
+bool furi_hal_nfc_legic_poller_tx_in_flight(void);
+
+/**
  * @brief Wait until a specified type of interrupt occurs.
  *
  * @param[in,out] handle pointer to the SPI handle associated with the NFC chip.
