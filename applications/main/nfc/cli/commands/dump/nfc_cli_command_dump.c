@@ -18,6 +18,7 @@
 #include "protocols/st25tb/nfc_cli_dump_st25tb.h"
 #include "protocols/ntag4xx/nfc_cli_dump_ntag4xx.h"
 #include "protocols/type_4_tag/nfc_cli_dump_type_4_tag.h"
+#include "protocols/legic_prime/nfc_cli_dump_legic_prime.h"
 
 #include <datetime.h>
 #include <furi_hal_rtc.h>
@@ -97,6 +98,14 @@ NfcGenericCallback protocol_poller_callbacks[NfcProtocolNum] = {
     [NfcProtocolSt25tb] = nfc_cli_dump_poller_callback_st25tb,
     [NfcProtocolNtag4xx] = nfc_cli_dump_poller_callback_ntag4xx,
     [NfcProtocolType4Tag] = nfc_cli_dump_poller_callback_type_4_tag,
+    [NfcProtocolLegicPrime] = nfc_cli_dump_poller_callback_legic_prime,
+};
+
+// Read timeouts for protocols that take longer than NFC_CLI_DUMP_DEFAULT_TIMEOUT,
+// used unless --timeout is given.
+static const uint32_t protocol_read_timeouts[NfcProtocolNum] = {
+    // Two agreeing reads per byte: a MIM1024 takes ~5.5 s.
+    [NfcProtocolLegicPrime] = 20000,
 };
 
 static void nfc_cli_dump_generate_filename(FuriString* file_path) {
@@ -173,8 +182,12 @@ static bool nfc_cli_dump_card(NfcCliDumpContext* instance) {
     instance->poller = nfc_poller_alloc(instance->nfc, instance->desired_protocol);
     NfcGenericCallback callback = protocol_poller_callbacks[instance->desired_protocol];
     if(callback) {
+        uint32_t timeout = instance->timeout;
+        if(!instance->timeout_set && protocol_read_timeouts[instance->desired_protocol]) {
+            timeout = protocol_read_timeouts[instance->desired_protocol];
+        }
         nfc_poller_start(instance->poller, callback, instance);
-        FuriStatus status = furi_semaphore_acquire(instance->sem_done, instance->timeout);
+        FuriStatus status = furi_semaphore_acquire(instance->sem_done, timeout);
 
         if(status == FuriStatusErrorTimeout) instance->result = NfcCliDumpErrorTimeout;
         nfc_poller_stop(instance->poller);
@@ -225,6 +238,7 @@ static const NfcProtocolNameValuePair supported_protocols[] = {
     {.name = "st25", .value = NfcProtocolSt25tb},
     {.name = "ntag4", .value = NfcProtocolNtag4xx},
     {.name = "t4t", .value = NfcProtocolType4Tag},
+    {.name = "legic", .value = NfcProtocolLegicPrime},
 };
 
 static bool nfc_cli_dump_parse_protocol(FuriString* value, void* output) {
@@ -272,6 +286,7 @@ bool nfc_cli_dump_parse_timeout(FuriString* value, NfcCliActionContext* output) 
     NfcCliDumpContext* ctx = output;
 
     StrintParseError err = strint_to_uint32(furi_string_get_cstr(value), NULL, &ctx->timeout, 10);
+    ctx->timeout_set = true;
     return err == StrintParseNoError;
 }
 

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,88.4,,
+Version,+,88.5,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
@@ -162,6 +162,9 @@ Header,+,lib/nfc/protocols/iso14443_4b/iso14443_4b_poller.h,,
 Header,+,lib/nfc/protocols/iso15693_3/iso15693_3.h,,
 Header,+,lib/nfc/protocols/iso15693_3/iso15693_3_listener.h,,
 Header,+,lib/nfc/protocols/iso15693_3/iso15693_3_poller.h,,
+Header,+,lib/nfc/protocols/legic_prime/legic_prime.h,,
+Header,+,lib/nfc/protocols/legic_prime/legic_prime_poller.h,,
+Header,+,lib/nfc/protocols/legic_prime/legic_prime_poller_sync.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic_listener.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic_poller.h,,
@@ -2328,6 +2331,28 @@ Function,-,ldexp,double,"double, int"
 Function,-,ldexpf,float,"float, int"
 Function,-,ldexpl,long double,"long double, int"
 Function,-,ldiv,ldiv_t,"long, long"
+Function,+,legic_prime_alloc,LegicPrimeData*,
+Function,+,legic_prime_copy,void,"LegicPrimeData*, const LegicPrimeData*"
+Function,+,legic_prime_free,void,LegicPrimeData*
+Function,+,legic_prime_get_base_data,LegicPrimeData*,const LegicPrimeData*
+Function,+,legic_prime_get_dcf,uint16_t,const LegicPrimeData*
+Function,+,legic_prime_get_device_name,const char*,"const LegicPrimeData*, NfcDeviceNameType"
+Function,+,legic_prime_get_mem_size,uint16_t,LegicPrimeType
+Function,+,legic_prime_get_segment,_Bool,"const LegicPrimeData*, size_t, LegicPrimeSegment*"
+Function,+,legic_prime_get_token_type,LegicPrimeTokenType,const LegicPrimeData*
+Function,+,legic_prime_get_token_type_name,const char*,LegicPrimeTokenType
+Function,+,legic_prime_get_uid,const uint8_t*,"const LegicPrimeData*, size_t*"
+Function,+,legic_prime_is_equal,_Bool,"const LegicPrimeData*, const LegicPrimeData*"
+Function,+,legic_prime_load,_Bool,"LegicPrimeData*, FlipperFormat*, uint32_t"
+Function,+,legic_prime_poller_read,LegicPrimeError,LegicPrimePoller*
+Function,+,legic_prime_poller_setup,LegicPrimeError,"LegicPrimePoller*, uint8_t"
+Function,+,legic_prime_poller_sync_read,LegicPrimeError,"Nfc*, LegicPrimeData*"
+Function,+,legic_prime_poller_sync_write,LegicPrimeError,"Nfc*, uint16_t, const uint8_t*, size_t"
+Function,+,legic_prime_reset,void,LegicPrimeData*
+Function,+,legic_prime_save,_Bool,"const LegicPrimeData*, FlipperFormat*"
+Function,+,legic_prime_set_uid,_Bool,"LegicPrimeData*, const uint8_t*, size_t"
+Function,+,legic_prime_verify,_Bool,"LegicPrimeData*, const FuriString*"
+Function,+,legic_prime_verify_mcc,_Bool,const LegicPrimeData*
 Function,+,lfrfid_dict_file_load,ProtocolId,"ProtocolDict*, const char*"
 Function,+,lfrfid_dict_file_save,_Bool,"ProtocolDict*, ProtocolId, const char*"
 Function,+,lfrfid_raw_file_alloc,LFRFIDRawFile*,Storage*
@@ -4143,6 +4168,7 @@ Variable,+,message_sound_off,const NotificationMessage,
 Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
 Variable,-,nfc_device_felica,const NfcDeviceBase,
+Variable,+,nfc_device_legic_prime,const NfcDeviceBase,
 Variable,-,nfc_device_mf_classic,const NfcDeviceBase,
 Variable,-,nfc_device_mf_desfire,const NfcDeviceBase,
 Variable,-,nfc_device_mf_plus,const NfcDeviceBase,
