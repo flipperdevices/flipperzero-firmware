@@ -20,6 +20,9 @@
 #include <nfc/protocols/slix/slix_i.h>
 #include <nfc/protocols/slix/slix_poller.h>
 #include <nfc/protocols/slix/slix_poller_i.h>
+#include <nfc/protocols/legic_prime/legic_prime.h>
+#include <nfc/protocols/legic_prime/legic_prime_crc.h>
+#include <nfc/protocols/legic_prime/legic_prime_prng.h>
 
 #include <nfc/nfc_poller.h>
 
@@ -1014,6 +1017,117 @@ MU_TEST(slix_set_password_access_all_passwords_cap) {
         EXT_PATH("unit_tests/nfc/Slix_cap_accept_all_pass.nfc"), 0x12341234, false);
 }
 
+// Reference values from Proxmark3's common/legic_prng.c and common/crc.c.
+static uint32_t legic_prime_test_keystream(uint8_t iv, int skip, uint8_t bits) {
+    legic_prime_prng_init(iv);
+    legic_prime_prng_forward(skip);
+    uint32_t value = 0;
+    for(uint8_t i = 0; i < bits; i++) {
+        value |= (uint32_t)legic_prime_prng_get_bit() << i;
+        legic_prime_prng_forward(1);
+    }
+    return value;
+}
+
+MU_TEST(legic_prime_prng_test) {
+    mu_assert_int_eq(0x82B50098, legic_prime_test_keystream(0x55, 0, 32));
+    mu_assert_int_eq(0xAA13D912, legic_prime_test_keystream(0x01, 0, 32));
+    mu_assert_int_eq(0x3D7AD81F, legic_prime_test_keystream(0x7F, 0, 32));
+    mu_assert_int_eq(0x0093, legic_prime_test_keystream(0x55, 100, 16));
+}
+
+MU_TEST(legic_prime_crc_test) {
+    const uint8_t uid1[] = {0x81, 0xAB, 0x2C, 0x87};
+    const uint8_t uid2[] = {0x11, 0x22, 0x33, 0x44};
+    const uint8_t uid3[] = {0xA1, 0xB2, 0xC3, 0xD4};
+    mu_assert_int_eq(0x2D, legic_prime_crc8(uid1, sizeof(uid1)));
+    mu_assert_int_eq(0xD4, legic_prime_crc8(uid2, sizeof(uid2)));
+    mu_assert_int_eq(0xFD, legic_prime_crc8(uid3, sizeof(uid3)));
+
+    // READ command (address << 1 | 1) or WRITE (address << 1), then the byte.
+    mu_assert_int_eq(0x4, legic_prime_crc4((5 << 1) | 1, 9, 0x2D));
+    mu_assert_int_eq(0x3, legic_prime_crc4((0 << 1) | 1, 6, 0x81));
+    mu_assert_int_eq(0x7, legic_prime_crc4(600 << 1, 11, 0xA1));
+}
+
+// MIM256 IM-S card with two segments; the second one has a corrupted header
+// CRC.  Proxmark3 `hf legic info` decodes it the same way.
+static const uint8_t legic_prime_test_ims256[] = {
+    0x11, 0x22, 0x33, 0x44, 0xD4, 0x05, 0x00, 0x9F, 0xFF, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
+    0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0xFC, 0x94, 0xDE, 0xE4, 0x92, 0xC4, 0xC5, 0xC6, 0xC7, 0xC0,
+    0xC1, 0xC2, 0xC3, 0xCC, 0xCD, 0xCE, 0xCF, 0xC8, 0xC9, 0xCA, 0xCB, 0xC4, 0xC5, 0xC6, 0xC7, 0xC0,
+    0xC1, 0xC2, 0xC3, 0xCC, 0xCD, 0xCE, 0xCF, 0xC8, 0xC9, 0xCA, 0xCB, 0xC4, 0xC5, 0xC6, 0xCA, 0x14,
+    0xD4, 0x54, 0x2D, 0xF4, 0xF5, 0xF6, 0xF7, 0xF0, 0xF1, 0xF2, 0xF3, 0xFC, 0xFD, 0xFE, 0xFF, 0xF8,
+    0xF9, 0xFA, 0xFB, 0xF4, 0xF5, 0xF6, 0xF7, 0xF0, 0xF1, 0xF2, 0xF3, 0xFC,
+};
+
+static LegicPrimeData* legic_prime_test_card(void) {
+    LegicPrimeData* data = legic_prime_alloc();
+    data->type = LegicPrimeTypeMim256;
+    data->data_size = LEGIC_PRIME_MEM_SIZE_MIM256;
+    // The unused area is 00 obfuscated with the MCC (0xD4).
+    memset(data->data, 0xD4, data->data_size);
+    memcpy(data->data, legic_prime_test_ims256, sizeof(legic_prime_test_ims256));
+    return data;
+}
+
+MU_TEST(legic_prime_layout_test) {
+    LegicPrimeData* data = legic_prime_test_card();
+    LegicPrimeSegment seg;
+
+    mu_assert(legic_prime_verify_mcc(data), "MCC\r\n");
+    mu_assert_int_eq(5, legic_prime_get_dcf(data));
+    mu_assert_int_eq(LegicPrimeTokenTypeImSegmented, legic_prime_get_token_type(data));
+
+    mu_assert(legic_prime_get_segment(data, 0, &seg), "segment 0 missing\r\n");
+    mu_assert_int_eq(22, seg.offset);
+    mu_assert_int_eq(40, seg.length);
+    mu_assert(seg.valid && !seg.last && !seg.rd && seg.crc_ok, "segment 0 flags\r\n");
+    mu_assert_int_eq(10, seg.wrp);
+    mu_assert_int_eq(3, seg.wrc);
+
+    mu_assert(legic_prime_get_segment(data, 1, &seg), "segment 1 missing\r\n");
+    mu_assert_int_eq(62, seg.offset);
+    mu_assert_int_eq(30, seg.length);
+    mu_assert(seg.valid && seg.last && seg.rd && !seg.crc_ok, "segment 1 flags\r\n");
+    mu_assert_int_eq(0, seg.wrp);
+    mu_assert_int_eq(0, seg.wrc);
+
+    mu_assert(!legic_prime_get_segment(data, 2, &seg), "segment past the last one\r\n");
+
+    // Other token types, from the DCF and bytes 7-8.
+    data->data[5] = 0xFF;
+    data->data[6] = 0xFF;
+    mu_assert_int_eq(LegicPrimeTokenTypeNewMedia, legic_prime_get_token_type(data));
+    mu_assert(!legic_prime_get_segment(data, 0, &seg), "segments on new media\r\n");
+    data->data[5] = 0x34;
+    data->data[6] = 0x12;
+    data->data[7] = 0x25;
+    mu_assert_int_eq(LegicPrimeTokenTypeIm, legic_prime_get_token_type(data));
+    data->data[5] = 0x10;
+    data->data[6] = 0xF0;
+    mu_assert_int_eq(LegicPrimeTokenTypeIam, legic_prime_get_token_type(data));
+    data->data[5] = 0x40;
+    mu_assert_int_eq(LegicPrimeTokenTypeSam, legic_prime_get_token_type(data));
+    data->data[5] = 0x75;
+    mu_assert_int_eq(LegicPrimeTokenTypeGam, legic_prime_get_token_type(data));
+    data->data[6] = 0xEC;
+    mu_assert_int_eq(LegicPrimeTokenTypeXam, legic_prime_get_token_type(data));
+
+    legic_prime_free(data);
+}
+
+MU_TEST(legic_prime_file_test) {
+    NfcDevice* nfc_device = nfc_device_alloc();
+    LegicPrimeData* data = legic_prime_test_card();
+
+    nfc_device_set_data(nfc_device, NfcProtocolLegicPrime, data);
+    nfc_test_save_and_load(nfc_device);
+
+    legic_prime_free(data);
+    nfc_device_free(nfc_device);
+}
+
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
@@ -1066,6 +1180,11 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(slix_set_password_default_cap_correct_pass);
     MU_RUN_TEST(slix_set_password_default_cap_incorrect_pass);
     MU_RUN_TEST(slix_set_password_access_all_passwords_cap);
+
+    MU_RUN_TEST(legic_prime_prng_test);
+    MU_RUN_TEST(legic_prime_crc_test);
+    MU_RUN_TEST(legic_prime_layout_test);
+    MU_RUN_TEST(legic_prime_file_test);
 
     nfc_test_free();
 }
