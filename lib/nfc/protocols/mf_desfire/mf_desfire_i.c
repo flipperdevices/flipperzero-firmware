@@ -275,9 +275,7 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
                 printf("\r\n");
                 break;
             }
-            if(additional_access_rights_len >
-               MF_DESFIRE_MAX_KEYS * sizeof(MfDesfireFileAccessRights))
-                break;
+            if(additional_access_rights_len > MF_DESFIRE_MAX_KEYS - 1) break;
 
             memcpy(
                 &file_settings_temp.access_rights[1],
@@ -455,6 +453,7 @@ bool mf_desfire_file_settings_load(
         if(!flipper_format_get_value_count(ff, furi_string_get_cstr(key), &access_rights_len))
             break;
         if((access_rights_len == 0) || ((access_rights_len % 2) != 0)) break;
+        if(access_rights_len > sizeof(data->access_rights)) break;
         if(!flipper_format_read_hex(
                ff, furi_string_get_cstr(key), (uint8_t*)&data->access_rights, access_rights_len))
             break;
