@@ -1,18 +1,14 @@
 /*
- * LEGIC Prime CRC implementations.
+ * LEGIC Prime CRCs.  The CRC-4 is derived from Proxmark3: crc_update() in
+ * common/crc.c, with the parameters of armsrc/legicrf.c calc_crc4().
  *
- * Logic copied from Proxmark3 (common/crc.c crc_update + crc_update2 +
- * armsrc/legicrf.c:313 init values). Stripped to the two specific CRCs we
- * need and inlined for clarity — we don't need the full generic CRC engine.
+ * Copyright (C) Proxmark3 contributors. See AUTHORS.md for details
+ * (https://github.com/RfidResearchGroup/proxmark3).
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 #include "legic_prime_crc.h"
 
-static uint8_t reflect8(uint8_t b) {
-    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-    return b;
-}
+#include <lib/bit_lib/bit_lib.h>
 
 uint8_t legic_prime_crc4(uint32_t cmd, uint8_t cmd_sz, uint8_t value) {
     // Equivalent to Proxmark crc_init(&legic_crc, 4, 0x19>>1, 0x05, 0)
@@ -34,21 +30,7 @@ uint8_t legic_prime_crc4(uint32_t cmd, uint8_t cmd_sz, uint8_t value) {
 }
 
 uint8_t legic_prime_crc8(const uint8_t* buf, size_t size) {
-    // Equivalent to Proxmark CRC8Legic: poly=0x63, init=0x55, refin=true,
-    // refout=true, followed by reflect8() on the result. The two reflections
-    // on output cancel, so we compute the MSB-first form on reflected input
-    // bytes and don't reflect the output.
-    const uint8_t poly = 0x63u;
-    uint8_t state = reflect8(0x55u);
-    for(size_t i = 0; i < size; i++) {
-        state ^= reflect8(buf[i]);
-        for(int bit = 0; bit < 8; bit++) {
-            if(state & 0x80u) {
-                state = (uint8_t)((state << 1) ^ poly);
-            } else {
-                state = (uint8_t)(state << 1);
-            }
-        }
-    }
-    return state;
+    // Proxmark3 CRC8Legic() reflects the init along with the input (0x55 ->
+    // 0xAA) and reflects the result twice, which cancels out.
+    return bit_lib_crc8(buf, size, 0x63, 0xAA, true, false, 0);
 }
