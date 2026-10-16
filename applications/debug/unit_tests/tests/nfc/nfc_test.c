@@ -1269,6 +1269,54 @@ MU_TEST(legic_prime_write_range_test) {
     }
 }
 
+MU_TEST(legic_prime_read_range_test) {
+    // The requested range clamped to the card; size 0 is the whole card.
+    static const struct {
+        LegicPrimeType type;
+        uint16_t offset;
+        uint16_t size;
+        uint16_t start;
+        uint16_t end;
+    } cases[] = {
+        {LegicPrimeTypeMim256, 0, 0, 0, 256},
+        {LegicPrimeTypeMim256, 22, 16, 22, 38},
+        {LegicPrimeTypeMim256, 250, 16, 250, 256},
+        {LegicPrimeTypeMim256, 300, 16, 256, 256},
+        {LegicPrimeTypeMim256, 5, 0xFFFF, 5, 256},
+        // A corrected type changes the card's size, and the range with it.
+        {LegicPrimeTypeMim22, 0, 0, 0, 22},
+        {LegicPrimeTypeMim22, 20, 16, 20, 22},
+    };
+    LegicPrimePoller poller = {};
+    poller.data = legic_prime_alloc();
+    poller.progress = malloc(LEGIC_PRIME_MEM_MAX);
+    for(size_t i = 0; i < COUNT_OF(cases); i++) {
+        legic_prime_set_type(poller.data, cases[i].type);
+        poller.read_offset = cases[i].offset;
+        poller.read_size = cases[i].size;
+        // A previous read's state, which the reset must clear.
+        poller.done_count = 7;
+        poller.uid_known = true;
+        poller.read_cursor = 3;
+        memset(poller.progress, LEGIC_PRIME_POLLER_DONE, LEGIC_PRIME_MEM_MAX);
+        memset(poller.data->data, 0xA5, sizeof(poller.data->data));
+
+        legic_prime_poller_read_reset(&poller);
+        mu_assert_int_eq(cases[i].start, poller.read_start);
+        mu_assert_int_eq(cases[i].end, poller.read_end);
+        mu_assert_int_eq(0, poller.done_count);
+        mu_assert(!poller.uid_known, "UID still known after a reset\r\n");
+        // The next read is of the first byte of the range.
+        mu_assert_int_eq(cases[i].end - 1, poller.read_cursor);
+        for(size_t a = 0; a < LEGIC_PRIME_MEM_MAX; a++) {
+            mu_assert_int_eq(0, poller.progress[a]);
+            mu_assert_int_eq(0, poller.data->data[a]);
+        }
+    }
+    free(poller.progress);
+    legic_prime_free(poller.data);
+}
+
 static void legic_prime_file_test(LegicPrimeType type) {
     NfcDevice* nfc_device = nfc_device_alloc();
     LegicPrimeData* data = legic_prime_alloc();
@@ -1354,6 +1402,7 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(legic_prime_layout_test);
     MU_RUN_TEST(legic_prime_set_uid_test);
     MU_RUN_TEST(legic_prime_write_range_test);
+    MU_RUN_TEST(legic_prime_read_range_test);
     MU_RUN_TEST(legic_prime_mim22_file_test);
     MU_RUN_TEST(legic_prime_mim256_file_test);
     MU_RUN_TEST(legic_prime_mim1024_file_test);
