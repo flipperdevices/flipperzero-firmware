@@ -103,13 +103,16 @@ static void legic_prime_poller_load_tx(LegicPrimePoller* instance, const LegicPr
     bit_buffer_copy_bits(instance->tx_buffer, bytes, ex->tx_bits);
 }
 
-// Send ex (or claim it if the HAL already sent it) and decode its reply.
+// Send ex and decode its reply.  A queued ex that the HAL already sent
+// (claim) is only claimed: its reply is on the way.
 static LegicPrimeError legic_prime_poller_exchange(
     LegicPrimePoller* instance,
     const LegicPrimeExchange* ex,
+    bool claim,
     uint32_t* reply) {
     legic_prime_poller_load_tx(instance, ex);
     furi_hal_nfc_legic_poller_set_rx_bits(ex->rx_bits);
+    if(claim) furi_hal_nfc_legic_poller_claim_next();
 
     NfcError nerr = nfc_poller_trx(
         instance->nfc, instance->tx_buffer, instance->rx_buffer, LEGIC_PRIME_FWT_FC);
@@ -128,11 +131,13 @@ LegicPrimeError legic_prime_poller_setup(LegicPrimePoller* instance, uint8_t iv)
 
     // Hold the carrier briefly to power the tag (Proxmark uses ~5 ms).
     furi_delay_ms(5);
+    // Nothing of an earlier session may go out behind the type reply.
+    furi_hal_nfc_legic_poller_cancel_next();
 
     LegicPrimeExchange iv_ex;
     legic_prime_poller_build_iv(&iv_ex, iv);
     uint32_t reply = 0;
-    LegicPrimeError ret = legic_prime_poller_exchange(instance, &iv_ex, &reply);
+    LegicPrimeError ret = legic_prime_poller_exchange(instance, &iv_ex, false, &reply);
     if(ret != LegicPrimeErrorNone) return ret;
 
     LegicPrimeType type;
@@ -235,7 +240,7 @@ static LegicPrimeError
         legic_prime_poller_queue(&next, NULL);
 
         uint32_t reply = 0;
-        const LegicPrimeError ret = legic_prime_poller_exchange(instance, cur, &reply);
+        const LegicPrimeError ret = legic_prime_poller_exchange(instance, cur, true, &reply);
         if(ret != LegicPrimeErrorNone) return ret;
         if(legic_prime_poller_read_crc_ok(instance, cur, reply)) {
             legic_prime_poller_record_read(&progress[cur->addr], &uid[cur->addr], reply & 0xFF);
@@ -259,6 +264,9 @@ static LegicPrimeError
     legic_prime_poller_start_session(LegicPrimePoller* instance, LegicPrimeExchange* cur) {
     // Hold the carrier briefly to power the tag, as for the detection.
     furi_delay_ms(5);
+    // A frame the previous session left queued or unclaimed would go out
+    // behind the type reply on that session's keystream.
+    furi_hal_nfc_legic_poller_cancel_next();
 
     const LegicPrimeType type = instance->data->type;
     LegicPrimeExchange iv_ex, ack;
@@ -269,7 +277,7 @@ static LegicPrimeError
     legic_prime_poller_queue(&ack, cur);
 
     uint32_t reply = 0;
-    LegicPrimeError ret = legic_prime_poller_exchange(instance, &iv_ex, &reply);
+    LegicPrimeError ret = legic_prime_poller_exchange(instance, &iv_ex, false, &reply);
     if(ret != LegicPrimeErrorNone) return ret;
     if((reply & LEGIC_PRIME_TYPE_MASK) != legic_prime_type_code(type)) {
         // ACK and READ were built for the stored type: end the session.
@@ -340,6 +348,7 @@ static LegicPrimeError legic_prime_poller_write_exchange(
     legic_prime_poller_load_tx(instance, ex);
     furi_hal_nfc_legic_poller_set_rx_bits(LEGIC_PRIME_WRITE_ACK_WINDOW_BITS);
     furi_hal_nfc_legic_poller_set_rx_ack(next_window);
+    furi_hal_nfc_legic_poller_claim_next();
     NfcError nerr = nfc_poller_trx(
         instance->nfc, instance->tx_buffer, instance->rx_buffer, LEGIC_PRIME_WRITE_FWT_FC);
     if(nerr == NfcErrorTimeout) return LegicPrimeErrorNoAck;
@@ -375,7 +384,7 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
         instance, &next, instance->write_pos, LEGIC_PRIME_STEPS_AFTER_REPLY);
     legic_prime_poller_queue(&next, NULL);
     uint32_t reply = 0;
-    ret = legic_prime_poller_exchange(instance, &cur, &reply);
+    ret = legic_prime_poller_exchange(instance, &cur, true, &reply);
     if(ret != LegicPrimeErrorNone) return ret;
     cur = next;
     if(!furi_hal_nfc_legic_poller_next_sent()) return LegicPrimeErrorTimeout;
@@ -514,7 +523,7 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
             instance->read_cursor = next_addr;
         }
 
-        ret = legic_prime_poller_exchange(instance, &cur, &reply);
+        ret = legic_prime_poller_exchange(instance, &cur, true, &reply);
         if(ret != LegicPrimeErrorNone) return ret;
 
         uint8_t* byte_progress = &progress[cur.addr];
