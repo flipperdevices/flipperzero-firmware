@@ -8,6 +8,9 @@
 
 #define TAG "UsbUartNus"
 
+// Nordic UART Service UUIDs and characteristic definitions:
+// https://nrfconnectdocs.nordicsemi.com/ncs/latest/nrf/libraries/bluetooth/services/nus.html
+
 /* STM32WB represents 128-bit UUIDs least significant byte first. */
 #define USB_UART_NUS_UUID(value) \
     {0x9e,                       \
