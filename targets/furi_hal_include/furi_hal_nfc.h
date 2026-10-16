@@ -566,25 +566,31 @@ void furi_hal_nfc_legic_poller_claim_next(void);
 void furi_hal_nfc_legic_poller_cancel_next(void);
 
 /**
- * @brief Get when the last received LEGIC Prime reader frame started (first pause).
+ * @brief Set the LEGIC Prime tag's keystream reference to the end of the last reader frame.
  *
- * @returns DWT cycle count.
+ * The tag steps its keystream once per 99.1 µs slot while it waits for the
+ * reader.  The protocol counts those slots from a reference point it sets
+ * here or with furi_hal_nfc_legic_listener_set_ref_to_tx_end(), and reads
+ * the time since it with furi_hal_nfc_legic_listener_get_elapsed_fc().
+ *
+ * @param[in] extra_fc offset after the end of the frame's closing pause, in carrier cycles (1/fc).
  */
-uint32_t furi_hal_nfc_legic_listener_get_frame_start(void);
+void furi_hal_nfc_legic_listener_set_ref_to_frame_end(uint32_t extra_fc);
 
 /**
- * @brief Get when the last received LEGIC Prime reader frame ended (closing pause end).
+ * @brief Set the LEGIC Prime tag's keystream reference to the end of its last reply.
  *
- * @returns DWT cycle count.
+ * The end is nominal: the reply's delay after the reader's frame plus 99.1 µs
+ * per bit, regardless of when the modulation actually started.
  */
-uint32_t furi_hal_nfc_legic_listener_get_frame_end(void);
+void furi_hal_nfc_legic_listener_set_ref_to_tx_end(void);
 
 /**
- * @brief Get when the last LEGIC Prime tag reply ended.
+ * @brief Get the time from the keystream reference to the start of the last reader frame.
  *
- * @returns DWT cycle count.
+ * @returns carrier cycles (1/fc), modulo one cycle counter wrap (~67 s).
  */
-uint32_t furi_hal_nfc_legic_listener_get_tx_end(void);
+uint32_t furi_hal_nfc_legic_listener_get_elapsed_fc(void);
 
 /**
  * @brief Delay the next LEGIC Prime tag reply.

@@ -841,11 +841,17 @@ typedef struct {
     size_t rx_bits;
     uint32_t t_frame_start;
     uint32_t t_frame_end;
-    uint32_t t_tx_end;
+    uint32_t t_tx_end; // nominal, without TX_OFFSET
+    uint32_t t_ref; // keystream reference, chosen by the protocol
     uint32_t tx_delay_chips; // one-shot reply delay override, 0 = default
 } FuriHalNfcLegicListener;
 
 static FuriHalNfcLegicListener* furi_hal_nfc_legic_listener = NULL;
+
+static uint32_t legic_fc_to_cycles(uint32_t fc) {
+    const uint64_t cpu_hz = (uint64_t)furi_hal_cortex_instructions_per_microsecond() * 1000000U;
+    return (uint32_t)(fc * cpu_hz / FURI_HAL_NFC_CARRIER_HZ);
+}
 
 static void furi_hal_nfc_legic_listener_edge_isr(void* context) {
     FuriHalNfcLegicListener* l = context;
@@ -921,19 +927,25 @@ static FuriHalNfcError furi_hal_nfc_legic_listener_deinit(const FuriHalSpiBusHan
     return FuriHalNfcErrorNone;
 }
 
-uint32_t furi_hal_nfc_legic_listener_get_frame_start(void) {
-    furi_check(furi_hal_nfc_legic_listener);
-    return furi_hal_nfc_legic_listener->t_frame_start;
+void furi_hal_nfc_legic_listener_set_ref_to_frame_end(uint32_t extra_fc) {
+    FuriHalNfcLegicListener* l = furi_hal_nfc_legic_listener;
+    furi_check(l);
+    l->t_ref = l->t_frame_end + legic_fc_to_cycles(extra_fc);
 }
 
-uint32_t furi_hal_nfc_legic_listener_get_frame_end(void) {
-    furi_check(furi_hal_nfc_legic_listener);
-    return furi_hal_nfc_legic_listener->t_frame_end;
+void furi_hal_nfc_legic_listener_set_ref_to_tx_end(void) {
+    FuriHalNfcLegicListener* l = furi_hal_nfc_legic_listener;
+    furi_check(l);
+    l->t_ref = l->t_tx_end;
 }
 
-uint32_t furi_hal_nfc_legic_listener_get_tx_end(void) {
-    furi_check(furi_hal_nfc_legic_listener);
-    return furi_hal_nfc_legic_listener->t_tx_end;
+uint32_t furi_hal_nfc_legic_listener_get_elapsed_fc(void) {
+    FuriHalNfcLegicListener* l = furi_hal_nfc_legic_listener;
+    furi_check(l);
+    // Subtract in cycles first, so a cycle counter wrap in between cancels.
+    const uint64_t cycles = (uint32_t)(l->t_frame_start - l->t_ref);
+    const uint64_t cpu_hz = (uint64_t)furi_hal_cortex_instructions_per_microsecond() * 1000000U;
+    return (uint32_t)(cycles * FURI_HAL_NFC_CARRIER_HZ / cpu_hz);
 }
 
 void furi_hal_nfc_legic_listener_set_tx_delay(uint32_t chips) {

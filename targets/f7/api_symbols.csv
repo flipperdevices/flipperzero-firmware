@@ -1532,9 +1532,9 @@ Function,+,furi_hal_nfc_iso14443a_poller_tx_custom_parity,FuriHalNfcError,"const
 Function,+,furi_hal_nfc_iso14443a_rx_sdd_frame,FuriHalNfcError,"uint8_t*, size_t, size_t*"
 Function,+,furi_hal_nfc_iso14443a_tx_sdd_frame,FuriHalNfcError,"const uint8_t*, size_t"
 Function,+,furi_hal_nfc_iso15693_listener_tx_sof,FuriHalNfcError,
-Function,-,furi_hal_nfc_legic_listener_get_frame_end,uint32_t,
-Function,-,furi_hal_nfc_legic_listener_get_frame_start,uint32_t,
-Function,-,furi_hal_nfc_legic_listener_get_tx_end,uint32_t,
+Function,-,furi_hal_nfc_legic_listener_get_elapsed_fc,uint32_t,
+Function,-,furi_hal_nfc_legic_listener_set_ref_to_frame_end,void,uint32_t
+Function,-,furi_hal_nfc_legic_listener_set_ref_to_tx_end,void,
 Function,-,furi_hal_nfc_legic_listener_set_tx_delay,void,uint32_t
 Function,-,furi_hal_nfc_legic_poller_cancel_next,void,
 Function,-,furi_hal_nfc_legic_poller_claim_next,void,
