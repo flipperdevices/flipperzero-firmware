@@ -118,6 +118,40 @@ static void nfc_cli_legic_wrbl_free_ctx(NfcCliActionContext* ctx) {
     free(instance);
 }
 
+// The tag acknowledges a WRITE with one unencrypted bit: read the range back
+// to tell whether the card holds the data.
+static void nfc_cli_legic_wrbl_verify(const NfcCliLegicWrblContext* instance) {
+    LegicPrimeData* card = legic_prime_alloc();
+    size_t total = 0;
+    LegicPrimeError error = legic_prime_poller_sync_read_range(
+        instance->nfc, instance->offset, instance->size, card, NULL, &total);
+    if(error != LegicPrimeErrorNone) {
+        printf(
+            ANSI_FG_RED "Written (acknowledged), but the verify read failed: %s\r\n" ANSI_RESET,
+            nfc_cli_legic_get_error(error));
+    } else if(total < instance->size) {
+        printf(
+            ANSI_FG_RED
+            "Written (acknowledged), but the verify read found a %u-byte card\r\n" ANSI_RESET,
+            card->data_size);
+    } else {
+        size_t i = 0;
+        while(i < instance->size && card->data[instance->offset + i] == instance->data[i]) {
+            i++;
+        }
+        if(i == instance->size) {
+            printf(ANSI_FG_BR_GREEN "Verified\r\n" ANSI_RESET);
+        } else {
+            printf(
+                ANSI_FG_RED "Verify mismatch at offset %u: wrote %02X, read %02X\r\n" ANSI_RESET,
+                (unsigned)(instance->offset + i),
+                instance->data[i],
+                card->data[instance->offset + i]);
+        }
+    }
+    legic_prime_free(card);
+}
+
 static void nfc_cli_legic_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx) {
     furi_assert(pipe);
     NfcCliLegicWrblContext* instance = ctx;
@@ -155,6 +189,7 @@ static void nfc_cli_legic_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
         nfc_cli_printf_array(&instance->data[instance->size - written], written, "Data: ");
         printf("\r\n");
     }
+    if(error == LegicPrimeErrorNone) nfc_cli_legic_wrbl_verify(instance);
 }
 
 static bool nfc_cli_legic_wrbl_parse_offset(FuriString* value, NfcCliActionContext* output) {
@@ -234,7 +269,7 @@ static const NfcCliKeyDescriptor wrbl_action_keys[] = {
 //legic wrbl -o 30 -d DEADBEEF
 static const NfcCliActionDescriptor wrbl_action = {
     .name = "wrbl",
-    .description = "Write bytes to a LEGIC Prime card",
+    .description = "Write bytes to a LEGIC Prime card and read them back",
     .alloc = nfc_cli_legic_wrbl_alloc_ctx,
     .free = nfc_cli_legic_wrbl_free_ctx,
     .execute = nfc_cli_legic_wrbl_execute,
