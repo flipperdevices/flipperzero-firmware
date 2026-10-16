@@ -133,7 +133,7 @@ static NfcCommand legic_prime_poller_request_mode_handler(LegicPrimePoller* inst
         // Proxmark3's legicrfsim.c ACKs in window 33; a real tag's window is
         // learned from its first ACK.
         instance->write_ack_window = 33;
-        instance->write_uid_known = false;
+        instance->uid_known = false;
         // Only what doesn't depend on the card type: one misread type reply
         // must not refuse a write, so the write session checks the range
         // once its handshake confirmed the type.
@@ -149,8 +149,7 @@ static NfcCommand legic_prime_poller_request_mode_handler(LegicPrimePoller* inst
 
     instance->state = LegicPrimePollerStateRead;
     if(!instance->progress) instance->progress = malloc(LEGIC_PRIME_MEM_MAX);
-    memset(instance->progress, 0, LEGIC_PRIME_MEM_MAX);
-    instance->done_count = 0;
+    legic_prime_poller_read_reset(instance);
     instance->resume_done = 0;
     instance->resumes = 0;
     // The tag is waiting for the ACK of the detection handshake; start the
@@ -159,7 +158,8 @@ static NfcCommand legic_prime_poller_request_mode_handler(LegicPrimePoller* inst
 }
 
 // A tag that misses a frame drops its session and waits for a new IV; a
-// field reset plus a fresh handshake lets the read continue where it stopped.
+// field reset plus a fresh handshake and UID check lets the read continue
+// where it stopped.
 #define LEGIC_PRIME_MAX_RESUMES (8U)
 
 static NfcCommand legic_prime_poller_read_handler(LegicPrimePoller* instance) {
@@ -167,7 +167,10 @@ static NfcCommand legic_prime_poller_read_handler(LegicPrimePoller* instance) {
     const uint16_t done_before = instance->done_count;
     legic_prime_poller_apply_gain(instance);
     LegicPrimeError err = legic_prime_poller_read(instance);
-    if(err != LegicPrimeErrorNone && instance->done_count == done_before) {
+    if(err == LegicPrimeErrorWrongCard) {
+        // read() started over on the card that answered now.
+        FURI_LOG_W(TAG, "Another card answered, reading it from the start");
+    } else if(err != LegicPrimeErrorNone && instance->done_count == done_before) {
         instance->rx_reduced_gain = !instance->rx_reduced_gain;
     }
     // Only resumes that make no progress count against the limit.

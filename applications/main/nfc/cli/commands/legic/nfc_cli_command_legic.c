@@ -41,9 +41,9 @@ static const char* nfc_cli_legic_get_error(LegicPrimeError error) {
     case LegicPrimeErrorReadOnly:
         return "address not writable (bytes 0-4, or past the end of the card)";
     case LegicPrimeErrorWrongCard:
-        return "a card with another UID answered; the write was stopped";
+        return "a card with another UID answered";
     case LegicPrimeErrorUidUnconfirmed:
-        return "could not read the card UID reliably; the write was stopped";
+        return "could not read the card UID reliably";
     default:
         return "unknown error";
     }

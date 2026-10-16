@@ -147,16 +147,15 @@ LegicPrimeError legic_prime_poller_setup(LegicPrimePoller* instance, uint8_t iv)
 
 // A session's handshake answered with another card type than detection
 // found.  The type codes differ by one bit, so detection may have misread
-// it: as long as nothing was read or written, the next session uses this
-// type.  After that the data proves the stored type and this handshake was
+// it: until a session confirmed the UID, the next session uses this type.
+// After that the UID reads prove the stored type and this handshake was
 // misread.
-static void legic_prime_poller_retype(LegicPrimePoller* instance, uint8_t code, bool proven) {
+static void legic_prime_poller_retype(LegicPrimePoller* instance, uint8_t code) {
     LegicPrimeType type;
-    if(proven || !legic_prime_type_from_code(code, &type)) return;
+    if(instance->uid_known || !legic_prime_type_from_code(code, &type)) return;
     legic_prime_poller_set_type(instance, type);
     // Bytes read with the misread type are no use for the new one.
-    memset(instance->data->data, 0, sizeof(instance->data->data));
-    if(instance->progress) memset(instance->progress, 0, LEGIC_PRIME_MEM_MAX);
+    if(instance->state == LegicPrimePollerStateRead) legic_prime_poller_read_reset(instance);
 }
 
 // READ of byte `addr`; its 12-bit reply (data | CRC-4 << 8) is decoded with ex.
@@ -178,6 +177,108 @@ static bool legic_prime_poller_read_crc_ok(
            legic_prime_crc4((ex->addr << 1) | 1u, instance->cmd_size_bits, reply & 0xFF);
 }
 
+typedef enum {
+    LegicPrimePollerReadFirst, // the byte's first read: kept
+    LegicPrimePollerReadAgreed, // agrees with the kept read: the byte is confirmed
+    LegicPrimePollerReadDisagreed, // differs from the kept read and replaces it
+} LegicPrimePollerRead;
+
+// A 4-bit CRC passes 1 in 16 misdecoded replies, so a byte is only accepted
+// once two CRC-valid reads agree.  Records one such read of a byte that is
+// not confirmed yet, in its progress flags and its kept value.
+static LegicPrimePollerRead
+    legic_prime_poller_record_read(uint8_t* progress, uint8_t* kept, uint8_t value) {
+    if(!(*progress & LEGIC_PRIME_POLLER_SEEN)) {
+        *progress |= LEGIC_PRIME_POLLER_SEEN;
+        *kept = value;
+        return LegicPrimePollerReadFirst;
+    }
+    if(*kept == value) {
+        *progress |= LEGIC_PRIME_POLLER_DONE;
+        return LegicPrimePollerReadAgreed;
+    }
+    *kept = value;
+    return LegicPrimePollerReadDisagreed;
+}
+
+/*
+ * Every session reads the UID (bytes 0-3) first and compares it with the
+ * first session's, so that a card swapped in during a field reset neither
+ * gets the rest of a write nor completes another card's dump.  Each byte
+ * needs two agreeing reads: a session always starts at the same keystream
+ * position, and a reply that misdecodes there would otherwise fail (or fool)
+ * the check every time.
+ */
+#define LEGIC_PRIME_UID_MAX_READS (16U)
+
+// On entry *cur is the READ of byte 0, sent behind the handshake's ACK.
+// Returns with *cur, a READ of a UID byte, sent but not claimed and nothing
+// queued behind it: the caller queues its next frame, then claims *cur.
+static LegicPrimeError
+    legic_prime_poller_confirm_uid(LegicPrimePoller* instance, LegicPrimeExchange* cur) {
+    uint8_t uid[LEGIC_PRIME_UID_SIZE];
+    uint8_t progress[LEGIC_PRIME_UID_SIZE] = {0};
+    for(size_t reads = 0;; reads++) {
+        if(!furi_hal_nfc_legic_poller_next_sent()) return LegicPrimeErrorTimeout;
+        // The next unconfirmed byte after cur's, cur's own last.
+        uint16_t addr = cur->addr;
+        bool confirmed = true;
+        for(uint16_t i = 1; confirmed && i <= LEGIC_PRIME_UID_SIZE; i++) {
+            addr = (cur->addr + i) % LEGIC_PRIME_UID_SIZE;
+            confirmed = progress[addr] & LEGIC_PRIME_POLLER_DONE;
+        }
+        if(confirmed) break;
+        if(reads == LEGIC_PRIME_UID_MAX_READS) return LegicPrimeErrorUidUnconfirmed;
+
+        LegicPrimeExchange next;
+        legic_prime_poller_build_read(instance, &next, addr, LEGIC_PRIME_STEPS_AFTER_REPLY);
+        legic_prime_poller_queue(&next, NULL);
+
+        uint32_t reply = 0;
+        const LegicPrimeError ret = legic_prime_poller_exchange(instance, cur, &reply);
+        if(ret != LegicPrimeErrorNone) return ret;
+        if(legic_prime_poller_read_crc_ok(instance, cur, reply)) {
+            legic_prime_poller_record_read(&progress[cur->addr], &uid[cur->addr], reply & 0xFF);
+        }
+        *cur = next;
+    }
+
+    if(!instance->uid_known) {
+        memcpy(instance->uid, uid, sizeof(uid));
+        instance->uid_known = true;
+    } else if(memcmp(instance->uid, uid, sizeof(uid)) != 0) {
+        return LegicPrimeErrorWrongCard;
+    }
+    return LegicPrimeErrorNone;
+}
+
+// Starts a session from a fresh field: the handshake, with the ACK and the
+// first UID READ chained behind the type reply, then the UID check.  Returns
+// as legic_prime_poller_confirm_uid() does.
+static LegicPrimeError
+    legic_prime_poller_start_session(LegicPrimePoller* instance, LegicPrimeExchange* cur) {
+    // Hold the carrier briefly to power the tag, as for the detection.
+    furi_delay_ms(5);
+
+    const LegicPrimeType type = instance->data->type;
+    LegicPrimeExchange iv_ex, ack;
+    legic_prime_poller_build_iv(&iv_ex, instance->iv);
+    legic_prime_poller_build(
+        &ack, legic_prime_ack_code(type), LEGIC_PRIME_ACK_BITS, LEGIC_PRIME_STEPS_AFTER_REPLY, 0);
+    legic_prime_poller_build_read(instance, cur, 0, LEGIC_PRIME_STEPS_AFTER_READER_ACK);
+    legic_prime_poller_queue(&ack, cur);
+
+    uint32_t reply = 0;
+    LegicPrimeError ret = legic_prime_poller_exchange(instance, &iv_ex, &reply);
+    if(ret != LegicPrimeErrorNone) return ret;
+    if((reply & LEGIC_PRIME_TYPE_MASK) != legic_prime_type_code(type)) {
+        // ACK and READ were built for the stored type: end the session.
+        legic_prime_poller_retype(instance, reply & LEGIC_PRIME_TYPE_MASK);
+        return LegicPrimeErrorUnknownType;
+    }
+    return legic_prime_poller_confirm_uid(instance, cur);
+}
+
 /*
  * Write: like Proxmark3 armsrc/legicrf.c write_byte.  The frame is the
  * address with bit 0 clear, the data byte and a CRC-4 over both.  The tag
@@ -194,16 +295,9 @@ static bool legic_prime_poller_read_crc_ok(
  * window is predicted from the previous ACK and the HAL drops the frame if
  * the ACK comes in another one; the session then ends and the next one uses
  * the measured window.
- *
- * Every session first reads the UID (bytes 0-3) and compares it with the
- * first session's, so that a card swapped in during a field reset doesn't
- * get the remaining bytes.  Each byte needs two agreeing reads: a session
- * always starts at the same keystream position, and a reply that misdecodes
- * there would otherwise fail (or fool) the check every time.
  */
 #define LEGIC_PRIME_WRITE_ACK_WINDOW_BITS (60U)
 #define LEGIC_PRIME_WRITE_FWT_FC          (95000U) // ≈ 7 ms
-#define LEGIC_PRIME_WRITE_UID_MAX_READS   (16U)
 
 uint32_t legic_prime_poller_write_frame(uint16_t addr, uint8_t value, uint8_t cmd_bits) {
     const uint32_t cmd = (uint32_t)addr << 1;
@@ -254,26 +348,9 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
     furi_assert(instance->write_pos < instance->write_size);
     furi_check(instance->cmd_size_bits);
 
-    furi_delay_ms(5);
-
-    const LegicPrimeType type = instance->data->type;
-    LegicPrimeExchange iv_ex, ack, cur, next;
-    legic_prime_poller_build_iv(&iv_ex, instance->iv);
-    legic_prime_poller_build(
-        &ack, legic_prime_ack_code(type), LEGIC_PRIME_ACK_BITS, LEGIC_PRIME_STEPS_AFTER_REPLY, 0);
-    legic_prime_poller_build_read(instance, &cur, 0, LEGIC_PRIME_STEPS_AFTER_READER_ACK);
-    legic_prime_poller_queue(&ack, &cur);
-
-    uint32_t reply = 0;
-    LegicPrimeError ret = legic_prime_poller_exchange(instance, &iv_ex, &reply);
+    LegicPrimeExchange cur, next;
+    LegicPrimeError ret = legic_prime_poller_start_session(instance, &cur);
     if(ret != LegicPrimeErrorNone) return ret;
-    if((reply & LEGIC_PRIME_TYPE_MASK) != legic_prime_type_code(type)) {
-        legic_prime_poller_retype(
-            instance,
-            reply & LEGIC_PRIME_TYPE_MASK,
-            instance->write_pos || instance->write_uid_known);
-        return LegicPrimeErrorUnknownType;
-    }
     // Only now, with the type confirmed by this handshake: one misread type
     // reply, at detection or here, must not fail an in-range write.
     if(!legic_prime_is_writable(
@@ -281,54 +358,14 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
         return LegicPrimeErrorReadOnly;
     }
 
-    // UID bytes: two agreeing reads with a valid CRC each, as in
-    // legic_prime_poller_read().  A READ is queued before the previous reply
-    // is decoded, so the first WRITE follows one READ after the last byte.
-    uint8_t uid[LEGIC_PRIME_UID_SIZE];
-    uint8_t seen = 0, confirmed = 0;
-    const uint8_t uid_all = (1u << LEGIC_PRIME_UID_SIZE) - 1;
-    bool write_queued = false;
-    for(size_t reads = 0; !write_queued; reads++) {
-        if(!furi_hal_nfc_legic_poller_next_sent()) return LegicPrimeErrorTimeout;
-        if(confirmed == uid_all) {
-            if(!instance->write_uid_known) {
-                memcpy(instance->write_uid, uid, sizeof(uid));
-                instance->write_uid_known = true;
-            } else if(memcmp(instance->write_uid, uid, sizeof(uid)) != 0) {
-                return LegicPrimeErrorWrongCard;
-            }
-            legic_prime_poller_build_write(
-                instance, &next, instance->write_pos, LEGIC_PRIME_STEPS_AFTER_REPLY);
-            write_queued = true;
-        } else if(reads == LEGIC_PRIME_WRITE_UID_MAX_READS) {
-            return LegicPrimeErrorUidUnconfirmed;
-        } else {
-            // The next unconfirmed byte after cur's, else cur's own.
-            uint16_t addr = cur.addr;
-            for(uint16_t i = 1; i < LEGIC_PRIME_UID_SIZE; i++) {
-                const uint16_t a = (cur.addr + i) % LEGIC_PRIME_UID_SIZE;
-                if(!(confirmed & (1u << a))) {
-                    addr = a;
-                    break;
-                }
-            }
-            legic_prime_poller_build_read(instance, &next, addr, LEGIC_PRIME_STEPS_AFTER_REPLY);
-        }
-        legic_prime_poller_queue(&next, NULL);
-
-        ret = legic_prime_poller_exchange(instance, &cur, &reply);
-        if(ret != LegicPrimeErrorNone) return ret;
-        const uint8_t bit = 1u << cur.addr;
-        if(legic_prime_poller_read_crc_ok(instance, &cur, reply)) {
-            if((seen & bit) && uid[cur.addr] == (reply & 0xFF)) {
-                confirmed |= bit;
-            } else {
-                uid[cur.addr] = reply & 0xFF;
-                seen |= bit;
-            }
-        }
-        cur = next;
-    }
+    // The first WRITE follows the reply to the last UID READ.
+    legic_prime_poller_build_write(
+        instance, &next, instance->write_pos, LEGIC_PRIME_STEPS_AFTER_REPLY);
+    legic_prime_poller_queue(&next, NULL);
+    uint32_t reply = 0;
+    ret = legic_prime_poller_exchange(instance, &cur, &reply);
+    if(ret != LegicPrimeErrorNone) return ret;
+    cur = next;
     if(!furi_hal_nfc_legic_poller_next_sent()) return LegicPrimeErrorTimeout;
 
     while(true) {
@@ -380,45 +417,54 @@ static bool
     return false;
 }
 
+void legic_prime_poller_read_reset(LegicPrimePoller* instance) {
+    furi_assert(instance);
+    furi_assert(instance->progress);
+
+    memset(instance->progress, 0, LEGIC_PRIME_MEM_MAX);
+    memset(instance->data->data, 0, sizeof(instance->data->data));
+    instance->done_count = 0;
+    // The first read goes to address 0.
+    instance->read_cursor = instance->data->data_size - 1;
+    instance->uid_known = false;
+}
+
 /*
  * One read session, mirroring Proxmark armsrc/legicrf.c but pipelined: the
  * ACK and the first READ go out chained behind the type reply, and every
  * further READ is queued before the previous reply is decoded, so each frame
  * follows the tag's reply by 260 µs (Proxmark3: 220 µs) as real tags require.
+ *
+ * Every session starts at the same keystream position, so a session goes on
+ * from where the previous one stopped: the read that confirms a byte doesn't
+ * repeat the keystream of the read before it.
  */
 LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
     furi_assert(instance);
     furi_assert(instance->progress);
     furi_check(instance->cmd_size_bits);
 
+    uint8_t* progress = instance->progress;
+    uint8_t* data = instance->data->data;
     const uint16_t size = instance->data->data_size;
     // Failed reads only count within a session.
     for(uint16_t a = 0; a < size; a++) {
-        instance->progress[a] &= LEGIC_PRIME_POLLER_DONE | LEGIC_PRIME_POLLER_SEEN;
-    }
-    uint16_t addr;
-    if(!legic_prime_poller_next_addr(instance, size - 1, &addr)) {
-        // With no failed reads yet, only a complete read has nothing left.
-        return LegicPrimeErrorNone;
+        progress[a] &= LEGIC_PRIME_POLLER_DONE | LEGIC_PRIME_POLLER_SEEN;
     }
 
-    furi_delay_ms(5);
-
-    const LegicPrimeType type = instance->data->type;
-    LegicPrimeExchange iv_ex, ack, cur, next;
-    legic_prime_poller_build_iv(&iv_ex, instance->iv);
-    legic_prime_poller_build(
-        &ack, legic_prime_ack_code(type), LEGIC_PRIME_ACK_BITS, LEGIC_PRIME_STEPS_AFTER_REPLY, 0);
-    legic_prime_poller_build_read(instance, &cur, addr, LEGIC_PRIME_STEPS_AFTER_READER_ACK);
-    legic_prime_poller_queue(&ack, &cur);
-
-    uint32_t reply = 0;
-    LegicPrimeError ret = legic_prime_poller_exchange(instance, &iv_ex, &reply);
+    LegicPrimeExchange cur, next;
+    LegicPrimeError ret = legic_prime_poller_start_session(instance, &cur);
+    if(ret == LegicPrimeErrorWrongCard) {
+        // What was read so far is another card's: read this one from scratch.
+        legic_prime_poller_read_reset(instance);
+    }
     if(ret != LegicPrimeErrorNone) return ret;
-    if((reply & LEGIC_PRIME_TYPE_MASK) != legic_prime_type_code(type)) {
-        // ACK and READ were built for the stored type: end the session.
-        legic_prime_poller_retype(instance, reply & LEGIC_PRIME_TYPE_MASK, instance->done_count);
-        return LegicPrimeErrorUnknownType;
+    // The UID check confirmed bytes 0-3, two agreeing reads each.
+    for(uint16_t a = 0; a < LEGIC_PRIME_UID_SIZE; a++) {
+        if(progress[a] & LEGIC_PRIME_POLLER_DONE) continue;
+        progress[a] = LEGIC_PRIME_POLLER_DONE | LEGIC_PRIME_POLLER_SEEN;
+        data[a] = instance->uid[a];
+        instance->done_count++;
     }
 
     const uint16_t done_start = instance->done_count;
@@ -428,38 +474,40 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
     bool fresh = false;
     const uint32_t budget_max =
         MIN(size * LEGIC_PRIME_READ_ATTEMPTS + 16U, LEGIC_PRIME_READ_SESSION_EXCHANGES);
+    uint32_t reply = 0;
+    // The first claim is the last UID READ, a byte that is confirmed already.
     for(uint32_t budget = budget_max; budget; budget--) {
         if(!furi_hal_nfc_legic_poller_next_sent()) return LegicPrimeErrorTimeout;
 
         uint16_t next_addr;
-        const bool have_next = legic_prime_poller_next_addr(instance, cur.addr, &next_addr);
+        const bool have_next =
+            legic_prime_poller_next_addr(instance, instance->read_cursor, &next_addr);
         if(have_next) {
             legic_prime_poller_build_read(
                 instance, &next, next_addr, LEGIC_PRIME_STEPS_AFTER_REPLY);
             legic_prime_poller_queue(&next, NULL);
+            instance->read_cursor = next_addr;
         }
 
         ret = legic_prime_poller_exchange(instance, &cur, &reply);
         if(ret != LegicPrimeErrorNone) return ret;
 
-        // A 4-bit CRC passes 1 in 16 misdecoded replies, so a byte is only
-        // accepted once two reads (with different keystreams) agree.
-        uint8_t* progress = &instance->progress[cur.addr];
-        if(!(*progress & LEGIC_PRIME_POLLER_DONE)) {
-            const bool seen = *progress & LEGIC_PRIME_POLLER_SEEN;
-            const uint8_t data = reply & 0xFF;
-            confirmable |= seen;
+        uint8_t* byte_progress = &progress[cur.addr];
+        if(!(*byte_progress & LEGIC_PRIME_POLLER_DONE)) {
+            confirmable |= (*byte_progress & LEGIC_PRIME_POLLER_SEEN) != 0;
             if(!legic_prime_poller_read_crc_ok(instance, &cur, reply)) {
                 // No logging here: the next frame is already on air.
-                *progress += LEGIC_PRIME_POLLER_ATTEMPT;
-            } else if(seen && instance->data->data[cur.addr] == data) {
-                *progress |= LEGIC_PRIME_POLLER_DONE;
-                instance->done_count++;
+                *byte_progress += LEGIC_PRIME_POLLER_ATTEMPT;
             } else {
-                if(seen) *progress += LEGIC_PRIME_POLLER_ATTEMPT;
-                fresh |= !seen;
-                instance->data->data[cur.addr] = data;
-                *progress |= LEGIC_PRIME_POLLER_SEEN;
+                const LegicPrimePollerRead read =
+                    legic_prime_poller_record_read(byte_progress, &data[cur.addr], reply & 0xFF);
+                if(read == LegicPrimePollerReadFirst) {
+                    fresh = true;
+                } else if(read == LegicPrimePollerReadAgreed) {
+                    instance->done_count++;
+                } else {
+                    *byte_progress += LEGIC_PRIME_POLLER_ATTEMPT;
+                }
             }
         }
 
