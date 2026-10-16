@@ -97,14 +97,14 @@
 // region, e.g. malloc) would delay the frame one-for-one, and the ACK-window
 // gate only notices a delay of half a bit window (~49 µs) while a real MIM256
 // tolerates ~20 µs on the 240 µs gap.  What matters is the excess over the
-// usual path, so the value is that path's floor plus ~20 µs.  30 µs is a
-// starting point, not a measurement: the 240 µs gap was validated before
-// this veto existed and the floor was never read.  Set it from the
-// LEGIC_WAKE_STATS bench (~96 chained WRITEs on the PM3 sim and on a MIM256;
-// hist gives the floor, ack_max_us the worst ACK wake-up); a non-zero
-// vetoed count on a healthy run means it is too tight, and every veto costs
-// a session.  Record the measured floor here once it is known.
-#define LEGIC_ACK_WAKE_LATE_US        (30U)
+// usual path, so the value is that path's typical latency plus ~20 µs.
+// Measured with LEGIC_WAKE_STATS (a 1000-byte chained write, its read-back
+// and dumps on the PM3 sim, driven from the CLI): 5907 RxStart wake-ups, 1011
+// of them write ACKs with a frame queued, all 40-58 µs, 97% within 40-49 µs,
+// worst ACK 54 µs.  A first guess of 30 µs vetoed every chained WRITE.
+// Re-measure if the wake-up path changes: a non-zero vetoed count on a
+// healthy run means the value is too tight, and every veto costs a session.
+#define LEGIC_ACK_WAKE_LATE_US        (65U)
 
 #define LEGIC_RX_GAP_MS       (2U)
 #define LEGIC_RX_MAX_SEGMENTS (16U)
