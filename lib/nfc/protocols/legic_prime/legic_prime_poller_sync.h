@@ -37,7 +37,11 @@ LegicPrimeError legic_prime_poller_sync_read_range(
  * Bytes are written last to first, several per session, each WRITE chained
  * ~240 µs behind the tag's ACK of the previous one; the write resumes in a
  * new session (new field, new handshake, UID re-check) whenever an ACK lands
- * outside the predicted bit window.
+ * outside the predicted bit window, and after 256 bytes.
+ *
+ * Success means the tag acknowledged every byte: its ACK is a single
+ * unencrypted bit, as Proxmark3 takes it.  To be sure the card holds the
+ * data, read it back with legic_prime_poller_sync_read_range().
  *
  * @param[out] bytes_written bytes the tag acknowledged (may be NULL): the
  * last ones of the range, on success and on failure.
