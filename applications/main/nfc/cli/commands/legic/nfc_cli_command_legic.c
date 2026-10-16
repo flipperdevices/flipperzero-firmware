@@ -66,9 +66,14 @@ static void nfc_cli_legic_rdbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
     furi_assert(pipe);
     NfcCliLegicRdblContext* instance = ctx;
 
-    LegicPrimeError error = legic_prime_poller_sync_read(instance->nfc, &instance->card);
+    size_t confirmed = 0;
+    size_t total = 0;
+    LegicPrimeError error = legic_prime_poller_sync_read_range(
+        instance->nfc, instance->offset, instance->length, &instance->card, &confirmed, &total);
     if(error != LegicPrimeErrorNone) {
+        // Bytes that are not confirmed (two agreeing reads) aren't shown.
         printf(ANSI_FG_RED "Error: %s" ANSI_RESET, nfc_cli_legic_get_error(error));
+        if(total) printf("\r\nConfirmed %u of %u bytes", (unsigned)confirmed, (unsigned)total);
         return;
     }
     if(instance->offset >= instance->card.data_size) {
@@ -96,7 +101,7 @@ static bool nfc_cli_legic_rdbl_parse_length(FuriString* value, NfcCliActionConte
     NfcCliLegicRdblContext* ctx = output;
     return strint_to_uint16(furi_string_get_cstr(value), NULL, &ctx->length, 10) ==
                StrintParseNoError &&
-           ctx->length > 0;
+           ctx->length > 0 && ctx->length <= LEGIC_PRIME_MEM_MAX;
 }
 
 static NfcCliActionContext* nfc_cli_legic_wrbl_alloc_ctx(Nfc* nfc) {
@@ -180,7 +185,7 @@ static const NfcCliKeyDescriptor rdbl_action_keys[] = {
         .short_name = "l",
         .long_name = "length",
         .features = {.required = false, .parameter = true},
-        .description = "number of bytes (default 16)",
+        .description = "number of bytes (default 16, at most 1024)",
         .parse = nfc_cli_legic_rdbl_parse_length,
     },
 };
@@ -188,7 +193,7 @@ static const NfcCliKeyDescriptor rdbl_action_keys[] = {
 //legic rdbl -o 0 -l 32
 static const NfcCliActionDescriptor rdbl_action = {
     .name = "rdbl",
-    .description = "Read bytes from a LEGIC Prime card",
+    .description = "Read bytes from a LEGIC Prime card, shown once all are confirmed",
     .alloc = nfc_cli_legic_rdbl_alloc_ctx,
     .free = nfc_cli_legic_rdbl_free_ctx,
     .execute = nfc_cli_legic_rdbl_execute,

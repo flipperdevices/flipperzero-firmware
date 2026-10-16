@@ -82,10 +82,17 @@ struct LegicPrimePoller {
     uint8_t uid[LEGIC_PRIME_UID_SIZE];
     bool uid_known;
 
+    // Read request: read_size bytes from read_offset, the whole card if
+    // read_size is 0.  [read_start, read_end) is that range clamped to the
+    // card, whose size a corrected type can change.
+    uint16_t read_offset;
+    uint16_t read_size;
+    uint16_t read_start;
+    uint16_t read_end;
     // Read progress per byte, kept across field resets (resumes); allocated
     // when a read is requested, so detection doesn't carry it.
     uint8_t* progress;
-    uint16_t done_count;
+    uint16_t done_count; // bytes of the range confirmed
     // The address queued last: the next session continues after it.
     uint16_t read_cursor;
     uint16_t resume_done; // done_count at the last resume
@@ -140,14 +147,16 @@ uint32_t legic_prime_poller_write_frame(uint16_t addr, uint8_t value, uint8_t cm
  *  before the next session. */
 LegicPrimeError legic_prime_poller_setup(LegicPrimePoller* instance, uint8_t iv);
 
-/** Starts a read over: nothing read yet, no UID known. */
+/** Starts a read over: nothing read yet, no UID known, and the requested
+ *  range clamped to the card's current size. */
 void legic_prime_poller_read_reset(LegicPrimePoller* instance);
 
 /**
  * One read session from a fresh field: handshake, UID check, then read the
- * bytes not read yet, within the session's exchange budget, from where the
- * previous session stopped.  The read is complete once done_count reaches
- * data_size; until then reset the field and run another session.
+ * bytes of the range not read yet, within the session's exchange budget,
+ * from where the previous session stopped.  The read is complete once a
+ * session confirmed the UID and done_count covers the range; until then
+ * reset the field and run another session.
  *
  * @return LegicPrimeErrorNone unless the session failed.  Running out of
  * budget fails a session that confirmed no byte although bytes read before

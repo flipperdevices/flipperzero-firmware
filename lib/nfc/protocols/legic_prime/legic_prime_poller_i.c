@@ -402,13 +402,15 @@ static bool legic_prime_poller_is_pending(const LegicPrimePoller* instance, uint
            progress / LEGIC_PRIME_POLLER_ATTEMPT < LEGIC_PRIME_READ_ATTEMPTS;
 }
 
-// Next address to read after `after`, cycling, `after` itself last.
+// Next address of the range to read after `after` (in the range), cycling,
+// `after` itself last.
 static bool
     legic_prime_poller_next_addr(LegicPrimePoller* instance, uint16_t after, uint16_t* addr) {
-    const uint16_t size = instance->data->data_size;
+    const uint16_t start = instance->read_start;
+    const uint16_t end = instance->read_end;
     uint16_t a = after;
-    for(uint16_t i = 0; i < size; i++) {
-        if(++a == size) a = 0;
+    for(uint16_t i = start; i < end; i++) {
+        if(++a == end) a = start;
         if(legic_prime_poller_is_pending(instance, a)) {
             *addr = a;
             return true;
@@ -421,11 +423,20 @@ void legic_prime_poller_read_reset(LegicPrimePoller* instance) {
     furi_assert(instance);
     furi_assert(instance->progress);
 
+    const uint16_t size = instance->data->data_size;
+    if(instance->read_size) {
+        instance->read_start = MIN(instance->read_offset, size);
+        instance->read_end = MIN((uint32_t)instance->read_start + instance->read_size, size);
+    } else {
+        instance->read_start = 0;
+        instance->read_end = size;
+    }
     memset(instance->progress, 0, LEGIC_PRIME_MEM_MAX);
+    // Outside the range only the UID gets filled in.
     memset(instance->data->data, 0, sizeof(instance->data->data));
     instance->done_count = 0;
-    // The first read goes to address 0.
-    instance->read_cursor = instance->data->data_size - 1;
+    // The first read goes to the start of the range.
+    instance->read_cursor = instance->read_end - 1;
     instance->uid_known = false;
 }
 
@@ -446,9 +457,8 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
 
     uint8_t* progress = instance->progress;
     uint8_t* data = instance->data->data;
-    const uint16_t size = instance->data->data_size;
     // Failed reads only count within a session.
-    for(uint16_t a = 0; a < size; a++) {
+    for(uint16_t a = instance->read_start; a < instance->read_end; a++) {
         progress[a] &= LEGIC_PRIME_POLLER_DONE | LEGIC_PRIME_POLLER_SEEN;
     }
 
@@ -459,14 +469,16 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
         legic_prime_poller_read_reset(instance);
     }
     if(ret != LegicPrimeErrorNone) return ret;
-    // The UID check confirmed bytes 0-3, two agreeing reads each.
+    // The UID check confirmed bytes 0-3, two agreeing reads each.  They are
+    // marked done outside the range too: the first claim below is a UID READ.
     for(uint16_t a = 0; a < LEGIC_PRIME_UID_SIZE; a++) {
         if(progress[a] & LEGIC_PRIME_POLLER_DONE) continue;
         progress[a] = LEGIC_PRIME_POLLER_DONE | LEGIC_PRIME_POLLER_SEEN;
         data[a] = instance->uid[a];
-        instance->done_count++;
+        if(a >= instance->read_start && a < instance->read_end) instance->done_count++;
     }
 
+    const uint16_t size = instance->read_end - instance->read_start;
     const uint16_t done_start = instance->done_count;
     // A byte read earlier came up again: the session could confirm bytes.
     bool confirmable = false;

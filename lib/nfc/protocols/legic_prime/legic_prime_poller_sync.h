@@ -7,8 +7,30 @@
 extern "C" {
 #endif
 
-/** Reads the whole card. */
+/**
+ * Reads the whole card.  Each byte needs two agreeing reads, as a 4-bit CRC
+ * passes 1 in 16 misdecoded replies; `data` is only filled on success.
+ */
 LegicPrimeError legic_prime_poller_sync_read(Nfc* nfc, LegicPrimeData* data);
+
+/**
+ * Reads `size` bytes from `offset`, clamped to the end of the card.  As for
+ * legic_prime_poller_sync_read(), each byte needs two agreeing reads and
+ * `data` is only filled on success: the card type and size, the UID and the
+ * bytes of the range, the others 0, so it is no dump to save.
+ *
+ * @param[out] bytes_read bytes of the range confirmed (may be NULL), on
+ * success and on failure.
+ * @param[out] bytes_total size of the range clamped to the card (may be
+ * NULL); 0 if the card was not detected.
+ */
+LegicPrimeError legic_prime_poller_sync_read_range(
+    Nfc* nfc,
+    uint16_t offset,
+    size_t size,
+    LegicPrimeData* data,
+    size_t* bytes_read,
+    size_t* bytes_total);
 
 /**
  * Writes `size` bytes from `offset` (>= 5: MCD, MSN and MCC are read-only).
