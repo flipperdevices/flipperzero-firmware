@@ -9,6 +9,8 @@ typedef enum {
     UsbUartLineIndexFlow,
 } LineIndex;
 
+static const char* transport_names[] = {"USB", "BLE NUS"};
+
 static const char* vcp_ch[] = {"0 (CLI)", "1"};
 static const char* uart_ch[] = {"13,14", "15,16"};
 static const char* flow_pins[] = {"None", "2,3", "6,7", "16,15"};
@@ -29,24 +31,89 @@ static const uint32_t baudrate_list[] = {
 };
 static const char* software_de_re[] = {"None", "4"};
 
+static void gpio_scene_usb_uart_cfg_error_dismiss(DialogExResult result, void* context) {
+    UNUSED(result);
+    GpioApp* app = context;
+    app->transport_error = false;
+    view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewUsbUartCfg);
+}
+
+static void gpio_scene_usb_uart_cfg_show_error(GpioApp* app) {
+    app->transport_error = true;
+    dialog_ex_set_context(app->dialog, app);
+    dialog_ex_set_header(app->dialog, "Transport unavailable", 64, 5, AlignCenter, AlignTop);
+    dialog_ex_set_text(
+        app->dialog,
+        "Try again, or disconnect\nUSB RPC before using USB.",
+        64,
+        23,
+        AlignCenter,
+        AlignTop);
+    dialog_ex_set_left_button_text(app->dialog, "Back");
+    dialog_ex_set_right_button_text(app->dialog, NULL);
+    dialog_ex_set_result_callback(app->dialog, gpio_scene_usb_uart_cfg_error_dismiss);
+    view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewExitConfirm);
+}
+
+static void gpio_scene_usb_uart_cfg_enter(void* context, uint32_t index) {
+    /* Settings apply immediately; OK does not start or stop the bridge. */
+    UNUSED(context);
+    UNUSED(index);
+}
+
 bool gpio_scene_usb_uart_cfg_on_event(void* context, SceneManagerEvent event) {
     GpioApp* app = context;
     furi_assert(app);
+    if(event.type == SceneManagerEventTypeBack && app->transport_error) {
+        gpio_scene_usb_uart_cfg_error_dismiss(DialogExResultLeft, app);
+        return true;
+    }
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GpioUsbUartEventConfigSet) {
-            usb_uart_set_config(app->usb_uart_bridge, app->usb_uart_cfg);
+            UsbUartConfig previous;
+            usb_uart_get_config(app->usb_uart_bridge, &previous);
+            bool success = usb_uart_set_config(app->usb_uart_bridge, app->usb_uart_cfg);
+            usb_uart_get_config(app->usb_uart_bridge, app->usb_uart_cfg);
+            if(!success || previous.transport != app->usb_uart_cfg->transport) {
+                gpio_scene_usb_uart_cfg_on_exit(app);
+                gpio_scene_usb_uart_cfg_on_enter(app);
+            }
+            if(!success) gpio_scene_usb_uart_cfg_show_error(app);
             return true;
         }
     }
     return false;
 }
 
-void line_ensure_flow_invariant(GpioApp* app) {
+static void line_transport_cb(VariableItem* item) {
+    GpioApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    app->usb_uart_cfg->transport = index;
+    if(index == UsbUartTransportBle) {
+        app->usb_uart_cfg->flow_pins = 0;
+        if(!app->usb_uart_cfg->baudrate) {
+            app->usb_uart_cfg->baudrate = 115200;
+            for(size_t baudrate_index = 0; baudrate_index < COUNT_OF(baudrate_list);
+                baudrate_index++) {
+                if(baudrate_list[baudrate_index] == app->usb_uart_cfg->baudrate) {
+                    app->usb_uart_cfg->baudrate_mode = baudrate_index + 1;
+                    break;
+                }
+            }
+        }
+    }
+    variable_item_set_current_value_text(item, transport_names[index]);
+    view_dispatcher_send_custom_event(app->view_dispatcher, GpioUsbUartEventConfigSet);
+}
+
+static void line_ensure_flow_invariant(GpioApp* app) {
     // GPIO pins PC0, PC1 (16,15) are unavailable for RTS/DTR when LPUART is
     // selected. This function enforces that invariant by resetting flow_pins
     // to None if it is configured to 16,15 when LPUART is selected.
 
-    uint8_t available_flow_pins = app->usb_uart_cfg->uart_ch == FuriHalSerialIdLpuart ? 3 : 4;
+    uint8_t available_flow_pins = app->usb_uart_cfg->transport == UsbUartTransportBle ? 1 :
+                                  app->usb_uart_cfg->uart_ch == FuriHalSerialIdLpuart ? 3 :
+                                                                                        4;
     VariableItem* item = app->var_item_flow;
     variable_item_set_values_count(item, available_flow_pins);
 
@@ -111,6 +178,7 @@ static void line_baudrate_cb(VariableItem* item) {
     GpioApp* app = variable_item_get_context(item);
     furi_assert(app);
     uint8_t index = variable_item_get_current_value_index(item);
+    if(app->usb_uart_cfg->transport == UsbUartTransportBle) index++;
 
     char br_text[8];
 
@@ -137,17 +205,25 @@ void gpio_scene_usb_uart_cfg_on_enter(void* context) {
     VariableItem* item;
     char br_text[8];
 
-    item = variable_item_list_add(var_item_list, "USB Channel", 2, line_vcp_cb, app);
-    variable_item_set_current_value_index(item, app->usb_uart_cfg->vcp_ch);
-    variable_item_set_current_value_text(item, vcp_ch[app->usb_uart_cfg->vcp_ch]);
+    item = variable_item_list_add(var_item_list, "Transport", 2, line_transport_cb, app);
+    variable_item_set_current_value_index(item, app->usb_uart_cfg->transport);
+    variable_item_set_current_value_text(item, transport_names[app->usb_uart_cfg->transport]);
+    if(app->usb_uart_cfg->transport == UsbUartTransportUsb) {
+        item = variable_item_list_add(var_item_list, "USB Channel", 2, line_vcp_cb, app);
+        variable_item_set_current_value_index(item, app->usb_uart_cfg->vcp_ch);
+        variable_item_set_current_value_text(item, vcp_ch[app->usb_uart_cfg->vcp_ch]);
+    }
 
     item = variable_item_list_add(
         var_item_list,
         "Baudrate",
-        sizeof(baudrate_list) / sizeof(baudrate_list[0]) + 1,
+        COUNT_OF(baudrate_list) + (app->usb_uart_cfg->transport == UsbUartTransportUsb ? 1 : 0),
         line_baudrate_cb,
         app);
-    variable_item_set_current_value_index(item, app->usb_uart_cfg->baudrate_mode);
+    variable_item_set_current_value_index(
+        item,
+        app->usb_uart_cfg->baudrate_mode -
+            (app->usb_uart_cfg->transport == UsbUartTransportBle ? 1 : 0));
     if(app->usb_uart_cfg->baudrate_mode > 0) {
         snprintf(br_text, 7, "%lu", baudrate_list[app->usb_uart_cfg->baudrate_mode - 1]);
         variable_item_set_current_value_text(item, br_text);
@@ -172,8 +248,10 @@ void gpio_scene_usb_uart_cfg_on_enter(void* context) {
     variable_item_set_current_value_index(item, app->usb_uart_cfg->software_de_re);
     variable_item_set_current_value_text(item, software_de_re[app->usb_uart_cfg->software_de_re]);
 
-    variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, GpioAppViewUsbUartCfg));
+    variable_item_list_set_enter_callback(var_item_list, gpio_scene_usb_uart_cfg_enter, app);
+    uint32_t selected = scene_manager_get_scene_state(app->scene_manager, GpioSceneUsbUartCfg);
+    uint32_t last = app->usb_uart_cfg->transport == UsbUartTransportUsb ? 5 : 4;
+    variable_item_list_set_selected_item(var_item_list, selected > last ? last : selected);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewUsbUartCfg);
 }
@@ -182,8 +260,11 @@ void gpio_scene_usb_uart_cfg_on_exit(void* context) {
     GpioApp* app = context;
     scene_manager_set_scene_state(
         app->scene_manager,
-        GpioAppViewUsbUartCfg,
+        GpioSceneUsbUartCfg,
         variable_item_list_get_selected_item_index(app->var_item_list));
+    app->transport_error = false;
+    dialog_ex_reset(app->dialog);
     variable_item_list_reset(app->var_item_list);
     free(app->usb_uart_cfg);
+    app->usb_uart_cfg = NULL;
 }
