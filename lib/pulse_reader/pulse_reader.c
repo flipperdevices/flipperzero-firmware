@@ -182,8 +182,7 @@ void pulse_reader_start(PulseReader* signal) {
 }
 
 uint32_t pulse_reader_receive(PulseReader* signal, int timeout_us) {
-    uint32_t start_time = DWT->CYCCNT;
-    uint32_t timeout_ticks = timeout_us * (F_TIM2 / 1000000);
+    FuriHalCortexTimer timeout_timer = furi_hal_cortex_timer_get(timeout_us);
 
     do {
         /* get the DMA's next write position by reading "remaining length" register */
@@ -226,9 +225,7 @@ uint32_t pulse_reader_receive(PulseReader* signal, int timeout_us) {
         }
 
         /* check for timeout */
-        uint32_t elapsed = DWT->CYCCNT - start_time;
-
-        if(elapsed > timeout_ticks) {
+        if(furi_hal_cortex_timer_is_expired(timeout_timer)) {
             return PULSE_READER_NO_EDGE;
         }
     } while(true);
