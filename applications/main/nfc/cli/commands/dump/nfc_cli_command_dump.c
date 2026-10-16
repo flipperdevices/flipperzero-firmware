@@ -214,6 +214,9 @@ static void nfc_cli_dump_execute(PipeSide* pipe, NfcCliActionContext* context) {
             const char* path = furi_string_get_cstr(instance->file_path);
             if(nfc_device_save(instance->nfc_device, path)) {
                 printf("Dump saved to \'%s\'\r\n", path);
+            } else {
+                printf(
+                    ANSI_FG_RED "Error: failed to save the dump to \'%s\'\r\n" ANSI_RESET, path);
             }
         } else {
             printf(
@@ -286,8 +289,9 @@ bool nfc_cli_dump_parse_timeout(FuriString* value, NfcCliActionContext* output) 
     NfcCliDumpContext* ctx = output;
 
     StrintParseError err = strint_to_uint32(furi_string_get_cstr(value), NULL, &ctx->timeout, 10);
+    if(err != StrintParseNoError) return false;
     ctx->timeout_set = true;
-    return err == StrintParseNoError;
+    return true;
 }
 
 const NfcCliKeyDescriptor dump_keys[] = {
