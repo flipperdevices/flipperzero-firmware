@@ -92,6 +92,10 @@ struct LegicPrimePoller {
     uint16_t write_size;
     uint16_t write_pos;
     uint8_t write_attempts;
+    // The last WRITE sent (of the byte at write_pos) got no ACK: the tag may
+    // hold the new value or the old.  A Communication error after a WRITE
+    // can't be told from one before it, and doesn't set this.
+    bool write_unacked;
     uint8_t write_uid[LEGIC_PRIME_UID_SIZE]; // read by the first write session
     bool write_uid_known;
     uint8_t write_ack_window; // bit window of the last write ACK (predicts the next)

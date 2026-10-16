@@ -2347,7 +2347,7 @@ Function,+,legic_prime_is_equal,_Bool,"const LegicPrimeData*, const LegicPrimeDa
 Function,+,legic_prime_is_writable,_Bool,"uint16_t, uint16_t, size_t"
 Function,+,legic_prime_load,_Bool,"LegicPrimeData*, FlipperFormat*, uint32_t"
 Function,+,legic_prime_poller_sync_read,LegicPrimeError,"Nfc*, LegicPrimeData*"
-Function,+,legic_prime_poller_sync_write,LegicPrimeError,"Nfc*, uint16_t, const uint8_t*, size_t, size_t*"
+Function,+,legic_prime_poller_sync_write,LegicPrimeError,"Nfc*, uint16_t, const uint8_t*, size_t, size_t*, _Bool*"
 Function,+,legic_prime_reset,void,LegicPrimeData*
 Function,+,legic_prime_save,_Bool,"const LegicPrimeData*, FlipperFormat*"
 Function,+,legic_prime_set_type,void,"LegicPrimeData*, LegicPrimeType"

@@ -80,7 +80,8 @@ LegicPrimeError legic_prime_poller_sync_write(
     uint16_t offset,
     const uint8_t* data,
     size_t size,
-    size_t* bytes_written) {
+    size_t* bytes_written,
+    bool* write_unacked) {
     furi_check(nfc);
     furi_check(data);
     furi_check(size > 0 && size <= LEGIC_PRIME_MEM_MAX);
@@ -92,5 +93,6 @@ LegicPrimeError legic_prime_poller_sync_write(
     };
     LegicPrimeError error = legic_prime_poller_sync_execute(nfc, &ctx);
     if(bytes_written) *bytes_written = ctx.result.bytes_done;
+    if(write_unacked) *write_unacked = ctx.result.write_unacked;
     return error;
 }

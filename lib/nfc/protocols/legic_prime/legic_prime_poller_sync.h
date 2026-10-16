@@ -19,6 +19,9 @@ LegicPrimeError legic_prime_poller_sync_read(Nfc* nfc, LegicPrimeData* data);
  *
  * @param[out] bytes_written bytes the tag acknowledged (may be NULL): the
  * last ones of the range, on success and on failure.
+ * @param[out] write_unacked set on failure if the WRITE of the byte just
+ * before the acknowledged ones went out without an ACK, so that byte may
+ * hold the new value (may be NULL).
  *
  * @warning Bytes 5-6 are the DCF, which a real tag only lets decrease:
  * writing them is irreversible.  Bytes 7-8 mark a card as segmented.
@@ -28,7 +31,8 @@ LegicPrimeError legic_prime_poller_sync_write(
     uint16_t offset,
     const uint8_t* data,
     size_t size,
-    size_t* bytes_written);
+    size_t* bytes_written,
+    bool* write_unacked);
 
 #ifdef __cplusplus
 }
