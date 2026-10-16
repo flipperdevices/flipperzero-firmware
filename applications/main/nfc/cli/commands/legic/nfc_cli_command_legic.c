@@ -126,8 +126,9 @@ static void nfc_cli_legic_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
     }
 
     size_t written = 0;
+    bool unacked = false;
     LegicPrimeError error = legic_prime_poller_sync_write(
-        instance->nfc, instance->offset, instance->data, instance->size, &written);
+        instance->nfc, instance->offset, instance->data, instance->size, &written, &unacked);
 
     if(error == LegicPrimeErrorNone) {
         printf(ANSI_FG_BR_GREEN "\r\nSuccess\r\n" ANSI_RESET);
@@ -139,7 +140,7 @@ static void nfc_cli_legic_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
     printf("Wrote %u of %u bytes, last to first", (unsigned)written, (unsigned)instance->size);
     if(written) printf(" (offsets %u-%u)", (unsigned)(end - written), (unsigned)(end - 1));
     printf("\r\n");
-    if(error == LegicPrimeErrorNoAck) {
+    if(unacked) {
         printf(
             "The byte at offset %u may have been written without an ACK\r\n",
             (unsigned)(end - written - 1));

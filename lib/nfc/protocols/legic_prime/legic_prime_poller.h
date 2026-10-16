@@ -42,6 +42,10 @@ typedef struct {
     /** Bytes requested: the card size for a read, write_size for a write.
      *  0 if the card was not detected. */
     uint16_t bytes_total;
+    /** Write failure: the WRITE of the byte just before the written ones
+     *  went out and its ACK never came, so that byte may hold the new value
+     *  or the old one. */
+    bool write_unacked;
 } LegicPrimePollerEventDataResult;
 
 typedef union {

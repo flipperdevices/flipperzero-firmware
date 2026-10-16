@@ -93,6 +93,7 @@ static void legic_prime_poller_finish(
     result->error = error;
     result->bytes_done = bytes_done;
     result->bytes_total = bytes_total;
+    result->write_unacked = false;
     instance->state = error == LegicPrimeErrorNone ? LegicPrimePollerStateSuccess :
                                                      LegicPrimePollerStateFailure;
 }
@@ -128,6 +129,7 @@ static NfcCommand legic_prime_poller_request_mode_handler(LegicPrimePoller* inst
         instance->write_size = request->write_size;
         instance->write_pos = 0;
         instance->write_attempts = 0;
+        instance->write_unacked = false;
         // Proxmark3's legicrfsim.c ACKs in window 33; a real tag's window is
         // learned from its first ACK.
         instance->write_ack_window = 33;
@@ -196,6 +198,10 @@ static NfcCommand legic_prime_poller_write_handler(LegicPrimePoller* instance) {
         legic_prime_poller_apply_gain(instance);
         const uint16_t pos_before = instance->write_pos;
         err = legic_prime_poller_write_session(instance);
+        // NoAck only comes after a WRITE went out.  Sessions that fail before
+        // their first WRITE leave that byte in doubt.
+        if(instance->write_pos != pos_before) instance->write_unacked = false;
+        if(err == LegicPrimeErrorNoAck) instance->write_unacked = true;
         if(instance->write_pos == instance->write_size) {
             err = LegicPrimeErrorNone;
         } else if(instance->write_pos != pos_before) {
@@ -209,6 +215,7 @@ static NfcCommand legic_prime_poller_write_handler(LegicPrimePoller* instance) {
         }
     }
     legic_prime_poller_finish(instance, err, instance->write_pos, instance->write_size);
+    instance->legic_event_data.result.write_unacked = instance->write_unacked;
     return NfcCommandContinue;
 }
 
