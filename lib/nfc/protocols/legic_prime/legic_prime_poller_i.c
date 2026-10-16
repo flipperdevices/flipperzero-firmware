@@ -424,6 +424,8 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
     const uint16_t done_start = instance->done_count;
     // A byte read earlier came up again: the session could confirm bytes.
     bool confirmable = false;
+    // A byte passed its CRC for the first time.
+    bool fresh = false;
     const uint32_t budget_max =
         MIN(size * LEGIC_PRIME_READ_ATTEMPTS + 16U, LEGIC_PRIME_READ_SESSION_EXCHANGES);
     for(uint32_t budget = budget_max; budget; budget--) {
@@ -455,6 +457,7 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
                 instance->done_count++;
             } else {
                 if(seen) *progress += LEGIC_PRIME_POLLER_ATTEMPT;
+                fresh |= !seen;
                 instance->data->data[cur.addr] = data;
                 *progress |= LEGIC_PRIME_POLLER_SEEN;
             }
@@ -467,8 +470,10 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
     }
 
     // Running out of budget is no failure by itself: a MIM1024's first
-    // session reads each byte once.  It is one if bytes came up again and
-    // none of them could be confirmed.
-    return confirmable && instance->done_count == done_start ? LegicPrimeErrorWrongCrc :
-                                                               LegicPrimeErrorNone;
+    // session reads each byte once, so its progress is new bytes, not
+    // confirmed ones.  It is one if nothing was confirmed although bytes came
+    // up again, or if no new byte passed its CRC either.
+    return instance->done_count == done_start && (confirmable || !fresh) ?
+               LegicPrimeErrorWrongCrc :
+               LegicPrimeErrorNone;
 }
