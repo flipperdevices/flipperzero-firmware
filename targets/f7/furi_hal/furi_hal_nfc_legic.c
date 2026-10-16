@@ -34,9 +34,10 @@
 #include <furi_hal_cortex.h>
 #include <furi_hal_resources.h>
 
-// Chip-bit buffers (x4 bytes).  The longest transmission is the chained ACK
-// + MIM1024 WRITE: 6 + 23 bits of up to 21 chips, two closing pauses and the
-// 47-chip gap = 664 chips; 16 x 4 bytes (512 chips) cut the WRITE short.
+// Chip-bit buffers (x4 bytes).  The longest frame is a MIM1024 WRITE, 23 bits
+// of up to 21 chips plus the closing pause = 487 chips; the chained ACK + READ
+// is 130 + 47 + 235 = 412.  24 x 4 bytes (768 chips) leave headroom: an
+// earlier 512-chip buffer cut a chained frame short.
 #define FURI_HAL_NFC_LEGIC_POLLER_MAX_BUFFER_SIZE (24U)
 #define FURI_HAL_NFC_LEGIC_FIFO_SIZE              (512U)
 
@@ -88,10 +89,19 @@
 #define LEGIC_RX_FORCE_END_US         (45U)
 // Longest wait for TxEnd before giving up on it (longest frame ~1.5 ms).
 #define LEGIC_TXE_MAX_WAIT_MS         (10U)
+// The ACK's measured end, and so the launch time of a frame queued behind
+// it, comes from the thread's RxStart timestamp.  The usual wake-up path
+// (ISR, context switch, IRQ status read) is absorbed by LEGIC_RX_LAG_CHIPS;
+// a wake-up later than this (another thread inside a scheduler-suspended
+// region, e.g. malloc) would delay the frame one-for-one, and the ACK-window
+// gate only notices a delay of half a bit window (~49 µs) while a real MIM256
+// tolerates ~20 µs on the 240 µs gap.  Tune with LEGIC_WAKE_STATS.
+#define LEGIC_ACK_WAKE_LATE_US        (30U)
 
 #define LEGIC_RX_GAP_MS       (2U)
 #define LEGIC_RX_MAX_SEGMENTS (16U)
-#define LEGIC_RX_WINDOW_CHIPS (LEGIC_TAG_FRAME_WAIT_CHIPS + 23U * LEGIC_TAG_BIT_CHIPS + 40U)
+// Longest reply the poller asks for (the 60-window write ACK wait).
+#define LEGIC_RX_MAX_BITS     (64U)
 
 // Poller first-stage AM gain reduction, rg1_am = 2 (the default, "reduced
 // gain").  Full gain lost runs of a strong tag (PM3 `hf legic sim`: 43%
@@ -103,61 +113,93 @@
 #define LEGIC_RX_CONF3_POLLER (0x40U)
 #define LEGIC_RX_CONF3_FULL   (0x00U)
 
+// RxStart wake-up latency statistics (IRQ edge to the thread's timestamp),
+// for tuning LEGIC_ACK_WAKE_LATE_US: build with LEGIC_WAKE_STATS 1, run a
+// chained-write bench and read legic_wake_stats with a debugger.
+#define LEGIC_WAKE_STATS 0
+
+// TxEnd owed for the frame of the current exchange.
+typedef enum {
+    LegicTxeNone, // seen, or never expected
+    LegicTxeOwed, // the frame is on air, its TxEnd has not been seen
+    LegicTxeSynth, // seen before the frame was claimed: report it once
+} LegicTxeState;
+
+// One reception of the current reply (DWT cycles, bits in fifo_buf).
 typedef struct {
-    uint8_t frame_buf[FURI_HAL_NFC_LEGIC_POLLER_MAX_BUFFER_SIZE * 4];
-    size_t frame_buf_bits;
+    uint32_t t_rxs;
+    uint32_t t_rxe;
+    uint16_t bits;
+    uint16_t off; // byte offset in fifo_buf
+} LegicRxSegment;
+
+typedef struct {
     bool rx_reduced_gain;
     bool rx_gain_applied;
-    // Queued next frame (furi_hal_nfc_legic_poller_set_next).
+    // Reply of the next exchange, requested by set_rx_bits()/set_rx_ack()
+    // and latched by tx() for that exchange.
+    size_t rx_bits_expected;
+    int16_t rx_ack_window; // write ACK expected in this bit window, -1: data reply
+
+    // Queued next frame (furi_hal_nfc_legic_poller_set_next), chip bits.
     uint8_t next_buf[FURI_HAL_NFC_LEGIC_POLLER_MAX_BUFFER_SIZE * 4];
-    // The poller frame tx() must match to claim a queued frame: recorded at
-    // queue time and copied to the in-flight record when it is sent (the
-    // poller queues frame k+1 before claiming frame k).
-    uint8_t next_claim[4];
-    size_t next_claim_bits;
-    uint8_t sent_claim[4];
-    size_t sent_claim_bits;
     size_t next_chip_bits;
     bool next_pending;
+    // In-flight queued frame: sent from the receive loop, not yet claimed by
+    // the poller's tx() (furi_hal_nfc_legic_poller_claim_next).
     bool next_sent;
+    bool claim_requested;
     bool next_txe_seen;
-    bool synth_txe;
-    uint32_t next_tx_cmd;
     uint32_t next_frame_end;
-    // TxEnd still owed for the frame of the current exchange.
-    bool txe_pending;
-    uint8_t fifo_buf[FURI_HAL_NFC_LEGIC_FIFO_SIZE];
-    size_t fifo_buf_bits;
-    // Current frame timing (DWT cycles).
-    uint32_t t_tx_cmd;
+
+    // Current exchange (DWT cycles).
     uint32_t t_frame_end;
-    size_t rx_bits_expected;
-    // The next exchange's reply is a write ACK: one bit at a time set by the
-    // tag.  Requested by set_rx_ack(), latched by tx() for that exchange only.
-    bool rx_ack;
-    uint8_t rx_ack_window;
-    bool reply_is_ack;
-    uint8_t reply_ack_window; // the bit window a queued frame was built for
+    uint32_t t_rx_window_end;
+    int16_t reply_ack_window; // -1: data reply
+    LegicTxeState txe;
     // RX segments of the current exchange: one per reception.
     bool rx_started;
     bool seg_open;
     uint32_t t_last_rx_event;
     size_t seg_count;
-    uint32_t seg_t_rxs[LEGIC_RX_MAX_SEGMENTS];
-    uint32_t seg_t_rxe[LEGIC_RX_MAX_SEGMENTS];
-    uint16_t seg_bits[LEGIC_RX_MAX_SEGMENTS];
-    uint16_t seg_off[LEGIC_RX_MAX_SEGMENTS];
+    LegicRxSegment seg[LEGIC_RX_MAX_SEGMENTS];
+    uint8_t fifo_buf[FURI_HAL_NFC_LEGIC_FIFO_SIZE];
+    size_t fifo_buf_bits;
 } FuriHalNfcLegicPoller;
 
 static FuriHalNfcLegicPoller* furi_hal_nfc_legic_poller = NULL;
 
+#if LEGIC_WAKE_STATS
+#define LEGIC_WAKE_STATS_BIN_US (5U)
+#define LEGIC_WAKE_STATS_BINS   (32U)
+typedef struct {
+    uint32_t count; // RxStart wake-ups seen in the blocking branch
+    uint32_t ack_count; // of which write ACKs with a frame queued
+    uint32_t vetoed; // queued frames dropped by LEGIC_ACK_WAKE_LATE_US
+    uint32_t max_us;
+    uint32_t ack_max_us;
+    uint32_t hist[LEGIC_WAKE_STATS_BINS]; // 5 µs bins, the last one open-ended
+} LegicWakeStats;
+
+static volatile LegicWakeStats legic_wake_stats;
+
+static void legic_wake_stats_record(uint32_t latency_cycles, bool ack) {
+    const uint32_t us = latency_cycles / furi_hal_cortex_instructions_per_microsecond();
+    uint32_t bin = us / LEGIC_WAKE_STATS_BIN_US;
+    if(bin >= LEGIC_WAKE_STATS_BINS) bin = LEGIC_WAKE_STATS_BINS - 1;
+    legic_wake_stats.count++;
+    legic_wake_stats.hist[bin]++;
+    if(us > legic_wake_stats.max_us) legic_wake_stats.max_us = us;
+    if(ack) {
+        legic_wake_stats.ack_count++;
+        if(us > legic_wake_stats.ack_max_us) legic_wake_stats.ack_max_us = us;
+    }
+}
+#endif
+
 static uint32_t legic_chips_to_cycles(uint32_t chips) {
     const uint64_t cpu_hz = (uint64_t)furi_hal_cortex_instructions_per_microsecond() * 1000000U;
     return (uint32_t)(chips * 64U * cpu_hz / 13560000U);
-}
-
-static int32_t legic_cycles_to_us(int32_t cycles) {
-    return cycles / (int32_t)furi_hal_cortex_instructions_per_microsecond();
 }
 
 static FuriHalNfcError furi_hal_nfc_legic_common_init(const FuriHalSpiBusHandle* handle) {
@@ -199,6 +241,8 @@ static FuriHalNfcError furi_hal_nfc_legic_poller_init(const FuriHalSpiBusHandle*
 
     furi_hal_nfc_legic_poller = malloc(sizeof(FuriHalNfcLegicPoller));
     memset(furi_hal_nfc_legic_poller, 0, sizeof(FuriHalNfcLegicPoller));
+    furi_hal_nfc_legic_poller->rx_ack_window = -1;
+    furi_hal_nfc_legic_poller->reply_ack_window = -1;
 
     // Subcarrier-stream mode + OOK: FIFO chip-bits are OOK-modulated directly
     // on TX, and RX demodulates a 212 kHz subcarrier into the FIFO.
@@ -244,13 +288,13 @@ static FuriHalNfcError furi_hal_nfc_legic_poller_deinit(const FuriHalSpiBusHandl
 
 void furi_hal_nfc_legic_poller_set_rx_bits(size_t bits) {
     furi_check(furi_hal_nfc_legic_poller);
+    furi_check(bits > 0 && bits <= LEGIC_RX_MAX_BITS);
     furi_hal_nfc_legic_poller->rx_bits_expected = bits;
 }
 
 void furi_hal_nfc_legic_poller_set_rx_ack(size_t window) {
     furi_check(furi_hal_nfc_legic_poller);
-    furi_check(window <= UINT8_MAX);
-    furi_hal_nfc_legic_poller->rx_ack = true;
+    furi_check(window < LEGIC_RX_MAX_BITS);
     furi_hal_nfc_legic_poller->rx_ack_window = window;
 }
 
@@ -282,8 +326,10 @@ typedef struct {
 } LegicChipBitWriter;
 
 static void legic_chip_bit_writer_emit(LegicChipBitWriter* w, bool bit, size_t count) {
+    // A truncated frame would reach the tag as a different command (a WRITE
+    // cannot be undone), so a buffer too small for a frame fails loudly.
+    furi_check(w->bit_pos + count <= sizeof(w->buf) * BITS_IN_BYTE);
     for(size_t i = 0; i < count; i++) {
-        if(w->bit_pos >= sizeof(w->buf) * 8) return; // full
         if(bit) {
             w->buf[w->bit_pos / 8] |= (1u << (w->bit_pos % 8));
         }
@@ -321,14 +367,24 @@ void furi_hal_nfc_legic_poller_set_next(
         legic_encode_frame(&w, second, second_bits);
     }
     memcpy(instance->next_buf, w.buf, sizeof(instance->next_buf));
-    const uint8_t* claim = (second && second_bits) ? second : first;
-    instance->next_claim_bits = (second && second_bits) ? second_bits : first_bits;
-    furi_check(instance->next_claim_bits <= sizeof(instance->next_claim) * 8);
-    memcpy(instance->next_claim, claim, (instance->next_claim_bits + 7) / 8);
     instance->next_chip_bits = w.bit_pos;
     // next_sent refers to the previous queued frame, which may still be on
     // air waiting to be claimed; leave it alone.
     instance->next_pending = true;
+}
+
+void furi_hal_nfc_legic_poller_claim_next(void) {
+    furi_check(furi_hal_nfc_legic_poller);
+    furi_hal_nfc_legic_poller->claim_requested = true;
+}
+
+void furi_hal_nfc_legic_poller_cancel_next(void) {
+    FuriHalNfcLegicPoller* instance = furi_hal_nfc_legic_poller;
+    furi_check(instance);
+    instance->next_pending = false;
+    instance->next_sent = false;
+    instance->next_txe_seen = false;
+    instance->claim_requested = false;
 }
 
 bool furi_hal_nfc_legic_poller_next_sent(void) {
@@ -336,8 +392,15 @@ bool furi_hal_nfc_legic_poller_next_sent(void) {
     return furi_hal_nfc_legic_poller->next_sent;
 }
 
-bool furi_hal_nfc_legic_poller_tx_in_flight(void) {
-    return furi_hal_nfc_legic_poller && furi_hal_nfc_legic_poller->next_sent;
+// A queued frame is sent from the receive path of the exchange before it;
+// until the poller's tx() claims it, that frame or its reply is on air and
+// the STOP of a trx_reset would cut it off.
+static FuriHalNfcError furi_hal_nfc_legic_poller_trx_reset(const FuriHalSpiBusHandle* handle) {
+    FuriHalNfcLegicPoller* instance = furi_hal_nfc_legic_poller;
+    if(instance && instance->next_sent) return FuriHalNfcErrorNone;
+
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
+    return FuriHalNfcErrorNone;
 }
 
 static FuriHalNfcError furi_hal_nfc_legic_poller_tx(
@@ -345,51 +408,40 @@ static FuriHalNfcError furi_hal_nfc_legic_poller_tx(
     const uint8_t* tx_data,
     size_t tx_bits) {
     FuriHalNfcLegicPoller* instance = furi_hal_nfc_legic_poller;
-    instance->reply_is_ack = instance->rx_ack;
     instance->reply_ack_window = instance->rx_ack_window;
-    instance->rx_ack = false;
+    instance->rx_ack_window = -1;
 
-    // Compare bit by bit: bytes past tx_bits may hold stale data.
-    bool claims_queued = instance->next_sent && tx_bits == instance->sent_claim_bits;
-    for(size_t i = 0; claims_queued && i < tx_bits; i++) {
-        claims_queued = ((tx_data[i / 8] ^ instance->sent_claim[i / 8]) >> (i % 8) & 1u) == 0;
-    }
-    // A queued frame left over from an abandoned session must not swallow a
-    // new frame (it would never be transmitted).
-    instance->next_sent = instance->next_sent && claims_queued;
-    if(claims_queued) {
-        // Queued frame already on air (sent from the previous exchange's
-        // receive loop): only set up the bookkeeping for its reply.
-        instance->next_sent = false;
-        instance->t_tx_cmd = instance->next_tx_cmd;
-        instance->t_frame_end = instance->next_frame_end;
-        instance->rx_started = false;
-        instance->seg_open = false;
-        instance->seg_count = 0;
-        instance->fifo_buf_bits = 0;
-        // Its TxEnd may already have been consumed by the block-TX wait loop.
-        instance->synth_txe = instance->next_txe_seen;
-        instance->txe_pending = !instance->next_txe_seen;
-        instance->next_txe_seen = false;
-        return FuriHalNfcErrorNone;
-    }
-    // A frame queued with set_next() before this tx() stays queued: it goes
-    // out after this frame's reply.
-    instance->synth_txe = false;
-
-    LegicChipBitWriter w = {0};
-    // tx_data is LSB-first: frame bit i is bit (i % 8) of byte i / 8.
-    legic_encode_frame(&w, tx_data, tx_bits);
-
-    // Round up to whole bytes for the chip FIFO; padding chip-bits are 0
-    // (carrier on).
-    instance->frame_buf_bits = ((w.bit_pos + 7) / 8) * 8;
-    memcpy(instance->frame_buf, w.buf, instance->frame_buf_bits / 8);
+    // A claim (furi_hal_nfc_legic_poller_claim_next) names this frame as the
+    // one sent from the previous exchange's receive loop.  A sent frame
+    // nobody claims belongs to an abandoned session: forget it, or it would
+    // swallow this frame (which would then never be transmitted).
+    const bool claims_queued = instance->claim_requested && instance->next_sent;
+    instance->claim_requested = false;
+    instance->next_sent = false;
 
     instance->rx_started = false;
     instance->seg_open = false;
     instance->seg_count = 0;
     instance->fifo_buf_bits = 0;
+    const uint32_t rx_window_chips =
+        LEGIC_TAG_FRAME_WAIT_CHIPS + instance->rx_bits_expected * LEGIC_TAG_BIT_CHIPS + 10U;
+
+    if(claims_queued) {
+        // Already on air: only set up the bookkeeping for its reply.  Its
+        // TxEnd may already have been consumed by the block-TX wait loop.
+        instance->t_frame_end = instance->next_frame_end;
+        instance->txe = instance->next_txe_seen ? LegicTxeSynth : LegicTxeOwed;
+        instance->next_txe_seen = false;
+        instance->t_rx_window_end = instance->t_frame_end + legic_chips_to_cycles(rx_window_chips);
+        return FuriHalNfcErrorNone;
+    }
+    // A frame queued with set_next() before this tx() stays queued: it goes
+    // out after this frame's reply.
+
+    LegicChipBitWriter w = {0};
+    // tx_data is LSB-first: frame bit i is bit (i % 8) of byte i / 8.
+    legic_encode_frame(&w, tx_data, tx_bits);
+
     if(instance->rx_reduced_gain != instance->rx_gain_applied) {
         st25r3916_write_reg(
             handle,
@@ -398,39 +450,20 @@ static FuriHalNfcError furi_hal_nfc_legic_poller_tx(
         instance->rx_gain_applied = instance->rx_reduced_gain;
     }
 
-    // Same preparation as furi_hal_nfc_poller_tx_common.
-    st25r3916_direct_cmd(handle, ST25R3916_CMD_CLEAR_FIFO);
-    st25r3916_clear_reg_bits(
-        handle, ST25R3916_REG_TIMER_EMV_CONTROL, ST25R3916_REG_TIMER_EMV_CONTROL_nrt_emv);
-    st25r3916_change_reg_bits(
-        handle,
-        ST25R3916_REG_ISO14443A_NFC,
-        (ST25R3916_REG_ISO14443A_NFC_no_tx_par | ST25R3916_REG_ISO14443A_NFC_no_rx_par),
-        (ST25R3916_REG_ISO14443A_NFC_no_tx_par_off | ST25R3916_REG_ISO14443A_NFC_no_rx_par_off));
-    uint32_t interrupts =
-        (ST25R3916_IRQ_MASK_FWL | ST25R3916_IRQ_MASK_TXE | ST25R3916_IRQ_MASK_RXS |
-         ST25R3916_IRQ_MASK_RXE | ST25R3916_IRQ_MASK_PAR | ST25R3916_IRQ_MASK_CRC |
-         ST25R3916_IRQ_MASK_ERR1 | ST25R3916_IRQ_MASK_ERR2 | ST25R3916_IRQ_MASK_NRE);
-    st25r3916_get_irq(handle);
-    st25r3916_mask_irq(handle, ~interrupts);
-    st25r3916_write_fifo(handle, instance->frame_buf, instance->frame_buf_bits);
+    furi_hal_nfc_poller_tx_prepare(handle);
+    // Round up to whole bytes for the chip FIFO; padding chip-bits are 0
+    // (carrier on).
+    st25r3916_write_fifo(handle, w.buf, ((w.bit_pos + 7) / 8) * 8);
 
     const uint32_t cmd_latency =
         LEGIC_TX_CMD_LATENCY_US * furi_hal_cortex_instructions_per_microsecond();
-    instance->t_tx_cmd = DWT->CYCCNT;
+    const uint32_t t_tx_cmd = DWT->CYCCNT;
     st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSMIT_WITHOUT_CRC);
-    instance->txe_pending = true;
-    instance->t_frame_end = instance->t_tx_cmd + cmd_latency + legic_chips_to_cycles(w.bit_pos);
+    instance->txe = LegicTxeOwed;
+    instance->t_frame_end = t_tx_cmd + cmd_latency + legic_chips_to_cycles(w.bit_pos);
+    instance->t_rx_window_end = instance->t_frame_end + legic_chips_to_cycles(rx_window_chips);
 
     return FuriHalNfcErrorNone;
-}
-
-static uint32_t furi_hal_nfc_legic_rx_window_end(FuriHalNfcLegicPoller* instance) {
-    uint32_t chips =
-        instance->rx_bits_expected ?
-            LEGIC_TAG_FRAME_WAIT_CHIPS + instance->rx_bits_expected * LEGIC_TAG_BIT_CHIPS + 10U :
-            LEGIC_RX_WINDOW_CHIPS;
-    return instance->t_frame_end + legic_chips_to_cycles(chips);
 }
 
 // Append the FIFO content of one finished reception to fifo_buf and re-arm
@@ -440,26 +473,36 @@ static void
     const FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
     uint8_t seg[64];
     size_t seg_bits = 0;
-    st25r3916_read_fifo(handle, seg, sizeof(seg), &seg_bits);
+    if(!st25r3916_read_fifo(handle, seg, sizeof(seg), &seg_bits)) {
+        // An empty reception (shorter than one FIFO bit).  It is recorded
+        // all the same: its end is the re-arm time that the next segment's
+        // detection lag depends on.  More than sizeof(seg) cannot build up,
+        // gap_over ends a reception within ~2 ms (~14 bytes).
+        seg_bits = 0;
+    }
+    const bool started = instance->seg_open;
     instance->seg_open = false;
 
-    if(rearm && (int32_t)(now - furi_hal_nfc_legic_rx_window_end(instance)) < 0) {
+    if(rearm && (int32_t)(now - instance->t_rx_window_end) < 0) {
         st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
     }
 
-    // Byte-align each segment in fifo_buf so segments stay readable in the log.
-    size_t pos = (instance->fifo_buf_bits + 7) / BITS_IN_BYTE;
-    size_t seg_bytes = (seg_bits + 7) / BITS_IN_BYTE;
-    if(seg_bytes > sizeof(seg)) seg_bytes = sizeof(seg);
+    // Without an RxStart the run has no start time and cannot be placed; the
+    // FIFO is drained above so it does not land in the next segment.
+    if(!started) return;
     if(instance->seg_count >= LEGIC_RX_MAX_SEGMENTS) return;
+    // Byte-align each segment: seg.off is a byte offset and decode() reads a
+    // segment from bit 0 of its first byte.
+    const size_t pos = (instance->fifo_buf_bits + 7) / BITS_IN_BYTE;
+    const size_t seg_bytes = (seg_bits + 7) / BITS_IN_BYTE;
     if(pos + seg_bytes > sizeof(instance->fifo_buf)) return;
 
     memcpy(&instance->fifo_buf[pos], seg, seg_bytes);
     instance->fifo_buf_bits = pos * BITS_IN_BYTE + seg_bits;
-    instance->seg_t_rxe[instance->seg_count] = now;
-    instance->seg_bits[instance->seg_count] = seg_bits;
-    instance->seg_off[instance->seg_count] = pos;
-    instance->seg_count++;
+    LegicRxSegment* s = &instance->seg[instance->seg_count++];
+    s->t_rxe = now;
+    s->bits = seg_bits;
+    s->off = pos;
 }
 
 // Bit window of a write ACK, counted like reply bits from 330 µs after our
@@ -469,7 +512,7 @@ static int32_t furi_hal_nfc_legic_ack_window(FuriHalNfcLegicPoller* instance) {
     const uint32_t t0 = instance->t_frame_end + legic_chips_to_cycles(LEGIC_TAG_FRAME_WAIT_CHIPS);
     const int32_t tb = legic_chips_to_cycles(LEGIC_TAG_BIT_CHIPS);
     const int32_t start =
-        (int32_t)(instance->seg_t_rxs[0] - legic_chips_to_cycles(LEGIC_RX_LAG_CHIPS) - t0);
+        (int32_t)(instance->seg[0].t_rxs - legic_chips_to_cycles(LEGIC_RX_LAG_CHIPS) - t0);
     return start < -tb / 2 ? -1 : (start + tb / 2) / tb;
 }
 
@@ -479,14 +522,14 @@ static int32_t furi_hal_nfc_legic_ack_window(FuriHalNfcLegicPoller* instance) {
 // from its reception, as tags time the next frame from their own ACK and
 // don't all place it on the grid (Proxmark3's sim sends it ~23 µs early).
 static bool furi_hal_nfc_legic_reply_end(FuriHalNfcLegicPoller* instance, uint32_t* end) {
-    if(!instance->reply_is_ack) {
+    if(instance->reply_ack_window < 0) {
         *end = instance->t_frame_end +
                legic_chips_to_cycles(
                    LEGIC_TAG_FRAME_WAIT_CHIPS + instance->rx_bits_expected * LEGIC_TAG_BIT_CHIPS);
         return true;
     }
     if(!instance->rx_started || furi_hal_nfc_legic_ack_window(instance) < 0) return false;
-    *end = instance->seg_t_rxs[0] - legic_chips_to_cycles(LEGIC_RX_LAG_CHIPS) +
+    *end = instance->seg[0].t_rxs - legic_chips_to_cycles(LEGIC_RX_LAG_CHIPS) +
            legic_chips_to_cycles(LEGIC_TAG_BIT_CHIPS);
     return true;
 }
@@ -496,7 +539,7 @@ static bool furi_hal_nfc_legic_reply_end(FuriHalNfcLegicPoller* instance, uint32
 // writing, so in any other window the frame would reach the tag garbled (and
 // a garbled WRITE passes its CRC-4 one time in 16).
 static bool furi_hal_nfc_legic_next_in_step(FuriHalNfcLegicPoller* instance) {
-    return !instance->reply_is_ack ||
+    return instance->reply_ack_window < 0 ||
            furi_hal_nfc_legic_ack_window(instance) == instance->reply_ack_window;
 }
 
@@ -510,8 +553,8 @@ static void furi_hal_nfc_legic_send_next(FuriHalNfcLegicPoller* instance, uint32
     const uint32_t cmd_latency = LEGIC_TX_CMD_LATENCY_US * mhz;
     instance->next_pending = false;
 
-    const uint32_t gap_us = instance->reply_is_ack ? LEGIC_NEXT_FRAME_AFTER_ACK_US :
-                                                     LEGIC_NEXT_FRAME_US;
+    const uint32_t gap_us = instance->reply_ack_window >= 0 ? LEGIC_NEXT_FRAME_AFTER_ACK_US :
+                                                              LEGIC_NEXT_FRAME_US;
     const uint32_t cmd_at = reply_end + gap_us * mhz - cmd_latency;
 
     const size_t fifo_bits = ((instance->next_chip_bits + 7) / 8) * 8;
@@ -528,50 +571,78 @@ static void furi_hal_nfc_legic_send_next(FuriHalNfcLegicPoller* instance, uint32
         // Too late: the tag would read it in the wrong keystream slot.
         return;
     }
+    // The rest of the wait (up to ~100 µs) is a cycle-accurate launch: the
+    // frame has to start within ~20 µs of its slot (a real MIM256 lost 1 in
+    // 5 chained WRITEs at +263-268 µs), so a timer wake-up here would still
+    // end in a short spin.
     while((int32_t)(cmd_at - DWT->CYCCNT) > 0) {
     }
-    instance->next_tx_cmd = DWT->CYCCNT;
+    const uint32_t tx_cmd = DWT->CYCCNT;
     st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSMIT_WITHOUT_CRC);
     if(fifo_bytes > head_bytes) {
         st25r3916_reg_write_fifo(handle, &instance->next_buf[head_bytes], fifo_bytes - head_bytes);
     }
     instance->next_frame_end =
-        instance->next_tx_cmd + cmd_latency + legic_chips_to_cycles(instance->next_chip_bits);
-    memcpy(instance->sent_claim, instance->next_claim, sizeof(instance->sent_claim));
-    instance->sent_claim_bits = instance->next_claim_bits;
+        tx_cmd + cmd_latency + legic_chips_to_cycles(instance->next_chip_bits);
     instance->next_txe_seen = false;
     instance->next_sent = true;
+}
+
+// The frame queued behind a write ACK is launched from the ACK's thread-side
+// RxStart timestamp (see LEGIC_ACK_WAKE_LATE_US).  A wake-up later than the
+// usual path would send it late by the same amount, past what the tag
+// accepts, while the ACK-window gate still passes: drop it instead (one
+// session lost) rather than risk a WRITE decoded on a stepped keystream.
+// The chip holds its IRQ line until the status registers are read, so the
+// ISR timestamp is the RxStart edge even when RxEnd is pending too.  An EXTI
+// delayed by a critical section is late in both timestamps and not caught.
+static void furi_hal_nfc_legic_check_wake(FuriHalNfcLegicPoller* instance, uint32_t now) {
+    const uint32_t latency = now - furi_hal_nfc_get_irq_timestamp();
+    const bool ack_with_next = instance->reply_ack_window >= 0 && instance->next_pending;
+#if LEGIC_WAKE_STATS
+    legic_wake_stats_record(latency, ack_with_next);
+#endif
+    if(!ack_with_next) return;
+    if(latency > LEGIC_ACK_WAKE_LATE_US * furi_hal_cortex_instructions_per_microsecond()) {
+        instance->next_pending = false;
+#if LEGIC_WAKE_STATS
+        legic_wake_stats.vetoed++;
+#endif
+    }
 }
 
 static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms) {
     FuriHalNfcLegicPoller* instance = furi_hal_nfc_legic_poller;
 
-    if(instance->synth_txe) {
-        instance->synth_txe = false;
+    if(instance->txe == LegicTxeSynth) {
+        instance->txe = LegicTxeNone;
         return FuriHalNfcEventTxEnd;
     }
 
     if(!instance->rx_started) {
         // Never block forever on a TxEnd: the transceive state machine only
         // starts its frame-wait timer after TxEnd, so a lost one would hang.
-        const bool owed = instance->txe_pending;
+        const bool owed = instance->txe == LegicTxeOwed;
         FuriHalNfcEvent event =
             furi_hal_nfc_wait_event_common(owed ? LEGIC_TXE_MAX_WAIT_MS : timeout_ms);
-        uint32_t now = DWT->CYCCNT;
+        const uint32_t now = DWT->CYCCNT;
         if(owed && (event & FuriHalNfcEventTimeout)) {
-            instance->txe_pending = false;
+            instance->txe = LegicTxeNone;
             return FuriHalNfcEventTxEnd;
         }
-        if(event & FuriHalNfcEventTxEnd) instance->txe_pending = false;
-        if((event & FuriHalNfcEventTxEnd) && instance->next_sent) {
+        if(event & FuriHalNfcEventTxEnd) {
+            instance->txe = LegicTxeNone;
             // TxEnd of a queued frame before the poller claimed it.
-            instance->next_txe_seen = true;
+            if(instance->next_sent) instance->next_txe_seen = true;
         }
         if(event & FuriHalNfcEventRxStart) {
             instance->rx_started = true;
             instance->seg_open = true;
-            instance->seg_t_rxs[0] = now;
+            // The thread-side timestamp: the detection lag constants were
+            // tuned on it.
+            instance->seg[0].t_rxs = now;
             instance->t_last_rx_event = now;
+            furi_hal_nfc_legic_check_wake(instance, now);
             if(event & FuriHalNfcEventRxEnd)
                 furi_hal_nfc_legic_collect_segment(instance, now, true);
             // Report only RxStart now; RxEnd is reported once collection ends.
@@ -581,38 +652,45 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
     }
 
     // Collecting: swallow further RxStart/RxEnd until the reply window has
-    // passed or the line stays quiet.  Poll without blocking: a 1 ms tick
-    // wait here delays the next frame, and real tags drop the session if the
-    // reader waits too long (PM3 uses 220 µs gaps).
+    // passed or the line stays quiet.  This polls without blocking, about
+    // 1.2 ms of every ~2.6 ms exchange at the NFC worker's priority: the
+    // queued frame has to leave LEGIC_RX_FORCE_END_US (45 µs) after the
+    // reply's end, which no tick wait meets (90 µs already made every queued
+    // frame late), and real tags drop the session if the reader waits too
+    // long (PM3 uses 220 µs gaps).  Arming the HAL's one-pulse block-TX timer
+    // for the deadline and blocking in wait_event_common would reclaim the
+    // time (nfc.c stops both timers at RxStart), but it moves every segment
+    // timestamp by a few µs and so needs the sim + card clean-read bench
+    // re-run; left for a follow-up.  Everything constant for the exchange is
+    // computed once here, so an iteration is a flag peek and three compares.
+    // flags_wait() with a zero timeout returns FuriFlagErrorResource (all
+    // bits set) when nothing is pending, which wait_event_common would read
+    // as every event including abort; peek first.
+    const uint32_t mhz = furi_hal_cortex_instructions_per_microsecond();
+    uint32_t reply_end = 0;
+    const bool reply_end_known = furi_hal_nfc_legic_reply_end(instance, &reply_end);
+    const int32_t force_cycles = LEGIC_RX_FORCE_END_US * mhz;
+    const int32_t gap_cycles = LEGIC_RX_GAP_MS * 1000U * mhz;
     while(true) {
-        // flags_wait() with a zero timeout returns FuriFlagErrorResource (all
-        // bits set) when nothing is pending, which wait_event_common would
-        // read as every event including abort; peek first.
         FuriHalNfcEvent event = 0;
         if(furi_thread_flags_get() & FURI_HAL_NFC_EVENT_INTERNAL_ALL) {
             event = furi_hal_nfc_wait_event_common(0);
         }
-        uint32_t now = DWT->CYCCNT;
+        const uint32_t now = DWT->CYCCNT;
         if(event & (FuriHalNfcEventRxStart | FuriHalNfcEventRxEnd))
             instance->t_last_rx_event = now;
         if(event & FuriHalNfcEventRxStart) {
             instance->seg_open = true;
             if(instance->seg_count < LEGIC_RX_MAX_SEGMENTS) {
-                instance->seg_t_rxs[instance->seg_count] = now;
+                instance->seg[instance->seg_count].t_rxs = now;
             }
         }
         if(event & FuriHalNfcEventRxEnd) furi_hal_nfc_legic_collect_segment(instance, now, true);
 
-        const int32_t past_window = (int32_t)(now - furi_hal_nfc_legic_rx_window_end(instance));
-        bool window_over = past_window > 0;
-        uint32_t reply_end = 0;
-        const bool reply_end_known = furi_hal_nfc_legic_reply_end(instance, &reply_end);
-        bool force_end =
-            instance->next_pending && reply_end_known &&
-            (int32_t)(now - reply_end) >
-                (int32_t)(LEGIC_RX_FORCE_END_US * furi_hal_cortex_instructions_per_microsecond());
-        bool gap_over = legic_cycles_to_us(now - instance->t_last_rx_event) >
-                        (int32_t)(LEGIC_RX_GAP_MS * 1000U);
+        const bool window_over = (int32_t)(now - instance->t_rx_window_end) > 0;
+        const bool force_end = instance->next_pending && reply_end_known &&
+                               (int32_t)(now - reply_end) > force_cycles;
+        const bool gap_over = (int32_t)(now - instance->t_last_rx_event) > gap_cycles;
         if((window_over && !instance->seg_open) || force_end || gap_over ||
            (event & FuriHalNfcEventAbortRequest)) {
             if(instance->seg_open) {
@@ -642,6 +720,8 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
  * pause; it is '1' when FIFO '1' samples, shifted back by the detection lag,
  * cover at least half of the window.  (A 40% threshold without the lag
  * misread MIM1024's card type 110110 as 111110 in 25% of replies.)
+ * One pass over the samples: a sample (18.9 µs) is shorter than a window, so
+ * it covers parts of at most two.
  */
 static size_t furi_hal_nfc_legic_decode(
     FuriHalNfcLegicPoller* instance,
@@ -658,33 +738,34 @@ static size_t furi_hal_nfc_legic_decode(
 
     size_t nbits = max_bits;
     if(nbits > out_size * BITS_IN_BYTE) nbits = out_size * BITS_IN_BYTE;
+    furi_check(nbits <= LEGIC_RX_MAX_BITS);
 
-    size_t last_one = 0;
-    for(size_t k = 0; k < nbits; k++) {
-        const int32_t w0 = k * tb;
-        const int32_t w1 = w0 + tb;
-        int32_t ones = 0;
-        for(size_t i = 0; i < instance->seg_count; i++) {
-            const bool just_rearmed =
-                i && (int32_t)(instance->seg_t_rxs[i] - instance->seg_t_rxe[i - 1]) < rearm_short;
-            int32_t s =
-                (int32_t)(instance->seg_t_rxs[i] - t0) - (just_rearmed ? lag_rearm : lag_first);
-            const uint8_t* seg = &instance->fifo_buf[instance->seg_off[i]];
-            for(size_t j = 0; j < instance->seg_bits[i]; j++) {
-                if(!((seg[j / 8] >> (j % 8)) & 1u)) continue;
-                int32_t a = s + (int32_t)j * fb;
-                int32_t b = a + fb;
-                if(a < w0) a = w0;
-                if(b > w1) b = w1;
-                if(b > a) ones += b - a;
+    int32_t ones[LEGIC_RX_MAX_BITS] = {0};
+    for(size_t i = 0; i < instance->seg_count; i++) {
+        const LegicRxSegment* sg = &instance->seg[i];
+        const bool just_rearmed = i &&
+                                  (int32_t)(sg->t_rxs - instance->seg[i - 1].t_rxe) < rearm_short;
+        const int32_t s = (int32_t)(sg->t_rxs - t0) - (just_rearmed ? lag_rearm : lag_first);
+        const uint8_t* samples = &instance->fifo_buf[sg->off];
+        for(size_t j = 0; j < sg->bits; j++) {
+            if(!((samples[j / 8] >> (j % 8)) & 1u)) continue;
+            int32_t a = s + (int32_t)j * fb;
+            const int32_t b = a + fb;
+            if(b <= 0) continue;
+            if(a < 0) a = 0;
+            for(size_t k = a / tb; k < nbits && (int32_t)k * tb < b; k++) {
+                const int32_t w0 = k * tb;
+                const int32_t w1 = w0 + tb;
+                ones[k] += MIN(b, w1) - MAX(a, w0);
             }
         }
-        if(ones * 2 >= tb) {
+    }
+    for(size_t k = 0; k < nbits; k++) {
+        if(ones[k] * 2 >= tb) {
             out[k / BITS_IN_BYTE] |= 1u << (k % BITS_IN_BYTE);
-            last_one = k + 1;
         }
     }
-    return instance->rx_bits_expected ? nbits : last_one;
+    return nbits;
 }
 
 static FuriHalNfcError furi_hal_nfc_legic_poller_rx(
@@ -695,8 +776,8 @@ static FuriHalNfcError furi_hal_nfc_legic_poller_rx(
     UNUSED(handle);
     FuriHalNfcLegicPoller* instance = furi_hal_nfc_legic_poller;
 
-    size_t max_bits = instance->rx_bits_expected ? instance->rx_bits_expected : 23U;
-    *rx_bits = furi_hal_nfc_legic_decode(instance, rx_data, rx_data_size, max_bits);
+    *rx_bits =
+        furi_hal_nfc_legic_decode(instance, rx_data, rx_data_size, instance->rx_bits_expected);
 
     return FuriHalNfcErrorNone;
 }
@@ -1020,6 +1101,7 @@ const FuriHalNfcTechBase furi_hal_nfc_legic = {
             .wait_event = furi_hal_nfc_legic_poller_wait_event,
             .tx = furi_hal_nfc_legic_poller_tx,
             .rx = furi_hal_nfc_legic_poller_rx,
+            .trx_reset = furi_hal_nfc_legic_poller_trx_reset,
         },
     .listener =
         {

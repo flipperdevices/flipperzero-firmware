@@ -472,10 +472,19 @@ FuriHalNfcError furi_hal_nfc_felica_listener_set_sensf_res_data(
     const uint8_t pmm_len,
     const uint16_t sys_code);
 
+/*
+ * The furi_hal_nfc_legic_* functions below are deliberately not exported to
+ * applications (api_symbols: -): LEGIC Prime is driven through lib/nfc, whose
+ * poller and listener are their only users.
+ */
+
 /**
  * @brief Set the length of the tag reply expected for the next frame.
  *
- * @param[in] bits number of reply bits, 0 if no reply is expected.
+ * Every LEGIC Prime frame sent by the poller gets a reply of known length.
+ *
+ * @param[in] bits number of reply bits, 1 to 64 (the longest is the 60-window
+ *            wait for a write ACK).
  */
 void furi_hal_nfc_legic_poller_set_rx_bits(size_t bits);
 
@@ -484,12 +493,13 @@ void furi_hal_nfc_legic_poller_set_rx_bits(size_t bits);
  *
  * The ACK is a single bit in the bit window in which the tag finished
  * writing.  A frame queued with furi_hal_nfc_legic_poller_set_next() is sent
- * 260 µs after the ACK, but only if the ACK came in bit window `window`
- * (counted from 0 like reply bits), because the queued frame's keystream
- * depends on it; otherwise, or if no ACK comes, the queued frame is dropped.
+ * 240 µs after the ACK's measured end, but only if the ACK came in bit window
+ * `window` (counted from 0 like reply bits), because the queued frame's
+ * keystream depends on it; otherwise, if no ACK comes, or if the HAL noticed
+ * the ACK too late to send the frame on time, the queued frame is dropped.
  * Applies to the next exchange only.
  *
- * @param[in] window bit window the queued frame was built for.
+ * @param[in] window bit window the queued frame was built for (below 64).
  */
 void furi_hal_nfc_legic_poller_set_rx_ack(size_t window);
 
@@ -508,13 +518,14 @@ void furi_hal_nfc_legic_poller_set_rx_reduced_gain(bool reduced);
  *
  * Real tags only wait a few 99.1 µs slots for the reader's next frame, so it
  * is sent from the receive path, 260 µs after the tag's reply ends (240 µs
- * after a write ACK), before the reply is decoded.  The following poller tx()
- * of the same frame then only waits for its reply, whose length is set with
+ * after a write ACK), before the reply is decoded.  The poller then passes
+ * the same frame to tx() after furi_hal_nfc_legic_poller_claim_next(), and
+ * tx() only waits for its reply, whose length is set with
  * furi_hal_nfc_legic_poller_set_rx_bits() as for any other frame.
  *
  * @param[in] first first frame, LSB-first bits.
  * @param[in] first_bits number of bits in the first frame.
- * @param[in] second optional frame chained ~220 µs after the first (or NULL).
+ * @param[in] second optional frame chained 221.8 µs after the first (or NULL).
  * @param[in] second_bits number of bits in the second frame.
  */
 void furi_hal_nfc_legic_poller_set_next(
@@ -529,6 +540,30 @@ void furi_hal_nfc_legic_poller_set_next(
  * @returns true if it was sent and has not been claimed by tx() yet.
  */
 bool furi_hal_nfc_legic_poller_next_sent(void);
+
+/**
+ * @brief Declare the next poller tx() to be the queued LEGIC Prime frame.
+ *
+ * Call it before the nfc_poller_trx() of a frame that was queued with
+ * furi_hal_nfc_legic_poller_set_next() and sent in the previous exchange
+ * (furi_hal_nfc_legic_poller_next_sent()): tx() then only sets up the
+ * reception of its reply instead of transmitting the frame again.  Without
+ * the claim, or if the queued frame was not sent, tx() transmits as usual.
+ * Applies to the next tx() only.
+ */
+void furi_hal_nfc_legic_poller_claim_next(void);
+
+/**
+ * @brief Drop the queued LEGIC Prime frame and forget an unclaimed sent one.
+ *
+ * Call it at the start of every session's handshake, before the session's
+ * first furi_hal_nfc_legic_poller_set_next() and before the IV's
+ * nfc_poller_trx().  A frame left over from a session that ended without
+ * claiming it (frame-wait timeout, unknown card type) would otherwise be
+ * transmitted after the handshake's reply on the old session's keystream,
+ * or keep furi_hal_nfc_trx_reset() from stopping the receiver.
+ */
+void furi_hal_nfc_legic_poller_cancel_next(void);
 
 /**
  * @brief Get when the last received LEGIC Prime reader frame started (first pause).
