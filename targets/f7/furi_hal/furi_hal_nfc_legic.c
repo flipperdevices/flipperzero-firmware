@@ -36,8 +36,9 @@
 
 // Chip-bit buffers (x4 bytes).  The longest frame is a MIM1024 WRITE, 23 bits
 // of up to 21 chips plus the closing pause = 487 chips; the chained ACK + READ
-// is 130 + 47 + 235 = 412.  24 x 4 bytes (768 chips) leave headroom: an
-// earlier 512-chip buffer cut a chained frame short.
+// is 130 + 47 + 235 = 412.  24 x 4 bytes (768 chips) leave headroom; a
+// 512-chip buffer was too small for the ACK + WRITE chain (664 chips) that
+// the writer used before WRITEs were chained behind the tag's ACK.
 #define FURI_HAL_NFC_LEGIC_POLLER_MAX_BUFFER_SIZE (24U)
 #define FURI_HAL_NFC_LEGIC_FIFO_SIZE              (512U)
 
@@ -95,7 +96,14 @@
 // a wake-up later than this (another thread inside a scheduler-suspended
 // region, e.g. malloc) would delay the frame one-for-one, and the ACK-window
 // gate only notices a delay of half a bit window (~49 µs) while a real MIM256
-// tolerates ~20 µs on the 240 µs gap.  Tune with LEGIC_WAKE_STATS.
+// tolerates ~20 µs on the 240 µs gap.  What matters is the excess over the
+// usual path, so the value is that path's floor plus ~20 µs.  30 µs is a
+// starting point, not a measurement: the 240 µs gap was validated before
+// this veto existed and the floor was never read.  Set it from the
+// LEGIC_WAKE_STATS bench (~96 chained WRITEs on the PM3 sim and on a MIM256;
+// hist gives the floor, ack_max_us the worst ACK wake-up); a non-zero
+// vetoed count on a healthy run means it is too tight, and every veto costs
+// a session.  Record the measured floor here once it is known.
 #define LEGIC_ACK_WAKE_LATE_US        (30U)
 
 #define LEGIC_RX_GAP_MS       (2U)
@@ -114,9 +122,12 @@
 #define LEGIC_RX_CONF3_FULL   (0x00U)
 
 // RxStart wake-up latency statistics (IRQ edge to the thread's timestamp),
-// for tuning LEGIC_ACK_WAKE_LATE_US: build with LEGIC_WAKE_STATS 1, run a
-// chained-write bench and read legic_wake_stats with a debugger.
+// for tuning LEGIC_ACK_WAKE_LATE_US: build with LEGIC_WAKE_STATS 1 (here or
+// as a build define), run a chained-write bench and read legic_wake_stats
+// with a debugger.
+#ifndef LEGIC_WAKE_STATS
 #define LEGIC_WAKE_STATS 0
+#endif
 
 // TxEnd owed for the frame of the current exchange.
 typedef enum {
