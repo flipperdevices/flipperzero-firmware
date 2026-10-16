@@ -165,6 +165,10 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
 
     // Connected: READ = cmd_size bits with bit 0 set.
     if(bits == instance->cmd_size_bits && (value & 1u)) {
+        // Only a MIM22 has addresses past its memory (22-31).  They answer
+        // 0x00 with a valid CRC, as legicrfsim.c answers any address from its
+        // emulator memory: a READ has no error reply, and what a real MIM22
+        // sends there is unknown.
         const uint16_t addr = value >> 1;
         const uint8_t byte = addr < instance->data->data_size ? instance->data->data[addr] : 0;
         const uint8_t crc = legic_prime_crc4(value, instance->cmd_size_bits, byte);
@@ -178,6 +182,13 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
         const uint16_t addr = (value >> 1) & addr_mask;
         const uint8_t byte = (value >> instance->cmd_size_bits) & 0xFF;
         const uint8_t crc = (value >> (instance->cmd_size_bits + 8U)) & 0x0F;
+        // Writes to the DCF (5-6) and bytes 7-8 are accepted as a real tag
+        // accepts them: that is how an encoder turns new media into an IM or
+        // IM-S card (legicrfsim.c even accepts 0-4).  The DCF's decrement-only
+        // rule is not emulated.  A write only changes this emulated copy,
+        // which the app keeps as a shadow file that "Restore to Original
+        // State" undoes; guarding the DCF of a physical card is the reader
+        // client's policy, as in Proxmark3.
         if(crc == legic_prime_crc4(addr << 1, instance->cmd_size_bits, byte) &&
            addr >= LEGIC_PRIME_LISTENER_WRITABLE_FROM && addr < instance->data->data_size) {
             instance->data->data[addr] = byte;
