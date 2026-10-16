@@ -1036,16 +1036,21 @@ static FuriHalNfcError furi_hal_nfc_legic_listener_tx(
     const uint32_t mhz = furi_hal_cortex_instructions_per_microsecond();
 
     // Reply starts 330 µs after the end of the reader's closing pause (a
-    // write ACK ~3.6 ms after it, see set_tx_delay).
-    // The early start (TX_OFFSET) only applies to normal replies.  A write
-    // ACK goes out on legicrfsim.c's timing: 20 µs early, the gap to the
-    // reader's next frame (sent ~220 µs after it samples the ACK) crossed
-    // into a third keystream slot and the tag fell out of step.
+    // write ACK ~3.6 ms after it, see set_tx_delay).  TX_OFFSET only moves
+    // when a normal reply is modulated.  The reply end kept as the keystream
+    // reference stays nominal (330 µs + 99.1 µs per bit), because a reader
+    // sends its next frame on its own grid, not after the reply it sampled;
+    // counted from the advanced end, a Flipper reader's next frame was only
+    // ~12 µs from a fourth keystream slot.  A write ACK is not advanced: the
+    // -34..+13 µs window was measured on data replies, and a Flipper reader
+    // times the frame after an ACK from the ACK it measured, so moving the
+    // ACK would move that frame against the reference.
     const bool delayed = l->tx_delay_chips != 0;
     const uint32_t delay_chips = delayed ? l->tx_delay_chips : LEGIC_TAG_FRAME_WAIT_CHIPS;
     l->tx_delay_chips = 0;
-    const uint32_t start = l->t_frame_end + legic_chips_to_cycles(delay_chips) +
-                           (delayed ? 0 : LEGIC_LISTENER_TX_OFFSET_US * (int32_t)mhz);
+    const uint32_t reply_start = l->t_frame_end + legic_chips_to_cycles(delay_chips);
+    const uint32_t start =
+        reply_start + (delayed ? 0 : LEGIC_LISTENER_TX_OFFSET_US * (int32_t)mhz);
     const int32_t wait = (int32_t)(start - DWT->CYCCNT);
     if(wait > (int32_t)(5U * mhz) && wait < (int32_t)(5000U * mhz)) {
         while((int32_t)(start - (5U * mhz) - DWT->CYCCNT) > 0) {
@@ -1071,7 +1076,7 @@ static FuriHalNfcError furi_hal_nfc_legic_listener_tx(
     }
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
     FURI_CRITICAL_EXIT();
-    l->t_tx_end = t_start + (acc_q8 >> 8);
+    l->t_tx_end = reply_start + (acc_q8 >> 8);
 
     // Drop edges caused by our own load modulation.
     furi_delay_us(10);
