@@ -77,10 +77,17 @@ struct LegicPrimePoller {
     // Command width in bits (6/9/11), from the detected type.
     uint8_t cmd_size_bits;
 
+    // UID (bytes 0-3) the first session of this read or write confirmed;
+    // every later session checks it against the card present then.
+    uint8_t uid[LEGIC_PRIME_UID_SIZE];
+    bool uid_known;
+
     // Read progress per byte, kept across field resets (resumes); allocated
     // when a read is requested, so detection doesn't carry it.
     uint8_t* progress;
     uint16_t done_count;
+    // The address queued last: the next session continues after it.
+    uint16_t read_cursor;
     uint16_t resume_done; // done_count at the last resume
     uint8_t resumes; // field resets since the read last made progress
     uint8_t setup_attempts; // failed handshakes in a row
@@ -96,8 +103,6 @@ struct LegicPrimePoller {
     // hold the new value or the old.  A Communication error after a WRITE
     // can't be told from one before it, and doesn't set this.
     bool write_unacked;
-    uint8_t write_uid[LEGIC_PRIME_UID_SIZE]; // read by the first write session
-    bool write_uid_known;
     uint8_t write_ack_window; // bit window of the last write ACK (predicts the next)
 
     NfcGenericEvent general_event;
@@ -135,16 +140,21 @@ uint32_t legic_prime_poller_write_frame(uint16_t addr, uint8_t value, uint8_t cm
  *  before the next session. */
 LegicPrimeError legic_prime_poller_setup(LegicPrimePoller* instance, uint8_t iv);
 
+/** Starts a read over: nothing read yet, no UID known. */
+void legic_prime_poller_read_reset(LegicPrimePoller* instance);
+
 /**
- * One read session from a fresh field: handshake, then read the bytes not
- * read yet, within the session's exchange budget.  The read is complete once
- * done_count reaches data_size; until then reset the field and run another
- * session.
+ * One read session from a fresh field: handshake, UID check, then read the
+ * bytes not read yet, within the session's exchange budget, from where the
+ * previous session stopped.  The read is complete once done_count reaches
+ * data_size; until then reset the field and run another session.
  *
  * @return LegicPrimeErrorNone unless the session failed.  Running out of
  * budget fails a session that confirmed no byte although bytes read before
  * came up again, or that read no new byte either (no reply passed its CRC).
  * A MIM1024's first session reads each byte once and only adds new bytes.
+ * LegicPrimeErrorWrongCard if the UID differs from the first session's: the
+ * read then starts over (legic_prime_poller_read_reset()).
  */
 LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance);
 

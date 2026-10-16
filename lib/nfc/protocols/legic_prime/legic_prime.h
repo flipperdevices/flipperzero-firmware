@@ -33,7 +33,7 @@ typedef enum {
     LegicPrimeErrorUnknownType,
     LegicPrimeErrorNoAck, /**< The tag did not acknowledge a write. */
     LegicPrimeErrorReadOnly, /**< Address can't be written (MCD/MSN/MCC, or past the end). */
-    LegicPrimeErrorWrongCard, /**< A write session met a card with another UID. */
+    LegicPrimeErrorWrongCard, /**< A session met a card with another UID than the first. */
     LegicPrimeErrorUidUnconfirmed, /**< A session could not read the UID reliably. */
 } LegicPrimeError;
 
