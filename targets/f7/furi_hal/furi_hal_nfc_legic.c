@@ -800,9 +800,18 @@ static FuriHalNfcError furi_hal_nfc_legic_poller_rx(
  * pin then carries the demodulated field (high during a reader pause) and
  * MOSI drives load modulation.  Reader frames are decoded from EXTI edge
  * timestamps; replies are a 212 kHz subcarrier bit-banged on MOSI by the
- * CPU (cycle-counter deadlines, interrupts off), started 330 µs after the
- * reader's closing pause.  digital_sequence was tried first: its ~130 µs
- * DMA prefill latency is longer than the time left after decoding a frame.
+ * CPU on cycle-counter deadlines, started 330 µs after the reader's closing
+ * pause.  digital_sequence was tried first: its ~130 µs DMA prefill latency
+ * is longer than the time left after decoding a frame.
+ *
+ * A reply is sent inside FURI_CRITICAL, which raises BASEPRI to 5: SysTick
+ * and every interrupt at priority 5-15 wait (0-4 still run) for ~1189 µs for
+ * a 12-bit READ answer, ~595 µs for the 6-bit card type and ~99 µs for a
+ * write ACK, plus up to 5 µs of alignment.  The ISO14443-3A and ISO15693
+ * listeners hold the same section for their whole reply too, across
+ * digital_sequence_transmit() (~1.5 ms for an 18-byte MIFARE Classic reply).
+ * A tick is only lost when two SysTicks fall inside one section: ~0.19 per
+ * READ answer on average.
  */
 #define LEGIC_LISTENER_EDGES            (256U)
 // A frame is over once no pause follows within the longest bit (99 µs).
@@ -827,7 +836,12 @@ static FuriHalNfcError furi_hal_nfc_legic_poller_rx(
 // pass, -37 and +16 fail.  The PM3 samples on a 100 µs grid while tag bits
 // are 99.1 µs, and our frame-end timestamp (falling edge of the last pause on
 // the IRQ pin) lags the field.
-#define LEGIC_LISTENER_TX_OFFSET_US (-10)
+#define LEGIC_LISTENER_TX_OFFSET_US   (-10)
+// The last stretch before a reply is waited with interrupts masked.
+#define LEGIC_LISTENER_TX_ALIGN_US    (5U)
+// No reply slot is further out than this (the write ACK's 3.57 ms is the
+// longest delay), so the masked wait stays within TX_ALIGN.
+#define LEGIC_LISTENER_TX_MAX_WAIT_US (5000U)
 
 typedef struct {
     volatile uint32_t edge_t[LEGIC_LISTENER_EDGES];
@@ -1026,6 +1040,11 @@ static FuriHalNfcEvent furi_hal_nfc_legic_listener_wait_event(uint32_t timeout_m
         if(flag & FuriHalNfcEventInternalTypeAbort) return FuriHalNfcEventAbortRequest;
 
         // A frame started: wait until the line has been quiet for a while.
+        // This spins (interrupts on) for the rest of the reader frame, up to
+        // ~1 ms.  Waking on every edge instead would not remove it: the frame
+        // ends 120 µs after its last edge, when no edge comes to wake the
+        // thread, and flag-wait timeouts are whole 1 ms ticks.  Blocking
+        // would need a one-pulse timer re-armed by each edge.
         const uint32_t t_begin = DWT->CYCCNT;
         while(true) {
             const uint32_t head = l->edge_head;
@@ -1064,8 +1083,13 @@ static FuriHalNfcError furi_hal_nfc_legic_listener_tx(
     const uint32_t start =
         reply_start + (delayed ? 0 : LEGIC_LISTENER_TX_OFFSET_US * (int32_t)mhz);
     const int32_t wait = (int32_t)(start - DWT->CYCCNT);
-    if(wait > (int32_t)(5U * mhz) && wait < (int32_t)(5000U * mhz)) {
-        while((int32_t)(start - (5U * mhz) - DWT->CYCCNT) > 0) {
+    if(wait >= (int32_t)(LEGIC_LISTENER_TX_MAX_WAIT_US * mhz)) {
+        // Only a stale frame end or a bogus delay gets here: skip the reply.
+        l->t_tx_end = reply_start;
+        return FuriHalNfcErrorCommunicationTimeout;
+    }
+    if(wait > (int32_t)(LEGIC_LISTENER_TX_ALIGN_US * mhz)) {
+        while((int32_t)(start - (LEGIC_LISTENER_TX_ALIGN_US * mhz) - DWT->CYCCNT) > 0) {
         }
     }
 
