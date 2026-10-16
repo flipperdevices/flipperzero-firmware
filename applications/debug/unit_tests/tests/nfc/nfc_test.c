@@ -22,6 +22,7 @@
 #include <nfc/protocols/slix/slix_poller_i.h>
 #include <nfc/protocols/legic_prime/legic_prime.h>
 #include <nfc/protocols/legic_prime/legic_prime_crc.h>
+#include <nfc/protocols/legic_prime/legic_prime_listener_i.h>
 #include <nfc/protocols/legic_prime/legic_prime_prng.h>
 #include <nfc/protocols/legic_prime/legic_prime_poller_i.h>
 
@@ -1037,6 +1038,46 @@ MU_TEST(legic_prime_prng_test) {
     mu_assert_int_eq(0x0093, legic_prime_test_keystream(0x55, 100, 16));
 }
 
+// Proxmark3 armsrc/legicrfsim.c rx_frame(), in its 212 kHz ticks (64 fc):
+// starting 2 ticks before the reference, step once per 21-tick slot until
+// the slot that holds the frame's first pause.
+static uint32_t legic_prime_test_sim_idle_steps(uint32_t pause_tick) {
+    int32_t last_frame_end = -2;
+    uint32_t steps = 0;
+    do {
+        last_frame_end += 21;
+        steps++;
+    } while((int32_t)pause_tick > last_frame_end);
+    return steps;
+}
+
+MU_TEST(legic_prime_listener_steps_test) {
+    // legicrfsim.c only sees whole ticks.
+    const uint32_t gap_ticks = LEGIC_PRIME_LISTENER_SESSION_GAP_FC / LEGIC_PRIME_LISTENER_CHIP_FC;
+    for(uint32_t tick = 0; tick <= gap_ticks; tick++) {
+        mu_assert_int_eq(
+            legic_prime_test_sim_idle_steps(tick),
+            legic_prime_listener_idle_steps(tick * LEGIC_PRIME_LISTENER_CHIP_FC));
+    }
+
+    // The reader's next frame 188.8-287.9 µs after the reply end takes 3 steps:
+    // PM3 reader ~235 µs, Flipper reader ~266 µs (260 µs + IRQ pin lag).
+    mu_assert_int_eq(2, legic_prime_listener_idle_steps(2560));
+    mu_assert_int_eq(3, legic_prime_listener_idle_steps(2561));
+    mu_assert_int_eq(3, legic_prime_listener_idle_steps(3187));
+    mu_assert_int_eq(3, legic_prime_listener_idle_steps(3607));
+    mu_assert_int_eq(3, legic_prime_listener_idle_steps(3904));
+    mu_assert_int_eq(4, legic_prime_listener_idle_steps(3905));
+    // Chained READ 221.8 µs after the reader's ACK, counted from one slot after it.
+    mu_assert_int_eq(2, legic_prime_listener_idle_steps(1664));
+
+    // Past the session gap (or a frame before the reference, which reads as
+    // a gap of about a minute) the session is over.
+    mu_assert_int_eq(202, legic_prime_listener_idle_steps(LEGIC_PRIME_LISTENER_SESSION_GAP_FC));
+    mu_assert_int_eq(0, legic_prime_listener_idle_steps(LEGIC_PRIME_LISTENER_SESSION_GAP_FC + 1));
+    mu_assert_int_eq(0, legic_prime_listener_idle_steps(UINT32_MAX));
+}
+
 MU_TEST(legic_prime_crc_test) {
     // CRC-8/LEGIC check value, as documented in Proxmark3's common/crc.c.
     mu_assert_int_eq(0xC6, legic_prime_crc8((const uint8_t*)"123456789", 9));
@@ -1397,6 +1438,7 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(slix_set_password_access_all_passwords_cap);
 
     MU_RUN_TEST(legic_prime_prng_test);
+    MU_RUN_TEST(legic_prime_listener_steps_test);
     MU_RUN_TEST(legic_prime_crc_test);
     MU_RUN_TEST(legic_prime_frame_test);
     MU_RUN_TEST(legic_prime_layout_test);
