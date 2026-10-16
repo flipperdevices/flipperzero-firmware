@@ -138,8 +138,9 @@ LegicPrimeError legic_prime_poller_setup(LegicPrimePoller* instance, uint8_t iv)
  * session.
  *
  * @return LegicPrimeErrorNone unless the session failed.  Running out of
- * budget only fails a session if bytes read before came up again and none
- * of them could be confirmed (a MIM1024's first session reads each byte once).
+ * budget fails a session that confirmed no byte although bytes read before
+ * came up again, or that read no new byte either (no reply passed its CRC).
+ * A MIM1024's first session reads each byte once and only adds new bytes.
  */
 LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance);
 
