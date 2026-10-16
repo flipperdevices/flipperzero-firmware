@@ -10,8 +10,6 @@
 #include <nfc/protocols/nfc_listener_base.h>
 #include <toolbox/bit_buffer.h>
 
-#define TAG "LegicPrimeListener"
-
 /*
  * LEGIC Prime tag emulation, mirroring Proxmark armsrc/legicrfsim.c.
  *
@@ -22,6 +20,9 @@
  * the reference point and measures the time since it.
  */
 #define LEGIC_PRIME_LISTENER_MAX_BITS       (24U)
+// nfc_listener_tx() first waits this long after the reader's frame; the HAL
+// itself starts the reply 330 µs after it, so one subcarrier period will do.
+#define LEGIC_PRIME_LISTENER_FDT_FC         (64U)
 // Write ACK: a single unencrypted '1' bit 3.57 ms after the reader's frame,
 // as legicrfsim.c tx_ack (TAG_ACK_WAIT), which steps the keystream 35 times
 // while waiting and once for the ACK bit.
@@ -43,10 +44,6 @@ struct LegicPrimeListener {
     uint8_t cmd_size_bits;
     uint8_t type_code;
     uint8_t ack_code;
-
-    NfcGenericEvent generic_event;
-    NfcGenericCallback callback;
-    void* context;
 };
 
 static LegicPrimeListener* legic_prime_listener_alloc(Nfc* nfc, LegicPrimeData* data) {
@@ -64,12 +61,7 @@ static LegicPrimeListener* legic_prime_listener_alloc(Nfc* nfc, LegicPrimeData* 
     instance->type_code = params->type_code;
     instance->ack_code = params->ack_code;
 
-    instance->generic_event.protocol = NfcProtocolLegicPrime;
-    instance->generic_event.instance = instance;
-    instance->generic_event.event_data = NULL;
-
-    // The HAL schedules replies itself, 330 µs after the reader's frame.
-    nfc_set_fdt_listen_fc(instance->nfc, 64);
+    nfc_set_fdt_listen_fc(instance->nfc, LEGIC_PRIME_LISTENER_FDT_FC);
     nfc_config(instance->nfc, NfcModeListener, NfcTechLegic);
     return instance;
 }
@@ -84,9 +76,11 @@ static void legic_prime_listener_set_callback(
     LegicPrimeListener* instance,
     NfcGenericCallback callback,
     void* context) {
-    furi_assert(instance);
-    instance->callback = callback;
-    instance->context = context;
+    // No events: reader writes reach the app through the emulated data, as
+    // for MIFARE Classic and Ultralight.
+    UNUSED(instance);
+    UNUSED(callback);
+    UNUSED(context);
 }
 
 static const LegicPrimeData* legic_prime_listener_get_data(const LegicPrimeListener* instance) {
