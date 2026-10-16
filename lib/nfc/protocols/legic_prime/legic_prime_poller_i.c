@@ -295,9 +295,21 @@ static LegicPrimeError
  * window is predicted from the previous ACK and the HAL drops the frame if
  * the ACK comes in another one; the session then ends and the next one uses
  * the measured window.
+ *
+ * The window only matters for that chained frame's keystream, which the HAL
+ * gate covers.  An ACK in another window than predicted still acknowledges
+ * the WRITE: the tag only ACKs a WRITE whose CRC-4 matched, and the window
+ * is the time it took to program the byte.  Proxmark3's rx_ack() takes the
+ * ACK from any window too.  Rejecting it would write the byte again, which
+ * on the DCF (the tag only lets it decrease) could report a failure after
+ * the first WRITE succeeded.
  */
 #define LEGIC_PRIME_WRITE_ACK_WINDOW_BITS (60U)
 #define LEGIC_PRIME_WRITE_FWT_FC          (95000U) // ≈ 7 ms
+// A write session is a single poller step too: it stops after this many
+// bytes (~1.3 s), with no WRITE queued behind the last one, and the write
+// continues in the next session.
+#define LEGIC_PRIME_WRITE_SESSION_BYTES   (256U)
 
 uint32_t legic_prime_poller_write_frame(uint16_t addr, uint8_t value, uint8_t cmd_bits) {
     const uint32_t cmd = (uint32_t)addr << 1;
@@ -368,9 +380,10 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
     cur = next;
     if(!furi_hal_nfc_legic_poller_next_sent()) return LegicPrimeErrorTimeout;
 
-    while(true) {
+    for(uint16_t session_bytes = 1;; session_bytes++) {
         const uint16_t done = instance->write_pos;
-        const bool have_next = done + 1 < instance->write_size;
+        const bool have_next = done + 1 < instance->write_size &&
+                               session_bytes < LEGIC_PRIME_WRITE_SESSION_BYTES;
         const uint8_t predicted = instance->write_ack_window;
         if(have_next) {
             legic_prime_poller_build_write(
@@ -384,10 +397,10 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
 
         instance->data->data[cur.addr] = instance->write_data[cur.addr - instance->write_offset];
         instance->write_pos = done + 1;
-        if(!have_next) return LegicPrimeErrorNone;
-        if(!furi_hal_nfc_legic_poller_next_sent()) {
-            // The ACK came in another window than predicted (or the frame
-            // would have been late): continue in a new session.
+        if(!have_next || !furi_hal_nfc_legic_poller_next_sent()) {
+            // The last byte, the session's last, or the ACK came in another
+            // window than predicted (or the frame would have been late): a
+            // new session continues, predicting the window of this ACK.
             instance->write_ack_window = window;
             return LegicPrimeErrorNone;
         }
