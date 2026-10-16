@@ -78,6 +78,9 @@ typedef enum {
 typedef struct {
     LoaderStatus value;
     LoaderStatusError error;
+    // API version from the app manifest (major << 16 | minor), set for
+    // LoaderStatusErrorOutdatedApp and LoaderStatusErrorOutdatedFirmware
+    uint32_t app_api_version;
 } LoaderMessageLoaderStatusResult;
 
 typedef struct {
