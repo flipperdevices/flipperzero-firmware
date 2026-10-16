@@ -399,6 +399,116 @@ void nfc_felica_listener_timer_anticol_start(Nfc* instance, uint8_t target_time_
  */
 void nfc_felica_listener_timer_anticol_stop(Nfc* instance);
 
+/*
+ * LEGIC Prime transport.  The ST25R3916 has no LEGIC support, so the HAL
+ * frames, times and pipelines LEGIC exchanges itself; these pass the
+ * protocol's requests through to it.  The furi_hal_nfc_legic_*() functions
+ * of the same names document them in detail.  They are not part of the SDK
+ * (yet): the transport's timing is still being tuned on real tags.
+ */
+
+/**
+ * @brief Set the length of the LEGIC Prime tag reply expected for the next frame.
+ *
+ * @param[in, out] instance pointer to the instance to be configured.
+ * @param[in] bits number of reply bits, 1 to 64.
+ */
+void nfc_legic_poller_set_rx_bits(Nfc* instance, size_t bits);
+
+/**
+ * @brief Expect a LEGIC Prime write ACK as the reply to the next frame.
+ *
+ * A frame queued with nfc_legic_poller_set_next() is only sent if the ACK
+ * comes in bit window `window`.
+ *
+ * @param[in, out] instance pointer to the instance to be configured.
+ * @param[in] window bit window the queued frame was built for (below 64).
+ */
+void nfc_legic_poller_set_rx_ack(Nfc* instance, size_t window);
+
+/**
+ * @brief Select the receiver gain for LEGIC Prime exchanges.
+ *
+ * @param[in, out] instance pointer to the instance to be configured.
+ * @param[in] reduced true for the default first-stage gain reduction, false for full gain.
+ */
+void nfc_legic_poller_set_rx_reduced_gain(Nfc* instance, bool reduced);
+
+/**
+ * @brief Queue the LEGIC Prime reader frame that follows the next reply.
+ *
+ * The frame is sent from the receive path of the next exchange; the poller
+ * then claims it (nfc_legic_poller_claim_next()) and passes it to
+ * nfc_poller_trx() to receive its reply.
+ *
+ * @param[in, out] instance pointer to the instance to be configured.
+ * @param[in] first first frame, LSB-first bits.
+ * @param[in] first_bits number of bits in the first frame.
+ * @param[in] second optional frame chained 221.8 µs after the first (or NULL).
+ * @param[in] second_bits number of bits in the second frame.
+ */
+void nfc_legic_poller_set_next(
+    Nfc* instance,
+    const uint8_t* first,
+    size_t first_bits,
+    const uint8_t* second,
+    size_t second_bits);
+
+/**
+ * @brief Check whether the queued LEGIC Prime frame went out in its slot.
+ *
+ * @param[in] instance pointer to the instance to be checked.
+ * @returns true if it was sent and has not been claimed yet.
+ */
+bool nfc_legic_poller_next_sent(Nfc* instance);
+
+/**
+ * @brief Declare the next nfc_poller_trx() frame to be the sent queued LEGIC Prime frame.
+ *
+ * @param[in, out] instance pointer to the instance to be configured.
+ */
+void nfc_legic_poller_claim_next(Nfc* instance);
+
+/**
+ * @brief Drop the queued LEGIC Prime frame and forget an unclaimed sent one.
+ *
+ * Call it at the start of every session's handshake.
+ *
+ * @param[in, out] instance pointer to the instance to be configured.
+ */
+void nfc_legic_poller_cancel_next(Nfc* instance);
+
+/**
+ * @brief Set the emulated LEGIC Prime tag's keystream reference to the end of the last reader frame.
+ *
+ * @param[in, out] instance pointer to the instance to be configured.
+ * @param[in] extra_fc offset after the end of the frame, in carrier cycles (1/fc).
+ */
+void nfc_legic_listener_set_ref_to_frame_end(Nfc* instance, uint32_t extra_fc);
+
+/**
+ * @brief Set the emulated LEGIC Prime tag's keystream reference to the end of its last reply.
+ *
+ * @param[in, out] instance pointer to the instance to be configured.
+ */
+void nfc_legic_listener_set_ref_to_tx_end(Nfc* instance);
+
+/**
+ * @brief Get the time from the keystream reference to the start of the last reader frame.
+ *
+ * @param[in] instance pointer to the instance to be checked.
+ * @returns carrier cycles (1/fc).
+ */
+uint32_t nfc_legic_listener_get_elapsed_fc(Nfc* instance);
+
+/**
+ * @brief Delay the next LEGIC Prime tag reply.
+ *
+ * @param[in, out] instance pointer to the instance to be configured.
+ * @param[in] chips delay after the reader's frame, in 212 kHz subcarrier periods (64/fc).
+ */
+void nfc_legic_listener_set_tx_delay(Nfc* instance, uint32_t chips);
+
 #ifdef __cplusplus
 }
 #endif

@@ -2978,6 +2978,17 @@ Function,+,nfc_iso14443a_poller_trx_custom_parity,NfcError,"Nfc*, const BitBuffe
 Function,+,nfc_iso14443a_poller_trx_sdd_frame,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,nfc_iso14443a_poller_trx_short_frame,NfcError,"Nfc*, NfcIso14443aShortFrame, BitBuffer*, uint32_t"
 Function,+,nfc_iso15693_listener_tx_sof,NfcError,Nfc*
+Function,-,nfc_legic_listener_get_elapsed_fc,uint32_t,Nfc*
+Function,-,nfc_legic_listener_set_ref_to_frame_end,void,"Nfc*, uint32_t"
+Function,-,nfc_legic_listener_set_ref_to_tx_end,void,Nfc*
+Function,-,nfc_legic_listener_set_tx_delay,void,"Nfc*, uint32_t"
+Function,-,nfc_legic_poller_cancel_next,void,Nfc*
+Function,-,nfc_legic_poller_claim_next,void,Nfc*
+Function,-,nfc_legic_poller_next_sent,_Bool,Nfc*
+Function,-,nfc_legic_poller_set_next,void,"Nfc*, const uint8_t*, size_t, const uint8_t*, size_t"
+Function,-,nfc_legic_poller_set_rx_ack,void,"Nfc*, size_t"
+Function,-,nfc_legic_poller_set_rx_bits,void,"Nfc*, size_t"
+Function,-,nfc_legic_poller_set_rx_reduced_gain,void,"Nfc*, _Bool"
 Function,+,nfc_listener_alloc,NfcListener*,"Nfc*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_listener_free,void,NfcListener*
 Function,+,nfc_listener_get_data,const NfcDeviceData*,"const NfcListener*, NfcProtocol"

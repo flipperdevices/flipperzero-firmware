@@ -6,7 +6,6 @@
 #include "legic_prime_crc.h"
 
 #include <furi.h>
-#include <furi_hal_nfc.h>
 #include <nfc/protocols/nfc_listener_base.h>
 #include <toolbox/bit_buffer.h>
 
@@ -106,7 +105,7 @@ static void legic_prime_listener_reply(LegicPrimeListener* instance, uint32_t va
         legic_prime_prng_forward(1);
     }
     nfc_listener_tx(instance->nfc, instance->tx_buffer);
-    furi_hal_nfc_legic_listener_set_ref_to_tx_end();
+    nfc_legic_listener_set_ref_to_tx_end(instance->nfc);
 }
 
 static bool
@@ -132,7 +131,7 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
 
     uint32_t steps = 0;
     if(instance->state != LegicPrimeListenerStateIdle) {
-        steps = legic_prime_listener_idle_steps(furi_hal_nfc_legic_listener_get_elapsed_fc());
+        steps = legic_prime_listener_idle_steps(nfc_legic_listener_get_elapsed_fc(instance->nfc));
         if(steps == 0) instance->state = LegicPrimeListenerStateIdle;
     }
 
@@ -155,7 +154,7 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
         if(bits == 6 && value == instance->ack_code) {
             instance->state = LegicPrimeListenerStateConnected;
             // Slots count from one slot after the ACK, as legicrfsim.c init_card.
-            furi_hal_nfc_legic_listener_set_ref_to_frame_end(LEGIC_PRIME_LISTENER_BIT_FC);
+            nfc_legic_listener_set_ref_to_frame_end(instance->nfc, LEGIC_PRIME_LISTENER_BIT_FC);
         } else {
             instance->state = LegicPrimeListenerStateIdle;
             legic_prime_listener_handle_iv(instance, rx, bits);
@@ -175,7 +174,7 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
         legic_prime_listener_reply(instance, ((uint32_t)crc << 8) | byte, 12);
     } else if(bits == instance->cmd_size_bits) {
         // Write header without data: nothing to answer.
-        furi_hal_nfc_legic_listener_set_ref_to_frame_end(0);
+        nfc_legic_listener_set_ref_to_frame_end(instance->nfc, 0);
     } else if(bits == instance->cmd_size_bits + 8U + 4U && !(value & 1u)) {
         // WRITE: address | data byte | CRC-4 over both.
         const uint32_t addr_mask = (1u << (instance->cmd_size_bits - 1)) - 1;
@@ -197,11 +196,11 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
             bit_buffer_reset(instance->tx_buffer);
             bit_buffer_append_bit(instance->tx_buffer, true);
             legic_prime_prng_forward(1);
-            furi_hal_nfc_legic_listener_set_tx_delay(LEGIC_PRIME_LISTENER_ACK_WAIT_CHIPS);
+            nfc_legic_listener_set_tx_delay(instance->nfc, LEGIC_PRIME_LISTENER_ACK_WAIT_CHIPS);
             nfc_listener_tx(instance->nfc, instance->tx_buffer);
-            furi_hal_nfc_legic_listener_set_ref_to_tx_end();
+            nfc_legic_listener_set_ref_to_tx_end(instance->nfc);
         } else {
-            furi_hal_nfc_legic_listener_set_ref_to_frame_end(0);
+            nfc_legic_listener_set_ref_to_frame_end(instance->nfc, 0);
         }
     } else {
         instance->state = LegicPrimeListenerStateIdle;

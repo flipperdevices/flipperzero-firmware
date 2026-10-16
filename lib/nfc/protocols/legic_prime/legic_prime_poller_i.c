@@ -3,7 +3,6 @@
 #include "legic_prime_crc.h"
 
 #include <furi.h>
-#include <furi_hal_nfc.h>
 #include <lib/bit_lib/bit_lib.h>
 
 #define TAG "LegicPrimePoller"
@@ -87,14 +86,16 @@ void legic_prime_poller_build_iv(LegicPrimeExchange* ex, uint8_t iv) {
     ex->ks = legic_prime_poller_keystream(LEGIC_PRIME_TYPE_BITS);
 }
 
-static void
-    legic_prime_poller_queue(const LegicPrimeExchange* first, const LegicPrimeExchange* second) {
+static void legic_prime_poller_queue(
+    LegicPrimePoller* instance,
+    const LegicPrimeExchange* first,
+    const LegicPrimeExchange* second) {
     uint8_t a[sizeof(first->tx)];
     uint8_t b[sizeof(first->tx)];
     bit_lib_num_to_bytes_le(first->tx, sizeof(a), a);
     if(second) bit_lib_num_to_bytes_le(second->tx, sizeof(b), b);
-    furi_hal_nfc_legic_poller_set_next(
-        a, first->tx_bits, second ? b : NULL, second ? second->tx_bits : 0);
+    nfc_legic_poller_set_next(
+        instance->nfc, a, first->tx_bits, second ? b : NULL, second ? second->tx_bits : 0);
 }
 
 static void legic_prime_poller_load_tx(LegicPrimePoller* instance, const LegicPrimeExchange* ex) {
@@ -111,8 +112,8 @@ static LegicPrimeError legic_prime_poller_exchange(
     bool claim,
     uint32_t* reply) {
     legic_prime_poller_load_tx(instance, ex);
-    furi_hal_nfc_legic_poller_set_rx_bits(ex->rx_bits);
-    if(claim) furi_hal_nfc_legic_poller_claim_next();
+    nfc_legic_poller_set_rx_bits(instance->nfc, ex->rx_bits);
+    if(claim) nfc_legic_poller_claim_next(instance->nfc);
 
     NfcError nerr = nfc_poller_trx(
         instance->nfc, instance->tx_buffer, instance->rx_buffer, LEGIC_PRIME_FWT_FC);
@@ -132,7 +133,7 @@ LegicPrimeError legic_prime_poller_setup(LegicPrimePoller* instance, uint8_t iv)
     // Hold the carrier briefly to power the tag (Proxmark uses ~5 ms).
     furi_delay_ms(5);
     // Nothing of an earlier session may go out behind the type reply.
-    furi_hal_nfc_legic_poller_cancel_next();
+    nfc_legic_poller_cancel_next(instance->nfc);
 
     LegicPrimeExchange iv_ex;
     legic_prime_poller_build_iv(&iv_ex, iv);
@@ -224,7 +225,7 @@ static LegicPrimeError
     uint8_t uid[LEGIC_PRIME_UID_SIZE];
     uint8_t progress[LEGIC_PRIME_UID_SIZE] = {0};
     for(size_t reads = 0;; reads++) {
-        if(!furi_hal_nfc_legic_poller_next_sent()) return LegicPrimeErrorTimeout;
+        if(!nfc_legic_poller_next_sent(instance->nfc)) return LegicPrimeErrorTimeout;
         // The next unconfirmed byte after cur's, cur's own last.
         uint16_t addr = cur->addr;
         bool confirmed = true;
@@ -237,7 +238,7 @@ static LegicPrimeError
 
         LegicPrimeExchange next;
         legic_prime_poller_build_read(instance, &next, addr, LEGIC_PRIME_STEPS_AFTER_REPLY);
-        legic_prime_poller_queue(&next, NULL);
+        legic_prime_poller_queue(instance, &next, NULL);
 
         uint32_t reply = 0;
         const LegicPrimeError ret = legic_prime_poller_exchange(instance, cur, true, &reply);
@@ -266,7 +267,7 @@ static LegicPrimeError
     furi_delay_ms(5);
     // A frame the previous session left queued or unclaimed would go out
     // behind the type reply on that session's keystream.
-    furi_hal_nfc_legic_poller_cancel_next();
+    nfc_legic_poller_cancel_next(instance->nfc);
 
     const LegicPrimeType type = instance->data->type;
     LegicPrimeExchange iv_ex, ack;
@@ -274,7 +275,7 @@ static LegicPrimeError
     legic_prime_poller_build(
         &ack, legic_prime_ack_code(type), LEGIC_PRIME_ACK_BITS, LEGIC_PRIME_STEPS_AFTER_REPLY, 0);
     legic_prime_poller_build_read(instance, cur, 0, LEGIC_PRIME_STEPS_AFTER_READER_ACK);
-    legic_prime_poller_queue(&ack, cur);
+    legic_prime_poller_queue(instance, &ack, cur);
 
     uint32_t reply = 0;
     LegicPrimeError ret = legic_prime_poller_exchange(instance, &iv_ex, false, &reply);
@@ -346,9 +347,9 @@ static LegicPrimeError legic_prime_poller_write_exchange(
     uint8_t next_window,
     uint8_t* ack_window) {
     legic_prime_poller_load_tx(instance, ex);
-    furi_hal_nfc_legic_poller_set_rx_bits(LEGIC_PRIME_WRITE_ACK_WINDOW_BITS);
-    furi_hal_nfc_legic_poller_set_rx_ack(next_window);
-    furi_hal_nfc_legic_poller_claim_next();
+    nfc_legic_poller_set_rx_bits(instance->nfc, LEGIC_PRIME_WRITE_ACK_WINDOW_BITS);
+    nfc_legic_poller_set_rx_ack(instance->nfc, next_window);
+    nfc_legic_poller_claim_next(instance->nfc);
     NfcError nerr = nfc_poller_trx(
         instance->nfc, instance->tx_buffer, instance->rx_buffer, LEGIC_PRIME_WRITE_FWT_FC);
     if(nerr == NfcErrorTimeout) return LegicPrimeErrorNoAck;
@@ -382,12 +383,12 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
     // The first WRITE follows the reply to the last UID READ.
     legic_prime_poller_build_write(
         instance, &next, instance->write_pos, LEGIC_PRIME_STEPS_AFTER_REPLY);
-    legic_prime_poller_queue(&next, NULL);
+    legic_prime_poller_queue(instance, &next, NULL);
     uint32_t reply = 0;
     ret = legic_prime_poller_exchange(instance, &cur, true, &reply);
     if(ret != LegicPrimeErrorNone) return ret;
     cur = next;
-    if(!furi_hal_nfc_legic_poller_next_sent()) return LegicPrimeErrorTimeout;
+    if(!nfc_legic_poller_next_sent(instance->nfc)) return LegicPrimeErrorTimeout;
 
     for(uint16_t session_bytes = 1;; session_bytes++) {
         const uint16_t done = instance->write_pos;
@@ -397,7 +398,7 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
         if(have_next) {
             legic_prime_poller_build_write(
                 instance, &next, done + 1, predicted + LEGIC_PRIME_WRITE_STEPS_AFTER_ACK);
-            legic_prime_poller_queue(&next, NULL);
+            legic_prime_poller_queue(instance, &next, NULL);
         }
 
         uint8_t window = 0;
@@ -406,7 +407,7 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
 
         instance->data->data[cur.addr] = instance->write_data[cur.addr - instance->write_offset];
         instance->write_pos = done + 1;
-        if(!have_next || !furi_hal_nfc_legic_poller_next_sent()) {
+        if(!have_next || !nfc_legic_poller_next_sent(instance->nfc)) {
             // The last byte, the session's last, or the ACK came in another
             // window than predicted (or the frame would have been late): a
             // new session continues, predicting the window of this ACK.
@@ -511,7 +512,7 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
     uint32_t reply = 0;
     // The first claim is the last UID READ, a byte that is confirmed already.
     for(uint32_t budget = budget_max; budget; budget--) {
-        if(!furi_hal_nfc_legic_poller_next_sent()) return LegicPrimeErrorTimeout;
+        if(!nfc_legic_poller_next_sent(instance->nfc)) return LegicPrimeErrorTimeout;
 
         uint16_t next_addr;
         const bool have_next =
@@ -519,7 +520,7 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
         if(have_next) {
             legic_prime_poller_build_read(
                 instance, &next, next_addr, LEGIC_PRIME_STEPS_AFTER_REPLY);
-            legic_prime_poller_queue(&next, NULL);
+            legic_prime_poller_queue(instance, &next, NULL);
             instance->read_cursor = next_addr;
         }
 

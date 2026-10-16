@@ -2,7 +2,6 @@
 #include "legic_prime_poller_i.h"
 
 #include <nfc/protocols/nfc_poller_base.h>
-#include <furi_hal_nfc.h>
 
 #define TAG "LegicPrimePoller"
 
@@ -80,7 +79,7 @@ static void legic_prime_poller_set_callback(
 // handshake or a session that made no progress.  The gain is applied with
 // the session's first frame (the IV).
 static void legic_prime_poller_apply_gain(LegicPrimePoller* instance) {
-    furi_hal_nfc_legic_poller_set_rx_reduced_gain(instance->rx_reduced_gain);
+    nfc_legic_poller_set_rx_reduced_gain(instance->nfc, instance->rx_reduced_gain);
 }
 
 // Ends the read or write with its result, reported by the next state.
