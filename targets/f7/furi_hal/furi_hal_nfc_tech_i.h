@@ -82,6 +82,18 @@ typedef FuriHalNfcError (*FuriHalNfcSleep)(const FuriHalSpiBusHandle* handle);
 typedef FuriHalNfcError (*FuriHalNfcIdle)(const FuriHalSpiBusHandle* handle);
 
 /**
+ * @brief Reset the communication before a poller transceive.
+ *
+ * Optional. The default (a NULL pointer) stops the chip's transmission and
+ * reception; a technology that keeps a frame on air across transceives
+ * provides its own.
+ *
+ * @param[in,out] handle pointer to the NFC chip SPI handle.
+ * @returns FuriHalNfcErrorNone on success, any other error code on failure.
+ */
+typedef FuriHalNfcError (*FuriHalNfcTrxReset)(const FuriHalSpiBusHandle* handle);
+
+/**
  * @brief Technology-specific compenstaion values for pollers.
  *
  * Timing compensations are needed due to execution delays not accounted for
@@ -105,6 +117,8 @@ typedef struct {
     FuriHalNfcWaitEvent wait_event; /**< Pointer to the wait_event() function. */
     FuriHalNfcTx tx; /**< Pointer to the tx() function. */
     FuriHalNfcRx rx; /**< Pointer to the rx() function. */
+    FuriHalNfcTrxReset
+        trx_reset; /**< Pointer to the trx_reset() function, or NULL for the default. */
 } FuriHalNfcTechPollerBase;
 
 /**
