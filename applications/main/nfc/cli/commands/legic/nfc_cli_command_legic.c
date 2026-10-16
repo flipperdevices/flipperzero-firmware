@@ -7,17 +7,10 @@
 #include <toolbox/strint.h>
 #include <nfc/protocols/legic_prime/legic_prime_poller_sync.h>
 
-#define TAG "LEGIC"
-
-// Bytes 5-6 are the DCF.  On a real tag it can only ever be decreased, so a
-// write there (e.g. turning new media into a data card) is irreversible.
-#define NFC_CLI_LEGIC_DCF_FIRST (5U)
-#define NFC_CLI_LEGIC_DCF_LAST  (6U)
-
 typedef struct {
     Nfc* nfc;
     uint16_t offset;
-    uint8_t data[LEGIC_PRIME_MEM_MAX];
+    uint8_t* data;
     size_t size;
     bool danger;
 } NfcCliLegicWrblContext;
@@ -49,6 +42,8 @@ static const char* nfc_cli_legic_get_error(LegicPrimeError error) {
         return "address not writable (bytes 0-4, or past the end of the card)";
     case LegicPrimeErrorWrongCard:
         return "a card with another UID answered; the write was stopped";
+    case LegicPrimeErrorUidUnconfirmed:
+        return "could not read the card UID reliably; the write was stopped";
     default:
         return "unknown error";
     }
@@ -113,30 +108,46 @@ static NfcCliActionContext* nfc_cli_legic_wrbl_alloc_ctx(Nfc* nfc) {
 
 static void nfc_cli_legic_wrbl_free_ctx(NfcCliActionContext* ctx) {
     furi_assert(ctx);
-    free(ctx);
+    NfcCliLegicWrblContext* instance = ctx;
+    free(instance->data);
+    free(instance);
 }
 
 static void nfc_cli_legic_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx) {
     furi_assert(pipe);
     NfcCliLegicWrblContext* instance = ctx;
 
-    if(!instance->danger && instance->offset <= NFC_CLI_LEGIC_DCF_LAST &&
-       instance->offset + instance->size > NFC_CLI_LEGIC_DCF_FIRST) {
+    // The DCF can only ever be decreased on a real tag, so a write there
+    // (e.g. turning new media into a data card) is irreversible.
+    if(!instance->danger && legic_prime_is_dcf_write(instance->offset, instance->size)) {
         printf(ANSI_FG_RED "Bytes 5-6 are the DCF: changing it is irreversible on a real card.\r\n"
                            "Add --danger to write them anyway." ANSI_RESET);
         return;
     }
 
+    size_t written = 0;
     LegicPrimeError error = legic_prime_poller_sync_write(
-        instance->nfc, instance->offset, instance->data, instance->size);
+        instance->nfc, instance->offset, instance->data, instance->size, &written);
 
     if(error == LegicPrimeErrorNone) {
         printf(ANSI_FG_BR_GREEN "\r\nSuccess\r\n" ANSI_RESET);
-        printf("Offset: %u ", instance->offset);
-        nfc_cli_printf_array(instance->data, instance->size, "Data: ");
-        printf("\r\n");
     } else {
-        printf(ANSI_FG_RED "Error: %s" ANSI_RESET, nfc_cli_legic_get_error(error));
+        printf(ANSI_FG_RED "Error: %s\r\n" ANSI_RESET, nfc_cli_legic_get_error(error));
+    }
+    // Bytes go last to first: the ones written are the end of the range.
+    const size_t end = instance->offset + instance->size;
+    printf("Wrote %u of %u bytes, last to first", (unsigned)written, (unsigned)instance->size);
+    if(written) printf(" (offsets %u-%u)", (unsigned)(end - written), (unsigned)(end - 1));
+    printf("\r\n");
+    if(error == LegicPrimeErrorNoAck) {
+        printf(
+            "The byte at offset %u may have been written without an ACK\r\n",
+            (unsigned)(end - written - 1));
+    }
+    if(written) {
+        printf("Offset: %u ", (unsigned)(end - written));
+        nfc_cli_printf_array(&instance->data[instance->size - written], written, "Data: ");
+        printf("\r\n");
     }
 }
 
@@ -149,8 +160,10 @@ static bool nfc_cli_legic_wrbl_parse_offset(FuriString* value, NfcCliActionConte
 static bool nfc_cli_legic_wrbl_parse_data(FuriString* value, void* output) {
     NfcCliLegicWrblContext* ctx = output;
     const size_t len = furi_string_size(value);
-    if(len == 0 || len % 2 != 0 || len / 2 > sizeof(ctx->data)) return false;
+    if(len == 0 || len % 2 != 0 || len / 2 > LEGIC_PRIME_MEM_MAX) return false;
     ctx->size = len / 2;
+    free(ctx->data);
+    ctx->data = malloc(ctx->size);
     return args_read_hex_bytes(value, ctx->data, ctx->size);
 }
 
