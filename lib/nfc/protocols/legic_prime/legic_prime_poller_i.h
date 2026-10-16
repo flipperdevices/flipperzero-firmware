@@ -17,7 +17,7 @@ extern "C" {
 // at TAG_BIT_PERIOD=100µs) lands inside the window.
 #define LEGIC_PRIME_FWT_FC       (33900U) // ≈ 2500 µs
 #define LEGIC_PRIME_GUARD_US     (5000U)
-// The HAL times LEGIC frames itself (furi_hal_nfc_legic_poller_set_next), so
+// The HAL times LEGIC frames itself (nfc_legic_poller_set_next), so
 // the generic inter-frame blocking timers are kept short.
 #define LEGIC_PRIME_FDT_POLL_FC  (500U)
 #define LEGIC_PRIME_POLL_POLL_US (50U)
@@ -30,7 +30,7 @@ extern "C" {
  *  - after a tag reply ending at E, the tag has advanced ceil((t - E) / 99.1 µs);
  *  - after our frame without a reply, ending at A, ceil((t - A) / 99.1 µs) - 1.
  * The HAL sends queued frames 260 µs after the tag's reply and chains the
- * first READ 222 µs after the ACK (furi_hal_nfc_legic_poller_set_next), so
+ * first READ 222 µs after the ACK (nfc_legic_poller_set_next), so
  * the steps are fixed: 3 after a reply and 2 after the ACK, as Proxmark's
  * reader with its 220 µs gaps.
  */
