@@ -10,6 +10,8 @@ typedef struct {
     FuriThreadId thread_id;
     LegicPrimePollerEventDataResult result;
     LegicPrimeData* data;
+    uint16_t read_offset;
+    uint16_t read_size;
     // Write mode when write_data is set.
     uint16_t write_offset;
     const uint8_t* write_data;
@@ -35,6 +37,8 @@ static NfcCommand legic_prime_poller_sync_callback(NfcGenericEvent event, void* 
             request->write_size = ctx->write_size;
         } else {
             request->mode = LegicPrimePollerModeRead;
+            request->read_offset = ctx->read_offset;
+            request->read_size = ctx->read_size;
         }
     } else {
         // Success or Failure.
@@ -73,6 +77,28 @@ LegicPrimeError legic_prime_poller_sync_read(Nfc* nfc, LegicPrimeData* data) {
         .data = data,
     };
     return legic_prime_poller_sync_execute(nfc, &ctx);
+}
+
+LegicPrimeError legic_prime_poller_sync_read_range(
+    Nfc* nfc,
+    uint16_t offset,
+    size_t size,
+    LegicPrimeData* data,
+    size_t* bytes_read,
+    size_t* bytes_total) {
+    furi_check(nfc);
+    furi_check(data);
+    furi_check(size > 0 && size <= LEGIC_PRIME_MEM_MAX);
+
+    LegicPrimePollerSyncContext ctx = {
+        .data = data,
+        .read_offset = offset,
+        .read_size = size,
+    };
+    LegicPrimeError error = legic_prime_poller_sync_execute(nfc, &ctx);
+    if(bytes_read) *bytes_read = ctx.result.bytes_done;
+    if(bytes_total) *bytes_total = ctx.result.bytes_total;
+    return error;
 }
 
 LegicPrimeError legic_prime_poller_sync_write(

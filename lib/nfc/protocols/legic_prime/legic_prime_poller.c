@@ -148,6 +148,8 @@ static NfcCommand legic_prime_poller_request_mode_handler(LegicPrimePoller* inst
     }
 
     instance->state = LegicPrimePollerStateRead;
+    instance->read_offset = request->read_offset;
+    instance->read_size = request->read_size;
     if(!instance->progress) instance->progress = malloc(LEGIC_PRIME_MEM_MAX);
     legic_prime_poller_read_reset(instance);
     instance->resume_done = 0;
@@ -178,8 +180,10 @@ static NfcCommand legic_prime_poller_read_handler(LegicPrimePoller* instance) {
         instance->resume_done = instance->done_count;
         instance->resumes = 0;
     }
-    const uint16_t size = instance->data->data_size;
-    if(instance->done_count == size) {
+    // An empty range (past the end of the card) is read once a session
+    // confirmed the UID, and the card's type and size with it.
+    const uint16_t size = instance->read_end - instance->read_start;
+    if(instance->uid_known && instance->done_count == size) {
         legic_prime_poller_finish(instance, LegicPrimeErrorNone, size, size);
     } else if(instance->resumes < LEGIC_PRIME_MAX_RESUMES) {
         instance->resumes++;
