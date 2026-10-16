@@ -32,25 +32,27 @@ typedef struct {
     uint16_t write_size;
 } LegicPrimePollerEventDataModeRequest;
 
+/** Outcome of a read or a write, reported with Success and Failure. */
+typedef struct {
+    LegicPrimeError error; /**< LegicPrimeErrorNone on Success. */
+    /** Read: bytes read (two agreeing reads each).  Write: bytes the tag
+     *  acknowledged, the last ones of the range, as they are written last to
+     *  first. */
+    uint16_t bytes_done;
+    /** Bytes requested: the card size for a read, write_size for a write.
+     *  0 if the card was not detected. */
+    uint16_t bytes_total;
+} LegicPrimePollerEventDataResult;
+
 typedef union {
     LegicPrimePollerEventDataModeRequest mode_request;
-    LegicPrimeError error;
+    LegicPrimePollerEventDataResult result;
 } LegicPrimePollerEventData;
 
 typedef struct {
     LegicPrimePollerEventType type;
     LegicPrimePollerEventData* data;
 } LegicPrimePollerEvent;
-
-/** Detect the tag: send the IV and decode the card type into instance->data. */
-LegicPrimeError legic_prime_poller_setup(LegicPrimePoller* instance, uint8_t iv);
-
-/**
- * Run one read session from a fresh field: handshake, then read every byte
- * not read yet.  Returns LegicPrimeErrorNone once all bytes are read; any
- * other error means the session ended early (reset the field and call again).
- */
-LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance);
 
 #ifdef __cplusplus
 }

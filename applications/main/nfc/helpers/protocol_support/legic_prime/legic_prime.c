@@ -18,7 +18,7 @@ static void nfc_scene_info_on_enter_legic_prime(NfcApp* instance) {
         temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
     nfc_render_legic_prime_info(data, NfcProtocolFormatTypeFull, temp_str);
     // Keep the last line clear of the "More" button when scrolled down.
-    furi_string_cat_printf(temp_str, "\n");
+    furi_string_cat_str(temp_str, "\n");
 
     widget_reset(instance->widget);
     widget_add_text_scroll_element(
@@ -53,6 +53,8 @@ static NfcCommand
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         return NfcCommandStop;
     }
+    // On Failure (logged by the poller) the poller starts over with a new
+    // handshake: the scene keeps reading until the user leaves it.
     return NfcCommandContinue;
 }
 

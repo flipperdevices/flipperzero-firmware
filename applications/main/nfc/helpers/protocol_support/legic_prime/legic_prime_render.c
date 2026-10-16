@@ -22,13 +22,14 @@ static void nfc_render_legic_prime_layout(const LegicPrimeData* data, FuriString
             (d[7] & 0x70) >> 4,
             (d[7] & 0x80) >> 7);
     } else if(token == LegicPrimeTokenTypeImSegmented) {
-        LegicPrimeSegment seg;
+        LegicPrimeSegment seg = {};
         size_t count = 0;
-        while(legic_prime_get_segment(data, count, &seg)) {
+        while(legic_prime_get_next_segment(data, &seg)) {
+            count++;
             furi_string_cat_printf(
                 str,
                 "\nSeg %u @%03X: %u B%s%s%s",
-                (unsigned)(count + 1),
+                (unsigned)count,
                 seg.offset,
                 seg.length,
                 seg.valid ? "" : " invalid",
@@ -36,21 +37,27 @@ static void nfc_render_legic_prime_layout(const LegicPrimeData* data, FuriString
                 seg.last ? " last" : "");
             furi_string_cat_printf(
                 str, "\n  WRP %u WRC %u CRC %s", seg.wrp, seg.wrc, seg.crc_ok ? "OK" : "FAIL");
-            count++;
         }
-        if(count == 0) furi_string_cat_printf(str, "\nNo valid segment header");
+        if(count == 0) furi_string_cat_str(str, "\nNo valid segment header");
     } else if(token != LegicPrimeTokenTypeNewMedia) {
         // Master token: Proxmark3 `hf legic info` OLE/OL/FL.
-        uint8_t ol;
-        uint8_t fl = 1;
-        if(token == LegicPrimeTokenTypeXam) {
+        const uint8_t level = d[5] & 0x7F;
+        uint8_t ol = 0xFC - d[6];
+        uint8_t fl;
+        switch(token) {
+        case LegicPrimeTokenTypeXam:
             ol = 0x0C - (d[5] >> 4);
-        } else {
-            const uint8_t level = d[5] & 0x7F;
-            fl = token == LegicPrimeTokenTypeIam ? 0x2F - level + 1 :
-                 token == LegicPrimeTokenTypeSam ? 0x6F - level + 1 :
-                                                   0x7F - level + 1;
-            ol = 0xFC - d[6];
+            fl = 1;
+            break;
+        case LegicPrimeTokenTypeIam:
+            fl = 0x2F - level + 1;
+            break;
+        case LegicPrimeTokenTypeSam:
+            fl = 0x6F - level + 1;
+            break;
+        default:
+            fl = 0x7F - level + 1;
+            break;
         }
         furi_string_cat_printf(
             str, "\nMaster token\nOLE %u OL %u FL %u", (d[5] & 0x80) >> 7, ol, fl);
@@ -61,7 +68,7 @@ void nfc_render_legic_prime_info(
     const LegicPrimeData* data,
     NfcProtocolFormatType format_type,
     FuriString* str) {
-    furi_string_cat_printf(str, "UID:");
+    furi_string_cat_str(str, "UID:");
     for(size_t i = 0; i < LEGIC_PRIME_UID_SIZE; i++) {
         furi_string_cat_printf(str, " %02X", data->data[i]);
     }
@@ -73,9 +80,9 @@ void nfc_render_legic_prime_info(
         furi_string_cat_printf(str, "\nMemory: %u bytes", (unsigned)data->data_size);
         nfc_render_legic_prime_layout(data, str);
     } else if(legic_prime_get_token_type(data) == LegicPrimeTokenTypeImSegmented) {
-        LegicPrimeSegment seg;
+        LegicPrimeSegment seg = {};
         size_t count = 0;
-        while(legic_prime_get_segment(data, count, &seg)) {
+        while(legic_prime_get_next_segment(data, &seg)) {
             count++;
         }
         furi_string_cat_printf(str, "\nSegments: %u", (unsigned)count);
@@ -102,10 +109,14 @@ void nfc_render_legic_prime_dump(const LegicPrimeData* data, FuriString* str) {
     nfc_render_legic_prime_hex(data->data, data->data_size, 0, 0, str);
 
     // Segment payloads with the MCC obfuscation removed.
-    LegicPrimeSegment seg;
-    for(size_t i = 0; legic_prime_get_segment(data, i, &seg); i++) {
-        const size_t start = seg.offset + 5;
-        furi_string_cat_printf(str, "\n\e#Segment %u (decoded)", (unsigned)(i + 1));
-        nfc_render_legic_prime_hex(&data->data[start], seg.length - 5, start, data->data[4], str);
+    LegicPrimeSegment seg = {};
+    for(size_t i = 1; legic_prime_get_next_segment(data, &seg); i++) {
+        furi_string_cat_printf(str, "\n\e#Segment %u (decoded)", (unsigned)i);
+        nfc_render_legic_prime_hex(
+            &data->data[seg.payload_offset],
+            seg.payload_length,
+            seg.payload_offset,
+            data->data[4],
+            str);
     }
 }
