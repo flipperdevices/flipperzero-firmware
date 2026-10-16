@@ -855,7 +855,7 @@ typedef struct {
     size_t rx_bits;
     uint32_t t_frame_start;
     uint32_t t_frame_end;
-    uint32_t t_tx_end; // nominal, without TX_OFFSET
+    uint32_t t_tx_end; // data reply: nominal end, write ACK: measured end
     uint32_t t_ref; // keystream reference, chosen by the protocol
     uint32_t tx_delay_chips; // one-shot reply delay override, 0 = default
 } FuriHalNfcLegicListener;
@@ -1075,7 +1075,8 @@ static FuriHalNfcError furi_hal_nfc_legic_listener_tx(
     // ~12 µs from a fourth keystream slot.  A write ACK is not advanced: the
     // -34..+13 µs window was measured on data replies, and a Flipper reader
     // times the frame after an ACK from the ACK it measured, so moving the
-    // ACK would move that frame against the reference.
+    // ACK would move that frame against the reference.  For the same reason
+    // a write ACK keeps its measured end, also when it went out late.
     const bool delayed = l->tx_delay_chips != 0;
     const uint32_t delay_chips = delayed ? l->tx_delay_chips : LEGIC_TAG_FRAME_WAIT_CHIPS;
     l->tx_delay_chips = 0;
@@ -1112,7 +1113,7 @@ static FuriHalNfcError furi_hal_nfc_legic_listener_tx(
     }
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
     FURI_CRITICAL_EXIT();
-    l->t_tx_end = reply_start + (acc_q8 >> 8);
+    l->t_tx_end = (delayed ? t_start : reply_start) + (acc_q8 >> 8);
 
     // Drop edges caused by our own load modulation.
     furi_delay_us(10);

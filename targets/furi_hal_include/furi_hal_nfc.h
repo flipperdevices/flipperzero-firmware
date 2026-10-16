@@ -580,8 +580,12 @@ void furi_hal_nfc_legic_listener_set_ref_to_frame_end(uint32_t extra_fc);
 /**
  * @brief Set the LEGIC Prime tag's keystream reference to the end of its last reply.
  *
- * The end is nominal: the reply's delay after the reader's frame plus 99.1 µs
- * per bit, regardless of when the modulation actually started.
+ * For a data reply the end is nominal: the reply's delay after the reader's
+ * frame plus 99.1 µs per bit, regardless of when the modulation actually
+ * started, because readers time their next frame on their own grid.  For a
+ * write ACK (a reply delayed with furi_hal_nfc_legic_listener_set_tx_delay())
+ * it is the ACK's actual end, because readers time the frame after an ACK from
+ * the ACK they sampled.
  */
 void furi_hal_nfc_legic_listener_set_ref_to_tx_end(void);
 
