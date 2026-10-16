@@ -97,6 +97,7 @@ struct LegicPrimePoller {
     uint16_t read_cursor;
     uint16_t resume_done; // done_count at the last resume
     uint8_t resumes; // field resets since the read last made progress
+    uint8_t swaps; // sessions of this read that met another card
     uint8_t setup_attempts; // failed handshakes in a row
     bool rx_reduced_gain; // receiver gain for the next handshake or session
 

@@ -154,6 +154,7 @@ static NfcCommand legic_prime_poller_request_mode_handler(LegicPrimePoller* inst
     legic_prime_poller_read_reset(instance);
     instance->resume_done = 0;
     instance->resumes = 0;
+    instance->swaps = 0;
     // The tag is waiting for the ACK of the detection handshake; start the
     // read session from a fresh field.
     return cmd == NfcCommandContinue ? NfcCommandReset : cmd;
@@ -163,6 +164,10 @@ static NfcCommand legic_prime_poller_request_mode_handler(LegicPrimePoller* inst
 // field reset plus a fresh handshake and UID check lets the read continue
 // where it stopped.
 #define LEGIC_PRIME_MAX_RESUMES (8U)
+// Card swaps a read survives: a card put down by mistake, or a sim restarted
+// with another UID.  Every swap gives the new card a fresh resume budget, so
+// swaps need a limit of their own for cards taking turns to end the read.
+#define LEGIC_PRIME_MAX_SWAPS   (2U)
 
 static NfcCommand legic_prime_poller_read_handler(LegicPrimePoller* instance) {
     NfcCommand command = NfcCommandContinue;
@@ -171,11 +176,13 @@ static NfcCommand legic_prime_poller_read_handler(LegicPrimePoller* instance) {
     LegicPrimeError err = legic_prime_poller_read(instance);
     if(err == LegicPrimeErrorWrongCard) {
         // read() started over on the card that answered now.
+        instance->swaps++;
         FURI_LOG_W(TAG, "Another card answered, reading it from the start");
     } else if(err != LegicPrimeErrorNone && instance->done_count == done_before) {
         instance->rx_reduced_gain = !instance->rx_reduced_gain;
     }
-    // Only resumes that make no progress count against the limit.
+    // Only resumes that make no progress count against the limit.  A swap
+    // starts it over for the new card.
     if(instance->done_count != instance->resume_done) {
         instance->resume_done = instance->done_count;
         instance->resumes = 0;
@@ -185,7 +192,7 @@ static NfcCommand legic_prime_poller_read_handler(LegicPrimePoller* instance) {
     const uint16_t size = instance->read_end - instance->read_start;
     if(instance->uid_known && instance->done_count == size) {
         legic_prime_poller_finish(instance, LegicPrimeErrorNone, size, size);
-    } else if(instance->resumes < LEGIC_PRIME_MAX_RESUMES) {
+    } else if(instance->resumes < LEGIC_PRIME_MAX_RESUMES && instance->swaps <= LEGIC_PRIME_MAX_SWAPS) {
         instance->resumes++;
         command = NfcCommandReset;
     } else {
