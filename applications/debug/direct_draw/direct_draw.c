@@ -1,4 +1,5 @@
 #include <furi.h>
+#include <furi_hal_cortex.h>
 #include <gui/gui.h>
 #include <input/input.h>
 
@@ -67,20 +68,21 @@ static void direct_draw_block(Canvas* canvas, uint32_t size, uint32_t counter) {
 }
 
 static void direct_draw_run(DirectDraw* instance) {
-    size_t start = DWT->CYCCNT;
+    const size_t cycles_per_second = furi_hal_cortex_instructions_per_microsecond() * 1000000;
+    size_t start = furi_hal_cortex_get_cycles();
     size_t counter = 0;
     float fps = 0;
 
     furi_thread_set_current_priority(FuriThreadPriorityIdle);
 
     do {
-        size_t elapsed = DWT->CYCCNT - start;
+        size_t elapsed = furi_hal_cortex_get_cycles() - start;
         char buffer[BUFFER_SIZE] = {0};
 
-        if(elapsed >= 64000000) {
-            fps = (float)counter / ((float)elapsed / 64000000.0f);
+        if(elapsed >= cycles_per_second) {
+            fps = (float)counter / ((float)elapsed / (float)cycles_per_second);
 
-            start = DWT->CYCCNT;
+            start = furi_hal_cortex_get_cycles();
             counter = 0;
         }
         snprintf(buffer, BUFFER_SIZE, "FPS: %.1f", (double)fps);
