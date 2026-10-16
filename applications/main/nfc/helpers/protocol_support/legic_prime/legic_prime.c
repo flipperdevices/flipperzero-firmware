@@ -77,19 +77,11 @@ static void nfc_scene_read_success_on_enter_legic_prime(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static NfcCommand
-    nfc_scene_emulate_listener_callback_legic_prime(NfcGenericEvent event, void* context) {
-    UNUSED(event);
-    UNUSED(context);
-    return NfcCommandContinue;
-}
-
 static void nfc_scene_emulate_on_enter_legic_prime(NfcApp* instance) {
     const LegicPrimeData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolLegicPrime);
 
     instance->listener = nfc_listener_alloc(instance->nfc, NfcProtocolLegicPrime, data);
-    nfc_listener_start(
-        instance->listener, nfc_scene_emulate_listener_callback_legic_prime, instance);
+    nfc_listener_start(instance->listener, NULL, NULL);
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_legic_prime = {
