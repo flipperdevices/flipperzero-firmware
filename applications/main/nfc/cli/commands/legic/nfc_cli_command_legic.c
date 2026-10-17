@@ -29,7 +29,7 @@ static const char* nfc_cli_legic_get_error(LegicPrimeError error) {
     case LegicPrimeErrorNotPresent:
         return "card not present";
     case LegicPrimeErrorWrongCrc:
-        return "wrong CRC";
+        return "replies kept failing their CRC check";
     case LegicPrimeErrorTimeout:
         return "timeout";
     case LegicPrimeErrorCommunication:
