@@ -83,29 +83,30 @@ static bool nfc_cli_dump_parse_filename_key(FuriString* value, void* output) {
     return true;
 }
 
-NfcGenericCallback protocol_poller_callbacks[NfcProtocolNum] = {
-    [NfcProtocolIso14443_3a] = nfc_cli_dump_poller_callback_iso14443_3a,
-    [NfcProtocolIso14443_3b] = nfc_cli_dump_poller_callback_iso14443_3b,
-    [NfcProtocolIso14443_4a] = nfc_cli_dump_poller_callback_iso14443_4a,
-    [NfcProtocolIso14443_4b] = nfc_cli_dump_poller_callback_iso14443_4b,
-    [NfcProtocolIso15693_3] = nfc_cli_dump_poller_callback_iso15693_3,
-    [NfcProtocolFelica] = nfc_cli_dump_poller_callback_felica,
-    [NfcProtocolMfUltralight] = nfc_cli_dump_poller_callback_mf_ultralight,
-    [NfcProtocolMfClassic] = nfc_cli_dump_poller_callback_mf_classic,
-    [NfcProtocolMfPlus] = nfc_cli_dump_poller_callback_mf_plus,
-    [NfcProtocolMfDesfire] = nfc_cli_dump_poller_callback_mf_desfire,
-    [NfcProtocolSlix] = nfc_cli_dump_poller_callback_slix,
-    [NfcProtocolSt25tb] = nfc_cli_dump_poller_callback_st25tb,
-    [NfcProtocolNtag4xx] = nfc_cli_dump_poller_callback_ntag4xx,
-    [NfcProtocolType4Tag] = nfc_cli_dump_poller_callback_type_4_tag,
-    [NfcProtocolLegicPrime] = nfc_cli_dump_poller_callback_legic_prime,
-};
+typedef struct {
+    NfcGenericCallback callback;
+    // The poller ends every read itself, with success or failure, however
+    // long it takes: no time limit applies unless --timeout is given.
+    bool poller_ends_read;
+} NfcCliDumpProtocol;
 
-// Read timeouts for protocols that take longer than NFC_CLI_DUMP_DEFAULT_TIMEOUT,
-// used unless --timeout is given.
-static const uint32_t protocol_read_timeouts[NfcProtocolNum] = {
-    // Two agreeing reads per byte: a MIM1024 takes ~5.5 s.
-    [NfcProtocolLegicPrime] = 20000,
+static const NfcCliDumpProtocol nfc_cli_dump_protocols[NfcProtocolNum] = {
+    [NfcProtocolIso14443_3a] = {.callback = nfc_cli_dump_poller_callback_iso14443_3a},
+    [NfcProtocolIso14443_3b] = {.callback = nfc_cli_dump_poller_callback_iso14443_3b},
+    [NfcProtocolIso14443_4a] = {.callback = nfc_cli_dump_poller_callback_iso14443_4a},
+    [NfcProtocolIso14443_4b] = {.callback = nfc_cli_dump_poller_callback_iso14443_4b},
+    [NfcProtocolIso15693_3] = {.callback = nfc_cli_dump_poller_callback_iso15693_3},
+    [NfcProtocolFelica] = {.callback = nfc_cli_dump_poller_callback_felica},
+    [NfcProtocolMfUltralight] = {.callback = nfc_cli_dump_poller_callback_mf_ultralight},
+    [NfcProtocolMfClassic] = {.callback = nfc_cli_dump_poller_callback_mf_classic},
+    [NfcProtocolMfPlus] = {.callback = nfc_cli_dump_poller_callback_mf_plus},
+    [NfcProtocolMfDesfire] = {.callback = nfc_cli_dump_poller_callback_mf_desfire},
+    [NfcProtocolSlix] = {.callback = nfc_cli_dump_poller_callback_slix},
+    [NfcProtocolSt25tb] = {.callback = nfc_cli_dump_poller_callback_st25tb},
+    [NfcProtocolNtag4xx] = {.callback = nfc_cli_dump_poller_callback_ntag4xx},
+    [NfcProtocolType4Tag] = {.callback = nfc_cli_dump_poller_callback_type_4_tag},
+    [NfcProtocolLegicPrime] =
+        {.callback = nfc_cli_dump_poller_callback_legic_prime, .poller_ends_read = true},
 };
 
 static void nfc_cli_dump_generate_filename(FuriString* file_path) {
@@ -180,13 +181,11 @@ static size_t nfc_cli_dump_set_protocol(NfcCliDumpContext* instance) {
 
 static bool nfc_cli_dump_card(NfcCliDumpContext* instance) {
     instance->poller = nfc_poller_alloc(instance->nfc, instance->desired_protocol);
-    NfcGenericCallback callback = protocol_poller_callbacks[instance->desired_protocol];
-    if(callback) {
+    const NfcCliDumpProtocol* protocol = &nfc_cli_dump_protocols[instance->desired_protocol];
+    if(protocol->callback) {
         uint32_t timeout = instance->timeout;
-        if(!instance->timeout_set && protocol_read_timeouts[instance->desired_protocol]) {
-            timeout = protocol_read_timeouts[instance->desired_protocol];
-        }
-        nfc_poller_start(instance->poller, callback, instance);
+        if(!instance->timeout_set && protocol->poller_ends_read) timeout = FuriWaitForever;
+        nfc_poller_start(instance->poller, protocol->callback, instance);
         FuriStatus status = furi_semaphore_acquire(instance->sem_done, timeout);
 
         if(status == FuriStatusErrorTimeout) instance->result = NfcCliDumpErrorTimeout;
