@@ -8,6 +8,7 @@
 #include <furi.h>
 #include <nfc/protocols/nfc_listener_base.h>
 #include <toolbox/bit_buffer.h>
+#include <lib/bit_lib/bit_lib.h>
 
 /*
  * LEGIC Prime tag emulation, mirroring Proxmark armsrc/legicrfsim.c.
@@ -26,8 +27,6 @@
 // as legicrfsim.c tx_ack (TAG_ACK_WAIT), which steps the keystream 35 times
 // while waiting and once for the ACK bit.
 #define LEGIC_PRIME_LISTENER_ACK_WAIT_CHIPS (758U)
-// Bytes 0-4 (MCD, MSN, MCC) can't be written.
-#define LEGIC_PRIME_LISTENER_WRITABLE_FROM  (5U)
 
 typedef enum {
     LegicPrimeListenerStateIdle, // waiting for IV
@@ -87,17 +86,14 @@ static const LegicPrimeData* legic_prime_listener_get_data(const LegicPrimeListe
     return instance->data;
 }
 
+// The first `bits` bits of a reader frame, LSB first (at most 24).
 static uint32_t legic_prime_listener_raw_value(const BitBuffer* rx_buffer, size_t bits) {
-    uint32_t v = 0;
-    for(size_t i = 0; i < bits; i++) {
-        v |= (uint32_t)((bit_buffer_get_byte(rx_buffer, i / 8) >> (i % 8)) & 1u) << i;
-    }
-    return v;
+    const uint32_t v = bit_lib_bytes_to_num_le(bit_buffer_get_data(rx_buffer), (bits + 7) / 8);
+    return v & ((1UL << bits) - 1);
 }
 
 static void legic_prime_listener_reply(LegicPrimeListener* instance, uint32_t value, size_t bits) {
-    // The tag steps its PRNG twice between the reader frame and its reply.
-    legic_prime_prng_forward(2);
+    legic_prime_prng_forward(LEGIC_PRIME_REPLY_STEPS);
     bit_buffer_reset(instance->tx_buffer);
     for(size_t i = 0; i < bits; i++) {
         bit_buffer_append_bit(
@@ -110,10 +106,10 @@ static void legic_prime_listener_reply(LegicPrimeListener* instance, uint32_t va
 
 static bool
     legic_prime_listener_handle_iv(LegicPrimeListener* instance, const BitBuffer* rx, size_t bits) {
-    if(bits != 7) return false;
-    const uint8_t iv = legic_prime_listener_raw_value(rx, 7);
+    if(bits != LEGIC_PRIME_IV_BITS) return false;
+    const uint8_t iv = legic_prime_listener_raw_value(rx, LEGIC_PRIME_IV_BITS);
     legic_prime_prng_init(iv);
-    legic_prime_listener_reply(instance, instance->type_code, 6);
+    legic_prime_listener_reply(instance, instance->type_code, LEGIC_PRIME_TYPE_BITS);
     instance->state = LegicPrimeListenerStateWaitAck;
     return true;
 }
@@ -128,6 +124,12 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
 
     const BitBuffer* rx = nfc_event->data.buffer;
     const size_t bits = bit_buffer_get_size(rx);
+    // No reader frame is longer than a MIM1024 WRITE: a longer one is noise
+    // and ends the session, as any other frame that fits no state does.
+    if(bits > LEGIC_PRIME_LISTENER_MAX_BITS) {
+        instance->state = LegicPrimeListenerStateIdle;
+        return NfcCommandContinue;
+    }
 
     uint32_t steps = 0;
     if(instance->state != LegicPrimeListenerStateIdle) {
@@ -142,16 +144,15 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
 
     legic_prime_prng_forward((int)steps);
 
-    uint32_t value = 0;
+    // Decrypt: one keystream bit per frame bit.
+    uint32_t value = legic_prime_listener_raw_value(rx, bits);
     for(size_t i = 0; i < bits; i++) {
-        value |= (uint32_t)(((bit_buffer_get_byte(rx, i / 8) >> (i % 8)) & 1u) ^
-                            legic_prime_prng_get_bit())
-                 << i;
+        value ^= (uint32_t)legic_prime_prng_get_bit() << i;
         legic_prime_prng_forward(1);
     }
 
     if(instance->state == LegicPrimeListenerStateWaitAck) {
-        if(bits == 6 && value == instance->ack_code) {
+        if(bits == LEGIC_PRIME_ACK_BITS && value == instance->ack_code) {
             instance->state = LegicPrimeListenerStateConnected;
             // Slots count from one slot after the ACK, as legicrfsim.c init_card.
             nfc_legic_listener_set_ref_to_frame_end(instance->nfc, LEGIC_PRIME_LISTENER_BIT_FC);
@@ -171,16 +172,18 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
         const uint16_t addr = value >> 1;
         const uint8_t byte = addr < instance->data->data_size ? instance->data->data[addr] : 0;
         const uint8_t crc = legic_prime_crc4(value, instance->cmd_size_bits, byte);
-        legic_prime_listener_reply(instance, ((uint32_t)crc << 8) | byte, 12);
+        legic_prime_listener_reply(
+            instance, ((uint32_t)crc << 8) | byte, LEGIC_PRIME_READ_REPLY_BITS);
     } else if(bits == instance->cmd_size_bits) {
         // Write header without data: nothing to answer.
         nfc_legic_listener_set_ref_to_frame_end(instance->nfc, 0);
-    } else if(bits == instance->cmd_size_bits + 8U + 4U && !(value & 1u)) {
+    } else if(bits == LEGIC_PRIME_WRITE_FRAME_BITS(instance->cmd_size_bits) && !(value & 1u)) {
         // WRITE: address | data byte | CRC-4 over both.
         const uint32_t addr_mask = (1u << (instance->cmd_size_bits - 1)) - 1;
         const uint16_t addr = (value >> 1) & addr_mask;
         const uint8_t byte = (value >> instance->cmd_size_bits) & 0xFF;
-        const uint8_t crc = (value >> (instance->cmd_size_bits + 8U)) & 0x0F;
+        const uint8_t crc = (value >> (instance->cmd_size_bits + 8U)) &
+                            ((1U << LEGIC_PRIME_CRC4_BITS) - 1);
         // Writes to the DCF (5-6) and bytes 7-8 are accepted as a real tag
         // accepts them: that is how an encoder turns new media into an IM or
         // IM-S card (legicrfsim.c even accepts 0-4).  The DCF's decrement-only
@@ -189,7 +192,7 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
         // State" undoes; guarding the DCF of a physical card is the reader
         // client's policy, as in Proxmark3.
         if(crc == legic_prime_crc4(addr << 1, instance->cmd_size_bits, byte) &&
-           addr >= LEGIC_PRIME_LISTENER_WRITABLE_FROM && addr < instance->data->data_size) {
+           addr >= LEGIC_PRIME_WRITABLE_FROM && addr < instance->data->data_size) {
             instance->data->data[addr] = byte;
             legic_prime_prng_forward(
                 LEGIC_PRIME_LISTENER_ACK_WAIT_CHIPS / LEGIC_PRIME_LISTENER_BIT_CHIPS - 1);
