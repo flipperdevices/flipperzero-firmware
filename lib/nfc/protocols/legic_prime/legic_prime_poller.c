@@ -249,10 +249,13 @@ static NfcCommand legic_prime_poller_failure_handler(LegicPrimePoller* instance)
     const LegicPrimePollerEventDataResult* result = &instance->legic_event_data.result;
     FURI_LOG_W(
         TAG,
-        "Failed: error %d, %u of %u bytes",
+        "Failed: error %d, %u of %u bytes, %u resumes, %u swaps, %u write attempts",
         result->error,
         (unsigned)result->bytes_done,
-        (unsigned)result->bytes_total);
+        (unsigned)result->bytes_total,
+        (unsigned)instance->resumes,
+        (unsigned)instance->swaps,
+        (unsigned)instance->write_attempts);
     return legic_prime_poller_report(instance, LegicPrimePollerEventTypeFailure);
 }
 
