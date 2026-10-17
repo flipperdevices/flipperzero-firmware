@@ -20,6 +20,11 @@
 #include <nfc/protocols/slix/slix_i.h>
 #include <nfc/protocols/slix/slix_poller.h>
 #include <nfc/protocols/slix/slix_poller_i.h>
+#include <nfc/protocols/legic_prime/legic_prime.h>
+#include <nfc/protocols/legic_prime/legic_prime_crc.h>
+#include <nfc/protocols/legic_prime/legic_prime_listener_i.h>
+#include <nfc/protocols/legic_prime/legic_prime_prng.h>
+#include <nfc/protocols/legic_prime/legic_prime_poller_i.h>
 
 #include <nfc/nfc_poller.h>
 
@@ -1014,6 +1019,371 @@ MU_TEST(slix_set_password_access_all_passwords_cap) {
         EXT_PATH("unit_tests/nfc/Slix_cap_accept_all_pass.nfc"), 0x12341234, false);
 }
 
+// Reference values from Proxmark3's common/legic_prng.c and common/crc.c.
+static uint32_t legic_prime_test_keystream(uint8_t iv, int skip, uint8_t bits) {
+    legic_prime_prng_init(iv);
+    legic_prime_prng_forward(skip);
+    uint32_t value = 0;
+    for(uint8_t i = 0; i < bits; i++) {
+        value |= (uint32_t)legic_prime_prng_get_bit() << i;
+        legic_prime_prng_forward(1);
+    }
+    return value;
+}
+
+MU_TEST(legic_prime_prng_test) {
+    mu_assert_int_eq(0x82B50098, legic_prime_test_keystream(0x55, 0, 32));
+    mu_assert_int_eq(0xAA13D912, legic_prime_test_keystream(0x01, 0, 32));
+    mu_assert_int_eq(0x3D7AD81F, legic_prime_test_keystream(0x7F, 0, 32));
+    mu_assert_int_eq(0x0093, legic_prime_test_keystream(0x55, 100, 16));
+}
+
+// Proxmark3 armsrc/legicrfsim.c rx_frame(), in its 212 kHz ticks (64 fc):
+// starting 2 ticks before the reference, step once per 21-tick slot until
+// the slot that holds the frame's first pause.
+static uint32_t legic_prime_test_sim_idle_steps(uint32_t pause_tick) {
+    int32_t last_frame_end = -2;
+    uint32_t steps = 0;
+    do {
+        last_frame_end += 21;
+        steps++;
+    } while((int32_t)pause_tick > last_frame_end);
+    return steps;
+}
+
+MU_TEST(legic_prime_listener_steps_test) {
+    // legicrfsim.c only sees whole ticks.
+    const uint32_t gap_ticks = LEGIC_PRIME_LISTENER_SESSION_GAP_FC / LEGIC_PRIME_LISTENER_CHIP_FC;
+    for(uint32_t tick = 0; tick <= gap_ticks; tick++) {
+        mu_assert_int_eq(
+            legic_prime_test_sim_idle_steps(tick),
+            legic_prime_listener_idle_steps(tick * LEGIC_PRIME_LISTENER_CHIP_FC));
+    }
+
+    // The reader's next frame 188.8-287.9 µs after the reply end takes 3 steps:
+    // PM3 reader ~235 µs, Flipper reader ~266 µs (260 µs + IRQ pin lag).
+    mu_assert_int_eq(2, legic_prime_listener_idle_steps(2560));
+    mu_assert_int_eq(3, legic_prime_listener_idle_steps(2561));
+    mu_assert_int_eq(3, legic_prime_listener_idle_steps(3187));
+    mu_assert_int_eq(3, legic_prime_listener_idle_steps(3607));
+    mu_assert_int_eq(3, legic_prime_listener_idle_steps(3904));
+    mu_assert_int_eq(4, legic_prime_listener_idle_steps(3905));
+    // Chained READ 221.8 µs after the reader's ACK, counted from one slot after it.
+    mu_assert_int_eq(2, legic_prime_listener_idle_steps(1664));
+
+    // Past the session gap (or a frame before the reference, which reads as
+    // a gap of about a minute) the session is over.
+    mu_assert_int_eq(202, legic_prime_listener_idle_steps(LEGIC_PRIME_LISTENER_SESSION_GAP_FC));
+    mu_assert_int_eq(0, legic_prime_listener_idle_steps(LEGIC_PRIME_LISTENER_SESSION_GAP_FC + 1));
+    mu_assert_int_eq(0, legic_prime_listener_idle_steps(UINT32_MAX));
+}
+
+MU_TEST(legic_prime_crc_test) {
+    // CRC-8/LEGIC check value, as documented in Proxmark3's common/crc.c.
+    mu_assert_int_eq(0xC6, legic_prime_crc8((const uint8_t*)"123456789", 9));
+
+    const uint8_t uid1[] = {0x81, 0xAB, 0x2C, 0x87};
+    const uint8_t uid2[] = {0x11, 0x22, 0x33, 0x44};
+    const uint8_t uid3[] = {0xA1, 0xB2, 0xC3, 0xD4};
+    mu_assert_int_eq(0x2D, legic_prime_crc8(uid1, sizeof(uid1)));
+    mu_assert_int_eq(0xD4, legic_prime_crc8(uid2, sizeof(uid2)));
+    mu_assert_int_eq(0xFD, legic_prime_crc8(uid3, sizeof(uid3)));
+
+    // READ command (address << 1 | 1) or WRITE (address << 1), then the byte.
+    mu_assert_int_eq(0x4, legic_prime_crc4((5 << 1) | 1, 9, 0x2D));
+    mu_assert_int_eq(0x3, legic_prime_crc4((0 << 1) | 1, 6, 0x81));
+    mu_assert_int_eq(0x7, legic_prime_crc4(600 << 1, 11, 0xA1));
+    // The last MIM1024 address uses all 11 command bits.
+    mu_assert_int_eq(0xD, legic_prime_crc4(1023 << 1, 11, 0xA5));
+}
+
+// On-air frames and reply keystreams for IV 0x55 on a MIM256 (9-bit
+// commands), as Proxmark3's reader builds them (armsrc/legicrf.c
+// setup_phase(), read_byte(), write_byte() and rx_ack() on
+// common/legic_prng.c).
+MU_TEST(legic_prime_frame_test) {
+    LegicPrimeExchange ex;
+
+    legic_prime_poller_build_iv(&ex, 0x55);
+    mu_assert_int_eq(0x55, ex.tx);
+    mu_assert_int_eq(7, ex.tx_bits);
+    mu_assert_int_eq(6, ex.rx_bits);
+    // MIM256's type code 0x1D arrives as 0x3B.
+    mu_assert_int_eq(0x26, ex.ks);
+
+    // The ACK, the first READ chained behind it, then READs behind replies.
+    legic_prime_poller_build(&ex, 0x39, 6, LEGIC_PRIME_STEPS_AFTER_REPLY, 0);
+    mu_assert_int_eq(0x19, ex.tx);
+    mu_assert_int_eq(0, ex.ks);
+    legic_prime_poller_build(&ex, (0 << 1) | 1, 9, LEGIC_PRIME_STEPS_AFTER_READER_ACK, 12);
+    mu_assert_int_eq(0x057, ex.tx);
+    mu_assert_int_eq(0x352, ex.ks);
+    legic_prime_poller_build(&ex, (1 << 1) | 1, 9, LEGIC_PRIME_STEPS_AFTER_REPLY, 12);
+    mu_assert_int_eq(0x17C, ex.tx);
+    mu_assert_int_eq(0x387, ex.ks);
+    legic_prime_poller_build(&ex, (2 << 1) | 1, 9, LEGIC_PRIME_STEPS_AFTER_REPLY, 12);
+    mu_assert_int_eq(0x0FA, ex.tx);
+    mu_assert_int_eq(0x905, ex.ks);
+
+    // IV, ACK and READ 0, then WRITE 0x16 = A5 behind the READ's reply, its
+    // ACK in window 33 and WRITE 0x15 = 5A chained behind that ACK.
+    legic_prime_poller_build_iv(&ex, 0x55);
+    legic_prime_poller_build(&ex, 0x39, 6, LEGIC_PRIME_STEPS_AFTER_REPLY, 0);
+    legic_prime_poller_build(&ex, (0 << 1) | 1, 9, LEGIC_PRIME_STEPS_AFTER_READER_ACK, 12);
+    const uint32_t write1 = legic_prime_poller_write_frame(0x16, 0xA5, 9);
+    mu_assert_int_eq(0x034A2C, write1);
+    legic_prime_poller_build(&ex, write1, 21, LEGIC_PRIME_STEPS_AFTER_REPLY, 0);
+    mu_assert_int_eq(0x1F7153, ex.tx);
+    const uint32_t write2 = legic_prime_poller_write_frame(0x15, 0x5A, 9);
+    mu_assert_int_eq(0x1CB42A, write2);
+    legic_prime_poller_build(&ex, write2, 21, 33 + LEGIC_PRIME_WRITE_STEPS_AFTER_ACK, 0);
+    mu_assert_int_eq(0x0CB42E, ex.tx);
+}
+
+// Generated MIM256 IM-S image with two segments; the second one has a
+// corrupted header CRC.  Proxmark3 `hf legic info`, reading it emulated by
+// the Flipper, reports the same two segments (len 40 WRP 10 WRC 3 CRC ok;
+// len 30 RD CRC fail).
+static const uint8_t legic_prime_test_ims256[] = {
+    0x11, 0x22, 0x33, 0x44, 0xD4, 0x05, 0x00, 0x9F, 0xFF, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
+    0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0xFC, 0x94, 0xDE, 0xE4, 0x92, 0xC4, 0xC5, 0xC6, 0xC7, 0xC0,
+    0xC1, 0xC2, 0xC3, 0xCC, 0xCD, 0xCE, 0xCF, 0xC8, 0xC9, 0xCA, 0xCB, 0xC4, 0xC5, 0xC6, 0xC7, 0xC0,
+    0xC1, 0xC2, 0xC3, 0xCC, 0xCD, 0xCE, 0xCF, 0xC8, 0xC9, 0xCA, 0xCB, 0xC4, 0xC5, 0xC6, 0xCA, 0x14,
+    0xD4, 0x54, 0x2D, 0xF4, 0xF5, 0xF6, 0xF7, 0xF0, 0xF1, 0xF2, 0xF3, 0xFC, 0xFD, 0xFE, 0xFF, 0xF8,
+    0xF9, 0xFA, 0xFB, 0xF4, 0xF5, 0xF6, 0xF7, 0xF0, 0xF1, 0xF2, 0xF3, 0xFC,
+};
+
+static LegicPrimeData* legic_prime_test_card(void) {
+    LegicPrimeData* data = legic_prime_alloc();
+    legic_prime_set_type(data, LegicPrimeTypeMim256);
+    // The unused area is 00 obfuscated with the MCC (0xD4).
+    memset(data->data, 0xD4, data->data_size);
+    memcpy(data->data, legic_prime_test_ims256, sizeof(legic_prime_test_ims256));
+    return data;
+}
+
+// Checks the two segments of legic_prime_test_card(), whatever its UID.
+static void legic_prime_test_segments(const LegicPrimeData* data) {
+    LegicPrimeSegment seg = {};
+
+    mu_assert(legic_prime_get_next_segment(data, &seg), "segment 1 missing\r\n");
+    mu_assert_int_eq(22, seg.offset);
+    mu_assert_int_eq(40, seg.length);
+    mu_assert_int_eq(27, seg.payload_offset);
+    mu_assert_int_eq(35, seg.payload_length);
+    mu_assert(seg.valid && !seg.last && !seg.rd && seg.crc_ok, "segment 1 flags\r\n");
+    mu_assert_int_eq(10, seg.wrp);
+    mu_assert_int_eq(3, seg.wrc);
+
+    mu_assert(legic_prime_get_next_segment(data, &seg), "segment 2 missing\r\n");
+    mu_assert_int_eq(62, seg.offset);
+    mu_assert_int_eq(30, seg.length);
+    mu_assert(seg.valid && seg.last && seg.rd && !seg.crc_ok, "segment 2 flags\r\n");
+    mu_assert_int_eq(0, seg.wrp);
+    mu_assert_int_eq(0, seg.wrc);
+
+    mu_assert(!legic_prime_get_next_segment(data, &seg), "segment past the last one\r\n");
+}
+
+MU_TEST(legic_prime_layout_test) {
+    LegicPrimeData* data = legic_prime_test_card();
+
+    mu_assert(legic_prime_verify_mcc(data), "MCC\r\n");
+    mu_assert_int_eq(5, legic_prime_get_dcf(data));
+    mu_assert_int_eq(LegicPrimeTokenTypeImSegmented, legic_prime_get_token_type(data));
+    legic_prime_test_segments(data);
+
+    // Other token types, from the DCF and bytes 7-8.
+    LegicPrimeSegment seg = {};
+    data->data[5] = 0xFF;
+    data->data[6] = 0xFF;
+    mu_assert_int_eq(LegicPrimeTokenTypeNewMedia, legic_prime_get_token_type(data));
+    mu_assert(!legic_prime_get_next_segment(data, &seg), "segments on new media\r\n");
+    data->data[5] = 0x34;
+    data->data[6] = 0x12;
+    data->data[7] = 0x25;
+    mu_assert_int_eq(LegicPrimeTokenTypeIm, legic_prime_get_token_type(data));
+    data->data[5] = 0x10;
+    data->data[6] = 0xF0;
+    mu_assert_int_eq(LegicPrimeTokenTypeIam, legic_prime_get_token_type(data));
+    data->data[5] = 0x40;
+    mu_assert_int_eq(LegicPrimeTokenTypeSam, legic_prime_get_token_type(data));
+    data->data[5] = 0x75;
+    mu_assert_int_eq(LegicPrimeTokenTypeGam, legic_prime_get_token_type(data));
+    data->data[6] = 0xEC;
+    mu_assert_int_eq(LegicPrimeTokenTypeXam, legic_prime_get_token_type(data));
+
+    legic_prime_free(data);
+}
+
+MU_TEST(legic_prime_set_uid_test) {
+    const uint8_t uid[] = {0xA1, 0xB2, 0xC3, 0xD4};
+    const uint8_t old_uid[] = {0x11, 0x22, 0x33, 0x44};
+
+    // As nfc_device_load() does it, on a reset card.
+    LegicPrimeData* data = legic_prime_alloc();
+    mu_assert_int_eq(LegicPrimeTypeMim22, data->type);
+    mu_assert_int_eq(LEGIC_PRIME_MEM_SIZE_MIM22, data->data_size);
+    mu_assert(legic_prime_set_uid(data, uid, sizeof(uid)), "set_uid on a reset card\r\n");
+    mu_assert_mem_eq(uid, data->data, sizeof(uid));
+    mu_assert(legic_prime_verify_mcc(data), "MCC after set_uid on a reset card\r\n");
+    mu_assert(!legic_prime_set_uid(data, uid, 7), "set_uid with a 7-byte UID\r\n");
+    legic_prime_free(data);
+
+    LegicPrimeData* reference = legic_prime_test_card();
+    data = legic_prime_test_card();
+    mu_assert(legic_prime_set_uid(data, uid, sizeof(uid)), "set_uid\r\n");
+    mu_assert_mem_eq(uid, data->data, sizeof(uid));
+    mu_assert_int_eq(0xFD, data->data[4]);
+    // The header area is not obfuscated.
+    mu_assert_mem_eq(&reference->data[5], &data->data[5], 22 - 5);
+    // Bytes from 22 on move from MCC D4 to FD, except the segment header
+    // CRCs: segment 1's matches the new UID (Proxmark3 CRC8Legic), segment
+    // 2's stays wrong.
+    for(size_t i = 22; i < data->data_size; i++) {
+        if(i == 26 || i == 66) continue;
+        mu_assert_int_eq(reference->data[i] ^ 0xD4 ^ 0xFD, data->data[i]);
+    }
+    mu_assert_int_eq(0xA8, data->data[26]);
+    mu_assert_int_eq(0x17, data->data[66]);
+    legic_prime_test_segments(data);
+
+    // Back to the old UID: the original image.
+    mu_assert(legic_prime_set_uid(data, old_uid, sizeof(old_uid)), "set_uid back\r\n");
+    mu_assert(legic_prime_is_equal(reference, data), "set_uid round trip\r\n");
+
+    legic_prime_free(reference);
+    legic_prime_free(data);
+}
+
+MU_TEST(legic_prime_write_range_test) {
+    // Bytes 0-4 never, the rest up to the end of the card.
+    static const struct {
+        uint16_t data_size;
+        uint16_t offset;
+        uint16_t size;
+        bool writable;
+    } writable_cases[] = {
+        {256, 0, 1, false},     {256, 4, 1, false},       {256, 4, 2, false},
+        {256, 5, 1, true},      {256, 5, 0, false},       {256, 6, 2, true},
+        {256, 7, 1, true},      {22, 21, 1, true},        {22, 21, 2, false},
+        {22, 22, 1, false},     {22, 5, 17, true},        {22, 5, 18, false},
+        {256, 255, 1, true},    {256, 255, 2, false},     {256, 256, 1, false},
+        {256, 5, 251, true},    {256, 5, 252, false},     {1024, 1023, 1, true},
+        {1024, 1023, 2, false}, {1024, 1024, 1, false},   {1024, 5, 1019, true},
+        {1024, 5, 1020, false}, {1024, 0xFFFF, 1, false}, {256, 5, 0xFFFF, false},
+    };
+    for(size_t i = 0; i < COUNT_OF(writable_cases); i++) {
+        mu_assert(
+            legic_prime_is_writable(
+                writable_cases[i].data_size, writable_cases[i].offset, writable_cases[i].size) ==
+                writable_cases[i].writable,
+            "legic_prime_is_writable\r\n");
+    }
+
+    // The DCF is bytes 5-6.
+    static const struct {
+        uint16_t offset;
+        uint16_t size;
+        bool dcf;
+    } dcf_cases[] = {
+        {0, 4, false},
+        {0, 5, false},
+        {0, 6, true},
+        {3, 2, false},
+        {4, 1, false},
+        {4, 2, true},
+        {5, 1, true},
+        {5, 2, true},
+        {6, 1, true},
+        {6, 2, true},
+        {7, 1, false},
+        {7, 2, false},
+        {2, 100, true},
+        {5, 0, false},
+        {300, 4, false},
+    };
+    for(size_t i = 0; i < COUNT_OF(dcf_cases); i++) {
+        mu_assert(
+            legic_prime_is_dcf_write(dcf_cases[i].offset, dcf_cases[i].size) == dcf_cases[i].dcf,
+            "legic_prime_is_dcf_write\r\n");
+    }
+}
+
+MU_TEST(legic_prime_read_range_test) {
+    // The requested range clamped to the card; size 0 is the whole card.
+    static const struct {
+        LegicPrimeType type;
+        uint16_t offset;
+        uint16_t size;
+        uint16_t start;
+        uint16_t end;
+    } cases[] = {
+        {LegicPrimeTypeMim256, 0, 0, 0, 256},
+        {LegicPrimeTypeMim256, 22, 16, 22, 38},
+        {LegicPrimeTypeMim256, 250, 16, 250, 256},
+        {LegicPrimeTypeMim256, 300, 16, 256, 256},
+        {LegicPrimeTypeMim256, 5, 0xFFFF, 5, 256},
+        // A corrected type changes the card's size, and the range with it.
+        {LegicPrimeTypeMim22, 0, 0, 0, 22},
+        {LegicPrimeTypeMim22, 20, 16, 20, 22},
+    };
+    LegicPrimePoller poller = {};
+    poller.data = legic_prime_alloc();
+    poller.progress = malloc(LEGIC_PRIME_MEM_MAX);
+    for(size_t i = 0; i < COUNT_OF(cases); i++) {
+        legic_prime_set_type(poller.data, cases[i].type);
+        poller.read_offset = cases[i].offset;
+        poller.read_size = cases[i].size;
+        // A previous read's state, which the reset must clear.
+        poller.done_count = 7;
+        poller.uid_known = true;
+        poller.read_cursor = 3;
+        memset(poller.progress, LEGIC_PRIME_POLLER_DONE, LEGIC_PRIME_MEM_MAX);
+        memset(poller.data->data, 0xA5, sizeof(poller.data->data));
+
+        legic_prime_poller_read_reset(&poller);
+        mu_assert_int_eq(cases[i].start, poller.read_start);
+        mu_assert_int_eq(cases[i].end, poller.read_end);
+        mu_assert_int_eq(0, poller.done_count);
+        mu_assert(!poller.uid_known, "UID still known after a reset\r\n");
+        // The next read is of the first byte of the range.
+        mu_assert_int_eq(cases[i].end - 1, poller.read_cursor);
+        for(size_t a = 0; a < LEGIC_PRIME_MEM_MAX; a++) {
+            mu_assert_int_eq(0, poller.progress[a]);
+            mu_assert_int_eq(0, poller.data->data[a]);
+        }
+    }
+    free(poller.progress);
+    legic_prime_free(poller.data);
+}
+
+static void legic_prime_file_test(LegicPrimeType type) {
+    NfcDevice* nfc_device = nfc_device_alloc();
+    LegicPrimeData* data = legic_prime_alloc();
+
+    legic_prime_set_type(data, type);
+    // Past data_size too: only data_size bytes are saved and compared.
+    furi_hal_random_fill_buf(data->data, sizeof(data->data));
+    nfc_device_set_data(nfc_device, NfcProtocolLegicPrime, data);
+    nfc_test_save_and_load(nfc_device);
+
+    legic_prime_free(data);
+    nfc_device_free(nfc_device);
+}
+
+MU_TEST(legic_prime_mim22_file_test) {
+    legic_prime_file_test(LegicPrimeTypeMim22);
+}
+
+MU_TEST(legic_prime_mim256_file_test) {
+    legic_prime_file_test(LegicPrimeTypeMim256);
+}
+
+MU_TEST(legic_prime_mim1024_file_test) {
+    legic_prime_file_test(LegicPrimeTypeMim1024);
+}
+
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
@@ -1066,6 +1436,18 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(slix_set_password_default_cap_correct_pass);
     MU_RUN_TEST(slix_set_password_default_cap_incorrect_pass);
     MU_RUN_TEST(slix_set_password_access_all_passwords_cap);
+
+    MU_RUN_TEST(legic_prime_prng_test);
+    MU_RUN_TEST(legic_prime_listener_steps_test);
+    MU_RUN_TEST(legic_prime_crc_test);
+    MU_RUN_TEST(legic_prime_frame_test);
+    MU_RUN_TEST(legic_prime_layout_test);
+    MU_RUN_TEST(legic_prime_set_uid_test);
+    MU_RUN_TEST(legic_prime_write_range_test);
+    MU_RUN_TEST(legic_prime_read_range_test);
+    MU_RUN_TEST(legic_prime_mim22_file_test);
+    MU_RUN_TEST(legic_prime_mim256_file_test);
+    MU_RUN_TEST(legic_prime_mim1024_file_test);
 
     nfc_test_free();
 }

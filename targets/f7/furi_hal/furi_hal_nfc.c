@@ -13,6 +13,7 @@ const FuriHalNfcTechBase* const furi_hal_nfc_tech[FuriHalNfcTechNum] = {
     [FuriHalNfcTechIso14443b] = &furi_hal_nfc_iso14443b,
     [FuriHalNfcTechIso15693] = &furi_hal_nfc_iso15693,
     [FuriHalNfcTechFelica] = &furi_hal_nfc_felica,
+    [FuriHalNfcTechLegic] = &furi_hal_nfc_legic,
     // Add new technologies here
 };
 
@@ -475,15 +476,7 @@ FuriHalNfcError furi_hal_nfc_poller_field_on(void) {
     return error;
 }
 
-FuriHalNfcError furi_hal_nfc_poller_tx_common(
-    const FuriHalSpiBusHandle* handle,
-    const uint8_t* tx_data,
-    size_t tx_bits) {
-    furi_check(tx_data);
-
-    FuriHalNfcError err = FuriHalNfcErrorNone;
-
-    // Prepare tx
+void furi_hal_nfc_poller_tx_prepare(const FuriHalSpiBusHandle* handle) {
     st25r3916_direct_cmd(handle, ST25R3916_CMD_CLEAR_FIFO);
     st25r3916_clear_reg_bits(
         handle, ST25R3916_REG_TIMER_EMV_CONTROL, ST25R3916_REG_TIMER_EMV_CONTROL_nrt_emv);
@@ -500,11 +493,19 @@ FuriHalNfcError furi_hal_nfc_poller_tx_common(
     st25r3916_get_irq(handle);
     // Enable interrupts
     st25r3916_mask_irq(handle, ~interrupts);
+}
 
+FuriHalNfcError furi_hal_nfc_poller_tx_common(
+    const FuriHalSpiBusHandle* handle,
+    const uint8_t* tx_data,
+    size_t tx_bits) {
+    furi_check(tx_data);
+
+    furi_hal_nfc_poller_tx_prepare(handle);
     st25r3916_write_fifo(handle, tx_data, tx_bits);
     st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSMIT_WITHOUT_CRC);
 
-    return err;
+    return FuriHalNfcErrorNone;
 }
 
 FuriHalNfcError furi_hal_nfc_common_fifo_tx(
@@ -588,6 +589,13 @@ FuriHalNfcError furi_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, 
 
 FuriHalNfcError furi_hal_nfc_trx_reset(void) {
     const FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+
+    // Public function: the mode and technology may not be set.
+    if(furi_hal_nfc.mode == FuriHalNfcModePoller && furi_hal_nfc.tech < FuriHalNfcTechNum) {
+        const FuriHalNfcTrxReset trx_reset =
+            furi_hal_nfc_tech[furi_hal_nfc.tech]->poller.trx_reset;
+        if(trx_reset) return trx_reset(handle);
+    }
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
 
