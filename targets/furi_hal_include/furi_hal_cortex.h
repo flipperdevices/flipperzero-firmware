@@ -34,6 +34,12 @@ void furi_hal_cortex_delay_us(uint32_t microseconds);
  */
 uint32_t furi_hal_cortex_instructions_per_microsecond(void);
 
+/** Get current value of the free-running cycle counter
+ *
+ * @return     cycle counter value
+ */
+uint32_t furi_hal_cortex_get_cycles(void);
+
 /** Get Timer
  *
  * @param[in]  timeout_us  The expire timeout in us
