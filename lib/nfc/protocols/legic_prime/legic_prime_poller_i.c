@@ -217,6 +217,19 @@ static LegicPrimePollerRead
  */
 #define LEGIC_PRIME_UID_MAX_READS (16U)
 
+// The UID byte after `after` that is not confirmed yet, `after` itself last.
+static bool
+    legic_prime_poller_next_uid_byte(const uint8_t* progress, uint16_t after, uint16_t* addr) {
+    for(uint16_t i = 1; i <= LEGIC_PRIME_UID_SIZE; i++) {
+        const uint16_t a = (after + i) % LEGIC_PRIME_UID_SIZE;
+        if(!(progress[a] & LEGIC_PRIME_POLLER_DONE)) {
+            *addr = a;
+            return true;
+        }
+    }
+    return false;
+}
+
 // On entry *cur is the READ of byte 0, sent behind the handshake's ACK.
 // Returns with *cur, a READ of a UID byte, sent but not claimed and nothing
 // queued behind it: the caller queues its next frame, then claims *cur.
@@ -226,14 +239,8 @@ static LegicPrimeError
     uint8_t progress[LEGIC_PRIME_UID_SIZE] = {0};
     for(size_t reads = 0;; reads++) {
         if(!nfc_legic_poller_next_sent(instance->nfc)) return LegicPrimeErrorTimeout;
-        // The next unconfirmed byte after cur's, cur's own last.
-        uint16_t addr = cur->addr;
-        bool confirmed = true;
-        for(uint16_t i = 1; confirmed && i <= LEGIC_PRIME_UID_SIZE; i++) {
-            addr = (cur->addr + i) % LEGIC_PRIME_UID_SIZE;
-            confirmed = progress[addr] & LEGIC_PRIME_POLLER_DONE;
-        }
-        if(confirmed) break;
+        uint16_t addr;
+        if(!legic_prime_poller_next_uid_byte(progress, cur->addr, &addr)) break;
         if(reads == LEGIC_PRIME_UID_MAX_READS) return LegicPrimeErrorUidUnconfirmed;
 
         LegicPrimeExchange next;
