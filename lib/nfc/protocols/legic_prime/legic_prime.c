@@ -166,7 +166,7 @@ const char* legic_prime_get_device_name(const LegicPrimeData* data, NfcDeviceNam
 }
 
 const uint8_t* legic_prime_get_uid(const LegicPrimeData* data, size_t* uid_len) {
-    furi_check(data);
+    legic_prime_check(data);
     if(uid_len) *uid_len = LEGIC_PRIME_UID_SIZE;
     return data->data;
 }

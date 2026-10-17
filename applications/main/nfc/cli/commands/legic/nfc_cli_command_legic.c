@@ -54,6 +54,7 @@ static NfcCliActionContext* nfc_cli_legic_rdbl_alloc_ctx(Nfc* nfc) {
     NfcCliLegicRdblContext* instance = malloc(sizeof(NfcCliLegicRdblContext));
     instance->nfc = nfc;
     instance->length = 16;
+    legic_prime_reset(&instance->card);
     return instance;
 }
 
