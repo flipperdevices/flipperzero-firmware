@@ -27,7 +27,7 @@ extern "C" {
 typedef enum {
     LegicPrimeErrorNone,
     LegicPrimeErrorNotPresent,
-    LegicPrimeErrorWrongCrc,
+    LegicPrimeErrorWrongCrc, /**< Replies kept failing their CRC: bytes could not be confirmed. */
     LegicPrimeErrorTimeout,
     LegicPrimeErrorCommunication,
     LegicPrimeErrorUnknownType,

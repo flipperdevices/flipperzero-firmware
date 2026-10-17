@@ -5,6 +5,7 @@
 #include <furi.h>
 
 #include <nfc/nfc_common.h>
+#include <lib/bit_lib/bit_lib.h>
 
 #define LEGIC_PRIME_PROTOCOL_NAME "LEGIC Prime"
 #define LEGIC_PRIME_TYPE_KEY      "Legic Prime Type"
@@ -63,6 +64,14 @@ const NfcDeviceBase nfc_device_legic_prime = {
     .set_uid = (NfcDeviceSetUid)legic_prime_set_uid,
     .get_base_data = (NfcDeviceGetBaseData)legic_prime_get_base_data,
 };
+
+// The type and the memory size always agree: legic_prime_reset() leaves a
+// MIM22, and only legic_prime_set_type() and legic_prime_load() set either.
+static void legic_prime_check(const LegicPrimeData* data) {
+    furi_check(data);
+    furi_check(data->type < LegicPrimeTypeNum);
+    furi_check(data->data_size == legic_prime_features[data->type].mem_size);
+}
 
 LegicPrimeData* legic_prime_alloc(void) {
     LegicPrimeData* data = malloc(sizeof(LegicPrimeData));
@@ -124,9 +133,8 @@ bool legic_prime_load(LegicPrimeData* data, FlipperFormat* ff, uint32_t version)
 }
 
 bool legic_prime_save(const LegicPrimeData* data, FlipperFormat* ff) {
-    furi_check(data);
+    legic_prime_check(data);
     furi_check(ff);
-    furi_check(data->type < LegicPrimeTypeNum);
 
     bool saved = false;
 
@@ -145,15 +153,14 @@ bool legic_prime_save(const LegicPrimeData* data, FlipperFormat* ff) {
 }
 
 bool legic_prime_is_equal(const LegicPrimeData* data, const LegicPrimeData* other) {
-    furi_check(data);
-    furi_check(other);
+    legic_prime_check(data);
+    legic_prime_check(other);
     return data->type == other->type && data->data_size == other->data_size &&
            memcmp(data->data, other->data, data->data_size) == 0;
 }
 
 const char* legic_prime_get_device_name(const LegicPrimeData* data, NfcDeviceNameType name_type) {
-    furi_check(data);
-    furi_check(data->type < LegicPrimeTypeNum);
+    legic_prime_check(data);
     return name_type == NfcDeviceNameTypeFull ? legic_prime_features[data->type].full_name :
                                                 legic_prime_features[data->type].type_name;
 }
@@ -183,7 +190,7 @@ static uint8_t legic_prime_segment_crc(const uint8_t* uid, const uint8_t* header
 }
 
 bool legic_prime_set_uid(LegicPrimeData* data, const uint8_t* uid, size_t uid_len) {
-    furi_check(data);
+    legic_prime_check(data);
     furi_check(uid);
     if(uid_len != LEGIC_PRIME_UID_SIZE) return false;
 
@@ -234,19 +241,18 @@ const LegicPrimeProtocolParams* legic_prime_get_protocol_params(LegicPrimeType t
 }
 
 bool legic_prime_verify_mcc(const LegicPrimeData* data) {
-    furi_check(data);
+    legic_prime_check(data);
     return legic_prime_crc8(data->data, LEGIC_PRIME_UID_SIZE) ==
            data->data[LEGIC_PRIME_MCC_OFFSET];
 }
 
 uint16_t legic_prime_get_dcf(const LegicPrimeData* data) {
-    furi_check(data);
-    return (uint16_t)data->data[LEGIC_PRIME_DCF_OFFSET] |
-           ((uint16_t)data->data[LEGIC_PRIME_DCF_OFFSET + 1] << 8);
+    legic_prime_check(data);
+    return bit_lib_bytes_to_num_le(&data->data[LEGIC_PRIME_DCF_OFFSET], LEGIC_PRIME_DCF_SIZE);
 }
 
 LegicPrimeTokenType legic_prime_get_token_type(const LegicPrimeData* data) {
-    furi_check(data);
+    legic_prime_check(data);
     const uint16_t dcf = legic_prime_get_dcf(data);
     if(dcf == 0xFFFF) return LegicPrimeTokenTypeNewMedia;
     if(dcf > 60000) {
@@ -275,7 +281,7 @@ const char* legic_prime_get_token_type_name(LegicPrimeTokenType token_type) {
 }
 
 bool legic_prime_get_next_segment(const LegicPrimeData* data, LegicPrimeSegment* segment) {
-    furi_check(data);
+    legic_prime_check(data);
     furi_check(segment);
     if(legic_prime_get_token_type(data) != LegicPrimeTokenTypeImSegmented) return false;
 
