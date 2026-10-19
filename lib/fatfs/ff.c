@@ -2051,6 +2051,7 @@ FRESULT load_obj_dir (
 	dp->obj.sclust = obj->c_scl;
 	dp->obj.stat = (BYTE)obj->c_size;
 	dp->obj.objsize = obj->c_size & 0xFFFFFF00;
+	dp->obj.n_frag = 0;
 	dp->blk_ofs = obj->c_ofs;
 
 	res = dir_sdi(dp, dp->blk_ofs);	/* Goto object's entry block */
@@ -2326,19 +2327,22 @@ FRESULT dir_register (	/* FR_OK:succeeded, FR_DENIED:no free entry or too many S
 		if (res != FR_OK) return res;
 		dp->blk_ofs = dp->dptr - SZDIRE * (nent - 1);	/* Set the allocated entry block offset */
 
-		if (dp->obj.sclust != 0 && (dp->obj.stat & 4)) {	/* Has the sub-directory been stretched? */
-			dp->obj.objsize += (DWORD)fs->csize * SS(fs);	/* Increase the directory size by cluster size */
-			res = fill_first_frag(&dp->obj);				/* Fill first fragment on the FAT if needed */
+		if (dp->obj.stat & 4) {			/* Has the directory been stretched? */
+			dp->obj.stat &= ~4;
+			res = fill_first_frag(&dp->obj);	/* Fill the first fragment on the FAT if needed */
 			if (res != FR_OK) return res;
-			res = fill_last_frag(&dp->obj, dp->clust, 0xFFFFFFFF);	/* Fill last fragment on the FAT if needed */
+			res = fill_last_frag(&dp->obj, dp->clust, 0xFFFFFFFF);	/* Fill the last fragment on the FAT if needed */
 			if (res != FR_OK) return res;
-			res = load_obj_dir(&dj, &dp->obj);				/* Load the object status */
-			if (res != FR_OK) return res;
-			st_qword(fs->dirbuf + XDIR_FileSize, dp->obj.objsize);		/* Update the allocation status */
-			st_qword(fs->dirbuf + XDIR_ValidFileSize, dp->obj.objsize);
-			fs->dirbuf[XDIR_GenFlags] = dp->obj.stat | 1;
-			res = store_xdir(&dj);							/* Store the object status */
-			if (res != FR_OK) return res;
+			if (dp->obj.sclust != 0) {		/* Is it a sub directory? */
+				res = load_obj_dir(&dj, &dp->obj);	/* Load the object status */
+				if (res != FR_OK) return res;
+				dp->obj.objsize += (DWORD)fs->csize * SS(fs);			/* Increase the directory size by cluster size */
+				st_qword(fs->dirbuf + XDIR_FileSize, dp->obj.objsize);	/* Update the allocation status */
+				st_qword(fs->dirbuf + XDIR_ValidFileSize, dp->obj.objsize);
+				fs->dirbuf[XDIR_GenFlags] = dp->obj.stat | 1;
+				res = store_xdir(&dj);				/* Store the object status */
+				if (res != FR_OK) return res;
+			}
 		}
 
 		create_xdir(fs->dirbuf, fs->lfnbuf);	/* Create on-memory directory block to be written later */
