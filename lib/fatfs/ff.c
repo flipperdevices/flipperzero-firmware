@@ -3450,6 +3450,7 @@ FRESULT f_open (
 				fp->obj.sclust = ld_dword(fs->dirbuf + XDIR_FstClus);	/* Get object allocation info */
 				fp->obj.objsize = ld_qword(fs->dirbuf + XDIR_FileSize);
 				fp->obj.stat = fs->dirbuf[XDIR_GenFlags] & 2;
+				fp->obj.n_frag = 0;
 			} else
 #endif
 			{
