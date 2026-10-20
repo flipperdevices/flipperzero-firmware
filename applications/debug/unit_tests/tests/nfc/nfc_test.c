@@ -1387,6 +1387,23 @@ MU_TEST(legic_prime_read_range_test) {
     legic_prime_free(poller.data);
 }
 
+MU_TEST(legic_prime_session_cap_test) {
+    // 32 times the clean session count (one per 320 bytes read, two agreeing
+    // reads each, or 256 written, at least one) plus a resume budget: never
+    // 0, however short the range.
+    mu_assert_int_eq(40, legic_prime_poller_max_sessions(LegicPrimePollerModeRead, 0));
+    mu_assert_int_eq(
+        40, legic_prime_poller_max_sessions(LegicPrimePollerModeRead, LEGIC_PRIME_MEM_SIZE_MIM22));
+    mu_assert_int_eq(
+        40,
+        legic_prime_poller_max_sessions(LegicPrimePollerModeRead, LEGIC_PRIME_MEM_SIZE_MIM256));
+    mu_assert_int_eq(
+        136,
+        legic_prime_poller_max_sessions(LegicPrimePollerModeRead, LEGIC_PRIME_MEM_SIZE_MIM1024));
+    mu_assert_int_eq(40, legic_prime_poller_max_sessions(LegicPrimePollerModeWrite, 16));
+    mu_assert_int_eq(136, legic_prime_poller_max_sessions(LegicPrimePollerModeWrite, 1000));
+}
+
 static void legic_prime_file_test(LegicPrimeType type) {
     NfcDevice* nfc_device = nfc_device_alloc();
     LegicPrimeData* data = legic_prime_alloc();
@@ -1476,6 +1493,7 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(legic_prime_zero_init_test);
     MU_RUN_TEST(legic_prime_write_range_test);
     MU_RUN_TEST(legic_prime_read_range_test);
+    MU_RUN_TEST(legic_prime_session_cap_test);
     MU_RUN_TEST(legic_prime_mim22_file_test);
     MU_RUN_TEST(legic_prime_mim256_file_test);
     MU_RUN_TEST(legic_prime_mim1024_file_test);

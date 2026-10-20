@@ -121,6 +121,9 @@ static NfcCommand legic_prime_poller_request_mode_handler(LegicPrimePoller* inst
     memset(request, 0, sizeof(*request));
     request->mode = LegicPrimePollerModeRead;
     NfcCommand cmd = instance->callback(instance->general_event, instance->context);
+    // Counts every session of the read or write, swaps and progress included,
+    // against legic_prime_poller_max_sessions().
+    instance->sessions = 0;
 
     if(request->mode == LegicPrimePollerModeWrite) {
         instance->write_offset = request->write_offset;
@@ -173,6 +176,7 @@ static NfcCommand legic_prime_poller_read_handler(LegicPrimePoller* instance) {
     const uint16_t done_before = instance->done_count;
     legic_prime_poller_apply_gain(instance);
     LegicPrimeError err = legic_prime_poller_read(instance);
+    instance->sessions++;
     if(err == LegicPrimeErrorWrongCard) {
         // read() started over on the card that answered now.
         instance->swaps++;
@@ -191,11 +195,14 @@ static NfcCommand legic_prime_poller_read_handler(LegicPrimePoller* instance) {
     const uint16_t size = instance->read_end - instance->read_start;
     if(instance->uid_known && instance->done_count == size) {
         legic_prime_poller_finish(instance, LegicPrimeErrorNone, size, size);
-    } else if(instance->resumes < LEGIC_PRIME_MAX_RESUMES && instance->swaps <= LEGIC_PRIME_MAX_SWAPS) {
+    } else if(
+        instance->resumes < LEGIC_PRIME_MAX_RESUMES && instance->swaps <= LEGIC_PRIME_MAX_SWAPS &&
+        instance->sessions < legic_prime_poller_max_sessions(LegicPrimePollerModeRead, size)) {
         instance->resumes++;
         command = NfcCommandReset;
     } else {
-        // Sessions that only ran out of budget confirmed nothing either.
+        // A read that only ran out of budget (resumes or sessions) did not
+        // confirm the range either.
         if(err == LegicPrimeErrorNone) err = LegicPrimeErrorWrongCrc;
         legic_prime_poller_finish(instance, err, instance->done_count, size);
     }
@@ -211,12 +218,20 @@ static NfcCommand legic_prime_poller_write_handler(LegicPrimePoller* instance) {
         legic_prime_poller_apply_gain(instance);
         const uint16_t pos_before = instance->write_pos;
         err = legic_prime_poller_write_session(instance);
+        instance->sessions++;
         // NoAck only comes after a WRITE went out.  Sessions that fail before
         // their first WRITE leave that byte in doubt.
         if(instance->write_pos != pos_before) instance->write_unacked = false;
         if(err == LegicPrimeErrorNoAck) instance->write_unacked = true;
         if(instance->write_pos == instance->write_size) {
             err = LegicPrimeErrorNone;
+        } else if(
+            instance->sessions >=
+            legic_prime_poller_max_sessions(LegicPrimePollerModeWrite, instance->write_size)) {
+            // Still progressing, but too slowly: report what was written.
+            // Timeout here means the session budget ran out, as WrongCrc does
+            // for a read; the bytes done are exact, so the write can be re-run.
+            if(err == LegicPrimeErrorNone) err = LegicPrimeErrorTimeout;
         } else if(instance->write_pos != pos_before) {
             // Progress: the session ended early or failed after some bytes.
             // Continue in a new session from a fresh field.
@@ -249,10 +264,11 @@ static NfcCommand legic_prime_poller_failure_handler(LegicPrimePoller* instance)
     const LegicPrimePollerEventDataResult* result = &instance->legic_event_data.result;
     FURI_LOG_W(
         TAG,
-        "Failed: error %d, %u of %u bytes, %u resumes, %u swaps, %u write attempts",
+        "Failed: error %d, %u of %u bytes, %u sessions, %u resumes, %u swaps, %u write attempts",
         result->error,
         (unsigned)result->bytes_done,
         (unsigned)result->bytes_total,
+        (unsigned)instance->sessions,
         (unsigned)instance->resumes,
         (unsigned)instance->swaps,
         (unsigned)instance->write_attempts);
