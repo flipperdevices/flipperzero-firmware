@@ -154,6 +154,19 @@ static void nfc_cli_legic_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
     furi_assert(pipe);
     NfcCliLegicWrblContext* instance = ctx;
 
+    // The poller makes the same check, but only after a handshake: without a
+    // card the user would see "card not present" instead of the address
+    // error.  It comes before the DCF check, as --danger can't make bytes 0-4
+    // or a range past 1024 writable.
+    // The card's own size is only known after the handshake; the poller
+    // checks the range against it then.
+    if(!legic_prime_is_writable(LEGIC_PRIME_MEM_MAX, instance->offset, instance->size)) {
+        printf(
+            ANSI_FG_RED "Error: %s\r\n" ANSI_RESET,
+            nfc_cli_legic_get_error(LegicPrimeErrorReadOnly));
+        return;
+    }
+
     // The DCF can only ever be decreased on a real tag, so a write there
     // (e.g. turning new media into a data card) is irreversible.
     if(!instance->danger && legic_prime_is_dcf_write(instance->offset, instance->size)) {
@@ -246,7 +259,7 @@ static const NfcCliKeyDescriptor wrbl_action_keys[] = {
         .short_name = "o",
         .long_name = "offset",
         .features = {.required = true, .parameter = true},
-        .description = "first byte to write (5 or more)",
+        .description = "first byte to write (5 to 1023)",
         .parse = nfc_cli_legic_wrbl_parse_offset,
     },
     {
