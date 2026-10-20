@@ -1216,6 +1216,20 @@ MU_TEST(legic_prime_layout_test) {
     legic_prime_free(data);
 }
 
+MU_TEST(legic_prime_bad_segment_test) {
+    LegicPrimeData* data = legic_prime_test_card();
+    LegicPrimeSegment seg = {};
+    mu_assert(legic_prime_get_next_segment(data, &seg), "segment 1 missing\r\n");
+    const LegicPrimeSegment first = seg;
+
+    // Segment 2's header (at 62) gets length 3, shorter than a header.
+    data->data[62] = 3 ^ data->data[4];
+    mu_assert(!legic_prime_get_next_segment(data, &seg), "malformed segment 2\r\n");
+    mu_assert_mem_eq(&first, &seg, sizeof(seg));
+
+    legic_prime_free(data);
+}
+
 MU_TEST(legic_prime_set_uid_test) {
     const uint8_t uid[] = {0xA1, 0xB2, 0xC3, 0xD4};
     const uint8_t old_uid[] = {0x11, 0x22, 0x33, 0x44};
@@ -1457,6 +1471,7 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(legic_prime_crc_test);
     MU_RUN_TEST(legic_prime_frame_test);
     MU_RUN_TEST(legic_prime_layout_test);
+    MU_RUN_TEST(legic_prime_bad_segment_test);
     MU_RUN_TEST(legic_prime_set_uid_test);
     MU_RUN_TEST(legic_prime_zero_init_test);
     MU_RUN_TEST(legic_prime_write_range_test);
