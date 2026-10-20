@@ -100,6 +100,8 @@ struct LegicPrimePoller {
     uint8_t swaps; // sessions of this read that met another card
     uint16_t sessions; // sessions of this read or write so far, across swaps
     uint8_t setup_attempts; // failed handshakes in a row
+    // Error of the last failed handshake a tag answered; None if none did.
+    LegicPrimeError setup_error;
     bool rx_reduced_gain; // receiver gain for the next handshake or session
 
     // Write request: chained WRITEs, resumed across sessions.
@@ -146,7 +148,8 @@ uint32_t legic_prime_poller_write_frame(uint16_t addr, uint8_t value, uint8_t cm
 
 /** Detects the tag: sends the IV and decodes the card type into
  *  instance->data.  The tag then waits for an ACK, so reset the field
- *  before the next session. */
+ *  before the next session.  LegicPrimeErrorNotPresent if nothing answered
+ *  the IV. */
 LegicPrimeError legic_prime_poller_setup(LegicPrimePoller* instance, uint8_t iv);
 
 /** Starts a read over: nothing read yet, no UID known, and the requested

@@ -25,6 +25,7 @@
 #include <nfc/protocols/legic_prime/legic_prime_listener_i.h>
 #include <nfc/protocols/legic_prime/legic_prime_prng.h>
 #include <nfc/protocols/legic_prime/legic_prime_poller_i.h>
+#include <nfc/protocols/legic_prime/legic_prime_poller_sync.h>
 
 #include <nfc/nfc_poller.h>
 
@@ -1404,6 +1405,34 @@ MU_TEST(legic_prime_session_cap_test) {
     mu_assert_int_eq(136, legic_prime_poller_max_sessions(LegicPrimePollerModeWrite, 1000));
 }
 
+static NfcCommand legic_prime_test_silent_listener(NfcEvent event, void* context) {
+    UNUSED(event);
+    UNUSED(context);
+    return NfcCommandContinue;
+}
+
+MU_TEST(legic_prime_not_present_test) {
+    // No reply to any of the handshakes: no tag, not a timeout of one that
+    // answered.
+    Nfc* poller = nfc_alloc();
+    Nfc* listener = nfc_alloc();
+    nfc_config(listener, NfcModeListener, NfcTechLegic);
+    nfc_start(listener, legic_prime_test_silent_listener, NULL);
+    LegicPrimeData* data = legic_prime_alloc();
+    uint16_t done = 1;
+    uint16_t total = 1;
+    const LegicPrimeError error =
+        legic_prime_poller_sync_read_range(poller, 0, 16, data, &done, &total);
+    // Free first: a failed mu_assert returns from the test.
+    legic_prime_free(data);
+    nfc_stop(listener);
+    nfc_free(listener);
+    nfc_free(poller);
+    mu_assert_int_eq(LegicPrimeErrorNotPresent, error);
+    mu_assert_int_eq(0, done);
+    mu_assert_int_eq(0, total);
+}
+
 static void legic_prime_file_test(LegicPrimeType type) {
     NfcDevice* nfc_device = nfc_device_alloc();
     LegicPrimeData* data = legic_prime_alloc();
@@ -1494,6 +1523,7 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(legic_prime_write_range_test);
     MU_RUN_TEST(legic_prime_read_range_test);
     MU_RUN_TEST(legic_prime_session_cap_test);
+    MU_RUN_TEST(legic_prime_not_present_test);
     MU_RUN_TEST(legic_prime_mim22_file_test);
     MU_RUN_TEST(legic_prime_mim256_file_test);
     MU_RUN_TEST(legic_prime_mim1024_file_test);

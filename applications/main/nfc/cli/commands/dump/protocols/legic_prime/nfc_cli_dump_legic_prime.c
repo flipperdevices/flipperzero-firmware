@@ -17,7 +17,9 @@ NfcCommand nfc_cli_dump_poller_callback_legic_prime(NfcGenericEvent event, void*
         instance->result = NfcCliDumpErrorNone;
         command = NfcCommandStop;
     } else if(legic_event->type == LegicPrimePollerEventTypeFailure) {
-        instance->result = NfcCliDumpErrorFailedToRead;
+        instance->result = legic_event->data->result.error == LegicPrimeErrorNotPresent ?
+                               NfcCliDumpErrorNotPresent :
+                               NfcCliDumpErrorFailedToRead;
         command = NfcCommandStop;
     }
 

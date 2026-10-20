@@ -26,8 +26,13 @@ extern "C" {
 
 typedef enum {
     LegicPrimeErrorNone,
-    LegicPrimeErrorNotPresent,
-    LegicPrimeErrorWrongCrc, /**< Replies kept failing their CRC: bytes could not be confirmed. */
+    LegicPrimeErrorNotPresent, /**< No tag answered the handshake (the IV) in any attempt. */
+    /** Replies kept failing their CRC: bytes could not be confirmed.  Also
+     *  a read whose session budget ran out. */
+    LegicPrimeErrorWrongCrc,
+    /** The card answered the handshake, then a reply did not come or the
+     *  next frame could not be sent in time.  Also a write that was still
+     *  progressing when its session budget ran out. */
     LegicPrimeErrorTimeout,
     LegicPrimeErrorCommunication,
     LegicPrimeErrorUnknownType,
