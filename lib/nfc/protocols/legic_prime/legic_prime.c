@@ -300,19 +300,24 @@ bool legic_prime_get_next_segment(const LegicPrimeData* data, LegicPrimeSegment*
 
     uint8_t header[LEGIC_PRIME_SEGMENT_HEADER_SIZE];
     legic_prime_read_segment_header(data, offset, header);
-    segment->offset = offset;
-    segment->length = ((uint16_t)(header[1] & 0x0F) << 8) | header[0];
-    segment->valid = header[1] & 0x40;
-    segment->last = header[1] & 0x80;
-    segment->wrp = header[2];
-    segment->wrc = (header[3] & 0x70) >> 4;
-    segment->rd = header[3] & 0x80;
-    segment->crc_ok = legic_prime_segment_crc(data->data, header) == header[4];
-    if(segment->length < LEGIC_PRIME_SEGMENT_HEADER_SIZE || offset + segment->length > mem_size) {
+    // Decoded aside: *segment is still the previous segment, and a malformed
+    // header must leave it so.
+    LegicPrimeSegment next = {
+        .offset = offset,
+        .length = ((uint16_t)(header[1] & 0x0F) << 8) | header[0],
+        .valid = header[1] & 0x40,
+        .last = header[1] & 0x80,
+        .wrp = header[2],
+        .wrc = (header[3] & 0x70) >> 4,
+        .rd = header[3] & 0x80,
+        .crc_ok = legic_prime_segment_crc(data->data, header) == header[4],
+    };
+    if(next.length < LEGIC_PRIME_SEGMENT_HEADER_SIZE || offset + next.length > mem_size) {
         return false;
     }
-    segment->payload_offset = offset + LEGIC_PRIME_SEGMENT_HEADER_SIZE;
-    segment->payload_length = segment->length - LEGIC_PRIME_SEGMENT_HEADER_SIZE;
+    next.payload_offset = offset + LEGIC_PRIME_SEGMENT_HEADER_SIZE;
+    next.payload_length = next.length - LEGIC_PRIME_SEGMENT_HEADER_SIZE;
+    *segment = next;
     return true;
 }
 

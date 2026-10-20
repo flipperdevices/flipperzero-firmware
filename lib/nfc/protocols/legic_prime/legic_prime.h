@@ -140,7 +140,8 @@ const char* legic_prime_get_token_type_name(LegicPrimeTokenType token_type);
  * call replaces it with the one that follows.
  *
  * @return false if the card is not IM-S, the previous segment was the last
- * one, or the next header is malformed or outside the memory.
+ * one, or the next header is malformed or outside the memory.  On false the
+ * segment is left as it was.
  */
 bool legic_prime_get_next_segment(const LegicPrimeData* data, LegicPrimeSegment* segment);
 
