@@ -149,13 +149,13 @@ bool legic_prime_get_next_segment(const LegicPrimeData* data, LegicPrimeSegment*
  * Checks a write of `size` bytes at `offset` on a card of `mem_size` bytes:
  * not empty, clear of bytes 0-4 and within the memory.
  */
-bool legic_prime_is_writable(uint16_t mem_size, uint16_t offset, size_t size);
+bool legic_prime_is_writable(uint16_t mem_size, uint16_t offset, uint16_t size);
 
 /**
  * Checks whether a write of `size` bytes at `offset` changes the DCF
  * (bytes 5-6), which is irreversible on a real tag.
  */
-bool legic_prime_is_dcf_write(uint16_t offset, size_t size);
+bool legic_prime_is_dcf_write(uint16_t offset, uint16_t size);
 
 #ifdef __cplusplus
 }

@@ -321,11 +321,11 @@ bool legic_prime_get_next_segment(const LegicPrimeData* data, LegicPrimeSegment*
     return true;
 }
 
-bool legic_prime_is_writable(uint16_t mem_size, uint16_t offset, size_t size) {
+bool legic_prime_is_writable(uint16_t mem_size, uint16_t offset, uint16_t size) {
     return size > 0 && offset >= LEGIC_PRIME_WRITABLE_FROM && offset + size <= mem_size;
 }
 
-bool legic_prime_is_dcf_write(uint16_t offset, size_t size) {
+bool legic_prime_is_dcf_write(uint16_t offset, uint16_t size) {
     return size > 0 && offset < LEGIC_PRIME_DCF_OFFSET + LEGIC_PRIME_DCF_SIZE &&
            offset + size > LEGIC_PRIME_DCF_OFFSET;
 }
