@@ -36,6 +36,7 @@ typedef enum {
     NfcCliDumpErrorNotPresent,
     NfcCliDumpErrorFailedToRead,
     NfcCliDumpErrorAuthFailed,
+    NfcCliDumpErrorAborted,
 
     NfcCliDumpErrorNum,
 } NfcCliDumpError;
