@@ -170,7 +170,8 @@ uint16_t legic_prime_poller_max_sessions(LegicPrimePollerMode mode, uint16_t siz
  *
  * @return LegicPrimeErrorNone unless the session failed.  Running out of
  * budget fails a session that confirmed no byte although bytes read before
- * came up again, or that read no new byte either (no reply passed its CRC).
+ * came up again with a valid CRC, or that read no new byte either (no reply
+ * passed its CRC).
  * A MIM1024's first session reads each byte once and only adds new bytes.
  * LegicPrimeErrorWrongCard if the UID differs from the first session's: the
  * read then starts over (legic_prime_poller_read_reset()).
