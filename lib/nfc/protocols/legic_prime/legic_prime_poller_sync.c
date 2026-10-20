@@ -69,16 +69,6 @@ static LegicPrimeError
     return ctx->result.error;
 }
 
-LegicPrimeError legic_prime_poller_sync_read(Nfc* nfc, LegicPrimeData* data) {
-    furi_check(nfc);
-    furi_check(data);
-
-    LegicPrimePollerSyncContext ctx = {
-        .data = data,
-    };
-    return legic_prime_poller_sync_execute(nfc, &ctx);
-}
-
 LegicPrimeError legic_prime_poller_sync_read_range(
     Nfc* nfc,
     uint16_t offset,
