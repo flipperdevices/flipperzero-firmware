@@ -530,18 +530,21 @@ void nfc_felica_listener_timer_anticol_stop(Nfc* instance) {
 
 void nfc_legic_poller_set_rx_bits(Nfc* instance, size_t bits) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
 
     UNUSED(bits);
 }
 
 void nfc_legic_poller_set_rx_ack(Nfc* instance, size_t window) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
 
     UNUSED(window);
 }
 
 void nfc_legic_poller_set_rx_reduced_gain(Nfc* instance, bool reduced) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
 
     UNUSED(reduced);
 }
@@ -553,8 +556,9 @@ void nfc_legic_poller_set_next(
     const uint8_t* second,
     size_t second_bits) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
+    furi_check(first);
 
-    UNUSED(first);
     UNUSED(first_bits);
     UNUSED(second);
     UNUSED(second_bits);
@@ -562,36 +566,43 @@ void nfc_legic_poller_set_next(
 
 bool nfc_legic_poller_next_sent(Nfc* instance) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
 
     return false;
 }
 
 void nfc_legic_poller_claim_next(Nfc* instance) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
 }
 
 void nfc_legic_poller_cancel_next(Nfc* instance) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
 }
 
 void nfc_legic_listener_set_ref_to_frame_end(Nfc* instance, uint32_t extra_fc) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModeListener);
 
     UNUSED(extra_fc);
 }
 
 void nfc_legic_listener_set_ref_to_tx_end(Nfc* instance) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModeListener);
 }
 
 uint32_t nfc_legic_listener_get_elapsed_fc(Nfc* instance) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModeListener);
 
     return 0;
 }
 
 void nfc_legic_listener_set_tx_delay(Nfc* instance, uint32_t chips) {
     furi_check(instance);
+    furi_check(instance->mode == NfcModeListener);
 
     UNUSED(chips);
 }
