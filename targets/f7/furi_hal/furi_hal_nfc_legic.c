@@ -553,14 +553,18 @@ static int32_t furi_hal_nfc_legic_ack_window(FuriHalNfcLegicPoller* instance) {
 // single bit that comes when the tag has finished writing; its end is taken
 // from its reception, as tags time the next frame from their own ACK and
 // don't all place it on the grid (Proxmark3's sim sends it ~23 µs early).
-static bool furi_hal_nfc_legic_reply_end(FuriHalNfcLegicPoller* instance, uint32_t* end) {
+// ack_win is the exchange's ACK window, read once with next_in_step().
+static bool furi_hal_nfc_legic_reply_end(
+    const FuriHalNfcLegicPoller* instance,
+    int32_t ack_win,
+    uint32_t* end) {
     if(instance->reply_ack_window < 0) {
         *end = instance->t_frame_end +
                legic_chips_to_cycles(
                    LEGIC_TAG_FRAME_WAIT_CHIPS + instance->rx_bits_expected * LEGIC_TAG_BIT_CHIPS);
         return true;
     }
-    if(!instance->rx_started || furi_hal_nfc_legic_ack_window(instance) < 0) return false;
+    if(ack_win < 0) return false;
     *end = instance->seg[0].t_rxs - legic_chips_to_cycles(LEGIC_RX_LAG_CHIPS) +
            legic_chips_to_cycles(LEGIC_TAG_BIT_CHIPS);
     return true;
@@ -570,9 +574,9 @@ static bool furi_hal_nfc_legic_reply_end(FuriHalNfcLegicPoller* instance, uint32
 // expected the ACK in: the tag steps its keystream once per window it spends
 // writing, so in any other window the frame would reach the tag garbled (and
 // a garbled WRITE passes its CRC-4 one time in 16).
-static bool furi_hal_nfc_legic_next_in_step(FuriHalNfcLegicPoller* instance) {
-    return instance->reply_ack_window < 0 ||
-           furi_hal_nfc_legic_ack_window(instance) == instance->reply_ack_window;
+static bool
+    furi_hal_nfc_legic_next_in_step(const FuriHalNfcLegicPoller* instance, int32_t ack_win) {
+    return instance->reply_ack_window < 0 || ack_win == instance->reply_ack_window;
 }
 
 // Send the queued frame LEGIC_NEXT_FRAME_US (LEGIC_NEXT_FRAME_AFTER_ACK_US after a
@@ -698,9 +702,15 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
     // flags_wait() with a zero timeout returns FuriFlagErrorResource (all
     // bits set) when nothing is pending, which wait_event_common would read
     // as every event including abort; peek first.
+    // ack_window() and reply_end() read seg[0].t_rxs here, before the loop
+    // can write it (rx_started is set, so it holds the first RxStart), and
+    // next_in_step() reuses the window: the queued frame's launch time and
+    // the in-step gate come from the same value.
     const uint32_t mhz = furi_hal_cortex_instructions_per_microsecond();
+    const int32_t ack_win = furi_hal_nfc_legic_ack_window(instance);
     uint32_t reply_end = 0;
-    const bool reply_end_known = furi_hal_nfc_legic_reply_end(instance, &reply_end);
+    const bool reply_end_known = furi_hal_nfc_legic_reply_end(instance, ack_win, &reply_end);
+    const bool next_in_step = furi_hal_nfc_legic_next_in_step(instance, ack_win);
     const int32_t force_cycles = LEGIC_RX_FORCE_END_US * mhz;
     const int32_t gap_cycles = LEGIC_RX_GAP_MS * 1000U * mhz;
     while(true) {
@@ -711,6 +721,16 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
         const uint32_t now = DWT->CYCCNT;
         if(event & (FuriHalNfcEventRxStart | FuriHalNfcEventRxEnd))
             instance->t_last_rx_event = now;
+        // With a segment open, an RxEnd in the mask ends it and an RxStart
+        // beside it would be a new reception, so close first; without one,
+        // RxStart then RxEnd is one short reception, in that order.  (The
+        // first case needs an RxStart the receiver cannot raise before
+        // collect_segment re-arms it; this only keeps it from re-timing the
+        // open segment if it ever did.)
+        if((event & FuriHalNfcEventRxEnd) && instance->seg_open) {
+            furi_hal_nfc_legic_collect_segment(instance, now, true);
+            event &= ~FuriHalNfcEventRxEnd;
+        }
         if(event & FuriHalNfcEventRxStart) {
             instance->seg_open = true;
             if(instance->seg_count < LEGIC_RX_MAX_SEGMENTS) {
@@ -733,7 +753,7 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
             }
             instance->rx_started = false;
             if(instance->next_pending && !(event & FuriHalNfcEventAbortRequest)) {
-                if(reply_end_known && furi_hal_nfc_legic_next_in_step(instance)) {
+                if(reply_end_known && next_in_step) {
                     furi_hal_nfc_legic_send_next(instance, reply_end);
                 } else {
                     // No ACK, or not in the expected window: the queued frame
