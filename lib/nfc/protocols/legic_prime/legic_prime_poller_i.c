@@ -562,7 +562,8 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
 
     const uint16_t size = instance->read_end - instance->read_start;
     const uint16_t done_start = instance->done_count;
-    // A byte read earlier came up again: the session could confirm bytes.
+    // A byte read earlier came up again with a valid CRC: the session could
+    // confirm bytes.
     bool confirmable = false;
     // A byte passed its CRC for the first time.
     bool fresh = false;
@@ -588,13 +589,14 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
 
         uint8_t* byte_progress = &progress[cur.addr];
         if(!(*byte_progress & LEGIC_PRIME_POLLER_DONE)) {
-            confirmable |= (*byte_progress & LEGIC_PRIME_POLLER_SEEN) != 0;
             if(!legic_prime_poller_read_crc_ok(instance, &cur, reply)) {
                 // No logging here: the next frame is already on air.
                 *byte_progress += LEGIC_PRIME_POLLER_ATTEMPT;
             } else {
                 const LegicPrimePollerRead read =
                     legic_prime_poller_record_read(byte_progress, &data[cur.addr], reply & 0xFF);
+                // A byte read earlier came up again with a valid CRC.
+                confirmable |= read != LegicPrimePollerReadFirst;
                 if(read == LegicPrimePollerReadFirst) {
                     fresh = true;
                 } else if(read == LegicPrimePollerReadAgreed) {
@@ -614,7 +616,8 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance) {
     // Running out of budget is no failure by itself: a MIM1024's first
     // session reads each byte once, so its progress is new bytes, not
     // confirmed ones.  It is one if nothing was confirmed although bytes came
-    // up again, or if no new byte passed its CRC either.
+    // up again with a valid CRC, or if no new byte passed its CRC either.  A
+    // re-read that fails its CRC says no more than a new read that fails it.
     return instance->done_count == done_start && (confirmable || !fresh) ?
                LegicPrimeErrorWrongCrc :
                LegicPrimeErrorNone;
