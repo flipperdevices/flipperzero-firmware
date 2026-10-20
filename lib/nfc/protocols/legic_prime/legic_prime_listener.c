@@ -102,6 +102,10 @@ static void legic_prime_listener_reply(LegicPrimeListener* instance, uint32_t va
             instance->tx_buffer, ((value >> i) & 1u) ^ legic_prime_prng_get_bit());
         legic_prime_prng_forward(1);
     }
+    // The return is ignored on purpose: a reply the HAL skipped (reply slot
+    // past its bound) still leaves the nominal reply end as reference, and a
+    // reader that got no reply re-handshakes with an IV, which every state
+    // routes to handle_iv.  Same at the write ACK below.
     nfc_listener_tx(instance->nfc, instance->tx_buffer);
     nfc_legic_listener_set_ref_to_tx_end(instance->nfc);
 }
