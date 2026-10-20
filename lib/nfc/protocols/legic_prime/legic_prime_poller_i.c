@@ -104,6 +104,11 @@ static void legic_prime_poller_load_tx(LegicPrimePoller* instance, const LegicPr
     bit_buffer_copy_bits(instance->tx_buffer, bytes, ex->tx_bits);
 }
 
+// The replies exchange() decodes: the type reply and a READ's.
+_Static_assert(
+    LEGIC_PRIME_TYPE_BITS <= 32U && LEGIC_PRIME_READ_REPLY_BITS <= 32U,
+    "replies are decoded into a uint32_t");
+
 // Send ex and decode its reply.  A queued ex that the HAL already sent
 // (claim) is only claimed: its reply is on the way.
 static LegicPrimeError legic_prime_poller_exchange(
@@ -111,6 +116,9 @@ static LegicPrimeError legic_prime_poller_exchange(
     const LegicPrimeExchange* ex,
     bool claim,
     uint32_t* reply) {
+    // reply, ex->ks and the decode below are 32 bits wide.  The HAL allows up
+    // to 64 bits for the write ACK window, which write_exchange() decodes itself.
+    furi_check(ex->rx_bits <= 32U);
     legic_prime_poller_load_tx(instance, ex);
     nfc_legic_poller_set_rx_bits(instance->nfc, ex->rx_bits);
     if(claim) nfc_legic_poller_claim_next(instance->nfc);
