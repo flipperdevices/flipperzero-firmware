@@ -7,13 +7,28 @@
 extern "C" {
 #endif
 
+/*
+ * Both calls block until the poller reports success or failure: there is
+ * no timeout and no abort.  The poller goes on in a new session (new field,
+ * new handshake, UID re-check) as long as it makes progress, within a total
+ * session budget (legic_prime_poller_max_sessions(), internal to the
+ * poller: 32 times the sessions a clean run needs, plus 8), so a weakly
+ * coupled whole-card MIM1024 read can take minutes.  An application that
+ * needs an abort drives the generic poller as `nfc dump` does:
+ * nfc_poller_alloc(nfc, NfcProtocolLegicPrime), nfc_poller_start() with a
+ * callback that answers LegicPrimePollerEventTypeRequestMode, and
+ * nfc_poller_stop(), which returns once the running session ends (at most
+ * ~2 s) and reports no result.
+ */
+
 /**
  * Reads `size` bytes (1 to LEGIC_PRIME_MEM_MAX) from `offset`, clamped to
  * the end of the card; offset 0 and size LEGIC_PRIME_MEM_MAX read the whole
  * card, whatever its size.  Each byte needs two agreeing reads, as a 4-bit
  * CRC passes 1 in 16 misdecoded replies.  `data` is only filled on success:
  * the card type, the UID and the bytes of the range, the others 0, so only
- * a whole-card read gives a dump to save.
+ * a whole-card read gives a dump to save.  Blocks, see the top of this
+ * header.
  *
  * @param[out] bytes_read bytes of the range confirmed (may be NULL), on
  * success and on failure.
@@ -34,7 +49,7 @@ LegicPrimeError legic_prime_poller_sync_read_range(
  * session, each WRITE chained ~240 µs behind the tag's ACK of the previous
  * one; the write resumes in a new session (new field, new handshake, UID
  * re-check) whenever an ACK lands outside the predicted bit window, and
- * after 256 bytes.
+ * after 256 bytes.  Blocks, see the top of this header.
  *
  * Success means the tag acknowledged every byte: its ACK is a single
  * unencrypted bit, as Proxmark3 takes it.  To be sure the card holds the
