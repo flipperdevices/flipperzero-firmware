@@ -196,9 +196,12 @@ static NfcCommand legic_prime_poller_read_handler(LegicPrimePoller* instance) {
     const bool budget_left =
         instance->resumes < LEGIC_PRIME_MAX_RESUMES && instance->swaps <= LEGIC_PRIME_MAX_SWAPS &&
         instance->sessions < legic_prime_poller_max_sessions(LegicPrimePollerModeRead, size);
-    // An empty range (past the end of the card) is read once a session
-    // confirmed the UID, and the card's type and size with it.
-    if(instance->uid_known && instance->done_count == size) {
+    if(instance->uid_known && size == 0) {
+        // The range starts at or past the end of the card.  Only a session
+        // that confirmed the UID confirms the type and size: a one-bit
+        // misread of the type reply at detection must not refuse a read.
+        legic_prime_poller_finish(instance, LegicPrimeErrorReadOnly, 0, 0);
+    } else if(instance->uid_known && instance->done_count == size) {
         legic_prime_poller_finish(instance, LegicPrimeErrorNone, size, size);
     } else if(budget_left) {
         instance->resumes++;
