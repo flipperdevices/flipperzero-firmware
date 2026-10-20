@@ -76,15 +76,20 @@
 #define LEGIC_NEXT_FRAME_US           (260U)
 // After a write ACK, timed from the ACK's end as recovered from its
 // thread-side RxStart (start - LEGIC_RX_LAG_CHIPS + one bit; the wake-up
-// jitter puts up to ~8 µs on it).  Value and ACK end were tuned as one set
-// in this time base (2026-10-15, before an IRQ timestamp existed): the PM3
-// sim takes the next frame at 240 and 260 but mostly not at 280, a real
-// MIM256 at 240 and 260 but drops 1 in 5 at 263-268.  Those are values of
-// this constant, not gaps on air.  The gap on air was not sniffed; the
-// sim's 3->4 step boundary (287.9 µs on its clock) against the sweep edge
-// puts this base within ~10 µs of the air if the PM5 sim's reply offset is
-// the pipeline compensation its fix commit describes, up to ~20 µs behind
-// it otherwise.
+// jitter puts ~10 µs on it, up to 25 µs before LEGIC_ACK_WAKE_LATE_US drops
+// the frame).  Value and ACK end were tuned as one set in this time base
+// (2026-10-15, before an IRQ timestamp existed): the PM3 sim takes the next
+// frame at 240 and 260 but mostly not at 280, a real MIM256 at 240 and 260
+// but drops 1 in 5 at 263-268.  Those are values of this constant, timed
+// from the recovered ACK end.  On the PM3 sim (generic firmware, reply
+// offset 0) that base comes out close to the air.  The sim's own trace
+// (hf legic list, 4.72 µs ticks) logs the WRITE chained at 240 mostly 53
+// ticks after its ACK (54-55 after a slower wake-up), and the READ sent 260
+// after a data reply 57 ticks after that reply.  The second gap is 260 on
+// air whatever the TX latency is (the reply end and the launch both derive
+// from t_frame_end), so the sim reads ~9 µs long, and 240 is ~241 µs on air
+// for a usual wake-up, up to ~250 for a slow one (~255-260 in the slowest
+// 1-2 %).  The MIM256's ACK timing on air was not measured.
 #define LEGIC_NEXT_FRAME_AFTER_ACK_US (240U)
 // A queued frame is started with only this much of it in the FIFO and the
 // rest is loaded while it goes out (37.8 µs per byte on air): loading a whole
@@ -109,15 +114,16 @@
 // (ISR, context switch, IRQ status read; 40-58 µs measured) is not removed
 // by LEGIC_RX_LAG_CHIPS alone: that constant, LEGIC_TX_CMD_LATENCY_US and
 // LEGIC_NEXT_FRAME_AFTER_ACK_US were tuned together with the usual wake-up
-// inside, so 240 is the value that works from this timestamp, not the gap
-// on air (see LEGIC_NEXT_FRAME_AFTER_ACK_US).  A wake-up later than usual
-// (another thread inside a scheduler-suspended region, e.g. malloc) delays
-// the frame one-for-one beyond what was tuned; the ACK-window gate only
-// notices about half a bit window (~49 µs, less for a tag whose ACK sits
-// late in its window) while a real MIM256 dropped 1 in 5 chained WRITEs
-// 23-28 µs above the tuned value.  What matters is the excess over the
-// usual path, so the value is that path's typical latency plus ~20 µs: a
-// wake-up at this limit lands the frame at the MIM256's edge.
+// inside, so 240 is the value that works from this timestamp (on the PM3
+// sim also about the gap on air, see LEGIC_NEXT_FRAME_AFTER_ACK_US).  A
+// wake-up later than usual (another thread inside a scheduler-suspended
+// region, e.g. malloc) delays the frame one-for-one beyond what was tuned;
+// the ACK-window gate only notices about half a bit window (~49 µs, less
+// for a tag whose ACK sits late in its window) while a real MIM256 dropped
+// 1 in 5 chained WRITEs 23-28 µs above the tuned value.  What matters is
+// the excess over the usual path, so the value is that path's typical
+// latency plus ~20 µs: a wake-up at this limit lands the frame at the
+// MIM256's edge.
 // Measured with LEGIC_WAKE_STATS (a 1000-byte chained write, its read-back
 // and dumps on the PM3 sim, driven from the CLI): 5907 RxStart wake-ups, 1011
 // of them write ACKs with a frame queued, all 40-58 µs, 97% within 40-49 µs,
