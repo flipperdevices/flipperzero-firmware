@@ -116,35 +116,36 @@ static void nfc_cli_legic_wrbl_free_ctx(NfcCliActionContext* ctx) {
     free(instance);
 }
 
-// The tag acknowledges a WRITE with one unencrypted bit: read the range back
-// to tell whether the card holds the data.
-static void nfc_cli_legic_wrbl_verify(const NfcCliLegicWrblContext* instance) {
+// The tag acknowledges a WRITE with one unencrypted bit: read the bytes back
+// to tell whether the card holds them.
+static void
+    nfc_cli_legic_wrbl_verify(Nfc* nfc, uint16_t offset, const uint8_t* data, uint16_t size) {
     LegicPrimeData* card = legic_prime_alloc();
     uint16_t total = 0;
-    LegicPrimeError error = legic_prime_poller_sync_read_range(
-        instance->nfc, instance->offset, instance->size, card, NULL, &total);
+    LegicPrimeError error =
+        legic_prime_poller_sync_read_range(nfc, offset, size, card, NULL, &total);
     if(error != LegicPrimeErrorNone) {
         printf(
             ANSI_FG_RED "Written (acknowledged), but the verify read failed: %s\r\n" ANSI_RESET,
             nfc_cli_legic_get_error(error));
-    } else if(total < instance->size) {
+    } else if(total < size) {
         printf(
             ANSI_FG_RED
             "Written (acknowledged), but the verify read found a %u-byte card\r\n" ANSI_RESET,
             legic_prime_get_mem_size(card->type));
     } else {
         size_t i = 0;
-        while(i < instance->size && card->data[instance->offset + i] == instance->data[i]) {
+        while(i < size && card->data[offset + i] == data[i]) {
             i++;
         }
-        if(i == instance->size) {
+        if(i == size) {
             printf(ANSI_FG_BR_GREEN "Verified\r\n" ANSI_RESET);
         } else {
             printf(
                 ANSI_FG_RED "Verify mismatch at offset %u: wrote %02X, read %02X\r\n" ANSI_RESET,
-                (unsigned)(instance->offset + i),
-                instance->data[i],
-                card->data[instance->offset + i]);
+                (unsigned)(offset + i),
+                data[i],
+                card->data[offset + i]);
         }
     }
     legic_prime_free(card);
@@ -200,7 +201,15 @@ static void nfc_cli_legic_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
         nfc_cli_printf_array(&instance->data[instance->size - written], written, "Data: ");
         printf("\r\n");
     }
-    if(error == LegicPrimeErrorNone) nfc_cli_legic_wrbl_verify(instance);
+    // The bytes the tag acknowledged, after a failure too.  Not after a swap:
+    // the card on the antenna now is not the one they were written to.
+    if(written && error != LegicPrimeErrorWrongCard) {
+        nfc_cli_legic_wrbl_verify(
+            instance->nfc,
+            (uint16_t)(end - written),
+            &instance->data[instance->size - written],
+            written);
+    }
 }
 
 static bool nfc_cli_legic_wrbl_parse_offset(FuriString* value, NfcCliActionContext* output) {
