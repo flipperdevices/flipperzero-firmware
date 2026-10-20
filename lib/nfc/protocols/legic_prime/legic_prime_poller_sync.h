@@ -14,10 +14,11 @@ extern "C" {
 LegicPrimeError legic_prime_poller_sync_read(Nfc* nfc, LegicPrimeData* data);
 
 /**
- * Reads `size` bytes from `offset`, clamped to the end of the card.  As for
- * legic_prime_poller_sync_read(), each byte needs two agreeing reads and
- * `data` is only filled on success: the card type and size, the UID and the
- * bytes of the range, the others 0, so it is no dump to save.
+ * Reads `size` bytes (1 to LEGIC_PRIME_MEM_MAX) from `offset`, clamped to
+ * the end of the card.  As for legic_prime_poller_sync_read(), each byte
+ * needs two agreeing reads and `data` is only filled on success: the card
+ * type and size, the UID and the bytes of the range, the others 0, so it is
+ * no dump to save.
  *
  * @param[out] bytes_read bytes of the range confirmed (may be NULL), on
  * success and on failure.
@@ -27,17 +28,18 @@ LegicPrimeError legic_prime_poller_sync_read(Nfc* nfc, LegicPrimeData* data);
 LegicPrimeError legic_prime_poller_sync_read_range(
     Nfc* nfc,
     uint16_t offset,
-    size_t size,
+    uint16_t size,
     LegicPrimeData* data,
-    size_t* bytes_read,
-    size_t* bytes_total);
+    uint16_t* bytes_read,
+    uint16_t* bytes_total);
 
 /**
- * Writes `size` bytes from `offset` (>= 5: MCD, MSN and MCC are read-only).
- * Bytes are written last to first, several per session, each WRITE chained
- * ~240 µs behind the tag's ACK of the previous one; the write resumes in a
- * new session (new field, new handshake, UID re-check) whenever an ACK lands
- * outside the predicted bit window, and after 256 bytes.
+ * Writes `size` bytes (1 to LEGIC_PRIME_MEM_MAX) from `offset` (>= 5: MCD,
+ * MSN and MCC are read-only).  Bytes are written last to first, several per
+ * session, each WRITE chained ~240 µs behind the tag's ACK of the previous
+ * one; the write resumes in a new session (new field, new handshake, UID
+ * re-check) whenever an ACK lands outside the predicted bit window, and
+ * after 256 bytes.
  *
  * Success means the tag acknowledged every byte: its ACK is a single
  * unencrypted bit, as Proxmark3 takes it.  To be sure the card holds the
@@ -56,8 +58,8 @@ LegicPrimeError legic_prime_poller_sync_write(
     Nfc* nfc,
     uint16_t offset,
     const uint8_t* data,
-    size_t size,
-    size_t* bytes_written,
+    uint16_t size,
+    uint16_t* bytes_written,
     bool* write_unacked);
 
 #ifdef __cplusplus

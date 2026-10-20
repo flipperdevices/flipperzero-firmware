@@ -82,10 +82,10 @@ LegicPrimeError legic_prime_poller_sync_read(Nfc* nfc, LegicPrimeData* data) {
 LegicPrimeError legic_prime_poller_sync_read_range(
     Nfc* nfc,
     uint16_t offset,
-    size_t size,
+    uint16_t size,
     LegicPrimeData* data,
-    size_t* bytes_read,
-    size_t* bytes_total) {
+    uint16_t* bytes_read,
+    uint16_t* bytes_total) {
     furi_check(nfc);
     furi_check(data);
     furi_check(size > 0 && size <= LEGIC_PRIME_MEM_MAX);
@@ -105,8 +105,8 @@ LegicPrimeError legic_prime_poller_sync_write(
     Nfc* nfc,
     uint16_t offset,
     const uint8_t* data,
-    size_t size,
-    size_t* bytes_written,
+    uint16_t size,
+    uint16_t* bytes_written,
     bool* write_unacked) {
     furi_check(nfc);
     furi_check(data);

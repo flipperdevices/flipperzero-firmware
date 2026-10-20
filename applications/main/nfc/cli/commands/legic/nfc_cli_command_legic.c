@@ -11,7 +11,7 @@ typedef struct {
     Nfc* nfc;
     uint16_t offset;
     uint8_t* data;
-    size_t size;
+    uint16_t size;
     bool danger;
 } NfcCliLegicWrblContext;
 
@@ -67,8 +67,8 @@ static void nfc_cli_legic_rdbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
     furi_assert(pipe);
     NfcCliLegicRdblContext* instance = ctx;
 
-    size_t confirmed = 0;
-    size_t total = 0;
+    uint16_t confirmed = 0;
+    uint16_t total = 0;
     LegicPrimeError error = legic_prime_poller_sync_read_range(
         instance->nfc, instance->offset, instance->length, &instance->card, &confirmed, &total);
     if(error != LegicPrimeErrorNone) {
@@ -123,7 +123,7 @@ static void nfc_cli_legic_wrbl_free_ctx(NfcCliActionContext* ctx) {
 // to tell whether the card holds the data.
 static void nfc_cli_legic_wrbl_verify(const NfcCliLegicWrblContext* instance) {
     LegicPrimeData* card = legic_prime_alloc();
-    size_t total = 0;
+    uint16_t total = 0;
     LegicPrimeError error = legic_prime_poller_sync_read_range(
         instance->nfc, instance->offset, instance->size, card, NULL, &total);
     if(error != LegicPrimeErrorNone) {
@@ -165,7 +165,7 @@ static void nfc_cli_legic_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
         return;
     }
 
-    size_t written = 0;
+    uint16_t written = 0;
     bool unacked = false;
     LegicPrimeError error = legic_prime_poller_sync_write(
         instance->nfc, instance->offset, instance->data, instance->size, &written, &unacked);
