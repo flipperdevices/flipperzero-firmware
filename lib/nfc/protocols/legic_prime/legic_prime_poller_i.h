@@ -98,6 +98,7 @@ struct LegicPrimePoller {
     uint16_t resume_done; // done_count at the last resume
     uint8_t resumes; // field resets since the read last made progress
     uint8_t swaps; // sessions of this read that met another card
+    uint16_t sessions; // sessions of this read or write so far, across swaps
     uint8_t setup_attempts; // failed handshakes in a row
     bool rx_reduced_gain; // receiver gain for the next handshake or session
 
@@ -151,6 +152,10 @@ LegicPrimeError legic_prime_poller_setup(LegicPrimePoller* instance, uint8_t iv)
 /** Starts a read over: nothing read yet, no UID known, and the requested
  *  range clamped to the card's current size. */
 void legic_prime_poller_read_reset(LegicPrimePoller* instance);
+
+/** Sessions a read or write of `size` bytes may take before it is ended:
+ *  32 times the clean session count plus one resume budget, never 0. */
+uint16_t legic_prime_poller_max_sessions(LegicPrimePollerMode mode, uint16_t size);
 
 /**
  * One read session from a fresh field: handshake, UID check, then read the

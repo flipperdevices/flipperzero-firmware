@@ -327,6 +327,30 @@ static LegicPrimeError
 // continues in the next session.
 #define LEGIC_PRIME_WRITE_SESSION_BYTES   (256U)
 
+// A clean read takes one session per LEGIC_PRIME_READ_SESSION_EXCHANGES / 2
+// bytes (two agreeing reads each): 1 for a MIM22 or MIM256, 4 for a MIM1024
+// on the Proxmark3 sim.  A clean write takes one per
+// LEGIC_PRIME_WRITE_SESSION_BYTES.  The cap is 32 times the clean session
+// count (rounded up, at least 1) plus one resume budget for a stall at the
+// start.  A read or write that progresses more slowly still completes if it
+// averages at least 1/32 of a clean session's progress (10 bytes per
+// session for a 320-byte read, 8 for a 256-byte write); a slower one can
+// end at the cap, with its last session's error or, if that session had
+// none, WrongCrc for a read and Timeout for a write.  The slowest the bench
+// logged, 25-31 sessions for a 40 B write at a mistuned gap, is inside it.
+// The NFC app's read scene starts over on a failure, so this is a
+// backstop, not a tuning knob.
+#define LEGIC_PRIME_SESSIONS_FACTOR (32U)
+#define LEGIC_PRIME_SESSIONS_EXTRA  (8U)
+
+uint16_t legic_prime_poller_max_sessions(LegicPrimePollerMode mode, uint16_t size) {
+    const uint32_t per_session = mode == LegicPrimePollerModeRead ?
+                                     LEGIC_PRIME_READ_SESSION_EXCHANGES / 2 :
+                                     LEGIC_PRIME_WRITE_SESSION_BYTES;
+    const uint32_t clean = MAX((size + per_session - 1) / per_session, 1U);
+    return LEGIC_PRIME_SESSIONS_FACTOR * clean + LEGIC_PRIME_SESSIONS_EXTRA;
+}
+
 uint32_t legic_prime_poller_write_frame(uint16_t addr, uint8_t value, uint8_t cmd_bits) {
     const uint32_t cmd = (uint32_t)addr << 1;
     const uint8_t crc = legic_prime_crc4(cmd, cmd_bits, value);
