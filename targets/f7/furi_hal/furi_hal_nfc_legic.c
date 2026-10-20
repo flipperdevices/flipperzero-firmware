@@ -460,6 +460,9 @@ static FuriHalNfcError furi_hal_nfc_legic_poller_tx(
     if(claims_queued) {
         // Already on air: only set up the bookkeeping for its reply.  Its
         // TxEnd may already have been consumed by the block-TX wait loop.
+        // tx_prepare's status read is skipped on purpose, as it would eat
+        // this frame's TxEnd; anything stale from the previous exchange was
+        // drained by send_next before the TRANSMIT.
         instance->t_frame_end = instance->next_frame_end;
         instance->txe = instance->next_txe_seen ? LegicTxeSynth : LegicTxeOwed;
         instance->next_txe_seen = false;
@@ -599,6 +602,17 @@ static void furi_hal_nfc_legic_send_next(FuriHalNfcLegicPoller* instance, uint32
     // The receiver may have been re-armed after the reply's last run; a
     // transmission started with it armed got cut off after a few bits.
     st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
+    // A reception that began or ended between the collecting loop's last
+    // flag read and the STOP is still in the chip's status and the thread's
+    // flag, and the claim path never reads the status (tx() skips
+    // tx_prepare).  Carried into the claimed exchange it opens segment 0 at
+    // a time before our frame (or ends it with no segment at all), and a
+    // write ACK is then never sampled.  Nothing wanted is pending here: the
+    // receiver is stopped and TRANSMIT has not been issued, so the frame's
+    // TxEnd cannot be lost.  Thread flag first, as wait_event_common does,
+    // so a late ISR can only leave a flag that reads as no event.
+    furi_thread_flags_clear(FuriHalNfcEventInternalTypeIrq);
+    furi_hal_nfc_get_irq(handle);
     st25r3916_direct_cmd(handle, ST25R3916_CMD_CLEAR_FIFO);
     st25r3916_write_reg(handle, ST25R3916_REG_NUM_TX_BYTES2, (uint8_t)(fifo_bits & 0xFFU));
     st25r3916_write_reg(handle, ST25R3916_REG_NUM_TX_BYTES1, (uint8_t)((fifo_bits >> 8) & 0xFFU));
