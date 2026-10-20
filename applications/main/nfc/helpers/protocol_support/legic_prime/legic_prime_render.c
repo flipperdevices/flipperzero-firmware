@@ -77,7 +77,8 @@ void nfc_render_legic_prime_info(
     nfc_render_legic_prime_dcf(data, str);
 
     if(format_type == NfcProtocolFormatTypeFull) {
-        furi_string_cat_printf(str, "\nMemory: %u bytes", (unsigned)data->data_size);
+        furi_string_cat_printf(
+            str, "\nMemory: %u bytes", (unsigned)legic_prime_get_mem_size(data->type));
         nfc_render_legic_prime_layout(data, str);
     } else if(legic_prime_get_token_type(data) == LegicPrimeTokenTypeImSegmented) {
         LegicPrimeSegment seg = {};
@@ -106,7 +107,7 @@ static void nfc_render_legic_prime_hex(
 }
 
 void nfc_render_legic_prime_dump(const LegicPrimeData* data, FuriString* str) {
-    nfc_render_legic_prime_hex(data->data, data->data_size, 0, 0, str);
+    nfc_render_legic_prime_hex(data->data, legic_prime_get_mem_size(data->type), 0, 0, str);
 
     // Segment payloads with the MCC obfuscation removed.
     LegicPrimeSegment seg = {};

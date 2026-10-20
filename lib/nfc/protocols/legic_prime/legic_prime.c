@@ -65,12 +65,11 @@ const NfcDeviceBase nfc_device_legic_prime = {
     .get_base_data = (NfcDeviceGetBaseData)legic_prime_get_base_data,
 };
 
-// The type and the memory size always agree: legic_prime_reset() leaves a
-// MIM22, and only legic_prime_set_type() and legic_prime_load() set either.
+// type indexes legic_prime_features: the only field to check.  The memory
+// size follows it, so a zero-initialised instance is a valid blank MIM22.
 static void legic_prime_check(const LegicPrimeData* data) {
     furi_check(data);
     furi_check(data->type < LegicPrimeTypeNum);
-    furi_check(data->data_size == legic_prime_features[data->type].mem_size);
 }
 
 LegicPrimeData* legic_prime_alloc(void) {
@@ -92,7 +91,8 @@ void legic_prime_reset(LegicPrimeData* data) {
 
 void legic_prime_copy(LegicPrimeData* data, const LegicPrimeData* other) {
     furi_check(data);
-    furi_check(other);
+    // A bad source would otherwise only fail in the next reader of the copy.
+    legic_prime_check(other);
     *data = *other;
 }
 
@@ -123,7 +123,9 @@ bool legic_prime_load(LegicPrimeData* data, FlipperFormat* ff, uint32_t version)
         }
         if(!type_parsed) break;
 
-        if(!flipper_format_read_hex(ff, LEGIC_PRIME_DATA_KEY, data->data, data->data_size)) break;
+        if(!flipper_format_read_hex(
+               ff, LEGIC_PRIME_DATA_KEY, data->data, legic_prime_get_mem_size(data->type)))
+            break;
 
         parsed = true;
     } while(false);
@@ -144,7 +146,9 @@ bool legic_prime_save(const LegicPrimeData* data, FlipperFormat* ff) {
         if(!flipper_format_write_string_cstr(
                ff, LEGIC_PRIME_TYPE_KEY, legic_prime_features[data->type].type_name))
             break;
-        if(!flipper_format_write_hex(ff, LEGIC_PRIME_DATA_KEY, data->data, data->data_size)) break;
+        if(!flipper_format_write_hex(
+               ff, LEGIC_PRIME_DATA_KEY, data->data, legic_prime_get_mem_size(data->type)))
+            break;
 
         saved = true;
     } while(false);
@@ -155,8 +159,8 @@ bool legic_prime_save(const LegicPrimeData* data, FlipperFormat* ff) {
 bool legic_prime_is_equal(const LegicPrimeData* data, const LegicPrimeData* other) {
     legic_prime_check(data);
     legic_prime_check(other);
-    return data->type == other->type && data->data_size == other->data_size &&
-           memcmp(data->data, other->data, data->data_size) == 0;
+    return data->type == other->type &&
+           memcmp(data->data, other->data, legic_prime_get_mem_size(data->type)) == 0;
 }
 
 const char* legic_prime_get_device_name(const LegicPrimeData* data, NfcDeviceNameType name_type) {
@@ -213,7 +217,8 @@ bool legic_prime_set_uid(LegicPrimeData* data, const uint8_t* uid, size_t uid_le
     // nfc_device_load() calls this on a reset MIM22, before the memory is
     // loaded: nothing to re-encode then.
     const uint8_t mcc_change = old_mcc ^ data->data[LEGIC_PRIME_MCC_OFFSET];
-    for(size_t i = LEGIC_PRIME_SEGMENT_AREA_START; i < data->data_size; i++) {
+    const uint16_t mem_size = legic_prime_get_mem_size(data->type);
+    for(size_t i = LEGIC_PRIME_SEGMENT_AREA_START; i < mem_size; i++) {
         data->data[i] ^= mcc_change;
     }
     return true;
@@ -231,7 +236,7 @@ uint16_t legic_prime_get_mem_size(LegicPrimeType type) {
 
 void legic_prime_set_type(LegicPrimeData* data, LegicPrimeType type) {
     furi_check(data);
-    data->data_size = legic_prime_get_mem_size(type);
+    furi_check(type < LegicPrimeTypeNum);
     data->type = type;
 }
 
@@ -284,13 +289,14 @@ bool legic_prime_get_next_segment(const LegicPrimeData* data, LegicPrimeSegment*
     legic_prime_check(data);
     furi_check(segment);
     if(legic_prime_get_token_type(data) != LegicPrimeTokenTypeImSegmented) return false;
+    const uint16_t mem_size = legic_prime_get_mem_size(data->type);
 
     size_t offset = LEGIC_PRIME_SEGMENT_AREA_START;
     if(segment->offset) {
         if(segment->last) return false;
         offset = segment->offset + segment->length;
     }
-    if(offset + LEGIC_PRIME_SEGMENT_HEADER_SIZE > data->data_size) return false;
+    if(offset + LEGIC_PRIME_SEGMENT_HEADER_SIZE > mem_size) return false;
 
     uint8_t header[LEGIC_PRIME_SEGMENT_HEADER_SIZE];
     legic_prime_read_segment_header(data, offset, header);
@@ -302,8 +308,7 @@ bool legic_prime_get_next_segment(const LegicPrimeData* data, LegicPrimeSegment*
     segment->wrc = (header[3] & 0x70) >> 4;
     segment->rd = header[3] & 0x80;
     segment->crc_ok = legic_prime_segment_crc(data->data, header) == header[4];
-    if(segment->length < LEGIC_PRIME_SEGMENT_HEADER_SIZE ||
-       offset + segment->length > data->data_size) {
+    if(segment->length < LEGIC_PRIME_SEGMENT_HEADER_SIZE || offset + segment->length > mem_size) {
         return false;
     }
     segment->payload_offset = offset + LEGIC_PRIME_SEGMENT_HEADER_SIZE;
@@ -311,8 +316,8 @@ bool legic_prime_get_next_segment(const LegicPrimeData* data, LegicPrimeSegment*
     return true;
 }
 
-bool legic_prime_is_writable(uint16_t data_size, uint16_t offset, size_t size) {
-    return size > 0 && offset >= LEGIC_PRIME_WRITABLE_FROM && offset + size <= data_size;
+bool legic_prime_is_writable(uint16_t mem_size, uint16_t offset, size_t size) {
+    return size > 0 && offset >= LEGIC_PRIME_WRITABLE_FROM && offset + size <= mem_size;
 }
 
 bool legic_prime_is_dcf_write(uint16_t offset, size_t size) {

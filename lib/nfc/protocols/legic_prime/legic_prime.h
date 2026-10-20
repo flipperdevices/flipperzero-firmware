@@ -75,11 +75,13 @@ typedef struct {
     bool crc_ok; /**< Header CRC-8 (over MCD+MSN and the header) matches. */
 } LegicPrimeSegment;
 
-/** type and data_size always match: set them with legic_prime_set_type(). */
+/**
+ * The memory size follows the type (legic_prime_get_mem_size()).  A
+ * zero-initialised instance is a blank MIM22, as legic_prime_reset() leaves.
+ */
 typedef struct {
     LegicPrimeType type;
     uint8_t data[LEGIC_PRIME_MEM_MAX];
-    uint16_t data_size; /**< Memory size of the type: 22, 256 or 1024 bytes. */
 } LegicPrimeData;
 
 extern const NfcDeviceBase nfc_device_legic_prime;
@@ -118,7 +120,7 @@ LegicPrimeData* legic_prime_get_base_data(const LegicPrimeData* data);
 
 uint16_t legic_prime_get_mem_size(LegicPrimeType type);
 
-/** Sets the type and the matching data_size. */
+/** Sets the type; the memory size follows it. */
 void legic_prime_set_type(LegicPrimeData* data, LegicPrimeType type);
 
 /** Returns true if the MCC byte equals CRC8 over MCD+MSN. */
@@ -143,10 +145,10 @@ const char* legic_prime_get_token_type_name(LegicPrimeTokenType token_type);
 bool legic_prime_get_next_segment(const LegicPrimeData* data, LegicPrimeSegment* segment);
 
 /**
- * Checks a write of `size` bytes at `offset` on a card of `data_size` bytes:
+ * Checks a write of `size` bytes at `offset` on a card of `mem_size` bytes:
  * not empty, clear of bytes 0-4 and within the memory.
  */
-bool legic_prime_is_writable(uint16_t data_size, uint16_t offset, size_t size);
+bool legic_prime_is_writable(uint16_t mem_size, uint16_t offset, size_t size);
 
 /**
  * Checks whether a write of `size` bytes at `offset` changes the DCF
