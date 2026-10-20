@@ -1157,7 +1157,7 @@ static LegicPrimeData* legic_prime_test_card(void) {
     LegicPrimeData* data = legic_prime_alloc();
     legic_prime_set_type(data, LegicPrimeTypeMim256);
     // The unused area is 00 obfuscated with the MCC (0xD4).
-    memset(data->data, 0xD4, data->data_size);
+    memset(data->data, 0xD4, legic_prime_get_mem_size(data->type));
     memcpy(data->data, legic_prime_test_ims256, sizeof(legic_prime_test_ims256));
     return data;
 }
@@ -1223,7 +1223,7 @@ MU_TEST(legic_prime_set_uid_test) {
     // As nfc_device_load() does it, on a reset card.
     LegicPrimeData* data = legic_prime_alloc();
     mu_assert_int_eq(LegicPrimeTypeMim22, data->type);
-    mu_assert_int_eq(LEGIC_PRIME_MEM_SIZE_MIM22, data->data_size);
+    mu_assert_int_eq(LEGIC_PRIME_MEM_SIZE_MIM22, legic_prime_get_mem_size(data->type));
     mu_assert(legic_prime_set_uid(data, uid, sizeof(uid)), "set_uid on a reset card\r\n");
     mu_assert_mem_eq(uid, data->data, sizeof(uid));
     mu_assert(legic_prime_verify_mcc(data), "MCC after set_uid on a reset card\r\n");
@@ -1240,7 +1240,7 @@ MU_TEST(legic_prime_set_uid_test) {
     // Bytes from 22 on move from MCC D4 to FD, except the segment header
     // CRCs: segment 1's matches the new UID (Proxmark3 CRC8Legic), segment
     // 2's stays wrong.
-    for(size_t i = 22; i < data->data_size; i++) {
+    for(size_t i = 22; i < legic_prime_get_mem_size(data->type); i++) {
         if(i == 26 || i == 66) continue;
         mu_assert_int_eq(reference->data[i] ^ 0xD4 ^ 0xFD, data->data[i]);
     }
@@ -1254,6 +1254,21 @@ MU_TEST(legic_prime_set_uid_test) {
 
     legic_prime_free(reference);
     legic_prime_free(data);
+}
+
+MU_TEST(legic_prime_zero_init_test) {
+    // A caller's own zeroed struct, as a stack `LegicPrimeData d = {0}` that a
+    // failed read left untouched: it is the blank MIM22 a reset leaves, and
+    // every reader takes it.  On the heap only to keep 1 KB off the stack.
+    LegicPrimeData* zero = malloc(sizeof(LegicPrimeData));
+    memset(zero, 0, sizeof(LegicPrimeData));
+    LegicPrimeData* reset = legic_prime_alloc();
+
+    mu_assert_int_eq(0, legic_prime_get_dcf(zero));
+    mu_assert(legic_prime_is_equal(zero, reset), "zero-init equals reset\r\n");
+
+    legic_prime_free(reset);
+    free(zero);
 }
 
 MU_TEST(legic_prime_write_range_test) {
@@ -1363,7 +1378,7 @@ static void legic_prime_file_test(LegicPrimeType type) {
     LegicPrimeData* data = legic_prime_alloc();
 
     legic_prime_set_type(data, type);
-    // Past data_size too: only data_size bytes are saved and compared.
+    // Past the card's size too: only that many bytes are saved and compared.
     furi_hal_random_fill_buf(data->data, sizeof(data->data));
     nfc_device_set_data(nfc_device, NfcProtocolLegicPrime, data);
     nfc_test_save_and_load(nfc_device);
@@ -1443,6 +1458,7 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(legic_prime_frame_test);
     MU_RUN_TEST(legic_prime_layout_test);
     MU_RUN_TEST(legic_prime_set_uid_test);
+    MU_RUN_TEST(legic_prime_zero_init_test);
     MU_RUN_TEST(legic_prime_write_range_test);
     MU_RUN_TEST(legic_prime_read_range_test);
     MU_RUN_TEST(legic_prime_mim22_file_test);

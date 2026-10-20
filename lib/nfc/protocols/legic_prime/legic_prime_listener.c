@@ -42,6 +42,7 @@ struct LegicPrimeListener {
     uint8_t cmd_size_bits;
     uint8_t type_code;
     uint8_t ack_code;
+    uint16_t mem_size;
 };
 
 static LegicPrimeListener* legic_prime_listener_alloc(Nfc* nfc, LegicPrimeData* data) {
@@ -58,6 +59,7 @@ static LegicPrimeListener* legic_prime_listener_alloc(Nfc* nfc, LegicPrimeData* 
     instance->cmd_size_bits = params->cmd_size_bits;
     instance->type_code = params->type_code;
     instance->ack_code = params->ack_code;
+    instance->mem_size = legic_prime_get_mem_size(data->type);
 
     nfc_set_fdt_listen_fc(instance->nfc, LEGIC_PRIME_LISTENER_FDT_FC);
     nfc_config(instance->nfc, NfcModeListener, NfcTechLegic);
@@ -170,7 +172,7 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
         // emulator memory: a READ has no error reply, and what a real MIM22
         // sends there is unknown.
         const uint16_t addr = value >> 1;
-        const uint8_t byte = addr < instance->data->data_size ? instance->data->data[addr] : 0;
+        const uint8_t byte = addr < instance->mem_size ? instance->data->data[addr] : 0;
         const uint8_t crc = legic_prime_crc4(value, instance->cmd_size_bits, byte);
         legic_prime_listener_reply(
             instance, ((uint32_t)crc << 8) | byte, LEGIC_PRIME_READ_REPLY_BITS);
@@ -192,7 +194,7 @@ static NfcCommand legic_prime_listener_run(NfcGenericEvent event, void* context)
         // State" undoes; guarding the DCF of a physical card is the reader
         // client's policy, as in Proxmark3.
         if(crc == legic_prime_crc4(addr << 1, instance->cmd_size_bits, byte) &&
-           addr >= LEGIC_PRIME_WRITABLE_FROM && addr < instance->data->data_size) {
+           addr >= LEGIC_PRIME_WRITABLE_FROM && addr < instance->mem_size) {
             instance->data->data[addr] = byte;
             legic_prime_prng_forward(
                 LEGIC_PRIME_LISTENER_ACK_WAIT_CHIPS / LEGIC_PRIME_LISTENER_BIT_CHIPS - 1);

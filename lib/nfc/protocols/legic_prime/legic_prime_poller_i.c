@@ -383,7 +383,9 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
     // Only now, with the type confirmed by this handshake: one misread type
     // reply, at detection or here, must not fail an in-range write.
     if(!legic_prime_is_writable(
-           instance->data->data_size, instance->write_offset, instance->write_size)) {
+           legic_prime_get_mem_size(instance->data->type),
+           instance->write_offset,
+           instance->write_size)) {
         return LegicPrimeErrorReadOnly;
     }
 
@@ -453,7 +455,7 @@ void legic_prime_poller_read_reset(LegicPrimePoller* instance) {
     furi_assert(instance);
     furi_assert(instance->progress);
 
-    const uint16_t size = instance->data->data_size;
+    const uint16_t size = legic_prime_get_mem_size(instance->data->type);
     if(instance->read_size) {
         instance->read_start = MIN(instance->read_offset, size);
         instance->read_end = MIN((uint32_t)instance->read_start + instance->read_size, size);

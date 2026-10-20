@@ -77,15 +77,15 @@ static void nfc_cli_legic_rdbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
         if(total) printf("\r\nConfirmed %u of %u bytes", (unsigned)confirmed, (unsigned)total);
         return;
     }
-    if(instance->offset >= instance->card.data_size) {
+    const uint16_t mem_size = legic_prime_get_mem_size(instance->card.type);
+    if(instance->offset >= mem_size) {
         printf(
-            ANSI_FG_RED "Error: offset past the end of the card (%u bytes)" ANSI_RESET,
-            instance->card.data_size);
+            ANSI_FG_RED "Error: offset past the end of the card (%u bytes)" ANSI_RESET, mem_size);
         return;
     }
     size_t length = instance->length;
-    if(instance->offset + length > instance->card.data_size) {
-        length = instance->card.data_size - instance->offset;
+    if(instance->offset + length > mem_size) {
+        length = mem_size - instance->offset;
     }
     printf("\r\nOffset: %u ", instance->offset);
     nfc_cli_printf_array(&instance->card.data[instance->offset], length, "Data: ");
@@ -134,7 +134,7 @@ static void nfc_cli_legic_wrbl_verify(const NfcCliLegicWrblContext* instance) {
         printf(
             ANSI_FG_RED
             "Written (acknowledged), but the verify read found a %u-byte card\r\n" ANSI_RESET,
-            card->data_size);
+            legic_prime_get_mem_size(card->type));
     } else {
         size_t i = 0;
         while(i < instance->size && card->data[instance->offset + i] == instance->data[i]) {
