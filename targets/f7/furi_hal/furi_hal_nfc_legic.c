@@ -895,7 +895,8 @@ static FuriHalNfcError furi_hal_nfc_legic_poller_rx(
 // The last stretch before a reply is waited with interrupts masked.
 #define LEGIC_LISTENER_TX_ALIGN_US    (5U)
 // No reply slot is further out than this (the write ACK's 3.57 ms is the
-// longest delay), so the masked wait stays within TX_ALIGN.
+// longest delay), so the masked wait stays within TX_ALIGN.  A slot further
+// out is skipped; the reference still lands on its nominal end.
 #define LEGIC_LISTENER_TX_MAX_WAIT_US (5000U)
 
 typedef struct {
@@ -1141,7 +1142,10 @@ static FuriHalNfcError furi_hal_nfc_legic_listener_tx(
     const int32_t wait = (int32_t)(start - DWT->CYCCNT);
     if(wait >= (int32_t)(LEGIC_LISTENER_TX_MAX_WAIT_US * mhz)) {
         // Only a stale frame end or a bogus delay gets here: skip the reply.
-        l->t_tx_end = reply_start;
+        // The protocol takes t_tx_end as its keystream reference regardless
+        // (it already stepped the PRNG for every reply bit), so leave the
+        // nominal end of the reply slot, as a sent reply would.
+        l->t_tx_end = reply_start + legic_chips_to_cycles((uint32_t)tx_bits * LEGIC_TAG_BIT_CHIPS);
         return FuriHalNfcErrorCommunicationTimeout;
     }
     if(wait > (int32_t)(LEGIC_LISTENER_TX_ALIGN_US * mhz)) {
