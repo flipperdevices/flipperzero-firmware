@@ -51,9 +51,15 @@
 #define LEGIC_TAG_FRAME_WAIT_CHIPS    (70U) // 330 µs from closing pause to reply
 #define LEGIC_TAG_BIT_CHIPS           (21U) // 99.1 µs per reply bit
 #define LEGIC_FIFO_BIT_CHIPS          (4U) // scp_8 report period, measured
-// Detection lag between subcarrier onset and the reported reception start:
-// ~25 µs for the first reception after TX and for a receiver re-armed long
-// before the run, ~40 µs when re-armed within ~100 µs of the onset.
+// Offset between a reply's start on the tag's bit grid and the thread-side
+// RxStart timestamp (seg[].t_rxs), in the frame's own time base
+// (t_frame_end).  Tuned on the decoder, not sniffed: it nets the chip's
+// subcarrier detection, the IRQ-to-thread wake-up (40-58 µs, see
+// LEGIC_ACK_WAKE_LATE_US) and the error of LEGIC_TX_CMD_LATENCY_US (itself
+// a thread-side TxE figure, so it contains a wake-up too) against each
+// other, which is why it is smaller than the wake-up alone.  ~25 µs for the
+// first reception after TX and for a receiver re-armed long before the run,
+// ~40 µs when re-armed within ~100 µs of the onset.
 #define LEGIC_RX_LAG_CHIPS            (5U)
 #define LEGIC_RX_REARM_LAG_CHIPS      (8U)
 #define LEGIC_RX_REARM_SHORT_CHIPS    (21U)
@@ -68,9 +74,17 @@
 // keystream 3 times if the frame starts 198-297 µs after its reply (PM3
 // reader: ~225 µs); 260 µs leaves time to drain the receiver and load the FIFO.
 #define LEGIC_NEXT_FRAME_US           (260U)
-// After a write ACK, timed from the ACK's measured end (which jitters by up to
-// ~8 µs): Proxmark3's sim takes the next frame up to 260-280 µs later and a
-// real MIM256 up to ~260 µs.
+// After a write ACK, timed from the ACK's end as recovered from its
+// thread-side RxStart (start - LEGIC_RX_LAG_CHIPS + one bit; the wake-up
+// jitter puts up to ~8 µs on it).  Value and ACK end were tuned as one set
+// in this time base (2026-10-15, before an IRQ timestamp existed): the PM3
+// sim takes the next frame at 240 and 260 but mostly not at 280, a real
+// MIM256 at 240 and 260 but drops 1 in 5 at 263-268.  Those are values of
+// this constant, not gaps on air.  The gap on air was not sniffed; the
+// sim's 3->4 step boundary (287.9 µs on its clock) against the sweep edge
+// puts this base within ~10 µs of the air if the PM5 sim's reply offset is
+// the pipeline compensation its fix commit describes, up to ~20 µs behind
+// it otherwise.
 #define LEGIC_NEXT_FRAME_AFTER_ACK_US (240U)
 // A queued frame is started with only this much of it in the FIFO and the
 // rest is loaded while it goes out (37.8 µs per byte on air): loading a whole
@@ -92,12 +106,18 @@
 #define LEGIC_TXE_MAX_WAIT_MS         (10U)
 // The ACK's measured end, and so the launch time of a frame queued behind
 // it, comes from the thread's RxStart timestamp.  The usual wake-up path
-// (ISR, context switch, IRQ status read) is absorbed by LEGIC_RX_LAG_CHIPS;
-// a wake-up later than this (another thread inside a scheduler-suspended
-// region, e.g. malloc) would delay the frame one-for-one, and the ACK-window
-// gate only notices a delay of half a bit window (~49 µs) while a real MIM256
-// tolerates ~20 µs on the 240 µs gap.  What matters is the excess over the
-// usual path, so the value is that path's typical latency plus ~20 µs.
+// (ISR, context switch, IRQ status read; 40-58 µs measured) is not removed
+// by LEGIC_RX_LAG_CHIPS alone: that constant, LEGIC_TX_CMD_LATENCY_US and
+// LEGIC_NEXT_FRAME_AFTER_ACK_US were tuned together with the usual wake-up
+// inside, so 240 is the value that works from this timestamp, not the gap
+// on air (see LEGIC_NEXT_FRAME_AFTER_ACK_US).  A wake-up later than usual
+// (another thread inside a scheduler-suspended region, e.g. malloc) delays
+// the frame one-for-one beyond what was tuned; the ACK-window gate only
+// notices about half a bit window (~49 µs, less for a tag whose ACK sits
+// late in its window) while a real MIM256 dropped 1 in 5 chained WRITEs
+// 23-28 µs above the tuned value.  What matters is the excess over the
+// usual path, so the value is that path's typical latency plus ~20 µs: a
+// wake-up at this limit lands the frame at the MIM256's edge.
 // Measured with LEGIC_WAKE_STATS (a 1000-byte chained write, its read-back
 // and dumps on the PM3 sim, driven from the CLI): 5907 RxStart wake-ups, 1011
 // of them write ACKs with a frame queued, all 40-58 µs, 97% within 40-49 µs,
@@ -650,8 +670,8 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
         if(event & FuriHalNfcEventRxStart) {
             instance->rx_started = true;
             instance->seg_open = true;
-            // The thread-side timestamp: the detection lag constants were
-            // tuned on it.
+            // The thread-side timestamp: the RX lag offsets
+            // (LEGIC_RX_LAG_CHIPS, LEGIC_RX_REARM_LAG_CHIPS) were tuned on it.
             instance->seg[0].t_rxs = now;
             instance->t_last_rx_event = now;
             furi_hal_nfc_legic_check_wake(instance, now);
@@ -729,7 +749,7 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
 /*
  * Place the received runs into LEGIC bit windows.  Bit k occupies
  * [t0 + k*99.1 µs, t0 + (k+1)*99.1 µs) with t0 330 µs after our closing
- * pause; it is '1' when FIFO '1' samples, shifted back by the detection lag,
+ * pause; it is '1' when FIFO '1' samples, shifted back by the RX lag offset,
  * cover at least half of the window.  (A 40% threshold without the lag
  * misread MIM1024's card type 110110 as 111110 in 25% of replies.)
  * One pass over the samples: a sample (18.9 µs) is shorter than a window, so
