@@ -5,7 +5,13 @@
 #include <furi.h>
 #include <toolbox/args.h>
 #include <toolbox/strint.h>
+#include <nfc/nfc_poller.h>
+#include <nfc/protocols/legic_prime/legic_prime_poller.h>
 #include <nfc/protocols/legic_prime/legic_prime_poller_sync.h>
+
+// rdbl and wrbl's read-back wait for the poller in steps this long, so
+// Ctrl+C can end them.
+#define NFC_CLI_LEGIC_POLL_MS (100)
 
 typedef struct {
     Nfc* nfc;
@@ -21,6 +27,15 @@ typedef struct {
     uint16_t length;
     LegicPrimeData card;
 } NfcCliLegicRdblContext;
+
+typedef struct {
+    NfcPoller* poller;
+    FuriSemaphore* done;
+    uint16_t offset;
+    uint16_t size;
+    LegicPrimeData* card;
+    LegicPrimePollerEventDataResult result;
+} NfcCliLegicRead;
 
 static const char* nfc_cli_legic_get_error(LegicPrimeError error) {
     switch(error) {
@@ -63,14 +78,77 @@ static void nfc_cli_legic_rdbl_free_ctx(NfcCliActionContext* ctx) {
     free(ctx);
 }
 
+static NfcCommand nfc_cli_legic_read_callback(NfcGenericEvent event, void* context) {
+    furi_assert(event.protocol == NfcProtocolLegicPrime);
+    NfcCliLegicRead* read = context;
+    const LegicPrimePollerEvent* legic_event = event.event_data;
+
+    if(legic_event->type == LegicPrimePollerEventTypeRequestMode) {
+        legic_event->data->mode_request.mode = LegicPrimePollerModeRead;
+        legic_event->data->mode_request.read_offset = read->offset;
+        legic_event->data->mode_request.read_size = read->size;
+        return NfcCommandContinue;
+    }
+    // Success or Failure: the read is over either way.
+    if(legic_event->type == LegicPrimePollerEventTypeSuccess) {
+        legic_prime_copy(read->card, (const LegicPrimeData*)nfc_poller_get_data(read->poller));
+    }
+    read->result = legic_event->data->result;
+    furi_semaphore_release(read->done);
+    return NfcCommandStop;
+}
+
+// Reads `size` bytes from `offset` as legic_prime_poller_sync_read_range()
+// does (`card` is only filled on success), but on the generic poller, as nfc
+// dump does, so Ctrl+C or a closed pipe can end a long read.  Returns false
+// if it was aborted before the poller reported.
+static bool nfc_cli_legic_read(
+    Nfc* nfc,
+    PipeSide* pipe,
+    uint16_t offset,
+    uint16_t size,
+    LegicPrimeData* card,
+    LegicPrimePollerEventDataResult* result) {
+    NfcCliLegicRead read = {
+        .done = furi_semaphore_alloc(1, 0),
+        .offset = offset,
+        .size = size,
+        .card = card,
+    };
+    bool aborted = false;
+    read.poller = nfc_poller_alloc(nfc, NfcProtocolLegicPrime);
+    nfc_poller_start(read.poller, nfc_cli_legic_read_callback, &read);
+    while(furi_semaphore_acquire(read.done, NFC_CLI_LEGIC_POLL_MS) != FuriStatusOk) {
+        if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
+            aborted = true;
+            break;
+        }
+    }
+    // Returns once the poller's current session is done (at most ~2 s), so
+    // the callback can't run after this.
+    nfc_poller_stop(read.poller);
+    nfc_poller_free(read.poller);
+    // A result the poller reported before it stopped stands.
+    const bool reported = !aborted || furi_semaphore_acquire(read.done, 0) == FuriStatusOk;
+    furi_semaphore_free(read.done);
+    if(reported) *result = read.result;
+    return reported;
+}
+
 static void nfc_cli_legic_rdbl_execute(PipeSide* pipe, NfcCliActionContext* ctx) {
     furi_assert(pipe);
     NfcCliLegicRdblContext* instance = ctx;
 
-    uint16_t confirmed = 0;
-    uint16_t total = 0;
-    LegicPrimeError error = legic_prime_poller_sync_read_range(
-        instance->nfc, instance->offset, instance->length, &instance->card, &confirmed, &total);
+    printf("Press Ctrl+C to abort\r\n");
+    LegicPrimePollerEventDataResult result;
+    if(!nfc_cli_legic_read(
+           instance->nfc, pipe, instance->offset, instance->length, &instance->card, &result)) {
+        printf(ANSI_FG_RED "Error: aborted" ANSI_RESET);
+        return;
+    }
+    const LegicPrimeError error = result.error;
+    const uint16_t confirmed = result.bytes_done;
+    const uint16_t total = result.bytes_total;
     if(error != LegicPrimeErrorNone) {
         // Bytes that are not confirmed (two agreeing reads) aren't shown.
         printf(
@@ -84,7 +162,7 @@ static void nfc_cli_legic_rdbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
     // `total` is its length clamped to the card; the guard only keeps a
     // broken invariant from printing past the card.
     if(instance->offset + total > legic_prime_get_mem_size(instance->card.type)) return;
-    printf("\r\nOffset: %u ", instance->offset);
+    printf("Offset: %u ", instance->offset);
     nfc_cli_printf_array(&instance->card.data[instance->offset], total, "Data: ");
     printf("\r\n");
 }
@@ -118,17 +196,22 @@ static void nfc_cli_legic_wrbl_free_ctx(NfcCliActionContext* ctx) {
 
 // The tag acknowledges a WRITE with one unencrypted bit: read the bytes back
 // to tell whether the card holds them.
-static void
-    nfc_cli_legic_wrbl_verify(Nfc* nfc, uint16_t offset, const uint8_t* data, uint16_t size) {
+// The write is reported before this runs, so the read can be aborted.
+static void nfc_cli_legic_wrbl_verify(
+    Nfc* nfc,
+    PipeSide* pipe,
+    uint16_t offset,
+    const uint8_t* data,
+    uint16_t size) {
     LegicPrimeData* card = legic_prime_alloc();
-    uint16_t total = 0;
-    LegicPrimeError error =
-        legic_prime_poller_sync_read_range(nfc, offset, size, card, NULL, &total);
-    if(error != LegicPrimeErrorNone) {
+    LegicPrimePollerEventDataResult result;
+    if(!nfc_cli_legic_read(nfc, pipe, offset, size, card, &result)) {
+        printf(ANSI_FG_RED "Written (acknowledged), verify read aborted\r\n" ANSI_RESET);
+    } else if(result.error != LegicPrimeErrorNone) {
         printf(
             ANSI_FG_RED "Written (acknowledged), but the verify read failed: %s\r\n" ANSI_RESET,
-            nfc_cli_legic_get_error(error));
-    } else if(total < size) {
+            nfc_cli_legic_get_error(result.error));
+    } else if(result.bytes_total < size) {
         printf(
             ANSI_FG_RED
             "Written (acknowledged), but the verify read found a %u-byte card\r\n" ANSI_RESET,
@@ -206,6 +289,7 @@ static void nfc_cli_legic_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
     if(written && error != LegicPrimeErrorWrongCard) {
         nfc_cli_legic_wrbl_verify(
             instance->nfc,
+            pipe,
             (uint16_t)(end - written),
             &instance->data[instance->size - written],
             written);
