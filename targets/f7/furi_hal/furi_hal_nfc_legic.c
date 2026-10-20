@@ -159,9 +159,10 @@ typedef enum {
 // One reception of the current reply (DWT cycles, bits in fifo_buf).
 typedef struct {
     uint32_t t_rxs;
-    uint32_t t_rxe;
+    uint32_t t_rearm; // receiver re-armed before this reception (if rearmed)
     uint16_t bits;
     uint16_t off; // byte offset in fifo_buf
+    bool rearmed; // false: first reception after TX
 } LegicRxSegment;
 
 typedef struct {
@@ -192,6 +193,9 @@ typedef struct {
     bool rx_started;
     bool seg_open;
     uint32_t t_last_rx_event;
+    // Last re-arm of the receiver in this exchange (UNMASK_RECEIVE_DATA).
+    uint32_t t_last_rearm;
+    bool rx_rearmed;
     size_t seg_count;
     LegicRxSegment seg[LEGIC_RX_MAX_SEGMENTS];
     uint8_t fifo_buf[FURI_HAL_NFC_LEGIC_FIFO_SIZE];
@@ -452,6 +456,7 @@ static FuriHalNfcError furi_hal_nfc_legic_poller_tx(
 
     instance->rx_started = false;
     instance->seg_open = false;
+    instance->rx_rearmed = false;
     instance->seg_count = 0;
     instance->fifo_buf_bits = 0;
     const uint32_t rx_window_chips =
@@ -508,22 +513,31 @@ static void
     uint8_t seg[64];
     size_t seg_bits = 0;
     if(!st25r3916_read_fifo(handle, seg, sizeof(seg), &seg_bits)) {
-        // An empty reception (shorter than one FIFO bit).  It is recorded
-        // all the same: its end is the re-arm time that the next segment's
-        // detection lag depends on.  More than sizeof(seg) cannot build up,
-        // gap_over ends a reception within ~2 ms (~14 bytes).
+        // An empty reception (shorter than one FIFO bit).  More than
+        // sizeof(seg) cannot build up, gap_over ends a reception within
+        // ~2 ms (~14 bytes).
         seg_bits = 0;
     }
     const bool started = instance->seg_open;
     instance->seg_open = false;
 
+    // The re-arm before this reception picks its RX lag offset (decode();
+    // LEGIC_RX_LAG_CHIPS / LEGIC_RX_REARM_LAG_CHIPS); take it before this
+    // one's re-arm, which is for the next reception.
+    const bool rearmed = instance->rx_rearmed;
+    const uint32_t t_rearm = instance->t_last_rearm;
     if(rearm && (int32_t)(now - instance->t_rx_window_end) < 0) {
         st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
+        instance->t_last_rearm = now;
+        instance->rx_rearmed = true;
     }
 
     // Without an RxStart the run has no start time and cannot be placed; the
     // FIFO is drained above so it does not land in the next segment.
     if(!started) return;
+    // An empty reception adds nothing to decode() and its re-arm is kept
+    // above, so it takes no slot: noise must not crowd out the reply.
+    if(!seg_bits) return;
     if(instance->seg_count >= LEGIC_RX_MAX_SEGMENTS) return;
     // Byte-align each segment: seg.off is a byte offset and decode() reads a
     // segment from bit 0 of its first byte.
@@ -534,7 +548,8 @@ static void
     memcpy(&instance->fifo_buf[pos], seg, seg_bytes);
     instance->fifo_buf_bits = pos * BITS_IN_BYTE + seg_bits;
     LegicRxSegment* s = &instance->seg[instance->seg_count++];
-    s->t_rxe = now;
+    s->t_rearm = t_rearm;
+    s->rearmed = rearmed;
     s->bits = seg_bits;
     s->off = pos;
 }
@@ -809,8 +824,7 @@ static size_t furi_hal_nfc_legic_decode(
     int32_t ones[LEGIC_RX_MAX_BITS] = {0};
     for(size_t i = 0; i < instance->seg_count; i++) {
         const LegicRxSegment* sg = &instance->seg[i];
-        const bool just_rearmed = i &&
-                                  (int32_t)(sg->t_rxs - instance->seg[i - 1].t_rxe) < rearm_short;
+        const bool just_rearmed = sg->rearmed && (int32_t)(sg->t_rxs - sg->t_rearm) < rearm_short;
         const int32_t s = (int32_t)(sg->t_rxs - t0) - (just_rearmed ? lag_rearm : lag_first);
         const uint8_t* samples = &instance->fifo_buf[sg->off];
         for(size_t j = 0; j < sg->bits; j++) {
