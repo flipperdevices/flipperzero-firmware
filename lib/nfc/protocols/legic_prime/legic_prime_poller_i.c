@@ -423,7 +423,12 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
     legic_prime_poller_queue(instance, &next, NULL);
     uint32_t reply = 0;
     ret = legic_prime_poller_exchange(instance, &cur, true, &reply);
-    if(ret != LegicPrimeErrorNone) return ret;
+    if(ret != LegicPrimeErrorNone) {
+        // A queued frame only leaves after the reply's RxStart, so a Timeout
+        // leaves it unsent; the HAL knows either way.
+        if(nfc_legic_poller_next_sent(instance->nfc)) instance->write_unacked = true;
+        return ret;
+    }
     cur = next;
     if(!nfc_legic_poller_next_sent(instance->nfc)) return LegicPrimeErrorTimeout;
 
@@ -440,8 +445,25 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
 
         uint8_t window = 0;
         ret = legic_prime_poller_write_exchange(instance, &cur, predicted, &window);
-        if(ret != LegicPrimeErrorNone) return ret;
-
+        if(ret != LegicPrimeErrorNone) {
+            // cur went out (next_sent() said so before it was claimed) and no
+            // ACK was decoded: the byte at write_pos may hold either value.
+            instance->write_unacked = true;
+            // A reception the HAL gate placed in the predicted window but
+            // that decoded to no '1' bit sent the chained WRITE as well.  The
+            // flag can't name a second byte; the session ends here, so log it.
+            if(ret == LegicPrimeErrorNoAck && have_next &&
+               nfc_legic_poller_next_sent(instance->nfc)) {
+                FURI_LOG_W(
+                    TAG,
+                    "WRITE of byte %u went out behind the missing ACK of byte %u",
+                    (unsigned)next.addr,
+                    (unsigned)cur.addr);
+            }
+            return ret;
+        }
+        // Acknowledged: no doubt about this byte any more.
+        instance->write_unacked = false;
         instance->data->data[cur.addr] = instance->write_data[cur.addr - instance->write_offset];
         instance->write_pos = done + 1;
         if(!have_next || !nfc_legic_poller_next_sent(instance->nfc)) {

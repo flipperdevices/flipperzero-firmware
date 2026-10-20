@@ -110,9 +110,10 @@ struct LegicPrimePoller {
     uint16_t write_size;
     uint16_t write_pos;
     uint8_t write_attempts;
-    // The last WRITE sent (of the byte at write_pos) got no ACK: the tag may
-    // hold the new value or the old.  A Communication error after a WRITE
-    // can't be told from one before it, and doesn't set this.
+    // The WRITE of the byte at write_pos went out and no ACK was decoded for
+    // it (in this session or an earlier one): the tag may hold the new value
+    // or the old.  Kept by legic_prime_poller_write_session(): set on every
+    // error after a WRITE was sent, cleared by every ACK.
     bool write_unacked;
     uint8_t write_ack_window; // bit window of the last write ACK (predicts the next)
 
@@ -180,7 +181,7 @@ LegicPrimeError legic_prime_poller_read(LegicPrimePoller* instance);
 // chained after the tag's ACKs.  Advances write_pos for every acknowledged
 // byte; the session may end early (without an error) for the next one to
 // continue.  LegicPrimeErrorWrongCard if the UID differs from the first
-// session's.
+// session's.  Keeps write_unacked (see the field).
 LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance);
 
 #ifdef __cplusplus

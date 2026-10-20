@@ -62,7 +62,9 @@ LegicPrimeError legic_prime_poller_sync_read_range(
  * last ones of the range, on success and on failure.
  * @param[out] write_unacked set on failure if the WRITE of the byte just
  * before the acknowledged ones went out without an ACK, so that byte may
- * hold the new value (may be NULL).
+ * hold the new value (may be NULL).  A WRITE chained behind that missing
+ * ACK may have gone out as well, so the byte before it is unconfirmed too;
+ * read the range back to be sure.
  *
  * @warning Bytes 5-6 are the DCF, which a real tag only lets decrease:
  * writing them is irreversible.  Bytes 7-8 mark a card as segmented.

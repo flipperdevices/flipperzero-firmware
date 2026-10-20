@@ -54,7 +54,9 @@ typedef struct {
     uint16_t bytes_total;
     /** Write failure: the WRITE of the byte just before the written ones
      *  went out and its ACK never came, so that byte may hold the new value
-     *  or the old one. */
+     *  or the old one.  A WRITE chained behind that missing ACK may have gone
+     *  out as well, so the byte before it is unconfirmed too; read the range
+     *  back to be sure. */
     bool write_unacked;
 } LegicPrimePollerEventDataResult;
 
