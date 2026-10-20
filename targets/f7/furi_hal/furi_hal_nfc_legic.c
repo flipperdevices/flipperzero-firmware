@@ -519,6 +519,7 @@ static void
 // Bit window of a write ACK, counted like reply bits from 330 µs after our
 // frame: the window start nearest to its first reception, as the decoder's
 // half-coverage rule places a one-bit run.  -1 if it started too early.
+// nfc_test.c legic_prime_write_chain_steps_test transcribes this rounding.
 static int32_t furi_hal_nfc_legic_ack_window(FuriHalNfcLegicPoller* instance) {
     const uint32_t t0 = instance->t_frame_end + legic_chips_to_cycles(LEGIC_TAG_FRAME_WAIT_CHIPS);
     const int32_t tb = legic_chips_to_cycles(LEGIC_TAG_BIT_CHIPS);

@@ -1137,8 +1137,44 @@ MU_TEST(legic_prime_frame_test) {
     mu_assert_int_eq(0x1F7153, ex.tx);
     const uint32_t write2 = legic_prime_poller_write_frame(0x15, 0x5A, 9);
     mu_assert_int_eq(0x1CB42A, write2);
-    legic_prime_poller_build(&ex, write2, 21, 33 + LEGIC_PRIME_WRITE_STEPS_AFTER_ACK, 0);
+    legic_prime_poller_build(&ex, write2, 21, legic_prime_poller_write_chain_steps(33), 0);
     mu_assert_int_eq(0x0CB42E, ex.tx);
+}
+
+// Proxmark3 armsrc/legicrfsim.c, in its 212 kHz ticks: tx_ack() steps
+// ack_wait / 21 - 1 times before the ACK and once for it, then rx_frame()
+// steps until the next frame's first pause, `gap` ticks after the ACK.
+static uint32_t legic_prime_test_sim_write_steps(uint32_t ack_wait, uint32_t gap) {
+    return ack_wait / 21 + legic_prime_test_sim_idle_steps(gap);
+}
+
+// The rounding of furi_hal_nfc_legic_ack_window(), static in the HAL: the
+// nearest window start, windows counted from 70 ticks (330 µs) after the
+// reader's frame.  For ack_wait >= 60 (window 0 and up).
+static uint8_t legic_prime_test_ack_window(uint32_t ack_wait) {
+    return (2 * ((int32_t)ack_wait - 70) + 21) / 42;
+}
+
+MU_TEST(legic_prime_write_chain_steps_test) {
+    // The HAL sends the chained WRITE 240 µs (51 ticks) after the ACK's end;
+    // the tag steps 3 times for any gap of 41-61 ticks.
+    const uint32_t gap = 51;
+    // legicrfsim.c's TAG_ACK_WAIT, 5 ticks before window 33.
+    mu_assert_int_eq(33, legic_prime_test_ack_window(758));
+    mu_assert_int_eq(39, legic_prime_test_sim_write_steps(758, gap));
+    mu_assert_int_eq(39, legic_prime_poller_write_chain_steps(33));
+
+    // k + 6 is the sim's count for every ACK delay except those starting
+    // 8-10 ticks before the window start they round to (3 in 21): there the
+    // tag has stepped once less, in the window the HAL gate expects.
+    for(uint32_t ack_wait = 60; ack_wait <= 70 + 21 * 59; ack_wait++) {
+        const uint8_t window = legic_prime_test_ack_window(ack_wait);
+        const int32_t early = 70 + 21 * (int32_t)window - (int32_t)ack_wait;
+        const bool off_by_one = early >= 8 && early <= 10;
+        mu_assert_int_eq(
+            legic_prime_poller_write_chain_steps(window) - (off_by_one ? 1 : 0),
+            legic_prime_test_sim_write_steps(ack_wait, gap));
+    }
 }
 
 // Generated MIM256 IM-S image with two segments; the second one has a
@@ -1516,6 +1552,7 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(legic_prime_listener_steps_test);
     MU_RUN_TEST(legic_prime_crc_test);
     MU_RUN_TEST(legic_prime_frame_test);
+    MU_RUN_TEST(legic_prime_write_chain_steps_test);
     MU_RUN_TEST(legic_prime_layout_test);
     MU_RUN_TEST(legic_prime_bad_segment_test);
     MU_RUN_TEST(legic_prime_set_uid_test);
