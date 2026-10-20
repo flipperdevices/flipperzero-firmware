@@ -39,7 +39,7 @@ static const char* nfc_cli_legic_get_error(LegicPrimeError error) {
     case LegicPrimeErrorNoAck:
         return "write not acknowledged";
     case LegicPrimeErrorReadOnly:
-        return "address not writable (bytes 0-4, or past the end of the card)";
+        return "address out of range (bytes 0-4 are read-only, or past the end of the card)";
     case LegicPrimeErrorWrongCard:
         return "a card with another UID answered";
     case LegicPrimeErrorUidUnconfirmed:
@@ -73,22 +73,19 @@ static void nfc_cli_legic_rdbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
         instance->nfc, instance->offset, instance->length, &instance->card, &confirmed, &total);
     if(error != LegicPrimeErrorNone) {
         // Bytes that are not confirmed (two agreeing reads) aren't shown.
-        printf(ANSI_FG_RED "Error: %s" ANSI_RESET, nfc_cli_legic_get_error(error));
+        printf(
+            ANSI_FG_RED "Error: %s" ANSI_RESET,
+            error == LegicPrimeErrorReadOnly ? "offset past the end of the card" :
+                                               nfc_cli_legic_get_error(error));
         if(total) printf("\r\nConfirmed %u of %u bytes", (unsigned)confirmed, (unsigned)total);
         return;
     }
-    const uint16_t mem_size = legic_prime_get_mem_size(instance->card.type);
-    if(instance->offset >= mem_size) {
-        printf(
-            ANSI_FG_RED "Error: offset past the end of the card (%u bytes)" ANSI_RESET, mem_size);
-        return;
-    }
-    size_t length = instance->length;
-    if(instance->offset + length > mem_size) {
-        length = mem_size - instance->offset;
-    }
+    // On success the range starts at the offset, inside the card, and
+    // `total` is its length clamped to the card; the guard only keeps a
+    // broken invariant from printing past the card.
+    if(instance->offset + total > legic_prime_get_mem_size(instance->card.type)) return;
     printf("\r\nOffset: %u ", instance->offset);
-    nfc_cli_printf_array(&instance->card.data[instance->offset], length, "Data: ");
+    nfc_cli_printf_array(&instance->card.data[instance->offset], total, "Data: ");
     printf("\r\n");
 }
 

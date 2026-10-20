@@ -26,7 +26,9 @@ typedef struct {
     LegicPrimePollerMode mode;
     /** Read mode: read_size bytes from read_offset on, clamped to the card,
      *  or the whole card if read_size is 0.  Of the bytes outside the range
-     *  only the UID is filled in, so a range read is no dump to save. */
+     *  only the UID is filled in, so a range read is no dump to save.  A
+     *  range that starts at or past the end fails with
+     *  LegicPrimeErrorReadOnly. */
     uint16_t read_offset;
     uint16_t read_size;
     /** Write mode: bytes to write from write_offset on (offset >= 5), sent
@@ -46,7 +48,9 @@ typedef struct {
     uint16_t bytes_done;
     /** Bytes requested: for a read the range clamped to the card (the card
      *  size for a whole-card read), for a write write_size.  0 if the card
-     *  was not detected. */
+     *  was not detected, or if a read range starts at or past the card's
+     *  end (LegicPrimeErrorReadOnly once a session confirmed the UID,
+     *  another error if none did). */
     uint16_t bytes_total;
     /** Write failure: the WRITE of the byte just before the written ones
      *  went out and its ACK never came, so that byte may hold the new value

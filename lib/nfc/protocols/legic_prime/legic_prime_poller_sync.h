@@ -24,16 +24,19 @@ extern "C" {
 /**
  * Reads `size` bytes (1 to LEGIC_PRIME_MEM_MAX) from `offset`, clamped to
  * the end of the card; offset 0 and size LEGIC_PRIME_MEM_MAX read the whole
- * card, whatever its size.  Each byte needs two agreeing reads, as a 4-bit
- * CRC passes 1 in 16 misdecoded replies.  `data` is only filled on success:
- * the card type, the UID and the bytes of the range, the others 0, so only
- * a whole-card read gives a dump to save.  Blocks, see the top of this
- * header.
+ * card, whatever its size.  A range that starts at or past the end fails
+ * with LegicPrimeErrorReadOnly.  Each byte needs two agreeing reads, as a
+ * 4-bit CRC passes 1 in 16 misdecoded replies.  `data` is only filled on
+ * success: the card type, the UID and the bytes of the range, the others
+ * 0, so only a whole-card read gives a dump to save.  Blocks, see the top
+ * of this header.
  *
  * @param[out] bytes_read bytes of the range confirmed (may be NULL), on
  * success and on failure.
  * @param[out] bytes_total size of the range clamped to the card (may be
- * NULL); 0 if the card was not detected.
+ * NULL); 0 if the card was not detected, or if the range starts at or past
+ * the card's end (LegicPrimeErrorReadOnly once a session confirmed the
+ * UID, another error if none did).
  */
 LegicPrimeError legic_prime_poller_sync_read_range(
     Nfc* nfc,
