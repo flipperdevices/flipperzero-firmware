@@ -139,6 +139,10 @@ LegicPrimeError legic_prime_poller_setup(LegicPrimePoller* instance, uint8_t iv)
     legic_prime_poller_build_iv(&iv_ex, iv);
     uint32_t reply = 0;
     LegicPrimeError ret = legic_prime_poller_exchange(instance, &iv_ex, false, &reply);
+    // No reply to the IV at all: no tag in the field, as ISO14443-3A takes an
+    // unanswered REQA.  A session's own handshake (start_session) keeps
+    // Timeout: this handshake found a card before it.
+    if(ret == LegicPrimeErrorTimeout) return LegicPrimeErrorNotPresent;
     if(ret != LegicPrimeErrorNone) return ret;
 
     LegicPrimeType type;

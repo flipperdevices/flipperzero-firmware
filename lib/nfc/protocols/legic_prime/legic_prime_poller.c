@@ -101,6 +101,10 @@ static NfcCommand legic_prime_poller_setup_handler(LegicPrimePoller* instance) {
     legic_prime_poller_apply_gain(instance);
     LegicPrimeError err = legic_prime_poller_setup(instance, LEGIC_PRIME_POLLER_IV);
     NfcCommand command = NfcCommandContinue;
+    // A handshake a tag answered tells more than one nobody answered: a
+    // weakly coupled card may answer at one gain and stay silent at the
+    // other.
+    if(err != LegicPrimeErrorNotPresent) instance->setup_error = err;
     if(err == LegicPrimeErrorNone) {
         instance->setup_attempts = 0;
         instance->state = LegicPrimePollerStateRequestMode;
@@ -109,7 +113,10 @@ static NfcCommand legic_prime_poller_setup_handler(LegicPrimePoller* instance) {
         // The tag is waiting for an ACK; start over from a fresh field.
         command = NfcCommandReset;
     } else {
+        // Not present only if no handshake got an answer.
+        if(instance->setup_error != LegicPrimeErrorNone) err = instance->setup_error;
         instance->setup_attempts = 0;
+        instance->setup_error = LegicPrimeErrorNone;
         legic_prime_poller_finish(instance, err, 0, 0);
     }
     return command;
