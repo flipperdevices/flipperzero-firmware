@@ -40,6 +40,12 @@ extern "C" {
 // of the ACK (see the write path in legic_prime_poller_i.c).
 #define LEGIC_PRIME_WRITE_STEPS_AFTER_ACK  (6U)
 
+// Keystream steps from one WRITE to the WRITE chained behind its ACK in bit
+// window `ack_window` (see the write path in legic_prime_poller_i.c).
+static inline uint8_t legic_prime_poller_write_chain_steps(uint8_t ack_window) {
+    return ack_window + LEGIC_PRIME_WRITE_STEPS_AFTER_ACK;
+}
+
 // One reader frame and the keystream for its reply, built ahead of time.
 typedef struct {
     uint32_t tx; // on-air bits, LSB first

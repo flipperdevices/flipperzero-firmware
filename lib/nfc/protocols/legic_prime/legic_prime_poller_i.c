@@ -324,6 +324,19 @@ static LegicPrimeError
  * the ACK comes in another one; the session then ends and the next one uses
  * the measured window.
  *
+ * In legicrfsim.c's model the tag has stepped W / 21 times (rounded down)
+ * by the end of an ACK that starts W chips after the WRITE, while the HAL
+ * rounds the window to the nearest (W - 70) / 21.  So k + 6 is one step too
+ * many for an ACK that starts 7 to 10.5 chips (33-50 µs) before the window
+ * start it rounds to, and the HAL gate can't see it, as the window matches:
+ * such a tag would get every chained WRITE garbled.  Most fail their CRC-4
+ * and the write goes on one byte per session until the session cap ends it
+ * (after 40 bytes for a write of up to 256); one in 16 passes it, and the
+ * tag writes a stray byte to the garbled address and ACKs.  The sim
+ * (W = 758, 5 chips before window 33) is clear of it, and so is the MIM256
+ * on the bench, which takes chained WRITEs (nfc_test.c
+ * legic_prime_write_chain_steps_test).
+ *
  * The window only matters for that chained frame's keystream, which the HAL
  * gate covers.  An ACK in another window than predicted still acknowledges
  * the WRITE: the tag only ACKs a WRITE whose CRC-4 matched, and the window
@@ -447,7 +460,7 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
         const uint8_t predicted = instance->write_ack_window;
         if(have_next) {
             legic_prime_poller_build_write(
-                instance, &next, done + 1, predicted + LEGIC_PRIME_WRITE_STEPS_AFTER_ACK);
+                instance, &next, done + 1, legic_prime_poller_write_chain_steps(predicted));
             legic_prime_poller_queue(instance, &next, NULL);
         }
 
