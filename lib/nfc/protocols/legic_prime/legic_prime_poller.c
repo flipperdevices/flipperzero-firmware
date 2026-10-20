@@ -232,10 +232,8 @@ static NfcCommand legic_prime_poller_write_handler(LegicPrimePoller* instance) {
         const uint16_t pos_before = instance->write_pos;
         err = legic_prime_poller_write_session(instance);
         instance->sessions++;
-        // NoAck only comes after a WRITE went out.  Sessions that fail before
-        // their first WRITE leave that byte in doubt.
-        if(instance->write_pos != pos_before) instance->write_unacked = false;
-        if(err == LegicPrimeErrorNoAck) instance->write_unacked = true;
+        // write_session() keeps write_unacked: set when a WRITE went out and its
+        // exchange ended without an ACK, cleared by every ACK.
         if(instance->write_pos == instance->write_size) {
             err = LegicPrimeErrorNone;
         } else if(
