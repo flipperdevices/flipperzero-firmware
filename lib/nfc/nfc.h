@@ -479,7 +479,7 @@ void nfc_legic_poller_claim_next(Nfc* instance);
 void nfc_legic_poller_cancel_next(Nfc* instance);
 
 /**
- * @brief Set the emulated LEGIC Prime tag's keystream reference to the end of the last reader frame.
+ * @brief Set the emulated LEGIC Prime tag's keystream reference to the last reader frame's end.
  *
  * @param[in, out] instance pointer to the instance to be configured.
  * @param[in] extra_fc offset after the end of the frame, in carrier cycles (1/fc).
