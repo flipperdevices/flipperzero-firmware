@@ -6,6 +6,7 @@ enum SubmenuIndex {
     SubmenuIndexMfUltralightCKeys,
     SubmenuIndexMfUltralightUnlock,
     SubmenuIndexSlixUnlock,
+    SubmenuIndexWriteNdef,
 };
 
 void nfc_scene_extra_actions_submenu_callback(void* context, uint32_t index) {
@@ -48,6 +49,12 @@ void nfc_scene_extra_actions_on_enter(void* context) {
         SubmenuIndexSlixUnlock,
         nfc_scene_extra_actions_submenu_callback,
         instance);
+    submenu_add_item(
+        submenu,
+        "Write NDEF Tag",
+        SubmenuIndexWriteNdef,
+        nfc_scene_extra_actions_submenu_callback,
+        instance);
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(instance->scene_manager, NfcSceneExtraActions));
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewMenu);
@@ -73,6 +80,9 @@ bool nfc_scene_extra_actions_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexSlixUnlock) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneSlixUnlockMenu);
+            consumed = true;
+        } else if(event.event == SubmenuIndexWriteNdef) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneWriteNdefType);
             consumed = true;
         }
         scene_manager_set_scene_state(instance->scene_manager, NfcSceneExtraActions, event.event);
