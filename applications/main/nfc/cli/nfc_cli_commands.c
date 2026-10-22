@@ -6,6 +6,7 @@
 #include "commands/apdu/nfc_cli_command_apdu.h"
 #include "commands/dump/nfc_cli_command_dump.h"
 #include "commands/mfu/nfc_cli_command_mfu.h"
+#include "commands/legic/nfc_cli_command_legic.h"
 #include "commands/nfc_cli_command_emulate.h"
 #include "commands/nfc_cli_command_scanner.h"
 #include "commands/nfc_cli_command_field.h"
@@ -18,6 +19,7 @@ static const NfcCliCommandDescriptor* nfc_cli_commands[] = {
     &raw_cmd,
     &emulate_cmd,
     &mfu_cmd,
+    &legic_cmd,
     &scanner_cmd,
     &dump_cmd,
     &field_cmd,

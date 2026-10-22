@@ -36,6 +36,7 @@ typedef enum {
     NfcCliDumpErrorNotPresent,
     NfcCliDumpErrorFailedToRead,
     NfcCliDumpErrorAuthFailed,
+    NfcCliDumpErrorAborted,
 
     NfcCliDumpErrorNum,
 } NfcCliDumpError;
@@ -47,6 +48,7 @@ typedef struct {
     NfcCliScanner* scanner;
     NfcProtocol desired_protocol;
     uint32_t timeout;
+    bool timeout_set; // --timeout given: overrides per-protocol read timeouts
     FuriSemaphore* sem_done;
 
     NfcCliDumpError result;
