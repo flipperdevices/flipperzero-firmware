@@ -2,6 +2,7 @@
 
 #include <furi_hal_rfid.h>
 #include <furi_hal_ibutton.h>
+#include <furi_hal_cortex.h>
 
 #include <toolbox/protocols/protocol_dict.h>
 
@@ -75,7 +76,7 @@ typedef struct {
 static void ibutton_protocols_comparator_callback(bool level, void* context) {
     iButtonReadContext* read_context = context;
 
-    uint32_t current_dwt_value = DWT->CYCCNT;
+    uint32_t current_dwt_value = furi_hal_cortex_get_cycles();
 
     LevelDuration data =
         level_duration_make(level, current_dwt_value - read_context->last_dwt_value);
@@ -97,7 +98,7 @@ static bool ibutton_protocol_group_misc_read(
     furi_hal_rfid_pin_pull_pulldown();
 
     iButtonReadContext read_context = {
-        .last_dwt_value = DWT->CYCCNT,
+        .last_dwt_value = furi_hal_cortex_get_cycles(),
         .stream = furi_stream_buffer_alloc(sizeof(LevelDuration) * 512, 1),
     };
 
