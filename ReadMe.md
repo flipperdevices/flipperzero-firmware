@@ -90,6 +90,22 @@ Make sure your Flipper is on, and your firmware is functioning. Connect your Fli
 ./fbt flash_usb
 ```
 
+## Running unit tests
+
+Unit tests run on the device. Build firmware with tests enabled, flash it (and copy resources from `build/latest/resources` to the SD card), then in a CLI session run:
+
+```shell
+unit_tests
+```
+
+To run only the Furi tests (e.g. after changing event loop or event flag code):
+
+```shell
+unit_tests test_furi
+```
+
+See [Unit Tests](/documentation/UnitTests.md) for details and how to add tests.
+
 ## Documentation
 
 - [Flipper Build Tool](/documentation/fbt.md) - building, flashing, and debugging Flipper software
