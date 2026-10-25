@@ -207,6 +207,41 @@ MU_TEST(mf_classic_4k_7b_file_test) {
     nfc_file_test_with_generator(NfcDataGeneratorTypeMfClassic4k_7b);
 }
 
+MU_TEST(mf_classic_1k_ev1_file_test) {
+    NfcDevice* nfc_device = nfc_device_alloc();
+    nfc_data_generator_fill_data(NfcDataGeneratorTypeMfClassic1k_4b, nfc_device);
+
+    MfClassicData* data = mf_classic_alloc();
+    nfc_device_copy_data(nfc_device, NfcProtocolMfClassic, data);
+    data->type = MfClassicType1kEv1;
+
+    // Sector 17 holds the originality signature and is readable
+    for(uint8_t block = 68; block < 72; block++) {
+        furi_hal_random_fill_buf(data->block[block].data, MF_CLASSIC_BLOCK_SIZE);
+        mf_classic_set_block_read(data, block, &data->block[block]);
+    }
+    mf_classic_set_key_found(data, 17, MfClassicKeyTypeA, 0x75CCB59C9BED);
+    mf_classic_set_key_found(data, 17, MfClassicKeyTypeB, 0x4B791BEA7BCC);
+
+    // Sector 16 refuses every read: only its keys can be found
+    mf_classic_set_key_found(data, 16, MfClassicKeyTypeA, 0x5C8FF9990DA2);
+    mu_assert(!mf_classic_is_card_read(data), "EV1 sector 16 needs both keys\r\n");
+    mf_classic_set_key_found(data, 16, MfClassicKeyTypeB, 0xD01AFEEB890A);
+    mu_assert(mf_classic_is_card_read(data), "EV1 without sector 16 blocks is read\r\n");
+
+    uint8_t sectors_read = 0;
+    uint8_t keys_found = 0;
+    mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
+    mu_assert(sectors_read == 18, "EV1 sectors read != 18\r\n");
+    mu_assert(keys_found == 36, "EV1 keys found != 36\r\n");
+
+    nfc_device_set_data(nfc_device, NfcProtocolMfClassic, data);
+    nfc_test_save_and_load(nfc_device);
+
+    mf_classic_free(data);
+    nfc_device_free(nfc_device);
+}
+
 MU_TEST(iso14443_3a_reader) {
     Nfc* poller = nfc_alloc();
     Nfc* listener = nfc_alloc();
@@ -408,6 +443,56 @@ static void mf_classic_reader(void) {
     const MfClassicData* mfc_data = nfc_device_get_data(nfc_device, NfcProtocolMfClassic);
     mu_assert(memcmp(&mfc_data->block[0], &block, sizeof(MfClassicBlock)) == 0, "Data mismatch");
 
+    nfc_device_free(nfc_device);
+    nfc_free(listener);
+    nfc_free(poller);
+}
+
+static void mf_classic_ev1_sync_read(void) {
+    Nfc* poller = nfc_alloc();
+    Nfc* listener = nfc_alloc();
+
+    NfcDevice* nfc_device = nfc_device_alloc();
+    nfc_data_generator_fill_data(NfcDataGeneratorTypeMfClassic1k_7b, nfc_device);
+    MfClassicData* ev1_data = mf_classic_alloc();
+    nfc_device_copy_data(nfc_device, NfcProtocolMfClassic, ev1_data);
+    ev1_data->type = MfClassicType1kEv1;
+
+    // Hidden sector 17 as on a genuine card: key B can authenticate
+    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(ev1_data, 17);
+    const uint8_t access_bits[] = {0x70, 0xF0, 0xF8, 0x69};
+    memcpy(sec_tr->access_bits.data, access_bits, sizeof(access_bits));
+    mf_classic_set_key_found(ev1_data, 17, MfClassicKeyTypeA, 0x75CCB59C9BED);
+    mf_classic_set_key_found(ev1_data, 17, MfClassicKeyTypeB, 0x4B791BEA7BCC);
+
+    NfcListener* mfc_listener = nfc_listener_alloc(listener, NfcProtocolMfClassic, ev1_data);
+    nfc_listener_start(mfc_listener, NULL, NULL);
+
+    // Same sequence as the parser plugins: sync detection, then a read with 1K keys
+    MfClassicType type = MfClassicTypeNum;
+    MfClassicError error = mf_classic_poller_sync_detect_type(poller, &type);
+
+    MfClassicDeviceKeys keys = {};
+    for(size_t i = 0; i < mf_classic_get_total_sectors_num(MfClassicType1k); i++) {
+        memset(keys.key_a[i].data, 0xFF, sizeof(MfClassicKey));
+        memset(keys.key_b[i].data, 0xFF, sizeof(MfClassicKey));
+        FURI_BIT_SET(keys.key_a_mask, i);
+        FURI_BIT_SET(keys.key_b_mask, i);
+    }
+    MfClassicData* data = mf_classic_alloc();
+    data->type = type;
+    MfClassicError read_error = mf_classic_poller_sync_read(poller, &keys, data);
+
+    nfc_listener_stop(mfc_listener);
+    nfc_listener_free(mfc_listener);
+
+    mu_assert(error == MfClassicErrorNone, "mf_classic_poller_sync_detect_type() failed\r\n");
+    mu_assert(type == MfClassicType1k, "EV1 not reported as 1K by sync detection\r\n");
+    mu_assert(read_error == MfClassicErrorNone, "EV1 read with 1K keys not complete\r\n");
+    mu_assert(data->type == MfClassicType1k, "EV1 read with 1K keys not reported as 1K\r\n");
+
+    mf_classic_free(data);
+    mf_classic_free(ev1_data);
     nfc_device_free(nfc_device);
     nfc_free(listener);
     nfc_free(poller);
@@ -1049,8 +1134,10 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(mf_classic_1k_7b_file_test);
     MU_RUN_TEST(mf_classic_4k_4b_file_test);
     MU_RUN_TEST(mf_classic_4k_7b_file_test);
+    MU_RUN_TEST(mf_classic_1k_ev1_file_test);
 
     MU_RUN_TEST(mf_classic_reader);
+    MU_RUN_TEST(mf_classic_ev1_sync_read);
     MU_RUN_TEST(mf_classic_write);
     MU_RUN_TEST(mf_classic_value_block);
     MU_RUN_TEST(mf_classic_send_frame_test);
