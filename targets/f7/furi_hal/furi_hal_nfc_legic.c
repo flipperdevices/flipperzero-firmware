@@ -106,8 +106,20 @@
 // notice the subcarrier is gone (~125 µs after it stops), so the queued frame
 // can go out on time.  Stopping drops the chip's last partial FIFO byte;
 // 45 µs gave fewer missed final '1' bits than 30 µs (MIM256 card at ~1 cm:
-// 95-96% vs 93-94% clean reads) with the same worst-case send_next entry
-// (~113 µs of the 215 µs budget); at 90 µs the receiver's own end of
+// 95-96% vs 93-94% clean reads) with the same worst-case send_next entry,
+// ~113 µs after a data reply's nominal end (reads, 2026-10-14, before the
+// ACK path and the stale-IRQ drain existed; the loop's last iteration may
+// still read the IRQ status and the FIFO and re-arm over SPI before it
+// exits).  TRANSMIT is due at reply end + 215 µs after a data reply (260
+// less the 45 µs TX latency) and + 195 µs after a write ACK.  Before its
+// launch spin send_next moves 15 bytes over the 8 MHz SPI (STOP, CLEAR_FIFO,
+// NUM_TX_BYTES, 8 FIFO bytes; 25 when the IRQ line is up at the drain),
+// up to ~50 µs with the per-transfer waits: from a 113 µs entry about
+// 30 µs are left on the ACK path.  The data figure is the bound used for
+// the ACK path too (its own exit does less, but a noise reception in the
+// last iteration costs the same); not re-measured since the drain.  A miss
+// is send_next's too-late return, not logged: the poller sees an unsent
+// frame and starts a new session.  At 90 µs the receiver's own end of
 // reception pushed every queued frame past its slot.
 #define LEGIC_RX_FORCE_END_US         (45U)
 // Longest wait for TxEnd before giving up on it (longest frame ~1.5 ms).
