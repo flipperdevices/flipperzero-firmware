@@ -1228,7 +1228,10 @@ static FuriHalNfcError furi_hal_nfc_legic_listener_tx(
         // Only a stale frame end or a bogus delay gets here: skip the reply.
         // The protocol takes t_tx_end as its keystream reference regardless
         // (it already stepped the PRNG for every reply bit), so leave the
-        // nominal end of the reply slot, as a sent reply would.
+        // nominal end of the reply slot: what the sent path below leaves (to
+        // a cycle of Q8 rounding) for any reply whose wait is still positive,
+        // data reply or write ACK (only a write ACK found late, wait <= 0,
+        // keeps a measured end).
         l->t_tx_end = reply_start + legic_chips_to_cycles((uint32_t)tx_bits * LEGIC_TAG_BIT_CHIPS);
         return FuriHalNfcErrorCommunicationTimeout;
     }
