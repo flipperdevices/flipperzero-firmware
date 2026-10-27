@@ -28,6 +28,7 @@
  *  - Tracking issue: github.com/flipperdevices/flipperzero-firmware/issues/1688
  */
 #include "furi_hal_nfc_i.h"
+#include "furi_hal_nfc_legic_i.h"
 #include "furi_hal_nfc_tech_i.h"
 
 #include <furi.h>
@@ -146,6 +147,18 @@
 // Re-measure if the wake-up path changes: a non-zero vetoed count on a
 // healthy run means the value is too tight, and every veto costs a session.
 #define LEGIC_ACK_WAKE_LATE_US        (65U)
+
+// legicrfsim.c's rx_frame() steps the tag 3 times for a frame whose first
+// pause comes 41-61 of its 4.72 µs ticks after the ACK's end, and the k + 6
+// of legic_prime_poller_write_chain_steps() counts on those 3 (nfc_test.c
+// legic_prime_write_chain_steps_test).  This pins that model only: the
+// bench limits given at LEGIC_NEXT_FRAME_AFTER_ACK_US are tighter.
+#define LEGIC_NEXT_FRAME_AFTER_ACK_TICKS \
+    ((LEGIC_NEXT_FRAME_AFTER_ACK_US * 13560U + 32000U) / 64000U)
+_Static_assert(
+    LEGIC_NEXT_FRAME_AFTER_ACK_TICKS >= FURI_HAL_NFC_LEGIC_SIM_3STEP_MIN_TICKS &&
+        LEGIC_NEXT_FRAME_AFTER_ACK_TICKS <= FURI_HAL_NFC_LEGIC_SIM_3STEP_MAX_TICKS,
+    "chained WRITE gap left the 3-step band of legic_prime_write_chain_steps_test");
 
 #define LEGIC_RX_GAP_MS       (2U)
 #define LEGIC_RX_MAX_SEGMENTS (16U)
@@ -578,13 +591,13 @@ static void
 // Bit window of a write ACK, counted like reply bits from 330 µs after our
 // frame: the window start nearest to its first reception, as the decoder's
 // half-coverage rule places a one-bit run.  -1 if it started too early.
-// nfc_test.c legic_prime_write_chain_steps_test transcribes this rounding.
+// nfc_test.c legic_prime_write_chain_steps_test runs the same rounding on
+// legicrfsim.c's ticks.
 static int32_t furi_hal_nfc_legic_ack_window(const FuriHalNfcLegicPoller* instance) {
     const uint32_t t0 = instance->t_frame_end + legic_chips_to_cycles(LEGIC_TAG_FRAME_WAIT_CHIPS);
-    const int32_t tb = legic_chips_to_cycles(LEGIC_TAG_BIT_CHIPS);
     const int32_t start =
         (int32_t)(instance->seg[0].t_rxs - legic_chips_to_cycles(LEGIC_RX_LAG_CHIPS) - t0);
-    return start < -tb / 2 ? -1 : (start + tb / 2) / tb;
+    return furi_hal_nfc_legic_round_window(start, legic_chips_to_cycles(LEGIC_TAG_BIT_CHIPS));
 }
 
 // End of the current tag reply.  A data reply starts 330 µs after our frame

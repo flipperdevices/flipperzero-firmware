@@ -26,6 +26,7 @@
 #include <nfc/protocols/legic_prime/legic_prime_prng.h>
 #include <nfc/protocols/legic_prime/legic_prime_poller_i.h>
 #include <nfc/protocols/legic_prime/legic_prime_poller_sync.h>
+#include <furi_hal_nfc_legic_i.h>
 
 #include <nfc/nfc_poller.h>
 
@@ -1148,16 +1149,23 @@ static uint32_t legic_prime_test_sim_write_steps(uint32_t ack_wait, uint32_t gap
     return ack_wait / 21 + legic_prime_test_sim_idle_steps(gap);
 }
 
-// The rounding of furi_hal_nfc_legic_ack_window(), static in the HAL: the
-// nearest window start, windows counted from 70 ticks (330 µs) after the
-// reader's frame.  For ack_wait >= 60 (window 0 and up).
+// furi_hal_nfc_legic_ack_window()'s rounding (furi_hal_nfc_legic_i.h) on
+// legicrfsim.c's grid: windows of 21 ticks counted from 70 ticks (330 µs)
+// after the reader's frame.  For ack_wait >= 60 (window 0 and up).
 static uint8_t legic_prime_test_ack_window(uint32_t ack_wait) {
-    return (2 * ((int32_t)ack_wait - 70) + 21) / 42;
+    return furi_hal_nfc_legic_round_window((int32_t)ack_wait - 70, 21);
 }
 
 MU_TEST(legic_prime_write_chain_steps_test) {
-    // The HAL sends the chained WRITE 240 µs (51 ticks) after the ACK's end;
-    // the tag steps 3 times for any gap of 41-61 ticks.
+    // The tag steps 3 times for a gap of 41-61 ticks after its ACK; the HAL
+    // asserts that LEGIC_NEXT_FRAME_AFTER_ACK_US (240 µs, 51 ticks) stays in
+    // that band.
+    const uint32_t lo = FURI_HAL_NFC_LEGIC_SIM_3STEP_MIN_TICKS;
+    const uint32_t hi = FURI_HAL_NFC_LEGIC_SIM_3STEP_MAX_TICKS;
+    mu_assert_int_eq(2, legic_prime_test_sim_idle_steps(lo - 1));
+    mu_assert_int_eq(3, legic_prime_test_sim_idle_steps(lo));
+    mu_assert_int_eq(3, legic_prime_test_sim_idle_steps(hi));
+    mu_assert_int_eq(4, legic_prime_test_sim_idle_steps(hi + 1));
     const uint32_t gap = 51;
     // legicrfsim.c's TAG_ACK_WAIT, 5 ticks before window 33.
     mu_assert_int_eq(33, legic_prime_test_ack_window(758));
