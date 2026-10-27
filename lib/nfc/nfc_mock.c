@@ -166,8 +166,6 @@ void nfc_free(Nfc* instance) {
 }
 
 void nfc_config(Nfc* instance, NfcMode mode, NfcTech tech) {
-    UNUSED(instance);
-
     instance->mode = mode;
     instance->tech = tech;
     instance->legic_rx_ack_window = -1;
