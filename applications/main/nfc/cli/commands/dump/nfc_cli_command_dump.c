@@ -197,8 +197,15 @@ static bool nfc_cli_dump_card(NfcCliDumpContext* instance, PipeSide* pipe) {
         nfc_poller_start(instance->poller, protocol->callback, instance);
         // Short waits, so Ctrl+C or a closed pipe ends the dump as it ends
         // emulate, field and scanner.  The last wait ends at the time limit,
-        // so --timeout holds to the tick and -t 0 times out before any wait.
+        // so --timeout holds to the tick.  Every pass looks for Ctrl+C and a
+        // closed pipe before it tests the limit: a Ctrl+C typed during the
+        // last wait is an abort, not a timeout, and -t 0 times out before any
+        // wait unless a Ctrl+C is already pending or the pipe is closed.
         while(true) {
+            if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
+                stopped = NfcCliDumpErrorAborted;
+                break;
+            }
             uint32_t wait_ticks = step;
             if(time_limit) {
                 const uint32_t elapsed = furi_get_tick() - start;
@@ -209,10 +216,6 @@ static bool nfc_cli_dump_card(NfcCliDumpContext* instance, PipeSide* pipe) {
                 wait_ticks = MIN(wait_ticks, limit - elapsed);
             }
             if(furi_semaphore_acquire(instance->sem_done, wait_ticks) == FuriStatusOk) break;
-            if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
-                stopped = NfcCliDumpErrorAborted;
-                break;
-            }
         }
         // Returns once the poller's current step is done (for LEGIC at most
         // one session, ~1.8 s), so the callback can't run after this.
