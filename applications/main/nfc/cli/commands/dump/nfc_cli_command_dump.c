@@ -31,7 +31,8 @@
 #define NFC_CLI_DEFAULT_FILENAME_PREFIX "dump"
 
 #define NFC_CLI_DUMP_DEFAULT_TIMEOUT (5000)
-// How often the wait for the poller looks for Ctrl+C and the time limit.
+// How often the wait for the poller looks for Ctrl+C; the wait before the
+// time limit is cut short to end on it.
 #define NFC_CLI_DUMP_POLL_MS         (100)
 
 #define TAG "DUMP"
@@ -190,18 +191,28 @@ static bool nfc_cli_dump_card(NfcCliDumpContext* instance, PipeSide* pipe) {
         const bool time_limit = instance->timeout_set || !protocol->poller_ends_read;
         if(!time_limit) printf("Press Ctrl+C to abort\r\n");
         NfcCliDumpError stopped = NfcCliDumpErrorNone;
+        const uint32_t step = furi_ms_to_ticks(NFC_CLI_DUMP_POLL_MS);
         const uint32_t start = furi_get_tick();
         const uint32_t limit = furi_ms_to_ticks(instance->timeout);
         nfc_poller_start(instance->poller, protocol->callback, instance);
         // Short waits, so Ctrl+C or a closed pipe ends the dump as it ends
-        // emulate, field and scanner.
-        while(furi_semaphore_acquire(instance->sem_done, NFC_CLI_DUMP_POLL_MS) != FuriStatusOk) {
+        // emulate, field and scanner.  The last wait ends at the time limit,
+        // so --timeout holds to the tick and -t 0 times out before any wait.
+        while(true) {
+            uint32_t wait_ticks = step;
+            if(time_limit) {
+                const uint32_t elapsed = furi_get_tick() - start;
+                if(elapsed >= limit) {
+                    stopped = NfcCliDumpErrorTimeout;
+                    break;
+                }
+                wait_ticks = MIN(wait_ticks, limit - elapsed);
+            }
+            if(furi_semaphore_acquire(instance->sem_done, wait_ticks) == FuriStatusOk) break;
             if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
                 stopped = NfcCliDumpErrorAborted;
-            } else if(time_limit && furi_get_tick() - start >= limit) {
-                stopped = NfcCliDumpErrorTimeout;
+                break;
             }
-            if(stopped != NfcCliDumpErrorNone) break;
         }
         // Returns once the poller's current step is done (for LEGIC at most
         // one session, ~1.8 s), so the callback can't run after this.
