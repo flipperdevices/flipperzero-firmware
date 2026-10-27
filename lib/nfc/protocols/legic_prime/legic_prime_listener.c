@@ -55,6 +55,8 @@ static LegicPrimeListener* legic_prime_listener_alloc(Nfc* nfc, LegicPrimeData* 
     instance->tx_buffer = bit_buffer_alloc(LEGIC_PRIME_LISTENER_MAX_BITS / 8 + 1);
     instance->state = LegicPrimeListenerStateIdle;
 
+    // The type is fixed for the listener's lifetime: data is nfc_listener_alloc()'s
+    // private copy, and this listener writes only its data[].
     const LegicPrimeProtocolParams* params = legic_prime_get_protocol_params(data->type);
     instance->cmd_size_bits = params->cmd_size_bits;
     instance->type_code = params->type_code;
