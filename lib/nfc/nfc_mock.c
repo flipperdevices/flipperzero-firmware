@@ -516,10 +516,15 @@ static NfcError
             in_step = first_one == (size_t)ack_window;
         }
         if(in_step) {
-            // The last one is the frame the poller claims (the READ behind
-            // the handshake's ACK, which gets no reply).
+            // The last one is the frame the poller claims, and only it may
+            // draw a reply (it may also draw none).  An earlier one, the
+            // handshake's ACK before its READ, gets no reply; one that did
+            // would be overwritten here by the next answer, unseen by the
+            // tests, so it fails the check instead.
             for(uint8_t i = 0; i < instance->legic_next_count; i++) {
-                nfc_legic_poller_send(&instance->legic_next[i], &instance->legic_next_answer);
+                const bool answered =
+                    nfc_legic_poller_send(&instance->legic_next[i], &instance->legic_next_answer);
+                furi_check(!answered || i + 1 == instance->legic_next_count);
             }
             instance->legic_next_sent = true;
         }
