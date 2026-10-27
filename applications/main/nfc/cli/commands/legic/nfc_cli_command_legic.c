@@ -128,7 +128,10 @@ static bool nfc_cli_legic_read(
     // the callback can't run after this.
     nfc_poller_stop(read.poller);
     nfc_poller_free(read.poller);
-    // A result the poller reported before it stopped stands.
+    // A result the poller reported before it stopped stands, even one that
+    // came after the last timed-out wait: the Ctrl+C then came too late, and
+    // rdbl shows the bytes or the error (wrbl's read-back its outcome)
+    // without saying so.
     const bool reported = !aborted || furi_semaphore_acquire(read.done, 0) == FuriStatusOk;
     furi_semaphore_free(read.done);
     if(reported) *result = read.result;

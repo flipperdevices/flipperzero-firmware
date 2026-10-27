@@ -217,10 +217,14 @@ static bool nfc_cli_dump_card(NfcCliDumpContext* instance, PipeSide* pipe) {
         // Returns once the poller's current step is done (for LEGIC at most
         // one session, ~1.8 s), so the callback can't run after this.
         nfc_poller_stop(instance->poller);
-        // A result the poller reported before it stopped stands.  Otherwise
-        // result still holds its initial None, and an abort or timeout must
-        // not reach the save: the device has no data and saving it fails a
-        // furi_check.
+        // A result the poller reported before it stopped stands, even one
+        // that came after the last timed-out wait: the Ctrl+C or time limit
+        // then came too late and is dropped, and the dump is saved or its
+        // failure shown.
+        // Otherwise result still holds its initial None, and the abort or
+        // timeout must replace it, or the save would run: it fails a
+        // furi_check on a device that got no data and writes a partial dump
+        // on one whose callback set data before it reported.
         if(stopped != NfcCliDumpErrorNone &&
            furi_semaphore_acquire(instance->sem_done, 0) != FuriStatusOk) {
             instance->result = stopped;
