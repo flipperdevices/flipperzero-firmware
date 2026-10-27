@@ -1511,10 +1511,19 @@ static uint32_t
 }
 
 MU_TEST(legic_prime_test_lfsr_test) {
-    // The copy against legic_prime_prng_test's reference for IV 0x55.
+    // The copy against legic_prime_prng_test's four reference values.  The
+    // last one runs forward() on its own, as the test tag does for its idle
+    // steps and write ACKs.
     LegicPrimeTestLfsr lfsr;
     legic_prime_test_lfsr_init(&lfsr, 0x55);
     mu_assert_int_eq(0x82B50098, legic_prime_test_lfsr_crypt(&lfsr, 0, 32));
+    legic_prime_test_lfsr_init(&lfsr, 0x01);
+    mu_assert_int_eq(0xAA13D912, legic_prime_test_lfsr_crypt(&lfsr, 0, 32));
+    legic_prime_test_lfsr_init(&lfsr, 0x7F);
+    mu_assert_int_eq(0x3D7AD81F, legic_prime_test_lfsr_crypt(&lfsr, 0, 32));
+    legic_prime_test_lfsr_init(&lfsr, 0x55);
+    legic_prime_test_lfsr_forward(&lfsr, 100);
+    mu_assert_int_eq(0x0093, legic_prime_test_lfsr_crypt(&lfsr, 0, 16));
 }
 
 /*
