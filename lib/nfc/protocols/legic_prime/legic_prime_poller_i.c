@@ -470,11 +470,12 @@ LegicPrimeError legic_prime_poller_write_session(LegicPrimePoller* instance) {
             // cur went out (next_sent() said so before it was claimed) and no
             // ACK was decoded: the byte at write_pos may hold either value.
             instance->write_unacked = true;
-            // A reception the HAL gate placed in the predicted window but
-            // that decoded to no '1' bit sent the chained WRITE as well.  The
-            // flag can't name a second byte; the session ends here, so log it.
-            if(ret == LegicPrimeErrorNoAck && have_next &&
-               nfc_legic_poller_next_sent(instance->nfc)) {
+            // Whatever the error, the HAL may have sent the chained WRITE as
+            // well (on f7: a reception its gate placed in the predicted window
+            // that decoded to no '1' bit), and then that byte is in doubt too.
+            // The flag can't name a second byte; the session ends here, so
+            // log it.
+            if(have_next && nfc_legic_poller_next_sent(instance->nfc)) {
                 FURI_LOG_W(
                     TAG,
                     "WRITE of byte %u went out behind the missing ACK of byte %u",
