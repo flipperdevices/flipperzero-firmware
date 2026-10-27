@@ -208,6 +208,7 @@ static void nfc_cli_legic_wrbl_verify(
     uint16_t size) {
     LegicPrimeData* card = legic_prime_alloc();
     LegicPrimePollerEventDataResult result;
+    printf("Reading the bytes back, press Ctrl+C to abort\r\n");
     if(!nfc_cli_legic_read(nfc, pipe, offset, size, card, &result)) {
         printf(ANSI_FG_RED "Written (acknowledged), verify read aborted\r\n" ANSI_RESET);
     } else if(result.error != LegicPrimeErrorNone) {
@@ -262,13 +263,18 @@ static void nfc_cli_legic_wrbl_execute(PipeSide* pipe, NfcCliActionContext* ctx)
         return;
     }
 
+    // The write stays on the blocking sync call: its progress is only
+    // reported in the poller's result, which a stopped poller never sends.
+    // A Ctrl+C typed during it waits in the pipe and aborts the read-back
+    // when one runs (bytes written, no card swap); otherwise the shell gets it.
+    printf("Writing: Ctrl+C can't stop the write, only the read-back after it\r\n");
     uint16_t written = 0;
     bool unacked = false;
     LegicPrimeError error = legic_prime_poller_sync_write(
         instance->nfc, instance->offset, instance->data, instance->size, &written, &unacked);
 
     if(error == LegicPrimeErrorNone) {
-        printf(ANSI_FG_BR_GREEN "\r\nSuccess\r\n" ANSI_RESET);
+        printf(ANSI_FG_BR_GREEN "Success\r\n" ANSI_RESET);
     } else {
         printf(ANSI_FG_RED "Error: %s\r\n" ANSI_RESET, nfc_cli_legic_get_error(error));
     }
