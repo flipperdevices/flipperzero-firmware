@@ -756,15 +756,16 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
         const uint32_t now = DWT->CYCCNT;
         if(event & (FuriHalNfcEventRxStart | FuriHalNfcEventRxEnd))
             instance->t_last_rx_event = now;
-        // With a segment open, an RxEnd in the mask ends it and an RxStart
-        // beside it would be a new reception, so close first; without one,
-        // RxStart then RxEnd is one short reception, in that order.  (The
-        // first case needs an RxStart the receiver cannot raise before
-        // collect_segment re-arms it; this only keeps it from re-timing the
-        // open segment if it ever did.)
-        if((event & FuriHalNfcEventRxEnd) && instance->seg_open) {
+        // RxStart and RxEnd in one mask are one short reception, in that
+        // order.  With a segment still open the pair cannot occur (a new
+        // RxStart needs the re-arm collect_segment issues on the thread's
+        // RxEnd); if it ever did, close the open segment first and let the
+        // RxEnd below close the new one at once, rather than leave a segment
+        // open until force_end or the 2 ms gap ends the exchange.
+        if((event & (FuriHalNfcEventRxStart | FuriHalNfcEventRxEnd)) ==
+               (FuriHalNfcEventRxStart | FuriHalNfcEventRxEnd) &&
+           instance->seg_open) {
             furi_hal_nfc_legic_collect_segment(instance, now, true);
-            event &= ~FuriHalNfcEventRxEnd;
         }
         if(event & FuriHalNfcEventRxStart) {
             instance->seg_open = true;
