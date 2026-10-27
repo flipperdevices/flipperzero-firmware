@@ -1469,6 +1469,375 @@ MU_TEST(legic_prime_not_present_test) {
     mu_assert_int_eq(0, total);
 }
 
+// The two LFSRs of legic_prime_prng.c (Proxmark3 common/legic_prng.c), copied
+// for the test tag below.
+typedef struct {
+    uint8_t a; // 7-bit LFSR
+    uint8_t b; // 8-bit LFSR
+} LegicPrimeTestLfsr;
+
+static void legic_prime_test_lfsr_init(LegicPrimeTestLfsr* lfsr, uint8_t iv) {
+    lfsr->a = iv;
+    lfsr->b = iv ? (iv << 1) | 1 : 0;
+}
+
+static void legic_prime_test_lfsr_forward(LegicPrimeTestLfsr* lfsr, uint32_t steps) {
+    while(steps--) {
+        const uint8_t a = lfsr->a;
+        const uint8_t b = lfsr->b;
+        lfsr->a = (a >> 1 | (a ^ a >> 6) << 6) & 0x7F;
+        lfsr->b = b >> 1 | (b ^ b >> 2 ^ b >> 3 ^ b >> 7) << 7;
+    }
+}
+
+// value XORed with the next `bits` keystream bits, LSB first: encrypts a
+// reply, decrypts a reader frame.
+static uint32_t
+    legic_prime_test_lfsr_crypt(LegicPrimeTestLfsr* lfsr, uint32_t value, size_t bits) {
+    for(size_t i = 0; i < bits; i++) {
+        const uint8_t idx = 7 - ((lfsr->a & 4) | (lfsr->a >> 2 & 2) | (lfsr->a >> 4 & 1));
+        value ^= (uint32_t)(lfsr->b >> idx & 1) << i;
+        legic_prime_test_lfsr_forward(lfsr, 1);
+    }
+    return value;
+}
+
+MU_TEST(legic_prime_test_lfsr_test) {
+    // The copy against legic_prime_prng_test's reference for IV 0x55.
+    LegicPrimeTestLfsr lfsr;
+    legic_prime_test_lfsr_init(&lfsr, 0x55);
+    mu_assert_int_eq(0x82B50098, legic_prime_test_lfsr_crypt(&lfsr, 0, 32));
+}
+
+/*
+ * A MIM256 (legic_prime_test_card()) for the LEGIC poller to read and write
+ * through the mock's queued frames (nfc_mock.c).  It is a raw NfcEventCallback,
+ * not a LegicPrimeListener: that one steps the poller's own keystream
+ * (legic_prime_prng.c keeps one global state, which the poller advances for
+ * the frames it builds ahead) and takes its idle steps from frame timing,
+ * which the mock doesn't have.  The tag runs its own LFSR copy on the
+ * schedule the poller's frames assume (legicrfsim.c's, with the HAL's gaps):
+ * 2 steps before each reply, 3 before a frame behind a reply or a write ACK,
+ * 2 before the READ chained behind the reader's ACK, and for a write ACK in
+ * bit window k, k + 2 while writing and 1 for the ACK bit.  With the 3 before
+ * the next WRITE that makes legic_prime_poller_write_chain_steps(k) = k + 6;
+ * legicrfsim.c ACKs in window 33, after 36 steps.  A frame that fits nothing
+ * the poller sends counts as garbled; the tests check there was none.
+ */
+#define LEGIC_PRIME_TEST_TAG_CMD_BITS   (9U) // MIM256
+#define LEGIC_PRIME_TEST_TAG_WRITE_BITS LEGIC_PRIME_WRITE_FRAME_BITS(LEGIC_PRIME_TEST_TAG_CMD_BITS)
+#define LEGIC_PRIME_TEST_TAG_NO_ACK     (0xFFU)
+
+typedef enum {
+    LegicPrimeTestTagStateIdle,
+    LegicPrimeTestTagStateWaitAck,
+    LegicPrimeTestTagStateConnected,
+} LegicPrimeTestTagState;
+
+typedef struct LegicPrimeTestTag LegicPrimeTestTag;
+
+struct LegicPrimeTestTag {
+    Nfc* nfc;
+    BitBuffer* tx;
+    LegicPrimeTestLfsr lfsr;
+    LegicPrimeTestTagState state;
+    uint8_t idle_steps; // before the session's next frame
+    uint8_t mem[LEGIC_PRIME_MEM_SIZE_MIM256];
+    // Whether a READ's reply passes its CRC (a UID byte's always does; NULL:
+    // every reply does), and the bit window of a WRITE's ACK (NO_ACK: none;
+    // NULL: no WRITE is ACKed).  Asked before the counts below include the
+    // frame.
+    bool (*read_ok)(const LegicPrimeTestTag* tag, uint16_t addr);
+    uint8_t (*write_ack)(const LegicPrimeTestTag* tag);
+    // Handshakes that reached the ACK: the current session's number, from 1.
+    // The poller's detection handshake gets no ACK.
+    uint16_t sessions;
+    uint8_t session_reads[LEGIC_PRIME_MEM_SIZE_MIM256]; // READs of each byte this session
+    uint16_t session_writes;
+    uint16_t writes; // WRITEs with a valid CRC, in all sessions
+    uint16_t garbled;
+};
+
+static void legic_prime_test_tag_reply(LegicPrimeTestTag* tag, uint32_t value, size_t bits) {
+    legic_prime_test_lfsr_forward(&tag->lfsr, 2);
+    value = legic_prime_test_lfsr_crypt(&tag->lfsr, value, bits);
+    bit_buffer_reset(tag->tx);
+    for(size_t i = 0; i < bits; i++) {
+        bit_buffer_append_bit(tag->tx, (value >> i) & 1u);
+    }
+    nfc_listener_tx(tag->nfc, tag->tx);
+    tag->idle_steps = 3;
+}
+
+static void legic_prime_test_tag_read(LegicPrimeTestTag* tag, uint32_t cmd) {
+    const uint16_t addr = cmd >> 1;
+    const uint8_t byte = tag->mem[addr];
+    uint8_t crc = legic_prime_crc4(cmd, LEGIC_PRIME_TEST_TAG_CMD_BITS, byte);
+    // A reply that fails its CRC: one CRC bit flipped.
+    if(addr >= LEGIC_PRIME_UID_SIZE && tag->read_ok && !tag->read_ok(tag, addr)) crc ^= 1;
+    tag->session_reads[addr]++;
+    legic_prime_test_tag_reply(tag, (uint32_t)crc << 8 | byte, LEGIC_PRIME_READ_REPLY_BITS);
+}
+
+static void legic_prime_test_tag_write(LegicPrimeTestTag* tag, uint32_t frame) {
+    const uint16_t addr = (frame >> 1) & 0xFF;
+    const uint8_t byte = (frame >> LEGIC_PRIME_TEST_TAG_CMD_BITS) & 0xFF;
+    const uint8_t crc = (frame >> (LEGIC_PRIME_TEST_TAG_CMD_BITS + 8)) & 0x0F;
+    if(crc != legic_prime_crc4(addr << 1, LEGIC_PRIME_TEST_TAG_CMD_BITS, byte)) {
+        tag->garbled++;
+        return;
+    }
+    const uint8_t window = tag->write_ack ? tag->write_ack(tag) : LEGIC_PRIME_TEST_TAG_NO_ACK;
+    tag->writes++;
+    tag->session_writes++;
+    if(window == LEGIC_PRIME_TEST_TAG_NO_ACK) return;
+
+    tag->mem[addr] = byte;
+    // The ACK is a single unencrypted '1': its bit index is its window.
+    legic_prime_test_lfsr_forward(&tag->lfsr, window + 2);
+    bit_buffer_reset(tag->tx);
+    for(uint8_t i = 0; i < window; i++) {
+        bit_buffer_append_bit(tag->tx, false);
+    }
+    bit_buffer_append_bit(tag->tx, true);
+    legic_prime_test_lfsr_forward(&tag->lfsr, 1);
+    nfc_listener_tx(tag->nfc, tag->tx);
+    tag->idle_steps = 3;
+}
+
+static NfcCommand legic_prime_test_tag_callback(NfcEvent event, void* context) {
+    LegicPrimeTestTag* tag = context;
+    if(event.type != NfcEventTypeRxEnd) return NfcCommandContinue;
+
+    const BitBuffer* rx = event.data.buffer;
+    const size_t bits = bit_buffer_get_size(rx);
+    if(bits == 0 || bits > LEGIC_PRIME_TEST_TAG_WRITE_BITS) {
+        tag->garbled++;
+        tag->state = LegicPrimeTestTagStateIdle;
+        return NfcCommandContinue;
+    }
+    uint32_t value = 0;
+    for(size_t i = 0; i < bit_buffer_get_size_bytes(rx); i++) {
+        value |= (uint32_t)bit_buffer_get_byte(rx, i) << (8 * i);
+    }
+    value &= (1UL << bits) - 1;
+
+    if(bits == LEGIC_PRIME_IV_BITS) {
+        // The IV is sent plain and starts a handshake in any state.
+        legic_prime_test_lfsr_init(&tag->lfsr, value);
+        legic_prime_test_tag_reply(tag, 0x1D, LEGIC_PRIME_TYPE_BITS); // MIM256
+        tag->state = LegicPrimeTestTagStateWaitAck;
+        return NfcCommandContinue;
+    }
+    if(tag->state == LegicPrimeTestTagStateIdle) {
+        tag->garbled++;
+        return NfcCommandContinue;
+    }
+
+    legic_prime_test_lfsr_forward(&tag->lfsr, tag->idle_steps);
+    value = legic_prime_test_lfsr_crypt(&tag->lfsr, value, bits);
+    if(tag->state == LegicPrimeTestTagStateWaitAck) {
+        if(bits == LEGIC_PRIME_ACK_BITS && value == 0x39) {
+            tag->state = LegicPrimeTestTagStateConnected;
+            tag->sessions++;
+            memset(tag->session_reads, 0, sizeof(tag->session_reads));
+            tag->session_writes = 0;
+            tag->idle_steps = 2;
+        } else {
+            tag->garbled++;
+            tag->state = LegicPrimeTestTagStateIdle;
+        }
+    } else if(bits == LEGIC_PRIME_TEST_TAG_CMD_BITS && (value & 1u)) {
+        legic_prime_test_tag_read(tag, value);
+    } else if(bits == LEGIC_PRIME_TEST_TAG_WRITE_BITS && !(value & 1u)) {
+        legic_prime_test_tag_write(tag, value);
+    } else {
+        tag->garbled++;
+        tag->state = LegicPrimeTestTagStateIdle;
+    }
+    return NfcCommandContinue;
+}
+
+static LegicPrimeTestTag* legic_prime_test_tag_start(
+    bool (*read_ok)(const LegicPrimeTestTag* tag, uint16_t addr),
+    uint8_t (*write_ack)(const LegicPrimeTestTag* tag)) {
+    LegicPrimeTestTag* tag = malloc(sizeof(LegicPrimeTestTag));
+    memset(tag, 0, sizeof(LegicPrimeTestTag));
+    LegicPrimeData* card = legic_prime_test_card();
+    memcpy(tag->mem, card->data, sizeof(tag->mem));
+    legic_prime_free(card);
+    tag->read_ok = read_ok;
+    tag->write_ack = write_ack;
+    tag->tx = bit_buffer_alloc(8);
+    tag->nfc = nfc_alloc();
+    nfc_config(tag->nfc, NfcModeListener, NfcTechLegic);
+    nfc_start(tag->nfc, legic_prime_test_tag_callback, tag);
+    return tag;
+}
+
+static void legic_prime_test_tag_stop(LegicPrimeTestTag* tag) {
+    nfc_stop(tag->nfc);
+    nfc_free(tag->nfc);
+    bit_buffer_free(tag->tx);
+    free(tag);
+}
+
+static LegicPrimeError
+    legic_prime_test_read(uint16_t offset, uint16_t size, uint16_t* done, uint16_t* total) {
+    Nfc* poller = nfc_alloc();
+    LegicPrimeData* data = legic_prime_alloc();
+    const LegicPrimeError error =
+        legic_prime_poller_sync_read_range(poller, offset, size, data, done, total);
+    legic_prime_free(data);
+    nfc_free(poller);
+    return error;
+}
+
+static LegicPrimeError legic_prime_test_write(
+    uint16_t offset,
+    const uint8_t* data,
+    uint16_t size,
+    uint16_t* written,
+    bool* unacked) {
+    Nfc* poller = nfc_alloc();
+    const LegicPrimeError error =
+        legic_prime_poller_sync_write(poller, offset, data, size, written, unacked);
+    nfc_free(poller);
+    return error;
+}
+
+// In session s, byte 22 + s - 1 passes its CRC.
+static bool legic_prime_test_read_one_per_session(const LegicPrimeTestTag* tag, uint16_t addr) {
+    return addr == 22 + tag->sessions - 1;
+}
+
+MU_TEST(legic_prime_read_session_cap_test) {
+    // Pins the read's session cap, `instance->sessions < legic_prime_poller_max_sessions(...)`
+    // in legic_prime_poller_read_handler()'s budget_left.  Reading bytes 22-69, a session
+    // confirms its one passing byte (two agreeing reads) and fails every other pending byte 6
+    // times (LEGIC_PRIME_READ_ATTEMPTS).  The longest, session 1, takes 1 + 2 + 47 * 6 = 285
+    // replies plus the READs queued ahead of a byte's last failure, inside the 48 * 6 + 16 = 304
+    // exchange budget, so every session ends at legic_prime_poller_read()'s
+    // `if(!have_next) return LegicPrimeErrorWrongCrc;`.
+    // Each session confirms a byte, so `resumes` starts over every time and the resume limit
+    // never ends the read; session 40 reaches legic_prime_poller_max_sessions(Read, 48) = 40 and
+    // the read ends with that session's WrongCrc and 40 of 48 bytes.  Without the cap it would
+    // complete in 48 sessions.
+    LegicPrimeTestTag* tag =
+        legic_prime_test_tag_start(legic_prime_test_read_one_per_session, NULL);
+    uint16_t done = 0;
+    uint16_t total = 0;
+    const LegicPrimeError error = legic_prime_test_read(22, 48, &done, &total);
+    const uint16_t sessions = tag->sessions;
+    const uint16_t garbled = tag->garbled;
+    // Free first: a failed mu_assert returns from the test.
+    legic_prime_test_tag_stop(tag);
+    mu_assert_int_eq(0, garbled);
+    mu_assert_int_eq(LegicPrimeErrorWrongCrc, error);
+    mu_assert_int_eq(40, done);
+    mu_assert_int_eq(48, total);
+    mu_assert_int_eq(40, sessions);
+}
+
+// No data byte passes its CRC before session 9, which passes each byte's first READ.
+static bool legic_prime_test_read_once_in_ninth(const LegicPrimeTestTag* tag, uint16_t addr) {
+    return tag->sessions == 9 && tag->session_reads[addr] == 0;
+}
+
+MU_TEST(legic_prime_read_budget_substitution_test) {
+    // Pins `if(err == LegicPrimeErrorNone) err = LegicPrimeErrorWrongCrc;` in
+    // legic_prime_poller_read_handler(), reached through the resume limit (the cap needs a read
+    // that progresses).  Reading bytes 22-69, sessions 1-8 fail each byte 6 times: 48 * 6 = 288
+    // replies plus READs queued ahead, inside the 304-exchange budget, so each ends WrongCrc with
+    // no progress and `resumes` counts up to LEGIC_PRIME_MAX_RESUMES (8), which allows a 9th
+    // session and no more.  There each byte's first READ passes and the rest fail: 48 * 7 = 336
+    // replies don't fit the budget, which runs out with bytes read once and none confirmed or
+    // re-read with a valid CRC, so legic_prime_poller_read() returns LegicPrimeErrorNone.  The
+    // handler then has no budget left; without the substitution the read would end in success
+    // with 0 of 48 bytes.
+    LegicPrimeTestTag* tag = legic_prime_test_tag_start(legic_prime_test_read_once_in_ninth, NULL);
+    uint16_t done = 1;
+    uint16_t total = 0;
+    const LegicPrimeError error = legic_prime_test_read(22, 48, &done, &total);
+    const uint16_t sessions = tag->sessions;
+    const uint16_t garbled = tag->garbled;
+    legic_prime_test_tag_stop(tag);
+    mu_assert_int_eq(0, garbled);
+    mu_assert_int_eq(LegicPrimeErrorWrongCrc, error);
+    mu_assert_int_eq(0, done);
+    mu_assert_int_eq(48, total);
+    mu_assert_int_eq(9, sessions);
+}
+
+// The first WRITE of a session is ACKed in window 33, as legicrfsim.c does; the rest are not.
+static uint8_t legic_prime_test_write_first_of_session(const LegicPrimeTestTag* tag) {
+    return tag->session_writes == 0 ? 33 : LEGIC_PRIME_TEST_TAG_NO_ACK;
+}
+
+MU_TEST(legic_prime_write_session_cap_test) {
+    // Pins the write's session cap, `instance->sessions >= legic_prime_poller_max_sessions(...)`
+    // in legic_prime_poller_write_handler().  Writing bytes 22-85 (last to first), each session
+    // writes the byte its first WRITE carries and gets no ACK for the WRITE chained behind that
+    // ACK: it ends NoAck with write_unacked set, and its progress resets write_attempts.
+    // Session 40 reaches legic_prime_poller_max_sessions(Write, 64) = 40 and the write ends with
+    // that session's NoAck and 40 of 64 bytes (85 down to 46).  Without the cap it would
+    // complete in 64 sessions.
+    uint8_t data[64];
+    for(size_t i = 0; i < sizeof(data); i++) {
+        data[i] = 0x40 + i;
+    }
+    LegicPrimeTestTag* tag =
+        legic_prime_test_tag_start(NULL, legic_prime_test_write_first_of_session);
+    uint16_t written = 0;
+    bool unacked = false;
+    const LegicPrimeError error =
+        legic_prime_test_write(22, data, sizeof(data), &written, &unacked);
+    const uint16_t sessions = tag->sessions;
+    const uint16_t garbled = tag->garbled;
+    const bool tail_written = memcmp(&data[64 - 40], &tag->mem[22 + 64 - 40], 40) == 0;
+    legic_prime_test_tag_stop(tag);
+    mu_assert_int_eq(0, garbled);
+    mu_assert_int_eq(LegicPrimeErrorNoAck, error);
+    mu_assert_int_eq(40, written);
+    mu_assert(unacked, "write_unacked\r\n");
+    mu_assert_int_eq(40, sessions);
+    mu_assert(tail_written, "bytes 46-85 on the tag\r\n");
+}
+
+// Every WRITE is ACKed, in window 34 in odd sessions and 33 in even ones.
+static uint8_t legic_prime_test_write_window_per_session(const LegicPrimeTestTag* tag) {
+    return tag->sessions % 2 ? 34 : 33;
+}
+
+MU_TEST(legic_prime_write_budget_substitution_test) {
+    // Pins `if(err == LegicPrimeErrorNone) err = LegicPrimeErrorTimeout;` in
+    // legic_prime_poller_write_handler().  The poller predicts each session's ACK window from
+    // the last ACK of the session before (33 at first), and this tag's first ACK of every
+    // session comes in another window: the mock, as the HAL's gate, does not send the WRITE
+    // chained behind it, and the session ends without an error after one byte, keeping the new
+    // window.  Writing bytes 22-85, session 40 reaches the cap
+    // (legic_prime_poller_max_sessions(Write, 64) = 40) with LegicPrimeErrorNone and 40 of 64
+    // bytes.  Without the substitution the write would end in success with 40 of 64 bytes.
+    uint8_t data[64];
+    for(size_t i = 0; i < sizeof(data); i++) {
+        data[i] = 0x40 + i;
+    }
+    LegicPrimeTestTag* tag =
+        legic_prime_test_tag_start(NULL, legic_prime_test_write_window_per_session);
+    uint16_t written = 0;
+    bool unacked = true;
+    const LegicPrimeError error =
+        legic_prime_test_write(22, data, sizeof(data), &written, &unacked);
+    const uint16_t sessions = tag->sessions;
+    const uint16_t garbled = tag->garbled;
+    legic_prime_test_tag_stop(tag);
+    mu_assert_int_eq(0, garbled);
+    mu_assert_int_eq(LegicPrimeErrorTimeout, error);
+    mu_assert_int_eq(40, written);
+    mu_assert(!unacked, "write_unacked after an ACK\r\n");
+    mu_assert_int_eq(40, sessions);
+}
+
 static void legic_prime_file_test(LegicPrimeType type) {
     NfcDevice* nfc_device = nfc_device_alloc();
     LegicPrimeData* data = legic_prime_alloc();
@@ -1561,6 +1930,11 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(legic_prime_read_range_test);
     MU_RUN_TEST(legic_prime_session_cap_test);
     MU_RUN_TEST(legic_prime_not_present_test);
+    MU_RUN_TEST(legic_prime_test_lfsr_test);
+    MU_RUN_TEST(legic_prime_read_session_cap_test);
+    MU_RUN_TEST(legic_prime_read_budget_substitution_test);
+    MU_RUN_TEST(legic_prime_write_session_cap_test);
+    MU_RUN_TEST(legic_prime_write_budget_substitution_test);
     MU_RUN_TEST(legic_prime_mim22_file_test);
     MU_RUN_TEST(legic_prime_mim256_file_test);
     MU_RUN_TEST(legic_prime_mim1024_file_test);
