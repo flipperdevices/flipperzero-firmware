@@ -9,10 +9,19 @@ extern "C" {
 
 typedef struct LegicPrimePoller LegicPrimePoller;
 
+/**
+ * Events of the LEGIC Prime poller.  A read or write runs from RequestMode to
+ * one Success or Failure (a Failure comes without a RequestMode when no card
+ * completes the handshake), and its session budget bounds that read or write,
+ * not the poller: on NfcCommandContinue to Success or Failure the poller
+ * starts over with a new handshake and RequestMode and a fresh budget, so it
+ * runs until the callback answers NfcCommandStop or nfc_poller_stop() is
+ * called.
+ */
 typedef enum {
-    LegicPrimePollerEventTypeRequestMode,
-    LegicPrimePollerEventTypeSuccess,
-    LegicPrimePollerEventTypeFailure,
+    LegicPrimePollerEventTypeRequestMode, /**< Fill in data->mode_request. */
+    LegicPrimePollerEventTypeSuccess, /**< Read or write done, see data->result. */
+    LegicPrimePollerEventTypeFailure, /**< Read, write or handshake failed, see data->result. */
 } LegicPrimePollerEventType;
 
 typedef enum {

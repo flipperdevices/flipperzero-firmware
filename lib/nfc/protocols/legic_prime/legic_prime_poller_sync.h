@@ -25,7 +25,9 @@ extern "C" {
  * coupled whole-card MIM1024 read can take minutes.  An application that
  * needs an abort drives the generic poller as `nfc dump` and `legic rdbl`
  * do: nfc_poller_alloc(nfc, NfcProtocolLegicPrime), nfc_poller_start() with
- * a callback that answers LegicPrimePollerEventTypeRequestMode, and
+ * a callback that answers LegicPrimePollerEventTypeRequestMode and returns
+ * NfcCommandStop on Success and Failure (on Continue the poller starts over
+ * with a fresh budget, see LegicPrimePollerEventType), and
  * nfc_poller_stop(), which returns once the running session ends (at most
  * ~2 s) and reports no result.  A write is best left on the blocking call:
  * a stopped write cannot report which bytes the tag acknowledged, nor
