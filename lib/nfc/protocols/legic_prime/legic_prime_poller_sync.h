@@ -8,17 +8,28 @@ extern "C" {
 #endif
 
 /*
+ * Blocking wrappers around the LEGIC Prime poller (legic_prime_poller.h),
+ * the convenience every *_poller_sync.h in lib/nfc offers: an application
+ * with nothing else to do while the card is read or written calls one
+ * function instead of writing a poller callback.  The read is the
+ * counterpart of the write and the way to verify one.  The nfc CLI only
+ * calls the write: `legic rdbl`, and the read-back after `legic wrbl`, must
+ * stop on Ctrl+C, which a call here cannot see, so they drive the generic
+ * poller themselves, as described below.
+ *
  * Both calls block until the poller reports success or failure: there is
  * no timeout and no abort.  The poller goes on in a new session (new field,
  * new handshake, UID re-check) as long as it makes progress, within a total
  * session budget (legic_prime_poller_max_sessions(), internal to the
  * poller: 32 times the sessions a clean run needs, plus 8), so a weakly
  * coupled whole-card MIM1024 read can take minutes.  An application that
- * needs an abort drives the generic poller as `nfc dump` does:
- * nfc_poller_alloc(nfc, NfcProtocolLegicPrime), nfc_poller_start() with a
- * callback that answers LegicPrimePollerEventTypeRequestMode, and
+ * needs an abort drives the generic poller as `nfc dump` and `legic rdbl`
+ * do: nfc_poller_alloc(nfc, NfcProtocolLegicPrime), nfc_poller_start() with
+ * a callback that answers LegicPrimePollerEventTypeRequestMode, and
  * nfc_poller_stop(), which returns once the running session ends (at most
- * ~2 s) and reports no result.
+ * ~2 s) and reports no result.  A write is best left on the blocking call:
+ * a stopped write cannot report which bytes the tag acknowledged, nor
+ * whether a WRITE went out without an ACK.
  */
 
 /**
