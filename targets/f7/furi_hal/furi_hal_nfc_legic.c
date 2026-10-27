@@ -564,7 +564,7 @@ static void
 // frame: the window start nearest to its first reception, as the decoder's
 // half-coverage rule places a one-bit run.  -1 if it started too early.
 // nfc_test.c legic_prime_write_chain_steps_test transcribes this rounding.
-static int32_t furi_hal_nfc_legic_ack_window(FuriHalNfcLegicPoller* instance) {
+static int32_t furi_hal_nfc_legic_ack_window(const FuriHalNfcLegicPoller* instance) {
     const uint32_t t0 = instance->t_frame_end + legic_chips_to_cycles(LEGIC_TAG_FRAME_WAIT_CHIPS);
     const int32_t tb = legic_chips_to_cycles(LEGIC_TAG_BIT_CHIPS);
     const int32_t start =
@@ -601,6 +601,39 @@ static bool furi_hal_nfc_legic_reply_end(
 static bool
     furi_hal_nfc_legic_next_in_step(const FuriHalNfcLegicPoller* instance, int32_t ack_win) {
     return instance->reply_ack_window < 0 || ack_win == instance->reply_ack_window;
+}
+
+// What the collecting loop keeps of the exchange's first reception for the
+// queued frame: the write-ACK window, the reply's end (the frame's launch
+// time) and the in-step gate, from one reading of seg[0].t_rxs.
+typedef struct {
+    int32_t ack_win;
+    uint32_t reply_end;
+    bool reply_end_known;
+    bool next_in_step;
+} LegicReplyRef;
+
+static void
+    furi_hal_nfc_legic_take_reply_ref(const FuriHalNfcLegicPoller* instance, LegicReplyRef* ref) {
+    ref->ack_win = furi_hal_nfc_legic_ack_window(instance);
+    ref->reply_end_known = furi_hal_nfc_legic_reply_end(instance, ref->ack_win, &ref->reply_end);
+    ref->next_in_step = furi_hal_nfc_legic_next_in_step(instance, ref->ack_win);
+}
+
+// A write ACK's reference names the reception that stamped seg[0].t_rxs.
+// Once that reception has ended without a FIFO bit (no segment recorded,
+// none open) it was noise: neither force_end nor the launch may follow it.
+// The exchange then waits for the real ACK, which ends it normally (one
+// more than LEGIC_RX_GAP_MS after the noise's last event is still lost to
+// gap_over, as before); the chain stops there and the poller continues in
+// a new session.  A data reply's end comes from t_frame_end and stays.
+static void
+    furi_hal_nfc_legic_drop_empty_ref(const FuriHalNfcLegicPoller* instance, LegicReplyRef* ref) {
+    if(instance->reply_ack_window < 0) return;
+    if(instance->seg_count == 0 && !instance->seg_open) {
+        ref->reply_end_known = false;
+        ref->next_in_step = false;
+    }
 }
 
 // Send the queued frame LEGIC_NEXT_FRAME_US (LEGIC_NEXT_FRAME_AFTER_ACK_US after a
@@ -737,15 +770,22 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
     // flags_wait() with a zero timeout returns FuriFlagErrorResource (all
     // bits set) when nothing is pending, which wait_event_common would read
     // as every event including abort; peek first.
-    // ack_window() and reply_end() read seg[0].t_rxs here, before the loop
-    // can write it (rx_started is set, so it holds the first RxStart), and
-    // next_in_step() reuses the window: the queued frame's launch time and
-    // the in-step gate come from the same value.
+    // ack_window(), reply_end() and next_in_step() read seg[0].t_rxs, the
+    // stamp of the exchange's first reception, once (ref): the queued
+    // frame's launch time and the in-step gate come from the same value.
+    // The loop rewrites that field on every RxStart while no segment is
+    // recorded (an empty reception takes no slot, collect_segment), so the
+    // first RxStart need not be the reception decode() places.  For a write
+    // ACK the reference is therefore dropped once the reception it names
+    // has ended empty (noise must neither arm force_end nor time the
+    // frame), and the frame leaves only behind a recorded segment.  Both
+    // act per RxEnd and at the exit; an iteration stays a flag peek and
+    // three compares.
     const uint32_t mhz = furi_hal_cortex_instructions_per_microsecond();
-    const int32_t ack_win = furi_hal_nfc_legic_ack_window(instance);
-    uint32_t reply_end = 0;
-    const bool reply_end_known = furi_hal_nfc_legic_reply_end(instance, ack_win, &reply_end);
-    const bool next_in_step = furi_hal_nfc_legic_next_in_step(instance, ack_win);
+    LegicReplyRef ref;
+    furi_hal_nfc_legic_take_reply_ref(instance, &ref);
+    // The blocking branch may have collected the first reception already.
+    furi_hal_nfc_legic_drop_empty_ref(instance, &ref);
     const int32_t force_cycles = LEGIC_RX_FORCE_END_US * mhz;
     const int32_t gap_cycles = LEGIC_RX_GAP_MS * 1000U * mhz;
     while(true) {
@@ -766,6 +806,7 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
                (FuriHalNfcEventRxStart | FuriHalNfcEventRxEnd) &&
            instance->seg_open) {
             furi_hal_nfc_legic_collect_segment(instance, now, true);
+            furi_hal_nfc_legic_drop_empty_ref(instance, &ref);
         }
         if(event & FuriHalNfcEventRxStart) {
             instance->seg_open = true;
@@ -773,11 +814,14 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
                 instance->seg[instance->seg_count].t_rxs = now;
             }
         }
-        if(event & FuriHalNfcEventRxEnd) furi_hal_nfc_legic_collect_segment(instance, now, true);
+        if(event & FuriHalNfcEventRxEnd) {
+            furi_hal_nfc_legic_collect_segment(instance, now, true);
+            furi_hal_nfc_legic_drop_empty_ref(instance, &ref);
+        }
 
         const bool window_over = (int32_t)(now - instance->t_rx_window_end) > 0;
-        const bool force_end = instance->next_pending && reply_end_known &&
-                               (int32_t)(now - reply_end) > force_cycles;
+        const bool force_end = instance->next_pending && ref.reply_end_known &&
+                               (int32_t)(now - ref.reply_end) > force_cycles;
         const bool gap_over = (int32_t)(now - instance->t_last_rx_event) > gap_cycles;
         if((window_over && !instance->seg_open) || force_end || gap_over ||
            (event & FuriHalNfcEventAbortRequest)) {
@@ -789,8 +833,12 @@ static FuriHalNfcEvent furi_hal_nfc_legic_poller_wait_event(uint32_t timeout_ms)
             }
             instance->rx_started = false;
             if(instance->next_pending && !(event & FuriHalNfcEventAbortRequest)) {
-                if(reply_end_known && next_in_step) {
-                    furi_hal_nfc_legic_send_next(instance, reply_end);
+                // A frame behind a write ACK leaves only behind a recorded
+                // segment: with none, decode() finds no ACK and the frame
+                // would be the WRITE sent behind a missing ACK.
+                const bool recorded = instance->reply_ack_window < 0 || instance->seg_count > 0;
+                if(ref.reply_end_known && ref.next_in_step && recorded) {
+                    furi_hal_nfc_legic_send_next(instance, ref.reply_end);
                 } else {
                     // No ACK, or not in the expected window: the queued frame
                     // would be out of step with the tag's keystream.
