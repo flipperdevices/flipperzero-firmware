@@ -84,6 +84,20 @@ struct Nfc {
     void* context;
 
     NfcMode mode;
+    NfcTech tech;
+
+    // LEGIC poller: the HAL's queued-frame state (furi_hal_nfc_legic.c), see
+    // nfc_legic_poller_trx().  Frames queued with set_next(), not sent yet.
+    NfcMessageData legic_next[2];
+    uint8_t legic_next_count;
+    // The queued frames went out behind the last reply; legic_next_answer is
+    // what the listener answered to the last of them, for the claim.
+    bool legic_next_sent;
+    NfcMessage legic_next_answer;
+    bool legic_claim_requested;
+    int32_t legic_rx_ack_window; // set_rx_ack() for the next exchange, -1: data reply
+    // LEGIC listener: the callback answered the frame it was given.
+    bool legic_replied;
 
     FuriThread* worker_thread;
 };
@@ -153,9 +167,10 @@ void nfc_free(Nfc* instance) {
 
 void nfc_config(Nfc* instance, NfcMode mode, NfcTech tech) {
     UNUSED(instance);
-    UNUSED(tech);
 
     instance->mode = mode;
+    instance->tech = tech;
+    instance->legic_rx_ack_window = -1;
 }
 
 void nfc_set_fdt_poll_fc(Nfc* instance, uint32_t fdt_poll_fc) {
@@ -323,7 +338,14 @@ static int32_t nfc_worker_listener(void* context) {
             } else {
                 instance->state = NfcStateReady;
                 nfc_event.type = NfcEventTypeRxEnd;
+                instance->legic_replied = false;
                 instance->callback(nfc_event, instance->context);
+                // A LEGIC poller takes one answer per frame (nfc_legic_poller_send()),
+                // so a frame left without a reply says so at once.
+                if(instance->tech == NfcTechLegic && !instance->legic_replied) {
+                    NfcMessage no_reply = {.type = NfcMessageTypeTimeout};
+                    furi_message_queue_put(poller_queue, &no_reply, FuriWaitForever);
+                }
             }
         }
     }
@@ -413,6 +435,7 @@ NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
     message.data.data_bits = bit_buffer_get_size(tx_buffer);
     bit_buffer_write_bytes(tx_buffer, message.data.data, bit_buffer_get_size_bytes(tx_buffer));
 
+    instance->legic_replied = true;
     furi_message_queue_put(poller_queue, &message, FuriWaitForever);
 
     return NfcErrorNone;
@@ -420,6 +443,91 @@ NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
 
 NfcError nfc_iso14443a_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
     return nfc_listener_tx(instance, tx_buffer);
+}
+
+/*
+ * LEGIC poller exchanges with the HAL's queued frames (furi_hal_nfc_legic.c).
+ * The HAL sends a frame queued with nfc_legic_poller_set_next() from the
+ * receive path of the exchange before it, behind the tag's reply, and the
+ * poller's next exchange only claims it.  Here the frame goes to the listener
+ * at that point and its answer is kept for the claim.  The mock's LEGIC
+ * listener answers every frame, with its reply or with NfcMessageTypeTimeout,
+ * so an answer always belongs to the frame just sent, and a sent frame that
+ * nobody claims leaves nothing behind for the next exchange.  The HAL's
+ * timing vetoes (a launch too late, a late wake-up) are not modelled.
+ */
+// Only bounds a listener that never answers.
+#define NFC_LEGIC_ANSWER_TIMEOUT_MS (1000)
+
+static void nfc_legic_frame_set(NfcMessageData* frame, const uint8_t* data, size_t bits) {
+    furi_check(bits <= sizeof(frame->data) * 8);
+    frame->data_bits = bits;
+    memcpy(frame->data, data, (bits + 7) / 8);
+}
+
+// One frame to the listener; true if its answer is a reply.
+static bool nfc_legic_poller_send(const NfcMessageData* frame, NfcMessage* answer) {
+    NfcMessage message = {.type = NfcMessageTypeTx, .data = *frame};
+    furi_check(furi_message_queue_put(listener_queue, &message, FuriWaitForever) == FuriStatusOk);
+    if(furi_message_queue_get(poller_queue, answer, NFC_LEGIC_ANSWER_TIMEOUT_MS) != FuriStatusOk ||
+       answer->type != NfcMessageTypeTx) {
+        answer->type = NfcMessageTypeTimeout;
+        return false;
+    }
+    nfc_test_print(NfcTransportLogLevelWarning, "TAG", answer->data.data, answer->data.data_bits);
+    return true;
+}
+
+static NfcError
+    nfc_legic_poller_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer) {
+    // As the HAL's tx(): a claim takes the frame sent behind the previous
+    // reply, and a sent frame nobody claims is forgotten.
+    const bool claims = instance->legic_claim_requested && instance->legic_next_sent;
+    instance->legic_claim_requested = false;
+    instance->legic_next_sent = false;
+    const int32_t ack_window = instance->legic_rx_ack_window;
+    instance->legic_rx_ack_window = -1;
+
+    NfcMessage answer;
+    bool replied;
+    if(claims) {
+        answer = instance->legic_next_answer;
+        replied = answer.type == NfcMessageTypeTx;
+    } else {
+        NfcMessageData frame;
+        nfc_legic_frame_set(
+            &frame, bit_buffer_get_data(tx_buffer), bit_buffer_get_size(tx_buffer));
+        replied = nfc_legic_poller_send(&frame, &answer);
+    }
+    // Nothing received: what set_next() queued stays queued, as in the HAL.
+    if(!replied) return NfcErrorTimeout;
+    bit_buffer_copy_bits(rx_buffer, answer.data.data, answer.data.data_bits);
+
+    if(instance->legic_next_count) {
+        // The HAL sends the queued frames behind a data reply, or behind a
+        // write ACK in the bit window the poller predicted (set_rx_ack()): in
+        // another one they would be out of step with the tag's keystream.  An
+        // ACK's window is the index of its '1' bit.
+        bool in_step = ack_window < 0;
+        if(!in_step) {
+            size_t first_one = 0;
+            while(first_one < answer.data.data_bits &&
+                  !((answer.data.data[first_one / 8] >> (first_one % 8)) & 1u)) {
+                first_one++;
+            }
+            in_step = first_one == (size_t)ack_window;
+        }
+        if(in_step) {
+            // The last one is the frame the poller claims (the READ behind
+            // the handshake's ACK, which gets no reply).
+            for(uint8_t i = 0; i < instance->legic_next_count; i++) {
+                nfc_legic_poller_send(&instance->legic_next[i], &instance->legic_next_answer);
+            }
+            instance->legic_next_sent = true;
+        }
+        instance->legic_next_count = 0;
+    }
+    return NfcErrorNone;
 }
 
 NfcError
@@ -430,6 +538,10 @@ NfcError
     furi_check(poller_queue);
     furi_check(listener_queue);
     UNUSED(fwt);
+
+    if(instance->tech == NfcTechLegic) {
+        return nfc_legic_poller_trx(instance, tx_buffer, rx_buffer);
+    }
 
     NfcError error = NfcErrorNone;
 
@@ -539,7 +651,7 @@ void nfc_legic_poller_set_rx_ack(Nfc* instance, size_t window) {
     furi_check(instance);
     furi_check(instance->mode == NfcModePoller);
 
-    UNUSED(window);
+    instance->legic_rx_ack_window = window;
 }
 
 void nfc_legic_poller_set_rx_reduced_gain(Nfc* instance, bool reduced) {
@@ -559,26 +671,37 @@ void nfc_legic_poller_set_next(
     furi_check(instance->mode == NfcModePoller);
     furi_check(first);
 
-    UNUSED(first_bits);
-    UNUSED(second);
-    UNUSED(second_bits);
+    nfc_legic_frame_set(&instance->legic_next[0], first, first_bits);
+    instance->legic_next_count = 1;
+    if(second && second_bits) {
+        nfc_legic_frame_set(&instance->legic_next[1], second, second_bits);
+        instance->legic_next_count = 2;
+    }
+    // legic_next_sent is about the frame queued before, which may still wait
+    // for its claim: left alone, as in the HAL.
 }
 
 bool nfc_legic_poller_next_sent(Nfc* instance) {
     furi_check(instance);
     furi_check(instance->mode == NfcModePoller);
 
-    return false;
+    return instance->legic_next_sent;
 }
 
 void nfc_legic_poller_claim_next(Nfc* instance) {
     furi_check(instance);
     furi_check(instance->mode == NfcModePoller);
+
+    instance->legic_claim_requested = true;
 }
 
 void nfc_legic_poller_cancel_next(Nfc* instance) {
     furi_check(instance);
     furi_check(instance->mode == NfcModePoller);
+
+    instance->legic_next_count = 0;
+    instance->legic_next_sent = false;
+    instance->legic_claim_requested = false;
 }
 
 void nfc_legic_listener_set_ref_to_frame_end(Nfc* instance, uint32_t extra_fc) {
