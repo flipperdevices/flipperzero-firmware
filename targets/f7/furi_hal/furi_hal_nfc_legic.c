@@ -52,14 +52,17 @@
 #define LEGIC_TAG_BIT_CHIPS           (21U) // 99.1 µs per reply bit
 #define LEGIC_FIFO_BIT_CHIPS          (4U) // scp_8 report period, measured
 // Offset between a reply's start on the tag's bit grid and the thread-side
-// RxStart timestamp (seg[].t_rxs), in the frame's own time base
-// (t_frame_end).  Tuned on the decoder, not sniffed: it nets the chip's
-// subcarrier detection, the IRQ-to-thread wake-up (40-58 µs, see
-// LEGIC_ACK_WAKE_LATE_US) and the error of LEGIC_TX_CMD_LATENCY_US (itself
-// a thread-side TxE figure, so it contains a wake-up too) against each
-// other, which is why it is smaller than the wake-up alone.  ~25 µs for the
-// first reception after TX and for a receiver re-armed long before the run,
-// ~40 µs when re-armed within ~100 µs of the onset.
+// RxStart timestamp (seg[].t_rxs).  decode() and ack_window() apply it in
+// the frame's own time base (against t_frame_end); reply_end() also
+// subtracts it bare from a write ACK's RxStart, with no t_frame_end term,
+// a use that only works as tuned together with LEGIC_NEXT_FRAME_AFTER_ACK_US
+// (see LEGIC_ACK_WAKE_LATE_US).  Tuned on the decoder, not sniffed: it nets
+// the chip's subcarrier detection, the IRQ-to-thread wake-up (40-58 µs, see
+// LEGIC_ACK_WAKE_LATE_US) and the error of LEGIC_TX_CMD_LATENCY_US (itself a
+// thread-side TxE figure, so it contains a wake-up too) against each other,
+// which is why it is smaller than the wake-up alone.  ~25 µs for the first
+// reception after TX and for a receiver re-armed long before the run, ~40 µs
+// when re-armed within ~100 µs of the onset.
 #define LEGIC_RX_LAG_CHIPS            (5U)
 #define LEGIC_RX_REARM_LAG_CHIPS      (8U)
 #define LEGIC_RX_REARM_SHORT_CHIPS    (21U)
