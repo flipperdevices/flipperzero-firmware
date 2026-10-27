@@ -1555,6 +1555,7 @@ struct LegicPrimeTestTag {
     uint8_t session_reads[LEGIC_PRIME_MEM_SIZE_MIM256]; // READs of each byte this session
     uint16_t session_writes;
     uint16_t writes; // WRITEs with a valid CRC, in all sessions
+    uint16_t silent_addr; // the last of them left without an ACK
     uint16_t garbled;
 };
 
@@ -1590,7 +1591,10 @@ static void legic_prime_test_tag_write(LegicPrimeTestTag* tag, uint32_t frame) {
     const uint8_t window = tag->write_ack ? tag->write_ack(tag) : LEGIC_PRIME_TEST_TAG_NO_ACK;
     tag->writes++;
     tag->session_writes++;
-    if(window == LEGIC_PRIME_TEST_TAG_NO_ACK) return;
+    if(window == LEGIC_PRIME_TEST_TAG_NO_ACK) {
+        tag->silent_addr = addr;
+        return;
+    }
 
     tag->mem[addr] = byte;
     // The ACK is a single unencrypted '1': its bit index is its window.
@@ -1838,6 +1842,79 @@ MU_TEST(legic_prime_write_budget_substitution_test) {
     mu_assert_int_eq(40, sessions);
 }
 
+// The first three WRITEs are ACKed, none after them.
+static uint8_t legic_prime_test_write_first_three(const LegicPrimeTestTag* tag) {
+    return tag->writes < 3 ? 33 : LEGIC_PRIME_TEST_TAG_NO_ACK;
+}
+
+MU_TEST(legic_prime_write_unacked_test) {
+    // Pins write_unacked, which legic_prime_poller_write_session() sets when a WRITE went out
+    // and its exchange ended without an ACK, and the write's result reports.  Writing bytes
+    // 22-31 last to first, session 1 gets ACKs for 31, 30 and 29 and none for the WRITE of 28
+    // chained behind 29's: NoAck with the flag set.  Sessions 2-4 send the WRITE of 28 again and
+    // get no ACK either; after three sessions in a row without progress
+    // (LEGIC_PRIME_WRITE_ATTEMPTS) the write ends with NoAck, 3 of 10 bytes and the flag.  The
+    // bytes written are the range's tail, 29-31, and the byte in doubt is the one before it,
+    // 22 + 10 - 3 - 1 = 28, which is how the CLI names it; a set flag means fewer bytes written
+    // than asked for.
+    const uint8_t data[10] = {0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39};
+    LegicPrimeData* card = legic_prime_test_card();
+    LegicPrimeTestTag* tag = legic_prime_test_tag_start(NULL, legic_prime_test_write_first_three);
+    uint16_t written = 0;
+    bool unacked = false;
+    const LegicPrimeError error =
+        legic_prime_test_write(22, data, sizeof(data), &written, &unacked);
+    const uint16_t sessions = tag->sessions;
+    const uint16_t garbled = tag->garbled;
+    const uint16_t silent_addr = tag->silent_addr;
+    const bool tail_written = memcmp(&data[7], &tag->mem[29], 3) == 0;
+    const bool rest_kept = memcmp(&card->data[22], &tag->mem[22], 7) == 0;
+    // Free first: a failed mu_assert returns from the test.
+    legic_prime_test_tag_stop(tag);
+    legic_prime_free(card);
+    mu_assert_int_eq(0, garbled);
+    mu_assert_int_eq(LegicPrimeErrorNoAck, error);
+    mu_assert_int_eq(3, written);
+    mu_assert(unacked, "write_unacked\r\n");
+    mu_assert(written < sizeof(data), "write_unacked with every byte written\r\n");
+    mu_assert_int_eq(22 + sizeof(data) - written - 1, silent_addr);
+    mu_assert(tail_written, "bytes 29-31 on the tag\r\n");
+    mu_assert(rest_kept, "bytes 22-28 changed on the tag\r\n");
+    mu_assert_int_eq(4, sessions);
+}
+
+// Every WRITE but the fourth is ACKed.
+static uint8_t legic_prime_test_write_all_but_fourth(const LegicPrimeTestTag* tag) {
+    return tag->writes != 3 ? 33 : LEGIC_PRIME_TEST_TAG_NO_ACK;
+}
+
+MU_TEST(legic_prime_write_unacked_cleared_test) {
+    // Pins `instance->write_unacked = false;` on every ACK in
+    // legic_prime_poller_write_session().  Writing bytes 22-31, session 1 gets ACKs for 31, 30
+    // and 29 and none for 28: NoAck, write_unacked set, 3 bytes written.  Session 2 sends the
+    // WRITE of 28 again, gets its ACK and writes 27 down to 22 chained behind the ACKs, and the
+    // write ends with success and all 10 bytes.  The result reports the poller's flag after
+    // legic_prime_poller_finish() reset the result's own, so without the clear it would still
+    // say a WRITE went out unacknowledged.
+    const uint8_t data[10] = {0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39};
+    LegicPrimeTestTag* tag =
+        legic_prime_test_tag_start(NULL, legic_prime_test_write_all_but_fourth);
+    uint16_t written = 0;
+    bool unacked = true;
+    const LegicPrimeError error =
+        legic_prime_test_write(22, data, sizeof(data), &written, &unacked);
+    const uint16_t sessions = tag->sessions;
+    const uint16_t garbled = tag->garbled;
+    const bool all_written = memcmp(data, &tag->mem[22], sizeof(data)) == 0;
+    legic_prime_test_tag_stop(tag);
+    mu_assert_int_eq(0, garbled);
+    mu_assert_int_eq(LegicPrimeErrorNone, error);
+    mu_assert_int_eq(10, written);
+    mu_assert(!unacked, "write_unacked after the retried byte's ACK\r\n");
+    mu_assert(all_written, "bytes 22-31 on the tag\r\n");
+    mu_assert_int_eq(2, sessions);
+}
+
 static void legic_prime_file_test(LegicPrimeType type) {
     NfcDevice* nfc_device = nfc_device_alloc();
     LegicPrimeData* data = legic_prime_alloc();
@@ -1935,6 +2012,8 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(legic_prime_read_budget_substitution_test);
     MU_RUN_TEST(legic_prime_write_session_cap_test);
     MU_RUN_TEST(legic_prime_write_budget_substitution_test);
+    MU_RUN_TEST(legic_prime_write_unacked_test);
+    MU_RUN_TEST(legic_prime_write_unacked_cleared_test);
     MU_RUN_TEST(legic_prime_mim22_file_test);
     MU_RUN_TEST(legic_prime_mim256_file_test);
     MU_RUN_TEST(legic_prime_mim1024_file_test);
