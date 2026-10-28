@@ -88,6 +88,21 @@ ATS must be no less than 5 bytes long.
 Version differences:
 None, there are no versions yet.
 
+## FeliCa SEAC
+
+### Example
+
+    Filetype: Flipper NFC device
+    Version: 4
+    Device type: FeliCa SEAC
+    UID: 01 2E 27 11 22 33 44 55
+    # FeliCa SEAC specific data
+    Context: 01 00
+
+### Description
+
+Stores the information returned by FeliCa SEAC polling. `UID` contains the eight-byte IDm, and `Context` contains the two CTX bytes in response order. Both fields are required. Card contents require authentication and are not included.
+
 ## NTAG/Ultralight
 
 ### Example
