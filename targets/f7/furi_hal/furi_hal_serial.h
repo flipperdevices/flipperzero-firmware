@@ -129,6 +129,9 @@ typedef void (*FuriHalSerialAsyncRxCallback)(
  *
  * @warning    Callback will be called in interrupt context, ensure thread
  *             safety on your side
+ * @note       The same callback function may be registered on multiple serial
+ *             handles at the same time. Use the handle and context arguments
+ *             to distinguish registrations.
  *
  * @param      handle         Serial handle
  * @param      callback       callback pointer
@@ -225,6 +228,10 @@ const GpioPin*
     furi_hal_serial_get_gpio_pin(FuriHalSerialHandle* handle, FuriHalSerialDirection direction);
 
 /** Start and sets Serial event callback receive DMA
+ *
+ * @note       The same callback function may be registered on multiple serial
+ *             handles at the same time. Use the handle and context arguments
+ *             to distinguish registrations.
  *
  * @param      handle         Serial handle
  * @param      callback       callback pointer
