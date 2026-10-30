@@ -148,6 +148,8 @@ typedef struct {
 extern const FuriHalNfcTechBase furi_hal_nfc_iso14443a;
 /** @brief Technology declaration for ISO14443 (Type B). */
 extern const FuriHalNfcTechBase furi_hal_nfc_iso14443b;
+/** @brief Technology declaration for Innovatron B Prime. */
+extern const FuriHalNfcTechBase furi_hal_nfc_innovatron;
 /** @brief Technology declaration for ISO15693. */
 extern const FuriHalNfcTechBase furi_hal_nfc_iso15693;
 /** @brief Technology declaration for FeliCa. */
