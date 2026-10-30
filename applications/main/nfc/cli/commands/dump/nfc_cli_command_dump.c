@@ -10,6 +10,7 @@
 #include "protocols/iso14443_4b/nfc_cli_dump_iso14443_4b.h"
 #include "protocols/iso15693_3/nfc_cli_dump_iso15693_3.h"
 #include "protocols/felica/nfc_cli_dump_felica.h"
+#include "protocols/felica_seac/nfc_cli_dump_felica_seac.h"
 #include "protocols/mf_ultralight/nfc_cli_dump_mf_ultralight.h"
 #include "protocols/mf_classic/nfc_cli_dump_mf_classic.h"
 #include "protocols/mf_plus/nfc_cli_dump_mf_plus.h"
@@ -89,6 +90,7 @@ NfcGenericCallback protocol_poller_callbacks[NfcProtocolNum] = {
     [NfcProtocolIso14443_4b] = nfc_cli_dump_poller_callback_iso14443_4b,
     [NfcProtocolIso15693_3] = nfc_cli_dump_poller_callback_iso15693_3,
     [NfcProtocolFelica] = nfc_cli_dump_poller_callback_felica,
+    [NfcProtocolFelicaSeac] = nfc_cli_dump_poller_callback_felica_seac,
     [NfcProtocolMfUltralight] = nfc_cli_dump_poller_callback_mf_ultralight,
     [NfcProtocolMfClassic] = nfc_cli_dump_poller_callback_mf_classic,
     [NfcProtocolMfPlus] = nfc_cli_dump_poller_callback_mf_plus,
@@ -217,6 +219,7 @@ static const NfcProtocolNameValuePair supported_protocols[] = {
     {.name = "14_4b", .value = NfcProtocolIso14443_4b},
     {.name = "15", .value = NfcProtocolIso15693_3},
     {.name = "felica", .value = NfcProtocolFelica},
+    {.name = "seac", .value = NfcProtocolFelicaSeac},
     {.name = "mfu", .value = NfcProtocolMfUltralight},
     {.name = "mfc", .value = NfcProtocolMfClassic},
     {.name = "mfp", .value = NfcProtocolMfPlus},
