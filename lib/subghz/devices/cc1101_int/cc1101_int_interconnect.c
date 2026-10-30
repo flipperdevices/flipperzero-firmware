@@ -73,6 +73,9 @@ const SubGhzDeviceInterconnect subghz_device_cc1101_int_interconnect = {
     .set_async_mirror_pin = furi_hal_subghz_set_async_mirror_pin,
     .get_data_gpio = furi_hal_subghz_get_data_gpio,
 
+    .set_channel = furi_hal_subghz_set_channel,
+    .get_channel = furi_hal_subghz_get_channel,
+
     .set_tx = furi_hal_subghz_tx,
     .flush_tx = furi_hal_subghz_flush_tx,
     .start_async_tx = subghz_device_cc1101_int_interconnect_start_async_tx,
