@@ -4,7 +4,11 @@
 
 static void nfc_cli_field(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(args);
-    UNUSED(context);
+
+    // This command bypasses nfc_cli_command_processor, but a previous action
+    // (raw -k) may still own a running poller and the NFC GPIO ISR. Release it
+    // before touching furi_hal_nfc, see nfc_cli_command_processor_release_action().
+    nfc_cli_command_processor_release_action(context);
 
     furi_hal_nfc_low_power_mode_stop();
     furi_hal_nfc_poller_field_on();
