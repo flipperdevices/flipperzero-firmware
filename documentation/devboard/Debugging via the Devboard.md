@@ -86,3 +86,12 @@ To debug in **VS Code**, do the following:
 > If you want to read logs via the Developer Board, see [Reading logs via the Devboard](#dev_board_reading_logs).
 > 
 > To learn about debugging in VS Code, see [VS Code official guide](https://code.visualstudio.com/docs/editor/debugging).
+
+## Troubleshooting
+
+If VS Code reports **"Command `Start Debugging` exists, but its preconditions are not currently met"**, check the following:
+
+1. Install **all** workspace-recommended extensions, not only Cortex-Debug. In particular, the launch configuration uses **Command Variable** (`rioj7.command-variable`) for Blackmagic debugging. Reload VS Code after installing extensions.
+2. Open the **flipperzero-firmware** directory itself in VS Code, rather than one of its parent directories, so the generated `.vscode/launch.json` is used.
+3. Run `./fbt vscode_dist` to generate the VS Code configuration, then run `./fbt` and confirm that `build/latest/firmware.elf` exists.
+4. Select a debug configuration from the **Run and Debug** dropdown before clicking **Start Debugging**.
