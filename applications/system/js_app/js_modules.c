@@ -82,6 +82,7 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
     const char* optional_module_prefix = "@" JS_SDK_VENDOR "/fz-sdk/";
     if(strncmp(name, optional_module_prefix, strlen(optional_module_prefix)) == 0) {
         name += strlen(optional_module_prefix);
+        name_len -= strlen(optional_module_prefix);
     }
 
     // Check if module is already installed
