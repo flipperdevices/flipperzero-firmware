@@ -31,6 +31,20 @@ type Props = {};
 type Child = { label: string, variants: string[] };
 
 declare class ViList extends View<Props, Child> {
+    /**
+     * Emitted when the selected variant changes.
+     *
+     * The event object uses camelCase fields: `itemIndex` is the zero-based
+     * index of the list item, and `valueIndex` is the zero-based index of the
+     * selected variant.
+     *
+     * ```js
+     * eventLoop.subscribe(views.config.valueUpdate, function (_sub, event) {
+     *     print("itemIndex:", event.itemIndex);
+     *     print("valueIndex:", event.valueIndex);
+     * });
+     * ```
+     */
     valueUpdate: Contract<{ itemIndex: number, valueIndex: number }>;
 }
 declare class ViListFactory extends ViewFactory<Props, Child, ViList> { }
