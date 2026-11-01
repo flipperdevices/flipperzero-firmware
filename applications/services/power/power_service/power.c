@@ -5,6 +5,7 @@
 
 #include <update_util/update_operation.h>
 #include <notification/notification_messages.h>
+#include <storage/storage.h>
 
 #define TAG "Power"
 
@@ -13,6 +14,26 @@
 
 #define POWER_VBUS_LOW_THRESHOLD   (4.0f)
 #define POWER_HEALTH_LOW_THRESHOLD (70U)
+
+#define POWER_BATTERY_LOW_ALERT_TIMEOUT_S  (10U)
+#define POWER_BATTERY_LOW_ALERT_HYSTERESIS (2U)
+
+static const NotificationSequence sequence_battery_low_alert = {
+    &message_display_backlight_on,
+    &message_red_255,
+    &message_vibro_on,
+    &message_note_c5,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_sound_off,
+    &message_delay_100,
+    &message_vibro_on,
+    &message_note_a4,
+    &message_delay_250,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
 
 static void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
@@ -123,6 +144,8 @@ static void power_check_low_battery(Power* power) {
     if((power->info.is_shutdown_requested) &&
        (power->info.voltage_vbus < POWER_VBUS_LOW_THRESHOLD) && power->show_battery_low_warning) {
         if(!power->battery_low) {
+            // Critical warning replaces the low battery alert, if any
+            power->battery_low_alert_shown = false;
             view_holder_send_to_front(power->view_holder);
             view_holder_set_view(power->view_holder, power_off_get_view(power->view_power_off));
         }
@@ -156,6 +179,94 @@ static void power_check_low_battery(Power* power) {
         } else if(response == PowerOffResponseCancel) {
             view_holder_set_view(power->view_holder, NULL);
         }
+    }
+}
+
+static void power_hide_battery_low_alert(Power* power) {
+    if(power->battery_low_alert_shown) {
+        view_holder_set_view(power->view_holder, NULL);
+        power->battery_low_alert_shown = false;
+    }
+}
+
+static void power_show_battery_low_alert(Power* power) {
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(notification, &sequence_battery_low_alert);
+    furi_record_close(RECORD_NOTIFICATION);
+
+    if(power->settings.low_battery_show_popup) {
+        power_battery_low_set_charge(power->view_power_battery_low, power->info.charge);
+        view_holder_send_to_front(power->view_holder);
+        view_holder_set_view(
+            power->view_holder, power_battery_low_get_view(power->view_power_battery_low));
+        power->battery_low_alert_shown = true;
+        power->battery_low_alert_timeout = POWER_BATTERY_LOW_ALERT_TIMEOUT_S;
+    }
+}
+
+static void power_check_battery_low_alert(Power* power) {
+    const uint8_t threshold = power->settings.low_battery_threshold;
+
+    if(!power->info.gauge_is_ok || power->battery_low) {
+        // Unreliable data or critical warning is already shown
+        return;
+    }
+
+    if(!threshold || power->info.is_charging) {
+        // Disabled or charger connected: hide the alert and wait for the next discharge
+        power->battery_low_alert_armed = true;
+        power_hide_battery_low_alert(power);
+        return;
+    }
+
+    if(power->info.charge >= threshold + POWER_BATTERY_LOW_ALERT_HYSTERESIS) {
+        power->battery_low_alert_armed = true;
+    } else if(power->info.charge <= threshold && power->show_battery_low_warning) {
+        // Alert on crossing the threshold, then again after every repeat step drop
+        const uint8_t repeat_step = power->settings.low_battery_repeat_step;
+        if(power->battery_low_alert_armed ||
+           (repeat_step && power->info.charge + repeat_step <= power->battery_low_alert_level)) {
+            power->battery_low_alert_armed = false;
+            power->battery_low_alert_level = power->info.charge;
+            power_show_battery_low_alert(power);
+            return;
+        }
+    }
+
+    if(power->battery_low_alert_shown) {
+        if(!power->show_battery_low_warning || !power->battery_low_alert_timeout) {
+            power_hide_battery_low_alert(power);
+        } else {
+            power_battery_low_set_charge(power->view_power_battery_low, power->info.charge);
+            power->battery_low_alert_timeout--;
+        }
+    }
+}
+
+static void power_battery_low_alert_callback(void* context) {
+    furi_assert(context);
+    Power* power = context;
+
+    const PowerMessage msg = {
+        .type = PowerMessageTypeHideBatteryLowAlert,
+    };
+
+    // Called from the GUI thread, don't block it if the queue is full
+    furi_message_queue_put(power->message_queue, &msg, 0);
+}
+
+static void power_storage_callback(const void* message, void* context) {
+    furi_assert(context);
+    Power* power = context;
+    const StorageEvent* event = message;
+
+    if(event->type == StorageEventTypeCardMount) {
+        const PowerMessage msg = {
+            .type = PowerMessageTypeReloadSettings,
+        };
+
+        furi_check(
+            furi_message_queue_put(power->message_queue, &msg, FuriWaitForever) == FuriStatusOk);
     }
 }
 
@@ -217,6 +328,23 @@ static void power_message_callback(FuriEventLoopObject* object, void* context) {
     case PowerMessageTypeShowBatteryLowWarning:
         power->show_battery_low_warning = *msg.bool_param;
         break;
+    case PowerMessageTypeGetSettings:
+        *msg.settings = power->settings;
+        break;
+    case PowerMessageTypeSetSettings:
+        if(power->settings.low_battery_threshold != msg.csettings->low_battery_threshold) {
+            // Re-evaluate the battery level against the new threshold
+            power->battery_low_alert_armed = true;
+        }
+        power->settings = *msg.csettings;
+        power_settings_save(&power->settings);
+        break;
+    case PowerMessageTypeReloadSettings:
+        power_settings_load(&power->settings);
+        break;
+    case PowerMessageTypeHideBatteryLowAlert:
+        power_hide_battery_low_alert(power);
+        break;
     case PowerMessageTypeSwitchOTG:
         power->is_otg_requested = *msg.bool_param;
         if(power->is_otg_requested) {
@@ -258,6 +386,8 @@ static void power_tick_callback(void* context) {
     const bool need_refresh = power_update_info(power);
     // Check low battery level
     power_check_low_battery(power);
+    // Check and notify about battery level dropping below the user threshold
+    power_check_battery_low_alert(power);
     // Check and notify about charging state
     power_check_charging_state(power);
     // Check and notify about battery level change
@@ -288,12 +418,17 @@ static Power* power_alloc(void) {
     // State initialization
     power->power_off_timeout = POWER_OFF_TIMEOUT_S;
     power->show_battery_low_warning = true;
+    power->battery_low_alert_armed = true;
+    power_settings_reset(&power->settings);
     // Gui
     Gui* gui = furi_record_open(RECORD_GUI);
 
     power->view_holder = view_holder_alloc();
     power->view_power_off = power_off_alloc();
     power->view_power_unplug_usb = power_unplug_usb_alloc();
+    power->view_power_battery_low = power_battery_low_alloc();
+    power_battery_low_set_callback(
+        power->view_power_battery_low, power_battery_low_alert_callback, power);
 
     view_holder_attach_to_gui(power->view_holder, gui);
     // Battery view port
@@ -328,6 +463,15 @@ int32_t power_srv(void* p) {
     power_update_info(power);
 
     furi_record_create(RECORD_POWER, power);
+
+    // Settings are stored on the SD card: load now if it is ready, otherwise on mount
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    furi_pubsub_subscribe(storage_get_pubsub(storage), power_storage_callback, power);
+    if(storage_sd_status(storage) == FSE_OK) {
+        power_settings_load(&power->settings);
+    }
+    furi_record_close(RECORD_STORAGE);
+
     furi_event_loop_run(power->event_loop);
 
     return 0;

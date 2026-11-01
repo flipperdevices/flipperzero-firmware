@@ -1,4 +1,5 @@
 #include "power_i.h"
+#include "power_settings_api_i.h"
 
 void power_off(Power* power) {
     furi_check(power);
@@ -88,4 +89,34 @@ void power_enable_otg(Power* power, bool enable) {
 bool power_is_otg_enabled(Power* power) {
     furi_check(power);
     return power->is_otg_requested;
+}
+
+void power_get_settings(Power* power, PowerSettings* settings) {
+    furi_check(power);
+    furi_check(settings);
+
+    PowerMessage msg = {
+        .type = PowerMessageTypeGetSettings,
+        .settings = settings,
+        .lock = api_lock_alloc_locked(),
+    };
+
+    furi_check(
+        furi_message_queue_put(power->message_queue, &msg, FuriWaitForever) == FuriStatusOk);
+    api_lock_wait_unlock_and_free(msg.lock);
+}
+
+void power_set_settings(Power* power, const PowerSettings* settings) {
+    furi_check(power);
+    furi_check(settings);
+
+    PowerMessage msg = {
+        .type = PowerMessageTypeSetSettings,
+        .csettings = settings,
+        .lock = api_lock_alloc_locked(),
+    };
+
+    furi_check(
+        furi_message_queue_put(power->message_queue, &msg, FuriWaitForever) == FuriStatusOk);
+    api_lock_wait_unlock_and_free(msg.lock);
 }

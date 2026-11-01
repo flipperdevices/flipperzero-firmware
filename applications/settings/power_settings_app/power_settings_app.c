@@ -2,10 +2,11 @@
 
 const SubmenuSettingsHelperDescriptor settings_helper_descriptor = {
     .app_name = "Power",
-    .options_cnt = 3,
+    .options_cnt = 4,
     .options =
         {
             {.name = "Battery Info", .scene_id = PowerSettingsAppSceneBatteryInfo},
+            {.name = "Low Battery Alert", .scene_id = PowerSettingsAppSceneBatteryAlert},
             {.name = "Reboot", .scene_id = PowerSettingsAppSceneReboot},
             {.name = "Power OFF", .scene_id = PowerSettingsAppScenePowerOff},
         },
@@ -35,6 +36,7 @@ PowerSettingsApp* power_settings_app_alloc(void) {
     // Records
     app->gui = furi_record_open(RECORD_GUI);
     app->power = furi_record_open(RECORD_POWER);
+    power_get_settings(app->power, &app->settings);
 
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
@@ -60,6 +62,11 @@ PowerSettingsApp* power_settings_app_alloc(void) {
     app->dialog = dialog_ex_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, PowerSettingsAppViewDialog, dialog_ex_get_view(app->dialog));
+    app->var_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        PowerSettingsAppViewVarItemList,
+        variable_item_list_get_view(app->var_item_list));
 
     // Helper
     app->settings_helper = submenu_settings_helpers_alloc(&settings_helper_descriptor);
@@ -85,6 +92,8 @@ void power_settings_app_free(PowerSettingsApp* app) {
     submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewDialog);
     dialog_ex_free(app->dialog);
+    view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewVarItemList);
+    variable_item_list_free(app->var_item_list);
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
