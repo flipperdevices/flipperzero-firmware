@@ -77,6 +77,25 @@ static bool ducky3_set_variable(BadUsbScript* bad_usb, const char* name, const D
     return true;
 }
 
+static Ducky3Variable* ducky3_find_define(BadUsbScript* bad_usb, const char* name) {
+    for(size_t i = 0; i < bad_usb->ducky3.define_count; i++) {
+        if(strcmp(bad_usb->ducky3.defines[i].name, name) == 0) {
+            return &bad_usb->ducky3.defines[i];
+        }
+    }
+    return NULL;
+}
+
+static bool ducky3_add_define(BadUsbScript* bad_usb, const char* name, const Ducky3Value* value) {
+    if(ducky3_find_define(bad_usb, name) || bad_usb->ducky3.define_count >= DUCKY3_MAX_DEFINES) {
+        return false;
+    }
+    Ducky3Variable* define = &bad_usb->ducky3.defines[bad_usb->ducky3.define_count++];
+    ducky3_copy_string(define->name, DUCKY3_MAX_VAR_NAME, name);
+    define->value = *value;
+    return true;
+}
+
 static bool ducky3_parse_variable_name(const char** input, char* name, size_t name_size) {
     const char* start = *input;
     if(*start != '$' && !isalpha((unsigned char)*start) && *start != '_') return false;
@@ -269,6 +288,12 @@ static Ducky3Value ducky3_parse_primary(Ducky3ExpressionParser* parser) {
                 parser->input += 2;
                 ducky3_begin_call(parser, function, name);
             }
+            return result;
+        }
+
+        Ducky3Variable* define = ducky3_find_define(parser->bad_usb, name);
+        if(define) {
+            result = define->value;
             return result;
         }
 
@@ -538,6 +563,22 @@ static int32_t ducky3_parse_var(BadUsbScript* bad_usb, const char* line) {
     return 0;
 }
 
+static bool ducky3_if_chain_taken(BadUsbScript* bad_usb, Ducky3Block* block) {
+    while(block) {
+        if(block->condition == 1) return true;
+        if(block->parent_line == DUCKY3_NO_LINE) return false;
+        Ducky3Block* parent = NULL;
+        for(size_t i = 0; i < bad_usb->ducky3.block_count; i++) {
+            if(bad_usb->ducky3.blocks[i].start_line == block->parent_line) {
+                parent = &bad_usb->ducky3.blocks[i];
+                break;
+            }
+        }
+        block = parent;
+    }
+    return false;
+}
+
 int32_t ducky3_parse_line(BadUsbScript* bad_usb, const char* line) {
     size_t current_line = bad_usb->st.line_cur - 1;
     if(bad_usb->ducky3.has_deferred && bad_usb->ducky3.call_depth > 0 &&
@@ -545,6 +586,7 @@ int32_t ducky3_parse_line(BadUsbScript* bad_usb, const char* line) {
         bad_usb->ducky3.has_deferred = false;
     }
 
+    if(ducky3_is_keyword(line, "DEFINE")) return 0;
     if(ducky3_is_keyword(line, "VAR")) return ducky3_parse_var(bad_usb, line);
 
     if(ducky3_is_keyword(line, "IF")) {
@@ -556,6 +598,38 @@ int32_t ducky3_parse_line(BadUsbScript* bad_usb, const char* line) {
             return ducky_error(bad_usb, "Invalid IF expression %s", expression);
         }
         if(bad_usb->ducky3.has_deferred) return ducky3_jump(bad_usb, bad_usb->ducky3.jump_line);
+        block->condition = ducky3_value_truthy(&condition) ? 1 : 2;
+        if(ducky3_value_truthy(&condition)) return 0;
+        if(block->else_line != DUCKY3_NO_LINE) return ducky3_jump(bad_usb, block->else_line + 1);
+        return ducky3_jump(bad_usb, block->end_line + 1);
+    }
+
+    if(ducky3_is_keyword(line, "ELSE IF")) {
+        Ducky3Block* block = NULL;
+        Ducky3Block* parent = NULL;
+        for(size_t i = 0; i < bad_usb->ducky3.block_count; i++) {
+            if(bad_usb->ducky3.blocks[i].start_line == current_line) {
+                block = &bad_usb->ducky3.blocks[i];
+            }
+        }
+        if(block) {
+            for(size_t i = 0; i < bad_usb->ducky3.block_count; i++) {
+                if(bad_usb->ducky3.blocks[i].start_line == block->parent_line) {
+                    parent = &bad_usb->ducky3.blocks[i];
+                    break;
+                }
+            }
+        }
+        if(!block || !parent) return ducky_error(bad_usb, "Unexpected ELSE IF");
+        if(parent->condition == 1) return ducky3_jump(bad_usb, block->end_line + 1);
+
+        Ducky3Value condition;
+        const char* expression = ducky3_skip_spaces(line + 7);
+        if(!ducky3_eval_expression(bad_usb, expression, &condition)) {
+            return ducky_error(bad_usb, "Invalid ELSE IF expression %s", expression);
+        }
+        if(bad_usb->ducky3.has_deferred) return ducky3_jump(bad_usb, bad_usb->ducky3.jump_line);
+        block->condition = ducky3_value_truthy(&condition) ? 1 : 2;
         if(ducky3_value_truthy(&condition)) return 0;
         if(block->else_line != DUCKY3_NO_LINE) return ducky3_jump(bad_usb, block->else_line + 1);
         return ducky3_jump(bad_usb, block->end_line + 1);
@@ -564,7 +638,8 @@ int32_t ducky3_parse_line(BadUsbScript* bad_usb, const char* line) {
     if(ducky3_is_keyword(line, "ELSE")) {
         Ducky3Block* block = ducky3_find_block(bad_usb, Ducky3BlockIf, current_line, true);
         if(!block) return ducky_error(bad_usb, "Unexpected ELSE");
-        return ducky3_jump(bad_usb, block->end_line + 1);
+        if(ducky3_if_chain_taken(bad_usb, block)) return ducky3_jump(bad_usb, block->end_line + 1);
+        return 0;
     }
 
     if(ducky3_is_keyword(line, "ENDIF")) {
@@ -715,6 +790,7 @@ bool ducky3_preload(BadUsbScript* bad_usb, File* script_file) {
 
     bad_usb->ducky3.block_count = 0;
     bad_usb->ducky3.function_count = 0;
+    bad_usb->ducky3.define_count = 0;
     bad_usb->ducky3.call_depth = 0;
     bad_usb->ducky3.has_deferred = false;
     bad_usb->ducky3.has_return_value = false;
@@ -723,7 +799,28 @@ bool ducky3_preload(BadUsbScript* bad_usb, File* script_file) {
         furi_string_trim(line);
         const char* text = furi_string_get_cstr(line);
 
-        if(ducky3_is_keyword(text, "FUNCTION")) {
+        if(ducky3_is_keyword(text, "DEFINE")) {
+            const char* input = ducky3_skip_spaces(text + 6);
+            char name[DUCKY3_MAX_VAR_NAME];
+            if(!ducky3_parse_variable_name(&input, name, sizeof(name))) {
+                success = false;
+            } else {
+                input = ducky3_skip_spaces(input);
+                Ducky3Value value;
+                char* end = NULL;
+                long number = strtol(input, &end, 0);
+                if(end != input && *end == '\0') {
+                    ducky3_value_number(&value, (int32_t)number);
+                } else if(strcmp(input, "TRUE") == 0) {
+                    ducky3_value_number(&value, 1);
+                } else if(strcmp(input, "FALSE") == 0) {
+                    ducky3_value_number(&value, 0);
+                } else {
+                    ducky3_value_string(&value, input);
+                }
+                success = ducky3_add_define(bad_usb, name, &value);
+            }
+        } else if(ducky3_is_keyword(text, "FUNCTION")) {
             const char* input = ducky3_skip_spaces(text + 8);
             char name[DUCKY3_MAX_VAR_NAME];
             if(!ducky3_parse_variable_name(&input, name, sizeof(name)) ||
@@ -750,6 +847,25 @@ bool ducky3_preload(BadUsbScript* bad_usb, File* script_file) {
             }
         } else if(ducky3_is_keyword(text, "IF")) {
             success = ducky3_push_block(bad_usb, stack, &depth, Ducky3BlockIf, current_line);
+        } else if(ducky3_is_keyword(text, "ELSE IF")) {
+            if(depth == 0) {
+                success = false;
+            } else {
+                Ducky3Block* parent = &bad_usb->ducky3.blocks[stack[depth - 1]];
+                if(parent->type != Ducky3BlockIf || parent->else_line != DUCKY3_NO_LINE) {
+                    success = false;
+                } else {
+                    parent->else_line = current_line;
+                    success = ducky3_push_block(bad_usb, stack, &depth, Ducky3BlockIf, current_line);
+                    if(success) {
+                        Ducky3Block* block =
+                            &bad_usb->ducky3.blocks[bad_usb->ducky3.block_count - 1];
+                        block->parent_line = parent->start_line;
+                        depth--;
+                        stack[depth - 1] = bad_usb->ducky3.block_count - 1;
+                    }
+                }
+            }
         } else if(ducky3_is_keyword(text, "ELSE")) {
             if(depth == 0) {
                 success = false;
@@ -769,7 +885,12 @@ bool ducky3_preload(BadUsbScript* bad_usb, File* script_file) {
                 if(block->type != Ducky3BlockIf) {
                     success = false;
                 } else {
-                    block->end_line = current_line;
+                    for(size_t i = 0; i < bad_usb->ducky3.block_count; i++) {
+                        Ducky3Block* chain = &bad_usb->ducky3.blocks[i];
+                        if(chain->type == Ducky3BlockIf && chain->end_line == DUCKY3_NO_LINE) {
+                            chain->end_line = current_line;
+                        }
+                    }
                     depth--;
                 }
             }
