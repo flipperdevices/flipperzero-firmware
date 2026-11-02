@@ -193,6 +193,11 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, FuriString* line) {
     }
     FURI_LOG_D(WORKER_TAG, "line:%s", line_cstr);
 
+    int32_t ducky3_result = ducky3_parse_line(bad_usb, line_cstr);
+    if(ducky3_result != SCRIPT_STATE_CMD_UNKNOWN) {
+        return ducky3_result;
+    }
+
     // Ducky Lang Functions
     int32_t cmd_result = ducky_execute_cmd(bad_usb, line_cstr);
     if(cmd_result != SCRIPT_STATE_CMD_UNKNOWN) {
@@ -316,6 +321,10 @@ static bool ducky_script_preload(BadUsbScript* bad_usb, File* script_file) {
         }
     } while(ret > 0);
 
+    if(!ducky3_preload(bad_usb, script_file)) {
+        return false;
+    }
+
     if(bad_usb->load_id_cfg) {
         const char* line_tmp = furi_string_get_cstr(bad_usb->line);
         BadUsbHidInterface interface = *bad_usb->interface;
@@ -354,6 +363,13 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
     if(bad_usb->repeat_cnt > 0) {
         bad_usb->repeat_cnt--;
         delay_val = ducky_parse_line(bad_usb, bad_usb->line_prev);
+        if(delay_val == SCRIPT_STATE_JUMP) {
+            storage_file_seek(script_file, 0, true);
+            bad_usb->buf_len = 0;
+            bad_usb->file_end = false;
+            bad_usb->st.line_cur = bad_usb->ducky3.jump_line;
+            return 0;
+        }
         if(delay_val == SCRIPT_STATE_NEXT_LINE) { // Empty line
             return 0;
         } else if(delay_val == SCRIPT_STATE_STRING_START) { // Print string with delays
@@ -393,6 +409,13 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
                 bad_usb->buf_start = i + 1;
                 furi_string_trim(bad_usb->line);
                 delay_val = ducky_parse_line(bad_usb, bad_usb->line);
+                if(delay_val == SCRIPT_STATE_JUMP) {
+                    storage_file_seek(script_file, 0, true);
+                    bad_usb->buf_len = 0;
+                    bad_usb->file_end = false;
+                    bad_usb->st.line_cur = bad_usb->ducky3.jump_line;
+                    return 0;
+                }
                 if(delay_val == SCRIPT_STATE_NEXT_LINE) { // Empty line
                     return 0;
                 } else if(delay_val == SCRIPT_STATE_STRING_START) { // Print string with delays
@@ -501,6 +524,7 @@ static int32_t bad_usb_worker(void* context) {
                 bad_usb->repeat_cnt = 0;
                 bad_usb->key_hold_nb = 0;
                 bad_usb->file_end = false;
+                ducky3_reset(bad_usb);
                 storage_file_seek(script_file, 0, true);
                 worker_state = BadUsbStateRunning;
                 bad_usb->st.elapsed = 0;
@@ -526,6 +550,7 @@ static int32_t bad_usb_worker(void* context) {
                 bad_usb->defstringdelay = 0;
                 bad_usb->repeat_cnt = 0;
                 bad_usb->file_end = false;
+                ducky3_reset(bad_usb);
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
                 flags = furi_thread_flags_wait(
@@ -637,7 +662,6 @@ static int32_t bad_usb_worker(void* context) {
                     bad_usb->hid->release_all(bad_usb->hid_inst);
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadUsbStateNotConnected; // Disconnected
-                    bad_usb->st.state = worker_state;
                     bad_usb->hid->release_all(bad_usb->hid_inst);
                 } else if(flags & WorkerEvtPauseResume) {
                     if(pause_state == BadUsbStateRunning) {
