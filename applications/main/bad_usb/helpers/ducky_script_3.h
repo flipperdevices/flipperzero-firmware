@@ -11,6 +11,9 @@ extern "C" {
 #define DUCKY3_MAX_VARIABLES    (8U)
 #define DUCKY3_MAX_VAR_NAME     (16U)
 #define DUCKY3_MAX_STRING_VALUE (48U)
+#define DUCKY3_MAX_FUNCTIONS    (4U)
+#define DUCKY3_MAX_CALL_DEPTH   (4U)
+#define DUCKY3_MAX_EXPRESSION   (64U)
 
 typedef enum {
     Ducky3BlockIf,
@@ -36,11 +39,33 @@ typedef struct {
 } Ducky3Variable;
 
 typedef struct {
+    char name[DUCKY3_MAX_VAR_NAME];
+    size_t start_line;
+    size_t end_line;
+} Ducky3Function;
+
+typedef struct {
+    char name[DUCKY3_MAX_VAR_NAME];
+    size_t return_line;
+    char expression[DUCKY3_MAX_EXPRESSION];
+    Ducky3Value return_value;
+} Ducky3CallFrame;
+
+typedef struct {
     Ducky3Block blocks[DUCKY3_MAX_BLOCKS];
     size_t block_count;
     Ducky3Variable variables[DUCKY3_MAX_VARIABLES];
     size_t variable_count;
     size_t jump_line;
+    Ducky3Function functions[DUCKY3_MAX_FUNCTIONS];
+    size_t function_count;
+    Ducky3CallFrame call_stack[DUCKY3_MAX_CALL_DEPTH];
+    size_t call_depth;
+    bool has_deferred;
+    bool has_return_value;
+    char deferred_function[DUCKY3_MAX_VAR_NAME];
+    char deferred_expression[DUCKY3_MAX_EXPRESSION];
+    Ducky3Value deferred_value;
 } Ducky3Context;
 
 bool ducky3_preload(BadUsbScript* bad_usb, File* script_file);
