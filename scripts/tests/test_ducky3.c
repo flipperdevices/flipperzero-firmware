@@ -17,6 +17,11 @@ struct FuriString {
 
 static char printed[8][64];
 static size_t printed_count;
+static uint32_t random_state;
+
+uint32_t furi_hal_random_get(void) {
+    return random_state++;
+}
 
 FuriString* furi_string_alloc(void) {
     return calloc(1, sizeof(FuriString));
@@ -87,8 +92,16 @@ bool ducky_string(BadUsbScript* bad_usb, const char* param) {
 }
 
 static int32_t run_line(BadUsbScript* script, size_t index, const char* line) {
+    char trimmed[128];
+    snprintf(trimmed, sizeof(trimmed), "%s", line);
+    char* start = trimmed;
+    while(*start == ' ' || *start == '\t') start++;
+    size_t len = strlen(start);
+    while(len > 0 && (start[len - 1] == ' ' || start[len - 1] == '\t' ||
+                      start[len - 1] == '\r' || start[len - 1] == '\n'))
+        start[--len] = '\0';
     script->st.line_cur = index + 1;
-    return ducky3_parse_line(script, line);
+    return ducky3_parse_line(script, start);
 }
 
 static void test_expressions(BadUsbScript* script) {
@@ -158,6 +171,86 @@ static void test_control_flow(BadUsbScript* script) {
     assert(strcmp(printed[2], "3\n") == 0);
 }
 
+static Ducky3Variable* test_find_variable(BadUsbScript* script, const char* name) {
+    for(size_t i = 0; i < script->ducky3.variable_count; i++) {
+        if(strcmp(script->ducky3.variables[i].name, name) == 0) {
+            return &script->ducky3.variables[i];
+        }
+    }
+    return NULL;
+}
+
+static void test_functions_and_random(BadUsbScript* script) {
+    static const char* nested[] = {
+        "FUNCTION INNER()",
+        " RETURN 2",
+        "END_FUNCTION",
+        "FUNCTION OUTER()",
+        " RETURN INNER() + 3",
+        "END_FUNCTION",
+        "VAR $x = OUTER()",
+    };
+    MockStream nested_stream = {
+        .text = "FUNCTION INNER()\nRETURN 2\nEND_FUNCTION\n"
+                "FUNCTION OUTER()\nRETURN INNER() + 3\nEND_FUNCTION\nVAR $x = OUTER()\n"};
+    script->st.line_nb = 7;
+    assert(ducky3_preload(script, (File*)&nested_stream));
+    assert(script->ducky3.function_count == 2);
+    assert(run_line(script, 0, nested[0]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 3, nested[3]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 6, nested[6]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 4, nested[4]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 1, nested[1]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 4, nested[4]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 6, nested[6]) == 0);
+    Ducky3Variable* result = test_find_variable(script, "x");
+    assert(result && result->value.number == 5);
+
+    static const char* recursive[] = {
+        "FUNCTION COUNT()",
+        " IF $N == 0",
+        "  RETURN 0",
+        " ELSE",
+        "  VAR $N = $N - 1",
+        "  RETURN COUNT() + 1",
+        " ENDIF",
+        "END_FUNCTION",
+        "VAR $N = 3",
+        "VAR $x = COUNT()",
+    };
+    MockStream recursive_stream = {
+        .text = "FUNCTION COUNT()\nIF $N == 0\nRETURN 0\nELSE\n"
+                "VAR $N = $N - 1\nRETURN COUNT() + 1\nENDIF\nEND_FUNCTION\n"
+                "VAR $N = 3\nVAR $x = COUNT()\n"};
+    script->st.line_nb = 10;
+    assert(ducky3_preload(script, (File*)&recursive_stream));
+    assert(run_line(script, 8, recursive[8]) == 0);
+    assert(run_line(script, 9, recursive[9]) == SCRIPT_STATE_JUMP);
+    for(size_t value = 3; value > 0; value--) {
+        assert(run_line(script, 1, recursive[1]) == SCRIPT_STATE_JUMP);
+        assert(run_line(script, 4, recursive[4]) == 0);
+        assert(run_line(script, 5, recursive[5]) == SCRIPT_STATE_JUMP);
+    }
+    assert(run_line(script, 1, recursive[1]) == 0);
+    assert(run_line(script, 2, recursive[2]) == SCRIPT_STATE_JUMP);
+    for(size_t i = 0; i < 3; i++) {
+        assert(run_line(script, 5, recursive[5]) == SCRIPT_STATE_JUMP);
+    }
+    assert(run_line(script, 9, recursive[9]) == 0);
+    result = test_find_variable(script, "x");
+    assert(result && result->value.number == 3);
+
+    random_state = 0;
+    assert(run_line(script, 0, "RANDOM_NUMBER") == 0);
+    assert(printed_count == 1);
+    assert(printed[0][0] >= '0' && printed[0][0] <= '9');
+    Ducky3Value random_value;
+    assert(ducky3_eval_expression(script, "RANDINT(2, 4)", &random_value));
+    assert(random_value.number >= 2 && random_value.number <= 4);
+    assert(ducky3_eval_expression(script, "RANDINT(5, 5)", &random_value));
+    assert(random_value.number == 5);
+}
+
 static void test_invalid_nesting(BadUsbScript* script) {
     MockStream stream = {.text = "IF 1\nELSE\nENDWHILE\n"};
     script->st.line_nb = 3;
@@ -169,6 +262,9 @@ int main(void) {
     script->string_print = furi_string_alloc();
     test_expressions(script);
     test_control_flow(script);
+    memset(&script->ducky3, 0, sizeof(script->ducky3));
+    printed_count = 0;
+    test_functions_and_random(script);
     test_invalid_nesting(script);
     furi_string_free(script->string_print);
     free(script);
