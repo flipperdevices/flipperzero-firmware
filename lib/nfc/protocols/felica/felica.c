@@ -172,7 +172,7 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
         if(!flipper_format_read_uint32(ff, "System found", &systems_total, 1)) break;
         if(systems_total == 0) break;
 
-        simple_array_init(data->systems, systems_total);
+        if(systems_total > 0) simple_array_init(data->systems, systems_total);
 
         for(uint8_t sys_idx = 0; sys_idx < systems_total; sys_idx++) {
             FelicaSystem* system = simple_array_get(data->systems, sys_idx);
@@ -213,7 +213,7 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                 if(!flipper_format_read_uint32(ff, "Area found", &area_count, 1)) break;
                 if(area_count == 0) break;
 
-                simple_array_init(system->areas, area_count);
+                if(area_count > 0) simple_array_init(system->areas, area_count);
 
                 furi_string_reset(str_key_buffer);
                 furi_string_reset(str_data_buffer);
@@ -257,7 +257,7 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                 if(!flipper_format_read_uint32(ff, "Service found", &service_count, 1)) break;
                 if(service_count == 0) break;
 
-                simple_array_init(system->services, service_count);
+                if(service_count > 0) simple_array_init(system->services, service_count);
 
                 furi_string_reset(str_key_buffer);
                 furi_string_reset(str_data_buffer);
@@ -301,7 +301,8 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
                     break;
                 if(public_block_count == 0) break;
 
-                simple_array_init(system->public_blocks, public_block_count);
+                if(public_block_count > 0)
+                    simple_array_init(system->public_blocks, public_block_count);
                 for(uint16_t i = 0; i < public_block_count; i++) {
                     furi_string_printf(str_key_buffer, "Block %04X", i);
                     if(!flipper_format_read_string(
