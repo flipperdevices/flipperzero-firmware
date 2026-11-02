@@ -98,7 +98,7 @@ static int32_t run_line(BadUsbScript* script, size_t index, const char* line) {
     while(*start == ' ' || *start == '\t') start++;
     size_t len = strlen(start);
     while(len > 0 && (start[len - 1] == ' ' || start[len - 1] == '\t' ||
-                      start[len - 1] == '\r' || start[len - 1] == '\n'))
+                      start[len - 1] == '\r' || start[len - 1] == '\n')
         start[--len] = '\0';
     script->st.line_cur = index + 1;
     return ducky3_parse_line(script, start);
@@ -251,6 +251,61 @@ static void test_functions_and_random(BadUsbScript* script) {
     assert(random_value.number == 5);
 }
 
+static void test_else_if_and_defines(BadUsbScript* script) {
+    static const char* lines[] = {
+        "DEFINE LIMIT 2",
+        "VAR $x = 0",
+        "IF $x > LIMIT",
+        "STRINGLN \"high\"",
+        "ELSE IF $x == LIMIT",
+        "STRINGLN \"equal\"",
+        "ELSE IF $x < 0",
+        "STRINGLN \"low\"",
+        "ELSE",
+        "STRINGLN \"other\"",
+        "ENDIF",
+    };
+    MockStream stream = {
+        .text = "DEFINE LIMIT 2\nVAR $x = 0\nIF $x > LIMIT\nSTRINGLN \"high\"\n"
+                "ELSE IF $x == LIMIT\nSTRINGLN \"equal\"\nELSE IF $x < 0\n"
+                "STRINGLN \"low\"\nELSE\nSTRINGLN \"other\"\nENDIF\n"};
+    script->st.line_nb = 11;
+    assert(ducky3_preload(script, (File*)&stream));
+    assert(script->ducky3.define_count == 1);
+    assert(run_line(script, 1, lines[1]) == 0);
+
+    assert(run_line(script, 2, lines[2]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 4, lines[4]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 6, lines[6]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 8, lines[8]) == 0);
+    assert(run_line(script, 9, lines[9]) == 0);
+    assert(run_line(script, 10, lines[10]) == 0);
+    assert(printed_count == 2);
+    assert(strcmp(printed[1], "other\n") == 0);
+
+    assert(run_line(script, 1, "VAR $x = 2") == 0);
+    assert(run_line(script, 2, lines[2]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 4, lines[4]) == 0);
+    assert(run_line(script, 5, lines[5]) == 0);
+    assert(printed_count == 3);
+    assert(strcmp(printed[2], "equal\n") == 0);
+
+    assert(run_line(script, 1, "VAR $x = 3") == 0);
+    assert(run_line(script, 2, lines[2]) == 0);
+    assert(run_line(script, 3, lines[3]) == 0);
+    assert(run_line(script, 8, lines[8]) == SCRIPT_STATE_END);
+    assert(printed_count == 4);
+    assert(strcmp(printed[3], "high\n") == 0);
+
+    assert(run_line(script, 1, "VAR $x = -1") == 0);
+    assert(run_line(script, 2, lines[2]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 4, lines[4]) == SCRIPT_STATE_JUMP);
+    assert(run_line(script, 6, lines[6]) == 0);
+    assert(run_line(script, 7, lines[7]) == 0);
+    assert(printed_count == 5);
+    assert(strcmp(printed[4], "low\n") == 0);
+}
+
 static void test_invalid_nesting(BadUsbScript* script) {
     MockStream stream = {.text = "IF 1\nELSE\nENDWHILE\n"};
     script->st.line_nb = 3;
@@ -265,6 +320,7 @@ int main(void) {
     memset(&script->ducky3, 0, sizeof(script->ducky3));
     printed_count = 0;
     test_functions_and_random(script);
+    test_else_if_and_defines(script);
     test_invalid_nesting(script);
     furi_string_free(script->string_print);
     free(script);
