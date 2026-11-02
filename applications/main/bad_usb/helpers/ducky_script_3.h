@@ -14,6 +14,7 @@ extern "C" {
 #define DUCKY3_MAX_FUNCTIONS    (4U)
 #define DUCKY3_MAX_CALL_DEPTH   (4U)
 #define DUCKY3_MAX_EXPRESSION   (64U)
+#define DUCKY3_MAX_DEFINES      (4U)
 
 typedef enum {
     Ducky3BlockIf,
@@ -25,6 +26,8 @@ typedef struct {
     size_t start_line;
     size_t else_line;
     size_t end_line;
+    size_t parent_line;
+    uint8_t condition;
 } Ducky3Block;
 
 typedef struct {
@@ -56,6 +59,8 @@ typedef struct {
     size_t block_count;
     Ducky3Variable variables[DUCKY3_MAX_VARIABLES];
     size_t variable_count;
+    Ducky3Variable defines[DUCKY3_MAX_DEFINES];
+    size_t define_count;
     size_t jump_line;
     Ducky3Function functions[DUCKY3_MAX_FUNCTIONS];
     size_t function_count;
