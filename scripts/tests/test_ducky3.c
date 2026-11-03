@@ -340,6 +340,41 @@ static void test_internal_variables(BadUsbScript* script) {
     assert(value.number == 0);
 }
 
+static bool test_usb_enabled;
+
+void furi_hal_usb_disable(void) {
+    test_usb_enabled = false;
+}
+void furi_hal_usb_enable(void) {
+    test_usb_enabled = true;
+}
+
+static void test_attack_mode(BadUsbScript* script) {
+    script->ducky3.attack_mode = 1;
+    test_usb_enabled = true;
+    assert(run_line(script, 0, "SAVE_ATTACKMODE") == 0);
+    assert(script->ducky3.has_saved_attack_mode);
+    assert(script->ducky3.saved_attack_mode == 1);
+
+    assert(run_line(script, 1, "ATTACKMODE OFF") == 0);
+    assert(script->ducky3.attack_mode == 0);
+    assert(!test_usb_enabled);
+
+    script->hid_cfg->usb.vid = 0xFFFF;
+    script->hid_cfg->usb.pid = 0xFFFF;
+    int32_t restore_result = run_line(script, 2, "RESTORE_ATTACKMODE");
+    assert(restore_result == 0);
+    assert(script->ducky3.attack_mode == 1);
+    assert(test_usb_enabled);
+    assert(script->hid_cfg->usb.vid == 0x046D);
+    assert(script->hid_cfg->usb.pid == 0xC31C);
+    Ducky3Value value;
+    assert(ducky3_eval_expression(script, "$_CURRENT_ATTACKMODE", &value));
+    assert(value.number == 1);
+
+    assert(run_line(script, 3, "ATTACKMODE STORAGE") == SCRIPT_STATE_ERROR);
+}
+
 static void test_invalid_nesting(BadUsbScript* script) {
     MockStream stream = {.text = "IF 1\nELSE\nENDWHILE\n"};
     script->st.line_nb = 3;
@@ -356,6 +391,8 @@ int main(void) {
     test_functions_and_random(script);
     test_else_if_and_defines(script);
     test_internal_variables(script);
+    memset(&script->ducky3, 0, sizeof(script->ducky3));
+    test_attack_mode(script);
     test_invalid_nesting(script);
     furi_string_free(script->string_print);
     free(script);
