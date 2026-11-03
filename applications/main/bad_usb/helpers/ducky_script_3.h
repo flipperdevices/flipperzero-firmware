@@ -67,6 +67,8 @@ typedef struct {
     uint8_t saved_attack_mode;
     BadUsbHidConfig saved_hid_config;
     bool has_saved_attack_mode;
+    uint8_t saved_lock_state;
+    bool exfil_enabled;
     size_t jump_line;
     Ducky3Function functions[DUCKY3_MAX_FUNCTIONS];
     size_t function_count;
