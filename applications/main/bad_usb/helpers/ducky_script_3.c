@@ -315,7 +315,7 @@ static Ducky3Value ducky3_parse_primary(Ducky3ExpressionParser* parser) {
             return result;
         }
         if(strcmp(name, "_CURRENT_ATTACKMODE") == 0) {
-            ducky3_value_number(&result, 1);
+            ducky3_value_number(&result, parser->bad_usb->ducky3.attack_mode);
             return result;
         }
         if(strcmp(name, "_CAPSLOCK_ON") == 0 || strcmp(name, "_NUMLOCK_ON") == 0 ||
@@ -750,6 +750,42 @@ int32_t ducky3_parse_line(BadUsbScript* bad_usb, const char* line) {
         return ducky3_return_value(bad_usb, value);
     }
 
+    if(ducky3_is_keyword(line, "SAVE_ATTACKMODE")) {
+        bad_usb->ducky3.saved_attack_mode = bad_usb->ducky3.attack_mode;
+        bad_usb->ducky3.saved_hid_config = *bad_usb->hid_cfg;
+        bad_usb->ducky3.has_saved_attack_mode = true;
+        return 0;
+    }
+
+    if(ducky3_is_keyword(line, "RESTORE_ATTACKMODE")) {
+        if(!bad_usb->ducky3.has_saved_attack_mode) {
+            return ducky_error(bad_usb, "No saved ATTACKMODE");
+        }
+        bad_usb->ducky3.attack_mode = bad_usb->ducky3.saved_attack_mode;
+        *bad_usb->hid_cfg = bad_usb->ducky3.saved_hid_config;
+        if(bad_usb->ducky3.attack_mode == 0) {
+            furi_hal_usb_disable();
+        } else {
+            furi_hal_usb_enable();
+        }
+        return 0;
+    }
+
+    if(ducky3_is_keyword(line, "ATTACKMODE")) {
+        const char* mode = ducky3_skip_spaces(line + 10);
+        if(strcmp(mode, "OFF") == 0) {
+            bad_usb->ducky3.attack_mode = 0;
+            furi_hal_usb_disable();
+            return 0;
+        }
+        if(strcmp(mode, "HID") == 0) {
+            bad_usb->ducky3.attack_mode = 1;
+            furi_hal_usb_enable();
+            return 0;
+        }
+        return ducky_error(bad_usb, "Unsupported ATTACKMODE %s", mode);
+    }
+
     static const char random_commands[] = "RANDOM_";
     if(strncmp(line, random_commands, sizeof(random_commands) - 1) == 0) {
         const char* characters = NULL;
@@ -845,6 +881,8 @@ bool ducky3_preload(BadUsbScript* bad_usb, File* script_file) {
     bad_usb->ducky3.define_count = 0;
     bad_usb->ducky3.random_min = 0;
     bad_usb->ducky3.random_max = 9;
+    bad_usb->ducky3.attack_mode = 1;
+    bad_usb->ducky3.has_saved_attack_mode = false;
     bad_usb->ducky3.call_depth = 0;
     bad_usb->ducky3.has_deferred = false;
     bad_usb->ducky3.has_return_value = false;
@@ -993,6 +1031,8 @@ void ducky3_reset(BadUsbScript* bad_usb) {
     bad_usb->ducky3.variable_count = 0;
     bad_usb->ducky3.random_min = 0;
     bad_usb->ducky3.random_max = 9;
+    bad_usb->ducky3.attack_mode = 1;
+    bad_usb->ducky3.has_saved_attack_mode = false;
     bad_usb->ducky3.jump_line = 0;
     bad_usb->ducky3.call_depth = 0;
     bad_usb->ducky3.has_deferred = false;
