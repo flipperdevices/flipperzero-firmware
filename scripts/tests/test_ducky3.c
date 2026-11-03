@@ -306,6 +306,8 @@ static void test_else_if_and_defines(BadUsbScript* script) {
     assert(strcmp(printed[4], "low\n") == 0);
 }
 
+static BadUsbHidApi test_hid_api;
+static BadUsbHidConfig test_hid_config;
 static uint8_t test_led_state;
 
 static uint8_t test_get_led_state(void* inst) {
@@ -314,10 +316,11 @@ static uint8_t test_get_led_state(void* inst) {
 }
 
 static void test_internal_variables(BadUsbScript* script) {
-    BadUsbHidConfig config = {.usb = {.vid = 0x046D, .pid = 0xC31C}};
-    BadUsbHidApi api = {.get_led_state = test_get_led_state};
-    script->hid_cfg = &config;
-    script->hid = &api;
+    test_hid_config.usb.vid = 0x046D;
+    test_hid_config.usb.pid = 0xC31C;
+    test_hid_api.get_led_state = test_get_led_state;
+    script->hid_cfg = &test_hid_config;
+    script->hid = &test_hid_api;
 
     assert(run_line(script, 0, "VAR $_RANDOM_MIN = 2") == 0);
     assert(run_line(script, 1, "VAR $_RANDOM_MAX = 4") == 0);
@@ -375,6 +378,63 @@ static void test_attack_mode(BadUsbScript* script) {
     assert(run_line(script, 3, "ATTACKMODE STORAGE") == SCRIPT_STATE_ERROR);
 }
 
+struct File {
+    uint8_t data[256];
+    size_t size;
+};
+
+static File* mock_loot;
+
+void* furi_record_open(const char* record) {
+    (void)record;
+    return NULL;
+}
+
+static File* storage_file_alloc(Storage* storage) {
+    (void)storage;
+    if(!mock_loot) mock_loot = calloc(1, sizeof(File));
+    return mock_loot;
+}
+bool storage_file_open(File* file, const char* path, FS_AccessMode mode, FS_OpenMode open_mode) {
+    (void)file;
+    (void)mode;
+    (void)open_mode;
+    assert(strcmp(path, "/ext/loot.bin") == 0);
+    return true;
+}
+size_t storage_file_write(File* file, const void* data, size_t size) {
+    memcpy(file->data + file->size, data, size);
+    file->size += size;
+    return size;
+}
+bool storage_file_close(File* file) {
+    (void)file;
+    return true;
+}
+void storage_file_free(File* file) {
+    (void)file;
+}
+
+static void test_exfil(BadUsbScript* script) {
+    File* loot = storage_file_alloc(NULL);
+    (void)loot;
+    assert(run_line(script, 0, "EXFIL \"ABC\"") == 0);
+    assert(run_line(script, 1, "EXFIL 42") == 0);
+    assert(run_line(script, 2, "VAR $_EXFIL_MODE_ENABLED = TRUE") == 0);
+    assert(mock_loot && mock_loot->size == 7);
+    assert(memcmp(mock_loot->data, "ABC", 3) == 0);
+    uint32_t exfil_number = 0;
+    memcpy(&exfil_number, mock_loot->data + 3, sizeof(exfil_number));
+    assert(exfil_number == 42);
+    assert(run_line(script, 3, "SAVE_HOST_KEYBOARD_LOCK_STATE") == 0);
+    assert(run_line(script, 4, "RESTORE_HOST_KEYBOARD_LOCK_STATE") == SCRIPT_STATE_ERROR);
+    Ducky3Value value;
+    assert(ducky3_eval_expression(script, "$_EXFIL_MODE_ENABLED", &value));
+    assert(value.number == 1);
+    assert(ducky3_eval_expression(script, "$_SAVED_NUMLOCK_ON", &value));
+    assert(value.number == 1);
+}
+
 static void test_invalid_nesting(BadUsbScript* script) {
     MockStream stream = {.text = "IF 1\nELSE\nENDWHILE\n"};
     script->st.line_nb = 3;
@@ -393,6 +453,7 @@ int main(void) {
     test_internal_variables(script);
     memset(&script->ducky3, 0, sizeof(script->ducky3));
     test_attack_mode(script);
+    test_exfil(script);
     test_invalid_nesting(script);
     furi_string_free(script->string_print);
     free(script);
