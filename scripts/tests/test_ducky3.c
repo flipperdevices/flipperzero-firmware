@@ -309,13 +309,19 @@ static void test_else_if_and_defines(BadUsbScript* script) {
 static BadUsbHidApi test_hid_api;
 static BadUsbHidConfig test_hid_config;
 static uint8_t test_led_state;
+static size_t led_poll_count;
+static bool led_change_after;
 
 static uint8_t test_get_led_state(void* inst) {
     (void)inst;
+    led_poll_count++;
+    if(led_change_after && led_poll_count >= 2) test_led_state |= HID_KB_LED_SCROLL;
     return test_led_state;
 }
 
 static void test_internal_variables(BadUsbScript* script) {
+    led_change_after = false;
+    led_poll_count = 0;
     test_hid_config.usb.vid = 0x046D;
     test_hid_config.usb.pid = 0xC31C;
     test_hid_api.get_led_state = test_get_led_state;
@@ -435,6 +441,21 @@ static void test_exfil(BadUsbScript* script) {
     assert(value.number == 1);
 }
 
+void furi_delay_ms(uint32_t ms) {
+    (void)ms;
+}
+
+static void test_wait_for_scroll(BadUsbScript* script) {
+    led_change_after = true;
+    led_poll_count = 0;
+    assert(run_line(script, 0, "WAIT_FOR_SCROLL_CHANGE") == 0);
+    assert(led_poll_count >= 2);
+    assert(run_line(script, 1, "VAR $_EXFIL_LEDS_ENABLED = TRUE") == 0);
+    Ducky3Value value;
+    assert(ducky3_eval_expression(script, "$_EXFIL_LEDS_ENABLED", &value));
+    assert(value.number == 1);
+}
+
 static void test_invalid_nesting(BadUsbScript* script) {
     MockStream stream = {.text = "IF 1\nELSE\nENDWHILE\n"};
     script->st.line_nb = 3;
@@ -454,6 +475,7 @@ int main(void) {
     memset(&script->ducky3, 0, sizeof(script->ducky3));
     test_attack_mode(script);
     test_exfil(script);
+    test_wait_for_scroll(script);
     test_invalid_nesting(script);
     furi_string_free(script->string_print);
     free(script);
