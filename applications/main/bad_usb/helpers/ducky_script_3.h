@@ -9,7 +9,7 @@ extern "C" {
 
 #define DUCKY3_MAX_BLOCKS       (8U)
 #define DUCKY3_MAX_VARIABLES    (8U)
-#define DUCKY3_MAX_VAR_NAME     (16U)
+#define DUCKY3_MAX_VAR_NAME     (32U)
 #define DUCKY3_MAX_STRING_VALUE (48U)
 #define DUCKY3_MAX_FUNCTIONS    (4U)
 #define DUCKY3_MAX_CALL_DEPTH   (4U)
@@ -61,6 +61,8 @@ typedef struct {
     size_t variable_count;
     Ducky3Variable defines[DUCKY3_MAX_DEFINES];
     size_t define_count;
+    uint16_t random_min;
+    uint16_t random_max;
     size_t jump_line;
     Ducky3Function functions[DUCKY3_MAX_FUNCTIONS];
     size_t function_count;
