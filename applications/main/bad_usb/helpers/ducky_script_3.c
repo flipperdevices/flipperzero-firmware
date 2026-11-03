@@ -318,6 +318,18 @@ static Ducky3Value ducky3_parse_primary(Ducky3ExpressionParser* parser) {
             ducky3_value_number(&result, parser->bad_usb->ducky3.attack_mode);
             return result;
         }
+        if(strcmp(name, "_EXFIL_MODE_ENABLED") == 0) {
+            ducky3_value_number(&result, parser->bad_usb->ducky3.exfil_enabled);
+            return result;
+        }
+        if(strcmp(name, "_SAVED_CAPSLOCK_ON") == 0 || strcmp(name, "_SAVED_NUMLOCK_ON") == 0 ||
+           strcmp(name, "_SAVED_SCROLLLOCK_ON") == 0) {
+            uint8_t mask = strcmp(name, "_SAVED_CAPSLOCK_ON") == 0 ? HID_KB_LED_CAPS :
+                           strcmp(name, "_SAVED_NUMLOCK_ON") == 0  ? HID_KB_LED_NUM :
+                                                                     HID_KB_LED_SCROLL;
+            ducky3_value_number(&result, (parser->bad_usb->ducky3.saved_lock_state & mask) != 0);
+            return result;
+        }
         if(strcmp(name, "_CAPSLOCK_ON") == 0 || strcmp(name, "_NUMLOCK_ON") == 0 ||
            strcmp(name, "_SCROLLLOCK_ON") == 0) {
             uint8_t led_state = parser->bad_usb->hid->get_led_state(parser->bad_usb->hid_inst);
@@ -325,6 +337,15 @@ static Ducky3Value ducky3_parse_primary(Ducky3ExpressionParser* parser) {
                            strcmp(name, "_NUMLOCK_ON") == 0  ? HID_KB_LED_NUM :
                                                                HID_KB_LED_SCROLL;
             ducky3_value_number(&result, (led_state & mask) != 0);
+            return result;
+        }
+
+        if(strcmp(name, "TRUE") == 0) {
+            ducky3_value_number(&result, 1);
+            return result;
+        }
+        if(strcmp(name, "FALSE") == 0) {
+            ducky3_value_number(&result, 0);
             return result;
         }
 
@@ -589,6 +610,15 @@ static int32_t ducky3_parse_var(BadUsbScript* bad_usb, const char* line) {
     if(*input != '=') return ducky_error(bad_usb, "Expected '=' after %s", name);
     input++;
 
+    if(strcmp(name, "_EXFIL_MODE_ENABLED") == 0) {
+        Ducky3Value enabled;
+        if(!ducky3_eval_expression(bad_usb, input, &enabled)) {
+            return ducky_error(bad_usb, "Invalid exfil mode %s", input);
+        }
+        bad_usb->ducky3.exfil_enabled = ducky3_value_truthy(&enabled);
+        return 0;
+    }
+
     bool is_random_bound = strcmp(name, "_RANDOM_MIN") == 0 || strcmp(name, "_RANDOM_MAX") == 0;
     if(is_random_bound) {
         char* end = NULL;
@@ -750,6 +780,41 @@ int32_t ducky3_parse_line(BadUsbScript* bad_usb, const char* line) {
         return ducky3_return_value(bad_usb, value);
     }
 
+    if(ducky3_is_keyword(line, "EXFIL")) {
+        const char* expression = ducky3_skip_spaces(line + 5);
+        Ducky3Value value;
+        if(!ducky3_eval_expression(bad_usb, expression, &value)) {
+            return ducky_error(bad_usb, "Invalid EXFIL expression %s", expression);
+        }
+        if(bad_usb->ducky3.has_deferred) return ducky3_jump(bad_usb, bad_usb->ducky3.jump_line);
+
+        File* loot = storage_file_alloc(furi_record_open(RECORD_STORAGE));
+        if(!storage_file_open(loot, "/ext/loot.bin", FSAM_WRITE, FSOM_OPEN_APPEND)) {
+            storage_file_free(loot);
+            return ducky_error(bad_usb, "Unable to open loot.bin");
+        }
+        size_t written = 0;
+        if(value.is_string) {
+            written = storage_file_write(loot, (const uint8_t*)value.string, strlen(value.string));
+        } else {
+            uint32_t number = (uint32_t)value.number;
+            written = storage_file_write(loot, (const uint8_t*)&number, sizeof(number));
+        }
+        storage_file_close(loot);
+        storage_file_free(loot);
+        if(written == 0) return ducky_error(bad_usb, "Unable to write loot.bin");
+        return 0;
+    }
+
+    if(ducky3_is_keyword(line, "SAVE_HOST_KEYBOARD_LOCK_STATE")) {
+        bad_usb->ducky3.saved_lock_state = bad_usb->hid->get_led_state(bad_usb->hid_inst);
+        return 0;
+    }
+
+    if(ducky3_is_keyword(line, "RESTORE_HOST_KEYBOARD_LOCK_STATE")) {
+        return ducky_error(bad_usb, "LED state restoration is not supported");
+    }
+
     if(ducky3_is_keyword(line, "SAVE_ATTACKMODE")) {
         bad_usb->ducky3.saved_attack_mode = bad_usb->ducky3.attack_mode;
         bad_usb->ducky3.saved_hid_config = *bad_usb->hid_cfg;
@@ -883,6 +948,7 @@ bool ducky3_preload(BadUsbScript* bad_usb, File* script_file) {
     bad_usb->ducky3.random_max = 9;
     bad_usb->ducky3.attack_mode = 1;
     bad_usb->ducky3.has_saved_attack_mode = false;
+    bad_usb->ducky3.exfil_enabled = false;
     bad_usb->ducky3.call_depth = 0;
     bad_usb->ducky3.has_deferred = false;
     bad_usb->ducky3.has_return_value = false;
@@ -1033,6 +1099,7 @@ void ducky3_reset(BadUsbScript* bad_usb) {
     bad_usb->ducky3.random_max = 9;
     bad_usb->ducky3.attack_mode = 1;
     bad_usb->ducky3.has_saved_attack_mode = false;
+    bad_usb->ducky3.exfil_enabled = false;
     bad_usb->ducky3.jump_line = 0;
     bad_usb->ducky3.call_depth = 0;
     bad_usb->ducky3.has_deferred = false;
