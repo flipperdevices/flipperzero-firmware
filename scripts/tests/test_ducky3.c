@@ -306,6 +306,40 @@ static void test_else_if_and_defines(BadUsbScript* script) {
     assert(strcmp(printed[4], "low\n") == 0);
 }
 
+static uint8_t test_led_state;
+
+static uint8_t test_get_led_state(void* inst) {
+    (void)inst;
+    return test_led_state;
+}
+
+static void test_internal_variables(BadUsbScript* script) {
+    BadUsbHidConfig config = {.usb = {.vid = 0x046D, .pid = 0xC31C}};
+    BadUsbHidApi api = {.get_led_state = test_get_led_state};
+    script->hid_cfg = &config;
+    script->hid = &api;
+
+    assert(run_line(script, 0, "VAR $_RANDOM_MIN = 2") == 0);
+    assert(run_line(script, 1, "VAR $_RANDOM_MAX = 4") == 0);
+    Ducky3Value value;
+    assert(ducky3_eval_expression(script, "$_RANDOM_INT", &value));
+    assert(value.number >= 2 && value.number <= 4);
+    assert(ducky3_eval_expression(script, "$_CURRENT_VID", &value));
+    assert(value.number == 0x046D);
+    assert(ducky3_eval_expression(script, "$_CURRENT_PID", &value));
+    assert(value.number == 0xC31C);
+    assert(ducky3_eval_expression(script, "$_CURRENT_ATTACKMODE", &value));
+    assert(value.number == 1);
+
+    test_led_state = HID_KB_LED_NUM | HID_KB_LED_CAPS;
+    assert(ducky3_eval_expression(script, "$_CAPSLOCK_ON", &value));
+    assert(value.number == 1);
+    assert(ducky3_eval_expression(script, "$_NUMLOCK_ON", &value));
+    assert(value.number == 1);
+    assert(ducky3_eval_expression(script, "$_SCROLLLOCK_ON", &value));
+    assert(value.number == 0);
+}
+
 static void test_invalid_nesting(BadUsbScript* script) {
     MockStream stream = {.text = "IF 1\nELSE\nENDWHILE\n"};
     script->st.line_nb = 3;
@@ -321,6 +355,7 @@ int main(void) {
     printed_count = 0;
     test_functions_and_random(script);
     test_else_if_and_defines(script);
+    test_internal_variables(script);
     test_invalid_nesting(script);
     furi_string_free(script->string_print);
     free(script);
