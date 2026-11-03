@@ -5,7 +5,7 @@ cd "$(dirname "$0")/../.."
 BUILD_DIR="${TMPDIR:-/tmp}/ducky3-test"
 mkdir -p "$BUILD_DIR"
 
-cc -std=gnu11 -Wall -Wextra -Werror \
+cc -O2 -std=gnu11 -Wall -Wextra -Werror \
     -Wno-error=implicit-function-declaration \
     -Wno-format -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -Wno-overflow \
     '-D_ATTRIBUTE(x)=__attribute__(x)' \
