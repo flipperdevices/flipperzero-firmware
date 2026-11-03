@@ -291,6 +291,43 @@ static Ducky3Value ducky3_parse_primary(Ducky3ExpressionParser* parser) {
             return result;
         }
 
+        if(strcmp(name, "_RANDOM_INT") == 0) {
+            uint32_t min = parser->bad_usb->ducky3.random_min;
+            uint32_t max = parser->bad_usb->ducky3.random_max;
+            uint32_t span = max >= min ? max - min + 1 : 1;
+            ducky3_value_number(&result, (int32_t)(min + furi_hal_random_get() % span));
+            return result;
+        }
+        if(strcmp(name, "_RANDOM_MIN") == 0) {
+            ducky3_value_number(&result, parser->bad_usb->ducky3.random_min);
+            return result;
+        }
+        if(strcmp(name, "_RANDOM_MAX") == 0) {
+            ducky3_value_number(&result, parser->bad_usb->ducky3.random_max);
+            return result;
+        }
+        if(strcmp(name, "_CURRENT_VID") == 0) {
+            ducky3_value_number(&result, parser->bad_usb->hid_cfg->usb.vid);
+            return result;
+        }
+        if(strcmp(name, "_CURRENT_PID") == 0) {
+            ducky3_value_number(&result, parser->bad_usb->hid_cfg->usb.pid);
+            return result;
+        }
+        if(strcmp(name, "_CURRENT_ATTACKMODE") == 0) {
+            ducky3_value_number(&result, 1);
+            return result;
+        }
+        if(strcmp(name, "_CAPSLOCK_ON") == 0 || strcmp(name, "_NUMLOCK_ON") == 0 ||
+           strcmp(name, "_SCROLLLOCK_ON") == 0) {
+            uint8_t led_state = parser->bad_usb->hid->get_led_state(parser->bad_usb->hid_inst);
+            uint8_t mask = strcmp(name, "_CAPSLOCK_ON") == 0 ? HID_KB_LED_CAPS :
+                           strcmp(name, "_NUMLOCK_ON") == 0  ? HID_KB_LED_NUM :
+                                                               HID_KB_LED_SCROLL;
+            ducky3_value_number(&result, (led_state & mask) != 0);
+            return result;
+        }
+
         Ducky3Variable* define = ducky3_find_define(parser->bad_usb, name);
         if(define) {
             result = define->value;
@@ -552,6 +589,21 @@ static int32_t ducky3_parse_var(BadUsbScript* bad_usb, const char* line) {
     if(*input != '=') return ducky_error(bad_usb, "Expected '=' after %s", name);
     input++;
 
+    bool is_random_bound = strcmp(name, "_RANDOM_MIN") == 0 || strcmp(name, "_RANDOM_MAX") == 0;
+    if(is_random_bound) {
+        char* end = NULL;
+        long bound = strtol(input, &end, 0);
+        if(end == input || *end != '\0' || bound < 0 || bound > 65535) {
+            return ducky_error(bad_usb, "Invalid random bound %s", input);
+        }
+        if(strcmp(name, "_RANDOM_MIN") == 0) {
+            bad_usb->ducky3.random_min = (uint16_t)bound;
+        } else {
+            bad_usb->ducky3.random_max = (uint16_t)bound;
+        }
+        return 0;
+    }
+
     Ducky3Value value;
     if(!ducky3_eval_expression(bad_usb, input, &value)) {
         return ducky_error(bad_usb, "Invalid expression %s", input);
@@ -791,6 +843,8 @@ bool ducky3_preload(BadUsbScript* bad_usb, File* script_file) {
     bad_usb->ducky3.block_count = 0;
     bad_usb->ducky3.function_count = 0;
     bad_usb->ducky3.define_count = 0;
+    bad_usb->ducky3.random_min = 0;
+    bad_usb->ducky3.random_max = 9;
     bad_usb->ducky3.call_depth = 0;
     bad_usb->ducky3.has_deferred = false;
     bad_usb->ducky3.has_return_value = false;
@@ -937,6 +991,8 @@ bool ducky3_preload(BadUsbScript* bad_usb, File* script_file) {
 
 void ducky3_reset(BadUsbScript* bad_usb) {
     bad_usb->ducky3.variable_count = 0;
+    bad_usb->ducky3.random_min = 0;
+    bad_usb->ducky3.random_max = 9;
     bad_usb->ducky3.jump_line = 0;
     bad_usb->ducky3.call_depth = 0;
     bad_usb->ducky3.has_deferred = false;
