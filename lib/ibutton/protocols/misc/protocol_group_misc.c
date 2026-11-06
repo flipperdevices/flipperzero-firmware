@@ -56,7 +56,10 @@ static uint32_t ibutton_protocol_group_misc_get_features(
     iButtonProtocolLocalId id) {
     UNUSED(group);
     furi_assert(id < iButtonProtocolMiscMax);
-    return ibutton_protocols_misc[id]->features;
+
+    // A protocol that cannot write must not advertise the feature: the writing screen
+    // trusts this bit and calls write_id.
+    return ibutton_protocols_misc[id]->write_id ? iButtonProtocolFeatureWriteId : 0;
 }
 
 static const char* ibutton_protocol_group_misc_get_manufacturer(
@@ -153,8 +156,7 @@ static bool ibutton_protocol_group_misc_write_id(
     furi_assert(id < iButtonProtocolMiscMax);
 
     const iButtonProtocolMiscBase* protocol = ibutton_protocols_misc[id];
-    furi_assert(protocol->features & iButtonProtocolFeatureWriteId);
-    furi_assert(protocol->write_id);
+    furi_check(protocol->write_id);
 
     OneWireHost* host = group->host;
 
@@ -265,9 +267,10 @@ static void ibutton_protocol_group_misc_render_error(
     iButtonProtocolLocalId id,
     FuriString* result) {
     UNUSED(group);
-    UNUSED(data);
-    UNUSED(id);
-    UNUSED(result);
+    furi_assert(id < iButtonProtocolMiscMax);
+
+    const iButtonProtocolMiscBase* protocol = ibutton_protocols_misc[id];
+    if(protocol->render_error) protocol->render_error(result, data);
 }
 
 static bool ibutton_protocol_group_misc_is_valid(
@@ -275,9 +278,10 @@ static bool ibutton_protocol_group_misc_is_valid(
     const iButtonProtocolData* data,
     iButtonProtocolLocalId id) {
     UNUSED(group);
-    UNUSED(data);
-    UNUSED(id);
-    return true;
+    furi_assert(id < iButtonProtocolMiscMax);
+
+    const iButtonProtocolMiscBase* protocol = ibutton_protocols_misc[id];
+    return protocol->is_valid ? protocol->is_valid(data) : true;
 }
 
 static void ibutton_protocol_group_misc_get_editable_data(

@@ -377,6 +377,8 @@ const iButtonProtocolMiscBase ibutton_protocol_misc_cyfral = {
             .render_uid = (ProtocolRenderData)protocol_cyfral_render_uid,
             .render_brief_data = (ProtocolRenderData)protocol_cyfral_render_brief_data,
         },
-    .features = iButtonProtocolFeatureWriteId,
     .write_id = protocol_cyfral_write_id,
+    // A Cyfral code carries no check digit, so every value that can be typed is a valid key.
+    .is_valid = NULL,
+    .render_error = NULL,
 };

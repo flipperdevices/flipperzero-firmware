@@ -19,11 +19,33 @@
  */
 typedef bool (*iButtonProtocolMiscWriteIdFunc)(OneWireHost* host, const iButtonProtocolData* data);
 
+/**
+ * Check the protocol's own redundancy in a key's data.
+ *
+ * @param data  Protocol data, `base.data_size` bytes.
+ *
+ * @returns true if the data is a code the protocol could have produced.
+ */
+typedef bool (*iButtonProtocolMiscIsValidFunc)(const iButtonProtocolData* data);
+
+/**
+ * Explain to the user why is_valid() rejected the data.
+ *
+ * @param result  String to append the explanation to.
+ * @param data    Protocol data, `base.data_size` bytes.
+ */
+typedef void (
+    *iButtonProtocolMiscRenderErrorFunc)(FuriString* result, const iButtonProtocolData* data);
+
 typedef struct {
     /** Generic part, used for decoding, encoding and rendering. */
     const ProtocolBase base;
 
-    const uint32_t features;
-
     const iButtonProtocolMiscWriteIdFunc write_id;
+
+    /** NULL means "every value is valid", as for a protocol with no redundancy. */
+    const iButtonProtocolMiscIsValidFunc is_valid;
+
+    /** NULL means "nothing to explain", as for a protocol with no redundancy. */
+    const iButtonProtocolMiscRenderErrorFunc render_error;
 } iButtonProtocolMiscBase;
