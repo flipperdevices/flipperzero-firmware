@@ -836,6 +836,14 @@ int32_t ducky3_parse_line(BadUsbScript* bad_usb, const char* line) {
         return 0;
     }
 
+    if(ducky3_is_keyword(line, "WAIT_FOR_CONNECTION")) {
+        return SCRIPT_STATE_WAIT_FOR_CONNECTION;
+    }
+
+    if(ducky3_is_keyword(line, "WAIT_FOR_DISCONNECTION")) {
+        return SCRIPT_STATE_WAIT_FOR_DISCONNECTION;
+    }
+
     if(ducky3_is_keyword(line, "SAVE_ATTACKMODE")) {
         bad_usb->ducky3.saved_attack_mode = bad_usb->ducky3.attack_mode;
         bad_usb->ducky3.saved_hid_config = *bad_usb->hid_cfg;
