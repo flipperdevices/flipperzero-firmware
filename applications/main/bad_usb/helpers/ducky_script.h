@@ -17,6 +17,8 @@ typedef enum {
     BadUsbStateDelay,
     BadUsbStateStringDelay,
     BadUsbStateWaitForBtn,
+    BadUsbStateWaitForConnection,
+    BadUsbStateWaitForDisconnection,
     BadUsbStatePaused,
     BadUsbStateDone,
     BadUsbStateScriptError,
