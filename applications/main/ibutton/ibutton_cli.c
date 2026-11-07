@@ -164,7 +164,6 @@ void ibutton_cli_write(PipeSide* pipe, FuriString* args) {
                     printf("Write success\r\n");
                     break;
                 } else if(write_context.result == iButtonWorkerWriteCannotWrite) {
-                    // Refused before the write started: the reason comes from the protocol.
                     FuriString* reason = furi_string_alloc();
                     ibutton_protocols_render_error(protocols, key, reason);
                     printf(
