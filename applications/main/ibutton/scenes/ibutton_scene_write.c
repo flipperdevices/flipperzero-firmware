@@ -92,7 +92,10 @@ bool ibutton_scene_write_on_event(void* context, SceneManagerEvent event) {
             if(furi_string_empty(reason)) furi_string_set(reason, "This key cannot be written");
             ibutton_scene_write_show_error(ibutton, furi_string_get_cstr(reason));
             furi_string_free(reason);
-            ibutton_notification_message(ibutton, iButtonNotificationMessageYellowBlink);
+
+            ibutton_notification_message(ibutton, iButtonNotificationMessageBlinkStop);
+            ibutton_notification_message(ibutton, iButtonNotificationMessageError);
+            ibutton_notification_message(ibutton, iButtonNotificationMessageRedOn);
         }
     }
 
@@ -106,5 +109,6 @@ void ibutton_scene_write_on_exit(void* context) {
     ibutton_worker_stop(ibutton->worker);
     widget_reset(ibutton->widget);
 
+    ibutton_notification_message(ibutton, iButtonNotificationMessageRedOff);
     ibutton_notification_message(ibutton, iButtonNotificationMessageBlinkStop);
 }
