@@ -8,7 +8,7 @@ Dolphin assets are split into 3 parts:
 
 # Files
 
-- `manifest.txt` - contains animations enumeration that is used for random animation selection. Starting point for Dolphin.
+- `manifest.txt` - contains the animation enumeration and the values used for random idle animation selection. Starting point for Dolphin.
 - `meta.txt`     - contains data that describes how animation is drawn.
 - `frame_X.png`  - animation frame.
 
@@ -23,12 +23,14 @@ Filetype: Flipper Animation Manifest
 Version: 1
 ```
 
-- `Name` - name of animation. Must be exact animation directory name.
-- `Min butthurt`, `Max butthurt` - range of dolphin's butthurt for this animation.
-- `Min level`, `Max level` - range of dolphin's level for this animation. If 0, this animation doesn't participate in random idle animation selection and can only be selected by exact name.
-- `Weight` - chance of this animation to be chosen at random animation selection.
+All fields below are required for each animation entry.
 
-Some animations can be excluded from participation in random animation selection, such as `L1_NoSd_128x49`.
+- `Name` - name of animation. Must be exact animation directory name.
+- `Min butthurt`, `Max butthurt` - inclusive range of dolphin's butthurt used to filter animations for random idle selection.
+- `Min level`, `Max level` - inclusive range of dolphin's level used to filter animations for random idle selection. Setting both values to 0 excludes the animation from random idle selection, but it can still be selected by exact name.
+- `Weight` - relative chance of this animation being chosen from the valid idle animations. A weight of 0 effectively disables random selection for this entry.
+
+These values only affect random idle selection. Blocking animations are invoked by exact name for system notifications, so their `Min butthurt`, `Max butthurt`, `Min level`, `Max level`, and `Weight` values are unused and are set to 0 in `blocking/manifest.txt`. Internal and external animations can participate in random idle selection, so their values determine eligibility and relative selection probability. Some animations can also be excluded from random selection, such as `L1_NoSd_128x49`.
 
 ## File meta.txt
 
