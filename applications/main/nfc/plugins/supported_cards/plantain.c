@@ -257,7 +257,7 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
         }
         furi_string_cat_printf(parsed_data, "%s\n", furi_string_get_cstr(tmp_s));
         // this works for 2K Plantain
-        if(data->type == MfClassicType1k) {
+        if(data->type == MfClassicType1k || data->type == MfClassicType1kEv1) {
             //balance
             uint32_t balance = 0;
             for(uint8_t i = 0; i < 4; i++) {

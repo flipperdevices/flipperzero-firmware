@@ -18,7 +18,8 @@ static bool gallagher_parse(const NfcDevice* device, FuriString* parsed_data) {
 
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
 
-    if(!(data->type == MfClassicType1k || data->type == MfClassicType4k)) {
+    if(!(data->type == MfClassicType1k || data->type == MfClassicType1kEv1 ||
+         data->type == MfClassicType4k)) {
         return false;
     }
 

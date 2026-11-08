@@ -127,6 +127,8 @@ static bool hi_read(Nfc* nfc, NfcDevice* device) {
         MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
         if(error != MfClassicErrorNone) break;
 
+        // Ensure 1K EV1 tags are read as 1K tags
+        data->type = type;
         HiCardConfig cfg = {};
         if(!hi_get_card_config(&cfg, data->type)) break;
 

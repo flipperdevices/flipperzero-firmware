@@ -52,7 +52,7 @@ static bool umarsh_parse(const NfcDevice* device, FuriString* parsed_data) {
 
     do {
         // Verify card type
-        if(data->type != MfClassicType1k) break;
+        if(data->type != MfClassicType1k && data->type != MfClassicType1kEv1) break;
 
         const uint8_t ticket_sector = 8;
 

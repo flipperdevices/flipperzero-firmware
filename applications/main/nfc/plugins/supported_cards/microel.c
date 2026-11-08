@@ -102,6 +102,9 @@ static bool microel_read(Nfc* nfc, NfcDevice* device) {
         MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
         if(error != MfClassicErrorNone) break;
 
+        // Ensure 1K EV1 tags are read as 1K tags
+        data->type = type;
+
         //Get UID and check if it is 4 bytes
         size_t uid_len;
         const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
