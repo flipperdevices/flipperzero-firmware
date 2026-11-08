@@ -23,6 +23,9 @@ static void gpio_app_tick_event_callback(void* context) {
 
 GpioApp* gpio_app_alloc(void) {
     GpioApp* app = malloc(sizeof(GpioApp));
+    app->usb_uart_bridge = NULL;
+    app->usb_uart_cfg = NULL;
+    app->transport_error = false;
 
     app->expansion = furi_record_open(RECORD_EXPANSION);
     expansion_disable(app->expansion);
@@ -81,6 +84,9 @@ GpioApp* gpio_app_alloc(void) {
 
 void gpio_app_free(GpioApp* app) {
     furi_assert(app);
+
+    gpio_scene_usb_uart_cleanup(app);
+    free(app->usb_uart_cfg);
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewVarItemList);
