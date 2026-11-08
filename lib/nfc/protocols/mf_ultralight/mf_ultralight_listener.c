@@ -697,10 +697,19 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .callback = mf_ultralight_c_authenticate_handler_p1,
     }};
 
+static void mf_ultralight_listener_refresh_access_config(MfUltralightListener* instance) {
+    if(instance->config) {
+        instance->auth0 = instance->config->auth0;
+        instance->prot = instance->config->access.prot;
+        instance->cfglck = instance->config->access.cfglck;
+    }
+}
+
 static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* instance) {
     MfUltralightData* data = instance->data;
     instance->features = mf_ultralight_get_feature_support_set(data->type);
     mf_ultralight_get_config_page(data, &instance->config);
+    mf_ultralight_listener_refresh_access_config(instance);
     mf_ultralight_mirror_prepare_emulation(instance);
     mf_ultralight_static_lock_bytes_prepare(instance);
     mf_ultralight_dynamic_lock_bytes_prepare(instance);
@@ -735,6 +744,7 @@ static NfcCommand mf_ultralight_reset_listener_state(
     Iso14443_3aListenerEventType event_type) {
     mf_ultralight_composite_command_reset(instance);
     mf_ultralight_single_counter_try_to_unlock(instance, event_type);
+    mf_ultralight_listener_refresh_access_config(instance);
     instance->sector = 0;
     instance->auth_state = MfUltralightListenerAuthStateIdle;
     return NfcCommandSleep;
