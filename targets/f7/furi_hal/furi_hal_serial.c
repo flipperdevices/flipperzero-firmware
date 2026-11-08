@@ -864,11 +864,6 @@ void furi_hal_serial_async_rx_start(
 
     furi_hal_serial_event_init(handle, report_errors);
     furi_hal_serial_async_rx_configure(handle, callback, context);
-
-    // Assign different functions to different UARTs
-    furi_check(
-        furi_hal_serial[FuriHalSerialIdUsart].rx_byte_callback !=
-        furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback);
 }
 
 void furi_hal_serial_async_rx_stop(FuriHalSerialHandle* handle) {
@@ -994,11 +989,6 @@ void furi_hal_serial_dma_rx_start(
 
     furi_hal_serial_event_init(handle, report_errors);
     furi_hal_serial_dma_configure(handle, callback, context);
-
-    // Assign different functions to different UARTs
-    furi_check(
-        furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback !=
-        furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback);
 }
 
 void furi_hal_serial_dma_rx_stop(FuriHalSerialHandle* handle) {

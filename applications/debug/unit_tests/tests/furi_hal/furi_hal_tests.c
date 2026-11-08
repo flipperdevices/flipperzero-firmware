@@ -11,6 +11,15 @@
 #define EEPROM_SIZE           512
 #define EEPROM_PAGE_SIZE      16
 #define EEPROM_WRITE_DELAY_MS 6
+#define SERIAL_TEST_BAUD_RATE 115200
+#define SERIAL_TEST_DMA_CHUNK 16
+
+static FuriHalSerialHandle* furi_hal_serial_test_handles[FuriHalSerialIdMax] = {0};
+
+typedef struct {
+    FuriHalSerialHandle* expected_handle;
+    volatile bool handle_mismatch;
+} FuriHalSerialTestCallbackContext;
 
 static void furi_hal_i2c_int_setup(void) {
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
@@ -26,6 +35,68 @@ static void furi_hal_i2c_ext_setup(void) {
 
 static void furi_hal_i2c_ext_teardown(void) {
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+}
+
+static void furi_hal_serial_test_setup(void) {
+    furi_hal_serial_test_handles[FuriHalSerialIdUsart] =
+        furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_hal_serial_test_handles[FuriHalSerialIdLpuart] =
+        furi_hal_serial_control_acquire(FuriHalSerialIdLpuart);
+
+    if(furi_hal_serial_test_handles[FuriHalSerialIdUsart] &&
+       furi_hal_serial_test_handles[FuriHalSerialIdLpuart]) {
+        for(size_t i = 0; i < FuriHalSerialIdMax; i++) {
+            furi_hal_serial_init(furi_hal_serial_test_handles[i], SERIAL_TEST_BAUD_RATE);
+        }
+    }
+}
+
+static void furi_hal_serial_test_teardown(void) {
+    for(size_t i = 0; i < FuriHalSerialIdMax; i++) {
+        if(!furi_hal_serial_test_handles[i]) {
+            continue;
+        }
+
+        furi_hal_serial_control_release(furi_hal_serial_test_handles[i]);
+        furi_hal_serial_test_handles[i] = NULL;
+    }
+}
+
+static void furi_hal_serial_test_shared_async_callback(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
+    FuriHalSerialTestCallbackContext* callback_context = context;
+
+    if(handle != callback_context->expected_handle) {
+        callback_context->handle_mismatch = true;
+    }
+
+    if(event & FuriHalSerialRxEventData) {
+        while(furi_hal_serial_async_rx_available(handle)) {
+            (void)furi_hal_serial_async_rx(handle);
+        }
+    }
+}
+
+static void furi_hal_serial_test_shared_dma_callback(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    size_t data_len,
+    void* context) {
+    FuriHalSerialTestCallbackContext* callback_context = context;
+    UNUSED(data_len);
+
+    if(handle != callback_context->expected_handle) {
+        callback_context->handle_mismatch = true;
+    }
+
+    if(event & FuriHalSerialRxEventData) {
+        uint8_t data[SERIAL_TEST_DMA_CHUNK];
+
+        while(furi_hal_serial_dma_rx(handle, data, sizeof(data)) > 0) {
+        }
+    }
 }
 
 MU_TEST(furi_hal_i2c_int_1b) {
@@ -214,6 +285,62 @@ MU_TEST(furi_hal_i2c_ext_eeprom) {
     }
 }
 
+// Registration-only regression coverage for both async and DMA RX start paths:
+// the second start call used to abort before either port received any traffic.
+MU_TEST(furi_hal_serial_async_rx_shared_callback_registration) {
+    FuriHalSerialHandle* usart_handle = furi_hal_serial_test_handles[FuriHalSerialIdUsart];
+    FuriHalSerialHandle* lpuart_handle = furi_hal_serial_test_handles[FuriHalSerialIdLpuart];
+
+    mu_assert(
+        usart_handle && lpuart_handle,
+        "Shared async callback test requires both USART and LPUART handles");
+
+    FuriHalSerialTestCallbackContext usart_context = {
+        .expected_handle = usart_handle,
+    };
+    FuriHalSerialTestCallbackContext lpuart_context = {
+        .expected_handle = lpuart_handle,
+    };
+
+    furi_hal_serial_async_rx_start(
+        usart_handle, furi_hal_serial_test_shared_async_callback, &usart_context, false);
+    furi_hal_serial_async_rx_start(
+        lpuart_handle, furi_hal_serial_test_shared_async_callback, &lpuart_context, false);
+
+    furi_hal_serial_async_rx_stop(usart_handle);
+    furi_hal_serial_async_rx_stop(lpuart_handle);
+
+    mu_assert(!usart_context.handle_mismatch, "USART async callback got wrong handle");
+    mu_assert(!lpuart_context.handle_mismatch, "LPUART async callback got wrong handle");
+}
+
+MU_TEST(furi_hal_serial_dma_rx_shared_callback_registration) {
+    FuriHalSerialHandle* usart_handle = furi_hal_serial_test_handles[FuriHalSerialIdUsart];
+    FuriHalSerialHandle* lpuart_handle = furi_hal_serial_test_handles[FuriHalSerialIdLpuart];
+
+    mu_assert(
+        usart_handle && lpuart_handle,
+        "Shared DMA callback test requires both USART and LPUART handles");
+
+    FuriHalSerialTestCallbackContext usart_context = {
+        .expected_handle = usart_handle,
+    };
+    FuriHalSerialTestCallbackContext lpuart_context = {
+        .expected_handle = lpuart_handle,
+    };
+
+    furi_hal_serial_dma_rx_start(
+        usart_handle, furi_hal_serial_test_shared_dma_callback, &usart_context, false);
+    furi_hal_serial_dma_rx_start(
+        lpuart_handle, furi_hal_serial_test_shared_dma_callback, &lpuart_context, false);
+
+    furi_hal_serial_dma_rx_stop(usart_handle);
+    furi_hal_serial_dma_rx_stop(lpuart_handle);
+
+    mu_assert(!usart_context.handle_mismatch, "USART DMA callback got wrong handle");
+    mu_assert(!lpuart_context.handle_mismatch, "LPUART DMA callback got wrong handle");
+}
+
 MU_TEST_SUITE(furi_hal_i2c_int_suite) {
     MU_SUITE_CONFIGURE(&furi_hal_i2c_int_setup, &furi_hal_i2c_int_teardown);
     MU_RUN_TEST(furi_hal_i2c_int_1b);
@@ -227,9 +354,16 @@ MU_TEST_SUITE(furi_hal_i2c_ext_suite) {
     MU_RUN_TEST(furi_hal_i2c_ext_eeprom);
 }
 
+MU_TEST_SUITE(furi_hal_serial_suite) {
+    MU_SUITE_CONFIGURE(&furi_hal_serial_test_setup, &furi_hal_serial_test_teardown);
+    MU_RUN_TEST(furi_hal_serial_async_rx_shared_callback_registration);
+    MU_RUN_TEST(furi_hal_serial_dma_rx_shared_callback_registration);
+}
+
 int run_minunit_test_furi_hal(void) {
     MU_RUN_SUITE(furi_hal_i2c_int_suite);
     MU_RUN_SUITE(furi_hal_i2c_ext_suite);
+    MU_RUN_SUITE(furi_hal_serial_suite);
     return MU_EXIT_CODE;
 }
 
