@@ -12,6 +12,12 @@ except ImportError:
         return node
 
 
+# File name masks that pick up C and C++ sources and nothing else. A bare "*.c*"
+# also matches unrelated files whose name contains ".c", such as "*.csv" or
+# "__pycache__/*.cpython-312.pyc", and feeds them to the linker.
+DEFAULT_SOURCE_MASKS = ["*.c", "*.cc", "*.cpp", "*.cxx"]
+
+
 class FlipperManifestException(Exception):
     pass
 
@@ -45,7 +51,7 @@ class FlipperApplication:
     class Library:
         name: str
         fap_include_paths: List[str] = field(default_factory=lambda: ["."])
-        sources: List[str] = field(default_factory=lambda: ["*.c*"])
+        sources: List[str] = field(default_factory=lambda: list(DEFAULT_SOURCE_MASKS))
         cflags: List[str] = field(default_factory=list)
         cdefines: List[str] = field(default_factory=list)
         cincludes: List[str] = field(default_factory=list)
@@ -67,7 +73,7 @@ class FlipperApplication:
     resources: Optional[str] = None
 
     # .fap-specific
-    sources: List[str] = field(default_factory=lambda: ["*.c*"])
+    sources: List[str] = field(default_factory=lambda: list(DEFAULT_SOURCE_MASKS))
     fap_version: Union[str, Tuple[int]] = "0.1"
     fap_icon: Optional[str] = None
     fap_libs: List[str] = field(default_factory=list)
