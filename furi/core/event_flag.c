@@ -4,6 +4,8 @@
 
 #include <FreeRTOS.h>
 #include <event_groups.h>
+#include <task.h>
+#include <timers.h>
 
 #include "event_loop_link_i.h"
 
@@ -72,6 +74,30 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
     return rflags;
 }
 
+/**
+ * Runs in timer daemon context. Clears the event group bits then notifies the
+ * event loop, so the loop observes the cleared bits when it evaluates the
+ * FuriEventLoopEventOut level (fixes ISR lost-event delivery: see
+ * https://github.com/flipperdevices/flipperzero-firmware/issues/4417).
+ */
+static void
+    furi_event_flag_clear_bits_and_notify_callback(void* pvParameter1, uint32_t ulParameter2) {
+    FuriEventFlag* instance = (FuriEventFlag*)pvParameter1;
+    EventBits_t bits = (EventBits_t)ulParameter2;
+
+    /* xEventGroupClearBits() is a plain critical section and cannot wake or
+     * yield to another task. The scheduler is suspended anyway so that the
+     * clear and the notify execute as one atomic step with respect to other
+     * tasks, matching the task-context path below, which performs both under
+     * FURI_CRITICAL. */
+    vTaskSuspendAll();
+    EventBits_t rflags = xEventGroupClearBits((EventGroupHandle_t)instance, bits);
+    if(rflags & bits) {
+        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
+    }
+    (void)xTaskResumeAll();
+}
+
 uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
     furi_check(instance);
     furi_check((flags & FURI_EVENT_FLAG_INVALID_BITS) == 0U);
@@ -83,20 +109,27 @@ uint32_t furi_event_flag_clear(FuriEventFlag* instance, uint32_t flags) {
     if(FURI_IS_IRQ_MODE()) {
         rflags = xEventGroupGetBitsFromISR(hEventGroup);
 
-        if(xEventGroupClearBitsFromISR(hEventGroup, (EventBits_t)flags) == pdFAIL) {
+        /* Defer clear + notify to the timer daemon, like the stock
+         * xEventGroupClearBitsFromISR() does for the clear alone. Notifying
+         * here would wake the event loop before the daemon has applied the
+         * clear, and the loop would evaluate the level against stale bits. */
+        if(xTimerPendFunctionCallFromISR(
+               furi_event_flag_clear_bits_and_notify_callback,
+               (void*)instance,
+               (uint32_t)flags,
+               NULL) == pdFAIL) {
             rflags = (uint32_t)FuriStatusErrorResource;
         } else {
-            /* xEventGroupClearBitsFromISR only registers clear operation in the timer command queue. */
+            /* The pended callback only registers the clear operation in the timer command queue.  */
             /* Yield is required here otherwise clear operation might not execute in the right order. */
             /* See https://github.com/FreeRTOS/FreeRTOS-Kernel/issues/93 for more info.               */
             portYIELD_FROM_ISR(pdTRUE);
         }
     } else {
         rflags = xEventGroupClearBits(hEventGroup, (EventBits_t)flags);
-    }
-
-    if(rflags & flags) {
-        furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
+        if(rflags & flags) {
+            furi_event_loop_link_notify(&instance->event_loop_link, FuriEventLoopEventOut);
+        }
     }
     FURI_CRITICAL_EXIT();
 
