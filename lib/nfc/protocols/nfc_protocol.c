@@ -14,11 +14,11 @@
  *
  *                                                  (Start)
  *                                                     |
- *                            +------------------------+-----------+---------+------------+
- *                            |                        |           |         |            |
- *                       ISO14443-3A              ISO14443-3B    Felica  ISO15693-3    ST25TB
- *                            |                        |                     |
- *            +---------------+-------------+     ISO14443-4B              SLIX
+ *                            +------------------------+------------+---------+---------+----------+
+ *                            |                        |            |         |         |          |
+ *                       ISO14443-3A              ISO14443-3B    ST25TB    ASKCTX    FeliCa    ISO15693-3
+ *                            |                        |                                           |
+ *            +---------------+-------------+     ISO14443-4B                                     SLIX
  *            |               |             |
  *       ISO14443-4A   Mf Ultralight   Mf Classic
  *            |
@@ -166,6 +166,12 @@ static const NfcProtocolTreeNode nfc_protocol_nodes[NfcProtocolNum] = {
     [NfcProtocolType4Tag] =
         {
             .parent_protocol = NfcProtocolIso14443_4a,
+            .children_num = 0,
+            .children_protocol = NULL,
+        },
+    [NfcProtocolAskCtx] =
+        {
+            .parent_protocol = NfcProtocolInvalid,
             .children_num = 0,
             .children_protocol = NULL,
         },
