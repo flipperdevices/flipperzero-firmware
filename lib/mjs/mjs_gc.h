@@ -20,7 +20,7 @@ extern "C" {
  * bytes wide
  */
 #define GC_CELL_OP(arena, cell, op, arg) \
-    ((struct gc_cell*)(((char*)(cell))op((arg) * (arena)->cell_size)))
+    ((struct gc_cell*)(((uintptr_t)(cell))op((arg) * (arena)->cell_size)))
 
 struct gc_cell {
     union {
