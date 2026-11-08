@@ -863,6 +863,7 @@ int32_t loader_srv(void* p) {
                 break;
             case LoaderMessageTypeMenuClosed:
                 loader_do_menu_closed(loader);
+                loader_do_emit_queue_empty_event(loader);
                 break;
             case LoaderMessageTypeIsLocked:
                 message.bool_value->value = loader_do_is_locked(loader);
@@ -880,6 +881,7 @@ int32_t loader_srv(void* p) {
                 break;
             case LoaderMessageTypeApplicationsClosed:
                 loader_do_applications_closed(loader);
+                loader_do_emit_queue_empty_event(loader);
                 break;
             case LoaderMessageTypeSignal:
                 message.bool_value->value =
