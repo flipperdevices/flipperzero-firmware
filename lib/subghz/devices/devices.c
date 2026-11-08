@@ -116,6 +116,22 @@ const GpioPin* subghz_devices_get_data_gpio(const SubGhzDevice* device) {
     return ret;
 }
 
+void subghz_devices_set_channel(const SubGhzDevice* device, uint8_t channel) {
+    furi_check(device);
+    if(device->interconnect->set_channel) {
+        device->interconnect->set_channel(channel);
+    }
+}
+
+uint8_t subghz_devices_get_channel(const SubGhzDevice* device) {
+    uint8_t ret = 0xff;
+    furi_check(device);
+    if(device->interconnect->get_channel) {
+        ret = device->interconnect->get_channel();
+    }
+    return ret;
+}
+
 bool subghz_devices_set_tx(const SubGhzDevice* device) {
     bool ret = 0;
     furi_check(device);

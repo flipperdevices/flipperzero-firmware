@@ -492,6 +492,25 @@ uint32_t subghz_device_cc1101_ext_set_frequency(uint32_t value) {
     return real_frequency;
 }
 
+void subghz_device_cc1101_ext_set_channel(uint8_t channel) {
+    furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
+    cc1101_set_channel(subghz_device_cc1101_ext->spi_bus_handle, channel);
+    cc1101_calibrate(subghz_device_cc1101_ext->spi_bus_handle);
+
+    furi_check(cc1101_wait_status_state(
+        subghz_device_cc1101_ext->spi_bus_handle, CC1101StateIDLE, 10000));
+
+    furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
+}
+
+uint8_t subghz_device_cc1101_ext_get_channel() {
+    uint8_t channel;
+    furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
+    channel = cc1101_get_channel(subghz_device_cc1101_ext->spi_bus_handle);
+    furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
+    return channel;
+}
+
 static bool subghz_device_cc1101_ext_start_debug(void) {
     bool ret = false;
     if(subghz_device_cc1101_ext->async_mirror_pin != NULL) {

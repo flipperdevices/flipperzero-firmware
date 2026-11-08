@@ -27,6 +27,9 @@ typedef void (*SubGhzLoadPreset)(FuriHalSubGhzPreset preset, uint8_t* preset_dat
 typedef uint32_t (*SubGhzSetFrequency)(uint32_t frequency);
 typedef bool (*SubGhzIsFrequencyValid)(uint32_t frequency);
 
+typedef void (*SubGhzSetChannel)(uint8_t channel);
+typedef uint8_t (*SubGhzGetChannel)(void);
+
 typedef void (*SubGhzSetAsyncMirrorPin)(const GpioPin* gpio);
 typedef const GpioPin* (*SubGhzGetDataGpio)(void);
 
@@ -63,6 +66,9 @@ typedef struct {
     SubGhzIsFrequencyValid is_frequency_valid;
     SubGhzSetAsyncMirrorPin set_async_mirror_pin;
     SubGhzGetDataGpio get_data_gpio;
+
+    SubGhzSetChannel set_channel;
+    SubGhzGetChannel get_channel;
 
     SubGhzSetTx set_tx;
     SubGhzFlushTx flush_tx;

@@ -172,6 +172,9 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
  */
 uint32_t furi_hal_subghz_set_frequency(uint32_t value);
 
+void furi_hal_subghz_set_channel(uint8_t channel);
+uint8_t furi_hal_subghz_get_channel(void);
+
 /** Set path
  *
  * @param      path  path to use

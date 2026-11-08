@@ -28,6 +28,9 @@ bool subghz_devices_is_frequency_valid(const SubGhzDevice* device, uint32_t freq
 void subghz_devices_set_async_mirror_pin(const SubGhzDevice* device, const GpioPin* gpio);
 const GpioPin* subghz_devices_get_data_gpio(const SubGhzDevice* device);
 
+void subghz_devices_set_channel(const SubGhzDevice* device, uint8_t channel);
+uint8_t subghz_devices_get_channel(const SubGhzDevice* device);
+
 bool subghz_devices_set_tx(const SubGhzDevice* device);
 void subghz_devices_flush_tx(const SubGhzDevice* device);
 bool subghz_devices_start_async_tx(const SubGhzDevice* device, void* callback, void* context);
