@@ -28,6 +28,10 @@ uint32_t furi_hal_cortex_instructions_per_microsecond(void) {
     return FURI_HAL_CORTEX_INSTRUCTIONS_PER_MICROSECOND;
 }
 
+uint32_t furi_hal_cortex_get_cycles(void) {
+    return DWT->CYCCNT;
+}
+
 FURI_WARN_UNUSED FuriHalCortexTimer furi_hal_cortex_timer_get(uint32_t timeout_us) {
     furi_check(timeout_us < (UINT32_MAX / FURI_HAL_CORTEX_INSTRUCTIONS_PER_MICROSECOND));
 

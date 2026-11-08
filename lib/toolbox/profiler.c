@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <m-dict.h>
 #include <furi.h>
-#include <furi_hal_gpio.h>
+#include <furi_hal_cortex.h>
 
 typedef struct {
     uint32_t start;
@@ -46,14 +46,14 @@ void profiler_start(Profiler* profiler, const char* key) {
     }
 
     furi_check(record->start == 0);
-    record->start = DWT->CYCCNT;
+    record->start = furi_hal_cortex_get_cycles();
 }
 
 void profiler_stop(Profiler* profiler, const char* key) {
     ProfilerRecord* record = ProfilerRecordDict_get(profiler->records, key);
     furi_check(record != NULL);
 
-    record->length += DWT->CYCCNT - record->start;
+    record->length += furi_hal_cortex_get_cycles() - record->start;
     record->start = 0;
     record->count++;
 }
@@ -69,9 +69,9 @@ void profiler_dump(Profiler* profiler) {
         uint32_t count = itref->value.count;
 
         uint32_t clocks = itref->value.length;
-        double us = (double)clocks / (double)64.0;
-        double ms = (double)clocks / (double)64000.0;
-        double s = (double)clocks / (double)64000000.0;
+        double us = (double)clocks / (double)furi_hal_cortex_instructions_per_microsecond();
+        double ms = us / (double)1000.0;
+        double s = us / (double)1000000.0;
 
         printf("\t%s[%lu]: %f s, %f ms, %f us, %lu clk\r\n", itref->key, count, s, ms, us, clocks);
 
