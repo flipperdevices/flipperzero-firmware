@@ -1,6 +1,7 @@
 #pragma once
 
 #include "power.h"
+#include "../power_settings.h"
 
 #include <gui/gui.h>
 #include <gui/view_holder.h>
@@ -10,6 +11,7 @@
 
 #include "views/power_off.h"
 #include "views/power_unplug_usb.h"
+#include "views/power_battery_low.h"
 
 typedef enum {
     PowerStateNotCharging,
@@ -26,16 +28,22 @@ struct Power {
     ViewPort* battery_view_port;
     PowerOff* view_power_off;
     PowerUnplugUsb* view_power_unplug_usb;
+    PowerBatteryLow* view_power_battery_low;
 
     PowerEvent event;
     PowerState state;
     PowerInfo info;
+    PowerSettings settings;
 
     bool battery_low;
     bool show_battery_low_warning;
+    bool battery_low_alert_armed;
+    bool battery_low_alert_shown;
     bool is_otg_requested;
     uint8_t battery_level;
     uint8_t power_off_timeout;
+    uint8_t battery_low_alert_timeout;
+    uint8_t battery_low_alert_level;
 };
 
 typedef enum {
@@ -50,6 +58,10 @@ typedef enum {
     PowerMessageTypeIsBatteryHealthy,
     PowerMessageTypeShowBatteryLowWarning,
     PowerMessageTypeSwitchOTG,
+    PowerMessageTypeGetSettings,
+    PowerMessageTypeSetSettings,
+    PowerMessageTypeReloadSettings,
+    PowerMessageTypeHideBatteryLowAlert,
 } PowerMessageType;
 
 typedef struct {
@@ -58,6 +70,8 @@ typedef struct {
         PowerBootMode boot_mode;
         PowerInfo* power_info;
         bool* bool_param;
+        PowerSettings* settings;
+        const PowerSettings* csettings;
     };
     FuriApiLock lock;
 } PowerMessage;
