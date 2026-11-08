@@ -12,7 +12,7 @@ In this guide, we'll install the JavaScript SDK and learn how to run JavaScript 
 
 ## How to get JavaScript SDK
 
-The JavaScript SDK for Flipper Zero is distributed as an [NPM package](npmjs.com/package/\@flipperdevices/fz-sdk), so you can install it using a package manager like npm, pnpm, or yarn. You'll also need Node.js, a JavaScript runtime environment required for the NPM package manager to work.
+The JavaScript SDK for Flipper Zero is distributed as an [NPM package](https://www.npmjs.com/package/@flipperdevices/fz-sdk), so you can install it using a package manager like npm, pnpm, or yarn. You'll also need Node.js, a JavaScript runtime environment required for the NPM package manager to work.
 
 > [!note]
 > In this guide, we'll use **npm**, the default package manager for Node.js.
@@ -78,6 +78,7 @@ Some things to look out for:
 - Importing modules:
   - Instead of `let module = require("module");`
   - You will use `import * as module from "@flipperdevices/fz-sdk/module";`
+  - The firmware's module loader removes the `@flipperdevices/fz-sdk/` prefix, so the package import resolves to the same runtime module as `require("module")`.
 - Multiple source code files:
   - The Flipper JavaScript SDK does not yet support having multiple `.ts` files and importing them
   - You can use `load()`, but this will not benefit from TypeScript type checking
