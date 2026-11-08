@@ -26,6 +26,7 @@
 #include <nfc/protocols/st25tb/st25tb.h>
 #include <nfc/protocols/ntag4xx/ntag4xx.h>
 #include <nfc/protocols/type_4_tag/type_4_tag.h>
+#include <nfc/protocols/legic_prime/legic_prime_device_defs.h>
 
 /**
  * @brief List of registered NFC device implementations.
@@ -48,5 +49,6 @@ const NfcDeviceBase* const nfc_devices[NfcProtocolNum] = {
     [NfcProtocolSt25tb] = &nfc_device_st25tb,
     [NfcProtocolNtag4xx] = &nfc_device_ntag4xx,
     [NfcProtocolType4Tag] = &nfc_device_type_4_tag,
+    [NfcProtocolLegicPrime] = &nfc_device_legic_prime,
     /* Add new protocols here */
 };

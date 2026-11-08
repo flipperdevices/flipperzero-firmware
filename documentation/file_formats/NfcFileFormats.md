@@ -274,6 +274,31 @@ This file format is used to store the NFC-A and Mifare DESFire specific data of 
 Version differences:
 None, there are no versions yet.
 
+## LEGIC Prime
+
+### Example
+
+    Filetype: Flipper NFC device
+    Version: 4
+    # Device type can be ISO14443-3A, ISO14443-3B, ISO14443-4A, NTAG/Ultralight, Mifare Classic, Mifare DESFire, LEGIC Prime
+    Device type: LEGIC Prime
+    # UID is common for all formats
+    UID: 01 02 03 04
+    # LEGIC Prime specific data
+    Legic Prime Type: MIM22
+    Data: 01 02 03 04 CB FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+### Description
+
+This file format is used to store the memory of a LEGIC Prime tag.
+
+- `Legic Prime Type`: `MIM22`, `MIM256` or `MIM1024`; it sets the memory size (22, 256 or 1024 bytes).
+- `Data`: the whole memory as read from the tag, byte 0 first. Bytes 0-3 are the MCD and MSN, which form the UID. Byte 4 is the MCC (CRC-8 over bytes 0-3). Bytes 5-6 are the DCF. Every byte from 22 on is stored as on the tag, XORed with the MCC (as in a Proxmark3 dump without `--de`), so it changes with the UID.
+- `UID`: the MCD and MSN (bytes 0-3 of `Data`).
+
+Version differences:
+None, there are no versions yet.
+
 ## Mifare Classic Dictionary
 
 ### Example

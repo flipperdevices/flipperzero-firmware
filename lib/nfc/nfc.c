@@ -73,6 +73,7 @@ static const FuriHalNfcTech nfc_tech_table[NfcModeNum][NfcTechNum] = {
             [NfcTechIso14443b] = FuriHalNfcTechIso14443b,
             [NfcTechIso15693] = FuriHalNfcTechIso15693,
             [NfcTechFelica] = FuriHalNfcTechFelica,
+            [NfcTechLegic] = FuriHalNfcTechLegic,
         },
     [NfcModeListener] =
         {
@@ -80,6 +81,7 @@ static const FuriHalNfcTech nfc_tech_table[NfcModeNum][NfcTechNum] = {
             [NfcTechIso14443b] = FuriHalNfcTechInvalid,
             [NfcTechIso15693] = FuriHalNfcTechIso15693,
             [NfcTechFelica] = FuriHalNfcTechFelica,
+            [NfcTechLegic] = FuriHalNfcTechLegic,
         },
 };
 
@@ -678,6 +680,89 @@ void nfc_felica_listener_timer_anticol_stop(Nfc* instance) {
     if(furi_hal_nfc_timer_block_tx_is_running()) {
         furi_hal_nfc_timer_block_tx_stop();
     }
+}
+
+void nfc_legic_poller_set_rx_bits(Nfc* instance, size_t bits) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
+
+    furi_hal_nfc_legic_poller_set_rx_bits(bits);
+}
+
+void nfc_legic_poller_set_rx_ack(Nfc* instance, size_t window) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
+
+    furi_hal_nfc_legic_poller_set_rx_ack(window);
+}
+
+void nfc_legic_poller_set_rx_reduced_gain(Nfc* instance, bool reduced) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
+
+    furi_hal_nfc_legic_poller_set_rx_reduced_gain(reduced);
+}
+
+void nfc_legic_poller_set_next(
+    Nfc* instance,
+    const uint8_t* first,
+    size_t first_bits,
+    const uint8_t* second,
+    size_t second_bits) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
+    furi_check(first);
+
+    furi_hal_nfc_legic_poller_set_next(first, first_bits, second, second_bits);
+}
+
+bool nfc_legic_poller_next_sent(Nfc* instance) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
+
+    return furi_hal_nfc_legic_poller_next_sent();
+}
+
+void nfc_legic_poller_claim_next(Nfc* instance) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
+
+    furi_hal_nfc_legic_poller_claim_next();
+}
+
+void nfc_legic_poller_cancel_next(Nfc* instance) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModePoller);
+
+    furi_hal_nfc_legic_poller_cancel_next();
+}
+
+void nfc_legic_listener_set_ref_to_frame_end(Nfc* instance, uint32_t extra_fc) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModeListener);
+
+    furi_hal_nfc_legic_listener_set_ref_to_frame_end(extra_fc);
+}
+
+void nfc_legic_listener_set_ref_to_tx_end(Nfc* instance) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModeListener);
+
+    furi_hal_nfc_legic_listener_set_ref_to_tx_end();
+}
+
+uint32_t nfc_legic_listener_get_elapsed_fc(Nfc* instance) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModeListener);
+
+    return furi_hal_nfc_legic_listener_get_elapsed_fc();
+}
+
+void nfc_legic_listener_set_tx_delay(Nfc* instance, uint32_t chips) {
+    furi_check(instance);
+    furi_check(instance->mode == NfcModeListener);
+
+    furi_hal_nfc_legic_listener_set_tx_delay(chips);
 }
 
 #endif // FW_CFG_unit_tests

@@ -107,6 +107,16 @@ void furi_hal_nfc_timers_deinit(void);
 uint32_t furi_hal_nfc_get_irq(const FuriHalSpiBusHandle* handle);
 
 /**
+ * @brief Get the time of the last interrupt from the NFC hardware.
+ *
+ * Taken in the interrupt handler, before the event thread is woken, so a
+ * technology can tell how late it reacted to the interrupt.
+ *
+ * @returns DWT cycle count at the last rising edge of the IRQ line.
+ */
+uint32_t furi_hal_nfc_get_irq_timestamp(void);
+
+/**
  * @brief Wait until a specified type of interrupt occurs.
  *
  * @param[in,out] handle pointer to the SPI handle associated with the NFC chip.
@@ -170,6 +180,16 @@ FuriHalNfcError furi_hal_nfc_common_fifo_rx(
     uint8_t* rx_data,
     size_t rx_data_size,
     size_t* rx_bits);
+
+/**
+ * @brief Prepare the chip for a transmission in poller mode.
+ *
+ * Clears the FIFO, disables parity handling and enables the transceive
+ * interrupts. The caller then loads the FIFO and issues the transmit command.
+ *
+ * @param[in,out] handle pointer to the SPI handle associated with the NFC chip.
+ */
+void furi_hal_nfc_poller_tx_prepare(const FuriHalSpiBusHandle* handle);
 
 /**
  * @brief Transmit data in poller mode.

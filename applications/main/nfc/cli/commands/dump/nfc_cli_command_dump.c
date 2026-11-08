@@ -18,6 +18,7 @@
 #include "protocols/st25tb/nfc_cli_dump_st25tb.h"
 #include "protocols/ntag4xx/nfc_cli_dump_ntag4xx.h"
 #include "protocols/type_4_tag/nfc_cli_dump_type_4_tag.h"
+#include "protocols/legic_prime/nfc_cli_dump_legic_prime.h"
 
 #include <datetime.h>
 #include <furi_hal_rtc.h>
@@ -30,6 +31,9 @@
 #define NFC_CLI_DEFAULT_FILENAME_PREFIX "dump"
 
 #define NFC_CLI_DUMP_DEFAULT_TIMEOUT (5000)
+// How often the wait for the poller looks for Ctrl+C; the wait before the
+// time limit is cut short to end on it.
+#define NFC_CLI_DUMP_POLL_MS         (100)
 
 #define TAG "DUMP"
 
@@ -39,6 +43,7 @@ static const char* nfc_cli_dump_error_names[NfcCliDumpErrorNum] = {
     [NfcCliDumpErrorAuthFailed] = "authentication failed",
     [NfcCliDumpErrorTimeout] = "timeout",
     [NfcCliDumpErrorFailedToRead] = "failed to read",
+    [NfcCliDumpErrorAborted] = "aborted",
 };
 
 static NfcCliActionContext* nfc_cli_dump_alloc_ctx(Nfc* nfc) {
@@ -82,21 +87,31 @@ static bool nfc_cli_dump_parse_filename_key(FuriString* value, void* output) {
     return true;
 }
 
-NfcGenericCallback protocol_poller_callbacks[NfcProtocolNum] = {
-    [NfcProtocolIso14443_3a] = nfc_cli_dump_poller_callback_iso14443_3a,
-    [NfcProtocolIso14443_3b] = nfc_cli_dump_poller_callback_iso14443_3b,
-    [NfcProtocolIso14443_4a] = nfc_cli_dump_poller_callback_iso14443_4a,
-    [NfcProtocolIso14443_4b] = nfc_cli_dump_poller_callback_iso14443_4b,
-    [NfcProtocolIso15693_3] = nfc_cli_dump_poller_callback_iso15693_3,
-    [NfcProtocolFelica] = nfc_cli_dump_poller_callback_felica,
-    [NfcProtocolMfUltralight] = nfc_cli_dump_poller_callback_mf_ultralight,
-    [NfcProtocolMfClassic] = nfc_cli_dump_poller_callback_mf_classic,
-    [NfcProtocolMfPlus] = nfc_cli_dump_poller_callback_mf_plus,
-    [NfcProtocolMfDesfire] = nfc_cli_dump_poller_callback_mf_desfire,
-    [NfcProtocolSlix] = nfc_cli_dump_poller_callback_slix,
-    [NfcProtocolSt25tb] = nfc_cli_dump_poller_callback_st25tb,
-    [NfcProtocolNtag4xx] = nfc_cli_dump_poller_callback_ntag4xx,
-    [NfcProtocolType4Tag] = nfc_cli_dump_poller_callback_type_4_tag,
+typedef struct {
+    NfcGenericCallback callback;
+    // The poller ends every read itself, with success or failure, and bounds
+    // how many sessions it spends on it: no time limit applies unless
+    // --timeout is given, and Ctrl+C aborts the wait.
+    bool poller_ends_read;
+} NfcCliDumpProtocol;
+
+static const NfcCliDumpProtocol nfc_cli_dump_protocols[NfcProtocolNum] = {
+    [NfcProtocolIso14443_3a] = {.callback = nfc_cli_dump_poller_callback_iso14443_3a},
+    [NfcProtocolIso14443_3b] = {.callback = nfc_cli_dump_poller_callback_iso14443_3b},
+    [NfcProtocolIso14443_4a] = {.callback = nfc_cli_dump_poller_callback_iso14443_4a},
+    [NfcProtocolIso14443_4b] = {.callback = nfc_cli_dump_poller_callback_iso14443_4b},
+    [NfcProtocolIso15693_3] = {.callback = nfc_cli_dump_poller_callback_iso15693_3},
+    [NfcProtocolFelica] = {.callback = nfc_cli_dump_poller_callback_felica},
+    [NfcProtocolMfUltralight] = {.callback = nfc_cli_dump_poller_callback_mf_ultralight},
+    [NfcProtocolMfClassic] = {.callback = nfc_cli_dump_poller_callback_mf_classic},
+    [NfcProtocolMfPlus] = {.callback = nfc_cli_dump_poller_callback_mf_plus},
+    [NfcProtocolMfDesfire] = {.callback = nfc_cli_dump_poller_callback_mf_desfire},
+    [NfcProtocolSlix] = {.callback = nfc_cli_dump_poller_callback_slix},
+    [NfcProtocolSt25tb] = {.callback = nfc_cli_dump_poller_callback_st25tb},
+    [NfcProtocolNtag4xx] = {.callback = nfc_cli_dump_poller_callback_ntag4xx},
+    [NfcProtocolType4Tag] = {.callback = nfc_cli_dump_poller_callback_type_4_tag},
+    [NfcProtocolLegicPrime] =
+        {.callback = nfc_cli_dump_poller_callback_legic_prime, .poller_ends_read = true},
 };
 
 static void nfc_cli_dump_generate_filename(FuriString* file_path) {
@@ -169,15 +184,54 @@ static size_t nfc_cli_dump_set_protocol(NfcCliDumpContext* instance) {
     return protocol_count;
 }
 
-static bool nfc_cli_dump_card(NfcCliDumpContext* instance) {
+static bool nfc_cli_dump_card(NfcCliDumpContext* instance, PipeSide* pipe) {
     instance->poller = nfc_poller_alloc(instance->nfc, instance->desired_protocol);
-    NfcGenericCallback callback = protocol_poller_callbacks[instance->desired_protocol];
-    if(callback) {
-        nfc_poller_start(instance->poller, callback, instance);
-        FuriStatus status = furi_semaphore_acquire(instance->sem_done, instance->timeout);
-
-        if(status == FuriStatusErrorTimeout) instance->result = NfcCliDumpErrorTimeout;
+    const NfcCliDumpProtocol* protocol = &nfc_cli_dump_protocols[instance->desired_protocol];
+    if(protocol->callback) {
+        const bool time_limit = instance->timeout_set || !protocol->poller_ends_read;
+        if(!time_limit) printf("Press Ctrl+C to abort\r\n");
+        NfcCliDumpError stopped = NfcCliDumpErrorNone;
+        const uint32_t step = furi_ms_to_ticks(NFC_CLI_DUMP_POLL_MS);
+        const uint32_t start = furi_get_tick();
+        const uint32_t limit = furi_ms_to_ticks(instance->timeout);
+        nfc_poller_start(instance->poller, protocol->callback, instance);
+        // Short waits, so Ctrl+C or a closed pipe ends the dump as it ends
+        // emulate, field and scanner.  The last wait ends at the time limit,
+        // so --timeout holds to the tick.  Every pass looks for Ctrl+C and a
+        // closed pipe before it tests the limit: a Ctrl+C typed during the
+        // last wait is an abort, not a timeout, and -t 0 times out before any
+        // wait unless a Ctrl+C is already pending or the pipe is closed.
+        while(true) {
+            if(cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
+                stopped = NfcCliDumpErrorAborted;
+                break;
+            }
+            uint32_t wait_ticks = step;
+            if(time_limit) {
+                const uint32_t elapsed = furi_get_tick() - start;
+                if(elapsed >= limit) {
+                    stopped = NfcCliDumpErrorTimeout;
+                    break;
+                }
+                wait_ticks = MIN(wait_ticks, limit - elapsed);
+            }
+            if(furi_semaphore_acquire(instance->sem_done, wait_ticks) == FuriStatusOk) break;
+        }
+        // Returns once the poller's current step is done (for LEGIC at most
+        // one session, ~1.8 s), so the callback can't run after this.
         nfc_poller_stop(instance->poller);
+        // A result the poller reported before it stopped stands, even one
+        // that came after the last timed-out wait: the Ctrl+C or time limit
+        // then came too late and is dropped, and the dump is saved or its
+        // failure shown.
+        // Otherwise result still holds its initial None, and the abort or
+        // timeout must replace it, or the save would run: it fails a
+        // furi_check on a device that got no data and writes a partial dump
+        // on one whose callback set data before it reported.
+        if(stopped != NfcCliDumpErrorNone &&
+           furi_semaphore_acquire(instance->sem_done, 0) != FuriStatusOk) {
+            instance->result = stopped;
+        }
     }
     nfc_poller_free(instance->poller);
 
@@ -185,7 +239,7 @@ static bool nfc_cli_dump_card(NfcCliDumpContext* instance) {
 }
 
 static void nfc_cli_dump_execute(PipeSide* pipe, NfcCliActionContext* context) {
-    UNUSED(pipe);
+    furi_assert(pipe);
     furi_assert(context);
     NfcCliDumpContext* instance = context;
     do {
@@ -197,10 +251,13 @@ static void nfc_cli_dump_execute(PipeSide* pipe, NfcCliActionContext* context) {
         printf("Dumping as \"%s\"\r\n", nfc_cli_get_protocol_name(instance->desired_protocol));
         if(protocol_count > 1) printf("Use \'-p\' key to specify another protocol\r\n");
 
-        if(nfc_cli_dump_card(instance)) {
+        if(nfc_cli_dump_card(instance, pipe)) {
             const char* path = furi_string_get_cstr(instance->file_path);
             if(nfc_device_save(instance->nfc_device, path)) {
                 printf("Dump saved to \'%s\'\r\n", path);
+            } else {
+                printf(
+                    ANSI_FG_RED "Error: failed to save the dump to \'%s\'\r\n" ANSI_RESET, path);
             }
         } else {
             printf(
@@ -225,6 +282,7 @@ static const NfcProtocolNameValuePair supported_protocols[] = {
     {.name = "st25", .value = NfcProtocolSt25tb},
     {.name = "ntag4", .value = NfcProtocolNtag4xx},
     {.name = "t4t", .value = NfcProtocolType4Tag},
+    {.name = "legic", .value = NfcProtocolLegicPrime},
 };
 
 static bool nfc_cli_dump_parse_protocol(FuriString* value, void* output) {
@@ -272,7 +330,9 @@ bool nfc_cli_dump_parse_timeout(FuriString* value, NfcCliActionContext* output) 
     NfcCliDumpContext* ctx = output;
 
     StrintParseError err = strint_to_uint32(furi_string_get_cstr(value), NULL, &ctx->timeout, 10);
-    return err == StrintParseNoError;
+    if(err != StrintParseNoError) return false;
+    ctx->timeout_set = true;
+    return true;
 }
 
 const NfcCliKeyDescriptor dump_keys[] = {
