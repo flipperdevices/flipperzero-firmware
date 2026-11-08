@@ -84,6 +84,12 @@ static void nfc_cli_action_free(NfcCliProcessorContext* instance) {
         instance->action->free(instance->action_context);
     }
     instance->action = NULL;
+    instance->action_context = NULL;
+}
+
+void nfc_cli_command_processor_release_action(NfcCliProcessorContext* instance) {
+    furi_assert(instance);
+    nfc_cli_action_free(instance);
 }
 
 static NfcCliProcessorError
