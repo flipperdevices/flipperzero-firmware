@@ -23,6 +23,7 @@
 #include "st25tb/st25tb.h"
 #include "ntag4xx/ntag4xx.h"
 #include "type_4_tag/type_4_tag.h"
+#include "innovatron/innovatron.h"
 
 /**
  * @brief Array of pointers to concrete protocol support implementations.
@@ -47,5 +48,6 @@ const NfcProtocolSupportBase* nfc_protocol_support[NfcProtocolNum] = {
     [NfcProtocolSt25tb] = &nfc_protocol_support_st25tb,
     [NfcProtocolNtag4xx] = &nfc_protocol_support_ntag4xx,
     [NfcProtocolType4Tag] = &nfc_protocol_support_type_4_tag,
+    [NfcProtocolInnovatron] = &nfc_protocol_support_innovatron,
     /* Add new protocol support implementations here */
 };
