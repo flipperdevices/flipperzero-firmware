@@ -4,6 +4,7 @@
 #include <FreeRTOS.h>
 #include <FreeRTOS-Kernel/include/queue.h>
 #include <task.h>
+#include <furi_hal_interrupt.h>
 
 #include <rpc/rpc_i.h>
 #include <flipper.pb.h>
@@ -25,6 +26,7 @@ static constexpr auto unit_tests_api_table = sort(create_array_t<sym_entry>(
         BaseType_t,
         (TaskHandle_t, UBaseType_t, uint32_t, eNotifyAction, uint32_t*)),
     API_METHOD(xTaskGetCurrentTaskHandle, TaskHandle_t, ()),
+    API_METHOD(furi_hal_interrupt_trigger_pending, void, (FuriHalInterruptId)),
     API_METHOD(vQueueDelete, void, (QueueHandle_t)),
     API_METHOD(
         xQueueGenericCreateStatic,
