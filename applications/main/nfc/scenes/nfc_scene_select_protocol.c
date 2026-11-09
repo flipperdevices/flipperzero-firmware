@@ -50,7 +50,11 @@ bool nfc_scene_select_protocol_on_event(void* context, SceneManagerEvent event) 
 
     if(event.type == SceneManagerEventTypeCustom) {
         nfc_detected_protocols_select(instance->detected_protocols, event.event);
-        scene_manager_next_scene(instance->scene_manager, NfcSceneRead);
+        const NfcProtocol protocol =
+            nfc_detected_protocols_get_selected(instance->detected_protocols);
+        if(nfc_check_free_memory_for_read(instance, protocol)) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneRead);
+        }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeBack) {
         if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneDetect)) {
