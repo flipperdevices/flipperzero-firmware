@@ -56,11 +56,13 @@ bool nfc_scene_mf_ultralight_unlock_warn_on_event(void* context, SceneManagerEve
     if((type == MfUltralightAuthTypeReader) || (type == MfUltralightAuthTypeManual)) {
         if(event.type == SceneManagerEventTypeCustom) {
             if(event.event == DialogExResultRight) {
-                const NfcProtocol mfu_protocol[] = {NfcProtocolMfUltralight};
-                nfc_detected_protocols_set(
-                    nfc->detected_protocols, mfu_protocol, COUNT_OF(mfu_protocol));
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
-                dolphin_deed(DolphinDeedNfcRead);
+                if(nfc_check_free_memory_for_read(nfc, NfcProtocolMfUltralight)) {
+                    const NfcProtocol mfu_protocol[] = {NfcProtocolMfUltralight};
+                    nfc_detected_protocols_set(
+                        nfc->detected_protocols, mfu_protocol, COUNT_OF(mfu_protocol));
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+                    dolphin_deed(DolphinDeedNfcRead);
+                }
                 consumed = true;
             } else if(event.event == DialogExResultLeft) {
                 if(type == MfUltralightAuthTypeReader) {
@@ -77,11 +79,13 @@ bool nfc_scene_mf_ultralight_unlock_warn_on_event(void* context, SceneManagerEve
     } else {
         if(event.type == SceneManagerEventTypeCustom) {
             if(event.event == DialogExResultCenter) {
-                const NfcProtocol mfu_protocol[] = {NfcProtocolMfUltralight};
-                nfc_detected_protocols_set(
-                    nfc->detected_protocols, mfu_protocol, COUNT_OF(mfu_protocol));
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
-                dolphin_deed(DolphinDeedNfcRead);
+                if(nfc_check_free_memory_for_read(nfc, NfcProtocolMfUltralight)) {
+                    const NfcProtocol mfu_protocol[] = {NfcProtocolMfUltralight};
+                    nfc_detected_protocols_set(
+                        nfc->detected_protocols, mfu_protocol, COUNT_OF(mfu_protocol));
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+                    dolphin_deed(DolphinDeedNfcRead);
+                }
                 consumed = true;
             }
         }
