@@ -3,6 +3,7 @@
 #include <storage/storage.h>
 
 #include <nfc/nfc_device.h>
+#include <nfc/nfc_common.h>
 #include <nfc/helpers/nfc_data_generator.h>
 #include <nfc/nfc_poller.h>
 #include <nfc/nfc_listener.h>
@@ -13,6 +14,7 @@
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 #include <nfc/protocols/felica/felica.h>
+#include <nfc/protocols/felica_seac/felica_seac.h>
 #include <nfc/protocols/felica/felica_poller_sync.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller.h>
 #include <nfc/protocols/iso15693_3/iso15693_3_poller.h>
@@ -205,6 +207,53 @@ MU_TEST(mf_classic_4k_4b_file_test) {
 
 MU_TEST(mf_classic_4k_7b_file_test) {
     nfc_file_test_with_generator(NfcDataGeneratorTypeMfClassic4k_7b);
+}
+
+MU_TEST(felica_seac_file_test) {
+    NfcDevice* device = nfc_device_alloc();
+    const FelicaSeacData data = {
+        .idm = {0x01, 0x2E, 0x27, 0x11, 0x22, 0x33, 0x44, 0x55},
+        .context = {0x01, 0x00},
+    };
+
+    nfc_device_set_data(device, NfcProtocolFelicaSeac, &data);
+    nfc_test_save_and_load(device);
+    nfc_device_free(device);
+}
+
+MU_TEST(felica_seac_invalid_file_test) {
+    const struct {
+        uint8_t uid_size;
+        uint8_t context_size;
+    } cases[] = {{0, 2}, {7, 2}, {9, 2}, {8, 0}, {8, 1}, {8, 3}};
+    const uint8_t bytes[9] = {0x01, 0x2E, 0x27, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
+    NfcDevice* device = nfc_device_alloc();
+    FlipperFormat* ff = flipper_format_file_alloc(nfc_test->storage);
+
+    for(size_t i = 0; i < COUNT_OF(cases); i++) {
+        mu_assert(flipper_format_file_open_always(ff, NFC_TEST_NFC_DEV_PATH), "open file failed");
+        mu_assert(
+            flipper_format_write_header_cstr(ff, "Flipper NFC device", NFC_CURRENT_FORMAT_VERSION),
+            "write header failed");
+        mu_assert(
+            flipper_format_write_string_cstr(ff, "Device type", "FeliCa SEAC"),
+            "write device type failed");
+        if(cases[i].uid_size) {
+            mu_assert(
+                flipper_format_write_hex(ff, "UID", bytes, cases[i].uid_size), "write UID failed");
+        }
+        if(cases[i].context_size) {
+            mu_assert(
+                flipper_format_write_hex(ff, "Context", bytes, cases[i].context_size),
+                "write context failed");
+        }
+        flipper_format_file_close(ff);
+        mu_assert(!nfc_device_load(device, NFC_TEST_NFC_DEV_PATH), "accepted invalid SEAC file");
+    }
+
+    mu_assert(storage_simply_remove(nfc_test->storage, NFC_TEST_NFC_DEV_PATH), "remove failed");
+    flipper_format_free(ff);
+    nfc_device_free(device);
 }
 
 MU_TEST(iso14443_3a_reader) {
@@ -1049,6 +1098,8 @@ MU_TEST_SUITE(nfc) {
     MU_RUN_TEST(mf_classic_1k_7b_file_test);
     MU_RUN_TEST(mf_classic_4k_4b_file_test);
     MU_RUN_TEST(mf_classic_4k_7b_file_test);
+    MU_RUN_TEST(felica_seac_file_test);
+    MU_RUN_TEST(felica_seac_invalid_file_test);
 
     MU_RUN_TEST(mf_classic_reader);
     MU_RUN_TEST(mf_classic_write);
