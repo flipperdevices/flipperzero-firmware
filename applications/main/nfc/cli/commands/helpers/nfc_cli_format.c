@@ -15,6 +15,7 @@ static const char* protocol_names[NfcProtocolNum] = {
     [NfcProtocolSt25tb] = "St25tb",
     [NfcProtocolNtag4xx] = "Ntag4xx",
     [NfcProtocolType4Tag] = "Type 4 Tag",
+    [NfcProtocolInnovatron] = "Innovatron",
 };
 
 const char* nfc_cli_get_protocol_name(NfcProtocol protocol) {
