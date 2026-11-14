@@ -243,6 +243,26 @@ NfcCommand mf_classic_handler_check_write_conditions(MfClassicPoller* instance) 
             write_ctx->key_type_write = MfClassicKeyTypeB;
         } else if(mf_classic_is_value_block(sec_tr, write_ctx->current_block)) {
             write_ctx->is_value_block = true;
+            // For value blocks, find a key type with read access
+            if(mf_classic_is_allowed_access_data_block(
+                   sec_tr, write_ctx->current_block, MfClassicKeyTypeA, MfClassicActionDataRead)) {
+                write_ctx->key_type_read = MfClassicKeyTypeA;
+                write_ctx->key_type_write = MfClassicKeyTypeA;
+            } else if(mf_classic_is_allowed_access_data_block(
+                          sec_tr,
+                          write_ctx->current_block,
+                          MfClassicKeyTypeB,
+                          MfClassicActionDataRead)) {
+                write_ctx->key_type_read = MfClassicKeyTypeB;
+                write_ctx->key_type_write = MfClassicKeyTypeB;
+            } else {
+                FURI_LOG_D(TAG, "No read access to value block %d", write_ctx->current_block);
+                write_ctx->current_block++;
+                break;
+            }
+            write_ctx->need_halt_before_write = false;
+            instance->state = MfClassicPollerStateReadBlock;
+            break;
         } else {
             FURI_LOG_D(TAG, "Not allowed to write block %d", write_ctx->current_block);
             write_ctx->current_block++;
