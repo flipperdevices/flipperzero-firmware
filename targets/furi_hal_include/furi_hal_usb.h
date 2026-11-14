@@ -6,6 +6,19 @@
 extern "C" {
 #endif
 
+/** Max packet size of the control endpoint, as passed to usbd_init.
+ * A FuriHalUsbInterface must use it for bMaxPacketSize0 in its device descriptor. */
+#define USB_EP0_SIZE 8
+
+/** String descriptor indices served by furi_hal_usb for the active interface:
+ * str_manuf_descr, str_prod_descr and str_serial_descr of FuriHalUsbInterface. */
+enum UsbDevDescStr {
+    UsbDevLang = 0,
+    UsbDevManuf = 1,
+    UsbDevProduct = 2,
+    UsbDevSerial = 3,
+};
+
 typedef struct FuriHalUsbInterface FuriHalUsbInterface;
 
 struct FuriHalUsbInterface {
