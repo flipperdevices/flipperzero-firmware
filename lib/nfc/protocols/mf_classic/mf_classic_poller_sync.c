@@ -489,8 +489,14 @@ MfClassicError
     if((sectors_read == 0) && (keys_found == 0)) {
         error = MfClassicErrorNotPresent;
     } else {
+        MfClassicType requested_type = data->type;
         mf_classic_copy(data, mfc_data);
-        error = mf_classic_is_card_read(mfc_data) ? MfClassicErrorNone : MfClassicErrorPartialRead;
+        // Callers pass keys for the type from sync detection, which reports EV1 as 1K. Keep
+        // that type so that a read without the hidden sectors counts as complete.
+        if(requested_type == MfClassicType1k && data->type == MfClassicType1kEv1) {
+            data->type = MfClassicType1k;
+        }
+        error = mf_classic_is_card_read(data) ? MfClassicErrorNone : MfClassicErrorPartialRead;
     }
 
     nfc_poller_free(poller);
@@ -504,18 +510,22 @@ MfClassicError mf_classic_poller_sync_detect_type(Nfc* nfc, MfClassicType* type)
 
     MfClassicError error = MfClassicErrorNone;
 
-    const uint8_t mf_classic_verify_block[MfClassicTypeNum] = {
-        [MfClassicTypeMini] = 0,
-        [MfClassicType1k] = 62,
-        [MfClassicType4k] = 254,
+    // EV1 is reported as 1K: telling them apart needs a full authentication with the hidden
+    // sector key, and callers only use the 16 regular sectors.
+    const struct {
+        MfClassicType type;
+        uint8_t block;
+    } mf_classic_verify_block[] = {
+        {MfClassicType4k, 254},
+        {MfClassicType1k, 62},
+        {MfClassicTypeMini, 0},
     };
 
-    size_t i = 0;
-    for(i = 0; i < COUNT_OF(mf_classic_verify_block); i++) {
+    for(size_t i = 0; i < COUNT_OF(mf_classic_verify_block); i++) {
         error = mf_classic_poller_sync_collect_nt(
-            nfc, mf_classic_verify_block[MfClassicTypeNum - i - 1], MfClassicKeyTypeA, NULL);
+            nfc, mf_classic_verify_block[i].block, MfClassicKeyTypeA, NULL);
         if(error == MfClassicErrorNone) {
-            *type = MfClassicTypeNum - i - 1;
+            *type = mf_classic_verify_block[i].type;
             break;
         }
     }
