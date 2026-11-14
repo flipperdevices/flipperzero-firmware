@@ -140,6 +140,20 @@ class CoproBinary:
             whole_file = fin.read()
             self.binary_size = len(whole_file)
 
+            text_prefix = whole_file[:64]
+            if text_prefix and all(
+                byte in (9, 10, 13, *range(32, 127)) for byte in text_prefix
+            ):
+                raise CoproException(
+                    f"Invalid radio binary {self.binary_path}: expected firmware data, "
+                    "found text (possibly a Git LFS pointer or HTML error page). "
+                    "Restore the binary with git submodule update --init --recursive"
+                )
+            if self.binary_size < CoproFooterBase.SIG_BIN_SIZE:
+                raise CoproException(
+                    f"Invalid radio binary {self.binary_path}: file is too small"
+                )
+
             img_sig_footer_bin = whole_file[-CoproFooterBase.SIG_BIN_SIZE :]
             self.img_sig_footer = CoproSigFooter(img_sig_footer_bin)
             img_sig_size = self.img_sig_footer.size + CoproSigFooter.SIG_BIN_SIZE
