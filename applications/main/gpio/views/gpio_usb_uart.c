@@ -1,4 +1,5 @@
 #include "gpio_usb_uart.h"
+#include "../usb_uart_nus.h"
 #include "../usb_uart_bridge.h"
 #include <furi_hal.h>
 #include <gui/elements.h>
@@ -15,6 +16,10 @@ typedef struct {
     uint32_t tx_cnt;
     uint32_t rx_cnt;
     uint8_t vcp_port;
+    bool ble;
+    bool show_bt_info;
+    char bt_name[USB_UART_NUS_NAME_SIZE];
+    char bt_address[USB_UART_NUS_ADDRESS_SIZE];
     uint8_t tx_pin;
     uint8_t rx_pin;
     bool tx_active;
@@ -23,18 +28,31 @@ typedef struct {
 
 static void gpio_usb_uart_draw_callback(Canvas* canvas, void* _model) {
     GpioUsbUartModel* model = _model;
+    if(model->ble && model->show_bt_info) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 3, 10, "Bluetooth Info");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 3, 23, "Scan name:");
+        canvas_draw_str(canvas, 3, 34, model->bt_name);
+        canvas_draw_str(canvas, 3, 48, model->bt_address);
+        elements_button_center(canvas, "Back");
+        return;
+    }
     char temp_str[18];
     elements_button_left(canvas, "Config");
     canvas_draw_line(canvas, 2, 10, 125, 10);
     canvas_draw_line(canvas, 44, 52, 123, 52);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 9, "USB Serial");
+    canvas_draw_str(canvas, 2, 9, model->ble ? "BLE Serial" : "USB Serial");
     canvas_draw_str(canvas, 3, 25, "TX:");
     canvas_draw_str(canvas, 3, 42, "RX:");
 
     canvas_set_font(canvas, FontSecondary);
-    snprintf(temp_str, 18, "COM PORT:%u", model->vcp_port);
+    if(model->ble)
+        snprintf(temp_str, 18, "OK: BT");
+    else
+        snprintf(temp_str, 18, "COM PORT:%u", model->vcp_port);
     canvas_draw_str_aligned(canvas, 126, 8, AlignRight, AlignBottom, temp_str);
     snprintf(temp_str, 18, "Pin %u", model->tx_pin);
     canvas_draw_str(canvas, 22, 25, temp_str);
@@ -92,6 +110,22 @@ static bool gpio_usb_uart_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     if(event->type == InputTypeShort) {
+        with_view_model(
+            usb_uart->view,
+            GpioUsbUartModel * model,
+            {
+                if(model->ble && event->key == InputKeyOk) {
+                    model->show_bt_info = !model->show_bt_info;
+                    consumed = true;
+                } else if(
+                    model->show_bt_info &&
+                    (event->key == InputKeyBack || event->key == InputKeyLeft)) {
+                    model->show_bt_info = false;
+                    consumed = true;
+                }
+            },
+            true);
+        if(consumed) return true;
         if(event->key == InputKeyLeft) {
             consumed = true;
             furi_assert(usb_uart->callback);
@@ -107,6 +141,11 @@ GpioUsbUart* gpio_usb_uart_alloc(void) {
 
     usb_uart->view = view_alloc();
     view_allocate_model(usb_uart->view, ViewModelTypeLocking, sizeof(GpioUsbUartModel));
+    with_view_model(
+        usb_uart->view,
+        GpioUsbUartModel * model,
+        { usb_uart_nus_get_identity(model->bt_name, model->bt_address); },
+        false);
     view_set_context(usb_uart->view, usb_uart);
     view_set_draw_callback(usb_uart->view, gpio_usb_uart_draw_callback);
     view_set_input_callback(usb_uart->view, gpio_usb_uart_input_callback);
@@ -133,7 +172,7 @@ void gpio_usb_uart_set_callback(GpioUsbUart* usb_uart, GpioUsbUartCallback callb
         usb_uart->view,
         GpioUsbUartModel * model,
         {
-            UNUSED(model);
+            model->show_bt_info = false;
             usb_uart->callback = callback;
             usb_uart->context = context;
         },
@@ -151,6 +190,7 @@ void gpio_usb_uart_update_state(GpioUsbUart* instance, UsbUartConfig* cfg, UsbUa
         {
             model->baudrate = st->baudrate_cur;
             model->vcp_port = cfg->vcp_ch;
+            model->ble = cfg->transport == UsbUartTransportBle;
             model->tx_pin = (cfg->uart_ch == 0) ? (13) : (15);
             model->rx_pin = (cfg->uart_ch == 0) ? (14) : (16);
             model->tx_active = (model->tx_cnt != st->tx_cnt);
