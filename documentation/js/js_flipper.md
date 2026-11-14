@@ -6,6 +6,14 @@ The module contains methods and values to query device information and propertie
 let flipper = require("flipper");
 ```
 
+For a TypeScript app developed with the JavaScript SDK, import the same module using the package path:
+
+```ts
+import * as flipper from "@flipperdevices/fz-sdk/flipper";
+```
+
+The firmware's module loader removes the `@flipperdevices/fz-sdk/` prefix, so both forms resolve to the built-in `flipper` module.
+
 # Values
 
 ## firmwareVendor
