@@ -9,6 +9,7 @@ void test_furi_pubsub(void);
 void test_furi_memmgr(void);
 void test_furi_event_loop(void);
 void test_furi_event_loop_self_unsubscribe(void);
+void test_furi_event_loop_event_flag_from_isr(void);
 void test_errno_saving(void);
 void test_furi_primitives(void);
 void test_stdin(void);
@@ -51,6 +52,10 @@ MU_TEST(mu_test_furi_event_loop_self_unsubscribe) {
     test_furi_event_loop_self_unsubscribe();
 }
 
+MU_TEST(mu_test_furi_event_loop_event_flag_from_isr) {
+    test_furi_event_loop_event_flag_from_isr();
+}
+
 MU_TEST(mu_test_errno_saving) {
     test_errno_saving();
 }
@@ -74,6 +79,7 @@ MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(mu_test_furi_memmgr);
     MU_RUN_TEST(mu_test_furi_event_loop);
     MU_RUN_TEST(mu_test_furi_event_loop_self_unsubscribe);
+    MU_RUN_TEST(mu_test_furi_event_loop_event_flag_from_isr);
     MU_RUN_TEST(mu_test_stdio);
     MU_RUN_TEST(mu_test_errno_saving);
     MU_RUN_TEST(mu_test_furi_primitives);

@@ -26,6 +26,10 @@ void furi_event_flag_free(FuriEventFlag* instance);
 
 /** Set flags
  *
+ * Safe to call from interrupt context (ISR). When used with FuriEventLoop
+ * (furi_event_loop_subscribe_event_flag), events are delivered with the
+ * correct flag value; there is no one-event delay when setting from ISR.
+ *
  * @warning    result of this function can be flags that you've just asked to
  *             set or not if someone was waiting for them and asked to clear it.
  *             It is highly recommended to read this function and
