@@ -158,6 +158,19 @@ bool subghz_device_cc1101_ext_is_frequency_valid(uint32_t value);
  */
 uint32_t subghz_device_cc1101_ext_set_frequency(uint32_t value);
 
+/** Set channel ID to calculate channel-based frequency using the base frequency, channel ID,
+ * and channel spacing (base_freq + chan_id * chan_spacing)
+ *
+ * @param      channel - channel ID
+ */
+void subghz_device_cc1101_ext_set_channel(uint8_t channel);
+
+/** Get channel ID
+ *
+ * @return     channel ID currently set in modem register
+ */
+uint8_t subghz_device_cc1101_ext_get_channel();
+
 /* High Level API */
 
 /** Signal Timings Capture callback */

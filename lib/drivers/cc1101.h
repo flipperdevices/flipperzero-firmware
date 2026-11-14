@@ -173,6 +173,22 @@ uint32_t cc1101_set_intermediate_frequency(const FuriHalSpiBusHandle* handle, ui
  */
 void cc1101_set_pa_table(const FuriHalSpiBusHandle* handle, const uint8_t value[8]);
 
+/** Set channel ID to calculate channel-based frequency using the base frequency, channel ID,
+ * and channel spacing (base_freq + chan_id * chan_spacing)
+ *
+ * @param      handle  - pointer to FuriHalSpiHandle
+ * @param      channel - channel ID
+ */
+void cc1101_set_channel(const FuriHalSpiBusHandle* handle, uint8_t channel);
+
+/** Get channel ID
+ *
+ * @param      handle  - pointer to FuriHalSpiHandle
+ *
+ * @return     channel ID currently set in modem register
+ */
+uint8_t cc1101_get_channel(const FuriHalSpiBusHandle* handle);
+
 /** Write FIFO
  *
  * @param      handle  - pointer to FuriHalSpiHandle
