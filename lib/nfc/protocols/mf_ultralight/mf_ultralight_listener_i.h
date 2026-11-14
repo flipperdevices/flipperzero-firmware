@@ -57,6 +57,10 @@ struct MfUltralightListener {
     BitBuffer* tx_buffer;
     MfUltralightFeatureSupport features;
     MfUltralightConfigPages* config;
+    // Access configuration active for the current session
+    uint8_t auth0;
+    bool prot;
+    bool cfglck;
     MfUltralightStaticLockData* static_lock;
     MfUltralightDynamicLockData* dynamic_lock;
 
