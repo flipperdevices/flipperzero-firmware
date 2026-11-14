@@ -289,12 +289,18 @@ Type4TagError type_4_tag_poller_read_cc(Type4TagPoller* instance) {
         if(error != Type4TagErrorNone) break;
         cc_len = bit_lib_bytes_to_num_be(cc_len_be, sizeof(cc_len_be));
 
+        uint8_t cc_buf[TYPE_4_TAG_BUF_SIZE];
+        if(cc_len > sizeof(cc_buf)) {
+            FURI_LOG_E(TAG, "CC file too large: %u bytes", cc_len);
+            error = Type4TagErrorNotSupported;
+            break;
+        }
+
         FURI_LOG_D(TAG, "Read CC");
-        uint8_t cc_buf[cc_len];
-        error = type_4_tag_poller_iso_read(instance, 0, sizeof(cc_buf), cc_buf);
+        error = type_4_tag_poller_iso_read(instance, 0, cc_len, cc_buf);
         if(error != Type4TagErrorNone) break;
 
-        error = type_4_tag_cc_parse(instance->data, cc_buf, sizeof(cc_buf));
+        error = type_4_tag_cc_parse(instance->data, cc_buf, cc_len);
         if(error != Type4TagErrorNone) break;
         instance->data->is_tag_specific = true;
 
