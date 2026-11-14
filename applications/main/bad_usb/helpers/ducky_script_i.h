@@ -7,6 +7,7 @@ extern "C" {
 #include <furi.h>
 #include <furi_hal.h>
 #include "ducky_script.h"
+#include "ducky_script_3.h"
 #include "bad_usb_hid.h"
 
 #define SCRIPT_STATE_ERROR        (-1)
@@ -15,6 +16,7 @@ extern "C" {
 #define SCRIPT_STATE_CMD_UNKNOWN  (-4)
 #define SCRIPT_STATE_STRING_START (-5)
 #define SCRIPT_STATE_WAIT_FOR_BTN (-6)
+#define SCRIPT_STATE_JUMP         (-7)
 
 #define FILE_BUFFER_LEN 16
 
@@ -48,6 +50,7 @@ struct BadUsbScript {
 
     FuriString* string_print;
     size_t string_print_pos;
+    Ducky3Context ducky3;
 };
 
 uint16_t ducky_get_keycode(BadUsbScript* bad_usb, const char* param, bool accept_modifiers);
