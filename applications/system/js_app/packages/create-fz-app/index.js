@@ -58,11 +58,17 @@ const __dirname = path.dirname(__filename);
     replaceInFileSync({ files: `${name}/**/*`, from: /<app_name>/g, to: name });
 
     console.log("Installing packages...");
-    spawnSync("bash", ["-c", `cd ${name} && ${pkgManager} install`], {
+    const installation = spawnSync("bash", ["-c", `cd ${name} && ${pkgManager} install`], {
         cwd: process.cwd(),
         detached: true,
         stdio: "inherit",
     });
+
+    if (installation.error || installation.status !== 0) {
+        console.error(`Failed to install packages. Run \`cd ${name} && ${pkgManager} install\` to retry.`);
+        process.exitCode = 1;
+        return;
+    }
 
     console.log(`Done! Created ${name}. Run \`cd ${name} && ${pkgManager} start\` to run it on your Flipper.`);
 })();
