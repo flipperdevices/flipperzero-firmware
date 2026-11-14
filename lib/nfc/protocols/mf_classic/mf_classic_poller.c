@@ -139,6 +139,18 @@ NfcCommand mf_classic_poller_handler_detect_type(MfClassicPoller* instance) {
             instance->current_type_check = MfClassicType4k;
             FURI_LOG_D(TAG, "4K detected");
         } else {
+            instance->current_type_check = MfClassicTypePlus2k;
+        }
+    } else if(instance->current_type_check == MfClassicTypePlus2k) {
+        // Second-last block in sector 16, which may exist if said sector is not in SL3 mode
+        MfClassicError error =
+            mf_classic_poller_get_nt(instance, 66, MfClassicKeyTypeA, NULL, false);
+        if(error == MfClassicErrorNone) {
+            instance->data->type = MfClassicTypePlus2k;
+            instance->state = MfClassicPollerStateStart;
+            instance->current_type_check = MfClassicType4k;
+            FURI_LOG_D(TAG, "Plus 2K detected");
+        } else {
             instance->current_type_check = MfClassicType1k;
         }
     } else if(instance->current_type_check == MfClassicType1k) {
