@@ -71,9 +71,8 @@ class BufferedRead:
 
     def until(self, eol: str = "\n", cut_eol: bool = True, timeout: float = None):
         eol = eol.encode("ascii")
-        # timeout=None keeps the original behavior: wait forever (e.g. while the
-        # device reboots during an update). A timeout is only passed on the copy
-        # path, where a silent device means a hung transfer, not a slow reboot.
+        # timeout=None waits forever (e.g. while the device reboots during an
+        # update). Callers that must not hang on a silent device pass a timeout.
         deadline = None if timeout is None else time.monotonic() + timeout
         while True:
             # search in buffer
@@ -105,7 +104,7 @@ class FlipperStorage:
     CLI_PROMPT = ">: "
     CLI_EOL = "\r\n"
     # A silent device mid-transfer means a hung CLI/RPC, not a slow reboot, so
-    # the copy path bounds its waits; other callers (e.g. await_flipper) don't.
+    # the copy path bounds its waits.
     WRITE_CHUNK_TIMEOUT = 60.0
 
     def __init__(self, portname: str, chunk_size: int = 8192):
@@ -127,16 +126,16 @@ class FlipperStorage:
     def __exit__(self, exc_type, exc_value, traceback):
         self.stop()
 
-    def start(self):
+    def start(self, timeout: float = None):
         self.port.open()
         time.sleep(0.5)
-        self.read.until(self.CLI_PROMPT)
+        self.read.until(self.CLI_PROMPT, timeout=timeout)
         self.port.reset_input_buffer()
         # Send a command with a known syntax to make sure the buffer is flushed
         self.send("device_info\r")
-        self.read.until("hardware_model")
+        self.read.until("hardware_model", timeout=timeout)
         # And read buffer until we get prompt
-        self.read.until(self.CLI_PROMPT)
+        self.read.until(self.CLI_PROMPT, timeout=timeout)
 
     def stop(self) -> None:
         self.port.close()

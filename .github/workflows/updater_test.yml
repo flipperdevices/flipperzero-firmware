@@ -32,12 +32,12 @@ jobs:
         run: |
           source scripts/toolchain/fbtenv.sh
           for attempt in 1 2 3; do
-            python3 scripts/testops.py -t=180 await_flipper
-            if timeout 150 ./fbt flash_usb_full FORCE=1; then
+            if python3 scripts/testops.py -t=180 await_flipper &&
+              timeout 150 ./fbt flash_usb_full FORCE=1; then
               echo "Flashed on attempt ${attempt}"
               exit 0
             fi
-            echo "::warning::Flash attempt ${attempt} failed/hung; hard-resetting flipper via devboard (CMSIS-DAP)"
+            echo "::warning::Await or flash attempt ${attempt} failed/hung; hard-resetting flipper via devboard (CMSIS-DAP)"
             openocd -f interface/cmsis-dap.cfg -c "transport select swd" \
               -f scripts/debug/stm32wbx.cfg -c "init; reset run; exit" || true
           done
@@ -61,13 +61,13 @@ jobs:
           source scripts/toolchain/fbtenv.sh
           ok=0
           for attempt in 1 2 3; do
-            python3 scripts/testops.py -t=180 await_flipper
-            if timeout 150 ./fbt flash_usb FORCE=1; then
+            if python3 scripts/testops.py -t=180 await_flipper &&
+              timeout 150 ./fbt flash_usb FORCE=1; then
               echo "Flashed on attempt ${attempt}"
               ok=1
               break
             fi
-            echo "::warning::flash_usb attempt ${attempt} failed/hung; hard-resetting flipper via devboard (CMSIS-DAP)"
+            echo "::warning::Await or flash_usb attempt ${attempt} failed/hung; hard-resetting flipper via devboard (CMSIS-DAP)"
             openocd -f interface/cmsis-dap.cfg -c "transport select swd" \
               -f scripts/debug/stm32wbx.cfg -c "init; reset run; exit" || true
           done
