@@ -2,12 +2,11 @@
 import re
 import time
 from datetime import datetime
-from typing import Optional
 
 from serial.serialutil import SerialException
 
 from flipper.app import App
-from flipper.storage import FlipperStorage
+from flipper.storage import FlipperStorage, FlipperStorageException
 from flipper.utils.cdc import resolve_port
 
 
@@ -34,39 +33,33 @@ class Main(App):
         )
         self.parser_run_units.set_defaults(func=self.run_units)
 
-    def _get_flipper(self, retry_count: Optional[int] = 1):
-        port = None
-        for i in range(retry_count):
+    # A port can open while the CLI never answers, e.g. mid-update.
+    START_TIMEOUT = 10
+
+    def _get_flipper(self, timeout: int):
+        deadline = time.monotonic() + timeout
+        attempt = 0
+        while time.monotonic() < deadline:
+            attempt += 1
             time.sleep(1)
-            self.logger.info(
-                f"Attempting to find flipper (Attempt {i + 1}/{retry_count})."
-            )
+            if not (port := resolve_port(self.logger, self.args.port)):
+                self.logger.info(f"Failed to find flipper (Attempt {attempt}).")
+                continue
 
-            if port := resolve_port(self.logger, self.args.port):
-                self.logger.info(f"Found flipper at {port}")
-                break
-
-        if not port:
-            self.logger.info(f"Failed to find flipper")
-            return None
-
-        flipper = FlipperStorage(port)
-        for i in range(retry_count):
+            flipper = FlipperStorage(port)
             try:
-                flipper.start()
-                self.logger.info("Flipper successfully started.")
+                flipper.start(timeout=self.START_TIMEOUT)
+                self.logger.info(f"Flipper successfully started at {port}.")
                 return flipper
-            except IOError as e:
-                self.logger.info(
-                    f"Failed to start flipper (Attempt {i + 1}/{retry_count}): {e}"
-                )
-                time.sleep(1)
+            except (IOError, FlipperStorageException) as e:
+                flipper.stop()
+                self.logger.info(f"Failed to start flipper (Attempt {attempt}): {e}")
 
-        self.logger.error("Flipper failed to start after all retries.")
+        self.logger.error(f"Flipper failed to start within {timeout}s.")
         return None
 
     def await_flipper(self):
-        if not (flipper := self._get_flipper(retry_count=self.args.timeout)):
+        if not (flipper := self._get_flipper(timeout=self.args.timeout)):
             return 1
 
         self.logger.info("Flipper started")
@@ -74,7 +67,7 @@ class Main(App):
         return 0
 
     def run_units(self):
-        if not (flipper := self._get_flipper(retry_count=10)):
+        if not (flipper := self._get_flipper(timeout=10)):
             return 1
 
         self.logger.info("Running unit tests")
