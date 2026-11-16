@@ -141,6 +141,19 @@ static const BleGattCharacteristicParams ble_svc_hid_report_template = {
     .is_variable = CHAR_VALUE_LEN_VARIABLE,
 };
 
+/* Attribute records reserved for the service, including the service
+ * declaration. Same count as ST's reference HID service, without its
+ * optional boot keyboard/mouse and external report attributes:
+ * https://github.com/flipperdevices/stm32wb_copro/blob/133182d5583e998bb263cd947105be4df9c29cb3/wpan/ble/svc/Src/hids.c#L658-L680
+ * aci_gatt_add_service reserves handles svc_handle to
+ * svc_handle + BLE_SVC_HID_MAX_ATTR_RECORDS - 1 for the service:
+ * https://github.com/flipperdevices/stm32wb_copro/blob/133182d5583e998bb263cd947105be4df9c29cb3/wpan/ble/core/auto/ble_gatt_aci.h#L56-L62 */
+#define BLE_SVC_HID_MAX_ATTR_RECORDS                                                \
+    (2 + /* protocol mode */                                                        \
+     (4 * BLE_SVC_HID_INPUT_REPORT_COUNT) + (3 * BLE_SVC_HID_OUTPUT_REPORT_COUNT) + \
+     (3 * BLE_SVC_HID_FEATURE_REPORT_COUNT) + 1 + 2 + 2 +                           \
+     2) /* Service + Report Map + HID Information + HID Control Point */
+
 struct BleServiceHid {
     uint16_t svc_handle;
     BleGattCharacteristicInstance chars[HidSvcGattCharacteristicCount];
@@ -151,17 +164,23 @@ struct BleServiceHid {
 };
 
 static BleEventAckStatus ble_svc_hid_event_handler(void* event, void* context) {
-    UNUSED(context);
+    BleServiceHid* hid_svc = (BleServiceHid*)context;
 
     BleEventAckStatus ret = BleEventNotAck;
     hci_event_pckt* event_pckt = (hci_event_pckt*)(((hci_uart_pckt*)event)->data);
     evt_blecore_aci* blecore_evt = (evt_blecore_aci*)event_pckt->data;
-    // aci_gatt_attribute_modified_event_rp0* attribute_modified;
 
     if(event_pckt->evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE) {
         if(blecore_evt->ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE) {
-            // Process modification events
-            ret = BleEventAckFlowEnable;
+            // Only claim writes to this service's own attributes, so that
+            // other services in the same profile still receive theirs
+            aci_gatt_attribute_modified_event_rp0* attribute_modified =
+                (aci_gatt_attribute_modified_event_rp0*)blecore_evt->data;
+            if(attribute_modified->Attr_Handle > hid_svc->svc_handle &&
+               attribute_modified->Attr_Handle <
+                   hid_svc->svc_handle + BLE_SVC_HID_MAX_ATTR_RECORDS) {
+                ret = BleEventAckFlowEnable;
+            }
         } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
             // Process notification confirmation
             ret = BleEventAckFlowEnable;
@@ -183,10 +202,7 @@ BleServiceHid* ble_svc_hid_start(void) {
            UUID_TYPE_16,
            &ble_svc_hid_uuid,
            PRIMARY_SERVICE,
-           2 + /* protocol mode */
-               (4 * BLE_SVC_HID_INPUT_REPORT_COUNT) + (3 * BLE_SVC_HID_OUTPUT_REPORT_COUNT) +
-               (3 * BLE_SVC_HID_FEATURE_REPORT_COUNT) + 1 + 2 + 2 +
-               2, /* Service + Report Map + HID Information + HID Control Point */
+           BLE_SVC_HID_MAX_ATTR_RECORDS,
            &hid_svc->svc_handle)) {
         free(hid_svc);
         return NULL;
