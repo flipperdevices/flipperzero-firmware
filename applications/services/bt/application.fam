@@ -11,6 +11,7 @@ App(
     provides=[
         "bt_start",
         "bt_settings",
+        "ams_cli_start",
     ],
     stack_size=1 * 1024,
     order=20,
@@ -22,4 +23,12 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="bt_on_system_start",
     order=40,
+)
+
+App(
+    appid="ams_cli_start",
+    apptype=FlipperAppType.STARTUP,
+    entry_point="ams_cli_on_system_start",
+    requires=["bt"],
+    order=65,
 )
