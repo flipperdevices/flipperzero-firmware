@@ -32,6 +32,7 @@
 #include "helpers/mfkey32_logger.h"
 #include "helpers/mf_classic_key_cache.h"
 #include "helpers/nfc_supported_cards.h"
+#include "helpers/nfc_read_memory.h"
 #include "helpers/felica_auth.h"
 #include "helpers/slix_unlock.h"
 
@@ -207,6 +208,10 @@ void nfc_blink_detect_start(NfcApp* nfc);
 void nfc_blink_stop(NfcApp* nfc);
 
 void nfc_show_loading_popup(void* context, bool show);
+
+void nfc_show_low_memory_dialog(NfcApp* instance);
+
+bool nfc_check_free_memory_for_read(NfcApp* instance, NfcProtocol protocol);
 
 bool nfc_has_shadow_file(NfcApp* instance);
 

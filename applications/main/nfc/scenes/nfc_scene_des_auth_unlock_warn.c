@@ -45,8 +45,11 @@ bool nfc_scene_des_auth_unlock_warn_on_event(void* context, SceneManagerEvent ev
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == DialogExResultRight) {
-            nfc->felica_auth->skip_auth = false;
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            if(nfc_check_free_memory_for_read(
+                   nfc, nfc_detected_protocols_get_selected(nfc->detected_protocols))) {
+                nfc->felica_auth->skip_auth = false;
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            }
             consumed = true;
         } else if(event.event == DialogExResultLeft) {
             scene_manager_previous_scene(nfc->scene_manager);
