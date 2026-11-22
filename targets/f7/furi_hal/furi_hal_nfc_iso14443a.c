@@ -244,7 +244,12 @@ FuriHalNfcError furi_hal_nfc_iso14443a_listener_set_col_res_data(
     if(uid_len == 4) {
         pt_memory[12] = sak & ~0x04;
     } else {
-        pt_memory[12] = 0x04;
+        // Cascade-level-1 SAK for a 7-byte UID. ISO14443-3 only requires the
+        // cascade bit (0x04); a genuine NXP DESFire actually returns 0x24, and a
+        // hardened access reader can treat 0x04 as "not a genuine chip" and
+        // DESELECT right after the ATS. Emit 0x24 to match the real chip for that
+        // anti-clone check. Revert to 0x04 for standard behaviour.
+        pt_memory[12] = 0x24;
     }
     pt_memory[13] = sak & ~0x04;
     pt_memory[14] = sak & ~0x04;
