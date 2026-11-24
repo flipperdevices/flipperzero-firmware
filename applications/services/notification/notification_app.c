@@ -14,6 +14,11 @@
 
 static const uint8_t minimal_delay = 100;
 static const uint8_t led_off_values[NOTIFICATION_LED_COUNT] = {0x00, 0x00, 0x00};
+static const uint8_t ble_stream_rgb[NOTIFICATION_LED_COUNT] = {255, 96, 0};
+_Static_assert(
+    NotificationMessageTypeLedGreen == NotificationMessageTypeLedRed + 1 &&
+        NotificationMessageTypeLedBlue == NotificationMessageTypeLedRed + 2,
+    "Internal RGB messages must follow channel order");
 
 static const uint8_t reset_red_mask = 1 << 0;
 static const uint8_t reset_green_mask = 1 << 1;
@@ -41,6 +46,30 @@ void notification_message_save_settings(NotificationApp* app) {
     furi_event_flag_free(m.back_event);
 }
 
+static void notification_request_rgb_refresh(NotificationApp* app) {
+    NotificationAppMessage message = {.type = RefreshRgbMessage};
+    furi_check(furi_message_queue_put(app->queue, &message, FuriWaitForever) == FuriStatusOk);
+}
+
+void notification_set_rpc_led(NotificationApp* app, bool enabled) {
+    atomic_store(&app->settings.rpc_led, enabled);
+    if(atomic_load(&app->ble_screen_streams)) {
+        notification_request_rgb_refresh(app);
+    }
+}
+
+void notification_ble_screen_stream_changed(NotificationApp* app, bool started) {
+    // A notification can be in a delay when the last stream disconnects.
+    // Publish the new count before asking the service to refresh its background.
+    if(started) {
+        atomic_fetch_add(&app->ble_screen_streams, 1);
+    } else {
+        unsigned previous = atomic_fetch_sub(&app->ble_screen_streams, 1);
+        furi_check(previous > 0);
+    }
+    notification_request_rgb_refresh(app);
+}
+
 // internal layer
 static void
     notification_apply_internal_led_layer(NotificationLedLayer* layer, uint8_t layer_value) {
@@ -53,6 +82,19 @@ static void
     // apply if current layer is internal
     if(layer->index == LayerInternal) {
         furi_hal_light_set(layer->light, layer->value[LayerInternal]);
+    }
+}
+
+static uint8_t notification_rgb_background(NotificationApp* app, size_t channel) {
+    uint8_t raw = atomic_load(&app->ble_screen_streams) && atomic_load(&app->settings.rpc_led) ?
+                      ble_stream_rgb[channel] :
+                      app->led[channel].value_last[LayerInternal];
+    return notification_settings_get_rgb_led_brightness(app, raw);
+}
+
+static void notification_refresh_rgb(NotificationApp* app) {
+    for(size_t i = 0; i < NOTIFICATION_LED_COUNT; ++i) {
+        notification_apply_internal_led_layer(&app->led[i], notification_rgb_background(app, i));
     }
 }
 
@@ -91,7 +133,8 @@ static void notification_apply_notification_led_layer(
     furi_hal_light_set(layer->light, layer->value[LayerNotification]);
 }
 
-static void notification_reset_notification_led_layer(NotificationLedLayer* layer) {
+static void
+    notification_reset_notification_led_layer(NotificationLedLayer* layer, uint8_t background) {
     furi_assert(layer);
     furi_assert(layer->index < LayerMAX);
 
@@ -101,7 +144,7 @@ static void notification_reset_notification_led_layer(NotificationLedLayer* laye
     layer->index = LayerInternal;
 
     // apply
-    furi_hal_light_set(layer->light, layer->value[LayerInternal]);
+    notification_apply_internal_led_layer(layer, background);
 }
 
 static void notification_reset_notification_layer(
@@ -112,13 +155,16 @@ static void notification_reset_notification_layer(
         furi_hal_light_blink_stop();
     }
     if(reset_mask & reset_red_mask) {
-        notification_reset_notification_led_layer(&app->led[0]);
+        notification_reset_notification_led_layer(
+            &app->led[0], notification_rgb_background(app, 0));
     }
     if(reset_mask & reset_green_mask) {
-        notification_reset_notification_led_layer(&app->led[1]);
+        notification_reset_notification_led_layer(
+            &app->led[1], notification_rgb_background(app, 1));
     }
     if(reset_mask & reset_blue_mask) {
-        notification_reset_notification_led_layer(&app->led[2]);
+        notification_reset_notification_led_layer(
+            &app->led[2], notification_rgb_background(app, 2));
     }
     if(reset_mask & reset_vibro_mask) {
         notification_vibro_off();
@@ -220,7 +266,8 @@ static void notification_process_notification_message(
                 reset_mask |= reset_display_mask;
             } else {
                 reset_mask &= ~reset_display_mask;
-                notification_reset_notification_led_layer(&app->display);
+                notification_reset_notification_led_layer(
+                    &app->display, app->display.value[LayerInternal]);
                 if(furi_timer_is_running(app->display_timer)) {
                     furi_timer_stop(app->display_timer);
                 }
@@ -398,32 +445,16 @@ static void
                     app, notification_message->data.led.value));
             break;
         case NotificationMessageTypeLedRed:
-            app->led[0].value_last[LayerInternal] = notification_message->data.led.value;
-            notification_apply_internal_led_layer(
-                &app->led[0],
-                notification_settings_get_rgb_led_brightness(
-                    app, notification_message->data.led.value));
-            break;
         case NotificationMessageTypeLedGreen:
-            app->led[1].value_last[LayerInternal] = notification_message->data.led.value;
+        case NotificationMessageTypeLedBlue: {
+            size_t channel = notification_message->type - NotificationMessageTypeLedRed;
+            app->led[channel].value_last[LayerInternal] = notification_message->data.led.value;
             notification_apply_internal_led_layer(
-                &app->led[1],
-                notification_settings_get_rgb_led_brightness(
-                    app, notification_message->data.led.value));
+                &app->led[channel], notification_rgb_background(app, channel));
             break;
-        case NotificationMessageTypeLedBlue:
-            app->led[2].value_last[LayerInternal] = notification_message->data.led.value;
-            notification_apply_internal_led_layer(
-                &app->led[2],
-                notification_settings_get_rgb_led_brightness(
-                    app, notification_message->data.led.value));
-            break;
+        }
         case NotificationMessageTypeLedBrightnessSettingApply:
-            for(uint8_t i = 0; i < NOTIFICATION_LED_COUNT; i++) {
-                uint8_t new_val = notification_settings_get_rgb_led_brightness(
-                    app, app->led[i].value_last[LayerInternal]);
-                notification_apply_internal_led_layer(&app->led[i], new_val);
-            }
+            notification_refresh_rgb(app);
             break;
         default:
             break;
@@ -432,6 +463,12 @@ static void
         notification_message = (*message->sequence)[notification_message_index];
     }
 }
+
+// Versions 3 and 4 each use one of version 2's trailing padding bytes.
+_Static_assert(
+    sizeof(NotificationSettings) == 24 && offsetof(NotificationSettings, smart_backlight) == 22 &&
+        offsetof(NotificationSettings, rpc_led) == 23 && sizeof(atomic_bool) == 1,
+    "Notification settings v2/v3/v4 file layout");
 
 static bool notification_load_settings(NotificationApp* app) {
     NotificationSettings settings;
@@ -451,6 +488,14 @@ static bool notification_load_settings(NotificationApp* app) {
     }
 
     if(fs_result) {
+        if(settings.version == 0x02) {
+            settings.smart_backlight = false;
+            settings.version = 0x03;
+        }
+        if(settings.version == 0x03) {
+            atomic_init(&settings.rpc_led, true);
+            settings.version = NOTIFICATION_SETTINGS_VERSION;
+        }
         if(settings.version != NOTIFICATION_SETTINGS_VERSION) {
             FURI_LOG_E(
                 TAG, "version(%d != %d) mismatch", settings.version, NOTIFICATION_SETTINGS_VERSION);
@@ -508,12 +553,16 @@ static void input_event_callback(const void* value, void* context) {
     furi_assert(value);
     furi_assert(context);
     NotificationApp* app = context;
-    notification_message(app, &sequence_display_backlight_on);
+    const InputEvent* event = value;
+    if(event->sequence_source != INPUT_SEQUENCE_SOURCE_BLE_RPC || !app->settings.smart_backlight) {
+        notification_message(app, &sequence_display_backlight_on);
+    }
 }
 
 // App alloc
 static NotificationApp* notification_app_alloc(void) {
     NotificationApp* app = malloc(sizeof(NotificationApp));
+    atomic_init(&app->ble_screen_streams, 0);
     app->queue = furi_message_queue_alloc(8, sizeof(NotificationAppMessage));
     app->display_timer = furi_timer_alloc(notification_display_timer, FuriTimerTypeOnce, app);
 
@@ -522,6 +571,8 @@ static NotificationApp* notification_app_alloc(void) {
     app->settings.led_brightness = 1.0f;
     app->settings.display_off_delay_ms = 30000;
     app->settings.vibro_on = true;
+    app->settings.smart_backlight = false;
+    atomic_init(&app->settings.rpc_led, true);
 
     app->display.value[LayerInternal] = 0x00;
     app->display.value[LayerNotification] = 0x00;
@@ -618,7 +669,12 @@ int32_t notification_srv(void* p) {
             notification_save_settings(app);
             break;
         case LoadSettingsMessage:
-            notification_load_settings(app);
+            if(notification_load_settings(app) && atomic_load(&app->ble_screen_streams)) {
+                notification_refresh_rgb(app);
+            }
+            break;
+        case RefreshRgbMessage:
+            notification_refresh_rgb(app);
             break;
         }
 

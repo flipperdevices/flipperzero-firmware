@@ -50,7 +50,7 @@ static void input_cli_send_print_usage(void) {
 
 static void input_cli_send(PipeSide* pipe, FuriString* args, FuriPubSub* event_pubsub) {
     UNUSED(pipe);
-    InputEvent event;
+    InputEvent event = {.sequence_source = INPUT_SEQUENCE_SOURCE_SOFTWARE};
     FuriString* key_str;
     key_str = furi_string_alloc();
     bool parsed = false;

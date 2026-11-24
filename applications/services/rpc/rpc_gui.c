@@ -1,5 +1,6 @@
 #include "rpc_i.h"
 #include <gui/gui_i.h>
+#include <notification/notification_app.h>
 #include <assets_icons.h>
 
 #include <flipper.pb.h>
@@ -144,6 +145,14 @@ static void rpc_system_gui_start_screen_stream_process(const PB_Main* request, v
         rpc_send_and_release_empty(
             session, request->command_id, PB_CommandStatus_ERROR_VIRTUAL_DISPLAY_ALREADY_STARTED);
     } else {
+        if(rpc_session_get_owner(session) == RpcOwnerBle) {
+            NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+            notification_ble_screen_stream_changed(notification, true);
+            if(notification->settings.smart_backlight) {
+                notification_message(notification, &sequence_display_backlight_off);
+            }
+            furi_record_close(RECORD_NOTIFICATION);
+        }
         rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
 
         rpc_gui->is_streaming = true;
@@ -165,32 +174,39 @@ static void rpc_system_gui_start_screen_stream_process(const PB_Main* request, v
     }
 }
 
+static void rpc_system_gui_stop_screen_stream(RpcGuiSystem* rpc_gui) {
+    if(!rpc_gui->is_streaming) return;
+    rpc_gui->is_streaming = false;
+
+    if(rpc_session_get_owner(rpc_gui->session) == RpcOwnerBle) {
+        NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+        notification_ble_screen_stream_changed(notification, false);
+        furi_record_close(RECORD_NOTIFICATION);
+    }
+
+    gui_remove_framebuffer_callback(
+        rpc_gui->gui, rpc_system_gui_screen_stream_frame_callback, rpc_gui);
+    furi_thread_flags_set(furi_thread_get_id(rpc_gui->transmit_thread), RpcGuiWorkerFlagExit);
+    furi_thread_join(rpc_gui->transmit_thread);
+    furi_thread_free(rpc_gui->transmit_thread);
+    pb_release(&PB_Main_msg, rpc_gui->transmit_frame);
+    free(rpc_gui->transmit_frame);
+    rpc_gui->transmit_frame = NULL;
+}
+
 static void rpc_system_gui_stop_screen_stream_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(context);
 
     FURI_LOG_D(TAG, "StopScreenStream");
-
     RpcGuiSystem* rpc_gui = context;
-    RpcSession* session = rpc_gui->session;
-    furi_assert(session);
+    rpc_system_gui_stop_screen_stream(rpc_gui);
+    rpc_send_and_release_empty(rpc_gui->session, request->command_id, PB_CommandStatus_OK);
+}
 
-    if(rpc_gui->is_streaming) {
-        rpc_gui->is_streaming = false;
-        // Remove GUI framebuffer callback
-        gui_remove_framebuffer_callback(
-            rpc_gui->gui, rpc_system_gui_screen_stream_frame_callback, context);
-        // Stop and release worker thread
-        furi_thread_flags_set(furi_thread_get_id(rpc_gui->transmit_thread), RpcGuiWorkerFlagExit);
-        furi_thread_join(rpc_gui->transmit_thread);
-        furi_thread_free(rpc_gui->transmit_thread);
-        // Release frame
-        pb_release(&PB_Main_msg, rpc_gui->transmit_frame);
-        free(rpc_gui->transmit_frame);
-        rpc_gui->transmit_frame = NULL;
-    }
-
-    rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
+static uint8_t rpc_system_gui_input_source(RpcSession* session) {
+    return rpc_session_get_owner(session) == RpcOwnerBle ? INPUT_SEQUENCE_SOURCE_BLE_RPC :
+                                                           INPUT_SEQUENCE_SOURCE_SOFTWARE;
 }
 
 static void
@@ -215,12 +231,12 @@ static void
     }
 
     InputEvent event = {
+        .sequence_source = rpc_system_gui_input_source(session),
         .key = (int32_t)request->content.gui_send_input_event_request.key,
         .type = (int32_t)request->content.gui_send_input_event_request.type,
     };
 
     // Event sequence shenanigans
-    event.sequence_source = INPUT_SEQUENCE_SOURCE_SOFTWARE;
     if(event.type == InputTypePress) {
         rpc_gui->input_counter++;
         if(rpc_gui->input_counter == RPC_GUI_INPUT_RESET) rpc_gui->input_counter++;
@@ -452,7 +468,7 @@ void rpc_system_gui_free(void* context) {
             InputEvent event = {
                 .key = key,
                 .type = InputTypeRelease,
-                .sequence_source = INPUT_SEQUENCE_SOURCE_SOFTWARE,
+                .sequence_source = rpc_system_gui_input_source(rpc_gui->session),
                 .sequence_counter = rpc_gui->input_key_counter[key],
             };
             furi_pubsub_publish(rpc_gui->input_events, &event);
@@ -472,20 +488,7 @@ void rpc_system_gui_free(void* context) {
         view_port_free(rpc_gui->rpc_session_active_viewport);
     }
 
-    if(rpc_gui->is_streaming) {
-        rpc_gui->is_streaming = false;
-        // Remove GUI framebuffer callback
-        gui_remove_framebuffer_callback(
-            rpc_gui->gui, rpc_system_gui_screen_stream_frame_callback, context);
-        // Stop and release worker thread
-        furi_thread_flags_set(furi_thread_get_id(rpc_gui->transmit_thread), RpcGuiWorkerFlagExit);
-        furi_thread_join(rpc_gui->transmit_thread);
-        furi_thread_free(rpc_gui->transmit_thread);
-        // Release frame
-        pb_release(&PB_Main_msg, rpc_gui->transmit_frame);
-        free(rpc_gui->transmit_frame);
-        rpc_gui->transmit_frame = NULL;
-    }
+    rpc_system_gui_stop_screen_stream(rpc_gui);
     furi_record_close(RECORD_INPUT_EVENTS);
     furi_record_close(RECORD_GUI);
     free(rpc_gui);
