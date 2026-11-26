@@ -6,6 +6,7 @@
 #include <task.h>
 
 #include <rpc/rpc_i.h>
+#include <storage/storage_open_timeout.h>
 #include <flipper.pb.h>
 #include <applications/system/js_app/js_thread.h>
 #include <applications/system/js_app/js_value.h>
@@ -19,6 +20,14 @@ static constexpr auto unit_tests_api_table = sort(create_array_t<sym_entry>(
     API_METHOD(slix_process_iso15693_3_error, SlixError, (Iso15693_3Error)),
     API_METHOD(iso15693_3_poller_get_data, const Iso15693_3Data*, (Iso15693_3Poller*)),
     API_METHOD(rpc_system_storage_get_error, PB_CommandStatus, (FS_Error)),
+    API_METHOD(
+        storage_file_open_timeout,
+        bool,
+        (File*, const char*, FS_AccessMode, FS_OpenMode, uint32_t)),
+    API_METHOD(
+        storage_file_md5_timeout,
+        bool,
+        (File*, const char*, FuriString*, FS_Error*, uint32_t)),
     API_METHOD(xQueueSemaphoreTake, BaseType_t, (QueueHandle_t, TickType_t)),
     API_METHOD(
         xTaskGenericNotify,
