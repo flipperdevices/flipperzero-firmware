@@ -227,8 +227,6 @@ static void storage_cli_write(PipeSide* pipe, FuriString* path, FuriString* args
         uint32_t read_index = 0;
 
         while(true) {
-            // EOF means the host closed the session (the pipe is broken): stop like on Ctrl+C.
-            // Stored as a byte it would be 0xFF, never ETX, and the loop would never end.
             int input = getchar();
             uint8_t symbol = input;
 
@@ -289,7 +287,9 @@ static void storage_cli_read_chunks(PipeSide* pipe, FuriString* path, FuriString
             uint8_t* data = malloc(buffer_size);
             while(file_size > 0) {
                 printf("\r\nReady?\r\n");
-                if(getchar() == EOF) break; // session closed
+                if(getchar() == EOF) {
+                    break;
+                }
 
                 size_t read_size = storage_file_read(file, data, buffer_size);
                 for(size_t i = 0; i < read_size; i++) {
