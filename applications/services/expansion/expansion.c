@@ -169,6 +169,14 @@ static void expansion_control_handler_module_connected(
         return;
     }
 
+    // Detection fired, but an app or CLI plugin may have taken the port since (the message can sit
+    // in the queue, or be stale): it is theirs now, keep listening and do not start a worker. The
+    // HAL arms the detection again when the port is released.
+    if(furi_hal_serial_control_is_busy(instance->serial_id)) {
+        FURI_LOG_D(TAG, "Port is in use by another owner, not starting a worker");
+        return;
+    }
+
     furi_hal_serial_control_set_expansion_callback(instance->serial_id, NULL, NULL);
 
     instance->state = ExpansionStateRunning;

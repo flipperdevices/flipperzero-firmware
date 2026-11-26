@@ -50,6 +50,7 @@ typedef struct {
     FuriHalSerialHandle* expansion_serial;
     FuriHalSerialControlExpansionCallback expansion_cb;
     void* expansion_ctx;
+    bool expansion_irq_armed; // detection interrupt installed on the RX pin of expansion_serial
 } FuriHalSerialControl;
 
 FuriHalSerialControl* furi_hal_serial_control = NULL;
@@ -68,18 +69,28 @@ static void furi_hal_serial_control_expansion_irq_callback(void* context) {
     furi_message_queue_put(furi_hal_serial_control->queue, &message, 0);
 }
 
+/**
+ * Arms or disarms the expansion detection interrupt. Idempotent: the interrupt callback is installed
+ * at most once and removed only if it is installed (a second add is a furi_check in the GPIO HAL).
+ * A port that is in use belongs to its owner: detection is never armed on it (the release handler does
+ * it later), and when it is disarmed the RX direction of the owner's configuration is left alone.
+ */
 static void
     furi_hal_serial_control_enable_expansion_irq(FuriHalSerialHandle* handle, bool enable) {
+    if(enable == furi_hal_serial_control->expansion_irq_armed) return;
+
     const GpioPin* gpio = furi_hal_serial_get_gpio_pin(handle, FuriHalSerialDirectionRx);
 
     if(enable) {
+        if(handle->in_use) return;
         furi_hal_serial_disable_direction(handle, FuriHalSerialDirectionRx);
         furi_hal_gpio_add_int_callback(gpio, furi_hal_serial_control_expansion_irq_callback, NULL);
         furi_hal_gpio_init(gpio, GpioModeInterruptFall, GpioPullUp, GpioSpeedLow);
     } else {
         furi_hal_gpio_remove_int_callback(gpio);
-        furi_hal_serial_enable_direction(handle, FuriHalSerialDirectionRx);
+        if(!handle->in_use) furi_hal_serial_enable_direction(handle, FuriHalSerialDirectionRx);
     }
+    furi_hal_serial_control->expansion_irq_armed = enable;
 }
 
 static void furi_hal_serial_control_log_set_handle(FuriHalSerialHandle* handle) {
@@ -128,8 +139,9 @@ static bool furi_hal_serial_control_handler_acquire(void* input, void* output) {
         // Logging
         if(furi_hal_serial_control->log_config_serial_id == serial_id) {
             furi_hal_serial_control_log_set_handle(NULL);
-            // Expansion
-        } else if(furi_hal_serial_control->expansion_serial == handle) {
+        }
+        // Expansion (also after the logging: taking it off the port re-arms the detection on its way out)
+        if(furi_hal_serial_control->expansion_serial == handle) {
             furi_hal_serial_control_enable_expansion_irq(handle, false);
         }
         // Return handle
@@ -208,6 +220,7 @@ static bool furi_hal_serial_control_handler_expansion_set_callback(void* input, 
     furi_hal_serial_control->expansion_cb = message_input->callback;
     furi_hal_serial_control->expansion_ctx = message_input->context;
 
+    // does nothing while another owner holds the port: release arms the detection then
     furi_hal_serial_control_enable_expansion_irq(handle, enable_irq);
 
     return true;
@@ -217,7 +230,10 @@ static bool furi_hal_serial_control_handler_expansion_irq(void* input, void* out
     UNUSED(input);
     UNUSED(output);
 
-    if(furi_hal_serial_control->expansion_cb) {
+    // The message may have been queued before another owner acquired the port (acquire switches
+    // the detection interrupt off, but cannot recall a message already in the queue)
+    const FuriHalSerialHandle* handle = furi_hal_serial_control->expansion_serial;
+    if(furi_hal_serial_control->expansion_cb && handle && !handle->in_use) {
         void* context = furi_hal_serial_control->expansion_ctx;
         furi_hal_serial_control->expansion_cb(context);
     }

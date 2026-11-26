@@ -344,13 +344,25 @@ static int32_t expansion_worker(void* context) {
 
     furi_hal_power_insomnia_enter();
 
+    instance->exit_reason = ExpansionWorkerExitReasonUnknown;
     instance->serial_handle = furi_hal_serial_control_acquire(instance->serial_id);
-    furi_check(instance->serial_handle);
+    if(instance->serial_handle == NULL) {
+        // Another owner (an app or a CLI plugin) took the port between the detection of RX activity
+        // and the start of this worker. That is a normal race, not an error of the service: the
+        // port is not ours, so leave it untouched and let the service re-arm the detection (it is
+        // enabled again by the HAL when that owner releases the port).
+        FURI_LOG_D(TAG, "Port is busy, worker not started");
+        instance->exit_reason = ExpansionWorkerExitReasonError;
+        furi_hal_power_insomnia_exit();
+        if(instance->callback != NULL) {
+            instance->callback(instance->cb_context);
+        }
+        return 0;
+    }
 
     FURI_LOG_D(TAG, "Worker started");
 
     instance->state = ExpansionWorkerStateHandShake;
-    instance->exit_reason = ExpansionWorkerExitReasonUnknown;
 
     furi_hal_serial_init(instance->serial_handle, EXPANSION_PROTOCOL_DEFAULT_BAUD_RATE);
 
