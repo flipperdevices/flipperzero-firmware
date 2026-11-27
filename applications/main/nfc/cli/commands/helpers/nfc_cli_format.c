@@ -7,6 +7,7 @@ static const char* protocol_names[NfcProtocolNum] = {
     [NfcProtocolIso14443_4b] = "Iso14443-4b",
     [NfcProtocolIso15693_3] = "Iso15693-3",
     [NfcProtocolFelica] = "FeliCa",
+    [NfcProtocolFelicaSeac] = "FeliCa SEAC",
     [NfcProtocolMfUltralight] = "Mifare Ultralight",
     [NfcProtocolMfClassic] = "Mifare Classic",
     [NfcProtocolMfPlus] = "Mifare Plus",
