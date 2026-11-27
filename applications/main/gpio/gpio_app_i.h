@@ -37,6 +37,7 @@ struct GpioApp {
     GPIOItems* gpio_items;
     UsbUartBridge* usb_uart_bridge;
     UsbUartConfig* usb_uart_cfg;
+    bool transport_error;
 };
 
 typedef enum {
@@ -47,3 +48,5 @@ typedef enum {
     GpioAppViewUsbUartCloseRpc,
     GpioAppViewExitConfirm,
 } GpioAppView;
+
+void gpio_scene_usb_uart_cleanup(GpioApp* app);
