@@ -79,10 +79,11 @@ Up to 5 keys can be hold simultaneously.
 
 ## String
 
-| Command  | Parameters  | Notes                                      |
-| -------  | ----------- | -----------------                          |
-| STRING   | Text string | Print text string                          |
-| STRINGLN | Text string | Print text string and press enter after it |
+| Command          | Parameters  | Notes                                      |
+| ---------------- | ----------- | -----------------                          |
+| STRING           | Text string | Print text string                          |
+| STRINGLN         | Text string | Print text string and press enter after it |
+| STRING_FROM_FILE | File path   | Print text contained in a file             |
 
 ## String delay
 
