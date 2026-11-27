@@ -53,6 +53,11 @@ void subghz_tx_rx_worker_set_callback_have_read(
     SubGhzTxRxWorkerCallbackHaveRead callback,
     void* context);
 
+void subghz_tx_rx_worker_set_preset(
+    SubGhzTxRxWorker* instance,
+    FuriHalSubGhzPreset preset,
+    uint8_t* preset_data);
+
 /** 
  * Allocate SubGhzTxRxWorker
  * @return SubGhzTxRxWorker* Pointer to a SubGhzTxRxWorker instance
