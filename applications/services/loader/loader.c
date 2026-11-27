@@ -68,10 +68,17 @@ static const LoaderError err_outdated_app = {"Outdated App", "Update the app", "
 static const LoaderError err_outdated_firmware =
     {"Outdated\nFirmware", "Update firmware", "err_07", &I_err_07};
 
-static void loader_dialog_prepare_and_show(DialogsApp* dialogs, const LoaderError* err) {
+// detail is an optional extra line shown under the description
+static void loader_dialog_prepare_and_show(
+    DialogsApp* dialogs,
+    const LoaderError* err,
+    const char* detail) {
     FuriString* header = furi_string_alloc_printf("Error: %s", err->error);
-    FuriString* text =
-        furi_string_alloc_printf("%s\nLearn more:\nr.flipper.net/%s", err->description, err->url);
+    FuriString* text = furi_string_alloc_printf("%s\n", err->description);
+    if(detail) {
+        furi_string_cat_printf(text, "%s\n", detail);
+    }
+    furi_string_cat_printf(text, "Learn more:\nr.flipper.net/%s", err->url);
     DialogMessage* message = dialog_message_alloc();
 
     dialog_message_set_header(message, furi_string_get_cstr(header), 64, 0, AlignCenter, AlignTop);
@@ -111,29 +118,42 @@ static void loader_show_gui_error(
         dialog_message_set_text(message, text, 3, 26, AlignLeft, AlignTop);
         dialog_message_show(dialogs, message);
     } else if(status.value == LoaderStatusErrorUnknownApp) {
-        loader_dialog_prepare_and_show(dialogs, &err_app_not_found);
+        loader_dialog_prepare_and_show(dialogs, &err_app_not_found, NULL);
     } else if(status.value == LoaderStatusErrorInternal) {
         // TODO FL-3522: we have many places where we can emit a double start, ex: desktop, menu
         // so i prefer to not show LoaderStatusErrorAppStarted error message for now
         switch(status.error) {
         case LoaderStatusErrorInvalidFile:
-            loader_dialog_prepare_and_show(dialogs, &err_invalid_flie);
+            loader_dialog_prepare_and_show(dialogs, &err_invalid_flie, NULL);
             break;
         case LoaderStatusErrorInvalidManifest:
-            loader_dialog_prepare_and_show(dialogs, &err_invalid_manifest);
+            loader_dialog_prepare_and_show(dialogs, &err_invalid_manifest, NULL);
             break;
         case LoaderStatusErrorMissingImports:
-            loader_dialog_prepare_and_show(dialogs, &err_missing_imports);
+            loader_dialog_prepare_and_show(dialogs, &err_missing_imports, NULL);
             break;
         case LoaderStatusErrorHWMismatch:
-            loader_dialog_prepare_and_show(dialogs, &err_hw_target_mismatch);
+            loader_dialog_prepare_and_show(dialogs, &err_hw_target_mismatch, NULL);
             break;
         case LoaderStatusErrorOutdatedApp:
-            loader_dialog_prepare_and_show(dialogs, &err_outdated_app);
+        case LoaderStatusErrorOutdatedFirmware: {
+            // Show both API versions so the user can tell which side to update
+            char detail[40];
+            snprintf(
+                detail,
+                sizeof(detail),
+                "App API %u.%u, FW %u.%u",
+                (unsigned)(status.app_api_version >> 16),
+                (unsigned)(status.app_api_version & 0xFFFF),
+                (unsigned)firmware_api_interface->api_version_major,
+                (unsigned)firmware_api_interface->api_version_minor);
+            loader_dialog_prepare_and_show(
+                dialogs,
+                status.error == LoaderStatusErrorOutdatedApp ? &err_outdated_app :
+                                                               &err_outdated_firmware,
+                detail);
             break;
-        case LoaderStatusErrorOutdatedFirmware:
-            loader_dialog_prepare_and_show(dialogs, &err_outdated_firmware);
-            break;
+        }
         case LoaderStatusErrorOutOfMemory:
             dialog_message_set_header(
                 message, "Error: Out of Memory", 64, 0, AlignCenter, AlignTop);
@@ -505,6 +525,7 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
     LoaderMessageLoaderStatusResult result;
     result.value = loader_make_success_status(error_message);
     result.error = LoaderStatusErrorUnknown;
+    result.app_api_version = 0;
 
     do {
         loader->app.fap = flipper_application_alloc(storage, firmware_api_interface);
@@ -516,9 +537,31 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
             flipper_application_preload(loader->app.fap, path);
         if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             const char* err_msg = flipper_application_preload_status_to_string(preload_res);
-            result.value = loader_make_status_error(
-                LoaderStatusErrorInternal, error_message, "Preload failed, %s: %s", path, err_msg);
             result.error = loader_status_error_from_preload_status(preload_res);
+            if(result.error == LoaderStatusErrorOutdatedApp ||
+               result.error == LoaderStatusErrorOutdatedFirmware) {
+                // The manifest was parsed before the API check failed, so report both versions
+                const FlipperApplicationManifest* manifest =
+                    flipper_application_get_manifest(loader->app.fap);
+                result.app_api_version = manifest->base.api_version.version;
+                result.value = loader_make_status_error(
+                    LoaderStatusErrorInternal,
+                    error_message,
+                    "Preload failed, %s: %s, app API %u.%u, firmware API %u.%u",
+                    path,
+                    err_msg,
+                    (unsigned)manifest->base.api_version.major,
+                    (unsigned)manifest->base.api_version.minor,
+                    (unsigned)firmware_api_interface->api_version_major,
+                    (unsigned)firmware_api_interface->api_version_minor);
+            } else {
+                result.value = loader_make_status_error(
+                    LoaderStatusErrorInternal,
+                    error_message,
+                    "Preload failed, %s: %s",
+                    path,
+                    err_msg);
+            }
             break;
         }
 
@@ -609,6 +652,7 @@ static LoaderMessageLoaderStatusResult loader_do_start_by_name(
     LoaderMessageLoaderStatusResult status;
     status.value = loader_make_success_status(error_message);
     status.error = LoaderStatusErrorUnknown;
+    status.app_api_version = 0;
 
     if(name == NULL) return status;
 
