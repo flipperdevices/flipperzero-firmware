@@ -88,6 +88,7 @@ typedef enum {
     FuriHalNfcTechIso14443b, /**< Configure NFC HAL to use the ISO14443 (type B) technology. */
     FuriHalNfcTechIso15693, /**< Configure NFC HAL to use the ISO15693 technology. */
     FuriHalNfcTechFelica, /**< Configure NFC HAL to use the FeliCa technology. */
+    FuriHalNfcTechInnovatron, /**< Configure NFC HAL for the Innovatron B Prime technology. */
 
     FuriHalNfcTechNum, /**< Special value equal to the supported technologies count. Internal use. */
     FuriHalNfcTechInvalid, /**< Special value indicating the unconfigured state. Internal use. */

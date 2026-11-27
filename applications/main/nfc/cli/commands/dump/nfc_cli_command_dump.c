@@ -18,6 +18,7 @@
 #include "protocols/st25tb/nfc_cli_dump_st25tb.h"
 #include "protocols/ntag4xx/nfc_cli_dump_ntag4xx.h"
 #include "protocols/type_4_tag/nfc_cli_dump_type_4_tag.h"
+#include "protocols/innovatron/nfc_cli_dump_innovatron.h"
 
 #include <datetime.h>
 #include <furi_hal_rtc.h>
@@ -97,6 +98,7 @@ NfcGenericCallback protocol_poller_callbacks[NfcProtocolNum] = {
     [NfcProtocolSt25tb] = nfc_cli_dump_poller_callback_st25tb,
     [NfcProtocolNtag4xx] = nfc_cli_dump_poller_callback_ntag4xx,
     [NfcProtocolType4Tag] = nfc_cli_dump_poller_callback_type_4_tag,
+    [NfcProtocolInnovatron] = nfc_cli_dump_poller_callback_innovatron,
 };
 
 static void nfc_cli_dump_generate_filename(FuriString* file_path) {
@@ -225,6 +227,7 @@ static const NfcProtocolNameValuePair supported_protocols[] = {
     {.name = "st25", .value = NfcProtocolSt25tb},
     {.name = "ntag4", .value = NfcProtocolNtag4xx},
     {.name = "t4t", .value = NfcProtocolType4Tag},
+    {.name = "bi", .value = NfcProtocolInnovatron},
 };
 
 static bool nfc_cli_dump_parse_protocol(FuriString* value, void* output) {
