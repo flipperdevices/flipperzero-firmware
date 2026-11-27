@@ -194,8 +194,6 @@ static int32_t usb_uart_worker(void* context) {
         usb_uart_update_ctrl_lines(usb_uart);
     }
 
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtCdcRx);
-
     furi_thread_start(usb_uart->tx_thread);
 
     while(1) {
@@ -317,10 +315,8 @@ static int32_t usb_uart_tx_thread(void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
 
     uint8_t data[USB_CDC_PKT_LEN];
+    uint32_t events = WorkerEvtCdcRx;
     while(1) {
-        uint32_t events =
-            furi_thread_flags_wait(WORKER_ALL_TX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
-        furi_check(!(events & FuriFlagError));
         if(events & WorkerEvtTxStop) break;
         if(events & WorkerEvtCdcRx) {
             furi_check(furi_mutex_acquire(usb_uart->usb_mutex, FuriWaitForever) == FuriStatusOk);
@@ -341,6 +337,8 @@ static int32_t usb_uart_tx_thread(void* context) {
                 }
             }
         }
+        events = furi_thread_flags_wait(WORKER_ALL_TX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
+        furi_check(!(events & FuriFlagError));
     }
     return 0;
 }
