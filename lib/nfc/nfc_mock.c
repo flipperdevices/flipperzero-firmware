@@ -23,6 +23,7 @@ typedef enum {
     NfcMessageTypeTx,
     NfcMessageTypeTimeout,
     NfcMessageTypeAbort,
+    NfcMessageTypeFieldOff,
 } NfcMessageType;
 
 typedef struct {
@@ -212,6 +213,11 @@ static int32_t nfc_worker_poller(void* context) {
         command = instance->callback(event, instance->context);
         if(command == NfcCommandStop) {
             break;
+        } else if(command == NfcCommandReset && listener_queue) {
+            // A field reset brings the card back to its initial state
+            NfcMessage message = {.type = NfcMessageTypeFieldOff};
+            furi_check(
+                furi_message_queue_put(listener_queue, &message, FuriWaitForever) == FuriStatusOk);
         }
     }
 
@@ -313,6 +319,10 @@ static int32_t nfc_worker_listener(void* context) {
 
         if(message.type == NfcMessageTypeAbort) {
             break;
+        } else if(message.type == NfcMessageTypeFieldOff) {
+            instance->col_res_status = Iso14443_3aColResStatusIdle;
+            nfc_event.type = NfcEventTypeFieldOff;
+            instance->callback(nfc_event, instance->context);
         } else if(message.type == NfcMessageTypeTx) {
             nfc_test_print(
                 NfcTransportLogLevelInfo, "RDR", message.data.data, message.data.data_bits);

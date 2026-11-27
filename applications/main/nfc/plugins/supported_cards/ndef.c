@@ -903,8 +903,8 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
 
     // Check card type can contain NDEF
-    if(data->type != MfClassicType1k && data->type != MfClassicType4k &&
-       data->type != MfClassicTypeMini) {
+    if(data->type != MfClassicType1k && data->type != MfClassicType1kEv1 &&
+       data->type != MfClassicType4k && data->type != MfClassicTypeMini) {
         return false;
     }
 

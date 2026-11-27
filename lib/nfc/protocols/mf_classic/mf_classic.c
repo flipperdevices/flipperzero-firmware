@@ -31,6 +31,13 @@ static const MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
             .full_name = "Mifare Classic 1K",
             .type_name = "1K",
         },
+    [MfClassicType1kEv1] =
+        {
+            .sectors_total = 18,
+            .blocks_total = 72,
+            .full_name = "Mifare Classic 1K EV1",
+            .type_name = "1K EV1",
+        },
     [MfClassicType4k] =
         {
             .sectors_total = 40,
@@ -596,6 +603,22 @@ uint8_t mf_classic_get_blocks_num_in_sector(uint8_t sector) {
     return sector < 32 ? 4 : 16;
 }
 
+static bool mf_classic_is_sector_blocks_read(const MfClassicData* data, uint8_t sector_num) {
+    // EV1 hidden sector 16 refuses every read, only its keys can be found
+    if(data->type == MfClassicType1kEv1 && sector_num == 16) {
+        return mf_classic_is_key_found(data, sector_num, MfClassicKeyTypeA) &&
+               mf_classic_is_key_found(data, sector_num, MfClassicKeyTypeB);
+    }
+
+    uint8_t first_block = mf_classic_get_first_block_num_of_sector(sector_num);
+    uint8_t total_blocks = mf_classic_get_blocks_num_in_sector(sector_num);
+    for(size_t i = first_block; i < first_block + total_blocks; i++) {
+        if(!mf_classic_is_block_read(data, i)) return false;
+    }
+
+    return true;
+}
+
 void mf_classic_get_read_sectors_and_keys(
     const MfClassicData* data,
     uint8_t* sectors_read,
@@ -614,14 +637,7 @@ void mf_classic_get_read_sectors_and_keys(
         if(mf_classic_is_key_found(data, i, MfClassicKeyTypeB)) {
             *keys_found += 1;
         }
-        uint8_t first_block = mf_classic_get_first_block_num_of_sector(i);
-        uint8_t total_blocks_in_sec = mf_classic_get_blocks_num_in_sector(i);
-        bool blocks_read = true;
-        for(size_t j = first_block; j < first_block + total_blocks_in_sec; j++) {
-            blocks_read = mf_classic_is_block_read(data, j);
-            if(!blocks_read) break;
-        }
-        if(blocks_read) {
+        if(mf_classic_is_sector_blocks_read(data, i)) {
             *sectors_read += 1;
         }
     }
@@ -646,14 +662,7 @@ bool mf_classic_is_sector_read(const MfClassicData* data, uint8_t sector_num) {
     do {
         if(!mf_classic_is_key_found(data, sector_num, MfClassicKeyTypeA)) break;
         if(!mf_classic_is_key_found(data, sector_num, MfClassicKeyTypeB)) break;
-        uint8_t start_block = mf_classic_get_first_block_num_of_sector(sector_num);
-        uint8_t total_blocks = mf_classic_get_blocks_num_in_sector(sector_num);
-        uint8_t block_read = true;
-        for(size_t i = start_block; i < start_block + total_blocks; i++) {
-            block_read = mf_classic_is_block_read(data, i);
-            if(!block_read) break;
-        }
-        sector_read = block_read;
+        sector_read = mf_classic_is_sector_blocks_read(data, sector_num);
     } while(false);
 
     return sector_read;
