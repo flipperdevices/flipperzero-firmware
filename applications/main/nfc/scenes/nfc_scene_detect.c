@@ -45,8 +45,16 @@ bool nfc_scene_detect_on_event(void* context, SceneManagerEvent event) {
             if(nfc_detected_protocols_get_num(instance->detected_protocols) > 1) {
                 notification_message(instance->notifications, &sequence_single_vibro);
                 scene_manager_next_scene(instance->scene_manager, NfcSceneSelectProtocol);
-            } else {
+            } else if(nfc_read_memory_is_available(
+                          nfc_detected_protocols_get_selected(instance->detected_protocols))) {
                 scene_manager_next_scene(instance->scene_manager, NfcSceneRead);
+            } else {
+                // Leave the scene first to stop the scanner
+                if(!scene_manager_search_and_switch_to_previous_scene(
+                       instance->scene_manager, NfcSceneStart)) {
+                    scene_manager_previous_scene(instance->scene_manager);
+                }
+                nfc_show_low_memory_dialog(instance);
             }
             consumed = true;
         }

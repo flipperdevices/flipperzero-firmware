@@ -3,6 +3,8 @@
 
 #include <dolphin/dolphin.h>
 
+#define TAG "NfcApp"
+
 bool nfc_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     NfcApp* nfc = context;
@@ -437,6 +439,36 @@ void nfc_show_loading_popup(void* context, bool show) {
         // Restore default timer priority
         furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
     }
+}
+
+void nfc_show_low_memory_dialog(NfcApp* instance) {
+    FURI_LOG_W(
+        TAG,
+        "Not enough memory to read: free %zu, max block %zu",
+        memmgr_get_free_heap(),
+        memmgr_heap_get_max_free_block());
+
+    DialogMessage* message = dialog_message_alloc();
+    dialog_message_set_header(message, "Error: Out of Memory", 64, 0, AlignCenter, AlignTop);
+    dialog_message_set_text(
+        message,
+        "Not enough RAM to read.\nDisconnect qFlipper or\nthe app, or reboot",
+        64,
+        13,
+        AlignCenter,
+        AlignTop);
+    dialog_message_set_buttons(message, "Back", NULL, "Reboot");
+    if(dialog_message_show(instance->dialogs, message) == DialogMessageButtonRight) {
+        furi_hal_power_reset();
+    }
+    dialog_message_free(message);
+}
+
+bool nfc_check_free_memory_for_read(NfcApp* instance, NfcProtocol protocol) {
+    if(nfc_read_memory_is_available(protocol)) return true;
+
+    nfc_show_low_memory_dialog(instance);
+    return false;
 }
 
 void nfc_append_filename_string_when_present(NfcApp* instance, FuriString* string) {
