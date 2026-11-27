@@ -80,6 +80,15 @@ void furi_hal_serial_configure_framing(
     FuriHalSerialParity parity,
     FuriHalSerialStopBits stop_bits);
 
+/**
+ * @brief Configures hardware flow control of a serial interface
+ *
+ * @param      handle     Serial handle
+ * @param      rts        Whether to enable RTS (Request To Send)
+ * @param      cts        Whether to enable CTS (Clear To Send)
+ */
+void furi_hal_serial_configure_flow_control(FuriHalSerialHandle* handle, bool rts, bool cts);
+
 /** Transmits data in semi-blocking mode
  *
  * Fills transmission pipe with data, returns as soon as all bytes from buffer
