@@ -141,13 +141,7 @@ static const BleGattCharacteristicParams ble_svc_hid_report_template = {
     .is_variable = CHAR_VALUE_LEN_VARIABLE,
 };
 
-/* Attribute records reserved for the service, including the service
- * declaration. Same count as ST's reference HID service, without its
- * optional boot keyboard/mouse and external report attributes:
- * https://github.com/flipperdevices/stm32wb_copro/blob/133182d5583e998bb263cd947105be4df9c29cb3/wpan/ble/svc/Src/hids.c#L658-L680
- * aci_gatt_add_service reserves handles svc_handle to
- * svc_handle + BLE_SVC_HID_MAX_ATTR_RECORDS - 1 for the service:
- * https://github.com/flipperdevices/stm32wb_copro/blob/133182d5583e998bb263cd947105be4df9c29cb3/wpan/ble/core/auto/ble_gatt_aci.h#L56-L62 */
+// Attribute records reserved for the service: handles svc_handle .. svc_handle + N - 1
 #define BLE_SVC_HID_MAX_ATTR_RECORDS                                                \
     (2 + /* protocol mode */                                                        \
      (4 * BLE_SVC_HID_INPUT_REPORT_COUNT) + (3 * BLE_SVC_HID_OUTPUT_REPORT_COUNT) + \
@@ -181,9 +175,6 @@ static BleEventAckStatus ble_svc_hid_event_handler(void* event, void* context) {
                    hid_svc->svc_handle + BLE_SVC_HID_MAX_ATTR_RECORDS) {
                 ret = BleEventAckFlowEnable;
             }
-        } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
-            // Process notification confirmation
-            ret = BleEventAckFlowEnable;
         }
     }
     return ret;
@@ -192,9 +183,6 @@ static BleEventAckStatus ble_svc_hid_event_handler(void* event, void* context) {
 BleServiceHid* ble_svc_hid_start(void) {
     BleServiceHid* hid_svc = malloc(sizeof(BleServiceHid));
 
-    // Register event handler
-    hid_svc->event_handler =
-        ble_event_dispatcher_register_svc_handler(ble_svc_hid_event_handler, hid_svc);
     /**
      *  Add Human Interface Device Service
      */
@@ -207,6 +195,10 @@ BleServiceHid* ble_svc_hid_start(void) {
         free(hid_svc);
         return NULL;
     }
+
+    // Register event handler once svc_handle is known
+    hid_svc->event_handler =
+        ble_event_dispatcher_register_svc_handler(ble_svc_hid_event_handler, hid_svc);
 
     // Maintain previously defined characteristic order
     ble_gatt_characteristic_init(
