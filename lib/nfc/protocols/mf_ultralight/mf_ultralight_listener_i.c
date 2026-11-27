@@ -588,13 +588,12 @@ bool mf_ultralight_common_check_access(
 
     do {
         if(instance->auth_state != MfUltralightListenerAuthStateSuccess) {
-            if((instance->config->auth0 <= start_page) &&
-               (instance->config->access.prot || is_write_op)) {
+            if((instance->auth0 <= start_page) && (instance->prot || is_write_op)) {
                 break;
             }
         }
 
-        if(instance->config->access.cfglck && is_write_op) {
+        if(instance->cfglck && is_write_op) {
             uint16_t config_page_start = instance->data->pages_total - 4;
             if((start_page == config_page_start) || (start_page == config_page_start + 1)) {
                 break;
