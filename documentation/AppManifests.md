@@ -47,7 +47,7 @@ Only two parameters are mandatory: **appid** and **apptype**. Others are optiona
 
 The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 
-- **sources**: list of strings, file name masks used for gathering sources within the app folder. The default value of `["*.c*"]` includes C and C++ source files. Apps cannot use the `"lib"` folder for their own source code, as it is reserved for **fap_private_libs**. Paths starting with `"!"` are excluded from the list of sources. They can also include wildcard characters and directory names. For example, a value of `["*.c*", "!plugins"]` will include all C and C++ source files in the app folder except those in the `plugins` (and `lib`) folders. Paths with no wildcards (`*, ?`) are treated as full literal paths for both inclusion and exclusion.
+- **sources**: list of strings, file name masks used for gathering sources within the app folder. The default value of `["*.c", "*.cc", "*.cpp", "*.cxx"]` includes C and C++ source files. Apps cannot use the `"lib"` folder for their own source code, as it is reserved for **fap_private_libs**. Paths starting with `"!"` are excluded from the list of sources. They can also include wildcard characters and directory names. For example, a value of `["*.c*", "!plugins"]` will include all C and C++ source files in the app folder except those in the `plugins` (and `lib`) folders. Paths with no wildcards (`*, ?`) are treated as full literal paths for both inclusion and exclusion.
 - **fap_version**: string, app version. The default value is "0.1". You can also use a tuple of 2 numbers in the form of (x,y) to specify the version. It is also possible to add more dot-separated parts to the version, like patch number, but only major and minor version numbers are stored in the built .fap.
 - **fap_icon**: name of a `.png` file, 1-bit color depth, 10x10px, to be embedded within `.fap` file.
 - **fap_libs**: list of extra libraries to link the app against. Provides access to extra functions that are not exported as a part of main firmware at the expense of increased `.fap` file size and RAM consumption.
@@ -79,7 +79,7 @@ Example for building an app from Rust sources:
 
   - **name**: name of the library's folder. Required.
   - **fap_include_paths**: list of the library's relative paths to add to the parent fap's include path list. The default value is `["."]`, meaning the library's source root.
-  - **sources**: list of filename masks to be used for gathering include files for this library. Paths are relative to the library's source root. The default value is `["*.c*"]`.
+  - **sources**: list of filename masks to be used for gathering include files for this library. Paths are relative to the library's source root. The default value is `["*.c", "*.cc", "*.cpp", "*.cxx"]`.
   - **cflags**: list of additional compiler flags to be used for building this library. The default value is `[]`.
   - **cdefines**: list of additional preprocessor definitions to be used for building this library. The default value is `[]`.
   - **cincludes**: list of additional include paths to be used for building this library. Paths are relative to the app's root. This can be used for providing external search paths for this library's code — for configuration headers. The default value is `[]`.
