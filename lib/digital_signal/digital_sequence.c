@@ -3,6 +3,7 @@
 
 #include <furi.h>
 #include <furi_hal_bus.h>
+#include <furi_hal_cortex.h>
 
 #include <stm32wbxx_ll_dma.h>
 #include <stm32wbxx_ll_tim.h>
@@ -25,8 +26,7 @@
 #define DIGITAL_SEQUENCE_TIMER_MAX 0xFFFFFFFFUL
 
 /* Time to wait in loops before returning */
-#define DIGITAL_SEQUENCE_LOCK_WAIT_MS    10UL
-#define DIGITAL_SEQUENCE_LOCK_WAIT_TICKS (DIGITAL_SEQUENCE_LOCK_WAIT_MS * 1000 * 64)
+#define DIGITAL_SEQUENCE_LOCK_WAIT_MS 10UL
 
 #define DIGITAL_SEQUENCE_GPIO_BUFFER_SIZE 2
 
@@ -197,7 +197,8 @@ static inline void digital_sequence_init_gpio_buffer(
 
 static inline void digital_sequence_finish(DigitalSequence* sequence) {
     if(sequence->state == DigitalSequenceStateActive) {
-        const uint32_t prev_timer = DWT->CYCCNT;
+        const FuriHalCortexTimer lock_timer =
+            furi_hal_cortex_timer_get(DIGITAL_SEQUENCE_LOCK_WAIT_MS * 1000);
 
         do {
             /* Special value has been loaded into the timer, signaling the end of transmission. */
@@ -205,7 +206,7 @@ static inline void digital_sequence_finish(DigitalSequence* sequence) {
                 break;
             }
 
-            if(DWT->CYCCNT - prev_timer > DIGITAL_SEQUENCE_LOCK_WAIT_TICKS) {
+            if(furi_hal_cortex_timer_is_expired(lock_timer)) {
                 DigitalSequenceRingBuffer* dma_buffer = &sequence->timer_buf;
                 dma_buffer->read_pos = DIGITAL_SEQUENCE_RING_BUFFER_SIZE -
                                        LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2);
@@ -229,7 +230,8 @@ static inline void digital_sequence_enqueue_period(DigitalSequence* sequence, ui
     DigitalSequenceRingBuffer* dma_buffer = &sequence->timer_buf;
 
     if(sequence->state == DigitalSequenceStateActive) {
-        const uint32_t prev_timer = DWT->CYCCNT;
+        const FuriHalCortexTimer lock_timer =
+            furi_hal_cortex_timer_get(DIGITAL_SEQUENCE_LOCK_WAIT_MS * 1000);
 
         do {
             dma_buffer->read_pos =
@@ -243,7 +245,7 @@ static inline void digital_sequence_enqueue_period(DigitalSequence* sequence, ui
                 break;
             }
 
-            if(DWT->CYCCNT - prev_timer > DIGITAL_SEQUENCE_LOCK_WAIT_TICKS) {
+            if(furi_hal_cortex_timer_is_expired(lock_timer)) {
                 FURI_LOG_D(
                     TAG,
                     "[SEQ] hung %lu ms in queue (ARR 0x%08lx, read %lu, write %lu)",

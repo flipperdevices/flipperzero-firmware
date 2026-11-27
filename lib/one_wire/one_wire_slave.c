@@ -79,13 +79,13 @@ static const OneWireSlaveTimings onewire_slave_timings_overdrive = {
 
 static bool
     onewire_slave_wait_while_gpio_is(OneWireSlave* bus, uint32_t time_us, const bool pin_value) {
-    const uint32_t time_start = DWT->CYCCNT;
+    const uint32_t time_start = furi_hal_cortex_get_cycles();
     const uint32_t time_ticks = time_us * furi_hal_cortex_instructions_per_microsecond();
 
     uint32_t time_elapsed;
 
     do { //-V1044
-        time_elapsed = DWT->CYCCNT - time_start;
+        time_elapsed = furi_hal_cortex_get_cycles() - time_start;
         if(furi_hal_gpio_read(bus->gpio_pin) != pin_value) {
             return time_ticks >= time_elapsed;
         }
@@ -182,8 +182,8 @@ static void onewire_slave_exti_callback(void* context) {
     static uint32_t pulse_start = 0;
 
     if(input_state) {
-        const uint32_t pulse_length =
-            (DWT->CYCCNT - pulse_start) / furi_hal_cortex_instructions_per_microsecond();
+        const uint32_t pulse_length = (furi_hal_cortex_get_cycles() - pulse_start) /
+                                      furi_hal_cortex_instructions_per_microsecond();
 
         if((pulse_length >= onewire_slave_timings_overdrive.trstl_min) &&
            (pulse_length <= onewire_slave_timings_normal.trstl_max)) {
@@ -202,7 +202,7 @@ static void onewire_slave_exti_callback(void* context) {
         }
 
     } else {
-        pulse_start = DWT->CYCCNT;
+        pulse_start = furi_hal_cortex_get_cycles();
     }
 }
 
