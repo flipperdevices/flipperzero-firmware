@@ -97,12 +97,7 @@ const char* const delay_text[DELAY_COUNT] = {
 const uint32_t delay_value[DELAY_COUNT] =
     {1000, 5000, 10000, 15000, 30000, 60000, 90000, 120000, 300000, 600000, 1800000};
 
-#define VIBRO_COUNT 2
-const char* const vibro_text[VIBRO_COUNT] = {
-    "OFF",
-    "ON",
-};
-const bool vibro_value[VIBRO_COUNT] = {false, true};
+static const char* const off_on_text[] = {"OFF", "ON"};
 
 static void contrast_changed(VariableItem* item) {
     NotificationAppSettings* app = variable_item_get_context(item);
@@ -129,6 +124,22 @@ static void screen_changed(VariableItem* item) {
     variable_item_set_current_value_text(item, delay_text[index]);
     app->notification->settings.display_off_delay_ms = delay_value[index];
     notification_message(app->notification, &sequence_display_backlight_on);
+}
+
+static void rpc_backlight_changed(VariableItem* item) {
+    NotificationAppSettings* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, off_on_text[index]);
+    app->notification->settings.smart_backlight = index == 0;
+}
+
+static void rpc_led_changed(VariableItem* item) {
+    NotificationAppSettings* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, off_on_text[index]);
+    notification_set_rpc_led(app->notification, index != 0);
 }
 
 const NotificationMessage apply_message = {
@@ -163,8 +174,8 @@ static void vibro_changed(VariableItem* item) {
     NotificationAppSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    variable_item_set_current_value_text(item, vibro_text[index]);
-    app->notification->settings.vibro_on = vibro_value[index];
+    variable_item_set_current_value_text(item, off_on_text[index]);
+    app->notification->settings.vibro_on = index != 0;
     notification_message(app->notification, &sequence_single_vibro);
 }
 
@@ -207,6 +218,22 @@ static NotificationAppSettings* alloc_settings(void) {
     variable_item_set_current_value_text(item, delay_text[value_index]);
 
     item = variable_item_list_add(
+        app->variable_item_list,
+        "RPC Backlight",
+        COUNT_OF(off_on_text),
+        rpc_backlight_changed,
+        app);
+    value_index = !app->notification->settings.smart_backlight;
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, off_on_text[value_index]);
+
+    item = variable_item_list_add(
+        app->variable_item_list, "RPC LED", COUNT_OF(off_on_text), rpc_led_changed, app);
+    value_index = atomic_load(&app->notification->settings.rpc_led);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, off_on_text[value_index]);
+
+    item = variable_item_list_add(
         app->variable_item_list, "LED Brightness", BACKLIGHT_COUNT, led_changed, app);
     value_index = value_index_float(
         app->notification->settings.led_brightness, backlight_value, BACKLIGHT_COUNT);
@@ -234,11 +261,10 @@ static NotificationAppSettings* alloc_settings(void) {
         variable_item_set_current_value_text(item, "Stealth");
     } else {
         item = variable_item_list_add(
-            app->variable_item_list, "Vibro", VIBRO_COUNT, vibro_changed, app);
-        value_index =
-            value_index_bool(app->notification->settings.vibro_on, vibro_value, VIBRO_COUNT);
+            app->variable_item_list, "Vibro", COUNT_OF(off_on_text), vibro_changed, app);
+        value_index = app->notification->settings.vibro_on;
         variable_item_set_current_value_index(item, value_index);
-        variable_item_set_current_value_text(item, vibro_text[value_index]);
+        variable_item_set_current_value_text(item, off_on_text[value_index]);
     }
 
     app->view_dispatcher = view_dispatcher_alloc();

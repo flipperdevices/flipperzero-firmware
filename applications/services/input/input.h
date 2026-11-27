@@ -14,6 +14,7 @@ extern "C" {
 #define RECORD_INPUT_EVENTS            "input_events"
 #define INPUT_SEQUENCE_SOURCE_HARDWARE (0u)
 #define INPUT_SEQUENCE_SOURCE_SOFTWARE (1u)
+#define INPUT_SEQUENCE_SOURCE_BLE_RPC  (2u)
 
 /** Input Types
  * Some of them are physical events and some logical
