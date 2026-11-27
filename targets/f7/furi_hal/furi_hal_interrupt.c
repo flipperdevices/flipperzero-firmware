@@ -542,3 +542,8 @@ const char* furi_hal_interrupt_get_name(uint8_t exception_number) {
 uint32_t furi_hal_interrupt_get_time_in_isr_total(void) {
     return furi_hal_interrupt.counter_time_in_isr_total;
 }
+
+void furi_hal_interrupt_trigger_pending(FuriHalInterruptId index) {
+    furi_check(index < FuriHalInterruptIdMax);
+    NVIC_SetPendingIRQ(furi_hal_interrupt_irqn[index]);
+}
