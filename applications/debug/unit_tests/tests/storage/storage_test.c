@@ -5,6 +5,7 @@
 // DO NOT USE THIS IN PRODUCTION CODE
 // This is a hack to access internal storage functions and definitions
 #include <storage/storage_i.h>
+#include <storage/storage_open_timeout.h>
 
 #define UNIT_TESTS_RESOURCES_PATH(path) EXT_PATH("unit_tests/" path)
 #define UNIT_TESTS_PATH(path)           EXT_PATH(".tmp/unit_tests/" path)
@@ -97,6 +98,63 @@ MU_TEST(storage_file_open_lock) {
     mu_assert(result, "cannot open locked file");
 }
 
+MU_TEST(storage_file_open_timeout_busy) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FuriSemaphore* semaphore = furi_semaphore_alloc(1, 0);
+    File* file = storage_file_alloc(storage);
+    FuriString* md5 = furi_string_alloc();
+
+    FuriThread* locker_thread =
+        furi_thread_alloc_ex("StorageFileLocker", 2048, storage_file_locker, semaphore);
+    furi_thread_start(locker_thread);
+    furi_semaphore_acquire(semaphore, FuriWaitForever);
+    furi_semaphore_free(semaphore);
+
+    uint32_t t0 = furi_get_tick();
+    bool no_wait =
+        storage_file_open_timeout(file, STORAGE_LOCKED_FILE, FSAM_READ, FSOM_OPEN_EXISTING, 0);
+    uint32_t no_wait_ms = furi_get_tick() - t0;
+    FS_Error no_wait_error = storage_file_get_error(file);
+    storage_file_close(file);
+
+    t0 = furi_get_tick();
+    bool short_wait =
+        storage_file_open_timeout(file, STORAGE_LOCKED_FILE, FSAM_READ, FSOM_OPEN_EXISTING, 200);
+    uint32_t short_wait_ms = furi_get_tick() - t0;
+    FS_Error short_wait_error = storage_file_get_error(file);
+    storage_file_close(file);
+
+    FS_Error md5_error = FSE_OK;
+    bool md5_busy = storage_file_md5_timeout(file, STORAGE_LOCKED_FILE, md5, &md5_error, 200);
+
+    bool long_wait =
+        storage_file_open_timeout(file, STORAGE_LOCKED_FILE, FSAM_READ, FSOM_OPEN_EXISTING, 5000);
+    storage_file_close(file);
+
+    mu_check(furi_thread_join(locker_thread));
+    furi_thread_free(locker_thread);
+
+    bool md5_free = storage_file_md5_timeout(file, STORAGE_LOCKED_FILE, md5, NULL, 200);
+    // md5 of "0123"
+    bool md5_match = strcmp(furi_string_get_cstr(md5), "eb62f6b9306db575c2d596b1279627a4") == 0;
+
+    furi_string_free(md5);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+
+    mu_check(!no_wait);
+    mu_assert_int_eq(FSE_ALREADY_OPEN, no_wait_error);
+    mu_check(no_wait_ms < 100);
+    mu_check(!short_wait);
+    mu_assert_int_eq(FSE_ALREADY_OPEN, short_wait_error);
+    mu_check(short_wait_ms >= 190 && short_wait_ms < 600);
+    mu_check(!md5_busy);
+    mu_assert_int_eq(FSE_ALREADY_OPEN, md5_error);
+    mu_check(long_wait);
+    mu_check(md5_free);
+    mu_check(md5_match);
+}
+
 MU_TEST(storage_file_open_close) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file;
@@ -180,6 +238,7 @@ MU_TEST_SUITE(storage_file) {
     storage_file_open_lock_setup();
     MU_RUN_TEST(storage_file_open_close);
     MU_RUN_TEST(storage_file_open_lock);
+    MU_RUN_TEST(storage_file_open_timeout_busy);
     storage_file_open_lock_teardown();
 }
 

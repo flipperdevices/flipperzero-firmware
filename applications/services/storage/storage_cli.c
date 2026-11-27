@@ -6,10 +6,10 @@
 #include <cli/cli_main_commands.h>
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/dir_walk.h>
-#include <lib/toolbox/md5_calc.h>
 #include <lib/toolbox/strint.h>
 #include <lib/toolbox/tar/tar_archive.h>
 #include <storage/storage.h>
+#include <storage/storage_open_timeout.h>
 #include <storage/storage_sd_api.h>
 #include <power/power_service/power.h>
 #include <toolbox/pipe.h>
@@ -186,7 +186,12 @@ static void storage_cli_read(PipeSide* pipe, FuriString* path, FuriString* args)
     Storage* api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(api);
 
-    if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(storage_file_open_timeout(
+           file,
+           furi_string_get_cstr(path),
+           FSAM_READ,
+           FSOM_OPEN_EXISTING,
+           STORAGE_OPEN_TIMEOUT_MS)) {
         const size_t buffer_size = 128;
         size_t read_size = 0;
         uint8_t* data = malloc(buffer_size);
@@ -221,7 +226,12 @@ static void storage_cli_write(PipeSide* pipe, FuriString* path, FuriString* args
     const size_t buffer_size = 512;
     uint8_t* buffer = malloc(buffer_size);
 
-    if(storage_file_open(file, furi_string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
+    if(storage_file_open_timeout(
+           file,
+           furi_string_get_cstr(path),
+           FSAM_WRITE,
+           FSOM_OPEN_APPEND,
+           STORAGE_OPEN_TIMEOUT_MS)) {
         printf("Just write your text data. New line by Ctrl+Enter, exit by Ctrl+C.\r\n");
 
         uint32_t read_index = 0;
@@ -278,7 +288,12 @@ static void storage_cli_read_chunks(PipeSide* pipe, FuriString* path, FuriString
     if(strint_to_uint32(furi_string_get_cstr(args), NULL, &buffer_size, 10) !=
        StrintParseNoError) {
         storage_cli_print_usage();
-    } else if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+    } else if(storage_file_open_timeout(
+                  file,
+                  furi_string_get_cstr(path),
+                  FSAM_READ,
+                  FSOM_OPEN_EXISTING,
+                  STORAGE_OPEN_TIMEOUT_MS)) {
         uint64_t file_size = storage_file_size(file);
 
         printf("Size: %llu\r\n", file_size);
@@ -320,7 +335,12 @@ static void storage_cli_write_chunk(PipeSide* pipe, FuriString* path, FuriString
        StrintParseNoError) {
         storage_cli_print_usage();
     } else {
-        if(storage_file_open(file, furi_string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
+        if(storage_file_open_timeout(
+               file,
+               furi_string_get_cstr(path),
+               FSAM_WRITE,
+               FSOM_OPEN_APPEND,
+               STORAGE_OPEN_TIMEOUT_MS)) {
             printf("Ready\r\n");
             const size_t buffer_size = 1024;
             uint8_t* buffer = malloc(buffer_size);
@@ -484,7 +504,8 @@ static void storage_cli_md5(PipeSide* pipe, FuriString* path, FuriString* args) 
     FuriString* md5 = furi_string_alloc();
     FS_Error file_error;
 
-    if(md5_string_calc_file(file, furi_string_get_cstr(path), md5, &file_error)) {
+    if(storage_file_md5_timeout(
+           file, furi_string_get_cstr(path), md5, &file_error, STORAGE_OPEN_TIMEOUT_MS)) {
         printf("%s\r\n", furi_string_get_cstr(md5));
     } else {
         storage_cli_print_error(file_error);

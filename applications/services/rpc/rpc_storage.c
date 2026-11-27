@@ -5,7 +5,7 @@
 #include <rpc/rpc_i.h>
 #include <storage/filesystem_api_defines.h>
 #include <storage/storage.h>
-#include <lib/toolbox/md5_calc.h>
+#include <storage/storage_open_timeout.h>
 #include <lib/toolbox/path.h>
 #include <update_util/int_backup.h>
 #include <toolbox/tar/tar_archive.h>
@@ -313,7 +313,12 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
                 if(include_md5 && !file_info_is_dir(&fileinfo)) {
                     furi_string_printf(md5_path, "%s/%s", list_request->path, name); //-V576
 
-                    if(md5_string_calc_file(file, furi_string_get_cstr(md5_path), md5, NULL)) {
+                    if(storage_file_md5_timeout(
+                           file,
+                           furi_string_get_cstr(md5_path),
+                           md5,
+                           NULL,
+                           STORAGE_OPEN_TIMEOUT_MS)) {
                         char* md5sum = list->file[i].md5sum;
                         size_t md5sum_size = sizeof(list->file[i].md5sum);
                         snprintf(md5sum, md5sum_size, "%s", furi_string_get_cstr(md5));
@@ -358,7 +363,8 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
     PB_Main* response = malloc(sizeof(PB_Main));
     const char* path = request->content.storage_read_request.path;
     File* file = storage_file_alloc(rpc_storage->api);
-    bool fs_operation_success = storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING);
+    bool fs_operation_success = storage_file_open_timeout(
+        file, path, FSAM_READ, FSOM_OPEN_EXISTING, STORAGE_OPEN_TIMEOUT_MS);
 
     if(fs_operation_success) {
         size_t size_left = storage_file_size(file);
@@ -439,8 +445,8 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
         rpc_storage->current_command_id = request->command_id;
         rpc_storage->state = RpcStorageStateWriting;
         const char* path = request->content.storage_write_request.path;
-        fs_operation_success =
-            storage_file_open(rpc_storage->file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+        fs_operation_success = storage_file_open_timeout(
+            rpc_storage->file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS, STORAGE_OPEN_TIMEOUT_MS);
     }
 
     File* file = rpc_storage->file;
@@ -592,7 +598,7 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
     FuriString* md5 = furi_string_alloc();
     FS_Error file_error;
 
-    if(md5_string_calc_file(file, filename, md5, &file_error)) {
+    if(storage_file_md5_timeout(file, filename, md5, &file_error, STORAGE_OPEN_TIMEOUT_MS)) {
         PB_Main response = {
             .command_id = request->command_id,
             .command_status = PB_CommandStatus_OK,

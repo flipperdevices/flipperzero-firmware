@@ -4,6 +4,8 @@
 #include "storage.h"
 #include "storage_i.h" // IWYU pragma: keep
 #include "storage_message.h"
+#include "storage_open_timeout.h"
+#include <mbedtls/md5.h>
 #include <toolbox/stream/file_stream.h>
 #include <toolbox/dir_walk.h>
 #include "toolbox/path.h"
@@ -89,24 +91,37 @@ static void storage_file_close_callback(const void* message, void* context) {
     }
 }
 
-bool storage_file_open(
+bool storage_file_open_timeout(
     File* file,
     const char* path,
     FS_AccessMode access_mode,
-    FS_OpenMode open_mode) {
+    FS_OpenMode open_mode,
+    uint32_t timeout_ms) {
     furi_check(file);
 
     bool result;
     FuriEventFlag* event = furi_event_flag_alloc();
     FuriPubSubSubscription* subscription = furi_pubsub_subscribe(
         storage_get_pubsub(file->storage), storage_file_close_callback, event);
+    const uint32_t start = furi_get_tick();
 
     do {
         result = storage_file_open_internal(file, path, access_mode, open_mode);
 
         if(!result && file->error_id == FSE_ALREADY_OPEN) {
-            furi_event_flag_wait(
-                event, StorageEventFlagFileClose, FuriFlagWaitAny, FuriWaitForever);
+            uint32_t wait = FuriWaitForever;
+            if(timeout_ms != FuriWaitForever) {
+                const uint32_t elapsed = furi_get_tick() - start;
+                if(elapsed >= timeout_ms) {
+                    break;
+                }
+                wait = timeout_ms - elapsed;
+            }
+            const uint32_t flags =
+                furi_event_flag_wait(event, StorageEventFlagFileClose, FuriFlagWaitAny, wait);
+            if(flags & FuriFlagError) {
+                break;
+            }
         } else {
             break;
         }
@@ -122,6 +137,65 @@ bool storage_file_open(
         (void*)(file->file_id - SRAM_BASE),
         path);
 
+    return result;
+}
+
+bool storage_file_open(
+    File* file,
+    const char* path,
+    FS_AccessMode access_mode,
+    FS_OpenMode open_mode) {
+    return storage_file_open_timeout(file, path, access_mode, open_mode, FuriWaitForever);
+}
+
+bool storage_file_md5_timeout(
+    File* file,
+    const char* path,
+    FuriString* output,
+    FS_Error* file_error,
+    uint32_t timeout_ms) {
+    const bool opened =
+        storage_file_open_timeout(file, path, FSAM_READ, FSOM_OPEN_EXISTING, timeout_ms);
+    bool result = opened;
+
+    if(opened) {
+        const size_t size_to_read = 512;
+        uint8_t* data = malloc(size_to_read);
+        unsigned char hash[16];
+        mbedtls_md5_context* md5_ctx = malloc(sizeof(mbedtls_md5_context));
+
+        mbedtls_md5_init(md5_ctx);
+        mbedtls_md5_starts(md5_ctx);
+        while(true) {
+            const size_t read_size = storage_file_read(file, data, size_to_read);
+            if(storage_file_get_error(file) != FSE_OK) {
+                result = false;
+                break;
+            }
+            if(read_size == 0) {
+                break;
+            }
+            mbedtls_md5_update(md5_ctx, data, read_size);
+        }
+        mbedtls_md5_finish(md5_ctx, hash);
+        free(md5_ctx);
+        free(data);
+
+        if(result) {
+            furi_string_set(output, "");
+            for(size_t i = 0; i < sizeof(hash); i++) {
+                furi_string_cat_printf(output, "%02x", hash[i]);
+            }
+        }
+    }
+
+    if(file_error != NULL) {
+        *file_error = storage_file_get_error(file);
+    }
+
+    if(opened) {
+        storage_file_close(file);
+    }
     return result;
 }
 
