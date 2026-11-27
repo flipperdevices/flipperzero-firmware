@@ -38,6 +38,8 @@
  * 5. Add path to nfc_cli_command_<cmd>.c file into 'cli_nfc' plugin in application.fam file 
  *
  * This option suites for simple commands with no any parameters. 
+ * Such commands receive the shared NfcCliProcessorContext as context and MUST call
+ * nfc_cli_command_processor_release_action() before touching furi_hal_nfc directly.
  * @see nfc_cli_command_field.c implementation as an example.
  * 
  * --------------------------------------------------------------------------
